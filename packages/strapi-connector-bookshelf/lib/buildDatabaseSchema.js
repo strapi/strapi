@@ -111,6 +111,63 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   const createOrUpdateTable = async (table, attributes) => {
     const tableExists = await ORM.knex.schema.hasTable(table);
 
+    const generateIndexes = async table => {
+      try {
+        const connection = strapi.config.connections[definition.connection];
+        let columns = Object.keys(attributes).filter(attribute =>
+          ['string', 'text'].includes(attributes[attribute].type)
+        );
+
+        if (!columns.length) {
+          // No text columns founds, exit from creating Fulltext Index
+          return;
+        }
+
+        switch (connection.settings.client) {
+          case 'mysql':
+            columns = columns.map(attribute => `\`${attribute}\``).join(',');
+
+            // Create fulltext indexes for every column.
+            await ORM.knex.raw(
+              `CREATE FULLTEXT INDEX SEARCH_${_.toUpper(
+                _.snakeCase(table)
+              )} ON \`${table}\` (${columns})`
+            );
+            break;
+          case 'pg': {
+            // Enable extension to allow GIN indexes.
+            await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+
+            // Create GIN indexes for every column.
+            const indexes = columns.map(column => {
+              const indexName = `${_.snakeCase(table)}_${column}`;
+              const attribute = _.toLower(column) === column ? column : `"${column}"`;
+
+              return ORM.knex.raw(
+                `CREATE INDEX IF NOT EXISTS search_${_.toLower(
+                  indexName
+                )} ON "${table}" USING gin(${attribute} gin_trgm_ops)`
+              );
+            });
+
+            await Promise.all(indexes);
+            break;
+          }
+        }
+      } catch (e) {
+        // Handle duplicate errors.
+        if (e.errno !== 1061 && e.code !== '42P07') {
+          if (_.get(connection, 'options.debug') === true) {
+            console.log(e);
+          }
+
+          strapi.log.warn(
+            `The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.`
+          );
+        }
+      }
+    };
+
     const buildColumns = (tbl, columns, opts = {}) => {
       const { tableExists, alter = false } = opts;
 
@@ -162,6 +219,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
     if (!tableExists) {
       await createTable(table);
+      await generateIndexes(table);
       await storeTable(table, attributes);
       return;
     }
@@ -190,6 +248,9 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
         createColumns(tbl, columnsToAdd, { tableExists });
       });
     }
+
+    // Generate indexes for new attributes.
+    await generateIndexes(table, columnsToAdd);
 
     let previousAttributes;
     try {
@@ -243,12 +304,17 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
         const allAttrs = ['id', ...attrs];
 
-        await trx.insert(qb => qb.select(allAttrs).from(tmpTable)).into(table);
+        await trx.raw(`INSERT INTO ?? (${allAttrs.join(', ')}) ??`, [
+          table,
+          trx.select(allAttrs).from(tmpTable),
+        ]);
+
         await trx.schema.dropTableIfExists(tmpTable);
       };
 
       try {
         await ORM.knex.transaction(trx => rebuildTable(trx));
+        await generateIndexes(table);
       } catch (err) {
         if (err.message.includes('UNIQUE constraint failed')) {
           strapi.log.error(
@@ -350,9 +416,6 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       [definition.attributes[morphRelation.alias].filter]: {
         type: 'text',
       },
-      order: {
-        type: 'integer',
-      },
     };
 
     if (connection.options && connection.options.autoMigration !== false) {
@@ -360,7 +423,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     }
   }
 
-  // Equilize many to many relations
+  // Equilize many to many releations
   const manyRelations = definition.associations.filter(({ nature }) =>
     ['manyToMany', 'manyWay'].includes(nature)
   );

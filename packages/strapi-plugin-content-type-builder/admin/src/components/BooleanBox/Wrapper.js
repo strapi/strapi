@@ -5,7 +5,6 @@ const Wrapper = styled.div`
   justify-content: space-between;
   position: relative;
   margin-top: 8px;
-  margin-bottom: 10px;
 
   .option {
     border-radius: 2px;
@@ -15,9 +14,8 @@ const Wrapper = styled.div`
     color: #9ea7b8;
     > p {
       max-width: calc(100% - 20px);
-      margin-top: -2px;
+      margin-top: -1px;
       line-height: 18px;
-      margin-bottom: 1.4rem;
     }
   }
 

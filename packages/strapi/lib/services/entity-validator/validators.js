@@ -48,7 +48,7 @@ const addMaxIntegerValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
 
 /**
- * Adds min float/decimal validator
+ * Adds min float/decimal validatore
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
@@ -56,28 +56,19 @@ const addMinFloatValidator = ({ min }, validator) =>
   _.isNumber(min) ? validator.min(min) : validator;
 
 /**
- * Adds max float/decimal validator
+ * Adds max float/decimal validatore
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
 const addMaxFloatValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(max) : validator;
 
-/**
- * Adds regex validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
- */
-const addStringRegexValidator = ({ regex }, validator) =>
-  _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
-
 /* Type validators */
 
 const stringValidator = composeValidators(
-  () => yup.string().transform((val, originalVal) => originalVal),
+  () => yup.string().strict(),
   addMinLengthValidator,
-  addMaxLengthValidator,
-  addStringRegexValidator
+  addMaxLengthValidator
 );
 
 const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());

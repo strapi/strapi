@@ -86,7 +86,6 @@ const formatAttribute = (key, attribute, { model }) => {
       type: 'media',
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
-      allowedTypes: attribute.allowedTypes,
     };
   } else {
     return {

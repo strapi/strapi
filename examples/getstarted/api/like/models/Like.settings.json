@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "likes",
   "info": {
     "name": "like",

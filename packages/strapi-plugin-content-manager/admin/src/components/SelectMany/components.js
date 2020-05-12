@@ -92,11 +92,15 @@ const Li = styled.li`
   > div {
     width: 90%;
     > a {
-      max-width: 100%;
       color: rgb(35, 56, 77);
     }
     > a:hover {
       text-decoration: none;
+    }
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     &:first-of-type {
@@ -141,12 +145,4 @@ const Li = styled.li`
   }
 `;
 
-const Span = styled.span`
-  display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-export { ListShadow, ListWrapper, Li, Span };
+export { ListShadow, ListWrapper, Li };

@@ -1,8 +1,5 @@
 {
   "logger": {
-    "enabled": true,
-    "level": "debug",
-    "exposeInContext": true,
-    "requests": true
+    "enabled": true
   }
 }

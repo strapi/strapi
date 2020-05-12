@@ -2,11 +2,13 @@
 
 const _ = require('lodash');
 const yup = require('yup');
-const { formatYupErrors, nameToSlug } = require('strapi-utils');
-const pluralize = require('pluralize');
+const { formatYupErrors } = require('strapi-utils');
 
 const createSchema = require('./model-schema');
-const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
+const {
+  removeEmptyDefaults,
+  removeDeletedUIDTargetFields,
+} = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('./constants');
 
@@ -34,20 +36,16 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone'];
  * Returns a yup schema to validate a content type payload
  * @param {Object} data payload
  */
-const createContentTypeSchema = (data, { isEdition = false } = {}) => {
+const createContentTypeSchema = data => {
   const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
 
-  const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
-    modelType: modelTypes.CONTENT_TYPE,
-  }).shape({
-    name: yup
-      .string()
-      .test(hasPluralName)
-      .test(alreadyUsedContentTypeName(isEdition))
-      .test(forbiddenContentTypeNameValidator())
-      .min(1)
-      .required(),
-  });
+  const contentTypeSchema = createSchema(
+    VALID_TYPES,
+    VALID_RELATIONS[kind] || [],
+    {
+      modelType: modelTypes.CONTENT_TYPE,
+    }
+  );
 
   return yup
     .object({
@@ -87,60 +85,12 @@ const validateUpdateContentTypeInput = data => {
 
   removeDeletedUIDTargetFields(data.contentType);
 
-  return createContentTypeSchema(data, { isEdition: true })
+  return createContentTypeSchema(data)
     .validate(data, {
       strict: true,
       abortEarly: false,
     })
     .catch(error => Promise.reject(formatYupErrors(error)));
-};
-
-const forbiddenContentTypeNameValidator = () => {
-  const reservedNames = strapi.plugins['content-type-builder'].services.builder.getReservedNames()
-    .models;
-
-  return {
-    name: 'forbiddenContentTypeName',
-    message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
-    test: value => {
-      if (reservedNames.includes(nameToSlug(value))) {
-        return false;
-      }
-
-      return true;
-    },
-  };
-};
-
-const hasPluralName = {
-  name: 'hasPluralName',
-  message:
-    'Content Type name `${value}` cannot be pluralized. \nSuggestion: add Item after the name (e.g News -> NewsItem).',
-  test: value => {
-    if (pluralize.singular(value) === pluralize(value)) {
-      return false;
-    }
-
-    return true;
-  },
-};
-
-const alreadyUsedContentTypeName = isEdition => {
-  const usedNames = Object.values(strapi.contentTypes).map(ct => ct.modelName);
-
-  return {
-    name: 'nameAlreadyUsed',
-    message: 'Content Type name `${value}` is already being used.',
-    test: value => {
-      // don't check on edition
-      if (isEdition) return true;
-
-      if (usedNames.includes(nameToSlug(value))) {
-        return false;
-      }
-      return true;
-    },
-  };
 };
 
 /**

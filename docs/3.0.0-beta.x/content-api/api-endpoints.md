@@ -2,16 +2,12 @@
 
 When you create a `Content Type` you will have a certain number of **REST API endpoints** available to interact with it.
 
-::: warning
-Components don't have API endpoints
-:::
-
 As an **example**, let's consider the following models:
 
 **Content Types**:
 
-- `Restaurant` (Collection Type)
-- `Homepage` (Single Type)
+- `Restaurant` **(Collection Type)**
+- `Homepage` **(Single Type)**
 
 **Components**:
 
@@ -146,7 +142,7 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 ### Here are some Content Type examples
 
-#### Single Types
+### Single Types
 
 :::: tabs
 
@@ -180,11 +176,7 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 </div>
 
-:::
-
-::::
-
-#### Collection Types
+### Collection Types
 
 :::: tabs
 
@@ -304,17 +296,7 @@ GET http://localhost:1337/restaurants
     "name": "Restaurant 1",
     "cover": {
       "id": 1,
-      "name": "image.png",
-      "hash": "123456712DHZAUD81UDZQDAZ",
-      "sha256": "v",
-      "ext": ".png",
-      "mime": "image/png",
-      "size": 122.95,
-      "url": "http://localhost:1337/uploads/123456712DHZAUD81UDZQDAZ.png",
-      "provider": "local",
-      "provider_metadata": null,
-      "created_at": "2019-12-09T00:00:00.000Z",
-      "updated_at": "2019-12-09T00:00:00.000Z"
+      "url": "/uploads/3d89ba92f762433bbb75bbbfd9c13974.png"
     },
     "content": [
       {
@@ -374,17 +356,7 @@ GET http://localhost:1337/restaurants/1
   "title": "Restaurant 1",
   "cover": {
     "id": 1,
-    "name": "image.png",
-    "hash": "123456712DHZAUD81UDZQDAZ",
-    "sha256": "v",
-    "ext": ".png",
-    "mime": "image/png",
-    "size": 122.95,
-    "url": "http://localhost:1337/uploads/123456712DHZAUD81UDZQDAZ.png",
-    "provider": "local",
-    "provider_metadata": null,
-    "created_at": "2019-12-09T00:00:00.000Z",
-    "updated_at": "2019-12-09T00:00:00.000Z"
+    "url": "/uploads/3d89ba92f762433bbb75bbbfd9c13974.png"
   },
   "content": [
     {
@@ -486,17 +458,7 @@ POST http://localhost:1337/restaurants
   "title": "restaurant 1",
   "cover": {
     "id": 1,
-    "name": "image.png",
-    "hash": "123456712DHZAUD81UDZQDAZ",
-    "sha256": "v",
-    "ext": ".png",
-    "mime": "image/png",
-    "size": 122.95,
-    "url": "http://localhost:1337/uploads/123456712DHZAUD81UDZQDAZ.png",
-    "provider": "local",
-    "provider_metadata": null,
-    "created_at": "2019-12-09T00:00:00.000Z",
-    "updated_at": "2019-12-09T00:00:00.000Z"
+    "url": "/uploads/3d89ba92f762433bbb75bbbfd9c13974.png"
   },
   "content": [
     {
@@ -592,17 +554,7 @@ PUT http://localhost:1337/restaurants/1
   "title": "Restaurant 1",
   "cover": {
     "id": 1,
-    "name": "image.png",
-    "hash": "123456712DHZAUD81UDZQDAZ",
-    "sha256": "v",
-    "ext": ".png",
-    "mime": "image/png",
-    "size": 122.95,
-    "url": "http://localhost:1337/uploads/123456712DHZAUD81UDZQDAZ.png",
-    "provider": "local",
-    "provider_metadata": null,
-    "created_at": "2019-12-09T00:00:00.000Z",
-    "updated_at": "2019-12-09T00:00:00.000Z"
+    "url": "/uploads/3d89ba92f762433bbb75bbbfd9c13974.png"
   },
   "content": [
     {
@@ -667,17 +619,7 @@ DELETE http://localhost:1337/restaurants/1
   "title": "Restaurant 1",
   "cover": {
     "id": 1,
-    "name": "image.png",
-    "hash": "123456712DHZAUD81UDZQDAZ",
-    "sha256": "v",
-    "ext": ".png",
-    "mime": "image/png",
-    "size": 122.95,
-    "url": "http://localhost:1337/uploads/123456712DHZAUD81UDZQDAZ.png",
-    "provider": "local",
-    "provider_metadata": null,
-    "created_at": "2019-12-09T00:00:00.000Z",
-    "updated_at": "2019-12-09T00:00:00.000Z"
+    "url": "/uploads/3d89ba92f762433bbb75bbbfd9c13974.png"
   },
   "content": [
     {

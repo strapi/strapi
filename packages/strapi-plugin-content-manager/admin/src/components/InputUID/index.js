@@ -7,7 +7,7 @@ import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
 import { request, LoadingIndicator } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
@@ -42,12 +42,13 @@ const InputUID = ({
   error: inputError,
   name,
   onChange,
+  required,
   validations,
   value,
   editable,
   ...inputProps
 }) => {
-  const { modifiedData, initialData, layout } = useDataManager();
+  const { modifiedData, initialData } = useDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);
@@ -58,10 +59,9 @@ const InputUID = ({
   const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
-  const createdAtName = get(layout, ['schema', 'options', 'timestamps', 0]);
-  const isCreation = !initialData[createdAtName];
+  const isCreation = isEmpty(initialData);
 
-  generateUid.current = async (shouldSetInitialValue = false) => {
+  generateUid.current = async () => {
     setIsLoading(true);
     const requestURL = getRequestUrl('explorer/uid/generate');
     try {
@@ -73,8 +73,7 @@ const InputUID = ({
           data: modifiedData,
         },
       });
-
-      onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
+      onChange({ target: { name, value: data, type: 'text' } });
       setIsLoading(false);
     } catch (err) {
       console.error({ err });
@@ -107,8 +106,8 @@ const InputUID = ({
   };
 
   useEffect(() => {
-    if (!value && validations.required) {
-      generateUid.current(true);
+    if (!value && required) {
+      generateUid.current();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -144,15 +143,9 @@ const InputUID = ({
   }, [availability]);
 
   useEffect(() => {
-    if (
-      !isCustomized &&
-      isCreation &&
-      debouncedTargetFieldValue &&
-      modifiedData[attribute.targetField]
-    ) {
-      generateUid.current(true);
+    if (!isCustomized && isCreation && debouncedTargetFieldValue !== null) {
+      generateUid.current();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedTargetFieldValue, isCustomized, isCreation]);
 
   useClickAwayListener(wrapperRef, () => setIsSuggestionOpen(false));
@@ -227,7 +220,7 @@ const InputUID = ({
                   <RegenerateButton
                     onMouseEnter={handleGenerateMouseEnter}
                     onMouseLeave={handleGenerateMouseLeave}
-                    onClick={() => generateUid.current()}
+                    onClick={generateUid.current}
                   >
                     {isLoading ? (
                       <LoadingIndicator small />
@@ -271,6 +264,7 @@ InputUID.propTypes = {
   error: PropTypes.string,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  required: PropTypes.bool,
   validations: PropTypes.object,
   value: PropTypes.string,
 };
@@ -279,6 +273,7 @@ InputUID.defaultProps = {
   description: '',
   editable: false,
   error: null,
+  required: false,
   validations: {},
   value: '',
 };

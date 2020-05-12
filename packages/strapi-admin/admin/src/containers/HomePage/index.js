@@ -50,6 +50,10 @@ const SOCIAL_LINKS = [
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
   },
+  {
+    name: 'Stack Overflow',
+    link: 'https://stackoverflow.com/questions/tagged/strapi',
+  },
 ];
 
 const HomePage = ({ global: { plugins }, history: { push } }) => {

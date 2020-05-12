@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "components_closingperiods",
   "info": {
     "name": "closingperiod",

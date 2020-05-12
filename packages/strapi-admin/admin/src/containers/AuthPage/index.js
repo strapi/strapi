@@ -3,8 +3,13 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, omit, set, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link, Redirect } from 'react-router-dom';
-import { Button } from '@buffetjs/core';
-import { auth, getQueryParameters, getYupInnerErrors, request } from 'strapi-helper-plugin';
+import {
+  auth,
+  Button,
+  getQueryParameters,
+  getYupInnerErrors,
+  request,
+} from 'strapi-helper-plugin';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LogoStrapi from '../../assets/images/logo_strapi.png';
 import PageTitle from '../../components/PageTitle';
@@ -24,9 +29,9 @@ const AuthPage = ({
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const codeRef = useRef();
-  const abortController = new AbortController();
+  const aborController = new AbortController();
 
-  const { signal } = abortController;
+  const { signal } = aborController;
   codeRef.current = getQueryParameters(search, 'code');
   useEffect(() => {
     // Set the reset code provided by the url
@@ -44,11 +49,17 @@ const AuthPage = ({
     }
 
     return () => {
-      abortController.abort();
+      aborController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authType, codeRef]);
-  const { didCheckErrors, errors, modifiedData, submitSuccess, userEmail } = reducerState.toJS();
+  const {
+    didCheckErrors,
+    errors,
+    modifiedData,
+    submitSuccess,
+    userEmail,
+  } = reducerState.toJS();
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -113,7 +124,9 @@ const AuthPage = ({
         } else if (authType === 'forgot-password') {
           formErrors = { email: formattedError[0] };
         } else {
-          strapi.notification.error(get(formattedError, '0.id', 'notification.error'));
+          strapi.notification.error(
+            get(formattedError, '0.id', 'notification.error')
+          );
         }
       }
     } catch (err) {
@@ -151,7 +164,7 @@ const AuthPage = ({
   return (
     <>
       <PageTitle title={upperFirst(authType)} />
-      <Wrapper authType={authType} withSuccessBorder={submitSuccess}>
+      <Wrapper authType={authType} withSucessBorder={submitSuccess}>
         <NavTopRightWrapper>
           <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
         </NavTopRightWrapper>
@@ -164,7 +177,9 @@ const AuthPage = ({
             )}
           </div>
           <div className="headerDescription">
-            {authType === 'register' && <FormattedMessage id="Auth.header.register.description" />}
+            {authType === 'register' && (
+              <FormattedMessage id="Auth.header.register.description" />
+            )}
           </div>
           {/* TODO Forgot success style */}
           <div className="formContainer bordered">
@@ -202,21 +217,20 @@ const AuthPage = ({
                     })}
                   <div
                     className={`${
-                      authType === 'login' ? 'col-6 loginButton' : 'col-12 buttonContainer'
+                      authType === 'login'
+                        ? 'col-6 loginButton'
+                        : 'col-12 buttonContainer'
                     }`}
                   >
                     <Button
-                      color="primary"
                       className={submitSuccess ? 'buttonForgotSuccess' : ''}
                       type="submit"
+                      label={`Auth.form.button.${
+                        submitSuccess ? 'forgot-password.success' : authType
+                      }`}
+                      primary={!submitSuccess}
                       style={authType === 'login' ? {} : { width: '100%' }}
-                    >
-                      <FormattedMessage
-                        id={`Auth.form.button.${
-                          submitSuccess ? 'forgot-password.success' : authType
-                        }`}
-                      />
-                    </Button>
+                    />
                   </div>
                 </div>
               </div>
@@ -224,9 +238,15 @@ const AuthPage = ({
           </div>
           <div className="linkContainer">
             {authType !== 'register' && authType !== 'reset-password' && (
-              <Link to={`/auth/${authType === 'login' ? 'forgot-password' : 'login'}`}>
+              <Link
+                to={`/auth/${
+                  authType === 'login' ? 'forgot-password' : 'login'
+                }`}
+              >
                 <FormattedMessage
-                  id={`Auth.link.${authType === 'login' ? 'forgot-password' : 'ready'}`}
+                  id={`Auth.link.${
+                    authType === 'login' ? 'forgot-password' : 'ready'
+                  }`}
                 />
               </Link>
             )}

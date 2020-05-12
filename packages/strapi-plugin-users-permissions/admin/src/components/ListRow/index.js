@@ -8,10 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
-import { IconLinks } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { PopUpWarning } from 'strapi-helper-plugin';
+import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
 import en from '../../translations/en.json';
 import { HomePageContext } from '../../contexts/HomePage';
 import { Container, Flex, Row, Wrapper } from './Components';
@@ -30,15 +28,14 @@ class ListRow extends React.Component {
   undeletableIDs = ['public', 'authenticated'];
 
   generateContent = () => {
-    let links = [
+    let icons = [
       {
-        icon: <FontAwesomeIcon icon="pencil-alt" />,
+        icoType: 'pencil-alt',
         onClick: this.handleClick,
       },
       {
-        icon: <FontAwesomeIcon icon="trash-alt" />,
-        onClick: e => {
-          e.stopPropagation();
+        icoType: 'trash',
+        onClick: () => {
           this.setState({ showModalDelete: true });
         },
       },
@@ -47,16 +44,11 @@ class ListRow extends React.Component {
     switch (this.props.settingType) {
       case 'roles':
         if (includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
-          links = [];
+          icons = [];
         }
 
         if (includes(this.undeletableIDs, get(this.props.item, 'type', ''))) {
-          links = [
-            {
-              icon: <FontAwesomeIcon icon="pencil-alt" />,
-              onClick: this.handleClick,
-            },
-          ];
+          icons = [{ icoType: 'pencil-alt', onClick: this.handleClick }];
         }
 
         return (
@@ -70,12 +62,12 @@ class ListRow extends React.Component {
               {this.props.item.nb_users > 1 ? 'users' : 'user'}
             </div>
             <div className="col-md-2">
-              <IconLinks links={links} />
+              <IcoContainer icons={icons} />
             </div>
           </Wrapper>
         );
       case 'providers':
-        links.pop(); // Remove the delete CTA
+        icons.pop(); // Remove the icon-trash
 
         return (
           <Wrapper className="row">
@@ -83,29 +75,32 @@ class ListRow extends React.Component {
               <Flex>
                 <div>
                   <i
-                    className={`fa${this.props.item.key !== undefined ? 'b' : ''} fa-${
-                      this.props.item.icon
-                    }`}
+                    className={`fa${
+                      this.props.item.key !== undefined ? 'b' : ''
+                    } fa-${this.props.item.icon}`}
                   />
                 </div>
                 <div>{capitalize(this.props.item.name)}</div>
               </Flex>
             </div>
             <div className="col-md-6" style={{ fontWeight: '500' }}>
-              {get(this.props.values, [get(this.props.item, 'name'), 'enabled']) ? (
+              {get(this.props.values, [
+                get(this.props.item, 'name'),
+                'enabled',
+              ]) ? (
                 <span style={{ color: '#5A9E06' }}>Enabled</span>
               ) : (
                 <span style={{ color: '#F64D0A' }}>Disabled</span>
               )}
             </div>
             <div className="col-md-2">
-              <IconLinks links={links} />
+              <IcoContainer icons={icons} />
             </div>
           </Wrapper>
         );
 
       case 'email-templates':
-        links.pop(); // Remove the delete CTA
+        icons.pop();
 
         return (
           <Wrapper className="row">
@@ -116,7 +111,9 @@ class ListRow extends React.Component {
                 </div>
                 <div>
                   {this.props.item.display && en[this.props.item.display] ? (
-                    <FormattedMessage id={`users-permissions.${this.props.item.display}`} />
+                    <FormattedMessage
+                      id={`users-permissions.${this.props.item.display}`}
+                    />
                   ) : (
                     this.props.item.name
                   )}
@@ -124,7 +121,7 @@ class ListRow extends React.Component {
               </Flex>
             </div>
             <div className="col-md-8">
-              <IconLinks links={links} />
+              <IcoContainer icons={icons} />
             </div>
           </Wrapper>
         );
@@ -139,7 +136,9 @@ class ListRow extends React.Component {
 
     switch (this.props.settingType) {
       case 'roles': {
-        if (!includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
+        if (
+          !includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))
+        ) {
           return push(`${pathname}/edit/${this.props.item.id}`);
         }
         return;

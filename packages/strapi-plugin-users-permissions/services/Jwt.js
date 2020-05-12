@@ -44,7 +44,9 @@ module.exports = {
     _.defaults(jwtOptions, defaultJwtOptions);
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
+      process.env.JWT_SECRET ||
+        _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') ||
+        'oursecret',
       jwtOptions
     );
   },
@@ -53,7 +55,9 @@ module.exports = {
     return new Promise(function(resolve, reject) {
       jwt.verify(
         token,
-        _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
+        process.env.JWT_SECRET ||
+          _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') ||
+          'oursecret',
         {},
         function(err, tokenPayload = {}) {
           if (err) {

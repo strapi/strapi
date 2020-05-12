@@ -12,7 +12,9 @@ const _ = require('lodash');
 const convertRestQueryParams = (params = {}, defaults = {}) => {
   if (typeof params !== 'object' || params === null) {
     throw new Error(
-      `convertRestQueryParams expected an object got ${params === null ? 'null' : typeof params}`
+      `convertRestQueryParams expected an object got ${
+        params === null ? 'null' : typeof params
+      }`
     );
   }
 
@@ -34,18 +36,12 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     Object.assign(finalParams, convertLimitQueryParams(params._limit));
   }
 
-  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where']);
-  const whereClauses = [];
+  const whereParams = _.omit(params, ['_sort', '_start', '_limit']);
 
-  if (_.keys(whereParams).length > 0) {
-    whereClauses.push(...convertWhereParams(whereParams));
-  }
-
-  if (_.has(params, '_where')) {
-    whereClauses.push(...convertWhereParams(params._where));
-  }
-
-  Object.assign(finalParams, { where: whereClauses });
+  if (_.keys(whereParams).length > 0)
+    Object.assign(finalParams, {
+      where: convertWhereParams(whereParams),
+    });
 
   return finalParams;
 };
@@ -56,7 +52,9 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
  */
 const convertSortQueryParams = sortQuery => {
   if (typeof sortQuery !== 'string') {
-    throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
+    throw new Error(
+      `convertSortQueryParams expected a string, got ${typeof sortQuery}`
+    );
   }
 
   const sortKeys = [];
@@ -89,7 +87,9 @@ const convertStartQueryParams = startQuery => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
-    throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
+    throw new Error(
+      `convertStartQueryParams expected a positive integer got ${startAsANumber}`
+    );
   }
 
   return {
@@ -104,8 +104,13 @@ const convertStartQueryParams = startQuery => {
 const convertLimitQueryParams = limitQuery => {
   const limitAsANumber = _.toNumber(limitQuery);
 
-  if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
-    throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
+  if (
+    !_.isInteger(limitAsANumber) ||
+    (limitAsANumber !== -1 && limitAsANumber < 0)
+  ) {
+    throw new Error(
+      `convertLimitQueryParams expected a positive integer got ${limitAsANumber}`
+    );
   }
 
   return {
@@ -135,12 +140,6 @@ const VALID_OPERATORS = [
  */
 const convertWhereParams = whereParams => {
   let finalWhere = [];
-
-  if (Array.isArray(whereParams)) {
-    return whereParams.reduce((acc, whereParam) => {
-      return acc.concat(convertWhereParams(whereParam));
-    }, []);
-  }
 
   Object.keys(whereParams).forEach(whereClause => {
     const { field, operator = 'eq', value } = convertWhereClause(

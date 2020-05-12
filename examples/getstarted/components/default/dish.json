@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "components_dishes",
   "info": {
     "name": "dish",

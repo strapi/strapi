@@ -8,15 +8,15 @@ import {
   ModalForm,
   getYupInnerErrors,
   useGlobalContext,
-  useQuery,
   InputsIndex,
 } from 'strapi-helper-plugin';
-import { Button, Label } from '@buffetjs/core';
+import { Button } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
+import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
@@ -53,7 +53,6 @@ const FormModal = () => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const query = useQuery();
   const attributeOptionRef = useRef();
-
   const {
     addAttribute,
     addCreatedComponentToDynamicZone,
@@ -71,7 +70,6 @@ const FormModal = () => {
     setModifiedData,
     sortedContentTypesList,
     updateSchema,
-    reservedNames,
   } = useDataManager();
   const {
     componentToCreate,
@@ -344,8 +342,7 @@ const FormModal = () => {
         Object.keys(contentTypes),
         state.actionType === 'edit',
         // currentUID
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
-        reservedNames
+        get(allDataSchema, [...state.pathToSchema, 'uid'], null)
       );
 
       // Check form validity for component
@@ -354,7 +351,6 @@ const FormModal = () => {
       schema = forms.component.schema(
         Object.keys(components),
         modifiedData.category || '',
-        reservedNames,
         state.actionType === 'edit',
         get(allDataSchema, [...state.pathToSchema, 'uid'], null)
       );
@@ -366,8 +362,7 @@ const FormModal = () => {
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
         Object.keys(components),
-        get(modifiedData, 'componentToCreate.category', ''),
-        reservedNames
+        get(modifiedData, 'componentToCreate.category', '')
       );
 
       // Check form validity for creating a 'common attribute'
@@ -407,8 +402,7 @@ const FormModal = () => {
         state.actionType === 'edit',
         state.attributeName,
         initialData,
-        alreadyTakenTargetContentTypeAttributes,
-        reservedNames
+        alreadyTakenTargetContentTypeAttributes
       );
     } else if (isEditingCategory) {
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
@@ -420,8 +414,7 @@ const FormModal = () => {
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components),
-          get(modifiedData, 'componentToCreate.category', ''),
-          reservedNames
+          get(modifiedData, 'componentToCreate.category', '')
         );
       } else {
         // The form is valid
@@ -502,23 +495,8 @@ const FormModal = () => {
     });
   };
 
-  const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE_ALLOWED_TYPE',
-      name,
-      value,
-    });
-  };
-
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
-    const namesThatCanResetToNullValue = [
-      'enumName',
-      'max',
-      'min',
-      'maxLength',
-      'minLength',
-      'regex',
-    ];
+    const namesThatCanResetToNullValue = ['enumName', 'max', 'min', 'maxLength', 'minLength'];
     let val;
 
     if (['default', ...namesThatCanResetToNullValue].includes(name) && value === '') {
@@ -1023,10 +1001,7 @@ const FormModal = () => {
       onOpened={onOpened}
       onClosed={onClosed}
       onToggle={handleToggle}
-      withoverflow={toString(
-        state.modalType === 'addComponentToDynamicZone' ||
-          (state.modalType === 'attribute' && state.attributeType === 'media')
-      )}
+      withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
     >
       <HeaderModal>
         <ModalHeader headerId={state.headerId} headers={headers} />
@@ -1123,7 +1098,7 @@ const FormModal = () => {
                     attributes
                   ).items.map((row, index) => {
                     return (
-                      <div className="row" key={index}>
+                      <div className="row" key={index} style={{ marginBottom: 4 }}>
                         {row.map((input, i) => {
                           // The divider type is used mainly the advanced tab
                           // It is the one responsible for displaying the settings label
@@ -1133,32 +1108,30 @@ const FormModal = () => {
                                 className="col-12"
                                 style={{
                                   marginBottom: '1.4rem',
-                                  lineHeight: 'normal',
+                                  marginTop: -2,
                                   fontWeight: 500,
                                 }}
                                 key="divider"
                               >
-                                <Label htmlFor="divider-no-for">
-                                  <FormattedMessage
-                                    id={getTrad('form.attribute.item.settings.name')}
-                                  />
-                                </Label>
+                                <FormattedMessage
+                                  id={getTrad('form.attribute.item.settings.name')}
+                                />
                               </div>
                             );
                           }
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
-                            return <div key="spacer" style={{ height: 8 }} />;
+                            return <div key="spacer" style={{ height: 11 }} />;
                           }
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer-small') {
-                            return <div key={`${index}.${i}`} style={{ height: 4 }} />;
+                            return <div key="spacer" style={{ height: 4 }} />;
                           }
 
                           if (input.type === 'spacer-medium') {
-                            return <div key={`${index}.${i}`} style={{ height: 8 }} />;
+                            return <div key="spacer" style={{ height: 8 }} />;
                           }
 
                           // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
@@ -1213,8 +1186,6 @@ const FormModal = () => {
                             value = retrievedValue.join('\n');
                           } else if (input.name === 'uid') {
                             value = input.value;
-                          } else if (input.name === 'allowedTypes' && retrievedValue === '') {
-                            value = null;
                           } else {
                             value = retrievedValue;
                           }
@@ -1230,6 +1201,7 @@ const FormModal = () => {
                                 type="string"
                                 onChange={handleChange}
                                 value={value}
+                                style={{ marginTop: 8, marginBottom: 11 }}
                               />
                             );
                           }
@@ -1240,9 +1212,7 @@ const FormModal = () => {
                                 {...input}
                                 modifiedData={modifiedData}
                                 addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
-                                changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
                                 customInputs={{
-                                  allowedTypesSelect: WrapperSelect,
                                   componentIconPicker: ComponentIconPicker,
                                   componentSelect: WrapperSelect,
                                   creatableSelect: WrapperSelect,

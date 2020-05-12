@@ -1,0 +1,19 @@
+{
+  "timeout": 100,
+  "load": {
+    "before": [
+      "responseTime",
+      "logger",
+      "cors",
+      "responses",
+      "gzip"
+    ],
+    "order": [
+      "session", "xframe", "public"
+    ],
+    "after": [
+      "parser",
+      "router"
+    ]
+  }
+}

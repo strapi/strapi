@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
   display: flex;
@@ -7,14 +7,16 @@ const Wrapper = styled.div`
   height: 30px;
   width: 100%;
   padding: 0 5px;
+  ${({ isComponent }) => {
+    if (isComponent) {
+      return css`
+        height: 34px;
+        padding: 0;
+      `;
+    }
 
-  ${({ isComponent }) =>
-    isComponent &&
-    `
-    height: 34px;
-    padding: 0;
-  `}
-
+    return '';
+  }}
   border-radius: 2px;
   > div {
     width: 100%;

@@ -82,6 +82,19 @@ module.exports = ({ models, target }, ctx) => {
       _.omitBy(definition.loadedModel, ({ type }) => type === 'virtual')
     );
 
+    // Initialize lifecycle callbacks.
+    const preLifecycle = {
+      validate: 'beforeCreate',
+      find: 'beforeFetchAll',
+      findOne: 'beforeFetch',
+      findOneAndUpdate: 'beforeUpdate',
+      findOneAndRemove: 'beforeDestroy',
+      remove: 'beforeDestroy',
+      update: 'beforeUpdate',
+      updateOne: 'beforeUpdate',
+      save: 'beforeSave',
+    };
+
     const findLifecycles = ['find', 'findOne', 'findOneAndUpdate', 'findOneAndRemove'];
 
     /*
@@ -89,6 +102,7 @@ module.exports = ({ models, target }, ctx) => {
         It allows us to make Upload.find().populate('related')
         instead of Upload.find().populate('related.item')
       */
+
     const morphAssociations = definition.associations.filter(isPolymorphicAssoc);
 
     const populateFn = createOnFetchPopulateFn({
@@ -99,6 +113,45 @@ module.exports = ({ models, target }, ctx) => {
 
     findLifecycles.forEach(key => {
       schema.pre(key, populateFn);
+    });
+
+    Object.keys(preLifecycle).forEach(key => {
+      const fn = preLifecycle[key];
+
+      if (_.isFunction(target[model.toLowerCase()][fn])) {
+        schema.pre(key, function() {
+          return target[model.toLowerCase()][fn](this);
+        });
+      }
+    });
+
+    const postLifecycle = {
+      validate: 'afterCreate',
+      findOneAndRemove: 'afterDestroy',
+      remove: 'afterDestroy',
+      update: 'afterUpdate',
+      updateOne: 'afterUpdate',
+      find: 'afterFetchAll',
+      findOne: 'afterFetch',
+      save: 'afterSave',
+    };
+
+    // Mongoose doesn't allow post 'remove' event on model.
+    // See https://github.com/Automattic/mongoose/issues/3054
+    Object.keys(postLifecycle).forEach(key => {
+      const fn = postLifecycle[key];
+
+      if (_.isFunction(target[model.toLowerCase()][fn])) {
+        schema.post(key, function(doc, next) {
+          target[model.toLowerCase()]
+            [fn](this, doc)
+            .then(next)
+            .catch(err => {
+              strapi.log.error(err);
+              next(err);
+            });
+        });
+      }
     });
 
     // Add virtual key to provide populate and reverse populate
@@ -165,7 +218,6 @@ module.exports = ({ models, target }, ctx) => {
       virtuals: true,
       transform: function(doc, returned) {
         // Remover $numberDecimal nested property.
-
         Object.keys(returned)
           .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
           .forEach(key => {
@@ -186,13 +238,11 @@ module.exports = ({ models, target }, ctx) => {
                 break;
 
               case 'manyMorphToMany':
-              case 'manyMorphToOne': {
+              case 'manyMorphToOne':
                 returned[association.alias] = returned[association.alias].map(obj =>
                   refToStrapiRef(obj)
                 );
-
                 break;
-              }
               default:
             }
           }
@@ -228,7 +278,8 @@ module.exports = ({ models, target }, ctx) => {
     // Instantiate model.
     const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
-    const handleIndexesErrors = () => {
+    // Ensure indexes are synced with the model, prevent duplicate index errors
+    Model.syncIndexes(null, () => {
       Model.on('index', error => {
         if (error) {
           if (error.code === 11000) {
@@ -240,17 +291,7 @@ module.exports = ({ models, target }, ctx) => {
           }
         }
       });
-    };
-
-    // Only sync indexes in development env while it's not possible to create complex indexes directly from models
-    // In other environments it will simply create missing indexes (those defined in the models but not present in db)
-    if (strapi.app.env === 'development') {
-      // Ensure indexes are synced with the model, prevent duplicate index errors
-      // Side-effect: Delete all the indexes not present in the model.json
-      Model.syncIndexes(null, handleIndexesErrors);
-    } else {
-      handleIndexesErrors();
-    }
+    });
 
     // Expose ORM functions through the `target` object.
     target[model] = _.assign(Model, target[model]);
@@ -258,7 +299,6 @@ module.exports = ({ models, target }, ctx) => {
     // Push attributes to be aware of model schema.
     target[model]._attributes = definition.attributes;
     target[model].updateRelations = relations.update;
-    target[model].deleteRelations = relations.deleteRelations;
   }
 
   // Parse every authenticated model.
@@ -273,8 +313,20 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
       const { alias, nature } = association;
 
       if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate(alias);
-      } else if (populatedPaths.includes(alias)) {
+        this.populate({
+          path: alias,
+          match: {
+            [`${association.via}.${association.filter}`]: association.alias,
+            [`${association.via}.kind`]: definition.globalId,
+          },
+          options: {
+            sort: '-createdAt',
+          },
+        });
+        return;
+      }
+
+      if (populatedPaths.includes(alias)) {
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
       }
     });
@@ -296,52 +348,48 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {
   const { nature, verbose } =
-    utilsModels.getNature({
-      attribute,
-      attributeName: name,
-      modelName: model.toLowerCase(),
-    }) || {};
+    utilsModels.getNature(attribute, name, undefined, model.toLowerCase()) || {};
 
   // Build associations key
   utilsModels.defineAssociations(model.toLowerCase(), definition, attribute, name);
 
-  const getRef = (name, plugin) => {
-    return plugin ? strapi.plugins[plugin].models[name].globalId : strapi.models[name].globalId;
-  };
-
-  const setField = (name, val) => {
-    definition.loadedModel[name] = val;
-  };
-
-  const { ObjectId } = instance.Schema.Types;
-
   switch (verbose) {
     case 'hasOne': {
-      const ref = getRef(attribute.model, attribute.plugin);
+      const ref = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.model].globalId
+        : strapi.models[attribute.model].globalId;
 
-      setField(name, { type: ObjectId, ref });
-
+      definition.loadedModel[name] = {
+        type: instance.Schema.Types.ObjectId,
+        ref,
+      };
       break;
     }
     case 'hasMany': {
       const FK = _.find(definition.associations, {
         alias: name,
       });
-
-      const ref = getRef(attribute.collection, attribute.plugin);
+      const ref = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.collection].globalId
+        : strapi.models[attribute.collection].globalId;
 
       if (FK) {
-        setField(name, {
+        definition.loadedModel[name] = {
           type: 'virtual',
           ref,
           via: FK.via,
           justOne: false,
-        });
+        };
 
         // Set this info to be able to see if this field is a real database's field.
         attribute.isVirtual = true;
       } else {
-        setField(name, [{ type: ObjectId, ref }]);
+        definition.loadedModel[name] = [
+          {
+            type: instance.Schema.Types.ObjectId,
+            ref,
+          },
+        ];
       }
       break;
     }
@@ -349,8 +397,9 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
       const FK = _.find(definition.associations, {
         alias: name,
       });
-
-      const ref = getRef(attribute.model, attribute.plugin);
+      const ref = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.model].globalId
+        : strapi.models[attribute.model].globalId;
 
       if (
         FK &&
@@ -359,26 +408,38 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
         FK.nature !== 'oneWay' &&
         FK.nature !== 'oneToMorph'
       ) {
-        setField(name, {
+        definition.loadedModel[name] = {
           type: 'virtual',
           ref,
           via: FK.via,
           justOne: true,
-        });
+        };
 
         // Set this info to be able to see if this field is a real database's field.
         attribute.isVirtual = true;
       } else {
-        setField(name, { type: ObjectId, ref });
+        definition.loadedModel[name] = {
+          type: instance.Schema.Types.ObjectId,
+          ref,
+        };
       }
 
       break;
     }
     case 'belongsToMany': {
-      const ref = getRef(attribute.collection, attribute.plugin);
+      const targetModel = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.collection]
+        : strapi.models[attribute.collection];
+
+      const ref = targetModel.globalId;
 
       if (nature === 'manyWay') {
-        setField(name, [{ type: ObjectId, ref }]);
+        definition.loadedModel[name] = [
+          {
+            type: instance.Schema.Types.ObjectId,
+            ref,
+          },
+        ];
       } else {
         const FK = _.find(definition.associations, {
           alias: name,
@@ -386,47 +447,84 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
 
         // One-side of the relationship has to be a virtual field to be bidirectional.
         if ((FK && _.isUndefined(FK.via)) || attribute.dominant !== true) {
-          setField(name, {
+          definition.loadedModel[name] = {
             type: 'virtual',
             ref,
             via: FK.via,
-          });
+          };
 
           // Set this info to be able to see if this field is a real database's field.
           attribute.isVirtual = true;
         } else {
-          setField(name, [{ type: ObjectId, ref }]);
+          definition.loadedModel[name] = [
+            {
+              type: instance.Schema.Types.ObjectId,
+              ref,
+            },
+          ];
         }
       }
       break;
     }
     case 'morphOne': {
-      const ref = getRef(attribute.model, attribute.plugin);
-      setField(name, { type: ObjectId, ref });
+      const FK = _.find(definition.associations, {
+        alias: name,
+      });
+      const ref = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.model].globalId
+        : strapi.models[attribute.model].globalId;
+
+      definition.loadedModel[name] = {
+        type: 'virtual',
+        ref,
+        via: `${FK.via}.ref`,
+        justOne: true,
+      };
+
+      // Set this info to be able to see if this field is a real database's field.
+      attribute.isVirtual = true;
       break;
     }
     case 'morphMany': {
-      const ref = getRef(attribute.collection, attribute.plugin);
-      setField(name, [{ type: ObjectId, ref }]);
+      const FK = _.find(definition.associations, {
+        alias: name,
+      });
+      const ref = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.collection].globalId
+        : strapi.models[attribute.collection].globalId;
+
+      definition.loadedModel[name] = {
+        type: 'virtual',
+        ref,
+        via: `${FK.via}.ref`,
+      };
+
+      // Set this info to be able to see if this field is a real database's field.
+      attribute.isVirtual = true;
       break;
     }
-
     case 'belongsToMorph': {
-      setField(name, {
+      definition.loadedModel[name] = {
         kind: String,
         [attribute.filter]: String,
-        ref: { type: ObjectId, refPath: `${name}.kind` },
-      });
+        ref: {
+          type: instance.Schema.Types.ObjectId,
+          refPath: `${name}.kind`,
+        },
+      };
       break;
     }
     case 'belongsToManyMorph': {
-      setField(name, [
+      definition.loadedModel[name] = [
         {
           kind: String,
           [attribute.filter]: String,
-          ref: { type: ObjectId, refPath: `${name}.kind` },
+          ref: {
+            type: instance.Schema.Types.ObjectId,
+            refPath: `${name}.kind`,
+          },
         },
-      ]);
+      ];
       break;
     }
     default:

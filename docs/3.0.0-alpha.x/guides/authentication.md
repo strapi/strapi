@@ -28,7 +28,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -57,7 +57,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -86,7 +86,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -139,7 +139,8 @@ import axios from 'axios';
 axios
   .post('http://localhost:1337/auth/forgot-password', {
     email: 'user@strapi.io',
-    url: 'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
+    url:
+      'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
   })
   .then(response => {
     // Handle success.
@@ -147,7 +148,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -175,7 +176,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 });
 ```

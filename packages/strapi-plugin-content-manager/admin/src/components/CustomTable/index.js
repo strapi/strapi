@@ -3,14 +3,13 @@ import PropTypes from 'prop-types';
 import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
-import { LoadingIndicator } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
 import TableHeader from './TableHeader';
-import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from './styledComponents';
+import { Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
+const CustomTable = ({ data, headers, isBulkable }) => {
   const {
     emitEvent,
     entriesToDelete,
@@ -65,21 +64,6 @@ const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
       })
     );
 
-  if (showLoader) {
-    return (
-      <>
-        <Table className="table">
-          <TableHeader headers={headers} isBulkable={isBulkable} />
-        </Table>
-        <LoadingWrapper>
-          <LoadingContainer>
-            <LoadingIndicator />
-          </LoadingContainer>
-        </LoadingWrapper>
-      </>
-    );
-  }
-
   return (
     <Table className="table">
       <TableHeader headers={headers} isBulkable={isBulkable} />
@@ -95,14 +79,12 @@ CustomTable.defaultProps = {
   data: [],
   headers: [],
   isBulkable: true,
-  showLoader: false,
 };
 
 CustomTable.propTypes = {
   data: PropTypes.array,
   headers: PropTypes.array,
   isBulkable: PropTypes.bool,
-  showLoader: PropTypes.bool,
 };
 
 export default memo(CustomTable);

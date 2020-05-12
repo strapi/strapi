@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "users-permissions_user",
   "info": {
     "name": "user",

@@ -14,3 +14,7 @@ Create a development project
 In a new terminal window:
 
 1. Generate a new plugin: `cd /path/to/myDevelopmentProject && strapi generate:plugin my-plugin`
+
+::: tip
+The admin panel integration is currently not available. You can still add backend features.
+:::

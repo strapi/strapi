@@ -38,22 +38,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "_limit": 20,
-  "name_contains": "sushi"
-}
-```
-
-- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
-
 :::
 
 ::: tab findOne
@@ -73,21 +57,6 @@ module.exports = {
   },
 };
 ```
-
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
-```
-
-- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
 
 :::
 
@@ -109,19 +78,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
-```
-
 :::
 
 ::: tab create
@@ -137,13 +93,12 @@ module.exports = {
    */
 
   async create(data, { files } = {}) {
-    const entry = await strapi.query('restaurant').create(data);
+    const entry = await strapi.query(model).create(data);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
-        model: 'restaurant',
-        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+        model: strapi.models.restaurant,
       });
       return this.findOne({ id: entry.id });
     }
@@ -168,13 +123,12 @@ module.exports = {
    */
 
   async update(params, data, { files } = {}) {
-    const entry = await strapi.query('restaurant').update(params, data);
+    const entry = await strapi.query(model).update(params, data);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
-        model: 'restaurant',
-        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+        model: strapi.models.restaurant,
       });
       return this.findOne({ id: entry.id });
     }
@@ -183,8 +137,6 @@ module.exports = {
   },
 };
 ```
-
-- `params` (object): if should looks like this `{id: 1}`
 
 :::
 
@@ -206,8 +158,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
-
 :::
 
 ::: tab search
@@ -226,19 +176,6 @@ module.exports = {
     return strapi.query('restaurant').search(params);
   },
 };
-```
-
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
 ```
 
 :::
@@ -260,19 +197,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
-```
-
 :::
 
 ::::
@@ -285,7 +209,7 @@ You can also create custom services to build your own business logic.
 
 There are two ways to create a service.
 
-- Using the CLI `strapi generate:service restaurant`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
+- Using the CLI `strapi generate:service restaurant`. Read the [CLI documentation](../cli/CLI.md) for more information.
 - Manually create a JavaScript file named in `./api/**/services/`.
 
 #### Example

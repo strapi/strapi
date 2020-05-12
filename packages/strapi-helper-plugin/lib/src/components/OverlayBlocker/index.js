@@ -110,7 +110,7 @@ class OverlayBlocker extends React.Component {
 
     if (this.props.isOpen) {
       return ReactDOM.createPortal(
-        <Overlay noGradient={this.props.noGradient}>
+        <Overlay>
           <div>{content}</div>
         </Overlay>,
         this.overlayContainer
@@ -126,7 +126,6 @@ OverlayBlocker.defaultProps = {
   description: 'components.OverlayBlocker.description',
   icon: 'sync-alt',
   isOpen: false,
-  noGradient: false,
   title: 'components.OverlayBlocker.title',
 };
 
@@ -135,7 +134,6 @@ OverlayBlocker.propTypes = {
   description: PropTypes.string,
   icon: PropTypes.string,
   isOpen: PropTypes.bool,
-  noGradient: PropTypes.bool,
   title: PropTypes.string,
 };
 

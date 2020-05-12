@@ -1,6 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
+const minimatch = require('minimatch');
+
+const envMatcher = new minimatch.Minimatch(
+  'config/environments/*/+(request|database|server|security|response).+(json|js)'
+);
 
 // files to load with filename key
 const prefixedPaths = [
@@ -14,5 +19,8 @@ const prefixedPaths = [
 ];
 
 module.exports = function checkReservedFilenames(file) {
-  return _.some(prefixedPaths, e => file.indexOf(`config/${e}`) >= 0) ? true : false;
+  if (envMatcher.match(file)) return true;
+  return _.some(prefixedPaths, e => file.indexOf(`config/${e}`) >= 0)
+    ? true
+    : false;
 };

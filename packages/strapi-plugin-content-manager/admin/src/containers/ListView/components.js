@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Button, FilterIcon as Filter } from 'strapi-helper-plugin';
+import { Button } from 'strapi-helper-plugin';
+import Filter from '../../icons/Filter';
 import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
 
 const Wrapper = styled.div`
@@ -20,21 +21,20 @@ const AddFilterCta = styled(Button)`
   margin-right: 10px;
   padding: 0 10px;
   text-align: center;
-  background-color: #ffffff;
-  border: 1px solid #e3e9f3;
+  background-color: #FFFFFF;
+  border: 1px solid #E3E9F3;
   border-radius: 2px;
   line-height: 28px;
   font-size: 13px;
   font-weight: 500;
   font-family: Lato;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing-antialiased;
   cursor: pointer;
   &:hover {
-    background: #f7f8f8;
+    background: #F7F8F8;
   }
-  &:focus,
-  &:active {
-    outline: 0;
+  &:focus, &:active {
+    outline:0;
   }
   > span {
     margin-left: 10px;
@@ -93,6 +93,7 @@ const FilterWrapper = styled.div`
   }
 
   -webkit-font-smoothing: antialiased;
+  font-size: 13px;
 `;
 
 const Separator = styled.span`

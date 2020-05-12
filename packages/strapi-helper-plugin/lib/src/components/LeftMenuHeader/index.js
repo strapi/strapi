@@ -28,7 +28,9 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
       );
     }
 
-    return <FormattedMessage id={title.id} defaultMessage={title.defaultMessage} />;
+    return (
+      <FormattedMessage id={title.id} defaultMessage={title.defaultMessage} />
+    );
   };
 
   const handleClose = () => {
@@ -65,7 +67,12 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
     <div className="search-wrapper">
       <FontAwesomeIcon icon="search" />
       <button onClick={toggleSearch} />
-      <Search ref={ref} onChange={handleChange} value={search} placeholder="search…" />
+      <Search
+        ref={ref}
+        onChange={handleChange}
+        value={search}
+        placeholder="search…"
+      />
       <button onClick={handleClose}>
         <FontAwesomeIcon icon="times" />
       </button>

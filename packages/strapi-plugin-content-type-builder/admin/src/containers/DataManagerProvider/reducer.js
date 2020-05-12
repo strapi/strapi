@@ -10,7 +10,6 @@ const initialState = fromJS({
   initialContentTypes: {},
   initialData: {},
   modifiedData: {},
-  reservedNames: {},
   isLoading: true,
   isLoadingForDataToBeSet: true,
 });
@@ -340,7 +339,6 @@ const reducer = (state, action) => {
         .update('initialComponents', () => fromJS(action.components))
         .update('initialContentTypes', () => fromJS(action.contentTypes))
         .update('contentTypes', () => fromJS(action.contentTypes))
-        .update('reservedNames', () => fromJS(action.reservedNames))
 
         .update('isLoading', () => false);
     }

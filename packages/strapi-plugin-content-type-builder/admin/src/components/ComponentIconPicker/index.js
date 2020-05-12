@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useClickAwayListener } from '@buffetjs/hooks';
+import React, { createRef, useEffect, useState } from 'react';
 import { Label, ErrorMessage } from '@buffetjs/styles';
 import { AutoSizer, Collection } from 'react-virtualized';
 import PropTypes from 'prop-types';
@@ -22,17 +21,12 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
     // Edition
     return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
   });
-  const ref = useRef();
-  const searchWrapperRef = useRef();
+  const ref = createRef();
   const [originalIcon] = useState(value);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
   const [icons, setIcons] = useState(initialIcons);
   const toggleSearch = () => setShowSearch(prev => !prev);
-
-  useClickAwayListener(searchWrapperRef, () => {
-    setShowSearch(false);
-  });
 
   useEffect(() => {
     if (showSearch && ref.current) {
@@ -64,11 +58,6 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
     };
   };
 
-  const handleChangeSearch = ({ target: { value } }) => {
-    setSearch(value);
-    setIcons(() => initialIcons.filter(icon => icon.includes(value)));
-  };
-
   return (
     <Wrapper error={error !== null}>
       <div className="search">
@@ -80,10 +69,18 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
             <FontAwesomeIcon icon="search" />
           </button>
         ) : (
-          <SearchWrapper ref={searchWrapperRef}>
+          <SearchWrapper>
             <FontAwesomeIcon icon="search" />
             <button onClick={toggleSearch} type="button" />
-            <Search ref={ref} onChange={handleChangeSearch} value={search} placeholder="Search…" />
+            <Search
+              ref={ref}
+              onChange={({ target: { value } }) => {
+                setSearch(value);
+                setIcons(() => initialIcons.filter(icon => icon.includes(value)));
+              }}
+              value={search}
+              placeholder="Search…"
+            />
             <button
               onClick={() => {
                 setSearch('');

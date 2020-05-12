@@ -89,7 +89,10 @@ program
 program
   .command('new <directory>')
   .option('--no-run', 'Do not start the application after it is created')
-  .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
+  .option(
+    '--use-npm',
+    'Force usage of npm instead of yarn to create the project'
+  )
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
@@ -148,6 +151,7 @@ program
   .command('generate:model <id> [attributes...]')
   .option('-a, --api <api>', 'API name to generate a sub API')
   .option('-p, --plugin <api>', 'plugin name')
+  .option('-t, --tpl <template>', 'template name')
   .option('-c, --connection <connection>', 'The name of the connection to use')
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
@@ -181,8 +185,11 @@ program
 
 program
   .command('build')
-  .option('--clean', 'Remove the build and .cache folders', false)
-  .option('--no-optimization', 'Build the Administration without assets optimization', false)
+  .option(
+    '--no-optimization',
+    'Build the Administration without assets optimization',
+    false
+  )
   .description('Builds the strapi admin app')
   .action(getLocalScript('build'));
 

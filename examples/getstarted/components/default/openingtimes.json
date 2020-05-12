@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "components_openingtimes",
   "info": {
     "name": "openingtimes",

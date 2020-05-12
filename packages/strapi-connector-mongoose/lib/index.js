@@ -93,22 +93,17 @@ module.exports = function(strapi) {
            * https://github.com/Automattic/mongoose/issues/6881 */
           await instance.connect(
             uri ||
-              `mongodb${isSrv ? '+srv' : ''}://${username}:${encodeURIComponent(password)}@${host}${
-                !isSrv ? ':' + port : ''
-              }/`,
+              `mongodb${isSrv ? '+srv' : ''}://${username}:${encodeURIComponent(
+                password
+              )}@${host}${!isSrv ? ':' + port : ''}/`,
             connectOptions
           );
         } catch (error) {
-          const err = new Error(`Error connecting to the Mongo database. ${error.message}`);
+          const err = new Error(
+            `Error connecting to the Mongo database. ${error.message}`
+          );
           delete err.stack;
           throw err;
-        }
-
-        try {
-          const { version } = await instance.connection.db.admin().serverInfo();
-          instance.mongoDBVersion = version;
-        } catch {
-          instance.mongoDBVersion = null;
         }
 
         const initFunctionPath = path.resolve(
@@ -145,7 +140,10 @@ module.exports = function(strapi) {
 
   function mountComponents(connectionName, ctx) {
     const options = {
-      models: _.pickBy(strapi.components, ({ connection }) => connection === connectionName),
+      models: _.pickBy(
+        strapi.components,
+        ({ connection }) => connection === connectionName
+      ),
       target: strapi.components,
     };
 
@@ -154,7 +152,10 @@ module.exports = function(strapi) {
 
   function mountApis(connectionName, ctx) {
     const options = {
-      models: _.pickBy(strapi.models, ({ connection }) => connection === connectionName),
+      models: _.pickBy(
+        strapi.models,
+        ({ connection }) => connection === connectionName
+      ),
       target: strapi.models,
     };
 
@@ -163,7 +164,10 @@ module.exports = function(strapi) {
 
   function mountAdmin(connectionName, ctx) {
     const options = {
-      models: _.pickBy(strapi.admin.models, ({ connection }) => connection === connectionName),
+      models: _.pickBy(
+        strapi.admin.models,
+        ({ connection }) => connection === connectionName
+      ),
       target: strapi.admin.models,
     };
 
@@ -176,7 +180,10 @@ module.exports = function(strapi) {
         const plugin = strapi.plugins[name];
         return mountModels(
           {
-            models: _.pickBy(plugin.models, ({ connection }) => connection === connectionName),
+            models: _.pickBy(
+              plugin.models,
+              ({ connection }) => connection === connectionName
+            ),
             target: plugin.models,
           },
           ctx
@@ -192,8 +199,5 @@ module.exports = function(strapi) {
     buildQuery,
     queries,
     ...relations,
-    get defaultTimestamps() {
-      return ['createdAt', 'updatedAt'];
-    },
   };
 };

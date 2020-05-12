@@ -38,7 +38,10 @@ const createSingleTypeService = ({ model, strapi }) => {
       const entity = await this.find();
 
       if (!entity) {
-        return strapi.entityService.create({ data, files }, { model: modelName });
+        return strapi.entityService.create(
+          { data, files },
+          { model: modelName }
+        );
       } else {
         return strapi.entityService.update(
           {
@@ -63,7 +66,10 @@ const createSingleTypeService = ({ model, strapi }) => {
 
       if (!entity) return;
 
-      return strapi.entityService.delete({ params: { id: entity.id } }, { model: modelName });
+      return strapi.entityService.delete(
+        { params: { id: entity.id } },
+        { model: modelName }
+      );
     },
   };
 };
@@ -82,7 +88,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.entityService.find({ params, populate }, { model: modelName });
+      return strapi.entityService.find(
+        { params, populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -92,7 +101,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.entityService.findOne({ params, populate }, { model: modelName });
+      return strapi.entityService.findOne(
+        { params, populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -122,7 +134,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     update(params, data, { files } = {}) {
-      return strapi.entityService.update({ params, data, files }, { model: modelName });
+      return strapi.entityService.update(
+        { params, data, files },
+        { model: modelName }
+      );
     },
 
     /**

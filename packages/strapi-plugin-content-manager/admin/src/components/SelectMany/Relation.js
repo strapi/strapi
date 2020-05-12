@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import IconRemove from '../../assets/images/icon_remove.svg';
-import { Span } from './components';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
@@ -19,7 +18,7 @@ const Relation = ({ data, mainField, onRemove, to }) => {
         <FormattedMessage id={`${pluginId}.containers.Edit.clickToJump`}>
           {title => (
             <Link to={to} title={title}>
-              <Span>{data[mainField]}</Span>
+              <span>{data[mainField]}</span>
             </Link>
           )}
         </FormattedMessage>

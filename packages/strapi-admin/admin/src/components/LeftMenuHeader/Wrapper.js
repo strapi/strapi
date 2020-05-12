@@ -15,6 +15,7 @@ const Wrapper = styled.div`
 
   .projectName {
     display: block;
+    height: 100%;
     width: 100%;
     text-align: center;
     height: ${props => props.theme.main.sizes.leftMenu.height};

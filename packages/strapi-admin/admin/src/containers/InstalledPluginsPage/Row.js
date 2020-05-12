@@ -4,12 +4,13 @@ import { IconLinks } from '@buffetjs/core';
 import { useGlobalContext, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory } from 'react-router-dom';
-import { faTrashAlt, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faCog } from '@fortawesome/free-solid-svg-icons';
 import Text from '../../components/Text';
 import CustomRow from './CustomRow';
 import LogoContainer from './Logo';
 
-const PLUGINS_WITH_CONFIG = ['email'];
+// TODO: remove the upload plugin when the media lib feature is merged.
+const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
   const { currentEnvironment, formatMessage } = useGlobalContext();
@@ -39,7 +40,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   if (!isRequired) {
     links.push({
-      icon: <FontAwesomeIcon icon={faTrashAlt} />,
+      icon: <FontAwesomeIcon icon={faTrash} />,
       onClick: handleToggle,
     });
   }

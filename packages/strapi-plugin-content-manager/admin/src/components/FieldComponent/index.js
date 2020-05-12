@@ -32,8 +32,13 @@ const FieldComponent = ({
   const componentValue = get(modifiedData, name, null);
   const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
-  const showResetComponent = !isRepeatable && isInitialized && !isFromDynamicZone;
-  const currentComponentSchema = get(allLayoutData, ['components', componentUid], {});
+  const showResetComponent =
+    !isRepeatable && isInitialized && !isFromDynamicZone;
+  const currentComponentSchema = get(
+    allLayoutData,
+    ['components', componentUid],
+    {}
+  );
 
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
 

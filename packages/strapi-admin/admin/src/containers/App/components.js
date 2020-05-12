@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  font-family: 'Lato';
+  font-amily: 'Lato';
   font-size: 1.4rem;
   font-weight: 400;
   line-height: 1.5;

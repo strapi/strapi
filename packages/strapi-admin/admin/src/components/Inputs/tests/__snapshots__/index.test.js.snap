@@ -6,6 +6,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   margin: 0;
   position: relative;
   width: 14px;
+  font-weight: 100;
 }
 
 .c4:focus,
@@ -39,6 +40,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   height: 14px;
   text-align: center;
   font-size: 9px;
+  font-weight: 400;
   color: #1C5DE7;
   line-height: 14px;
 }
@@ -63,6 +65,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   margin: 0;
   position: relative;
   width: 14px;
+  font-weight: 100;
 }
 
 .c5:focus,
@@ -96,6 +99,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   height: 14px;
   text-align: center;
   font-size: 9px;
+  font-weight: 400;
   color: #1C5DE7;
   line-height: 14px;
 }
@@ -122,28 +126,27 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   font-size: 1.3rem;
 }
 
-.c3 input,
-.c3 label {
-  display: inline-block;
-  vertical-align: top;
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 18px;
+  line-height: 18px;
 }
 
-.c3 input {
-  margin-top: 4px;
-  width: 14px;
-  height: 12px;
+.c3 input label {
+  cursor: pointer;
+  margin-bottom: 0 !important;
 }
 
 .c3 input + label {
-  display: inline-block;
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-  max-width: calc(100% - 14px);
   margin-left: 10px;
   margin-bottom: 0;
-  line-height: 18px;
-  cursor: pointer;
 }
 
 .c1 {
@@ -204,7 +207,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 
 .c2 tbody td {
   height: 54px;
-  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .c2 tbody td input[type='checkbox']:disabled:before {
@@ -221,6 +224,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
+  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -235,7 +239,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 
 .c0 {
   position: relative;
-  padding-bottom: 27px;
+  padding-bottom: 23px;
 }
 
 .c0 label {
@@ -444,7 +448,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 autoFocus={false}
                 checked={false}
                 className="c4"
-                disabled={false}
+                disabled={true}
                 id="media.update"
                 name="media.update"
                 onChange={[Function]}
@@ -713,7 +717,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 
 .c0 {
   position: relative;
-  padding-bottom: 27px;
+  padding-bottom: 23px;
 }
 
 .c0 label {
@@ -777,7 +781,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
               onTouchEnd={[Function]}
             >
               <div
-                className=" css-g1d714-ValueContainer"
+                className=" css-1hwfws3"
               >
                 <div
                   className=" css-1uccc91-singleValue"

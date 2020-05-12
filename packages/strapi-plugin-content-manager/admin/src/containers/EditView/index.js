@@ -21,7 +21,7 @@ import reducer, { initialState } from './reducer';
 
 /* eslint-disable  react/no-array-index-key */
 
-const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugins, slug }) => {
+const EditView = ({ components, currentEnvironment, layouts, plugins, slug }) => {
   const formatLayoutRef = useRef();
   formatLayoutRef.current = createAttributesLayout;
   // Retrieve push to programmatically navigate between views
@@ -95,9 +95,6 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
         currentContentTypeSchema.attributes
       ),
     });
-
-    return () => deleteLayout(slug);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentContentTypeLayout, currentContentTypeSchema.attributes]);
 
   const { formattedContentTypeLayout, isDraggingComponent } = reducerState.toJS();
@@ -268,13 +265,12 @@ EditView.defaultProps = {
 };
 
 EditView.propTypes = {
-  components: PropTypes.array.isRequired,
   currentEnvironment: PropTypes.string,
-  deleteLayout: PropTypes.func.isRequired,
+  components: PropTypes.array.isRequired,
   emitEvent: PropTypes.func,
   layouts: PropTypes.object.isRequired,
-  plugins: PropTypes.object,
   slug: PropTypes.string.isRequired,
+  plugins: PropTypes.object,
 };
 
 export { EditView };

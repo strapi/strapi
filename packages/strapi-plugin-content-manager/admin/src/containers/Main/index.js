@@ -17,6 +17,7 @@ import {
   getLayoutSucceeded,
   resetProps,
 } from './actions';
+import reducer from './reducer';
 import makeSelectMain from './selectors';
 
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
@@ -37,6 +38,9 @@ function Main({
   models,
   resetProps,
 }) {
+  // FIXME: when new store injector available
+  strapi.useInjectReducer({ key: 'main', reducer, pluginId });
+
   const { emitEvent } = useGlobalContext();
   const {
     params: { slug },

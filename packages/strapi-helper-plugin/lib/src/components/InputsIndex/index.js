@@ -11,6 +11,7 @@ import { isEmpty, merge } from 'lodash';
 // Design
 import InputAddonWithErrors from '../InputAddonWithErrors';
 import InputCheckboxWithErrors from '../InputCheckboxWithErrors';
+import InputDateWithErrors from '../InputDateWithErrors';
 import InputEmailWithErrors from '../InputEmailWithErrors';
 import InputNumberWithErrors from '../InputNumberWithErrors';
 import InputSearchWithErrors from '../InputSearchWithErrors';
@@ -29,6 +30,7 @@ const DefaultInputError = ({ type }) => (
 const inputs = {
   addon: InputAddonWithErrors,
   checkbox: InputCheckboxWithErrors,
+  date: InputDateWithErrors,
   email: InputEmailWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,

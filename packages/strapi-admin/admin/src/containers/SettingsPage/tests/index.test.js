@@ -22,14 +22,13 @@ describe('Admin | containers | SettingsPage', () => {
       },
       {}
     );
-    const { intl: originalIntl } = intlProvider.state;
+    const { intl: originalIntl } = intlProvider.getChildContext();
 
     const { asFragment } = render(
       <IntlProvider
         locale="en"
         defaultLocale="en"
         messages={translationMessages}
-        textComponent="span"
       >
         <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
           <Router history={history}>

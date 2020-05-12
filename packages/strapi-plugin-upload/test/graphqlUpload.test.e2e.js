@@ -75,7 +75,7 @@ describe('Upload plugin end to end tests', () => {
       data: {
         upload: {
           id: expect.anything(),
-          name: 'rec',
+          name: 'rec.jpg',
         },
       },
     });
@@ -122,7 +122,7 @@ describe('Upload plugin end to end tests', () => {
         multipleUpload: expect.arrayContaining([
           expect.objectContaining({
             id: expect.anything(),
-            name: 'rec',
+            name: 'rec.jpg',
           }),
         ]),
       },

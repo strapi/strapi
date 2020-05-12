@@ -7,7 +7,11 @@ const SettingDispatcher = () => {
   const { plugins } = useGlobalContext();
   const { pluginId } = useParams();
 
-  const pluginToRender = get(plugins, [pluginId, 'settings', 'mainComponent'], null);
+  const pluginToRender = get(
+    plugins,
+    [pluginId, 'settings', 'mainComponent'],
+    null
+  );
 
   if (!pluginToRender) {
     return null;

@@ -4,11 +4,20 @@
  * Module dependencies
  */
 
+// Node.js core.
+const fs = require('fs');
+const path = require('path');
+
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 
+// Fetch stub attribute template on initial load.
+const attributeTemplate = fs.readFileSync(
+  path.resolve(__dirname, '..', 'templates', 'attribute.template'),
+  'utf8'
+);
 /* eslint-disable prefer-template */
 
 /**
@@ -56,57 +65,23 @@ module.exports = (scope, cb) => {
   // Validate optional attribute arguments.
   const invalidAttributes = [];
 
-  if (_.isPlainObject(scope.args.attributes)) {
-    scope.attributes = scope.args.attributes;
-  } else {
-    // Map attributes and split them for CLI.
-    scope.attributes = scope.args.attributes.map(attribute => {
-      if (_.isString(attribute)) {
-        const parts = attribute.split(':');
+  // Map attributes and split them.
+  scope.attributes = scope.args.attributes.map(attribute => {
+    const parts = attribute.split(':');
 
-        parts[1] = parts[1] || 'string';
+    parts[1] = parts[1] ? parts[1] : 'string';
 
-        // Handle invalid attributes.
-        if (!parts[1] || !parts[0]) {
-          invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
-          return;
-        }
-
-        return {
-          name: _.trim(_.deburr(parts[0].toLowerCase())),
-          params: {
-            type: _.trim(_.deburr(parts[1].toLowerCase())),
-          },
-        };
-      } else {
-        return _.has(attribute, 'params.type') ? attribute : undefined;
-      }
-    });
-
-    scope.attributes = _.compact(scope.attributes);
-
-    // Handle invalid action arguments.
-    // Send back invalidActions.
-    if (invalidAttributes.length) {
-      return cb.invalid(invalidAttributes);
+    // Handle invalid attributes.
+    if (!parts[1] || !parts[0]) {
+      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+      return;
     }
 
-    // Make sure there aren't duplicates.
-    if (
-      _(scope.attributes.map(attribute => attribute.name))
-        .uniq()
-        .valueOf().length !== scope.attributes.length
-    ) {
-      return cb.invalid('Duplicate attributes not allowed!');
-    }
-
-    // Render some stringified code from the action template
-    // and make it available in our scope for use later on.
-    scope.attributes = scope.attributes.reduce((acc, attribute) => {
-      acc[attribute.name] = attribute.params;
-      return acc;
-    }, {});
-  }
+    return {
+      name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
+      type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase())),
+    };
+  });
 
   // Set collectionName
   scope.collectionName = _.has(scope.args, 'collectionName')
@@ -116,28 +91,50 @@ module.exports = (scope, cb) => {
   // Set description
   scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
 
-  // Set connection
-  scope.connection = _.get(scope.args, 'connection', undefined);
+  // Handle invalid action arguments.
+  // Send back invalidActions.
+  if (invalidAttributes.length) {
+    return cb.invalid(invalidAttributes);
+  }
 
-  scope.schema = JSON.stringify(
-    {
-      kind: 'collectionType',
-      connection: scope.connection,
-      collectionName: scope.collectionName,
-      info: {
-        name: scope.id,
-        description: scope.description,
-      },
-      options: {
-        timestamps: true,
-        increments: true,
-        comment: '',
-      },
-      attributes: scope.attributes,
-    },
-    null,
-    2
-  );
+  // Make sure there aren't duplicates.
+  if (
+    _(scope.attributes.map(attribute => attribute.name))
+      .uniq()
+      .valueOf().length !== scope.attributes.length
+  ) {
+    return cb.invalid('Duplicate attributes not allowed!');
+  }
+
+  // Render some stringified code from the action template
+  // and make it available in our scope for use later on.
+  scope.attributes = scope.attributes
+    .map(attribute => {
+      const compiled = _.template(attributeTemplate);
+      return _.trimEnd(
+        _.unescape(
+          compiled({
+            name: attribute.name,
+            type: attribute.type,
+          })
+        )
+      );
+    })
+    .join(',\n');
+
+  // Get default connection
+  try {
+    scope.connection =
+      scope.args.connection ||
+      JSON.parse(
+        fs.readFileSync(
+          path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'database.json')
+        )
+      ).defaultConnection ||
+      '';
+  } catch (err) {
+    return cb.invalid(err);
+  }
 
   // Trigger callback with no error to proceed.
   return cb();

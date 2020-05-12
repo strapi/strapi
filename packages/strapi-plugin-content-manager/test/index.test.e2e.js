@@ -331,7 +331,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/application::articlewithtag.articlewithtag',
+        url:
+          '/content-manager/explorer/application::articlewithtag.articlewithtag',
         method: 'POST',
         body: entry,
       });
@@ -728,7 +729,8 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
+        return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

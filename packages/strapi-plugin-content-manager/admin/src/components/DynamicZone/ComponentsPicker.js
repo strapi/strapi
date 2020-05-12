@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const ComponentsPicker = styled.div`
   overflow: hidden;
@@ -12,10 +12,10 @@ const ComponentsPicker = styled.div`
   }
 
   ${({ isOpen }) =>
-  isOpen &&
-    `
-    max-height: 260px;
-  `}
+    isOpen &&
+    css`
+      max-height: 260px;
+    `}
 
   .componentPickerTitle {
     margin-bottom: 15px;

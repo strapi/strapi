@@ -70,7 +70,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -99,7 +99,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -128,7 +128,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -257,7 +257,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 226437944084-o2mojv5i4lfnng9q8kq3jkf5v03avemk.apps.googleusercontent.com
-- **Client Secret**: aiTbMoiuJQflSBy6uQrfgsni
+- **Client ID**: aiTbMoiuJQflSBy6uQrfgsni
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/google`
 
 :::
@@ -486,7 +486,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -519,7 +519,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error.response);
+    console.log('An error occurred:', error);
   });
 ```
 
@@ -545,7 +545,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.error('An error occured:', error.response);
+    console.err('An error occured:', err);
   });
 ```
 
@@ -712,10 +712,6 @@ Add the language translation in `packages/strapi-plugin-users-permissions/admin/
 
 These two change will set up the popup message that appears in the UI. That's it, now you should be able to use your new provider.
 
-### Rebuild the Admin Panel
-
-Please see the following [documentation](../admin-panel/customization.md#build) on rebuilding the admin panel.
-
 ## Templating emails
 
 By default, this plugin comes with only two templates (reset password and email address confirmation) at the moment. More templates will come later. The templates use Lodash's template() method to populate the variables.
@@ -742,18 +738,8 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 
 ## Security configuration
 
-JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a _secret_ is required. By default Strapi generates one that is stored in `./extensions/users-permissions/config/jwt.js`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production.
+JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a _secret_ is required. By default Strapi generates one that is stored in `./your-app/extensions/users-permissions/config/jwt.json`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production. It is also possible to modify `jwt.json` file to accept `JWT_TOKEN` automatically by doing following ([docs](https://strapi.io/documentation/3.0.0-beta.x/concepts/configurations.html#dynamic-configurations)).
 
-By default you can set a `JWT_SECRET` environment variable and it will be used as secret. If you want to use another variable you can update the configuration file.
-
-**Path -** `./extensions/users-permissions/config/jwt.js`.
-
-```js
-module.exports = {
-  jwtSecret: process.env.SOME_ENV_VAR,
-};
 ```
-
-::: tip
-You can learn more on configuration in the documentation [here](../concepts/configurations.md)
-:::
+  "jwtSecret": "${process.env.JWT_SECRET}"
+```

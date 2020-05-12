@@ -1,4 +1,7 @@
-const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('../data-transform');
+const {
+  removeEmptyDefaults,
+  removeDeletedUIDTargetFields,
+} = require('../data-transform');
 
 describe('Data transform', () => {
   describe('removeEmptyDefaults', () => {

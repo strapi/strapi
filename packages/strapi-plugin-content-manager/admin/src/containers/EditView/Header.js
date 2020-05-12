@@ -98,7 +98,7 @@ const Header = () => {
     title: {
       label: headerTitle && headerTitle.toString(),
     },
-    content: `${formatMessage({ id: `${pluginId}.api.id` })} : ${layout.apiID}`,
+    content: isSingleType ? `${formatMessage({ id: `${pluginId}.api.id` })} : ${layout.apiID}` : '',
     actions: getHeaderActions(),
   };
 

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Div = styled.div`
   padding-left: 0;
@@ -41,22 +41,26 @@ const Label = styled.label`
     border-radius: 3px;
   }
 
-  ${({ value }) =>
-  value &&
-    `
-    font-weight: 500;
-    &:after {
-      content: '\f00c';
-      position: absolute;
-      top: 1px;
-      left: 17px;
-      font-size: 10px;
-      font-family: 'FontAwesome';
-      font-weight: 100;
-      color: #1c5de7;
-      transition: all 0.2s;
+  ${({ value }) => {
+    if (value === true) {
+      return css`
+        font-weight: 500;
+        &:after {
+          content: '\f00c';
+          position: absolute;
+          top: 1px;
+          left: 17px;
+          font-size: 10px;
+          font-family: 'FontAwesome';
+          font-weight: 100;
+          color: #1c5de7;
+          transition: all 0.2s;
+        }
+      `;
     }
-  `}
+
+    return '';
+  }}
 `;
 
 export { Div, Label };

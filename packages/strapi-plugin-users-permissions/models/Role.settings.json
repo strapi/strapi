@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "info": {
     "name": "role",
     "description": ""

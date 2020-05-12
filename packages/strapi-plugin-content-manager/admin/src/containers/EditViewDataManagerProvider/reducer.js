@@ -16,7 +16,10 @@ const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], () => {
-        const defaultDataStructure = state.getIn(['componentsDataStructure', action.componentUid]);
+        const defaultDataStructure = state.getIn([
+          'componentsDataStructure',
+          action.componentUid,
+        ]);
 
         return fromJS(defaultDataStructure);
       });
@@ -85,14 +88,21 @@ const reducer = (state, action) => {
     case 'IS_SUBMITTING':
       return state.update('shouldShowLoadingState', () => action.value);
     case 'MOVE_COMPONENT_FIELD':
-      return state.updateIn(['modifiedData', ...action.pathToComponent], list => {
-        return list
-          .delete(action.dragIndex)
-          .insert(
-            action.hoverIndex,
-            state.getIn(['modifiedData', ...action.pathToComponent, action.dragIndex])
-          );
-      });
+      return state.updateIn(
+        ['modifiedData', ...action.pathToComponent],
+        list => {
+          return list
+            .delete(action.dragIndex)
+            .insert(
+              action.hoverIndex,
+              state.getIn([
+                'modifiedData',
+                ...action.pathToComponent,
+                action.dragIndex,
+              ])
+            );
+        }
+      );
     case 'MOVE_COMPONENT_UP':
       return state
         .update('shouldCheckErrors', v => {
@@ -107,7 +117,11 @@ const reducer = (state, action) => {
             .delete(action.currentIndex)
             .insert(
               action.currentIndex - 1,
-              state.getIn(['modifiedData', action.dynamicZoneName, action.currentIndex])
+              state.getIn([
+                'modifiedData',
+                action.dynamicZoneName,
+                action.currentIndex,
+              ])
             );
         });
     case 'MOVE_COMPONENT_DOWN':
@@ -124,32 +138,31 @@ const reducer = (state, action) => {
             .delete(action.currentIndex)
             .insert(
               action.currentIndex + 1,
-              state.getIn(['modifiedData', action.dynamicZoneName, action.currentIndex])
+              state.getIn([
+                'modifiedData',
+                action.dynamicZoneName,
+                action.currentIndex,
+              ])
             );
         });
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
-        return list.delete(action.dragIndex).insert(action.overIndex, list.get(action.dragIndex));
+        return list
+          .delete(action.dragIndex)
+          .insert(action.overIndex, list.get(action.dragIndex));
       });
     case 'ON_CHANGE': {
       let newState = state;
       const [nonRepeatableComponentKey] = action.keys;
 
-      // This is used to set the initialData for inputs
-      // that needs an asynchronous initial value like the UID field
-      // This is just a temporary patch.
-      // TODO : Refactor the default form creation (workflow) to accept async default values.
-      if (action.shouldSetInitialValue) {
-        newState = state.updateIn(['initialData', ...action.keys], () => {
-          return action.value;
-        });
-      }
-
       if (
         action.keys.length === 2 &&
         state.getIn(['modifiedData', nonRepeatableComponentKey]) === null
       ) {
-        newState = newState.updateIn(['modifiedData', nonRepeatableComponentKey], () => fromJS({}));
+        newState = state.updateIn(
+          ['modifiedData', nonRepeatableComponentKey],
+          () => fromJS({})
+        );
       }
 
       return newState.updateIn(['modifiedData', ...action.keys], () => {
@@ -170,9 +183,6 @@ const reducer = (state, action) => {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 
       return state.updateIn(componentPathToRemove, () => null);
-    }
-    case 'REMOVE_PASSWORD_FIELD': {
-      return state.removeIn(['modifiedData', ...action.keys]);
     }
     case 'REMOVE_REPEATABLE_FIELD': {
       const componentPathToRemove = ['modifiedData', ...action.keys];
@@ -201,8 +211,12 @@ const reducer = (state, action) => {
       return initialState;
     case 'SET_DEFAULT_DATA_STRUCTURES':
       return state
-        .update('componentsDataStructure', () => fromJS(action.componentsDataStructure))
-        .update('contentTypeDataStructure', () => fromJS(action.contentTypeDataStructure));
+        .update('componentsDataStructure', () =>
+          fromJS(action.componentsDataStructure)
+        )
+        .update('contentTypeDataStructure', () =>
+          fromJS(action.contentTypeDataStructure)
+        );
     case 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE':
       return state
         .update('isLoading', () => false)

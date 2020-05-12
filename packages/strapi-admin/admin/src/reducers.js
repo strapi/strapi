@@ -5,7 +5,6 @@
 import { combineReducers } from 'redux-immutable';
 
 import globalReducer from './containers/App/reducer';
-import adminReducer from './containers/Admin/reducer';
 import languageProviderReducer from './containers/LanguageProvider/reducer';
 import notificationProviderReducer from './containers/NotificationProvider/reducer';
 
@@ -15,7 +14,6 @@ import notificationProviderReducer from './containers/NotificationProvider/reduc
 export default function createReducer(injectedReducers) {
   return combineReducers({
     app: globalReducer,
-    admin: adminReducer,
     language: languageProviderReducer,
     notification: notificationProviderReducer,
     ...injectedReducers,

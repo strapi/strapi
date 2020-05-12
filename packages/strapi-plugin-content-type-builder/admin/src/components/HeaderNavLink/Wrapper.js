@@ -1,11 +1,9 @@
-import styled from 'styled-components';
-
-/* eslint-disable indent */
+import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
   ${({ isActive }) => {
     if (isActive) {
-      return `
+      return css`
         height: 3rem;
         color: #007eff;
         font-weight: 600;

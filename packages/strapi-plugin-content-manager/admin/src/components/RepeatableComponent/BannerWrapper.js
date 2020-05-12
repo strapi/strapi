@@ -90,7 +90,7 @@ const BannerWrapper = styled.button`
   }}
 
   &:focus {
-    outline: 0;
+    outline: 0;;
   }
 
 
@@ -131,9 +131,6 @@ const BannerWrapper = styled.button`
 
     .grab {
       cursor: move;
-      svg {
-        vertical-align: initial;
-      }
     }
   }
 
@@ -167,7 +164,7 @@ const BannerWrapper = styled.button`
     `;
   }}
 
-  -webkit-font-smoothing: antialiased;
+  webkit-font-smoothing: antialiased;
 
   > div {
     align-self: center;

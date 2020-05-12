@@ -76,8 +76,12 @@ function LeftMenu({ wait }) {
 
   const canOpenModalCreateCTorComponent = () => {
     return (
-      !Object.keys(contentTypes).some(ct => contentTypes[ct].isTemporary === true) &&
-      !Object.keys(components).some(component => components[component].isTemporary === true)
+      !Object.keys(contentTypes).some(
+        ct => contentTypes[ct].isTemporary === true
+      ) &&
+      !Object.keys(components).some(
+        component => components[component].isTemporary === true
+      )
     );
   };
 
@@ -124,7 +128,9 @@ function LeftMenu({ wait }) {
             },
           }
         : null,
-      links: sortedContentTypesList.filter(contentType => contentType.kind === 'collectionType'),
+      links: sortedContentTypesList.filter(
+        contentType => contentType.kind === 'collectionType'
+      ),
     },
     {
       name: 'singleTypes',
@@ -143,7 +149,9 @@ function LeftMenu({ wait }) {
             },
           }
         : null,
-      links: sortedContentTypesList.filter(singleType => singleType.kind === 'singleType'),
+      links: sortedContentTypesList.filter(
+        singleType => singleType.kind === 'singleType'
+      ),
     },
     {
       name: 'components',
@@ -169,7 +177,9 @@ function LeftMenu({ wait }) {
   return (
     <Wrapper className="col-md-3">
       {data.map(list => {
-        return <LeftMenuList {...list} key={list.name} />;
+        return (
+          <LeftMenuList numberOfVisibleItems={5} {...list} key={list.name} />
+        );
       })}
     </Wrapper>
   );

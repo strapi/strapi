@@ -21,7 +21,10 @@ function parseJSON(response) {
  * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response, checkToken = true) {
-  if ((response.status >= 200 && response.status < 300) || response.status === 0) {
+  if (
+    (response.status >= 200 && response.status < 300) ||
+    response.status === 0
+  ) {
     return response;
   }
 
@@ -29,19 +32,12 @@ function checkStatus(response, checkToken = true) {
     return checkTokenValidity(response);
   }
 
-  return parseJSON(response)
-    .then(responseFormatted => {
-      const error = new Error(response.statusText);
-      error.response = response;
-      error.response.payload = responseFormatted;
-      throw error;
-    })
-    .catch(() => {
-      const error = new Error(response.statusText);
-      error.response = response;
-
-      throw error;
-    });
+  return parseJSON(response).then(responseFormatted => {
+    const error = new Error(response.statusText);
+    error.response = response;
+    error.response.payload = responseFormatted;
+    throw error;
+  });
 }
 
 function checkTokenValidity(response) {
@@ -118,7 +114,13 @@ function serverRestartWatcher(response) {
  * @return {object}           The response data
  */
 export default function request(...args) {
-  let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
+  let [
+    url,
+    options = {},
+    shouldWatchServerRestart,
+    stringify = true,
+    ...rest
+  ] = args;
   let noAuth;
 
   try {

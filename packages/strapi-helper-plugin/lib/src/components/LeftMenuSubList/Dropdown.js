@@ -11,8 +11,8 @@ const Dropdown = styled.div`
   button {
     position: relative;
     padding: 0 10px 1px 15px;
-    margin-bottom: 10px;
-    margin-top: 8px;
+    margin-bottom: 9px;
+    margin-top: 9px;
     font-weight: 600;
     text-transform: capitalize;
     &::before {
@@ -32,14 +32,14 @@ const Dropdown = styled.div`
     padding-left: 10px;
   }
   .collapse {
-    margin-bottom: 10px;
+    margin-bottom: 2px;
   }
   &:last-of-type {
     margin-bottom: 0;
     button {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       &.is-open {
-        margin-bottom: 8px;
+        margin-bottom: 10px;
       }
     }
     .collapse {

@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SelectWrapper, SelectNav } from 'strapi-helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
-import AllowedTypesSelect from '../AllowedTypesSelect';
 import ComponentSelect from '../ComponentSelect';
 import CreatableSelect from '../CreatableSelect';
 
@@ -44,15 +43,8 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
     },
   };
 
-  let Component;
-
-  if (type === 'allowedTypesSelect') {
-    Component = AllowedTypesSelect;
-  } else if (type === 'creatableSelect') {
-    Component = CreatableSelect;
-  } else {
-    Component = ComponentSelect;
-  }
+  const Component =
+    type === 'creatableSelect' ? CreatableSelect : ComponentSelect;
 
   return (
     <SelectWrapper className="form-group" style={{ marginBottom: 0 }}>
@@ -64,7 +56,9 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
       <Component name={name} {...rest} styles={styles} />
 
       {error && (
-        <ErrorMessage style={{ paddingTop: 11, paddingBottom: 0, marginBottom: 12 }}>
+        <ErrorMessage
+          style={{ paddingTop: 11, paddingBottom: 0, marginBottom: 12 }}
+        >
           {error}
         </ErrorMessage>
       )}

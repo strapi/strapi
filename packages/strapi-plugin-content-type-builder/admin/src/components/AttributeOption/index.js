@@ -4,14 +4,20 @@
  *
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
+import useQuery from '../../hooks/useQuery';
 import Button from './Button';
 import Card from './Card';
 
@@ -101,7 +107,11 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     <div className="col-6">
       <Button ref={buttonRef} type="button" onClick={handleClick}>
         <Card>
-          <AttributeIcon type={type} style={{ marginRight: 10 }} className="attributeIcon" />
+          <AttributeIcon
+            type={type}
+            style={{ marginRight: 10 }}
+            className="attributeIcon"
+          />
           <FormattedMessage id={getTrad(`attribute.${type}`)}>
             {message => <span className="attributeType">{message}</span>}
           </FormattedMessage>

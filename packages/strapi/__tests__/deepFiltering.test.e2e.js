@@ -154,6 +154,8 @@ describe('Deep Filtering API', () => {
         },
       });
 
+      console.log('res', JSON.stringify(res.body, null, 2));
+
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.collectors[1]);

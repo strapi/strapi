@@ -5,10 +5,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const FaIcon = styled(({ small, ...props }) => <FontAwesomeIcon {...props} />)`
   position: absolute;
-  top: ${({ small }) => (small ? 'calc(50% - 0.3rem)' : 'calc(50% - 0.9rem + 0.3rem)')};
-  left: ${({ small }) => (small ? '2.2rem' : '1.6rem')};
-  width: ${({ small }) => (small ? 'auto' : '1.3rem')} !important;
-  font-size: ${({ small }) => (small ? '.5rem' : '1.3rem')};
+  top: calc(50% - 0.9rem + 0.3rem);
+  left: 1.6rem;
+  margin-right: 1.2rem;
+  margin-top: ${({ small }) => (small ? '.3rem' : null)};
+  font-size: ${({ small }) => (small ? '.9rem' : '1.4rem')};
+  width: 1.4rem;
+  padding-bottom: 0.2rem;
+  text-align: center;
 `;
 
 const LeftMenuIcon = ({ icon }) => <FaIcon small={icon === 'circle'} icon={icon} />;

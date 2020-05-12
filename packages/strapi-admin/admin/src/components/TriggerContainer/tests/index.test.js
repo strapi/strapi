@@ -15,7 +15,7 @@ describe('<TriggerContainer />', () => {
 
   it('should match the snapshot', () => {
     const tree = renderer.create(
-      <IntlProvider locale="en" textComponent="span">
+      <IntlProvider locale="en">
         <TriggerContainer {...props} />
       </IntlProvider>
     );

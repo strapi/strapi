@@ -18,6 +18,11 @@ const koaStatic = require('koa-static');
 module.exports = {
   getInfos: async ctx => {
     try {
+      const prefix = _.get(
+        strapi.plugins,
+        ['documentation', 'config', 'x-strapi-config', 'path'],
+        '/documentation'
+      );
       const service = strapi.plugins.documentation.services.documentation;
       const docVersions = service.retrieveDocumentationVersions();
       const form = await service.retrieveFrontForm();
@@ -25,7 +30,7 @@ module.exports = {
       ctx.send({
         docVersions,
         currentVersion: service.getDocumentationVersion(),
-        prefix: strapi.plugins.documentation.config['x-strapi-config'].path,
+        prefix: `/${prefix}`.replace('//', '/'),
         form,
       });
     } catch (err) {
@@ -34,7 +39,15 @@ module.exports = {
   },
 
   async index(ctx, next) {
+    // Read layout file.
+
     try {
+      const layout = fs.readFileSync(
+        path.resolve(__dirname, '..', 'public', 'index.html'),
+        'utf8'
+      );
+      const $ = cheerio.load(layout);
+
       /**
        * We don't expose the specs using koa-static or something else due to security reasons.
        * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
@@ -55,16 +68,39 @@ module.exports = {
 
       try {
         const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
-        const layout = fs.readFileSync(
-          path.resolve(__dirname, '..', 'public', 'index.html'),
-          'utf8'
-        );
-        const filledLayout = _.template(layout)({
-          backendUrl: strapi.config.server.url,
-          spec: JSON.stringify(JSON.parse(documentation)),
-        });
+
+        // Remove previous Swagger configuration.
+        $('.custom-swagger-ui').remove();
+        // Set new Swagger configuration
+        $('body').append(`
+          <script class="custom-swagger-ui">
+            window.onload = function() {
+
+              // Build a system
+              const ui = SwaggerUIBundle({
+                url: "https://petstore.swagger.io/v2/swagger.json",
+                spec: ${JSON.stringify(JSON.parse(documentation))},
+                dom_id: '#swagger-ui',
+                docExpansion: "none",
+                deepLinking: true,
+                presets: [
+                  SwaggerUIBundle.presets.apis,
+                  SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                  SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout"
+              })
+
+              window.ui = ui
+            }
+          </script>
+        `);
 
         try {
+          // Write the layout with the new Swagger configuration.
+          // fs.writeFileSync(layoutPath, $.html());
           const layoutPath = path.resolve(
             strapi.config.appPath,
             'extensions',
@@ -73,7 +109,7 @@ module.exports = {
             'index.html'
           );
           await fs.ensureFile(layoutPath);
-          await fs.writeFile(layoutPath, filledLayout);
+          await fs.writeFile(layoutPath, $.html());
 
           // Serve the file.
           ctx.url = path.basename(`${ctx.url}/index.html`);
@@ -104,12 +140,15 @@ module.exports = {
     const { error } = ctx.query;
 
     try {
-      const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
-      const filledLayout = _.template(layout)({
-        actionUrl: `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}/login`,
-      });
-      const $ = cheerio.load(filledLayout);
+      const layout = fs.readFileSync(
+        path.join(__dirname, '..', 'public', 'login.html')
+      );
+      const $ = cheerio.load(layout);
 
+      $('form').attr(
+        'action',
+        `${strapi.plugins.documentation.config['x-strapi-config'].path}/login`
+      );
       $('.error').text(_.isEmpty(error) ? '' : 'Wrong password...');
 
       try {
@@ -158,10 +197,9 @@ module.exports = {
       })
       .get();
 
-    const isValid = strapi.plugins['users-permissions'].services.user.validatePassword(
-      password,
-      storedPassword
-    );
+    const isValid = strapi.plugins[
+      'users-permissions'
+    ].services.user.validatePassword(password, storedPassword);
     let querystring = '?error=password';
 
     if (isValid) {
@@ -170,13 +208,17 @@ module.exports = {
     }
 
     ctx.redirect(
-      `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}${querystring}`
+      `${
+        strapi.plugins.documentation.config['x-strapi-config'].path
+      }${querystring}`
     );
   },
 
   regenerateDoc: async ctx => {
     const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
+    const documentationVersions = service
+      .retrieveDocumentationVersions()
+      .map(el => el.version);
     const {
       request: {
         body: { version },
@@ -212,7 +254,10 @@ module.exports = {
       );
       ctx.send({ ok: true });
     } catch (err) {
-      ctx.badRequest(null, admin ? 'documentation.error.regenerateDoc' : 'An error occured');
+      ctx.badRequest(
+        null,
+        admin ? 'documentation.error.regenerateDoc' : 'An error occured'
+      );
     } finally {
       strapi.reload.isWatching = true;
     }
@@ -221,7 +266,9 @@ module.exports = {
   deleteDoc: async ctx => {
     strapi.reload.isWatching = false;
     const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
+    const documentationVersions = service
+      .retrieveDocumentationVersions()
+      .map(el => el.version);
     const {
       request: {
         params: { version },
@@ -271,11 +318,14 @@ module.exports = {
     if (restrictedAccess && _.isEmpty(password)) {
       return ctx.badRequest(
         null,
-        admin ? 'users-permissions.Auth.form.error.password.provide' : 'Please provide a password'
+        admin
+          ? 'users-permissions.Auth.form.error.password.provide'
+          : 'Please provide a password'
       );
     }
 
-    const isNewPassword = !_.isEmpty(password) && password !== prevConfig.password;
+    const isNewPassword =
+      !_.isEmpty(password) && password !== prevConfig.password;
 
     if (isNewPassword && usersPermService.user.isHashed(password)) {
       // Throw an error if the password selected by the user

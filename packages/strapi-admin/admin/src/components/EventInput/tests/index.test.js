@@ -6,8 +6,11 @@ import translationMessages from '../../../translations/en.json';
 import EventInput from '../index';
 import EventRow from '../EventRow';
 
-const intlProvider = new IntlProvider({ locale: 'en', message: translationMessages }, {});
-const { intl } = intlProvider.state;
+const intlProvider = new IntlProvider(
+  { locale: 'en', message: translationMessages },
+  {}
+);
+const { intl } = intlProvider.getChildContext();
 
 function nodeWithIntlProp(node) {
   return React.cloneElement(node, { intl });
@@ -26,7 +29,7 @@ describe('<EventInput />', () => {
 
   it('should match the snapshot', () => {
     const tree = renderer.create(
-      <IntlProvider locale="en" messages={translationMessages} textComponent="span">
+      <IntlProvider locale="en" messages={translationMessages}>
         <EventInput {...props} />
       </IntlProvider>
     );
@@ -101,7 +104,13 @@ describe('<EventInput />', () => {
     const formattedEvent = {
       target: {
         name: 'events',
-        value: ['media.create', 'media.delete', 'entry.create', 'entry.update', 'entry.delete'],
+        value: [
+          'media.create',
+          'media.delete',
+          'entry.create',
+          'entry.update',
+          'entry.delete',
+        ],
       },
     };
 

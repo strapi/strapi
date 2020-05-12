@@ -53,10 +53,13 @@ const RepeatableComponent = ({
     });
   };
   const missingComponentsValue = min - componentValueLength;
-  const errorsArray = componentErrorKeys.map(key => get(formErrors, [key, 'id'], ''));
+  const errorsArray = componentErrorKeys.map(key =>
+    get(formErrors, [key, 'id'], '')
+  );
 
   const hasMinError =
-    get(errorsArray, [0], '').includes('min') && !collapses.some(obj => obj.isOpen === true);
+    get(errorsArray, [0], '').includes('min') &&
+    !collapses.some(obj => obj.isOpen === true);
 
   return (
     <div>
@@ -81,7 +84,9 @@ const RepeatableComponent = ({
               <DraggedItem
                 fields={fields}
                 componentFieldName={componentFieldName}
-                doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
+                doesPreviousFieldContainErrorsAndIsOpen={
+                  doesPreviousFieldContainErrorsAndIsOpen
+                }
                 hasErrors={hasErrors}
                 hasMinError={hasMinError}
                 isFirst={index === 0}
@@ -124,7 +129,11 @@ const RepeatableComponent = ({
           if (componentValueLength < max) {
             const shouldCheckErrors = hasMinError;
 
-            addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
+            addRepeatableComponentToField(
+              name,
+              componentUid,
+              shouldCheckErrors
+            );
             dispatch({
               type: 'ADD_NEW_FIELD',
             });

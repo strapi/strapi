@@ -68,7 +68,6 @@ const Wrapper = styled.tr`
   .button-container {
     svg {
       color: #333740;
-      vertical-align: middle;
     }
   }
 `;

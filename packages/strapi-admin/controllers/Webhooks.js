@@ -8,7 +8,6 @@ const ALLOWED_EVENTS = [
   'entry.update',
   'entry.delete',
   'media.create',
-  'media.update',
   'media.delete',
 ];
 
@@ -166,7 +165,11 @@ module.exports = {
 
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    const response = await strapi.webhookRunner.run(webhook, 'trigger-test', {});
+    const response = await strapi.webhookRunner.run(
+      webhook,
+      'trigger-test',
+      {}
+    );
 
     ctx.body = { data: response };
   },

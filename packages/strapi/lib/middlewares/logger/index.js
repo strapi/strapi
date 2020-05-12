@@ -23,10 +23,14 @@ module.exports = strapi => {
      * Initialize the hook
      */
     initialize() {
-      const { level, exposeInContext, requests } = strapi.config.middleware.settings.logger;
+      const {
+        level,
+        exposeInContext,
+        requests,
+      } = strapi.config.middleware.settings.logger;
 
       if (level) {
-        strapi.log.level = level;
+        strapi.log.level = strapi.config.middleware.settings.logger.level;
       }
 
       if (exposeInContext) {
@@ -38,7 +42,9 @@ module.exports = strapi => {
           const start = Date.now();
           await next();
           const delta = Math.ceil(Date.now() - start);
-          strapi.log.debug(`${ctx.method} ${ctx.url} (${delta} ms) ${codeToColor(ctx.status)}`);
+          strapi.log.debug(
+            `${ctx.method} ${ctx.url} (${delta} ms) ${codeToColor(ctx.status)}`
+          );
         });
       }
     },

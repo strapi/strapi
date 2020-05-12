@@ -6,11 +6,9 @@ const yup = require('yup');
 const {
   validators,
   areEnumValuesUnique,
-  isValidDefaultJSON,
   isValidName,
   isValidEnum,
   isValidUID,
-  isValidRegExpPattern,
 } = require('./common');
 const { hasComponent } = require('../../utils/attributes');
 const { modelTypes, VALID_UID_TARGETS } = require('./constants');
@@ -51,10 +49,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
-        allowedTypes: yup
-          .array()
-          .of(yup.string().oneOf(['images', 'videos', 'files']))
-          .min(1),
       };
     }
 
@@ -100,7 +94,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
-        regex: yup.string().test(isValidRegExpPattern),
       };
     }
     case 'richtext': {
@@ -113,7 +106,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     }
     case 'json': {
       return {
-        default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
         unique: validators.unique,
       };

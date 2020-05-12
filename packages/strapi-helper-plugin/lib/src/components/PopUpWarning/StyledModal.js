@@ -2,10 +2,10 @@ import styled from 'styled-components';
 import { Modal } from 'reactstrap';
 
 const StyledModal = styled(Modal)`
-  width: 41.6rem !important;
-  margin: 14.4rem auto !important;
+  max-width: 37.5rem !important;
+  margin: 16.2rem auto !important;
   > div {
-    width: 41.6rem;
+    width: 37.5rem;
     padding: 0 !important;
     border: none;
     border-radius: 2px;

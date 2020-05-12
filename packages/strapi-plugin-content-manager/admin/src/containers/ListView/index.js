@@ -5,22 +5,14 @@ import { bindActionCreators, compose } from 'redux';
 import { get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Header } from '@buffetjs/custom';
-import {
-  PopUpWarning,
-  generateFiltersFromSearch,
-  generateSearchFromFilters,
-  generateSearchFromObject,
-  getQueryParameters,
-  useGlobalContext,
-  request,
-} from 'strapi-helper-plugin';
-
+import { PopUpWarning, getQueryParameters, useGlobalContext, request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
+import { generateFiltersFromSearch, generateSearchFromFilters } from '../../utils/search';
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
@@ -36,9 +28,10 @@ import {
   toggleModalDelete,
   toggleModalDeleteAll,
 } from './actions';
-
+import reducer from './reducer';
 import makeSelectListView from './selectors';
 import getRequestUrl from '../../utils/getRequestUrl';
+import generateSearchFromObject from './utils/generateSearchFromObject';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -47,7 +40,6 @@ function ListView({
   data,
   emitEvent,
   entriesToDelete,
-  isLoading,
   location: { pathname, search },
   getDataSucceeded,
   layouts,
@@ -66,6 +58,8 @@ function ListView({
   showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
+  strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
+
   const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const getDataRef = useRef();
@@ -349,7 +343,7 @@ function ListView({
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading} />}
+          {!isFilterPickerOpen && <Header {...headerProps} />}
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
@@ -366,7 +360,7 @@ function ListView({
                     <>
                       <AddFilterCta type="button" onClick={toggleFilterPickerState}>
                         <FilterIcon />
-                        <FormattedMessage id="app.utils.filters" />
+                        <FormattedMessage id={`${pluginId}.components.AddFilterCTA.add`} />
                       </AddFilterCta>
                       {getSearchParams().filters.map((filter, key) => (
                         <Filter
@@ -404,7 +398,6 @@ function ListView({
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
-                  showLoader={isLoading}
                 />
                 <Footer />
               </div>
@@ -450,7 +443,6 @@ ListView.propTypes = {
   data: PropTypes.array.isRequired,
   emitEvent: PropTypes.func.isRequired,
   entriesToDelete: PropTypes.array.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   layouts: PropTypes.object,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,

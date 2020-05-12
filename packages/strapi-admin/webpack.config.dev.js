@@ -27,7 +27,7 @@ module.exports = () => {
         index: '/admin/',
         disableDotRule: true,
       },
-      open: false,
+      open: true,
       openPage: '/admin',
     },
   };

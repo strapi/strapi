@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "restaurants",
   "info": {
     "name": "restaurant",
@@ -43,6 +44,7 @@
       "max": 35.12
     },
     "address": {
+      "required": true,
       "model": "address"
     },
     "cover": {

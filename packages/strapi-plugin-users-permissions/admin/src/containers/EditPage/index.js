@@ -51,6 +51,8 @@ import {
 
 // Selectors
 import makeSelectEditPage from './selectors';
+
+import reducer from './reducer';
 import saga from './saga';
 
 import { Loader, Title, Separator, Wrapper } from './Components';
@@ -219,7 +221,10 @@ export class EditPage extends React.Component {
         label: formatMessage({ id: getTrad('EditPage.submit') }),
         onClick: this.handleSubmit,
         type: 'submit',
-        disabled: isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData),
+        disabled: isEqual(
+          this.props.editPage.modifiedData,
+          this.props.editPage.initialData
+        ),
         key: 'button-submit',
       },
     ];
@@ -235,7 +240,9 @@ export class EditPage extends React.Component {
         selectAllActions={this.props.selectAllActions}
         setInputPoliciesPath={this.props.setInputPoliciesPath}
         setShouldDisplayPolicieshint={this.props.setShouldDisplayPolicieshint}
-        resetShouldDisplayPoliciesHint={this.props.resetShouldDisplayPoliciesHint}
+        resetShouldDisplayPoliciesHint={
+          this.props.resetShouldDisplayPoliciesHint
+        }
       >
         <Wrapper>
           <BackHeader onClick={() => this.props.history.goBack()} />
@@ -249,7 +256,11 @@ export class EditPage extends React.Component {
                   <FormattedMessage
                     id={pluginHeaderDescription}
                     values={{
-                      description: get(this.props.editPage.initialData, 'description', ''),
+                      description: get(
+                        this.props.editPage.initialData,
+                        'description',
+                        ''
+                      ),
                     }}
                   >
                     {description => {
@@ -291,11 +302,16 @@ export class EditPage extends React.Component {
                       )}
                       {!this.showLoaderPermissions() && (
                         <Plugins
-                          plugins={get(this.props.editPage, ['modifiedData', 'permissions'])}
+                          plugins={get(this.props.editPage, [
+                            'modifiedData',
+                            'permissions',
+                          ])}
                         />
                       )}
                       <Policies
-                        shouldDisplayPoliciesHint={this.props.editPage.shouldDisplayPoliciesHint}
+                        shouldDisplayPoliciesHint={
+                          this.props.editPage.shouldDisplayPoliciesHint
+                        }
                         inputSelectName={this.props.editPage.inputPoliciesPath}
                         routes={this.props.editPage.routes}
                         selectOptions={this.props.editPage.policies}
@@ -378,7 +394,11 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
+const withReducer = strapi.injectReducer({
+  key: 'editPage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
-export default compose(withSaga, withConnect)(EditPage);
+export default compose(withReducer, withSaga, withConnect)(EditPage);

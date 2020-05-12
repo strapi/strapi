@@ -36,12 +36,6 @@ module.exports = {
       type: String
     }
 
-    input UsersPermissionsRegisterInput {
-      username: String!
-      email: String!
-      password: String!
-    }
-
     input UsersPermissionsLoginInput {
       identifier: String!
       password: String!
@@ -62,7 +56,7 @@ module.exports = {
   `,
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
-    register(input: UsersPermissionsRegisterInput!): UsersPermissionsLoginPayload!
+    register(input: UserInput!): UsersPermissionsLoginPayload!
     forgotPassword(email: String!): ForgotPassword
     changePassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
@@ -110,11 +104,9 @@ module.exports = {
         description: 'Update an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.updateRole',
         resolver: async (obj, options, { context }) => {
-          context.params = { ...context.params, ...options.input };
-          context.params.role = context.params.id;
-
           await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(
-            context
+            context.params,
+            context.body
           );
 
           return { ok: true };
@@ -124,9 +116,6 @@ module.exports = {
         description: 'Delete an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.deleteRole',
         resolver: async (obj, options, { context }) => {
-          context.params = { ...context.params, ...options.input };
-          context.params.role = context.params.id;
-
           await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(
             context
           );
@@ -260,7 +249,6 @@ module.exports = {
 
           await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(
             context,
-            null,
             true
           );
           let output = context.body.toJSON ? context.body.toJSON() : context.body;

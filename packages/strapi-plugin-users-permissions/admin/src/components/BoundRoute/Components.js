@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   display: flex;
@@ -14,41 +13,33 @@ const Header = styled.div`
   padding-top: 1.1rem;
   color: #333740;
   font-size: 18px;
-  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
+  font-weight: 600;
 
   > span:not(:first-child) {
     color: #787e8f;
     font-size: 16px;
-    font-weight: ${({ theme }) => theme.main.fontWeights.semiBold};
+    font-weight: 500;
   }
 
   > span:last-child {
     color: #1642e1;
-    font-weight: ${({ theme }) => theme.main.fontWeights.bold};
+    font-weight: 600;
   }
 `;
-
-Header.propTypes = {
-  ...themePropTypes,
-};
 
 const Path = styled.div`
   padding: 0 1rem;
   font-size: 13px;
-  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
+  font-weight: 600;
   color: #333740;
 `;
-
-Path.propTypes = {
-  ...themePropTypes,
-};
 
 const Verb = styled.div`
   padding: 0 1rem;
   border-radius: 3px;
   color: #ffffff;
   font-size: 12px;
-  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   &.get {
@@ -67,9 +58,5 @@ const Verb = styled.div`
     background-color: #f64d0a;
   }
 `;
-
-Verb.propTypes = {
-  ...themePropTypes,
-};
 
 export { Header, Path, Verb, Wrapper };

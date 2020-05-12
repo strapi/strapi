@@ -27,14 +27,27 @@ module.exports = strapi => {
       const { defaultIndex, maxAge, path: publicPath } = strapi.config.middleware.settings.public;
       const staticDir = path.resolve(strapi.dir, publicPath || strapi.config.paths.static);
 
+      // Match every route with an extension.
+      // The file without extension will not be served.
+      // Note: This route can be overriden by the user.
+      strapi.router.get(
+        '/*',
+        async (ctx, next) => {
+          const parse = path.parse(ctx.url);
+          ctx.url = path.join(parse.dir, parse.base);
+
+          await next();
+        },
+        koaStatic(staticDir, {
+          maxage: maxAge,
+          defer: false,
+        })
+      );
+
       if (defaultIndex === true) {
         const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-        const serveIndexPage = async (ctx, next) => {
-          // defer rendering of strapi index page
-          await next();
-          if (ctx.body != null || ctx.status !== 404) return;
-
+        const serveIndexPage = async ctx => {
           ctx.url = 'index.html';
           const isInitialised = await utils.isInitialised(strapi);
           const data = {
@@ -63,21 +76,17 @@ module.exports = strapi => {
         strapi.router.get('/index.html', serveIndexPage);
       }
 
-      // serve files in public folder unless a sub router renders something else
-      strapi.router.get(
-        '/(.*)',
-        koaStatic(staticDir, {
-          maxage: maxAge,
-          defer: true,
-        })
-      );
-
       if (!strapi.config.serveAdminPanel) return;
+
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
+        ? strapi.config.currentEnvironment.server.admin.path
+        : '/admin';
 
       const buildDir = path.resolve(strapi.dir, 'build');
 
+      // Serve admin assets.
       strapi.router.get(
-        `${strapi.config.admin.path}/*`,
+        `${basename}/*`,
         async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
           await next();
@@ -89,7 +98,7 @@ module.exports = strapi => {
         })
       );
 
-      strapi.router.get(`${strapi.config.admin.path}*`, ctx => {
+      strapi.router.get(`${basename}*`, ctx => {
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       });

@@ -211,21 +211,21 @@ This event is triggered only when you delete a media through the media interface
 
 ### Available configurations
 
-You can set webhook configurations inside the file `./config/server.js`.
+You can set webhook configurations inside the file `./config/environments/{env}/server.json`.
 
 - `webhooks`
   - `defaultHeaders`: You can set default headers to use for your webhook requests. This option is overwritten by the headers set in the webhook itself.
 
 **Example configuration**
 
-```js
-module.exports = {
-  webhooks: {
-    defaultHeaders: {
-      'Custom-Header': 'my-custom-header',
-    },
-  },
-};
+```json
+{
+  "webhooks": {
+    "defaultHeaders": {
+      "Custom-Header": "my-custom-header"
+    }
+  }
+}
 ```
 
 ### Securing your webhooks
@@ -235,34 +235,34 @@ Most of the time, webhooks make requests to public URLs, therefore it is possibl
 To prevent this from happening you can send a header with an authentication token. Using the Admin panel you would have to do it for every webhook.
 Another way is to define `defaultHeaders` to add to every webhook requests.
 
-You can configure these global headers by updating the file at `./config/server.js`:
+You can configure these global headers by updating the file at `./config/environments/{env}/server.json`:
 
 :::: tabs
 
 ::: tab "Simple token"
 
-```js
-module.exports = {
-  webhooks: {
-    defaultHeaders: {
-      Authorization: 'Bearer my-very-secured-token',
-    },
-  },
-};
+```json
+{
+  "webhooks": {
+    "defaultHeaders": {
+      "Authorization": "Bearer my-very-secured-token"
+    }
+  }
+}
 ```
 
 :::
 
 ::: tab "Environment variable"
 
-```js
-module.exports = {
-  webhooks: {
-    defaultHeaders: {
-      Authorization: `Bearer ${process.env.WEBHOOK_TOKEN}`,
-    },
-  },
-};
+```json
+{
+  "webhooks": {
+    "defaultHeaders": {
+      "Authorization": "Bearer ${ process.env.WEBHOOK_TOKEN }"
+    }
+  }
+}
 ```
 
 ::::

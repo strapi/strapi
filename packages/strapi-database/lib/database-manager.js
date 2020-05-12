@@ -2,10 +2,9 @@
 
 const _ = require('lodash');
 
+const requireConnector = require('./require-connector');
 const { createQuery } = require('./queries');
-const createConnectorRegistry = require('./connector-registry');
-const constants = require('./constants');
-const { validateModelSchemas } = require('./validation');
+const { checkDuplicatedTableNames } = require('./validation/before-mounting-models');
 
 class DatabaseManager {
   constructor(strapi) {
@@ -13,12 +12,8 @@ class DatabaseManager {
 
     this.initialized = false;
 
-    this.connectors = createConnectorRegistry({
-      connections: strapi.config.get('database.connections'),
-      defaultConnection: strapi.config.get('database.defaultConnection'),
-    });
-
     this.queries = new Map();
+    this.connectors = new Map();
     this.models = new Map();
   }
 
@@ -29,11 +24,23 @@ class DatabaseManager {
 
     this.initialized = true;
 
-    this.connectors.load();
+    const connectorsToInitialize = [];
+    for (const connection of Object.values(this.strapi.config.connections)) {
+      const { connector } = connection;
+      if (!connectorsToInitialize.includes(connector)) {
+        connectorsToInitialize.push(connector);
+      }
+    }
 
-    validateModelSchemas({ strapi: this.strapi, manager: this });
+    checkDuplicatedTableNames(this.strapi);
 
-    await this.connectors.initialize();
+    for (const connectorToInitialize of connectorsToInitialize) {
+      const connector = requireConnector(connectorToInitialize)(strapi);
+
+      this.connectors.set(connectorToInitialize, connector);
+
+      await connector.initialize();
+    }
 
     this.initializeModelsMap();
 
@@ -101,33 +108,17 @@ class DatabaseManager {
       return _.get(strapi.admin, ['models', key]);
     }
 
-    if (plugin) {
-      return _.get(strapi.plugins, [plugin, 'models', key]);
-    }
-
-    return _.get(strapi, ['models', key]) || _.get(strapi, ['components', key]);
+    return (
+      _.get(strapi.plugins, [plugin, 'models', key]) ||
+      _.get(strapi, ['models', key]) ||
+      _.get(strapi, ['components', key])
+    );
   }
 
   getModelByCollectionName(collectionName) {
     return Array.from(this.models.values()).find(model => {
       return model.collectionName === collectionName;
     });
-  }
-
-  getModelByGlobalId(globalId) {
-    return Array.from(this.models.values()).find(model => {
-      return model.globalId === globalId;
-    });
-  }
-
-  getReservedNames() {
-    return {
-      models: constants.RESERVED_MODEL_NAMES,
-      attributes: [
-        ...constants.RESERVED_ATTRIBUTE_NAMES,
-        ...(strapi.db.connectors.default.defaultTimestamps || []),
-      ],
-    };
   }
 }
 

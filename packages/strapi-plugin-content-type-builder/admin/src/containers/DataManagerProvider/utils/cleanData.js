@@ -55,9 +55,11 @@ const formatMainDataType = (data, isComponent = false) => {
   );
   const initObj = isComponent ? { category: get(data, 'category', '') } : {};
 
-  const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
-    attributes: formattedAttributes,
-  });
+  const formattedContentType = Object.assign(
+    initObj,
+    omit(data.schema, 'attributes'),
+    { attributes: formattedAttributes }
+  );
 
   delete formattedContentType.uid;
   delete formattedContentType.isTemporary;
@@ -72,17 +74,28 @@ const formatMainDataType = (data, isComponent = false) => {
  * @param {Boolean} isCreatingMainData
  * @param {Boolean} isComponent
  */
-const formatAttributes = (attributes, mainDataUID, isCreatingMainData, isComponent) => {
+const formatAttributes = (
+  attributes,
+  mainDataUID,
+  isCreatingMainData,
+  isComponent
+) => {
   return Object.keys(attributes).reduce((acc, current) => {
     const currentAttribute = get(attributes, current, {});
     const hasARelationWithMainDataUID = currentAttribute.target === mainDataUID;
     const isRelationType = has(currentAttribute, 'nature');
-    const currentTargetAttribute = get(currentAttribute, 'targetAttribute', null);
+    const currentTargetAttribute = get(
+      currentAttribute,
+      'targetAttribute',
+      null
+    );
 
     if (!hasARelationWithMainDataUID) {
       if (isRelationType) {
         const relationAttr = Object.assign({}, currentAttribute, {
-          targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
+          targetAttribute: formatRelationTargetAttribute(
+            currentTargetAttribute
+          ),
         });
 
         acc[current] = removeNullKeys(relationAttr);
@@ -128,10 +141,17 @@ const getComponentsToPost = (
   mainDataUID,
   isCreatingData = false
 ) => {
-  const componentsToFormat = getCreatedAndModifiedComponents(allComponents, initialComponents);
+  const componentsToFormat = getCreatedAndModifiedComponents(
+    allComponents,
+    initialComponents
+  );
   const formattedComponents = componentsToFormat.map(compoUID => {
     const currentCompo = get(allComponents, compoUID, {});
-    const formattedComponent = formatComponent(currentCompo, mainDataUID, isCreatingData);
+    const formattedComponent = formatComponent(
+      currentCompo,
+      mainDataUID,
+      isCreatingData
+    );
 
     return formattedComponent;
   });

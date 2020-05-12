@@ -40,8 +40,10 @@ import {
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
+import injectReducer from '../../utils/injectReducer';
 import { setAppError } from './actions';
 import makeSelectAdmin from './selectors';
+import reducer from './reducer';
 import Wrapper from './Wrapper';
 import Content from './Content';
 
@@ -115,12 +117,9 @@ export class Admin extends React.Component {
 
     return Object.keys(plugins).reduce((acc, current) => {
       const InitializerComponent = plugins[current].initializer;
+      const key = plugins[current].id;
 
-      if (InitializerComponent) {
-        const key = plugins[current].id;
-
-        acc.push(<InitializerComponent key={key} {...this.props} {...this.helpers} />);
-      }
+      acc.push(<InitializerComponent key={key} {...this.props} {...this.helpers} />);
 
       return acc;
     }, []);
@@ -272,5 +271,6 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withReducer = injectReducer({ key: 'admin', reducer });
 
-export default compose(injectIntl, withConnect)(Admin);
+export default compose(injectIntl, withReducer, withConnect)(Admin);

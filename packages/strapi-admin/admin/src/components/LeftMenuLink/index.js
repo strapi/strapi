@@ -36,7 +36,9 @@ const LeftMenuLink = ({
         label={label}
         location={location}
         source={source}
-        suffixUrlToReplaceForLeftMenuHighlight={suffixUrlToReplaceForLeftMenuHighlight}
+        suffixUrlToReplaceForLeftMenuHighlight={
+          suffixUrlToReplaceForLeftMenuHighlight
+        }
       />
       {plugin}
     </>

@@ -10,14 +10,20 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { findIndex, get, isEmpty } from 'lodash';
 import { Header } from '@buffetjs/custom';
+
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import { ContainerFluid, HeaderNav, GlobalContext } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
+
 // Plugin's components
 import EditForm from '../../components/EditForm';
+
 import { getSettings, onCancel, onChange, setErrors, submit } from './actions';
+
+import reducer from './reducer';
 import saga from './saga';
 import selectConfigPage from './selectors';
 
@@ -51,7 +57,9 @@ class ConfigPage extends React.Component {
 
     // Redirect the user to the email list after modifying is provider
     if (prevProps.submitSuccess !== this.props.submitSuccess) {
-      this.props.history.push(`/plugins/email/configurations/${this.props.match.params.env}`);
+      this.props.history.push(
+        `/plugins/email/configurations/${this.props.match.params.env}`
+      );
     }
   }
 
@@ -93,7 +101,11 @@ class ConfigPage extends React.Component {
   handleSubmit = e => {
     e.preventDefault();
     const formErrors = Object.keys(
-      get(this.props.settings, ['providers', this.getSelectedProviderIndex(), 'auth'], {})
+      get(
+        this.props.settings,
+        ['providers', this.getSelectedProviderIndex(), 'auth'],
+        {}
+      )
     ).reduce((acc, current) => {
       if (isEmpty(get(this.props.modifiedData, current, ''))) {
         acc.push({
@@ -128,7 +140,10 @@ class ConfigPage extends React.Component {
               })}
               title={{ label: formatMessage({ id: 'email.ConfigPage.title' }) }}
             />
-            <HeaderNav links={this.generateLinks()} style={{ marginTop: '4.6rem' }} />
+            <HeaderNav
+              links={this.generateLinks()}
+              style={{ marginTop: '4.6rem' }}
+            />
             <EditForm
               didCheckErrors={this.props.didCheckErrors}
               formErrors={this.props.formErrors}
@@ -183,8 +198,20 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectConfigPage();
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
+const withReducer = strapi.injectReducer({
+  key: 'configPage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 
-export default compose(withSaga, withConnect)(ConfigPage);
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect
+)(ConfigPage);

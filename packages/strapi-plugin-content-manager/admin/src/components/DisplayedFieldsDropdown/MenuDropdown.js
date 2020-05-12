@@ -10,12 +10,16 @@ const MenuDropdown = styled(DropdownMenu)`
   box-shadow: 0px 2px 4px rgba(227, 233, 243, 0.5);
   transform: translate3d(-178px, 28px, 0px) !important;
 
-  ${({ isopen }) =>
-  isopen === 'true' &&
-    `
-    border-top-color: #aed4fb !important;
-    border-top-right-radius: 0;
-  `}
+  ${({ isopen }) => {
+    if (isopen === 'true') {
+      return `
+        border-top-color: #aed4fb !important;
+        border-top-right-radius: 0;
+      `;
+    }
+
+    return '';
+  }}
 `;
 
 export default MenuDropdown;

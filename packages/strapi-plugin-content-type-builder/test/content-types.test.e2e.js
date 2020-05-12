@@ -18,7 +18,8 @@ describe('Content Type Builder - Content types', () => {
   afterEach(() => waitRestart());
 
   describe('Collection Types', () => {
-    const collectionTypeUID = 'application::test-collection-type.test-collection-type';
+    const collectionTypeUID =
+      'application::test-collection-type.test-collection-type';
 
     test('Successfull creation of a collection type', async () => {
       const res = await rq({
@@ -116,7 +117,9 @@ describe('Content Type Builder - Content types', () => {
       expect(res.body).toMatchObject({
         error: {
           ['contentType.attributes.relation.nature']: expect.arrayContaining([
-            expect.stringMatching('must be one of the following values: oneWay, manyWay'),
+            expect.stringMatching(
+              'must be one of the following values: oneWay, manyWay'
+            ),
           ]),
         },
       });

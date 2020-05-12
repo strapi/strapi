@@ -1,5 +1,6 @@
 {
   "collectionName": "users-permissions_role",
+  "connection": "default",
   "info": {
     "name": "role",
     "description": ""

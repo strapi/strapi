@@ -2,9 +2,16 @@
 
 const convert = require('koa-convert');
 const { xssProtection } = require('koa-lusca');
+/**
+ * XSS hook
+ */
 
 module.exports = strapi => {
   return {
+    /**
+     * Initialize the hook
+     */
+
     initialize() {
       const defaults = require('./defaults.json');
 
@@ -18,9 +25,10 @@ module.exports = strapi => {
           )(ctx, next);
         }
 
-        const xssConfig = strapi.config.get('middleware.settings.xss');
-        if (xssConfig.enabled) {
-          return await convert(xssProtection(xssConfig))(ctx, next);
+        if (strapi.config.currentEnvironment.security.xss.enabled) {
+          return await convert(
+            xssProtection(strapi.config.middleware.settings.xss)
+          )(ctx, next);
         }
 
         await next();

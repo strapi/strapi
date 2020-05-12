@@ -155,18 +155,6 @@ function SelectWrapper({
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
 
-  const customStyles = {
-    option: provided => {
-      return {
-        ...provided,
-        maxWidth: '100% !important',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      };
-    },
-  };
-
   return (
     <Wrapper className="form-group">
       <Nav>
@@ -210,7 +198,6 @@ function SelectWrapper({
             placeholder
           )
         }
-        styles={customStyles}
         targetModel={targetModel}
         value={value}
       />

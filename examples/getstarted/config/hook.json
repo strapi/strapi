@@ -1,0 +1,8 @@
+{
+  "timeout": 3000,
+  "load": {
+    "before": [],
+    "order": [],
+    "after": []
+  }
+}

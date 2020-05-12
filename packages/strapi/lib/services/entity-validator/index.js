@@ -59,11 +59,7 @@ const createValidator = model => {
 
         const { required } = attr;
 
-        let validator = createAttributeValidator(attr).nullable();
-
-        if (_.has(attr, 'default')) {
-          validator = validator.default(attr.default);
-        }
+        const validator = createAttributeValidator(attr).nullable();
 
         if (required) {
           return validator.notNil();

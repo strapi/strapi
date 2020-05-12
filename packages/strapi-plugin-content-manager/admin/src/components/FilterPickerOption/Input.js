@@ -36,13 +36,16 @@ const getInputType = attrType => {
 
 function Input({ type, ...rest }) {
   const Component = getInputType(type);
-  let style = type !== 'time' ? { width: '210px' } : {};
+  let style = type !== 'time' ? { width: '210px', paddingTop: '4px' } : {};
 
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
-    style = { marginRight: '15px' };
+    style = { marginRight: '20px' };
   }
   const styles = type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
-  const wrapperStyle = { marginRight: '15px' };
+  const wrapperStyle =
+    type === 'boolean' || ['date', 'timestamp', 'time', 'datetime'].includes(type)
+      ? { marginRight: '20px' }
+      : { marginRight: '10px' };
 
   return (
     <InputWrapperDate type={type || 'text'} style={wrapperStyle}>

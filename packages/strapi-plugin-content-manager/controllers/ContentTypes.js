@@ -22,6 +22,7 @@ module.exports = {
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
+        if (uid === 'plugins::upload.file') return false;
 
         if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
           return false;

@@ -46,7 +46,7 @@ Now you can run `node server.js` and it will start your application.
 By following their Node.js onboarding, we need to require the Sqreen node_module where the server is started.
 Also, Sqreen has to be required just before Strapi to work!
 
-_This is the reason why we have created a `server.js` file._
+*This is the reason why we have created a `server.js` file.*
 
 To do so, you will have to update this file.
 

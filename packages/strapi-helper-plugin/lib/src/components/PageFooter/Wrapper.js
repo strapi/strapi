@@ -2,13 +2,14 @@ import styled from 'styled-components';
 import Bkg from '../../assets/images/background_input.svg';
 
 const Wrapper = styled.div`
-  margin-top: 1.6rem;
+  margin-top: 2.5rem;
   > div {
     padding: 0;
   }
 
   .pageFooterLabel {
     margin-left: 1rem;
+    padding-top: 1px;
     color: #787e8f;
     font-size: 13px;
     font-style: italic;

@@ -5,7 +5,10 @@ import PropTypes from 'prop-types';
 /* eslint-disable indent */
 
 const Wrapper = styled.div`
-  min-height: 198px;
+  min-height: 199px;
+  margin-top: -2px;
+  margin-bottom: -2px;
+
   .collection {
     background-color: #fafafb;
     ${({ error }) => {
@@ -40,6 +43,7 @@ const Wrapper = styled.div`
 
   .search {
     display: flex;
+    padding-top: 2px;
     color: #919bae;
     > button {
       margin-top: -8px;

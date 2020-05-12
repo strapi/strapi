@@ -3,17 +3,16 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { useGlobalContext } from 'strapi-helper-plugin';
-import { IconLinks } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
-import dateFormats from '../../utils/dateFormats';
+import DATE_FORMATS from '../../utils/DATE_FORMATS';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+
+const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
@@ -40,7 +39,7 @@ const getDisplayedValue = (type, value, name) => {
       const date =
         value && isObject(value) && value._isAMomentObject === true ? JSON.stringify(value) : value;
 
-      return moment(date).format(dateFormats[type]);
+      return dateToUtcTime(date).format(DATE_FORMATS[type]);
     }
     case 'password':
       return '••••••••';
@@ -61,7 +60,7 @@ const getDisplayedValue = (type, value, name) => {
       };
       const date = moment().set(timeObj);
 
-      return date.format(dateFormats.time);
+      return date.format(DATE_FORMATS.time);
     }
     default:
       return '-';
@@ -81,24 +80,6 @@ function Row({ goTo, isBulkable, row, headers }) {
   );
 
   const { emitEvent } = useGlobalContext();
-
-  const links = [
-    {
-      icon: <FontAwesomeIcon icon="pencil-alt" />,
-      onClick: () => {
-        emitEvent('willEditEntryFromList');
-        goTo(row.id);
-      },
-    },
-    {
-      icon: <FontAwesomeIcon icon="trash-alt" />,
-      onClick: e => {
-        e.stopPropagation();
-        emitEvent('willDeleteEntryFromList');
-        onClickDelete(row.id);
-      },
-    },
-  ];
 
   return (
     <>
@@ -125,7 +106,26 @@ function Row({ goTo, isBulkable, row, headers }) {
         );
       })}
       <ActionContainer>
-        <IconLinks links={links} />
+        <IcoContainer
+          style={{ minWidth: 'inherit', width: '100%', lineHeight: 48 }}
+          icons={[
+            {
+              icoType: 'pencil-alt',
+              onClick: () => {
+                emitEvent('willEditEntryFromList');
+                goTo(row.id);
+              },
+            },
+            {
+              id: row.id,
+              icoType: 'trash',
+              onClick: () => {
+                emitEvent('willDeleteEntryFromList');
+                onClickDelete(row.id);
+              },
+            },
+          ]}
+        />
       </ActionContainer>
     </>
   );

@@ -9,6 +9,7 @@ import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
 import { NAME_REGEX, ENUM_REGEX, CATEGORY_NAME_REGEX } from './attributesRegexes';
+import RESERVED_NAMES from './reservedNames';
 
 /* eslint-disable indent */
 /* eslint-disable prefer-arrow-callback */
@@ -29,7 +30,7 @@ yup.addMethod(yup.string, 'unique', function(
     }
 
     return !alreadyTakenAttributes.includes(
-      typeof validator === 'function' ? validator(string, category) : string.toLowerCase()
+      typeof validator === 'function' ? validator(string, category) : string
     );
   });
 });
@@ -42,13 +43,13 @@ yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   });
 });
 
-yup.addMethod(yup.string, 'isAllowed', function(message, reservedNames) {
+yup.addMethod(yup.string, 'isAllowed', function(message) {
   return this.test('isAllowed', message, function(string) {
     if (!string) {
       return false;
     }
 
-    return !reservedNames.includes(toLower(trim(string)));
+    return !RESERVED_NAMES.includes(toLower(trim(string)));
   });
 });
 
@@ -74,12 +75,6 @@ yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
   });
 });
 
-yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
-  return this.test('isValidRegExpPattern', message, function(string) {
-    return new RegExp(string) !== null;
-  });
-});
-
 const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = ['boolean', 'date', 'enumeration', 'media'];
 
 const forms = {
@@ -91,8 +86,7 @@ const forms = {
       isEditing,
       attributeToEditName,
       initialData,
-      alreadyTakenTargetContentTypeAttributes,
-      reservedNames
+      alreadyTakenTargetContentTypeAttributes
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
@@ -125,7 +119,6 @@ const forms = {
           .string()
           .unique(errorsTrads.unique, alreadyTakenAttributes)
           .matches(NAME_REGEX, errorsTrads.regex)
-          .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes)
           .required(errorsTrads.required),
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
@@ -234,15 +227,6 @@ const forms = {
               .matchesEnumRegex(errorsTrads.regex)
               .hasNotEmptyValues('Empty strings are not allowed', dataToValidate.enum),
             enumName: yup.string().nullable(),
-          });
-        case 'text':
-          return yup.object().shape({
-            ...commonShape,
-            ...fieldsThatSupportMaxAndMinLengthShape,
-            regex: yup
-              .string()
-              .isValidRegExpPattern(getTrad('error.validation.regex'))
-              .nullable(),
           });
         case 'number':
         case 'integer':
@@ -400,34 +384,8 @@ const forms = {
           ]);
         }
 
-        if (type === 'text') {
-          items.splice(1, 0, [
-            {
-              autoFocus: false,
-              label: {
-                id: getTrad('form.attribute.item.text.regex'),
-              },
-              name: 'regex',
-              type: 'text',
-              validations: {},
-              description: {
-                id: getTrad('form.attribute.item.text.regex.description'),
-              },
-            },
-          ]);
-        } else if (type === 'media') {
+        if (type === 'media') {
           items.splice(0, 1);
-          items.push([
-            {
-              label: {
-                id: getTrad('form.attribute.media.allowed-types'),
-              },
-              name: 'allowedTypes',
-              type: 'allowedTypesSelect',
-              value: '',
-              validations: {},
-            },
-          ]);
         } else if (type === 'boolean') {
           items.splice(0, 1, [
             {
@@ -504,8 +462,6 @@ const forms = {
           ];
 
           items = uidItems;
-        } else if (type === 'json') {
-          items.splice(0, 1);
         }
 
         if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
@@ -805,7 +761,7 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid, reservedNames) {
+    schema(alreadyTakenNames, isEditing, ctUid) {
       const takenNames = isEditing
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
@@ -814,7 +770,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createUid)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         collectionName: yup.string(),
         kind: yup.string().oneOf(['singleType', 'collectionType']),
@@ -903,13 +859,7 @@ const forms = {
     },
   },
   component: {
-    schema(
-      alreadyTakenAttributes,
-      componentCategory,
-      reservedNames,
-      isEditing = false,
-      compoUid = null
-    ) {
+    schema(alreadyTakenAttributes, componentCategory, isEditing = false, compoUid = null) {
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;
@@ -918,7 +868,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createComponentUid, componentCategory)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         category: yup
           .string()

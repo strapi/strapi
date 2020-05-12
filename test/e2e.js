@@ -1,5 +1,9 @@
 const path = require('path');
-const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
+const {
+  cleanTestApp,
+  generateTestApp,
+  startTestApp,
+} = require('./helpers/testAppGenerator');
 const execa = require('execa');
 const waitOn = require('wait-on');
 const yargs = require('yargs');

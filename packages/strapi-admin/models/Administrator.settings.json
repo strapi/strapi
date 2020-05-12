@@ -1,4 +1,5 @@
 {
+  "connection": "default",
   "collectionName": "strapi_administrator",
   "info": {
     "name": "Administrator",

@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "connection": "<%= connection %>",
+  "collectionName": "<%= collectionName %>",
+  "info": {
+    "name": "<%= id %>",
+    "description": "<%= description %>"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "comment": ""
+  },
+  "attributes": {
+    <%= attributes %>
+  }
+}

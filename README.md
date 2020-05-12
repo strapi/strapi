@@ -115,9 +115,10 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
-- [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
-- [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
-- [GitHub Discussions](https://github.com/strapi/strapi/discussions) (Questions and Discussions)
+- [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
+- [Slack](http://slack.strapi.io) (Highly recommended for faster support)
+- [Spectrum](https://spectrum.chat/strapi)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports, contributions)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)

@@ -12,6 +12,10 @@ const GlobalStyle = createGlobalStyle`
     color: #292b2c;
   }
 
+  // ::-webkit-scrollbar {
+  //   width: 0;
+  // }
+
   * {
     -webkit-font-smoothing: antialiased;
     box-sizing: border-box;
@@ -133,6 +137,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
 
+  // scrollbar
   ::-webkit-scrollbar {
     width: 9px;
   }
@@ -158,13 +163,13 @@ const GlobalStyle = createGlobalStyle`
     display: none;
   }
 
-  /* firefox scrollbar */
-  /* stylelint-disable */
+  // firefox scrollbar
   * {
     scrollbar-color: #bbb #eee;
     scrollbar-width: thin;
   }
-  /* stylelint-enable */
+
+
 `;
 
 export default GlobalStyle;

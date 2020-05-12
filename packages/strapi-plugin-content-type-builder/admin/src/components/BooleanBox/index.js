@@ -1,12 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Label } from '@buffetjs/core';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import CustomLabel from './Label';
+import Div from './Div';
 import Enumeration from './Enumeration';
 import EnumerationWrapper from './EnumerationWrapper';
 import Wrapper from './Wrapper';
 
-const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value }) => {
+const BooleanBox = ({
+  label,
+  name,
+  onChange,
+  onChangeCallback,
+  options,
+  value,
+}) => {
   const { formatMessage } = useGlobalContext();
 
   const handleChange = e => {
@@ -15,8 +23,8 @@ const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value })
   };
 
   return (
-    <div>
-      <CustomLabel htmlFor={name}>{label}</CustomLabel>
+    <Div>
+      <Label htmlFor={name}>{label}</Label>
       <Wrapper>
         {options.map(option => (
           <Enumeration
@@ -38,12 +46,14 @@ const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value })
             htmlFor={option.value.toString()}
           >
             <span className="option__indicator" />
-            <span className="option__title">{formatMessage({ id: option.headerId })}</span>
+            <span className="option__title">
+              {formatMessage({ id: option.headerId })}
+            </span>
             <p>{formatMessage({ id: option.descriptionId })}</p>
           </EnumerationWrapper>
         ))}
       </Wrapper>
-    </div>
+    </Div>
   );
 };
 

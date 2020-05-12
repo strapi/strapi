@@ -20,7 +20,10 @@ function createCoreApi({ api, model, strapi }) {
 
   const service = Object.assign(createService({ model, strapi }), userService);
 
-  const controller = Object.assign(createController({ service, model }), userController);
+  const controller = Object.assign(
+    createController({ service, model }),
+    userController
+  );
 
   return {
     service,

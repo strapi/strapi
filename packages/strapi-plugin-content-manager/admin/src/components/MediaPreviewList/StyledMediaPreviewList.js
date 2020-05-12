@@ -94,6 +94,7 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
     position: absolute;
     left: 120%;
     bottom: -10px;
+    display: none;
     max-width: 150px;
     color: #333740;
   }

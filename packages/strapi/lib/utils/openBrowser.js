@@ -49,7 +49,11 @@ function executeNodeScript(scriptPath, url) {
   child.on('close', code => {
     if (code !== 0) {
       console.log();
-      console.log(chalk.red('The script specified as BROWSER environment variable failed.'));
+      console.log(
+        chalk.red(
+          'The script specified as BROWSER environment variable failed.'
+        )
+      );
       console.log(`${chalk.cyan(scriptPath)} exited with code ${code}.`);
       console.log();
       return;
@@ -64,17 +68,21 @@ function startBrowserProcess(browser, url) {
   // Chrome with AppleScript. This lets us reuse an
   // existing tab when possible instead of creating a new one.
   const shouldTryOpenChromeWithAppleScript =
-    process.platform === 'darwin' && (typeof browser !== 'string' || browser === OSX_CHROME);
+    process.platform === 'darwin' &&
+    (typeof browser !== 'string' || browser === OSX_CHROME);
 
   if (shouldTryOpenChromeWithAppleScript) {
     try {
       // Try our best to reuse existing tab
       // on OS X Google Chrome with AppleScript
       execSync('ps cax | grep "Google Chrome"');
-      execSync(`osascript resources/openChrome.applescript "${encodeURI(url)}"`, {
-        cwd: __dirname,
-        stdio: 'ignore',
-      });
+      execSync(
+        `osascript resources/openChrome.applescript "${encodeURI(url)}"`,
+        {
+          cwd: __dirname,
+          stdio: 'ignore',
+        }
+      );
       return true;
     } catch (err) {
       strapi.log.error('Failed to open Google Chrome with AppleScript');
@@ -112,7 +120,9 @@ async function pingDashboard(url, multipleTime = false) {
 
     // Only display once.
     if (!multipleTime) {
-      this.log.warn(`⚠️  The admin panel is unavailable... Impossible to open it in the browser.`);
+      this.log.warn(
+        `⚠️  The admin panel is unavailable... Impossible to open it in the browser.`
+      );
     }
   }
 }
@@ -122,10 +132,7 @@ async function pingDashboard(url, multipleTime = false) {
  * true if it opened a browser or ran a node.js script, otherwise false.
  */
 async function openBrowser() {
-  let url = this.config.admin.url;
-  if (!url.startsWith('http')) {
-    url = `http://${strapi.config.host}:${strapi.config.port}${this.config.admin.url}`;
-  }
+  const url = this.config.admin.url;
 
   // Ping the dashboard to ensure it's available.
   await pingDashboard.call(this, url);

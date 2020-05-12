@@ -7,8 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox, IconLinks } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 import Switch from '../Switch';
 import StyledListRow from './StyledListRow';
@@ -26,11 +24,11 @@ function ListRow({
 }) {
   const links = [
     {
-      icon: <FontAwesomeIcon icon={faPencilAlt} />,
+      icon: 'pencil',
       onClick: () => onEditClick(id),
     },
     {
-      icon: <FontAwesomeIcon icon={faTrashAlt} />,
+      icon: 'trash',
       onClick: e => {
         e.stopPropagation();
         onDeleteCLick(id);
@@ -57,7 +55,11 @@ function ListRow({
         <p title={url}>{url}</p>
       </td>
       <td>
-        <div onClick={e => e.stopPropagation()} role="button" aria-hidden="true">
+        <div
+          onClick={e => e.stopPropagation()}
+          role="button"
+          aria-hidden="true"
+        >
           <Switch
             name={name}
             value={isEnabled}

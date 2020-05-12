@@ -31,6 +31,7 @@ import {
   submit,
   unsetDataToEdit,
 } from './actions';
+import reducer from './reducer';
 import saga from './saga';
 import checkFormValidity from './checkFormValidity';
 
@@ -98,7 +99,8 @@ export class HomePage extends React.Component {
   UNSAFE_componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect =
-      allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
+      allowedPaths.filter(el => el === nextProps.match.params.settingType)
+        .length === 0;
 
     if (shouldRedirect) {
       this.props.history.push('/404');
@@ -110,7 +112,9 @@ export class HomePage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.match.params.settingType !== this.props.match.params.settingType) {
+    if (
+      prevProps.match.params.settingType !== this.props.match.params.settingType
+    ) {
       this.props.fetchData(this.props.match.params.settingType);
     }
   }
@@ -155,7 +159,10 @@ export class HomePage extends React.Component {
       this.getEndPoint(),
       this.props.dataToEdit,
     ]);
-    const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
+    const initObject = get(this.props.initialData, [
+      this.getEndPoint(),
+      this.props.dataToEdit,
+    ]);
     const formErrors = checkFormValidity(
       this.props.match.params.settingType,
       modifiedObject,
@@ -182,8 +189,12 @@ export class HomePage extends React.Component {
     const { data, isLoading, modifiedData } = this.props;
 
     return (
-      (isLoading && get(data, this.getEndPoint()) === undefined && !this.isAdvanded()) ||
-      (isLoading && this.isAdvanded() && get(modifiedData, this.getEndPoint()) === undefined)
+      (isLoading &&
+        get(data, this.getEndPoint()) === undefined &&
+        !this.isAdvanded()) ||
+      (isLoading &&
+        this.isAdvanded() &&
+        get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
 
@@ -201,11 +212,13 @@ export class HomePage extends React.Component {
     } = this.props;
     const { formatMessage } = this.context;
     const headerActions =
-      match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData)
+      match.params.settingType === 'advanced' &&
+      !isEqual(modifiedData, initialData)
         ? this.pluginHeaderActions
         : [];
     const noButtonList =
-      match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
+      match.params.settingType === 'email-templates' ||
+      match.params.settingType === 'providers';
     const values = get(modifiedData, this.getEndPoint(), {});
 
     return (
@@ -229,7 +242,10 @@ export class HomePage extends React.Component {
               })}
               actions={headerActions}
             />
-            <HeaderNav links={this.headerNavLinks} style={{ marginTop: '4.6rem' }} />
+            <HeaderNav
+              links={this.headerNavLinks}
+              style={{ marginTop: '4.6rem' }}
+            />
             {!this.isAdvanded() ? (
               <List
                 data={get(data, this.getEndPoint(), [])}
@@ -308,8 +324,19 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
+const withReducer = strapi.injectReducer({
+  key: 'homePage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
-export default compose(withSaga, withConnect)(injectIntl(HomePage));
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect
+)(injectIntl(HomePage));
