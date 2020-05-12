@@ -8,7 +8,7 @@ const sanitizeUser = user => {
   return _.omit(user, ['password', 'resetPasswordToken']);
 };
 
-const defaultOptions = { expiresIn: '30d' };
+const defaultOptions = { expiresIn: '1s' };
 
 const getJWTOptions = () => {
   const { options, secret } = strapi.config.get('server.admin.jwt', {});
@@ -78,6 +78,17 @@ const checkCredentials = async ({ email, password }) => {
   return [null, user];
 };
 
+const decodeToken = token => {
+  const { secret } = getJWTOptions();
+
+  try {
+    const payload = jwt.verify(token, secret);
+    return { payload, isValid: true };
+  } catch (err) {
+    return { payloda: null, isValid: false };
+  }
+};
+
 module.exports = {
   checkCredentials,
   createJwtToken,
@@ -85,4 +96,5 @@ module.exports = {
   validatePassword,
   hashPassword,
   getJWTOptions,
+  decodeToken,
 };
