@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding-bottom: 26px;
+  padding-bottom: 30px;
 
   label {
     margin-bottom: 1rem;
@@ -18,7 +18,7 @@ const Wrapper = styled.div`
     }
   }
   > p {
-    width 100%;
+    width: 100%;
     padding-top: 14px;
     font-size: 1.2rem;
     line-height: normal;

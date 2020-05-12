@@ -99,16 +99,13 @@ const Wrapper = styled.div`
     padding: 0 15px;
     margin: 0;
     border-radius: 2px !important;
-    line-height: 24px;
+    line-height: 23px;
     font-size: 13px;
-    font-weight: 500 !important;
     cursor: pointer;
-
     span {
       display: inline-block;
       width: 100%;
       height: 100%;
-      line-height: 24px;
     }
   }
 

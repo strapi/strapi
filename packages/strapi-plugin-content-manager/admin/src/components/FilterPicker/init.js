@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
+import { getFilterType } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-import getFilterType from '../FilterPickerOption/utils';
 
 function init(initialState, { name, type, options }) {
   // Create the first filter

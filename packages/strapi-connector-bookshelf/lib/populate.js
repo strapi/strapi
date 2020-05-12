@@ -43,7 +43,7 @@ const populateAssociations = (definition, { prefix = '' } = {}) => {
 };
 
 const populateBareAssociations = (definition, { prefix = '' } = {}) => {
-  return definition.associations
+  return (definition.associations || [])
     .filter(ast => ast.autoPopulate !== false)
     .map(assoc => {
       if (isPolymorphic({ assoc })) {

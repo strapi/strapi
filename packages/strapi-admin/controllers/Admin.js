@@ -22,10 +22,10 @@ const isValidPluginName = plugin => {
 
 module.exports = {
   async init(ctx) {
-    const uuid = _.get(strapi, ['config', 'uuid'], false);
     const currentEnvironment = strapi.app.env;
-    const autoReload = _.get(strapi, ['config', 'autoReload'], false);
-    const strapiVersion = _.get(strapi.config, 'info.strapi', null);
+    const uuid = strapi.config.get('uuid', false);
+    const autoReload = strapi.config.get('autoReload', false);
+    const strapiVersion = strapi.config.get('info.strapi', null);
 
     return ctx.send({
       data: { uuid, currentEnvironment, autoReload, strapiVersion },
@@ -43,7 +43,7 @@ module.exports = {
 
   async getStrapiVersion(ctx) {
     try {
-      const strapiVersion = _.get(strapi.config, 'info.strapi', null);
+      const strapiVersion = strapi.config.get('info.strapi', null);
       return ctx.send({ strapiVersion });
     } catch (err) {
       return ctx.badRequest(null, [{ messages: [{ id: 'The version is not available' }] }]);
@@ -52,7 +52,7 @@ module.exports = {
 
   async getGaConfig(ctx) {
     try {
-      ctx.send({ uuid: _.get(strapi.config, 'uuid', false) });
+      ctx.send({ uuid: strapi.config.get('uuid', false) });
     } catch (err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
@@ -246,16 +246,6 @@ module.exports = {
       );
     }
 
-    if (!password) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'missing.password',
-          message: 'Missing password',
-          field: ['password'],
-        })
-      );
-    }
     const admin = await strapi.query('administrator', 'admin').findOne({ id });
 
     // check the user exists
@@ -301,7 +291,7 @@ module.exports = {
       blocked: blocked === true ? true : false,
     };
 
-    if (password !== admin.password) {
+    if (password && password !== admin.password) {
       user.password = await strapi.admin.services.auth.hashPassword(password);
     }
 

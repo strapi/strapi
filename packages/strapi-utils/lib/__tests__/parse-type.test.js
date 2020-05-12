@@ -1,4 +1,5 @@
 const parseType = require('../parse-type');
+const format = require('date-fns/format');
 
 describe('parseType', () => {
   describe('boolean', () => {
@@ -25,18 +26,10 @@ describe('parseType', () => {
 
   describe('Time', () => {
     it('Always returns the same time format', () => {
-      expect(parseType({ type: 'time', value: '12:31:11' })).toBe(
-        '12:31:11.000'
-      );
-      expect(parseType({ type: 'time', value: '12:31:11.2' })).toBe(
-        '12:31:11.200'
-      );
-      expect(parseType({ type: 'time', value: '12:31:11.31' })).toBe(
-        '12:31:11.310'
-      );
-      expect(parseType({ type: 'time', value: '12:31:11.319' })).toBe(
-        '12:31:11.319'
-      );
+      expect(parseType({ type: 'time', value: '12:31:11' })).toBe('12:31:11.000');
+      expect(parseType({ type: 'time', value: '12:31:11.2' })).toBe('12:31:11.200');
+      expect(parseType({ type: 'time', value: '12:31:11.31' })).toBe('12:31:11.310');
+      expect(parseType({ type: 'time', value: '12:31:11.319' })).toBe('12:31:11.319');
     });
 
     it('Throws on  invalid time format', () => {
@@ -54,17 +47,14 @@ describe('parseType', () => {
 
   describe('Date', () => {
     it('Supports ISO formats and always returns the right format', () => {
-      expect(parseType({ type: 'date', value: '2019-01-01 12:01:11' })).toBe(
-        '2019-01-01'
-      );
+      expect(parseType({ type: 'date', value: '2019-01-01 12:01:11' })).toBe('2019-01-01');
 
-      expect(parseType({ type: 'date', value: '2018-11-02' })).toBe(
-        '2018-11-02'
-      );
+      expect(parseType({ type: 'date', value: '2018-11-02' })).toBe('2018-11-02');
 
-      expect(
-        parseType({ type: 'date', value: '2019-04-21T00:00:00.000Z' })
-      ).toBe('2019-04-21');
+      const isoDateFormat = new Date().toISOString();
+      const expectedDateFormat = format(new Date(isoDateFormat), 'yyyy-MM-dd');
+
+      expect(parseType({ type: 'date', value: isoDateFormat })).toBe(expectedDateFormat);
     });
 
     it('Throws on invalid formator dates', () => {
@@ -76,14 +66,12 @@ describe('parseType', () => {
   });
 
   describe('Datetime', () => {
-    it.each([
-      '2019-01-01',
-      '2019-01-01 10:11:12',
-      '1234567890111',
-      '2019-01-01T10:11:12.123Z',
-    ])('Supports ISO formats and always returns a date %s', value => {
-      const r = parseType({ type: 'datetime', value });
-      expect(r instanceof Date).toBe(true);
-    });
+    it.each(['2019-01-01', '2019-01-01 10:11:12', '1234567890111', '2019-01-01T10:11:12.123Z'])(
+      'Supports ISO formats and always returns a date %s',
+      value => {
+        const r = parseType({ type: 'datetime', value });
+        expect(r instanceof Date).toBe(true);
+      }
+    );
   });
 });

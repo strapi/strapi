@@ -36,7 +36,7 @@ module.exports = strapi => {
   return {
     async beforeInitialize() {
       // Try to inject this hook just after the others hooks to skip the router processing.
-      if (!_.get(strapi.config.hook.load, 'after')) {
+      if (!strapi.config.get('hook.load.after')) {
         _.set(strapi.config.hook.load, 'after', []);
       }
 
@@ -67,18 +67,10 @@ module.exports = strapi => {
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const baseSchema = mergeSchemas([
-        ...apisSchemas,
-        ...pluginsSchemas,
-        ...extensionsSchemas,
-      ]);
+      const baseSchema = mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas]);
 
       // save the final schema in the plugin's config
-      _.set(
-        strapi,
-        ['plugins', 'graphql', 'config', '_schema', 'graphql'],
-        baseSchema
-      );
+      _.set(strapi, ['plugins', 'graphql', 'config', '_schema', 'graphql'], baseSchema);
     },
 
     initialize() {
@@ -87,9 +79,7 @@ module.exports = strapi => {
       ].generateSchema();
 
       if (_.isEmpty(typeDefs)) {
-        strapi.log.warn(
-          'The GraphQL schema has not been generated because it is empty'
-        );
+        strapi.log.warn('The GraphQL schema has not been generated because it is empty');
 
         return;
       }
@@ -112,11 +102,7 @@ module.exports = strapi => {
         playground: false,
         cors: false,
         bodyParserConfig: true,
-        introspection: _.get(
-          strapi.plugins.graphql,
-          'config.introspection',
-          true
-        ),
+        introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
       };
 
       // Disable GraphQL Playground in production environment.
@@ -125,7 +111,7 @@ module.exports = strapi => {
         strapi.plugins.graphql.config.playgroundAlways
       ) {
         serverParams.playground = {
-          endpoint: strapi.plugins.graphql.config.endpoint,
+          endpoint: `${strapi.config.server.url}${strapi.plugins.graphql.config.endpoint}`,
           shareEnabled: strapi.plugins.graphql.config.shareEnabled,
         };
       }

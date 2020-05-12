@@ -46,11 +46,7 @@ class OnboardingVideo extends React.Component {
   };
 
   handleCurrentTimeChange = curr => {
-    this.props.getVideoCurrentTime(
-      this.props.id,
-      curr,
-      this.props.video.duration
-    );
+    this.props.getVideoCurrentTime(this.props.id, curr, this.props.video.duration);
   };
 
   handleModalOpen = () => {
@@ -98,10 +94,7 @@ class OnboardingVideo extends React.Component {
     const { video } = this.props;
     const time = isNaN(video.duration)
       ? '\xA0'
-      : `${Math.floor(video.duration / 60)}:${this.getVideoTime(
-          video.duration,
-          '%'
-        )}`;
+      : `${Math.floor(video.duration / 60)}:${this.getVideoTime(video.duration, '%')}`;
 
     return (
       <Li
