@@ -352,7 +352,7 @@ You are now ready use Strapi locally or to deploy your project to an external ho
 
 #### 1. Install PostgreSQL on your development environment
 
-If you already have PostgreSQL installed locally and running as a background service, you may skip to [Creating a local database with PostgreSQL](#_2-creating-a-postgresql-database-and-user-for-strapi). (If you have additional questions, please see the official [PostgreSQL documentation](https://www.postgresql.org/docs/current/installation.html). )
+If you already have PostgreSQL installed locally and running as a background service, you may skip to [Creating a local database with PostgreSQL](#_2-creating-a-database-and-user-for-strapi). (If you have additional questions, please see the official [PostgreSQL documentation](https://www.postgresql.org/docs/current/installation.html). )
 
 Please complete the installation steps appropriate to your operating system.
 
@@ -368,6 +368,8 @@ Follow these steps to [install PostgreSQL onto your Windows 10](https://www.post
 
 2. After successfully installing PostgreSQL, the PostgreSQL service is started.
 
+You have now installed PostgreSQL for _Windows 10_. You are now ready to [Creating a local database with PostgreSQL](#_2-creating-a-database-and-user-for-strapi).
+
 :::
 
 ::: tab "Mac O/S"
@@ -379,6 +381,8 @@ Follow these steps to [install PostgreSQL onto your Mac](https://www.postgresql.
 1. Download the interactive installer for Mac [here](https://www.postgresql.org/download/windows/). Verify which version you need based on your platform, then follow the link to the installer page and download that version. Run the installer and follow any install prompts
 
 2. After successfully installing PostgreSQL, the PostgreSQL service is started.
+
+You have now installed PostgreSQL for _macOS_. You are now ready to [Creating a local database with PostgreSQL](#_2-creating-a-database-and-user-for-strapi).
 
 :::
 
@@ -420,15 +424,15 @@ sudo apt install postgresql-12 -y
 systemctl status postgresql
 ```
 
+You have now installed PostgreSQL for _Ubuntu_. You are now ready to [Creating a local database with PostgreSQL](#_2-creating-a-database-and-user-for-strapi).
+
 :::
 
 ::::
 
-#### 2. Creating a PostgreSQL database and user for Strapi
+#### 2. Creating a database and user for Strapi
 
 <!-- Add tabs for commands on different OSes -->
-
-blah blah blah
 
 #### 3. Install Strapi locally with PostgreSQL
 
@@ -525,348 +529,6 @@ You have successfully installed Strapi with PostgreSQL on your local development
 
 ### Install MySQL locally
 
-#### 1. Install MySQL on your development environment
-
-If you already have MySQL installed locally and running as a background service, you may skip to [Creating a local database with MySQL](#_2-creating-a-mysql-database-and-user-for-strapi). (If you have additional questions, please see the official [MySQL documentation](). )
-
-Please complete the installation steps appropriate to your operating system.
-
-:::: tabs
-
-::: tab "Windows 10"
-
-#### Install MySQL on Windows 10
-
-Follow these steps to [install MySQL onto your Windows 10]() environment:
-
-1. Download the interactive installer for Windows [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version. Run the installer and follow any install prompts
-
-2. After successfully installing MySQL, the MySQL service is started.
-
-:::
-
-::: tab "Mac O/S"
-
-#### Install MySQL on Mac
-
-Follow these steps to [install MySQL onto your Mac]() environment:
-
-1. Download the interactive installer for Mac [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version. Run the installer and follow any install prompts
-
-2. After successfully installing MySQL, the MySQL service is started.
-
-:::
-
-::: tab "Ubuntu 18.04"
-
-#### Install MySQL on Ubuntu
-
-Follow these steps to [install MySQL onto your Ubuntu]() environment:
-
-1. Using the interactive documentation linked above, select your Ubuntu version (we will be using 18.04).
-
-2. Add the apt repository:
-
-```bash
-echo ""
-```
-
-3. Import the repository signing key:
-
-```bash
-wget --quiet -O -
-```
-
-4. Update your apt cache:
-
-```bash
-sudo apt update
-```
-
-5. Install the default default MySQL package:
-
-```bash
-sudo apt install -y
-```
-
-6. Confirm the MySQL status:
-
-```bash
-systemctl status mysql
-```
-
-:::
-
-::::
-
-#### 2. Creating a MySQL database and user for Strapi
-
-<!-- Add tabs for commands on different OSes -->
-
-blah blah blah
-
-#### 3. Install Strapi locally with MySQL
-
-Follow these steps to create a Strapi project locally using the MySQL database.
-
-::: tip
-MySQL must already be running in the background.
-:::
-
-1. Create a new Strapi project
-
-`Path: ./`
-
-:::: tabs
-
-::: tab yarn
-
-```
-yarn create strapi-app my-project
-```
-
-:::
-
-::: tab npx
-
-```
-npx create-strapi-app my-project
-```
-
-:::
-
-::::
-
-- Use your `down arrow` key and select `Custom (manual settings)` and press `enter`:
-
-```bash
-? Choose your installation type
-  Quickstart (recommended)
-❯ Custom (manual settings)
-```
-
-- Select `Postgres` and press `enter`:
-
-```bash
-? Choose your installation type Custom (manual settings)
-? Choose your main database:
-  SQLite
-  MongoDB
-❯ MySQL
-  Postgres
-```
-
-- Press `enter` to select the remaining default options. It will look something like this:
-
-```bash
-? Choose your installation type Custom (manual settings)
-? Choose your default database client mysql
-? Database name: strapi
-? Host: 127.0.0.1
-? Port: 3306
-? Username: strapi
-? Password: ******
-? Enable SSL connection: No
-
-Creating a project with custom database options.
-Creating files.
-Dependencies installed successfully.
-
-Your application was created at /home/dmehaffy/my-project.
-
-Available commands in your project:
-
-  yarn develop
-  Start Strapi in watch mode.
-
-  yarn start
-  Start Strapi without watch mode.
-
-  yarn build
-  Build Strapi admin panel.
-
-  yarn strapi
-  Display all available commands.
-
-You can start by doing:
-
-  cd /home/dmehaffy/my-project
-  yarn develop
-```
-
-You have successfully installed Strapi with MySQL on your local development environment. You are now ready to [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
-
 ## MariaDB Installation
 
 ### Install MariaDB locally
-
-#### 1. Install MariaDB on your development environment
-
-If you already have MariaDB installed locally and running as a background service, you may skip to [Creating a local database with MariaDB](#_2-creating-a-mariadb-database-and-user-for-strapi). (If you have additional questions, please see the official [MariaDB documentation](). )
-
-Please complete the installation steps appropriate to your operating system.
-
-:::: tabs
-
-::: tab "Windows 10"
-
-#### Install MariaDB on Windows 10
-
-Follow these steps to [install MariaDB onto your Windows 10]() environment:
-
-1. Download the interactive installer for Windows [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version. Run the installer and follow any install prompts
-
-2. After successfully installing MariaDB, the MariaDB service is started.
-
-:::
-
-::: tab "Mac O/S"
-
-#### Install MariaDB on Mac
-
-Follow these steps to [install MariaDB onto your Mac]() environment:
-
-1. Download the interactive installer for Mac [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version. Run the installer and follow any install prompts
-
-2. After successfully installing MariaDB, the MariaDB service is started.
-
-:::
-
-::: tab "Ubuntu 18.04"
-
-#### Install MariaDB on Ubuntu
-
-Follow these steps to [install MariaDB onto your Ubuntu]() environment:
-
-1. Using the interactive documentation linked above, select your Ubuntu version (we will be using 18.04).
-
-2. Add the apt repository:
-
-```bash
-echo ""
-```
-
-3. Import the repository signing key:
-
-```bash
-wget --quiet -O -
-```
-
-4. Update your apt cache:
-
-```bash
-sudo apt update
-```
-
-5. Install the default default MariaDB package:
-
-```bash
-sudo apt install -y
-```
-
-6. Confirm the MariaDB status:
-
-```bash
-systemctl status mariadb
-```
-
-:::
-
-::::
-
-#### 2. Creating a MariaDB database and user for Strapi
-
-<!-- Add tabs for commands on different OSes -->
-
-blah blah blah
-
-#### 3. Install Strapi locally with MariaDB
-
-Follow these steps to create a Strapi project locally using the MariaDB database.
-
-::: tip
-MariaDB must already be running in the background.
-:::
-
-1. Create a new Strapi project
-
-`Path: ./`
-
-:::: tabs
-
-::: tab yarn
-
-```
-yarn create strapi-app my-project
-```
-
-:::
-
-::: tab npx
-
-```
-npx create-strapi-app my-project
-```
-
-:::
-
-::::
-
-- Use your `down arrow` key and select `Custom (manual settings)` and press `enter`:
-
-```bash
-? Choose your installation type
-  Quickstart (recommended)
-❯ Custom (manual settings)
-```
-
-- Select `Postgres` and press `enter`:
-
-```bash
-? Choose your installation type Custom (manual settings)
-? Choose your main database:
-  SQLite
-  MongoDB
-❯ MySQL
-  Postgres
-```
-
-- Press `enter` to select the remaining default options. It will look something like this:
-
-```bash
-? Choose your installation type Custom (manual settings)
-? Choose your default database client mysql
-? Database name: strapi
-? Host: 127.0.0.1
-? Port: 3306
-? Username: strapi
-? Password: ******
-? Enable SSL connection: No
-
-Creating a project with custom database options.
-Creating files.
-Dependencies installed successfully.
-
-Your application was created at /home/dmehaffy/my-project.
-
-Available commands in your project:
-
-  yarn develop
-  Start Strapi in watch mode.
-
-  yarn start
-  Start Strapi without watch mode.
-
-  yarn build
-  Build Strapi admin panel.
-
-  yarn strapi
-  Display all available commands.
-
-You can start by doing:
-
-  cd /home/dmehaffy/my-project
-  yarn develop
-```
-
-You have successfully installed Strapi with MariaDB on your local development environment. You are now ready to [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
