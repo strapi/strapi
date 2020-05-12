@@ -322,8 +322,8 @@ module.exports = {
       });
 
       if (targetName !== '*') {
-        const models = strapi.db.getModelsByPluginName(association.plugin);
-        details = _.get(models, [targetName, 'attributes', association.via], {});
+        const model = strapi.db.getModel(targetName, association.plugin);
+        details = _.get(model, ['attributes', association.via], {});
       }
 
       // Build associations object
