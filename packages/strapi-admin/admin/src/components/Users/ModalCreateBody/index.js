@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { ModalSection } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { Inputs } from '@buffetjs/custom';
+import { Padded, Text } from '@buffetjs/core';
 import { Col, Row } from 'reactstrap';
-import Padded from './Padded';
-import Text from './Text';
+
 import Wrapper from './Wrapper';
 import form from './utils/form';
 

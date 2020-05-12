@@ -2,10 +2,10 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Text } from '@buffetjs/core';
 import HeaderModalTitle from '../HeaderModalTitle';
 import ModalSection from '../ModalSection';
 import BackButton from './BackButton';
-import Text from './Text';
 import Wrapper from './Wrapper';
 
 const ModalHeader = ({ headerBreadcrumbs, onClickGoBack, withBackButton, HeaderComponent }) => {
