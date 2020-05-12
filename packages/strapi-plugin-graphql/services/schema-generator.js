@@ -91,7 +91,11 @@ const generateSchema = () => {
   }
 
   // Remove custom scalar (like Upload), if not using Federation
-  if (!strapi.plugins.graphql.config.federation) {
+  // Federation requires scalar Upload defined in typeDefs to use
+  // buildFederatedSchema()
+  // (https://www.apollographql.com/docs/apollo-server/federation/implementing-services/)
+  const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
+  if (!isFederated) {
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
   }
 
