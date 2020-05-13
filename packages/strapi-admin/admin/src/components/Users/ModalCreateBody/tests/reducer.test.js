@@ -40,4 +40,31 @@ describe('ADMIN | COMPONENTS | USERS | MODALCREATEBODY | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expected);
     });
   });
+
+  describe('SET_ERRORS', () => {
+    it('Should set the formErrors object correctly', () => {
+      const action = {
+        type: 'SET_ERRORS',
+        errors: {
+          test: 'this is required',
+        },
+      };
+      const initialState = {
+        formErrors: {},
+        modifiedData: {
+          ok: true,
+        },
+      };
+      const expected = {
+        formErrors: {
+          test: 'this is required',
+        },
+        modifiedData: {
+          ok: true,
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
 });
