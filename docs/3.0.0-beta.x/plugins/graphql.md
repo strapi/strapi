@@ -263,6 +263,10 @@ query {
 
 To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
+::: tip NOTE
+If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.html#core-controllers).
+:::
+
 ### Example
 
 If you've generated an API called `Restaurant` using the CLI `strapi generate:api restaurant` or the administration panel, your model looks like this:
@@ -517,7 +521,7 @@ module.exports = {
   `,
   mutation: `
     attachRestaurantToChef(id: ID, chefID: ID): Restaurant!
-  `
+  `,
   resolver: {
     Query: {
       restaurant: {

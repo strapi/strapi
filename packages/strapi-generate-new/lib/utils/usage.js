@@ -71,6 +71,7 @@ function trackError({ scope, error }) {
         version: scope.strapiVersion,
         nodeVersion: process.version,
         docker: scope.docker,
+        useYarn: scope.useYarn,
       },
     });
   } catch (err) {
@@ -92,6 +93,7 @@ function trackUsage({ event, scope, error }) {
         node_version: process.version,
         version: scope.strapiVersion,
         docker: scope.docker,
+        useYarn: scope.useYarn,
       },
     });
   } catch (err) {

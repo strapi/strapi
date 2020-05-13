@@ -4,16 +4,8 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   position: absolute;
   width: 100%;
-
   background: ${props => props.theme.main.colors.strapi['blue-darker']};
   bottom: 0;
-
-  .list {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 0;
-  }
-
   .poweredBy {
     width: 100%;
     bottom: 0;

@@ -1,39 +1,27 @@
-/* eslint-disable no-useless-escape */
-const path = require('path');
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
-const _ = require('lodash');
+const { getConfigUrls } = require('strapi-utils');
 
-const loadConfigFile = require('../load/load-config-files');
+const loadConfiguration = require('../core/app-configuration');
 const addSlash = require('../utils/addSlash');
 
 module.exports = async function() {
   const dir = process.cwd();
-  const envConfigDir = path.join(dir, 'config', 'environments', 'development');
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
 
-  const port = _.get(serverConfig, 'port', 1337);
-  const host = _.get(serverConfig, 'host', 'localhost');
-  const adminPort = _.get(serverConfig, 'admin.port', 8000);
-  const adminHost = _.get(serverConfig, 'admin.host', 'localhost');
-  const adminBackend = _.get(
-    serverConfig,
-    'admin.build.backend',
-    `http://${host}:${port}`
-  );
-  const adminPath = _.get(serverConfig, 'admin.path', '/admin');
-  const adminWatchIgnoreFiles = _.get(
-    serverConfig,
-    'admin.watchIgnoreFiles',
-    []
-  );
+  const config = loadConfiguration(dir);
+
+  const { serverUrl, adminPath } = getConfigUrls(config.get('server'), true);
+
+  const adminPort = config.get('server.admin.port', 8000);
+  const adminHost = config.get('server.admin.host', 'localhost');
+  const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
 
   strapiAdmin.watchAdmin({
     dir,
     port: adminPort,
     host: adminHost,
     options: {
-      backend: adminBackend,
+      backend: serverUrl,
       publicPath: addSlash(adminPath),
       watchIgnoreFiles: adminWatchIgnoreFiles,
     },

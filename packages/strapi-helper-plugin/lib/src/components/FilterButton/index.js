@@ -13,9 +13,7 @@ function Filter({ label, onClick }) {
   return (
     <Wrapper>
       <span>{upperFirst(name)}&nbsp;</span>
-      <FormattedMessage
-        id={`components.FilterOptions.FILTER_TYPES.${filter}`}
-      />
+      <FormattedMessage id={`components.FilterOptions.FILTER_TYPES.${filter}`} />
       <span>&nbsp;{value}</span>
       <RemoveButton type="button" onClick={onClick}>
         <Close width="11px" height="11px" fill="#007eff" />

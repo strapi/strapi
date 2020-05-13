@@ -77,14 +77,14 @@ The framework allows to load hooks from the project directly without having to i
 
 ## Configuration and activation
 
-To activate and configure your hook with custom options, you need to edit your `./config/environments/**/hook.json` file in your Strapi app.
+To activate and configure your hook with custom options, you need to edit your `./config/hook.js` file in your Strapi app.
 
-```javascript
-{
-  ...
-  "hook-name": {
-    "enabled": true,
-    ...
-  }
-}
+```js
+module.exports = {
+  settings: {
+    'hook-name': {
+      enabled: true,
+    },
+  },
+};
 ```
