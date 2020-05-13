@@ -1,4 +1,5 @@
 /* eslint-disable indent */
+/* eslint-disable no-nested-ternary */
 
 const styles = {
   control: (base, state) => {
@@ -10,11 +11,21 @@ const styles = {
         }
       : {};
 
+    const {
+      selectProps: { error, value },
+    } = state;
+
     return {
       ...base,
       fontSize: 13,
       minHeight: 34,
-      border: state.isFocused ? '1px solid #78caff !important' : '1px solid #e3e9f3 !important',
+      border: state.isFocused
+        ? '1px solid #78caff !important'
+        : // In order to avoir checking the form validations when modifying the Select we can
+        // refer to value in order to know if the required validation passes
+        error && value.length === 0
+        ? '1px solid #f64d0a !important'
+        : '1px solid #e3e9f3 !important',
       outline: 0,
       boxShadow: 0,
       borderRadius: '2px !important',

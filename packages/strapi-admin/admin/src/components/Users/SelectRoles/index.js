@@ -33,6 +33,7 @@ const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
           IndicatorSeparator,
           MultiValueContainer,
         }}
+        error={error}
         getOptionLabel={option => option.name}
         getOptionValue={option => option.id}
         onChange={data => {
