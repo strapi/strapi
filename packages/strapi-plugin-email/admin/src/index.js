@@ -8,6 +8,7 @@
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
+import trads from './translations';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -30,7 +31,7 @@ export default strapi => {
     name: pluginPkg.strapi.name,
     pluginLogo,
     preventComponentRendering: false,
-    trads: {},
+    trads,
   };
 
   return strapi.registerPlugin(plugin);
