@@ -44,7 +44,13 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onOpened={handleOpened} onToggle={onToggle} onClosed={handleClosed}>
+    <Modal
+      isOpen={isOpen}
+      onOpened={handleOpened}
+      onToggle={onToggle}
+      onClosed={handleClosed}
+      withoverflow="true"
+    >
       <ModalHeader headerBreadcrumbs={['Settings.permissions.users.add-new']} />
       {showBody && (
         <Component

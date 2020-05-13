@@ -8,7 +8,7 @@ const schema = yup.object().shape({
     .string()
     .email(translatedErrors.email)
     .required(translatedErrors.required),
-  roles: yup.array().of(yup.number()),
+  roles: yup.array().required(translatedErrors.required),
 });
 
 export default schema;

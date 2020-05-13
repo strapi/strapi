@@ -2,18 +2,19 @@ import React, { forwardRef, useReducer, useImperativeHandle, useRef } from 'reac
 import PropTypes from 'prop-types';
 import { ModalSection } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
-import { Inputs } from '@buffetjs/custom';
 import { Padded, Text } from '@buffetjs/core';
 import { Col, Row } from 'reactstrap';
 import checkFormValidity from '../../../utils/users/checkFormValidity';
+import SelectRoles from '../SelectRoles';
 import form from './utils/form';
 import { initialState, reducer } from './reducer';
 import init from './init';
+import Input from './Input';
 import Wrapper from './Wrapper';
 
 const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { modifiedData } = reducerState;
+  const { formErrors, modifiedData } = reducerState;
   const buttonSubmitRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -34,11 +35,17 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
     e.persist();
     e.preventDefault();
     const errors = await checkFormValidity(modifiedData);
-    console.log(errors);
 
     if (!errors) {
       onSubmit(e, modifiedData);
+
+      // TODO post request with errors handling
     }
+
+    dispatch({
+      type: 'SET_ERRORS',
+      errors: errors || {},
+    });
   };
 
   return (
@@ -57,21 +64,16 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
           <Padded top size="20px">
             <Row>
               {Object.keys(form).map((inputName, i) => (
-                <Col xs="6" key={inputName}>
-                  <FormattedMessage id={form[inputName].label}>
-                    {label => (
-                      <Inputs
-                        {...form[inputName]}
-                        autoFocus={i === 0}
-                        disabled={isDisabled}
-                        label={label}
-                        name={inputName}
-                        onChange={handleChange}
-                        value={modifiedData[inputName]}
-                      />
-                    )}
-                  </FormattedMessage>
-                </Col>
+                <Input
+                  key={inputName}
+                  {...form[inputName]}
+                  autoFocus={i === 0}
+                  disabled={isDisabled}
+                  error={formErrors[inputName]}
+                  name={inputName}
+                  onChange={handleChange}
+                  value={modifiedData[inputName]}
+                />
               ))}
             </Row>
           </Padded>
@@ -86,7 +88,22 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
           </Text>
         </Padded>
       </ModalSection>
-      <ModalSection>COMING SOON</ModalSection>
+      <ModalSection>
+        <Wrapper>
+          <Padded top size="11px">
+            <Row>
+              <Col xs="6">
+                <SelectRoles
+                  name="roles"
+                  onChange={handleChange}
+                  value={modifiedData.roles}
+                  error={formErrors.roles}
+                />
+              </Col>
+            </Row>
+          </Padded>
+        </Wrapper>
+      </ModalSection>
       <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
         hidden button to make to get the native form event
       </button>
