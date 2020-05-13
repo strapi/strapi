@@ -109,8 +109,11 @@
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
+
   "app.components.Users.ModalCreateBody.block-title.details": "Details",
   "app.components.Users.ModalCreateBody.block-title.roles": "User's roles",
+
+  "app.containers.Users.ModalForm.footer.button-success": "Create user",
   "app.links.configure-view": "Configure the view",
 
   "app.utils.SelectOption.defaultMessage": " ",
@@ -280,6 +283,7 @@
   "Settings.webhooks.created": "Webhook created",
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
   "components.Input.error.password.noMatch": "Passwords do not match",
+  "form.button.continue": "Continue",
   "form.button.done": "Done",
   "form.button.finish": "Finish",
   "notification.contentType.relations.conflict": "Content type has conflicting relations",
