@@ -1,5 +1,6 @@
 const form = {
   firstname: {
+    autoFocus: true,
     label: 'Settings.permissions.users.form.firstname',
     placeholder: 'e.g. John',
     type: 'text',
