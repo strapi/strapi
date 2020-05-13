@@ -78,6 +78,63 @@ options: [--no-optimization]
 - **strapi build --no-optimization**<br/>
   Builds the administration panel without minimizing the assets. The build duration is faster.
 
+## strapi configuration:dump|config:dump
+
+Dumps configurations to a file or stdout to help you migrate to production.
+
+The dump format will be a JSON array.
+
+```
+strapi configuration:dump
+
+Options:
+  -f, --file <file>  Output file, default output is stdout
+```
+
+**Examples**
+
+- `strapi configuration:dump -f dump.json`
+- `strapi config:dump --file dump.json`
+- `strapi config:dump > dump.json`
+
+All these examples are equivalent.
+
+::: warning
+When configuring your application you often enter credentials for thrid party services (e.g authentication providers), Be aware that those credentials will also be dumped into the output of this command.
+When you aren't sure of what you are doing, you should avoid commiting this into a versioning system and rather copy the dump to the environment you want to restore it into when needed.
+:::
+
+## strapi configuration:restore|config:restore
+
+Restore a configuration dump into your application.
+
+The input format must be a JSON array.
+
+```
+strapi configuration:restore
+
+Options:
+  -f, --file <file>          Input file, default input is stdin
+  -s, --strategy <strategy>  Strategy name, one of: "replace", "merge", "keep". Defaults to: "replace"
+```
+
+**Examples**
+
+- `strapi configuration:restore -f dump.json`
+- `strapi config:restore --file dump.json -s replace`
+- `cat dump.json | strapi config:restore`
+- `strapi config:restore < dump.json`
+
+All these examples are equivalent.
+
+**Strategies**
+
+When running the restore command, you can choose from three different strategies:
+
+- **replace**: Will create missing keys and replace existing ones.
+- **merge**: Will create missing keys and merge existing keys whith there new value.
+- **keep**: Will create missing keys and keep existing keys as is.
+
 ## strapi generate:api
 
 Scaffold a complete API with its configurations, controller, model and service.
