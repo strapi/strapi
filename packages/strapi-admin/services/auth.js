@@ -1,40 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-const sanitizeUser = user => {
-  return _.omit(user, ['password', 'resetPasswordToken']);
-};
-
-const defaultOptions = { expiresIn: '30d' };
-
-const getJWTOptions = () => {
-  const { options, secret } = strapi.config.get('server.admin.jwt', {});
-
-  return {
-    secret,
-    options: _.merge(options, defaultOptions),
-  };
-};
-
-/**
- * Creates a JWT token for an administration user
- * @param {object} admon - admin user
- */
-const createJwtToken = admin => {
-  const { options, secret } = getJWTOptions();
-
-  return jwt.sign(
-    {
-      id: admin.id,
-      isAdmin: true,
-    },
-    secret,
-    options
-  );
-};
 
 /**
  * hashes a password
@@ -58,43 +24,27 @@ const validatePassword = (password, hash) => bcrypt.compare(password, hash);
  * @param {string} options.password
  */
 const checkCredentials = async ({ email, password }) => {
-  const admin = await strapi.query('user', 'admin').findOne({ email });
+  const user = await strapi.query('user', 'admin').findOne({ email });
 
-  if (!admin) {
+  if (!user) {
     return [null, false, { message: 'Invalid credentials' }];
   }
 
-  const isValid = await strapi.admin.services.auth.validatePassword(password, admin.password);
+  const isValid = await validatePassword(password, user.password);
 
   if (!isValid) {
     return [null, false, { message: 'Invalid credentials' }];
   }
 
-  // TODO: change to isActive
-  if (!(admin.isActive === true)) {
+  if (!(user.isActive === true)) {
     return [null, false, { message: 'User not active' }];
   }
 
-  return [null, admin];
-};
-
-const decodeToken = token => {
-  const { secret } = getJWTOptions();
-
-  try {
-    const payload = jwt.verify(token, secret);
-    return { payload, isValid: true };
-  } catch (err) {
-    return { payloda: null, isValid: false };
-  }
+  return [null, user];
 };
 
 module.exports = {
   checkCredentials,
-  createJwtToken,
-  sanitizeUser,
   validatePassword,
   hashPassword,
-  getJWTOptions,
-  decodeToken,
 };
