@@ -5,7 +5,7 @@ import { colors } from '@buffetjs/styles';
 const InputUID = styled(InputText)`
   width: 100%;
   ${({ error }) =>
-    error &&
+  error &&
     `
       > input {
         border-color: ${colors.darkOrange};

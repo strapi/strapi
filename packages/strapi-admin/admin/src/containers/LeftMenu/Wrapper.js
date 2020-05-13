@@ -16,7 +16,7 @@ const Wrapper = styled.div`
   width: ${props => props.theme.main.sizes.leftMenu.width};
   background: ${props => props.theme.main.colors.strapi['blue-darker']};
 
-  // scrollbar overrides
+  /* scrollbar overrides */
   * {
     ::-webkit-scrollbar {
       width: 7px;
@@ -35,7 +35,7 @@ const Wrapper = styled.div`
       background-color: ${props => props.theme.main.colors.leftMenu['link-color']};
     }
 
-    // firefox
+    /* firefox */
     scrollbar-color: ${props => props.theme.main.colors.leftMenu['title-color']} transparent;
   }
 `;

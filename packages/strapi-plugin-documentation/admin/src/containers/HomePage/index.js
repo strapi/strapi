@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectIntl } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
@@ -39,7 +38,6 @@ import {
 } from './actions';
 // Selectors
 import selectHomePage from './selectors';
-import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
@@ -188,9 +186,7 @@ export class HomePage extends React.Component {
                     onChange={() => {}}
                     label={{ id: getTrad('containers.HomePage.form.jwtToken') }}
                     inputDescription={{
-                      id: getTrad(
-                        'containers.HomePage.form.jwtToken.description'
-                      ),
+                      id: getTrad('containers.HomePage.form.jwtToken.description'),
                     }}
                   />
                 </div>
@@ -257,19 +253,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
-const withReducer = strapi.injectReducer({
-  key: 'homePage',
-  reducer,
-  pluginId,
-});
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(injectIntl(HomePage));
+export default compose(withSaga, withConnect)(HomePage);

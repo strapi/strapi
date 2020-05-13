@@ -1,6 +1,28 @@
-const { validateKind, validateUpdateContentTypeInput } = require('../content-type');
+const {
+  validateKind,
+  validateUpdateContentTypeInput,
+  validateContentTypeInput,
+} = require('../content-type');
 
 describe('Content type validator', () => {
+  global.strapi = {
+    contentTypes: {},
+    plugins: {
+      'content-type-builder': {
+        services: {
+          builder: {
+            getReservedNames() {
+              return {
+                models: [],
+                attributes: ['thisIsReserved'],
+              };
+            },
+          },
+        },
+      },
+    },
+  };
+
   describe('validateKind', () => {
     it('Only allows for single and collection types', async () => {
       await expect(validateKind('wrong')).rejects.toBeDefined();
@@ -13,6 +35,51 @@ describe('Content type validator', () => {
 
     it('allows undefined', async () => {
       await expect(validateKind()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('Prevents use of reservedNames', () => {
+    test('Throws when reserved names are used', async () => {
+      const data = {
+        contentType: {
+          name: 'test',
+          attributes: {
+            thisIsReserved: {
+              type: 'string',
+              default: '',
+            },
+          },
+        },
+      };
+
+      await validateUpdateContentTypeInput(data).catch(err => {
+        expect(err).toMatchObject({
+          'contentType.attributes.thisIsReserved': [
+            expect.stringMatching('Attribute keys cannot be one of'),
+          ],
+        });
+      });
+    });
+  });
+
+  describe('Prevents use of names without plural form', () => {
+    test('Throws when using name without plural form', async () => {
+      const data = {
+        contentType: {
+          name: 'news',
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      await validateContentTypeInput(data).catch(err => {
+        expect(err).toMatchObject({
+          'contentType.name': [expect.stringMatching('cannot be pluralized')],
+        });
+      });
     });
   });
 
