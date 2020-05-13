@@ -19,7 +19,7 @@ module.exports = async function(strapi) {
 
   await loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares);
   // internal middlewares
-  await loaders.loadInternalMiddlexares(middlewares);
+  await loaders.loadInternalMiddlewares(middlewares);
   // local middleware
   await loaders.loadLocalMiddlewares(appPath, middlewares);
   // plugins middlewares
@@ -48,7 +48,7 @@ const createLoaders = strapi => {
     });
   };
 
-  const loadInternalMiddlexares = middlewares =>
+  const loadInternalMiddlewares = middlewares =>
     loadMiddlewaresInDir(path.resolve(__dirname, '..', 'middlewares'), middlewares);
 
   const loadLocalMiddlewares = (appPath, middlewares) =>
@@ -114,7 +114,7 @@ const createLoaders = strapi => {
   };
 
   return {
-    loadInternalMiddlexares,
+    loadInternalMiddlewares,
     loadLocalMiddlewares,
     loadPluginsMiddlewares,
     loadLocalPluginsMiddlewares,
