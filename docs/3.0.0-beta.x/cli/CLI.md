@@ -100,13 +100,18 @@ Options:
 All these examples are equivalent.
 
 ::: warning
-When configuring your application you often enter credentials for thrid party services (e.g authentication providers), Be aware that those credentials will also be dumped into the output of this command.
-When you aren't sure of what you are doing, you should avoid commiting this into a versioning system and rather copy the dump to the environment you want to restore it into when needed.
+When configuring your application you often enter credentials for thrid party services (e.g authentication providers). Be aware that those credentials will also be dumped into the output of this command.
+In case of doubt, you should avoid committing the dump file into a versioning system. Here are some methods you can explore:
+
+- Copy the file directly to the environment you want and run the restore command there.
+- Put the file in a secure location and download it at deploy time with the right credentials.
+- Encrypt the file before committing and decrypt it when running the restore command.
+
 :::
 
 ## strapi configuration:restore|config:restore
 
-Restore a configuration dump into your application.
+Restores a configuration dump into your application.
 
 The input format must be a JSON array.
 
