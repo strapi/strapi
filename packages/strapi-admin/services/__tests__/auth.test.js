@@ -20,7 +20,7 @@ describe('Auth', () => {
       expect(res).toEqual([null, false, { message: 'Invalid credentials' }]);
     });
 
-    test('Fails when password is invalid, without leaking info specific infos', async () => {
+    test('Fails when password is invalid, without leaking specific info', async () => {
       const user = {
         id: 1,
         firstname: '',

@@ -15,6 +15,14 @@ const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
+// this is a temp patch for the next dev
+const createUser = params => ({
+  ...params,
+  isActive: true,
+  firstname: null,
+  lastname: null,
+});
+
 module.exports = {
   async register(ctx) {
     const params = ctx.request.body;
@@ -91,10 +99,7 @@ module.exports = {
     }
 
     try {
-      const admin = await strapi.query('user', 'admin').create({
-        ...params,
-        isActive: true,
-      });
+      const admin = await strapi.query('user', 'admin').create(createUser(params));
 
       admin.isAdmin = true;
 
