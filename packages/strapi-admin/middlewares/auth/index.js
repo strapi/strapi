@@ -14,7 +14,7 @@ const createLocalStrategy = strapi => {
       return strapi.admin.services.auth
         .checkCredentials({ email, password })
         .then(([error, user, message]) => done(error, user, message))
-        .catch(err => done(err));
+        .catch(error => done(error));
     }
   );
 };
@@ -32,7 +32,7 @@ module.exports = strapi => ({
       ) {
         const token = ctx.request.header.authorization.split(' ')[1];
 
-        const { payload, isValid } = strapi.admin.services.auth.decodeToken(token);
+        const { payload, isValid } = strapi.admin.services.token.decodeToken(token);
 
         if (isValid) {
           // request is made by an admin
