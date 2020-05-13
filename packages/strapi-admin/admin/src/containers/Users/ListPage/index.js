@@ -3,7 +3,7 @@ import Header from './Header';
 import ModalForm from './ModalForm';
 
 const ListPage = () => {
-  const [isModalOpened, setIsModalOpened] = useState(true);
+  const [isModalOpened, setIsModalOpened] = useState(false);
   // TODO when API ready
   const usersCount = 1;
   const handleToggle = () => setIsModalOpened(prev => !prev);
