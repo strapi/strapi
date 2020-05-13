@@ -11,7 +11,6 @@ const createRequest = (defaults = {}) => {
 };
 
 const createAuthRequest = token => {
-  console.log(token);
   return createRequest({
     headers: {
       Authorization: `Bearer ${token}`,
