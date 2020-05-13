@@ -7,7 +7,6 @@
   "Files Upload": "Files Upload",
   "Media Library": "Media Library",
   "HomePage.notification.newsLetter.success": "Successfully subscribed to the newsletter",
-  "Media Library": "Media Library",
   "New entry": "New entry",
   "Password": "Password",
   "Provider": "Provider",
@@ -113,8 +112,11 @@
   "app.components.ListPluginsPage.deletePlugin.title": "Uninstalling",
   "app.components.ListPluginsPage.deletePlugin.description": "It might take a few seconds to uninstall the plugin.",
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
+
   "app.components.Users.ModalCreateBody.block-title.details": "Details",
   "app.components.Users.ModalCreateBody.block-title.roles": "User's roles",
+
+  "app.containers.Users.ModalForm.footer.button-success": "Create user",
   "app.links.configure-view": "Configure the view",
 
   "app.utils.SelectOption.defaultMessage": " ",
@@ -283,7 +285,8 @@
   "Settings.webhooks.events.delete": "Delete",
   "Settings.webhooks.created": "Webhook created",
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
-  "components.Input.error.password.noMatch": "Passwords do not match.",
+  "components.Input.error.password.noMatch": "Passwords do not match",
+  "form.button.continue": "Continue",
   "form.button.done": "Done",
   "form.button.finish": "Finish",
   "notification.contentType.relations.conflict": "Content type has conflicting relations",
