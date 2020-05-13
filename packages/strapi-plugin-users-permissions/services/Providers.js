@@ -328,8 +328,7 @@ const getProfile = async (provider, query, callback) => {
 
       vk.query()
         .get('users.get')
-        .auth(access_token)
-        .qs({ id: query.raw.user_id, v: '5.013' })
+        .qs({ access_token, id: query.raw.user_id, v: '5.013' })
         .request((err, res, body) => {
           if (err) {
             callback(err);
@@ -337,6 +336,50 @@ const getProfile = async (provider, query, callback) => {
             callback(null, {
               username: `${body.response[0].last_name} ${body.response[0].first_name}`,
               email: query.raw.email,
+            });
+          }
+        });
+      break;
+    }
+    case 'twitch': {
+      const twitch = purest({
+        provider: 'twitch',
+        config: {
+          twitch: {
+            'https://api.twitch.tv': {
+              __domain: {
+                auth: {
+                  headers: {
+                    Authorization: 'Bearer [0]',
+                    'Client-ID': '[1]',
+                  },
+                },
+              },
+              'helix/{endpoint}': {
+                __path: {
+                  alias: '__default',
+                },
+              },
+              'oauth2/{endpoint}': {
+                __path: {
+                  alias: 'oauth',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      twitch
+        .get('users')
+        .auth(access_token, grant.twitch.key)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.data[0].login,
+              email: body.data[0].email,
             });
           }
         });
