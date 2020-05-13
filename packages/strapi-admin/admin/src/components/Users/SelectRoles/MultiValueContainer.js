@@ -5,6 +5,7 @@ import StyledOption from './StyledOption';
 
 const MultiValueContainer = ({ data, selectProps }) => {
   const Component = components.MultiValueContainer;
+
   const handleClick = () => {
     const newValue = selectProps.value.filter(option => option.id !== data.id);
 
@@ -15,9 +16,9 @@ const MultiValueContainer = ({ data, selectProps }) => {
     <Component {...data} {...selectProps}>
       <StyledOption
         label={data.name}
-        height="26px"
+        height="24px"
         lineHeight="26px"
-        margin="2px 5px 0 0"
+        margin="2px 5px 0px 0"
         onClick={handleClick}
       />
     </Component>
