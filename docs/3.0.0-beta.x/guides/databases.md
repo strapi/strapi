@@ -4,7 +4,7 @@ Strapi gives you the option to choose the most appropriate database for your pro
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
 ::: tip
-Deploying **Strapi** itself is covered in the [Deployment Guide](deployment.md).
+Deploying **Strapi** itself is covered in the [Deployment Guide](../getting-started/deployment.md).
 :::
 
 ## SQLite Installation
