@@ -89,7 +89,7 @@ describe('Token', () => {
       expect(typeof token === 'string').toBe(true);
     });
 
-    test('token payload does not leak user infos', () => {
+    test('Token payload does not leak user infos', () => {
       global.strapi = {
         config: {
           get() {
@@ -159,7 +159,7 @@ describe('Token', () => {
           get() {
             return {
               options: {
-                expiresIn: 1,
+                expiresIn: '1ms',
               },
               secret: 'test-123',
             };
@@ -167,20 +167,10 @@ describe('Token', () => {
         },
       };
 
-      await delay(10);
-
       const user = { id: 1 };
       const token = createToken(user);
 
-      global.strapi = {
-        config: {
-          get() {
-            return {
-              secret: 'not-the-same-secret',
-            };
-          },
-        },
-      };
+      await delay(10);
 
       const { payload, isValid } = decodeToken(token);
       expect(payload).toBe(null);
@@ -192,6 +182,7 @@ describe('Token', () => {
         config: {
           get() {
             return {
+              options: { expiresIn: '30d' },
               secret: 'test-123',
             };
           },
