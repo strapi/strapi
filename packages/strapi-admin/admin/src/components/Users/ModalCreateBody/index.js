@@ -97,7 +97,7 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit, showMagicLink }, ref
       </ModalSection>
       <ModalSection>
         <Wrapper>
-          <Padded top size="11px">
+          <Padded top size="12px">
             <Row>
               <Col xs="6">
                 <SelectRoles
