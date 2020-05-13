@@ -1,3 +1,5 @@
+// This component is a work in progress
+// It's made to be used when the users API is ready
 import React from 'react';
 import { Text } from '@buffetjs/core';
 import PropTypes from 'prop-types';

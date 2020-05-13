@@ -3,11 +3,10 @@
 
 const styles = {
   control: (base, state) => {
-    const borderStyle = state.selectProps.menuIsOpen
+    const borderRadiusStyle = state.selectProps.menuIsOpen
       ? {
           borderBottomLeftRadius: '0 !important',
           borderBottomRightRadius: '0 !important',
-          borderBottom: '1px solid transparent !important',
         }
       : {};
 
@@ -15,21 +14,25 @@ const styles = {
       selectProps: { error, value },
     } = state;
 
+    let border;
+
+    if (state.isFocused) {
+      border = '1px solid #78caff !important';
+    } else if (error && !value.length) {
+      border = '1px solid #f64d0a !important';
+    } else {
+      border = '1px solid #e3e9f3 !important';
+    }
+
     return {
       ...base,
       fontSize: 13,
       minHeight: 34,
-      border: state.isFocused
-        ? '1px solid #78caff !important'
-        : // In order to avoir checking the form validations when modifying the Select we can
-        // refer to value in order to know if the required validation passes
-        error && value.length === 0
-        ? '1px solid #f64d0a !important'
-        : '1px solid #e3e9f3 !important',
+      border,
       outline: 0,
       boxShadow: 0,
       borderRadius: '2px !important',
-      ...borderStyle,
+      ...borderRadiusStyle,
     };
   },
   menu: base => {
@@ -43,13 +46,13 @@ const styles = {
       borderTopRightRadius: '0 !important',
       border: '1px solid #78caff !important',
       boxShadow: 0,
-      borderTopColor: '#E3E9F3 !important',
+      borderTop: '0 !important',
       fontSize: '13px',
     };
   },
   menuList: base => ({
     ...base,
-    paddingTop: 2,
+    maxHeight: '112px',
   }),
   option: (base, state) => {
     return {
@@ -69,6 +72,7 @@ const styles = {
   valueContainer: base => ({
     ...base,
     padding: '2px 4px 4px 4px',
+    lineHeight: '18px',
   }),
 };
 
