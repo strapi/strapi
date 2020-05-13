@@ -84,6 +84,14 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/vk/callback`,
       scope: ['email'],
     },
+    twitch: {
+      enabled: false,
+      icon: 'twitch',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/twitch/callback`,
+      scope: ['user:read:email'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
