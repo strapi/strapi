@@ -11,8 +11,9 @@ import { initialState, reducer } from './reducer';
 import init from './init';
 import Input from './Input';
 import Wrapper from './Wrapper';
+import MagicLink from '../MagicLink';
 
-const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
+const ModalCreateBody = forwardRef(({ isDisabled, onSubmit, showMagicLink }, ref) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { formErrors, modifiedData } = reducerState;
   const buttonSubmitRef = useRef(null);
@@ -50,6 +51,12 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* TODO magic link with token when api ready */}
+      {showMagicLink && (
+        <ModalSection>
+          <MagicLink />
+        </ModalSection>
+      )}
       <ModalSection>
         <Padded top size="18px">
           <Text fontSize="xs" color="grey" fontWeight="bold" textTransform="uppercase">
@@ -94,6 +101,7 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
             <Row>
               <Col xs="6">
                 <SelectRoles
+                  isDisabled={isDisabled}
                   name="roles"
                   onChange={handleChange}
                   value={modifiedData.roles}
@@ -114,11 +122,13 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit }, ref) => {
 ModalCreateBody.defaultProps = {
   isDisabled: false,
   onSubmit: e => e.preventDefault(),
+  showMagicLink: false,
 };
 
 ModalCreateBody.propTypes = {
   isDisabled: PropTypes.bool,
   onSubmit: PropTypes.func,
+  showMagicLink: PropTypes.bool,
 };
 
 export default ModalCreateBody;

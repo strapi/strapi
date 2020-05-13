@@ -9,7 +9,7 @@ import DropdownIndicator from './DropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 import MultiValueContainer from './MultiValueContainer';
 
-const SelectRoles = ({ error, name, onChange, value }) => {
+const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
   const [options, setOptions] = useState([]);
   const { formatMessage } = useGlobalContext();
   const translatedError = error ? formatMessage(error) : null;
@@ -20,6 +20,7 @@ const SelectRoles = ({ error, name, onChange, value }) => {
       { id: 1, name: 'Super Admin' },
       { id: 2, name: 'Author' },
       { id: 3, name: 'Editor' },
+      { id: 4, name: 'Soup' },
     ]);
   }, []);
 
@@ -37,8 +38,9 @@ const SelectRoles = ({ error, name, onChange, value }) => {
         onChange={data => {
           onChange({ target: { name, value: data } });
         }}
-        isMulti
         isClearable
+        isDisabled={isDisabled}
+        isMulti
         options={options}
         styles={styles}
         value={value}
@@ -56,6 +58,7 @@ const SelectRoles = ({ error, name, onChange, value }) => {
 
 SelectRoles.defaultProps = {
   error: null,
+  isDisabled: false,
   value: [],
 };
 
@@ -63,6 +66,7 @@ SelectRoles.propTypes = {
   error: PropTypes.shape({
     id: PropTypes.string,
   }),
+  isDisabled: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,
