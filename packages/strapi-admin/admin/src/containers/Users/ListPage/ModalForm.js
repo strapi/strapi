@@ -57,6 +57,7 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
           isDisabled={isDisabled}
           onSubmit={handleSubmit}
           ref={currentStep === 'create' ? ref : null}
+          showMagicLink={currentStep === 'magic-link'}
         />
       )}
       <ModalFooter>

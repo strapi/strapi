@@ -7,7 +7,7 @@ const stepper = {
     isDisabled: false,
     // next: 'magic-link',
 
-    // TODO: set is back to magic-link
+    // TODO: set it back to magic-link
     next: null,
   },
   'magic-link': {
