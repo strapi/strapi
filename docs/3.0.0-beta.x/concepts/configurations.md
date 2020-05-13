@@ -190,7 +190,7 @@ module.exports = ({ env }) => ({
 ```js
 module.exports = {
   responses: {
-    privateFields: ['_v', 'id', 'created_at'],
+    privateAttributes: ['_v', 'id', 'created_at'],
   },
 };
 ```
