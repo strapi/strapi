@@ -86,6 +86,7 @@
   "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your Google application configurations",
   "PopUpForm.Providers.instagram.providerConfig.redirectURL": "The redirect URL to add in your Instagram application configurations",
   "PopUpForm.Providers.vk.providerConfig.redirectURL": "The redirect URL to add in your VK application configurations",
+  "PopUpForm.Providers.twitch.providerConfig.redirectURL": "The redirect URL to add in your Twitch application configurations",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your Linkedin application configurations",
