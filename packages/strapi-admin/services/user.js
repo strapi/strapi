@@ -1,15 +1,20 @@
 'use strict';
 
-const _ = require('lodash');
-
-/**
- * Remove private user fields
- * @param {Object} user - user to sanitize
- */
-const sanitizeUser = user => {
-  return _.omit(user, ['password', 'resetPasswordToken']);
-};
-
 module.exports = {
-  sanitizeUser,
+  withDefaults(attributes) {
+    return {
+      roles: [],
+      isActive: false,
+      ...attributes,
+    };
+  },
+
+  async create(attributes) {
+    const user = this.withDefaults(attributes);
+    return strapi.query('user', 'admin').create(user);
+  },
+
+  async exists(attributes) {
+    return !!(await strapi.query('user', 'admin').findOne(attributes));
+  },
 };

@@ -134,6 +134,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "handler": "User.create",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
