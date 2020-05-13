@@ -12,6 +12,7 @@ import pluginId from './pluginId';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
 import lifecycles from './lifecycles';
+import reducers from './reducers';
 import trads from './translations';
 
 export default strapi => {
@@ -34,6 +35,7 @@ export default strapi => {
     name: pluginPkg.strapi.name,
     pluginLogo,
     preventComponentRendering: false,
+    reducers,
     settings: {},
     suffixUrl: () => '/roles',
     suffixUrlToReplaceForLeftMenuHighlight: '/roles',

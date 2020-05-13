@@ -6,7 +6,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   margin: 0;
   position: relative;
   width: 14px;
-  font-weight: 100;
 }
 
 .c2:focus,
@@ -40,7 +39,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   height: 14px;
   text-align: center;
   font-size: 9px;
-  font-weight: 400;
   color: #1C5DE7;
   line-height: 14px;
 }
@@ -65,7 +63,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   margin: 0;
   position: relative;
   width: 14px;
-  font-weight: 100;
 }
 
 .c4:focus,
@@ -99,7 +96,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   height: 14px;
   text-align: center;
   font-size: 9px;
-  font-weight: 400;
   color: #1C5DE7;
   line-height: 14px;
 }
@@ -126,27 +122,28 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   font-size: 1.3rem;
 }
 
-.c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  height: 18px;
-  line-height: 18px;
+.c1 input,
+.c1 label {
+  display: inline-block;
+  vertical-align: top;
 }
 
-.c1 input label {
-  cursor: pointer;
-  margin-bottom: 0 !important;
+.c1 input {
+  margin-top: 4px;
+  width: 14px;
+  height: 12px;
 }
 
 .c1 input + label {
+  display: inline-block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: calc(100% - 14px);
   margin-left: 10px;
   margin-bottom: 0;
+  line-height: 18px;
+  cursor: pointer;
 }
 
 .c3 {
@@ -207,7 +204,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
 
 .c0 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 .c0 tbody td input[type='checkbox']:disabled:before {
@@ -224,7 +221,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }

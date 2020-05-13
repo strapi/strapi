@@ -16,13 +16,14 @@ const { mergeSchemas, convertToParams, convertToQuery, amountLimiting } = requir
 const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
+const { actionExists } = require('./utils');
 
 const isQueryEnabled = (schema, name) => {
-  return _.get(schema, ['resolver', 'Query', name]) !== false;
+  return _.get(schema, `resolver.Query.${name}`) !== false;
 };
 
 const isMutationEnabled = (schema, name) => {
-  return _.get(schema, ['resolver', 'Mutation', name]) !== false;
+  return _.get(schema, `resolver.Mutation.${name}`) !== false;
 };
 
 const buildTypeDefObj = model => {
@@ -172,7 +173,7 @@ const buildAssocResolvers = model => {
             if (association.type === 'model') {
               params[targetModel.primaryKey] = _.get(
                 obj,
-                [association.alias, targetModel.primaryKey],
+                `${association.alias}.${targetModel.primaryKey}`,
                 obj[association.alias]
               );
             } else {
@@ -289,7 +290,7 @@ const buildSingleType = model => {
 
   const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
-  const globalType = _.get(_schema, ['type', model.globalId], {});
+  const globalType = _.get(_schema, `type.${model.globalId}`, {});
 
   const localSchema = buildModelDefinition(model, globalType);
 
@@ -308,7 +309,7 @@ const buildSingleType = model => {
         Query: {
           [singularName]: buildQuery(singularName, {
             resolver: `${uid}.find`,
-            ..._.get(_schema, ['resolver', 'Query', singularName], {}),
+            ..._.get(_schema, `resolver.Query.${singularName}`, {}),
           }),
         },
       },
@@ -320,9 +321,9 @@ const buildSingleType = model => {
 
   // build every mutation
   ['update', 'delete'].forEach(action => {
-    const mutationScheam = buildMutationTypeDef({ model, action }, { _schema });
+    const mutationSchema = buildMutationTypeDef({ model, action }, { _schema });
 
-    mergeSchemas(localSchema, mutationScheam);
+    mergeSchemas(localSchema, mutationSchema);
   });
 
   return localSchema;
@@ -336,7 +337,7 @@ const buildCollectionType = model => {
 
   const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
-  const globalType = _.get(_schema, ['type', model.globalId], {});
+  const globalType = _.get(_schema, `type.${model.globalId}`, {});
 
   const localSchema = {
     definition: '',
@@ -370,50 +371,52 @@ const buildCollectionType = model => {
   }
 
   if (isQueryEnabled(_schema, singularName)) {
-    _.merge(localSchema, {
-      query: {
-        [`${singularName}(id: ID!)`]: model.globalId,
-      },
-      resolvers: {
-        Query: {
-          [singularName]: buildQuery(singularName, {
-            resolver: `${uid}.findOne`,
-            ..._.get(_schema, ['resolver', 'Query', singularName], {}),
-          }),
+    const resolverOpts = {
+      resolver: `${uid}.findOne`,
+      ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
+    };
+    if (actionExists(resolverOpts)) {
+      _.merge(localSchema, {
+        query: {
+          [`${singularName}(id: ID!)`]: model.globalId,
         },
-      },
-    });
+        resolvers: {
+          Query: {
+            [singularName]: buildQuery(singularName, resolverOpts),
+          },
+        },
+      });
+    }
   }
 
   if (isQueryEnabled(_schema, pluralName)) {
     const resolverOpts = {
       resolver: `${uid}.find`,
-      ..._.get(_schema, ['resolver', 'Query', pluralName], {}),
+      ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
     };
-
-    const resolverFn = buildQuery(pluralName, resolverOpts);
-
-    _.merge(localSchema, {
-      query: {
-        [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
-      },
-      resolvers: {
-        Query: {
-          [pluralName]: resolverFn,
+    if (actionExists(resolverOpts)) {
+      _.merge(localSchema, {
+        query: {
+          [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
         },
-      },
-    });
+        resolvers: {
+          Query: {
+            [pluralName]: buildQuery(pluralName, resolverOpts),
+          },
+        },
+      });
 
-    // Generation the aggregation for the given model
-    const aggregationSchema = formatModelConnectionsGQL({
-      fields: typeDefObj,
-      model,
-      name: modelName,
-      resolver: resolverOpts,
-      plugin,
-    });
+      // Generate the aggregation for the given model
+      const aggregationSchema = formatModelConnectionsGQL({
+        fields: typeDefObj,
+        model,
+        name: modelName,
+        resolver: resolverOpts,
+        plugin,
+      });
 
-    mergeSchemas(localSchema, aggregationSchema);
+      mergeSchemas(localSchema, aggregationSchema);
+    }
   }
 
   // Add model Input definition.
@@ -421,9 +424,8 @@ const buildCollectionType = model => {
 
   // build every mutation
   ['create', 'update', 'delete'].forEach(action => {
-    const mutationScheam = buildMutationTypeDef({ model, action }, { _schema });
-
-    mergeSchemas(localSchema, mutationScheam);
+    const mutationSchema = buildMutationTypeDef({ model, action }, { _schema });
+    mergeSchemas(localSchema, mutationSchema);
   });
 
   return localSchema;
@@ -433,9 +435,18 @@ const buildCollectionType = model => {
 // - Implement batch methods (need to update the content-manager as well).
 // - Implement nested transactional methods (create/update).
 const buildMutationTypeDef = ({ model, action }, { _schema }) => {
-  const { uid } = model;
   const capitalizedName = _.upperFirst(toSingular(model.modelName));
   const mutationName = `${action}${capitalizedName}`;
+
+  const resolverOpts = {
+    resolver: `${model.uid}.${action}`,
+    transformOutput: result => ({ [toSingular(model.modelName)]: result }),
+    ..._.get(_schema, `resolver.Mutation.${mutationName}`, {}),
+  };
+
+  if (!actionExists(resolverOpts)) {
+    return {};
+  }
 
   const definition = types.generateInputPayloadArguments({
     model,
@@ -465,13 +476,7 @@ const buildMutationTypeDef = ({ model, action }, { _schema }) => {
     },
     resolvers: {
       Mutation: {
-        [mutationName]: buildMutation(mutationName, {
-          resolver: `${uid}.${action}`,
-          transformOutput: result => ({
-            [toSingular(model.modelName)]: result,
-          }),
-          ..._.get(_schema, ['resolver', 'Mutation', mutationName], {}),
-        }),
+        [mutationName]: buildMutation(mutationName, resolverOpts),
       },
     },
   };

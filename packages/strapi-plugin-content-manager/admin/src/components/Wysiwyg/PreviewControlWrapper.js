@@ -6,9 +6,6 @@ const PreviewControlWrapper = styled.div`
   width: 100%;
   padding: 0 17px;
   justify-content: space-between;
-  background-color: #fafafb;
-  line-height: 30px;
-  font-size: 12px;
   font-family: Lato;
   background-color: #fff;
   border-bottom: 1px solid #f3f4f4;

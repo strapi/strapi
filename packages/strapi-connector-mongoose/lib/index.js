@@ -104,6 +104,13 @@ module.exports = function(strapi) {
           throw err;
         }
 
+        try {
+          const { version } = await instance.connection.db.admin().serverInfo();
+          instance.mongoDBVersion = version;
+        } catch {
+          instance.mongoDBVersion = null;
+        }
+
         const initFunctionPath = path.resolve(
           strapi.config.appPath,
           'config',
@@ -185,5 +192,8 @@ module.exports = function(strapi) {
     buildQuery,
     queries,
     ...relations,
+    get defaultTimestamps() {
+      return ['createdAt', 'updatedAt'];
+    },
   };
 };

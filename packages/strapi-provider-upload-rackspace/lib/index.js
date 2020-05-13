@@ -29,7 +29,7 @@ module.exports = {
         const readStream = streamifier.createReadStream(file.buffer);
         const writeStream = client.upload({
           ...options,
-          remote: file.name,
+          remote: file.hash,
           contentType: file.mime,
         });
 
@@ -38,22 +38,21 @@ module.exports = {
           writeStream.on('error', error => error && reject(error));
           writeStream.on('success', result => {
             remoteURL()
-              .then(data =>
+              .then(data => {
                 resolve(
                   Object.assign(file, {
-                    name: result.name,
                     mime: result.contentType,
                     url: `${data.cdnSslUri}/${result.name}`,
                   })
-                )
-              )
+                );
+              })
               .catch(err => console.error(err) && reject(err));
           });
         });
       },
       delete(file) {
         return new Promise((resolve, reject) => {
-          client.removeFile(config.container, file.name, error => {
+          client.removeFile(config.container, file.hash, error => {
             if (error) return reject(error);
             return resolve();
           });

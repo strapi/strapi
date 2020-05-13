@@ -25,6 +25,10 @@ export default ({ key, reducer, pluginId }) => WrappedComponent => {
       super(props, context);
       const reducerName = pluginId ? `${pluginId}_${key}` : key;
 
+      console.warn(
+        'Warning: strapi.injectReducer will be removed in the next major release. \n Please update your code.'
+      );
+
       getInjectors(context.store).injectReducer(reducerName, reducer);
     }
 
@@ -41,6 +45,10 @@ const useInjectReducer = ({ key, reducer, pluginId }) => {
   const reducerName = pluginId ? `${pluginId}_${key}` : key;
 
   React.useEffect(() => {
+    console.warn(
+      'Warning: strapi.useInjectReducer will be removed in the next major release. \n Please update your code.'
+    );
+
     getInjectors(context.store).injectReducer(reducerName, reducer);
   }, []);
 };
