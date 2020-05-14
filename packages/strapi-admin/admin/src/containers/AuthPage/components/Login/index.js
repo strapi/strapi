@@ -18,7 +18,7 @@ const Login = ({ formErrors, modifiedData, onChange, onSubmit, requestError }) =
       <Section textAlign="center">
         <Logo />
       </Section>
-      <Section>
+      <Section withBackground>
         <Padded top size="24px">
           <Box errorMessage={get(requestError, 'errorMessage', null)}>
             <form onSubmit={onSubmit}>
