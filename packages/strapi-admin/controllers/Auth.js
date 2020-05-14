@@ -103,13 +103,13 @@ module.exports = {
 
       admin.isAdmin = true;
 
-      const jwt = strapi.admin.services.auth.createJwtToken(admin);
+      const jwt = strapi.admin.services.token.createJwtToken(admin);
 
       await strapi.telemetry.send('didCreateFirstAdmin');
 
       ctx.send({
         jwt,
-        user: strapi.admin.services.auth.sanitizeUser(admin),
+        user: strapi.admin.services.user.sanitizeUser(admin),
       });
     } catch (err) {
       strapi.log.error(err);
