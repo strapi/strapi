@@ -17,12 +17,10 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'ON_CHANGE': {
         set(draftState.modifiedData, action.keys.split('.'), action.value);
-
         break;
       }
       case 'SET_ERRORS': {
         draftState.formErrors = action.errors;
-
         break;
       }
       default:
