@@ -182,8 +182,8 @@
   "Auth.form.register-success.email.label": "Email sent with success to",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
   "Auth.form.register.confirmPassword.label": "確認パスワード",
-  "Auth.form.register.email.label": "Eメール",
-  "Auth.form.register.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.email.label": "Eメール",
+  "Auth.form.email.placeholder": "johndoe@gmail.com",
 
   "Auth.form.register.username.label": "ユーザー名",
   "Auth.form.register.username.placeholder": "John Doe",
