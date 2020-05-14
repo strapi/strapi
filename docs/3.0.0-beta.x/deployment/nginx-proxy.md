@@ -12,7 +12,7 @@ Upstream blocks are used to map an alias such as `strapi` to a specific URL such
 
 In the below configuration we are mapping `localhost:1337` to the Nginx alias `strapi`.
 
-Path: `/etc/nginx/conf.d/upstream.conf`
+**Path —** `/etc/nginx/conf.d/upstream.conf`
 
 ```
 # Strapi server
@@ -45,7 +45,7 @@ This config is using the sub-domain that is dedicated to Strapi only. It will re
 
 Example Domain: `api.example.com`
 
-Path: `/etc/nginx/sites-available/strapi.conf`
+**Path —** `/etc/nginx/sites-available/strapi.conf`
 
 ```
 server {
@@ -99,7 +99,7 @@ Please note that this config is not focused on the frontend hosting, you will mo
 
 Example Domain: `example.com/api`
 
-Path: `/etc/nginx/sites-available/strapi.conf`
+**Path —** `/etc/nginx/sites-available/strapi.conf`
 
 ```
 server {
@@ -163,7 +163,7 @@ Example API Domain: `example.com/api`
 
 Example Admin Domain: `example.com/dashboard`
 
-Path: `/etc/nginx/sites-available/strapi.conf`
+**Path —** `/etc/nginx/sites-available/strapi.conf`
 
 ```
 server {
@@ -240,7 +240,7 @@ In order to take full advantage of a proxied Strapi application you will need to
 
 Example Domain: `api.example.com`
 
-Path: `config/server.js`
+**Path —** `config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
@@ -260,7 +260,7 @@ module.exports = ({ env }) => ({
 
 Example Domain: `example.com/api`
 
-Path: `config/server.js`
+**Path —** `config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
@@ -282,7 +282,7 @@ Example API Domain: `example.com/api`
 
 Example Admin Domain: `example.com/dashboard`
 
-Path: `config/server.js`
+**Path —** `config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
