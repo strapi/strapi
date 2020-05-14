@@ -51,7 +51,7 @@ module.exports = {
 
     const createdUser = await strapi.admin.services.user.create({
       ...requiredAttributes,
-      registrationToken: strapi.admin.services.token.generate(),
+      registrationToken: strapi.admin.services.token.createToken(),
     });
 
     // Send 201 created

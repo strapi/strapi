@@ -1,32 +1,32 @@
 'use strict';
 
-const crypto = require('crypto');
 const _ = require('lodash');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const defaultOptions = { expiresIn: '30d' };
+const defaultJwtOptions = { expiresIn: '30d' };
 
 const getTokenOptions = () => {
   const { options, secret } = strapi.config.get('server.admin.auth', {});
 
   return {
     secret,
-    options: _.merge(defaultOptions, options),
+    options: _.merge(defaultJwtOptions, options),
   };
 };
 
 /**
- * Generate a random token
+ * Create a random token
  * @returns {string}
  */
-function generate() {
+const createToken = () => {
   return crypto.randomBytes(64).toString('hex');
-}
+};
 
 /**
  * Creates a JWT token for an administration user
- * @param {object} admon - admin user
+ * @param {object} user - admin user
  */
-const createToken = user => {
+const createJwtToken = user => {
   const { options, secret } = getTokenOptions();
 
   return jwt.sign({ id: user.id }, secret, options);
@@ -37,7 +37,7 @@ const createToken = user => {
  * @param {string} token - a token to decode
  * @return {Object} decodeInfo - the decoded info
  */
-const decodeToken = token => {
+const decodeJwtToken = token => {
   const { secret } = getTokenOptions();
 
   try {
@@ -50,7 +50,7 @@ const decodeToken = token => {
 
 module.exports = {
   createToken,
+  createJwtToken,
   getTokenOptions,
-  decodeToken,
-  generate,
+  decodeJwtToken,
 };
