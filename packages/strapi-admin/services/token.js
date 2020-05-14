@@ -19,7 +19,7 @@ const getTokenOptions = () => {
  * @returns {string}
  */
 const createToken = () => {
-  return crypto.randomBytes(64).toString('hex');
+  return crypto.randomBytes(20).toString('hex');
 };
 
 /**
