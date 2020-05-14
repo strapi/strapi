@@ -22,15 +22,9 @@ await strapi.plugins['email'].services.email.send({
 
 ## Configure the plugin
 
-The plugin provides you a settings page where you can define the email provider you want to use.
-You will also be able to add some configuration.
+### Install the provider you want
 
-- Click on **Plugins** in the left menu
-- Click on the cog button on the **Email** plugin line
-
-## Install new providers
-
-By default Strapi provides a local email system. You might want to send email with a third party.
+By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to [Configure your provider](#configure-your-provider).
 
 You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
 
@@ -56,28 +50,44 @@ npm install strapi-provider-email-sendgrid@beta --save
 
 ::::
 
-::: tip
-If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
-:::
+**Note:** If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 
-Then, visit [http://localhost:1337/admin/plugins/email/configurations/development](http://localhost:1337/admin/plugins/email/configurations/development) on your web browser and configure the provider.
+### Configure your provider
+
+After installing your provider you will need to add some settings in `config/plugins.js`. Check the README of each provider to know what configuration settings the provider needs.
+
+Here is an example of a configuration made for the provider [strapi-provider-email-sendgrid](https://www.npmjs.com/package/strapi-provider-email-sendgrid).
+
+**Path —** `./config/plugins.js`.
+
+```js
+module.exports = ({ env }) => ({
+  // ...
+  email: {
+    provider: {
+      name: 'sendgrid',
+      enabled: true,
+      defaultFrom: 'myemail@protonmail.com',
+      defaultReplyTo: 'myemail@protonmail.com',
+      apiKey: env('SENDGRID_API_KEY'),
+    },
+  },
+  // ...
+});
+```
+
+::: tip
+If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations#environments)
+:::
 
 ## Create new provider
 
-If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier), modify the `auth` config object and customize the `send` function.
+If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier) and customize the `send` function.
 
 Default template
 
 ```js
 module.exports = {
-  provider: 'provider-id',
-  name: 'display name',
-  auth: {
-    config_1: {
-      label: 'My Config 1',
-      type: 'text',
-    },
-  },
   init: config => {
     return {
       send: async options => {},
@@ -88,7 +98,7 @@ module.exports = {
 
 In the `send` function you will have access to:
 
-- `config` that contains configurations you setup in your admin panel
+- `config` that contains configurations written in `plugins.js`
 - `options` that contains options you send when you call the `send` function from the email plugin service
 
 To use it you will have to publish it on **npm**.
@@ -149,6 +159,6 @@ Error: SMTP code:550 msg:550-5.7.1 [87.88.179.13] The IP you're using to send ma
 550 5.7.1  https://support.google.com/mail/?p=NotAuthorizedError 30si2132728pjz.75 - gsmtp
 ```
 
-To fix it, I suggest you to use another email provider that uses third party to send emails.
+To fix it, we suggest you to use another email provider that uses third party to send emails.
 
 When using a third party provider, you avoid having to setup a mail server on your server and get extra features such as email analytics.
