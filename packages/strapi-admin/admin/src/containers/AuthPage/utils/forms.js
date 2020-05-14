@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
 import Login from '../components/Login';
+import Oops from '../components/Oops';
 
 const forms = {
   login: {
@@ -15,6 +16,12 @@ const forms = {
       password: yup.string().required(translatedErrors.required),
       rememberMe: yup.bool().nullable(),
     }),
+  },
+  oops: {
+    Component: Oops,
+    endPoint: null,
+    fieldsToOmit: [],
+    schema: null,
   },
 };
 

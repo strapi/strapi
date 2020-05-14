@@ -35,6 +35,24 @@ describe('ADMIN | CONTAINERS | AUTH | reducer', () => {
     });
   });
 
+  describe('RESET_PROPS', () => {
+    it('should return the initial state', () => {
+      const action = {
+        type: 'RESET_PROPS',
+      };
+      const state = {
+        ok: true,
+      };
+      const expected = {
+        formErrors: {},
+        modifiedData: {},
+        requestError: null,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('SET_ERRORS', () => {
     it('Should set the formErrors object correctly', () => {
       const action = {
