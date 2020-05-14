@@ -301,6 +301,15 @@
     },
     {
       "method": "GET",
+      "path": "/users/count",
+      "handler": "User.count",
+      "config": {
+        "prefix": "",
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/users",
       "handler": "User.find",
       "config": {
