@@ -37,7 +37,9 @@ At this time and in the future there is no plan to allow model creating or updat
 
 ### Does Strapi handle deploying or migrating of content
 
-Strapi does not currently provide any tools for migrating or deploying your data changes between different environments (_ie. from development to production_). We do plan to eventually add a [migration feature](https://portal.productboard.com/strapi/1-public-roadmap/c/12-migrate-across-environments) as well as a [data import and export](https://portal.productboard.com/strapi/1-public-roadmap/c/23-import-export-data) option in the future, current ETA is around Q3 of 2020.
+Strapi does not currently provide any tools for migrating or deploying your data changes between different environments (_ie. from development to production_).
+
+With the release of the stable version (current ETA end of May 2020), there will be a CLI based migration command, and eventually this will be expanded into the AdminUI [migration feature](https://portal.productboard.com/strapi/1-public-roadmap/c/12-migrate-across-environments) as well as a [data import and export](https://portal.productboard.com/strapi/1-public-roadmap/c/23-import-export-data) option in the future, current ETA is around Q3 of 2020.
 
 ### User can't login to the admin panel
 
