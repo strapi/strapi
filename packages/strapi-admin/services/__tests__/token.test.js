@@ -1,6 +1,6 @@
 'use strict';
 
-const { createJwtToken, getTokenOptions, decodeJwtToken } = require('../token');
+const { createJwtToken, getTokenOptions, decodeJwtToken, createToken } = require('../token');
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time));
 
@@ -199,6 +199,16 @@ describe('Token', () => {
         exp: expect.any(Number),
       });
       expect(isValid).toBe(true);
+    });
+  });
+
+  describe('createToken', () => {
+    test('Create a random token of length 128', () => {
+      const token = createToken();
+
+      expect(token).toBeDefined();
+      expect(typeof token === 'string').toBe(true);
+      expect(token.length).toBe(128);
     });
   });
 });
