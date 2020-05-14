@@ -194,6 +194,7 @@
   "HomePage.greetings": "Hi {name}!",
 
   "Auth.advanced.allow_register": "",
+  "Auth.components.Oops.text": "Your account has been suspended",
   "Auth.privacy-policy-agreement.terms": "terms",
   "Auth.privacy-policy-agreement.policy": "privacy policy",
   "Auth.form.button.forgot-password": "Send Email",
