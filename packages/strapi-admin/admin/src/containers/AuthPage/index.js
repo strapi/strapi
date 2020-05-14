@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import { Padded } from '@buffetjs/core';
 import axios from 'axios';
 // import PropTypes from 'prop-types';
-import { get, omit, upperFirst } from 'lodash';
+import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth } from 'strapi-helper-plugin';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -84,6 +84,16 @@ const AuthPage = () => {
         if (err.response) {
           const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
           const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
+
+          if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
+            push('/auth/oops');
+
+            dispatch({
+              type: 'RESET_PROPS',
+            });
+
+            return;
+          }
 
           dispatch({
             type: 'SET_REQUEST_ERROR',

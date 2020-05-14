@@ -197,6 +197,7 @@
   "Auth.privacy-policy-agreement.terms": "terms",
   "Auth.privacy-policy-agreement.policy": "privacy policy",
   "Auth.form.button.forgot-password": "Send Email",
+  "Auth.form.button.go-home": "GO BACK HOME",
   "Auth.form.button.forgot-password.success": "Send again",
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",

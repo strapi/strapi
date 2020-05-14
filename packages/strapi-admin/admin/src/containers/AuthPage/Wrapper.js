@@ -2,10 +2,9 @@
 import styled from 'styled-components';
 // import Background from '../../assets/images/background_empty.svg';
 
-const Wrapper = styled.div`
-  // height: 100vh;
-  // background: #fafafb;
-`;
+/* eslint-disable */
+
+const Wrapper = styled.div``;
 
 // const Wrapper = styled.div`
 //   display: flex;
