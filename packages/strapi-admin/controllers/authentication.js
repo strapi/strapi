@@ -46,7 +46,7 @@ module.exports = {
 
     ctx.body = {
       data: {
-        token: strapi.admin.services.token.createToken(payload.id),
+        token: strapi.admin.services.token.createToken({ id: payload.id }),
       },
     };
   },
