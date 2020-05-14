@@ -23,6 +23,7 @@ const sizes = {
     sm: '12px',
     md: '13px',
     lg: '18px',
+    xl: '24px',
   },
 };
 
