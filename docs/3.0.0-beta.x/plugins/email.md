@@ -64,12 +64,11 @@ Here is an example of a configuration made for the provider [strapi-provider-ema
 module.exports = ({ env }) => ({
   // ...
   email: {
-    provider: {
-      name: 'sendgrid',
-      enabled: true,
+    provider: 'sendgrid',
+    providerOptions: {
+      apiKey: env('SENDGRID_API_KEY'),
       defaultFrom: 'myemail@protonmail.com',
       defaultReplyTo: 'myemail@protonmail.com',
-      apiKey: env('SENDGRID_API_KEY'),
     },
   },
   // ...

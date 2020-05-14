@@ -4,10 +4,9 @@ module.exports = {
     depthLimit: 10,
   },
   email: {
-    provider: {
-      name: 'mailgun',
-      defaultFrom: '',
-      defaultReplyTo: '',
+    provider: 'sendmail',
+    providerOptions: {
+      defaultFrom: 'strapi@strapi.io',
     },
   },
 };

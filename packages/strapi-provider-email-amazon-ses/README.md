@@ -26,15 +26,14 @@ npm install strapi-provider-email-amazon-ses --save
 
 ## Configuration
 
-| Variable       | Type                    | Description                                    | Required | Default                                 |
-| -------------- | ----------------------- | ---------------------------------------------- | -------- | --------------------------------------- |
-| name           | string                  | The name of the provider you use               | yes      |                                         |
-| key            | string                  | Api key given by Amazon SES                    | yes      |                                         |
-| secret         | string                  | Secret given by Amazon SES                     | yes      |                                         |
-| enabled        | boolean                 | Enable the possibility to send emails          | no       | true                                    |
-| defaultFrom    | string                  | Sender mail address                            | no       | undefined                               |
-| defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined                               |
-| endpoint       | string                  | Amazon endpoint uri                            | no       | 'https://email.us-east-1.amazonaws.com' |
+| Variable                       | Type                    | Description                                    | Required | Default                                 |
+| ------------------------------ | ----------------------- | ---------------------------------------------- | -------- | --------------------------------------- |
+| provider                       | string                  | The name of the provider you use               | yes      |                                         |
+| providerOptions.key            | string                  | Api key given by Amazon SES                    | yes      |                                         |
+| providerOptions.secret         | string                  | Secret given by Amazon SES                     | yes      |                                         |
+| providerOptions.defaultFrom    | string                  | Sender mail address                            | no       | undefined                               |
+| providerOptions.defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined                               |
+| providerOptions.endpoint       | string                  | Amazon endpoint uri                            | no       | 'https://email.us-east-1.amazonaws.com' |
 
 ### Example
 
@@ -44,12 +43,14 @@ npm install strapi-provider-email-amazon-ses --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    name: 'amazon-ses',
-    key: env('AWS_SES_KEY'),
-    secret: env('AWS_SES_SECRET'),
-    defaultFrom: 'myemail@protonmail.com',
-    defaultReplyTo: 'myemail@protonmail.com',
-    endpoint: 'https://email.us-east-1.amazonaws.com',
+    provider: 'amazon-ses',
+    providerOptions: {
+      key: env('AWS_SES_KEY'),
+      secret: env('AWS_SES_SECRET'),
+      defaultFrom: 'myemail@protonmail.com',
+      defaultReplyTo: 'myemail@protonmail.com',
+      endpoint: 'https://email.us-east-1.amazonaws.com',
+    },
   },
   // ...
 });

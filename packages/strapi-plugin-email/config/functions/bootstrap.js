@@ -2,21 +2,20 @@
 
 const _ = require('lodash');
 
-const createProvider = providerConfig => {
-  const providerName = _.toLower(providerConfig.name);
+const createProvider = emailConfig => {
+  const providerName = _.toLower(emailConfig.provider);
+  let provider;
   try {
-    const providerInstance = require(`strapi-provider-email-${providerName}`).init(providerConfig);
-
-    return providerInstance;
+    provider = require(`strapi-provider-email-${providerName}`);
   } catch (err) {
-    strapi.log.error(err);
     throw new Error(
-      `The provider package isn't installed. Please run \`npm install strapi-provider-email-${providerName}\``
+      `The provider package isn't installed. Please run \`npm install strapi-provider-email-${providerName}\` --save`
     );
   }
+  return provider.init(emailConfig.providerOptions);
 };
 
 module.exports = async () => {
-  const providerConfig = _.get(strapi.plugins, 'email.config.provider', {});
-  strapi.plugins.email.provider = createProvider(providerConfig);
+  const emailConfig = _.get(strapi.plugins, 'email.config', {});
+  strapi.plugins.email.provider = createProvider(emailConfig);
 };

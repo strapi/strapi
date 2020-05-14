@@ -26,15 +26,14 @@ npm install strapi-provider-email-mailgun --save
 
 ## Configuration
 
-| Variable       | Type                    | Description                                    | Required | Default   |
-| -------------- | ----------------------- | ---------------------------------------------- | -------- | --------- |
-| name           | string                  | The name of the provider you use               | yes      |           |
-| apiKey         | string                  | Api key given by Mailgun                       | yes      |           |
-| enabled        | boolean                 | Enable the possibility to send emails          | no       | true      |
-| defaultFrom    | string                  | Sender mail address                            | no       | undefined |
-| defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
-| host           | string                  |                                                |          |           |
-| domain         | string                  |                                                |          |           |
+| Variable                       | Type                    | Description                                    | Required | Default   |
+| ------------------------------ | ----------------------- | ---------------------------------------------- | -------- | --------- |
+| provider                       | string                  | The name of the provider you use               | yes      |           |
+| providerOptions.apiKey         | string                  | Api key given by Mailgun                       | yes      |           |
+| providerOptions.defaultFrom    | string                  | Sender mail address                            | no       | undefined |
+| providerOptions.defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
+| providerOptions.host           | string                  |                                                |          |           |
+| providerOptions.domain         | string                  |                                                |          |           |
 
 ### Example
 
@@ -44,10 +43,12 @@ npm install strapi-provider-email-mailgun --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    name: 'mailgun',
-    apiKey: env('MAILGUN_API_KEY'),
-    defaultFrom: 'myemail@protonmail.com',
-    defaultReplyTo: 'myemail@protonmail.com',
+    provider: 'mailgun',
+    providerOptions: {
+      apiKey: env('MAILGUN_API_KEY'),
+      defaultFrom: 'myemail@protonmail.com',
+      defaultReplyTo: 'myemail@protonmail.com',
+    },
   },
   // ...
 });

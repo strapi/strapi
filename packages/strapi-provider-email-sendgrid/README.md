@@ -26,13 +26,12 @@ npm install strapi-provider-email-sendgrid --save
 
 ## Configuration
 
-| Variable       | Type                    | Description                                    | Required | Default   |
-| -------------- | ----------------------- | ---------------------------------------------- | -------- | --------- |
-| name           | string                  | The name of the provider you use               | yes      |           |
-| apiKey         | string                  | Api key given by Sendgrid                      | yes      |           |
-| enabled        | boolean                 | Enable the possibility to send emails          | no       | true      |
-| defaultFrom    | string                  | Sender mail address                            | no       | undefined |
-| defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
+| Variable                       | Type                    | Description                                    | Required | Default   |
+| ------------------------------ | ----------------------- | ---------------------------------------------- | -------- | --------- |
+| provider                       | string                  | The name of the provider you use               | yes      |           |
+| providerOptions.apiKey         | string                  | Api key given by Sendgrid                      | yes      |           |
+| providerOptions.defaultFrom    | string                  | Sender mail address                            | no       | undefined |
+| providerOptions.defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
 
 ### Example
 
@@ -42,10 +41,12 @@ npm install strapi-provider-email-sendgrid --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    name: 'sendgrid',
-    apiKey: env('SENDGRID_API_KEY'),
-    defaultFrom: 'myemail@protonmail.com',
-    defaultReplyTo: 'myemail@protonmail.com',
+    provider: 'sendgrid',
+    providerOptions: {
+      apiKey: env('SENDGRID_API_KEY'),
+      defaultFrom: 'myemail@protonmail.com',
+      defaultReplyTo: 'myemail@protonmail.com',
+    },
   },
   // ...
 });

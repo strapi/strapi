@@ -26,12 +26,11 @@ npm install strapi-provider-email-sendmail --save
 
 ## Configuration
 
-| Variable       | Type                    | Description                                    | Required | Default   |
-| -------------- | ----------------------- | ---------------------------------------------- | -------- | --------- |
-| name           | string                  | The name of the provider you use               | yes      |           |
-| enabled        | boolean                 | Enable the possibility to send emails          | no       | true      |
-| defaultFrom    | string                  | Sender mail address                            | no       | undefined |
-| defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
+| Variable                       | Type                    | Description                                    | Required | Default   |
+| ------------------------------ | ----------------------- | ---------------------------------------------- | -------- | --------- |
+| provider                       | string                  | The name of the provider you use               | yes      |           |
+| providerOptions.defaultFrom    | string                  | Sender mail address                            | no       | undefined |
+| providerOptions.defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
 
 ### Example
 
@@ -41,9 +40,11 @@ npm install strapi-provider-email-sendmail --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    name: 'sendmail',
-    defaultFrom: 'myemail@protonmail.com',
-    defaultReplyTo: 'myemail@protonmail.com',
+    provider: 'sendmail',
+    providerOptions: {
+      defaultFrom: 'myemail@protonmail.com',
+      defaultReplyTo: 'myemail@protonmail.com',
+    },
   },
   // ...
 });
