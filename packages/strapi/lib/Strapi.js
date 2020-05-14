@@ -53,6 +53,7 @@ class Strapi {
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
+    this.isLoaded = false;
 
     // internal services.
     this.fs = createStrapiFs(this);
@@ -157,12 +158,9 @@ class Strapi {
 
   async start(cb) {
     try {
-      await this.load();
-
-      // Run bootstrap function.
-      await this.runBootstrapFunctions();
-      // Freeze object.
-      await this.freeze();
+      if (!this.isLoaded) {
+        await this.load();
+      }
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
@@ -324,6 +322,13 @@ class Strapi {
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+
+    await this.runBootstrapFunctions();
+    await this.freeze();
+
+    this.isLoaded = true;
+
+    return this;
   }
 
   async startWebhooks() {
