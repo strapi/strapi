@@ -7,7 +7,7 @@ const Box = ({ children, errorMessage }) => (
   <Wrapper>
     <Padded top size="20px">
       <Padded bottom size="25px">
-        <Padded left right size="30px">
+        <Padded left right size="md">
           <Text fontSize="md" color="#f64d0a" style={{ textAlign: 'center' }}>
             {errorMessage}&nbsp;
           </Text>
