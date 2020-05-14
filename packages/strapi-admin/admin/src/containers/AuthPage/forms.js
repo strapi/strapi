@@ -24,16 +24,16 @@ const form = {
     }),
   },
   login: {
-    endPoint: 'local',
+    endPoint: 'login',
     inputs: [
       [
         {
           label: {
-            id: 'Auth.form.username.label',
+            id: 'Auth.form.email.label',
           },
-          name: 'identifier',
-          type: 'text',
-          placeholder: 'Auth.form.username.placeholder',
+          name: 'email',
+          type: 'email',
+          placeholder: 'Auth.form.email.placeholder',
         },
       ],
       [
@@ -57,7 +57,10 @@ const form = {
       ],
     ],
     schema: yup.object({
-      identifier: yup.string().required(translatedErrors.required),
+      email: yup
+        .string()
+        .email(translatedErrors.email)
+        .required(translatedErrors.required),
       password: yup.string().required(translatedErrors.required),
     }),
   },
@@ -95,11 +98,11 @@ const form = {
       [
         {
           label: {
-            id: 'Auth.form.register.email.label',
+            id: 'Auth.form.email.label',
           },
           name: 'email',
           type: 'email',
-          placeholder: 'Auth.form.register.email.placeholder',
+          placeholder: 'Auth.form.email.placeholder',
         },
       ],
       [
