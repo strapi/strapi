@@ -19,7 +19,7 @@ const userCreationSchema = yup.object().shape({
     .required(),
   roles: yup
     .array()
-    .of(yup.number())
+    .min(1)
     .required(),
 });
 

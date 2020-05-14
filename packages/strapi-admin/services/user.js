@@ -8,7 +8,11 @@ const { createUser } = require('../domain/user');
  * @returns {Promise<user>}
  */
 const create = async attributes => {
-  const user = createUser(attributes);
+  const user = createUser({
+    registrationToken: strapi.admin.services.token.createToken(),
+    ...attributes,
+  });
+
   return strapi.query('user', 'admin').create(user);
 };
 
