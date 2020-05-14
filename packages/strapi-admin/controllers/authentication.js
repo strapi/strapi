@@ -24,7 +24,7 @@ module.exports = {
 
       ctx.body = {
         data: {
-          token: strapi.admin.services.token.createToken(user),
+          token: strapi.admin.services.token.createJwtToken(user),
           user: strapi.admin.services.user.sanitizeUser(ctx.state.user), // TODO: fetch more detailed info
         },
       };
@@ -38,7 +38,7 @@ module.exports = {
       return ctx.badRequest('Missing token');
     }
 
-    const { isValid, payload } = strapi.admin.services.token.decodeToken(token);
+    const { isValid, payload } = strapi.admin.services.token.decodeJwtToken(token);
 
     if (!isValid) {
       return ctx.badRequest('Invalid token');
@@ -46,7 +46,7 @@ module.exports = {
 
     ctx.body = {
       data: {
-        token: strapi.admin.services.token.createToken({ id: payload.id }),
+        token: strapi.admin.services.token.createJwtToken(payload.id),
       },
     };
   },
