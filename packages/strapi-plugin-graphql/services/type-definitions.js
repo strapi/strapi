@@ -64,6 +64,17 @@ const buildTypeDefObj = model => {
       delete typeDef[association.alias];
     });
 
+  //remove private attributes (whihc are not attributes) defined per model or globally
+  const privateAttributes = _.union(
+    strapi.config.get('api.responses.privateAttributes', []),
+    _.get(model, 'options.privateAttributes', [])
+  );
+  privateAttributes.forEach(attr => {
+    if (typeDef[attr]) {
+      delete typeDef[attr];
+    }
+  });
+
   return typeDef;
 };
 
