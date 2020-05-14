@@ -226,7 +226,6 @@
   "Auth.form.register.email.label": "E-mail",
   "Auth.form.register.email.placeholder": "ivanivanov@gmail.com",
   "Auth.form.register.news.label": "Держите меня в курсе о новых функциях и предстоящих улучшениях (делая это, вы принимаете {terms} и {policy}).",
-  "Auth.form.register.password.label": "Пароль",
   "Auth.form.register.username.label": "Имя пользователя",
   "Auth.form.register.username.placeholder": "Иван Иванов",
   "Auth.header.register.description": "Для завершения установки и обеспечения безопасности приложения, создайте вашего первого пользователя (root admin), заполнив форму ниже.",

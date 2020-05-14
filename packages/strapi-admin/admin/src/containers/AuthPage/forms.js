@@ -29,17 +29,17 @@ const form = {
       [
         {
           label: {
-            id: 'Auth.form.login.username.label',
+            id: 'Auth.form.username.label',
           },
           name: 'identifier',
           type: 'text',
-          placeholder: 'Auth.form.login.username.placeholder',
+          placeholder: 'Auth.form.username.placeholder',
         },
       ],
       [
         {
           label: {
-            id: 'Auth.form.login.password.label',
+            id: 'Auth.form.password.label',
           },
           name: 'password',
           type: 'password',
@@ -49,7 +49,7 @@ const form = {
         {
           customBootstrapClass: 'col-6',
           label: {
-            id: 'Auth.form.login.rememberMe.label',
+            id: 'Auth.form.rememberMe.label',
           },
           name: 'rememberMe',
           type: 'checkbox',
@@ -77,7 +77,7 @@ const form = {
       [
         {
           label: {
-            id: 'Auth.form.register.password.label',
+            id: 'Auth.form.password.label',
           },
           name: 'password',
           type: 'password',
@@ -126,10 +126,7 @@ const form = {
       passwordConfirmation: yup
         .string()
         .min(6, translatedErrors.minLength)
-        .oneOf(
-          [yup.ref('password'), null],
-          'components.Input.error.password.noMatch'
-        )
+        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
         .required(translatedErrors.required),
     }),
   },
@@ -141,7 +138,7 @@ const form = {
           name: 'password',
           type: 'password',
           label: {
-            id: 'Auth.form.register.password.label',
+            id: 'Auth.form.password.label',
           },
         },
       ],
@@ -164,10 +161,7 @@ const form = {
       passwordConfirmation: yup
         .string()
         .min(6, translatedErrors.required)
-        .oneOf(
-          [yup.ref('password'), null],
-          'components.Input.error.password.noMatch'
-        )
+        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
         .required(translatedErrors.required),
     }),
   },
