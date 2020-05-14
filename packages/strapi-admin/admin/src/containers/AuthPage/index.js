@@ -2,19 +2,8 @@ import React, { useEffect, useReducer } from 'react';
 import { Padded } from '@buffetjs/core';
 import axios from 'axios';
 // import PropTypes from 'prop-types';
-import {
-  get,
-  // isEmpty,
-  omit,
-  // set,
-  upperFirst,
-} from 'lodash';
-import {
-  // Link,
-  Redirect,
-  useRouteMatch,
-  useHistory,
-} from 'react-router-dom';
+import { get, omit, upperFirst } from 'lodash';
+import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth } from 'strapi-helper-plugin';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
@@ -86,7 +75,6 @@ const AuthPage = () => {
         });
 
         // TODO register and other views logic
-        console.log(token);
         auth.setToken(token, modifiedData.rememberMe);
         auth.setUserInfo(user, modifiedData.rememberMe);
 
@@ -133,6 +121,8 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
+
+// TODO Remove comments when auth feature is finished
 
 // import React, { memo, useEffect, useReducer, useRef } from 'react';
 // import PropTypes from 'prop-types';

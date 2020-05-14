@@ -14,11 +14,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
-
+import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
@@ -27,9 +25,7 @@ import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
 import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
-
 import { Content, Wrapper } from './components';
-
 import { getDataSucceeded } from './actions';
 
 function App(props) {
@@ -39,6 +35,24 @@ function App(props) {
 
   useEffect(() => {
     const getData = async () => {
+      const currentToken = auth.getToken();
+
+      if (currentToken) {
+        try {
+          const {
+            data: { token },
+          } = await request('/admin/renew-token', {
+            method: 'POST',
+            body: { token: currentToken },
+          });
+          auth.updateToken(token);
+        } catch (err) {
+          // Refresh app
+          auth.clearAppStorage();
+          window.location.reload();
+        }
+      }
+
       try {
         const requestURL = '/users-permissions/init';
 
