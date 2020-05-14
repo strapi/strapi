@@ -1,9 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
+const { getConfigUrls } = require('strapi-utils');
 
 const { createCoreApi } = require('../core-api');
-const getURLFromSegments = require('../utils/url-from-segments');
 
 const getKind = obj => obj.kind || 'collectionType';
 
@@ -182,30 +182,15 @@ module.exports = function(strapi) {
   }, {});
 
   // default settings
-  const port = strapi.config.get('server.port');
-  const host = strapi.config.get('server.host');
+  strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
+  strapi.config.host = strapi.config.get('server.host') || strapi.config.host;
 
-  let hostname = host;
-  if (strapi.config.environment === 'development' && ['127.0.0.1', '0.0.0.0'].includes(host)) {
-    hostname = 'localhost';
-  }
+  const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config.get('server'));
 
-  // proxy settings
-  const proxy = strapi.config.get('server.proxy', {});
-
-  // check if proxy is enabled and construct url
-  strapi.config.url = proxy.enabled
-    ? getURLFromSegments({
-        hostname: proxy.host,
-        port: proxy.port,
-        ssl: proxy.ssl,
-      })
-    : getURLFromSegments({
-        hostname,
-        port,
-      });
-
-  const adminPath = strapi.config.get('server.admin.path', 'admin');
+  strapi.config.server = strapi.config.server || {};
+  strapi.config.server.url = serverUrl;
+  strapi.config.admin.url = adminUrl;
+  strapi.config.admin.path = adminPath;
 
   // check if we should serve admin panel
   const shouldServeAdmin = strapi.config.get(
@@ -216,6 +201,4 @@ module.exports = function(strapi) {
   if (!shouldServeAdmin) {
     strapi.config.serveAdminPanel = false;
   }
-
-  strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
 };

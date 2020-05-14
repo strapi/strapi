@@ -3,6 +3,8 @@
 const { green } = require('chalk');
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
+const { getConfigUrls } = require('strapi-utils');
+
 const loadConfiguration = require('../core/app-configuration');
 const addSlash = require('../utils/addSlash');
 /**
@@ -12,8 +14,7 @@ module.exports = async ({ clean, optimization }) => {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 
-  const adminPath = config.get('server.admin.path', '/admin');
-  const adminBackend = config.get('server.admin.build.backend', '/');
+  const { serverUrl, adminPath } = getConfigUrls(config.get('server'), true);
 
   console.log(`Building your admin UI with ${green(config.environment)} configuration ...`);
 
@@ -28,7 +29,7 @@ module.exports = async ({ clean, optimization }) => {
       env: 'production',
       optimize: optimization,
       options: {
-        backend: adminBackend,
+        backend: serverUrl,
         publicPath: addSlash(adminPath),
       },
     })

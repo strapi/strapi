@@ -15,7 +15,13 @@ const models = require('./models');
 const policy = require('./policy');
 const templateConfiguration = require('./templateConfiguration');
 const { yup, formatYupErrors } = require('./validators');
-const { nameToSlug, nameToCollectionName, escapeQuery } = require('./stringFormatting');
+const {
+  nameToSlug,
+  nameToCollectionName,
+  getCommonBeginning,
+  escapeQuery,
+} = require('./stringFormatting');
+const { getConfigUrls } = require('./config');
 
 module.exports = {
   yup,
@@ -32,5 +38,7 @@ module.exports = {
   parseType,
   nameToSlug,
   nameToCollectionName,
+  getCommonBeginning,
+  getConfigUrls,
   escapeQuery,
 };

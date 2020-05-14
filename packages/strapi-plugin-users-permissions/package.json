@@ -14,7 +14,7 @@
   "dependencies": {
     "@purest/providers": "^1.0.1",
     "bcryptjs": "^2.4.3",
-    "grant-koa": "^4.6.0",
+    "grant-koa": "^5.0.1",
     "immutable": "^3.8.2",
     "jsonwebtoken": "^8.1.0",
     "koa2-ratelimit": "^0.9.0",
