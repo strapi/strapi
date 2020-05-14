@@ -1,7 +1,7 @@
 'use strict';
 
 const coreStoreModel = config => ({
-  connection: config.get('currentEnvironment.database.defaultConnection'),
+  connection: config.get('database.defaultConnection'),
   uid: 'strapi::core-store',
   internal: true,
   info: {
@@ -52,7 +52,12 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         return null;
       }
 
-      if (data.type === 'object' || data.type === 'array' || data.type === 'boolean' || data.type === 'string') {
+      if (
+        data.type === 'object' ||
+        data.type === 'array' ||
+        data.type === 'boolean' ||
+        data.type === 'string'
+      ) {
         try {
           return JSON.parse(data.value);
         } catch (err) {

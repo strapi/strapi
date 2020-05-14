@@ -9,7 +9,6 @@ const Wrapper = styled.div`
   border: 1px solid #e3e9f3;
   border-radius: 2px;
   > div {
-    height: 100%;
     margin: auto;
     > label {
       margin-left: 0;

@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, omit, set, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link, Redirect } from 'react-router-dom';
-import { auth, Button, getQueryParameters, getYupInnerErrors, request } from 'strapi-helper-plugin';
+import { Button } from '@buffetjs/core';
+import { auth, getQueryParameters, getYupInnerErrors, request } from 'strapi-helper-plugin';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LogoStrapi from '../../assets/images/logo_strapi.png';
 import PageTitle from '../../components/PageTitle';
@@ -205,14 +206,17 @@ const AuthPage = ({
                     }`}
                   >
                     <Button
+                      color="primary"
                       className={submitSuccess ? 'buttonForgotSuccess' : ''}
                       type="submit"
-                      label={`Auth.form.button.${
-                        submitSuccess ? 'forgot-password.success' : authType
-                      }`}
-                      primary={!submitSuccess}
                       style={authType === 'login' ? {} : { width: '100%' }}
-                    />
+                    >
+                      <FormattedMessage
+                        id={`Auth.form.button.${
+                          submitSuccess ? 'forgot-password.success' : authType
+                        }`}
+                      />
+                    </Button>
                   </div>
                 </div>
               </div>

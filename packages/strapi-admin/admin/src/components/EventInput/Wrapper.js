@@ -51,7 +51,7 @@ const Wrapper = styled.div`
     box-shadow: inset 0px 0px 0px 1px #f6f6f6;
     td {
       height: 54px;
-      padding-bottom: 3px;
+      padding-top: 3px;
       input[type='checkbox']:disabled:before {
         background-color: #e8e5e5;
       }
@@ -61,7 +61,6 @@ const Wrapper = styled.div`
         text-transform: capitalize;
         label {
           width: fit-content;
-          margin-top: -1px;
           font-weight: 500;
           cursor: pointer;
         }
