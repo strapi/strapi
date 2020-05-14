@@ -13,7 +13,7 @@
   "main": "./lib",
   "dependencies": {
     "lodash": "^4.17.11",
-    "sendmail": "^1.2.0"
+    "sendmail": "^1.6.1"
   },
   "strapi": {
     "isProvider": true

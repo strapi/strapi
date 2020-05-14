@@ -5,41 +5,21 @@
  */
 
 // Public node modules.
-const _ = require('lodash');
 const sendmail = require('sendmail')({
   silent: true,
 });
 
 /* eslint-disable no-unused-vars */
 module.exports = {
-  provider: 'sendmail',
-  name: 'Sendmail',
-  auth: {
-    sendmail_default_from: {
-      label: 'Sendmail Default From',
-      type: 'text',
-    },
-    sendmail_default_replyto: {
-      label: 'Sendmail Default Reply-To',
-      type: 'text',
-    },
-  },
   init: config => {
     return {
       send: options => {
         return new Promise((resolve, reject) => {
-          // Default values.
-          options = _.isObject(options) ? options : {};
-          options.from = options.from || config.sendmail_default_from;
-          options.replyTo = options.replyTo || config.sendmail_default_replyto;
-          options.text = options.text || options.html;
-          options.html = options.html || options.text;
-
           sendmail(
             {
-              from: options.from,
+              from: options.from || config.defaultFrom,
               to: options.to,
-              replyTo: options.replyTo,
+              replyTo: options.replyTo || config.defaultReplyTo,
               subject: options.subject,
               text: options.text,
               html: options.html,

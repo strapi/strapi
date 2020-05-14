@@ -11,6 +11,8 @@ By using the following function, strapi will use the configured provider to send
 await strapi.plugins['email'].services.email.send({
   to: 'paulbocuse@strapi.io',
   from: 'joelrobuchon@strapi.io',
+  cc: 'lauralumale@strapi.io',
+  bcc: 'arthurpapailhau@strapi.io',
   replyTo: 'no-reply@strapi.io',
   subject: 'Use strapi email provider successfully',
   text: 'Hello world!',

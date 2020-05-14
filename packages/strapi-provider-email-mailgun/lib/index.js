@@ -11,35 +11,11 @@ const mailgunFactory = require('mailgun-js');
 
 /* eslint-disable no-unused-vars */
 module.exports = {
-  provider: 'mailgun',
-  name: 'Mailgun',
-  auth: {
-    mailgun_default_from: {
-      label: 'Mailgun Default From',
-      type: 'text',
-    },
-    mailgun_default_replyto: {
-      label: 'Mailgun Default Reply-To',
-      type: 'text',
-    },
-    mailgun_api_key: {
-      label: 'Mailgun API Key',
-      type: 'text',
-    },
-    mailgun_api_host: {
-      label: 'Mailgun API Host',
-      type: 'text',
-    },
-    mailgun_domain: {
-      label: 'Mailgun Domain',
-      type: 'text',
-    },
-  },
   init: config => {
     const mailgun = mailgunFactory({
-      apiKey: config.mailgun_api_key,
-      host: config.mailgun_api_host,
-      domain: config.mailgun_domain,
+      apiKey: config.apiKey,
+      host: config.apiHost,
+      domain: config.domain,
       mute: false,
     });
 
@@ -50,18 +26,18 @@ module.exports = {
           options = isObject(options) ? options : {};
 
           let msg = {
-            from: options.from || config.mailgun_default_from,
+            from: options.from || config.defaultFrom,
             to: options.to,
+            cc: options.cc,
+            bcc: options.bcc,
             subject: options.subject,
-            ...(options.text && { text: options.text }),
-            ...(options.html && { html: options.html }),
-            ...(options.template && { template: options.template }),
-            ...(options['h:X-Mailgun-Variables'] && {
-              'h:X-Mailgun-Variables': options['h:X-Mailgun-Variables'],
-            }),
-            ...(options.attachment && { attachment: options.attachment }),
+            'h:Reply-To': options.replyTo || config.defaultReplyTo,
+            text: options.text,
+            html: options.html,
+            template: options.template,
+            'h:X-Mailgun-Variables': options['h:X-Mailgun-Variables'],
+            attachment: options.attachment,
           };
-          msg['h:Reply-To'] = options.replyTo || config.mailgun_default_replyto;
 
           mailgun.messages().send(msg, function(err) {
             if (err) {
