@@ -26,7 +26,7 @@ const Oops = () => {
           </Text>
         </Padded>
         <Padded top size="18px">
-          <Text fontSize="md">Your account has been suspended</Text>
+          <Text fontSize="md">{formatMessage({ id: 'Auth.components.Oops.text' })}</Text>
         </Padded>
         <Padded top size="50px">
           <Button onClick={handleClick} type="button">
