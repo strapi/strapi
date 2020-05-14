@@ -113,7 +113,7 @@ const ModalCreateBody = forwardRef(({ isDisabled, onSubmit, showMagicLink }, ref
         </Wrapper>
       </ModalSection>
       <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
-        hidden button to make to get the native form event
+        hidden button to use the native form event
       </button>
     </form>
   );
