@@ -3,10 +3,6 @@
 const _ = require('lodash');
 const { validateUserCreationInput } = require('../validation/user');
 
-const formatError = error => [
-  { messages: [{ id: error.id, message: error.message, field: error.field }] },
-];
-
 module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
@@ -24,20 +20,10 @@ module.exports = {
     });
 
     if (userAlreadyExists) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.taken',
-          message: 'Email already taken',
-          field: ['email'],
-        })
-      );
+      return ctx.badRequest('Email already taken');
     }
 
-    const createdUser = await strapi.admin.services.user.create({
-      ...attributes,
-      registrationToken: strapi.admin.services.token.createToken(),
-    });
+    const createdUser = await strapi.admin.services.user.create(attributes);
 
     // Send 201 created
     ctx.created(strapi.admin.services.user.sanitizeUser(createdUser));
