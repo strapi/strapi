@@ -1,34 +1,34 @@
-import { fromJS } from 'immutable';
+import produce from 'immer';
+import { set } from 'lodash';
+/* eslint-disable consistent-return */
 
-const initialState = fromJS({
-  didCheckErrors: false,
-  errors: {},
+const initialState = {
+  formErrors: {},
   modifiedData: {},
-  userEmail: '',
-  submitSuccess: false,
-});
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'ON_CHANGE':
-      return state.updateIn(
-        ['modifiedData', ...action.keys],
-        () => action.value
-      );
-    case 'RESET_PROPS':
-      return initialState;
-    case 'SET_ERRORS':
-      return state
-        .update('errors', () => action.formErrors)
-        .update('didCheckErrors', v => !v);
-    case 'SUBMIT_SUCCESS':
-      return state
-        .update('userEmail', () => action.email)
-        .update('submitSuccess', () => true);
-    default:
-      return state;
-  }
+  requestError: null,
 };
 
-export default reducer;
-export { initialState };
+const reducer = (state, action) =>
+  produce(state, draftState => {
+    switch (action.type) {
+      case 'ON_CHANGE': {
+        set(draftState.modifiedData, action.keys.split('.'), action.value);
+        break;
+      }
+      case 'SET_ERRORS': {
+        draftState.formErrors = action.errors;
+        break;
+      }
+      case 'SET_REQUEST_ERROR': {
+        draftState.requestError = {
+          errorMessage: action.errorMessage,
+          errorStatus: action.errorStatus,
+        };
+        break;
+      }
+      default:
+        return draftState;
+    }
+  });
+
+export { initialState, reducer };
