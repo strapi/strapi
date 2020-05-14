@@ -3,7 +3,7 @@ import axios from 'axios';
 // import PropTypes from 'prop-types';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth } from 'strapi-helper-plugin';
+import { auth, useQuery } from 'strapi-helper-plugin';
 import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
@@ -18,8 +18,9 @@ const AuthPage = () => {
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
+  const query = useQuery();
 
-  const { Component, endPoint, fieldsToOmit, schema } = get(forms, authType, {});
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, schema } = get(forms, authType, {});
   const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
     reducer,
     initialState,
@@ -36,9 +37,34 @@ const AuthPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (authType === 'register') {
+      const getData = () => {
+        const data = {
+          email: 'soup@soup.io',
+          firstname: 'soup',
+          lastname: 'soup',
+        };
+
+        dispatch({
+          type: 'SET_DATA',
+          data,
+        });
+      };
+
+      const code = query.get('code');
+      console.log({ code });
+      // TODO API call
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authType]);
+
   if (!forms[authType]) {
     return <div>COMING SOON</div>;
   }
+
+  console.log({ modifiedData });
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -77,6 +103,14 @@ const AuthPage = () => {
         // TODO register and other views logic
         auth.setToken(token, modifiedData.rememberMe);
         auth.setUserInfo(user, modifiedData.rememberMe);
+
+        // Subscribe the user to the newsletter
+        if (authType.includes('register') && modifiedData.news === true) {
+          axios({
+            method: 'POST',
+            body: omit(modifiedData, ['password', 'confirmPassword']),
+          });
+        }
 
         // Redirect to the homePage
         push('/');
@@ -119,6 +153,7 @@ const AuthPage = () => {
       </NavTopRightWrapper>
       <BaselineAlignment top size="80px">
         <Component
+          fieldsToDisable={fieldsToDisable}
           formErrors={formErrors}
           modifiedData={modifiedData}
           onChange={handleChange}

@@ -18,6 +18,10 @@ const reducer = (state, action) =>
       case 'RESET_PROPS': {
         return initialState;
       }
+      case 'SET_DATA': {
+        draftState.modifiedData = action.data;
+        break;
+      }
       case 'SET_ERRORS': {
         draftState.formErrors = action.errors;
         break;
