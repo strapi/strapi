@@ -8,7 +8,7 @@ module.exports = async () => {
   const adminPath = findPackagePath('strapi-admin');
 
   const [files, config] = await Promise.all([
-    loadFiles(adminPath, '!(config|node_modules|scripts)/*.*(js|json)'),
+    loadFiles(adminPath, '!(config|node_modules|test|scripts)/*.*(js|json)'),
     loadConfig(adminPath),
   ]);
 
