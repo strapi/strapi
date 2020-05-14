@@ -1,22 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Padded, Text } from '@buffetjs/core';
+import { Text } from '@buffetjs/core';
+import BaselineAlignment from '../../../../components/BaselineAlignement';
 import Wrapper from './Wrapper';
 
 const Box = ({ children, errorMessage }) => (
   <Wrapper>
-    <Padded top size="20px">
-      <Padded bottom size="25px">
-        <Padded left right size="md">
-          <Text fontSize="md" color="#f64d0a" style={{ textAlign: 'center' }}>
-            {errorMessage}&nbsp;
-          </Text>
-          <Padded top size="2px">
-            {children}
-          </Padded>
-        </Padded>
-      </Padded>
-    </Padded>
+    <Text fontSize="md" color="#f64d0a" style={{ textAlign: 'center' }}>
+      {errorMessage}&nbsp;
+    </Text>
+    <BaselineAlignment top size="2px">
+      {children}
+    </BaselineAlignment>
   </Wrapper>
 );
 

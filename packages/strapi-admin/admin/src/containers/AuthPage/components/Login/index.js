@@ -1,8 +1,9 @@
 import React from 'react';
-import { Checkbox, Padded } from '@buffetjs/core';
+import { Checkbox } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
+import BaselineAlignment from '../../../../components/BaselineAlignement';
 import AuthLink from '../AuthLink';
 import Button from '../Button';
 import Input from '../Input';
@@ -19,7 +20,7 @@ const Login = ({ formErrors, modifiedData, onChange, onSubmit, requestError }) =
         <Logo />
       </Section>
       <Section withBackground>
-        <Padded top size="24px">
+        <BaselineAlignment top size="24px">
           <Box errorMessage={get(requestError, 'errorMessage', null)}>
             <form onSubmit={onSubmit}>
               <Input
@@ -49,14 +50,14 @@ const Login = ({ formErrors, modifiedData, onChange, onSubmit, requestError }) =
                 onChange={onChange}
                 value={modifiedData.rememberMe}
               />
-              <Padded top size="27px">
+              <BaselineAlignment top size="27px">
                 <Button type="submit" color="primary">
                   {formatMessage({ id: 'Auth.form.button.login' })}
                 </Button>
-              </Padded>
+              </BaselineAlignment>
             </form>
           </Box>
-        </Padded>
+        </BaselineAlignment>
       </Section>
       <AuthLink label="Auth.link.forgot-password" to="/auth/forgot-password" />
     </>
