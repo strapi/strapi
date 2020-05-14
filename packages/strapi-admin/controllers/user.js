@@ -1,41 +1,26 @@
 'use strict';
 
 const _ = require('lodash');
+const { validateUserCreationInput } = require('../validation/user');
 
 const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
-const findNextMissingField = (obj, requiredFields) => {
-  for (const field of requiredFields) {
-    if (!obj[field]) {
-      return field;
-    }
-  }
-};
-
 module.exports = {
   async create(ctx) {
-    const requiredFields = ['firstname', 'lastname', 'email', 'roles'];
     const { body } = ctx.request;
 
-    const missingField = findNextMissingField(body, requiredFields);
-
-    if (missingField !== undefined) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: `missing.${missingField}`,
-          message: `Missing ${missingField}`,
-          field: [missingField],
-        })
-      );
+    try {
+      await validateUserCreationInput(body);
+    } catch (err) {
+      return ctx.badRequest(err);
     }
 
-    const requiredAttributes = _.pick(body, requiredFields);
+    const attributes = _.pick(body, ['firstname', 'lastname', 'email', 'roles']);
 
     const userAlreadyExists = await strapi.admin.services.user.exists({
-      email: requiredAttributes.email,
+      email: attributes.email,
     });
 
     if (userAlreadyExists) {
@@ -50,11 +35,11 @@ module.exports = {
     }
 
     const createdUser = await strapi.admin.services.user.create({
-      ...requiredAttributes,
+      ...attributes,
       registrationToken: strapi.admin.services.token.createToken(),
     });
 
     // Send 201 created
-    ctx.created(strapi.admin.services.auth.sanitizeUser(createdUser));
+    ctx.created(strapi.admin.services.user.sanitizeUser(createdUser));
   },
 };
