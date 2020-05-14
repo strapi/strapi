@@ -29,7 +29,7 @@ Manual guides for deployment on various platforms, for One-click and docker plea
     </template>
 		<template #title>Azure</template>
 		<template #description>
-			Step by step guide for deploying on Azure web app
+			Step by step guide for deploying on Azure
 		</template>
 	</InstallLink>
 </div>

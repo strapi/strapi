@@ -28,7 +28,7 @@ This config is using the sub-domain that is dedicated to Strapi only. It will re
 
 Example Domain: `api.example.com`
 
-Path: `/etc/haproxy/haproxy.cfg`
+**Path —** `/etc/haproxy/haproxy.cfg`
 
 ```
 global
@@ -94,7 +94,7 @@ HAProxy **cannot** serve static content, the below example is proxying frontend 
 
 Example Domain: `example.com/api`
 
-Path: `/etc/haproxy/haproxy.cfg`
+**Path —** `/etc/haproxy/haproxy.cfg`
 
 ```
 global
@@ -171,7 +171,7 @@ Example API Domain: `example.com/api`
 
 Example Admin Domain: `example.com/dashboard`
 
-Path: `/etc/haproxy/haproxy.cfg`
+**Path —** `/etc/haproxy/haproxy.cfg`
 
 ```
 global
@@ -252,7 +252,7 @@ In order to take full advantage of a proxied Strapi application you will need to
 
 Example Domain: `api.example.com`
 
-Path: `config/server.js`
+**Path —** `config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
@@ -272,7 +272,7 @@ module.exports = ({ env }) => ({
 
 Example Domain: `example.com/api`
 
-Path: `config/server.js`
+**Path —** `config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
@@ -294,7 +294,7 @@ Example API Domain: `example.com/api`
 
 Example Admin Domain: `example.com/dashboard`
 
-Path: `config/server.js`
+**Path —** `config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
