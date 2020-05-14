@@ -29,7 +29,7 @@ Manual guides for deployment on various platforms, for One-click and docker plea
     </template>
 		<template #title>Azure</template>
 		<template #description>
-			Step by step guide for deploying on Azure web app
+			Step by step guide for deploying on Azure
 		</template>
 	</InstallLink>
 </div>
@@ -82,6 +82,18 @@ Additional guides for optional software additions that compliment or improve the
 		<template #title>Caddy</template>
 		<template #description>
 			Overview of proxying Strapi with Caddy
+		</template>
+	</InstallLink>
+</div>
+
+<div>
+	<InstallLink link="../deployment/haproxy-proxy">
+    <template #icon>
+    HAP
+    </template>
+		<template #title>HAProxy</template>
+		<template #description>
+			Overview of proxying Strapi with HAProxy
 		</template>
 	</InstallLink>
 </div>
