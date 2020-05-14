@@ -15,6 +15,9 @@ const reducer = (state, action) =>
         set(draftState.modifiedData, action.keys.split('.'), action.value);
         break;
       }
+      case 'RESET_PROPS': {
+        return initialState;
+      }
       case 'SET_ERRORS': {
         draftState.formErrors = action.errors;
         break;
