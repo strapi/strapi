@@ -10,19 +10,19 @@ To apply your changes you need to [rebuild](#build) your admin panel
 
 By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path.
 
-**Path —** `./config/environment/**/server.json`.
+**Path —** `./config/server.js`.
 
-```json
-{
-  "host": "localhost",
-  "port": 1337,
-  "cron": {
-    "enabled": false
+```js
+module.exports = {
+  host: 'localhost',
+  port: 1337,
+  cron: {
+    enabled: false,
   },
-  "admin": {
-    "path": "/dashboard"
-  }
-}
+  admin: {
+    path: '/dashboard',
+  },
+};
 ```
 
 The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
@@ -31,19 +31,19 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 
 By default, the administration panel client host name is `localhost`. However, you can change this setting by updating the `admin` configuration:
 
-**Path —** `./config/environment/**/server.json`.
+**Path —** `./config/server.js`.
 
-```json
-{
-  "host": "localhost",
-  "port": 1337,
-  "cron": {
-    "enabled": false
+```js
+module.exports = {
+  host: 'localhost',
+  port: 1337,
+  cron: {
+    enabled: false,
   },
-  "admin": {
-    "host": "my-host"
-  }
-}
+  admin: {
+    host: 'my-host',
+  },
+};
 ```
 
 ## Development mode
@@ -158,19 +158,19 @@ export const SETTINGS_BASE_URL = '/settings';
 
 By default, the front-development server runs on the `8000` port. However, you can change this setting by updating the following configuration:
 
-**Path —** `./config/environment/**/server.json`.
+**Path —** `./config/server.js`.
 
-```json
-{
-  "host": "localhost",
-  "port": 1337,
-  "cron": {
-    "enabled": false
+```js
+module.exports = {
+  host: 'localhost',
+  port: 1337,
+  cron: {
+    enabled: false,
   },
-  "admin": {
-    "port": 3000
-  }
-}
+  admin: {
+    port: 3000,
+  },
+};
 ```
 
 ## Build
@@ -199,36 +199,6 @@ npm run build
 
 ```
 strapi build
-```
-
-:::
-
-::::
-
-you can build your admin panel with a specific configuration (located in the `./config/environments/**/server.json`) config by specifying a NODE_ENV as follows:
-
-:::: tabs
-
-::: tab yarn
-
-```
-NODE_ENV=production yarn build
-```
-
-:::
-
-::: tab npm
-
-```
-NODE_ENV=production npm run build
-```
-
-:::
-
-::: tab strapi
-
-```
-NODE_ENV=production strapi build
 ```
 
 :::

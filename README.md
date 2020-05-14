@@ -115,10 +115,9 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
-- [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
-- [Slack](http://slack.strapi.io) (Highly recommended for faster support)
-- [Spectrum](https://spectrum.chat/strapi)
-- [GitHub](https://github.com/strapi/strapi) (Bug reports, contributions)
+- [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
+- [GitHub Discussions](https://github.com/strapi/strapi/discussions) (Questions and Discussions)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)
@@ -126,7 +125,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your projects up-to-date.
+Follow our [migration guides](https://strapi.io/documentation/3.0.0-beta.x/migration-guide/) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 

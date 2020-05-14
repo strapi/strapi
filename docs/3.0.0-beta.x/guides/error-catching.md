@@ -67,28 +67,26 @@ It's important to call `throw(error);` to avoid stopping the middleware stack. I
 
 Make sure your middleware is added at the end of the middleware stack.
 
-**Path —** `./config/middleware.json`
+**Path —** `./config/middleware.js`
 
-```json
-{
-  ...
-    "after": [
-      "parser",
-      "router",
-      "sentry"
-    ]
-  }
-}
+```js
+module.exports = {
+  load: {
+    after: ['parser', 'router', 'sentry'],
+  },
+};
 ```
 
 And finally you have to enable the middleware.
 
-**Path —** `./config/environments/**/middleware.json`
+**Path —** `./config/middleware.js`
 
-```json
-{
-  "sentry": {
-    "enabled": true
-  }
-}
+```js
+module.exports = {
+  settings: {
+    sentry: {
+      enabled: true,
+    },
+  },
+};
 ```

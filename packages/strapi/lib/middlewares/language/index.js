@@ -6,7 +6,6 @@
 
 // Node.js core.
 const { resolve } = require('path');
-const { get } = require('lodash');
 const locale = require('koa-locale');
 const i18n = require('koa-i18n');
 /**
@@ -22,28 +21,26 @@ module.exports = strapi => {
     initialize() {
       locale(strapi.app);
 
-      const {
-        defaultLocale,
-        modes,
-        cookieName,
-      } = strapi.config.middleware.settings.language;
+      const { defaultLocale, modes, cookieName } = strapi.config.middleware.settings.language;
 
-      const directory = resolve(
-        strapi.config.appPath,
-        strapi.config.paths.config,
-        'locales'
-      );
+      const directory = resolve(strapi.config.appPath, strapi.config.paths.config, 'locales');
 
       strapi.app.use(
         i18n(strapi.app, {
           directory,
-          locales: Object.keys(get(strapi.config, 'locales', {})),
+          locales: strapi.config.get('middleware.settings.language.locales', []),
           defaultLocale,
           modes,
           cookieName,
           extension: '.json',
         })
       );
+
+      strapi.app.use((ctx, next) => {
+        console.log(ctx.i18n.__('someKey'));
+
+        next();
+      });
     },
   };
 };

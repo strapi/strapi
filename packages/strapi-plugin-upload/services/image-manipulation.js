@@ -49,6 +49,7 @@ const generateThumbnail = async file => {
         height,
         size: bytesToKbytes(size),
         buffer: newBuff,
+        path: file.path ? file.path : null,
       };
     }
   }
@@ -128,6 +129,7 @@ const generateBreakpoint = async (key, { file, breakpoint }) => {
         height,
         size: bytesToKbytes(size),
         buffer: newBuff,
+        path: file.path ? file.path : null,
       },
     };
   }

@@ -1,6 +1,5 @@
 'use strict';
 
-const loadConfig = require('./load-config');
 const loadApis = require('./load-apis');
 const loadAdmin = require('./load-admin');
 const loadPlugins = require('./load-plugins');
@@ -11,7 +10,6 @@ const bootstrap = require('./bootstrap');
 const loadComponents = require('./load-components');
 
 module.exports = {
-  loadConfig,
   loadApis,
   loadAdmin,
   loadPlugins,
