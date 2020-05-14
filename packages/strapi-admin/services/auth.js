@@ -1,23 +1,6 @@
-const _ = require('lodash');
+'use strict';
+
 const bcrypt = require('bcryptjs');
-
-const sanitizeUser = user => {
-  return _.omit(user.toJSON ? user.toJSON() : user, [
-    'password',
-    'resetPasswordToken',
-  ]);
-};
-
-/**
- * Creates a JWT token for an administration user
- * @param {object} admon - admin user
- */
-const createJwtToken = admin => {
-  return strapi.plugins['users-permissions'].services.jwt.issue({
-    id: admin.id,
-    isAdmin: true,
-  });
-};
 
 /**
  * hashes a password
@@ -34,9 +17,34 @@ const hashPassword = password => bcrypt.hash(password, 10);
  */
 const validatePassword = (password, hash) => bcrypt.compare(password, hash);
 
+/**
+ * Check login credentials
+ * @param {Object} options
+ * @param {string} options.email
+ * @param {string} options.password
+ */
+const checkCredentials = async ({ email, password }) => {
+  const user = await strapi.query('user', 'admin').findOne({ email });
+
+  if (!user) {
+    return [null, false, { message: 'Invalid credentials' }];
+  }
+
+  const isValid = await validatePassword(password, user.password);
+
+  if (!isValid) {
+    return [null, false, { message: 'Invalid credentials' }];
+  }
+
+  if (!(user.isActive === true)) {
+    return [null, false, { message: 'User not active' }];
+  }
+
+  return [null, user];
+};
+
 module.exports = {
-  createJwtToken,
-  sanitizeUser,
+  checkCredentials,
   validatePassword,
   hashPassword,
 };
