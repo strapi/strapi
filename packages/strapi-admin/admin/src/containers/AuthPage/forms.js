@@ -1,3 +1,4 @@
+// TODO DELETE THIS FILE WHEN AUTH FINISHED
 import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
 

@@ -1,3 +1,4 @@
+// TODO DELETE THIS FILE WHEN AUTH FINISHED
 import styled from 'styled-components';
 // import Background from '../../assets/images/background_empty.svg';
 
@@ -16,11 +17,11 @@ const Wrapper = styled.div`
 //   -webkit-font-smoothing: antialiased;
 
 //   .wrapper {
-//     height: 22.1rem;
-//     width: 685px;
-//     text-align: center;
-//     background-image: url(${Background});
-//     background-position-x: center;
+// height: 22.1rem;
+// width: 685px;
+// text-align: center;
+// background-image: url(${Background});
+// background-position-x: center;
 //     font-size: 1.4rem;
 //     font-family: Lato;
 //   }
