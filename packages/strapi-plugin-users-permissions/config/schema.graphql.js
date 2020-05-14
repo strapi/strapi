@@ -36,6 +36,12 @@ module.exports = {
       type: String
     }
 
+    input UsersPermissionsRegisterInput {
+      username: String!
+      email: String!
+      password: String!
+    }
+
     input UsersPermissionsLoginInput {
       identifier: String!
       password: String!
@@ -56,7 +62,7 @@ module.exports = {
   `,
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
-    register(input: UserInput!): UsersPermissionsLoginPayload!
+    register(input: UsersPermissionsRegisterInput!): UsersPermissionsLoginPayload!
     forgotPassword(email: String!): ForgotPassword
     changePassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload

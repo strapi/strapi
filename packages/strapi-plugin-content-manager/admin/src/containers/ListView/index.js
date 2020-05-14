@@ -47,6 +47,7 @@ function ListView({
   data,
   emitEvent,
   entriesToDelete,
+  isLoading,
   location: { pathname, search },
   getDataSucceeded,
   layouts,
@@ -348,7 +349,7 @@ function ListView({
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && <Header {...headerProps} />}
+          {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading} />}
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
@@ -403,6 +404,7 @@ function ListView({
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
+                  showLoader={isLoading}
                 />
                 <Footer />
               </div>
@@ -448,6 +450,7 @@ ListView.propTypes = {
   data: PropTypes.array.isRequired,
   emitEvent: PropTypes.func.isRequired,
   entriesToDelete: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   layouts: PropTypes.object,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,

@@ -11,14 +11,14 @@ const NameWrapper = styled.div`
   ${({ isOverEditBlock, isOverRemove, isSelected }) => {
   if (isOverRemove) {
     return `
-      color: #f64d0a;
-    `;
+    color: #f64d0a;
+  `;
   }
 
   if (isSelected || isOverEditBlock) {
     return `
-      color: #007eff;
-    `;
+    color: #007eff;
+  `;
   }
 
   return '';
