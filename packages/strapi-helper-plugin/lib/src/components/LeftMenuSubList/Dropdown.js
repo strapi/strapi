@@ -37,9 +37,9 @@ const Dropdown = styled.div`
   &:last-of-type {
     margin-bottom: 0;
     button {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       &.is-open {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
     }
     .collapse {
