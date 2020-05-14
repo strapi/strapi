@@ -7,19 +7,19 @@ const { createUser } = require('../domain/user');
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-async function create(attributes) {
+const create = async attributes => {
   const user = createUser(attributes);
   return strapi.query('user', 'admin').create(user);
-}
+};
 
 /**
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  * @returns {Promise<boolean>}
  */
-async function exists(attributes) {
+const exists = async attributes => {
   return (await strapi.query('user', 'admin').count(attributes)) > 0;
-}
+};
 
 module.exports = {
   create,

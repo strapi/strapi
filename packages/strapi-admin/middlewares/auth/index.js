@@ -32,7 +32,7 @@ module.exports = strapi => ({
       ) {
         const token = ctx.request.header.authorization.split(' ')[1];
 
-        const { payload, isValid } = strapi.admin.services.token.decodeToken(token);
+        const { payload, isValid } = strapi.admin.services.token.decodeJwtToken(token);
 
         if (isValid) {
           // request is made by an admin

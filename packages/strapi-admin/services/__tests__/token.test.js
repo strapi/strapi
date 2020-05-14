@@ -1,6 +1,6 @@
 'use strict';
 
-const { createToken, getTokenOptions, decodeToken } = require('../token');
+const { createJwtToken, getTokenOptions, decodeJwtToken } = require('../token');
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time));
 
@@ -71,7 +71,7 @@ describe('Token', () => {
     });
   });
 
-  describe('createToken', () => {
+  describe('createJwtToken', () => {
     test('Returns a jwt token', () => {
       global.strapi = {
         config: {
@@ -83,7 +83,7 @@ describe('Token', () => {
         },
       };
 
-      const token = createToken({ id: 1 });
+      const token = createJwtToken({ id: 1 });
 
       expect(token).toBeDefined();
       expect(typeof token === 'string').toBe(true);
@@ -100,14 +100,14 @@ describe('Token', () => {
         },
       };
 
-      const token = createToken({
+      const token = createJwtToken({
         id: 1,
         password: 'pcw123',
         firstname: 'Test',
         email: 'test@strapi.io',
       });
 
-      const { payload } = decodeToken(token);
+      const { payload } = decodeJwtToken(token);
 
       expect(payload).toEqual({
         id: 1,
@@ -117,9 +117,9 @@ describe('Token', () => {
     });
   });
 
-  describe('decodeToken', () => {
+  describe('decodeJwtToken', () => {
     test('Fails if the token is invalid', () => {
-      const { payload, isValid } = decodeToken('invalid-token');
+      const { payload, isValid } = decodeJwtToken('invalid-token');
       expect(payload).toBe(null);
       expect(isValid).toBe(false);
     });
@@ -136,7 +136,7 @@ describe('Token', () => {
       };
 
       const user = { id: 1 };
-      const token = createToken(user);
+      const token = createJwtToken(user);
 
       global.strapi = {
         config: {
@@ -148,7 +148,7 @@ describe('Token', () => {
         },
       };
 
-      const { payload, isValid } = decodeToken(token);
+      const { payload, isValid } = decodeJwtToken(token);
       expect(payload).toBe(null);
       expect(isValid).toBe(false);
     });
@@ -168,11 +168,11 @@ describe('Token', () => {
       };
 
       const user = { id: 1 };
-      const token = createToken(user);
+      const token = createJwtToken(user);
 
       await delay(10);
 
-      const { payload, isValid } = decodeToken(token);
+      const { payload, isValid } = decodeJwtToken(token);
       expect(payload).toBe(null);
       expect(isValid).toBe(false);
     });
@@ -190,9 +190,9 @@ describe('Token', () => {
       };
 
       const user = { id: 1 };
-      const token = createToken(user);
+      const token = createJwtToken(user);
 
-      const { payload, isValid } = decodeToken(token);
+      const { payload, isValid } = decodeJwtToken(token);
       expect(payload).toEqual({
         id: 1,
         iat: expect.any(Number),
