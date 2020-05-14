@@ -168,20 +168,18 @@ module.exports = ({ env }) => ({
 
 **Available options**
 
-| Property                 | Description                                                                                                                                                 | Type          | Default     |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------- |
-| `host`                   | Host name                                                                                                                                                   | string        | `localhost` |
-| `port`                   | Port on which the server should be running.                                                                                                                 | integer       | `1337`      |
-| `emitErrors`             | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                      | boolean       |             |
-| `url`                    | Url of the server. Enable proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. Default value: `http://${host}:${port}`.             | string        |             |
-| `cron`                   | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule))                                                           | Object        |             |
-| `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                            | boolean       | `false`     |
-| `admin`                  | Admin panel configuration                                                                                                                                   | Object        |             |
-| `admin.url`              | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`.                                         | string        | `/admin`    |
-| `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                         | boolean       | `true`      |
-| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). | Array(string) | `[]`.       |
-| `admin.build`            | Admin panel build configuration                                                                                                                             | Object        |             |
-| `admin.build.backend`    | URL that the admin panel and plugins will request                                                                                                           | string        |             |
+| Property                 | Description                                                                                                                                                                                      | Type          | Default     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ----------- |
+| `host`                   | Host name                                                                                                                                                                                        | string        | `localhost` |
+| `port`                   | Port on which the server should be running.                                                                                                                                                      | integer       | `1337`      |
+| `emitErrors`             | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                                                           | boolean       | `false      |
+| `url`                    | Url of the server. Enable proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. | string        | `''`        |
+| `cron`                   | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule))                                                                                                | Object        |             |
+| `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                                                                 | boolean       | `false`     |
+| `admin`                  | Admin panel configuration                                                                                                                                                                        | Object        |             |
+| `admin.url`              | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`.                                                                              | string        | `/admin`    |
+| `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                                                              | boolean       | `true`      |
+| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`).                                      | Array(string) | `[]`.       |
 
 ## Functions
 

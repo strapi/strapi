@@ -1,6 +1,15 @@
 'use strict';
 
 const { createUser } = require('../domain/user');
+const _ = require('lodash');
+
+/**
+ * Remove private user fields
+ * @param {Object} user - user to sanitize
+ */
+const sanitizeUser = user => {
+  return _.omit(user, ['password', 'resetPasswordToken']);
+};
 
 /**
  * Create and save a user in database
@@ -24,4 +33,5 @@ async function exists(attributes) {
 module.exports = {
   create,
   exists,
+  sanitizeUser,
 };
