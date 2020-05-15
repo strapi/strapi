@@ -15,7 +15,7 @@
   "main": "./lib",
   "dependencies": {
     "node-ses": "^3.0.0",
-    "strapi-utils": "^3.0.0-beta.20.3"
+    "strapi-utils": "3.0.0-beta.20.3"
   },
   "author": {
     "email": "nikolay@tsenkov.net",
