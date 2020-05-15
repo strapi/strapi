@@ -1,0 +1,28 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/source-menu",
+      "handler": "Source_menu.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/source-menu/:id",
+      "handler": "Source_menu.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/source-menu",
+      "handler": "Source_menu.editMany",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}
