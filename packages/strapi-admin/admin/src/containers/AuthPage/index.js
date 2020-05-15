@@ -1,10 +1,10 @@
 import React, { useEffect, useReducer } from 'react';
-import { Padded } from '@buffetjs/core';
 import axios from 'axios';
 // import PropTypes from 'prop-types';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from 'strapi-helper-plugin';
+import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
@@ -151,7 +151,7 @@ const AuthPage = () => {
       <NavTopRightWrapper>
         <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
       </NavTopRightWrapper>
-      <Padded top size="80px">
+      <BaselineAlignment top size="80px">
         <Component
           fieldsToDisable={fieldsToDisable}
           formErrors={formErrors}
@@ -160,7 +160,7 @@ const AuthPage = () => {
           onSubmit={handleSubmit}
           requestError={requestError}
         />
-      </Padded>
+      </BaselineAlignment>
     </>
   );
 };

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Padded, Text } from '@buffetjs/core';
+import { Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import BaselineAlignment from '../../../../components/BaselineAlignement';
 import Section from '../Section';
 import Link from './Link';
 import Wrapper from './Wrapper';
@@ -13,9 +14,9 @@ const AuthLink = ({ children, label, to }) => {
   return (
     <Section textAlign="center">
       <Wrapper>
-        <Padded top size="24px">
+        <BaselineAlignment top size="24px">
           <Link to={to}>{children || <Text fontSize="md">{message}</Text>}</Link>
-        </Padded>
+        </BaselineAlignment>
       </Wrapper>
     </Section>
   );
