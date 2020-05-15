@@ -11,7 +11,8 @@ describe('Admin User CRUD End to End', () => {
   }, 60000);
 
   describe('Create a new user', () => {
-    test('Can create a user successfully', async () => {
+    // FIXME: Waiting for strapi-admin::roles API
+    test.skip('Can create a user successfully', async () => {
       const user = {
         email: 'new-user@strapi.io',
         firstname: 'New',
