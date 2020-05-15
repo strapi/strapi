@@ -208,7 +208,7 @@ describe('Token', () => {
 
       expect(token).toBeDefined();
       expect(typeof token === 'string').toBe(true);
-      expect(token.length).toBe(128);
+      expect(token.length).toBe(40);
     });
   });
 });
