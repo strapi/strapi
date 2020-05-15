@@ -21,6 +21,7 @@ const {
   getCommonBeginning,
   escapeQuery,
 } = require('./stringFormatting');
+const { removeUndefined } = require('./objectFormatting');
 const { getConfigUrls } = require('./config');
 
 module.exports = {
@@ -41,4 +42,5 @@ module.exports = {
   getCommonBeginning,
   getConfigUrls,
   escapeQuery,
+  removeUndefined,
 };

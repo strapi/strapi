@@ -1,7 +1,7 @@
 'use strict';
 
 const sendmailFactory = require('sendmail');
-const _ = require('lodash');
+const { removeUndefined } = require('strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
@@ -26,9 +26,7 @@ module.exports = {
             ...rest,
           };
 
-          msg = _.pickBy(msg, value => typeof value !== 'undefined');
-
-          sendmail(msg, err => {
+          sendmail(removeUndefined(msg), err => {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {

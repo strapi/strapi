@@ -1,7 +1,7 @@
 'use strict';
 
 const mailgunFactory = require('mailgun-js');
-const _ = require('lodash');
+const { removeUndefined } = require('strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
@@ -27,9 +27,7 @@ module.exports = {
             ...rest,
           };
 
-          msg = _.pickBy(msg, value => typeof value !== 'undefined');
-
-          mailgun.messages().send(msg, function(err) {
+          mailgun.messages().send(removeUndefined(msg), function(err) {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {

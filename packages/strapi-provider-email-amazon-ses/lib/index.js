@@ -1,7 +1,7 @@
 'use strict';
 
 const nodeSES = require('node-ses');
-const _ = require('lodash');
+const { removeUndefined } = require('strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
@@ -24,9 +24,7 @@ module.exports = {
             ...rest,
           };
 
-          msg = _.pickBy(msg, value => typeof value !== 'undefined');
-
-          client.sendEmail(msg, function(err) {
+          client.sendEmail(removeUndefined(msg), function(err) {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
