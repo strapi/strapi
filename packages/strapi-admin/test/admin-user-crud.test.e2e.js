@@ -16,7 +16,7 @@ describe('Admin User CRUD End to End', () => {
         email: 'new-user@strapi.io',
         firstname: 'New',
         lastname: 'User',
-        roles: [1, 2],
+        roles: ['41224d776a326fb40f000001'],
       };
 
       const res = await rq({
@@ -27,10 +27,8 @@ describe('Admin User CRUD End to End', () => {
 
       expect(res.statusCode).toBe(201);
       expect(res.body).toMatchObject({
-        id: 2,
         firstname: user.firstname,
         lastname: user.lastname,
-        username: null,
         email: user.email,
         registrationToken: expect.any(String),
         isActive: false,
