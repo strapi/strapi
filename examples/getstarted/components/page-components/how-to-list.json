@@ -1,0 +1,20 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_how_to_list",
+  "info": {
+    "name": "How to list",
+    "icon": "list-ol"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "cloudinaryImage": { "cloudinary": true, "type": "json" }
+  }
+}

@@ -22,7 +22,7 @@ function InputCheckboxPlugin({ inputSelected, label, name, setNewInputSelected, 
   const handleChange = () => {
     const target = {
       type: 'checkbox',
-      name: name,
+      name,
       value: !value,
     };
 

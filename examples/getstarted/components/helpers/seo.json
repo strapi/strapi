@@ -1,0 +1,51 @@
+{
+  "connection": "default",
+  "collectionName": "components_seo_seo",
+  "info": {
+    "name": "seo",
+    "icon": "globe"
+  },
+  "options": {},
+  "attributes": {
+    "urlSlug": {
+      "type": "string",
+      "private": false,
+      "required": true
+    },
+    "canonicalUrl": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "keywords": {
+      "type": "string"
+    },
+    "robots": {
+      "type": "enumeration",
+      "enum": [
+        "index_follow",
+        "index_nofollow",
+        "noindex_follow",
+        "noindex_nofollow"
+      ],
+      "default": "index_follow",
+      "required": true
+    },
+    "includeToSitemap": {
+      "type": "boolean"
+    },
+    "includeToSearchSitemap": {
+      "type": "boolean"
+    },
+    "codeGA": {
+      "type": "string"
+    },
+    "codeGTM": {
+      "type": "string"
+    }
+  }
+}

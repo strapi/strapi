@@ -1,0 +1,37 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_link",
+  "info": {
+    "name": "Odkaz",
+    "icon": "link"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "usePageAsLink": {
+      "default": false,
+      "type": "boolean"
+    },
+    "linkToPage": {
+      "model": "page"
+    },
+    "useSpecialOfferAsLink": {
+      "default": false,
+      "type": "boolean"
+    },
+    "linkToSpecialOffer": {
+      "model": "special-offer"
+    },
+    "useUrlAsLink": {
+      "type": "boolean",
+      "default": false
+    },
+    "linkUrl": {
+      "type": "string",
+      "default": "https://"
+    }
+  }
+}

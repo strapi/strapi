@@ -40,6 +40,7 @@ export class HomePage extends React.Component {
       type: 'submit',
     },
   ];
+
   actionEdit = [
     {
       kind: 'primary',
@@ -59,6 +60,7 @@ export class HomePage extends React.Component {
 
   render() {
     const testData = [{ id: 1, name: 'karel', depth: 0 }];
+
     return (
       <HomePageContextProvider
         pathname={this.props.location.pathname}

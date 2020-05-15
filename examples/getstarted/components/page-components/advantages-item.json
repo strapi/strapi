@@ -1,0 +1,26 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_advantages_item",
+  "info": {
+    "name": "Advantages Item",
+    "icon": "audio-description"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    },
+    "image": {
+      "cloudinary": true,
+      "type": "json"
+    }
+  }
+}

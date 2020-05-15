@@ -1,0 +1,52 @@
+{
+  "connection": "default",
+  "collectionName": "special_offers",
+  "info": {
+    "name": "Akce"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "validFrom": {
+      "type": "date"
+    },
+    "validTo": {
+      "type": "date"
+    },
+    "button": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    },
+    "cloudinaryImage": { "cloudinary": true, "type": "json" },
+    "entityStatus": {
+      "type": "component",
+      "repeatable": false,
+      "component": "helpers.entity-status",
+      "required": true
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "helpers.seo",
+      "required": true
+    },
+    "helpers": {
+      "type": "component",
+      "repeatable": false,
+      "component": "helpers.helpers"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_tipimage_and_content",
+  "info": {
+    "name": "TipImage & Content",
+    "icon": "address-card"
+  },
+  "options": {},
+  "attributes": {
+    "reverse": {
+      "type": "boolean",
+      "default": "false"
+    },
+    "content": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.content",
+      "required": true
+    },
+    "image": { "cloudinary": true, "type": "json" }
+  }
+}

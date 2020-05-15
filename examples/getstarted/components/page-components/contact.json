@@ -1,0 +1,22 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_contact",
+  "info": {
+    "name": "Contact",
+    "icon": "american-sign-language-interpreting"
+  },
+  "options": {},
+  "attributes": {
+    "heading": {
+      "type": "string"
+    },
+    "callUsLink": {
+      "type": "component",
+      "repeatable": true,
+      "component": "helpers.call-us-link"
+    },
+    "footNote": {
+      "type": "string"
+    }
+  }
+}

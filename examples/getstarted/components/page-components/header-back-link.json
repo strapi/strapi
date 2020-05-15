@@ -1,0 +1,17 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_header_back_link",
+  "info": {
+    "name": "Header back link - Unique",
+    "icon": "audio-description"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    }
+  }
+}

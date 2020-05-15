@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/downloadable-documents",
+      "handler": "downloadable-documents.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/downloadable-documents/count",
+      "handler": "downloadable-documents.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/downloadable-documents/:id",
+      "handler": "downloadable-documents.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/downloadable-documents",
+      "handler": "downloadable-documents.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/downloadable-documents/:id",
+      "handler": "downloadable-documents.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/downloadable-documents/:id",
+      "handler": "downloadable-documents.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

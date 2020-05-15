@@ -1,12 +1,12 @@
 import React, { Fragment, useCallback, memo, useRef, useEffect } from 'react';
 import Sortly, { add, insert } from 'react-sortly';
 import update from 'immutability-helper';
-import SortableMenuItem from './SortableMenuItem';
 import styled from 'styled-components';
 import { Button } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FormattedMessage } from 'react-intl';
+import SortableMenuItem from './SortableMenuItem';
 
 const ActionsMenu = styled.div`
   display: flex;
@@ -80,11 +80,11 @@ export default memo(function SortableMenu({
   }, [items.length]);
 
   return (
-    <Fragment>
+    <>
       <ActionsMenu editMode={editMode}>
-        <Button kind={'primary'} onClick={onClickCreatePage}>
+        <Button kind="primary" onClick={onClickCreatePage}>
           <FontAwesomeIcon icon={faPlus} />
-          <FormattedMessage id={'menu-editor.MenuEditor.addNewItem'} />
+          <FormattedMessage id="menu-editor.MenuEditor.addNewItem" />
         </Button>
       </ActionsMenu>
 
@@ -106,6 +106,6 @@ export default memo(function SortableMenu({
           )}
         </Sortly>
       </SortlyWrapper>
-    </Fragment>
+    </>
   );
 });

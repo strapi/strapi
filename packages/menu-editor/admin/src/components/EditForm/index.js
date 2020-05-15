@@ -22,6 +22,7 @@ function EditForm({ onChange, showLoaders, values }) {
         value: get(roles, [current, 'type']),
       };
       acc.push(option);
+
       return acc;
     }, []);
 
@@ -45,7 +46,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="select"
               value={get(settings, 'default_role')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.email',
@@ -58,7 +59,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'unique_email')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.sign-up',
@@ -71,7 +72,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'allow_register')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.email-reset-password',
@@ -84,7 +85,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="text"
               value={get(settings, 'email_reset_password')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.email-confirmation',
@@ -97,7 +98,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'email_confirmation')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.email-confirmation-redirection',

@@ -1,0 +1,19 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_benefit_item",
+  "info": {
+    "name": "Benefit Item",
+    "icon": "award"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "image": {
+      "cloudinary": true,
+      "type": "json"
+    }
+  }
+}

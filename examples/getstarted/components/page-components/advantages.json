@@ -1,0 +1,25 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_advantages",
+  "info": {
+    "name": "Advantages",
+    "icon": "audio-description"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "advantagesList": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.advantages-item"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    }
+  }
+}

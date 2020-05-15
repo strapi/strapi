@@ -1,0 +1,30 @@
+{
+  "connection": "default",
+  "collectionName": "components_nested_page_components_documents_wrappers",
+  "info": {
+    "name": "Documents Wrapper",
+    "icon": "id-card"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "default",
+        "blue"
+      ],
+      "default": "default"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "documentsCategory": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.documents-collapse"
+    }
+  }
+}

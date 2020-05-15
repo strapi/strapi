@@ -1,0 +1,27 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_tip_and_tabs",
+  "info": {
+    "name": "Tip & Tabs",
+    "icon": "address-card"
+  },
+  "options": {},
+  "attributes": {
+    "reverse": {
+      "type": "boolean",
+      "default": "false"
+    },
+    "tabs": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.tabs",
+      "required": true
+    },
+    "tip": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.tip",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_cards_mini",
+  "info": {
+    "name": "cards-mini",
+    "icon": "address-card"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "cardsList": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.cards-item",
+      "required": true
+    }
+  }
+}

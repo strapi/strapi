@@ -1,0 +1,16 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_quick_links",
+  "info": {
+    "name": "Quick Links",
+    "icon": "link"
+  },
+  "options": {},
+  "attributes": {
+    "link": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.link"
+    }
+  }
+}

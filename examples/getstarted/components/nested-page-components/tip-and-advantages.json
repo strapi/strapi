@@ -1,0 +1,27 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_tip_and_advantages",
+  "info": {
+    "name": "Tip & Advantages",
+    "icon": "address-card"
+  },
+  "options": {},
+  "attributes": {
+    "reverse": {
+      "type": "boolean",
+      "default": "false"
+    },
+    "advantages": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.advantages",
+      "required": true
+    },
+    "tip": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.tip",
+      "required": true
+    }
+  }
+}

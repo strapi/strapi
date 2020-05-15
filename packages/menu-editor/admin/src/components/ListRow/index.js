@@ -134,6 +134,7 @@ class ListRow extends React.Component {
         if (!includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
           return push(`${pathname}/edit/${this.props.item.id}`);
         }
+
         return;
       }
       case 'providers':
@@ -145,7 +146,6 @@ class ListRow extends React.Component {
 
         return this.context.setDataToEdit(this.props.item.name);
       default:
-        return;
     }
   };
 

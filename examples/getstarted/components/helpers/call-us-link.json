@@ -1,0 +1,19 @@
+{
+  "connection": "default",
+  "collectionName": "components_helpers_call_us_links",
+  "info": {
+    "name": "callUsLink",
+    "icon": "air-freshener"
+  },
+  "options": {},
+  "attributes": {
+    "heading": {
+      "type": "string"
+    },
+    "Link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    }
+  }
+}

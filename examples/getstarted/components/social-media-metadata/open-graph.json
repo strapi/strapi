@@ -1,0 +1,28 @@
+{
+  "connection": "default",
+  "collectionName": "components_social_media_metadata_open_graph",
+  "info": {
+    "name": "Open Graph",
+    "icon": "asterisk"
+  },
+  "options": {},
+  "attributes": {
+    "use": {
+      "type": "boolean"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["website", "article", "profile"]
+    },
+    "appId": {
+      "type": "string"
+    },
+    "cloudinaryImage": { "cloudinary": true, "type": "json" }
+  }
+}

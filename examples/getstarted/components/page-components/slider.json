@@ -1,0 +1,16 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_slider",
+  "info": {
+    "name": "Slider",
+    "icon": "film"
+  },
+  "options": {},
+  "attributes": {
+    "Slider": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.slider-item"
+    }
+  }
+}

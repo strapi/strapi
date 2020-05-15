@@ -2,21 +2,47 @@
   "connection": "default",
   "collectionName": "categories",
   "info": {
-    "name": "category",
+    "name": "Kategorie",
     "description": ""
   },
   "options": {
     "increments": true,
-    "timestamps": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
-    "name": {
-      "type": "string"
+    "title": {
+      "type": "string",
+      "required": true,
+      "unique": false
     },
-    "addresses": {
-      "via": "categories",
-      "collection": "address"
+    "canBeListed": {
+      "default": true,
+      "type": "boolean"
+    },
+    "entityStatus": {
+      "type": "component",
+      "repeatable": false,
+      "component": "helpers.entity-status",
+      "required": true
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "helpers.seo",
+      "required": true
+    },
+    "helpers": {
+      "type": "component",
+      "repeatable": false,
+      "component": "helpers.helpers"
+    },
+    "faq": {
+      "via": "category",
+      "collection": "faq"
     }
   }
 }

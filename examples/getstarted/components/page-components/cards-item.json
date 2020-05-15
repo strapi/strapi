@@ -1,0 +1,22 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_cards_item",
+  "info": {
+    "name": "Cards Item",
+    "icon": "sd-card"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    }
+  }
+}

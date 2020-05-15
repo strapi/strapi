@@ -2,18 +2,18 @@ import React, { useCallback, useRef, memo } from 'react';
 import { createDndContext, DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { ContextProvider } from 'react-sortly';
-import SortableMenu from './SortableMenu';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import nanoid from 'nanoid/non-secure';
 import { FormattedMessage } from 'react-intl';
+import SortableMenu from './SortableMenu';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
-const newItemLabel = <FormattedMessage id={'menu-editor.MenuEditor.addNewItem'} />;
+const newItemLabel = <FormattedMessage id="menu-editor.MenuEditor.addNewItem" />;
 
 // function createNewItem(items) {
 //   return {

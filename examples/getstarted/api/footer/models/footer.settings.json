@@ -1,0 +1,30 @@
+{
+  "kind": "singleType",
+  "connection": "default",
+  "collectionName": "footer",
+  "info": {
+    "name": "Footer"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "heading": {
+      "type": "string"
+    },
+    "footerMenu": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.quick-links"
+    },
+    "footerSocial": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.quick-links"
+    },
+    "disclaimer": {
+      "type": "string"
+    }
+  }
+}

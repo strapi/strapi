@@ -1,0 +1,26 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_tip",
+  "info": {
+    "name": "Tip",
+    "icon": "carrot"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    },
+    "image": {
+      "cloudinary": true,
+      "type": "json"
+    }
+  }
+}

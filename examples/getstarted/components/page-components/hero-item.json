@@ -1,0 +1,34 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_hero_item",
+  "info": {
+    "name": "Hero Item",
+    "icon": "dot-circle"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    },
+    "cloudinaryImageXl": {
+      "cloudinary": true,
+      "type": "json"
+    },
+    "cloudinaryImageMd": {
+      "cloudinary": true,
+      "type": "json"
+    },
+    "cloudinaryImageXs": {
+      "cloudinary": true,
+      "type": "json"
+    }
+  }
+}

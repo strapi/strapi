@@ -1,0 +1,28 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/call-us",
+      "handler": "call-us.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/call-us",
+      "handler": "call-us.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/call-us",
+      "handler": "call-us.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

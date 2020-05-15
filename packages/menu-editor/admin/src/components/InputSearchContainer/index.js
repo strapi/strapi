@@ -74,6 +74,7 @@ function InputSearchContainer({
     if (isAdding) {
       const id = has(item, '_id') ? '_id' : 'id';
       const users = values;
+
       // Check if user is already associated with this role
       if (findIndex(users, [id, item[id]]) === -1) {
         onClickAdd(item);
@@ -97,12 +98,12 @@ function InputSearchContainer({
       <Label htmlFor={name} message={label} />
       <div className="input-group">
         <Addon className={`input-group-addon ${isFocused && 'focus'}`}>
-          <i className="fas fa-search"></i>
+          <i className="fas fa-search" />
         </Addon>
         <FormattedMessage id="users-permissions.InputSearch.placeholder">
           {message => (
             <input
-              className={`form-control`}
+              className="form-control"
               id={name}
               name={name}
               onBlur={handleBlur}

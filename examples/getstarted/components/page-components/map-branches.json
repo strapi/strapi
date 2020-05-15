@@ -1,0 +1,11 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_map_branches",
+  "info": {
+    "name": "Map Branches",
+    "icon": "address-book"
+  },
+  "options": {},
+  "attributes": {
+  }
+}

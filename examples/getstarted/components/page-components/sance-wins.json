@@ -1,0 +1,23 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_sance_win",
+  "info": {
+    "name": "sanceWins",
+    "icon": "ad"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "prize": {
+      "type": "integer",
+      "required": true
+    },
+    "youtubeUrl": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_html",
+  "info": {
+    "name": "html",
+    "icon": "address-book"
+  },
+  "options": {},
+  "attributes": {
+    "html": {
+      "type": "richtext"
+    }
+  }
+}

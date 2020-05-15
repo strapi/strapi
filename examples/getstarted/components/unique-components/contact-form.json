@@ -1,0 +1,11 @@
+{
+  "connection": "default",
+  "collectionName": "components_unique_components_contact_form",
+  "info": {
+    "name": "Contact form - Unique",
+    "icon": "audio-description"
+  },
+  "options": {},
+  "attributes": {
+  }
+}

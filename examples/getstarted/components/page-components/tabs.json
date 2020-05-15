@@ -1,0 +1,30 @@
+{
+  "connection": "default",
+  "collectionName": "components_page_components_tabs",
+  "info": {
+    "name": "Tabs",
+    "icon": "audio-description"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "tabsList": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.tabs-item"
+    },
+    "descriptionBottom": {
+      "type": "richtext"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "page-components.link"
+    }
+  }
+}

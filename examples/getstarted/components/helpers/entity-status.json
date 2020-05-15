@@ -1,0 +1,47 @@
+{
+  "connection": "default",
+  "collectionName": "components_helpers_entity_status",
+  "info": {
+    "name": "entityStatus",
+    "icon": "eye"
+  },
+  "options": {},
+  "attributes": {
+    "publishingState": {
+      "type": "enumeration",
+      "enum": [
+        "not_published_yet",
+        "published",
+        "unpublished"
+      ],
+      "default": "not_published_yet",
+      "private": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "unfinished",
+        "ready",
+        "all_done"
+      ],
+      "default": "unfinished",
+      "private": true
+    },
+    "workflowStep": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "review",
+        "shedueled",
+        "publish"
+      ],
+      "default": "draft"
+    },
+    "publishDate": {
+      "type": "date"
+    },
+    "dueDate": {
+      "type": "date"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "connection": "default",
+  "collectionName": "components_unique_components_jackpot_cards",
+  "info": {
+    "name": "Jackpot cards - Unique",
+    "icon": "audio-description"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    }
+  }
+}

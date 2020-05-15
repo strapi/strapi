@@ -1,0 +1,16 @@
+{
+  "info": {
+    "name": "Benefits",
+    "icon": "award"
+  },
+  "options": {},
+  "attributes": {
+    "Benefits": {
+      "type": "component",
+      "repeatable": true,
+      "component": "page-components.benefit-item"
+    }
+  },
+  "connection": "default",
+  "collectionName": "components_page_components_benefits"
+}
