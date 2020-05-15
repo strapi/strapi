@@ -53,6 +53,7 @@ const AuthPage = () => {
       };
 
       const code = query.get('code');
+      // Leaving this log on purpose
       console.log({ code });
       // TODO API call
       getData();
@@ -60,11 +61,10 @@ const AuthPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authType]);
 
+  // We should redirect to the login page or the oops page
   if (!forms[authType]) {
     return <div>COMING SOON</div>;
   }
-
-  console.log({ modifiedData });
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
