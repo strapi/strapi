@@ -1,3 +1,4 @@
+// TODO DELETE THIS FILE WHEN AUTH FINISHED
 import { get } from 'lodash';
 
 const formatErrorFromRequest = errorResponse => {

@@ -130,6 +130,15 @@ const unlockApp = () => {
   dispatch(unfreezeApp());
 };
 
+const lockAppWithOverlay = () => {
+  const overlayblockerParams = {
+    children: <div />,
+    noGradient: true,
+  };
+
+  lockApp(overlayblockerParams);
+};
+
 window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
   env: NODE_ENV,
@@ -165,6 +174,7 @@ window.strapi = Object.assign(window.strapi || {}, {
     window.navigator.userLanguage ||
     'en',
   lockApp,
+  lockAppWithOverlay,
   unlockApp,
   injectReducer,
   injectSaga,
