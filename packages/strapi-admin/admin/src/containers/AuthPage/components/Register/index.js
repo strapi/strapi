@@ -14,6 +14,7 @@ import Section from '../Section';
 import Box from '../Box';
 import Checkbox from './Checkbox';
 import InputWrapper from './InputWrapper';
+import Span from './Span';
 
 const Register = ({
   fieldsToDisable,
@@ -35,26 +36,12 @@ const Register = ({
 
   const terms = (
     <FormattedMessage id="Auth.privacy-policy-agreement.terms">
-      {content => (
-        <span
-          style={{ color: '#0097f7', cursor: 'pointer' }}
-          onClick={e => handleClick(e, 'terms')}
-        >
-          {content}
-        </span>
-      )}
+      {content => <Span onClick={e => handleClick(e, 'terms')}>{content}</Span>}
     </FormattedMessage>
   );
   const policy = (
     <FormattedMessage id="Auth.privacy-policy-agreement.policy">
-      {content => (
-        <span
-          style={{ color: '#0097f7', cursor: 'pointer' }}
-          onClick={e => handleClick(e, 'privacy')}
-        >
-          {content}
-        </span>
-      )}
+      {content => <Span onClick={e => handleClick(e, 'privacy')}>{content}</Span>}
     </FormattedMessage>
   );
 
