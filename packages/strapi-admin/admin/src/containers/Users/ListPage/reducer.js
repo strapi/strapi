@@ -3,6 +3,7 @@ import produce from 'immer';
 
 const initialState = {
   data: [],
+  dataToDelete: [],
   isLoading: true,
 };
 
@@ -12,6 +13,10 @@ const reducer = (state, action) =>
       case 'GET_DATA_SUCCEEDED': {
         draftState.data = action.data;
         draftState.isLoading = false;
+        break;
+      }
+      case 'ON_CHANGE_DATA_TO_DELETE': {
+        draftState.dataToDelete = action.dataToDelete;
         break;
       }
       default:
