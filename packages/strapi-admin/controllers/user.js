@@ -10,7 +10,7 @@ module.exports = {
     try {
       await validateUserCreationInput(body);
     } catch (err) {
-      return ctx.badRequest(err);
+      return ctx.badRequest('ValidationError', err);
     }
 
     const attributes = _.pick(body, ['firstname', 'lastname', 'email', 'roles']);
