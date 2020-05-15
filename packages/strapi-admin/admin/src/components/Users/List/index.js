@@ -1,63 +1,35 @@
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import { Table } from '@buffetjs/core';
-import { cloneDeep } from 'lodash';
 import { useQuery, useGlobalContext } from 'strapi-helper-plugin';
+
 import { useHistory } from 'react-router-dom';
 import { SETTINGS_BASE_URL } from '../../../config';
+import { checkIfAllEntriesAreSelected, getSelectedIds, headers } from './utils';
+import { initialState, reducer } from './reducer';
+import init from './init';
 import Wrapper from './Wrapper';
-import ActiveStatus from './ActiveStatus';
 
-const headers = [
-  {
-    cellFormatter: (cellData, rowData) => {
-      return `${cellData} ${rowData.lastname}`;
-    },
-    name: 'name',
-    value: 'firstname',
-  },
-  {
-    name: 'email',
-    value: 'email',
-  },
-  {
-    cellFormatter: cellData => cellData.join(',\n'),
-    name: 'roles',
-    value: 'roles',
-  },
-  {
-    name: 'username',
-    value: 'username',
-  },
-  {
-    // eslint-disable-next-line react/prop-types
-    cellAdapter: ({ isActive }) => {
-      return (
-        <>
-          <ActiveStatus isActive={isActive}>{isActive ? 'Active' : 'Inactive'}</ActiveStatus>
-        </>
-      );
-    },
-    name: 'active user',
-    value: 'isActive',
-  },
-];
-
-const updateRows = (array, shouldSelect = true) =>
-  array.map(row => {
-    row._isChecked = shouldSelect;
-
-    return row;
-  });
-
-const List = ({ isLoading, rows }) => {
+// TODO this component should handle the users that are already selected
+// we need to add this logic
+const List = ({ data, isLoading, onChange }) => {
   const query = useQuery();
   const { push } = useHistory();
+  const [{ rows }, dispatch] = useReducer(reducer, initialState, init);
 
   const { formatMessage } = useGlobalContext();
   const searchParam = query.get('_q');
+
+  // TODO: test the effects we might need to add the isLoading prop in the dependencies array
+  useEffect(() => {
+    dispatch({
+      type: 'SET_DATA',
+      data,
+    });
+  }, [data]);
+
   let tableEmptyText = 'Users.components.List.empty';
 
   // TODO filters logic
@@ -69,28 +41,45 @@ const List = ({ isLoading, rows }) => {
 
   const tableEmptyTextTranslated = formatMessage({ id: tableEmptyText }, { search: searchParam });
 
+  const handleChange = (row, index) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      index,
+    });
+
+    onChange(getSelectedIds(rows, index));
+  };
+
+  const handleChangeAll = () => {
+    dispatch({
+      type: 'ON_CHANGE_ALL',
+    });
+
+    let selectedIds = [];
+    const areAllEntriesSelected = checkIfAllEntriesAreSelected(rows);
+
+    if (!areAllEntriesSelected) {
+      for (let i = 0; i < rows.length; i++) {
+        selectedIds.push(rows[i].id);
+      }
+    }
+
+    onChange(selectedIds);
+  };
+
   const handleClick = id => {
     push(`${SETTINGS_BASE_URL}/users/${id}`);
   };
 
   return (
-    <Wrapper withHigherHeight={!rows.length}>
+    <Wrapper withHigherHeight={!data.length}>
       <Table
         className="table-wrapper"
         isLoading={isLoading}
         headers={headers}
-        onClickRow={(e, data) => {
-          handleClick(data.id);
-        }}
-        // onSelect={(row, index) => {
-        //   dispatch({ type: 'SELECT_ROW', row, index });
-        // }}
-        // onSelectAll={() => {
-        //   const type = areAllEntriesSelected ? 'UNSELECT_ALL' : 'SELECT_ALL';
-
-        //   dispatch({ type });
-        // }}
-        rows={updateRows(cloneDeep(rows))}
+        onSelect={handleChange}
+        onSelectAll={handleChangeAll}
+        rows={rows}
         rowLinks={[
           {
             icon: <FontAwesomeIcon icon={faPencilAlt} />,
@@ -113,13 +102,15 @@ const List = ({ isLoading, rows }) => {
 };
 
 List.defaultProps = {
+  data: [],
   isLoading: false,
-  rows: [],
+  onChange: () => {},
 };
 
 List.propTypes = {
+  data: PropTypes.array,
   isLoading: PropTypes.bool,
-  rows: PropTypes.array,
+  onChange: PropTypes.func,
 };
 
 export default List;
