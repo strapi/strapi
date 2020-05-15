@@ -1,6 +1,7 @@
 'use strict';
 
 const sendgrid = require('@sendgrid/mail');
+const _ = require('lodash');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
@@ -22,6 +23,8 @@ module.exports = {
             html,
             ...rest,
           };
+
+          msg = _.pickBy(msg, value => typeof value !== 'undefined');
 
           sendgrid.send(msg, function(err) {
             if (err) {

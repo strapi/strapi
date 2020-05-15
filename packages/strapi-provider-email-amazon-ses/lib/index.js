@@ -1,6 +1,7 @@
 'use strict';
 
 const nodeSES = require('node-ses');
+const _ = require('lodash');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
@@ -22,6 +23,8 @@ module.exports = {
             html,
             ...rest,
           };
+
+          msg = _.pickBy(msg, value => typeof value !== 'undefined');
 
           client.sendEmail(msg, function(err) {
             if (err) {
