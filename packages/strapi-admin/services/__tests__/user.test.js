@@ -25,27 +25,41 @@ describe('User', () => {
   describe('create', () => {
     test('Creates a user by merging given and default attributes', async () => {
       const create = jest.fn(user => Promise.resolve(user));
+      const createToken = jest.fn(() => 'token');
 
       global.strapi = {
+        admin: {
+          services: {
+            token: { createToken },
+          },
+        },
         query() {
           return { create };
         },
       };
 
       const input = { firstname: 'John', lastname: 'Doe', email: 'johndoe@email.com' };
-      const expected = { ...input, isActive: false, roles: [] };
+      const expected = { ...input, isActive: false, roles: [], registrationToken: 'token' };
 
       const result = await userService.create(input);
 
+      expect(create).toHaveBeenCalled();
+      expect(createToken).toHaveBeenCalled();
       expect(result).toStrictEqual(expected);
     });
 
     test('Creates a user by using given attributes', async () => {
-      const createFn = jest.fn(user => Promise.resolve(user));
+      const create = jest.fn(user => Promise.resolve(user));
+      const createToken = jest.fn(() => 'token');
 
       global.strapi = {
+        admin: {
+          services: {
+            token: { createToken },
+          },
+        },
         query() {
-          return { create: createFn };
+          return { create };
         },
       };
 
@@ -55,6 +69,7 @@ describe('User', () => {
         email: 'johndoe@email.com',
         roles: [2],
         isActive: true,
+        registrationToken: 'another-token',
       };
       const expected = _.clone(input);
       const result = await userService.create(input);
