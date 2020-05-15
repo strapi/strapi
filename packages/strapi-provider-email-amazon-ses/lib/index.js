@@ -1,42 +1,26 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-/* eslint-disable prefer-template */
-// Public node modules.
-const _ = require('lodash');
 const nodeSES = require('node-ses');
 
-/* eslint-disable no-unused-vars */
 module.exports = {
-  init: config => {
-    var client = nodeSES.createClient({
-      key: config.apiKey,
-      secret: config.secret,
-      amazon: config.endpoint,
-    });
+  init: (providerOptions = {}, settings = {}) => {
+    var client = nodeSES.createClient({ ...providerOptions });
 
     return {
       send: options => {
         return new Promise((resolve, reject) => {
-          // Default values.
-          options = _.isObject(options) ? options : {};
-          options.from = options.from || config.defaultFrom;
-          options.replyTo = options.replyTo || config.defaultReplyTo;
-          options.text = options.text || options.html;
-          options.html = options.html || options.text;
+          const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
           let msg = {
-            from: options.from,
-            to: options.to,
-            cc: options.cc,
-            bcc: options.bcc,
-            replyTo: options.replyTo,
-            subject: options.subject,
-            altText: options.text,
-            message: options.html,
+            from: from || settings.defaultFrom,
+            to,
+            cc,
+            bcc,
+            replyTo: replyTo || settings.defaultReplyTo,
+            subject,
+            text,
+            html,
+            ...rest,
           };
 
           client.sendEmail(msg, function(err) {

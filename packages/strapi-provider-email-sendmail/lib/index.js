@@ -1,29 +1,29 @@
 'use strict';
 
-/**
- * Module dependencies
- */
+const sendmailFactory = require('sendmail');
 
-// Public node modules.
-const sendmail = require('sendmail')({
-  silent: true,
-});
-
-/* eslint-disable no-unused-vars */
 module.exports = {
-  init: config => {
+  init: (providerOptions = {}, settings = {}) => {
+    const sendmail = sendmailFactory({
+      silent: true,
+      ...providerOptions,
+    });
     return {
       send: options => {
         return new Promise((resolve, reject) => {
+          const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
+
           sendmail(
             {
-              from: options.from || config.defaultFrom,
-              to: options.to,
-              replyTo: options.replyTo || config.defaultReplyTo,
-              subject: options.subject,
-              text: options.text,
-              html: options.html,
-              attachments: options.attachments,
+              from: from || settings.defaultFrom,
+              to,
+              cc,
+              bcc,
+              replyTo: replyTo || settings.defaultReplyTo,
+              subject,
+              text,
+              html,
+              ...rest,
             },
             function(err) {
               if (err) {

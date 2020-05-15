@@ -26,11 +26,13 @@ npm install strapi-provider-email-sendmail --save
 
 ## Configuration
 
-| Variable                       | Type                    | Description                                    | Required | Default   |
-| ------------------------------ | ----------------------- | ---------------------------------------------- | -------- | --------- |
-| provider                       | string                  | The name of the provider you use               | yes      |           |
-| providerOptions.defaultFrom    | string                  | Sender mail address                            | no       | undefined |
-| providerOptions.defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
+| Variable                | Type                    | Description                                                                                                              | Required | Default   |
+| ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------- | --------- |
+| provider                | string                  | The name of the provider you use                                                                                         | yes      |           |
+| providerOptions         | object                  | Will be directly given to `require('sendmail')`. Please refer to [sendmail](https://www.npmjs.com/package/sendmail) doc. | no       | {}        |
+| settings                | object                  | Settings                                                                                                                 | no       | {}        |
+| settings.defaultFrom    | string                  | Default sender mail address                                                                                              | no       | undefined |
+| settings.defaultReplyTo | string \| array<string> | Default address or addresses the receiver is asked to reply to                                                           | no       | undefined |
 
 ### Example
 
@@ -41,7 +43,7 @@ module.exports = ({ env }) => ({
   // ...
   email: {
     provider: 'sendmail',
-    providerOptions: {
+    settings: {
       defaultFrom: 'myemail@protonmail.com',
       defaultReplyTo: 'myemail@protonmail.com',
     },

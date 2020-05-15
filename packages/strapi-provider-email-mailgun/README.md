@@ -26,14 +26,13 @@ npm install strapi-provider-email-mailgun --save
 
 ## Configuration
 
-| Variable                       | Type                    | Description                                    | Required | Default   |
-| ------------------------------ | ----------------------- | ---------------------------------------------- | -------- | --------- |
-| provider                       | string                  | The name of the provider you use               | yes      |           |
-| providerOptions.apiKey         | string                  | Api key given by Mailgun                       | yes      |           |
-| providerOptions.defaultFrom    | string                  | Sender mail address                            | no       | undefined |
-| providerOptions.defaultReplyTo | string \| array<string> | Address or addresses the receiver can reply to | no       | undefined |
-| providerOptions.host           | string                  |                                                |          |           |
-| providerOptions.domain         | string                  |                                                |          |           |
+| Variable                | Type                    | Description                                                                                                                        | Required | Default   |
+| ----------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
+| provider                | string                  | The name of the provider you use                                                                                                   | yes      |           |
+| providerOptions         | object                  | Will be directly given to the `require('mailgun-js')`. Please refer to [mailgun-js](https://www.npmjs.com/package/mailgun-js) doc. | yes      |           |
+| settings                | object                  | Settings                                                                                                                           | no       | {}        |
+| settings.defaultFrom    | string                  | Default sender mail address                                                                                                        | no       | undefined |
+| settings.defaultReplyTo | string \| array<string> | Default address or addresses the receiver is asked to reply to                                                                     | no       | undefined |
 
 ### Example
 
@@ -46,6 +45,8 @@ module.exports = ({ env }) => ({
     provider: 'mailgun',
     providerOptions: {
       apiKey: env('MAILGUN_API_KEY'),
+    },
+    settings: {
       defaultFrom: 'myemail@protonmail.com',
       defaultReplyTo: 'myemail@protonmail.com',
     },

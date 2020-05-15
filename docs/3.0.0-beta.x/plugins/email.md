@@ -50,8 +50,6 @@ npm install strapi-provider-email-sendgrid@beta --save
 
 ::::
 
-**Note:** If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
-
 ### Configure your provider
 
 After installing your provider you will need to add some settings in `config/plugins.js`. Check the README of each provider to know what configuration settings the provider needs.
@@ -67,6 +65,8 @@ module.exports = ({ env }) => ({
     provider: 'sendgrid',
     providerOptions: {
       apiKey: env('SENDGRID_API_KEY'),
+    },
+    settings: {
       defaultFrom: 'myemail@protonmail.com',
       defaultReplyTo: 'myemail@protonmail.com',
     },
@@ -87,7 +87,7 @@ Default template
 
 ```js
 module.exports = {
-  init: config => {
+  init: (providerOptions = {}, settings = {}) => {
     return {
       send: async options => {},
     };
@@ -97,7 +97,8 @@ module.exports = {
 
 In the `send` function you will have access to:
 
-- `config` that contains configurations written in `plugins.js`
+- `providerOptions` that contains configurations written in `plugins.js`
+- `settings` that contains configurations written in `plugins.js`
 - `options` that contains options you send when you call the `send` function from the email plugin service
 
 To use it you will have to publish it on **npm**.

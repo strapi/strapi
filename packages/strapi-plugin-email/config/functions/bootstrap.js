@@ -12,7 +12,7 @@ const createProvider = emailConfig => {
       `The provider package isn't installed. Please run \`npm install strapi-provider-email-${providerName}\` --save`
     );
   }
-  return provider.init(emailConfig.providerOptions);
+  return provider.init(emailConfig.providerOptions, emailConfig.settings);
 };
 
 module.exports = async () => {
