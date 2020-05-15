@@ -11,7 +11,7 @@ import { initialState, reducer } from './reducer';
 const ListPage = () => {
   const [isModalOpened, setIsModalOpened] = useState(false);
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
-  const [{ data, isLoading }, dispatch] = useReducer(reducer, initialState, init);
+  const [{ data, dataToDelete, isLoading }, dispatch] = useReducer(reducer, initialState, init);
 
   useEffect(() => {
     const getData = () => {
@@ -22,7 +22,7 @@ const ListPage = () => {
             data: rows,
           });
           resolve();
-        }, 5000);
+        }, 1000);
       });
     };
 
@@ -42,12 +42,24 @@ const ListPage = () => {
   const usersCount = 1;
   const handleToggle = () => setIsModalOpened(prev => !prev);
 
+  const handleChangeDataToDelete = ids => {
+    dispatch({
+      type: 'ON_CHANGE_DATA_TO_DELETE',
+      dataToDelete: ids,
+    });
+  };
+
   return (
     <div>
-      <Header count={usersCount} onClickAddUser={handleToggle} isLoading={isLoading} />
+      <Header
+        count={usersCount}
+        dataToDelete={dataToDelete}
+        onClickAddUser={handleToggle}
+        isLoading={isLoading}
+      />
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
       <div style={{ height: 37 }} />
-      <List isLoading={isLoading} rows={data} />
+      <List isLoading={isLoading} data={data} onChange={handleChangeDataToDelete} />
     </div>
   );
 };
