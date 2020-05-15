@@ -17,7 +17,7 @@ const HeaderSearch = ({ label, queryParameter }) => {
   useEffect(() => {
     const handler = setTimeout(() => {
       if (value) {
-        push({ search: `${queryParameter}=${value}` });
+        push({ search: `${queryParameter}=${encodeURIComponent(value)}` });
       } else {
         push({ search: '' });
       }
