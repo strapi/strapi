@@ -85,6 +85,12 @@ const auth = {
   setUserInfo(value = '', isLocalStorage = false, userInfo = USER_INFO) {
     return auth.set(value, userInfo, isLocalStorage);
   },
+
+  updateToken(value = '') {
+    const isLocalStorage = localStorage && localStorage.getItem(TOKEN_KEY);
+
+    return auth.setToken(value, isLocalStorage);
+  },
 };
 
 export default auth;

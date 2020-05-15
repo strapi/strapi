@@ -1,3 +1,4 @@
+// TODO DELETE THIS FILE WHEN AUTH FINISHED
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
