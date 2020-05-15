@@ -5,7 +5,7 @@ module.exports = {
   },
   email: {
     provider: 'sendmail',
-    providerOptions: {
+    settings: {
       defaultFrom: 'strapi@strapi.io',
     },
   },
