@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Header as HeaderCompo } from '@buffetjs/custom';
 
-const Header = ({ count, onClickAddUser }) => {
+const Header = ({ count, isLoading, onClickAddUser }) => {
   const { formatMessage } = useGlobalContext();
   const tradBaseId = 'Settings.permissions.users.listview.';
   const headerDescriptionSuffix =
@@ -29,16 +29,18 @@ const Header = ({ count, onClickAddUser }) => {
     title: { label: formatMessage({ id: `${tradBaseId}header.title` }) },
   };
 
-  return <HeaderCompo {...headerProps} />;
+  return <HeaderCompo {...headerProps} isLoading={isLoading} />;
 };
 
 Header.defaultProps = {
   count: 0,
+  isLoading: false,
   onClickAddUser: () => {},
 };
 
 Header.propTypes = {
   count: PropTypes.number,
+  isLoading: PropTypes.bool,
   onClickAddUser: PropTypes.func,
 };
 

@@ -285,6 +285,11 @@
   "Settings.webhooks.events.edit": "Edit",
   "Settings.webhooks.events.delete": "Delete",
   "Settings.webhooks.created": "Webhook created",
+
+  "Users.components.List.empty.withFilters": "There is no users with the applied filters...",
+  "Users.components.List.empty.withSearch": "There is no users corresponding to the search ({search})...",
+  "Users.components.List.empty": "There is no users...",
+
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
   "components.Input.error.password.noMatch": "Passwords do not match",
   "form.button.continue": "Continue",
