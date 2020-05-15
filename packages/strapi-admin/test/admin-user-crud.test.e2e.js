@@ -55,7 +55,8 @@ describe('Admin User CRUD End to End', () => {
       expect(res.body).toMatchObject({
         statusCode: 400,
         error: 'Bad Request',
-        message: {
+        message: 'ValidationError',
+        data: {
           email: ['email is a required field'],
         },
       });
@@ -79,7 +80,8 @@ describe('Admin User CRUD End to End', () => {
       expect(res.body).toMatchObject({
         statusCode: 400,
         error: 'Bad Request',
-        message: {
+        message: 'ValidationError',
+        data: {
           firstname: ['firstname must be a `string` type, but the final value was: `1`.'],
         },
       });
