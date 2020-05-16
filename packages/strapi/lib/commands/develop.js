@@ -23,7 +23,9 @@ module.exports = async function({ build, watchAdmin, dirPath }) {
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
     try {
-      execa.shellSync('strapi build --no-optimization', {
+      const buildScriptBase = 'strapi build --no-optimization';
+      const buildScript = dirPath ? buildScriptBase + ' --dir-path' + dirPath : buildScriptBase;
+      execa.shellSync(buildScript, {
         stdio: 'inherit',
       });
     } catch (err) {
