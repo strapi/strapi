@@ -26,6 +26,7 @@ module.exports = async ({ clean, optimization, dirPath }) => {
   return strapiAdmin
     .build({
       dir,
+      root,
       // front end build env is always production for now
       env: 'production',
       optimize: optimization,
