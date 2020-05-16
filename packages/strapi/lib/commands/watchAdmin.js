@@ -5,8 +5,9 @@ const { getConfigUrls } = require('strapi-utils');
 const loadConfiguration = require('../core/app-configuration');
 const addSlash = require('../utils/addSlash');
 
-module.exports = async function() {
-  const dir = process.cwd();
+module.exports = async function({ dirPath }) {
+  const root = process.cwd();
+  const dir = dirPath || root;
 
   const config = loadConfiguration(dir);
 
@@ -18,6 +19,7 @@ module.exports = async function() {
 
   strapiAdmin.watchAdmin({
     dir,
+    root,
     port: adminPort,
     host: adminHost,
     options: {

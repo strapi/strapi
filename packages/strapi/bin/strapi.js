@@ -215,6 +215,7 @@ program
 program
   .command('watch-admin')
   .description('Starts the admin dev server')
+  .option('--dir-path <path>', 'Path to strapi directory')
   .action(getLocalScript('watchAdmin'));
 
 program
