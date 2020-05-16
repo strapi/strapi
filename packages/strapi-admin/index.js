@@ -32,9 +32,9 @@ function getCustomWebpackConfig(dir, config) {
   return webpackConfig;
 }
 
-async function build({ dir, env, options, optimize }) {
+async function build({ dir, root = dir, env, options, optimize }) {
   // Create the cache dir containing the front-end files.
-  await createCacheDir(dir);
+  await createCacheDir(dir, root);
 
   const cacheDir = path.resolve(dir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
@@ -167,10 +167,10 @@ async function copyCustomAdmin(src, dest) {
   await fs.copy(src, path.resolve(dest, 'admin'));
 }
 
-async function createCacheDir(dir) {
+async function createCacheDir(dir, root = dir) {
   const cacheDir = path.resolve(dir, '.cache');
 
-  const pkgJSON = require(path.join(dir, 'package.json'));
+  const pkgJSON = require(path.join(root, 'package.json'));
 
   const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
     dep =>
@@ -227,9 +227,9 @@ async function createCacheDir(dir) {
   );
 }
 
-async function watchAdmin({ dir, host, port, options }) {
+async function watchAdmin({ dir, root = dir, host, port, options }) {
   // Create the cache dir containing the front-end files.
-  await createCacheDir(dir);
+  await createCacheDir(dir, root);
 
   const entry = path.join(dir, '.cache', 'admin', 'src', 'app.js');
   const dest = path.join(dir, 'build');
