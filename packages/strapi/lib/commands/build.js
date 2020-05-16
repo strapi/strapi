@@ -10,9 +10,10 @@ const addSlash = require('../utils/addSlash');
 /**
  * `$ strapi build`
  */
-module.exports = async ({ clean, optimization }) => {
-  const dir = process.cwd();
-  const config = loadConfiguration(dir);
+module.exports = async ({ clean, optimization, dirPath }) => {
+  const root = process.cwd();
+  const dir = dirPath ? root + '/' + dirPath : root;
+  const config = loadConfiguration(dir, undefined, root);
 
   const { serverUrl, adminPath } = getConfigUrls(config.get('server'), true);
 

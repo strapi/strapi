@@ -14,8 +14,8 @@ const strapi = require('../index');
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin }) {
-  const dir = process.cwd();
+module.exports = async function({ build, watchAdmin, dirPath }) {
+  const dir = dirPath || process.cwd();
   const config = loadConfiguration(dir);
 
   const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
@@ -23,7 +23,7 @@ module.exports = async function({ build, watchAdmin }) {
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
     try {
-      execa.shellSync('npm run -s build -- --no-optimization', {
+      execa.shellSync('strapi build --no-optimization', {
         stdio: 'inherit',
       });
     } catch (err) {

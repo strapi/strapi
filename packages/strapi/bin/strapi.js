@@ -118,6 +118,7 @@ program
 // `$ strapi start`
 program
   .command('start')
+  .option('--dir-path <path>', 'Path to strapi directory')
   .description('Start your Strapi application')
   .action(getLocalScript('start'));
 
@@ -127,6 +128,7 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build', false)
   .option('--watch-admin', 'Enable watch', true)
+  .option('--dir-path <path>', 'Path to strapi directory')
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
@@ -192,6 +194,7 @@ program
   .command('build')
   .option('--clean', 'Remove the build and .cache folders', false)
   .option('--no-optimization', 'Build the Administration without assets optimization', false)
+  .option('--dir-path <path>', 'Path to strapi directory')
   .description('Builds the strapi admin app')
   .action(getLocalScript('build'));
 
