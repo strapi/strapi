@@ -220,9 +220,9 @@ To improve the Developer Experience when developing or using the administration 
 
 **`uid`**
 
-This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+This field type allows a `targetField` key. The value is the name of an attribute that has `string` or `text` type.
 
-The field type also allows an `options` key. The value is an `object` of options passed to the `uid` generator.
+The field type also allows an `options` key. The value is an `object` of options passed to [the `uid` generator](https://github.com/sindresorhus/slugify).
 
 - `separator` (string) — Specify the string to be used for word separation. Allowed separators are: `"-"`, `"_"`, `"."`, and `"~"`. Default: `"-"`
 - `lowercase` (boolean) — Make the `uid` lowercase. Default: `true`
@@ -995,7 +995,7 @@ module.exports = {
   /**
    * Triggered before user creation.
    */
-  beforeCreate: async model => {
+  beforeCreate: async (model) => {
     // Hash password.
     const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
