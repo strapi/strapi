@@ -86,6 +86,19 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .test(isValidUID),
         minLength: validators.minLength,
         maxLength: validators.maxLength.max(256).test(maxLengthIsGreaterThanOrEqualToMinLength),
+        options: yup.object().shape({
+          separator: yup.string(),
+          lowercase: yup.boolean(),
+          decamelize: yup.boolean(),
+          customReplacements: yup.array().of(
+            yup
+              .array()
+              .of(yup.string())
+              .min(2)
+              .max(2)
+          ),
+          preserveLeadingUnderscore: yup.boolean(),
+        }),
       };
     }
 
