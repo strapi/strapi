@@ -27,7 +27,7 @@ describe('Role', () => {
         name: 'super_admin',
         description: "Have all permissions. Can't be delete",
       };
-      const dbFindOne = jest.fn(({ id }) => _.find([role], { id }));
+      const dbFindOne = jest.fn(({ id }) => Promise.resolve(_.find([role], { id })));
 
       global.strapi = {
         query: () => ({ findOne: dbFindOne }),
