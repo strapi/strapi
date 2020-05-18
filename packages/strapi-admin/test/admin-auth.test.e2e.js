@@ -21,7 +21,7 @@ expect.extend({
   },
 });
 
-describe('Content Manager End to End', () => {
+describe('Admin Auth End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
