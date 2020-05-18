@@ -34,12 +34,12 @@ const Register = ({
   };
 
   const terms = (
-    <FormattedMessage id="Auth.privacy-policy-agreement.terms">
+    <FormattedMessage id="Auth.privacy-policy-agreement.terms" key="1">
       {content => <Span onClick={e => handleClick(e, 'terms')}>{content}</Span>}
     </FormattedMessage>
   );
   const policy = (
-    <FormattedMessage id="Auth.privacy-policy-agreement.policy">
+    <FormattedMessage id="Auth.privacy-policy-agreement.policy" key="2">
       {content => <Span onClick={e => handleClick(e, 'privacy')}>{content}</Span>}
     </FormattedMessage>
   );
@@ -112,15 +112,7 @@ const Register = ({
                 <Padded left size="xs" />
                 <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
               </Flex>
-              {/* <Checkbox
-                message={() => (
-                  <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
-                )}
-                name="news"
-                onChange={onChange}
-                value={modifiedData.news}
-              /> */}
-              <Padded top size="30px">
+              <Padded top size="md">
                 <Button type="submit" color="primary">
                   {formatMessage({ id: 'Auth.form.button.register' })}
                 </Button>
