@@ -9,7 +9,7 @@ const createUser = data => {
     url: '/admin/users',
     method: 'POST',
     body: {
-      roles: ['41224d776a326fb40f000001'],
+      roles: [],
       ...data,
     },
   });
@@ -285,8 +285,6 @@ describe('Admin Auth End to End', () => {
           },
         },
       });
-
-      console.log(res.body.data);
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({

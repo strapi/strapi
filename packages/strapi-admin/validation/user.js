@@ -19,10 +19,7 @@ const userCreationSchema = yup
       .string()
       .min(1)
       .required(),
-    roles: yup
-      .array()
-      .min(1)
-      .required(),
+    roles: yup.array(), // FIXME: set min to 1 once the create  role API is created,
   })
   .noUnknown();
 
