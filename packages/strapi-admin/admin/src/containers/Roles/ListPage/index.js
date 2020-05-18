@@ -1,70 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Button } from '@buffetjs/core';
+import React, { useEffect, useState } from 'react';
 import { List, Header } from '@buffetjs/custom';
-import { Plus } from '@buffetjs/icons';
-import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { Pencil } from '@buffetjs/icons';
 
-import RoleRow from './RoleRow';
-import ListWrapper from './ListWrapper';
+import { RoleListWrapper, RoleRow } from '../../../components/Roles';
 import BaselineAlignment from './BaselineAlignment';
 
 const RoleListPage = () => {
-  const { settingsBaseURL, formatMessage } = useGlobalContext();
-  const { push } = useHistory();
-  const [selectedRoleIds, setSelectedRoleIds] = useState([]);
-  const [roles] = useState([
-    {
-      roleId: 1,
-      name: 'Super Admin',
-      description:
-        'This role is allowing a user to specify access etcetc and doing every things on the app',
-      numberOfUsers: 2,
-      isSelected: selectedRoleIds.findIndex(roleId => roleId === 1) !== -1,
-    },
-    {
-      roleId: 2,
-      name: 'Writter',
-      description: 'Content writter',
-      numberOfUsers: 15,
-      isSelected: selectedRoleIds.findIndex(roleId => roleId === 2) !== -1,
-    },
-  ]);
+  const { formatMessage } = useGlobalContext();
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
-    // fetchRoleList();
+    fetchRoleList();
   }, []);
 
-  // const fetchRoleList = async () => {
-  //   try {
-  //     const {data} = await request('/admin/roles', { method: 'GET' });
-  //     setRoles(data);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const fetchRoleList = async () => {
+    try {
+      const { data } = await request('/admin/roles', { method: 'GET' });
 
-  const handleRoleToggle = id => {
-    const roleIndex = selectedRoleIds.findIndex(roleId => roleId === id);
-
-    if (roleIndex === -1) {
-      setSelectedRoleIds([...selectedRoleIds, id]);
-    } else {
-      setSelectedRoleIds(selectedRoleIds.filter(roleId => roleId !== id));
+      setRoles(data);
+    } catch (e) {
+      console.error(e);
     }
   };
-  const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
-  const headerActions = [
-    {
-      label: formatMessage({
-        id: 'Settings.roles.list.button.add',
-      }),
-      onClick: handleNewRoleClick,
-      color: 'primary',
-      type: 'button',
-      icon: true,
-    },
-  ];
 
   return (
     <>
@@ -78,34 +36,27 @@ const RoleListPage = () => {
         content={formatMessage({
           id: 'Settings.roles.list.description',
         })}
-        actions={headerActions}
       />
       <BaselineAlignment />
-      <ListWrapper>
+      <RoleListWrapper>
         <List
-          title="5 roles"
-          button={{
-            color: 'primary',
-            disabled: true,
-            label: formatMessage({ id: 'app.utils.delete' }),
-            onClick: () => console.log('delete roles'),
-            type: 'button',
-          }}
+          title={`${roles.length} ${formatMessage({
+            id: 'Settings.roles.title',
+          })}`}
           items={roles}
-          customRowComponent={props => (
-            <RoleRow selectedRoleIds={selectedRoleIds} onRoleToggle={handleRoleToggle} {...props} />
+          customRowComponent={role => (
+            <RoleRow
+              links={[
+                {
+                  icon: <Pencil fill="#0e1622" />,
+                  onClick: () => console.log('edit', role.id),
+                },
+              ]}
+              role={role}
+            />
           )}
         />
-        <ListButton>
-          <Button
-            onClick={handleNewRoleClick}
-            icon={<Plus fill="#007eff" width="11px" height="11px" />}
-            label={formatMessage({
-              id: 'Settings.roles.list.button.add',
-            })}
-          />
-        </ListButton>
-      </ListWrapper>
+      </RoleListWrapper>
     </>
   );
 };
