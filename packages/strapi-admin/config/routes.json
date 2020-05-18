@@ -148,18 +148,12 @@
     {
       "method": "GET",
       "path": "/users/me",
-      "handler": "User.getAuthenticatedUser",
-      "config": {
-        "policies": []
-      }
+      "handler": "authenticated-user.getMe"
     },
     {
       "method": "PUT",
       "path": "/users/me",
-      "handler": "User.updateAuthenticatedUser",
-      "config": {
-        "policies": []
-      }
+      "handler": "authenticated-user.updateMe"
     },
     {
       "method": "POST",
