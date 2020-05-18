@@ -1,3 +1,4 @@
+// TODO DELETE THIS FILE WHEN AUTH FINISHED
 import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
 
@@ -24,22 +25,22 @@ const form = {
     }),
   },
   login: {
-    endPoint: 'local',
+    endPoint: 'login',
     inputs: [
       [
         {
           label: {
-            id: 'Auth.form.login.username.label',
+            id: 'Auth.form.email.label',
           },
-          name: 'identifier',
-          type: 'text',
-          placeholder: 'Auth.form.login.username.placeholder',
+          name: 'email',
+          type: 'email',
+          placeholder: 'Auth.form.email.placeholder',
         },
       ],
       [
         {
           label: {
-            id: 'Auth.form.login.password.label',
+            id: 'Auth.form.password.label',
           },
           name: 'password',
           type: 'password',
@@ -49,7 +50,7 @@ const form = {
         {
           customBootstrapClass: 'col-6',
           label: {
-            id: 'Auth.form.login.rememberMe.label',
+            id: 'Auth.form.rememberMe.label',
           },
           name: 'rememberMe',
           type: 'checkbox',
@@ -57,7 +58,10 @@ const form = {
       ],
     ],
     schema: yup.object({
-      identifier: yup.string().required(translatedErrors.required),
+      email: yup
+        .string()
+        .email(translatedErrors.email)
+        .required(translatedErrors.required),
       password: yup.string().required(translatedErrors.required),
     }),
   },
@@ -77,7 +81,7 @@ const form = {
       [
         {
           label: {
-            id: 'Auth.form.register.password.label',
+            id: 'Auth.form.password.label',
           },
           name: 'password',
           type: 'password',
@@ -95,11 +99,11 @@ const form = {
       [
         {
           label: {
-            id: 'Auth.form.register.email.label',
+            id: 'Auth.form.email.label',
           },
           name: 'email',
           type: 'email',
-          placeholder: 'Auth.form.register.email.placeholder',
+          placeholder: 'Auth.form.email.placeholder',
         },
       ],
       [
@@ -126,10 +130,7 @@ const form = {
       passwordConfirmation: yup
         .string()
         .min(6, translatedErrors.minLength)
-        .oneOf(
-          [yup.ref('password'), null],
-          'components.Input.error.password.noMatch'
-        )
+        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
         .required(translatedErrors.required),
     }),
   },
@@ -141,7 +142,7 @@ const form = {
           name: 'password',
           type: 'password',
           label: {
-            id: 'Auth.form.register.password.label',
+            id: 'Auth.form.password.label',
           },
         },
       ],
@@ -164,10 +165,7 @@ const form = {
       passwordConfirmation: yup
         .string()
         .min(6, translatedErrors.required)
-        .oneOf(
-          [yup.ref('password'), null],
-          'components.Input.error.password.noMatch'
-        )
+        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
         .required(translatedErrors.required),
     }),
   },

@@ -12,6 +12,7 @@ const alias = [
   'classnames',
   'history',
   'hoist-non-react-statics',
+  'immer',
   'immutable',
   'invariant',
   'moment',

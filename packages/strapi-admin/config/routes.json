@@ -56,8 +56,13 @@
     },
     {
       "method": "POST",
-      "path": "/auth/local",
-      "handler": "Auth.callback"
+      "path": "/login",
+      "handler": "authentication.login"
+    },
+    {
+      "method": "POST",
+      "path": "/renew-token",
+      "handler": "authentication.renewToken"
     },
     {
       "method": "POST",
@@ -126,6 +131,14 @@
       "method": "POST",
       "path": "/webhooks/:id/trigger",
       "handler": "Webhooks.triggerWebhook",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "handler": "User.create",
       "config": {
         "policies": []
       }

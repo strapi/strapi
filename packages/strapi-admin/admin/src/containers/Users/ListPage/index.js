@@ -1,15 +1,17 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import React, { useState } from 'react';
+import Header from './Header';
+import ModalForm from './ModalForm';
 
 const ListPage = () => {
-  const { settingsBaseURL } = useGlobalContext();
+  const [isModalOpened, setIsModalOpened] = useState(false);
+  // TODO when API ready
+  const usersCount = 1;
+  const handleToggle = () => setIsModalOpened(prev => !prev);
 
   return (
     <div>
-      <h1>Users list page</h1>
-      <p>Coming soon</p>
-      <Link to={`${settingsBaseURL}/users/1`}>Edit user 1</Link>
+      <Header count={usersCount} onClickAddUser={handleToggle} />
+      <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
     </div>
   );
 };

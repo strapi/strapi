@@ -15,90 +15,15 @@ const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
+// this is a temp patch for the next dev
+const createUser = params => ({
+  ...params,
+  isActive: true,
+  firstname: null,
+  lastname: null,
+});
+
 module.exports = {
-  async callback(ctx) {
-    const params = ctx.request.body;
-
-    // The identifier is required.
-    if (!params.identifier) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.provide',
-          message: 'Please provide your username or your e-mail.',
-        })
-      );
-    }
-
-    // The password is required.
-    if (!params.password) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.password.provide',
-          message: 'Please provide your password.',
-        })
-      );
-    }
-
-    const query = {};
-
-    // Check if the provided identifier is an email or not.
-    const isEmail = emailRegExp.test(params.identifier);
-
-    // Set the identifier to the appropriate query field.
-    if (isEmail) {
-      query.email = params.identifier.toLowerCase();
-    } else {
-      query.username = params.identifier;
-    }
-
-    // Check if the admin exists.
-    const admin = await strapi.query('user', 'admin').findOne(query);
-
-    if (!admin) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.invalid',
-          message: 'Identifier or password invalid.',
-        })
-      );
-    }
-
-    if (admin.blocked === true) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.blocked',
-          message: 'Your account has been blocked by the administrator.',
-        })
-      );
-    }
-
-    const validPassword = await strapi.admin.services.auth.validatePassword(
-      params.password,
-      admin.password
-    );
-
-    if (!validPassword) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.invalid',
-          message: 'Identifier or password invalid.',
-        })
-      );
-    } else {
-      admin.isAdmin = true;
-
-      ctx.send({
-        jwt: strapi.admin.services.auth.createJwtToken(admin),
-        user: strapi.admin.services.auth.sanitizeUser(admin),
-      });
-    }
-  },
-
   async register(ctx) {
     const params = ctx.request.body;
 
@@ -174,17 +99,17 @@ module.exports = {
     }
 
     try {
-      const admin = await strapi.query('user', 'admin').create(params);
+      const admin = await strapi.query('user', 'admin').create(createUser(params));
 
       admin.isAdmin = true;
 
-      const jwt = strapi.admin.services.auth.createJwtToken(admin);
+      const jwt = strapi.admin.services.token.createJwtToken(admin);
 
       await strapi.telemetry.send('didCreateFirstAdmin');
 
       ctx.send({
         jwt,
-        user: strapi.admin.services.auth.sanitizeUser(admin),
+        user: strapi.admin.services.user.sanitizeUser(admin),
       });
     } catch (err) {
       strapi.log.error(err);

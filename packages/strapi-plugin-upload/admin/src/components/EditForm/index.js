@@ -17,7 +17,7 @@ import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import { createFileToDownloadName, getTrad } from '../../utils';
+import { createFileToDownloadName } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
@@ -185,7 +185,7 @@ const EditForm = forwardRef(
     };
 
     const handleCopy = () => {
-      strapi.notification.info(getTrad('notification.link-copied'));
+      strapi.notification.info('notification.link-copied');
     };
 
     const handleClickDownload = () => {

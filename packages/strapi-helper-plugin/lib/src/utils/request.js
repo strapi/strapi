@@ -25,8 +25,10 @@ function checkStatus(response, checkToken = true) {
     return response;
   }
 
-  if (response.status === 401 && auth.getToken() && checkToken) {
-    return checkTokenValidity(response);
+  if ((response.status === 401 || response.status === 403) && auth.getToken() && checkToken) {
+    // Temporary fix until we create a new request helper
+    auth.clearAppStorage();
+    window.location.reload();
   }
 
   return parseJSON(response)
@@ -42,28 +44,6 @@ function checkStatus(response, checkToken = true) {
 
       throw error;
     });
-}
-
-function checkTokenValidity(response) {
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${auth.getToken()}`,
-    },
-  };
-
-  if (auth.getToken()) {
-    return fetch(`${strapi.backendURL}/users/me`, options).then(() => {
-      if (response.status === 401) {
-        window.location = `${strapi.remoteURL}/plugins/users-permissions/auth/login`;
-
-        auth.clearAppStorage();
-      }
-
-      return checkStatus(response, false);
-    });
-  }
 }
 
 /**
