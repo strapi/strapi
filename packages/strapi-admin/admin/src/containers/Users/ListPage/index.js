@@ -1,9 +1,12 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useQuery } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
+import { Flex } from '@buffetjs/core';
+import BaselineAlignement from '../../../components/BaselineAlignement';
 import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
 import Footer from '../../../components/Users/Footer';
 import List from '../../../components/Users/List';
+import SortPicker from '../../../components/Users/SortPicker';
 import Header from './Header';
 import ModalForm from './ModalForm';
 // TODO
@@ -83,8 +86,13 @@ const ListPage = () => {
         onClickAddUser={handleToggle}
         isLoading={isLoading}
       />
+      <BaselineAlignement top size="1px">
+        <Flex flexWrap="wrap">
+          <SortPicker />
+        </Flex>
+      </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
-      <div style={{ height: 37 }} />
+      <div style={{ height: 24 }} />
       <List isLoading={isLoading} data={data} onChange={handleChangeDataToDelete} />
       <Footer count={total} onChange={handleChangeFooterParams} params={{ _limit, _page }} />
     </div>
