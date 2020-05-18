@@ -14,7 +14,7 @@ const ListItem = ({ onClick, selectedItem, label, value }) => {
   return (
     <StyledListItem isActive={selectedItem === value} onClick={handleClick}>
       <Text lineHeight="27px">
-        {formatMessage({ id: `app.component.Users.SortPicker.sortby.${label}` })}
+        {formatMessage({ id: `app.components.Users.SortPicker.sortby.${label}` })}
       </Text>
     </StyledListItem>
   );

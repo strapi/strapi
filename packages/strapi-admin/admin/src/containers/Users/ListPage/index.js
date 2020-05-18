@@ -67,8 +67,10 @@ const ListPage = () => {
     });
   };
 
-  const handleChangeSort = ({ target: { name, value } }) => {
-    updateSearchParams(name, value);
+  const handleChangeFilter = ({ filter, name, value }) => {
+    const filterName = `${name}${filter}`;
+
+    updateSearchParams(filterName, encodeURIComponent(value), true);
   };
 
   const handleChangeFooterParams = ({ target: { name, value } }) => {
@@ -77,12 +79,20 @@ const ListPage = () => {
     updateSearchParams(paramName, value);
   };
 
+  const handleChangeSort = ({ target: { name, value } }) => {
+    updateSearchParams(name, value);
+  };
+
   const handleToggle = () => setIsModalOpened(prev => !prev);
 
-  const updateSearchParams = (name, value) => {
+  const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
     const currentSearch = new URLSearchParams(search);
     // Update the currentSearch
     currentSearch.set(name, value);
+
+    if (shouldDeleteSearch) {
+      currentSearch.delete('_q');
+    }
 
     push({
       search: currentSearch.toString(),
@@ -101,7 +111,7 @@ const ListPage = () => {
         <Flex flexWrap="wrap">
           <SortPicker onChange={handleChangeSort} value={_sort} />
           <Padded right size="10px" />
-          <FilterPicker />
+          <FilterPicker onChange={handleChangeFilter} />
         </Flex>
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />

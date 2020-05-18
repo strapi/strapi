@@ -185,6 +185,7 @@
   "request.error.model.unknown": "This model doesn't exist",
   "app.utils.delete": "Delete",
   "app.utils.filters": "Filters",
+  "app.utils.add-filter": "Add filter",
   "HomePage.helmet.title": "Homepage",
   "HomePage.welcome.congrats": "Congrats!",
   "HomePage.welcome.congrats.content": "You are logged as the first administrator. To discover the powerful features provided by Strapi,",
@@ -308,14 +309,14 @@
   "notification.success.delete": "The item has been deleted",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
 
-  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect.",
   "app.components.Users.SortPicker.button-label": "Sort by",
-  "app.component.Users.SortPicker.sortby.email_asc": "Email (A to Z)",
-  "app.component.Users.SortPicker.sortby.email_desc": "Email (Z to A)",
-  "app.component.Users.SortPicker.sortby.firstname_asc": "First name (A to Z)",
-  "app.component.Users.SortPicker.sortby.firstname_desc": "First name (Z to A)",
-  "app.component.Users.SortPicker.sortby.lastname_asc": "Last name (A to Z)",
-  "app.component.Users.SortPicker.sortby.lastname_desc": "Last name (Z to A)",
-  "app.component.Users.SortPicker.sortby.username_asc": "Username (A to Z)",
-  "app.component.Users.SortPicker.sortby.username_desc": "Username (Z to A)"
+  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect.",
+  "app.components.Users.SortPicker.sortby.email_asc": "Email (A to Z)",
+  "app.components.Users.SortPicker.sortby.email_desc": "Email (Z to A)",
+  "app.components.Users.SortPicker.sortby.firstname_asc": "First name (A to Z)",
+  "app.components.Users.SortPicker.sortby.firstname_desc": "First name (Z to A)",
+  "app.components.Users.SortPicker.sortby.lastname_asc": "Last name (A to Z)",
+  "app.components.Users.SortPicker.sortby.lastname_desc": "Last name (Z to A)",
+  "app.components.Users.SortPicker.sortby.username_asc": "Username (A to Z)",
+  "app.components.Users.SortPicker.sortby.username_desc": "Username (Z to A)"
 }

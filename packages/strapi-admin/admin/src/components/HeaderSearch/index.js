@@ -6,13 +6,21 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'strapi-helper-plugin';
 import StyledHeaderSearch from './HeaderSearch';
 
-const HeaderSearch = ({ label, queryParameter }) => {
+const HeaderSearch = ({ label, queryParameter, paramsToKeep }) => {
   const { formatMessage } = useIntl();
   const query = useQuery();
-  const [value, setValue] = useState(query.get(queryParameter) || '');
+  const searchValue = query.get(queryParameter) || '';
+  const [value, setValue] = useState(searchValue);
   const { push } = useHistory();
   const displayedLabel = typeof label === 'object' ? formatMessage(label) : label;
   const capitalizedLabel = upperFirst(displayedLabel);
+
+  useEffect(() => {
+    if (searchValue === '') {
+      // Synchronise the search
+      setValue('');
+    }
+  }, [searchValue]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -20,6 +28,14 @@ const HeaderSearch = ({ label, queryParameter }) => {
 
       if (value) {
         currentSearch.set(queryParameter, encodeURIComponent(value));
+
+        // Remove the filter params
+        // eslint-disable-next-line no-restricted-syntax
+        for (let key of currentSearch.keys()) {
+          if (!paramsToKeep.concat(queryParameter).includes(key)) {
+            currentSearch.delete(key);
+          }
+        }
       } else {
         currentSearch.delete(queryParameter);
       }
@@ -52,6 +68,7 @@ const HeaderSearch = ({ label, queryParameter }) => {
 
 HeaderSearch.defaultProps = {
   queryParameter: '_q',
+  paramsToKeep: ['_sort', '_limit', '_page'],
 };
 
 HeaderSearch.propTypes = {
@@ -62,6 +79,7 @@ HeaderSearch.propTypes = {
     }),
   ]).isRequired,
   queryParameter: PropTypes.string,
+  paramsToKeep: PropTypes.array,
 };
 
 export default HeaderSearch;
