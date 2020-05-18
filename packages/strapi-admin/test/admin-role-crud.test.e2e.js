@@ -44,7 +44,19 @@ describe('Role CRUD End to End', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(data[0]);
+      expect(res.body.data).toMatchObject(data.roles[0]);
+    });
+  });
+
+  describe('Find all roles', () => {
+    test.skip('Can find all roles successfully', async () => {
+      const res = await rq({
+        url: '/admin/roles',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject(data.roles);
     });
   });
 });
