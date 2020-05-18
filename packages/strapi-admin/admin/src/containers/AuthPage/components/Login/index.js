@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
+import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
-import Button from '../Button';
 import Input from '../Input';
 import Logo from '../Logo';
 import Section from '../Section';
@@ -51,7 +51,7 @@ const Login = ({ formErrors, modifiedData, onChange, onSubmit, requestError }) =
                 value={modifiedData.rememberMe}
               />
               <BaselineAlignment top size="27px">
-                <Button type="submit" color="primary">
+                <Button type="submit" color="primary" textTransform="uppercase">
                   {formatMessage({ id: 'Auth.form.button.login' })}
                 </Button>
               </BaselineAlignment>
