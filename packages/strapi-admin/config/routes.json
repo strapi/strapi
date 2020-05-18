@@ -152,6 +152,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "Role.findOne",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
