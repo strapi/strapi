@@ -12,8 +12,8 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "^4.17.11",
-    "sendmail": "^1.2.0"
+    "sendmail": "^1.6.1",
+    "strapi-utils": "3.0.0-beta.20.3"
   },
   "strapi": {
     "isProvider": true

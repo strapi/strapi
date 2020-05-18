@@ -1,58 +1,38 @@
 'use strict';
 
-/**
- * Module dependencies
- */
+const sendmailFactory = require('sendmail');
+const { removeUndefined } = require('strapi-utils');
 
-// Public node modules.
-const _ = require('lodash');
-const sendmail = require('sendmail')({
-  silent: true,
-});
-
-/* eslint-disable no-unused-vars */
 module.exports = {
-  provider: 'sendmail',
-  name: 'Sendmail',
-  auth: {
-    sendmail_default_from: {
-      label: 'Sendmail Default From',
-      type: 'text',
-    },
-    sendmail_default_replyto: {
-      label: 'Sendmail Default Reply-To',
-      type: 'text',
-    },
-  },
-  init: config => {
+  init: (providerOptions = {}, settings = {}) => {
+    const sendmail = sendmailFactory({
+      silent: true,
+      ...providerOptions,
+    });
     return {
       send: options => {
         return new Promise((resolve, reject) => {
-          // Default values.
-          options = _.isObject(options) ? options : {};
-          options.from = options.from || config.sendmail_default_from;
-          options.replyTo = options.replyTo || config.sendmail_default_replyto;
-          options.text = options.text || options.html;
-          options.html = options.html || options.text;
+          const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          sendmail(
-            {
-              from: options.from,
-              to: options.to,
-              replyTo: options.replyTo,
-              subject: options.subject,
-              text: options.text,
-              html: options.html,
-              attachments: options.attachments,
-            },
-            function(err) {
-              if (err) {
-                reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
-              } else {
-                resolve();
-              }
+          let msg = {
+            from: from || settings.defaultFrom,
+            to,
+            cc,
+            bcc,
+            replyTo: replyTo || settings.defaultReplyTo,
+            subject,
+            text,
+            html,
+            ...rest,
+          };
+
+          sendmail(removeUndefined(msg), err => {
+            if (err) {
+              reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
+            } else {
+              resolve();
             }
-          );
+          });
         });
       },
     };
