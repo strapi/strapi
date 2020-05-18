@@ -31,6 +31,7 @@ const ListPage = () => {
   ] = useReducer(reducer, initialState, init);
   const _limit = parseInt(query.get('_limit') || 10, 10);
   const _page = parseInt(query.get('_page') || 1, 10);
+  const _sort = decodeURIComponent(query.get('_sort'));
 
   useEffect(() => {
     const getData = () => {
@@ -65,18 +66,27 @@ const ListPage = () => {
     });
   };
 
+  const handleChangeSort = ({ target: { name, value } }) => {
+    updateSearchParams(name, value);
+  };
+
   const handleChangeFooterParams = ({ target: { name, value } }) => {
     const paramName = name.split('.')[1];
+
+    updateSearchParams(paramName, value);
+  };
+
+  const handleToggle = () => setIsModalOpened(prev => !prev);
+
+  const updateSearchParams = (name, value) => {
     const currentSearch = new URLSearchParams(search);
     // Update the currentSearch
-    currentSearch.set(paramName, value);
+    currentSearch.set(name, value);
 
     push({
       search: currentSearch.toString(),
     });
   };
-
-  const handleToggle = () => setIsModalOpened(prev => !prev);
 
   return (
     <div>
@@ -88,7 +98,7 @@ const ListPage = () => {
       />
       <BaselineAlignement top size="1px">
         <Flex flexWrap="wrap">
-          <SortPicker />
+          <SortPicker onChange={handleChangeSort} value={_sort} />
         </Flex>
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />

@@ -6,8 +6,14 @@ import ListWrapper from './ListWrapper';
 
 const SortList = ({ onClick, selectedItem }) => {
   const sortOptions = {
-    name_asc: 'name:ASC',
-    name_desc: 'name:DESC',
+    email_asc: 'email:ASC',
+    email_desc: 'email:DESC',
+    firstname_asc: 'firstname:ASC',
+    firstname_desc: 'firstname:DESC',
+    lastname_asc: 'lastname:ASC',
+    lastname_desc: 'lastname:DESC',
+    username_asc: 'username:ASC',
+    username_desc: 'username:DESC',
   };
 
   return (

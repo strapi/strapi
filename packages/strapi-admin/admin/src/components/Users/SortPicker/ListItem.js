@@ -1,20 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
-// import { getTrad } from '../../utils';
-
+import { Text } from '@buffetjs/core';
+import { useIntl } from 'react-intl';
 import StyledListItem from './StyledListItem';
-// import IntlText from '../IntlText';
 
 const ListItem = ({ onClick, selectedItem, label, value }) => {
+  const { formatMessage } = useIntl();
+
   const handleClick = () => {
     onClick({ target: { name: '_sort', value } });
   };
 
   return (
     <StyledListItem isActive={selectedItem === value} onClick={handleClick}>
-      {/* <IntlText id={getTrad(`sort.${label}`)} lineHeight="27px" /> */}
-      <span>{label}</span>
+      <Text lineHeight="27px">
+        {formatMessage({ id: `app.component.Users.SortPicker.sortby.${label}` })}
+      </Text>
     </StyledListItem>
   );
 };
