@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import { ErrorMessage } from '@buffetjs/styles';
+import { Padded } from '@buffetjs/core';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import styles from './utils/styles';
 import ClearIndicator from './ClearIndicator';
 import DropdownIndicator from './DropdownIndicator';
+import ErrorMessage from './ErrorMessage';
 import IndicatorSeparator from './IndicatorSeparator';
 import MultiValueContainer from './MultiValueContainer';
 
@@ -51,11 +52,9 @@ const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
         value={value}
       />
       {error && value.length === 0 ? (
-        <ErrorMessage style={{ paddingTop: 11, paddingBottom: 0, marginBottom: 17 }}>
-          {translatedError}
-        </ErrorMessage>
+        <ErrorMessage>{translatedError}</ErrorMessage>
       ) : (
-        <div style={{ height: 11 }} />
+        <Padded top size="11px" />
       )}
     </>
   );
