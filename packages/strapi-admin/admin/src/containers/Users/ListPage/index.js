@@ -39,6 +39,7 @@ const ListPage = () => {
   const _limit = parseInt(query.get('_limit') || 10, 10);
   const _page = parseInt(query.get('_page') || 1, 10);
   const _sort = decodeURIComponent(query.get('_sort'));
+  const _q = decodeURIComponent(query.get('_q') || '');
 
   useEffect(() => {
     const getData = () => {
@@ -135,7 +136,13 @@ const ListPage = () => {
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
       <div style={{ height: 18 }} />
-      <List isLoading={isLoading} datea={data} onChange={handleChangeDataToDelete} />
+      <List
+        isLoading={isLoading}
+        datea={data}
+        onChange={handleChangeDataToDelete}
+        searchParam={_q}
+        filters={filters}
+      />
       <Footer count={total} onChange={handleChangeFooterParams} params={{ _limit, _page }} />
     </div>
   );
