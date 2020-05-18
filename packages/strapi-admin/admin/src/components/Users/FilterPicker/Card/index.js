@@ -68,7 +68,7 @@ const Card = ({ onChange }) => {
           type={form[name].type}
           value={getInputValue(form[name].type, value)}
           options={[
-            { label: 'true', value: 'true', c: 'ooo' },
+            { label: 'true', value: 'true' },
             { label: 'false', value: 'false' },
           ]}
         />

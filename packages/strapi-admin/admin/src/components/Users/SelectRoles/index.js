@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { Padded } from '@buffetjs/core';
@@ -14,7 +14,6 @@ const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
   const [options, setOptions] = useState([]);
   const { formatMessage } = useGlobalContext();
   const translatedError = error ? formatMessage(error) : null;
-  const ref = useRef();
 
   useEffect(() => {
     // TODO
@@ -51,7 +50,6 @@ const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
         options={options}
         styles={styles}
         value={value}
-        ref={ref}
       />
       {error && value.length === 0 ? (
         <ErrorMessage>{translatedError}</ErrorMessage>

@@ -18,14 +18,12 @@ const reducer = (state, action) =>
             drafState.rows[index]._isChecked = !value;
           }
         });
-
         break;
       }
       case 'ON_CHANGE_ALL': {
         const areAllEntriesSelected = checkIfAllEntriesAreSelected(state.rows);
 
         drafState.rows = updateRows(drafState.rows, !areAllEntriesSelected);
-
         break;
       }
       case 'SET_DATA': {
