@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import { useQuery } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
@@ -6,11 +6,13 @@ import BaselineAlignement from '../../../components/BaselineAlignement';
 import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
 import Footer from '../../../components/Users/Footer';
 import List from '../../../components/Users/List';
+import Filter from '../../../components/Users/Filter';
 import FilterPicker from '../../../components/Users/FilterPicker';
 import SortPicker from '../../../components/Users/SortPicker';
 import Header from './Header';
 import ModalForm from './ModalForm';
 // TODO
+import getFilters from './utils/getFilters';
 import { pagination as fakeDataPagination, rows } from './utils/tempData';
 import init from './init';
 import { initialState, reducer } from './reducer';
@@ -21,6 +23,10 @@ const ListPage = () => {
   const query = useQuery();
   const { push } = useHistory();
   const { search } = useLocation();
+  const filters = useMemo(() => {
+    return getFilters(search);
+  }, [search]);
+
   const [
     {
       data,
@@ -83,6 +89,14 @@ const ListPage = () => {
     updateSearchParams(name, value);
   };
 
+  const handleClickDeleteFilter = ({ target: { name } }) => {
+    const currentSearch = new URLSearchParams(search);
+
+    currentSearch.delete(name);
+
+    push({ search: currentSearch.toString() });
+  };
+
   const handleToggle = () => setIsModalOpened(prev => !prev);
 
   const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
@@ -112,10 +126,15 @@ const ListPage = () => {
           <SortPicker onChange={handleChangeSort} value={_sort} />
           <Padded right size="10px" />
           <FilterPicker onChange={handleChangeFilter} />
+          <Padded right size="10px" />
+          {filters.map((filter, i) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
+          ))}
         </Flex>
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
-      <div style={{ height: 24 }} />
+      <div style={{ height: 18 }} />
       <List isLoading={isLoading} data={data} onChange={handleChangeDataToDelete} />
       <Footer count={total} onChange={handleChangeFooterParams} params={{ _limit, _page }} />
     </div>

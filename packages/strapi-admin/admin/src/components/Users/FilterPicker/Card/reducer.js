@@ -14,6 +14,10 @@ const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'ON_CHANGE': {
+        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        break;
+      }
       case 'ON_CHANGE_NAME': {
         // Change the name
         set(draftState, ['modifiedData', 'name'], action.value);
@@ -22,10 +26,6 @@ const reducer = (state, action) =>
         // Reset the default value
         const defaultValue = get(form, [action.value, 'defaultValue'], '');
         set(draftState, ['modifiedData', 'value'], defaultValue);
-        break;
-      }
-      case 'ON_CHANGE': {
-        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
         break;
       }
       case 'RESET_FORM': {
