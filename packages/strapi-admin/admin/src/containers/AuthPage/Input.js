@@ -4,10 +4,9 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
+/* eslint-disable */
 import { InputsIndex as Inputs } from 'strapi-helper-plugin';
 import CustomLabel from './CustomLabel';
-
-/* eslint-disable */
 
 const Input = ({
   autoFocus,
