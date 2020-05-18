@@ -1,6 +1,6 @@
 const getInputValue = (type, value) => {
   if (type === 'booleanSelect') {
-    return value === 'string';
+    return value === 'true';
   }
 
   return value;

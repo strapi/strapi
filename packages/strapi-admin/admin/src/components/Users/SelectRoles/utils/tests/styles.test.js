@@ -1,6 +1,6 @@
 import styles from '../styles';
 
-describe('ADMIN | COMPONENTS | USER | SelectRoles | utils | styles ', () => {
+describe('ADMIN | COMPONENTS | USER | SelectRoles | utils | styles', () => {
   describe('control', () => {
     describe('menuIsOpen is equal to true', () => {
       it('should return the correct border-radius', () => {
