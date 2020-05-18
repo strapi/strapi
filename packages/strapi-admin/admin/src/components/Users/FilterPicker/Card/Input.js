@@ -1,8 +1,3 @@
-/**
- *
- * InputWithAutoFocus that programatically manage the autofocus of another one
- */
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { InputText, Select, Toggle } from '@buffetjs/core';
