@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Header as HeaderCompo } from '@buffetjs/custom';
+// TODO uncomment when @buffetjs/icons is released
+// import { Envelope } from '@buffetjs/icons';
 
 const Header = ({ count, dataToDelete, isLoading, onClickAddUser }) => {
   const { formatMessage } = useGlobalContext();
@@ -24,6 +26,8 @@ const Header = ({ count, dataToDelete, isLoading, onClickAddUser }) => {
           {
             color: 'primary',
             icon: true,
+            // TODO uncomment when @buffetjs/icons is released
+            // icon: <Envelope style={{ verticalAlign: 'middle' }} />,
             label: formatMessage({ id: 'Settings.permissions.users.create' }),
             onClick: onClickAddUser,
             type: 'button',

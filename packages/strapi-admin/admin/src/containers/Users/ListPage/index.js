@@ -138,7 +138,7 @@ const ListPage = () => {
       <div style={{ height: 18 }} />
       <List
         isLoading={isLoading}
-        datea={data}
+        data={data}
         onChange={handleChangeDataToDelete}
         searchParam={_q}
         filters={filters}
