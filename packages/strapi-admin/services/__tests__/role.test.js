@@ -76,5 +76,24 @@ describe('Role', () => {
       expect(dbFind).toHaveBeenCalledWith({ _limit: -1 });
       expect(foundRoles).toStrictEqual(roles);
     });
+    test('Fetches all roles', async () => {
+      const roles = [
+        {
+          id: 1,
+          name: 'super_admin',
+          description: "Have all permissions. Can't be delete",
+        },
+      ];
+      const dbFind = jest.fn(() => Promise.resolve(roles));
+
+      global.strapi = {
+        query: () => ({ find: dbFind }),
+      };
+
+      const fetchedRole = await roleService.fetchAll();
+
+      expect(dbFind).toHaveBeenCalled();
+      expect(fetchedRole).toStrictEqual(roles);
+    });
   });
 });
