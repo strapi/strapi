@@ -546,12 +546,19 @@ module.exports = {
         }
       }
 
-      ctx.send({
-        jwt,
-        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-          model: strapi.query('user', 'users-permissions').model,
-        }),
+      const sanitizedUser = sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+        model: strapi.query('user', 'users-permissions').model,
       });
+      if (settings.email_confirmation) {
+        ctx.send({
+          user: sanitizedUser,
+        });
+      } else {
+        ctx.send({
+          jwt,
+          user: sanitizedUser,
+        });
+      }
     } catch (err) {
       const adminError = _.includes(err.message, 'username')
         ? {
