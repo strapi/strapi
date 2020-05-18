@@ -158,6 +158,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "Role.findAll",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
