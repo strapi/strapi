@@ -43,28 +43,4 @@ module.exports = {
       },
     };
   },
-
-  async getAuthenticatedUser(ctx) {
-    ctx.body = {
-      data: {
-        email: '',
-        firstname: '',
-        lastname: '',
-        username: '',
-        roles: [],
-      },
-    };
-  },
-
-  async updateAuthenticatedUser(ctx) {
-    ctx.body = {
-      data: {
-        email: '',
-        firstname: '',
-        lastname: '',
-        username: '',
-        roles: [],
-      },
-    };
-  },
 };
