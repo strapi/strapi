@@ -110,6 +110,10 @@
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
 
+  "app.components.Users.ModalCreateBody.block-title.details": "Details",
+  "app.components.Users.ModalCreateBody.block-title.roles": "User's roles",
+
+  "app.containers.Users.ModalForm.footer.button-success": "Create user",
   "app.links.configure-view": "Configure the view",
 
   "app.utils.SelectOption.defaultMessage": " ",
@@ -246,6 +250,14 @@
   "Settings.error": "Error",
   "Settings.permissions.menu.link.roles.label": "Roles",
   "Settings.permissions.menu.link.users.label": "Users",
+  "Settings.permissions.users.add-new": "Add new user",
+  "Settings.permissions.users.create": "Create new User",
+  "Settings.permissions.users.form.email": "Email",
+  "Settings.permissions.users.form.firstname": "First name",
+  "Settings.permissions.users.form.lastname": "Last name",
+  "Settings.permissions.users.listview.header.title": "Users",
+  "Settings.permissions.users.listview.header.description.singular": "{number} user found",
+  "Settings.permissions.users.listview.header.description.plural": "{number} users found",
   "Settings.webhooks.title": "Webhooks",
   "Settings.webhooks.singular": "webhook",
   "Settings.webhooks.list.description": "Get POST changes notifications.",
@@ -278,11 +290,15 @@
   "Settings.webhooks.created": "Webhook created",
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
   "components.Input.error.password.noMatch": "Passwords do not match",
+  "form.button.continue": "Continue",
   "form.button.done": "Done",
   "form.button.finish": "Finish",
   "notification.contentType.relations.conflict": "Content type has conflicting relations",
   "notification.form.error.fields": "The form contains some errors",
   "notification.form.success.fields": "Changes saved",
+  "notification.link-copied": "Link copied into the clipboard",
   "notification.success.delete": "The item has been deleted",
-  "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost"
+  "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
+
+  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect."
 }

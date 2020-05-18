@@ -196,7 +196,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c17 + label {
   display: inline-block;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 1.3rem;
 }
 
