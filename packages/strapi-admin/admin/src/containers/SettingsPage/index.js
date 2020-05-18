@@ -71,7 +71,7 @@ function SettingsPage() {
         },
         {
           title: formatMessage({ id: 'Settings.permissions.menu.link.users.label' }),
-          to: `${settingsBaseURL}/users`,
+          to: `${settingsBaseURL}/users?_limit=10&_page=1`,
           name: 'users',
         },
       ],

@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import { Table } from '@buffetjs/core';
 import { useQuery, useGlobalContext } from 'strapi-helper-plugin';
-
 import { useHistory } from 'react-router-dom';
 import { SETTINGS_BASE_URL } from '../../../config';
 import { checkIfAllEntriesAreSelected, getSelectedIds, headers } from './utils';
