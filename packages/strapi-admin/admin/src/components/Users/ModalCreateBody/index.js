@@ -13,6 +13,7 @@ import Input from './Input';
 import Wrapper from './Wrapper';
 import MagicLink from '../MagicLink';
 
+// This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(({ isDisabled, onSubmit, showMagicLink }, ref) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { formErrors, modifiedData } = reducerState;

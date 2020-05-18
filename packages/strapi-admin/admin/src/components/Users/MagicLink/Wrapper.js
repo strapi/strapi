@@ -18,21 +18,6 @@ const Wrapper = styled.div`
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
-  .icon-wrapper {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-right: 18px;
-    transform: rotate(-20deg);
-  }
-  .text-wrapper {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
   .icon-duplicate {
     margin-left: 10px;
     cursor: pointer;

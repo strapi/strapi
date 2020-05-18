@@ -1,24 +1,27 @@
 // This component is a work in progress
 // It's made to be used when the users API is ready
 import React from 'react';
-import { Text } from '@buffetjs/core';
+import { Flex, Text } from '@buffetjs/core';
+import { Duplicate } from '@buffetjs/icons';
+import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import Duplicate from '../../../icons/Duplicate';
-import Wrapper from './Wrapper';
+import IconWrapper from './IconWrapper';
 import Envelope from './Envelope';
+import Wrapper from './Wrapper';
 
 const MagicLink = ({ link }) => {
+  const { formatMessage } = useIntl();
   const handleCopy = () => {
     strapi.notification.info('notification.link-copied');
   };
 
   return (
     <Wrapper>
-      <div className="icon-wrapper">
+      <IconWrapper>
         <Envelope />
-      </div>
-      <div className="text-wrapper">
+      </IconWrapper>
+      <Flex flexDirection="column" justifyContent="center">
         <Text fontWeight="semiBold" color="black" fontSize="md" lineHeight="18px">
           {link}
           <CopyToClipboard onCopy={handleCopy} text={link}>
@@ -26,9 +29,9 @@ const MagicLink = ({ link }) => {
           </CopyToClipboard>
         </Text>
         <Text fontWeight="regular" color="grey" fontSize="sm" lineHeight="18px">
-          Send this link to the user for him to connect.
+          {formatMessage({ id: 'app.components.Users.MagicLink.connect' })}
         </Text>
-      </div>
+      </Flex>
     </Wrapper>
   );
 };
