@@ -103,8 +103,8 @@ Read the [CLI documentation](../cli/CLI.md) for more information.
 
 This will create two files located at `/api/restaurant/models`:
 
-- `restaurant.settings.json` — contains the list of attributes and settings. The JSON format makes the file easily editable.
-- `restaurant.js` — imports `restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
+- `restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
+- `restaurant.js`: imports `restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
 
 ::: tip
 When you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
@@ -120,11 +120,11 @@ Or you can create your component manually by following the file path discribed p
 
 Following settings are applied on models. `connection` and `globalId` are optional.
 
-- `kind` (string) — Define if the model is a Collection Type (`collectionType`) or a Single Type (`singleType`) - _only for Content Types_.
-- `connection` (string) — Connection name which must be used. Default value: `default`.
-- `collectionName` (string) — Collection name (or table name) in which the data should be stored.
-- `globalId` (string) — Global variable name for this model (case-sensitive) - _only for Content Types_.
-- `attributes` (object) — Define the data structure of your model. Find available options [below](#define-the-attributes).
+- `kind` (string): Define if the model is a Collection Type (`collectionType`) or a Single Type (`singleType`) - _only for Content Types_.
+- `connection` (string): Connection name which must be used. Default value: `default`.
+- `collectionName` (string): Collection name (or table name) in which the data should be stored.
+- `globalId` (string): Global variable name for this model (case-sensitive) - _only for Content Types_.
+- `attributes` (object): Define the data structure of your model. Find available options [below](#define-the-attributes).
 
 **Path —** `restaurant.settings.json`
 
@@ -157,9 +157,9 @@ The `connection` value can be changed whenever you want, but you should be aware
 
 The info key on the model-json states information about the model. This information is used in the admin interface, when showing the model.
 
-- `name` — The name of the model, as shown in admin interface.
-- `description` — The description of the model.
-- `icon` — The fontawesome V5 name - _only for Components_.
+- `name`: The name of the model, as shown in admin interface.
+- `description`: The description of the model.
+- `icon`: The fontawesome V5 name - _only for Components_.
 
 **Path —** `restaurant.settings.json`
 
@@ -176,7 +176,7 @@ The info key on the model-json states information about the model. This informat
 
 The options key on the model-json states.
 
-- `timestamps` - This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
+- `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
 **Path —** `restaurant.settings.json`
 
@@ -214,22 +214,22 @@ The following types are currently available:
 You can apply basic validations to the attributes. The following supported validations are _only supported by MongoDB_ connection.
 If you're using SQL databases, you should use the native SQL constraints to apply them.
 
-- `required` (boolean) — If true, adds a required validator for this property.
-- `unique` (boolean) — Whether to define a unique index on this property.
-- `index` (boolean) — Adds an index on this property, this will create a [single field index](https://docs.mongodb.com/manual/indexes/#single-field) that will run in the background. _Only supported by MongoDB._
-- `max` (integer) — Checks if the value is greater than or equal to the given maximum.
-- `min` (integer) — Checks if the value is less than or equal to the given minimum.
+- `required` (boolean): If true, adds a required validator for this property.
+- `unique` (boolean): Whether to define a unique index on this property.
+- `index` (boolean): Adds an index on this property, this will create a [single field index](https://docs.mongodb.com/manual/indexes/#single-field) that will run in the background. _Only supported by MongoDB._
+- `max` (integer): Checks if the value is greater than or equal to the given maximum.
+- `min` (integer): Checks if the value is less than or equal to the given minimum.
 
 **Security validations**
 
 To improve the Developer Experience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
 
-- `private` (boolean) — If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
-- `configurable` (boolean) — if false, the attribute isn't configurable from the Content Type Builder plugin.
+- `private` (boolean): If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
+- `configurable` (boolean): if false, the attribute isn't configurable from the Content Type Builder plugin.
 
 ### Exceptions
 
-- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+- `uid`: This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
 
 ### Example
 
@@ -417,7 +417,7 @@ Many-to-Many relationships are useful when an entry can be liked to multiple ent
 
 A `product` can be related to many `categories`, so a `category` can have many `products`.
 
-**Path —** `./api/product/models/Product.settings.json`.
+**Path —** `./api/product/models/Product.settings.json`
 
 ```json
 {
@@ -438,7 +438,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 **NOTE**:
 (NoSQL databases only) The `collectionName` key defines the name of the join table. It has to be specified once, in the `dominant` attribute of the relation. If it is not specified, Strapi will use a generated default one. It is useful to define the name of the join table when the name generated by Strapi is too long for the database you use.
 
-**Path —** `./api/category/models/Category.settings.json`.
+**Path —** `./api/category/models/Category.settings.json`
 
 ```json
 {
@@ -478,7 +478,7 @@ Let's stay with our `Image` model which might belong to **a single `Article` or 
 **NOTE**:
 In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
 
-**Path —** `./api/image/models/Image.settings.json`.
+**Path —** `./api/image/models/Image.settings.json`
 
 ```json
 {
@@ -496,7 +496,7 @@ Also, our `Image` model which might belongs to **many `Article` or `Product` ent
 **NOTE**:
 In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
 
-**Path —** `./api/image/models/Image.settings.json`.
+**Path —** `./api/image/models/Image.settings.json`
 
 ```json
 {
@@ -515,7 +515,7 @@ The `filter` attribute is optional (but we highly recommend to use it every time
 
 For example, the `Product` model might have two attributes which are associated to the `Image` model. To distinguish which image is attached to the `cover` field and which images are attached to the `pictures` field, we need to save and provide this to the database.
 
-**Path —** `./api/article/models/Product.settings.json`.
+**Path —** `./api/article/models/Product.settings.json`
 
 ```json
 {
@@ -538,7 +538,7 @@ The value is the `filter` attribute is the name of the column where the informat
 
 A `Image` model might belongs to many either `Article` models or a `Product` models.
 
-**Path —** `./api/image/models/Image.settings.json`.
+**Path —** `./api/image/models/Image.settings.json`
 
 ```json
 {
@@ -551,7 +551,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 }
 ```
 
-**Path —** `./api/article/models/Article.settings.json`.
+**Path —** `./api/article/models/Article.settings.json`
 
 ```json
 {
@@ -564,7 +564,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 }
 ```
 
-**Path —** `./api/article/models/Product.settings.json`.
+**Path —** `./api/article/models/Product.settings.json`
 
 ```json
 {
@@ -581,7 +581,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 
 If you're using MongoDB as a database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
 
-**Path —** `./api/image/models/Image.settings.json`.
+**Path —** `./api/image/models/Image.settings.json`
 
 ```json
 {
@@ -652,7 +652,7 @@ Component field let your create a relation between your Content Type and a Compo
 
 Lets say we created an `openinghours` component in `restaurant` category.
 
-**Path —** `./api/restaurant/models/Restaurant.settings.json`.
+**Path —** `./api/restaurant/models/Restaurant.settings.json`
 
 ```json
 {
@@ -813,7 +813,7 @@ Dynamic Zone field let your create flexible space to content based on a componen
 
 Let's say we created a `slider` and a `content` component in an `article` category.
 
-**Path —** `/api/article/models/article.settings.json`.
+**Path —** `/api/article/models/article.settings.json`
 
 ```json
 {
@@ -826,7 +826,7 @@ Let's say we created a `slider` and a `content` component in an `article` catego
 }
 ```
 
-- `components` (array) — An array of components, that follows this format `<category>.<componentName>`.
+- `components` (array): An array of components, that follows this format `<category>.<componentName>`.
 
 :::: tabs
 
@@ -983,7 +983,7 @@ Callbacks on:
 
 The entry is available through the `model` parameter.
 
-**Path —** `/api/user/models/user.js`.
+**Path —** `/api/user/models/user.js`
 
 ```js
 module.exports = {
@@ -1008,7 +1008,7 @@ module.exports = {
 
 Each of these functions receives three parameters `model`, `attrs` and `options`. You have to return a Promise.
 
-**Path —** `/api/user/models/user.js`.
+**Path —** `/api/user/models/user.js`
 
 ```js
 module.exports = {
