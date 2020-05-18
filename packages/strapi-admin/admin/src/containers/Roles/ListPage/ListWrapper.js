@@ -11,9 +11,6 @@ const ListWrapper = styled.div`
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-  p {
-    margin-bottom: 0;
-  }
 `;
 
 export default ListWrapper;
