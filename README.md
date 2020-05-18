@@ -6,6 +6,26 @@
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
 <br />
+
+<p align="center">
+  <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
+    <img src="https://blog.strapi.io/content/images/2020/05/Platform-sh.png"  />
+  </a>
+
+<a href="https://marketplace.digitalocean.com/apps/strapi">
+<img src="https://blog.strapi.io/content/images/2020/05/DigitalOcean.png" />
+</a>
+
+<a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
+<img src="https://blog.strapi.io/content/images/2020/05/Heroku.png" />
+</a>
+
+<a href="https://fastandcomfy.io/strapi/">
+<img src="https://blog.strapi.io/content/images/2020/05/FastandComfy.png" />
+</a>
+
+</p>
+
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
