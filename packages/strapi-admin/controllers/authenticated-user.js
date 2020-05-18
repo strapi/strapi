@@ -28,7 +28,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const updatedUser = strapi.admin.services.user.update({ id: ctx.state.user.id }, input);
+    const updatedUser = await strapi.admin.services.user.update({ id: ctx.state.user.id }, input);
 
     ctx.body = {
       data: strapi.admin.services.user.sanitizeUser(updatedUser),

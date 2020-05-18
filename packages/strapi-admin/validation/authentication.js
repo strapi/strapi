@@ -10,9 +10,9 @@ const registrationSchema = yup
     userInfo: yup
       .object()
       .shape({
-        firstname: validators.firstname,
-        lastname: validators.lastname,
-        password: validators.password,
+        firstname: validators.firstname.required(),
+        lastname: validators.lastname.required(),
+        password: validators.password.required(),
       })
       .required()
       .noUnknown(),
