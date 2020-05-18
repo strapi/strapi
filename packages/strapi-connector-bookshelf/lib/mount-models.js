@@ -479,7 +479,7 @@ module.exports = ({ models, target }, ctx) => {
             attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
 
             // Retrieve opposite model.
-            const model = strapi.getModel(
+            const model = strapi.db.getModel(
               association.collection || association.model,
               association.plugin
             );
