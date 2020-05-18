@@ -71,7 +71,8 @@ function SettingsPage() {
         },
         {
           title: formatMessage({ id: 'Settings.permissions.menu.link.users.label' }),
-          to: `${settingsBaseURL}/users?_limit=10&_page=1`,
+          // Init the search params directly
+          to: `${settingsBaseURL}/users?_limit=10&_page=1&_sort=firstname%3AASC`,
           name: 'users',
         },
       ],
