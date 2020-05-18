@@ -13,8 +13,8 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "^4.17.11",
-    "mailgun-js": "0.22.0"
+    "mailgun-js": "0.22.0",
+    "strapi-utils": "3.0.0-beta.20.3"
   },
   "strapi": {
     "isProvider": true
