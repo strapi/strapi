@@ -6,7 +6,7 @@
 
 Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the life cycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
-**Path —** `/api/restaurant/models/restaurant.js`
+**Path —** `/api/restaurant/models/restaurant.js`.
 
 ```js
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
 };
 ```
 
-**Path —** `/api/restaurant/models/restaurant.settings.json`
+**Path —** `/api/restaurant/models/restaurant.settings.json`.
 
 ```json
 {
@@ -58,7 +58,7 @@ In this example, there is a `restaurant` model which contains the attributes `na
 
 A Component is a self contained database structure that can be reused in one or more Content Type. There is no lifecycle related, only a JSON file definition.
 
-**Path —** `/components/default/meta.json`
+**Path —** `/components/default/meta.json`.
 
 ```json
 {
@@ -95,19 +95,43 @@ If you are just starting out it is very convenient to generate some models with 
 
 ### For Content Types models
 
-Use the CLI, and run the following command:
+Run the following command:
 
-`strapi generate:model restaurant name:string description:text`
+:::: tabs
+
+::: tab yarn
+
+```bash
+yarn strapi generate:model restaurant name:string description:text
+```
+
+:::
+
+::: tab npm
+
+```bash
+npm run strapi generate:model restaurant name:string description:text
+```
+
+:::
+
+::: tab strapi
+
+```bash
+strapi generate:model restaurant name:string description:text
+```
 
 Read the [CLI documentation](../cli/CLI.md) for more information.
 
+::::
+
 This will create two files located at `/api/restaurant/models`:
 
-- `restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
+- `restaurant.settings.json`: contains the list of model's attributes and settings. Your newly created model has two attributes: `name` of type string and `description` of type text. The JSON format makes the file easily editable.
 - `restaurant.js`: imports `restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
 
 ::: tip
-When you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
+When you create a new API using the CLI `strapi generate:api restaurant`, a model is automatically created.
 :::
 
 ### For Components models
@@ -126,7 +150,7 @@ Following settings are applied on models. `connection` and `globalId` are option
 - `globalId` (string): Global variable name for this model (case-sensitive) - _only for Content Types_.
 - `attributes` (object): Define the data structure of your model. Find available options [below](#define-the-attributes).
 
-**Path —** `restaurant.settings.json`
+**Path —** `restaurant.settings.json`.
 
 ```json
 {
@@ -141,7 +165,7 @@ Following settings are applied on models. `connection` and `globalId` are option
 }
 ```
 
-In this example, the model `Restaurants V2` will be accessible through the `restaurantsV2` global variable. The data will be stored in the `restaurants_v2` collection (mongoDB) or table (SQL) and the model will use the `mongo` connection defined in `./config/environments/**/database.json`.
+In this example, the model `Restaurants V2` will be accessible through the `restaurantsV2` global variable. The data will be stored in the `restaurants_v2` collection (MongoDB) or table (SQL) and the model will use the `mongo` connection defined in `./config/environments/**/database.json`.
 
 ::: warning
 If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
@@ -161,7 +185,7 @@ The info key on the model-json states information about the model. This informat
 - `description`: The description of the model.
 - `icon`: The fontawesome V5 name - _only for Components_.
 
-**Path —** `restaurant.settings.json`
+**Path —** `restaurant.settings.json`.
 
 ```json
 {
@@ -178,7 +202,7 @@ The options key on the model-json states.
 
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
-**Path —** `restaurant.settings.json`
+**Path —** `restaurant.settings.json`.
 
 ```json
 {
@@ -233,7 +257,7 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Example
 
-**Path —** `restaurant.settings.json`
+**Path —** `restaurant.settings.json`.
 
 ```json
 {
@@ -273,7 +297,7 @@ One-way relationships are useful to link an entry to another. However, only one 
 
 A `pet` can be owned by someone (a `user`).
 
-**Path —** `./api/pet/models/pet.settings.json`
+**Path —** `./api/pet/models/pet.settings.json`.
 
 ```json
 {
@@ -309,7 +333,7 @@ One-to-One relationships are useful when you have one entity that could be linke
 
 A `user` can have one `address`. And this address is only related to this `user`.
 
-**Path —** `./api/user/models/user.settings.json`
+**Path —** `./api/user/models/user.settings.json`.
 
 ```json
 {
@@ -322,7 +346,7 @@ A `user` can have one `address`. And this address is only related to this `user`
 }
 ```
 
-**Path —** `./api/address/models/address.settings.json`
+**Path —** `./api/address/models/address.settings.json`.
 
 ```json
 {
@@ -358,7 +382,7 @@ One-to-Many relationships are useful when an entry can be liked to multiple entr
 
 A `user` can have many `articles`, and an `article` can be related to one `user` (author).
 
-**Path —** `./api/user/models/user.settings.json`
+**Path —** `./api/user/models/user.settings.json`.
 
 ```json
 {
@@ -371,7 +395,7 @@ A `user` can have many `articles`, and an `article` can be related to one `user`
 }
 ```
 
-**Path —** `./api/article/models/article.settings.json`
+**Path —** `./api/article/models/article.settings.json`.
 
 ```json
 {
@@ -417,7 +441,7 @@ Many-to-Many relationships are useful when an entry can be liked to multiple ent
 
 A `product` can be related to many `categories`, so a `category` can have many `products`.
 
-**Path —** `./api/product/models/Product.settings.json`
+**Path —** `./api/product/models/Product.settings.json`.
 
 ```json
 {
@@ -438,7 +462,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 **NOTE**:
 (NoSQL databases only) The `collectionName` key defines the name of the join table. It has to be specified once, in the `dominant` attribute of the relation. If it is not specified, Strapi will use a generated default one. It is useful to define the name of the join table when the name generated by Strapi is too long for the database you use.
 
-**Path —** `./api/category/models/Category.settings.json`
+**Path —** `./api/category/models/Category.settings.json`.
 
 ```json
 {
@@ -478,7 +502,7 @@ Let's stay with our `Image` model which might belong to **a single `Article` or 
 **NOTE**:
 In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
 
-**Path —** `./api/image/models/Image.settings.json`
+**Path —** `./api/image/models/Image.settings.json`.
 
 ```json
 {
@@ -496,7 +520,7 @@ Also, our `Image` model which might belongs to **many `Article` or `Product` ent
 **NOTE**:
 In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
 
-**Path —** `./api/image/models/Image.settings.json`
+**Path —** `./api/image/models/Image.settings.json`.
 
 ```json
 {
@@ -515,7 +539,7 @@ The `filter` attribute is optional (but we highly recommend to use it every time
 
 For example, the `Product` model might have two attributes which are associated to the `Image` model. To distinguish which image is attached to the `cover` field and which images are attached to the `pictures` field, we need to save and provide this to the database.
 
-**Path —** `./api/article/models/Product.settings.json`
+**Path —** `./api/article/models/Product.settings.json`.
 
 ```json
 {
@@ -538,7 +562,7 @@ The value is the `filter` attribute is the name of the column where the informat
 
 A `Image` model might belongs to many either `Article` models or a `Product` models.
 
-**Path —** `./api/image/models/Image.settings.json`
+**Path —** `./api/image/models/Image.settings.json`.
 
 ```json
 {
@@ -551,7 +575,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 }
 ```
 
-**Path —** `./api/article/models/Article.settings.json`
+**Path —** `./api/article/models/Article.settings.json`.
 
 ```json
 {
@@ -564,7 +588,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 }
 ```
 
-**Path —** `./api/article/models/Product.settings.json`
+**Path —** `./api/article/models/Product.settings.json`.
 
 ```json
 {
@@ -581,7 +605,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 
 If you're using MongoDB as a database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
 
-**Path —** `./api/image/models/Image.settings.json`
+**Path —** `./api/image/models/Image.settings.json`.
 
 ```json
 {
@@ -652,7 +676,7 @@ Component field let your create a relation between your Content Type and a Compo
 
 Lets say we created an `openinghours` component in `restaurant` category.
 
-**Path —** `./api/restaurant/models/Restaurant.settings.json`
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
 
 ```json
 {
@@ -813,7 +837,7 @@ Dynamic Zone field let your create flexible space to content based on a componen
 
 Let's say we created a `slider` and a `content` component in an `article` category.
 
-**Path —** `/api/article/models/article.settings.json`
+**Path —** `/api/article/models/article.settings.json`.
 
 ```json
 {
@@ -983,7 +1007,7 @@ Callbacks on:
 
 The entry is available through the `model` parameter.
 
-**Path —** `/api/user/models/user.js`
+**Path —** `/api/user/models/user.js`.
 
 ```js
 module.exports = {
@@ -1008,7 +1032,7 @@ module.exports = {
 
 Each of these functions receives three parameters `model`, `attrs` and `options`. You have to return a Promise.
 
-**Path —** `/api/user/models/user.js`
+**Path —** `/api/user/models/user.js`.
 
 ```js
 module.exports = {
