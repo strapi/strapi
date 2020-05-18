@@ -8,12 +8,9 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 const userCreationSchema = yup
   .object()
   .shape({
-    email: yup
-      .string()
-      .email()
-      .required(),
-    firstname: validators.firstname,
-    lastname: validators.lastname,
+    email: validators.email.required(),
+    firstname: validators.firstname.required(),
+    lastname: validators.lastname.required(),
     roles: yup.array(), // FIXME: set min to 1 once the create  role API is created,
   })
   .noUnknown();
@@ -25,13 +22,13 @@ const validateUserCreationInput = data => {
 const profileUpdateSchema = yup
   .object()
   .shape({
-    email: yup
-      .string()
-      .email()
-      .required(),
+    email: validators.email,
     firstname: validators.firstname,
     lastname: validators.lastname,
-    username: yup.string().min(1),
+    username: yup
+      .string()
+      .min(1)
+      .nullable(),
     password: validators.password,
   })
   .noUnknown();
