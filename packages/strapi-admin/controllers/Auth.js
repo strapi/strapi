@@ -316,11 +316,6 @@ module.exports = {
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
     const settings = {
-      from: {
-        name: 'Administration Panel',
-        email: 'no-reply@strapi.io',
-      },
-      response_email: '',
       object: 'Reset password',
       message: `<p>We heard that you lost your password. Sorry about that!</p>
 
@@ -335,12 +330,7 @@ module.exports = {
       // Send an email to the admin.
       await strapi.plugins['email'].services.email.send({
         to: admin.email,
-        from:
-          settings.from.email || settings.from.name
-            ? `${settings.from.name} <${settings.from.email}>`
-            : undefined,
-        replyTo: settings.response_email,
-        subject: settings.object,
+        subject: 'Reset password',
         text: settings.message,
         html: settings.message,
       });
