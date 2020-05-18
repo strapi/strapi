@@ -1,44 +1,21 @@
 'use strict';
 
-/**
- * An asynchronous bootstrap function that runs before
- * your application gets started.
- *
- * This gives you an opportunity to set up your data model,
- * run jobs, or perform some special logic.
- */
 const _ = require('lodash');
 
+const createProvider = emailConfig => {
+  const providerName = _.toLower(emailConfig.provider);
+  let provider;
+  try {
+    provider = require(`strapi-provider-email-${providerName}`);
+  } catch (err) {
+    throw new Error(
+      `The provider package isn't installed. Please run \`npm install strapi-provider-email-${providerName}\` --save`
+    );
+  }
+  return provider.init(emailConfig.providerOptions, emailConfig.settings);
+};
+
 module.exports = async () => {
-  // set plugin store
-  const pluginStore = strapi.store({
-    environment: strapi.config.environment,
-    type: 'plugin',
-    name: 'email',
-  });
-
-  strapi.plugins.email.config.providers = [];
-
-  const installedProviders = Object.keys(strapi.config.info.dependencies)
-    .filter(d => d.includes('strapi-provider-email-'))
-    .concat('strapi-provider-email-sendmail');
-
-  for (let installedProvider of _.uniq(installedProviders)) {
-    strapi.plugins.email.config.providers.push(require(installedProvider));
-  }
-
-  // if provider config does not exist set one by default
-  const config = await pluginStore.get({ key: 'provider' });
-
-  if (!config) {
-    const provider = _.find(strapi.plugins.email.config.providers, {
-      provider: 'sendmail',
-    });
-
-    const value = _.assign({}, provider, {
-      // TODO: set other default settings here
-    });
-
-    await pluginStore.set({ key: 'provider', value });
-  }
+  const emailConfig = _.get(strapi.plugins, 'email.config', {});
+  strapi.plugins.email.provider = createProvider(emailConfig);
 };
