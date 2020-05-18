@@ -215,7 +215,10 @@ describe('Admin Auth End to End', () => {
       expect(res.body).toEqual({
         statusCode: 400,
         error: 'Bad Request',
-        message: 'Missing registrationToken',
+        message: 'QueryError',
+        data: {
+          registrationToken: ['registrationToken is a required field'],
+        },
       });
     });
 
@@ -322,13 +325,12 @@ describe('Admin Auth End to End', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual({
+      expect(res.body.data).toMatchObject({
         token: expect.any(String),
         user: {
           email: user.email,
-          firstname: expect.any(String),
-          lastname: expect.any(String),
-          password: expect.any(String),
+          firstname: 'test',
+          lastname: 'Strapi',
         },
       });
 

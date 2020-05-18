@@ -36,6 +36,21 @@ const validateRegistrationInput = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
+const registrationInfoQuerySchema = yup
+  .object()
+  .shape({
+    registrationToken: yup.string().required(),
+  })
+  .required()
+  .noUnknown();
+
+const validateRegistrationInfoQuery = query => {
+  return registrationInfoQuerySchema
+    .validate(query, { strict: true, abortEarly: false })
+    .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
 module.exports = {
   validateRegistrationInput,
+  validateRegistrationInfoQuery,
 };

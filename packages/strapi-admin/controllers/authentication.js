@@ -3,7 +3,10 @@
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 
-const { validateRegistrationInput } = require('../validation/authentication');
+const {
+  validateRegistrationInput,
+  validateRegistrationInfoQuery,
+} = require('../validation/authentication');
 
 module.exports = {
   login: compose([
@@ -54,11 +57,13 @@ module.exports = {
   },
 
   async registrationInfo(ctx) {
-    const { registrationToken } = ctx.request.query;
-
-    if (registrationToken === undefined) {
-      return ctx.badRequest('Missing registrationToken');
+    try {
+      await validateRegistrationInfoQuery(ctx.request.query);
+    } catch (err) {
+      return ctx.badRequest('QueryError', err);
     }
+
+    const { registrationToken } = ctx.request.query;
 
     const registrationInfo = await strapi.admin.services.user.findRegistrationInfo(
       registrationToken
