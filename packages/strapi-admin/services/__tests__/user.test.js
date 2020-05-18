@@ -107,4 +107,45 @@ describe('User', () => {
       expect(result).toBeFalsy();
     });
   });
+
+  describe('findRegistrationInfo', () => {
+    test('Returns undefined if not found', async () => {
+      const findOne = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query: () => {
+          return { findOne };
+        },
+      };
+
+      const res = await userService.findRegistrationInfo('ABCD');
+      expect(res).toBeUndefined();
+      expect(findOne).toHaveBeenCalledWith({ registrationToken: 'ABCD' });
+    });
+
+    test('Returns correct user registration info', async () => {
+      const user = {
+        email: 'test@strapi.io',
+        firstname: 'Test',
+        lastname: 'Strapi',
+        otherField: 'ignored',
+      };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+
+      global.strapi = {
+        query: () => {
+          return { findOne };
+        },
+      };
+
+      const res = await userService.findRegistrationInfo('ABCD');
+
+      expect(res).toEqual({
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+      });
+    });
+  });
 });
