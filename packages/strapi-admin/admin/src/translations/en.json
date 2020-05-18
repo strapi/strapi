@@ -308,5 +308,6 @@
   "notification.success.delete": "The item has been deleted",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
 
-  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect."
+  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect.",
+  "app.components.Users.SortPicker.button-label": "Sort by"
 }
