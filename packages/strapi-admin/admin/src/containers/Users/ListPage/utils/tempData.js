@@ -1,3 +1,10 @@
+const pagination = {
+  page: 1,
+  pageSize: 10,
+  pageCount: 5,
+  total: 20,
+};
+
 const rows = [
   {
     id: 1,
@@ -59,5 +66,4 @@ const rows = [
   },
 ];
 
-// eslint-disable-next-line import/prefer-default-export
-export { rows };
+export { pagination, rows };

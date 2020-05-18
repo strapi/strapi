@@ -5,6 +5,7 @@ const initialState = {
   data: [],
   dataToDelete: [],
   isLoading: true,
+  pagination: {},
 };
 
 const reducer = (state, action) =>
@@ -13,6 +14,7 @@ const reducer = (state, action) =>
       case 'GET_DATA_SUCCEEDED': {
         draftState.data = action.data;
         draftState.isLoading = false;
+        draftState.pagination = action.pagination;
         break;
       }
       case 'ON_CHANGE_DATA_TO_DELETE': {
