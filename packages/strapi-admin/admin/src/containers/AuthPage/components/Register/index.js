@@ -1,18 +1,17 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
-import { Padded, Text } from '@buffetjs/core';
+import { Checkbox, Flex, Padded, Text } from '@buffetjs/core';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import AuthLink from '../AuthLink';
 import Button from '../Button';
-import CustomLabel from '../../CustomLabel';
 import Input from '../Input';
 import Logo from '../Logo';
 import Section from '../Section';
+import CustomLabel from './CustomLabel';
 import Box from '../Box';
-import Checkbox from './Checkbox';
 import InputWrapper from './InputWrapper';
 import Span from './Span';
 
@@ -108,15 +107,19 @@ const Register = ({
                 validations={{ required: true }}
                 value={modifiedData.confirmPassword}
               />
-
-              <Checkbox
+              <Flex alignItems="flex-start">
+                <Checkbox name="news" onChange={onChange} value={modifiedData.news} />
+                <Padded left size="xs" />
+                <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
+              </Flex>
+              {/* <Checkbox
                 message={() => (
                   <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
                 )}
                 name="news"
                 onChange={onChange}
                 value={modifiedData.news}
-              />
+              /> */}
               <Padded top size="30px">
                 <Button type="submit" color="primary">
                   {formatMessage({ id: 'Auth.form.button.register' })}
