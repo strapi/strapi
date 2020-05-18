@@ -4,6 +4,9 @@ const ListWrapper = styled.div`
   border-radius: 2px;
   box-shadow: 0 2px 4px #e3e9f3;
   background: white;
+  > div > div:first-of-type {
+    padding-bottom: 8px;
+  }
   > div,
   > div > div:last-of-type {
     box-shadow: none;

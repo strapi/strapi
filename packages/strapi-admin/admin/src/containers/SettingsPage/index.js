@@ -14,7 +14,8 @@ import { BackHeader, useGlobalContext, LeftMenuList } from 'strapi-helper-plugin
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import HeaderSearch from '../../components/HeaderSearch';
-import RolesListPage from '../Roles/ListPage';
+// Should be ee_else_ce
+import RolesListPage from '../../../ee/containers/Roles/ListPage';
 import RolesCreatePage from '../Roles/CreatePage';
 import RolesEditPage from '../Roles/EditPage';
 import UsersEditPage from '../Users/EditPage';
