@@ -4,6 +4,17 @@ const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 
+const createUser = data => {
+  return rq({
+    url: '/admin/users',
+    method: 'POST',
+    body: {
+      roles: ['41224d776a326fb40f000001'],
+      ...data,
+    },
+  });
+};
+
 expect.extend({
   stringOrNull(received) {
     const pass = typeof received === 'string' || received === null;
@@ -162,6 +173,64 @@ describe('Admin Auth End to End', () => {
         statusCode: 400,
         error: 'Bad Request',
         message: 'Missing token',
+      });
+    });
+  });
+
+  describe('GET /registration-info', () => {
+    test('Returns registration info', async () => {
+      const user = {
+        email: 'test@strapi.io',
+        firstname: 'test',
+        lastname: 'strapi',
+      };
+      const createRes = await createUser(user);
+
+      const token = createRes.body.data.registrationToken;
+
+      const res = await rq({
+        url: `/admin/registration-info?registrationToken=${token}`,
+        method: 'GET',
+        body: {},
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        data: {
+          email: user.email,
+          firstname: user.firstname,
+          lastname: user.lastname,
+        },
+      });
+    });
+
+    test('Fails on missing registration token', async () => {
+      const res = await rq({
+        url: '/admin/registration-info',
+        method: 'GET',
+        body: {},
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Missing registrationToken',
+      });
+    });
+
+    test('Fails on invalid registration token. Without too much info', async () => {
+      const res = await rq({
+        url: '/admin/registration-info?registrationToken=ABCD',
+        method: 'GET',
+        body: {},
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Invalid registrationToken',
       });
     });
   });

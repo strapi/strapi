@@ -25,7 +25,9 @@ module.exports = {
 
     const createdUser = await strapi.admin.services.user.create(attributes);
 
+    const userInfo = strapi.admin.services.user.sanitizeUser(createdUser);
+
     // Send 201 created
-    ctx.created(strapi.admin.services.user.sanitizeUser(createdUser));
+    ctx.created({ data: userInfo });
   },
 };

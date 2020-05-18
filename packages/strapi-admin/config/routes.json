@@ -65,6 +65,11 @@
       "handler": "authentication.renewToken"
     },
     {
+      "method": "GET",
+      "path": "/registration-info",
+      "handler": "authentication.registrationInfo"
+    },
+    {
       "method": "POST",
       "path": "/auth/local/register",
       "handler": "Auth.register"
