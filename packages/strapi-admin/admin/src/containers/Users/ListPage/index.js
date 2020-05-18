@@ -1,11 +1,12 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useQuery } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Flex } from '@buffetjs/core';
+import { Flex, Padded } from '@buffetjs/core';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
 import Footer from '../../../components/Users/Footer';
 import List from '../../../components/Users/List';
+import FilterPicker from '../../../components/Users/FilterPicker';
 import SortPicker from '../../../components/Users/SortPicker';
 import Header from './Header';
 import ModalForm from './ModalForm';
@@ -99,6 +100,8 @@ const ListPage = () => {
       <BaselineAlignement top size="1px">
         <Flex flexWrap="wrap">
           <SortPicker onChange={handleChangeSort} value={_sort} />
+          <Padded right size="10px" />
+          <FilterPicker />
         </Flex>
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
