@@ -50,4 +50,22 @@ module.exports = {
       },
     };
   },
+
+  async registrationInfo(ctx) {
+    const { registrationToken } = ctx.request.query;
+
+    if (registrationToken === undefined) {
+      return ctx.badRequest('Missing registrationToken');
+    }
+
+    const registrationInfo = await strapi.admin.services.user.findRegistrationInfo(
+      registrationToken
+    );
+
+    if (!registrationInfo) {
+      return ctx.badRequest('Invalid registrationToken');
+    }
+
+    ctx.body = { data: registrationInfo };
+  },
 };
