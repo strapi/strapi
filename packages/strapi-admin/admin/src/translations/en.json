@@ -253,7 +253,7 @@
   "Settings.permissions.users.form.firstname": "First name",
   "Settings.permissions.users.form.lastname": "Last name",
   "Settings.permissions.users.listview.header.title": "Users",
-  "Settings.permissions.users.listview.header.description.singular": "0 users found",
+  "Settings.permissions.users.listview.header.description.singular": "{number} user found",
   "Settings.permissions.users.listview.header.description.plural": "{number} users found",
   "Settings.webhooks.title": "Webhooks",
   "Settings.webhooks.singular": "webhook",
@@ -300,5 +300,7 @@
   "notification.form.success.fields": "Changes saved",
   "notification.link-copied": "Link copied into the clipboard",
   "notification.success.delete": "The item has been deleted",
-  "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost"
+  "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
+
+  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect."
 }
