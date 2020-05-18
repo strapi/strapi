@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('strapi-utils');
+const validators = require('./common-validators');
 
 const registrationSchema = yup
   .object()
@@ -9,21 +10,9 @@ const registrationSchema = yup
     userInfo: yup
       .object()
       .shape({
-        firstname: yup
-          .string()
-          .min(1)
-          .required(),
-        lastname: yup
-          .string()
-          .min(1)
-          .required(),
-        password: yup
-          .string()
-          .min(8)
-          .matches(/[a-z]/, '${path} must contain at least one lowercase character')
-          .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
-          .matches(/\d/, '${path} must contain at least one number')
-          .required(),
+        firstname: validators.firstname,
+        lastname: validators.lastname,
+        password: validators.password,
       })
       .required()
       .noUnknown(),
