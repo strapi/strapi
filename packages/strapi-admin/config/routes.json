@@ -164,7 +164,15 @@
     {
       "method": "GET",
       "path": "/roles/:id",
-      "handler": "Role.findOne",
+      "handler": "role.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "role.find",
       "config": {
         "policies": []
       }
