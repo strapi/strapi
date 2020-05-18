@@ -135,7 +135,7 @@ const ListPage = () => {
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
       <div style={{ height: 18 }} />
-      <List isLoading={isLoading} data={data} onChange={handleChangeDataToDelete} />
+      <List isLoading={isLoading} datea={data} onChange={handleChangeDataToDelete} />
       <Footer count={total} onChange={handleChangeFooterParams} params={{ _limit, _page }} />
     </div>
   );
