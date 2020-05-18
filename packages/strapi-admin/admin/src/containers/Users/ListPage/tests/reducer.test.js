@@ -16,16 +16,29 @@ describe('ADMIN | CONTAINERS | USERS | ListPage | reducer', () => {
       const action = {
         type: 'GET_DATA_SUCCEEDED',
         data: [1, 2, 3],
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 5,
+          total: 20,
+        },
       };
       const initialState = {
         data: [],
         dataToDelete: [],
         isLoading: true,
+        pagination: {},
       };
       const expected = {
         data: [1, 2, 3],
         dataToDelete: [],
         isLoading: false,
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 5,
+          total: 20,
+        },
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

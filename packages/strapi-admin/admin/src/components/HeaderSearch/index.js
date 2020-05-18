@@ -16,11 +16,15 @@ const HeaderSearch = ({ label, queryParameter }) => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
+      const currentSearch = query;
+
       if (value) {
-        push({ search: `${queryParameter}=${encodeURIComponent(value)}` });
+        currentSearch.set(queryParameter, encodeURIComponent(value));
       } else {
-        push({ search: '' });
+        currentSearch.delete(queryParameter);
       }
+
+      push({ search: currentSearch.toString() });
     }, 300);
 
     return () => clearTimeout(handler);
