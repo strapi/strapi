@@ -5,9 +5,10 @@ import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { Padded, Text } from '@buffetjs/core';
 import { Col, Row } from 'reactstrap';
-import checkFormValidity from '../../../utils/users/checkFormValidity';
+import checkFormValidity from '../../../utils/checkFormValidity';
 import SelectRoles from '../SelectRoles';
 import form from './utils/form';
+import schema from './utils/schema';
 import { initialState, reducer } from './reducer';
 import init from './init';
 import Input from './Input';
@@ -38,7 +39,7 @@ const ModalCreateBody = forwardRef(
     const handleSubmit = async e => {
       e.persist();
       e.preventDefault();
-      const errors = await checkFormValidity(modifiedData);
+      const errors = await checkFormValidity(modifiedData, schema);
 
       if (!errors) {
         try {
