@@ -32,6 +32,10 @@ module.exports = {
   },
 
   async find(ctx) {
-    return strapi.query('user', 'admin').findPage(ctx.query);
+    const users = await strapi.query('user', 'admin').findPage(ctx.query);
+
+    return {
+      data: users,
+    };
   },
 };
