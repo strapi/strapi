@@ -44,10 +44,10 @@ const reducer = (state, action) =>
       //   draftState.showHeaderLoader = false;
       //   break;
       // }
-      // case 'SET_ERRORS': {
-      //   draftState.formErrors = action.errors;
-      //   break;
-      // }
+      case 'SET_ERRORS': {
+        draftState.formErrors = action.errors;
+        break;
+      }
       default:
         return draftState;
     }

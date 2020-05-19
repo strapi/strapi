@@ -1,5 +1,7 @@
 import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
+// TODO update schema
+// import { profileValidation } from '../../../validations/users';
 import Login from '../components/Login';
 import Oops from '../components/Oops';
 import Register from '../components/Register';
