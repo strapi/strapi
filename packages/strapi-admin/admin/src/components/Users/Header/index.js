@@ -1,13 +1,11 @@
 import React, { useMemo } from 'react';
 import { Header as PluginHeader } from '@buffetjs/custom';
 import { isEqual } from 'lodash';
-import { auth } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const Header = ({ initialData, isLoading, modifiedData, onCancel }) => {
+const Header = ({ initialData, isLoading, label, modifiedData, onCancel }) => {
   const { formatMessage } = useIntl();
-  const userInfos = auth.getUserInfo();
   const areButtonsDisabled = useMemo(() => {
     return isEqual(modifiedData, initialData);
   }, [initialData, modifiedData]);
@@ -36,7 +34,7 @@ const Header = ({ initialData, isLoading, modifiedData, onCancel }) => {
           },
         ],
     title: {
-      label: userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`,
+      label,
     },
   };
   /* eslint-enable indent */
@@ -44,9 +42,14 @@ const Header = ({ initialData, isLoading, modifiedData, onCancel }) => {
   return <PluginHeader {...headerProps} isLoading={isLoading} />;
 };
 
+Header.defaultProps = {
+  label: '',
+};
+
 Header.propTypes = {
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  label: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
 };
