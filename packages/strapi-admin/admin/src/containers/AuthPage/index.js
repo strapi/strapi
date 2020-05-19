@@ -127,6 +127,8 @@ const AuthPage = () => {
 
       auth.setToken(token, modifiedData.rememberMe);
       auth.setUserInfo(user, modifiedData.rememberMe);
+
+      push('/');
     } catch (err) {
       if (err.response) {
         const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
