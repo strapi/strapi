@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useQuery, request } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
@@ -38,32 +38,31 @@ const ListPage = () => {
   const page = parseInt(query.get('page') || 0, 10);
   const _sort = decodeURIComponent(query.get('_sort'));
   const _q = decodeURIComponent(query.get('_q') || '');
+  const getDataRef = useRef();
+  getDataRef.current = async () => {
+    // Show the loading state and reset the state
+    dispatch({
+      type: 'GET_DATA',
+    });
+
+    try {
+      const {
+        data: { results, pagination },
+      } = await request(`/admin/users${search}`, { method: 'GET' });
+
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data: results,
+        pagination,
+      });
+    } catch (err) {
+      console.error(err.response);
+      strapi.notification.error('notification.error');
+    }
+  };
 
   useEffect(() => {
-    const getData = async () => {
-      // Show the loading state and reset the state
-      dispatch({
-        type: 'GET_DATA',
-      });
-      console.log('oooo');
-      try {
-        const {
-          data: { results, pagination },
-        } = await request(`/admin/users${search}`, { method: 'GET' });
-        console.log(results);
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data: results,
-          pagination,
-        });
-      } catch (err) {
-        console.error(err.response);
-        strapi.notification.error('notification.error');
-      }
-    };
-
-    getData();
+    getDataRef.current();
   }, [search]);
 
   useEffect(() => {
@@ -110,6 +109,11 @@ const ListPage = () => {
     push({ search: currentSearch.toString() });
   };
 
+  const handleCloseModal = () => {
+    // Refetch data
+    getDataRef.current();
+  };
+
   const handleToggle = () => setIsModalOpened(prev => !prev);
 
   const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
@@ -125,8 +129,6 @@ const ListPage = () => {
       search: currentSearch.toString(),
     });
   };
-
-  console.log('lkll', total);
 
   return (
     <div>
@@ -150,7 +152,7 @@ const ListPage = () => {
           ))}
         </Flex>
       </BaselineAlignement>
-      <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
+      <ModalForm isOpen={isModalOpened} onClosed={handleCloseModal} onToggle={handleToggle} />
       <BaselineAlignement top size="8px" />
       <Padded top size="sm">
         <List
