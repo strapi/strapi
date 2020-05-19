@@ -7,13 +7,12 @@ import Bloc from '../../components/Bloc';
 import BaselineAlignement from '../../components/BaselineAlignement';
 import ContainerFluid from '../../components/ContainerFluid';
 import SizedInput from '../../components/SizedInput';
+import Header from '../../components/Users/Header';
 import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import { form, schema } from './utils';
-
 import { initialState, reducer } from './reducer';
 import init from './init';
-import Header from './Header';
 
 const ProfilePage = () => {
   const { goBack } = useHistory();
@@ -21,6 +20,8 @@ const ProfilePage = () => {
     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
     dispatch,
   ] = useReducer(reducer, initialState, init);
+  const userInfos = auth.getUserInfo();
+  const headerLabel = userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
 
   useEffect(() => {
     const getData = async () => {
@@ -32,7 +33,7 @@ const ProfilePage = () => {
           data,
         });
       } catch (err) {
-        console.log(err.response);
+        console.error(err.response);
       }
     };
 
@@ -105,6 +106,7 @@ const ProfilePage = () => {
           <Header
             isLoading={showHeaderLoader}
             initialData={initialData}
+            label={headerLabel}
             modifiedData={modifiedData}
             onCancel={handleCancel}
           />
