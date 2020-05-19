@@ -7,6 +7,7 @@ const initialState = {
   initialData: {},
   isLoading: true,
   modifiedData: {},
+  showHeaderLoader: true,
 };
 
 const reducer = (state, action) =>
@@ -14,6 +15,7 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
         draftState.isLoading = false;
+        draftState.showHeaderLoader = false;
         draftState.initialData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
         draftState.modifiedData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
         break;
@@ -28,6 +30,20 @@ const reducer = (state, action) =>
         } else {
           set(draftState.modifiedData, action.keys.split('.'), action.value);
         }
+        break;
+      }
+      case 'ON_SUBMIT': {
+        draftState.showHeaderLoader = true;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.initialData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
+        draftState.modifiedData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
+        draftState.showHeaderLoader = false;
+        break;
+      }
+      case 'SET_ERRORS': {
+        draftState.formErrors = action.errors;
         break;
       }
       default:
