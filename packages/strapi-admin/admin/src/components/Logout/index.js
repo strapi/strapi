@@ -16,7 +16,7 @@ import Wrapper from './components';
 const Logout = ({ history: { push } }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleGoTo = () => {
+  const handleGoToMe = () => {
     push({
       pathname: `/me`,
     });
@@ -40,7 +40,7 @@ const Logout = ({ history: { push } }) => {
           <FontAwesomeIcon icon="caret-down" />
         </DropdownToggle>
         <DropdownMenu className="dropDownContent">
-          <DropdownItem onClick={handleGoTo} className="item">
+          <DropdownItem onClick={handleGoToMe} className="item">
             <FormattedMessage id="app.components.Logout.profile" />
           </DropdownItem>
           <DropdownItem onClick={handleLogout}>

@@ -2,7 +2,6 @@ import React from 'react';
 import { translatedErrors } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import { Inputs } from '@buffetjs/custom';
-// import { Col } from 'reactstrap';
 import PropTypes from 'prop-types';
 
 const IntlInput = ({ label: labelId, defaultMessage, error, ...rest }) => {
