@@ -1,4 +1,4 @@
-const formatRegisterAPIError = ({ data }) => {
+const formatAPIError = ({ data }) => {
   try {
     return Object.keys(data).reduce((acc, current) => {
       const errorMessage = data[current][0];
@@ -14,4 +14,4 @@ const formatRegisterAPIError = ({ data }) => {
   }
 };
 
-export default formatRegisterAPIError;
+export default formatAPIError;
