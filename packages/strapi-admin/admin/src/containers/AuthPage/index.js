@@ -7,7 +7,7 @@ import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
-import checkFormValidity from './utils/checkFormValidity';
+import checkFormValidity from '../../utils/checkFormValidity';
 import { forms, formatRegisterAPIError } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
