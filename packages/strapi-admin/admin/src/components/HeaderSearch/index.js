@@ -18,7 +18,7 @@ const HeaderSearch = ({ label, queryParameter }) => {
   useEffect(() => {
     if (searchValue === '') {
       // Synchronise the search
-      setValue('');
+      handleClear();
     }
   }, [searchValue]);
 
