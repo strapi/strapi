@@ -32,6 +32,16 @@ const create = async attributes => {
  * @returns {Promise<user>}
  */
 const update = async (params, attributes) => {
+  // hash password if a new one is sent
+  if (_.has(attributes, 'password')) {
+    const hashedPassword = await strapi.admin.services.auth.hashPassword(attributes.password);
+
+    return strapi.query('user', 'admin').update(params, {
+      ...attributes,
+      password: hashedPassword,
+    });
+  }
+
   return strapi.query('user', 'admin').update(params, attributes);
 };
 
@@ -72,12 +82,10 @@ const register = async ({ registrationToken, userInfo }) => {
     throw strapi.errors.badRequest('Invalid registration info');
   }
 
-  const hashedPassword = await strapi.admin.services.auth.hashPassword(userInfo.password);
-
   return strapi.admin.services.user.update(
     { id: matchingUser.id },
     {
-      password: hashedPassword,
+      password: userInfo.password,
       firstname: userInfo.firstname,
       lastname: userInfo.lastname,
       registrationToken: null,
