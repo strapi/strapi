@@ -66,4 +66,6 @@ const rows = [
   },
 ];
 
+console.log('ooo');
+
 export { pagination, rows };

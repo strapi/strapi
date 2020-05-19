@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useReducer, useState } from 'react';
-import { useQuery } from 'strapi-helper-plugin';
+import { useQuery, request } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
 import BaselineAlignement from '../../../components/BaselineAlignement';
@@ -11,9 +11,7 @@ import FilterPicker from '../../../components/Users/FilterPicker';
 import SortPicker from '../../../components/Users/SortPicker';
 import Header from './Header';
 import ModalForm from './ModalForm';
-// TODO
 import getFilters from './utils/getFilters';
-import { pagination as fakeDataPagination, rows } from './utils/tempData';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -36,27 +34,37 @@ const ListPage = () => {
     },
     dispatch,
   ] = useReducer(reducer, initialState, init);
-  const _limit = parseInt(query.get('_limit') || 10, 10);
-  const _page = parseInt(query.get('_page') || 1, 10);
+  const pageSize = parseInt(query.get('pageSize') || 10, 10);
+  const page = parseInt(query.get('page') || 0, 10);
   const _sort = decodeURIComponent(query.get('_sort'));
   const _q = decodeURIComponent(query.get('_q') || '');
 
   useEffect(() => {
-    const getData = () => {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          dispatch({
-            type: 'GET_DATA_SUCCEEDED',
-            data: rows,
-            pagination: fakeDataPagination,
-          });
-          resolve();
-        }, 1000);
+    const getData = async () => {
+      // Show the loading state and reset the state
+      dispatch({
+        type: 'GET_DATA',
       });
+      console.log('oooo');
+      try {
+        const {
+          data: { results, pagination },
+        } = await request(`/admin/users${search}`, { method: 'GET' });
+        console.log(results);
+
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data: results,
+          pagination,
+        });
+      } catch (err) {
+        console.error(err.response);
+        strapi.notification.error('notification.error');
+      }
     };
 
     getData();
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     toggleHeaderSearch({ id: 'Settings.permissions.menu.link.users.label' });
@@ -81,7 +89,11 @@ const ListPage = () => {
   };
 
   const handleChangeFooterParams = ({ target: { name, value } }) => {
-    const paramName = name.split('.')[1];
+    let paramName = name.split('.')[1].replace('_', '');
+
+    if (paramName === 'limit') {
+      paramName = 'pageSize';
+    }
 
     updateSearchParams(paramName, value);
   };
@@ -113,6 +125,8 @@ const ListPage = () => {
       search: currentSearch.toString(),
     });
   };
+
+  console.log('lkll', total);
 
   return (
     <div>
@@ -147,7 +161,11 @@ const ListPage = () => {
           filters={filters}
         />
       </Padded>
-      <Footer count={total} onChange={handleChangeFooterParams} params={{ _limit, _page }} />
+      <Footer
+        count={total}
+        onChange={handleChangeFooterParams}
+        params={{ _limit: pageSize, _page: page }}
+      />
     </div>
   );
 };

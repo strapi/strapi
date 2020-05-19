@@ -5,12 +5,20 @@ const initialState = {
   data: [],
   dataToDelete: [],
   isLoading: true,
-  pagination: {},
+  pagination: {
+    page: 1,
+    pageSize: 10,
+    pageCount: 0,
+    total: 0,
+  },
 };
 
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'GET_DATA': {
+        return initialState;
+      }
       case 'GET_DATA_SUCCEEDED': {
         draftState.data = action.data;
         draftState.isLoading = false;
