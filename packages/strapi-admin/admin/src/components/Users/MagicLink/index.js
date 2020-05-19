@@ -6,15 +6,18 @@ import { Duplicate } from '@buffetjs/icons';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import basename from '../../../utils/basename';
 import IconWrapper from './IconWrapper';
 import Envelope from './Envelope';
 import Wrapper from './Wrapper';
 
-const MagicLink = ({ link }) => {
+const MagicLink = ({ registrationToken }) => {
   const { formatMessage } = useIntl();
   const handleCopy = () => {
     strapi.notification.info('notification.link-copied');
   };
+
+  const link = `${window.location.origin}${basename}auth/register?code=${registrationToken}`;
 
   return (
     <Wrapper>
@@ -37,11 +40,11 @@ const MagicLink = ({ link }) => {
 };
 
 MagicLink.defaultProps = {
-  link: 'http://my-app.com/admin/registration?code=1234567827654576856789',
+  registrationToken: '',
 };
 
 MagicLink.propTypes = {
-  link: PropTypes.string,
+  registrationToken: PropTypes.string,
 };
 
 export default MagicLink;

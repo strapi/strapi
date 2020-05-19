@@ -5,17 +5,15 @@ const stepper = {
     buttonSubmitLabel: 'app.containers.Users.ModalForm.footer.button-success',
     Component: ModalCreateBody,
     isDisabled: false,
-    // next: 'magic-link',
-
-    // TODO: set it back to magic-link
-    next: null,
+    next: 'magic-link',
   },
   'magic-link': {
     buttonSubmitLabel: 'form.button.continue',
     Component: ModalCreateBody,
     isDisabled: true,
-    next: 'summary',
+    next: null,
   },
+  // TODO: I am not sure this step is needed we might need to delete it
   summary: {
     buttonSubmitLabel: 'form.button.done',
     Component: () => 'COMING SOON',

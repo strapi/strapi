@@ -9,6 +9,7 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
   // Little trick to focus the first input
   // Without this the focus is lost
   const [showBody, setShowBody] = useState(false);
+  const [registrationToken, setRegistrationToken] = useState(null);
   const { formatMessage } = useGlobalContext();
   const ref = useRef(null);
   const { buttonSubmitLabel, Component, isDisabled, next } = stepper[currentStep];
@@ -35,7 +36,10 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
     setShowBody(false);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e, data) => {
+    const { registrationToken } = data;
+
+    setRegistrationToken(registrationToken);
     goNext();
   };
 
@@ -57,6 +61,7 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
           isDisabled={isDisabled}
           onSubmit={handleSubmit}
           ref={currentStep === 'create' ? ref : null}
+          registrationToken={registrationToken}
           showMagicLink={currentStep === 'magic-link'}
         />
       )}
