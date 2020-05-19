@@ -19,7 +19,7 @@ const findOne = (params = {}) => {
 /**
  * Find roles in database
  * @param params query params to find the roles
- * @returns {Promise<role>}
+ * @returns {Promise<array>}
  */
 const find = (params = {}) => {
   return strapi.query('role', 'admin').find(params);
