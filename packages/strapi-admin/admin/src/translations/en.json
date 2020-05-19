@@ -232,6 +232,7 @@
   "Auth.form.header.register": "Welcome!",
   "Auth.form.header.register-success": "strapi",
   "Auth.form.password.label": "Password",
+  "Auth.form.confirmPassword.label": "Confirmation Password",
   "Auth.form.rememberMe.label": "Remember me",
   "Auth.form.username.label": "Username",
   "Auth.form.username.placeholder": "John Doe",
