@@ -13,7 +13,7 @@ import MultiValueContainer from './MultiValueContainer';
 const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
   const [options, setOptions] = useState([]);
   const { formatMessage } = useGlobalContext();
-  const translatedError = error ? formatMessage(error) : null;
+  const translatedError = error && error.id ? formatMessage(error) : null;
 
   useEffect(() => {
     // TODO

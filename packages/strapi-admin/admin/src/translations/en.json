@@ -324,5 +324,7 @@
   "app.components.Users.SortPicker.sortby.username_asc": "Username (A to Z)",
   "app.components.Users.SortPicker.sortby.username_desc": "Username (Z to A)",
   "app.containers.Users.EditPage.header.label-loading": "Edit user",
-  "app.containers.Users.EditPage.header.label": "Edit {name}"
+  "app.containers.Users.EditPage.header.label": "Edit {name}",
+  "app.containers.Users.EditPage.roles-bloc-title": "Attributed roles",
+  "app.containers.Users.EditPage.form.active.label": "Active"
 }
