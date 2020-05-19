@@ -13,4 +13,10 @@ module.exports = {
       data: role,
     };
   },
+  async findAll(ctx) {
+    const roles = await strapi.admin.services.role.findAll();
+    ctx.body = {
+      data: roles,
+    };
+  },
 };
