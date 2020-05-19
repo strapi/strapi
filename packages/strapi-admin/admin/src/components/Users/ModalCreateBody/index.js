@@ -11,7 +11,7 @@ import form from './utils/form';
 import schema from './utils/schema';
 import { initialState, reducer } from './reducer';
 import init from './init';
-import Input from './Input';
+import Input from '../../SizedInput';
 import Wrapper from './Wrapper';
 import MagicLink from '../MagicLink';
 
