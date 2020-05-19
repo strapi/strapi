@@ -62,11 +62,11 @@ const findRegistrationInfo = async registrationToken => {
 /**
  * Registers a user based on a registrationToken and some informations to update
  * @param {Object} params
- * @param {Object} params.registrationInfo registration token
+ * @param {Object} params.registrationToken registration token
  * @param {Object} params.userInfo user info
  */
 const register = async ({ registrationToken, userInfo }) => {
-  const matchingUser = await strapi.query('user', 'admin').findOne({registrationToken});
+  const matchingUser = await strapi.query('user', 'admin').findOne({ registrationToken });
 
   if (!matchingUser) {
     throw strapi.errors.badRequest('Invalid registration info');
@@ -75,7 +75,7 @@ const register = async ({ registrationToken, userInfo }) => {
   const hashedPassword = await strapi.admin.services.auth.hashPassword(userInfo.password);
 
   return strapi.admin.services.user.update(
-    {id: matchingUser.id},
+    { id: matchingUser.id },
     {
       password: hashedPassword,
       firstname: userInfo.firstname,
@@ -84,7 +84,7 @@ const register = async ({ registrationToken, userInfo }) => {
       isActive: true,
     }
   );
-}
+};
 
 /** Find many users (paginated)
  * @param query
@@ -92,6 +92,14 @@ const register = async ({ registrationToken, userInfo }) => {
  */
 const findPage = async query => {
   return strapi.query('user', 'admin').findPage(query);
+};
+
+/** Search for many users (paginated)
+ * @param query
+ * @returns {Promise<user>}
+ */
+const searchPage = async query => {
+  return strapi.query('user', 'admin').searchPage(query);
 };
 
 module.exports = {
@@ -102,4 +110,5 @@ module.exports = {
   register,
   sanitizeUser,
   findPage,
+  searchPage,
 };

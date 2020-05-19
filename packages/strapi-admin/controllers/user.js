@@ -32,10 +32,15 @@ module.exports = {
   },
 
   async find(ctx) {
-    const users = await strapi.query('user', 'admin').findPage(ctx.query);
+    const method = _.has(ctx.query, '_q') ? 'searchPage' : 'findPage';
+
+    const { results, pagination } = await strapi.admin.services.user[method](ctx.query);
 
     return {
-      data: users,
+      data: {
+        results: results.map(strapi.admin.services.user.sanitizeUser),
+        pagination,
+      },
     };
   },
 };

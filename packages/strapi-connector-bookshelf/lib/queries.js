@@ -9,7 +9,6 @@ const {
   buildQuery,
   models: modelUtils,
   escapeQuery,
-  findPageQueryFactory,
 } = require('strapi-utils');
 
 module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
@@ -70,8 +69,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       })
       .then(results => results.toJSON());
   }
-
-  const findPage = findPageQueryFactory(find, count);
 
   /**
    * Count entries based on filters
@@ -639,7 +636,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   return {
     findOne,
     find,
-    findPage,
     create,
     update,
     delete: deleteMany,
