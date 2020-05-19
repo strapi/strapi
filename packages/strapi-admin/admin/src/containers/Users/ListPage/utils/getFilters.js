@@ -4,7 +4,7 @@ const getFilters = search => {
 
   // eslint-disable-next-line no-restricted-syntax
   for (let pair of query.entries()) {
-    if (!['_sort', '_limit', '_page', '_q'].includes(pair[0])) {
+    if (!['_sort', 'pageSize', 'page', '_q'].includes(pair[0])) {
       const splitted = pair[0].split('_');
       let filterName;
       let filterType;

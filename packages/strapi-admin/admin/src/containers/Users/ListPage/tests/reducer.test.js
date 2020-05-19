@@ -11,6 +11,32 @@ describe('ADMIN | CONTAINERS | USERS | ListPage | reducer', () => {
     });
   });
 
+  describe('GET_DATA', () => {
+    it('should return the initialState', () => {
+      const initialState = {
+        test: true,
+      };
+
+      const action = {
+        type: 'GET_DATA',
+      };
+
+      const expected = {
+        data: [],
+        dataToDelete: [],
+        isLoading: true,
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 0,
+          total: 0,
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
   describe('GET_DATA_SUCCEEDED', () => {
     it('Should set the data correctly', () => {
       const action = {
