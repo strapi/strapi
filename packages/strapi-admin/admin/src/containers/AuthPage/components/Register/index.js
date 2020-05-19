@@ -5,8 +5,8 @@ import { Checkbox, Flex, Padded, Text } from '@buffetjs/core';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
+import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
-import Button from '../Button';
 import Input from '../Input';
 import Logo from '../Logo';
 import Section from '../Section';
@@ -113,7 +113,7 @@ const Register = ({
                 <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
               </Flex>
               <Padded top size="md">
-                <Button type="submit" color="primary">
+                <Button type="submit" color="primary" textTransform="uppercase">
                   {formatMessage({ id: 'Auth.form.button.register' })}
                 </Button>
               </Padded>
