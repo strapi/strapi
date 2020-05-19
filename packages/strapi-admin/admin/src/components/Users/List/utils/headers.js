@@ -25,11 +25,7 @@ const headers = [
   {
     // eslint-disable-next-line react/prop-types
     cellAdapter: ({ isActive }) => {
-      return (
-        <>
-          <ActiveStatus isActive={isActive}>{isActive ? 'Active' : 'Inactive'}</ActiveStatus>
-        </>
-      );
+      return <ActiveStatus isActive={isActive}>{isActive ? 'Active' : 'Inactive'}</ActiveStatus>;
     },
     name: 'active user',
     value: 'isActive',
