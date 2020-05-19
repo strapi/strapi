@@ -16,12 +16,12 @@ describe('Role', () => {
 
       const createdRole = await roleService.create(input);
 
-      expect(dbCreate).toHaveBeenCalled();
+      expect(dbCreate).toHaveBeenCalledWith(input);
       expect(createdRole).toStrictEqual(input);
     });
   });
-  describe('fetch', () => {
-    test('Fetches a role', async () => {
+  describe('find one', () => {
+    test('Finds a role', async () => {
       const role = {
         id: 1,
         name: 'super_admin',
@@ -33,10 +33,10 @@ describe('Role', () => {
         query: () => ({ findOne: dbFindOne }),
       };
 
-      const fetchedRole = await roleService.fetch({ id: role.id });
+      const foundRole = await roleService.findOne({ id: role.id });
 
-      expect(dbFindOne).toHaveBeenCalled();
-      expect(fetchedRole).toStrictEqual(role);
+      expect(dbFindOne).toHaveBeenCalledWith({ id: role.id });
+      expect(foundRole).toStrictEqual(role);
     });
   });
 });
