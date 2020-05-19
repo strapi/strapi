@@ -2,9 +2,6 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  .row {
-    margin-bottom: 4px;
-  }
 
   ${({ isFromDynamicZone }) => {
   if (isFromDynamicZone) {

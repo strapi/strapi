@@ -40,6 +40,10 @@ const reducer = (state, action) => {
 
       return state.removeIn(['dataToDelete', index]);
     }
+    case 'ON_DELETE_MEDIA_SUCCEEDED':
+      return state
+        .update('data', list => list.filter(item => item.get('id') !== action.mediaId))
+        .update('dataCount', count => count - 1);
     case 'TOGGLE_SELECT_ALL': {
       const isSelected = state.get('data').every(item => state.get('dataToDelete').includes(item));
 
@@ -57,10 +61,6 @@ const reducer = (state, action) => {
         return dataToDelete.concat(newItems);
       });
     }
-    case 'ON_DELETE_MEDIA_SUCCEEDED':
-      return state
-        .update('data', list => list.filter(item => item.get('id') !== action.mediaId))
-        .update('dataCount', count => count - 1);
     default:
       return state;
   }

@@ -18,9 +18,7 @@ module.exports = strapi => {
     beforeInitialize() {
       strapi.config.middleware.load.before.push('documentation');
 
-      initialRoutes.push(
-        ..._.cloneDeep(strapi.plugins.documentation.config.routes)
-      );
+      initialRoutes.push(..._.cloneDeep(strapi.plugins.documentation.config.routes));
     },
 
     initialize() {
@@ -31,22 +29,12 @@ module.exports = strapi => {
             return route;
           }
 
-          if (
-            route.handler === 'Documentation.index' ||
-            route.path === '/login'
-          ) {
+          if (route.handler === 'Documentation.index' || route.path === '/login') {
             route.config.policies = initialRoutes[index].config.policies;
           }
 
           // Set prefix to empty to be able to customise it.
-          if (
-            _.get(strapi.plugins, [
-              'documentation',
-              'config',
-              'x-strapi-config',
-              'path',
-            ])
-          ) {
+          if (_.get(strapi.plugins, ['documentation', 'config', 'x-strapi-config', 'path'])) {
             route.config.prefix = '';
             route.path = `/${strapi.plugins.documentation.config['x-strapi-config'].path}${route.path}`.replace(
               '//',
