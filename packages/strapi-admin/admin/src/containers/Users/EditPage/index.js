@@ -1,19 +1,41 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import {
+  // BackHeader,
+  // LoadingIndicator,
+  // Row,
+  // auth,
+  // request,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
+import ContainerFluid from '../../../components/ContainerFluid';
+import Header from '../../../components/Users/Header';
 
 const EditPage = () => {
   const { settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/users/:id`);
+  console.log({ id });
+
+  const handleSubmit = e => {
+    e.preventDefault();
+  };
 
   return (
-    <div>
-      <h1>Users edit page</h1>
-      <h2>User id : {id} </h2>
-      <p>Coming soon</p>
-    </div>
+    <>
+      <form onSubmit={handleSubmit}>
+        <ContainerFluid padding="0">
+          <Header
+            isLoading={false}
+            initialData={{}}
+            label="Edit"
+            modifiedData={{}}
+            onCancel={() => {}}
+          />
+        </ContainerFluid>
+      </form>
+    </>
   );
 };
 
