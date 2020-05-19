@@ -14,8 +14,8 @@ const findPageQueryFactory = (find, count) => async (queryParams, ...args) => {
   const total = await count(params);
 
   const pagination = {
-    page: parseInt(page),
-    pageSize: parseInt(pageSize),
+    page,
+    pageSize,
     pageCount: Math.ceil(total / pageSize),
     total,
   };
