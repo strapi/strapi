@@ -30,9 +30,9 @@ const HeaderSearch = ({ label, queryParameter }) => {
         // Create a new search in order to remove the filters
         currentSearch = new URLSearchParams('');
 
-        // Keep the previous params _sort, _limit, _page
-        currentSearch.set('_limit', query.get('_limit'));
-        currentSearch.set('_page', query.get('_page'));
+        // Keep the previous params _sort, pageSize, page
+        currentSearch.set('pageSize', query.get('pageSize'));
+        currentSearch.set('page', query.get('page'));
         currentSearch.set('_sort', query.get('_sort'));
 
         currentSearch.set(queryParameter, encodeURIComponent(value));
