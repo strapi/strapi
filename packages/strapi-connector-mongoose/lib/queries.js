@@ -5,7 +5,12 @@
 
 const _ = require('lodash');
 var semver = require('semver');
-const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
+const {
+  convertRestQueryParams,
+  buildQuery,
+  models: modelUtils,
+  findPageQueryFactory,
+} = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 const utils = require('./utils')();
@@ -397,6 +402,8 @@ module.exports = ({ model, modelKey, strapi }) => {
     }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
+  const findPage = findPageQueryFactory(find, count);
+
   async function findOne(params, populate) {
     const entries = await find({ ...params, _limit: 1 }, populate);
     return entries[0] || null;
@@ -506,6 +513,7 @@ module.exports = ({ model, modelKey, strapi }) => {
   return {
     findOne,
     find,
+    findPage,
     create,
     update,
     delete: deleteMany,
