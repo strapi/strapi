@@ -188,17 +188,9 @@
       }
     },
     {
-      "method": "GET",
-      "path": "/roles",
-      "handler": "Role.findAll",
-      "config": {
-        "policies": []
-      }
-    },
-    {
       "method": "PUT",
       "path": "/roles/:id",
-      "handler": "Role.update",
+      "handler": "role.update",
       "config": {
         "policies": []
       }
