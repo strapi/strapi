@@ -17,7 +17,7 @@ const MagicLink = ({ registrationToken }) => {
     strapi.notification.info('notification.link-copied');
   };
 
-  const link = `${window.location.origin}${basename}auth/register?code=${registrationToken}`;
+  const link = `${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`;
 
   return (
     <Wrapper>

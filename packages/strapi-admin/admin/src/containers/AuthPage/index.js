@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-// import PropTypes from 'prop-types';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from 'strapi-helper-plugin';
@@ -9,7 +8,7 @@ import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
 import checkFormValidity from './utils/checkFormValidity';
-import forms from './utils/forms';
+import { forms, formatRegisterAPIError } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -19,7 +18,7 @@ const AuthPage = () => {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
-
+  const registrationToken = query.get('registrationToken');
   const { Component, endPoint, fieldsToDisable, fieldsToOmit, schema } = get(forms, authType, {});
   const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
     reducer,
@@ -37,24 +36,38 @@ const AuthPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Reset the state on navigation change
+  useEffect(() => {
+    dispatch({
+      type: 'RESET_PROPS',
+    });
+  }, [authType]);
+
   useEffect(() => {
     if (authType === 'register') {
-      const getData = () => {
-        const data = {
-          email: 'soup@soup.io',
-          firstname: 'soup',
-          lastname: 'soup',
-        };
+      const getData = async () => {
+        try {
+          const {
+            data: { data },
+          } = await axios.get(
+            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
+          );
 
-        dispatch({
-          type: 'SET_DATA',
-          data,
-        });
+          dispatch({
+            type: 'SET_DATA',
+            data: { registrationToken, userInfo: data },
+          });
+        } catch (err) {
+          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
+
+          strapi.notification.error(errorMessage);
+
+          // Redirect to the oops page in case of an invalid token
+          // @alexandrebodin @JAB I am not sure it is the wanted behavior
+          push(`/auth/oops?info=${encodeURIComponent(errorMessage)}`);
+        }
       };
 
-      const code = query.get('code');
-      // Leaving this log on purpose
-      console.log({ code });
       // TODO API call
       getData();
     }
@@ -85,56 +98,91 @@ const AuthPage = () => {
     });
 
     if (!errors) {
-      try {
-        const requestURL = `/admin/${endPoint}`;
-        const body = omit(modifiedData, fieldsToOmit);
-        // Using axios here until we create a new request helper
-        const {
-          data: {
-            data: { token, user },
-          },
-        } = await axios({
-          method: 'POST',
-          url: `${strapi.backendURL}${requestURL}`,
-          data: body,
-          cancelToken: source.token,
-        });
+      const body = omit(modifiedData, fieldsToOmit);
+      const requestURL = `/admin/${endPoint}`;
 
-        // TODO register and other views logic
-        auth.setToken(token, modifiedData.rememberMe);
-        auth.setUserInfo(user, modifiedData.rememberMe);
+      if (authType === 'login') {
+        await loginRequest(body, requestURL);
+      }
 
-        // Subscribe the user to the newsletter
-        if (authType.includes('register') && modifiedData.news === true) {
-          axios({
-            method: 'POST',
-            body: omit(modifiedData, ['password', 'confirmPassword']),
-          });
-        }
+      if (authType === 'register') {
+        await registerRequest(body, requestURL);
+      }
+    }
+  };
 
-        // Redirect to the homePage
-        push('/');
-      } catch (err) {
-        if (err.response) {
-          const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
-          const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
+  const loginRequest = async (body, requestURL) => {
+    try {
+      const {
+        data: {
+          data: { token, user },
+        },
+      } = await axios({
+        method: 'POST',
+        url: `${strapi.backendURL}${requestURL}`,
+        data: body,
+        cancelToken: source.token,
+      });
 
-          if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
-            push('/auth/oops');
+      auth.setToken(token, modifiedData.rememberMe);
+      auth.setUserInfo(user, modifiedData.rememberMe);
+    } catch (err) {
+      if (err.response) {
+        const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
+        const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
 
-            dispatch({
-              type: 'RESET_PROPS',
-            });
-
-            return;
-          }
+        if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
+          push('/auth/oops');
 
           dispatch({
-            type: 'SET_REQUEST_ERROR',
-            errorMessage,
-            errorStatus,
+            type: 'RESET_PROPS',
           });
+
+          return;
         }
+
+        dispatch({
+          type: 'SET_REQUEST_ERROR',
+          errorMessage,
+          errorStatus,
+        });
+      }
+    }
+  };
+
+  const registerRequest = async (body, requestURL) => {
+    try {
+      const {
+        data: {
+          data: { token, user },
+        },
+      } = await axios({
+        method: 'POST',
+        url: `${strapi.backendURL}${requestURL}`,
+        data: body,
+        cancelToken: source.token,
+      });
+
+      auth.setToken(token, false);
+      auth.setUserInfo(user, false);
+
+      if (authType.includes('register') && modifiedData.userInfo.news === true) {
+        axios({
+          method: 'POST',
+          body: omit(modifiedData, ['userInfo.password', 'userInfo.confirmPassword']),
+        });
+      }
+      // Redirect to the homePage
+      push('/');
+    } catch (err) {
+      if (err.response) {
+        const { data } = err.response;
+        const apiErrors = formatRegisterAPIError(data);
+
+        dispatch({
+          type: 'SET_ERRORS',
+          errors: apiErrors,
+        });
       }
     }
   };
