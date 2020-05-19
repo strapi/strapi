@@ -1,11 +1,10 @@
 import React, { useEffect, useReducer } from 'react';
-import { BackHeader, LoadingIndicator, Row, auth, request } from 'strapi-helper-plugin';
+import { BackHeader, auth, request } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
-import { Padded } from '@buffetjs/core';
 import { get, omit } from 'lodash';
-import Bloc from '../../components/Bloc';
 import BaselineAlignement from '../../components/BaselineAlignement';
 import ContainerFluid from '../../components/ContainerFluid';
+import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
 import Header from '../../components/Users/Header';
 import checkFormValidity from '../../utils/checkFormValidity';
@@ -111,32 +110,20 @@ const ProfilePage = () => {
             onCancel={handleCancel}
           />
           <BaselineAlignement top size="3px" />
-          <Bloc>
-            <BaselineAlignement top size="22px" />
-            <Padded left right size="sm">
-              {isLoading ? (
-                <>
-                  <LoadingIndicator />
-                  <BaselineAlignement bottom size="22px" />
-                </>
-              ) : (
-                <Row>
-                  {Object.keys(form).map(key => {
-                    return (
-                      <SizedInput
-                        {...form[key]}
-                        key={key}
-                        error={formErrors[key]}
-                        name={key}
-                        onChange={handleChange}
-                        value={get(modifiedData, key, '')}
-                      />
-                    );
-                  })}
-                </Row>
-              )}
-            </Padded>
-          </Bloc>
+          <FormBloc isLoading={isLoading}>
+            {Object.keys(form).map(key => {
+              return (
+                <SizedInput
+                  {...form[key]}
+                  key={key}
+                  error={formErrors[key]}
+                  name={key}
+                  onChange={handleChange}
+                  value={get(modifiedData, key, '')}
+                />
+              );
+            })}
+          </FormBloc>
         </ContainerFluid>
       </form>
     </>
