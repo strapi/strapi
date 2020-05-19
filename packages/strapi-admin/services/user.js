@@ -62,7 +62,7 @@ const findRegistrationInfo = async registrationToken => {
 /**
  * Registers a user based on a registrationToken and some informations to update
  * @param {Object} params
- * @param {Object} params.registrationInfo registration token
+ * @param {Object} params.registrationToken registration token
  * @param {Object} params.userInfo user info
  */
 const register = async ({ registrationToken, userInfo }) => {
@@ -86,11 +86,29 @@ const register = async ({ registrationToken, userInfo }) => {
   );
 };
 
+/** Find many users (paginated)
+ * @param query
+ * @returns {Promise<user>}
+ */
+const findPage = async query => {
+  return strapi.query('user', 'admin').findPage(query);
+};
+
+/** Search for many users (paginated)
+ * @param query
+ * @returns {Promise<user>}
+ */
+const searchPage = async query => {
+  return strapi.query('user', 'admin').searchPage(query);
+};
+
 module.exports = {
-  sanitizeUser,
   create,
   update,
   exists,
   findRegistrationInfo,
   register,
+  sanitizeUser,
+  findPage,
+  searchPage,
 };
