@@ -44,7 +44,6 @@ module.exports = strapi => ({
 
           ctx.state.admin = admin;
           ctx.state.user = admin;
-          ctx.state.isAuthenticatedAdmin = true;
           return next();
         }
       }

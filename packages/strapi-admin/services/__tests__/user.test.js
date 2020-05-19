@@ -79,36 +79,6 @@ describe('User', () => {
   });
 
   describe('update', () => {
-    test('Hash password', async () => {
-      const hash = 'aoizdnoaizndoainzodiaz';
-
-      const params = { id: 1 };
-      const input = { email: 'test@strapi.io', password: '123' };
-
-      const update = jest.fn((_, user) => Promise.resolve(user));
-      const hashPassword = jest.fn(() => Promise.resolve(hash));
-
-      global.strapi = {
-        query() {
-          return { update };
-        },
-        admin: {
-          services: {
-            auth: { hashPassword },
-          },
-        },
-      };
-
-      const result = await userService.update(params, input);
-
-      expect(hashPassword).toHaveBeenCalledWith(input.password);
-      expect(update).toHaveBeenCalledWith(params, { email: input.email, password: hash });
-      expect(result).toEqual({
-        email: 'test@strapi.io',
-        password: 'aoizdnoaizndoainzodiaz',
-      });
-    });
-
     test('Forwards call to the query layer', async () => {
       const user = {
         email: 'test@strapi.io',
@@ -229,9 +199,10 @@ describe('User', () => {
       expect(userService.register(input)).rejects.toThrowError('Invalid registration info');
     });
 
-    test('Calls udpate service', async () => {
+    test('Create a password hash', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
       const update = jest.fn(user => Promise.resolve(user));
+      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
         query() {
@@ -242,6 +213,7 @@ describe('User', () => {
         admin: {
           services: {
             user: { update },
+            auth: { hashPassword },
           },
         },
       };
@@ -257,15 +229,54 @@ describe('User', () => {
 
       await userService.register(input);
 
+      expect(hashPassword).toHaveBeenCalledWith('Test1234');
       expect(update).toHaveBeenCalledWith(
         { id: 1 },
-        expect.objectContaining({ firstname: 'test', lastname: 'Strapi', password: 'Test1234' })
+        expect.objectContaining({ password: '123456789' })
+      );
+    });
+
+    test('Set user firstname and lastname', async () => {
+      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
+      const update = jest.fn(user => Promise.resolve(user));
+      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+          };
+        },
+        admin: {
+          services: {
+            user: { update },
+            auth: { hashPassword },
+          },
+        },
+      };
+
+      const input = {
+        registrationToken: '123',
+        userInfo: {
+          firstname: 'test',
+          lastname: 'Strapi',
+          password: 'Test1234',
+        },
+      };
+
+      await userService.register(input);
+
+      expect(hashPassword).toHaveBeenCalledWith('Test1234');
+      expect(update).toHaveBeenCalledWith(
+        { id: 1 },
+        expect.objectContaining({ firstname: 'test', lastname: 'Strapi' })
       );
     });
 
     test('Set user to active', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
       const update = jest.fn(user => Promise.resolve(user));
+      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
         query() {
@@ -276,6 +287,7 @@ describe('User', () => {
         admin: {
           services: {
             user: { update },
+            auth: { hashPassword },
           },
         },
       };
@@ -291,41 +303,8 @@ describe('User', () => {
 
       await userService.register(input);
 
+      expect(hashPassword).toHaveBeenCalledWith('Test1234');
       expect(update).toHaveBeenCalledWith({ id: 1 }, expect.objectContaining({ isActive: true }));
-    });
-
-    test('Reset registrationToken', async () => {
-      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const update = jest.fn(user => Promise.resolve(user));
-
-      global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
-        },
-        admin: {
-          services: {
-            user: { update },
-          },
-        },
-      };
-
-      const input = {
-        registrationToken: '123',
-        userInfo: {
-          firstname: 'test',
-          lastname: 'Strapi',
-          password: 'Test1234',
-        },
-      };
-
-      await userService.register(input);
-
-      expect(update).toHaveBeenCalledWith(
-        { id: 1 },
-        expect.objectContaining({ registrationToken: null })
-      );
     });
   });
 });
