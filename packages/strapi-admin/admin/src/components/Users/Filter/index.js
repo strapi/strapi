@@ -1,18 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Option } from '@buffetjs/core';
-import Text from './Text';
+import { Option, Text } from '@buffetjs/core';
 
 const Filter = ({ displayName, filter, name, onClick, value }) => {
   const { formatMessage } = useIntl();
   const label = (
     <>
-      <Text>{displayName}</Text>
-      <Text fontWeight="700">
+      <Text color="mediumBlue" as="span">
+        {displayName}
+      </Text>
+      <Text as="span" color="mediumBlue" fontWeight="bold">
         &nbsp;{formatMessage({ id: `components.FilterOptions.FILTER_TYPES.${filter}` })}&nbsp;
       </Text>
-      <Text>{value}</Text>
+      <Text as="span" color="mediumBlue">
+        {value}
+      </Text>
     </>
   );
 
