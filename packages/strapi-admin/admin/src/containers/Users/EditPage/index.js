@@ -57,6 +57,12 @@ const EditPage = () => {
   }, []);
   console.log({ id });
 
+  const handleCancel = () => {
+    dispatch({
+      type: 'ON_CANCEL',
+    });
+  };
+
   const handleChange = ({ target: { name, value, type: inputType } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -91,7 +97,7 @@ const EditPage = () => {
             initialData={initialData}
             label={headerLabel}
             modifiedData={modifiedData}
-            onCancel={() => {}}
+            onCancel={handleCancel}
           />
           <BaselineAlignement top size="3px" />
           <FormBloc
