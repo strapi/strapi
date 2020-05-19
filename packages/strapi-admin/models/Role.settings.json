@@ -4,6 +4,9 @@
     "name": "Role",
     "description": ""
   },
+  "options": {
+    "timestamps": true
+  },
   "attributes": {
     "name": {
       "type": "string",
@@ -11,6 +14,9 @@
       "unique": true,
       "configurable": false,
       "required": true
+    },
+    "description": {
+      "type": "string"
     },
     "users": {
       "collection": "user",
