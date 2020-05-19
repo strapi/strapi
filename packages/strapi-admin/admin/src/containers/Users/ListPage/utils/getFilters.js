@@ -20,7 +20,7 @@ const getFilters = search => {
 
       const value = decodeURIComponent(pair[1]);
 
-      filters.push({ name: filterName, filter: filterType, value });
+      filters.push({ displayName: filterName, name: pair[0], filter: filterType, value });
     }
   }
 
