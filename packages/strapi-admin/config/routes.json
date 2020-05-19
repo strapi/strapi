@@ -172,7 +172,7 @@
     {
       "method": "GET",
       "path": "/roles",
-      "handler": "role.find",
+      "handler": "role.findAll",
       "config": {
         "policies": []
       }

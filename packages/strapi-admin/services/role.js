@@ -25,8 +25,17 @@ const find = (params = {}) => {
   return strapi.query('role', 'admin').find(params);
 };
 
+/**
+ * Find all roles in database
+ * @returns {Promise<array>}
+ */
+const findAll = () => {
+  return strapi.query('role', 'admin').find({ _limit: -1 });
+};
+
 module.exports = {
   create,
   findOne,
   find,
+  findAll,
 };
