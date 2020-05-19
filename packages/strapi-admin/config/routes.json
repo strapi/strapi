@@ -146,6 +146,16 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/users/me",
+      "handler": "authenticated-user.getMe"
+    },
+    {
+      "method": "PUT",
+      "path": "/users/me",
+      "handler": "authenticated-user.updateMe"
+    },
+    {
       "method": "POST",
       "path": "/users",
       "handler": "User.create",
