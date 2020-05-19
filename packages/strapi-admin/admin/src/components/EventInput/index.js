@@ -10,7 +10,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   const headersName = [
     'Settings.webhooks.events.create',
     'Settings.webhooks.events.edit',
-    'Settings.webhooks.events.delete',
+    'app.utils.delete',
   ];
 
   const events = {

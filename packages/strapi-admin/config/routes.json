@@ -152,6 +152,30 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/users",
+      "handler": "User.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "role.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "role.findAll",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

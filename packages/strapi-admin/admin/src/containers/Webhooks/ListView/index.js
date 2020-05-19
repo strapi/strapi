@@ -11,12 +11,7 @@ import { Header, List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
-import {
-  request,
-  useGlobalContext,
-  ListButton,
-  PopUpWarning,
-} from 'strapi-helper-plugin';
+import { request, useGlobalContext, ListButton, PopUpWarning } from 'strapi-helper-plugin';
 
 import ListRow from '../../../components/ListRow';
 import EmptyList from '../../../components/EmptyList';
@@ -41,8 +36,7 @@ function ListView() {
     return () => (isMounted.current = false);
   }, []);
 
-  const getWebhookIndex = id =>
-    webhooks.findIndex(webhook => webhook.id === id);
+  const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
 
   // New button
   const addBtnLabel = formatMessage({
@@ -89,7 +83,7 @@ function ListView() {
   const buttonProps = {
     color: 'delete',
     disabled: !(webhooksToDelete.length > 0),
-    label: formatMessage({ id: 'Settings.webhooks.list.button.delete' }),
+    label: formatMessage({ id: 'app.utils.delete' }),
     onClick: () => setShowModal(true),
     type: 'button',
   };
