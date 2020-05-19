@@ -1,5 +1,7 @@
 'use strict';
 
+const { validateRoleUpdateInput } = require('../validation/role');
+
 module.exports = {
   async findOne(ctx) {
     const { id } = ctx.params;
@@ -17,6 +19,25 @@ module.exports = {
     const roles = await strapi.admin.services.role.findAll();
     ctx.body = {
       data: roles,
+    };
+  },
+  async update(ctx) {
+    const { id } = ctx.params;
+
+    try {
+      await validateRoleUpdateInput(ctx.request.body);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const role = await strapi.admin.services.role.update({ id }, ctx.request.body);
+
+    if (!role) {
+      return ctx.notFound('role.notFound');
+    }
+
+    ctx.body = {
+      data: role,
     };
   },
 };
