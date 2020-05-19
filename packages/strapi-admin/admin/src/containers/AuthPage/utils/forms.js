@@ -30,19 +30,25 @@ const forms = {
     Component: Register,
     endPoint: 'register',
     fieldsToDisable: ['email'],
-    fieldsToOmit: ['confirmPassword', 'news', 'email'],
+    fieldsToOmit: ['userInfo.confirmPassword', 'userInfo.news', 'userInfo.email'],
     schema: yup.object().shape({
-      firstname: yup.string().required(translatedErrors.required),
-      lastname: yup.string().required(translatedErrors.required),
-      password: yup
-        .string()
-        .min(6, translatedErrors.minLength)
-        .required(translatedErrors.required),
-      confirmPassword: yup
-        .string()
-        .min(6, translatedErrors.minLength)
-        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
-        .required(translatedErrors.required),
+      userInfo: yup.object().shape({
+        firstname: yup.string().required(translatedErrors.required),
+        lastname: yup.string().required(translatedErrors.required),
+        password: yup
+          .string()
+          .min(8, translatedErrors.minLength)
+          .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
+          .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
+          .matches(/\d/, 'components.Input.error.contain.number')
+          .required(translatedErrors.required),
+        confirmPassword: yup
+          .string()
+          .min(8, translatedErrors.minLength)
+          .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
+          .required(translatedErrors.required),
+      }),
+      registrationToken: yup.string().required(translatedErrors.required),
     }),
   },
 };
