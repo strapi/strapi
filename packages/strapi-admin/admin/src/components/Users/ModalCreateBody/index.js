@@ -43,6 +43,9 @@ const ModalCreateBody = forwardRef(
 
       if (!errors) {
         try {
+          // Prevent user interactions until the request is completed
+          strapi.lockAppWithOverlay();
+
           const requestURL = '/admin/users';
 
           const { data } = await request(requestURL, { method: 'POST', body: modifiedData });
@@ -52,9 +55,9 @@ const ModalCreateBody = forwardRef(
           const message = get(err, ['response', 'payload', 'message'], 'An error occured');
 
           strapi.notification.error(message);
+        } finally {
+          strapi.unlockApp();
         }
-
-        // TODO post request with errors handling
       }
 
       dispatch({
