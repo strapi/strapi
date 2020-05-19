@@ -23,6 +23,7 @@ const {
 } = require('./stringFormatting');
 const { removeUndefined } = require('./objectFormatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
+const findPageQueryFactory = require('./findPageQueryFactory');
 
 module.exports = {
   yup,
@@ -45,4 +46,5 @@ module.exports = {
   removeUndefined,
   getAbsoluteAdminUrl,
   getAbsoluteServerUrl,
+  findPageQueryFactory,
 };

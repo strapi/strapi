@@ -52,6 +52,7 @@ module.exports = function createQuery(opts) {
     delete: createQueryWithLifecycles({ query: 'delete', model, connectorQuery }),
     find: createQueryWithLifecycles({ query: 'find', model, connectorQuery }),
     findOne: createQueryWithLifecycles({ query: 'findOne', model, connectorQuery }),
+    findPage: createQueryWithLifecycles({ query: 'findPage', model, connectorQuery }),
     count: createQueryWithLifecycles({ query: 'count', model, connectorQuery }),
     search: createQueryWithLifecycles({ query: 'search', model, connectorQuery }),
     countSearch: createQueryWithLifecycles({ query: 'countSearch', model, connectorQuery }),

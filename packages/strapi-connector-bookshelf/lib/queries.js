@@ -4,7 +4,12 @@
  */
 
 const _ = require('lodash');
-const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
+const {
+  convertRestQueryParams,
+  buildQuery,
+  escapeQuery,
+  findPageQueryFactory,
+} = require('strapi-utils');
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -64,6 +69,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       })
       .then(results => results.toJSON());
   }
+
+  const findPage = findPageQueryFactory(find, count);
 
   /**
    * Count entries based on filters
@@ -616,6 +623,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   return {
     findOne,
     find,
+    findPage,
     create,
     update,
     delete: deleteMany,

@@ -129,6 +129,51 @@ describe('User', () => {
     });
   });
 
+  describe('Find users (paginated)', () => {
+    const defaults = {page: 1, pageSize: 100};
+
+    beforeEach(() => {
+      const findPage = jest.fn(({page = defaults.page, pageSize = defaults.pageSize} = {}) => {
+        return {
+          results: Array.from({length: pageSize}).map((_, i) => i + (page - 1) * pageSize),
+          pagination: {page, pageSize, total: page * pageSize, pageCount: page},
+        };
+      });
+
+      global.strapi = {
+        query() {
+          return {findPage};
+        },
+      };
+    });
+
+    test('Find users with custom pagination', async () => {
+      const pagination = {page: 2, pageSize: 15};
+      const page = await userService.findPage(pagination);
+
+      expect(page.results.length).toBe(15);
+      expect(page.results[0]).toBe(15);
+      expect((page.pagination.total = 30));
+    });
+
+    test('Find users with default pagination', async () => {
+      const page = await userService.findPage();
+
+      expect(page.results.length).toBe(100);
+      expect(page.results[0]).toBe(0);
+      expect((page.pagination.total = 100));
+    });
+
+    test('Find users with partial pagination', async () => {
+      const pagination = {page: 2};
+      const page = await userService.findPage(pagination);
+
+      expect(page.results.length).toBe(100);
+      expect(page.results[0]).toBe(100);
+      expect((page.pagination.total = 200));
+    });
+  });
+
   describe('findRegistrationInfo', () => {
     test('Returns undefined if not found', async () => {
       const findOne = jest.fn(() => Promise.resolve());
@@ -304,7 +349,6 @@ describe('User', () => {
       await userService.register(input);
 
       expect(hashPassword).toHaveBeenCalledWith('Test1234');
-      expect(update).toHaveBeenCalledWith({ id: 1 }, expect.objectContaining({ isActive: true }));
     });
   });
 });

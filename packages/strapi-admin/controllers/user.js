@@ -30,4 +30,8 @@ module.exports = {
     // Send 201 created
     ctx.created({ data: userInfo });
   },
+
+  async find(ctx) {
+    return strapi.query('user', 'admin').findPage(ctx.query);
+  },
 };
