@@ -27,7 +27,7 @@ const reducer = (state, action) =>
       case 'ON_CHANGE': {
         if (action.inputType === 'password' && !action.value) {
           unset(draftState.modifiedData, action.keys.split('.'));
-        } else if (action.keys.includes('username')) {
+        } else if (action.keys.includes('username') && !action.value) {
           set(draftState.modifiedData, action.keys.split('.'), null);
         } else {
           set(draftState.modifiedData, action.keys.split('.'), action.value);
