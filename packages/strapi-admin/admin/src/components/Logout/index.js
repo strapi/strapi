@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { get } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 import { auth } from 'strapi-helper-plugin';
@@ -16,24 +15,20 @@ import Wrapper from './components';
 
 const Logout = ({ history: { push } }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => setIsOpen(prev => !prev);
-  const handleGoTo = () => {
-    const id = get(auth.getUserInfo(), 'id');
 
+  const handleGoTo = () => {
     push({
-      pathname: `/plugins/content-manager/collectionType/strapi::administrator/${id}`,
-      search: '?redirectUrl=/plugins/content-manager/collectionType/strapi::administrator',
+      pathname: `/me`,
     });
   };
-  const handleGoToAdministrator = () => {
-    push({
-      pathname: '/plugins/content-manager/collectionType/strapi::administrator',
-    });
-  };
+
   const handleLogout = () => {
     auth.clearAppStorage();
     push('/auth/login');
   };
+
+  const toggle = () => setIsOpen(prev => !prev);
+
   const userInfo = auth.getUserInfo();
   const displayName = userInfo.username || `${userInfo.firstname} ${userInfo.lastname}`;
 
@@ -47,9 +42,6 @@ const Logout = ({ history: { push } }) => {
         <DropdownMenu className="dropDownContent">
           <DropdownItem onClick={handleGoTo} className="item">
             <FormattedMessage id="app.components.Logout.profile" />
-          </DropdownItem>
-          <DropdownItem onClick={handleGoToAdministrator} className="item">
-            <FormattedMessage id="app.components.Logout.admin" />
           </DropdownItem>
           <DropdownItem onClick={handleLogout}>
             <FormattedMessage id="app.components.Logout.logout" />
