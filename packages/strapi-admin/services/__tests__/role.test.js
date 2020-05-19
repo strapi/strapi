@@ -52,9 +52,9 @@ describe('Role', () => {
         query: () => ({ find: dbFind }),
       };
 
-      const foundRoles = await roleService.find();
+      const foundRoles = await roleService.findAll();
 
-      expect(dbFind).toHaveBeenCalledWith({});
+      expect(dbFind).toHaveBeenCalledWith({ _limit: -1 });
       expect(foundRoles).toStrictEqual(roles);
     });
   });
