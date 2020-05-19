@@ -4,7 +4,7 @@
  */
 
 const _ = require('lodash');
-const { convertRestQueryParams, buildQuery, findPageQueryFactory } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
@@ -395,8 +395,6 @@ module.exports = ({ model, strapi }) => {
     }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
-  const findPage = findPageQueryFactory(find, count);
-
   async function findOne(params, populate) {
     const entries = await find({ ...params, _limit: 1 }, populate);
     return entries[0] || null;
@@ -507,7 +505,6 @@ module.exports = ({ model, strapi }) => {
   return {
     findOne,
     find,
-    findPage,
     create,
     update,
     delete: deleteMany,

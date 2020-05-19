@@ -129,48 +129,63 @@ describe('User', () => {
     });
   });
 
-  describe('Find users (paginated)', () => {
-    const defaults = {page: 1, pageSize: 100};
+  describe('Fetch users (paginated)', () => {
+    const defaults = { page: 1, pageSize: 100 };
 
     beforeEach(() => {
-      const findPage = jest.fn(({page = defaults.page, pageSize = defaults.pageSize} = {}) => {
+      const fetchPage = jest.fn(({ page = defaults.page, pageSize = defaults.pageSize } = {}) => {
         return {
-          results: Array.from({length: pageSize}).map((_, i) => i + (page - 1) * pageSize),
-          pagination: {page, pageSize, total: page * pageSize, pageCount: page},
+          results: Array.from({ length: pageSize }).map((_, i) => i + (page - 1) * pageSize),
+          pagination: { page, pageSize, total: page * pageSize, pageCount: page },
         };
       });
 
       global.strapi = {
         query() {
-          return {findPage};
+          return { findPage: fetchPage, searchPage: fetchPage };
         },
       };
     });
 
-    test('Find users with custom pagination', async () => {
-      const pagination = {page: 2, pageSize: 15};
-      const page = await userService.findPage(pagination);
+    test('Fetch users with custom pagination', async () => {
+      const pagination = { page: 2, pageSize: 15 };
+      const foundPage = await userService.findPage(pagination);
+      const searchedPage = await userService.searchPage(pagination);
 
-      expect(page.results.length).toBe(15);
-      expect(page.results[0]).toBe(15);
-      expect((page.pagination.total = 30));
+      expect(foundPage.results.length).toBe(15);
+      expect(foundPage.results[0]).toBe(15);
+      expect((foundPage.pagination.total = 30));
+
+      expect(searchedPage.results.length).toBe(15);
+      expect(searchedPage.results[0]).toBe(15);
+      expect((searchedPage.pagination.total = 30));
     });
 
-    test('Find users with default pagination', async () => {
-      const page = await userService.findPage();
+    test('Fetch users with default pagination', async () => {
+      const foundPage = await userService.findPage();
+      const searchedPage = await userService.searchPage();
 
-      expect(page.results.length).toBe(100);
-      expect(page.results[0]).toBe(0);
-      expect((page.pagination.total = 100));
+      expect(foundPage.results.length).toBe(100);
+      expect(foundPage.results[0]).toBe(0);
+      expect((foundPage.pagination.total = 100));
+
+      expect(searchedPage.results.length).toBe(100);
+      expect(searchedPage.results[0]).toBe(0);
+      expect((searchedPage.pagination.total = 100));
     });
 
-    test('Find users with partial pagination', async () => {
-      const pagination = {page: 2};
-      const page = await userService.findPage(pagination);
+    test('Fetch users with partial pagination', async () => {
+      const pagination = { page: 2 };
+      const foundPage = await userService.findPage(pagination);
+      const searchedPage = await userService.searchPage(pagination);
 
-      expect(page.results.length).toBe(100);
-      expect(page.results[0]).toBe(100);
-      expect((page.pagination.total = 200));
+      expect(foundPage.results.length).toBe(100);
+      expect(foundPage.results[0]).toBe(100);
+      expect((foundPage.pagination.total = 200));
+
+      expect(searchedPage.results.length).toBe(100);
+      expect(searchedPage.results[0]).toBe(100);
+      expect((searchedPage.pagination.total = 200));
     });
   });
 
