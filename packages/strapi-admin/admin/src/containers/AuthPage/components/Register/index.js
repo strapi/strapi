@@ -56,59 +56,63 @@ const Register = ({
               <InputWrapper>
                 <Input
                   autoFocus
-                  error={formErrors.firstname}
+                  error={formErrors['userInfo.firstname']}
                   label="Auth.form.firstname.label"
-                  name="firstname"
+                  name="userInfo.firstname"
                   onChange={onChange}
                   placeholder="Auth.form.firstname.placeholder"
                   type="text"
                   validations={{ required: true }}
-                  value={modifiedData.firstname}
+                  value={get(modifiedData, 'userInfo.firstname', '')}
                 />
                 <Input
                   autoFocus
-                  error={formErrors.lastname}
+                  error={formErrors['userInfo.lastname']}
                   label="Auth.form.lastname.label"
-                  name="lastname"
+                  name="userInfo.lastname"
                   onChange={onChange}
                   placeholder="Auth.form.lastname.placeholder"
                   type="text"
                   validations={{ required: true }}
-                  value={modifiedData.lastname}
+                  value={get(modifiedData, 'userInfo.lastname', '')}
                 />
               </InputWrapper>
               <Input
                 autoFocus
-                error={formErrors.email}
+                error={formErrors['userInfo.email']}
                 disabled={fieldsToDisable.includes('email')}
                 label="Auth.form.email.label"
-                name="email"
+                name="userInfo.email"
                 onChange={onChange}
                 placeholder="Auth.form.email.placeholder"
                 type="email"
                 validations={{ required: true }}
-                value={modifiedData.email}
+                value={get(modifiedData, 'userInfo.email', '')}
               />
               <Input
-                error={formErrors.password}
+                error={formErrors['userInfo.password']}
                 label="Auth.form.password.label"
-                name="password"
+                name="userInfo.password"
                 onChange={onChange}
                 type="password"
                 validations={{ required: true }}
-                value={modifiedData.password}
+                value={get(modifiedData, 'userInfo.password', '')}
               />
               <Input
-                error={formErrors.confirmPassword}
+                error={formErrors['userInfo.confirmPassword']}
                 label="Auth.form.password.label"
-                name="confirmPassword"
+                name="userInfo.confirmPassword"
                 onChange={onChange}
                 type="password"
                 validations={{ required: true }}
-                value={modifiedData.confirmPassword}
+                value={get(modifiedData, 'userInfo.confirmPassword', '')}
               />
               <Flex alignItems="flex-start">
-                <Checkbox name="news" onChange={onChange} value={modifiedData.news} />
+                <Checkbox
+                  name="userInfo.news"
+                  onChange={onChange}
+                  value={get(modifiedData, 'userInfo.news', false)}
+                />
                 <Padded left size="xs" />
                 <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
               </Flex>
