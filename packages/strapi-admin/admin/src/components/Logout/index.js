@@ -34,12 +34,14 @@ const Logout = ({ history: { push } }) => {
     auth.clearAppStorage();
     push('/auth/login');
   };
+  const userInfo = auth.getUserInfo();
+  const displayName = userInfo.username || `${userInfo.firstname} ${userInfo.lastname}`;
 
   return (
     <Wrapper>
       <ButtonDropdown isOpen={isOpen} toggle={toggle}>
         <DropdownToggle>
-          {get(auth.getUserInfo(), 'username')}
+          {displayName}
           <FontAwesomeIcon icon="caret-down" />
         </DropdownToggle>
         <DropdownMenu className="dropDownContent">
