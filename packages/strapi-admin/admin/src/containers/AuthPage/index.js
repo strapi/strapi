@@ -8,7 +8,8 @@ import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
 import checkFormValidity from '../../utils/checkFormValidity';
-import { forms, formatRegisterAPIError } from './utils';
+import formatAPIErrors from '../../utils/formatAPIErrors';
+import { forms } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -126,6 +127,8 @@ const AuthPage = () => {
 
       auth.setToken(token, modifiedData.rememberMe);
       auth.setUserInfo(user, modifiedData.rememberMe);
+
+      push('/');
     } catch (err) {
       if (err.response) {
         const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
@@ -177,7 +180,7 @@ const AuthPage = () => {
     } catch (err) {
       if (err.response) {
         const { data } = err.response;
-        const apiErrors = formatRegisterAPIError(data);
+        const apiErrors = formatAPIErrors(data);
 
         dispatch({
           type: 'SET_ERRORS',

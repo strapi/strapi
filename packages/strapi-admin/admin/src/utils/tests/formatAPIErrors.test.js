@@ -1,12 +1,12 @@
-import formatRegisterAPIError from '../formatRegisterAPIError';
+import formatAPIErrors from '../formatAPIErrors';
 
-describe('ADMIN | CONTAINERS | AuthPage | utils | formatRegisterAPIError', () => {
+describe('ADMIN | utils | formatAPIErrors', () => {
   it('should return an empty object', () => {
-    expect(formatRegisterAPIError({ data: {} })).toEqual({});
+    expect(formatAPIErrors({ data: {} })).toEqual({});
   });
 
   it('should return an empty object in case of error', () => {
-    expect(formatRegisterAPIError({})).toEqual({});
+    expect(formatAPIErrors({})).toEqual({});
   });
 
   it('should return a formatted object', () => {
@@ -20,6 +20,6 @@ describe('ADMIN | CONTAINERS | AuthPage | utils | formatRegisterAPIError', () =>
       },
     };
 
-    expect(formatRegisterAPIError({ data })).toEqual(expected);
+    expect(formatAPIErrors({ data })).toEqual(expected);
   });
 });

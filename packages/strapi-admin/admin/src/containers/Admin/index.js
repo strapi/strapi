@@ -34,6 +34,7 @@ import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../Onboarding';
 import SettingsPage from '../SettingsPage';
 import PluginDispatcher from '../PluginDispatcher';
+import ProfilePage from '../ProfilePage';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
@@ -186,6 +187,7 @@ export class Admin extends React.Component {
             <Content>
               <Switch>
                 <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                <Route path="/me" component={ProfilePage} />
                 <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
                 <Route
                   path="/list-plugins"
