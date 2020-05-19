@@ -151,6 +151,31 @@ describe('ADMIN | CONTAINERS | ProfilePage | reducer', () => {
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
+
+    it('should set the username value to null if the value is empty', () => {
+      const initialState = {
+        modifiedData: {
+          email: 'john@strapi.io',
+          password: 'pwd123',
+          username: 'test',
+        },
+      };
+      const action = {
+        type: 'ON_CHANGE',
+        keys: 'username',
+        inputType: 'text',
+        value: '',
+      };
+      const expected = {
+        modifiedData: {
+          email: 'john@strapi.io',
+          password: 'pwd123',
+          username: null,
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
   });
 
   describe('ON_SUBMIT', () => {

@@ -8,7 +8,7 @@ const schema = yup.object().shape({
     .string()
     .email(translatedErrors.email)
     .required(translatedErrors.required),
-  username: yup.string(),
+  username: yup.string().nullable(),
   password: yup
     .string()
     .min(8, translatedErrors.minLength)
