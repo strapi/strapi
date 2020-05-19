@@ -322,5 +322,7 @@
   "app.components.Users.SortPicker.sortby.lastname_asc": "Last name (A to Z)",
   "app.components.Users.SortPicker.sortby.lastname_desc": "Last name (Z to A)",
   "app.components.Users.SortPicker.sortby.username_asc": "Username (A to Z)",
-  "app.components.Users.SortPicker.sortby.username_desc": "Username (Z to A)"
+  "app.components.Users.SortPicker.sortby.username_desc": "Username (Z to A)",
+  "app.containers.Users.EditPage.header.label-loading": "Edit user",
+  "app.containers.Users.EditPage.header.label": "Edit {name}"
 }
