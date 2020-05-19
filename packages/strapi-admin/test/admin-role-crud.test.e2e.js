@@ -59,4 +59,45 @@ describe('Role CRUD End to End', () => {
       expect(res.body.data).toMatchObject(data.roles);
     });
   });
+
+  describe('Update a role', () => {
+    test.skip('Can update a role successfully', async () => {
+      const updates = {
+        description: 'new description - Can update a role successfully',
+      };
+      const res = await rq({
+        url: `/admin/roles/${data.roles[0].id}`,
+        method: 'PUT',
+        body: updates,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject({
+        ...data.roles[0],
+        ...updates,
+      });
+      data.roles[0] = res.body.data;
+    });
+    test.skip('Cannot update the name of a role', async () => {
+      const updates = {
+        description: 'new description - Cannot update the name of a role',
+      };
+      const res = await rq({
+        url: `/admin/roles/${data.roles[0].id}`,
+        method: 'PUT',
+        body: updates,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'ValidationError',
+        data: {
+          undefined: ['this field cannot have keys not specified in the object shape'],
+        },
+      });
+      data.roles[0] = res.body.data;
+    });
+  });
 });
