@@ -92,7 +92,6 @@ const ListPage = () => {
 
   const handleClickDeleteFilter = ({ target: { name } }) => {
     const currentSearch = new URLSearchParams(search);
-    console.log(name);
 
     currentSearch.delete(name);
 
@@ -138,14 +137,16 @@ const ListPage = () => {
         </Flex>
       </BaselineAlignement>
       <ModalForm isOpen={isModalOpened} onToggle={handleToggle} />
-      <div style={{ height: 18 }} />
-      <List
-        isLoading={isLoading}
-        data={data}
-        onChange={handleChangeDataToDelete}
-        searchParam={_q}
-        filters={filters}
-      />
+      <BaselineAlignement top size="8px" />
+      <Padded top size="sm">
+        <List
+          isLoading={isLoading}
+          data={data}
+          onChange={handleChangeDataToDelete}
+          searchParam={_q}
+          filters={filters}
+        />
+      </Padded>
       <Footer count={total} onChange={handleChangeFooterParams} params={{ _limit, _page }} />
     </div>
   );
