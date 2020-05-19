@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-// import { pick, set, unset } from 'lodash';
+import { set, unset } from 'lodash';
 
 const initialState = {
   formErrors: {},
@@ -16,24 +16,24 @@ const reducer = (state, action) =>
       case 'GET_DATA_SUCCEEDED': {
         draftState.isLoading = false;
         draftState.showHeaderLoader = false;
-        // draftState.initialData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
-        // draftState.modifiedData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
+        draftState.initialData = action.data;
+        draftState.modifiedData = action.data;
         break;
       }
       case 'ON_CANCEL': {
         draftState.modifiedData = state.initialData;
         break;
       }
-      // case 'ON_CHANGE': {
-      //   if (action.inputType === 'password' && !action.value) {
-      //     unset(draftState.modifiedData, action.keys.split('.'));
-      //   } else if (action.keys.includes('username')) {
-      //     set(draftState.modifiedData, action.keys.split('.'), null);
-      //   } else {
-      //     set(draftState.modifiedData, action.keys.split('.'), action.value);
-      //   }
-      //   break;
-      // }
+      case 'ON_CHANGE': {
+        if (action.inputType === 'password' && !action.value) {
+          unset(draftState.modifiedData, action.keys.split('.'));
+        } else if (action.keys.includes('username')) {
+          set(draftState.modifiedData, action.keys.split('.'), null);
+        } else {
+          set(draftState.modifiedData, action.keys.split('.'), action.value);
+        }
+        break;
+      }
       // case 'ON_SUBMIT': {
       //   draftState.showHeaderLoader = true;
       //   break;
