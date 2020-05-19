@@ -3,6 +3,11 @@
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 
+const {
+  validateRegistrationInput,
+  validateRegistrationInfoQuery,
+} = require('../validation/authentication');
+
 module.exports = {
   login: compose([
     (ctx, next) => {
@@ -47,6 +52,45 @@ module.exports = {
     ctx.body = {
       data: {
         token: strapi.admin.services.token.createJwtToken({ id: payload.id }),
+      },
+    };
+  },
+
+  async registrationInfo(ctx) {
+    try {
+      await validateRegistrationInfoQuery(ctx.request.query);
+    } catch (err) {
+      return ctx.badRequest('QueryError', err);
+    }
+
+    const { registrationToken } = ctx.request.query;
+
+    const registrationInfo = await strapi.admin.services.user.findRegistrationInfo(
+      registrationToken
+    );
+
+    if (!registrationInfo) {
+      return ctx.badRequest('Invalid registrationToken');
+    }
+
+    ctx.body = { data: registrationInfo };
+  },
+
+  async register(ctx) {
+    const input = ctx.request.body;
+
+    try {
+      await validateRegistrationInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const user = await strapi.admin.services.user.register(input);
+
+    ctx.body = {
+      data: {
+        token: strapi.admin.services.token.createJwtToken(user),
+        user: strapi.admin.services.user.sanitizeUser(user),
       },
     };
   },
