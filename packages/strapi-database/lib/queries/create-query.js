@@ -1,7 +1,7 @@
 'use strict';
 
-const { replaceIdByPrimaryKey } = require('../utils/primary-key');
-const { executeBeforeLifecycle, executeAfterLifecycle } = require('../utils/lifecycles');
+const { createQueryWithLifecycles, withLifecycles } = require('./helpers');
+const { createFindPageQuery, createSearchPageQuery } = require('./paginated-queries');
 
 /**
  * @param {Object} opts options
@@ -55,26 +55,12 @@ module.exports = function createQuery(opts) {
     count: createQueryWithLifecycles({ query: 'count', model, connectorQuery }),
     search: createQueryWithLifecycles({ query: 'search', model, connectorQuery }),
     countSearch: createQueryWithLifecycles({ query: 'countSearch', model, connectorQuery }),
+
+    findPage: withLifecycles({ query: 'findPage', model, fn: createFindPageQuery(connectorQuery) }),
+    searchPage: withLifecycles({
+      query: 'searchPage',
+      model,
+      fn: createSearchPageQuery(connectorQuery),
+    }),
   };
-};
-
-// wraps a connectorQuery call with:
-// - param substitution
-// - lifecycle hooks
-const createQueryWithLifecycles = ({ query, model, connectorQuery }) => async (params, ...rest) => {
-  // substitute id for primaryKey value in params
-  const newParams = replaceIdByPrimaryKey(params, model);
-  const queryArguments = [newParams, ...rest];
-
-  // execute before hook
-  await executeBeforeLifecycle(query, model, ...queryArguments);
-
-  // execute query
-  const result = await connectorQuery[query](...queryArguments);
-
-  // execute after hook with result and arguments
-  await executeAfterLifecycle(query, model, result, ...queryArguments);
-
-  // return result
-  return result;
 };

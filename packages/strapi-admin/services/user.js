@@ -32,6 +32,16 @@ const create = async attributes => {
  * @returns {Promise<user>}
  */
 const update = async (params, attributes) => {
+  // hash password if a new one is sent
+  if (_.has(attributes, 'password')) {
+    const hashedPassword = await strapi.admin.services.auth.hashPassword(attributes.password);
+
+    return strapi.query('user', 'admin').update(params, {
+      ...attributes,
+      password: hashedPassword,
+    });
+  }
+
   return strapi.query('user', 'admin').update(params, attributes);
 };
 
@@ -62,7 +72,7 @@ const findRegistrationInfo = async registrationToken => {
 /**
  * Registers a user based on a registrationToken and some informations to update
  * @param {Object} params
- * @param {Object} params.registrationInfo registration token
+ * @param {Object} params.registrationToken registration token
  * @param {Object} params.userInfo user info
  */
 const register = async ({ registrationToken, userInfo }) => {
@@ -72,12 +82,10 @@ const register = async ({ registrationToken, userInfo }) => {
     throw strapi.errors.badRequest('Invalid registration info');
   }
 
-  const hashedPassword = await strapi.admin.services.auth.hashPassword(userInfo.password);
-
   return strapi.admin.services.user.update(
     { id: matchingUser.id },
     {
-      password: hashedPassword,
+      password: userInfo.password,
       firstname: userInfo.firstname,
       lastname: userInfo.lastname,
       registrationToken: null,
@@ -86,11 +94,29 @@ const register = async ({ registrationToken, userInfo }) => {
   );
 };
 
+/** Find many users (paginated)
+ * @param query
+ * @returns {Promise<user>}
+ */
+const findPage = async query => {
+  return strapi.query('user', 'admin').findPage(query);
+};
+
+/** Search for many users (paginated)
+ * @param query
+ * @returns {Promise<user>}
+ */
+const searchPage = async query => {
+  return strapi.query('user', 'admin').searchPage(query);
+};
+
 module.exports = {
-  sanitizeUser,
   create,
   update,
   exists,
   findRegistrationInfo,
   register,
+  sanitizeUser,
+  findPage,
+  searchPage,
 };

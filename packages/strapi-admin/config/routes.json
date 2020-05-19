@@ -146,9 +146,43 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/users/me",
+      "handler": "authenticated-user.getMe"
+    },
+    {
+      "method": "PUT",
+      "path": "/users/me",
+      "handler": "authenticated-user.updateMe"
+    },
+    {
       "method": "POST",
       "path": "/users",
       "handler": "User.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/users",
+      "handler": "User.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles/:id",
+      "handler": "role.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/roles",
+      "handler": "role.findAll",
       "config": {
         "policies": []
       }

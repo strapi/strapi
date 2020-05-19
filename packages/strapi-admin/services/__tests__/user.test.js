@@ -79,6 +79,36 @@ describe('User', () => {
   });
 
   describe('update', () => {
+    test('Hash password', async () => {
+      const hash = 'aoizdnoaizndoainzodiaz';
+
+      const params = { id: 1 };
+      const input = { email: 'test@strapi.io', password: '123' };
+
+      const update = jest.fn((_, user) => Promise.resolve(user));
+      const hashPassword = jest.fn(() => Promise.resolve(hash));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        admin: {
+          services: {
+            auth: { hashPassword },
+          },
+        },
+      };
+
+      const result = await userService.update(params, input);
+
+      expect(hashPassword).toHaveBeenCalledWith(input.password);
+      expect(update).toHaveBeenCalledWith(params, { email: input.email, password: hash });
+      expect(result).toEqual({
+        email: 'test@strapi.io',
+        password: 'aoizdnoaizndoainzodiaz',
+      });
+    });
+
     test('Forwards call to the query layer', async () => {
       const user = {
         email: 'test@strapi.io',
@@ -126,6 +156,66 @@ describe('User', () => {
       const result = await userService.exists();
 
       expect(result).toBeFalsy();
+    });
+  });
+
+  describe('Fetch users (paginated)', () => {
+    const defaults = { page: 1, pageSize: 100 };
+
+    beforeEach(() => {
+      const fetchPage = jest.fn(({ page = defaults.page, pageSize = defaults.pageSize } = {}) => {
+        return {
+          results: Array.from({ length: pageSize }).map((_, i) => i + (page - 1) * pageSize),
+          pagination: { page, pageSize, total: page * pageSize, pageCount: page },
+        };
+      });
+
+      global.strapi = {
+        query() {
+          return { findPage: fetchPage, searchPage: fetchPage };
+        },
+      };
+    });
+
+    test('Fetch users with custom pagination', async () => {
+      const pagination = { page: 2, pageSize: 15 };
+      const foundPage = await userService.findPage(pagination);
+      const searchedPage = await userService.searchPage(pagination);
+
+      expect(foundPage.results.length).toBe(15);
+      expect(foundPage.results[0]).toBe(15);
+      expect((foundPage.pagination.total = 30));
+
+      expect(searchedPage.results.length).toBe(15);
+      expect(searchedPage.results[0]).toBe(15);
+      expect((searchedPage.pagination.total = 30));
+    });
+
+    test('Fetch users with default pagination', async () => {
+      const foundPage = await userService.findPage();
+      const searchedPage = await userService.searchPage();
+
+      expect(foundPage.results.length).toBe(100);
+      expect(foundPage.results[0]).toBe(0);
+      expect((foundPage.pagination.total = 100));
+
+      expect(searchedPage.results.length).toBe(100);
+      expect(searchedPage.results[0]).toBe(0);
+      expect((searchedPage.pagination.total = 100));
+    });
+
+    test('Fetch users with partial pagination', async () => {
+      const pagination = { page: 2 };
+      const foundPage = await userService.findPage(pagination);
+      const searchedPage = await userService.searchPage(pagination);
+
+      expect(foundPage.results.length).toBe(100);
+      expect(foundPage.results[0]).toBe(100);
+      expect((foundPage.pagination.total = 200));
+
+      expect(searchedPage.results.length).toBe(100);
+      expect(searchedPage.results[0]).toBe(100);
+      expect((searchedPage.pagination.total = 200));
     });
   });
 
@@ -199,10 +289,9 @@ describe('User', () => {
       expect(userService.register(input)).rejects.toThrowError('Invalid registration info');
     });
 
-    test('Create a password hash', async () => {
+    test('Calls udpate service', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
       const update = jest.fn(user => Promise.resolve(user));
-      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
         query() {
@@ -213,7 +302,6 @@ describe('User', () => {
         admin: {
           services: {
             user: { update },
-            auth: { hashPassword },
           },
         },
       };
@@ -229,54 +317,15 @@ describe('User', () => {
 
       await userService.register(input);
 
-      expect(hashPassword).toHaveBeenCalledWith('Test1234');
       expect(update).toHaveBeenCalledWith(
         { id: 1 },
-        expect.objectContaining({ password: '123456789' })
-      );
-    });
-
-    test('Set user firstname and lastname', async () => {
-      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const update = jest.fn(user => Promise.resolve(user));
-      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
-
-      global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
-        },
-        admin: {
-          services: {
-            user: { update },
-            auth: { hashPassword },
-          },
-        },
-      };
-
-      const input = {
-        registrationToken: '123',
-        userInfo: {
-          firstname: 'test',
-          lastname: 'Strapi',
-          password: 'Test1234',
-        },
-      };
-
-      await userService.register(input);
-
-      expect(hashPassword).toHaveBeenCalledWith('Test1234');
-      expect(update).toHaveBeenCalledWith(
-        { id: 1 },
-        expect.objectContaining({ firstname: 'test', lastname: 'Strapi' })
+        expect.objectContaining({ firstname: 'test', lastname: 'Strapi', password: 'Test1234' })
       );
     });
 
     test('Set user to active', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
       const update = jest.fn(user => Promise.resolve(user));
-      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
         query() {
@@ -287,7 +336,6 @@ describe('User', () => {
         admin: {
           services: {
             user: { update },
-            auth: { hashPassword },
           },
         },
       };
@@ -303,8 +351,41 @@ describe('User', () => {
 
       await userService.register(input);
 
-      expect(hashPassword).toHaveBeenCalledWith('Test1234');
       expect(update).toHaveBeenCalledWith({ id: 1 }, expect.objectContaining({ isActive: true }));
+    });
+
+    test('Reset registrationToken', async () => {
+      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
+      const update = jest.fn(user => Promise.resolve(user));
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+          };
+        },
+        admin: {
+          services: {
+            user: { update },
+          },
+        },
+      };
+
+      const input = {
+        registrationToken: '123',
+        userInfo: {
+          firstname: 'test',
+          lastname: 'Strapi',
+          password: 'Test1234',
+        },
+      };
+
+      await userService.register(input);
+
+      expect(update).toHaveBeenCalledWith(
+        { id: 1 },
+        expect.objectContaining({ registrationToken: null })
+      );
     });
   });
 });
