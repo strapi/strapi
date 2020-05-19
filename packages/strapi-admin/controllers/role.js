@@ -13,8 +13,8 @@ module.exports = {
       data: role,
     };
   },
-  async find(ctx) {
-    const roles = await strapi.admin.services.role.find({ _limit: -1 });
+  async findAll(ctx) {
+    const roles = await strapi.admin.services.role.findAll();
     ctx.body = {
       data: roles,
     };
