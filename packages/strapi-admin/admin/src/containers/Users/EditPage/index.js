@@ -16,6 +16,8 @@ import FormBloc from '../../../components/FormBloc';
 import SizedInput from '../../../components/SizedInput';
 import Header from '../../../components/Users/Header';
 import SelectRoles from '../../../components/Users/SelectRoles';
+import { editValidation } from '../../../validations/users';
+import checkFormValidity from '../../../utils/checkFormValidity';
 import form from './utils/form';
 import fakeData from './utils/tempData';
 import { initialState, reducer } from './reducer';
@@ -23,7 +25,7 @@ import init from './init';
 
 const EditPage = () => {
   const { settingsBaseURL } = useGlobalContext();
-  const [{ formErrors, isLoading, modifiedData }, dispatch] = useReducer(
+  const [{ formErrors, isLoading, initialData, modifiedData }, dispatch] = useReducer(
     reducer,
     initialState,
     init
@@ -64,11 +66,21 @@ const EditPage = () => {
     });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-  };
 
-  console.log({ modifiedData });
+    const errors = await checkFormValidity(modifiedData, editValidation);
+
+    dispatch({
+      type: 'SET_ERRORS',
+      errors: errors || {},
+    });
+
+    if (!errors) {
+      // todo
+      console.log('will submit');
+    }
+  };
 
   return (
     <>
@@ -76,9 +88,9 @@ const EditPage = () => {
         <ContainerFluid padding="0">
           <Header
             isLoading={isLoading}
-            initialData={{}}
+            initialData={initialData}
             label={headerLabel}
-            modifiedData={{}}
+            modifiedData={modifiedData}
             onCancel={() => {}}
           />
           <BaselineAlignement top size="3px" />
