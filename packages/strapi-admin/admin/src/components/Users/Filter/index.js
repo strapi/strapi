@@ -2,16 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Option } from '@buffetjs/core';
+import Text from './Text';
 
-const Filter = ({ filter, name, onClick, value }) => {
+const Filter = ({ displayName, filter, name, onClick, value }) => {
   const { formatMessage } = useIntl();
   const label = (
     <>
-      <span>{name}</span>
-      <span style={{ fontWeight: 700 }}>
+      <Text>{displayName}</Text>
+      <Text fontWeight="700">
         &nbsp;{formatMessage({ id: `components.FilterOptions.FILTER_TYPES.${filter}` })}&nbsp;
-      </span>
-      <span>{value}</span>
+      </Text>
+      <Text>{value}</Text>
     </>
   );
 
@@ -28,6 +29,7 @@ Filter.defaultProps = {
 
 Filter.propTypes = {
   filter: PropTypes.string.isRequired,
+  displayName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   value: PropTypes.string.isRequired,

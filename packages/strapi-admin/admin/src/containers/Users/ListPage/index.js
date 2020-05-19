@@ -92,6 +92,7 @@ const ListPage = () => {
 
   const handleClickDeleteFilter = ({ target: { name } }) => {
     const currentSearch = new URLSearchParams(search);
+    console.log(name);
 
     currentSearch.delete(name);
 
@@ -126,7 +127,9 @@ const ListPage = () => {
         <Flex flexWrap="wrap">
           <SortPicker onChange={handleChangeSort} value={_sort} />
           <Padded right size="10px" />
-          <FilterPicker onChange={handleChangeFilter} />
+          <BaselineAlignement bottom size="6px">
+            <FilterPicker onChange={handleChangeFilter} />
+          </BaselineAlignement>
           <Padded right size="10px" />
           {filters.map((filter, i) => (
             // eslint-disable-next-line react/no-array-index-key

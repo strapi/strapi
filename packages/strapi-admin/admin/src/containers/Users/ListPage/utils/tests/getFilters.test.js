@@ -11,12 +11,14 @@ describe('ADMIN | CONTAINERS | USERS | ListPage | utils | getFilters', () => {
     const search = '_sort=firstname&_page=1&_limit=1&firstname=test&firstname_ne=something';
     const expected = [
       {
+        displayName: 'firstname',
         name: 'firstname',
         filter: '=',
         value: 'test',
       },
       {
-        name: 'firstname',
+        displayName: 'firstname',
+        name: 'firstname_ne',
         filter: '_ne',
         value: 'something',
       },
