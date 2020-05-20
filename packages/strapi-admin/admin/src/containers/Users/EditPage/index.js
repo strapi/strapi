@@ -155,6 +155,7 @@ const EditPage = () => {
             </FormBloc>
           )}
         </ContainerFluid>
+        <Padded bottom size="md" />
       </form>
     </>
   );
