@@ -27,23 +27,23 @@ const reducer = (state, action) =>
       case 'ON_CHANGE': {
         if (action.inputType === 'password' && !action.value) {
           unset(draftState.modifiedData, action.keys.split('.'));
-        } else if (action.keys.includes('username')) {
+        } else if (action.keys.includes('username') && !action.value) {
           set(draftState.modifiedData, action.keys.split('.'), null);
         } else {
           set(draftState.modifiedData, action.keys.split('.'), action.value);
         }
         break;
       }
-      // case 'ON_SUBMIT': {
-      //   draftState.showHeaderLoader = true;
-      //   break;
-      // }
-      // case 'ON_SUBMIT_SUCCEEDED': {
-      //   draftState.initialData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
-      //   draftState.modifiedData = pick(action.data, ['email', 'firstname', 'lastname', 'username']);
-      //   draftState.showHeaderLoader = false;
-      //   break;
-      // }
+      case 'ON_SUBMIT': {
+        draftState.showHeaderLoader = true;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        // TODO fix this and add tests
+        draftState.initialData = state.modifiedData;
+        draftState.showHeaderLoader = false;
+        break;
+      }
       case 'SET_ERRORS': {
         draftState.formErrors = action.errors;
         break;

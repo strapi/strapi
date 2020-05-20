@@ -83,6 +83,8 @@ const ProfilePage = () => {
           type: 'ON_SUBMIT_SUCCEEDED',
           data,
         });
+
+        strapi.notification.success('notification.success.saved');
       } catch (err) {
         const data = get(err, 'response.payload', { data: {} });
         const apiErrors = formatAPIErrors(data);
