@@ -6,7 +6,7 @@ const data = {
     username: null,
     email: 'soup@soup.com',
     isActive: false,
-    roles: [],
+    roles: [{ id: 1, name: 'Super Admin' }],
     registrationToken: 'my-super-token',
   },
   other: {
@@ -16,7 +16,10 @@ const data = {
     username: 'Display username',
     email: 'soup@soup.com',
     isActive: false,
-    roles: [],
+    roles: [
+      { id: 1, name: 'Super Admin' },
+      { id: 2, name: 'Author' },
+    ],
     registrationToken: null,
   },
 };

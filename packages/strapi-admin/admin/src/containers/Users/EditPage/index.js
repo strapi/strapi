@@ -24,11 +24,10 @@ import init from './init';
 
 const EditPage = () => {
   const { settingsBaseURL } = useGlobalContext();
-  const [{ formErrors, isLoading, initialData, modifiedData }, dispatch] = useReducer(
-    reducer,
-    initialState,
-    init
-  );
+  const [
+    { formErrors, isLoading, initialData, modifiedData, showHeaderLoader },
+    dispatch,
+  ] = useReducer(reducer, initialState, init);
   const { formatMessage } = useIntl();
   const {
     params: { id },
@@ -75,6 +74,8 @@ const EditPage = () => {
     });
   };
 
+  // TODO: remove this line when API's ready
+  // eslint-disable-next-line consistent-return
   const handleSubmit = async e => {
     e.preventDefault();
 
@@ -85,11 +86,38 @@ const EditPage = () => {
       errors: errors || {},
     });
 
-    console.log(errors);
-
     if (!errors) {
-      // todo
-      console.log('will submit');
+      try {
+        strapi.lockAppWithOverlay();
+
+        dispatch({
+          type: 'ON_SUBMIT',
+        });
+
+        return new Promise(resolve => {
+          setTimeout(() => {
+            dispatch({
+              type: 'ON_SUBMIT_SUCCEEDED',
+              // TODO
+              // data,
+            });
+
+            strapi.notification.success('notification.success.saved');
+            resolve();
+          }, 1000);
+        });
+      } catch (err) {
+        // const data = get(err, 'response.payload', { data: {} });
+        // const apiErrors = formatAPIErrors(data);
+        // dispatch({
+        //   type: 'SET_ERRORS',
+        //   errors: apiErrors,
+        // });
+        // TODO
+        strapi.notification.error('An error occured');
+      } finally {
+        strapi.unlockApp();
+      }
     }
   };
 
@@ -103,7 +131,7 @@ const EditPage = () => {
           <Header
             // TODO: remove the content it is temporary
             content="Waiting for the API, this text will be removed when connected to the back-end"
-            isLoading={isLoading}
+            isLoading={showHeaderLoader}
             initialData={initialData}
             label={headerLabel}
             modifiedData={modifiedData}
