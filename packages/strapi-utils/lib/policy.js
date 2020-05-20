@@ -66,7 +66,7 @@ const PLUGIN_PREFIX = 'plugins::';
 const APPLICATION_PREFIX = 'application::';
 
 const getPolicyIn = (container, policy) => {
-  return _.get(container, ['config', 'policies', _.toLower(policy)]);
+  return _.get(container, ['config', 'policies', policy]);
 };
 
 const policyExistsIn = (container, policy) => {
