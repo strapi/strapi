@@ -243,19 +243,28 @@ Create a Google service account key.
 
 Save the JSON credentials file.
 
-Plugins > File Upload > Settings > Production tab
+Open the JSON credentials file, copy all the content and set an environment variable named as `GCS_SERVICE_ACCOUNT`
 
-By default `localhost` is selected. Select the `Google Cloud Storage` plugin.
+Create a settings.json file in below path
 
-Copy the JSON key and set the regions.
+```
+./extensions/upload/config/settings.json
+```
 
-Open the `Cloud Console > Storage > Browser` menu.
+Paste in the code below, replace `###YOUR BUCKET NAME###` with your bucket name such as `myapi-123456.appspot.com`
 
-Copy the bucket name to the plugin settings, the default is the app ID, such as `myapi-123456.appspot.com`.
+```
+{
+  "provider": "google-cloud-storage",
+  "providerOptions": {
+    "serviceAccount": "${process.env.GCS_SERVICE_ACCOUNT}",
+    "bucketName": "###YOUR BUCKET NAME###",
+    "baseUrl": "https://storage.googleapis.com/###YOUR BUCKET NAME###"
+  }
+}
+```
 
 (Note that the `Access control` setting of the bucket has to be `Fine-grained`, which is the default.)
-
-Click `Save`, and it's ready to go!
 
 ### Post-setup configuration
 

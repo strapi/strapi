@@ -18,6 +18,22 @@ describe('Upload service', () => {
       });
     });
 
+    test('Replaces reserved and unsafe characters for URLs and files in hash', () => {
+      const fileData = {
+        filename: 'File%&Näme\\<>:"|?*.png',
+        type: 'image/png',
+        size: 1000 * 1000,
+      };
+
+      expect(uploadService.formatFileInfo(fileData)).toMatchObject({
+        name: 'File%&Näme\\<>:"|?*',
+        hash: expect.stringContaining('File_and_Naeme'),
+        ext: '.png',
+        mime: 'image/png',
+        size: 1000,
+      });
+    });
+
     test('Overrides name with fileInfo', () => {
       const fileData = {
         filename: 'File Name.png',
