@@ -40,7 +40,7 @@ const form = {
     type: 'password',
     validations: {},
   },
-  active: {
+  isActive: {
     label: 'app.containers.Users.EditPage.form.active.label',
     type: 'bool',
     validations: {},
