@@ -14,6 +14,7 @@ import init from './init';
 import Input from '../../SizedInput';
 import Wrapper from './Wrapper';
 import MagicLink from '../MagicLink';
+import BaselineAlignment from '../../BaselineAlignement';
 
 // This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(
@@ -70,9 +71,12 @@ const ModalCreateBody = forwardRef(
       <form onSubmit={handleSubmit}>
         {/* TODO magic link with token when api ready */}
         {showMagicLink && (
-          <ModalSection>
-            <MagicLink registrationToken={registrationToken} />
-          </ModalSection>
+          <>
+            <BaselineAlignment top size="18px" />
+            <ModalSection>
+              <MagicLink registrationToken={registrationToken} />
+            </ModalSection>
+          </>
         )}
         <ModalSection>
           <Padded top size="18px">

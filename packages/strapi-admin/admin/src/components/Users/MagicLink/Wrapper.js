@@ -4,7 +4,6 @@ const Wrapper = styled.div`
   height: 68px;
   width: 100%;
   display: flex;
-  margin-top: 18px;
   margin-bottom: 4px;
   &:before {
     content: '';

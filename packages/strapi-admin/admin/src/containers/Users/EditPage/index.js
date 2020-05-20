@@ -1,10 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import {
-  // LoadingIndicator,
-  // auth,
   // request,
   useGlobalContext,
 } from 'strapi-helper-plugin';
@@ -15,6 +13,7 @@ import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
 import SizedInput from '../../../components/SizedInput';
 import Header from '../../../components/Users/Header';
+import MagicLink from '../../../components/Users/MagicLink';
 import SelectRoles from '../../../components/Users/SelectRoles';
 import { editValidation } from '../../../validations/users';
 import checkFormValidity from '../../../utils/checkFormValidity';
@@ -37,15 +36,20 @@ const EditPage = () => {
   const headerLabelId = isLoading
     ? 'app.containers.Users.EditPage.header.label-loading'
     : 'app.containers.Users.EditPage.header.label';
-  const headerLabel = formatMessage({ id: headerLabelId }, { name: 'soup' });
+  const headerLabelName = initialData.username
+    ? initialData.username
+    : `${initialData.firstname} ${initialData.lastname}`;
+  const headerLabel = formatMessage({ id: headerLabelId }, { name: headerLabelName });
 
   useEffect(() => {
     const getData = () => {
       return new Promise(resolve => {
         setTimeout(() => {
+          const data = id === '3' ? fakeData.withRegistrationToken : fakeData.other;
+
           dispatch({
             type: 'GET_DATA_SUCCEEDED',
-            data: fakeData,
+            data,
           });
 
           resolve();
@@ -54,8 +58,7 @@ const EditPage = () => {
     };
 
     getData();
-  }, []);
-  console.log({ id });
+  }, [id]);
 
   const handleCancel = () => {
     dispatch({
@@ -82,24 +85,37 @@ const EditPage = () => {
       errors: errors || {},
     });
 
+    console.log(errors);
+
     if (!errors) {
       // todo
       console.log('will submit');
     }
   };
 
+  const hasRegistrationToken = modifiedData.registrationToken;
+  const hasRolesError = formErrors.roles && isEmpty(modifiedData.roles);
+
   return (
     <>
       <form onSubmit={handleSubmit}>
         <ContainerFluid padding="0">
           <Header
+            // TODO: remove the content it is temporary
+            content="Waiting for the API, this text will be removed when connected to the back-end"
             isLoading={isLoading}
             initialData={initialData}
             label={headerLabel}
             modifiedData={modifiedData}
             onCancel={handleCancel}
           />
-          <BaselineAlignement top size="3px" />
+          {hasRegistrationToken && (
+            <>
+              <Padded top size="sm" />
+              <MagicLink registrationToken={initialData.registrationToken} />
+            </>
+          )}
+          <BaselineAlignement top size={hasRegistrationToken ? '11px' : '3px'} />
           <FormBloc
             isLoading={isLoading}
             title={formatMessage({
@@ -133,7 +149,7 @@ const EditPage = () => {
                     value={get(modifiedData, 'roles', [])}
                   />
                   {/* TODO fix padding for error */}
-                  <BaselineAlignement top size="17px" />
+                  <BaselineAlignement top size={hasRolesError ? '0' : '17px'} />
                 </Padded>
               </Col>
             </FormBloc>
