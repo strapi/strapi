@@ -4,7 +4,7 @@ import { isEqual } from 'lodash';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const Header = ({ initialData, isLoading, label, modifiedData, onCancel }) => {
+const Header = ({ content, initialData, isLoading, label, modifiedData, onCancel }) => {
   const { formatMessage } = useIntl();
   const areButtonsDisabled = useMemo(() => {
     return isEqual(modifiedData, initialData);
@@ -36,6 +36,7 @@ const Header = ({ initialData, isLoading, label, modifiedData, onCancel }) => {
     title: {
       label,
     },
+    content,
   };
   /* eslint-enable indent */
 
@@ -43,10 +44,12 @@ const Header = ({ initialData, isLoading, label, modifiedData, onCancel }) => {
 };
 
 Header.defaultProps = {
+  content: null,
   label: '',
 };
 
 Header.propTypes = {
+  content: PropTypes.string,
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
   label: PropTypes.string,
