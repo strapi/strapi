@@ -19,6 +19,7 @@ module.exports = async function({ build, watchAdmin }) {
   const config = loadConfiguration(dir);
 
   const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
+  const reloadScript = config.get('server.reload', null);
 
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
@@ -35,7 +36,7 @@ module.exports = async function({ build, watchAdmin }) {
     if (cluster.isMaster) {
       if (watchAdmin) {
         try {
-          execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
+          await execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
             stdio: 'inherit',
           });
         } catch (err) {
@@ -46,6 +47,11 @@ module.exports = async function({ build, watchAdmin }) {
       cluster.on('message', (worker, message) => {
         switch (message) {
           case 'reload':
+            if(reloadScript) {
+              execa.shell(reloadScript, {
+                stdio: 'inherit',
+              });
+            }
             logger.info('The server is restarting\n');
             worker.send('isKilled');
             break;
