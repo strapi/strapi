@@ -30,7 +30,7 @@ import { getDataSucceeded } from './actions';
 
 function App(props) {
   const getDataRef = useRef();
-  const [state, setState] = useState({ hasAdmin: false, isLoading: true });
+  const [isLoading, setIsLoading] = useState(true);
   getDataRef.current = props.getDataSucceeded;
 
   useEffect(() => {
@@ -54,11 +54,6 @@ function App(props) {
       }
 
       try {
-        const requestURL = '/users-permissions/init';
-
-        const { hasAdmin } = await request(requestURL, { method: 'GET' }, false, false, {
-          noAuth: true,
-        });
         const { data } = await request('/admin/init', { method: 'GET' });
         const { uuid } = data;
 
@@ -79,8 +74,8 @@ function App(props) {
           }
         }
 
-        getDataRef.current(hasAdmin, data);
-        setState({ hasAdmin, isLoading: false });
+        getDataRef.current(false, data);
+        setIsLoading(false);
       } catch (err) {
         strapi.notification.error('app.containers.App.notification.error.init');
       }
@@ -89,7 +84,7 @@ function App(props) {
     getData();
   }, [getDataRef]);
 
-  if (state.isLoading) {
+  if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
@@ -102,7 +97,7 @@ function App(props) {
           <Switch>
             <Route
               path="/auth/:authType"
-              render={routerProps => <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />}
+              render={routerProps => <AuthPage {...routerProps} />}
               exact
             />
             <PrivateRoute path="/" component={Admin} />
