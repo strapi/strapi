@@ -57,7 +57,8 @@
       "collectionName": "strapi_users_roles",
       "via": "users",
       "dominant": true,
-      "plugin": "admin"
+      "plugin": "admin",
+      "configurable": false
     }
   }
 }

@@ -22,6 +22,12 @@
       "collection": "user",
       "via": "roles",
       "plugin": "admin"
+    },
+    "permissions": {
+      "configurable": false,
+      "plugin": "admin",
+      "collection": "permission",
+      "via": "role"
     }
   }
 }
