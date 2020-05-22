@@ -206,7 +206,12 @@ module.exports = {
       });
 
       // Update the user.
-      await strapi.query('user', 'users-permissions').update({ id: user.id }, user);
+      await strapi
+        .query('user', 'users-permissions')
+        .update(
+          { id: user.id },
+          { resetPasswordToken: user.resetPasswordToken, password: user.password }
+        );
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
@@ -363,7 +368,7 @@ module.exports = {
     }
 
     // Update the user.
-    await strapi.query('user', 'users-permissions').update({ id: user.id }, user);
+    await strapi.query('user', 'users-permissions').update({ id: user.id }, { resetPasswordToken });
 
     ctx.send({ ok: true });
   },
