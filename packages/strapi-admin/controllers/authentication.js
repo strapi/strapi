@@ -8,6 +8,7 @@ const {
   validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
+  validateResetPasswordInput,
 } = require('../validation/authentication');
 
 module.exports = {
@@ -142,5 +143,24 @@ module.exports = {
     });
 
     ctx.status = 204;
+  },
+
+  async resetPassword(ctx) {
+    const input = ctx.request.body;
+
+    try {
+      await validateResetPasswordInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const user = await strapi.admin.services.auth.resetPassword(input);
+
+    ctx.body = {
+      data: {
+        token: strapi.admin.services.token.createJwtToken(user),
+        user: strapi.admin.services.user.sanitizeUser(user),
+      },
+    };
   },
 };
