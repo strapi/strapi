@@ -28,7 +28,7 @@ describe('Admin Auth End to End', () => {
         method: 'POST',
         body: {
           email: 'admin@strapi.io',
-          password: 'pcw123',
+          password: 'Password123',
         },
       });
 
@@ -106,7 +106,7 @@ describe('Admin Auth End to End', () => {
         method: 'POST',
         body: {
           email: 'admin@strapi.io',
-          password: 'pcw123',
+          password: 'Password123',
         },
       });
 
@@ -316,6 +316,74 @@ describe('Admin Auth End to End', () => {
       });
 
       expect(res.body.data.user.password === userInfo.password).toBe(false);
+    });
+  });
+
+  describe('GET /register-admin', () => {
+    test('Fails on missing payload', async () => {
+      const res = await rq({
+        url: '/admin/register-admin',
+        method: 'POST',
+        body: {},
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'ValidationError',
+        data: {
+          email: ['email is a required field'],
+          firstname: ['firstname is a required field'],
+          lastname: ['lastname is a required field'],
+          password: ['password is a required field'],
+        },
+      });
+    });
+
+    test('Fails on invalid password', async () => {
+      const res = await rq({
+        url: '/admin/register-admin',
+        method: 'POST',
+        body: {
+          email: 'test@strapi.io',
+          firstname: 'test',
+          lastname: 'Strapi',
+          password: '123',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'ValidationError',
+        data: {
+          password: ['password must contain at least one uppercase character'],
+        },
+      });
+    });
+
+    test('Fails if already a user', async () => {
+      const userInfo = {
+        email: 'test-admin@strapi.io',
+        firstname: 'test',
+        lastname: 'Strapi',
+        password: '1Test2azda3',
+      };
+
+      const res = await rq({
+        url: '/admin/register-admin',
+        method: 'POST',
+        body: userInfo,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'You cannot register a new super admin',
+      });
     });
   });
 });

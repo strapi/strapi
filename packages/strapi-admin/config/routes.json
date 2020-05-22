@@ -10,33 +10,8 @@
     },
     {
       "method": "GET",
-      "path": "/currentEnvironment",
-      "handler": "Admin.getCurrentEnvironment",
-      "policies": []
-    },
-    {
-      "method": "GET",
-      "path": "/gaConfig",
-      "handler": "Admin.getGaConfig",
-      "policies": []
-    },
-    {
-      "method": "GET",
-      "path": "/strapiVersion",
-      "handler": "Admin.getStrapiVersion",
-      "policies": []
-    },
-    {
-      "method": "GET",
-      "path": "/layout",
-      "handler": "Admin.getLayout",
-      "policies": []
-    },
-    {
-      "method": "GET",
       "path": "/init",
-      "handler": "Admin.init",
-      "policies": []
+      "handler": "Admin.init"
     },
     {
       "method": "POST",
@@ -65,6 +40,11 @@
       "handler": "authentication.renewToken"
     },
     {
+      "method": "POST",
+      "path": "/register-admin",
+      "handler": "authentication.registerAdmin"
+    },
+    {
       "method": "GET",
       "path": "/registration-info",
       "handler": "authentication.registrationInfo"
@@ -73,11 +53,6 @@
       "method": "POST",
       "path": "/register",
       "handler": "authentication.register"
-    },
-    {
-      "method": "POST",
-      "path": "/auth/local/register",
-      "handler": "Auth.register"
     },
     {
       "method": "POST",

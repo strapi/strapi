@@ -10,19 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/init",
-      "handler": "UsersPermissions.init",
-      "config": {
-        "policies": [],
-        "description": "Check if the first admin user has already been registered",
-        "tag": {
-          "plugin": "users-permissions",
-          "name": "Role"
-        }
-      }
-    },
-    {
-      "method": "GET",
       "path": "/search/:id",
       "handler": "UsersPermissions.searchUsers",
       "config": {

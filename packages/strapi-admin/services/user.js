@@ -22,6 +22,16 @@ const create = async attributes => {
     ...attributes,
   });
 
+  // hash password if a new one is sent
+  if (_.has(user, 'password')) {
+    const hashedPassword = await strapi.admin.services.auth.hashPassword(user.password);
+
+    return strapi.query('user', 'admin').create({
+      ...user,
+      password: hashedPassword,
+    });
+  }
+
   return strapi.query('user', 'admin').create(user);
 };
 
