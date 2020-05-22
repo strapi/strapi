@@ -61,13 +61,8 @@
     },
     {
       "method": "POST",
-      "path": "/auth/forgot-password",
-      "handler": "Auth.forgotPassword"
-    },
-    {
-      "method": "POST",
-      "path": "/auth/reset-password",
-      "handler": "Auth.resetPassword"
+      "path": "/reset-password",
+      "handler": "authentication.resetPassword"
     },
     {
       "method": "GET",

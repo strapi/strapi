@@ -53,7 +53,7 @@ const resetEmailTemplate = url => `
 <p>Thanks.</p>`;
 
 const forgotPassword = async ({ email }) => {
-  const admin = await strapi.query('user', 'admin').findOne({ email });
+  const admin = await strapi.query('user', 'admin').findOne({ email, isActive: true });
 
   // admin not found => do nothing
   if (!admin) {
@@ -79,9 +79,28 @@ const forgotPassword = async ({ email }) => {
   });
 };
 
+const resetPassword = async ({ resetPasswordToken, password }) => {
+  const matchingUser = await strapi
+    .query('user', 'admin')
+    .findOne({ resetPasswordToken, isActive: true });
+
+  if (!matchingUser) {
+    throw strapi.errors.badRequest('Invalid reset token');
+  }
+
+  return strapi.admin.services.user.update(
+    { id: matchingUser.id },
+    {
+      password: password,
+      resetPasswordToken: null,
+    }
+  );
+};
+
 module.exports = {
   checkCredentials,
   validatePassword,
   hashPassword,
   forgotPassword,
+  resetPassword,
 };
