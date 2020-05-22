@@ -1,6 +1,12 @@
 'use strict';
 
-const { validatePassword, hashPassword, checkCredentials } = require('../auth');
+const {
+  validatePassword,
+  hashPassword,
+  checkCredentials,
+  forgotPassword,
+  resetPassword,
+} = require('../auth');
 
 describe('Auth', () => {
   describe('checkCredentials', () => {
@@ -102,6 +108,175 @@ describe('Auth', () => {
 
       const isValid = await validatePassword(password, hash);
       expect(isValid).toBe(true);
+    });
+  });
+
+  describe('forgotPassword', () => {
+    test('Only run the process for active users', async () => {
+      const findOne = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+      };
+
+      const input = { email: 'test@strapi.io' };
+      await forgotPassword(input);
+
+      expect(findOne).toHaveBeenCalledWith({ email: input.email, isActive: true });
+    });
+
+    test('Will return silently in case the user is not found', async () => {
+      const findOne = jest.fn(() => Promise.resolve());
+      const send = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+        plugins: {
+          email: {
+            services: {
+              email: { send },
+            },
+          },
+        },
+      };
+
+      const input = { email: 'test@strapi.io' };
+      await forgotPassword(input);
+
+      expect(findOne).toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    test('Will assign a new reset token', async () => {
+      const user = {
+        id: 1,
+        email: 'test@strapi.io',
+      };
+      const resetPasswordToken = '123';
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const send = jest.fn(() => Promise.resolve());
+      const update = jest.fn(() => Promise.resolve());
+      const createToken = jest.fn(() => resetPasswordToken);
+
+      global.strapi = {
+        config: {
+          admin: { url: '/admin' },
+        },
+        query() {
+          return { findOne };
+        },
+        admin: { services: { user: { update }, token: { createToken } } },
+        plugins: { email: { services: { email: { send } } } },
+      };
+
+      const input = { email: user.email };
+      await forgotPassword(input);
+
+      expect(findOne).toHaveBeenCalled();
+      expect(createToken).toHaveBeenCalled();
+      expect(update).toHaveBeenCalledWith({ id: user.id }, { resetPasswordToken });
+    });
+
+    test('Will call the send service', async () => {
+      const user = {
+        id: 1,
+        email: 'test@strapi.io',
+      };
+      const resetPasswordToken = '123';
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const send = jest.fn(() => Promise.resolve());
+      const update = jest.fn(() => Promise.resolve());
+      const createToken = jest.fn(() => resetPasswordToken);
+
+      global.strapi = {
+        config: {
+          admin: { url: '/admin' },
+        },
+        query() {
+          return { findOne };
+        },
+        admin: { services: { user: { update }, token: { createToken } } },
+        plugins: { email: { services: { email: { send } } } },
+      };
+
+      const input = { email: user.email };
+      await forgotPassword(input);
+
+      expect(findOne).toHaveBeenCalled();
+      expect(createToken).toHaveBeenCalled();
+      expect(send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: user.email,
+        })
+      );
+    });
+  });
+
+  describe('resetPassword', () => {
+    test('Check user is active', async () => {
+      const resetPasswordToken = '123';
+      const findOne = jest.fn(() => Promise.resolve());
+      const badRequest = jest.fn(() => {});
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+        errors: { badRequest },
+      };
+
+      expect.assertions(2);
+      return resetPassword({ resetPasswordToken, password: 'Test1234' }).catch(() => {
+        expect(findOne).toHaveBeenCalledWith({ resetPasswordToken, isActive: true });
+        expect(badRequest).toHaveBeenCalled();
+      });
+    });
+
+    test('Fails if user is not found', async () => {
+      const resetPasswordToken = '123';
+      const findOne = jest.fn(() => Promise.resolve());
+      const badRequest = jest.fn(() => {});
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+        errors: { badRequest },
+      };
+
+      expect.assertions(1);
+      return resetPassword({ resetPasswordToken, password: 'Test1234' }).catch(() => {
+        expect(badRequest).toHaveBeenCalled();
+      });
+    });
+
+    test('Changes password and clear reset token', async () => {
+      const resetPasswordToken = '123';
+      const user = { id: 1 };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const update = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+        admin: { services: { user: { update } } },
+      };
+
+      const input = { resetPasswordToken, password: 'Test1234' };
+      await resetPassword(input);
+
+      expect(update).toHaveBeenCalledWith(
+        { id: user.id },
+        { password: input.password, resetPasswordToken: null }
+      );
     });
   });
 });

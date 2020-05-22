@@ -52,46 +52,58 @@ const resetEmailTemplate = url => `
 
 <p>Thanks.</p>`;
 
-const forgotPassword = async ({ email }) => {
-  const admin = await strapi.query('user', 'admin').findOne({ email, isActive: true });
+/**
+ * Send an email to the user if it exists or do nothing
+ * @param {Object} param params
+ * @param {string} param.email user email for which to reset the password
+ */
+const forgotPassword = async ({ email } = {}) => {
+  const user = await strapi.query('user', 'admin').findOne({ email, isActive: true });
 
-  // admin not found => do nothing
-  if (!admin) {
+  if (!user) {
     return;
   }
 
-  // Generate random token.
   const resetPasswordToken = strapi.admin.services.token.createToken();
-
-  await strapi.admin.services.user.update({ email }, { resetPasswordToken });
+  await strapi.admin.services.user.update({ id: user.id }, { resetPasswordToken });
 
   // TODO: set the final url once the front is developed
   const url = `${strapi.config.admin.url}/reset-password?code=${resetPasswordToken}`;
-
   const body = resetEmailTemplate(url);
 
   // Send an email to the admin.
-  await strapi.plugins['email'].services.email.send({
-    to: admin.email,
-    subject: 'Reset password',
-    text: body,
-    html: body,
-  });
+  return strapi.plugins['email'].services.email
+    .send({
+      to: user.email,
+      subject: 'Reset password',
+      text: body,
+      html: body,
+    })
+    .catch(err => {
+      // log error server side but do not disclose it to the user to avoid leaking informations
+      strapi.log.error(err);
+    });
 };
 
-const resetPassword = async ({ resetPasswordToken, password }) => {
+/**
+ * Reset a user password
+ * @param {Object} param params
+ * @param {string} param.resetPasswordToken token generated to request a password reset
+ * @param {string} param.password new user password
+ */
+const resetPassword = async ({ resetPasswordToken, password } = {}) => {
   const matchingUser = await strapi
     .query('user', 'admin')
     .findOne({ resetPasswordToken, isActive: true });
 
   if (!matchingUser) {
-    throw strapi.errors.badRequest('Invalid reset token');
+    throw strapi.errors.badRequest();
   }
 
   return strapi.admin.services.user.update(
     { id: matchingUser.id },
     {
-      password: password,
+      password,
       resetPasswordToken: null,
     }
   );

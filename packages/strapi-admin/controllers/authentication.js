@@ -137,10 +137,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    // log error server side but do not disclose it to end user to avoid leaking informations
-    strapi.admin.services.auth.forgotPassword(input).catch(err => {
-      strapi.log.error(err);
-    });
+    strapi.admin.services.auth.forgotPassword(input);
 
     ctx.status = 204;
   },
