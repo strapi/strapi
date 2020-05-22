@@ -217,6 +217,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/count-graphql',
             '/3.0.0-beta.x/guides/client',
             '/3.0.0-beta.x/guides/update-version',
+            '/3.0.0-beta.x/guides/unit-testing',
           ],
         },
         {
