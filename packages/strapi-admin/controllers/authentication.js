@@ -7,6 +7,7 @@ const {
   validateRegistrationInput,
   validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
+  validateForgotPasswordInput,
 } = require('../validation/authentication');
 
 module.exports = {
@@ -124,5 +125,22 @@ module.exports = {
         user: strapi.admin.services.user.sanitizeUser(user),
       },
     };
+  },
+
+  async forgotPassword(ctx) {
+    const input = ctx.request.body;
+
+    try {
+      await validateForgotPasswordInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    // log error server side but do not disclose it to end user to avoid leaking informations
+    strapi.admin.services.auth.forgotPassword(input).catch(err => {
+      strapi.log.error(err);
+    });
+
+    ctx.status = 204;
   },
 };

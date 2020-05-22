@@ -43,8 +43,45 @@ const checkCredentials = async ({ email, password }) => {
   return [null, user];
 };
 
+const resetEmailTemplate = url => `
+<p>We heard that you lost your password. Sorry about that!</p>
+
+<p>But don’t worry! You can use the following link to reset your password:</p>
+
+<p>${url}</p>
+
+<p>Thanks.</p>`;
+
+const forgotPassword = async ({ email }) => {
+  const admin = await strapi.query('user', 'admin').findOne({ email });
+
+  // admin not found => do nothing
+  if (!admin) {
+    return;
+  }
+
+  // Generate random token.
+  const resetPasswordToken = strapi.admin.services.token.createToken();
+
+  await strapi.admin.services.user.update({ email }, { resetPasswordToken });
+
+  // TODO: set the final url once the front is developed
+  const url = `${strapi.config.admin.url}/reset-password?code=${resetPasswordToken}`;
+
+  const body = resetEmailTemplate(url);
+
+  // Send an email to the admin.
+  await strapi.plugins['email'].services.email.send({
+    to: admin.email,
+    subject: 'Reset password',
+    text: body,
+    html: body,
+  });
+};
+
 module.exports = {
   checkCredentials,
   validatePassword,
   hashPassword,
+  forgotPassword,
 };

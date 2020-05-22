@@ -56,8 +56,23 @@ const validateAdminRegistrationInput = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
+const forgotPasswordSchema = yup
+  .object()
+  .shape({
+    email: validators.email.required(),
+  })
+  .required()
+  .noUnknown();
+
+const validateForgotPasswordInput = data => {
+  return forgotPasswordSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
 module.exports = {
   validateRegistrationInput,
   validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
+  validateForgotPasswordInput,
 };
