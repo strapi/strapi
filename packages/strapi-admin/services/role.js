@@ -1,9 +1,22 @@
+const _ = require('lodash');
+
+const sanitizeRole = role => {
+  return _.omit(role, ['users']);
+};
+
 /**
  * Create and save a role in database
  * @param attributes A partial role object
  * @returns {Promise<role>}
  */
-const create = attributes => {
+const create = async attributes => {
+  const existingSameRole = await strapi.query('role', 'admin').findOne({ name: attributes.name });
+  if (existingSameRole) {
+    throw new Error(
+      `The name must be unique and a role with name \`${existingSameRole.name}\` already exists.`
+    );
+  }
+
   return strapi.query('role', 'admin').create(attributes);
 };
 
@@ -39,11 +52,23 @@ const findAll = () => {
  * @param attributes A partial role object
  * @returns {Promise<role>}
  */
-const update = (params, attributes) => {
+const update = async (params, attributes) => {
+  if (_.has(params, 'id')) {
+    const existingSameRole = await strapi
+      .query('role', 'admin')
+      .findOne({ name: attributes.name, id_ne: params.id });
+    if (existingSameRole) {
+      throw new Error(
+        `The name must be unique and a role with name \`${existingSameRole.name}\` already exists.`
+      );
+    }
+  }
+
   return strapi.query('role', 'admin').update(params, attributes);
 };
 
 module.exports = {
+  sanitizeRole,
   create,
   findOne,
   find,
