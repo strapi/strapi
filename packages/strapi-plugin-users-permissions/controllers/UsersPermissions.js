@@ -143,12 +143,6 @@ module.exports = {
     ctx.send({ message: 'ok' });
   },
 
-  async init(ctx) {
-    const admins = await strapi.query('user', 'admin').find({ _limit: 1 });
-
-    ctx.send({ hasAdmin: admins.length > 0 });
-  },
-
   async searchUsers(ctx) {
     const { id } = ctx.params;
 

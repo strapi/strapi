@@ -5,6 +5,7 @@ const compose = require('koa-compose');
 
 const {
   validateRegistrationInput,
+  validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
 } = require('../validation/authentication');
 
@@ -86,6 +87,36 @@ module.exports = {
     }
 
     const user = await strapi.admin.services.user.register(input);
+
+    ctx.body = {
+      data: {
+        token: strapi.admin.services.token.createJwtToken(user),
+        user: strapi.admin.services.user.sanitizeUser(user),
+      },
+    };
+  },
+
+  async registerAdmin(ctx) {
+    const input = ctx.request.body;
+
+    try {
+      await validateAdminRegistrationInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const hasAdmin = await strapi.admin.services.user.exists({});
+
+    if (hasAdmin) {
+      return ctx.badRequest('You cannot register a new super admin');
+    }
+
+    // TODO: assign super admin role
+    const user = await strapi.admin.services.user.create({
+      ...input,
+      registrationToken: null,
+      isActive: true,
+    });
 
     ctx.body = {
       data: {

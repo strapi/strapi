@@ -27,45 +27,11 @@ module.exports = {
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
 
+    const hasAdmin = await strapi.admin.services.user.exists({});
+
     return ctx.send({
-      data: { uuid, currentEnvironment, autoReload, strapiVersion },
+      data: { uuid, currentEnvironment, autoReload, strapiVersion, hasAdmin },
     });
-  },
-
-  async getCurrentEnvironment(ctx) {
-    try {
-      const autoReload = strapi.config.autoReload;
-      return ctx.send({ autoReload, currentEnvironment: strapi.app.env });
-    } catch (err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
-  },
-
-  async getStrapiVersion(ctx) {
-    try {
-      const strapiVersion = strapi.config.get('info.strapi', null);
-      return ctx.send({ strapiVersion });
-    } catch (err) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'The version is not available' }] }]);
-    }
-  },
-
-  async getGaConfig(ctx) {
-    try {
-      ctx.send({ uuid: strapi.config.get('uuid', false) });
-    } catch (err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
-  },
-
-  async getLayout(ctx) {
-    try {
-      const layout = require('../config/layout.js');
-
-      return ctx.send({ layout });
-    } catch (err) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
   },
 
   async installPlugin(ctx) {

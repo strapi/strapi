@@ -26,11 +26,13 @@ describe('User', () => {
     test('Creates a user by merging given and default attributes', async () => {
       const create = jest.fn(user => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
+      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
         admin: {
           services: {
             token: { createToken },
+            auth: { hashPassword },
           },
         },
         query() {
@@ -48,14 +50,56 @@ describe('User', () => {
       expect(result).toStrictEqual(expected);
     });
 
-    test('Creates a user by using given attributes', async () => {
+    test('Creates a user and hash password if provided', async () => {
       const create = jest.fn(user => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
+      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
         admin: {
           services: {
             token: { createToken },
+            auth: { hashPassword },
+          },
+        },
+        query() {
+          return { create };
+        },
+      };
+
+      const input = {
+        firstname: 'John',
+        lastname: 'Doe',
+        email: 'johndoe@email.com',
+        password: 'Pcw123',
+      };
+      const expected = {
+        ...input,
+        password: expect.any(String),
+        isActive: false,
+        roles: [],
+        registrationToken: 'token',
+      };
+
+      const result = await userService.create(input);
+
+      expect(create).toHaveBeenCalled();
+      expect(hashPassword).toHaveBeenCalledWith(input.password);
+      expect(createToken).toHaveBeenCalled();
+      expect(result).toStrictEqual(expected);
+      expect(result.password !== input.password).toBe(true);
+    });
+
+    test('Creates a user by using given attributes', async () => {
+      const create = jest.fn(user => Promise.resolve(user));
+      const createToken = jest.fn(() => 'token');
+      const hashPassword = jest.fn(() => Promise.resolve('123456789'));
+
+      global.strapi = {
+        admin: {
+          services: {
+            token: { createToken },
+            auth: { hashPassword },
           },
         },
         query() {

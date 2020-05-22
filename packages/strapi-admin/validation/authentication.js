@@ -39,7 +39,25 @@ const validateRegistrationInfoQuery = query => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
+const adminRegistrationSchema = yup
+  .object()
+  .shape({
+    email: validators.email.required(),
+    firstname: validators.firstname.required(),
+    lastname: validators.lastname.required(),
+    password: validators.password.required(),
+  })
+  .required()
+  .noUnknown();
+
+const validateAdminRegistrationInput = data => {
+  return adminRegistrationSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
 module.exports = {
   validateRegistrationInput,
+  validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
 };

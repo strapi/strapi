@@ -8,20 +8,10 @@
 
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
-const _ = require('lodash');
 
-const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
-
-// this is a temp patch for the next dev
-const createUser = params => ({
-  ...params,
-  isActive: true,
-  firstname: null,
-  lastname: null,
-});
 
 module.exports = {
   async register(ctx) {
