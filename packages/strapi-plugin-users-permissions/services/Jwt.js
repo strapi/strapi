@@ -8,7 +8,6 @@
 
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
-const defaultJwtOptions = require('../config/jwt.json');
 
 module.exports = {
   getToken(ctx) {
@@ -40,7 +39,7 @@ module.exports = {
   },
 
   issue(payload, jwtOptions = {}) {
-    _.defaults(jwtOptions, defaultJwtOptions);
+    _.defaults(jwtOptions, strapi.plugins['users-permissions'].config.jwt);
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
       _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
