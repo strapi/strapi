@@ -386,4 +386,30 @@ describe('Admin Auth End to End', () => {
       });
     });
   });
+
+  describe('POST /forgot-password', () => {
+    test('Always returns en empty response', async () => {
+      const res = await rq({
+        url: '/admin/forgot-password',
+        method: 'POST',
+        body: {
+          email: 'admin@strapi.io',
+        },
+      });
+
+      expect(res.statusCode).toBe(204);
+      expect(res.body).toEqual();
+
+      const nonExistentRes = await rq({
+        url: '/admin/forgot-password',
+        method: 'POST',
+        body: {
+          email: 'email-do-not-exist@strapi.io',
+        },
+      });
+
+      expect(nonExistentRes.statusCode).toBe(204);
+      expect(nonExistentRes.body).toEqual();
+    });
+  });
 });
