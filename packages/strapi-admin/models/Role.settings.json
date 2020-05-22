@@ -16,9 +16,12 @@
       "required": true
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "configurable": false,
+      "required": true
     },
     "users": {
+      "configurable": false,
       "collection": "user",
       "via": "roles",
       "plugin": "admin"

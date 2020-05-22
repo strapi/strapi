@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/roles",
+      "handler": "role.create",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}
