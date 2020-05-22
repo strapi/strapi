@@ -105,7 +105,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const hasAdmin = await strapi.admin.services.user.exists({});
+    const hasAdmin = await strapi.admin.services.user.exists();
 
     if (hasAdmin) {
       return ctx.badRequest('You cannot register a new super admin');

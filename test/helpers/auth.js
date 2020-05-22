@@ -15,7 +15,7 @@ const register = async () => {
     method: 'POST',
     body: auth,
   }).catch(err => {
-    console.log(err);
+    console.error(err);
     if (err.message === 'You cannot register a new super admin') return;
     throw err;
   });
