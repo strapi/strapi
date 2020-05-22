@@ -27,7 +27,7 @@ module.exports = {
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
 
-    const hasAdmin = await strapi.admin.services.user.exists({});
+    const hasAdmin = await strapi.admin.services.user.exists();
 
     return ctx.send({
       data: { uuid, currentEnvironment, autoReload, strapiVersion, hasAdmin },

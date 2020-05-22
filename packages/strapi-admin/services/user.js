@@ -60,7 +60,7 @@ const update = async (params, attributes) => {
  * @param attributes A partial user object
  * @returns {Promise<boolean>}
  */
-const exists = async attributes => {
+const exists = async (attributes = {}) => {
   return (await strapi.query('user', 'admin').count(attributes)) > 0;
 };
 
