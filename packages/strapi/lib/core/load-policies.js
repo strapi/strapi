@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const _ = require('lodash');
 const path = require('path');
 const fse = require('fs-extra');
 
@@ -16,7 +17,7 @@ module.exports = dir => {
 
     const ext = path.extname(name);
     const key = path.basename(name, ext);
-    root[key] = loadPolicy(fullPath);
+    root[_.toLower(key)] = loadPolicy(fullPath);
   }
 
   return root;
