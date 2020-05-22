@@ -91,6 +91,7 @@ function createSchemaBuilder({ components, contentTypes }) {
             acc[key] = {
               [attribute.multiple ? 'collection' : 'model']: 'file',
               via,
+              allowedTypes: attribute.allowedTypes,
               plugin: 'upload',
               required: attribute.required ? true : false,
               configurable: configurable === false ? false : undefined,

@@ -56,7 +56,7 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
 
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
 
-const createYupSchema = (model, { components }) => {
+const createYupSchema = (model, { components }, isCreatingEntry = true) => {
   const attributes = getAttributes(model);
 
   return yup.object().shape(
@@ -68,7 +68,7 @@ const createYupSchema = (model, { components }) => {
         attribute.type !== 'component' &&
         attribute.type !== 'dynamiczone'
       ) {
-        const formatted = createYupSchemaAttribute(attribute.type, attribute);
+        const formatted = createYupSchemaAttribute(attribute.type, attribute, isCreatingEntry);
         acc[current] = formatted;
       }
 
@@ -166,7 +166,7 @@ const createYupSchema = (model, { components }) => {
   );
 };
 
-const createYupSchemaAttribute = (type, validations) => {
+const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
   let schema = yup.mixed();
 
   let regex = get(validations, 'regex', null);
@@ -231,9 +231,18 @@ const createYupSchemaAttribute = (type, validations) => {
       validationValue === 0
     ) {
       switch (validation) {
-        case 'required':
-          schema = schema.required(errorsTrads.required);
+        case 'required': {
+          if (type === 'password' && isCreatingEntry) {
+            schema = schema.required(errorsTrads.required);
+          }
+
+          if (type !== 'password') {
+            schema = schema.required(errorsTrads.required);
+          }
+
           break;
+        }
+
         case 'max': {
           if (type === 'biginteger') {
             schema = schema.isInferior(errorsTrads.max, validationValue);

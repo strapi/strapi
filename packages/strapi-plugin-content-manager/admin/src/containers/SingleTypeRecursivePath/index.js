@@ -20,11 +20,7 @@ const SingleTypeRecursivePath = props => {
     },
     { path: '', comp: EditView },
   ].map(({ path, comp }) => (
-    <Route
-      key={path}
-      path={`${url}/${path}`}
-      render={props => renderRoute(props, comp)}
-    />
+    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
   ));
 
   return (

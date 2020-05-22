@@ -45,12 +45,7 @@ const Button = ({
   const Icon = icons[type];
 
   return (
-    <StyledButton
-      active={active}
-      disabled={disabled}
-      onClick={handleClick}
-      type={type}
-    >
+    <StyledButton active={active} disabled={disabled} onClick={handleClick} type={type}>
       {icons[type] && <Icon />}
       {!hideLabel && label}
     </StyledButton>

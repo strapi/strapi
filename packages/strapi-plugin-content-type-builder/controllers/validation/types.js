@@ -6,6 +6,7 @@ const yup = require('yup');
 const {
   validators,
   areEnumValuesUnique,
+  isValidDefaultJSON,
   isValidName,
   isValidEnum,
   isValidUID,
@@ -50,6 +51,10 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
+        allowedTypes: yup
+          .array()
+          .of(yup.string().oneOf(['images', 'videos', 'files']))
+          .min(1),
       };
     }
 
@@ -108,6 +113,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     }
     case 'json': {
       return {
+        default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
         unique: validators.unique,
       };

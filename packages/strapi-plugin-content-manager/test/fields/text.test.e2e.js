@@ -20,14 +20,11 @@ describe('Test type text', () => {
   }, 60000);
 
   test('Creates an entry with JSON', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withtext.withtext',
-      {
-        body: {
-          field: 'Some\ntext',
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withtext.withtext', {
+      body: {
+        field: 'Some\ntext',
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -36,14 +33,11 @@ describe('Test type text', () => {
   });
 
   test('Creates an entry with formData', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withtext.withtext',
-      {
-        formData: {
-          data: JSON.stringify({ field: '"Some \ntext"' }),
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withtext.withtext', {
+      formData: {
+        data: JSON.stringify({ field: '"Some \ntext"' }),
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -52,9 +46,7 @@ describe('Test type text', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get(
-      '/content-manager/explorer/application::withtext.withtext'
-    );
+    const res = await rq.get('/content-manager/explorer/application::withtext.withtext');
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -68,12 +60,9 @@ describe('Test type text', () => {
   });
 
   test('Updating entry with JSON sets the right value and format', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withtext.withtext',
-      {
-        body: { field: 'Some \ntext' },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withtext.withtext', {
+      body: { field: 'Some \ntext' },
+    });
 
     const updateRes = await rq.put(
       `/content-manager/explorer/application::withtext.withtext/${res.body.id}`,
@@ -89,14 +78,11 @@ describe('Test type text', () => {
   });
 
   test('Updating entry with Formdata sets the right value and format', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withtext.withtext',
-      {
-        formData: {
-          data: JSON.stringify({ field: 'Some string' }),
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withtext.withtext', {
+      formData: {
+        data: JSON.stringify({ field: 'Some string' }),
+      },
+    });
 
     const updateRes = await rq.put(
       `/content-manager/explorer/application::withtext.withtext/${res.body.id}`,

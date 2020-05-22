@@ -72,9 +72,7 @@ module.exports = {
       entities = await strapi.services.article.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.article })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.article }));
   },
 };
 ```
@@ -99,7 +97,7 @@ module.exports = {
 
     ctx.query = {
       ...ctx.query,
-      status: 'published'
+      status: 'published',
     };
 
     if (ctx.query._q) {
@@ -108,9 +106,7 @@ module.exports = {
       entities = await strapi.services.article.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.article })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.article }));
   },
 };
 ```
@@ -120,4 +116,3 @@ And tada! Draft and archived articles disappeared.
 ::: tip
 This guide can be applied to any other controller action.
 :::
-

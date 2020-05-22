@@ -4,10 +4,7 @@
  *
  */
 
-import {
-  GET_PLUGINS_FROM_MARKETPLACE_SUCCEEDED,
-  SET_APP_ERROR,
-} from './constants';
+import { GET_PLUGINS_FROM_MARKETPLACE_SUCCEEDED, SET_APP_ERROR } from './constants';
 
 export function getPluginsFromMarketPlaceSucceeded(plugins) {
   return {

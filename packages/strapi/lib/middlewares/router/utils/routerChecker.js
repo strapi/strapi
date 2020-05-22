@@ -27,19 +27,14 @@ module.exports = strapi =>
     if (plugin) {
       controller = strapi.plugins[plugin].controllers[controllerKey];
     } else {
-      controller =
-        strapi.controllers[controllerKey] ||
-        strapi.admin.controllers[controllerKey];
+      controller = strapi.controllers[controllerKey] || strapi.admin.controllers[controllerKey];
     }
 
     const action = controller[actionName].bind(controller);
 
     // Retrieve the API's name where the controller is located
     // to access to the right validators
-    const currentApiName = finder(
-      strapi.plugins[plugin] || strapi.api || strapi.admin,
-      controller
-    );
+    const currentApiName = finder(strapi.plugins[plugin] || strapi.api || strapi.admin, controller);
 
     // Add the `globalPolicy`.
     const globalPolicy = policyUtils.globalPolicy({
@@ -65,9 +60,7 @@ module.exports = strapi =>
         try {
           policies.push(policyUtils.get(policyName, plugin, currentApiName));
         } catch (error) {
-          strapi.stopWithError(
-            `Error creating endpoint ${method} ${endpoint}: ${error.message}`
-          );
+          strapi.stopWithError(`Error creating endpoint ${method} ${endpoint}: ${error.message}`);
         }
       });
     }

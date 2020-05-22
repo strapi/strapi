@@ -17,6 +17,8 @@ const Initializer = ({ updatePlugin }) => {
   useEffect(() => {
     const getData = async () => {
       // When updating this we also need to update the content-type-builder/admin/src/containers/DataManager/index.js => updateAppMenu
+      // And also the upload/admin/src/containers/Initializer/index.js since the plugin needs to retrieve it's own model in order to get the timestamps
+      // options for the filter and sort components
       // since it uses the exact same method...
       const requestURL = `/${pluginId}/content-types`;
 

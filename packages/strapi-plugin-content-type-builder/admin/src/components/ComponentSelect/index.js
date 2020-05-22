@@ -35,16 +35,12 @@ const ComponentSelect = ({
   return (
     <Select
       addComponentsToDynamicZone={addComponentsToDynamicZone}
-      isAddingAComponentToAnotherComponent={
-        isAddingAComponentToAnotherComponent
-      }
+      isAddingAComponentToAnotherComponent={isAddingAComponentToAnotherComponent}
       isClearable={!isMultiple}
       isDisabled={isCreatingComponentWhileAddingAField}
       isCreatingComponent={isCreatingComponentWhileAddingAField}
       isMultiple={isMultiple}
-      componentCategory={
-        componentCategoryNeededForAddingAfieldWhileCreatingAComponent
-      }
+      componentCategory={componentCategoryNeededForAddingAfieldWhileCreatingAComponent}
       componentName={componentNameNeededForAddingAfieldWhileCreatingAComponent}
       name={name}
       onChange={handleChange}
@@ -73,8 +69,7 @@ ComponentSelect.defaultProps = {
 
 ComponentSelect.propTypes = {
   addComponentsToDynamicZone: PropTypes.func.isRequired,
-  componentCategoryNeededForAddingAfieldWhileCreatingAComponent:
-    PropTypes.string,
+  componentCategoryNeededForAddingAfieldWhileCreatingAComponent: PropTypes.string,
   componentNameNeededForAddingAfieldWhileCreatingAComponent: PropTypes.string,
   isAddingAComponentToAnotherComponent: PropTypes.bool,
   isCreatingComponentWhileAddingAField: PropTypes.bool,
@@ -82,10 +77,7 @@ ComponentSelect.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   styles: PropTypes.object.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string),
-  ]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
 };
 
 export default ComponentSelect;

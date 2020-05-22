@@ -9,7 +9,7 @@ import LeftMenuHeader from '../LeftMenuHeader';
 import List from './List';
 import Wrapper from './Wrapper';
 
-function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleItems }) {
+function LeftMenuList({ customLink, links, title, searchable }) {
   const [search, setSearch] = useState('');
   const { formatMessage } = useGlobalContext();
 
@@ -100,9 +100,7 @@ function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleIte
         <LeftMenuHeader {...headerProps} />
       </div>
       <div>
-        <List numberOfVisibleItems={numberOfVisibleItems}>
-          {getList().map((link, i) => renderCompo(link, i))}
-        </List>
+        <List>{getList().map((link, i) => renderCompo(link, i))}</List>
         {Component && isValidElement(<Component />) && <Component {...componentProps} />}
       </div>
     </Wrapper>
@@ -114,7 +112,6 @@ LeftMenuList.defaultProps = {
   links: [],
   title: null,
   searchable: false,
-  numberOfVisibleItems: null,
 };
 
 LeftMenuList.propTypes = {
@@ -130,7 +127,6 @@ LeftMenuList.propTypes = {
     id: PropTypes.string,
   }),
   searchable: PropTypes.bool,
-  numberOfVisibleItems: PropTypes.number,
 };
 
 export default LeftMenuList;

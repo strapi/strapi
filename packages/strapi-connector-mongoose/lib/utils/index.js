@@ -9,14 +9,8 @@ const { parseType } = require('strapi-utils');
  */
 
 module.exports = (mongoose = Mongoose) => {
-  mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(
-    mongoose,
-    2
-  );
-  mongoose.Schema.Types.Float = require('mongoose-float').loadType(
-    mongoose,
-    20
-  );
+  mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(mongoose, 2);
+  mongoose.Schema.Types.Float = require('mongoose-float').loadType(mongoose, 20);
 
   /**
    * Convert MongoDB ID to the stringify version as GraphQL throws an error if not.

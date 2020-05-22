@@ -14,11 +14,11 @@ const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
+const loadConfiguration = require('./core/app-configuration');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
-const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
@@ -26,21 +26,6 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
-
-const CONFIG_PATHS = {
-  admin: 'admin',
-  api: 'api',
-  config: 'config',
-  controllers: 'controllers',
-  models: 'models',
-  plugins: 'plugins',
-  policies: 'policies',
-  tmp: '.tmp',
-  services: 'services',
-  static: 'public',
-  validators: 'validators',
-  views: 'views',
-};
 
 /**
  * Construct an Strapi instance.
@@ -56,9 +41,6 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
 
-    // Mount the HTTP server.
-    this.server = http.createServer(this.app.callback());
-
     // Logger.
     this.log = logger;
 
@@ -70,58 +52,14 @@ class Strapi {
     this.dir = opts.dir || process.cwd();
     this.admin = {};
     this.plugins = {};
-    this.config = this.initConfig(opts);
+    this.config = loadConfiguration(this.dir, opts);
+    this.isLoaded = false;
 
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
-  }
-
-  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
-    const pkgJSON = require(path.resolve(this.dir, 'package.json'));
-
-    const config = {
-      serveAdminPanel,
-      launchedAt: Date.now(),
-      appPath: this.dir,
-      autoReload,
-      host: process.env.HOST || process.env.HOSTNAME || 'localhost',
-      port: process.env.PORT || 1337,
-      environment: _.toLower(process.env.NODE_ENV) || 'development',
-      environments: {},
-      admin: {},
-      paths: CONFIG_PATHS,
-      middleware: {},
-      hook: {},
-      functions: {},
-      routes: {},
-      info: pkgJSON,
-      installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
-      installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
-      installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
-    };
-
-    Object.defineProperty(config, 'get', {
-      value(path, defaultValue = null) {
-        return _.get(config, path, defaultValue);
-      },
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    Object.defineProperty(config, 'set', {
-      value(path, value) {
-        return _.set(config, path, value);
-      },
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    return config;
   }
 
   requireProjectBootstrap() {
@@ -148,7 +86,7 @@ class Strapi {
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node v${this.config.info.node})`]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`]
     );
 
     console.log(infoTable.toString());
@@ -160,6 +98,14 @@ class Strapi {
   logFirstStartupMessage() {
     this.logStats();
 
+    let hostname = strapi.config.host;
+    if (
+      strapi.config.environment === 'development' &&
+      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
+    ) {
+      hostname = 'localhost';
+    }
+
     console.log(chalk.bold('One more thing...'));
     console.log(
       chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
@@ -167,7 +113,13 @@ class Strapi {
     console.log();
 
     const addressTable = new CLITable();
-    addressTable.push([chalk.bold(this.config.admin.url)]);
+    if (this.config.admin.url.startsWith('http')) {
+      addressTable.push([chalk.bold(this.config.admin.url)]);
+    } else {
+      addressTable.push([
+        chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`),
+      ]);
+    }
     console.log(`${addressTable.toString()}`);
     console.log();
   }
@@ -175,57 +127,45 @@ class Strapi {
   logStartupMessage() {
     this.logStats();
 
+    let hostname = strapi.config.host;
+    if (
+      strapi.config.environment === 'development' &&
+      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
+    ) {
+      hostname = 'localhost';
+    }
+
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
       console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      console.log(chalk.bold(this.config.admin.url));
+      if (this.config.admin.url.startsWith('http')) {
+        console.log(chalk.bold(this.config.admin.url));
+      } else {
+        console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`));
+      }
       console.log();
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    console.log(chalk.bold(this.config.url));
+    if (this.config.admin.url.startsWith('http')) {
+      console.log(chalk.bold(this.config.server.url));
+    } else {
+      console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.server.url}`));
+    }
     console.log();
   }
 
   async start(cb) {
     try {
-      await this.load();
-
-      // Run bootstrap function.
-      await this.runBootstrapFunctions();
-      // Freeze object.
-      await this.freeze();
-      // Is the project initialised?
-      const isInitialised = await utils.isInitialised(this);
+      if (!this.isLoaded) {
+        await this.load();
+      }
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.server.listen(this.config.port, this.config.host, async err => {
-        if (err) return this.stopWithError(err);
-
-        if (!isInitialised) {
-          this.logFirstStartupMessage();
-        } else {
-          this.logStartupMessage();
-        }
-
-        // Emit started event.
-        await this.telemetry.send('didStartServer');
-
-        if (cb && typeof cb === 'function') {
-          cb();
-        }
-
-        if (
-          (this.config.environment === 'development' &&
-            _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
-          !isInitialised
-        ) {
-          await utils.openBrowser.call(this);
-        }
-      });
+      this.listen(cb);
     } catch (err) {
       this.stopWithError(err);
     }
@@ -234,7 +174,10 @@ class Strapi {
   /**
    * Add behaviors to the server
    */
-  async enhancer() {
+  async listen(cb) {
+    // Mount the HTTP server.
+    this.server = http.createServer(this.app.callback());
+
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
@@ -263,6 +206,38 @@ class Strapi {
         connections[key].destroy();
       }
     };
+
+    const onListen = async err => {
+      if (err) return this.stopWithError(err);
+
+      // Is the project initialised?
+      const isInitialised = await utils.isInitialised(this);
+
+      if (!isInitialised) {
+        this.logFirstStartupMessage();
+      } else {
+        this.logStartupMessage();
+      }
+
+      // Emit started event.
+      await this.telemetry.send('didStartServer');
+
+      if (cb && typeof cb === 'function') {
+        cb();
+      }
+
+      if (
+        (this.config.environment === 'development' &&
+          this.config.get('server.admin.autoOpen', true) !== false) ||
+        !isInitialised
+      ) {
+        await utils.openBrowser.call(this);
+      }
+    };
+
+    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), err =>
+      onListen(err).catch(err => this.stopWithError(err))
+    );
   }
 
   stopWithError(err, customMessage) {
@@ -276,7 +251,9 @@ class Strapi {
 
   stop(exitCode = 1) {
     // Destroy server and available connections.
-    this.server.destroy();
+    if (_.has(this, 'server.destroy')) {
+      this.server.destroy();
+    }
 
     if (this.config.autoReload) {
       process.send('stop');
@@ -287,8 +264,6 @@ class Strapi {
   }
 
   async load() {
-    await this.enhancer();
-
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
         ctx.set('strapi', 'You are so French!');
@@ -299,8 +274,6 @@ class Strapi {
     });
 
     const modules = await loadModules(this);
-
-    _.merge(this.config, modules.config);
 
     this.api = modules.api;
     this.admin = modules.admin;
@@ -315,7 +288,7 @@ class Strapi {
     this.webhookRunner = createWebhookRunner({
       eventHub: this.eventHub,
       logger: this.log,
-      configuration: this.config.get('currentEnvironment.server.webhooks', {}),
+      configuration: this.config.get('server.webhooks', {}),
     });
 
     // Init core store
@@ -349,6 +322,13 @@ class Strapi {
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+
+    await this.runBootstrapFunctions();
+    await this.freeze();
+
+    this.isLoaded = true;
+
+    return this;
   }
 
   async startWebhooks() {
@@ -406,7 +386,7 @@ class Strapi {
         this.log.warn('Make sure you call it?');
       }, timeoutMs);
 
-    async function execBootstrap(fn) {
+    const execBootstrap = async fn => {
       if (!fn) return;
 
       const timer = warnOnTimeout();
@@ -415,7 +395,7 @@ class Strapi {
       } finally {
         clearTimeout(timer);
       }
-    }
+    };
 
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {

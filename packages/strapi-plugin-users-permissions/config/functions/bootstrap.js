@@ -27,7 +27,7 @@ module.exports = async () => {
       icon: 'discord',
       key: '',
       secret: '',
-      callback: '/auth/discord/callback',
+      callback: `${strapi.config.server.url}/auth/discord/callback`,
       scope: ['identify', 'email'],
     },
     facebook: {
@@ -35,7 +35,7 @@ module.exports = async () => {
       icon: 'facebook-square',
       key: '',
       secret: '',
-      callback: '/auth/facebook/callback',
+      callback: `${strapi.config.server.url}/auth/facebook/callback`,
       scope: ['email'],
     },
     google: {
@@ -43,7 +43,7 @@ module.exports = async () => {
       icon: 'google',
       key: '',
       secret: '',
-      callback: '/auth/google/callback',
+      callback: `${strapi.config.server.url}/auth/google/callback`,
       scope: ['email'],
     },
     github: {
@@ -51,7 +51,7 @@ module.exports = async () => {
       icon: 'github',
       key: '',
       secret: '',
-      redirect_uri: '/auth/github/callback',
+      callback: `${strapi.config.server.url}/auth/github/callback`,
       scope: ['user', 'user:email'],
     },
     microsoft: {
@@ -59,7 +59,7 @@ module.exports = async () => {
       icon: 'windows',
       key: '',
       secret: '',
-      callback: '/auth/microsoft/callback',
+      callback: `${strapi.config.server.url}/auth/microsoft/callback`,
       scope: ['user.read'],
     },
     twitter: {
@@ -67,32 +67,37 @@ module.exports = async () => {
       icon: 'twitter',
       key: '',
       secret: '',
-      callback: '/auth/twitter/callback',
+      callback: `${strapi.config.server.url}/auth/twitter/callback`,
     },
     instagram: {
       enabled: false,
       icon: 'instagram',
       key: '',
       secret: '',
-      callback: '/auth/instagram/callback',
+      callback: `${strapi.config.server.url}/auth/instagram/callback`,
     },
     vk: {
       enabled: false,
       icon: 'vk',
       key: '',
       secret: '',
-      callback: '/auth/vk/callback',
+      callback: `${strapi.config.server.url}/auth/vk/callback`,
       scope: ['email'],
+    },
+    twitch: {
+      enabled: false,
+      icon: 'twitch',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/twitch/callback`,
+      scope: ['user:read:email'],
     },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
-  if (
-    !prevGrantConfig ||
-    !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))
-  ) {
+  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
     // merge with the previous provider config.
     _.keys(grantConfig).forEach(key => {
       if (key in prevGrantConfig) {
@@ -152,17 +157,15 @@ module.exports = async () => {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
-      email_reset_password: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
+      email_confirmation_redirection: `${strapi.config.admin.url}/admin`,
+      email_reset_password: `${strapi.config.admin.url}/admin`,
       default_role: 'authenticated',
     };
 
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  await strapi.plugins[
-    'users-permissions'
-  ].services.userspermissions.initialize();
+  await strapi.plugins['users-permissions'].services.userspermissions.initialize();
 
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     const jwtSecret = uuid();
@@ -172,8 +175,8 @@ module.exports = async () => {
 
     await strapi.fs.writePluginFile(
       'users-permissions',
-      'config/jwt.json',
-      JSON.stringify({ jwtSecret }, null, 2)
+      'config/jwt.js',
+      `module.exports = {\n  jwtSecret: process.env.JWT_SECRET || '${jwtSecret}'\n};`
     );
 
     strapi.reload.isWatching = true;

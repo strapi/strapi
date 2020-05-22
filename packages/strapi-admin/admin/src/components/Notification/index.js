@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Remove } from '@buffetjs/icons';
 import Li, { GlobalNotification } from './Li';
 class Notification extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -40,18 +41,13 @@ class Notification extends React.Component {
   };
 
   render() {
-    const options =
-      this.options[this.props.notification.status] || this.options.info;
+    const options = this.options[this.props.notification.status] || this.options.info;
     const {
       notification: { message },
     } = this.props;
     const content =
       isObject(message) && message.id ? (
-        <FormattedMessage
-          id={message.id}
-          defaultMessage={message.id}
-          values={message.values}
-        />
+        <FormattedMessage id={message.id} defaultMessage={message.id} values={message.values} />
       ) : (
         <FormattedMessage id={message} defaultMessage={message} />
       );
@@ -73,7 +69,7 @@ class Notification extends React.Component {
             <p className="notificationTitle">{content}</p>
           </div>
           <div className={`notificationClose`}>
-            <FontAwesomeIcon icon="times" onClick={this.handleCloseClicked} />
+            <Remove onClick={this.handleCloseClicked} />
           </div>
         </Li>
       </>

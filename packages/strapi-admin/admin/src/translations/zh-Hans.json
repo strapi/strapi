@@ -108,7 +108,7 @@
   "app.components.listPlugins.title.plural": "{number} 个插件已安装",
   "app.components.listPlugins.title.singular": "{number} 个插件已安装",
   "app.components.listPluginsPage.deletePlugin.error": "卸载插件时出错",
-  
+
   "app.links.configure-view": "配置视图",
 
   "app.utils.SelectOption.defaultMessage": " ",
@@ -117,6 +117,16 @@
   "components.AutoReloadBlocker.description": "使用以下命令中的一个来运行 Strapi：",
   "components.AutoReloadBlocker.header": "这个插件需要重新加载特性。",
   "components.ErrorBoundary.title": "哪里出问题了…",
+  "components.FilterOptions.FILTER_TYPES.=": "等于",
+  "components.FilterOptions.FILTER_TYPES._contains": "包含",
+  "components.FilterOptions.FILTER_TYPES._containss": "包含（区分大小写）",
+  "components.FilterOptions.FILTER_TYPES._gt": "大于",
+  "components.FilterOptions.FILTER_TYPES._gte": "大于等于",
+  "components.FilterOptions.FILTER_TYPES._lt": "小于",
+  "components.FilterOptions.FILTER_TYPES._lte": "小于等于",
+  "components.FilterOptions.FILTER_TYPES._ne": "不等于",
+  "components.FilterOptions.FILTER_TYPES._in": "包含在指定数组中",
+  "components.FilterOptions.FILTER_TYPES._nin": "不包含在指定数组中",
   "components.Input.error.attribute.key.taken": "此值已经存在",
   "components.Input.error.attribute.sameKeyAndName": "不能相等",
   "components.Input.error.attribute.taken": "此字段名称已经存在",

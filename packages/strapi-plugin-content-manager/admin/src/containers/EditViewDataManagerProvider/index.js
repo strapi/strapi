@@ -8,11 +8,12 @@ import pluginId from '../../pluginId';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import {
+  cleanData,
+  createDefaultForm,
   createYupSchema,
   getYupInnerErrors,
   getFilesToUpload,
-  createDefaultForm,
-  cleanData,
+  removePasswordFieldsFromData,
 } from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
@@ -57,7 +58,11 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data,
+          data: removePasswordFieldsFromData(
+            data,
+            allLayoutData.contentType,
+            allLayoutData.components
+          ),
         });
       } catch (err) {
         if (id && err.code !== 20) {
@@ -77,6 +82,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
 
       return acc;
     }, {});
+
     const contentTypeDataStructure = createDefaultForm(
       currentContentTypeLayout.schema.attributes,
       allLayoutData.components
@@ -142,9 +148,13 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
   };
 
   const checkFormErrors = async (dataToSet = {}) => {
-    const schema = createYupSchema(currentContentTypeLayout, {
-      components: get(allLayoutData, 'components', {}),
-    });
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      isCreatingEntry
+    );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
 
@@ -177,13 +187,22 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
     });
   };
 
-  const handleChange = ({ target: { name, value, type } }) => {
+  const handleChange = ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
     let inputValue = value;
 
     // Empty string is not a valid date,
     // Set the date to null when it's empty
     if (type === 'date' && value === '') {
       inputValue = null;
+    }
+
+    if (type === 'password' && !value) {
+      dispatch({
+        type: 'REMOVE_PASSWORD_FIELD',
+        keys: name.split('.'),
+      });
+
+      return;
     }
 
     // Allow to reset enum
@@ -200,6 +219,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
       type: 'ON_CHANGE',
       keys: name.split('.'),
       value: inputValue,
+      shouldSetInitialValue,
     });
   };
 
@@ -207,9 +227,13 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
     e.preventDefault();
 
     // Create yup schema
-    const schema = createYupSchema(currentContentTypeLayout, {
-      components: get(allLayoutData, 'components', {}),
-    });
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      isCreatingEntry
+    );
 
     try {
       // Validate the form using yup

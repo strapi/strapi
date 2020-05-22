@@ -49,7 +49,16 @@ const getLocalScript = name => (...args) => {
     process.exit(1);
   }
 
-  return require(cmdPath)(...args);
+  const script = require(cmdPath);
+
+  Promise.resolve()
+    .then(() => {
+      return script(...args);
+    })
+    .catch(error => {
+      console.error(`Error while running command ${name}: ${error.message}`);
+      process.exit(1);
+    });
 };
 
 /**
@@ -181,6 +190,7 @@ program
 
 program
   .command('build')
+  .option('--clean', 'Remove the build and .cache folders', false)
   .option('--no-optimization', 'Build the Administration without assets optimization', false)
   .description('Builds the strapi admin app')
   .action(getLocalScript('build'));
@@ -203,6 +213,19 @@ program
   .command('watch-admin')
   .description('Starts the admin dev server')
   .action(getLocalScript('watchAdmin'));
+
+program
+  .command('configuration:dump')
+  .alias('config:dump')
+  .option('-f, --file <file>', 'Output file, default output is stdout')
+  .action(getLocalScript('configurationDump'));
+
+program
+  .command('configuration:restore')
+  .alias('config:restore')
+  .option('-f, --file <file>', 'Input file, default input is stdin')
+  .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
+  .action(getLocalScript('configurationRestore'));
 
 /**
  * Normalize help argument

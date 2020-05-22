@@ -4,13 +4,12 @@ import PropTypes from 'prop-types';
 import { capitalize, get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { PluginHeader } from 'strapi-helper-plugin';
+import { PluginHeader, getFilterType } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
-import getFilterType from '../FilterPickerOption/utils';
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
 

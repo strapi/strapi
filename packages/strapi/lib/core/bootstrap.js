@@ -1,9 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
+const { getConfigUrls } = require('strapi-utils');
 
 const { createCoreApi } = require('../core-api');
-const getURLFromSegments = require('../utils/url-from-segments');
 
 const getKind = obj => obj.kind || 'collectionType';
 
@@ -17,29 +17,13 @@ const pickSchema = model => {
 };
 
 module.exports = function(strapi) {
-  // Retrieve Strapi version.
-  strapi.config.uuid = _.get(strapi.config.info, 'strapi.uuid', '');
-  strapi.config.info.customs = _.get(strapi.config.info, 'strapi', {});
-  strapi.config.info.strapi = (_.get(strapi.config, 'info.dependencies.strapi') || '').replace(
-    /(\^|~)/g,
-    ''
-  );
-  strapi.config.info.node = process.versions.node;
-
   // Set connections.
   strapi.connections = {};
 
-  // Set current environment config.
-  strapi.config.currentEnvironment = strapi.config.environments[strapi.config.environment] || {};
-
-  const defaultConnection = strapi.config.currentEnvironment.database.defaultConnection;
+  const defaultConnection = strapi.config.get('database.defaultConnection');
 
   // Set current connections.
-  strapi.config.connections = _.get(strapi.config.currentEnvironment, 'database.connections', {});
-
-  if (_.get(strapi.config, 'language.enabled')) {
-    strapi.config.language.locales = Object.keys(_.get(strapi.config, 'locales', {}));
-  }
+  strapi.config.connections = strapi.config.get('database.connections', {});
 
   strapi.contentTypes = {};
 
@@ -125,7 +109,7 @@ module.exports = function(strapi) {
       modelName: key,
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
-      connection: model.connection || strapi.config.currentEnvironment.database.defaultConnection,
+      connection: model.connection || defaultConnection,
     });
 
     strapi.contentTypes[model.uid] = model;
@@ -159,100 +143,22 @@ module.exports = function(strapi) {
         plugin: pluginName,
         collectionName: model.collectionName || `${pluginName}_${key}`.toLowerCase(),
         globalId: model.globalId || _.upperFirst(_.camelCase(`${pluginName}-${key}`)),
-        connection: model.connection || strapi.config.currentEnvironment.database.defaultConnection,
+        connection: model.connection || defaultConnection,
       });
 
       strapi.contentTypes[model.uid] = model;
     });
   });
 
-  // Define required middlewares categories.
-  const middlewareCategories = ['request', 'response', 'security', 'server'];
-
-  // Flatten middlewares configurations.
-  const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
-    const current = strapi.config.currentEnvironment[index];
-
-    if (_.isObject(current)) {
-      acc = _.merge(acc, current);
-    } else {
-      acc[index] = current;
-    }
-
-    return acc;
-  }, {});
-
-  // These middlewares cannot be disabled.
-  _.merge(flattenMiddlewaresConfig, {
-    // Necessary middlewares for the core.
-    responses: {
-      enabled: true,
-    },
-    router: {
-      enabled: true,
-    },
-    logger: {
-      enabled: true,
-    },
-    boom: {
-      enabled: true,
-    },
-    cors: {
-      enabled: true,
-    },
-    xframe: {
-      enabled: true,
-    },
-    xss: {
-      enabled: true,
-    },
-  });
-
-  // Exclude database and custom.
-  middlewareCategories.push('database');
-
-  // Flatten hooks configurations.
-  const flattenHooksConfig = _.pullAll(
-    Object.keys(strapi.config.currentEnvironment),
-    middlewareCategories
-  ).reduce((acc, index) => {
-    const current = strapi.config.currentEnvironment[index];
-
-    if (_.isObject(current)) {
-      acc = _.merge(acc, {
-        [index]: current,
-      });
-    } else {
-      acc[index] = current;
-    }
-
-    return acc;
-  }, {});
-
-  // Enable hooks and dependencies related to the connections.
-  for (let name in strapi.config.connections) {
-    const connection = strapi.config.connections[name];
-    const connector = connection.connector.replace('strapi-hook-', '');
-
-    enableHookNestedDependencies(strapi, connector, flattenHooksConfig);
-  }
-
   // Preset config in alphabetical order.
   strapi.config.middleware.settings = Object.keys(strapi.middleware).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
     const currentSettings = _.merge(
-      _.get(_.cloneDeep(strapi.middleware[current]), ['defaults', current], {}),
-      strapi.config[current],
-      strapi.config.currentEnvironment[current],
-      flattenMiddlewaresConfig[current]
+      _.cloneDeep(_.get(strapi.middleware[current], ['defaults', current], {})),
+      strapi.config.get(['middleware', 'settings', current], {})
     );
-    acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-    if (!_.has(acc[current], 'enabled')) {
-      strapi.log.warn(
-        `(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
-      );
-    }
+    acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
     // Ensure that enabled key exist by forcing to false.
     _.defaults(acc[current], { enabled: false });
@@ -263,19 +169,11 @@ module.exports = function(strapi) {
   strapi.config.hook.settings = Object.keys(strapi.hook).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
     const currentSettings = _.merge(
-      _.get(_.cloneDeep(strapi.hook[current]), ['defaults', current], {}),
-      flattenHooksConfig[current] ||
-        _.get(strapi.config.currentEnvironment, ['hook', current]) ||
-        _.get(strapi.config, ['hook', current])
+      _.cloneDeep(_.get(strapi.hook[current], ['defaults', current], {})),
+      strapi.config.get(['hook', 'settings', current], {})
     );
 
     acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
-
-    if (!_.has(acc[current], 'enabled')) {
-      strapi.log.warn(
-        `(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
-      );
-    }
 
     // Ensure that enabled key exist by forcing to false.
     _.defaults(acc[current], { enabled: false });
@@ -284,86 +182,23 @@ module.exports = function(strapi) {
   }, {});
 
   // default settings
-  strapi.config.port = _.get(strapi.config.currentEnvironment, 'server.port') || strapi.config.port;
-  strapi.config.host = _.get(strapi.config.currentEnvironment, 'server.host') || strapi.config.host;
+  strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
+  strapi.config.host = strapi.config.get('server.host') || strapi.config.host;
 
-  let hostname = strapi.config.host;
-  if (
-    strapi.config.environment === 'development' &&
-    ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-  ) {
-    hostname = 'localhost';
-  }
+  const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config.get('server'));
 
-  // proxy settings
-  const proxy = _.get(strapi.config.currentEnvironment, 'server.proxy', {});
-  strapi.config.proxy = proxy;
-
-  // check if proxy is enabled and construct url
-  strapi.config.url = proxy.enabled
-    ? getURLFromSegments({
-        hostname: proxy.host,
-        port: proxy.port,
-        ssl: proxy.ssl,
-      })
-    : getURLFromSegments({
-        hostname,
-        port: strapi.config.port,
-      });
-
-  const adminPath = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin');
+  strapi.config.server = strapi.config.server || {};
+  strapi.config.server.url = serverUrl;
+  strapi.config.admin.url = adminUrl;
+  strapi.config.admin.path = adminPath;
 
   // check if we should serve admin panel
-  const shouldServeAdmin = _.get(
-    strapi.config.currentEnvironment.server,
-    'admin.serveAdminPanel',
+  const shouldServeAdmin = strapi.config.get(
+    'server.admin.serveAdminPanel',
     strapi.config.serveAdminPanel
   );
+
   if (!shouldServeAdmin) {
     strapi.config.serveAdminPanel = false;
-  }
-
-  strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
-};
-
-const enableHookNestedDependencies = function(strapi, name, flattenHooksConfig, force = false) {
-  // Couldn't find configurations for this hook.
-  if (_.isEmpty(_.get(flattenHooksConfig, name, true))) {
-    // Check if database connector is used
-    const modelsUsed = Object.keys(_.assign(_.clone(strapi.api) || {}, strapi.plugins))
-      .filter(x =>
-        _.isObject(_.get(strapi.api, [x, 'models']) || _.get(strapi.plugins, [x, 'models']))
-      ) // Filter API with models
-      .map(x => _.get(strapi.api, [x, 'models']) || _.get(strapi.plugins, [x, 'models'])) // Keep models
-      .filter(models => {
-        const apiModelsUsed = Object.keys(models).filter(model => {
-          const connector = _.get(strapi.config.connections, models[model].connection, {})
-            .connector;
-
-          if (connector) {
-            return connector.replace('strapi-hook-', '') === name;
-          }
-
-          return false;
-        });
-
-        return apiModelsUsed.length !== 0;
-      }); // Filter model with the right connector
-
-    flattenHooksConfig[name] = {
-      enabled: force || modelsUsed.length > 0, // Will return false if there is no model, else true.
-    };
-
-    // Enabled dependencies.
-    if (_.get(strapi.hook, `${name}.dependencies`, []).length > 0) {
-      strapi.hook[name].dependencies.forEach(dependency => {
-        enableHookNestedDependencies(
-          strapi,
-          dependency.replace('strapi-hook-', ''),
-          flattenHooksConfig,
-          true
-        );
-      });
-    }
   }
 };

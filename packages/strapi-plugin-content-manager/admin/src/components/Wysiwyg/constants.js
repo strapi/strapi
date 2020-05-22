@@ -73,7 +73,7 @@ export const CONTROLS = [
       style: 'IMG',
       className: 'img',
       hideLabel: true,
-      handler: 'addSimpleBlockWithSelection',
+      handler: 'handleOpenMediaLibrary',
       text: '![text](textToReplace)',
     },
     {

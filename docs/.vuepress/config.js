@@ -213,6 +213,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/scheduled-publication',
             '/3.0.0-beta.x/guides/secure-your-app',
             '/3.0.0-beta.x/guides/send-email',
+            '/3.0.0-beta.x/guides/registering-a-field-in-admin',
             '/3.0.0-beta.x/guides/client',
             '/3.0.0-beta.x/guides/update-version',
           ],
@@ -220,7 +221,11 @@ module.exports = {
         {
           collapsable: true,
           title: '⚙️️ Admin Panel',
-          children: ['/3.0.0-beta.x/admin-panel/customization', '/3.0.0-beta.x/admin-panel/deploy'],
+          children: [
+            '/3.0.0-beta.x/admin-panel/customization',
+            '/3.0.0-beta.x/admin-panel/custom-webpack-config',
+            '/3.0.0-beta.x/admin-panel/deploy',
+          ],
         },
         {
           collapsable: true,
@@ -241,6 +246,7 @@ module.exports = {
             '/3.0.0-beta.x/plugin-development/plugin-architecture',
             '/3.0.0-beta.x/plugin-development/backend-development',
             '/3.0.0-beta.x/plugin-development/frontend-development',
+            '/3.0.0-beta.x/plugin-development/frontend-field-api',
             '/3.0.0-beta.x/plugin-development/frontend-settings-api',
           ],
         },

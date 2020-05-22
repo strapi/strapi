@@ -29,9 +29,7 @@ const hasComponent = model => {
 const isConfigurable = attribute => _.get(attribute, 'configurable', true);
 
 const isRelation = attribute =>
-  _.has(attribute, 'target') ||
-  _.has(attribute, 'model') ||
-  _.has(attribute, 'collection');
+  _.has(attribute, 'target') || _.has(attribute, 'model') || _.has(attribute, 'collection');
 
 /**
  * Formats a component's attributes
@@ -57,9 +55,7 @@ const formatAttribute = (key, attribute, { model }) => {
   if (_.has(attribute, 'type')) return attribute;
 
   // format relations
-  const relation = (model.associations || []).find(
-    assoc => assoc.alias === key
-  );
+  const relation = (model.associations || []).find(assoc => assoc.alias === key);
   const { plugin, configurable } = attribute;
   let targetEntity = attribute.model || attribute.collection;
 
@@ -69,6 +65,7 @@ const formatAttribute = (key, attribute, { model }) => {
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
       configurable: configurable === false ? false : undefined,
+      allowedTypes: attribute.allowedTypes,
     };
   } else {
     return {

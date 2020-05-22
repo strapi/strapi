@@ -11,12 +11,10 @@ module.exports = async ({ dir, config }) => {
   const localPlugins = await loadLocalPlugins({ dir });
   const plugins = await loadPlugins({
     installedPlugins: config.installedPlugins,
+    config,
   });
 
-  const pluginsIntersection = _.intersection(
-    Object.keys(localPlugins),
-    Object.keys(plugins)
-  );
+  const pluginsIntersection = _.intersection(Object.keys(localPlugins), Object.keys(plugins));
 
   if (pluginsIntersection.length > 0) {
     throw new Error(
@@ -43,7 +41,7 @@ const loadLocalPlugins = async ({ dir }) => {
   return _.merge(files, configs);
 };
 
-const loadPlugins = async ({ installedPlugins }) => {
+const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
 
   for (let plugin of installedPlugins) {
@@ -51,12 +49,16 @@ const loadPlugins = async ({ installedPlugins }) => {
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)//*.*(js|json),package.json}'
+      '{!(config|node_modules|test)/*.*(js|json),package.json}'
     );
 
-    const conf = await loadConfig(pluginPath);
+    const { config: pluginConfig } = await loadConfig(pluginPath);
 
-    _.set(plugins, plugin, _.assign({}, conf, files));
+    const userConfig = config.get(['plugins', plugin], {});
+
+    const mergedConfig = _.merge(pluginConfig, userConfig);
+
+    _.set(plugins, plugin, _.assign({}, files, { config: mergedConfig }));
   }
 
   return plugins;

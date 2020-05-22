@@ -16,6 +16,7 @@ https://guides.github.com/features/mastering-markdown/
 A clear and concise description of what the bug is.
 
 **Steps to reproduce the behavior**
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
@@ -31,6 +32,7 @@ If applicable, add screenshots to help explain your problem.
 If applicable, add code samples to help explain your problem.
 
 **System**
+
 - Node.js version: <!-- Please ensure you are using the Node LTS version (v12) -->
 - NPM version:
 - Strapi version: <!-- Please make sure you are on the latest version -->
