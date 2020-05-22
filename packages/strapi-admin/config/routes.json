@@ -56,6 +56,11 @@
     },
     {
       "method": "POST",
+      "path": "/forgot-password",
+      "handler": "authentication.forgotPassword"
+    },
+    {
+      "method": "POST",
       "path": "/auth/forgot-password",
       "handler": "Auth.forgotPassword"
     },
