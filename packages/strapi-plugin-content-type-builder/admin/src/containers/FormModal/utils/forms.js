@@ -500,6 +500,7 @@ const forms = {
           const uidItems = [
             [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
             [fields.divider],
+            [fields.private],
             [fields.required],
           ];
 
