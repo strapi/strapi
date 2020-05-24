@@ -2,42 +2,10 @@
 
 exports[`Admin | containers | ListView should match the snapshot 1`] = `
 <DocumentFragment>
-  .c6 button {
-  width: 100%;
-  height: 54px;
-  border: 0;
-  border-top: 1px solid #aed4fb;
-  color: #007eff;
-  font-weight: 500;
-  text-transform: uppercase;
-  background-color: #e6f0fb;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-}
-
-.c6 button svg {
-  vertical-align: initial;
-}
-
-.c6 button:hover {
-  box-shadow: none;
-}
-
-.c6 button:focus {
-  outline: 0;
-}
-
-.c9 {
-  width: 37.5rem !important;
-  -webkit-font-smoothing: antialiased !important;
-}
-
-.c4 {
+  .c4 {
   height: 30px;
-  padding: 0 14px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -49,12 +17,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
   color: #ffffff;
 }
 
-.c4:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
+.c4:hover,
 .c4:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
@@ -65,9 +28,16 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
   outline: 0;
 }
 
-.c4 > svg {
-  margin-right: 10px;
+.c4 > span svg {
+  font-size: 10px;
   vertical-align: initial;
+}
+
+.c4 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
 }
 
 .c1 {
@@ -99,10 +69,10 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
 .c1 .sticky {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 30.6rem;
   z-index: 1050;
   background-color: white;
-  width: calc(100vw - 30.5rem);
+  width: calc(100vw - 30.6rem);
   padding-right: 15px;
   height: 60px;
   display: -webkit-box;
@@ -114,10 +84,23 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
 .c1 .sticky .row {
   width: 100%;
   margin: auto;
+  margin-top: 16px;
+}
+
+.c1 .sticky .row .header-title p {
+  display: none;
 }
 
 .c1 .sticky .row > div > div {
   padding-top: 0;
+}
+
+.c1 .sticky .row > div > div h1 {
+  font-size: 2rem;
+}
+
+.c1 .sticky .row > div > div h1 svg {
+  margin-top: 8px;
 }
 
 .c1 .sticky .row > div > div button {
@@ -154,7 +137,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
 
 .c2 {
   position: relative;
-  padding-top: 0.8rem;
+  padding-top: 0.5rem;
 }
 
 .c2 h1 {
@@ -163,65 +146,57 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
   width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
+  margin-bottom: 0;
+  padding-right: 18px;
+  font-size: 2.4rem;
+  line-height: normal;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 2.4rem;
-  font-weight: 600;
-  margin-bottom: 1px;
-  padding-right: 18px;
 }
 
 .c2 svg {
   position: absolute;
   right: 0;
   top: 0;
-  margin-top: 11px;
+  margin-top: 12px;
   font-size: 12px;
   color: rgba(16,22,34,0.35);
   cursor: pointer;
   outline: 0;
 }
 
-.c7 {
-  height: 30px;
-  padding: 0 15px;
+.c6 button {
+  width: 100%;
+  height: 54px;
+  border: 0;
+  border-top: 1px solid #aed4fb;
+  color: #007eff;
   font-weight: 500;
-  font-size: 1.3rem;
-  line-height: normal;
-  border-radius: 2px;
-  cursor: pointer;
-  outline: 0;
-  background-color: #ffffff;
-  background-color: #007EFF;
-  border: 1px solid #007EFF;
-  color: #ffffff;
+  text-transform: uppercase;
+  background-color: #e6f0fb;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
 }
 
-.c7:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
-.c7:active {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
-.c7:focus {
-  outline: 0;
-}
-
-.c7 > svg {
-  margin-right: 10px;
+.c6 button svg {
   vertical-align: initial;
 }
 
-.c8 {
-  margin-right: 10px;
-  font-size: 0.94em;
+.c6 button:hover {
+  box-shadow: none;
+}
+
+.c6 button:focus {
+  outline: 0;
+}
+
+.c7 {
+  width: 41.6rem !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 .c5 {
@@ -359,38 +334,34 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
         class="c6"
       >
         <button
-          class="c7"
+          class="c4"
           color="primary"
           type="button"
         >
-          <span
-            class="c8"
+          <svg
+            fill="#007eff"
+            height="11px"
+            viewBox="0 0 13 13"
+            width="11px"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              fill="#007eff"
-              height="11px"
-              viewBox="0 0 13 13"
-              width="11px"
-              xmlns="http://www.w3.org/2000/svg"
+            <g
+              data-name="Layer 2"
             >
-              <g
-                data-name="Layer 2"
-              >
-                <path
-                  d="M6.5.5v12m6-6H.5"
-                  fill="none"
-                  stroke="#007eff"
-                  stroke-linecap="round"
-                />
-              </g>
-            </svg>
-          </span>
+              <path
+                d="M6.5.5v12m6-6H.5"
+                fill="none"
+                stroke="#007eff"
+                stroke-linecap="round"
+              />
+            </g>
+          </svg>
           Add new webhook
         </button>
       </div>
     </div>
     <div
-      class="c9"
+      class="c7"
     />
   </div>
 </DocumentFragment>

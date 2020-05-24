@@ -12,7 +12,6 @@
 
 const _ = require('lodash');
 
-const loadConfig = require('./load-config');
 const loadApis = require('./load-apis');
 const loadAdmin = require('./load-admin');
 const loadPlugins = require('./load-plugins');
@@ -22,17 +21,7 @@ const loadHooks = require('./load-hooks');
 const loadComponents = require('./load-components');
 
 module.exports = async strapi => {
-  const [
-    config,
-    api,
-    admin,
-    plugins,
-    middlewares,
-    hook,
-    extensions,
-    components,
-  ] = await Promise.all([
-    loadConfig(strapi),
+  const [api, admin, plugins, middlewares, hook, extensions, components] = await Promise.all([
     loadApis(strapi),
     loadAdmin(strapi),
     loadPlugins(strapi),
@@ -61,7 +50,6 @@ module.exports = async strapi => {
   });
 
   return {
-    config,
     api,
     admin,
     plugins,

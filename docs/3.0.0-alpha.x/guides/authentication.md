@@ -139,8 +139,7 @@ import axios from 'axios';
 axios
   .post('http://localhost:1337/auth/forgot-password', {
     email: 'user@strapi.io',
-    url:
-      'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
+    url: 'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
   })
   .then(response => {
     // Handle success.

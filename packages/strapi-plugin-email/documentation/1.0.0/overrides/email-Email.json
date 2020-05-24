@@ -3,7 +3,7 @@
     "/email/": {
       "post": {
         "deprecated": false,
-        "description": "Send an email using the provider defined through the dashboard",
+        "description": "Send an email",
         "requestBody": {
           "content": {
             "application/json": {
@@ -17,11 +17,22 @@
                   "to": {
                     "type": "string",
                     "format": "email",
-                    "example": "user@example.com"
+                    "example": "user1@example.com"
                   },
-                  "reply_to": {
+                  "cc": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user2@example.com"
+                  },
+                  "bcc": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user3@example.com"
+                  },
+                  "replyTo": {
                     "type": "string",
                     "format": "email"
+                    "example": "user4@example.com"
                   },
                   "subject": {
                     "type": "string",

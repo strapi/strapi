@@ -243,7 +243,6 @@ const ListView = () => {
 
   const addButtonProps = {
     icon: true,
-    className: 'add-button',
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     onClick: () => {
@@ -268,8 +267,7 @@ const ListView = () => {
     color: 'secondary',
     label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
     onClick: goToCMSettingsPage,
-    style: { height: '30px', marginTop: '1px' },
-    className: 'button-secondary',
+    style: { marginTop: '2px' },
   };
 
   const listActions = isInDevelopmentMode
