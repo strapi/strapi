@@ -67,7 +67,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
 };
 
 const createComponentJoinTables = async ({ definition, ORM }) => {
-  const { collectionName, primaryKey } = definition;
+  const { collectionName, primaryKey, primaryKeyType } = definition;
 
   const componentAttributes = getComponentAttributes(definition);
 
@@ -86,10 +86,11 @@ const createComponentJoinTables = async ({ definition, ORM }) => {
         .notNullable();
       table.string('component_type').notNullable();
       table.integer('component_id').notNullable();
-      table
-        .integer(joinColumn)
-        .unsigned()
-        .notNullable();
+      if (primaryKeyType === 'uuid') {
+        table.uuid(joinColumn).notNullable();
+      } else {
+        table.integer(joinColumn).unsigned().notNullable();
+      }
 
       table
         .foreign(joinColumn, `${joinColumn}_fk`)
