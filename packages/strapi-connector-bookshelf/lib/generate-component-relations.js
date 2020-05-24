@@ -87,7 +87,7 @@ const createComponentJoinTables = async ({ definition, ORM }) => {
       table.string('component_type').notNullable();
       table.integer('component_id').notNullable();
       switch (primaryKeyType) {
-        case 'uuid':
+        case 'uid':
           table.string(joinColumn).notNullable();
           break;
         case 'uuid':
