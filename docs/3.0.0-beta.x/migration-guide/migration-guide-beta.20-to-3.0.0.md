@@ -203,7 +203,7 @@ module.exports = {
 Adding a sub path to the url doesn't mean your api is going to be prefixed. You will need to host your app behind a proxy and remove the prefix so strapi receives request like if they where made on the root `/` path.
 :::
 
-You can see this option in action in the following [deployment guide](../deployment/nginx-proxy.md).
+You can see this option in action in the following [deployment guide](../getting-started/deployment.md#optional-software-guides).
 
 ### Admin path
 
@@ -236,7 +236,7 @@ module.exports = {
 };
 ```
 
-You can see this option in action in the following [deployment guide](../deployment/nginx-proxy.md).
+You can see this option in action in the following [deployment guide](../getting-started/deployment.md#optional-software-guides).
 
 ## Rebuilding your administration panel
 

@@ -50,17 +50,20 @@ You can also enable the Apollo server tracing feature, which is supported by the
 
 You can edit these configurations by creating following file.
 
-**Path —** `./extensions/graphql/config/settings.json`
+**Path —** `./config/plugins.js`
 
-```json
-{
-  "endpoint": "/graphql",
-  "tracing": false,
-  "shadowCRUD": true,
-  "playgroundAlways": false,
-  "depthLimit": 7,
-  "amountLimit": 100
-}
+```js
+module.exports = {
+  //
+  graphql: {
+    endpoint: '/graphql',
+    tracing: false,
+    shadowCRUD: true,
+    playgroundAlways: false,
+    depthLimit: 7,
+    amountLimit: 100,
+  },
+};
 ```
 
 ## Query API
