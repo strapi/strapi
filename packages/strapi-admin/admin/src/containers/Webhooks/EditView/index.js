@@ -365,7 +365,6 @@ function EditView() {
               {Object.keys(form).map(key => {
                 return (
                   <div key={key} className={form[key].styleName}>
-                    {console.log(formErrors)}
                     <InputsIndex
                       {...form[key]}
                       customInputs={{

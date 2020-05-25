@@ -2,23 +2,18 @@
 import produce from 'immer';
 
 export const initialState = {
-  roles: [],
   selectedRoles: [],
 };
 
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'GET_DATA_SUCCEEDED': {
-        draftState.roles = action.data;
-        break;
-      }
       case 'ON_SELECTION': {
         const { id } = action;
         const roleIndex = state.selectedRoles.findIndex(roleId => roleId === id);
 
         if (roleIndex === -1) {
-          draftState.selectedRoles = [...state.selectedRoles, id];
+          draftState.selectedRoles.push(id);
         } else {
           draftState.selectedRoles = state.selectedRoles.filter(roleId => roleId !== id);
         }
