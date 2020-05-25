@@ -217,6 +217,8 @@ Once you have setup your configuration, you can cleanup your database by deletin
 
 If you are using the graphql `register` mutation, the input and response types have changed. You can check the code [here](https://github.com/strapi/strapi/pull/6047).
 
+The `changePassword` mutation got renamed to `resetPassword` to reflect what it does. You can check the code [here](https://github.com/strapi/strapi/pull/5655)
+
 ## Remove `idAttribute` and `idAttributeType` options.
 
 Currently using the idAttribute and idAttributeType options can break strapi in many ways. Fixing this is going to require a lot of work on the database and content management layer.
