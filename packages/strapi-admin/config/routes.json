@@ -186,6 +186,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "PUT",
+      "path": "/roles/:id",
+      "handler": "role.update",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

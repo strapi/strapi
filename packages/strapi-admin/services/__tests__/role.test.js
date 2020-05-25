@@ -20,7 +20,7 @@ describe('Role', () => {
       expect(createdRole).toStrictEqual(input);
     });
   });
-  describe('find one', () => {
+  describe('findOne', () => {
     test('Finds a role', async () => {
       const role = {
         id: 1,
@@ -38,6 +38,8 @@ describe('Role', () => {
       expect(dbFindOne).toHaveBeenCalledWith({ id: role.id });
       expect(foundRole).toStrictEqual(role);
     });
+  });
+  describe('find', () => {
     test('Finds roles', async () => {
       const roles = [
         {
@@ -57,6 +59,8 @@ describe('Role', () => {
       expect(dbFind).toHaveBeenCalledWith({});
       expect(foundRoles).toStrictEqual(roles);
     });
+  });
+  describe('findAll', () => {
     test('Finds all roles', async () => {
       const roles = [
         {
@@ -75,6 +79,46 @@ describe('Role', () => {
 
       expect(dbFind).toHaveBeenCalledWith({ _limit: -1 });
       expect(foundRoles).toStrictEqual(roles);
+    });
+  });
+  describe('update', () => {
+    test('update a role', async () => {
+      const role = {
+        id: 1,
+        name: 'super_admin',
+        description: 'AAA',
+      };
+      const expectedUpdatedRole = {
+        id: 1,
+        name: 'super_admin_updated',
+        description: 'AAA_updated',
+      };
+      const dbUpdate = jest.fn(() => Promise.resolve(expectedUpdatedRole));
+
+      global.strapi = {
+        query: () => ({ update: dbUpdate }),
+      };
+
+      const updatedRole = await roleService.update(
+        {
+          id: role.id,
+        },
+        {
+          name: expectedUpdatedRole.name,
+          description: expectedUpdatedRole.description,
+        }
+      );
+
+      expect(dbUpdate).toHaveBeenCalledWith(
+        {
+          id: role.id,
+        },
+        {
+          name: expectedUpdatedRole.name,
+          description: expectedUpdatedRole.description,
+        }
+      );
+      expect(updatedRole).toStrictEqual(expectedUpdatedRole);
     });
   });
 });
