@@ -149,7 +149,7 @@ module.exports = {
     try {
       const data = await strapi.plugins['users-permissions'].services.user.add(user);
 
-      ctx.created(data);
+      ctx.created(sanitizeUser(data));
     } catch (error) {
       ctx.badRequest(null, formatError(error));
     }
@@ -230,7 +230,7 @@ module.exports = {
 
     const data = await strapi.plugins['users-permissions'].services.user.edit({ id }, updateData);
 
-    ctx.send(data);
+    ctx.send(sanitizeUser(data));
   },
 
   /**
@@ -240,7 +240,7 @@ module.exports = {
   async destroy(ctx) {
     const { id } = ctx.params;
     const data = await strapi.plugins['users-permissions'].services.user.remove({ id });
-    ctx.send(data);
+    ctx.send(sanitizeUser(data));
   },
 
   async destroyAll(ctx) {
