@@ -74,6 +74,26 @@ axios
   });
 ```
 
+### JWT configuration
+
+You can configure option for the JWT generation by creating `extensions/users-permissions/config/security.json` file.
+We are using [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) to generate the JWT.
+
+Available options:
+
+- `expiresIn`: expressed in seconds or a string describing a time span zeit/ms.<br>
+  Eg: 60, "2 days", "10h", "7d". A numeric value is interpreted as a seconds count. If you use a string be sure you provide the time units (days, hours, etc), otherwise milliseconds unit is used by default ("120" is equal to "120ms").
+
+**Path —** `extensions/users-permissions/config/security.json`
+
+```json
+{
+  "jwt": {
+    "expiresIn": "1d"
+  }
+}
+```
+
 ### Registration
 
 Creates a new user in the database with a default role as 'registered'.
