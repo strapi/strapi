@@ -1,28 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { List, Header } from '@buffetjs/custom';
-import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin';
 import { Pencil } from '@buffetjs/icons';
 
 import { RoleListWrapper, RoleRow } from '../../../components/Roles';
 import BaselineAlignment from './BaselineAlignment';
+import useRoleList from '../../../hooks/useRoleList';
 
 const RoleListPage = () => {
   const { formatMessage } = useGlobalContext();
-  const [roles, setRoles] = useState([]);
-
-  useEffect(() => {
-    fetchRoleList();
-  }, []);
-
-  const fetchRoleList = async () => {
-    try {
-      const { data } = await request('/admin/roles', { method: 'GET' });
-
-      setRoles(data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const { roles, isLoading } = useRoleList();
 
   return (
     <>
@@ -44,6 +31,7 @@ const RoleListPage = () => {
             id: 'Settings.roles.title',
           })}`}
           items={roles}
+          isLoading={isLoading}
           customRowComponent={role => (
             <RoleRow
               links={[

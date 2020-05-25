@@ -1,8 +1,8 @@
 import React from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
 import { Text, Flex, Padded } from '@buffetjs/core';
-import { useGlobalContext } from 'strapi-helper-plugin';
 import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
 
 import FormCard from './FormCard';
 import ButtonWithNumber from './ButtonWithNumber';
@@ -10,7 +10,7 @@ import InputWrapper from './InputWrapper';
 import schema from './utils/schema';
 
 const CreatePage = () => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -31,7 +31,7 @@ const CreatePage = () => {
     },
   ];
 
-  const submit = async data => {
+  const handleCreateRoleSubmit = async data => {
     try {
       console.log('Handle submit POST API', data);
     } catch (e) {
@@ -42,7 +42,7 @@ const CreatePage = () => {
   return (
     <Formik
       initialValues={{ name: '', description: '' }}
-      onSubmit={submit}
+      onSubmit={handleCreateRoleSubmit}
       validationSchema={schema}
     >
       {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (

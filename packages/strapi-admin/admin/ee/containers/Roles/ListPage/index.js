@@ -1,37 +1,24 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from '@buffetjs/core';
 import { List, Header } from '@buffetjs/custom';
 import { Plus } from '@buffetjs/icons';
-import { useGlobalContext, ListButton, request } from 'strapi-helper-plugin';
+import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { useIntl } from 'react-intl';
 
 import RoleRow from './RoleRow';
 import BaselineAlignment from './BaselineAlignment';
 import reducer, { initialState } from './reducer';
 import { RoleListWrapper } from '../../../../src/components/Roles';
+import useRoleList from '../../../../src/hooks/useRoleList';
 
 const RoleListPage = () => {
-  const { settingsBaseURL, formatMessage } = useGlobalContext();
+  const { settingsBaseURL } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const { push } = useHistory();
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { roles, selectedRoles } = reducerState;
-
-  useEffect(() => {
-    fetchRoleList();
-  }, []);
-
-  const fetchRoleList = async () => {
-    try {
-      const { data } = await request('/admin/roles', { method: 'GET' });
-
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const [reducerState] = useReducer(reducer, initialState);
+  const { selectedRoles } = reducerState;
+  const { roles, isLoading } = useRoleList();
 
   const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
   const handleDuplicateRole = () => console.log('duplicate');
@@ -54,7 +41,6 @@ const RoleListPage = () => {
   return (
     <>
       <Header
-        icon
         title={{
           label: formatMessage({
             id: 'Settings.roles.title',
@@ -71,6 +57,7 @@ const RoleListPage = () => {
           title={`${roles.length} ${formatMessage({
             id: 'Settings.roles.title',
           })}`}
+          isLoading={isLoading}
           button={{
             color: 'primary',
             disabled: selectedRoles.length === 0,
