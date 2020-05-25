@@ -1,103 +1,27 @@
-import React, { useEffect, useReducer } from 'react';
-import { BackHeader, auth, request } from 'strapi-helper-plugin';
+import React from 'react';
+import { BackHeader, auth } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import BaselineAlignement from '../../components/BaselineAlignement';
 import ContainerFluid from '../../components/ContainerFluid';
 import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
 import Header from '../../components/Users/Header';
-import checkFormValidity from '../../utils/checkFormValidity';
-import formatAPIErrors from '../../utils/formatAPIErrors';
+import useUsersForm from '../../hooks/useUsersForm';
 import { form, schema } from './utils';
-import { initialState, reducer } from './reducer';
-import init from './init';
 
 const ProfilePage = () => {
   const { goBack } = useHistory();
+  const onSubmitSuccessCb = data => auth.setUserInfo(data);
+
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
+    // eslint-disable-next-line no-unused-vars
     dispatch,
-  ] = useReducer(reducer, initialState, init);
+    { handleCancel, handleChange, handleSubmit },
+  ] = useUsersForm('/admin/users/me', schema, onSubmitSuccessCb);
   const userInfos = auth.getUserInfo();
   const headerLabel = userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const { data } = await request('/admin/users/me', { method: 'GET' });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        console.error(err.response);
-      }
-    };
-
-    getData();
-  }, []);
-
-  const handleCancel = () => {
-    dispatch({
-      type: 'ON_CANCEL',
-    });
-  };
-
-  const handleChange = ({ target: { name, value, type: inputType } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      inputType,
-      keys: name,
-      value,
-    });
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    const errors = await checkFormValidity(modifiedData, schema);
-
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: errors || {},
-    });
-
-    if (!errors) {
-      try {
-        strapi.lockAppWithOverlay();
-
-        dispatch({
-          type: 'ON_SUBMIT',
-        });
-
-        const { data } = await request('/admin/users/me', {
-          method: 'PUT',
-          body: omit(modifiedData, ['confirmPassword']),
-        });
-
-        // Refresh the localStorage
-        auth.setUserInfo(data);
-
-        dispatch({
-          type: 'ON_SUBMIT_SUCCEEDED',
-          data,
-        });
-
-        strapi.notification.success('notification.success.saved');
-      } catch (err) {
-        const data = get(err, 'response.payload', { data: {} });
-        const apiErrors = formatAPIErrors(data);
-
-        dispatch({
-          type: 'SET_ERRORS',
-          errors: apiErrors,
-        });
-      } finally {
-        strapi.unlockApp();
-      }
-    }
-  };
 
   return (
     <>
