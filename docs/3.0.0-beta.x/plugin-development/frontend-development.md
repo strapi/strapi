@@ -60,19 +60,23 @@ Each plugin exports all its configurations in an object. This object is located 
 
 Here are its properties:
 
-| key                       | type     | value                                                                             |
-| ------------------------- | -------- | :-------------------------------------------------------------------------------- |
-| blockerComponent          | node     | can be either `null` or React node (e.g. `() => <div />`)                         |
-| blockerComponentProps     | object   | `{}`                                                                              |
-| description               | string   | `My awesome plugin`                                                               |
-| id                        | string   | Id of the plugin from the `package.json`                                          |
-| initializer               | node     | Refer to the [Initializer documentation](#initializer)                            |
-| injectedComponents        | array    | Refer to the [Injected Component documentation](#injected-components)             |
-| leftMenuLinks             | array    | `[]`                                                                              |
-| lifecycles                | function | Refer to the [Lifecycle documentation](#lifecycle)                                |
-| mainComponent             | node     | The plugin's App container                                                        |
-| preventComponentRendering | boolean  | Wheter or not display the plugin's blockerComponent instead of the main component |
-| trads                     | object   | The plugin's translation files                                                    |
+| key                       | type    | Description                                                                                                                                                                                                             |
+| ------------------------- | ------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| blockerComponent          | node    | Props can be either `null` or React node (e.g. `() => <div />`)                                                                                                                                                         |
+| blockerComponentProps     | object  | Props to provide to customise the [blockerComponent](https://github.com/strapi/strapi/blob/58588e10e5d15921b0966e20ce1bc6cde70df5cc/packages/strapi-helper-plugin/lib/src/components/BlockerComponent/index.js#L81-L86) |
+| description               | string  | Plugin's description retrieved from the package.json                                                                                                                                                                    |
+| id                        | string  | Id of the plugin from the `package.json`                                                                                                                                                                                |
+| initializer               | node    | Refer to the [Initializer documentation](#initializer)                                                                                                                                                                  |
+| injectedComponents        | array   | Refer to the [Injected Component documentation](#injected-components)                                                                                                                                                   |
+| isReady                   | boolean | The app will load until this proprety is true                                                                                                                                                                           |
+| leftMenuLinks             | array   | Array of links to inject in the menu                                                                                                                                                                                    |
+| mainComponent             | node    | The plugin's App container, setting it to null will prevent the plugin from being displayed in the menu                                                                                                                 |
+| name                      | string  | The plugin's name retrieved from the package.json                                                                                                                                                                       |
+| pluginLogo                | file    | The plugin's logo                                                                                                                                                                                                       |
+| preventComponentRendering | boolean | Whether or not display the plugin's blockerComponent instead of the main component                                                                                                                                      |
+| settings                  | object  | Refer to the [Plugins settings API](./frontend-settings-api.md)                                                                                                                                                         |
+| reducers                  | object  | The plugin's redux reducers                                                                                                                                                                                             |
+| trads                     | object  | The plugin's translation files                                                                                                                                                                                          |
 
 ### Initializer
 
@@ -126,16 +130,8 @@ class Initializer extends React.PureComponent {
     }
 
     // Prevent the plugin from being rendered if currentEnvironment === PRODUCTION
-    this.props.updatePlugin(
-      pluginId,
-      'preventComponentRendering',
-      preventComponentRendering
-    );
-    this.props.updatePlugin(
-      pluginId,
-      'blockerComponentProps',
-      blockerComponentProps
-    );
+    this.props.updatePlugin(pluginId, 'preventComponentRendering', preventComponentRendering);
+    this.props.updatePlugin(pluginId, 'blockerComponentProps', blockerComponentProps);
     // Emit the event plugin ready
     this.props.updatePlugin(pluginId, 'isReady', true);
   }
@@ -188,11 +184,7 @@ class App extends React.Component {
     return (
       <div>
         <Switch>
-          <Route
-            exact
-            path={`/plugins/${pluginId}/user/:id`}
-            component={UserPage}
-          />
+          <Route exact path={`/plugins/${pluginId}/user/:id`} component={UserPage} />
         </Switch>
       </div>
     );

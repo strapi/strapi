@@ -2,7 +2,7 @@
 
 Upgrading your Strapi application to `v3.0.0-beta.19`.
 
-**Make sure your server is not running until then end of the migration**
+**Make sure your server is not running until the end of the migration**
 
 ## Upgrading your dependencies
 

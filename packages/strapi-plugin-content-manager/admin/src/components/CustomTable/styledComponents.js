@@ -2,6 +2,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { Carret } from '@buffetjs/icons';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Table = styled.table`
   border-radius: 3px;
@@ -165,19 +166,39 @@ const DeletAllSpan = styled.span`
   &:after {
     position: relative;
     top: -1px;
-    content: '\f1f8';
+    content: '\f2ed';
     margin-left: 7px;
-    font-size: 13px;
+    font-size: 10px;
     font-family: FontAwesome;
     -webkit-font-smoothing: antialiased;
   }
 `;
+
+const LoadingContainer = styled.div`
+  display: block;
+  margin: auto;
+`;
+
+const LoadingWrapper = styled.div`
+  width: 100%;
+  height: 108px;
+  display: flex;
+  background: ${props => props.theme.main.colors.white};
+  box-shadow: 0 2px 4px ${props => props.theme.main.colors.darkGrey};
+  clip-path: inset(0px -5px -5px -5px);
+`;
+
+LoadingWrapper.propTypes = {
+  ...themePropTypes,
+};
 
 export {
   ActionContainer,
   Arrow,
   DeletAllSpan,
   DeleteSpan,
+  LoadingContainer,
+  LoadingWrapper,
   Table,
   TableDelete,
   TableEmpty,

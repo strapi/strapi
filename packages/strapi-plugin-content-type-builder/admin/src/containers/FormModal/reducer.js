@@ -40,6 +40,16 @@ const reducer = (state, action) => {
           value,
           oneThatIsCreatingARelationWithAnother,
         } = action;
+        const hasDefaultValue = Boolean(obj.getIn(['default']));
+
+        // There is no need to remove the default key if the default value isn't defined
+        if (hasDefaultValue && keys.length === 1 && keys.includes('type')) {
+          const previousType = obj.getIn(['type']);
+
+          if (previousType && ['date', 'datetime', 'time'].includes(previousType)) {
+            return obj.updateIn(keys, () => value).remove('default');
+          }
+        }
 
         if (keys.length === 1 && keys.includes('nature')) {
           return obj

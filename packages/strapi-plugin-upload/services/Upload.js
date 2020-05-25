@@ -11,16 +11,26 @@ const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
-const filenamify = require('filenamify');
+const { nameToSlug } = require('strapi-utils');
 const mime = require('mime-types');
 
 const { bytesToKbytes } = require('../utils/file');
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 const generateFileName = name => {
-  const baseName = filenamify(name, { replacement: '_' }).replace(/\s/g, '_');
+  const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
+};
+
+const sendMediaMetrics = data => {
+  if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
+    strapi.telemetry.send('didSaveMediaWithCaption');
+  }
+
+  if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
+    strapi.telemetry.send('didSaveMediaWithAlternativeText');
+  }
 };
 
 const combineFilters = params => {
@@ -244,12 +254,16 @@ module.exports = {
   },
 
   async update(params, values) {
+    sendMediaMetrics(values);
+
     const res = await strapi.query('file', 'upload').update(params, values);
     strapi.eventHub.emit('media.update', { media: res });
     return res;
   },
 
   async add(values) {
+    sendMediaMetrics(values);
+
     const res = await strapi.query('file', 'upload').create(values);
     strapi.eventHub.emit('media.create', { media: res });
     return res;
@@ -335,6 +349,12 @@ module.exports = {
   },
 
   setSettings(value) {
+    if (value.responsiveDimensions === true) {
+      strapi.telemetry.send('didEnableResponsiveDimensions');
+    } else {
+      strapi.telemetry.send('didDisableResponsiveDimensions');
+    }
+
     return strapi
       .store({
         type: 'plugin',

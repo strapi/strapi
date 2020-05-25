@@ -3,30 +3,16 @@ import PropTypes from 'prop-types';
 import { IconLinks } from '@buffetjs/core';
 import { useGlobalContext, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useHistory } from 'react-router-dom';
-import { faTrash, faCog } from '@fortawesome/free-solid-svg-icons';
+
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import Text from '../../components/Text';
 import CustomRow from './CustomRow';
 import LogoContainer from './Logo';
 
-const PLUGINS_WITH_CONFIG = ['email'];
-
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
-  const { currentEnvironment, formatMessage } = useGlobalContext();
+  const { formatMessage } = useGlobalContext();
   const [isOpen, setIsOpen] = useState(false);
-  const { push } = useHistory();
   const links = [];
-
-  if (PLUGINS_WITH_CONFIG.includes(id)) {
-    links.push({
-      icon: <FontAwesomeIcon icon={faCog} />,
-      onClick: () => {
-        const settingsPath = `/plugins/${id}/configurations/${currentEnvironment}`;
-
-        push(settingsPath);
-      },
-    });
-  }
 
   const handleClickConfirm = () => {
     handleToggle();
@@ -39,7 +25,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   if (!isRequired) {
     links.push({
-      icon: <FontAwesomeIcon icon={faTrash} />,
+      icon: <FontAwesomeIcon icon={faTrashAlt} />,
       onClick: handleToggle,
     });
   }

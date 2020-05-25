@@ -5,14 +5,21 @@ import colors from '../../assets/styles/colors';
 const List = styled.ul`
   margin-bottom: 0;
   padding-left: 0;
-  max-height: 178px;
-  overflow-y: scroll;
+  max-height: 182px;
+  overflow-y: auto;
+  ::-webkit-scrollbar {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    &:hover {
+      background: transparent;
+    }
+  }
+
   li {
     position: relative;
     margin-bottom: 2px;
-    &:last-of-type {
-      margin-bottom: 0;
-    }
   }
   a {
     display: block;

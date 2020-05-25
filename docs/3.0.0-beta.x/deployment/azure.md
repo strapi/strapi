@@ -277,44 +277,34 @@ Now you should be able to access your Strapi application on the public IP of you
 
 #### 2. Modifying configurations to be more secure
 
-By default Strapi will write the previous database settings in plain text to the `/srv/strapi/mystrapiapp/config/environments/development/database.json` file, and if you plan on pushing your project into Git you will not want these to be present. Thankfully Strapi can parse environment variables in JSON files.
+By default Strapi will predefine environment variables to use with your database config.
 
-If we edit the above file using `nano` we can replace a few key settings:
+If we edit the `./config/database.js` file using `nano` we can replace a few key settings:
 
 ```bash
-nano /srv/strapi/mystrapiapp/config/environments/development/database.json
+nano /srv/strapi/mystrapiapp/config/database.js
 ```
 
 Using the following example we will remove any private information:
 
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "mysql",
-        "database": "${process.env.DB_NAME}",
-        "host": "${process.env.DB_HOST}",
-        "port": "${process.env.DB_PORT}",
-        "username": "${process.env.DB_USER}",
-        "password": "${process.env.DB_PASS}"
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'mysql',
+        database: env('DB_NAME'),
+        host: env('DB_HOST'),
+        port: env('DB_PORT'),
+        username: env('DB_USER'),
+        password: env('DB_PASS'),
       },
-      "options": {}
-    }
-  }
-}
-```
-
-This now allows us to set the private database information using environment variables. Likewise we will want to do the same for the JWT (JSON Web Token) secret key located in `/srv/strapi/mystrapiapp/extensions/users-permissions/config/jwt.json`
-
-Again using nano we will replace the secret key (do remember to take note of the generated one as we will need it later).
-
-```json
-{
-  "jwtSecret": "${process.env.JWT_SECRET}"
-}
+      options: {},
+    },
+  },
+});
 ```
 
 #### 3. Installing PM2 and running Strapi as a service
@@ -369,7 +359,7 @@ module.exports = {
       name: 'strapi-dev',
       cwd: '/srv/strapi/mystrapiapp',
       script: 'npm',
-      args: 'run develop',
+      args: 'start',
       env: {
         NODE_ENV: 'development',
         DB_HOST: 'localhost',
@@ -377,12 +367,25 @@ module.exports = {
         DB_NAME: 'strapi_dev',
         DB_USER: 'strapi',
         DB_PASS: 'mysecurepassword',
-        JWT_SECRET: '54265f24-b1e3-472a-a005-f681a905488f',
+        JWT_SECRET: 'aSecretKey',
       },
     },
   ],
 };
 ```
+
+You can also set your environment variables in a `.env` file in your project like so:
+
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=strapi_dev
+DB_USER=strapi
+DB_PASS=mysecurepassword
+JWT_SECRET=aSecretKey
+```
+
+We recommend you continue setting the `NODE_ENV` variable in the `ecosystem.config.js` file.
 
 Then use the following command to start the Strapi service:
 
