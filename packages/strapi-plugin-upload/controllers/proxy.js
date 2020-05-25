@@ -27,7 +27,7 @@ module.exports = {
         headers: _.omit(ctx.request.headers, ['origin', 'host', 'authorization']),
       });
 
-      for (var [key, value] of res.headers.entries()) {
+      for (const [key, value] of res.headers.entries()) {
         ctx.set(key, value);
       }
 
