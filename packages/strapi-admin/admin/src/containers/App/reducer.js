@@ -45,8 +45,7 @@ function appReducer(state = initialState, action) {
       });
     case GET_DATA_SUCCEEDED: {
       const {
-        hasAdminUser,
-        data: { uuid, currentEnvironment, autoReload, strapiVersion },
+        data: { hasAdmin, uuid, currentEnvironment, autoReload, strapiVersion },
       } = action;
 
       if (strapiVersion !== state.get('strapiVersion')) {
@@ -58,7 +57,7 @@ function appReducer(state = initialState, action) {
 
       return state
         .update('isLoading', () => false)
-        .update('hasAdminUser', () => hasAdminUser)
+        .update('hasAdminUser', () => hasAdmin)
         .update('uuid', () => uuid)
         .update('autoReload', () => autoReload)
         .update('currentEnvironment', () => currentEnvironment);
