@@ -1,3 +1,5 @@
+const path = require('path');
+
 const alias = [
   'object-assign',
   'whatwg-fetch',
@@ -52,5 +54,6 @@ module.exports = alias.reduce(
     'react-select/async-creatable': require.resolve('react-select/async-creatable'),
     'react-select/base': require.resolve('react-select/base'),
     'react-select/creatable': require.resolve('react-select/creatable'),
+    ee_else_ce: path.resolve(__dirname),
   }
 );
