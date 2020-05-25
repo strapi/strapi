@@ -22,8 +22,8 @@
 
     <span
       class="deprecated"
-      v-if="isAlpha">
-      Deprecated docs -
+      v-if="isBeta">
+      Beta docs -
       <router-link
         :to="$localePath"
         class="home-link"
@@ -56,7 +56,7 @@ export default {
   data () {
     return {
       linksWrapMaxWidth: null,
-      isAlpha: false
+      isBeta: false
     }
   },
   mounted () {
@@ -72,7 +72,7 @@ export default {
     }
     handleLinksWrapWidth()
     window.addEventListener('resize', handleLinksWrapWidth, false)
-    this.isAlpha = /documentation\/3.0.0-alpha.x/.test(window.location.href)
+    this.isBeta = /documentation\/3.0.0-beta.x/.test(window.location.href)
   },
   computed: {
     algolia () {
