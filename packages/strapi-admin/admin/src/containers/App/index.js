@@ -30,7 +30,7 @@ import { getDataSucceeded } from './actions';
 
 function App(props) {
   const getDataRef = useRef();
-  const [isLoading, setIsLoading] = useState(true);
+  const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
   getDataRef.current = props.getDataSucceeded;
 
   useEffect(() => {
@@ -55,6 +55,7 @@ function App(props) {
 
       try {
         const { data } = await request('/admin/init', { method: 'GET' });
+
         const { uuid } = data;
 
         if (uuid) {
@@ -74,8 +75,8 @@ function App(props) {
           }
         }
 
-        getDataRef.current(false, data);
-        setIsLoading(false);
+        getDataRef.current(data);
+        setState({ isLoading: false, hasAdmin: data.hasAdmin });
       } catch (err) {
         strapi.notification.error('app.containers.App.notification.error.init');
       }
@@ -97,7 +98,7 @@ function App(props) {
           <Switch>
             <Route
               path="/auth/:authType"
-              render={routerProps => <AuthPage {...routerProps} />}
+              render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
               exact
             />
             <PrivateRoute path="/" component={Admin} />
