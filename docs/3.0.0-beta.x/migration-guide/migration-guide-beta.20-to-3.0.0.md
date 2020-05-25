@@ -130,6 +130,75 @@ module.exports = {
 };
 ```
 
+### Final strucutre
+
+Here is an example of the strucuture you could have after migrating:
+
+**Before**
+
+```
+config
+├── application.json
+├── custom.json
+├── environments
+│   ├── development
+│   │   ├── custom.json
+│   │   ├── database.json
+│   │   ├── request.json
+│   │   ├── response.json
+│   │   ├── security.json
+│   │   └── server.json
+│   ├── production
+│   │   ├── custom.json
+│   │   ├── database.json
+│   │   ├── request.json
+│   │   ├── response.json
+│   │   ├── security.json
+│   │   └── server.json
+│   └── staging
+│       ├── custom.json
+│       ├── database.json
+│       ├── request.json
+│       ├── response.json
+│       ├── security.json
+│       └── server.json
+├── functions
+│   ├── bootstrap.js
+│   ├── cron.js
+│   └── responses
+│       └── 404.js
+├── hook.json
+├── language.json
+├── locales
+│   ├── cs_cz.json
+│   ├── de_de.json
+│   ├── en_us.json
+│   ├── es_es.json
+│   ├── fr_fr.json
+│   ├── it_it.json
+│   ├── ja_jp.json
+│   ├── ru_ru.json
+│   └── tr_tr.json
+└── middleware.json
+```
+
+**After**
+
+```
+config
+├── functions
+│   ├── bootstrap.js
+│   ├── cron.js
+│   └── responses
+│       └── 404.js
+├── env
+│   └── production
+│       └── database.js
+├── database.js
+├── middleware.js
+└── server.js
+```
+
 ## Database lifecycles
 
 We have replaced the old lifecycles that add a lot of issues with a new simpler lifecycle layer.
