@@ -16,8 +16,9 @@ import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
 import Wrapper from './Wrapper';
 import Input from '../Input';
+import ErrorMessage from './ErrorMessage';
 
-const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
+const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }) => {
   const [modal, setModal] = useState({
     isOpen: false,
     step: 'list',
@@ -31,6 +32,8 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
   const displaySlidePagination =
     attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
+  const inputId = id || name;
+  const errorId = `error-${inputId}`;
 
   useEffect(() => {
     setFileToDisplay(0);
@@ -166,6 +169,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           allowedTypes={attribute.allowedTypes}
         />
       )}
+      {error && <ErrorMessage id={errorId}>{error}</ErrorMessage>}
     </Wrapper>
   );
 };
@@ -189,3 +193,4 @@ InputMedia.defaultProps = {
 };
 
 export default InputMedia;
+
