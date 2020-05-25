@@ -22,6 +22,8 @@ import fakeData from './utils/tempData';
 import { initialState, reducer } from './reducer';
 import init from './init';
 
+// TODO use useUsersForm hooks when API is ready
+
 const EditPage = () => {
   const { settingsBaseURL } = useGlobalContext();
   const [
@@ -176,7 +178,6 @@ const EditPage = () => {
                     error={formErrors.roles}
                     value={get(modifiedData, 'roles', [])}
                   />
-                  {/* TODO fix padding for error */}
                   <BaselineAlignement top size={hasRolesError ? '0' : '17px'} />
                 </Padded>
               </Col>
