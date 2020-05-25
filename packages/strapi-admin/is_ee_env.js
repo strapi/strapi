@@ -2,6 +2,6 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const appSrc = path.join(__dirname, 'admin', 'src');
+const appAdminPath = path.join(__dirname, 'admin');
 
-module.exports = fs.existsSync(path.join(appSrc, 'ee'));
+module.exports = fs.existsSync(path.join(appAdminPath, 'ee'));

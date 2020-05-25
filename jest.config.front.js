@@ -12,8 +12,8 @@ const moduleNameMapper = {
 
 if (IS_EE) {
   const rootDirEE = [
-    '<rootDir>/packages/strapi-admin/admin/src/ee$1',
-    '<rootDir>/packages/strapi-plugin-*/admin/src/ee$1',
+    '<rootDir>/packages/strapi-admin/admin/ee$1',
+    '<rootDir>/packages/strapi-plugin-*/admin/ee$1',
   ];
 
   Object.assign(moduleNameMapper, {
