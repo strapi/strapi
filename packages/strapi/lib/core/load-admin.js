@@ -14,7 +14,7 @@ module.exports = async () => {
 
   let eeFiles = {};
   let eeConfig = {};
-  if (process.env.loadEE !== 'false') {
+  if (process.env.STRAPI_DISABLE_EE !== 'true') {
     const eeAdminPath = `${adminPath}/ee`;
     [eeFiles, eeConfig] = await Promise.all([
       loadFiles(eeAdminPath, '!(config|test)/*.*(js|json)'),

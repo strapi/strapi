@@ -65,7 +65,7 @@ const generateTestApp = async ({ appName, database }) => {
  * @param {string} options.appName - Name of the app / folder in which run the start script
  */
 const startTestApp = ({ appName }) => {
-  return execa.shell(`BROWSER=none strapi develop --no-build`, {
+  return execa.shell('BROWSER=none strapi develop --no-build', {
     stdio: 'inherit',
     cwd: path.resolve(appName),
   });

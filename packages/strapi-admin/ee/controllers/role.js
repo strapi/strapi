@@ -10,15 +10,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    let role;
-    try {
-      role = await strapi.admin.services.role.create(ctx.request.body);
-    } catch (err) {
-      if (err.message.startsWith('The name must be unique and a role with name')) {
-        return ctx.badRequest('ValidationError', { name: [err.message] });
-      }
-      throw err;
-    }
+    let role = await strapi.admin.services.role.create(ctx.request.body);
 
     const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
     ctx.created({ data: sanitizedRole });
@@ -32,20 +24,12 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    let role;
-    try {
-      role = await strapi.admin.services.role.update({ id }, ctx.request.body);
-    } catch (err) {
-      if (err.message.startsWith('The name must be unique and a role with name')) {
-        return ctx.badRequest('ValidationError', { name: [err.message] });
-      }
-      throw err;
-    }
-    const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
-
+    let role = await strapi.admin.services.role.update({ id }, ctx.request.body);
     if (!role) {
-      return ctx.notFound('role.notFound');
+      return ctx.notFound('Role not found');
     }
+
+    const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
 
     ctx.body = {
       data: sanitizedRole,
