@@ -2,9 +2,9 @@
 
 Please also refer to the following [documentation](../guides/update-version.md) for a better understanding of how to update your project
 
-## Migrating from Alpha ?
+## Migrating from Beta ?
 
-Read the [Migration guide from alpha.26 to beta](migration-guide-alpha.26-to-beta.md) first then read the [Beta migration guides](#beta-guides)
+Read the [Migration guide from beta.20+ to stable](migration-guide-beta.20-to-3.0.0.md).
 
 ## Beta guides
 
@@ -14,6 +14,7 @@ Read the [Migration guide from alpha.26 to beta](migration-guide-alpha.26-to-bet
 - [Migration guide from beta.18 to beta.19](migration-guide-beta.18-to-beta.19.md)
 - [Migration guide from beta.19+ to beta.19.4](migration-guide-beta.19-to-beta.19.4.md)
 - [Migration guide from beta.19.4+ to beta.20](migration-guide-beta.19-to-beta.20.md)
+- [Migration guide from beta.20+ to stable](migration-guide-beta.20-to-3.0.0.md)
 
 ## Alpha guides
 
