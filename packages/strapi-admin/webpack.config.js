@@ -188,17 +188,18 @@ module.exports = ({
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
         // We might need to improve this if we want to make it work with components
         const containerPathName = resource.context.split('/containers/');
+        const componentPathName = resource.context.split('/components/');
+        const wantedPath =
+          containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
+        console.log(containerPathName);
 
         if (IS_EE) {
           resource.request = resource.request.replace(
             /ee_else_ce/,
-            path.join(containerPathName[0], 'ee')
+            path.join(wantedPath[0], '..', 'ee')
           );
         } else {
-          resource.request = resource.request.replace(
-            /ee_else_ce/,
-            path.join(containerPathName[0])
-          );
+          resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath[0]));
         }
       }),
       ...webpackPlugins,
