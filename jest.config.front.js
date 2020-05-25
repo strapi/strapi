@@ -1,3 +1,26 @@
+const IS_EE = process.env.IS_EE === 'true';
+
+const moduleNameMapper = {
+  '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/test/config/front/mocks/cssModule.js',
+  '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
+    '<rootDir>/test/config/front/mocks/image.js',
+  '^ee_else_ce(/.*)$': [
+    '<rootDir>/packages/strapi-admin/admin/src$1',
+    '<rootDir>/packages/strapi-plugin-*/admin/src$1',
+  ],
+};
+
+if (IS_EE) {
+  const rootDirEE = [
+    '<rootDir>/packages/strapi-admin/admin/src/ee$1',
+    '<rootDir>/packages/strapi-plugin-*/admin/src/ee$1',
+  ];
+
+  Object.assign(moduleNameMapper, {
+    '^ee_else_ce(/.*)$': rootDirEE,
+  });
+}
+
 module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.js',
@@ -27,11 +50,7 @@ module.exports = {
     '<rootDir>/packages/strapi-admin/node_modules',
     '<rootDir>/test/config/front',
   ],
-  moduleNameMapper: {
-    '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/test/config/front/mocks/cssModule.js',
-    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
-      '<rootDir>/test/config/front/mocks/image.js',
-  },
+  moduleNameMapper,
   rootDir: process.cwd(),
   setupFiles: ['<rootDir>/test/config/front/test-bundler.js'],
   testPathIgnorePatterns: [
