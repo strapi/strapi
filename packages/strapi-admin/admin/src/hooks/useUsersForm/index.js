@@ -3,13 +3,12 @@ import { request } from 'strapi-helper-plugin';
 import { get, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
-import init from './init';
 
 const useUsersForm = (endPoint, schema, cbSuccess) => {
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
     dispatch,
-  ] = useReducer(reducer, initialState, init);
+  ] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const getData = async () => {

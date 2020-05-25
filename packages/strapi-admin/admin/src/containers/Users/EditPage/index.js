@@ -20,7 +20,6 @@ import checkFormValidity from '../../../utils/checkFormValidity';
 import form from './utils/form';
 import fakeData from './utils/tempData';
 import { initialState, reducer } from './reducer';
-import init from './init';
 
 // TODO use useUsersForm hooks when API is ready
 
@@ -29,7 +28,7 @@ const EditPage = () => {
   const [
     { formErrors, isLoading, initialData, modifiedData, showHeaderLoader },
     dispatch,
-  ] = useReducer(reducer, initialState, init);
+  ] = useReducer(reducer, initialState);
   const { formatMessage } = useIntl();
   const {
     params: { id },
@@ -46,7 +45,7 @@ const EditPage = () => {
     const getData = () => {
       return new Promise(resolve => {
         setTimeout(() => {
-          const data = id === '3' ? fakeData.withRegistrationToken : fakeData.other;
+          const data = id === '2' ? fakeData.withRegistrationToken : fakeData.other;
 
           dispatch({
             type: 'GET_DATA_SUCCEEDED',
@@ -131,21 +130,23 @@ const EditPage = () => {
       <form onSubmit={handleSubmit}>
         <ContainerFluid padding="0">
           <Header
-            // TODO: remove the content it is temporary
-            content="Waiting for the API, this text will be removed when connected to the back-end"
             isLoading={showHeaderLoader}
             initialData={initialData}
             label={headerLabel}
             modifiedData={modifiedData}
             onCancel={handleCancel}
           />
-          {hasRegistrationToken && (
+          {hasRegistrationToken ? (
             <>
-              <Padded top size="sm" />
-              <MagicLink registrationToken={initialData.registrationToken} />
+              <Padded top bottom size="sm">
+                <MagicLink registrationToken={initialData.registrationToken} />
+              </Padded>
+              <BaselineAlignement top size="1px" />
             </>
+          ) : (
+            <BaselineAlignement top size="3px" />
           )}
-          <BaselineAlignement top size={hasRegistrationToken ? '11px' : '3px'} />
+
           <FormBloc
             isLoading={isLoading}
             title={formatMessage({
@@ -165,24 +166,26 @@ const EditPage = () => {
               );
             })}
           </FormBloc>
-          <BaselineAlignement top size="32px" />
-          {!isLoading && (
-            <FormBloc
-              title={formatMessage({ id: 'app.containers.Users.EditPage.roles-bloc-title' })}
-            >
-              <Col xs="6">
-                <Padded top size="sm">
-                  <SelectRoles
-                    name="roles"
-                    onChange={handleChange}
-                    error={formErrors.roles}
-                    value={get(modifiedData, 'roles', [])}
-                  />
-                  <BaselineAlignement top size={hasRolesError ? '0' : '17px'} />
-                </Padded>
-              </Col>
-            </FormBloc>
-          )}
+          <BaselineAlignement top size="2px" />
+          <Padded top size="md">
+            {!isLoading && (
+              <FormBloc
+                title={formatMessage({ id: 'app.containers.Users.EditPage.roles-bloc-title' })}
+              >
+                <Col xs="6">
+                  <Padded top size="sm">
+                    <SelectRoles
+                      name="roles"
+                      onChange={handleChange}
+                      error={formErrors.roles}
+                      value={get(modifiedData, 'roles', [])}
+                    />
+                    <BaselineAlignement top size={hasRolesError ? '0' : '17px'} />
+                  </Padded>
+                </Col>
+              </FormBloc>
+            )}
+          </Padded>
         </ContainerFluid>
         <Padded bottom size="md" />
       </form>
