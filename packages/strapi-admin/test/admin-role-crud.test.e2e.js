@@ -2,7 +2,7 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-const edition = process.env.loadEE === 'false' ? 'CE' : 'EE';
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 let rq;
 
@@ -162,6 +162,24 @@ describe('Role CRUD End to End', () => {
           name: [
             `The name must be unique and a role with name \`${data.roles[0].name}\` already exists.`,
           ],
+        });
+      });
+      test("Cannot update a role if it doesn't exist", async () => {
+        const updates = {
+          name: "new name - Cannot update a role if it doesn't exist",
+          description: "new description - Cannot update a role if it doesn't exist",
+        };
+        const res = await rq({
+          url: '/admin/roles/1000', // id that doesn't exist
+          method: 'PUT',
+          body: updates,
+        });
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toMatchObject({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'entry.notFound',
         });
       });
     });

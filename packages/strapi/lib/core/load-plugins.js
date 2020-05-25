@@ -51,12 +51,14 @@ const loadPlugins = async ({ installedPlugins, config }) => {
       pluginPath,
       '{!(config|node_modules|test)/*.*(js|json),package.json}'
     );
-    const pluginConfig = await loadConfig(pluginPath);
 
-    const userConfig = {};
-    userConfig.config = config.get(['plugins', plugin], {});
+    const { config: pluginConfig } = await loadConfig(pluginPath);
 
-    _.set(plugins, plugin, _.merge({}, files, pluginConfig, userConfig));
+    const userConfig = config.get(['plugins', plugin], {});
+
+    const mergedConfig = _.merge(pluginConfig, userConfig);
+
+    _.set(plugins, plugin, _.assign({}, files, { config: mergedConfig }));
   }
 
   return plugins;

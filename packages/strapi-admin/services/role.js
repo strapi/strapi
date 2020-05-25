@@ -10,11 +10,11 @@ const sanitizeRole = role => {
  * @returns {Promise<role>}
  */
 const create = async attributes => {
-  const existingSameRole = await strapi.query('role', 'admin').findOne({ name: attributes.name });
-  if (existingSameRole) {
-    throw new Error(
-      `The name must be unique and a role with name \`${existingSameRole.name}\` already exists.`
-    );
+  const alreadyExists = await exists({ name: attributes.name });
+  if (alreadyExists) {
+    throw strapi.errors.badRequest('ValidationError', {
+      name: [`The name must be unique and a role with name \`${attributes.name}\` already exists.`],
+    });
   }
 
   return strapi.query('role', 'admin').create(attributes);
@@ -54,17 +54,28 @@ const findAll = () => {
  */
 const update = async (params, attributes) => {
   if (_.has(params, 'id')) {
-    const existingSameRole = await strapi
-      .query('role', 'admin')
-      .findOne({ name: attributes.name, id_ne: params.id });
-    if (existingSameRole) {
-      throw new Error(
-        `The name must be unique and a role with name \`${existingSameRole.name}\` already exists.`
-      );
+    const alreadyExists = await exists({ name: attributes.name, id_ne: params.id });
+    if (alreadyExists) {
+      throw strapi.errors.badRequest('ValidationError', {
+        name: [
+          `The name must be unique and a role with name \`${attributes.name}\` already exists.`,
+        ],
+      });
     }
   }
 
   return strapi.query('role', 'admin').update(params, attributes);
+};
+
+/**
+ * Check if a role exists in database
+ * @param params query params to find the role
+ * @returns {Promise<boolean>}
+ */
+const exists = async params => {
+  const foundCount = await strapi.query('role', 'admin').count(params);
+
+  return foundCount > 0;
 };
 
 module.exports = {
@@ -74,4 +85,5 @@ module.exports = {
   find,
   findAll,
   update,
+  exists,
 };

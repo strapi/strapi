@@ -7,10 +7,10 @@ describe('Role', () => {
   describe('create', () => {
     test('Creates a role', async () => {
       const dbCreate = jest.fn(role => Promise.resolve(role));
-      const dbFindOne = jest.fn(() => Promise.resolve(undefined));
+      const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query: () => ({ create: dbCreate, findOne: dbFindOne }),
+        query: () => ({ create: dbCreate, count: dbCount }),
       };
 
       const input = { name: 'super_admin', description: "Have all permissions. Can't be delete" };
@@ -95,10 +95,10 @@ describe('Role', () => {
         description: 'AAA_updated',
       };
       const dbUpdate = jest.fn(() => Promise.resolve(expectedUpdatedRole));
-      const dbFindOne = jest.fn(() => Promise.resolve(undefined));
+      const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query: () => ({ update: dbUpdate, findOne: dbFindOne }),
+        query: () => ({ update: dbUpdate, count: dbCount }),
       };
 
       const updatedRole = await roleService.update(
