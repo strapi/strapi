@@ -213,10 +213,17 @@ class Strapi {
       // Is the project initialised?
       const isInitialised = await utils.isInitialised(this);
 
-      if (!isInitialised) {
-        this.logFirstStartupMessage();
-      } else {
-        this.logStartupMessage();
+      // Should the startup message be displayed?
+      const showStartupMessage = process.env.SHOW_STARTUP_MESSAGE
+        ? process.env.SHOW_STARTUP_MESSAGE === 'true' || process.env.SHOW_STARTUP_MESSAGE === true
+        : true;
+
+      if (showStartupMessage) {
+        if (!isInitialised) {
+          this.logFirstStartupMessage();
+        } else {
+          this.logStartupMessage();
+        }
       }
 
       // Emit started event.
