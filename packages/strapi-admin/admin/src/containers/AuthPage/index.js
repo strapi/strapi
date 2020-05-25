@@ -3,6 +3,7 @@ import axios from 'axios';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from 'strapi-helper-plugin';
+import PropTypes from 'prop-types';
 import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
@@ -13,14 +14,18 @@ import { forms } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
-const AuthPage = () => {
+const AuthPage = ({ hasAdmin }) => {
   const { push } = useHistory();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
   const registrationToken = query.get('registrationToken');
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, schema } = get(forms, authType, {});
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema } = get(
+    forms,
+    authType,
+    {}
+  );
   const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
     reducer,
     initialState,
@@ -75,11 +80,6 @@ const AuthPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authType]);
 
-  // We should redirect to the login page or the oops page
-  if (!forms[authType]) {
-    return <div>COMING SOON</div>;
-  }
-
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -106,7 +106,7 @@ const AuthPage = () => {
         await loginRequest(body, requestURL);
       }
 
-      if (authType === 'register') {
+      if (authType === 'register' || authType === 'register-admin') {
         await registerRequest(body, requestURL);
       }
     }
@@ -169,10 +169,19 @@ const AuthPage = () => {
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
 
-      if (authType.includes('register') && modifiedData.userInfo.news === true) {
+      if (
+        (authType === 'register' && modifiedData.userInfo.news === true) ||
+        (authType === 'register-admin' && modifiedData.news === true)
+      ) {
         axios({
           method: 'POST',
-          body: omit(modifiedData, ['userInfo.password', 'userInfo.confirmPassword']),
+          url: 'https://analytics.strapi.io/register',
+          data: omit(modifiedData, [
+            'userInfo.password',
+            'userInfo.confirmPassword',
+            'password',
+            'confirmPassword',
+          ]),
         });
       }
       // Redirect to the homePage
@@ -190,8 +199,17 @@ const AuthPage = () => {
     }
   };
 
-  // Redirect the user to the homepage if he is logged in
+  // Redirect the user to the login page if the endpoint does not exist
+  if (!forms[authType]) {
+    return <Redirect to="/" />;
+  }
 
+  // Redirect the user to the register-admin if it is the first user
+  if (!hasAdmin && authType !== 'register-admin') {
+    return <Redirect to="/auth/register-admin" />;
+  }
+
+  // Redirect the user to the homepage if he is logged in
   if (auth.getToken()) {
     return <Redirect to="/" />;
   }
@@ -206,6 +224,7 @@ const AuthPage = () => {
         <Component
           fieldsToDisable={fieldsToDisable}
           formErrors={formErrors}
+          inputsPrefix={inputsPrefix}
           modifiedData={modifiedData}
           onChange={handleChange}
           onSubmit={handleSubmit}
@@ -214,6 +233,14 @@ const AuthPage = () => {
       </BaselineAlignment>
     </>
   );
+};
+
+AuthPage.defaultProps = {
+  hasAdmin: false,
+};
+
+AuthPage.propTypes = {
+  hasAdmin: PropTypes.bool,
 };
 
 export default AuthPage;

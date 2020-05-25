@@ -18,6 +18,7 @@ import Span from './Span';
 const Register = ({
   fieldsToDisable,
   formErrors,
+  inputsPrefix,
   modifiedData,
   onChange,
   onSubmit,
@@ -56,62 +57,60 @@ const Register = ({
               <InputWrapper>
                 <Input
                   autoFocus
-                  error={formErrors['userInfo.firstname']}
+                  error={formErrors[`${inputsPrefix}firstname`]}
                   label="Auth.form.firstname.label"
-                  name="userInfo.firstname"
+                  name={`${inputsPrefix}firstname`}
                   onChange={onChange}
                   placeholder="Auth.form.firstname.placeholder"
                   type="text"
                   validations={{ required: true }}
-                  value={get(modifiedData, 'userInfo.firstname', '')}
+                  value={get(modifiedData, `${inputsPrefix}firstname`, '')}
                 />
                 <Input
-                  autoFocus
-                  error={formErrors['userInfo.lastname']}
+                  error={formErrors[`${inputsPrefix}lastname`]}
                   label="Auth.form.lastname.label"
-                  name="userInfo.lastname"
+                  name={`${inputsPrefix}lastname`}
                   onChange={onChange}
                   placeholder="Auth.form.lastname.placeholder"
                   type="text"
                   validations={{ required: true }}
-                  value={get(modifiedData, 'userInfo.lastname', '')}
+                  value={get(modifiedData, `${inputsPrefix}lastname`, '')}
                 />
               </InputWrapper>
               <Input
-                autoFocus
-                error={formErrors['userInfo.email']}
+                error={formErrors[`${inputsPrefix}email`]}
                 disabled={fieldsToDisable.includes('email')}
                 label="Auth.form.email.label"
-                name="userInfo.email"
+                name={`${inputsPrefix}email`}
                 onChange={onChange}
                 placeholder="Auth.form.email.placeholder"
                 type="email"
                 validations={{ required: true }}
-                value={get(modifiedData, 'userInfo.email', '')}
+                value={get(modifiedData, `${inputsPrefix}email`, '')}
               />
               <Input
-                error={formErrors['userInfo.password']}
+                error={formErrors[`${inputsPrefix}password`]}
                 label="Auth.form.password.label"
-                name="userInfo.password"
+                name={`${inputsPrefix}password`}
                 onChange={onChange}
                 type="password"
                 validations={{ required: true }}
-                value={get(modifiedData, 'userInfo.password', '')}
+                value={get(modifiedData, `${inputsPrefix}password`, '')}
               />
               <Input
-                error={formErrors['userInfo.confirmPassword']}
+                error={formErrors[`${inputsPrefix}confirmPassword`]}
                 label="Auth.form.password.label"
-                name="userInfo.confirmPassword"
+                name={`${inputsPrefix}confirmPassword`}
                 onChange={onChange}
                 type="password"
                 validations={{ required: true }}
-                value={get(modifiedData, 'userInfo.confirmPassword', '')}
+                value={get(modifiedData, `${inputsPrefix}confirmPassword`, '')}
               />
               <Flex alignItems="flex-start">
                 <Checkbox
-                  name="userInfo.news"
+                  name={`${inputsPrefix}news`}
                   onChange={onChange}
-                  value={get(modifiedData, 'userInfo.news', false)}
+                  value={get(modifiedData, `${inputsPrefix}news`, false)}
                 />
                 <Padded left size="xs" />
                 <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
@@ -140,6 +139,7 @@ const Register = ({
 
 Register.defaultProps = {
   fieldsToDisable: [],
+  inputsPrefix: '',
   onSubmit: e => e.preventDefault(),
   requestError: null,
 };
@@ -147,6 +147,7 @@ Register.defaultProps = {
 Register.propTypes = {
   fieldsToDisable: PropTypes.array,
   formErrors: PropTypes.object.isRequired,
+  inputsPrefix: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,

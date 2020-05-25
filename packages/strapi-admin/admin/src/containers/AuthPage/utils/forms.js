@@ -20,6 +20,7 @@ const forms = {
       password: yup.string().required(translatedErrors.required),
       rememberMe: yup.bool().nullable(),
     }),
+    inputsPrefix: '',
   },
   oops: {
     Component: Oops,
@@ -27,6 +28,7 @@ const forms = {
     fieldsToDisable: [],
     fieldsToOmit: [],
     schema: null,
+    inputsPrefix: '',
   },
   register: {
     Component: Register,
@@ -52,6 +54,30 @@ const forms = {
       }),
       registrationToken: yup.string().required(translatedErrors.required),
     }),
+    inputsPrefix: 'userInfo.',
+  },
+  'register-admin': {
+    Component: Register,
+    endPoint: 'register-admin',
+    fieldsToDisable: [],
+    fieldsToOmit: ['confirmPassword', 'news'],
+    schema: yup.object().shape({
+      firstname: yup.string().required(translatedErrors.required),
+      lastname: yup.string().required(translatedErrors.required),
+      password: yup
+        .string()
+        .min(8, translatedErrors.minLength)
+        .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
+        .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
+        .matches(/\d/, 'components.Input.error.contain.number')
+        .required(translatedErrors.required),
+      confirmPassword: yup
+        .string()
+        .min(8, translatedErrors.minLength)
+        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
+        .required(translatedErrors.required),
+    }),
+    inputsPrefix: '',
   },
 };
 
