@@ -211,6 +211,8 @@ Email plugin settings have been moved to files. Now you can configure your email
 
 You can read the documentation [here](../plugins/email.md#configure-the-plugin) to update.
 
+Once you have setup your configuration, you can cleanup your database by deleting in the `core_store` model the data with the `key` equal to `plugin_email_provider`.
+
 ## GraphQL changes
 
 If you are using the graphql `register` mutation, the input and response types have changed. You can check the code [here](https://github.com/strapi/strapi/pull/6047).
