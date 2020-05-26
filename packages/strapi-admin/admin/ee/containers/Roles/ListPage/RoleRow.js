@@ -17,7 +17,6 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
       selectedRoles={selectedRoles}
       prefix={
         <Checkbox
-          disabled={false}
           value={selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1}
           onClick={handleRoleSelection}
           name="role-checkbox"

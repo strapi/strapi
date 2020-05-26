@@ -6,11 +6,11 @@ import { Plus } from '@buffetjs/icons';
 import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { RoleListWrapper } from '../../../../src/components/Roles';
+import useRolesList from '../../../../src/hooks/useRolesList';
 import RoleRow from './RoleRow';
 import BaselineAlignment from './BaselineAlignment';
 import reducer, { initialState } from './reducer';
-import { RoleListWrapper } from '../../../../src/components/Roles';
-import useRoleList from '../../../../src/hooks/useRoleList';
 
 const RoleListPage = () => {
   const { settingsBaseURL } = useGlobalContext();
@@ -18,7 +18,7 @@ const RoleListPage = () => {
   const { push } = useHistory();
   const [reducerState] = useReducer(reducer, initialState);
   const { selectedRoles } = reducerState;
-  const { roles, isLoading } = useRoleList();
+  const { roles, isLoading } = useRolesList();
 
   const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
   const handleDuplicateRole = () => console.log('duplicate');
