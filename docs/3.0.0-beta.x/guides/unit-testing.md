@@ -37,7 +37,7 @@ add `test` command to `scripts` section
     "start": "strapi start",
     "build": "strapi build",
     "strapi": "strapi",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --forceExit --detectOpenHandles"
   },
 ```
 
@@ -49,7 +49,8 @@ and add those line at the bottom of file
       "/node_modules/",
       ".tmp",
       ".cache"
-    ]
+    ],
+    "testEnvironment": "node"
   }
 ```
 
@@ -113,8 +114,7 @@ async function setupStrapi() {
     /** the follwing code in copied from `./node_modules/strapi/lib/Strapi.js` */
     await Strapi().load();
     instance = strapi; // strapi is global now
-    await instance.runBootstrapFunctions(); // run all bootstrap functions
-    instance.app
+    await instance.app
       .use(instance.router.routes()) // populate KOA routes
       .use(instance.router.allowedMethods()); // populate KOA methods
 
@@ -143,10 +143,14 @@ beforeAll(async (done) => {
 
 /** this code is called once before all the tested are finished */
 afterAll(async (done) => {
+  const dbSettings = strapi.config.get('database.connections.default.settings');
+
   //delete test database after all tests
-  const tmpDbFile = `${__dirname}/../${strapi.config.currentEnvironment.database.connections.default.settings.filename}`;
-  if (fs.existsSync(tmpDbFile)) {
-    fs.unlinkSync(tmpDbFile);
+  if (dbSettings && dbSettings.filename) {
+    const tmpDbFile = `${__dirname}/../${dbSettings.filename}`;
+    if (fs.existsSync(tmpDbFile)) {
+      fs.unlinkSync(tmpDbFile);
+    }
   }
   done();
 });
