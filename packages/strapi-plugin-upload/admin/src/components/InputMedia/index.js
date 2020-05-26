@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 
 import { getTrad, formatFileForEditing } from '../../utils';
@@ -107,7 +107,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }
   };
 
   return (
-    <Wrapper>
+    <Wrapper hasError={!isEmpty(error)}>
       <Name htmlFor={name}>{`${label}${displaySlidePagination}`}</Name>
 
       <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
@@ -195,4 +195,3 @@ InputMedia.defaultProps = {
 };
 
 export default InputMedia;
-

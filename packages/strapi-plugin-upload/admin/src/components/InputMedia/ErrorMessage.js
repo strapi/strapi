@@ -4,7 +4,8 @@ import { colors } from '@buffetjs/styles';
 
 const ErrorMessage = styled.p`
   font-size: 1.3rem !important;
-  padding-top: 10px;
+  padding-top: 5px;
+  margin: 0;
   color: ${colors.darkOrange};
 `;
 
