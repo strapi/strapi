@@ -38,7 +38,7 @@ module.exports = {
 };
 ```
 
-Make sure the enabled cron config is set to true in `./config/server.js` file.
+Make sure the enabled cron config is set to true in `./config/environments/**/server.json` file.
 
 ::: tip
 Please note that Strapi's built in CRON feature will not work if you plan to use `pm2` or node based clustering. You will need to execute these CRON tasks outside of Strapi.

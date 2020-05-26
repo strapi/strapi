@@ -488,10 +488,11 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
-              type: 'date',
+              type: data.type || 'date',
               value: null,
               withDefaultValue: false,
-              disabled: data.type !== 'date',
+              disabled: !data.type,
+              autoFocus: false,
             },
           ]);
         } else if (type === 'richtext') {
@@ -500,6 +501,7 @@ const forms = {
           const uidItems = [
             [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
             [fields.divider],
+            [fields.private],
             [fields.required],
           ];
 

@@ -90,29 +90,30 @@ Additional guides for optional software additions that compliment or improve the
 
 ### 1. Configure
 
-We always recommend you use environment variables to configure your application based on the environment. Here is an example:
+Update the `production` settings with the IP or domain name where the project will be running.
 
-**Path —** `./config/server.js`.
+**Path —** `./config/environments/production/server.json`.
 
 ```js
-module.exports = ({ env }) => ({
-  host: env('APP_HOST', '0.0.0.0'),
-  port: env.int('NODE_PORT', 1337),
-});
+{
+  "host": "0.0.0.0", // IP, localhost, or 0.0.0.0
+  "port": 1337
+}
 ```
 
-Then you can create a `.env` file or directly use the deployment platform you use to set environment variables:
+In case your database is not running on the same server, make sure that the environment of your production
+database (`./config/environments/production/database.json`) is set properly.
 
-**Path —** `.env`.
+If you are passing a number of configuration item values via environment variables, which is always encouraged for production environment, read the section for [Dynamic Configuration](../concepts/configurations.md#dynamic-configurations). Here is an example:
 
+**Path —** `./config/environments/production/server.json`.
+
+```js
+{
+  "host": "${process.env.APP_HOST || '0.0.0.0'}",
+  "port": "${process.env.NODE_PORT || 1337}"
+}
 ```
-APP_HOST=10.0.0.1
-NODE_PORT=1338
-```
-
-::: tip
-To learn more about configuration you can read the documentation [here](../concepts/configurations.md)
-:::
 
 ### 2. Launch the server
 
