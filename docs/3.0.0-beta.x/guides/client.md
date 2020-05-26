@@ -42,18 +42,17 @@ module.exports = strapi => {
 };
 ```
 
-When the hook is created, we have set it to `enabled` in order for Strapi to laod it. You will need to create or edit the file `./config/hook.js`.
+When the hook is created, we have to enable it to say to Strapi to use this hook.
 
-**Path —** `./config/hook.js`
+**Path —** `./config/hook.json`
 
-```js
-module.exports = {
-  settings: {
-    github: {
-      enabled: true,
-    },
-  },
-};
+```json
+{
+  ...
+  "github": {
+    "enabled": true
+  }
+}
 ```
 
 Now you can start your application, you should see a log `my hook is loaded` in your terminal.
@@ -63,23 +62,16 @@ Now you can start your application, you should see a log `my hook is loaded` in 
 First lets update the config file to add your [GitHub token](https://github.com/settings/tokens).
 By following the [documentation](https://octokit.github.io/rest.js/#authentication) you will also find the way to use GitHub applications.
 
-**Path —** `./config/hook.js`
+**Path —** `./config/hook.json`
 
-```js
-module.exports = {
-  settings: {
-    github: {
-      enabled: true,
-      token: process.env.GITHUB_TOKEN,
-    },
-  },
-};
-```
-
-**Path -** `.env`
-
-```
-GITHUB_TOKEN=bf78d4fc3c1767019870476d6d7cc8961383d80f
+```json
+{
+  ...
+  "github": {
+    "enabled": true,
+    "token": "bf78d4fc3c1767019870476d6d7cc8961383d80f"
+  }
+}
 ```
 
 Now we have to load the GitHub client.
@@ -92,10 +84,10 @@ const GitHubAPI = require('@octokit/rest');
 module.exports = strapi => {
   return {
     async initialize() {
-      const { token } = strapi.config.get('hook.settings.github');
+      const { token } = strapi.config.hook.github;
 
       strapi.services.github = new GitHubAPI({
-        userAgent: `${strapi.config.get('info.name')} v${strapi.config.get('info.version')}`,
+        userAgent: `${strapi.config.info.name} v${strapi.config.info.version}`,
         auth: `token ${token}`,
       });
     },
@@ -119,3 +111,43 @@ module.exports = async () => {
 ```
 
 Restart your server and you should see your GitHub profile data.
+
+## Configs by environment
+
+You would probably want specific configurations for development and production environment.
+
+To do so, we will update some configurations.
+
+You have to move your `github` configs from `./config/hook.json` to `./config/environments/development.json`, then remove it from the `hook.json` file.
+
+And in your GitHub hook, you will have to replace `strapi.config.hook.github` by `strapi.config.currentEnvironment.github` to access to the configs.
+
+**Path —** `./config/environments/development.json`
+
+```json
+{
+  "github": {
+    "enabled": true,
+    "token": "806506ab855a94e8608148315eeb39a44c29aee1"
+  }
+}
+```
+
+**Path —** `./hooks/github/index.js`
+
+```js
+const GitHubAPI = require('@octokit/rest');
+
+module.exports = strapi => {
+  return {
+    async initialize() {
+      const { token } = strapi.config.currentEnvironment.github;
+
+      strapi.services.github = new GitHubAPI({
+        userAgent: `${strapi.config.info.name} v${strapi.config.info.version}`,
+        auth: `token ${token}`,
+      });
+    },
+  };
+};
+```

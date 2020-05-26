@@ -12,7 +12,7 @@ Update your package.json accordingly:
 
 ```json
 {
-  // ...
+  //...
   "dependencies": {
     "strapi": "3.0.0-beta.20",
     "strapi-admin": "3.0.0-beta.20",
@@ -135,7 +135,7 @@ This script will create a models.json file at the root of your project that look
 
 ### Create migration script
 
-You then need to create the mongo shell script to run to migrate your data structure. First create a `migration.js` file with the following code:
+You then need to create the mongo shell script to run to migrate your data strucutre. First create a `migration.js` file with the following code:
 
 ```js
 var models = {
