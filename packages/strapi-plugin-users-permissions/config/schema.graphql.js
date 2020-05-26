@@ -53,8 +53,8 @@ module.exports = {
       user: UsersPermissionsMe!
     }
 
-    type ForgotPassword {
-      ok: Boolean
+    type UserPersmissionsPasswordPayload {
+      ok: Boolean!
     }
   `,
   query: `
@@ -63,8 +63,8 @@ module.exports = {
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
     register(input: UsersPermissionsRegisterInput!): UsersPermissionsLoginPayload!
-    forgotPassword(email: String!): ForgotPassword
-    changePassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
+    forgotPassword(email: String!): UserPersmissionsPasswordPayload
+    resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,
   resolver: {
@@ -235,13 +235,13 @@ module.exports = {
           };
         },
       },
-      changePassword: {
-        description: 'Change your password based on a code',
-        resolverOf: 'plugins::users-permissions.auth.changePassword',
+      resetPassword: {
+        description: 'Reset user password. Confirm with a code (resetToken from forgotPassword)',
+        resolverOf: 'plugins::users-permissions.auth.resetPassword',
         resolver: async (obj, options, { context }) => {
           context.request.body = _.toPlainObject(options);
 
-          await strapi.plugins['users-permissions'].controllers.auth.changePassword(context);
+          await strapi.plugins['users-permissions'].controllers.auth.resetPassword(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);

@@ -11,8 +11,6 @@ import { Button, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
-const PLUGINS_WITH_CONFIG = ['email'];
-
 /* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {
   state = {
@@ -92,13 +90,7 @@ class PluginCard extends React.Component {
       ? 'app.components.PluginCard.Button.label.install'
       : 'app.components.PluginCard.Button.label.download';
 
-    // Display settings link for a selection of plugins.
-    const settingsComponent = PLUGINS_WITH_CONFIG.includes(this.props.plugin.id) && (
-      <div className="settings" onClick={this.handleClickSettings}>
-        <FontAwesomeIcon icon="cog" />
-        <FormattedMessage id="app.components.PluginCard.settings" />
-      </div>
-    );
+    const settingsComponent = null;
 
     const descriptions = {
       short:
