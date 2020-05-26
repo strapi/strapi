@@ -10,11 +10,11 @@ module.exports = {
       const url = new URL(ctx.query.url);
 
       if (!['http:', 'https:'].includes(url.protocol)) {
-        throw new Error('Invalid URL');
+        throw new Error('Unexpected url protocol');
       }
 
       if (!isValidDomain(url.hostname)) {
-        throw new Error('Invalid URL');
+        throw new Error('Invalid url hostname');
       }
     } catch (err) {
       ctx.status = 400;
@@ -27,9 +27,9 @@ module.exports = {
         headers: _.omit(ctx.request.headers, ['origin', 'host', 'authorization']),
       });
 
-      Object.entries(res.headers.raw()).forEach(([key, value]) => {
+      for (const [key, value] of res.headers.entries()) {
         ctx.set(key, value);
-      });
+      }
 
       ctx.status = res.status;
       ctx.body = res.body;

@@ -100,10 +100,10 @@ module.exports = {
       entity = await strapi.services.comment.create(ctx.request.body);
     }
 
-    entity = sanitizeEntity(entity, { model: strapi.models.comment });
+    entry = sanitizeEntity(entity, { model: strapi.models.comment });
 
     // check if the comment content contains a bad word
-    if (entity.content !== filter.clean(entity.content)) {
+    if (entry.content !== filter.clean(entry.content)) {
 
       // send an email by using the email plugin
       await strapi.plugins['email'].services.email.send({
@@ -111,15 +111,15 @@ module.exports = {
         from: 'admin@strapi.io'
         subject: 'Comment posted that contains a bad words',
         text: `
-          The comment #${entity.id} contain a bad words.
+          The comment #${entry.id} contain a bad words.
 
           Comment:
-          ${entity.content}
+          ${entry.content}
         `,
       });
     }
 
-    return entity;
+    return entry;
   },
 };
 ```

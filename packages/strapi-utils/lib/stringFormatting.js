@@ -2,7 +2,7 @@
 
 const slugify = require('@sindresorhus/slugify');
 
-const nameToSlug = name => slugify(name, { separator: '-' });
+const nameToSlug = (name, options = { separator: '-' }) => slugify(name, options);
 
 const nameToCollectionName = name => slugify(name, { separator: '_' });
 

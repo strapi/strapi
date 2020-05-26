@@ -4,7 +4,7 @@ Strapi gives you the option to choose the most appropriate database for your pro
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
 ::: tip
-Deploying **Strapi** itself is covered in the [Deployment Guide](../getting-started/deployment.md).
+Deploying **Strapi** itself is covered in the [Deployment Guide](deployment.md).
 :::
 
 ## SQLite Installation
@@ -309,33 +309,27 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
 Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.
 :::
 
-#### 5. Update and replace your existing `/database.js` config file for the appropriate environment (development | production).
+#### 5. Update and replace your existing `/database.json` config file for the appropriate environment (development | production).
 
 Replace the contents of `/database.json` with the following and replace **< password >** with the password of the user of your database you created earlier:
 
-`Path: ./config/database.js`.
+`Path: ./config/environments/(development|production)/database.json`.
 
-```js
-module.exports = ({ env }) => ({
-  defaultConnection: 'default',
-  connections: {
-    default: {
-      connector: 'mongoose',
-      settings: {
-        uri: env('DATABASE_URI'),
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "mongoose",
+      "settings": {
+        "uri": "mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority"
       },
-      options: {
-        ssl: true,
-      },
-    },
-  },
-});
-```
-
-`Path: .env`
-
-```
-DATABASE_URI=mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority
+      "options": {
+        "ssl": true
+      }
+    }
+  }
+}
 ```
 
 ::: warning NOTE
@@ -346,7 +340,7 @@ The above configuration will create a database called `strapi`, the _default dat
 :::
 
 ::: danger WARNING
-We recommend replacing sensitive (eg. "URI string" above) information in your database configuration files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [configurations](../concepts/configurations.md).
+We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](../concepts/configurations.md#dynamic-configurations).
 
 :::
 

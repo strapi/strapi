@@ -1,0 +1,285 @@
+# Front-end Development
+
+Strapi's admin panel and plugins system aim to be an easy and powerful way to create new features.
+
+The admin panel is a [React](https://facebook.github.io/react/) application which can embed other React applications. These other React applications are the `admin` parts of each Strapi's plugins.
+
+## Environment setup
+
+To enable local plugin development, you need to start your application with the front-end development mode activated:
+
+```bash
+$ cd my-app
+$ yarn develop --watch-admin
+```
+
+## API
+
+### Strapi global variable
+
+The administration exposes a global variable that is accessible for all the plugins.
+
+#### `strapi.backendURL`
+
+Retrieve the back-end URL. (e.g. `http://localhost:1337`).
+
+#### `strapi.currentLanguage`
+
+Retrieve the administration panel default language (e.g. `en-US`)
+
+#### `strapi.languages`
+
+Array of the administration panel's supported languages. (e.g. `['ar', 'en', 'fr', ...]`).
+
+#### `strapi.lockApp()`
+
+Display a loader that will prevent the user from interacting with the application.
+
+#### `strapi.unlockApp()`
+
+Remove the loader so the user can interact with the application
+
+#### `strapi.notification`
+
+Display a notification (works with i18n message id). Use this command anywhere in your code.
+
+```js
+strapi.notification.error('app.notification.error');
+strapi.notification.info('app.notification.info');
+strapi.notification.success('app.notification.success');
+strapi.notification.warning('app.notification.warning');
+```
+
+#### `strapi.remoteURL`
+
+The administration url (e.g. `http://localhost:4000/admin`).
+
+### Main plugin object
+
+Each plugin exports all its configurations in an object. This object is located in `my-plugin/admin/src/index.js`
+
+Here are its properties:
+
+| key                       | type    | Description                                                                                                                                                                                                             |
+| ------------------------- | ------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| blockerComponent          | node    | Props can be either `null` or React node (e.g. `() => <div />`)                                                                                                                                                         |
+| blockerComponentProps     | object  | Props to provide to customise the [blockerComponent](https://github.com/strapi/strapi/blob/58588e10e5d15921b0966e20ce1bc6cde70df5cc/packages/strapi-helper-plugin/lib/src/components/BlockerComponent/index.js#L81-L86) |
+| description               | string  | Plugin's description retrieved from the package.json                                                                                                                                                                    |
+| id                        | string  | Id of the plugin from the `package.json`                                                                                                                                                                                |
+| initializer               | node    | Refer to the [Initializer documentation](#initializer)                                                                                                                                                                  |
+| injectedComponents        | array   | Refer to the [Injected Component documentation](#injected-components)                                                                                                                                                   |
+| isReady                   | boolean | The app will load until this proprety is true                                                                                                                                                                           |
+| leftMenuLinks             | array   | Array of links to inject in the menu                                                                                                                                                                                    |
+| mainComponent             | node    | The plugin's App container, setting it to null will prevent the plugin from being displayed in the menu                                                                                                                 |
+| name                      | string  | The plugin's name retrieved from the package.json                                                                                                                                                                       |
+| pluginLogo                | file    | The plugin's logo                                                                                                                                                                                                       |
+| preventComponentRendering | boolean | Whether or not display the plugin's blockerComponent instead of the main component                                                                                                                                      |
+| settings                  | object  | Refer to the [Plugins settings API](./frontend-settings-api.md)                                                                                                                                                         |
+| reducers                  | object  | The plugin's redux reducers                                                                                                                                                                                             |
+| trads                     | object  | The plugin's translation files                                                                                                                                                                                          |
+
+### Initializer
+
+The component is generated by default when you create a new plugin. Use this component to execute some logic when the app is loading. When the logic has been executed this component should emit the `isReady` event so the user can interact with the application.
+
+:::note
+Below is the Initializer component of the content-type-builder plugin.
+
+It checks whether or not the autoreload feature is enabled and depending on this value changes the mainComponent of the plugin.
+:::
+
+```js
+/**
+ *
+ * Initializer
+ *
+ */
+
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import pluginId from '../../pluginId';
+
+class Initializer extends React.PureComponent {
+  // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    const {
+      admin: { autoReload, currentEnvironment },
+    } = this.props;
+
+    let preventComponentRendering;
+    let blockerComponentProps;
+
+    if (currentEnvironment === 'production') {
+      preventComponentRendering = true;
+      blockerComponentProps = {
+        blockerComponentTitle: 'components.ProductionBlocker.header',
+        blockerComponentDescription: 'components.ProductionBlocker.description',
+        blockerComponentIcon: 'fa-ban',
+        blockerComponentContent: 'renderButton',
+      };
+    } else {
+      // Don't render the plugin if the server autoReload is disabled
+      preventComponentRendering = !autoReload;
+      blockerComponentProps = {
+        blockerComponentTitle: 'components.AutoReloadBlocker.header',
+        blockerComponentDescription: 'components.AutoReloadBlocker.description',
+        blockerComponentIcon: 'fa-refresh',
+        blockerComponentContent: 'renderIde',
+      };
+    }
+
+    // Prevent the plugin from being rendered if currentEnvironment === PRODUCTION
+    this.props.updatePlugin(pluginId, 'preventComponentRendering', preventComponentRendering);
+    this.props.updatePlugin(pluginId, 'blockerComponentProps', blockerComponentProps);
+    // Emit the event plugin ready
+    this.props.updatePlugin(pluginId, 'isReady', true);
+  }
+
+  render() {
+    return null;
+  }
+}
+
+Initializer.propTypes = {
+  admin: PropTypes.object.isRequired,
+  updatePlugin: PropTypes.func.isRequired,
+};
+
+export default Initializer;
+```
+
+### Injected Components
+
+(Coming soon)
+
+### Routing
+
+The routing is based on the [React Router V5](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/index.js` file.
+
+::: tip
+Each route defined in a plugin must be prefixed by the plugin's id.
+:::
+
+**Route declaration :**
+
+Let's say that you want to create a route `/user` with params `/:id` associated with the container UserPage.
+
+The declaration would be as follows :
+
+**Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
+
+```js
+import React from 'react';
+import pluginId from '../../pluginId';
+
+import UserPage from '../UserPage';
+
+// ...
+
+class App extends React.Component {
+  // ...
+
+  render() {
+    return (
+      <div>
+        <Switch>
+          <Route exact path={`/plugins/${pluginId}/user/:id`} component={UserPage} />
+        </Switch>
+      </div>
+    );
+  }
+}
+
+// ...
+```
+
+### Styling
+
+The administration panel uses [styled-components](https://styled-components.com/) for writing css.
+
+### i18n
+
+[React Intl](https://github.com/yahoo/react-intl) provides React components and an API to format dates, numbers, and strings, including pluralization and handling translations.
+
+**Usage**
+
+We recommend to set all your components text inside the translations folder.
+
+The example below shows how to use i18n inside your plugin.
+
+**Define all your ids with the associated message:**
+
+**Path —** `./plugins/my-plugin/admin/src/translations/en.json`.
+
+```json
+{
+  "notification.error.message": "An error occurred"
+}
+```
+
+**Path —** `./plugins/my-plugin/admin/src/translations/fr.json`
+
+```json
+{
+  "notification.error.message": "Une erreur est survenue"
+}
+```
+
+**Usage inside a component**
+
+**Path —** `./plugins/my-plugin/admin/src/components/Foo/index.js`.
+
+```js
+import { FormattedMessage } from 'react-intl';
+import SomeOtherComponent from 'components/SomeOtherComponent';
+
+const Foo = props => (
+  <div className={styles.foo}>
+    <FormattedMessage id="my-plugin.notification.error.message" />
+    <SomeOtherComponent {...props} />
+  </div>
+);
+
+export default Foo;
+```
+
+See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage.
+
+### Global context
+
+All plugins are wrapped inside the `GlobalContextProvider`, in this object you will have access to all plugins object as well as other utilities.
+
+Usage:
+
+**Inside a functional component:**
+
+```js
+import React from 'react';
+import { useGlobalContext } from 'strapi-helper-plugin';
+
+const Foo = () => {
+  const globalContext = useGlobalContext();
+
+  console.log(globalContext);
+
+  return <div>Foo</div>;
+};
+```
+
+**Inside a class component:**
+
+```js
+import React from 'react';
+import { GlobalContext } from 'strapi-helper-plugin';
+
+class Foo extends React.Component {
+  static contextType = GlobalContext;
+
+  render() {
+    console.log(this.context);
+
+    return <div>Foo</div>;
+  }
+}
+```

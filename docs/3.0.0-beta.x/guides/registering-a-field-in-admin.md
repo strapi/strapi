@@ -10,122 +10,31 @@ For this example, we will see how to change the WYSIWYG with [CKEditor](https://
 
 1. Create a new project:
 
-:::: tabs
-
-::: tab yarn
-
-```
+```bash
 # Create an application using SQLite and prevent the server from starting automatically as we will create a plugin
 # right after the project generation
 yarn create strapi-app my-app --quickstart --no-run
 ```
 
-:::
-
-::: tab npx
-
-```
-# Create an application using SQLite and prevent the server from starting automatically as we will create a plugin
-# right after the project generation
-npx create-strapi-app my-app --quickstart --no-run
-```
-
-:::
-
-::::
-
 2. Generate a plugin:
 
-:::: tabs
-
-::: tab yarn
-
+```bash
+yarn run strapi generate:plugin wysiwyg
 ```
-cd my-app
-yarn strapi generate:plugin wysiwyg
-```
-
-:::
-
-::: tab npm
-
-```
-cd my-app
-npm run strapi generate:plugin wysiwyg
-```
-
-:::
-
-::: tab strapi
-
-```
-cd my-app
-strapi generate:plugin wysiwyg
-```
-
-:::
-
-::::
 
 3. Install the needed dependencies:
 
-:::: tabs
-
-::: tab yarn
-
-```
-cd plugins/wysiwyg
+```bash
+cd my-app/plugins/wysiwyg
 yarn add @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic
 ```
 
-:::
-
-::: tab npm
-
-```
-cd plugins/wysiwyg
-npm install @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic
-```
-
-:::
-
-::::
-
 4. Start your application with the front-end development mode:
 
-:::: tabs
-
-::: tab yarn
-
-```
-# Go back to to strapi root folder
-cd ../..
+```bash
+cd my-app
 yarn develop --watch-admin
 ```
-
-:::
-
-::: tab npm
-
-```
-# Go back to to strapi root folder
-cd ../..
-npm run develop --watch-admin
-```
-
-:::
-
-::: tab strapi
-
-```
-# Go back to to strapi root folder
-cd ../..
-strapi develop --watch-admin
-```
-
-:::
-
-::::
 
 Once this step is over all we need to do is to create our new WYSIWYG which will replace the default one in the **Content Manager** plugin.
 
@@ -385,10 +294,7 @@ At this point we have simply created a new plugin which is mounted in our projec
 
 ### Registering a our new Field
 
-Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. 
-In order to do so, we will simply **modify** the front-end entry point of our plugin.
-
-This file is already present. Please replace the content of this file wit the following:
+Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. In order to do so, we will simply modify the front-end entry point of our plugin:
 
 **Path —** `./plugins/wysiwyg/admin/src/index.js`
 
@@ -424,39 +330,5 @@ export default strapi => {
   return strapi.registerPlugin(plugin);
 };
 ```
-
-Finally you will have to rebuild strapi so the new plugin is loaded correctly
-
-:::: tabs
-
-::: tab yarn
-
-```
-yarn build
-```
-
-:::
-
-::: tab npm
-
-```
-npm run build
-```
-
-:::
-
-::: tab strapi
-
-```
-strapi build
-```
-
-:::
-
-::::
-
-::: tip
-If the plugin still doesn't show up, you should probably empty the `.cache` folder too.
-:::
 
 And VOILA, if you create a new `collectionType` or a `singleType` with a `richtext` field you will see the implementation of [CKEditor](https://ckeditor.com/ckeditor-5/) instead of the default WYSIWYG.

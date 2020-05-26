@@ -199,7 +199,7 @@ module.exports = {
     }
   },
 
-  async changePassword(ctx) {
+  async resetPassword(ctx) {
     const { password, passwordConfirmation, code } = {
       ...ctx.request.body,
       ...ctx.params,

@@ -172,27 +172,52 @@ yarn add pg
 
 [Google App Engine requires](https://cloud.google.com/sql/docs/postgres/connect-app-engine) to connect to the database using the unix socket path, not an IP and port.
 
-Edit `database.js`, and use the socket path as `host`.
+Edit `database.json`, and use the socket path as `host`.
 
-`Path: ./config/env/production/database.js`.
+```
+config/environments/production/database.json
+```
 
-```js
-module.exports = ({ env }) => ({
-  defaultConnection: 'default',
-  connections: {
-    default: {
-      connector: 'bookshelf',
-      settings: {
-        client: 'postgres',
-        host: `/cloudsql/${env('INSTANCE_CONNECTION_NAME')}`,
-        database: env('DATABASE_NAME'),
-        username: env('DATABASE_USERNAME'),
-        password: env('DATABASE_PASSWORD'),
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "bookshelf",
+      "settings": {
+        "client": "postgres",
+        "host": "/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}",
+        "database": "${process.env.DATABASE_NAME}",
+        "username": "${process.env.DATABASE_USERNAME}",
+        "password": "${process.env.DATABASE_PASSWORD}"
       },
-      options: {},
-    },
+      "options": {}
+    }
+  }
+}
+```
+
+Edit `server.json` to pick up the deployed hostname from the `HOST` variable in `app.yaml`.
+
+```
+config/environments/production/server.json
+```
+
+```json
+{
+  "host": "${process.env.HOST}",
+  "port": "${process.env.PORT || 1337}",
+  "production": true,
+  "proxy": {
+    "enabled": false
   },
-});
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "autoOpen": false
+  }
+}
 ```
 
 ### Auto-build after deploy
@@ -243,28 +268,19 @@ Create a Google service account key.
 
 Save the JSON credentials file.
 
-Open the JSON credentials file, copy all the content and set an environment variable named as `GCS_SERVICE_ACCOUNT`
+Plugins > File Upload > Settings > Production tab
 
-Create a settings.json file in below path
+By default `localhost` is selected. Select the `Google Cloud Storage` plugin.
 
-```
-./extensions/upload/config/settings.json
-```
+Copy the JSON key and set the regions.
 
-Paste in the code below, replace `###YOUR BUCKET NAME###` with your bucket name such as `myapi-123456.appspot.com`
+Open the `Cloud Console > Storage > Browser` menu.
 
-```
-{
-  "provider": "google-cloud-storage",
-  "providerOptions": {
-    "serviceAccount": "${process.env.GCS_SERVICE_ACCOUNT}",
-    "bucketName": "###YOUR BUCKET NAME###",
-    "baseUrl": "https://storage.googleapis.com/###YOUR BUCKET NAME###"
-  }
-}
-```
+Copy the bucket name to the plugin settings, the default is the app ID, such as `myapi-123456.appspot.com`.
 
 (Note that the `Access control` setting of the bucket has to be `Fine-grained`, which is the default.)
+
+Click `Save`, and it's ready to go!
 
 ### Post-setup configuration
 
@@ -272,18 +288,20 @@ Paste in the code below, replace `###YOUR BUCKET NAME###` with your bucket name 
 
 CORS is enabled by default, allowing `*` origin. You may want to limit the allowed origins.
 
-Read the documentation [here](../concepts/middlewares.md)
+```
+config/environments/production/security.json
+```
 
 **Changing the admin url**
 
 ```
-config/env/production/server.js
+config/environments/production/server.json
 ```
 
-```js
-module.exports = {
-  admin: {
-    path: '/dashboard',
-  },
-};
+```json
+{
+  "admin": {
+    "path": "/dashboard"
+  }
+}
 ```

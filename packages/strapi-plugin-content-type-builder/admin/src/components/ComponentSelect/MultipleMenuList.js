@@ -172,7 +172,7 @@ const MultipleMenuList = ({
           return (
             <li key={categoryName} className="li-multi-menu">
               <div style={{ marginTop: 3 }}>
-                <CheckboxWrapper>
+                <CheckboxWrapper style={{ display: 'flex' }}>
                   <Label
                     htmlFor="overrideReactSelectBehavior"
                     onClick={() => {
@@ -190,7 +190,6 @@ const MultipleMenuList = ({
                   </Label>
                   <div
                     style={{
-                      display: 'flex',
                       width: '150px',
                       textAlign: 'right',
                       flexGrow: 2,
