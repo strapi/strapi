@@ -310,22 +310,20 @@ or
 $ yarn add strapi-provider-upload-aws-s3
 ```
 
-To enable the provider, create or edit the file at `./config/plugins.js`
+To enable the provider, create or edit the file at `./extensions/upload/config/settings.json`
 
-```js
-module.exports = ({ env }) => ({
-  upload: {
-    provider: 'aws-s3'
-    providerOptions: {
-      accessKeyId: env('AWS_ACCESS_KEY_ID')',
-      secretAccessKey: env('AWS_ACCESS_SECRET'),
-      region: 'aws-region',
-      params: {
-        Bucket: 'my-bucket',
-      },
-    },
+```json
+{
+  "provider": "aws-s3",
+  "providerOptions": {
+    "accessKeyId": "dev-key",
+    "secretAccessKey": "dev-secret",
+    "region": "aws-region",
+    "params": {
+      "Bucket": "my-bucket"
+    }
   }
-});
+}
 ```
 
 Make sure to read the provider's `README` to know what are the possible parameters.
@@ -334,7 +332,23 @@ Make sure to read the provider's `README` to know what are the possible paramete
 
 When configuring your upload provider you might want to change the configuration based on the `NODE_ENV` environment variable or use environment specific credentials.
 
-You can set a specific configuration in the `./config/env/{env}/plugins.js` configuration file and it will be used to overwrite the one in the default configuration.
+You can do so using a `settings.js` file:
+
+```js
+if (process.env.NODE_ENV === 'production') {
+  module.exports = {
+    provider: 'providerName',
+    providerOptions: {
+      cloud_name: process.env.PROVIDER_CLOUD_NAME,
+      api_key: process.env.PROVIDER_API_KEY,
+      api_secret: process.env.PROVIDER_API_SECRET,
+    },
+  };
+} else {
+  // to use the default local provider you can return an empty configuration
+  module.exports = {};
+}
+```
 
 ## Create providers
 

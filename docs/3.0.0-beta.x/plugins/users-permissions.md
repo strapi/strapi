@@ -74,26 +74,6 @@ axios
   });
 ```
 
-### JWT configuration
-
-You can configure option for the JWT generation by creating `extensions/users-permissions/config/security.json` file.
-We are using [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) to generate the JWT.
-
-Available options:
-
-- `expiresIn`: expressed in seconds or a string describing a time span zeit/ms.<br>
-  Eg: 60, "2 days", "10h", "7d". A numeric value is interpreted as a seconds count. If you use a string be sure you provide the time units (days, hours, etc), otherwise milliseconds unit is used by default ("120" is equal to "120ms").
-
-**Path —** `extensions/users-permissions/config/security.json`
-
-```json
-{
-  "jwt": {
-    "expiresIn": "1d"
-  }
-}
-```
-
 ### Registration
 
 Creates a new user in the database with a default role as 'registered'.
@@ -277,7 +257,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 226437944084-o2mojv5i4lfnng9q8kq3jkf5v03avemk.apps.googleusercontent.com
-- **Client Secret**: aiTbMoiuJQflSBy6uQrfgsni
+- **Client ID**: aiTbMoiuJQflSBy6uQrfgsni
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/google`
 
 :::
@@ -510,15 +490,14 @@ axios
   });
 ```
 
-This action will send the user an email that contains a URL with the needed code for the [reset password](#reset-password).
+This action will send the user an email that contains a URL with the needed code for the [reset password](#password-reset).
 The URL must link to your reset password form in your frontend application.
 
 To configure it you will have to go in the Roles & Permissions settings and navigate to the Advanced Settings tab.
 
-### Reset Password
+### Password reset
 
 This action will reset the user password.
-Also works with the [GraphQL Plugin](https://strapi.io/documentation/3.0.0-beta.x/plugins/graphql.html), exposes `resetPassword` mutation.
 
 #### Usage
 
@@ -536,15 +515,13 @@ axios
   })
   .then(response => {
     // Handle success.
-    console.log("Your user's password has been reset.");
+    console.log("Your user's password has been changed.");
   })
   .catch(error => {
     // Handle error.
     console.log('An error occurred:', error.response);
   });
 ```
-
-
 
 ### Email validation
 
@@ -765,18 +742,8 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 
 ## Security configuration
 
-JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a _secret_ is required. By default Strapi generates one that is stored in `./extensions/users-permissions/config/jwt.js`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production.
+JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a _secret_ is required. By default Strapi generates one that is stored in `./your-app/extensions/users-permissions/config/jwt.json`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production. It is also possible to modify `jwt.json` file to accept `JWT_TOKEN` automatically by doing following ([docs](https://strapi.io/documentation/3.0.0-beta.x/concepts/configurations.html#dynamic-configurations)).
 
-By default you can set a `JWT_SECRET` environment variable and it will be used as secret. If you want to use another variable you can update the configuration file.
-
-**Path -** `./extensions/users-permissions/config/jwt.js`.
-
-```js
-module.exports = {
-  jwtSecret: process.env.SOME_ENV_VAR,
-};
 ```
-
-::: tip
-You can learn more on configuration in the documentation [here](../concepts/configurations.md)
-:::
+  "jwtSecret": "${process.env.JWT_SECRET}"
+```

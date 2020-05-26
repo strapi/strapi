@@ -125,7 +125,7 @@ module.exports = async (ctx, next) => {
 
 The policy `isAdmin` located in `./api/restaurant/config/policies/isAdmin.js` will be executed before the `find` action in the `Restaurant.js` controller.
 
-### Using a policy outside its api
+### Using a policy outside it's api
 
 To use a policy in another api you can reference it with the following syntax: `{apiName}.{policyName}`.
 

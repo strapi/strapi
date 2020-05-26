@@ -27,9 +27,9 @@ module.exports = {
         headers: _.omit(ctx.request.headers, ['origin', 'host', 'authorization']),
       });
 
-      Object.entries(res.headers.raw()).forEach(([key, value]) => {
+      for (const [key, value] of res.headers.entries()) {
         ctx.set(key, value);
-      });
+      }
 
       ctx.status = res.status;
       ctx.body = res.body;

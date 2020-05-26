@@ -300,7 +300,11 @@ module.exports = {
 
           const model = getModel(details.model || details.collection, details.plugin);
 
-          _.set(acc, attribute, newIds);
+          if (!Array.isArray(newValue)) {
+            _.set(acc, attribute, newIds[0]);
+          } else {
+            _.set(acc, attribute, newIds);
+          }
 
           const addPromise = Promise.all(
             toAdd.map(id => {

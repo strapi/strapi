@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { cloneDeep, get, isArray, isEmpty } from 'lodash';
+import { cloneDeep, findIndex, get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -41,6 +41,22 @@ function SelectWrapper({
   const { signal } = abortController;
   const ref = useRef();
   const startRef = useRef();
+
+  const filteredOptions = useMemo(() => {
+    return options.filter(option => {
+      if (!isEmpty(value)) {
+        // SelectMany
+        if (Array.isArray(value)) {
+          return findIndex(value, o => o.id === option.value.id) === -1;
+        }
+
+        // SelectOne
+        return get(value, 'id', '') !== option.value.id;
+      }
+
+      return true;
+    });
+  }, [options, value]);
 
   startRef.current = state._start;
 
@@ -193,7 +209,7 @@ function SelectWrapper({
         move={moveRelation}
         name={name}
         nextSearch={nextSearch}
-        options={options}
+        options={filteredOptions}
         onChange={value => {
           onChange({ target: { name, value: value ? value.value : value } });
         }}
