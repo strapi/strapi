@@ -1,16 +1,17 @@
 import { useEffect, useReducer } from 'react';
 import { request } from 'strapi-helper-plugin';
+import { get } from 'lodash';
 
 import reducer, { initialState } from './reducer';
 
-const useRoleList = () => {
+const useRolesList = () => {
   const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    fetchRoleList();
+    fetchRolesList();
   }, []);
 
-  const fetchRoleList = async () => {
+  const fetchRolesList = async () => {
     try {
       const { data } = await request('/admin/roles', { method: 'GET' });
 
@@ -19,11 +20,16 @@ const useRoleList = () => {
         data,
       });
     } catch (err) {
-      console.error(err.response);
+      const message = get(err, ['response', 'payload', 'message'], 'An error occured');
+
+      strapi.notification.error(message);
+      dispatch({
+        type: 'GET_DATA_ERROR',
+      });
     }
   };
 
   return { roles, isLoading };
 };
 
-export default useRoleList;
+export default useRolesList;

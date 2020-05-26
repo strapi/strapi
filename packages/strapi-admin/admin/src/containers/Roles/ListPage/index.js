@@ -1,15 +1,15 @@
 import React from 'react';
 import { List, Header } from '@buffetjs/custom';
-import { useGlobalContext } from 'strapi-helper-plugin';
 import { Pencil } from '@buffetjs/icons';
+import { useIntl } from 'react-intl';
 
 import { RoleListWrapper, RoleRow } from '../../../components/Roles';
 import BaselineAlignment from './BaselineAlignment';
-import useRoleList from '../../../hooks/useRoleList';
+import useRolesList from '../../../hooks/useRolesList';
 
 const RoleListPage = () => {
-  const { formatMessage } = useGlobalContext();
-  const { roles, isLoading } = useRoleList();
+  const { formatMessage } = useIntl();
+  const { roles, isLoading } = useRolesList();
 
   return (
     <>

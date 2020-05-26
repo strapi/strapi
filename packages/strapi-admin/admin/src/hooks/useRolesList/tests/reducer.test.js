@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
+describe('ADMIN | HOOKS | USEROLESLIST | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -8,6 +8,24 @@ describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
       };
 
       expect(reducer(state, {})).toEqual(state);
+    });
+  });
+
+  describe('GET_DATA_ERROR', () => {
+    it('should set isLoading to false is an error occured', () => {
+      const action = {
+        type: 'GET_DATA_ERROR',
+      };
+      const initialState = {
+        roles: [],
+        isLoading: true,
+      };
+      const expected = {
+        roles: [],
+        isLoading: false,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
     });
   });
 
@@ -25,7 +43,7 @@ describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
       };
       const initialState = {
         roles: [],
-        selectedRoles: [],
+        isLoading: true,
       };
       const expected = {
         roles: [
@@ -35,7 +53,7 @@ describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
             description: 'This is the super admin role',
           },
         ],
-        selectedRoles: [],
+        isLoading: false,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

@@ -14,6 +14,10 @@ const reducer = (state, action) =>
         draftState.isLoading = false;
         break;
       }
+      case 'GET_DATA_ERROR': {
+        draftState.isLoading = false;
+        break;
+      }
       default:
         return draftState;
     }
