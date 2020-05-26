@@ -10,7 +10,7 @@ const SortListItem = styled.li`
     background-color: ${({ theme }) => theme.main.colors.mediumGrey};
   }
   ${({ isActive, theme }) =>
-    isActive &&
+  isActive &&
     `
     background-color: ${theme.main.colors.mediumGrey};
   `}

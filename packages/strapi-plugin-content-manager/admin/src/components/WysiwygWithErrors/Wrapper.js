@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding-bottom: 2.4rem;
+  padding-bottom: 2.8rem;
   font-size: 1.3rem;
-  font-family: 'Lato'; 
+  font-family: 'Lato';
   label {
     display: block;
     margin-bottom: 1rem;
@@ -14,7 +14,7 @@ const Wrapper = styled.div`
     }
   }
   > div + p {
-    width 100%;
+    width: 100%;
     padding-top: 12px;
     font-size: 1.2rem;
     line-height: normal;

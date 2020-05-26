@@ -3,15 +3,13 @@ import styled, { css } from 'styled-components';
 const Button = styled.button`
   width: 100%;
   height: 37px;
-  margin-bottom: 21px;
+  margin-bottom: 25px;
   padding: 0 0 3px 0;
   text-align: center;
   border: 1px solid rgba(227, 233, 243, 0.75);
   border-top: 1px solid
     ${({ doesPreviousFieldContainErrorsAndIsClosed }) =>
-      doesPreviousFieldContainErrorsAndIsClosed
-        ? '#FFA784'
-        : 'rgba(227, 233, 243, 0.75)'};
+      doesPreviousFieldContainErrorsAndIsClosed ? '#FFA784' : 'rgba(227, 233, 243, 0.75)'};
 
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;

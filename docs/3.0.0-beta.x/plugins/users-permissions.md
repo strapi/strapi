@@ -70,7 +70,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -99,7 +99,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -128,7 +128,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -486,7 +486,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -519,7 +519,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -545,7 +545,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.err('An error occured:', err);
+    console.error('An error occured:', error.response);
   });
 ```
 
@@ -711,6 +711,10 @@ Add the language translation in `packages/strapi-plugin-users-permissions/admin/
 ```
 
 These two change will set up the popup message that appears in the UI. That's it, now you should be able to use your new provider.
+
+### Rebuild the Admin Panel
+
+Please see the following [documentation](../admin-panel/customization.md#build) on rebuilding the admin panel.
 
 ## Templating emails
 

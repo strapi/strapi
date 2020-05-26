@@ -211,7 +211,7 @@ Strapi currently supports `Node.js v12.x.x`. The following steps will install No
 
 ```bash
 cd ~
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 ...
 sudo apt-get install nodejs
 ...

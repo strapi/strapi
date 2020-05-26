@@ -22,7 +22,7 @@ const ComponentButton = styled.button`
     display: flex;
     margin: auto;
     svg {
-      margin auto;
+      margin: auto;
       width: 11px;
       height: 11px;
     }

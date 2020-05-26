@@ -36,7 +36,7 @@ import {
   toggleModalDelete,
   toggleModalDeleteAll,
 } from './actions';
-import reducer from './reducer';
+
 import makeSelectListView from './selectors';
 import getRequestUrl from '../../utils/getRequestUrl';
 
@@ -47,6 +47,7 @@ function ListView({
   data,
   emitEvent,
   entriesToDelete,
+  isLoading,
   location: { pathname, search },
   getDataSucceeded,
   layouts,
@@ -65,8 +66,6 @@ function ListView({
   showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
-  strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
-
   const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const getDataRef = useRef();
@@ -350,7 +349,7 @@ function ListView({
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && <Header {...headerProps} />}
+          {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading} />}
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
@@ -405,6 +404,7 @@ function ListView({
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
+                  showLoader={isLoading}
                 />
                 <Footer />
               </div>
@@ -450,6 +450,7 @@ ListView.propTypes = {
   data: PropTypes.array.isRequired,
   emitEvent: PropTypes.func.isRequired,
   entriesToDelete: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   layouts: PropTypes.object,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,

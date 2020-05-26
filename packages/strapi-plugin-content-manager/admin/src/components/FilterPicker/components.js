@@ -37,8 +37,7 @@ const Flex = styled.div`
 
 const Div = styled.div`
   width: calc(100% + 60px);
-  margin: ${props =>
-    props.show ? '-100px -30px 30px' : `-${props.number}px -30px 103px`};
+  margin: ${props => (props.show ? '-100px -30px 30px' : `-${props.number}px -30px 103px`)};
   background: #fff;
   box-shadow: 3px 2px 4px #e3e9f3;
   padding: 18px 30px 0px 30px;

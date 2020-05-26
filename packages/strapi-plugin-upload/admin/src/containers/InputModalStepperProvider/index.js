@@ -34,7 +34,7 @@ const InputModalStepperProvider = ({
   step,
 }) => {
   const [formErrors, setFormErrors] = useState(null);
-  const { plugins } = useGlobalContext();
+  const { emitEvent, plugins } = useGlobalContext();
   const [, updated_at] = getFileModelTimestamps(plugins);
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
@@ -68,6 +68,11 @@ const InputModalStepperProvider = ({
 
   const downloadFiles = async () => {
     const files = getFilesToDownload(filesToUpload);
+
+    // Emit event when the users download files from url
+    if (files.length > 0) {
+      emitEvent('didSelectFile', { source: 'url', location: 'content-manager' });
+    }
 
     try {
       await Promise.all(
@@ -263,6 +268,9 @@ const InputModalStepperProvider = ({
   };
 
   const handleSetCropResult = blob => {
+    // Emit event : the user cropped a file that is not uploaded
+    emitEvent('didCropFile', { duplicatedFile: null, location: 'content-manager' });
+
     dispatch({
       type: 'SET_CROP_RESULT',
       blob,
@@ -352,6 +360,8 @@ const InputModalStepperProvider = ({
   };
 
   const addFilesToUpload = ({ target: { value } }) => {
+    emitEvent('didSelectFile', { source: 'computer', location: 'content-manager' });
+
     dispatch({
       type: 'ADD_FILES_TO_UPLOAD',
       filesToUpload: value,

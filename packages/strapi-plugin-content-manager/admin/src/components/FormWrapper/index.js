@@ -5,13 +5,12 @@ const FormWrapper = styled.div`
   background: #ffffff;
   border-radius: 2px;
   box-shadow: 0 2px 4px #e3e9f3;
-  margin-bottom: 3px;
+  margin-bottom: 17px;
   > div {
     margin-right: 0;
     margin-left: 0;
   }
   .row {
-    margin-bottom: 4px;
     &:last-of-type {
       margin-bottom: 0;
     }

@@ -51,12 +51,8 @@ const Wrapper = styled.div`
     > div {
       position: relative;
       z-index: 0;
-      margin-bottom: 4px;
       &:nth-of-type(3) {
         z-index: 1;
-      }
-      &:nth-of-type(4) {
-        margin-bottom: 0;
       }
     }
   }

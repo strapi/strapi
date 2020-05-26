@@ -9,6 +9,34 @@ const request = require('request');
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
+const DEFAULT_PERMISSIONS = [
+  { action: 'admincallback', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'adminregister', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'callback', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'connect', controller: 'auth', type: 'users-permissions', roleType: null },
+  { action: 'forgotpassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'register', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  {
+    action: 'emailconfirmation',
+    controller: 'auth',
+    type: 'users-permissions',
+    roleType: 'public',
+  },
+  { action: 'changepassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'init', controller: 'userspermissions', type: null, roleType: null },
+  { action: 'me', controller: 'user', type: 'users-permissions', roleType: null },
+  { action: 'autoreload', controller: null, type: null, roleType: null },
+];
+
+const isPermissionEnabled = (permission, role) =>
+  DEFAULT_PERMISSIONS.some(
+    defaultPerm =>
+      (defaultPerm.action === null || permission.action === defaultPerm.action) &&
+      (defaultPerm.controller === null || permission.controller === defaultPerm.controller) &&
+      (defaultPerm.type === null || permission.type === defaultPerm.type) &&
+      (defaultPerm.roleType === null || role.type === defaultPerm.roleType)
+  );
+
 module.exports = {
   async createRole(params) {
     if (!params.type) {
@@ -228,16 +256,17 @@ module.exports = {
   },
 
   async updatePermissions() {
-    // fetch all the current permissions from the database, and format them into an array of actions.
-    const databasePermissions = await strapi
+    const { primaryKey } = strapi.query('permission', 'users-permissions');
+    const roles = await strapi.query('role', 'users-permissions').find({}, []);
+    const rolesMap = roles.reduce((map, role) => ({ ...map, [role[primaryKey]]: role }), {});
+
+    const dbPermissions = await strapi
       .query('permission', 'users-permissions')
       .find({ _limit: -1 });
-
-    const actionsMap = databasePermissions.reduce((acc, permission) => {
-      acc[`${permission.type}.${permission.controller}.${permission.action}`] = permission.id;
-      return acc;
-    }, {});
-    const stringActions = Object.keys(actionsMap);
+    let permissionsFoundInDB = dbPermissions.map(
+      p => `${p.type}.${p.controller}.${p.action}.${p.role[primaryKey]}`
+    );
+    permissionsFoundInDB = _.uniq(permissionsFoundInDB);
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
@@ -265,169 +294,69 @@ module.exports = {
       return acc;
     }, []);
 
-    // Merge array into one.
-    const currentActions = appActions.concat(pluginsActions);
-    // Count permissions available.
-    const permissions = databasePermissions.length;
+    const actionsFoundInFiles = appActions.concat(pluginsActions);
+
+    // create permissions for each role
+    let permissionsFoundInFiles = actionsFoundInFiles.reduce(
+      (acc, action) => [...acc, ...roles.map(role => `${action}.${role[primaryKey]}`)],
+      []
+    );
+    permissionsFoundInFiles = _.uniq(permissionsFoundInFiles);
 
     // Compare to know if actions have been added or removed from controllers.
-    if (!_.isEqual(stringActions, currentActions) || permissions < 1) {
+    if (!_.isEqual(permissionsFoundInDB.sort(), permissionsFoundInFiles.sort())) {
       const splitted = str => {
-        const [type, controller, action] = str.split('.');
+        const [type, controller, action, roleId] = str.split('.');
 
-        return { type, controller, action };
+        return { type, controller, action, roleId };
       };
 
-      const defaultPolicy = (obj, role) => {
-        const isAdminCallback =
-          obj.action === 'admincallback' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isAdminRegister =
-          obj.action === 'adminregister' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isCallback =
-          obj.action === 'callback' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isConnect =
-          obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
-        const isPassword =
-          obj.action === 'forgotpassword' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isRegister =
-          obj.action === 'register' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isConfirmation =
-          obj.action === 'emailconfirmation' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isNewPassword =
-          obj.action === 'changepassword' &&
-          obj.controller === 'auth' &&
-          obj.type === 'users-permissions' &&
-          role.type === 'public';
-        const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
-        const isMe =
-          obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
-        const isReload = obj.action === 'autoreload';
-        const enabled =
-          isCallback ||
-          isRegister ||
-          isInit ||
-          isPassword ||
-          isNewPassword ||
-          isMe ||
-          isReload ||
-          isConnect ||
-          isConfirmation ||
-          isAdminCallback ||
-          isAdminRegister;
-
-        return Object.assign(obj, { enabled, policy: '' });
-      };
-
-      // Retrieve roles
-      const roles = await strapi.query('role', 'users-permissions').find({}, []);
-
-      // We have to know the difference to add or remove
-      // the permissions entries in the database.
-      const toRemove = _.difference(stringActions, currentActions).map(splitted);
-
-      const toAdd = (permissions < 1
-        ? currentActions
-        : _.difference(currentActions, stringActions)
-      ).map(splitted);
+      // We have to know the difference to add or remove the permissions entries in the database.
+      const toRemove = _.difference(permissionsFoundInDB, permissionsFoundInFiles).map(splitted);
+      const toAdd = _.difference(permissionsFoundInFiles, permissionsFoundInDB).map(splitted);
 
       const query = strapi.query('permission', 'users-permissions');
 
-      const createActions = role =>
-        Promise.all(
-          toAdd.map(action => {
-            const data = {
-              ...defaultPolicy(action, role),
-              role: role.id,
-            };
-
-            return query.create(data);
-          })
-        );
-
       // Execute request to update entries in database for each role.
       await Promise.all([
-        Promise.all(roles.map(createActions)),
-        Promise.all(toRemove.map(action => query.delete(action))),
+        Promise.all(
+          toAdd.map(permission =>
+            query.create({
+              type: permission.type,
+              controller: permission.controller,
+              action: permission.action,
+              enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
+              policy: '',
+              role: permission.roleId,
+            })
+          )
+        ),
+        Promise.all(
+          toRemove.map(permission => {
+            const { type, controller, action, roleId: role } = permission;
+            return query.delete({ type, controller, action, role });
+          })
+        ),
       ]);
     }
-  },
-
-  async removeDuplicate() {
-    const { primaryKey } = strapi.query('permission', 'users-permissions');
-
-    // Retrieve permissions by creation date (ID or ObjectID).
-    const permissions = await strapi
-      .query('permission', 'users-permissions')
-      .find({ _sort: `${primaryKey}`, _limit: -1 });
-
-    const value = permissions.reduce(
-      (acc, permission) => {
-        const key = `${permission.type}.controllers.${permission.controller}.${permission.action}.${permission.role[primaryKey]}`;
-
-        const index = acc.toKeep.findIndex(element => element === key);
-
-        if (index === -1) {
-          acc.toKeep.push(key);
-        } else {
-          acc.toRemove.push(permission[primaryKey]);
-        }
-
-        return acc;
-      },
-      {
-        toKeep: [],
-        toRemove: [],
-      }
-    );
-
-    if (value.toRemove.length > 0) {
-      return strapi.query('permission', 'users-permissions').delete({
-        [`${primaryKey}_in`]: value.toRemove,
-      });
-    }
-    return Promise.resolve();
   },
 
   async initialize() {
     const roleCount = await strapi.query('role', 'users-permissions').count();
 
-    // It has already been initialized.
-    if (roleCount > 0) {
-      await this.updatePermissions();
-      await this.removeDuplicate();
-      return;
+    if (roleCount === 0) {
+      await strapi.query('role', 'users-permissions').create({
+        name: 'Authenticated',
+        description: 'Default role given to authenticated user.',
+        type: 'authenticated',
+      });
+
+      await strapi.query('role', 'users-permissions').create({
+        name: 'Public',
+        description: 'Default role given to unauthenticated user.',
+        type: 'public',
+      });
     }
-
-    // Create two first default roles.
-    await strapi.query('role', 'users-permissions').create({
-      name: 'Authenticated',
-      description: 'Default role given to authenticated user.',
-      type: 'authenticated',
-    });
-
-    await strapi.query('role', 'users-permissions').create({
-      name: 'Public',
-      description: 'Default role given to unauthenticated user.',
-      type: 'public',
-    });
 
     return this.updatePermissions();
   },

@@ -9,7 +9,6 @@ import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
 import { NAME_REGEX, ENUM_REGEX, CATEGORY_NAME_REGEX } from './attributesRegexes';
-import RESERVED_NAMES from './reservedNames';
 
 /* eslint-disable indent */
 /* eslint-disable prefer-arrow-callback */
@@ -30,7 +29,7 @@ yup.addMethod(yup.string, 'unique', function(
     }
 
     return !alreadyTakenAttributes.includes(
-      typeof validator === 'function' ? validator(string, category) : string
+      typeof validator === 'function' ? validator(string, category) : string.toLowerCase()
     );
   });
 });
@@ -43,13 +42,13 @@ yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   });
 });
 
-yup.addMethod(yup.string, 'isAllowed', function(message) {
+yup.addMethod(yup.string, 'isAllowed', function(message, reservedNames) {
   return this.test('isAllowed', message, function(string) {
     if (!string) {
       return false;
     }
 
-    return !RESERVED_NAMES.includes(toLower(trim(string)));
+    return !reservedNames.includes(toLower(trim(string)));
   });
 });
 
@@ -92,7 +91,8 @@ const forms = {
       isEditing,
       attributeToEditName,
       initialData,
-      alreadyTakenTargetContentTypeAttributes
+      alreadyTakenTargetContentTypeAttributes,
+      reservedNames
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
@@ -125,6 +125,7 @@ const forms = {
           .string()
           .unique(errorsTrads.unique, alreadyTakenAttributes)
           .matches(NAME_REGEX, errorsTrads.regex)
+          .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes)
           .required(errorsTrads.required),
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
@@ -487,10 +488,11 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
-              type: 'date',
+              type: data.type || 'date',
               value: null,
               withDefaultValue: false,
-              disabled: data.type !== 'date',
+              disabled: !data.type,
+              autoFocus: false,
             },
           ]);
         } else if (type === 'richtext') {
@@ -499,6 +501,7 @@ const forms = {
           const uidItems = [
             [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
             [fields.divider],
+            [fields.private],
             [fields.required],
           ];
 
@@ -804,7 +807,7 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid) {
+    schema(alreadyTakenNames, isEditing, ctUid, reservedNames) {
       const takenNames = isEditing
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
@@ -813,7 +816,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createUid)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
           .required(errorsTrads.required),
         collectionName: yup.string(),
         kind: yup.string().oneOf(['singleType', 'collectionType']),
@@ -902,7 +905,13 @@ const forms = {
     },
   },
   component: {
-    schema(alreadyTakenAttributes, componentCategory, isEditing = false, compoUid = null) {
+    schema(
+      alreadyTakenAttributes,
+      componentCategory,
+      reservedNames,
+      isEditing = false,
+      compoUid = null
+    ) {
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;
@@ -911,7 +920,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createComponentUid, componentCategory)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
           .required(errorsTrads.required),
         category: yup
           .string()

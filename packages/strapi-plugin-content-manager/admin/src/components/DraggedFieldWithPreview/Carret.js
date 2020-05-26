@@ -5,13 +5,13 @@ const Carret = styled.div`
   ${({ right }) => {
     if (right) {
       return `
-        right: -4px;
-      `;
+      right: -4px;
+    `;
     }
 
     return `
-      left: -1px;
-    `;
+    left: -1px;
+  `;
   }}
   height: 100%;
   width: 2px;
