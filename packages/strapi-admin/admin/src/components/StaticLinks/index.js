@@ -17,11 +17,6 @@ function StaticLinks() {
       label: 'documentation',
       destination: 'https://strapi.io/documentation',
     },
-    {
-      icon: 'question-circle',
-      label: 'help',
-      destination: 'https://strapi.io/help',
-    },
   ];
 
   return (

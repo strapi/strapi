@@ -174,8 +174,8 @@ module.exports = {
       });
     }
   },
-
-  async changePassword(ctx) {
+  
+  async resetPassword(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.params);
 
     if (

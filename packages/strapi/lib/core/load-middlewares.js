@@ -17,18 +17,16 @@ module.exports = async function(strapi) {
 
   const loaders = createLoaders(strapi);
 
-  await Promise.all([
-    // load installed middlewares
-    loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares),
-    // internal middlewares
-    loaders.loadInternalMiddlexares(middlewares),
-    // local middleware
-    loaders.loadLocalMiddlewares(appPath, middlewares),
-    // plugins middlewares
-    loaders.loadPluginsMiddlewares(installedPlugins, middlewares),
-    // local plugin middlewares
-    loaders.loadLocalPluginsMiddlewares(appPath, middlewares),
-  ]);
+  // load installed middlewares
+  await loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares);
+  // internal middlewares
+  await loaders.loadInternalMiddlexares(middlewares);
+  // local middleware
+  await loaders.loadLocalMiddlewares(appPath, middlewares);
+  // plugins middlewares
+  await loaders.loadPluginsMiddlewares(installedPlugins, middlewares);
+  // local plugin middlewares
+  await loaders.loadLocalPluginsMiddlewares(appPath, middlewares);
 
   return middlewares;
 };

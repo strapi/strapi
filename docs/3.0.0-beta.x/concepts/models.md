@@ -4,18 +4,21 @@
 
 ### Content Type's models
 
-Models are a representation of the database's structure. They are split into two separate files. A JavaScript file that contains the model options (e.g: lifecycle hooks), and a JSON one that represents the data structure stored in the database.
+Models are a representation of the database's structure and life cycle. They are split into two separate files. A JavaScript file that contains the life cycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
 **Path —** `./api/restaurant/models/Restaurant.js`.
 
 ```js
 module.exports = {
-  lifecycles: {
-    // Called before an entry is created
-    beforeCreate(data) {},
-    // Called after an entry is created
-    afterCreated(result) {},
-  },
+  // Before saving a value.
+  // Fired before an `insert` or `update` query.
+  beforeSave: (model, attrs, options) => {},
+
+  // After saving a value.
+  // Fired after an `insert` or `update` query.
+  afterSave: (model, attrs, options) => {},
+
+  // ... and more
 };
 ```
 
@@ -127,7 +130,7 @@ Additional settings can be set on models:
 }
 ```
 
-In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/database.js`
+In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
 ::: warning
 If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
@@ -338,7 +341,7 @@ xhr.send(
 
 ::: tab "One-to-Many" id="one-to-many"
 
-One-to-Many relationships are useful when an entry can be linked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to only one entry.
+One-to-Many relationships are useful when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to only one entry.
 
 #### Example
 
@@ -397,7 +400,7 @@ xhr.send(
 
 ::: tab "Many-to-Many" id="many-to-many"
 
-Many-to-Many relationships are useful when an entry can be linked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries.
+Many-to-Many relationships are useful when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries.
 
 #### Example
 
@@ -891,209 +894,83 @@ xhr.send(
 
 ::::
 
-## Lifecycle hooks
+## Life cycle callbacks
 
-The lifecycle hooks are functions that get triggered when the Strapi [`queries`](../concepts/queries.md) are called. They will get triggered automatically when you manage your content in the Admin Panel or when you develop custom code using `queries`·
+::: warning
+The life cycle functions are based on the ORM life cycle and not on the Strapi request.
+We are currently working on it to make it easier to use and understand.
+Please check [this issue](https://github.com/strapi/strapi/issues/1443) on GitHub.
+:::
 
-To configure a `ContentType` lifecycle hooks you can set a `lifecycles` key in the `{modelName}.js` file located at `./api/{apiName}/models/{modelName}.js` folder.
+The following events are available by default:
 
-### Available Lifecycle hooks
+Callbacks on:
 
 :::: tabs
 
-::: tab find
+::: tab save
 
-**`beforeFind(params, populate)`**
+`save`
 
-_Parameters:_
-
-| Name   | Type   | Description                         |
-| ------ | ------ | ----------------------------------- |
-| params | Object | Find params _(e.g: limit, filters)_ |
-
----
-
-**`afterFind(results, params, populate)`**
-
-_Parameters:_
-
-| Name     | Type          | Description                            |
-| -------- | ------------- | -------------------------------------- |
-| results  | Array{Object} | The results found for the `find` query |
-| params   | Object        | Find params _(e.g: limit, filters)_    |
-| populate | Array{string} | Populate specific relations            |
+- beforeSave
+- afterSave
 
 :::
 
-::: tab findOne
+::: tab fetch
 
-**`beforeFindOne(params, populate)`**
+`fetch`
 
-_Parameters:_
+- beforeFetch
+- afterFetch
 
-| Name   | Type   | Description                  |
-| ------ | ------ | ---------------------------- |
-| params | Object | Find params _(e.g: filters)_ |
+::: tab fetchAll
 
----
+`fetchAll`
 
-**`afterFindOne(result, params, populate)`**
-
-_Parameters:_
-
-| Name     | Type          | Description                               |
-| -------- | ------------- | ----------------------------------------- |
-| result   | Object        | The results found for the `findOne` query |
-| params   | Object        | Find params _(e.g: filters)_              |
-| populate | Array{string} | Populate specific relations               |
+- beforeFetchAll
+- afterFetchAll
 
 :::
 
 ::: tab create
 
-**`beforeCreate(data)`**
+`create`
 
-_Parameters:_
-
-| Name | Type   | Description                              |
-| ---- | ------ | ---------------------------------------- |
-| data | Object | Input data to the entry was created with |
-
----
-
-**`afterCreate(result, data)`**
-
-_Parameters:_
-
-| Name   | Type   | Description                              |
-| ------ | ------ | ---------------------------------------- |
-| result | Object | Created entry                            |
-| data   | Object | Input data to the entry was created with |
+- beforeCreate
+- afterCreate
 
 :::
 
 ::: tab update
 
-**`beforeUpdate(params, data)`**
+`update`
 
-_Parameters:_
-
-| Name   | Type   | Description                              |
-| ------ | ------ | ---------------------------------------- |
-| params | Object | Find params _(e.g: filters)_             |
-| data   | Object | Input data to the entry was created with |
-
----
-
-**`afterUpdate(result, params, data)`**
-
-_Parameters:_
-
-| Name   | Type   | Description                              |
-| ------ | ------ | ---------------------------------------- |
-| result | Object | Updated entry                            |
-| params | Object | Find params _(e.g: filters)_             |
-| data   | Object | Input data to the entry was created with |
+- beforeUpdate
+- afterUpdate
 
 :::
 
-::: tab delete
+::: tab destroy
 
-**`beforeDeleted(params)`**
+`destroy`
 
-_Parameters:_
-
-| Name   | Type   | Description                  |
-| ------ | ------ | ---------------------------- |
-| params | Object | Find params _(e.g: filters)_ |
-
----
-
-**`afterDeleted(result, params)`**
-
-_Parameters:_
-
-| Name   | Type   | Description                  |
-| ------ | ------ | ---------------------------- |
-| result | Object | Deleted entry                |
-| params | Object | Find params _(e.g: filters)_ |
-
-:::
-
-::: tab count
-
-**`beforeCount(params)`**
-
-_Parameters:_
-
-| Name   | Type   | Description                  |
-| ------ | ------ | ---------------------------- |
-| params | Object | Find params _(e.g: filters)_ |
-
----
-
-**`afterCount(result, params)`**
-
-_Parameters:_
-
-| Name   | Type    | Description                  |
-| ------ | ------- | ---------------------------- |
-| result | Integer | The count matching entries   |
-| params | Object  | Find params _(e.g: filters)_ |
-
-:::
-
-::: tab search
-
-**`beforeSearch(params, populate)`**
-
-_Parameters:_
-
-| Name     | Type          | Description                  |
-| -------- | ------------- | ---------------------------- |
-| params   | Object        | Find params _(e.g: filters)_ |
-| populate | Array{string} | Populate specific relations  |
-
----
-
-**`afterSearch(result, params)`**
-
-_Parameters:_
-
-| Name     | Type          | Description                  |
-| -------- | ------------- | ---------------------------- |
-| results  | Array{Object} | The entries found            |
-| params   | Object        | Find params _(e.g: filters)_ |
-| populate | Array{string} | Populate specific relations  |
-
-:::
-
-::: tab countSearch
-
-**`beforeCountSearch(params)`**
-
-_Parameters:_
-
-| Name   | Type   | Description                  |
-| ------ | ------ | ---------------------------- |
-| params | Object | Find params _(e.g: filters)_ |
-
----
-
-**`afterCountSearch(result, params)`**
-
-_Parameters:_
-
-| Name   | Type    | Description                  |
-| ------ | ------- | ---------------------------- |
-| result | Integer | The count matching entries   |
-| params | Object  | Find params _(e.g: filters)_ |
+- beforeDestroy
+- afterDestroy
 
 :::
 
 ::::
 
 ### Example
+
+:::: tabs
+
+::: tab Mongoose
+
+#### Mongoose
+
+The entry is available through the `model` parameter.
 
 **Path —** `./api/user/models/User.js`.
 
@@ -1102,68 +979,43 @@ module.exports = {
   /**
    * Triggered before user creation.
    */
-  lifecycles: {
-    async beforeCreate(data) {
-      const passwordHashed = await strapi.api.user.services.user.hashPassword(data.password);
-      data.password = passwordHashed;
-    },
-  },
-};
-```
+  beforeCreate: async model => {
+    // Hash password.
+    const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
-::: tip
-You can mutate one of the parameters to change its properties. Make sure not to reassign the parameter as it will have no effect:
-
-**This will Work**
-
-```js
-module.exports = {
-  lifecycles: {
-    beforeCreate(data) {
-      data.name = 'Some fixed name';
-    },
-  },
-};
-```
-
-**This will NOT Work**
-
-```js
-module.exports = {
-  lifecycles: {
-    beforeCreate(data) {
-      data = {
-        ...data,
-        name: 'Some fixed name',
-      };
-    },
+    // Set the password.
+    model.password = passwordHashed;
   },
 };
 ```
 
 :::
 
-### Custom use
+::: tab Bookshelf
 
-When you are building custom ORM specific queries the lifecycles will not be triggered. You can however call a lifecycle function directly if you wish.
+#### Bookshelf
 
-**Bookshelf example**
+Each of these functions receives three parameters `model`, `attrs` and `options`. You have to return a Promise.
 
-**Path -** `./api/{apiName}/services/{serviceName}.js`
+**Path —** `./api/user/models/User.js`.
 
 ```js
 module.exports = {
-  async createCustomEntry() {
-    const ORMModel = strapi.query(modelName).model;
+  /**
+   * Triggered before user creation.
+   */
+  beforeCreate: async (model, attrs, options) => {
+    // Hash password.
+    const passwordHashed = await strapi.api.user.services.user.hashPassword(
+      model.attributes.password
+    );
 
-    const newCustomEntry = await ORMModel.forge().save();
-
-    // trigger manually
-    ORMModel.lifecycles.afterCreate(newCustomEntry.toJSON());
+    // Set the password.
+    model.set('password', passwordHashed);
   },
 };
 ```
 
-::: tip
-When calling a lifecycle function directly, you will need to make sur you call it with the expected parameters.
 :::
+
+:::::
