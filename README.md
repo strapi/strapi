@@ -45,7 +45,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://strapi.io/assets/images/readme.png" />
+    <img src="https://api-prod.strapi.io/uploads/readme_af7bb44a28.png" />
   </a>
 </p>
 
