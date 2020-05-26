@@ -214,8 +214,9 @@ class Strapi {
       const isInitialised = await utils.isInitialised(this);
 
       // Should the startup message be displayed?
-      const showStartupMessage = process.env.SHOW_STARTUP_MESSAGE
-        ? process.env.SHOW_STARTUP_MESSAGE === 'true' || process.env.SHOW_STARTUP_MESSAGE === true
+      const showStartupMessage = process.env.STRAPI_SHOW_STARTUP_MESSAGE
+        ? process.env.STRAPI_SHOW_STARTUP_MESSAGE === 'true' ||
+          process.env.STRAPI_SHOW_STARTUP_MESSAGE === true
         : true;
 
       if (showStartupMessage) {
