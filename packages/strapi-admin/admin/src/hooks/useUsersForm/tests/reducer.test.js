@@ -14,6 +14,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
   describe('GET_DATA_SUCCEEDED', () => {
     it('should set the data correctly', () => {
       const initialState = {
+        fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
         formErrors: {},
         initialData: {},
         isLoading: true,
@@ -32,6 +33,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
       };
 
       const expected = {
+        fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
         formErrors: {},
         initialData: {
           email: 'test@test.io',
@@ -56,6 +58,10 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
   describe('ON_CANCEL', () => {
     it('should set the modifiedData with the initialData', () => {
       const initialState = {
+        fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
+        formErrors: {
+          ok: true,
+        },
         initialData: {
           email: 'john@strapi.io',
           firstname: '',
@@ -69,6 +75,8 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         type: 'ON_CANCEL',
       };
       const expected = {
+        fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
+        formErrors: {},
         initialData: {
           email: 'john@strapi.io',
           firstname: '',
@@ -204,6 +212,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
   describe('ON_SUBMIT_SUCCEEDED', () => {
     it('should set the data correctly', () => {
       const initialState = {
+        fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
         initialData: {
           ok: true,
         },
@@ -214,6 +223,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         showHeaderLoader: true,
       };
       const expected = {
+        fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
         initialData: {
           email: 'test@test.io',
           firstname: 'test',
@@ -258,6 +268,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         modifiedData: {
           ok: true,
         },
+        showHeaderLoader: true,
       };
       const expected = {
         formErrors: {
@@ -266,6 +277,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         modifiedData: {
           ok: true,
         },
+        showHeaderLoader: false,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

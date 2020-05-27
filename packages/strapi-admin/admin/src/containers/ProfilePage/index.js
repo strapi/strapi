@@ -19,7 +19,12 @@ const ProfilePage = () => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useUsersForm('/admin/users/me', schema, onSubmitSuccessCb);
+  ] = useUsersForm('/admin/users/me', schema, onSubmitSuccessCb, [
+    'email',
+    'firstname',
+    'lastname',
+    'username',
+  ]);
   const userInfos = auth.getUserInfo();
   const headerLabel = userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
 
