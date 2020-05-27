@@ -65,12 +65,11 @@ Test framework must have a clean empty environment to perform valid test and als
 
 Once `jest` is running it uses the `test` [enviroment](../concepts/configurations.md#environments) (switching `NODE_ENV` to `test`)
 so we need to create a special environment setting for this purpose.
-Copy contents of `./config/environments/development` into `./config/environments/test` and add some changes.
-Edit `./config/environments/test/database.json` and add value `"filename": ".tmp/test.db"` - the reason of that is that we want to have a separate sqlite database for tests, so our test will not touch real data.
+Create a new config for test env `./config/env/test/database.json` and add the following value `"filename": ".tmp/test.db"` - the reason of that is that we want to have a separate sqlite database for tests, so our test will not touch real data.
 This file will be temporary, each time test is finished, we will remove that file that every time tests are run on the clean database.
 The whole file will look like this:
 
-**Path —** `./config/environments/test/database.json`
+**Path —** `./config/env/test/database.json`
 
 ```json
 {
@@ -111,7 +110,7 @@ let instance;
 
 async function setupStrapi() {
   if (!instance) {
-    /** the follwing code in copied from `./node_modules/strapi/lib/Strapi.js` */
+    /** the following code in copied from `./node_modules/strapi/lib/Strapi.js` */
     await Strapi().load();
     instance = strapi; // strapi is global now
     await instance.app
@@ -183,7 +182,9 @@ Ran all test suites.
 In the example we'll use and example `Hello world` `/hello` endpoint from [controllers](../concepts/controllers.md#example) section.
 :::
 
-We'll test if our endpoint works propelly and route `/hello` does return `Hello World`
+Some might say that API tests are not unit but limited integration tests, regardless of nomenclature, let's continue with testing first endpoint.
+
+We'll test if our endpoint works properly and route `/hello` does return `Hello World`
 
 Let's create a separate test file were `supertest` will be used to check if endpoint works as expected.
 
@@ -313,4 +314,27 @@ Then include this code to `./tests/app.test.js` at the bottom of that file
 
 ```js
 require('./user');
+```
+
+All the tests above should return an console output like
+
+```bash
+➜  my-project git:(master) yarn test
+
+yarn run v1.13.0
+$ jest --forceExit --detectOpenHandles
+[2020-05-27T08:30:30.811Z] debug GET /hello (10 ms) 200
+[2020-05-27T08:30:31.864Z] debug POST /auth/local (891 ms) 200
+ PASS  tests/app.test.js (6.811 s)
+  ✓ strapi is defined (3 ms)
+  ✓ should return hello world (54 ms)
+  ✓ should login user and return jwt token (1049 ms)
+  ✓ should return users data for authenticated user (163 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        6.874 s, estimated 9 s
+Ran all test suites.
+✨  Done in 8.40s.
 ```
