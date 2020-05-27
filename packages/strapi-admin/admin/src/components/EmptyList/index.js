@@ -17,7 +17,7 @@ function EmptyList() {
       <p>{formatMessage({ id: 'Settings.webhooks.list.empty.title' })}</p>
       <p>{formatMessage({ id: 'Settings.webhooks.list.empty.description' })}</p>
       <a
-        href="https://strapi.io/documentation/3.0.0-beta.x/guides/webhooks.html"
+        href="https://strapi.io/documentation/v3.x/concepts/webhooks.html"
         target="_blank"
         rel="noopener noreferrer"
       >
