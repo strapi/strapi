@@ -78,6 +78,34 @@ const exists = async params => {
   return foundCount > 0;
 };
 
+/**
+ * Delete roles in database if they have no user assigned
+ * @param params query params to find the roles
+ * @returns {Promise<boolean>}
+ */
+const deleteRoles = async params => {
+  const foundRoles = await strapi.query('role', 'admin').find(params);
+
+  if (foundRoles.some(r => r.users.length !== 0)) {
+    throw strapi.errors.badRequest('ValidationError', {
+      ids: ['Some roles are still assigned to some users.'],
+    });
+  }
+
+  const rolesToDeleteIds = foundRoles.map(role => role.id);
+
+  // TODO: Waiting for permissions
+  // await strapi.admin.services.permission.delete({ roleId_in: rolesToDeleteIds });
+
+  let deletedRoles = await strapi.query('role', 'admin').delete({ id_in: rolesToDeleteIds });
+
+  if (!Array.isArray(deletedRoles)) {
+    deletedRoles = [deletedRoles];
+  }
+
+  return deletedRoles;
+};
+
 module.exports = {
   sanitizeRole,
   create,
@@ -86,4 +114,5 @@ module.exports = {
   findAll,
   update,
   exists,
+  delete: deleteRoles,
 };
