@@ -5,7 +5,8 @@ const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
 const loadConfig = require('../load/load-config-files');
 
-const arrayHandler = (a, b) => (_.isArray(a) && _.isArray(b) ? a.concat(b) : undefined);
+const mergeRoutes = (a, b, key) =>
+  _.isArray(a) && _.isArray(b) && key === 'routes' ? a.concat(b) : undefined;
 
 module.exports = async () => {
   const adminPath = findPackagePath('strapi-admin');
@@ -24,5 +25,5 @@ module.exports = async () => {
     ]);
   }
 
-  return _.mergeWith({}, config, eeConfig, files, eeFiles, arrayHandler);
+  return _.mergeWith({}, files, eeFiles, config, eeConfig, mergeRoutes);
 };
