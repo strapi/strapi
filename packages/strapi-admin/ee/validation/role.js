@@ -1,7 +1,7 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('strapi-utils');
-const { intergerOrString } = require('../../validation/common-validators');
+const { strapiId } = require('../../validation/common-validators');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -34,7 +34,7 @@ const validateRoleDeleteInput = async data => {
     .shape({
       ids: yup
         .array()
-        .of(intergerOrString)
+        .of(strapiId)
         .min(1)
         .required(),
     })

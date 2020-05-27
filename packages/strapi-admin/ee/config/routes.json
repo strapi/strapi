@@ -9,8 +9,15 @@
       }
     }, {
       "method": "DELETE",
-      "path": "/roles",
-      "handler": "role.delete",
+      "path": "/roles/:id",
+      "handler": "role.deleteOne",
+      "config": {
+        "policies": []
+      }
+    }, {
+      "method": "POST",
+      "path": "/roles/batch-delete",
+      "handler": "role.deleteMany",
       "config": {
         "policies": []
       }
