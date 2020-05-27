@@ -147,6 +147,11 @@
       }
     },
     {
+      "method": "PUT",
+      "path": "/users/:id",
+      "handler": "User.update"
+    },
+    {
       "method": "GET",
       "path": "/roles/:id/permissions",
       "handler": "role.getPermissions",

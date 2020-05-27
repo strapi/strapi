@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { validateUserCreationInput } = require('../validation/user');
+const { validateUserCreationInput, validateUserUpdateInput } = require('../validation/user');
 
 module.exports = {
   async create(ctx) {
@@ -41,6 +41,29 @@ module.exports = {
         results: results.map(strapi.admin.services.user.sanitizeUser),
         pagination,
       },
+    };
+  },
+
+  async update(ctx) {
+    const { id } = ctx.params;
+    const { body: input } = ctx.request;
+
+    try {
+      await validateUserUpdateInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const userExists = await strapi.admin.services.user.exists({ id });
+
+    if (!userExists) {
+      return ctx.badRequest('User does not exists');
+    }
+
+    const updatedUser = await strapi.admin.services.user.update({ id }, input);
+
+    ctx.body = {
+      data: strapi.admin.services.user.sanitizeUser(updatedUser),
     };
   },
 };
