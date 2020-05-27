@@ -220,15 +220,8 @@ To improve the Developer Experience when developing or using the administration 
 
 **`uid`**
 
-This field type allows a `targetField` key. The value is the name of an attribute that has `string` or `text` type.
-
-The field type also allows an `options` key. The value is an `object` of options passed to [the `uid` generator](https://github.com/sindresorhus/slugify).
-
-- `separator` (string) — Specify the string to be used for word separation. Allowed separators are: `"-"`, `"_"`, `"."`, and `"~"`. Default: `"-"`
-- `lowercase` (boolean) — Make the `uid` lowercase. Default: `true`
-- `decamelize` (boolean) — Convert camelcase to separate words. E.g. `fooBar` -> `foo-bar`. Default: `true`
-- `customReplacements` (Array<[string, string]>) — Specify a list of custom replacements. The list contains couples, where the first element is the string to match, and the second is the string to replace. Adding and leading and trailing space to the replacement, ensures it's separated by the separator. Default: `[['&', ' and '], ['🦄', ' unicorn '], ['♥', ' love ']]`
-- `preserveLeadingUnderscore` (boolean) — If the string leads with an underscore. Setting this to true, preserves said underscore. Default: `false`.
+- This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+- This field also allows an `options` field. The value is a set of options passed to [the underlying `uid` generator](https://github.com/sindresorhus/slugify). A caveat is that the resulting `uid` must abide to the following RegEx `/^[A-Za-z0-9-_.~]*$`.
 
 ### Example
 
@@ -251,13 +244,7 @@ The field type also allows an `options` key. The value is an `object` of options
     },
     "slug": {
       "type": "uid",
-      "targetField": "title",
-      "options": {
-        "separator": "_",
-        "customReplacements": [
-          ["@", " at "]
-        ]
-      }
+      "targetField": "title"
     }
     ...
   }
