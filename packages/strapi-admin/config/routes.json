@@ -148,6 +148,22 @@
     },
     {
       "method": "GET",
+      "path": "/roles/:id/permissions",
+      "handler": "role.getPermissions",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/roles/:id/permissions",
+      "handler": "role.updatePermissions",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/roles/:id",
       "handler": "role.findOne",
       "config": {
