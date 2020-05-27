@@ -12,11 +12,10 @@
 import React, { memo, useState } from 'react';
 import { BackHeader, useGlobalContext, LeftMenuList } from 'strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
+import RolesListPage from 'ee_else_ce/containers/Roles/ListPage';
+import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
 import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import HeaderSearch from '../../components/HeaderSearch';
-// Should be ee_else_ce
-import RolesListPage from '../../../ee/containers/Roles/ListPage';
-import RolesCreatePage from '../Roles/CreatePage';
 import RolesEditPage from '../Roles/EditPage';
 import UsersEditPage from '../Users/EditPage';
 import UsersListPage from '../Users/ListPage';
