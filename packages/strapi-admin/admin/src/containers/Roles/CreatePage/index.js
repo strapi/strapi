@@ -6,14 +6,15 @@ import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormCard from '../../../components/FormBloc';
 import {
-  Tabs,
+  ButtonWithNumber,
   CollectionTypesPermissions,
+  Tabs,
   SingleTypesPermissions,
   PluginsPermissions,
   SettingsPermissions,
 } from '../../../components/Roles';
 import SizedInput from '../../../components/SizedInput';
-import ButtonWithNumber from './ButtonWithNumber';
+
 import schema from './utils/schema';
 
 const CreatePage = () => {
