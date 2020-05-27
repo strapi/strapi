@@ -204,6 +204,11 @@ const AuthPage = ({ hasAdmin }) => {
     return <Redirect to="/" />;
   }
 
+  // Redirect the user to the login page if there is already an admin user
+  if (hasAdmin && authType === 'register-admin') {
+    return <Redirect to="/" />;
+  }
+
   // Redirect the user to the register-admin if it is the first user
   if (!hasAdmin && authType !== 'register-admin') {
     return <Redirect to="/auth/register-admin" />;
@@ -220,7 +225,7 @@ const AuthPage = ({ hasAdmin }) => {
       <NavTopRightWrapper>
         <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
       </NavTopRightWrapper>
-      <BaselineAlignment top size="80px">
+      <BaselineAlignment top size="78px">
         <Component
           fieldsToDisable={fieldsToDisable}
           formErrors={formErrors}

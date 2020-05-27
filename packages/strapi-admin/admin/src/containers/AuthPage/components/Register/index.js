@@ -51,7 +51,7 @@ const Register = ({
         <Logo />
       </Section>
       <Section withBackground>
-        <Padded top size="23px">
+        <Padded top size="25px">
           <Box errorMessage={get(requestError, 'errorMessage', null)}>
             <form onSubmit={onSubmit}>
               <InputWrapper>

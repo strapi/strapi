@@ -10,7 +10,9 @@ const ButtonWithNumber = ({ number, onClick }) => (
     <Flex justifyContent="space-between" alignItems="center">
       <FontAwesomeIcon icon="users" />
       <Padded left size="xs" />
-      <Text color="white">Users with this role</Text>
+      <Text color="white" fontWeight="semiBold">
+        Users with this role
+      </Text>
       <Padded left size="xs" />
       <NumberCard>
         <Text fontSize="xs" fontWeight="bold" color="mediumBlue">
