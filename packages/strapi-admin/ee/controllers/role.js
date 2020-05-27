@@ -39,7 +39,22 @@ module.exports = {
       data: sanitizedRole,
     };
   },
-  async delete(ctx) {
+  async deleteOne(ctx) {
+    const { id } = ctx.params;
+
+    let roles = await strapi.admin.services.role.delete({ id });
+
+    if (roles.length === 0) {
+      return ctx.notFound('Role not found');
+    }
+
+    const sanitizedRole = strapi.admin.services.role.sanitizeRole(roles[0]);
+
+    ctx.body = {
+      data: sanitizedRole,
+    };
+  },
+  async deleteMany(ctx) {
     try {
       await validateRoleDeleteInput(ctx.request.body);
     } catch (err) {

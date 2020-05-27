@@ -160,55 +160,82 @@ describe('Role CRUD End to End', () => {
       });
     });
     describe('Delete roles', () => {
-      test('Can delete a role', async () => {
-        let res = await rq({
-          url: '/admin/roles',
-          method: 'DELETE',
-          body: { ids: [data.roles[0].id] },
-        });
-        expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject([data.roles[0]]);
+      describe('batch-delete', () => {
+        test('Can delete a role', async () => {
+          let res = await rq({
+            url: '/admin/roles/batch-delete',
+            method: 'POST',
+            body: { ids: [data.roles[0].id] },
+          });
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toMatchObject([data.roles[0]]);
 
-        res = await rq({
-          url: `/admin/roles/${data.roles[0].id}`,
-          method: 'GET',
-          body: { ids: data.roles[0].id },
-        });
-        expect(res.statusCode).toBe(404);
-
-        data.roles.shift();
-      });
-      test('Can delete two roles', async () => {
-        const roles = data.roles.slice(0, 2);
-        const rolesIds = roles.map(r => r.id);
-
-        let res = await rq({
-          url: '/admin/roles',
-          method: 'DELETE',
-          body: { ids: rolesIds },
-        });
-        expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject(roles);
-
-        for (let roleId of rolesIds) {
           res = await rq({
-            url: `/admin/roles/${roleId}`,
+            url: `/admin/roles/${data.roles[0].id}`,
             method: 'GET',
-            body: { ids: data.roles[0].id },
           });
           expect(res.statusCode).toBe(404);
-          data.roles.shift();
-        }
-      });
-      test("No error if deleting a role that doesn't exist", async () => {
-        const res = await rq({
-          url: '/admin/roles',
-          method: 'DELETE',
-          body: { ids: ['id-that-doesnt-exist'] },
-        });
 
-        expect(res.statusCode).toBe(200);
-        expect(res.body.data).toEqual([]);
+          data.roles.shift();
+        });
+        test('Can delete two roles', async () => {
+          const roles = data.roles.slice(0, 2);
+          const rolesIds = roles.map(r => r.id);
+
+          let res = await rq({
+            url: '/admin/roles/batch-delete',
+            method: 'POST',
+            body: { ids: rolesIds },
+          });
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toMatchObject(roles);
+
+          for (let roleId of rolesIds) {
+            res = await rq({
+              url: `/admin/roles/${roleId}`,
+              method: 'GET',
+            });
+            expect(res.statusCode).toBe(404);
+            data.roles.shift();
+          }
+        });
+        test("No error if deleting a role that doesn't exist", async () => {
+          const res = await rq({
+            url: '/admin/roles/batch-delete',
+            method: 'POST',
+            body: { ids: ['id-that-doesnt-exist'] },
+          });
+
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toEqual([]);
+        });
+      });
+      describe('simple delete', () => {
+        test('Can delete a role', async () => {
+          let res = await rq({
+            url: `/admin/roles/${data.roles[0].id}`,
+            method: 'DELETE',
+          });
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toMatchObject(data.roles[0]);
+
+          res = await rq({
+            url: `/admin/roles/${data.roles[0].id}`,
+            method: 'GET',
+          });
+          expect(res.statusCode).toBe(404);
+
+          data.roles.shift();
+        });
+        test("Having 404 error if deleting a role that doesn't exist", async () => {
+          const res = await rq({
+            url: '/admin/roles/id-that-doesnt-exist',
+            method: 'DELETE',
+          });
+
+          expect(res.statusCode).toBe(404);
+          expect(res.body.data).toEqual();
+        });
       });
     });
   }
@@ -228,6 +255,11 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(404);
+        expect(res.body).toMatchObject({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'entry.notFound',
+        });
       });
     });
   }
