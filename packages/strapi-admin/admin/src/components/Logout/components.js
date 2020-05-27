@@ -75,6 +75,9 @@ const Wrapper = styled.div`
     font-size: 14px;
     overflow: hidden;
     box-shadow: 0 1px 4px 0px rgba(40, 42, 49, 0.05);
+    &:active {
+      outline: 0;
+    }
 
     &:before {
       content: '';
