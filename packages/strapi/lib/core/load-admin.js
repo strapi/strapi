@@ -5,6 +5,8 @@ const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
 const loadConfig = require('../load/load-config-files');
 
+const arrayHandler = (a, b) => (_.isArray(a) && _.isArray(b) ? a.concat(b) : undefined);
+
 module.exports = async () => {
   const adminPath = findPackagePath('strapi-admin');
   const [files, config] = await Promise.all([
@@ -22,5 +24,5 @@ module.exports = async () => {
     ]);
   }
 
-  return _.merge({}, config, eeConfig, files, eeFiles);
+  return _.mergeWith({}, config, eeConfig, files, eeFiles, arrayHandler);
 };
