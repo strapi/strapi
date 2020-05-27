@@ -267,6 +267,7 @@
   "Settings.permissions.users.listview.header.description.singular": "{number} user found",
   "Settings.permissions.users.listview.header.description.plural": "{number} users found",
   "Settings.roles.title": "Roles",
+  "Settings.roles.created": "Role created",
   "Settings.roles.create.title": "Create a role",
   "Settings.roles.create.description": "Define the rights given to the role",
   "Settings.roles.form.title": "Details",
