@@ -10,6 +10,7 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/Main';
 import Initializer from './containers/Initializer';
+import ConfigureViewButton from './InjectedComponents/ContentTypeBuilder/ConfigureViewButton';
 import lifecycles from './lifecycles';
 import reducers from './reducers';
 import trads from './translations';
@@ -23,7 +24,14 @@ export default strapi => {
     icon: pluginPkg.strapi.icon,
     id: pluginId,
     initializer: Initializer,
-    injectedComponents: [],
+    injectedComponents: [
+      {
+        plugin: 'content-type-builder.listView',
+        area: 'list.link',
+        component: ConfigureViewButton,
+        key: 'content-manager.link',
+      },
+    ],
     isReady: false,
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
