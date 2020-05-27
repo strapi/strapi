@@ -4,8 +4,11 @@ import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'strapi-helper-plugin';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
+import OopsLogo from '../../../../assets/images/oops.png';
 import Logo from '../Logo';
 import Section from '../Section';
+import Img from './Img';
+import CustomText from './Text';
 
 const Oops = () => {
   const { push } = useHistory();
@@ -15,11 +18,7 @@ const Oops = () => {
     push('/auth/login');
   };
 
-  // TODO: I am not sure about this login
-  // @alexandrebodin @JAB
   const message = query.get('info') || formatMessage({ id: 'Auth.components.Oops.text' });
-  // TODO add logo when available
-  // This component is temporary
 
   return (
     <>
@@ -27,15 +26,16 @@ const Oops = () => {
         <Logo />
       </Section>
       <Section withBackground textAlign="center">
-        <BaselineAlignment top size="168px">
-          <Text fontSize="lg" fontWeight="bold">
-            Oops...
-          </Text>
+        <BaselineAlignment top size="60px">
+          <Img src={OopsLogo} />
+          <BaselineAlignment top size="26px">
+            <CustomText fontWeight="bold">Oops...</CustomText>
+          </BaselineAlignment>
         </BaselineAlignment>
-        <BaselineAlignment top size="18px">
-          <Text fontSize="md">{message}</Text>
+        <BaselineAlignment top size="14px">
+          <Text fontSize="lg">{message}</Text>
         </BaselineAlignment>
-        <BaselineAlignment top size="50px">
+        <BaselineAlignment top size="48px">
           <Button onClick={handleClick} type="button">
             {formatMessage({ id: 'Auth.form.button.go-home' })}
           </Button>
