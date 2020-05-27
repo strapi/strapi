@@ -1,6 +1,10 @@
 'use strict';
 
-const { validateRoleCreateInput, validateRoleUpdateInput } = require('../validation/role');
+const {
+  validateRoleCreateInput,
+  validateRoleUpdateInput,
+  validateRoleDeleteInput,
+} = require('../validation/role');
 
 module.exports = {
   async create(ctx) {
@@ -33,6 +37,20 @@ module.exports = {
 
     ctx.body = {
       data: sanitizedRole,
+    };
+  },
+  async delete(ctx) {
+    try {
+      await validateRoleDeleteInput(ctx.request.body);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    let roles = await strapi.admin.services.role.delete({ id_in: ctx.request.body.ids });
+    const sanitizedRoles = roles.map(strapi.admin.services.role.sanitizeRole);
+
+    ctx.body = {
+      data: sanitizedRoles,
     };
   },
 };

@@ -7,6 +7,13 @@
       "config": {
         "policies": []
       }
+    }, {
+      "method": "DELETE",
+      "path": "/roles",
+      "handler": "role.delete",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

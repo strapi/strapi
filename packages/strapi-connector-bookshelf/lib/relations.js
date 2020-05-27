@@ -24,11 +24,7 @@ const transformToArrayID = array => {
 };
 
 const getModel = (model, plugin) => {
-  return (
-    _.get(strapi.plugins, [plugin, 'models', model]) ||
-    _.get(strapi, ['models', model]) ||
-    undefined
-  );
+  return strapi.db.getModel(model, plugin) || strapi.db.getModel(model);
 };
 
 const removeUndefinedKeys = obj => _.pickBy(obj, _.negate(_.isUndefined));

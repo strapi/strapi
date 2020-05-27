@@ -1,4 +1,5 @@
-// Helpers.
+const _ = require('lodash');
+
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
@@ -17,20 +18,21 @@ describe('Role CRUD End to End', () => {
   }, 60000);
 
   if (edition === 'EE') {
-    describe('Create a new role', () => {
-      test('Can create a role successfully', async () => {
-        const role = {
-          name: 'new role',
-          description: 'Description of new role',
-        };
-
-        const res = await rq({
+    describe('Create some roles', () => {
+      const rolesToCreate = [
+        [{ name: 'new role 0', description: 'description' }],
+        [{ name: 'new role 1', description: 'description' }],
+        [{ name: 'new role 2', description: 'description' }],
+        [{ name: 'new role 3', description: 'description' }],
+        [{ name: 'new role 4', description: 'description' }],
+        [{ name: 'new role 5', description: 'description' }],
+      ];
+      test.each(rolesToCreate)('can create %p', async role => {
+        let res = await rq({
           url: '/admin/roles',
           method: 'POST',
           body: role,
         });
-
-        data.roles.push(res.body.data);
 
         expect(res.statusCode).toBe(201);
         expect(res.body.data).toMatchObject({
@@ -40,36 +42,10 @@ describe('Role CRUD End to End', () => {
           created_at: expect.anything(),
           updated_at: expect.anything(),
         });
-      });
-      test('Can create another role successfully', async () => {
-        const role = {
-          name: 'new role 2',
-          description: 'Description of new role 2',
-        };
-
-        const res = await rq({
-          url: '/admin/roles',
-          method: 'POST',
-          body: role,
-        });
-
         data.roles.push(res.body.data);
-
-        expect(res.statusCode).toBe(201);
-        expect(res.body.data).toMatchObject({
-          id: expect.anything(),
-          name: role.name,
-          description: role.description,
-          created_at: expect.anything(),
-          updated_at: expect.anything(),
-        });
       });
       test('Cannot create a role already existing', async () => {
-        const role = {
-          name: 'new role',
-          description: 'Description of new role',
-        };
-
+        const role = _.pick(data.roles[0], ['name', 'description']);
         const res = await rq({
           url: '/admin/roles',
           method: 'POST',
@@ -78,7 +54,7 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.data).toMatchObject({
-          name: ['The name must be unique and a role with name `new role` already exists.'],
+          name: [`The name must be unique and a role with name \`${role.name}\` already exists.`],
         });
       });
     });
@@ -181,6 +157,58 @@ describe('Role CRUD End to End', () => {
           error: 'Not Found',
           message: 'entry.notFound',
         });
+      });
+    });
+    describe('Delete roles', () => {
+      test('Can delete a role', async () => {
+        let res = await rq({
+          url: '/admin/roles',
+          method: 'DELETE',
+          body: { ids: [data.roles[0].id] },
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toMatchObject([data.roles[0]]);
+
+        res = await rq({
+          url: `/admin/roles/${data.roles[0].id}`,
+          method: 'GET',
+          body: { ids: data.roles[0].id },
+        });
+        expect(res.statusCode).toBe(404);
+
+        data.roles.shift();
+      });
+      test('Can delete two roles', async () => {
+        const roles = data.roles.slice(0, 2);
+        const rolesIds = roles.map(r => r.id);
+
+        let res = await rq({
+          url: '/admin/roles',
+          method: 'DELETE',
+          body: { ids: rolesIds },
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toMatchObject(roles);
+
+        for (let roleId of rolesIds) {
+          res = await rq({
+            url: `/admin/roles/${roleId}`,
+            method: 'GET',
+            body: { ids: data.roles[0].id },
+          });
+          expect(res.statusCode).toBe(404);
+          data.roles.shift();
+        }
+      });
+      test("No error if deleting a role that doesn't exist", async () => {
+        const res = await rq({
+          url: '/admin/roles',
+          method: 'DELETE',
+          body: { ids: ['id-that-doesnt-exist'] },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toEqual([]);
       });
     });
   }

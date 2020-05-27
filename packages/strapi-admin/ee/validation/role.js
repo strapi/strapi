@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('strapi-utils');
+const { intergerOrString } = require('../../validation/common-validators');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -27,7 +28,23 @@ const validateRoleUpdateInput = async data => {
     .catch(handleReject);
 };
 
+const validateRoleDeleteInput = async data => {
+  const roleDeleteSchema = yup
+    .object()
+    .shape({
+      ids: yup
+        .array()
+        .of(intergerOrString)
+        .min(1)
+        .required(),
+    })
+    .noUnknown();
+
+  return roleDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+};
+
 module.exports = {
   validateRoleCreateInput,
   validateRoleUpdateInput,
+  validateRoleDeleteInput,
 };
