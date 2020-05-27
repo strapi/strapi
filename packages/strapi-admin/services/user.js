@@ -8,7 +8,12 @@ const { createUser } = require('../domain/user');
  * @param {Object} user - user to sanitize
  */
 const sanitizeUser = user => {
-  return _.omit(user, ['password', 'resetPasswordToken']);
+  const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description']);
+
+  return {
+    ..._.omit(user, ['password', 'resetPasswordToken', 'roles']),
+    roles: user.roles.map(sanitizeUserRoles),
+  };
 };
 
 /**
