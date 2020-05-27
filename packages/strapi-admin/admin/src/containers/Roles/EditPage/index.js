@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
+import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import BaselineAlignement from '../../../components/BaselineAlignement';
@@ -25,8 +26,6 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
-
-  console.log({ id });
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -55,13 +54,13 @@ const EditPage = () => {
     }
   };
 
-  const cta = (
-    <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')}>
+  const actions = [
+    <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')} key="user-button">
       {formatMessage({
         id: 'Settings.roles.form.button.users-with-role',
       })}
-    </ButtonWithNumber>
-  );
+    </ButtonWithNumber>,
+  ];
 
   return (
     <Formik
@@ -75,8 +74,9 @@ const EditPage = () => {
             <Header
               title={{
                 label: formatMessage({
+                  // TODO change trad
                   id: 'Settings.roles.edit.title',
-                  defaultMessage: 'Edit Role',
+                  defaultMessage: `Edit ${id}`,
                 }),
               }}
               content={formatMessage({
@@ -86,13 +86,13 @@ const EditPage = () => {
             />
             <BaselineAlignement top size="3px" />
             <FormCard
+              actions={actions}
               title={formatMessage({
                 id: 'Settings.roles.form.title',
               })}
               subtitle={formatMessage({
                 id: 'Settings.roles.form.description',
               })}
-              cta={cta}
             >
               <SizedInput
                 label="Name"
@@ -116,14 +116,14 @@ const EditPage = () => {
               />
             </FormCard>
 
-            <BaselineAlignement top size="30px">
+            <Padded top size="md">
               <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
                 <CollectionTypesPermissions />
                 <SingleTypesPermissions />
                 <PluginsPermissions />
                 <SettingsPermissions />
               </Tabs>
-            </BaselineAlignement>
+            </Padded>
           </ContainerFluid>
         </form>
       )}
