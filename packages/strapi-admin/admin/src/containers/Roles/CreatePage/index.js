@@ -8,6 +8,13 @@ import FormCard from './FormCard';
 import ButtonWithNumber from './ButtonWithNumber';
 import InputWrapper from './InputWrapper';
 import schema from './utils/schema';
+import {
+  Tabs,
+  CollectionTypesPermissions,
+  SingleTypesPermissions,
+  PluginsPermissions,
+  SettingsPermissions,
+} from '../../../components/Roles';
 
 const CreatePage = () => {
   const { formatMessage } = useIntl();
@@ -106,6 +113,15 @@ const CreatePage = () => {
               </InputWrapper>
             </Flex>
           </FormCard>
+          <Padded top size="md" />
+          <Padded top size="xs">
+            <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
+              <CollectionTypesPermissions />
+              <SingleTypesPermissions />
+              <PluginsPermissions />
+              <SettingsPermissions />
+            </Tabs>
+          </Padded>
         </>
       )}
     </Formik>
