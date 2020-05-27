@@ -191,15 +191,14 @@ module.exports = ({
         const componentPathName = resource.context.split('/components/');
         const wantedPath =
           containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
-        console.log(containerPathName);
 
         if (IS_EE) {
           resource.request = resource.request.replace(
             /ee_else_ce/,
-            path.join(wantedPath[0], '..', 'ee')
+            path.join(wantedPath, '..', 'ee')
           );
         } else {
-          resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath[0]));
+          resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
         }
       }),
       ...webpackPlugins,
