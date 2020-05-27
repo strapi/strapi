@@ -64,6 +64,10 @@ If you used `--quickstart` to create your Strapi project, by default this uses t
 
 It is recommended you use the Heroku PostgreSQL plugin or use something like MongoDB's Atlas for your database. For file uploads, you will need to use one of the 3rd party providers such as Cloudinary or AWS S3.
 
+### Can I store my Content Manager layout configurations in the model settings
+
+Currently Strapi does not support this, a `config:dump` and `config:restore` command has been added to make migration of these settings easier when moving between different deployments and environments.
+
 ### How do I customize a plugin
 
 Strapi uses a system called [extensions](../concepts/customization.md#plugin-extensions) as plugins are stored in the `node_modules` folder. Due to this extensions work by Strapi detecting newer versions of files and using that as a replacement for the ones stored within the `node_modules`. If you are familiar with React and "ejecting" a file, the concept is similar.
