@@ -3,6 +3,10 @@
 const { validateRoleUpdateInput } = require('../validation/role');
 
 module.exports = {
+  /**
+   * Returns on role by id
+   * @param {KoaContext} ctx - koa context
+   */
   async findOne(ctx) {
     const { id } = ctx.params;
     const role = await strapi.admin.services.role.findOneWithUsersCount({ id });
@@ -15,6 +19,11 @@ module.exports = {
       data: role,
     };
   },
+
+  /**
+   * Returns every roles
+   * @param {KoaContext} ctx - koa context
+   */
   async findAll(ctx) {
     const roles = await strapi.admin.services.role.findAllWithUsersCount();
 
@@ -22,6 +31,11 @@ module.exports = {
       data: roles,
     };
   },
+
+  /**
+   * Updates a role by id
+   * @param {KoaContext} ctx - koa context
+   */
   async update(ctx) {
     const { id } = ctx.params;
 
@@ -41,6 +55,44 @@ module.exports = {
 
     ctx.body = {
       data: sanitizedRole,
+    };
+  },
+
+  /**
+   * Returns the permissions assigned to a role
+   * @param {KoaContext} ctx - koa context
+   */
+  async getPermissions(ctx) {
+    const { id } = ctx.params;
+
+    const role = await strapi.admin.services.role.findOne({ id });
+
+    if (!role) {
+      return ctx.notFound('role.notFound');
+    }
+
+    const permissions = await strapi.admin.services.permissions.find({ role: role.id });
+
+    ctx.body = {
+      data: permissions,
+    };
+  },
+
+  /**
+   * Updates the permissions assigned to a role
+   * @param {KoaContext} ctx - koa context
+   */
+  async updatePermissions(ctx) {
+    const { id } = ctx.params;
+
+    const role = await strapi.admin.services.role.findOne({ id });
+
+    if (!role) {
+      return ctx.notFound('role.notFound');
+    }
+
+    ctx.body = {
+      data: [],
     };
   },
 };
