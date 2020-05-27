@@ -1,11 +1,8 @@
-import React, { useEffect, useReducer } from 'react';
+import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import {
-  // request,
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { useGlobalContext, auth } from 'strapi-helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import BaselineAlignement from '../../../components/BaselineAlignement';
@@ -15,24 +12,41 @@ import SizedInput from '../../../components/SizedInput';
 import Header from '../../../components/Users/Header';
 import MagicLink from '../../../components/Users/MagicLink';
 import SelectRoles from '../../../components/Users/SelectRoles';
+import useUsersForm from '../../../hooks/useUsersForm';
 import { editValidation } from '../../../validations/users';
-import checkFormValidity from '../../../utils/checkFormValidity';
 import form from './utils/form';
-import fakeData from './utils/tempData';
-import { initialState, reducer } from './reducer';
-
-// TODO use useUsersForm hooks when API is ready
 
 const EditPage = () => {
   const { settingsBaseURL } = useGlobalContext();
-  const [
-    { formErrors, isLoading, initialData, modifiedData, showHeaderLoader },
-    dispatch,
-  ] = useReducer(reducer, initialState);
   const { formatMessage } = useIntl();
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/users/:id`);
+
+  // @HichamELBSI leaving this empty right now as we might need to handle the submit success in case the user is editing its profile
+  // in order to update the localStorage.
+  const cbSuccess = data => {
+    const userInfos = auth.getUserInfo();
+
+    // The user is updating himself
+    if (data.id === userInfos.id) {
+      auth.setUserInfo(data);
+    }
+  };
+  const [
+    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
+    // eslint-disable-next-line no-unused-vars
+    dispatch,
+    { handleCancel, handleChange, handleSubmit },
+  ] = useUsersForm(`/admin/users/${id}`, editValidation, cbSuccess, [
+    'email',
+    'firstname',
+    'lastname',
+    'username',
+    'isActive',
+    'roles',
+    'registrationToken',
+  ]);
   const headerLabelId = isLoading
     ? 'app.containers.Users.EditPage.header.label-loading'
     : 'app.containers.Users.EditPage.header.label';
@@ -40,87 +54,6 @@ const EditPage = () => {
     ? initialData.username
     : `${initialData.firstname} ${initialData.lastname}`;
   const headerLabel = formatMessage({ id: headerLabelId }, { name: headerLabelName });
-
-  useEffect(() => {
-    const getData = () => {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          const data = id === '2' ? fakeData.withRegistrationToken : fakeData.other;
-
-          dispatch({
-            type: 'GET_DATA_SUCCEEDED',
-            data,
-          });
-
-          resolve();
-        }, 1000);
-      });
-    };
-
-    getData();
-  }, [id]);
-
-  const handleCancel = () => {
-    dispatch({
-      type: 'ON_CANCEL',
-    });
-  };
-
-  const handleChange = ({ target: { name, value, type: inputType } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      inputType,
-      keys: name,
-      value,
-    });
-  };
-
-  // TODO: remove this line when API's ready
-  // eslint-disable-next-line consistent-return
-  const handleSubmit = async e => {
-    e.preventDefault();
-
-    const errors = await checkFormValidity(modifiedData, editValidation);
-
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: errors || {},
-    });
-
-    if (!errors) {
-      try {
-        strapi.lockAppWithOverlay();
-
-        dispatch({
-          type: 'ON_SUBMIT',
-        });
-
-        return new Promise(resolve => {
-          setTimeout(() => {
-            dispatch({
-              type: 'ON_SUBMIT_SUCCEEDED',
-              // TODO
-              // data,
-            });
-
-            strapi.notification.success('notification.success.saved');
-            resolve();
-          }, 1000);
-        });
-      } catch (err) {
-        // const data = get(err, 'response.payload', { data: {} });
-        // const apiErrors = formatAPIErrors(data);
-        // dispatch({
-        //   type: 'SET_ERRORS',
-        //   errors: apiErrors,
-        // });
-        // TODO
-        strapi.notification.error('An error occured');
-      } finally {
-        strapi.unlockApp();
-      }
-    }
-  };
 
   const hasRegistrationToken = modifiedData.registrationToken;
   const hasRolesError = formErrors.roles && isEmpty(modifiedData.roles);

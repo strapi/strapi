@@ -48,8 +48,12 @@ const ModalCreateBody = forwardRef(
           strapi.lockAppWithOverlay();
 
           const requestURL = '/admin/users';
+          const cleanedRoles = modifiedData.roles.map(role => role.id);
 
-          const { data } = await request(requestURL, { method: 'POST', body: modifiedData });
+          const { data } = await request(requestURL, {
+            method: 'POST',
+            body: { ...modifiedData, roles: cleanedRoles },
+          });
 
           onSubmit(e, data);
         } catch (err) {

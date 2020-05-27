@@ -3,12 +3,13 @@ import { request } from 'strapi-helper-plugin';
 import { get, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
+import init from './init';
 
-const useUsersForm = (endPoint, schema, cbSuccess) => {
+const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
     dispatch,
-  ] = useReducer(reducer, initialState);
+  ] = useReducer(reducer, initialState, () => init(initialState, fieldsToPick));
 
   useEffect(() => {
     const getData = async () => {
@@ -18,15 +19,18 @@ const useUsersForm = (endPoint, schema, cbSuccess) => {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
+          fieldsToPick,
         });
       } catch (err) {
         console.error(err.response);
+        strapi.notification.error('notification.error');
       }
     };
 
     if (endPoint) {
       getData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endPoint]);
 
   const handleCancel = () => {
@@ -61,9 +65,15 @@ const useUsersForm = (endPoint, schema, cbSuccess) => {
           type: 'ON_SUBMIT',
         });
 
+        const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
+
+        if (cleanedData.roles) {
+          cleanedData.roles = cleanedData.roles.map(role => role.id);
+        }
+
         const { data } = await request(endPoint, {
           method: 'PUT',
-          body: omit(modifiedData, ['confirmPassword']),
+          body: cleanedData,
         });
 
         cbSuccess(data);
