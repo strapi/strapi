@@ -12,12 +12,14 @@ describe('User', () => {
         otherField: 'Hello',
         password: '$5IAZUDB871',
         resetPasswordToken: '3456-5678-6789-789',
+        roles: [],
       });
 
       expect(res).toEqual({
         id: 1,
         firstname: 'Test',
         otherField: 'Hello',
+        roles: [],
       });
     });
   });
