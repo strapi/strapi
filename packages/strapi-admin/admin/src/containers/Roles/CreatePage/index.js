@@ -1,5 +1,6 @@
 import React from 'react';
 import { Header } from '@buffetjs/custom';
+import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import BaselineAlignement from '../../../components/BaselineAlignement';
@@ -47,13 +48,13 @@ const CreatePage = () => {
     }
   };
 
-  const cta = (
-    <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')}>
+  const actions = [
+    <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')} key="user-button">
       {formatMessage({
         id: 'Settings.roles.form.button.users-with-role',
       })}
-    </ButtonWithNumber>
-  );
+    </ButtonWithNumber>,
+  ];
 
   return (
     <Formik
@@ -77,13 +78,13 @@ const CreatePage = () => {
             />
             <BaselineAlignement top size="3px" />
             <FormCard
+              actions={actions}
               title={formatMessage({
                 id: 'Settings.roles.form.title',
               })}
               subtitle={formatMessage({
                 id: 'Settings.roles.form.description',
               })}
-              cta={cta}
             >
               <SizedInput
                 label="Name"
@@ -107,14 +108,14 @@ const CreatePage = () => {
               />
             </FormCard>
 
-            <BaselineAlignement top size="30px">
+            <Padded top size="md">
               <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
                 <CollectionTypesPermissions />
                 <SingleTypesPermissions />
                 <PluginsPermissions />
                 <SettingsPermissions />
               </Tabs>
-            </BaselineAlignement>
+            </Padded>
           </ContainerFluid>
         </form>
       )}

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import BaselineAlignement from '../BaselineAlignement';
 import Bloc from '../Bloc';
 
-const FormBloc = ({ children, cta, isLoading, title, subtitle }) => (
+const FormBloc = ({ children, actions, isLoading, title, subtitle }) => (
   <Bloc>
     <BaselineAlignement top size={title ? '18px' : '22px'} />
     <Padded left right size="sm">
@@ -30,7 +30,7 @@ const FormBloc = ({ children, cta, isLoading, title, subtitle }) => (
                       </Text>
                     )}
                   </Padded>
-                  {cta}
+                  {actions}
                 </Flex>
               </Padded>
               <BaselineAlignement top size="18px" />
@@ -44,15 +44,15 @@ const FormBloc = ({ children, cta, isLoading, title, subtitle }) => (
 );
 
 FormBloc.defaultProps = {
-  cta: null,
+  actions: null,
   isLoading: false,
   subtitle: null,
   title: null,
 };
 
 FormBloc.propTypes = {
+  actions: PropTypes.any,
   children: PropTypes.node.isRequired,
-  cta: PropTypes.any,
   isLoading: PropTypes.bool,
   subtitle: PropTypes.string,
   title: PropTypes.string,
