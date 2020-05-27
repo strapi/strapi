@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Strapi telemetry package.
- * You can learn more at https://strapi.io/documentation/3.0.0-beta.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
+ * You can learn more at https://strapi.io/documentation/v3.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
  */
 
 const { scheduleJob } = require('node-schedule');
