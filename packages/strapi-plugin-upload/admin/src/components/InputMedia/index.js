@@ -181,15 +181,17 @@ InputMedia.propTypes = {
     required: PropTypes.bool,
     type: PropTypes.string,
   }).isRequired,
+  error: PropTypes.string,
+  id: PropTypes.string,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  id: PropTypes.string.isRequired,
-  error: PropTypes.string.isRequired,
 };
 InputMedia.defaultProps = {
+  id: null,
+  error: null,
   label: '',
   value: null,
 };
