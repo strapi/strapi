@@ -112,11 +112,10 @@ describe('<LocaleToggle />', () => {
       const renderedComponent = shallow(<LocaleToggle {...props} />);
       const { getFlagUrl } = renderedComponent.instance();
 
-      expect(getFlagUrl('cs')).toEqual(
+      expect(getFlagUrl('ms')).toEqual(
         'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/my.svg'
       );
     });
-
 
     it('should return the locale flag', () => {
       const renderedComponent = shallow(<LocaleToggle {...props} />);
