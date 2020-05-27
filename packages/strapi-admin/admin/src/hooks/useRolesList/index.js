@@ -17,7 +17,11 @@ const useRolesList = () => {
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
-        data,
+        // TODO : TEMP => Uncomment after role creation is done.
+        // data,
+
+        // TODO : TEMP => Remove after role creation is done.
+        data: data.length > 0 ? data : initialState.roles,
       });
     } catch (err) {
       const message = get(err, ['response', 'payload', 'message'], 'An error occured');
