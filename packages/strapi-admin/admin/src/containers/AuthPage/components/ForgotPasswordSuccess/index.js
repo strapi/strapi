@@ -4,11 +4,11 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
 import Button from '../../../../components/FullWidthButton';
-
 import Box from '../Box';
 import Logo from '../Logo';
 import Section from '../Section';
-import IconWrapper from './IconWrapper';
+import Envelope from './Envelope';
+import CustomText from './Text';
 
 const ForgotPasswordSuccess = () => {
   const { formatMessage } = useIntl();
@@ -23,16 +23,22 @@ const ForgotPasswordSuccess = () => {
       <Section textAlign="center">
         <Logo />
       </Section>
-      <Section withBackground>
+      <Section withBackground textAlign="center">
+        {/* FIXME IN BUFFET.JS */}
         <BaselineAlignment top size="20px">
           <Padded top size="xs">
             <Box withoutError>
-              <Padded top>
-                <Padded top size="xs">
-                  <IconWrapper>todo</IconWrapper>
-                </Padded>
-              </Padded>
-              <BaselineAlignment top size="16px">
+              <BaselineAlignment top size="3px">
+                <Envelope />
+              </BaselineAlignment>
+              {/* FIXME IN BUFFET.JS */}
+              <BaselineAlignment top size="20px">
+                <CustomText fontWeight="bold" lineHeight="24px">
+                  Email sent
+                </CustomText>
+              </BaselineAlignment>
+              {/* FIXME IN BUFFET.JS */}
+              <BaselineAlignment top size="20px">
                 <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
                   {formatMessage({
                     id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
