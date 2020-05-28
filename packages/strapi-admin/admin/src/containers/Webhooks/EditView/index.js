@@ -89,8 +89,8 @@ function EditView() {
 
   const headerTitle = isCreating
     ? formatMessage({
-      id: 'Settings.webhooks.create',
-    })
+        id: 'Settings.webhooks.create',
+      })
     : name;
   const headersActions = [
     {
@@ -102,8 +102,8 @@ function EditView() {
       onClick: () => handleTrigger(),
       title: isTriggerActionDisabled
         ? formatMessage({
-          id: 'Settings.webhooks.trigger.save',
-        })
+            id: 'Settings.webhooks.trigger.save',
+          })
         : null,
       type: 'button',
       icon: (
