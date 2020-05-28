@@ -1,27 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
+import { useGlobalContext } from 'strapi-helper-plugin';
+import { useHistory } from 'react-router-dom';
 import { Pencil, Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { RoleRow as RoleRowBase } from '../../../../src/components/Roles';
 
 const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRoles }) => {
+  const { push } = useHistory();
+  const { settingsBaseURL } = useGlobalContext();
+
   const handleRoleSelection = e => {
     onRoleToggle(role.id);
     e.stopPropagation();
   };
 
+  const prefix = (
+    <Checkbox
+      value={selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1}
+      onClick={handleRoleSelection}
+      name="role-checkbox"
+    />
+  );
+
   return (
     <RoleRowBase
       selectedRoles={selectedRoles}
-      prefix={
-        <Checkbox
-          value={selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1}
-          onClick={handleRoleSelection}
-          name="role-checkbox"
-        />
-      }
+      prefix={prefix}
       role={role}
       links={[
         {
@@ -30,7 +37,7 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
         },
         {
           icon: <Pencil fill="#0e1622" />,
-          onClick: () => console.log('edit', role.id),
+          onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
         },
         {
           icon: <FontAwesomeIcon icon="trash-alt" />,
