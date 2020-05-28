@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
   padding: 0 20px !important;
