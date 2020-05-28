@@ -2,9 +2,11 @@
 
 const { yup } = require('strapi-utils');
 
-const strapiID = yup.lazy(value =>
-  typeof value === 'number' ? yup.number().integer() : yup.string()
-); // https://github.com/jquense/yup/issues/665
+yup['strapiID'] = yup.lazy(value =>
+  typeof value === 'number'
+    ? yup.number().integer()
+    : yup.string().matches(/^[a-f\d]{24}$/, '${path} must be a valid ID')
+);
 
 const email = yup
   .string()
@@ -24,7 +26,7 @@ const password = yup
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');
 
-const roles = yup.array(strapiID);
+const roles = yup.array(yup.strapiID).min(1);
 
 module.exports = {
   email,
@@ -33,5 +35,4 @@ module.exports = {
   username,
   password,
   roles,
-  strapiID,
 };
