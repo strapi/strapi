@@ -12,15 +12,15 @@ const RemoveWrapper = styled.div`
   width: 30px;
   text-align: center;
   background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) => {
-  return getColor(isOverRemove, isSelected, isOverEditBlock);
-}};
+    return getColor(isOverRemove, isSelected, isOverEditBlock);
+  }};
   cursor: pointer;
   svg {
     align-self: center;
     color: #b4b6ba;
   }
   ${({ isOverRemove }) =>
-  isOverRemove &&
+    isOverRemove &&
     `
     path {
       fill: #f64d0a;

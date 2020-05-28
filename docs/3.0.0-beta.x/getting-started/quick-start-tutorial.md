@@ -180,7 +180,7 @@ It is not necessary to always create a front-end **User** for your **Administrat
 - Next, complete the `Username`, `Email`, and `Password` fields.
 - Select `ON` for the **Confirmed** toggle field.
 - To the right, under **Role**, select `Authenticated`.
-- Save the new user by clicking the blue **Save** button (top right).
+- Save the new user by clicking the green **Save** button (top right).
 
 ![New front-end User](../assets/getting-started/tutorial/new-front-end-user.png 'New front-end User')
 
@@ -192,37 +192,37 @@ A **Content Type** can be considered a sort of _blueprint_ for the data created.
 
 Both **Collection Type** and **Single Type** are types of **Content Type**. **Collection Type** is used for content that repeats such as restaurants, or blog posts (hence "collection"). **Single Type** is used to manage content that will have only one instance - for example, your menu, a static page, or a footer.
 
-**Content Type** can hold data represented by fields. For example, a **Collection Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Collection Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `hoursofoperation`.
+**Content Type** can hold data represented by fields. For example, a **Collection Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Collection Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `Hours Of Operation`.
 
-The next section guides you through the steps needed for each of these above **Content Type** fields.
+The next section guides you through the steps needed for each of these above **Collection Type** fields.
 
 ::: tip NOTE
 
-Additional **Restaurant** themed **Content Types** and fields can be seen in the [FoodAdvisor demo site](https://foodadvisor.strapi.io/).
+Additional **Restaurant** themed **Collection Types** and fields can be seen in the [FoodAdvisor demo site](https://foodadvisor.strapi.io/).
 
 :::
 
-### The Restaurant Content Type
+### The Restaurant Collection Type
 
-Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS** -> **Content Type Builder**
+Go to the **Content Types Builder** plugin, located in the left menu: Under **PLUGINS** -> **Content Types Builder**
 
-You are now able to see the three available **Content Types**. At this point, three Content Types are available `Permission`, `Role`, and `Users`.
+You are now able to see the three available **Collection Types**. At this point, three Collection Types are available `Permission`, `Role`, and `Users`.
 
 ![Content Type Dashboard](../assets/getting-started/tutorial/content-type-dashboard.png 'Content Type Dashboard')
 
-You need to create a new **Content Type** for `Restaurants`.
+You need to create a new **Collection Type** for `Restaurants`.
 
-1. Complete these steps to **Add a Restaurant Content Type**.
+1. Complete these steps to **Add a Restaurant Collection Type**.
 
-- Click the `+ Create new collection type` link (under existing **CONTENT TYPES**).
-- Enter a **Name** for your new **Content Type** (call this `restaurant`).
+- Click the `+ Create new collection type` link (under existing **COLLECTION TYPES**).
+- Enter a **Name** for your new **Collection Type** (call this `restaurant`).
 - Click the `Continue` button.
 
-![Singular Name Entries for Content Type](../assets/getting-started/tutorial/singular-name-entry.png 'Singular Name Entries or Content Type')
+![Singular Name Entries for Collection Type](../assets/getting-started/tutorial/singular-name-entry.png 'Singular Name Entries or Content Type')
 
 ::: tip NOTE
 
-The Content Type **Name** is always **singular**. For example, `restaurant` not `restaurants`.
+The Collection Type **Name** is always **singular**. For example, `restaurant` not `restaurants`.
 
 :::
 
@@ -284,20 +284,20 @@ Your new Content Type called **Restaurant** is ready to be **Saved**.
 
 ![Strapi Restart](../assets/getting-started/tutorial/restaurant-strapi-restart.png 'Strapi Restart')
 
-After Strapi has restarted, you are ready to continue to create the `Category` **Content Type**.
+After Strapi has restarted, you are ready to continue to create the `Category` **Collection Type**.
 
-## 4. Create a new Content Type called "Category"
+## 4. Create a new Collection Type called "Category"
 
-### The Category Content Type
+### The Category Collection Type
 
-The `Category` **Content Type** will have a **Text** field named `category`, and a **Relation field** with a **Many to Many** relationship.
+The `Category` **Collection Type** will have a **Text** field named `category`, and a **Relation field** with a **Many to Many** relationship.
 
-![Category Add Content Type](../assets/getting-started/tutorial/category-add-content-type.png 'Category Add Content Type')
+![Category Add Collection Type](../assets/getting-started/tutorial/category-add-content-type.png 'Category Add Collection Type')
 
-1. Complete these steps to **add a Category Content Type**.
+1. Complete these steps to **add a Category Collection Type**.
 
 - Click the `+ Create new collection type` link.
-- Enter a **Name** for your new **Content Type** (call this `category`).
+- Enter a **Name** for your new **Collection Type** (call this `category`).
 
 ![Category Name Field](../assets/getting-started/tutorial/category-name-field.png 'Category Name Field')
 
@@ -320,7 +320,7 @@ The `Category` **Content Type** will have a **Text** field named `category`, and
 
 - Click the `+ Add another field` button.
 
-You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category** and **Restaurant** Content Types.
+You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category** and **Restaurant** Collection Types.
 
 - Click on the `Relation` field.
 
@@ -354,7 +354,7 @@ After Strapi has restarted, you are ready to create a `Component` called **"Hour
 
 ### The Hours of Operation Component
 
-The `Restaurant` Content Type has a **Component** field named `hours_of_operation`. This Component is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
+The `Restaurant` Collection Type has a **Component** field named `hours_of_operation`. This Component is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
 
 1. Complete these steps to **add a new Component**.
 
@@ -412,23 +412,23 @@ You are now ready to add a third field, another **Text** field for the **Closing
 
 ![Hours of Operation Strapi Restart](../assets/getting-started/tutorial/hours-of-operation-strapi-restart.png 'Hours of Operation Strapi Restart')
 
-After Strapi has restarted, you are ready to assign this **Hours_of_operation** Component to the **Restaurant** Content Type.
+After Strapi has restarted, you are ready to assign this **Hours Of Operation** Component to the **Restaurant** Collection Type.
 
 ::: tip NOTE
 
-It would be possible to assign the **Hours_of_operation** Component to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this component across your application.
+It would be possible to assign the **Hours Of Operation** Component to another **Collection Type**, let's say, a **Cafe** Collection Type. You have the option to reuse this component across your application.
 
 :::
 
-3. Next, you need to assign the **Hours_of_operation** Component to the **Restaurant** Content Type.
+3. Next, you need to assign the **Hours Of Operation** Component to the **Restaurant** Collection Type.
 
-To access the **Hours_of_operation** Component from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
+To access the **Hours Of Operation** Component from within the **Restaurant** Collection Type, you need to **edit** the **Restaurant** Collection Type in the **Content Type Builder**.
 
 - If needed, navigate back to the **Content Type Builder**.
 
-![Edit Restaurant Content Type](../assets/getting-started/tutorial/edit-restaurant-content-type.png 'Edit Restaurant Content Type')
+![Edit Restaurant Collection Type](../assets/getting-started/tutorial/edit-restaurant-content-type.png 'Edit Restaurant Collection Type')
 
-- Click on the `Restaurant` Content Type, under **CONTENT TYPES**.
+- Click on the `Restaurant` Collection Type, under **COLLECTION TYPES**.
 
 ![Edit Restaurant Add Another Field](../assets/getting-started/tutorial/edit-restaurant-add-another-field.png 'Edit Restaurant Add Another Field')
 
@@ -443,7 +443,7 @@ To access the **Hours_of_operation** Component from within the **Restaurant** Co
 ![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs-use.png 'Restaurant Component Inputs')
 
 - Ensure `hours_of_operation` is displayed in the **Select a component** dropdown.
-- Provide a **name** for this component in the **Restaurant** Content Type. E.g. `restaurant_hours`
+- Provide a **name** for this component in the **Restaurant** Collection Type. E.g. `restaurant_hours`
 - Select the `Repeatable component` option.
 
 ![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Component Inputs')
@@ -463,11 +463,11 @@ To access the **Hours_of_operation** Component from within the **Restaurant** Co
 
 ![Restaurant Component Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Component Strapi Restart')
 
-After Strapi has restarted, you are ready to continue to the next section where you customize the user-interface of your **Restaurant** Content Type.
+After Strapi has restarted, you are ready to continue to the next section where you customize the user-interface of your **Restaurant** Collection Type.
 
-4. Next, you will edit the **View Settings** for the new **Hoursofoperation Component** from within the **Content Manager**.
+4. Next, you will edit the **View Settings** for the new **Hours Of Operation Component** from within the **Content Manager**.
 
-You can _drag and drop_ fields into a different layout and _rename the labels_. This are two examples of how you can customize the user interface for your **Content Types**.
+You can _drag and drop_ fields into a different layout and _rename the labels_. This are two examples of how you can customize the user interface for your **Collection Types**.
 
 - Click on the `Configure the view`, button.
 
@@ -477,43 +477,44 @@ You can _drag and drop_ fields into a different layout and _rename the labels_. 
 
 ![Content Manager Components Tab](../assets/getting-started/tutorial/content-manager-restaurant-group.png 'Content Manager Components Tab')
 
-- Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hours`.
+- Rearrange the fields and make them more user friendly. Grab the `Opening_hours` and slide it in front of `Closing_hours`.
 
-![Content Manager Hoursofoperation Rearrange Fields](../assets/getting-started/tutorial/content-manager-hoursofoperation-rearrange-fields.png 'Content Manager Hoursofoperation Rearrange Fields')
+![Content Manager Hours Of Operation Rearrange Fields](../assets/getting-started/tutorial/content-manager-hoursofoperation-rearrange-fields.png 'Content Manager Hours Of Operation Rearrange Fields')
 
 Next, you will change the **field labels** to make them easier to understand.
 
-- Click on the `day_interval` field.
+- Click on the `Day_interval` field.
 - Edit the **Label** to read, `Day (or Days)`.
 - Add a **Description**, `You can type in one day or a series of days to complete this field. E.g. "Tuesday" or "Tues - Wed"`.
+- Click on the green **Done** button.
 
-![Content Manager Hoursofoperation Day Interval](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-interval.png 'Content Manager Hoursofoperation Day Interval')
+![Content Manager Hours Of Operation Day Interval](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-interval.png 'Content Manager Hours Of Operation Day Interval')
 
-- Click on the `opening_hours` field.
+- Click on the `Opening_hours` field.
 - Edit the **Label** to read, `Opening Hours`.
 
-![Content Manager Hoursofoperation Opening Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-opening-hours.png 'Content Manager Hoursofoperation Day Opening Hours')
+![Content Manager Hours Of Operation Opening Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-opening-hours.png 'Content Manager Hours Of Operation Day Opening Hours')
 
-- Click on `closing_hours` field.
+- Click on `Closing_hours` field.
 - Edit the **Label** to read, `Closing Hours`.
 
-![Content Manager Hoursofoperation Closing Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-closing-hours.png 'Content Manager Hoursofoperation Day Closing Hours')
+![Content Manager Hours Of Operation Closing Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-closing-hours.png 'Content Manager Hours Of Operation Day Closing Hours')
 
 - Click the `Save` button, and then the `Confirm` button to save your settings.
 
-Your settings have now saved.
+Your settings are now saved.
 
 Whenever anyone enters in information for a **Restaurant**, the entry form is cleared. With Strapi you can modify these and more settings to provide the best experience possible.
 
 You are ready to start inputting actual content.
 
-## 6. Manage and add content to a "Restaurant" Content Type
+## 6. Manage and add content to a "Restaurant" Collection Type
 
 You are now ready to add some **Restaurants** and **Categories**.
 
 1. You are now going to enter a new **Restaurant**.
 
-- Navigate to and click on the `Restaurants`, under **CONTENT TYPES** in the left-hand menu.
+- Navigate to and click on the `Restaurants`, under **Collection Types** in the left-hand menu.
 
 ![Restaurants Content Type](../assets/getting-started/tutorial/restaurants-content-type.png 'Restaurants Content Type')
 
@@ -527,7 +528,7 @@ You are now ready to add some **Restaurants** and **Categories**.
 
 ![Restaurant Content Type Basic Data](../assets/getting-started/tutorial/restaurant-content-type-basic-data.png 'Restaurant Content Type Basic Data')
 
-- Next scroll down to **RestaurantHours|(0)** and click the `+ ADD NEW ENTRY` button.
+- Next scroll down to **Restaurant_hours(0)** and click the `+ ADD NEW ENTRY` button.
   - In the **Create an Entry** section, enter the following details.
     - In the **Day (or Days)** field, enter `Sun - Mon`.
     - In the **Opening Hours** field, enter `Closed`.
@@ -549,7 +550,7 @@ You have now entered in all the information necessary for your first **Restauran
 
 Next, you need to enter in some **Categories** that can relate to the above and other **Restaurants**.
 
-- Navigate to and click on `Categories`, under **CONTENT TYPES** in the left-hand menu.
+- Navigate to and click on `Categories`, under **COLLECTION TYPES** in the left-hand menu.
 
 ![Categories Entry](../assets/getting-started/tutorial/categories-content-type.png 'Categories Entry')
 
@@ -577,7 +578,7 @@ You have now entered your first **Restaurant** Content Type. You have also assig
 
 ## 7. Set Roles and Permissions
 
-By default, Strapi publishes all **Content Types** with restricted permissions. Which means you have to explicitly give permissions to each **Content Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Content Type and **Category** Content Type.
+By default, Strapi publishes all **Content Types** with restricted permissions. That means you have to explicitly give permissions to each **Content Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Collection Type and **Category** Collection Type.
 
 - Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu.
 
@@ -587,9 +588,9 @@ By default, Strapi publishes all **Content Types** with restricted permissions. 
 
 ![Roles and Permissions Public Role](../assets/getting-started/tutorial/roles-and-permissions-public-role.png 'Roles And Permissions Public Role')
 
-- Next, scroll down under **Permissions** and locate the **Restaurant** and **Category** Content Types.
-- Click the checkbox for **find** and **findone** in the **Restaurant** Content Type.
-- Click the checkbox for **find** and **findone** in the **Category** Content Type.
+- Next, scroll down under **Permissions** and locate the **Restaurant** and **Category** Collection Types.
+- Click the checkbox for **find** and **findone** in the **Restaurant** Collection Type.
+- Click the checkbox for **find** and **findone** in the **Category** Collection Type.
 
 ![Roles and Permissions Find Permissions](../assets/getting-started/tutorial/roles-and-permissions-find-permissions.png 'Roles And Permissions Find Permissions')
 
@@ -599,15 +600,15 @@ You have now opened the API and are ready to consume the content.
 
 ## 8. Consume the Content Type API
 
-Each of your **Content Types** are accessible by following their automatically generated routes.
+Each of your **Collection Types** are accessible by following their automatically generated routes.
 
-Both your **Restaurant** and **Category** Content Types can now be accessed.
+Both your **Restaurant** and **Category** Collection Types can now be accessed.
 
-- In your browser, follow `http://localhost:1337/restaurants` to return the data for the allowed **Find** value of your **Restaurant** Content Type
+- In your browser, follow `http://localhost:1337/restaurants` to return the data for the allowed **Find** value of your **Restaurant** Collection Type
 
 ![Restaurant Api](../assets/getting-started/tutorial/restaurant-api.png 'Restaurant API')
 
-- In your browser, follow `http://localhost:1337/categories` to return the data for the allowed **Find** value of your **Category** Content Type.
+- In your browser, follow `http://localhost:1337/categories` to return the data for the allowed **Find** value of your **Category** Collection Type.
 
 ![Category Api](../assets/getting-started/tutorial/category-api.png 'Category API')
 
