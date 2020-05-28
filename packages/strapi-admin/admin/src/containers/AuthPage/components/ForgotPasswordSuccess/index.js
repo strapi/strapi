@@ -34,7 +34,7 @@ const ForgotPasswordSuccess = () => {
               {/* FIXME IN BUFFET.JS */}
               <BaselineAlignment top size="20px">
                 <CustomText fontWeight="bold" lineHeight="24px">
-                  Email sent
+                  {formatMessage({ id: 'app.containers.AuthPage.ForgotPasswordSuccess.title' })}
                 </CustomText>
               </BaselineAlignment>
               {/* FIXME IN BUFFET.JS */}
