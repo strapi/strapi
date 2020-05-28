@@ -3,16 +3,16 @@ import styled from 'styled-components';
 const Carret = styled.div`
   position: absolute;
   ${({ right }) => {
-  if (right) {
-    return `
+    if (right) {
+      return `
       right: -4px;
     `;
-  }
+    }
 
-  return `
+    return `
     left: -1px;
   `;
-}}
+  }}
   height: 100%;
   width: 2px;
   margin-right: 3px;
