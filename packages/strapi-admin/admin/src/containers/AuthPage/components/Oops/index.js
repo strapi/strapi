@@ -10,7 +10,6 @@ import Box from '../Box';
 import Logo from '../Logo';
 import Section from '../Section';
 import Img from './Img';
-import CustomText from './Text';
 
 const Oops = () => {
   const { push } = useHistory();
@@ -39,7 +38,9 @@ const Oops = () => {
             {/* FIXME IN BUFFET.JS */}
             <BaselineAlignment top size="20px">
               <Padded top size="xs">
-                <CustomText fontWeight="bold">Oops...</CustomText>
+                <Text fontSize="xl" fontWeight="bold">
+                  Oops...
+                </Text>
               </Padded>
             </BaselineAlignment>
             <Padded top size="xs">

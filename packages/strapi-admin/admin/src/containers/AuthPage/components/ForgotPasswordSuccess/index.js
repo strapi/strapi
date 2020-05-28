@@ -8,7 +8,6 @@ import Box from '../Box';
 import Logo from '../Logo';
 import Section from '../Section';
 import Envelope from './Envelope';
-import CustomText from './Text';
 
 const ForgotPasswordSuccess = () => {
   const { formatMessage } = useIntl();
@@ -33,9 +32,9 @@ const ForgotPasswordSuccess = () => {
               </BaselineAlignment>
               {/* FIXME IN BUFFET.JS */}
               <BaselineAlignment top size="20px">
-                <CustomText fontWeight="bold" lineHeight="24px">
+                <Text fontWeight="bold" lineHeight="24px" fontSize="xl">
                   {formatMessage({ id: 'app.containers.AuthPage.ForgotPasswordSuccess.title' })}
-                </CustomText>
+                </Text>
               </BaselineAlignment>
               {/* FIXME IN BUFFET.JS */}
               <BaselineAlignment top size="20px">
