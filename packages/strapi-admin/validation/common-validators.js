@@ -2,15 +2,6 @@
 
 const { yup } = require('strapi-utils');
 
-yup['strapiID'] = yup.lazy(value =>
-  typeof value === 'number'
-    ? yup
-        .number()
-        .integer()
-        .positive()
-    : yup.string()
-);
-
 const email = yup
   .string()
   .email()
@@ -29,7 +20,7 @@ const password = yup
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');
 
-const roles = yup.array(yup.strapiID).min(1);
+const roles = yup.array(yup.strapiID()).min(1);
 
 module.exports = {
   email,

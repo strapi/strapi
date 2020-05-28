@@ -265,6 +265,41 @@ describe('User', () => {
     });
   });
 
+  describe('Fetch user', () => {
+    const user = { firstname: 'John', lastname: 'Doe', email: 'johndoe@email.com' };
+
+    beforeEach(() => {
+      const findOne = jest.fn(({ id }) =>
+        Promise.resolve(
+          {
+            1: user,
+          }[id] || null
+        )
+      );
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+      };
+    });
+
+    test('Find and returns a user by its ID', async () => {
+      const input = { id: 1 };
+      const res = await userService.findOne(input);
+
+      expect(res).not.toBeNull();
+      expect(res).toStrictEqual(user);
+    });
+
+    test('Fail to find a user with provided params', async () => {
+      const input = { id: 27 };
+      const res = await userService.findOne(input);
+
+      expect(res).toBeNull();
+    });
+  });
+
   describe('findRegistrationInfo', () => {
     test('Returns undefined if not found', async () => {
       const findOne = jest.fn(() => Promise.resolve());

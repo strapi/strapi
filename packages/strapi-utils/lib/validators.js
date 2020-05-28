@@ -3,6 +3,8 @@
 const yup = require('yup');
 const _ = require('lodash');
 
+const MixedSchemaType = yup.mixed;
+
 const isNotNilTest = value => !_.isNil(value);
 
 function isNotNill(msg = '${path} must be defined.') {
@@ -21,6 +23,18 @@ function arrayRequiredAllowEmpty(message) {
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
 yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
+
+class StrapiIDSchema extends MixedSchemaType {
+  constructor() {
+    super({ type: 'strapiID' });
+  }
+
+  _typeCheck(value) {
+    return typeof value === 'string' || (Number.isInteger(value) && value > 0);
+  }
+}
+
+yup.strapiID = () => new StrapiIDSchema();
 
 /**
  * Returns a formatted error for http responses
