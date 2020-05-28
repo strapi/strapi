@@ -209,6 +209,9 @@ describe('Role CRUD End to End', () => {
           expect(res.statusCode).toBe(200);
           expect(res.body.data).toEqual([]);
         });
+        test.skip("Don't delete any role if some still have assigned users", async () => {
+          // TODO
+        });
       });
       describe('simple delete', () => {
         test('Can delete a role', async () => {
@@ -227,14 +230,17 @@ describe('Role CRUD End to End', () => {
 
           data.roles.shift();
         });
-        test("Having 404 error if deleting a role that doesn't exist", async () => {
+        test("No error if deleting a role that doesn't exist", async () => {
           const res = await rq({
             url: '/admin/roles/id-that-doesnt-exist',
             method: 'DELETE',
           });
 
-          expect(res.statusCode).toBe(404);
-          expect(res.body.data).toEqual();
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toEqual(null);
+        });
+        test.skip("Don't delete a role if it still has assigned users", async () => {
+          // TODO
         });
       });
     });

@@ -4,7 +4,13 @@ const _ = require('lodash');
 const parseType = require('./parse-type');
 
 const findModelByAssoc = assoc => {
-  const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
+  let models;
+  if (assoc.plugin === 'admin') {
+    models = strapi.admin.models;
+  } else {
+    models = assoc.plugin ? strapi.plugins[assoc.plugin].models : strapi.models;
+  }
+
   return models[assoc.collection || assoc.model];
 };
 
@@ -136,4 +142,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
   return strapi.db.connectors.get(model.orm).buildQuery({ model, filters, ...rest });
 };
 
-module.exports = buildQuery;
+module.exports = {
+  buildQuery,
+  findModelByAssoc,
+};

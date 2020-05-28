@@ -16,6 +16,17 @@ const roleCreateUpdateSchema = yup
   })
   .noUnknown();
 
+const roleDeleteSchema = yup
+  .object()
+  .shape({
+    ids: yup
+      .array()
+      .of(strapiId)
+      .min(1)
+      .required(),
+  })
+  .noUnknown();
+
 const validateRoleCreateInput = async data => {
   return roleCreateUpdateSchema
     .validate(data, { strict: true, abortEarly: false })
@@ -29,17 +40,6 @@ const validateRoleUpdateInput = async data => {
 };
 
 const validateRoleDeleteInput = async data => {
-  const roleDeleteSchema = yup
-    .object()
-    .shape({
-      ids: yup
-        .array()
-        .of(strapiId)
-        .min(1)
-        .required(),
-    })
-    .noUnknown();
-
   return roleDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 

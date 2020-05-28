@@ -83,21 +83,20 @@ const exists = async params => {
  * @param params query params to find the roles
  * @returns {Promise<boolean>}
  */
-const deleteRoles = async params => {
-  const foundRoles = await strapi.query('role', 'admin').find(params);
-
-  if (foundRoles.some(r => r.users.length !== 0)) {
-    throw strapi.errors.badRequest('ValidationError', {
-      ids: ['Some roles are still assigned to some users.'],
-    });
+const deleteByIds = async (ids = []) => {
+  for (let id of ids) {
+    const count = await strapi.query('user', 'admin').count({ 'roles.id': id });
+    if (count !== 0) {
+      throw strapi.errors.badRequest('ValidationError', {
+        ids: ['Some roles are still assigned to some users.'],
+      });
+    }
   }
-
-  const rolesToDeleteIds = foundRoles.map(role => role.id);
 
   // TODO: Waiting for permissions
   // await strapi.admin.services.permission.delete({ roleId_in: rolesToDeleteIds });
 
-  let deletedRoles = await strapi.query('role', 'admin').delete({ id_in: rolesToDeleteIds });
+  let deletedRoles = await strapi.query('role', 'admin').delete({ id_in: ids });
 
   if (!Array.isArray(deletedRoles)) {
     deletedRoles = [deletedRoles];
@@ -114,5 +113,5 @@ module.exports = {
   findAll,
   update,
   exists,
-  delete: deleteRoles,
+  deleteByIds,
 };

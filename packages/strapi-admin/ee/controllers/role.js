@@ -42,26 +42,26 @@ module.exports = {
   async deleteOne(ctx) {
     const { id } = ctx.params;
 
-    let roles = await strapi.admin.services.role.delete({ id });
+    const roles = await strapi.admin.services.role.deleteByIds([id]);
 
-    if (roles.length === 0) {
-      return ctx.notFound('Role not found');
+    let sanitizedRole = null;
+    if (roles[0]) {
+      sanitizedRole = strapi.admin.services.role.sanitizeRole(roles[0]);
     }
-
-    const sanitizedRole = strapi.admin.services.role.sanitizeRole(roles[0]);
 
     ctx.body = {
       data: sanitizedRole,
     };
   },
   async deleteMany(ctx) {
+    const { body } = ctx.request;
     try {
-      await validateRoleDeleteInput(ctx.request.body);
+      await validateRoleDeleteInput(body);
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
     }
 
-    let roles = await strapi.admin.services.role.delete({ id_in: ctx.request.body.ids });
+    let roles = await strapi.admin.services.role.deleteByIds(body.ids);
     const sanitizedRoles = roles.map(strapi.admin.services.role.sanitizeRole);
 
     ctx.body = {
