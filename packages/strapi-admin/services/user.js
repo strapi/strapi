@@ -3,16 +3,16 @@
 const _ = require('lodash');
 const { createUser } = require('../domain/user');
 
+const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description']);
+
 /**
  * Remove private user fields
  * @param {Object} user - user to sanitize
  */
 const sanitizeUser = user => {
-  const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description']);
-
   return {
     ..._.omit(user, ['password', 'resetPasswordToken', 'roles']),
-    roles: user.roles.map(sanitizeUserRoles),
+    roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };
 
