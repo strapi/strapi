@@ -2,11 +2,35 @@ import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
 // TODO update schema
 // import { profileValidation } from '../../../validations/users';
+import ForgotPassword from '../components/ForgotPassword';
+import ForgotPasswordSuccess from '../components/ForgotPasswordSuccess';
 import Login from '../components/Login';
 import Oops from '../components/Oops';
 import Register from '../components/Register';
+import ResetPassword from '../components/ResetPassword';
 
 const forms = {
+  'forgot-password': {
+    Component: ForgotPassword,
+    endPoint: 'forgot-password',
+    fieldsToDisable: [],
+    fieldsToOmit: [],
+    schema: yup.object().shape({
+      email: yup
+        .string()
+        .email(translatedErrors.email)
+        .required(translatedErrors.required),
+    }),
+    inputsPrefix: '',
+  },
+  'forgot-password-success': {
+    Component: ForgotPasswordSuccess,
+    endPoint: '',
+    fieldsToDisable: [],
+    fieldsToOmit: [],
+    schema: null,
+    inputsPrefix: '',
+  },
   login: {
     Component: Login,
     endPoint: 'login',
@@ -48,7 +72,6 @@ const forms = {
           .required(translatedErrors.required),
         confirmPassword: yup
           .string()
-          .min(8, translatedErrors.minLength)
           .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
           .required(translatedErrors.required),
       }),
@@ -73,11 +96,29 @@ const forms = {
         .required(translatedErrors.required),
       confirmPassword: yup
         .string()
-        .min(8, translatedErrors.minLength)
         .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
         .required(translatedErrors.required),
     }),
     inputsPrefix: '',
+  },
+  'reset-password': {
+    Component: ResetPassword,
+    endPoint: 'reset-password',
+    fieldsToDisable: [],
+    fieldsToOmit: ['confirmPassword'],
+    schema: yup.object().shape({
+      password: yup
+        .string()
+        .min(8, translatedErrors.minLength)
+        .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
+        .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
+        .matches(/\d/, 'components.Input.error.contain.number')
+        .required(translatedErrors.required),
+      confirmPassword: yup
+        .string()
+        .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
+        .required(translatedErrors.required),
+    }),
   },
 };
 
