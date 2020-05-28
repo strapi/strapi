@@ -6,10 +6,10 @@ import PropTypes from 'prop-types';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
 import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
+import Box from '../Box';
 import Input from '../Input';
 import Logo from '../Logo';
 import Section from '../Section';
-import Box from '../Box';
 
 const Login = ({ formErrors, modifiedData, onChange, onSubmit, requestError }) => {
   const { formatMessage } = useIntl();
