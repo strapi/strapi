@@ -1,6 +1,7 @@
 'use strict';
 
 const { validateRoleUpdateInput } = require('../validation/role');
+const { validatedUpdatePermissionsInput } = require('../validation/permission');
 
 module.exports = {
   /**
@@ -71,7 +72,7 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    const permissions = await strapi.admin.services.permissions.find({ role: role.id });
+    const permissions = await strapi.admin.services.permission.find({ role: role.id, _limit: -1 });
 
     ctx.body = {
       data: permissions,
@@ -84,6 +85,13 @@ module.exports = {
    */
   async updatePermissions(ctx) {
     const { id } = ctx.params;
+    const input = ctx.request.body;
+
+    try {
+      await validatedUpdatePermissionsInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
 
     const role = await strapi.admin.services.role.findOne({ id });
 
@@ -91,8 +99,10 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
+    const permissions = await strapi.admin.services.permission.assign(role.id, input.permissions);
+
     ctx.body = {
-      data: [],
+      data: permissions,
     };
   },
 };
