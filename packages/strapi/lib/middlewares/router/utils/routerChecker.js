@@ -69,7 +69,7 @@ module.exports = strapi =>
       // Set body.
       const values = await next();
 
-      if (!ctx.body) {
+      if (_.isNil(ctx.body) && !_.isNil(values)) {
         ctx.body = values;
       }
     });
