@@ -1,5 +1,7 @@
 'use strict';
 
+const { createPermission } = require('../domain/permission');
+
 /**
  * Delete permissions of roles in database
  * @param params ids of roles
@@ -29,10 +31,9 @@ const assign = async (roleID, permissions = []) => {
   // clear previous permissions
   await strapi.query('permission', 'admin').delete({ role: roleID });
 
-  const permissionsWithRole = permissions.map(permission => ({
-    ...permission,
-    role: roleID,
-  }));
+  const permissionsWithRole = permissions.map(permission => {
+    return createPermission({ ...permission, role: roleID });
+  });
 
   const newPermissions = [];
   for (const permission of permissionsWithRole) {

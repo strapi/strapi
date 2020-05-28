@@ -14,8 +14,13 @@ function isNotNull(msg = '${path} cannot be null.') {
   return this.test('defined', msg, isNotNullTest);
 }
 
+function arrayRequiredAllowEmpty(message) {
+  return this.test('field is required', message || '', value => _.isArray(value));
+}
+
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
+yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
 
 /**
  * Returns a formatted error for http responses

@@ -91,7 +91,9 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data).toMatchObject({
-          ...data.rolesWithoutUsers[0],
+          id: data.rolesWithoutUsers[0].id,
+          name: data.rolesWithoutUsers[0].name,
+          description: data.rolesWithoutUsers[0].description,
           usersCount: 0,
         });
       });
@@ -109,7 +111,18 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject(expectedRoles);
+        expectedRoles.forEach(role => {
+          expect(res.body.data).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                id: role.id,
+                name: role.name,
+                description: role.description,
+                usersCount: role.usersCount
+              }),
+            ])
+          );
+        });
       });
     });
 
@@ -132,6 +145,7 @@ describe('Role CRUD End to End', () => {
         });
         data.rolesWithoutUsers[0] = res.body.data;
       });
+
       test('Can update description of a role successfully', async () => {
         const updates = {
           name: 'new name - Cannot update the name of a role',
@@ -150,6 +164,7 @@ describe('Role CRUD End to End', () => {
         });
         data.rolesWithoutUsers[0] = res.body.data;
       });
+
       test('Cannot update the name of a role if already exists', async () => {
         const updates = {
           name: data.rolesWithoutUsers[0].name,
@@ -194,6 +209,7 @@ describe('Role CRUD End to End', () => {
             expect(res.body.data).toMatchObject(role);
           }
         });
+
         test('Can delete a role', async () => {
           let res = await rq({
             url: '/admin/roles/batch-delete',
@@ -212,6 +228,7 @@ describe('Role CRUD End to End', () => {
           data.deleteRolesIds.push(data.rolesWithoutUsers[0].id);
           data.rolesWithoutUsers.shift();
         });
+
         test('Can delete two roles', async () => {
           const roles = data.rolesWithoutUsers.slice(0, 2);
           const rolesIds = roles.map(r => r.id);
@@ -235,6 +252,7 @@ describe('Role CRUD End to End', () => {
           }
         });
       });
+
       describe('simple delete', () => {
         test('Can delete a role', async () => {
           let res = await rq({
@@ -253,6 +271,7 @@ describe('Role CRUD End to End', () => {
           data.deleteRolesIds.push(data.rolesWithoutUsers[0].id);
           data.rolesWithoutUsers.shift();
         });
+
         test("Don't delete a role if it still has assigned users", async () => {
           let res = await rq({
             url: `/admin/roles/${data.rolesWithUsers[0].id}`,
@@ -273,6 +292,7 @@ describe('Role CRUD End to End', () => {
         });
       });
     });
+
     describe("Roles don't exist", () => {
       test("Cannot update a role if it doesn't exist", async () => {
         const updates = {
@@ -292,6 +312,7 @@ describe('Role CRUD End to End', () => {
           message: 'entry.notFound',
         });
       });
+
       test("Simple delete - No error if deleting a role that doesn't exist", async () => {
         const res = await rq({
           url: `/admin/roles/${data.deleteRolesIds[0]}`,
@@ -302,6 +323,7 @@ describe('Role CRUD End to End', () => {
         expect(res.body.data).toEqual(null);
       });
     });
+
     test("Batch Delete - No error if deleting a role that doesn't exist", async () => {
       const res = await rq({
         url: '/admin/roles/batch-delete',
@@ -311,6 +333,80 @@ describe('Role CRUD End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data).toEqual([]);
+    });
+
+    describe('get & update Permissions', () => {
+      test('get permissions on empty role', async () => {
+        const res = await rq({
+          url: `/admin/roles/${data.roles[0].id}/permissions`,
+          method: 'GET',
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({
+          data: [],
+        });
+      });
+
+      test('assign permissions on role', async () => {
+        const res = await rq({
+          url: `/admin/roles/${data.roles[0].id}/permissions`,
+          method: 'PUT',
+          body: {
+            permissions: [
+              {
+                action: 'test.action',
+              },
+              {
+                action: 'test.action2',
+                subject: 'model1',
+                conditions: ['isOwner'],
+              },
+            ],
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length > 0).toBe(true);
+        res.body.data.forEach(permission => {
+          expect(permission).toMatchObject({
+            id: expect.anything(),
+            action: expect.any(String),
+            subject: expect.stringOrNull(),
+          });
+
+          if (permission.conditions.length > 0) {
+            expect(permission.conditions).toEqual(expect.arrayContaining([expect.any(String)]));
+          }
+          if (permission.fields.length > 0) {
+            expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
+          }
+        });
+      });
+
+      test('get permissions role', async () => {
+        const res = await rq({
+          url: `/admin/roles/${data.roles[0].id}/permissions`,
+          method: 'GET',
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length > 0).toBe(true);
+        res.body.data.forEach(permission => {
+          expect(permission).toMatchObject({
+            id: expect.anything(),
+            action: expect.any(String),
+            subject: expect.stringOrNull(),
+          });
+
+          if (permission.conditions.length > 0) {
+            expect(permission.conditions).toEqual(expect.arrayContaining([expect.any(String)]));
+          }
+          if (permission.fields.length > 0) {
+            expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
+          }
+        });
+      });
     });
   }
 
