@@ -102,7 +102,6 @@ describe('Role', () => {
       };
 
       const foundRoles = await roleService.findAllWithUsersCount();
-      console.log('foundRoles', foundRoles);
 
       expect(dbFind).toHaveBeenCalledWith({ _limit: -1 }, []);
       expect(foundRoles).toStrictEqual(roles);

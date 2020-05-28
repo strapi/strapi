@@ -251,7 +251,7 @@ module.exports = {
           }
 
           refs.forEach(obj => {
-            const targetModel = strapi.getModel(
+            const targetModel = strapi.db.getModel(
               obj.ref,
               obj.source !== 'content-manager' ? obj.source : null
             );
