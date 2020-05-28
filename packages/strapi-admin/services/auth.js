@@ -67,8 +67,7 @@ const forgotPassword = async ({ email } = {}) => {
   const resetPasswordToken = strapi.admin.services.token.createToken();
   await strapi.admin.services.user.update({ id: user.id }, { resetPasswordToken });
 
-  // TODO: set the final url once the front is developed
-  const url = `${strapi.config.admin.url}/reset-password?code=${resetPasswordToken}`;
+  const url = `${strapi.config.admin.url}/auth/reset-password?code=${resetPasswordToken}`;
   const body = resetEmailTemplate(url);
 
   // Send an email to the admin.
