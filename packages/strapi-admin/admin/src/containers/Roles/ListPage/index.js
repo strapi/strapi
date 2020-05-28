@@ -2,6 +2,8 @@ import React from 'react';
 import { List, Header } from '@buffetjs/custom';
 import { Pencil } from '@buffetjs/icons';
 import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import { useGlobalContext } from 'strapi-helper-plugin';
 
 import { RoleListWrapper, RoleRow } from '../../../components/Roles';
 import BaselineAlignment from './BaselineAlignment';
@@ -9,6 +11,8 @@ import useRolesList from '../../../hooks/useRolesList';
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
+  const { push } = useHistory();
+  const { settingsBaseURL } = useGlobalContext();
   const { roles, isLoading } = useRolesList();
 
   return (
@@ -37,7 +41,7 @@ const RoleListPage = () => {
               links={[
                 {
                   icon: <Pencil fill="#0e1622" />,
-                  onClick: () => console.log('edit', role.id),
+                  onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
                 },
               ]}
               role={role}
