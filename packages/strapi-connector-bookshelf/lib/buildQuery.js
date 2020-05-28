@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
+const { findModelByAssoc } = require('strapi-utils');
 
 /**
  * Build filters on a bookshelf query
@@ -252,15 +253,6 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     default:
       throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
   }
-};
-
-/**
- * Returns a Bookshelf model based on a model association
- * @param {Object} assoc - A strapi association
- */
-const findModelByAssoc = assoc => {
-  const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
-  return models[assoc.collection || assoc.model];
 };
 
 const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);
