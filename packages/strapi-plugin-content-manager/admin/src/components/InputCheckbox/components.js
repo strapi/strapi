@@ -42,7 +42,7 @@ const Label = styled.label`
   }
 
   ${({ value }) =>
-  value &&
+    value &&
     `
     font-weight: 500;
     &:after {

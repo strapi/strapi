@@ -14,7 +14,7 @@ const Button = styled(PlusButton)`
   }
 
   ${({ hasError }) =>
-  hasError &&
+    hasError &&
     `
     background-color: #FAA684;
     :before, :after {
