@@ -1,5 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
+import { Padded } from '@buffetjs/core';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
@@ -41,11 +42,12 @@ const ResetPassword = ({ formErrors, modifiedData, onChange, onSubmit, requestEr
                 validations={{ required: true }}
                 value={modifiedData.confirmPassword}
               />
-              <BaselineAlignment top size="13px">
+              <BaselineAlignment top size="3px" />
+              <Padded top>
                 <Button type="submit" color="primary" textTransform="uppercase">
                   {formatMessage({ id: 'Auth.form.button.reset-password' })}
                 </Button>
-              </BaselineAlignment>
+              </Padded>
             </form>
           </Box>
         </BaselineAlignment>

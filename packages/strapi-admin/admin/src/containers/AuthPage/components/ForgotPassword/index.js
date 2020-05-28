@@ -1,5 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
+import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
 import Button from '../../../../components/FullWidthButton';
@@ -32,11 +33,12 @@ const ForgotPassword = ({ formErrors, modifiedData, onChange, onSubmit }) => {
                 validations={{ required: true }}
                 value={modifiedData.email}
               />
-              <BaselineAlignment top size="13px">
+              <BaselineAlignment top size="3px" />
+              <Padded top>
                 <Button type="submit" color="primary" textTransform="uppercase">
                   {formatMessage({ id: 'Auth.form.button.forgot-password' })}
                 </Button>
-              </BaselineAlignment>
+              </Padded>
             </form>
           </Box>
         </BaselineAlignment>
