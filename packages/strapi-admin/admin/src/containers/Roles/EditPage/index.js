@@ -17,6 +17,7 @@ import {
   SettingsPermissions,
 } from '../../../components/Roles';
 import SizedInput from '../../../components/SizedInput';
+import useFetchPermissionsLayout from '../../../hooks/useFetchPermissionsLayout';
 
 import schema from './utils/schema';
 
@@ -27,24 +28,33 @@ const EditPage = () => {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
 
-  const headerActions = (handleSubmit, handleReset) => [
-    {
-      label: formatMessage({
-        id: 'app.components.Button.reset',
-      }),
-      onClick: handleReset,
-      color: 'cancel',
-      type: 'button',
-    },
-    {
-      label: formatMessage({
-        id: 'app.components.Button.save',
-      }),
-      onClick: handleSubmit,
-      color: 'success',
-      type: 'submit',
-    },
-  ];
+  // Retrieve the view's layout
+  const { data: layout, isLoading } = useFetchPermissionsLayout();
+  console.log({ layout });
+
+  /* eslint-disable indent */
+  const headerActions = (handleSubmit, handleReset) =>
+    isLoading
+      ? []
+      : [
+          {
+            label: formatMessage({
+              id: 'app.components.Button.reset',
+            }),
+            onClick: handleReset,
+            color: 'cancel',
+            type: 'button',
+          },
+          {
+            label: formatMessage({
+              id: 'app.components.Button.save',
+            }),
+            onClick: handleSubmit,
+            color: 'success',
+            type: 'submit',
+          },
+        ];
+  /* eslint-enable indent */
 
   const handleCreateRoleSubmit = async data => {
     try {
@@ -83,10 +93,12 @@ const EditPage = () => {
                 id: 'Settings.roles.create.description',
               })}
               actions={headerActions(handleSubmit, handleReset)}
+              isLoading={isLoading}
             />
             <BaselineAlignement top size="3px" />
             <FormCard
               actions={actions}
+              isLoading={isLoading}
               title={formatMessage({
                 id: 'Settings.roles.form.title',
               })}
@@ -115,15 +127,16 @@ const EditPage = () => {
                 style={{ height: 115 }}
               />
             </FormCard>
-
-            <Padded top size="md">
-              <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
-                <CollectionTypesPermissions />
-                <SingleTypesPermissions />
-                <PluginsPermissions />
-                <SettingsPermissions />
-              </Tabs>
-            </Padded>
+            {!isLoading && (
+              <Padded top size="md">
+                <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
+                  <CollectionTypesPermissions />
+                  <SingleTypesPermissions />
+                  <PluginsPermissions />
+                  <SettingsPermissions />
+                </Tabs>
+              </Padded>
+            )}
           </ContainerFluid>
         </form>
       )}
