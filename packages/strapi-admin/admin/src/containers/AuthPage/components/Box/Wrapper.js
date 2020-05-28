@@ -4,10 +4,10 @@ const Wrapper = styled.div`
   margin: auto;
   width: 41.6rem;
   padding: 20px 30px 25px 30px;
-  border-radius: 2px;
+  border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   border-top: 2px solid #1c5de7;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px 0 #e3e9f3;
+  background-color: ${({ theme }) => theme.main.colors.white};
+  box-shadow: 0 2px 4px 0 ${({ theme }) => theme.main.colors.darkGrey};
 `;
 
 export default Wrapper;

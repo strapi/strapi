@@ -6,7 +6,7 @@ import Wrapper from './Wrapper';
 const Box = ({ children, errorMessage, withoutError }) => (
   <Wrapper>
     {!withoutError && (
-      <Text fontSize="md" color="#f64d0a" style={{ textAlign: 'center' }} lineHeight="18px">
+      <Text fontSize="md" color="lightOrange" style={{ textAlign: 'center' }} lineHeight="18px">
         {errorMessage}&nbsp;
       </Text>
     )}
