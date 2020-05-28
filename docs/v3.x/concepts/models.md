@@ -999,7 +999,7 @@ _Parameters:_
 
 ::: tab delete
 
-**`beforeDeleted(params)`**
+**`beforeDelete(params)`**
 
 _Parameters:_
 
@@ -1009,7 +1009,7 @@ _Parameters:_
 
 ---
 
-**`afterDeleted(result, params)`**
+**`afterDelete(result, params)`**
 
 _Parameters:_
 

@@ -315,9 +315,9 @@ To enable the provider, create or edit the file at `./config/plugins.js`
 ```js
 module.exports = ({ env }) => ({
   upload: {
-    provider: 'aws-s3'
+    provider: 'aws-s3',
     providerOptions: {
-      accessKeyId: env('AWS_ACCESS_KEY_ID')',
+      accessKeyId: env('AWS_ACCESS_KEY_ID'),
       secretAccessKey: env('AWS_ACCESS_SECRET'),
       region: 'aws-region',
       params: {
@@ -330,7 +330,7 @@ module.exports = ({ env }) => ({
 
 Make sure to read the provider's `README` to know what are the possible parameters.
 
-### Configuration per envrionment
+### Configuration per environment
 
 When configuring your upload provider you might want to change the configuration based on the `NODE_ENV` environment variable or use environment specific credentials.
 
