@@ -109,6 +109,13 @@ const register = async ({ registrationToken, userInfo }) => {
   );
 };
 
+/**
+ * Find one user
+ */
+const findOne = async params => {
+  return strapi.query('user', 'admin').findOne(params);
+};
+
 /** Find many users (paginated)
  * @param query
  * @returns {Promise<user>}
@@ -132,6 +139,7 @@ module.exports = {
   findRegistrationInfo,
   register,
   sanitizeUser,
+  findOne,
   findPage,
   searchPage,
 };

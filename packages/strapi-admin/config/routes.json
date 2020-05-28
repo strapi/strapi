@@ -133,23 +133,22 @@
     {
       "method": "POST",
       "path": "/users",
-      "handler": "User.create",
-      "config": {
-        "policies": []
-      }
+      "handler": "user.create"
     },
     {
       "method": "GET",
       "path": "/users",
-      "handler": "User.find",
-      "config": {
-        "policies": []
-      }
+      "handler": "user.find"
+    },
+    {
+      "method": "GET",
+      "path": "/users/:id",
+      "handler": "user.findOne"
     },
     {
       "method": "PUT",
       "path": "/users/:id",
-      "handler": "User.update"
+      "handler": "user.update"
     },
     {
       "method": "GET",
