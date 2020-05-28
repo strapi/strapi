@@ -44,6 +44,20 @@ module.exports = {
     };
   },
 
+  async findOne(ctx) {
+    const { id } = ctx.params;
+
+    const user = await strapi.admin.services.user.findOne({ id });
+
+    if (!user) {
+      return ctx.badRequest('User does not exist');
+    }
+
+    ctx.body = {
+      data: strapi.admin.services.user.sanitizeUser(user),
+    };
+  },
+
   async update(ctx) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;

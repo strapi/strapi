@@ -4,8 +4,11 @@ const { yup } = require('strapi-utils');
 
 yup['strapiID'] = yup.lazy(value =>
   typeof value === 'number'
-    ? yup.number().integer()
-    : yup.string().matches(/^[a-f\d]{24}$/, '${path} must be a valid ID')
+    ? yup
+        .number()
+        .integer()
+        .positive()
+    : yup.string()
 );
 
 const email = yup
