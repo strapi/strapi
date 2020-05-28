@@ -334,5 +334,7 @@
   "app.containers.Users.EditPage.header.label": "Edit {name}",
   "app.containers.Users.EditPage.roles-bloc-title": "Attributed roles",
   "app.containers.Users.EditPage.form.active.label": "Active",
-  "app.containers.AuthPage.ForgotPasswordSuccess.text": "If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes. If you do not receive this link, please contact your administrator."
+  "app.containers.AuthPage.ForgotPasswordSuccess.text.email": "If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes.",
+  "app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin": "If you do not receive this link, please contact your administrator.",
+  "app.containers.AuthPage.ForgotPasswordSuccess.title": "Email sent"
 }

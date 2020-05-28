@@ -1,10 +1,12 @@
 import React from 'react';
-import { Button, Text } from '@buffetjs/core';
+import { Text, Padded } from '@buffetjs/core';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'strapi-helper-plugin';
 import BaselineAlignment from '../../../../components/BaselineAlignement';
+import Button from '../../../../components/FullWidthButton';
 import OopsLogo from '../../../../assets/images/oops.png';
+import Box from '../Box';
 import Logo from '../Logo';
 import Section from '../Section';
 import Img from './Img';
@@ -14,6 +16,7 @@ const Oops = () => {
   const { push } = useHistory();
   const { formatMessage } = useIntl();
   const query = useQuery();
+
   const handleClick = () => {
     push('/auth/login');
   };
@@ -26,19 +29,31 @@ const Oops = () => {
         <Logo />
       </Section>
       <Section withBackground textAlign="center">
-        <BaselineAlignment top size="60px">
-          <Img src={OopsLogo} />
-          <BaselineAlignment top size="26px">
-            <CustomText fontWeight="bold">Oops...</CustomText>
-          </BaselineAlignment>
-        </BaselineAlignment>
-        <BaselineAlignment top size="14px">
-          <Text fontSize="lg">{message}</Text>
-        </BaselineAlignment>
-        <BaselineAlignment top size="48px">
-          <Button onClick={handleClick} type="button">
-            {formatMessage({ id: 'Auth.form.button.go-home' })}
-          </Button>
+        <BaselineAlignment top size="25px">
+          <Box withoutError>
+            <Padded top>
+              <Padded top size="xs">
+                <Img src={OopsLogo} alt="oops" />
+              </Padded>
+            </Padded>
+            {/* FIXME IN BUFFET.JS */}
+            <BaselineAlignment top size="20px">
+              <Padded top size="xs">
+                <CustomText fontWeight="bold">Oops...</CustomText>
+              </Padded>
+            </BaselineAlignment>
+            <Padded top size="xs">
+              <Padded top size="sm">
+                <BaselineAlignment top size="3px" />
+                <Text fontSize="md">{message}</Text>
+              </Padded>
+            </Padded>
+            <Padded top size="md">
+              <Button type="button" color="primary" textTransform="uppercase" onClick={handleClick}>
+                {formatMessage({ id: 'Auth.link.signin' })}
+              </Button>
+            </Padded>
+          </Box>
         </BaselineAlignment>
       </Section>
     </>
