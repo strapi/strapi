@@ -11,7 +11,7 @@ const EmptyComponent = styled.div`
   background-color: #fff;
 
   ${({ hasMinError }) =>
-  hasMinError &&
+    hasMinError &&
     `
     border-color: #FAA684
   `}

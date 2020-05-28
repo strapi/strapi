@@ -9,7 +9,7 @@ const Wrapper = styled.div`
   padding: 0 5px;
 
   ${({ isComponent }) =>
-  isComponent &&
+    isComponent &&
     `
     height: 34px;
     padding: 0;

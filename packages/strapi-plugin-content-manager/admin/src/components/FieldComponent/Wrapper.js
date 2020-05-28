@@ -4,14 +4,14 @@ const Wrapper = styled.div`
   position: relative;
 
   ${({ isFromDynamicZone }) => {
-  if (isFromDynamicZone) {
-    return `
+    if (isFromDynamicZone) {
+      return `
         background-color: #fff;
       `;
-  }
+    }
 
-  return '';
-}}
+    return '';
+  }}
 `;
 
 export default Wrapper;
