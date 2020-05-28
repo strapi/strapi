@@ -19,28 +19,31 @@ const ForgotPassword = ({ formErrors, modifiedData, onChange, onSubmit }) => {
         <Logo />
       </Section>
       <Section withBackground>
-        <BaselineAlignment top size="25px">
-          <Box>
-            <form onSubmit={onSubmit}>
-              <Input
-                autoFocus
-                error={formErrors.email}
-                label="Auth.form.email.label"
-                name="email"
-                onChange={onChange}
-                placeholder="Auth.form.email.placeholder"
-                type="email"
-                validations={{ required: true }}
-                value={modifiedData.email}
-              />
-              <BaselineAlignment top size="3px" />
-              <Padded top>
-                <Button type="submit" color="primary" textTransform="uppercase">
-                  {formatMessage({ id: 'Auth.form.button.forgot-password' })}
-                </Button>
-              </Padded>
-            </form>
-          </Box>
+        {/* FIXME IN BUFFET.JS */}
+        <BaselineAlignment top size="20px">
+          <Padded top size="xs">
+            <Box>
+              <form onSubmit={onSubmit}>
+                <Input
+                  autoFocus
+                  error={formErrors.email}
+                  label="Auth.form.email.label"
+                  name="email"
+                  onChange={onChange}
+                  placeholder="Auth.form.email.placeholder"
+                  type="email"
+                  validations={{ required: true }}
+                  value={modifiedData.email}
+                />
+                <BaselineAlignment top size="3px" />
+                <Padded top>
+                  <Button type="submit" color="primary" textTransform="uppercase">
+                    {formatMessage({ id: 'Auth.form.button.forgot-password' })}
+                  </Button>
+                </Padded>
+              </form>
+            </Box>
+          </Padded>
         </BaselineAlignment>
         <AuthLink label="Auth.link.ready" to="/auth/login" />
       </Section>
