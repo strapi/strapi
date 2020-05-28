@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import getColor from './utils/getColor';
 
+/* eslint-disable indent */
 const RemoveWrapper = styled.div`
   display: flex;
   flex-direction: column;

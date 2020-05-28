@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 
+/* eslint-disable indent */
 const Button = styled.button`
   display: flex;
   height: 32px;

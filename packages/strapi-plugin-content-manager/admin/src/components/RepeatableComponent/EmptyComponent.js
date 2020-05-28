@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const EmptyComponent = styled.div`
   height: 71px;
   border: 1px solid rgba(227, 233, 243, 0.75);

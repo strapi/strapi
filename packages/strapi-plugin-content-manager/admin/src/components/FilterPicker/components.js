@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Wrapper = styled.div`
   margin-top: -6px;
   > div {
