@@ -12,6 +12,7 @@ var chalk = require('chalk');
 var spawn = require('cross-spawn');
 var opn = require('opn');
 const fetch = require('node-fetch');
+const { getAbsoluteAdminUrl } = require('strapi-utils');
 
 // https://github.com/sindresorhus/opn#app
 var OSX_CHROME = 'google chrome';
@@ -122,10 +123,7 @@ async function pingDashboard(url, multipleTime = false) {
  * true if it opened a browser or ran a node.js script, otherwise false.
  */
 async function openBrowser() {
-  let url = this.config.admin.url;
-  if (!url.startsWith('http')) {
-    url = `http://${strapi.config.host}:${strapi.config.port}${this.config.admin.url}`;
-  }
+  const url = getAbsoluteAdminUrl(strapi.config);
 
   // Ping the dashboard to ensure it's available.
   await pingDashboard.call(this, url);
