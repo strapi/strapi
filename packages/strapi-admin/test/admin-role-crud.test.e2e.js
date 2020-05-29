@@ -90,19 +90,26 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject(data.rolesWithoutUsers[0]);
+        expect(res.body.data).toMatchObject({
+          ...data.rolesWithoutUsers[0],
+          usersCount: 0,
+        });
       });
     });
 
     describe('Find all roles', () => {
       test('Can find all roles successfully', async () => {
+        const expectedRolesWithoutUser = data.rolesWithoutUsers.map(r => ({ ...r, usersCount: 0 }));
+        const expectedRolesWithUser = data.rolesWithUsers.map(r => ({ ...r, usersCount: 1 }));
+        const expectedRoles = expectedRolesWithoutUser.concat(expectedRolesWithUser);
+
         const res = await rq({
           url: '/admin/roles',
           method: 'GET',
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject(data.rolesWithoutUsers.concat(data.rolesWithUsers));
+        expect(res.body.data).toMatchObject(expectedRoles);
       });
     });
 
