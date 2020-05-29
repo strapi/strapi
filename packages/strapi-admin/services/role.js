@@ -32,6 +32,22 @@ const findOne = (params = {}, populate = []) => {
 };
 
 /**
+ * Find a role in database with usersCounts
+ * @param params query params to find the role
+ * @returns {Promise<role>}
+ */
+const findOneWithUsersCounts = async (params = {}, populate = []) => {
+  const role = await strapi.query('role', 'admin').findOne(params, populate);
+
+  if (role) {
+    const usersCounts = await getUsersCountsFor([role.id]);
+    role.usersCount = usersCounts[0];
+  }
+
+  return role;
+};
+
+/**
  * Find roles in database
  * @param params query params to find the roles
  * @returns {Promise<array>}
@@ -44,8 +60,13 @@ const find = (params = {}, populate = []) => {
  * Find all roles in database
  * @returns {Promise<array>}
  */
-const findAll = (populate = []) => {
-  return strapi.query('role', 'admin').find({ _limit: -1 }, populate);
+const findAllWithUsersCount = async (populate = []) => {
+  const roles = await strapi.query('role', 'admin').find({ _limit: -1 }, populate);
+  const rolesIds = roles.map(r => r.id);
+  const usersCounts = await getUsersCountsFor(rolesIds);
+  roles.forEach((role, index) => (role.usersCount = usersCounts[index]));
+
+  return roles;
 };
 
 /**
@@ -86,7 +107,7 @@ const exists = async params => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async (ids = []) => {
-  const usersCounts = await strapi.admin.services.user.countUsersForRoles(ids);
+  const usersCounts = await getUsersCountsFor(ids);
   if (usersCounts.some(count => count !== 0)) {
     throw strapi.errors.badRequest('ValidationError', {
       ids: ['Some roles are still assigned to some users.'],
@@ -104,13 +125,29 @@ const deleteByIds = async (ids = []) => {
   return deletedRoles;
 };
 
+/** Count the number of users for some roles
+ * @param rolesIds
+ * @returns {Promise<array>}
+ */
+const getUsersCountsFor = async (rolesIds = []) => {
+  const counts = [];
+  for (let roleId of rolesIds) {
+    const count = await strapi.query('user', 'admin').count({ 'roles.id': roleId });
+    counts.push(count);
+  }
+
+  return counts;
+};
+
 module.exports = {
   sanitizeRole,
   create,
   findOne,
+  findOneWithUsersCounts,
   find,
-  findAll,
+  findAllWithUsersCount,
   update,
   exists,
   deleteByIds,
+  getUsersCountsFor,
 };
