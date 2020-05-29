@@ -3,17 +3,6 @@
 const _ = require('lodash');
 const parseType = require('./parse-type');
 
-const findModelByAssoc = assoc => {
-  let models;
-  if (assoc.plugin === 'admin') {
-    models = strapi.admin.models;
-  } else {
-    models = assoc.plugin ? strapi.plugins[assoc.plugin].models : strapi.models;
-  }
-
-  return models[assoc.collection || assoc.model];
-};
-
 const isAttribute = (model, field) =>
   _.has(model.allAttributes, field) || model.primaryKey === field || field === 'id';
 
@@ -38,7 +27,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
 
     if (assoc) {
       association = assoc;
-      tmpModel = findModelByAssoc(assoc);
+      tmpModel = strapi.db.getModelByAssoc(assoc);
       continue;
     }
 

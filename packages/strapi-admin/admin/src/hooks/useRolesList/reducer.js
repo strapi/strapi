@@ -8,19 +8,19 @@ export const initialState = {
       id: 1,
       name: 'Super admin',
       description: 'This is the fake description of the super admin role.',
-      users: [1],
+      usersCounts: 3,
     },
     {
       id: 2,
       name: 'Editor',
       description:
         'This is the fake description of the editor role. This is the fake description of the editor role.',
-      users: [7, 2, 3, 4],
+      usersCounts: 1,
     },
     {
       id: 3,
       name: 'Author',
-      users: [5, 34],
+      usersCounts: 0,
     },
   ],
   isLoading: true,

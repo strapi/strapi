@@ -16,7 +16,9 @@ const RoleRow = ({ role, onClick, links, prefix }) => {
         <RoleDescription>{role.description}</RoleDescription>
       </td>
       <td>
-        <Text>123</Text>
+        <Text>
+          {role.usersCount} user{role.usersCount === 1 ? '' : 's'}
+        </Text>
       </td>
       <td>
         <IconLinks links={links} />
