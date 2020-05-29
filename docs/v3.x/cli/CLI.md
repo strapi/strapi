@@ -100,7 +100,7 @@ Options:
 All these examples are equivalent.
 
 ::: warning
-When configuring your application you often enter credentials for thrid party services (e.g authentication providers). Be aware that those credentials will also be dumped into the output of this command.
+When configuring your application you often enter credentials for third party services (e.g authentication providers). Be aware that those credentials will also be dumped into the output of this command.
 In case of doubt, you should avoid committing the dump file into a versioning system. Here are some methods you can explore:
 
 - Copy the file directly to the environment you want and run the restore command there.
@@ -137,7 +137,7 @@ All these examples are equivalent.
 When running the restore command, you can choose from three different strategies:
 
 - **replace**: Will create missing keys and replace existing ones.
-- **merge**: Will create missing keys and merge existing keys whith there new value.
+- **merge**: Will create missing keys and merge existing keys with their new value.
 - **keep**: Will create missing keys and keep existing keys as is.
 
 ## strapi generate:api
