@@ -9,7 +9,7 @@ const Router = require('koa-router');
 const _ = require('lodash');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
-const { logger, models } = require('strapi-utils');
+const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
@@ -98,14 +98,6 @@ class Strapi {
   logFirstStartupMessage() {
     this.logStats();
 
-    let hostname = strapi.config.host;
-    if (
-      strapi.config.environment === 'development' &&
-      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-    ) {
-      hostname = 'localhost';
-    }
-
     console.log(chalk.bold('One more thing...'));
     console.log(
       chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
@@ -113,13 +105,10 @@ class Strapi {
     console.log();
 
     const addressTable = new CLITable();
-    if (this.config.admin.url.startsWith('http')) {
-      addressTable.push([chalk.bold(this.config.admin.url)]);
-    } else {
-      addressTable.push([
-        chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`),
-      ]);
-    }
+
+    const adminUrl = getAbsoluteAdminUrl(strapi.config);
+    addressTable.push([chalk.bold(adminUrl)]);
+
     console.log(`${addressTable.toString()}`);
     console.log();
   }
@@ -127,32 +116,18 @@ class Strapi {
   logStartupMessage() {
     this.logStats();
 
-    let hostname = strapi.config.host;
-    if (
-      strapi.config.environment === 'development' &&
-      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-    ) {
-      hostname = 'localhost';
-    }
-
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
       console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      if (this.config.admin.url.startsWith('http')) {
-        console.log(chalk.bold(this.config.admin.url));
-      } else {
-        console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`));
-      }
+      const adminUrl = getAbsoluteAdminUrl(strapi.config);
+      console.log(chalk.bold(adminUrl));
       console.log();
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    if (this.config.admin.url.startsWith('http')) {
-      console.log(chalk.bold(this.config.server.url));
-    } else {
-      console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.server.url}`));
-    }
+    const serverUrl = getAbsoluteServerUrl(strapi.config);
+    console.log(chalk.bold(serverUrl));
     console.log();
   }
 

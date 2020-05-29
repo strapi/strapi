@@ -174,7 +174,7 @@ module.exports = {
       });
     }
   },
-  
+
   async resetPassword(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.params);
 

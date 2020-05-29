@@ -22,7 +22,7 @@ const {
   escapeQuery,
 } = require('./stringFormatting');
 const { removeUndefined } = require('./objectFormatting');
-const { getConfigUrls } = require('./config');
+const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
 
 module.exports = {
   yup,
@@ -43,4 +43,6 @@ module.exports = {
   getConfigUrls,
   escapeQuery,
   removeUndefined,
+  getAbsoluteAdminUrl,
+  getAbsoluteServerUrl,
 };

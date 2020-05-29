@@ -10,6 +10,10 @@ Before you start, please make sure your issue is understandable and reproducible
 To make your issue readable make sure you use valid Markdown syntax.
 
 https://guides.github.com/features/mastering-markdown/
+
+Please ensure you have also read and understand the contributing guide.
+
+https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue
 -->
 
 **Describe the bug**
@@ -35,7 +39,7 @@ If applicable, add code samples to help explain your problem.
 
 - Node.js version: <!-- Please ensure you are using the Node LTS version (v12) -->
 - NPM version:
-- Strapi version: <!-- Please make sure you are on the latest version -->
+- Strapi version: <!-- Beta and Alpha versions are no longer supported -->
 - Database:
 - Operating system:
 

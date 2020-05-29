@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Wrapper = styled.div`
   margin-top: -6px;
   > div {
@@ -42,14 +43,14 @@ const Div = styled.div`
   box-shadow: 3px 2px 4px #e3e9f3;
   padding: 18px 30px 0px 30px;
   transition: ${props => {
-  if (props.anim) {
-    return props.show
+    if (props.anim) {
+      return props.show
         ? 'margin-top .3s ease-out, margin-bottom .2s ease-out'
         : 'margin .3s ease-in';
-  }
+    }
 
-  return '';
-}};
+    return '';
+  }};
 `;
 
 export { Div, Flex, Span, Wrapper };

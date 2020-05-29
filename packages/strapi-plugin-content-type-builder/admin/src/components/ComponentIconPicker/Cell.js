@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Cell = styled.div`
   width: 54px;
   height: 100%;
@@ -10,8 +11,8 @@ const Cell = styled.div`
   cursor: pointer;
 
   ${({ isSelected }) => {
-  if (isSelected) {
-    return `
+    if (isSelected) {
+      return `
         &::after {
           content: '';
           position: absolute;
@@ -24,10 +25,10 @@ const Cell = styled.div`
           z-index: 1;
         }
       `;
-  }
+    }
 
-  return '';
-}}
+    return '';
+  }}
 
   > svg {
     z-index: 9;
