@@ -295,7 +295,7 @@ const buildQueryAggregate = (model, { paths } = {}) => {
  */
 const buildLookup = ({ model, key, paths }) => {
   const assoc = model.associations.find(a => a.alias === key);
-  const assocModel = findModelByAssoc({ assoc });
+  const assocModel = strapi.db.getModelByAssoc(assoc);
 
   if (!assocModel) return [];
 
@@ -542,7 +542,7 @@ const getAssociationFromFieldKey = (model, fieldKey) => {
   for (let key of parts) {
     assoc = tmpModel.associations.find(ast => ast.alias === key);
     if (assoc) {
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
     }
   }
 
@@ -565,7 +565,7 @@ const findModelByPath = ({ rootModel, path }) => {
   for (let part of parts) {
     const assoc = tmpModel.associations.find(ast => ast.alias === part);
     if (assoc) {
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
     }
   }
 
@@ -587,17 +587,12 @@ const findModelPath = ({ rootModel, path }) => {
     const assoc = tmpModel.associations.find(ast => ast.alias === part);
 
     if (assoc) {
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
       tmpPath.push(part);
     }
   }
 
   return tmpPath.length > 0 ? tmpPath.join('.') : null;
-};
-
-const findModelByAssoc = ({ assoc }) => {
-  const { models } = strapi.plugins[assoc.plugin] || strapi;
-  return models[assoc.model || assoc.collection];
 };
 
 module.exports = buildQuery;

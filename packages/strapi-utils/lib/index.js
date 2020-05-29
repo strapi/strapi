@@ -5,7 +5,7 @@
  */
 
 const convertRestQueryParams = require('./convertRestQueryParams');
-const { buildQuery, findModelByAssoc } = require('./buildQuery');
+const buildQuery = require('./buildQuery');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
@@ -34,7 +34,6 @@ module.exports = {
   templateConfiguration,
   convertRestQueryParams,
   buildQuery,
-  findModelByAssoc,
   parseMultipartData,
   sanitizeEntity,
   parseType,

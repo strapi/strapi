@@ -142,7 +142,4 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
   return strapi.db.connectors.get(model.orm).buildQuery({ model, filters, ...rest });
 };
 
-module.exports = {
-  buildQuery,
-  findModelByAssoc,
-};
+module.exports = buildQuery;

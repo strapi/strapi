@@ -108,6 +108,10 @@ class DatabaseManager {
     return _.get(strapi, ['models', key]) || _.get(strapi, ['components', key]);
   }
 
+  getModelByAssoc(assoc) {
+    return this.getModel(assoc.collection || assoc.model, assoc.plugin);
+  }
+
   getModelByCollectionName(collectionName) {
     return Array.from(this.models.values()).find(model => {
       return model.collectionName === collectionName;

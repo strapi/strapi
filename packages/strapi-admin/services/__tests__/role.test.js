@@ -36,7 +36,7 @@ describe('Role', () => {
 
       const foundRole = await roleService.findOne({ id: role.id });
 
-      expect(dbFindOne).toHaveBeenCalledWith({ id: role.id });
+      expect(dbFindOne).toHaveBeenCalledWith({ id: role.id }, undefined);
       expect(foundRole).toStrictEqual(role);
     });
   });
@@ -57,7 +57,7 @@ describe('Role', () => {
 
       const foundRoles = await roleService.find();
 
-      expect(dbFind).toHaveBeenCalledWith({});
+      expect(dbFind).toHaveBeenCalledWith({}, undefined);
       expect(foundRoles).toStrictEqual(roles);
     });
   });
@@ -78,7 +78,7 @@ describe('Role', () => {
 
       const foundRoles = await roleService.findAll();
 
-      expect(dbFind).toHaveBeenCalledWith({ _limit: -1 });
+      expect(dbFind).toHaveBeenCalledWith({ _limit: -1 }, undefined);
       expect(foundRoles).toStrictEqual(roles);
     });
   });
@@ -133,9 +133,11 @@ describe('Role', () => {
       };
       const dbDelete = jest.fn(() => Promise.resolve(role));
       const dbCount = jest.fn(() => Promise.resolve(0));
+      const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         query: () => ({ delete: dbDelete, count: dbCount }),
+        admin: { services: { permission: { deleteByRolesIds: dbDeleteByRolesIds } } },
       };
 
       const deletedRoles = await roleService.deleteByIds([role.id]);
@@ -162,9 +164,11 @@ describe('Role', () => {
       const rolesIds = roles.map(r => r.id);
       const dbDelete = jest.fn(() => Promise.resolve(roles));
       const dbCount = jest.fn(() => Promise.resolve(0));
+      const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         query: () => ({ delete: dbDelete, count: dbCount }),
+        admin: { services: { permission: { deleteByRolesIds: dbDeleteByRolesIds } } },
       };
 
       const deletedRoles = await roleService.deleteByIds(rolesIds);

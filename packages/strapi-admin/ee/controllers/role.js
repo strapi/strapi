@@ -44,10 +44,7 @@ module.exports = {
 
     const roles = await strapi.admin.services.role.deleteByIds([id]);
 
-    let sanitizedRole = null;
-    if (roles[0]) {
-      sanitizedRole = strapi.admin.services.role.sanitizeRole(roles[0]);
-    }
+    const sanitizedRole = roles.map(strapi.admin.services.role.sanitizeRole)[0] || null;
 
     ctx.body = {
       data: sanitizedRole,
@@ -61,7 +58,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    let roles = await strapi.admin.services.role.deleteByIds(body.ids);
+    const roles = await strapi.admin.services.role.deleteByIds(body.ids);
     const sanitizedRoles = roles.map(strapi.admin.services.role.sanitizeRole);
 
     ctx.body = {
