@@ -24,7 +24,7 @@ Fill out the form on the [Support page](https://strapi.io/support) of the Strapi
 
 ### Why can't I create or update content-types in production/staging?
 
-Strapi stores model configuration files (what defines the model schema) in files such as `api/restaurant/models/restaurant.settings.json`. Due to how Node.js works, in order for changes to take effect, that would require Node to restart the server. This could potentionally cause downtime of your production service and likewise these changes should be tracked in some kind of source control.
+Strapi stores model configuration files (what defines the model schema) in files such as `api/restaurant/models/restaurant.settings.json`. Due to how Node.js works, in order for changes to take effect, that would require Node to restart the server. This could potentially cause downtime of your production service and likewise these changes should be tracked in some kind of source control.
 
 Generally your "flow" of development would follow the following path:
 
