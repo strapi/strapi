@@ -145,7 +145,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/) on the documentation to keep your projects up-to-date.
+Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 
