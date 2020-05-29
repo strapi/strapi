@@ -58,7 +58,7 @@ const mongo = {
   options: {},
 };
 
-module.exports = mongo
+module.exports = mongo;
 ```
 
 `docker-compose.dev.yml`
