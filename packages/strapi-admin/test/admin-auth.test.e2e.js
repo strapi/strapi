@@ -9,7 +9,7 @@ const createUser = data => {
     url: '/admin/users',
     method: 'POST',
     body: {
-      roles: [],
+      roles: [1],
       ...data,
     },
   });
