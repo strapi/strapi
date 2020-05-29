@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 
 const sanitizeRole = role => {
@@ -25,7 +27,7 @@ const create = async attributes => {
  * @param params query params to find the role
  * @returns {Promise<role>}
  */
-const findOne = (params = {}, populate) => {
+const findOne = (params = {}, populate = []) => {
   return strapi.query('role', 'admin').findOne(params, populate);
 };
 
@@ -34,7 +36,7 @@ const findOne = (params = {}, populate) => {
  * @param params query params to find the roles
  * @returns {Promise<array>}
  */
-const find = (params = {}, populate) => {
+const find = (params = {}, populate = []) => {
   return strapi.query('role', 'admin').find(params, populate);
 };
 
@@ -42,7 +44,7 @@ const find = (params = {}, populate) => {
  * Find all roles in database
  * @returns {Promise<array>}
  */
-const findAll = populate => {
+const findAll = (populate = []) => {
   return strapi.query('role', 'admin').find({ _limit: -1 }, populate);
 };
 
@@ -80,17 +82,15 @@ const exists = async params => {
 
 /**
  * Delete roles in database if they have no user assigned
- * @param params query params to find the roles
- * @returns {Promise<boolean>}
+ * @param ids query params to find the roles
+ * @returns {Promise<array>}
  */
 const deleteByIds = async (ids = []) => {
-  for (let id of ids) {
-    const count = await strapi.query('user', 'admin').count({ 'roles.id': id });
-    if (count !== 0) {
-      throw strapi.errors.badRequest('ValidationError', {
-        ids: ['Some roles are still assigned to some users.'],
-      });
-    }
+  const usersCounts = await strapi.admin.services.user.countUsersForRoles(ids);
+  if (usersCounts.some(count => count !== 0)) {
+    throw strapi.errors.badRequest('ValidationError', {
+      ids: ['Some roles are still assigned to some users.'],
+    });
   }
 
   await strapi.admin.services.permission.deleteByRolesIds(ids);
