@@ -1,6 +1,7 @@
 import { DropdownToggle } from 'reactstrap';
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Toggle = styled(DropdownToggle)`
   height: 30px;
   padding: 0 10px;

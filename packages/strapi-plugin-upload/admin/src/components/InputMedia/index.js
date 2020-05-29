@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 
 import { getTrad, formatFileForEditing } from '../../utils';
@@ -16,8 +16,9 @@ import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
 import Wrapper from './Wrapper';
 import Input from '../Input';
+import ErrorMessage from './ErrorMessage';
 
-const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
+const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }) => {
   const [modal, setModal] = useState({
     isOpen: false,
     step: 'list',
@@ -31,6 +32,8 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
   const displaySlidePagination =
     attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
+  const inputId = id || name;
+  const errorId = `error-${inputId}`;
 
   useEffect(() => {
     setFileToDisplay(0);
@@ -104,7 +107,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   };
 
   return (
-    <Wrapper>
+    <Wrapper hasError={!isEmpty(error)}>
       <Name htmlFor={name}>{`${label}${displaySlidePagination}`}</Name>
 
       <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
@@ -166,6 +169,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           allowedTypes={attribute.allowedTypes}
         />
       )}
+      {error && <ErrorMessage id={errorId}>{error}</ErrorMessage>}
     </Wrapper>
   );
 };
@@ -177,6 +181,8 @@ InputMedia.propTypes = {
     required: PropTypes.bool,
     type: PropTypes.string,
   }).isRequired,
+  error: PropTypes.string,
+  id: PropTypes.string,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
@@ -184,6 +190,8 @@ InputMedia.propTypes = {
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 InputMedia.defaultProps = {
+  id: null,
+  error: null,
   label: '',
   value: null,
 };
