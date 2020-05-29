@@ -39,6 +39,27 @@ describe('Role', () => {
       expect(dbFindOne).toHaveBeenCalledWith({ id: role.id }, []);
       expect(foundRole).toStrictEqual(role);
     });
+    test('Finds a role with usersCount', async () => {
+      const role = {
+        id: 1,
+        name: 'super_admin',
+        description: "Have all permissions. Can't be delete",
+        usersCount: 0,
+      };
+      const dbFindOne = jest.fn(({ id }) =>
+        Promise.resolve(_.find([_.omit(role, ['usersCount'])], { id }))
+      );
+      const dbCount = jest.fn(() => Promise.resolve(0));
+      global.strapi = {
+        query: () => ({ findOne: dbFindOne, count: dbCount }),
+      };
+
+      const foundRole = await roleService.findOneWithUsersCounts({ id: role.id });
+
+      expect(dbFindOne).toHaveBeenCalledWith({ id: role.id }, []);
+      expect(dbCount).toHaveBeenCalledWith({ 'roles.id': role.id });
+      expect(foundRole).toStrictEqual(role);
+    });
   });
   describe('find', () => {
     test('Finds roles', async () => {
@@ -129,18 +150,17 @@ describe('Role', () => {
     });
   });
   describe('count', () => {
-    test('getUsersCountsFor', async () => {
-      const rolesIds = [1, 2];
+    test('getUsersCount', async () => {
+      const roleId = 1;
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
         query: () => ({ count: dbCount }),
       };
 
-      const usersCounts = await roleService.getUsersCountsFor(rolesIds);
+      const usersCount = await roleService.getUsersCount(roleId);
 
-      expect(dbCount).toHaveBeenNthCalledWith(1, { 'roles.id': rolesIds[0] });
-      expect(dbCount).toHaveBeenNthCalledWith(2, { 'roles.id': rolesIds[1] });
-      expect(usersCounts).toEqual([0, 0]);
+      expect(dbCount).toHaveBeenCalledWith({ 'roles.id': roleId });
+      expect(usersCount).toEqual(0);
     });
   });
   describe('delete', () => {
@@ -151,23 +171,22 @@ describe('Role', () => {
         description: 'Description',
         users: [],
       };
+      const dbCount = jest.fn(() => Promise.resolve(0));
       const dbDelete = jest.fn(() => Promise.resolve(role));
-      const dbCountUsersForRoles = jest.fn(() => Promise.resolve([0]));
       const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => ({ delete: dbDelete }),
+        query: () => ({ delete: dbDelete, count: dbCount }),
         admin: {
           services: {
             permission: { deleteByRolesIds: dbDeleteByRolesIds },
-            user: { countUsersForRoles: dbCountUsersForRoles },
           },
         },
       };
 
       const deletedRoles = await roleService.deleteByIds([role.id]);
 
-      expect(dbCountUsersForRoles).toHaveBeenCalledWith([role.id]);
+      expect(dbCount).toHaveBeenCalledWith({ 'roles.id': role.id });
       expect(dbDelete).toHaveBeenCalledWith({ id_in: [role.id] });
       expect(deletedRoles).toStrictEqual([role]);
     });
@@ -186,24 +205,27 @@ describe('Role', () => {
           users: [],
         },
       ];
+      const dbCount = jest.fn(() => Promise.resolve(0));
       const rolesIds = roles.map(r => r.id);
       const dbDelete = jest.fn(() => Promise.resolve(roles));
-      const dbCountUsersForRoles = jest.fn(() => Promise.resolve([0, 0]));
+      const dbGetUsersCount = jest.fn(() => Promise.resolve(0));
       const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => ({ delete: dbDelete }),
+        query: () => ({ delete: dbDelete, count: dbCount }),
         admin: {
           services: {
             permission: { deleteByRolesIds: dbDeleteByRolesIds },
-            user: { countUsersForRoles: dbCountUsersForRoles },
+            role: { getUsersCount: dbGetUsersCount },
           },
         },
       };
 
       const deletedRoles = await roleService.deleteByIds(rolesIds);
 
-      expect(dbCountUsersForRoles).toHaveBeenCalledWith(rolesIds);
+      expect(dbCount).toHaveBeenNthCalledWith(1, { 'roles.id': rolesIds[0] });
+      expect(dbCount).toHaveBeenNthCalledWith(2, { 'roles.id': rolesIds[1] });
+      expect(dbCount).toHaveBeenCalledTimes(2);
       expect(dbDelete).toHaveBeenCalledWith({ id_in: rolesIds });
       expect(deletedRoles).toStrictEqual(roles);
     });
