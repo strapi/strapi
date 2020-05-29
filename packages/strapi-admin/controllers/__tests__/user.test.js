@@ -71,5 +71,193 @@ describe('User Controller', () => {
     });
   });
 
-  describe('Find a user by its ID', () => {});
+  describe('Find a user by its ID', () => {
+    const user = {
+      id: 1,
+      firstname: 'John',
+      lastname: 'Doe',
+      email: 'johndoe@email.com',
+      roles: [1, 2],
+    };
+
+    test('Find a user correctly', async () => {
+      const findOne = jest.fn(() => user);
+      const sanitizeUser = jest.fn(user => user);
+      const ctx = createContext({ params: { id: user.id } });
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+          },
+        },
+      };
+
+      await userController.findOne(ctx);
+
+      expect(findOne).toHaveBeenCalledWith({ id: user.id });
+      expect(sanitizeUser).toHaveBeenCalledWith(user);
+      expect(ctx.body).toStrictEqual({ data: user });
+    });
+
+    test('User not found', async () => {
+      const fakeId = 42;
+      const badRequest = jest.fn();
+      const findOne = jest.fn(() => Promise.resolve(null));
+      const ctx = createContext({ params: { id: fakeId } }, { badRequest });
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne },
+          },
+        },
+      };
+
+      await userController.findOne(ctx);
+
+      expect(findOne).toHaveBeenCalledWith({ id: fakeId });
+      expect(badRequest).toHaveBeenCalledWith('User does not exist');
+    });
+  });
+
+  describe('Find users', () => {
+    const users = [
+      {
+        id: 1,
+        firstname: 'John',
+        lastname: 'Doe',
+        email: 'johndoe@email.com',
+        roles: [1, 2],
+      },
+      {
+        id: 2,
+        firstname: 'Doe',
+        lastname: 'John',
+        email: 'doejohn@email.com',
+        roles: [3],
+      },
+    ];
+
+    test('Find all users', async () => {
+      const pagination = { page: 1, pageSize: 5, pageCount: 1, total: 2 };
+      const findPage = jest.fn(() => ({
+        results: users,
+        pagination,
+      }));
+
+      const sanitizeUser = jest.fn(user => user);
+      const ctx = createContext({});
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findPage, sanitizeUser },
+          },
+        },
+      };
+
+      await userController.find(ctx);
+
+      expect(findPage).toHaveBeenCalled();
+      expect(sanitizeUser).toHaveBeenCalledTimes(2);
+      expect(ctx.body).toStrictEqual({ data: { results: users, pagination } });
+    });
+
+    test('Search all users', async () => {
+      const pagination = { page: 1, pageSize: 5, pageCount: 1, total: 2 };
+      const searchPage = jest.fn(() => ({
+        results: users,
+        pagination,
+      }));
+
+      const sanitizeUser = jest.fn(user => user);
+      const ctx = createContext({ query: { _q: 'foo' } });
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { searchPage, sanitizeUser },
+          },
+        },
+      };
+
+      await userController.find(ctx);
+
+      expect(searchPage).toHaveBeenCalled();
+      expect(sanitizeUser).toHaveBeenCalledTimes(2);
+      expect(ctx.body).toStrictEqual({ data: { results: users, pagination } });
+    });
+  });
+
+  describe('Update user', () => {
+    const user = {
+      id: 1,
+      firstname: 'John',
+      lastname: 'Doe',
+      email: 'johndoe@email.com',
+      roles: [1, 2],
+    };
+
+    test('User not found', async () => {
+      const fakeId = 42;
+      const exists = jest.fn(() => false);
+      const badRequest = jest.fn();
+      const body = { username: 'Foo' };
+
+      const ctx = createContext({ params: { id: fakeId }, body }, { badRequest });
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { exists },
+          },
+        },
+      };
+
+      await userController.update(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ id: fakeId });
+      expect(exists).toHaveReturnedWith(false);
+      expect(badRequest).toHaveBeenCalledWith('User does not exist');
+    });
+
+    test('Validation error', async () => {
+      const badRequest = jest.fn();
+      const body = { firstname: 21 };
+
+      const ctx = createContext({ params: { id: user.id }, body }, { badRequest });
+
+      await userController.update(ctx);
+
+      expect(badRequest).toHaveBeenCalledWith('ValidationError', {
+        firstname: ['firstname must be a `string` type, but the final value was: `21`.'],
+      });
+    });
+
+    test('Update a user correctly', async () => {
+      const exists = jest.fn(() => true);
+      const update = jest.fn((_, input) => ({ ...user, ...input }));
+      const sanitizeUser = jest.fn(user => user);
+      const body = { firstname: 'Foo' };
+
+      const ctx = createContext({ params: { id: user.id }, body });
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { update, sanitizeUser, exists },
+          },
+        },
+      };
+
+      await userController.update(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ id: user.id });
+      expect(exists).toHaveReturnedWith(true);
+      expect(update).toHaveBeenCalledWith({ id: user.id }, body);
+      expect(sanitizeUser).toHaveBeenCalled();
+      expect(ctx.body).toStrictEqual({ data: { ...user, ...body } });
+    });
+  });
 });

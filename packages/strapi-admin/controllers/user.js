@@ -36,7 +36,7 @@ module.exports = {
 
     const { results, pagination } = await strapi.admin.services.user[method](ctx.query);
 
-    return {
+    ctx.body = {
       data: {
         results: results.map(strapi.admin.services.user.sanitizeUser),
         pagination,
