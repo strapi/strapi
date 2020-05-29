@@ -5,7 +5,7 @@ const { validateRoleUpdateInput } = require('../validation/role');
 module.exports = {
   async findOne(ctx) {
     const { id } = ctx.params;
-    const role = await strapi.admin.services.role.findOne({ id });
+    const role = await strapi.admin.services.role.findOne({ id }, []);
 
     if (!role) {
       return ctx.notFound('role.notFound');
@@ -16,7 +16,7 @@ module.exports = {
     };
   },
   async findAll(ctx) {
-    const roles = await strapi.admin.services.role.findAll();
+    const roles = await strapi.admin.services.role.findAll([]);
     ctx.body = {
       data: roles,
     };
@@ -36,8 +36,10 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
+    const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
+
     ctx.body = {
-      data: role,
+      data: sanitizedRole,
     };
   },
 };

@@ -12,7 +12,7 @@ const roleCreateUpdateSchema = yup
       .string()
       .min(1)
       .required(),
-    description: yup.string().required(),
+    description: yup.string().nullable(),
   })
   .noUnknown();
 

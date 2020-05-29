@@ -17,8 +17,7 @@
     },
     "description": {
       "type": "string",
-      "configurable": false,
-      "required": true
+      "configurable": false
     },
     "users": {
       "configurable": false,

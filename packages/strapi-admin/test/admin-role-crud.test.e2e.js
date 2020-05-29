@@ -8,7 +8,9 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 let rq;
 
 const data = {
-  roles: [],
+  rolesWithUsers: [],
+  rolesWithoutUsers: [],
+  users: [],
 };
 
 describe('Role CRUD End to End', () => {
@@ -42,10 +44,10 @@ describe('Role CRUD End to End', () => {
           created_at: expect.anything(),
           updated_at: expect.anything(),
         });
-        data.roles.push(res.body.data);
+        data.rolesWithoutUsers.push(res.body.data);
       });
       test('Cannot create a role already existing', async () => {
-        const role = _.pick(data.roles[0], ['name', 'description']);
+        const role = _.pick(data.rolesWithoutUsers[0], ['name', 'description']);
         const res = await rq({
           url: '/admin/roles',
           method: 'POST',
@@ -57,17 +59,37 @@ describe('Role CRUD End to End', () => {
           name: [`The name must be unique and a role with name \`${role.name}\` already exists.`],
         });
       });
+      test('Can create a user with a role', async () => {
+        const user = {
+          email: 'new-user@strapi.io',
+          firstname: 'New',
+          lastname: 'User',
+          roles: [data.rolesWithoutUsers[5].id],
+        };
+
+        const res = await rq({
+          url: '/admin/users',
+          method: 'POST',
+          body: user,
+        });
+
+        expect(res.statusCode).toBe(201);
+
+        data.users.push(res.body.data);
+        data.rolesWithUsers.push(data.rolesWithoutUsers[5]);
+        data.rolesWithoutUsers.splice(5, 1);
+      });
     });
 
     describe('Find a role', () => {
       test('Can find a role successfully', async () => {
         const res = await rq({
-          url: `/admin/roles/${data.roles[0].id}`,
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}`,
           method: 'GET',
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject(data.roles[0]);
+        expect(res.body.data).toMatchObject(data.rolesWithoutUsers[0]);
       });
     });
 
@@ -79,7 +101,7 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data).toMatchObject(data.roles);
+        expect(res.body.data).toMatchObject(data.rolesWithoutUsers.concat(data.rolesWithUsers));
       });
     });
 
@@ -90,18 +112,18 @@ describe('Role CRUD End to End', () => {
           description: 'new description - Can update a role successfully',
         };
         const res = await rq({
-          url: `/admin/roles/${data.roles[0].id}`,
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}`,
           method: 'PUT',
           body: updates,
         });
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data).toMatchObject({
-          ...data.roles[0],
+          ...data.rolesWithoutUsers[0],
           ...updates,
           updated_at: expect.anything(),
         });
-        data.roles[0] = res.body.data;
+        data.rolesWithoutUsers[0] = res.body.data;
       });
       test('Can update description of a role successfully', async () => {
         const updates = {
@@ -109,26 +131,26 @@ describe('Role CRUD End to End', () => {
           description: 'new description - Can update description of a role successfully',
         };
         const res = await rq({
-          url: `/admin/roles/${data.roles[0].id}`,
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}`,
           method: 'PUT',
           body: updates,
         });
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data).toMatchObject({
-          ...data.roles[0],
+          ...data.rolesWithoutUsers[0],
           ...updates,
           updated_at: expect.anything(),
         });
-        data.roles[0] = res.body.data;
+        data.rolesWithoutUsers[0] = res.body.data;
       });
       test('Cannot update the name of a role if already exists', async () => {
         const updates = {
-          name: data.roles[0].name,
+          name: data.rolesWithoutUsers[0].name,
           description: 'new description - Cannot update the name of a role if already exists',
         };
         const res = await rq({
-          url: `/admin/roles/${data.roles[1].id}`,
+          url: `/admin/roles/${data.rolesWithoutUsers[1].id}`,
           method: 'PUT',
           body: updates,
         });
@@ -136,7 +158,7 @@ describe('Role CRUD End to End', () => {
         expect(res.statusCode).toBe(400);
         expect(res.body.data).toMatchObject({
           name: [
-            `The name must be unique and a role with name \`${data.roles[0].name}\` already exists.`,
+            `The name must be unique and a role with name \`${data.rolesWithoutUsers[0].name}\` already exists.`,
           ],
         });
       });
@@ -161,25 +183,48 @@ describe('Role CRUD End to End', () => {
     });
     describe('Delete roles', () => {
       describe('batch-delete', () => {
+        test("Don't delete the roles if some still have assigned users", async () => {
+          const roles = [data.rolesWithUsers[0], data.rolesWithUsers[0]];
+          const rolesIds = roles.map(r => r.id);
+          let res = await rq({
+            url: '/admin/roles/batch-delete',
+            method: 'POST',
+            body: { ids: rolesIds },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.data).toMatchObject({
+            ids: ['Some roles are still assigned to some users.'],
+          });
+
+          for (let role of roles) {
+            res = await rq({
+              url: `/admin/roles/${role.id}`,
+              method: 'GET',
+            });
+            expect(res.statusCode).toBe(200);
+            expect(res.body.data).toMatchObject(role);
+          }
+        });
         test('Can delete a role', async () => {
           let res = await rq({
             url: '/admin/roles/batch-delete',
             method: 'POST',
-            body: { ids: [data.roles[0].id] },
+            body: { ids: [data.rolesWithoutUsers[0].id] },
           });
           expect(res.statusCode).toBe(200);
-          expect(res.body.data).toMatchObject([data.roles[0]]);
+          expect(res.body.data).toMatchObject([data.rolesWithoutUsers[0]]);
 
           res = await rq({
-            url: `/admin/roles/${data.roles[0].id}`,
+            url: `/admin/roles/${data.rolesWithoutUsers[0].id}`,
             method: 'GET',
           });
           expect(res.statusCode).toBe(404);
 
-          data.roles.shift();
+          data.rolesWithoutUsers.shift();
         });
         test('Can delete two roles', async () => {
-          const roles = data.roles.slice(0, 2);
+          const roles = data.rolesWithoutUsers.slice(0, 2);
           const rolesIds = roles.map(r => r.id);
 
           let res = await rq({
@@ -196,7 +241,7 @@ describe('Role CRUD End to End', () => {
               method: 'GET',
             });
             expect(res.statusCode).toBe(404);
-            data.roles.shift();
+            data.rolesWithoutUsers.shift();
           }
         });
         test("No error if deleting a role that doesn't exist", async () => {
@@ -209,26 +254,23 @@ describe('Role CRUD End to End', () => {
           expect(res.statusCode).toBe(200);
           expect(res.body.data).toEqual([]);
         });
-        test.skip("Don't delete any role if some still have assigned users", async () => {
-          // TODO
-        });
       });
       describe('simple delete', () => {
         test('Can delete a role', async () => {
           let res = await rq({
-            url: `/admin/roles/${data.roles[0].id}`,
+            url: `/admin/roles/${data.rolesWithoutUsers[0].id}`,
             method: 'DELETE',
           });
           expect(res.statusCode).toBe(200);
-          expect(res.body.data).toMatchObject(data.roles[0]);
+          expect(res.body.data).toMatchObject(data.rolesWithoutUsers[0]);
 
           res = await rq({
-            url: `/admin/roles/${data.roles[0].id}`,
+            url: `/admin/roles/${data.rolesWithoutUsers[0].id}`,
             method: 'GET',
           });
           expect(res.statusCode).toBe(404);
 
-          data.roles.shift();
+          data.rolesWithoutUsers.shift();
         });
         test("No error if deleting a role that doesn't exist", async () => {
           const res = await rq({
@@ -239,8 +281,23 @@ describe('Role CRUD End to End', () => {
           expect(res.statusCode).toBe(200);
           expect(res.body.data).toEqual(null);
         });
-        test.skip("Don't delete a role if it still has assigned users", async () => {
-          // TODO
+        test("Don't delete a role if it still has assigned users", async () => {
+          let res = await rq({
+            url: `/admin/roles/${data.rolesWithUsers[0].id}`,
+            method: 'DELETE',
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.data).toMatchObject({
+            ids: ['Some roles are still assigned to some users.'],
+          });
+
+          res = await rq({
+            url: `/admin/roles/${data.rolesWithUsers[0].id}`,
+            method: 'GET',
+          });
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toMatchObject(data.rolesWithUsers[0]);
         });
       });
     });

@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
-const { findModelByAssoc } = require('strapi-utils');
 
 /**
  * Build filters on a bookshelf query
@@ -164,7 +163,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
         continue;
       }
 
-      const assocModel = findModelByAssoc(assoc);
+      const assocModel = strapi.db.getModelByAssoc(assoc);
 
       // if the last part of the path is an association
       // add the primary key of the model to the parts

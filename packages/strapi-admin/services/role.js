@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 const sanitizeRole = role => {
-  return _.omit(role, ['users']);
+  return _.omit(role, ['users', 'permissions']);
 };
 
 /**
@@ -25,8 +25,8 @@ const create = async attributes => {
  * @param params query params to find the role
  * @returns {Promise<role>}
  */
-const findOne = (params = {}) => {
-  return strapi.query('role', 'admin').findOne(params);
+const findOne = (params = {}, populate) => {
+  return strapi.query('role', 'admin').findOne(params, populate);
 };
 
 /**
@@ -34,16 +34,16 @@ const findOne = (params = {}) => {
  * @param params query params to find the roles
  * @returns {Promise<array>}
  */
-const find = (params = {}) => {
-  return strapi.query('role', 'admin').find(params);
+const find = (params = {}, populate) => {
+  return strapi.query('role', 'admin').find(params, populate);
 };
 
 /**
  * Find all roles in database
  * @returns {Promise<array>}
  */
-const findAll = () => {
-  return strapi.query('role', 'admin').find({ _limit: -1 });
+const findAll = populate => {
+  return strapi.query('role', 'admin').find({ _limit: -1 }, populate);
 };
 
 /**
@@ -93,8 +93,7 @@ const deleteByIds = async (ids = []) => {
     }
   }
 
-  // TODO: Waiting for permissions
-  // await strapi.admin.services.permission.delete({ roleId_in: rolesToDeleteIds });
+  await strapi.admin.services.permission.deleteByRolesIds(ids);
 
   let deletedRoles = await strapi.query('role', 'admin').delete({ id_in: ids });
 
