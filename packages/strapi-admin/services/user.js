@@ -120,20 +120,6 @@ const searchPage = async query => {
   return strapi.query('user', 'admin').searchPage(query);
 };
 
-/** Count the number of users for some roles
- * @param rolesIds
- * @returns {Promise<array>}
- */
-const countUsersForRoles = async (rolesIds = []) => {
-  const counts = [];
-  for (let roleId of rolesIds) {
-    const count = await strapi.query('user', 'admin').count({ 'roles.id': roleId });
-    counts.push(count);
-  }
-
-  return counts;
-};
-
 module.exports = {
   create,
   update,
@@ -143,5 +129,4 @@ module.exports = {
   sanitizeUser,
   findPage,
   searchPage,
-  countUsersForRoles,
 };

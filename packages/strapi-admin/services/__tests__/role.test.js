@@ -68,15 +68,20 @@ describe('Role', () => {
           id: 1,
           name: 'super_admin',
           description: "Have all permissions. Can't be delete",
+          usersCount: 0,
         },
       ];
-      const dbFind = jest.fn(() => Promise.resolve(roles));
+      const dbFind = jest.fn(() =>
+        Promise.resolve(roles.map(role => _.omit(role, ['usersCount'])))
+      );
+      const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query: () => ({ find: dbFind }),
+        query: () => ({ find: dbFind, count: dbCount }),
       };
 
-      const foundRoles = await roleService.findAll();
+      const foundRoles = await roleService.findAllWithUsersCount();
+      console.log('foundRoles', foundRoles);
 
       expect(dbFind).toHaveBeenCalledWith({ _limit: -1 }, []);
       expect(foundRoles).toStrictEqual(roles);
@@ -121,6 +126,21 @@ describe('Role', () => {
         }
       );
       expect(updatedRole).toStrictEqual(expectedUpdatedRole);
+    });
+  });
+  describe('count', () => {
+    test('getUsersCountsFor', async () => {
+      const rolesIds = [1, 2];
+      const dbCount = jest.fn(() => Promise.resolve(0));
+      global.strapi = {
+        query: () => ({ count: dbCount }),
+      };
+
+      const usersCounts = await roleService.getUsersCountsFor(rolesIds);
+
+      expect(dbCount).toHaveBeenNthCalledWith(1, { 'roles.id': rolesIds[0] });
+      expect(dbCount).toHaveBeenNthCalledWith(2, { 'roles.id': rolesIds[1] });
+      expect(usersCounts).toEqual([0, 0]);
     });
   });
   describe('delete', () => {
