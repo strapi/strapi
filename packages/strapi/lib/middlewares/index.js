@@ -8,6 +8,7 @@ const requiredMiddlewares = [
   'logger',
   'boom',
   'cors',
+  'cron',
   'xframe',
   'xss',
   'public',
