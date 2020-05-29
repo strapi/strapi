@@ -80,9 +80,10 @@ export class HomePage extends React.Component {
   };
 
   openCurrentDocumentation = () => {
-    const { currentDocVersion } = this.props;
+    const { currentDocVersion, prefix } = this.props;
+    const slash = prefix.startsWith('/') ? '' : '/';
 
-    return openWithNewTab(`/documentation/v${currentDocVersion}`);
+    return openWithNewTab(`${slash}${prefix}/v${currentDocVersion}`);
   };
 
   shouldHideInput = inputName => {
@@ -218,6 +219,7 @@ HomePage.defaultProps = {
   onConfirmDeleteDoc: () => {},
   onSubmit: () => {},
   onUpdateDoc: () => {},
+  prefix: '/documentation',
   versionToDelete: '',
 };
 
@@ -234,6 +236,7 @@ HomePage.propTypes = {
   onConfirmDeleteDoc: PropTypes.func,
   onSubmit: PropTypes.func,
   onUpdateDoc: PropTypes.func,
+  prefix: PropTypes.string,
   versionToDelete: PropTypes.string,
 };
 

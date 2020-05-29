@@ -1,6 +1,6 @@
 # Migration guide from 3.0.0-beta.20 to 3.0.0
 
-Upgrading your strapi application to `3.0.0`.
+Upgrading your Strapi application to `3.0.0`.
 
 **Make sure your server is not running until the end of the migration**
 
@@ -32,7 +32,7 @@ Then run either `yarn install` or `npm install`.
 
 ## New configuration loader
 
-We have reworked the way a strapi project is configured to make it simpler yet more powerfull.
+We have reworked the way a strapi project is configured to make it simpler yet more powerful.
 
 Some of the improvements are:
 
@@ -44,19 +44,19 @@ Before migrating, you should first read the new [configuration documentation](..
 
 ### Migrating
 
-**Server**
+#### Server
 
 Your server configuration can move from `./config/environments/{env}/server.json` to `./config/server.js` like shown [here](../concepts/configurations.md#server).
 
-**Database configuration**
+#### Database configuration
 
 Your database configuration can move from `./config/environments/{env}/database.json` to `./config/database.js` like shown [here](../concepts/configurations.md#database).
 
-**Middlewares**
+#### Middlewares
 
 We have moved all the middleware related configurations into one place: `./config/middleware.js`.
 
-The middlewares were configured in mutliple files:
+The middlewares were configured in multiple files:
 
 - `./config/middleware.json`
 - `./config/application.json`
@@ -94,7 +94,7 @@ You can review all possible options the [middleware documentation](../concepts/m
 If you never configured any middlewares you can delete the file all together. You can also only set the configurations you want to customize and leave the others out.
 :::
 
-**Hook**
+#### Hook
 
 We applied the same logic from the `middleware` configuration to the `hook` configuration.
 
@@ -104,19 +104,19 @@ First you can create a file `./config/hook.js`, and you can move the content of 
 If you never configured any hook you can delete the file all together. You can also only set the configurations you want to customize and leave the others out.
 :::
 
-**Functions**
+#### Functions
 
 You can leave your functions as is, we didn't change how they work.
 
-**Policies**
+#### Policies
 
 You can leave your policies as is, we didn't change how they work.
 
-**Custom**
+#### Custom
 
 Any custom configuration you have can still be used. You can read the [configuration documentation](../concepts/configurations.md) to know more.
 
-**Plugin**
+#### Plugin
 
 From now on, you can set your plugin configurations in `./config/plugins.js` or `./config/env/{env}/plugin.js`.
 
@@ -130,9 +130,9 @@ module.exports = {
 };
 ```
 
-### Final strucutre
+### Final structure
 
-Here is an example of the strucuture you could have after migrating:
+Here is an example of the structure you could have after migrating:
 
 **Before**
 
@@ -217,9 +217,9 @@ Once you have setup your configuration, you can cleanup your database by deletin
 
 If you are using the graphql `register` mutation, the input and response types have changed. You can check the code [here](https://github.com/strapi/strapi/pull/6047).
 
-The `changePassword` mutation got renamed to `resetPassword` to reflect what it does. You can check the code [here](https://github.com/strapi/strapi/pull/5655.
+The `changePassword` mutation got renamed to `resetPassword` to reflect what it does. You can check the code [here](https://github.com/strapi/strapi/pull/5655).
 
-## Remove `idAttribute` and `idAttributeType` options.
+## Remove `idAttribute` and `idAttributeType` options
 
 Currently using the idAttribute and idAttributeType options can break strapi in many ways. Fixing this is going to require a lot of work on the database and content management layer.
 
@@ -235,7 +235,7 @@ We replaced the `proxy` option found in `./config/server.json` by the `url` opti
 
 This option also makes the `admin.build.backend` option obsolete.
 
-This option tells strapi where it is hosted and is usefull for generating links or telling the admin panel where the API is available.
+This option tells strapi where it is hosted and is useful for generating links or telling the admin panel where the API is available.
 
 **Before**
 
