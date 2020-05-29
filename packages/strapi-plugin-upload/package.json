@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Media Library",
@@ -31,8 +31,8 @@
     "reactstrap": "8.4.1",
     "sharp": "0.24.1",
     "strapi-helper-plugin": "3.0.0",
-    "strapi-provider-upload-local": "3.0.0",
-    "strapi-utils": "3.0.0",
+    "strapi-provider-upload-local": "3.0.1",
+    "strapi-utils": "3.0.1",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
