@@ -19,8 +19,8 @@ module.exports = {
             bcc,
             replyTo: replyTo || settings.defaultReplyTo,
             subject,
-            text,
-            html,
+            altText: text,
+            message: html,
             ...rest,
           };
 
