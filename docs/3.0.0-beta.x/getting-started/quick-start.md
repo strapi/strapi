@@ -118,7 +118,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 ::: tip CONGRATULATIONS
 👏 Congratulations, you have now completed the **Strapi Quick Start**. Where to go next?
 
-- Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
+- Learn how to use Strapi with React ([Gatsby](https://strapi.io/blog/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://strapi.io/blog/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://strapi.io/blog/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
 - Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
