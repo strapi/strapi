@@ -58,7 +58,14 @@ const mongo = {
   options: {},
 };
 
-module.exports = mongo;
+// other connections...
+
+module.exports = {
+  defaultConnection: 'default',
+  connections: {
+    default: mongo,
+  },
+};
 ```
 
 `docker-compose.dev.yml`
