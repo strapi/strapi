@@ -53,7 +53,7 @@ module.exports = {
       user: UsersPermissionsMe!
     }
 
-    type UserPersmissionsPasswordPayload {
+    type UserPermissionsPasswordPayload {
       ok: Boolean!
     }
   `,
@@ -63,7 +63,7 @@ module.exports = {
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
     register(input: UsersPermissionsRegisterInput!): UsersPermissionsLoginPayload!
-    forgotPassword(email: String!): UserPersmissionsPasswordPayload
+    forgotPassword(email: String!): UserPermissionsPasswordPayload
     resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,

@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -9,7 +10,7 @@ const Wrapper = styled.div`
   padding: 0 5px;
 
   ${({ isComponent }) =>
-  isComponent &&
+    isComponent &&
     `
     height: 34px;
     padding: 0;

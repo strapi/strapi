@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
   padding: 0 20px !important;
 
   ${({ isEmpty, isFromDynamicZone }) => {
-  if (isEmpty) {
-    return `
+    if (isEmpty) {
+      return `
       position: relative;
       height: 108px;
       margin-bottom: 25px !important;
@@ -44,21 +45,21 @@ const NonRepeatableWrapper = styled.div`
         }
       }
     `;
-  }
+    }
 
-  if (isFromDynamicZone) {
-    return `
+    if (isFromDynamicZone) {
+      return `
       background-color: #fff;
       padding: 0 10px !important;
     `;
-  }
+    }
 
-  return `
+    return `
     padding-top: 25px !important;
     background-color: #f7f8f8;
     margin-bottom: 18px !important;
   `;
-}}
+  }}
 `;
 
 export default NonRepeatableWrapper;
