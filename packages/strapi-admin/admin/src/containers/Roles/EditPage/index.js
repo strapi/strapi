@@ -1,40 +1,40 @@
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
+import RoleForm from 'ee_else_ce/components/Roles/RoleForm';
+
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
-import FormCard from '../../../components/FormBloc';
 import {
-  ButtonWithNumber,
   CollectionTypesPermissions,
   Tabs,
   SingleTypesPermissions,
   PluginsPermissions,
   SettingsPermissions,
 } from '../../../components/Roles';
-import SizedInput from '../../../components/SizedInput';
-import useFetchPermissionsLayout from '../../../hooks/useFetchPermissionsLayout';
+import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 
 import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
+  const { goBack } = useHistory();
   const { settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
 
   // Retrieve the view's layout
-  const { data: layout, isLoading } = useFetchPermissionsLayout();
-  console.log({ layout });
+  const { isLoading: isLayoutLoading } = useFetchPermissionsLayout();
+  const { data: role, isLoading: isRoleLoading } = useFetchRole(id);
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
-    isLoading
+    isLayoutLoading && isRoleLoading
       ? []
       : [
           {
@@ -56,26 +56,36 @@ const EditPage = () => {
         ];
   /* eslint-enable indent */
 
-  const handleCreateRoleSubmit = async data => {
+  const handleEditRoleSubmit = async () => {
     try {
-      console.log('Handle submit POST API', data);
-    } catch (e) {
-      console.error(e);
+      // TODO : Uncomment when the API is done.
+
+      // const res = await request(`/admin/roles/${id}`, {
+      //   method: 'POST',
+      //   body: data,
+      // });
+
+      // if (res.data.id) {
+      strapi.notification.success('Settings.roles.edited');
+      goBack();
+      // }
+    } catch (err) {
+      // TODO : Uncomment when the API handle clean errors
+
+      //   if (err.response) {
+      // const data = get(err, 'response.payload', { data: {} });
+      // const apiErrorsMessage = formatAPIErrors(data);
+      // strapi.notification.error(apiErrorsMessage);
+      // }
+      strapi.notification.error('notification.error');
     }
   };
 
-  const actions = [
-    <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')} key="user-button">
-      {formatMessage({
-        id: 'Settings.roles.form.button.users-with-role',
-      })}
-    </ButtonWithNumber>,
-  ];
-
   return (
     <Formik
-      initialValues={{ name: '', description: '' }}
-      onSubmit={handleCreateRoleSubmit}
+      enableReinitialize
+      initialValues={role}
+      onSubmit={handleEditRoleSubmit}
       validationSchema={schema}
     >
       {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
@@ -86,57 +96,32 @@ const EditPage = () => {
                 label: formatMessage({
                   // TODO change trad
                   id: 'Settings.roles.edit.title',
-                  defaultMessage: `Edit ${id}`,
                 }),
               }}
               content={formatMessage({
                 id: 'Settings.roles.create.description',
               })}
               actions={headerActions(handleSubmit, handleReset)}
-              isLoading={isLoading}
             />
             <BaselineAlignement top size="3px" />
-            <FormCard
-              actions={actions}
-              isLoading={isLoading}
-              title={formatMessage({
-                id: 'Settings.roles.form.title',
-              })}
-              subtitle={formatMessage({
-                id: 'Settings.roles.form.description',
-              })}
-            >
-              <SizedInput
-                label="Name"
-                name="name"
-                type="text"
-                error={errors.name ? { id: errors.name } : null}
-                onBlur={handleBlur}
-                value={values.name}
-                onChange={handleChange}
-              />
-
-              <SizedInput
-                label="Description"
-                name="description"
-                type="textarea"
-                onBlur={handleBlur}
-                value={values.description}
-                onChange={handleChange}
-                // Override the default height of the textarea
-                style={{ height: 115 }}
-              />
-            </FormCard>
-            {!isLoading && (
-              <Padded top size="md">
-                <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
-                  <CollectionTypesPermissions />
-                  <SingleTypesPermissions />
-                  <PluginsPermissions />
-                  <SettingsPermissions />
-                </Tabs>
-              </Padded>
-            )}
+            <RoleForm
+              isLoading={isRoleLoading}
+              errors={errors}
+              values={values}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <Padded top size="md">
+              <Tabs
+                isLoading={isLayoutLoading}
+                tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}
+              >
+                <CollectionTypesPermissions />
+                <SingleTypesPermissions />
+                <PluginsPermissions />
+                <SettingsPermissions />
+              </Tabs>
+            </Padded>
           </ContainerFluid>
         </form>
       )}
