@@ -113,8 +113,6 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 
-This project is currently in **Beta**. Significant breaking changes are unlikely at this stage of the project, but using the latest version of Strapi ensures you have all the latest features and updates. New releases are usually shipped every two weeks to fix/enhance the project.
-
 ## Features
 
 - **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
