@@ -212,6 +212,7 @@ module.exports = {
             '/v3.x/guides/send-email',
             '/v3.x/guides/registering-a-field-in-admin',
             '/v3.x/guides/client',
+            '/v3.x/guides/computed-fields',
             '/v3.x/guides/update-version',
           ],
         },
