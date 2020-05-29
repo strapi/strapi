@@ -5,7 +5,7 @@ Thanks to the plugin `Email`, you can send email from your server or externals p
 ## Programmatic usage
 
 In your custom controllers or services you may want to send email.
-By using the following function, strapi will use the configured provider to send an email.
+By using the following function, Strapi will use the configured provider to send an email.
 
 ```js
 await strapi.plugins['email'].services.email.send({

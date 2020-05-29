@@ -36,7 +36,7 @@ We will create 2 new groups to manage available actions for different kind of us
 - Check `Select All` for the Application Article Content Type.
 - And save the new role
 
-And repeat the opperation for the `Reader` group and check `find`, `findOne` and `count`.
+And repeat the operation for the `Reader` group and check `find`, `findOne` and `count`.
 
 ### Create users
 

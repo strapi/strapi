@@ -4,7 +4,7 @@ As Strapi does not handle SSL directly and hosting a Node.js service on the "edg
 
 ## Configuration
 
-The below examples are more or less acting as an "SSL termination" proxy, meaning that HAProxy is only accepting the requests on SSL and proxying to other backend services such as Strapi or other web servers. **HAProxy cannot serve static content** and as such it is usually used to handle multi-server deployments in a failover or load-balance situtation. The examples provided below are based around everything existing on the same server, but could easily be tweaked for multi-server deployments.
+The below examples are more or less acting as an "SSL termination" proxy, meaning that HAProxy is only accepting the requests on SSL and proxying to other backend services such as Strapi or other web servers. **HAProxy cannot serve static content** and as such it is usually used to handle multi-server deployments in a failover or load-balance situation. The examples provided below are based around everything existing on the same server, but could easily be tweaked for multi-server deployments.
 
 ### HAProxy
 
@@ -84,7 +84,7 @@ backend strapi-backend
 
 #### Sub-Folder Unified
 
-This config is using a sub-folder that is dedicated to Strapi only. It will redirect normal HTTP traffic over to SSL and proxies the "frontend" to `localhost:8080`, but proxies all strapi requests on the `example.com/api` sub-path to the locally running Strapi application.
+This config is using a sub-folder that is dedicated to Strapi only. It will redirect normal HTTP traffic over to SSL and proxies the "frontend" to `localhost:8080`, but proxies all Strapi requests on the `example.com/api` sub-path to the locally running Strapi application.
 
 ::: warning
 HAProxy **cannot** serve static content, the below example is proxying frontend traffic to some other web server running on the localhost port 8080
