@@ -309,11 +309,7 @@ class PopUpForm extends React.Component {
                 onClick={this.context.unsetDataToEdit}
                 isSecondary
               />
-              <ButtonModal
-                message="users-permissions.PopUpForm.button.done"
-                onClick={onSubmit}
-                type="submit"
-              />
+              <ButtonModal message="form.button.done" onClick={onSubmit} type="submit" />
             </section>
           </ModalFooter>
         </form>
