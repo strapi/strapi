@@ -218,10 +218,7 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Exceptions
 
-**`uid`**
-
-- This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
-- This field also allows an `options` field. The value is a set of options passed to [the underlying `uid` generator](https://github.com/sindresorhus/slugify). A caveat is that the resulting `uid` must abide to the following RegEx `/^[A-Za-z0-9-_.~]*$`.
+- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
 
 ### Example
 
@@ -982,7 +979,7 @@ module.exports = {
   /**
    * Triggered before user creation.
    */
-  beforeCreate: async (model) => {
+  beforeCreate: async model => {
     // Hash password.
     const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
