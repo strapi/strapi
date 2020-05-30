@@ -108,6 +108,8 @@
   "app.components.listPlugins.title.none": "Nenhuma extensão instalada",
   "app.components.listPlugins.title.plural": "{number} extensões instaladas",
   "app.components.listPlugins.title.singular": "{number} extensão instalada",
+  "app.components.ListPluginsPage.deletePlugin.title": "Desinstalando",
+  "app.components.ListPluginsPage.deletePlugin.description": "Pode demorar alguns segundos para desinstalar a extensão.",
   "app.components.listPluginsPage.deletePlugin.error": "Ocorreu um erro ao desinstalar extensão",
 
   "app.links.configure-view": "Configure a visualização",
