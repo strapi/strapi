@@ -16,16 +16,15 @@ const buildQuery = ({
   filters = {},
   populate = [],
   aggregate = false,
+  session = null,
 } = {}) => {
-  const deepFilters = (filters.where || []).filter(
-    ({ field }) => field.split('.').length > 1
-  );
+  const deepFilters = (filters.where || []).filter(({ field }) => field.split('.').length > 1);
 
   if (deepFilters.length === 0 && aggregate === false) {
-    return buildSimpleQuery({ model, filters, populate });
+    return buildSimpleQuery({ model, filters, populate, session });
   }
 
-  return buildDeepQuery({ model, filters, populate });
+  return buildDeepQuery({ model, filters, populate, session });
 };
 
 /**
@@ -35,13 +34,16 @@ const buildQuery = ({
  * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildSimpleQuery = ({ model, filters, populate }) => {
+const buildSimpleQuery = ({ model, filters, populate, session }) => {
   const { where = [] } = filters;
 
   const wheres = where.map(buildWhereClause);
   const findCriteria = wheres.length > 0 ? { $and: wheres } : {};
 
-  let query = model.find(findCriteria).populate(populate);
+  let query = model
+    .find(findCriteria)
+    .session(session)
+    .populate(populate);
   query = applyQueryParams({ query, filters });
 
   return Object.assign(query, {
@@ -59,7 +61,7 @@ const buildSimpleQuery = ({ model, filters, populate }) => {
  * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildDeepQuery = ({ model, filters, populate }) => {
+const buildDeepQuery = ({ model, filters, populate, session }) => {
   // Build a tree of paths to populate based on the filtering and the populate option
   const { populatePaths, wherePaths } = computePopulatedPaths({
     model,
@@ -74,6 +76,7 @@ const buildDeepQuery = ({ model, filters, populate }) => {
         paths: _.merge({}, populatePaths, wherePaths),
       })
     )
+    .session(session)
     .append(buildQueryMatches(model, filters));
 
   return {
@@ -95,6 +98,7 @@ const buildDeepQuery = ({ model, filters, populate }) => {
                 $in: ids,
               },
             })
+            .session(session)
             .populate(populate);
 
           return applyQueryParams({ query, filters });
@@ -108,9 +112,7 @@ const buildDeepQuery = ({ model, filters, populate }) => {
      * Maps to query.count
      */
     count() {
-      return query
-        .count('count')
-        .then(results => _.get(results, ['0', 'count'], 0));
+      return query.count('count').then(results => _.get(results, ['0', 'count'], 0));
     },
 
     /**
@@ -214,8 +216,7 @@ const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
  * }
  * @param {Array<string>} paths - A list of paths to transform
  */
-const pathsToTree = paths =>
-  paths.reduce((acc, path) => _.merge(acc, _.set({}, path, {})), {});
+const pathsToTree = paths => paths.reduce((acc, path) => _.merge(acc, _.set({}, path, {})), {});
 
 /**
  * Builds the aggregations pipeling of the query
