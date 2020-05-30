@@ -2,66 +2,10 @@
 
 exports[`Admin | containers | EditView should match the snapshot 1`] = `
 <DocumentFragment>
-  .c1 {
-  position: fixed;
-  top: 0;
-  height: 6rem;
-  width: 6.5rem;
-  line-height: 6rem;
-  z-index: 1050;
-  text-align: center;
-  background-color: #ffffff;
-  color: #81848a;
-  border-top: 1px solid #f3f4f4;
-  border-right: 1px solid #f3f4f4;
-  border-left: 1px solid #f3f4f4;
-  cursor: pointer;
-}
-
-.c1:before {
-  content: '\\f053';
-  font-family: 'FontAwesome';
-  font-size: 1.8rem;
-  font-weight: bolder;
-}
-
-.c1:hover {
-  background-color: #f3f4f4;
-}
-
-.c17 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 20px;
-  width: 20px;
-  margin: 8px 5px 0px 0px;
-  border-radius: 50%;
-  border: 1px solid #e3e9f3;
-  cursor: pointer;
-}
-
-.c17:focus {
-  outline: 0;
-}
-
-.c17:after {
-  content: '\\f068';
-  font-family: FontAwesome;
-  font-size: 9px;
-  line-height: 18px;
-  color: #007eff;
-}
-
-.c5 {
+  .c5 {
   height: 30px;
-  padding: 0 14px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -73,12 +17,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   color: #ffffff;
 }
 
-.c5:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
+.c5:hover,
 .c5:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
@@ -89,15 +28,22 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   outline: 0;
 }
 
-.c5 > svg {
-  margin-right: 10px;
+.c5 > span svg {
+  font-size: 10px;
   vertical-align: initial;
 }
 
-.c7 {
+.c5 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
+}
+
+.c6 {
   height: 30px;
-  padding: 0 14px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -112,36 +58,43 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   color: #B4B6BA;
 }
 
-.c7:hover {
+.c6:hover,
+.c6:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   box-shadow: inset 0 0 30px [object Object];
 }
 
-.c7:active {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
-.c7:focus {
+.c6:focus {
   outline: 0;
 }
 
-.c7 > svg {
-  margin-right: 10px;
-  vertical-align: initial;
-}
-
-.c7:hover {
+.c6:hover {
   box-shadow: none;
   cursor: initial;
 }
 
-.c8 {
+.c6:hover {
+  box-shadow: none;
+  cursor: initial;
+}
+
+.c6 > span svg {
+  font-size: 10px;
+  vertical-align: initial;
+}
+
+.c6 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
+}
+
+.c7 {
   height: 30px;
-  padding: 0 14px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -157,33 +110,121 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   min-width: 140px;
 }
 
-.c8:hover {
+.c7:hover,
+.c7:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   box-shadow: inset 0 0 30px [object Object];
 }
 
-.c8:active {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
-.c8:focus {
+.c7:focus {
   outline: 0;
 }
 
-.c8 > svg {
-  margin-right: 10px;
-  vertical-align: initial;
-}
-
-.c8:hover {
+.c7:hover {
   box-shadow: none;
   cursor: initial;
 }
 
-.c12 {
+.c7:hover {
+  box-shadow: none;
+  cursor: initial;
+}
+
+.c7 > span svg {
+  font-size: 10px;
+  vertical-align: initial;
+}
+
+.c7 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
+}
+
+.c17 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+}
+
+.c17:focus,
+.c17:active {
+  outline: 0;
+}
+
+.c17:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c17:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c17:checked:after {
+  display: block;
+}
+
+.c17:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c17 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c16 input,
+.c16 label {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.c16 input {
+  margin-top: 4px;
+  width: 14px;
+  height: 12px;
+}
+
+.c16 input + label {
+  display: inline-block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: calc(100% - 14px);
+  margin-left: 10px;
+  margin-bottom: 0;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.c11 {
   width: 100%;
   height: 3.4rem;
   padding: 0 1rem;
@@ -197,24 +238,24 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   background-color: transparent;
 }
 
-.c12::-webkit-input-placeholder {
+.c11::-webkit-input-placeholder {
   color: #919BAE;
 }
 
-.c12:focus {
+.c11:focus {
   border-color: #78caff;
 }
 
-.c12:disabled {
+.c11:disabled {
   background-color: #FAFAFB;
 }
 
-.c11 {
+.c10 {
   position: relative;
   background-color: #ffffff;
 }
 
-.c11 button[type='button'] {
+.c10 button[type='button'] {
   width: 3.4rem;
   height: 3.4rem;
   position: absolute;
@@ -227,25 +268,25 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   background: transparent;
 }
 
-.c11 button[type='button']:hover span::before {
+.c10 button[type='button']:hover span::before {
   color: #000000;
 }
 
-.c11 button[type='button'].shown span::before {
+.c10 button[type='button'].shown span::before {
   color: #000000;
 }
 
-.c11 button[type='button'].shown + input[type='text'] {
+.c10 button[type='button'].shown + input[type='text'] {
   padding-right: calc(3.4rem + 1rem);
 }
 
-.c11 span {
+.c10 span {
   z-index: 0;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }
 
-.c11 input {
+.c10 input {
   position: relative;
   z-index: 1;
 }
@@ -279,10 +320,10 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c2 .sticky {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 30.6rem;
   z-index: 1050;
   background-color: white;
-  width: calc(100vw - 30.5rem);
+  width: calc(100vw - 30.6rem);
   padding-right: 15px;
   height: 60px;
   display: -webkit-box;
@@ -294,10 +335,23 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c2 .sticky .row {
   width: 100%;
   margin: auto;
+  margin-top: 16px;
+}
+
+.c2 .sticky .row .header-title p {
+  display: none;
 }
 
 .c2 .sticky .row > div > div {
   padding-top: 0;
+}
+
+.c2 .sticky .row > div > div h1 {
+  font-size: 2rem;
+}
+
+.c2 .sticky .row > div > div h1 svg {
+  margin-top: 8px;
 }
 
 .c2 .sticky .row > div > div button {
@@ -334,7 +388,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c3 {
   position: relative;
-  padding-top: 0.8rem;
+  padding-top: 0.5rem;
 }
 
 .c3 h1 {
@@ -343,49 +397,101 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
+  margin-bottom: 0;
+  padding-right: 18px;
+  font-size: 2.4rem;
+  line-height: normal;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 2.4rem;
-  font-weight: 600;
-  margin-bottom: 1px;
-  padding-right: 18px;
 }
 
 .c3 svg {
   position: absolute;
   right: 0;
   top: 0;
-  margin-top: 11px;
+  margin-top: 12px;
   font-size: 12px;
   color: rgba(16,22,34,0.35);
   cursor: pointer;
   outline: 0;
 }
 
-.c10 {
+.c9 {
   width: 100%;
   font-weight: 500;
   font-size: 1.3rem;
   color: #333740;
 }
 
-.c6 {
-  margin-right: 10px;
-  font-size: 0.94em;
+.c1 {
+  position: fixed;
+  top: 0;
+  height: 6rem;
+  width: 6.5rem;
+  line-height: 6rem;
+  z-index: 1050;
+  text-align: center;
+  background-color: #ffffff;
+  color: #81848a;
+  border-top: 1px solid #f3f4f4;
+  border-right: 1px solid #f3f4f4;
+  border-left: 1px solid #f3f4f4;
+  cursor: pointer;
 }
 
-.c9 {
+.c1:before {
+  content: '\\f053';
+  font-family: 'FontAwesome';
+  font-size: 1.8rem;
+  font-weight: bolder;
+}
+
+.c1:hover {
+  background-color: #f3f4f4;
+}
+
+.c14 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  margin: 8px 5px 0px 0px;
+  border-radius: 50%;
+  border: 1px solid #e3e9f3;
+  cursor: pointer;
+}
+
+.c14:focus {
+  outline: 0;
+}
+
+.c14:after {
+  content: '\\f068';
+  font-family: FontAwesome;
+  font-size: 9px;
+  line-height: 18px;
+  color: #007eff;
+}
+
+.c8 {
   position: relative;
-  padding-bottom: 23px;
+  padding-bottom: 27px;
 }
 
-.c9 label {
+.c8 label {
   display: block;
   margin-bottom: 1rem;
 }
 
-.c9 > p {
+.c8 > p {
   width: 100%;
   padding-top: 10px;
   font-size: 13px;
@@ -396,176 +502,24 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   margin-bottom: -8px;
 }
 
-.c20 {
-  cursor: pointer;
-  margin: 0;
-  position: relative;
-  width: 14px;
-  font-weight: 100;
+.c8 input[type="checkbox"] {
+  margin-bottom: 13px;
 }
 
-.c20:focus,
-.c20:active {
-  outline: 0;
-}
-
-.c20:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(16,22,34,0.15);
-  background-color: #fdfdfd;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
-.c20:after {
-  display: none;
-  content: '\\f00c';
-  font-family: 'FontAwesome';
-  position: absolute;
-  left: 0px;
-  top: 55%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 400;
-  color: #1C5DE7;
-  line-height: 14px;
-}
-
-.c20:checked:after {
-  display: block;
-}
-
-.c20:disabled {
-  background-color: #FAFAFB;
-  cursor: initial;
-}
-
-.c20 + label {
-  display: inline-block;
-  font-weight: 400;
-  font-size: 1.3rem;
-}
-
-.c19 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  height: 18px;
-  line-height: 18px;
-}
-
-.c19 input label {
-  cursor: pointer;
-  margin-bottom: 0 !important;
-}
-
-.c19 input + label {
-  margin-left: 10px;
-  margin-bottom: 0;
-}
-
-.c16 {
-  width: 100%;
-  height: 3.4rem;
-  padding: 0 1rem;
-  font-weight: 400;
-  font-size: 1.3rem;
-  cursor: text;
-  outline: 0;
-  border: 1px solid #E3E9F3;
-  border-radius: 2px;
-  color: #333740;
-  background-color: transparent;
-}
-
-.c16::-webkit-input-placeholder {
-  color: #919BAE;
-}
-
-.c16:focus {
-  border-color: #78caff;
-}
-
-.c16:disabled {
-  background-color: #FAFAFB;
-}
-
-.c15 {
-  position: relative;
-  background-color: #ffffff;
-}
-
-.c15 button[type='button'] {
-  width: 3.4rem;
-  height: 3.4rem;
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 2;
-  cursor: pointer;
-  outline: 0;
-  border: 0;
-  background: transparent;
-}
-
-.c15 button[type='button']:hover span::before {
-  color: #000000;
-}
-
-.c15 button[type='button'].shown span::before {
-  color: #000000;
-}
-
-.c15 button[type='button'].shown + input[type='text'] {
-  padding-right: calc(3.4rem + 1rem);
-}
-
-.c15 span {
-  z-index: 0;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-}
-
-.c15 input {
-  position: relative;
-  z-index: 1;
-}
-
-.c21 {
-  width: 100%;
-  font-weight: 500;
-  font-size: 1.3rem;
-  color: #333740;
-}
-
-.c14 {
+.c13 {
   margin-top: 12px;
   padding: 23px 24px 26px 24px;
   background-color: #fafafb;
   border-radius: 2px;
 }
 
-.c14 > ul {
+.c13 > ul {
   margin-bottom: 0;
   padding: 0;
   list-style-type: none;
 }
 
-.c14 > ul + button {
+.c13 > ul + button {
   padding: 0;
   color: #007eff;
   font-size: 13px;
@@ -573,53 +527,53 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   outline: 0;
 }
 
-.c14 > ul + button svg,
-.c14 > ul + button span {
+.c13 > ul + button svg,
+.c13 > ul + button span {
   vertical-align: middle;
 }
 
-.c14 > ul + button svg {
+.c13 > ul + button svg {
   margin-right: 10px;
 }
 
-.c14 > ul li {
+.c13 > ul li {
   position: relative;
   padding-right: 30px;
 }
 
-.c14 > ul li:not(:first-of-type) {
+.c13 > ul li:not(:first-of-type) {
   margin-bottom: 20px;
 }
 
-.c14 > ul li:last-of-type {
+.c13 > ul li:last-of-type {
   margin-bottom: 6px;
 }
 
-.c14 > ul li > section {
+.c13 > ul li > section {
   display: inline-block;
   width: 50%;
   vertical-align: top;
 }
 
-.c14 > ul li > section:nth-child(odd) {
+.c13 > ul li > section:nth-child(odd) {
   padding-right: 15px;
 }
 
-.c14 > ul li > section:nth-child(even) {
+.c13 > ul li > section:nth-child(even) {
   padding-left: 15px;
 }
 
-.c14 > ul li > section > p {
+.c13 > ul li > section > p {
   font-size: 13px;
   color: #333740;
   font-weight: 500;
 }
 
-.c14 > ul li > section > div:first-of-type {
+.c13 > ul li > section > div:first-of-type {
   height: 34px;
 }
 
-.c14 > ul li > section > div:first-of-type > div:first-of-type {
+.c13 > ul li > section > div:first-of-type > div:first-of-type {
   height: 34px;
   min-height: 34px;
   border: 1px solid #e3e9f3;
@@ -632,50 +586,50 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   align-items: normal;
 }
 
-.c14 > ul li > section > div:first-of-type > div:first-of-type > div:first-of-type {
+.c13 > ul li > section > div:first-of-type > div:first-of-type > div:first-of-type {
   height: 32px;
   padding: 0 1rem;
 }
 
-.c14 > ul li > section > div:first-of-type > div:first-of-type > div:last-of-type {
+.c13 > ul li > section > div:first-of-type > div:first-of-type > div:last-of-type {
   display: none;
 }
 
-.c14 > ul li > section > div:first-of-type > div:first-of-type:hover {
+.c13 > ul li > section > div:first-of-type > div:first-of-type:hover {
   cursor: text;
 }
 
-.c14 > ul li > section > div:first-of-type > span + div:first-of-type {
+.c13 > ul li > section > div:first-of-type > span + div:first-of-type {
   border-color: #78caff;
   box-shadow: none;
 }
 
-.c14 > ul li > section + div {
+.c13 > ul li > section + div {
   position: absolute;
   top: 7px;
   right: 0;
 }
 
-.c14 > ul li > section + div button {
+.c13 > ul li > section + div button {
   margin: 0;
 }
 
-.c14 .bordered input {
+.c13 .bordered input {
   border: 1px solid #f64d0a;
 }
 
-.c18 {
+.c15 {
   padding-top: 3px;
   padding-bottom: 8px;
 }
 
-.c18 table {
+.c15 table {
   width: 100%;
   border-radius: 2px;
   overflow: hidden;
 }
 
-.c18 tr:before {
+.c15 tr:before {
   content: '-';
   position: absolute;
   left: 20px;
@@ -688,7 +642,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   background-color: #f6f6f6;
 }
 
-.c18 tr:first-of-type:before {
+.c15 tr:first-of-type:before {
   left: 0;
   height: 2px;
   width: 100%;
@@ -696,48 +650,47 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   z-index: 1;
 }
 
-.c18 thead {
+.c15 thead {
   background-color: #fafafb;
 }
 
-.c18 thead td {
+.c15 thead td {
   height: 41px;
   text-align: center;
   font-size: 13px;
   font-weight: 500;
 }
 
-.c18 tbody {
+.c15 tbody {
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
   box-shadow: inset 0px 0px 0px 1px #f6f6f6;
 }
 
-.c18 tbody td {
+.c15 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
-.c18 tbody td input[type='checkbox']:disabled:before {
+.c15 tbody td input[type='checkbox']:disabled:before {
   background-color: #e8e5e5;
 }
 
-.c18 tbody td:first-of-type {
+.c15 tbody td:first-of-type {
   width: 200px;
   padding-left: 30px;
   text-transform: capitalize;
 }
 
-.c18 tbody td:first-of-type label {
+.c15 tbody td:first-of-type label {
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }
 
-.c18 tbody td:not(:first-of-type) > div {
+.c15 tbody td:not(:first-of-type) > div {
   display: block;
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -745,17 +698,17 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   margin: 0 auto;
 }
 
-.c13 {
+.c12 {
   position: relative;
-  padding-bottom: 23px;
+  padding-bottom: 27px;
 }
 
-.c13 label {
+.c12 label {
   display: block;
   margin-bottom: 1rem;
 }
 
-.c13 > p {
+.c12 > p {
   width: 100%;
   margin-bottom: -8px;
   padding-top: 10px;
@@ -766,7 +719,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   text-overflow: ellipsis;
 }
 
-.c13 .hasError input {
+.c12 .hasError input {
   border-color: #F64D0A;
 }
 
@@ -816,15 +769,10 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c0 .row > div {
   position: relative;
   z-index: 0;
-  margin-bottom: 4px;
 }
 
 .c0 .row > div:nth-of-type(3) {
   z-index: 1;
-}
-
-.c0 .row > div:nth-of-type(4) {
-  margin-bottom: 0;
 }
 
 <div
@@ -862,61 +810,56 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                 <button
                   class="c5"
                   color="primary"
-                  style="padding: 0px 15px;"
                   type="button"
                 >
-                  <span
-                    class="c6"
+                  <svg
+                    height="10px"
+                    viewBox="0 0 7 7"
+                    width="8px"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      height="14px"
-                      viewBox="0 0 14 14"
-                      width="14px"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <g
+                      fill="none"
+                      fill-rule="evenodd"
+                      stroke="none"
+                      stroke-width="1"
                     >
                       <g
-                        fill="none"
-                        fill-rule="evenodd"
-                        stroke="none"
-                        stroke-width="1"
+                        fill="#ffffff"
+                        fill-rule="nonzero"
+                        transform="translate(-1018.000000, -100.000000)"
                       >
                         <g
-                          fill="#ffffff"
-                          fill-rule="nonzero"
-                          transform="translate(-1018.000000, -100.000000)"
+                          transform="translate(537.000000, 85.000000)"
                         >
                           <g
-                            transform="translate(537.000000, 85.000000)"
+                            transform="translate(461.000000, 4.000000)"
                           >
                             <g
-                              transform="translate(461.000000, 4.000000)"
+                              transform="translate(20.000000, 11.000000)"
                             >
-                              <g
-                                transform="translate(20.000000, 11.000000)"
-                              >
-                                <path
-                                  d="M5.90191898,3.63963964 L0.23880597,6.96396396 C0.173418621,7.003003 0.117270789,7.00750751 0.0703624733,6.97747748 C0.0234541578,6.94744745 0,6.89339339 0,6.81531532 L0,0.184684685 C0,0.106606607 0.0234541578,0.0525525526 0.0703624733,0.0225225225 C0.117270789,-0.00750750751 0.173418621,-0.003003003 0.23880597,0.036036036 L5.90191898,3.36036036 C5.96730633,3.3993994 6,3.44594595 6,3.5 C6,3.55405405 5.96730633,3.6006006 5.90191898,3.63963964 Z"
-                                />
-                              </g>
+                              <path
+                                d="M5.90191898,3.63963964 L0.23880597,6.96396396 C0.173418621,7.003003 0.117270789,7.00750751 0.0703624733,6.97747748 C0.0234541578,6.94744745 0,6.89339339 0,6.81531532 L0,0.184684685 C0,0.106606607 0.0234541578,0.0525525526 0.0703624733,0.0225225225 C0.117270789,-0.00750750751 0.173418621,-0.003003003 0.23880597,0.036036036 L5.90191898,3.36036036 C5.96730633,3.3993994 6,3.44594595 6,3.5 C6,3.55405405 5.96730633,3.6006006 5.90191898,3.63963964 Z"
+                              />
                             </g>
                           </g>
                         </g>
                       </g>
-                    </svg>
-                  </span>
+                    </g>
+                  </svg>
                   Trigger
                 </button>
                 <button
-                  class="c7"
+                  class="c6"
                   color="cancel"
                   disabled=""
-                  style="padding: 0px 20px;"
+                  style="padding-left: 20px; padding-right: 20px;"
                   type="button"
                 >
                   Reset
                 </button>
                 <button
-                  class="c8"
+                  class="c7"
                   color="success"
                   disabled=""
                   style="min-width: 140px;"
@@ -942,22 +885,22 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-6"
             >
               <div
-                class="c9"
+                class="c8"
               >
                 <label
-                  class="c10"
+                  class="c9"
                   for="name"
                 >
                   Name
                 </label>
                 <div
-                  class="c11"
+                  class="c10"
                 >
                   <input
                     aria-describedby=" "
                     aria-invalid="false"
                     autocomplete="off"
-                    class="c12"
+                    class="c11"
                     id="name"
                     name="name"
                     tabindex="0"
@@ -974,22 +917,22 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="c9"
+                class="c8"
               >
                 <label
-                  class="c10"
+                  class="c9"
                   for="url"
                 >
                   Url
                 </label>
                 <div
-                  class="c11"
+                  class="c10"
                 >
                   <input
                     aria-describedby=" "
                     aria-invalid="false"
                     autocomplete="off"
-                    class="c12"
+                    class="c11"
                     id="url"
                     name="url"
                     tabindex="0"
@@ -1006,16 +949,16 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="c13"
+                class="c12"
               >
                 <label
-                  class="c10"
+                  class="c9"
                   for="headers"
                 >
                   Headers
                 </label>
                 <div
-                  class="c14"
+                  class="c13"
                 >
                   <ul>
                     <li>
@@ -1124,11 +1067,11 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       </section>
                       <section>
                         <div
-                          class="c15"
+                          class="c10"
                         >
                           <input
                             autocomplete="off"
-                            class="c16"
+                            class="c11"
                             id="headers.0.value"
                             name="headers.0.value"
                             tabindex="0"
@@ -1139,7 +1082,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       </section>
                       <div>
                         <button
-                          class="c17"
+                          class="c14"
                           type="button"
                         />
                       </div>
@@ -1177,16 +1120,16 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="c13"
+                class="c12"
               >
                 <label
-                  class="c10"
+                  class="c9"
                   for="events"
                 >
                   Events
                 </label>
                 <div
-                  class="c18"
+                  class="c15"
                 >
                   <table>
                     <thead>
@@ -1213,18 +1156,18 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       <tr>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="entry"
                               name="entry"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="entry"
                             >
                               entry
@@ -1233,54 +1176,54 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                         </td>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="entry.create"
                               name="entry.create"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="entry.create"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="entry.update"
                               name="entry.update"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="entry.update"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="entry.delete"
                               name="entry.delete"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="entry.delete"
                             />
                           </div>
@@ -1289,18 +1232,18 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       <tr>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="media"
                               name="media"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="media"
                             >
                               media
@@ -1309,54 +1252,54 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                         </td>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="media.create"
                               name="media.create"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="media.create"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="media.update"
                               name="media.update"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="media.update"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="c19"
+                            class="c16"
                           >
                             <input
                               autocomplete="off"
-                              class="c20"
+                              class="c17"
                               id="media.delete"
                               name="media.delete"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="c21"
+                              class="c9"
                               for="media.delete"
                             />
                           </div>

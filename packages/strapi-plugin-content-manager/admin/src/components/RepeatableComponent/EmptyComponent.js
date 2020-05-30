@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const EmptyComponent = styled.div`
   height: 71px;
   border: 1px solid rgba(227, 233, 243, 0.75);
@@ -10,13 +11,11 @@ const EmptyComponent = styled.div`
   text-align: center;
   background-color: #fff;
 
-  ${({ hasMinError }) => {
-  if (hasMinError) {
-    return 'border-color: #FAA684';
-  }
-
-  return '';
-}}
+  ${({ hasMinError }) =>
+    hasMinError &&
+    `
+    border-color: #FAA684
+  `}
 
   > p {
     color: #9ea7b8;

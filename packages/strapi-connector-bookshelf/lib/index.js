@@ -128,5 +128,8 @@ module.exports = function(strapi) {
     buildQuery,
     queries,
     ...relations,
+    get defaultTimestamps() {
+      return ['created_at', 'updated_at'];
+    },
   };
 };

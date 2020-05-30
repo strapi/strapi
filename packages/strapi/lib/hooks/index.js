@@ -13,8 +13,7 @@ module.exports = async function() {
   };
 
   // check if a hook is enabled
-  const hookEnabled = key =>
-    get(hookConfig, ['settings', key, 'enabled'], false) === true;
+  const hookEnabled = key => get(hookConfig, ['settings', key, 'enabled'], false) === true;
 
   // list of enabled hooks
   const enableddHook = Object.keys(this.hook).filter(hookEnabled);
@@ -83,12 +82,7 @@ module.exports = async function() {
     .filter(hookExists)
     .filter(hookEnabled);
 
-  const unspecifieddHook = difference(
-    enableddHook,
-    hooksBefore,
-    hooksOrder,
-    hooksAfter
-  );
+  const unspecifieddHook = difference(enableddHook, hooksBefore, hooksOrder, hooksAfter);
 
   // before
   await initdHookSeq(hooksBefore);

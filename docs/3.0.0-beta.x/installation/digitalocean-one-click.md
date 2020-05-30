@@ -27,7 +27,7 @@ To create a project head over to the Strapi [listing on the marketplace](https:/
 
 ### Step 3: Visit your app
 
-Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets). 
+Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets).
 
 ::: warning
 After the droplet has started, it will take a few more minutes to finish the Strapi installation.

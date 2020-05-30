@@ -1,9 +1,10 @@
 import styled, { css } from 'styled-components';
 
+/* eslint-disable indent */
 const Button = styled.button`
   width: 100%;
   height: 37px;
-  margin-bottom: 21px;
+  margin-bottom: 25px;
   padding: 0 0 3px 0;
   text-align: center;
   border: 1px solid rgba(227, 233, 243, 0.75);
@@ -14,25 +15,25 @@ const Button = styled.button`
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
   ${({ withBorderRadius }) => {
-        if (withBorderRadius) {
-          return css`
+    if (withBorderRadius) {
+      return css`
         border-radius: 2px;
       `;
-        }
+    }
 
-        return '';
-      }}
+    return '';
+  }}
 
   ${({ hasMinError }) => {
-        if (hasMinError) {
-          return `
+    if (hasMinError) {
+      return `
         border-color: #FAA684;
         border-top-color: rgba(227, 233, 243, 0.75);
       `;
-        }
+    }
 
-        return '';
-      }}
+    return '';
+  }}
 
   color: #007eff;
   font-size: 12px;

@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const NameWrapper = styled.div`
   position: relative;
   line-height: 26px;
@@ -9,20 +10,20 @@ const NameWrapper = styled.div`
   cursor: pointer;
 
   ${({ isOverEditBlock, isOverRemove, isSelected }) => {
-  if (isOverRemove) {
-    return `
-      color: #f64d0a;
-    `;
-  }
+    if (isOverRemove) {
+      return `
+        color: #f64d0a;
+      `;
+    }
 
-  if (isSelected || isOverEditBlock) {
-    return `
-      color: #007eff;
+    if (isSelected || isOverEditBlock) {
+      return `
+        color: #007eff;
     `;
-  }
+    }
 
-  return '';
-}}
+    return '';
+  }}
 `;
 
 export default NameWrapper;

@@ -21,10 +21,7 @@ class Search extends React.Component {
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
 
-    if (
-      prevProps.model !== model ||
-      (!isEmpty(prevProps.value) && isEmpty(value))
-    ) {
+    if (prevProps.model !== model || (!isEmpty(prevProps.value) && isEmpty(value))) {
       this.resetState();
     }
   }

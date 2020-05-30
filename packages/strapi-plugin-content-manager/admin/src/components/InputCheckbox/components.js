@@ -1,5 +1,6 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Div = styled.div`
   padding-left: 0;
   font-size: 13px;
@@ -41,26 +42,22 @@ const Label = styled.label`
     border-radius: 3px;
   }
 
-  ${({ value }) => {
-  if (value === true) {
-    return css`
-        font-weight: 500;
-        &:after {
-          content: '\f00c';
-          position: absolute;
-          top: 1px;
-          left: 17px;
-          font-size: 10px;
-          font-family: 'FontAwesome';
-          font-weight: 100;
-          color: #1c5de7;
-          transition: all 0.2s;
-        }
-      `;
-  }
-
-  return '';
-}}
+  ${({ value }) =>
+    value &&
+    `
+    font-weight: 500;
+    &:after {
+      content: '\f00c';
+      position: absolute;
+      top: 1px;
+      left: 17px;
+      font-size: 10px;
+      font-family: 'FontAwesome';
+      font-weight: 100;
+      color: #1c5de7;
+      transition: all 0.2s;
+    }
+  `}
 `;
 
 export { Div, Label };

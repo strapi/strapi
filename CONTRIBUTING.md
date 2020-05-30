@@ -55,7 +55,7 @@ The core team will review your pull request and will either merge it, request ch
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.0.0-beta.x/getting-started/install-requirements.html)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met)
 
 Then, please follow the instructions below:
 
@@ -143,7 +143,7 @@ Before submitting an issue you need to make sure:
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to [the official Strapi documentation](http://strapi.io).
   - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
-  - Ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
+  - Ask a question on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Your issue title is concise, on-topic and polite.
 - You can and do provide steps to reproduce your issue.
 - You have tried all the following (if relevant) and your issue remains:

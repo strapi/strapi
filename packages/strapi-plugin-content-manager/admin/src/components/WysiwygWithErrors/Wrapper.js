@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding-bottom: 2.4rem;
+  padding-bottom: 2.8rem;
   font-size: 1.3rem;
   font-family: 'Lato';
   label {

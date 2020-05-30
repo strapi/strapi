@@ -1,20 +1,18 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Wrapper = styled.div`
   position: relative;
-  .row {
-    margin-bottom: 4px;
-  }
 
   ${({ isFromDynamicZone }) => {
-  if (isFromDynamicZone) {
-    return `
+    if (isFromDynamicZone) {
+      return `
         background-color: #fff;
       `;
-  }
+    }
 
-  return '';
-}}
+    return '';
+  }}
 `;
 
 export default Wrapper;

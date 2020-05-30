@@ -1,11 +1,31 @@
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
+    <img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/899069a8-ac49-491f-b2d2-791b27799699/Logo.WhiteBackground.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200519%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200519T174202Z&X-Amz-Expires=86400&X-Amz-Signature=8a53d3ee4263f890e83c918313eaa659b8589b6d4a9300fda6b5cc99f89c56f8&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Logo.WhiteBackground.svg%22" width="318px" alt="Strapi logo" />
   </a>
 </p>
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
 <br />
+
+<p align="center">
+  <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
+    <img src="https://blog.strapi.io/content/images/2020/05/Platform-sh.png"  />
+  </a>
+
+<a href="https://marketplace.digitalocean.com/apps/strapi">
+<img src="https://blog.strapi.io/content/images/2020/05/DigitalOcean.png" />
+</a>
+
+<a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
+<img src="https://blog.strapi.io/content/images/2020/05/Heroku.png" />
+</a>
+
+<a href="https://fastandcomfy.io/strapi/">
+<img src="https://blog.strapi.io/content/images/2020/05/FastandComfy.png" />
+</a>
+
+</p>
+
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
@@ -25,7 +45,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://strapi.io/assets/images/readme.png" />
+    <img src="https://raw.githubusercontent.com/strapi/strapi/master/public/assets/administration_panel.png" alt="Administration panel" />
   </a>
 </p>
 
@@ -40,7 +60,7 @@ Strapi is a free and open source headless CMS delivering your content anywhere y
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/v3.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 ### ⏳ Installation
 
@@ -66,7 +86,7 @@ Enjoy 🎉
 
 ### 🖐 Requirements
 
-Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/3.0.0-beta.x/getting-started/install-requirements.html">Installation Requirements</a>.
+Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
 
 **Supported operating systems**:
 
@@ -115,10 +135,9 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
-- [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
-- [Slack](http://slack.strapi.io) (Highly recommended for faster support)
-- [Spectrum](https://spectrum.chat/strapi)
-- [GitHub](https://github.com/strapi/strapi) (Bug reports, contributions)
+- [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
+- [GitHub Discussions](https://github.com/strapi/strapi/discussions) (Questions and Discussions)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)
@@ -126,7 +145,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your projects up-to-date.
+Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 
