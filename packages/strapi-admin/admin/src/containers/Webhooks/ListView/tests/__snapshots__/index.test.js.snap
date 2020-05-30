@@ -323,7 +323,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
           Add your first one to this list.
         </p>
         <a
-          href="https://strapi.io/documentation/3.0.0-beta.x/guides/webhooks.html"
+          href="https://strapi.io/documentation/v3.x/concepts/webhooks.html"
           rel="noopener noreferrer"
           target="_blank"
         >
