@@ -34,31 +34,36 @@ docker-compose -f docker-compose.dev.yml stop
 DB={dbName} yarn develop
 ```
 
-The way it works is that the `getstarted` app has a specific `database.js` config file that will use the `DB` environment variable to setup the right database connection. You can look at the code [here](./config/environments/development/database.js)
+The way it works is that the `getstarted` app has a specific `database.js` config file that will use the `DB` environment variable to setup the right database connection. You can look at the code [here](./config/database.js)
 
 **Warning**
 
 You might have some errors while connecting to the databases.
-They might be coming from a conflict between a locally running database instance and the docker instance. To avoid the errors either shutdown your local database instance or change the ports in the `./config/environments/development/database.js` and the `docker-compose.dev.yml` file.
+They might be coming from a conflict between a locally running database instance and the docker instance. To avoid the errors either shutdown your local database instance or change the ports in the `./config/database.js` and the `docker-compose.dev.yml` file.
 
 **Example**:
 
 `database.js`
 
 ```js
+const mongo = {
+  connector: 'mongoose',
+  settings: {
+    database: 'strapi',
+    username: 'root',
+    password: 'strapi',
+    port: 27099,
+    host: 'localhost',
+  },
+  options: {},
+};
+
+// other connections...
+
 module.exports = {
+  defaultConnection: 'default',
   connections: {
-    default: {
-      connector: 'mongoose',
-      settings: {
-        // host: 'localhost',
-        // database: 'strapi',
-        // username: 'root',
-        // password: 'strapi',
-        port: 27099,
-      },
-      options: {},
-    },
+    default: mongo,
   },
 };
 ```
