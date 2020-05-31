@@ -198,20 +198,14 @@ module.exports = {
         );
       }
 
-      // Delete the current code
-      user.resetPasswordToken = null;
-
-      user.password = await strapi.plugins['users-permissions'].services.user.hashPassword({
+      const password = await strapi.plugins['users-permissions'].services.user.hashPassword({
         password: params.password,
       });
 
       // Update the user.
       await strapi
         .query('user', 'users-permissions')
-        .update(
-          { id: user.id },
-          { resetPasswordToken: user.resetPasswordToken, password: user.password }
-        );
+        .update({ id: user.id }, { resetPasswordToken: null, password });
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
@@ -308,9 +302,6 @@ module.exports = {
 
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
-
-    // Set the property code.
-    user.resetPasswordToken = resetPasswordToken;
 
     const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
       try {
