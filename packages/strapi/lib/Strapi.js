@@ -42,7 +42,7 @@ class Strapi {
     this.router = new Router();
 
     // Logger.
-    this.log = logger;
+    this.log = opts.logger || logger;
 
     // Utils.
     this.utils = {
