@@ -236,11 +236,12 @@ Wait a few seconds while the application is created.
 - Click on **OAuth consent screen** button
 - Chose **External** and click on **create**
 - Fill the **Application name** and save
-- Then click on **Create credentials** button
+- Then click on **Create credentials** button in the Credentials Tab
 - Chose **OAuth client ID** option
 
 Then fill the informations:
 
+- **Application Type** whether this for for a web app, Android, iOS etc...
 - **Name**: `Strapi Auth`
 - **Authorized redirect URIs**: `http://localhost:1337/connect/google/callback`
 
