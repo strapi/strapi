@@ -128,7 +128,7 @@ module.exports = { setupStrapi };
 
 We need a main entry file for our tests, one that will also test our helper file.
 
-**Path —** `./tests/helpers/strapi.js`
+**Path —** `./tests/app.test.js`
 
 ```js
 const fs = require('fs');
