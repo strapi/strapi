@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { request } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 
+import { roleTabsLabel } from '../../../../src/utils';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
 import ContainerFluid from '../../../../src/components/ContainerFluid';
 import FormCard from '../../../../src/components/FormBloc';
@@ -125,7 +126,7 @@ const CreatePage = () => {
             </FormCard>
 
             <Padded top size="md">
-              <Tabs tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}>
+              <Tabs tabsLabel={roleTabsLabel}>
                 <CollectionTypesPermissions />
                 <SingleTypesPermissions />
                 <PluginsPermissions />

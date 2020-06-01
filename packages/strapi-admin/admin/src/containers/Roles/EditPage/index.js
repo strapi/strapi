@@ -5,16 +5,17 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import RoleForm from 'ee_else_ce/components/Roles/RoleForm';
 
+import { roleTabsLabel } from '../../../utils';
+import RoleForm from '../../../components/Roles/RoleForm';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import {
   CollectionTypesPermissions,
-  Tabs,
-  SingleTypesPermissions,
   PluginsPermissions,
   SettingsPermissions,
+  SingleTypesPermissions,
+  Tabs,
 } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 
@@ -66,7 +67,7 @@ const EditPage = () => {
       // });
 
       // if (res.data.id) {
-      strapi.notification.success('Settings.roles.edited');
+      strapi.notification.success('notification.success.saved');
       goBack();
       // }
     } catch (err) {
@@ -112,10 +113,7 @@ const EditPage = () => {
               onBlur={handleBlur}
             />
             <Padded top size="md">
-              <Tabs
-                isLoading={isLayoutLoading}
-                tabsLabel={['Collection Types', 'Single Types', 'Plugins', 'Settings']}
-              >
+              <Tabs isLoading={isLayoutLoading} tabsLabel={roleTabsLabel}>
                 <CollectionTypesPermissions />
                 <SingleTypesPermissions />
                 <PluginsPermissions />
