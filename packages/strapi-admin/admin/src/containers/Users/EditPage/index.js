@@ -5,14 +5,13 @@ import { get, isEmpty } from 'lodash';
 import { useGlobalContext, auth } from 'strapi-helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
+
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
 import SizedInput from '../../../components/SizedInput';
-import Header from '../../../components/Users/Header';
-import MagicLink from '../../../components/Users/MagicLink';
-import SelectRoles from '../../../components/Users/SelectRoles';
-import useUsersForm from '../../../hooks/useUsersForm';
+import { Header, MagicLink, SelectRoles } from '../../../components/Users';
+import { useUsersForm } from '../../../hooks';
 import { editValidation } from '../../../validations/users';
 import form from './utils/form';
 

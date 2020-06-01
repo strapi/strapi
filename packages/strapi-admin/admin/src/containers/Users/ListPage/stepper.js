@@ -1,4 +1,4 @@
-import ModalCreateBody from '../../../components/Users/ModalCreateBody';
+import { ModalCreateBody } from '../../../components/Users';
 
 const stepper = {
   create: {

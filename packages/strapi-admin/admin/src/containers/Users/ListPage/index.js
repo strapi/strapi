@@ -2,13 +2,10 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useQuery, request } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
+
 import BaselineAlignement from '../../../components/BaselineAlignement';
-import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
-import Footer from '../../../components/Users/Footer';
-import List from '../../../components/Users/List';
-import Filter from '../../../components/Users/Filter';
-import FilterPicker from '../../../components/Users/FilterPicker';
-import SortPicker from '../../../components/Users/SortPicker';
+import { useSettingsHeaderSearchContext } from '../../../hooks';
+import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
 import Header from './Header';
 import ModalForm from './ModalForm';
 import getFilters from './utils/getFilters';

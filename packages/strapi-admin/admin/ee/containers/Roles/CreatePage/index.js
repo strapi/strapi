@@ -6,18 +6,10 @@ import { useIntl } from 'react-intl';
 import { request } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 
-import { roleTabsLabel } from '../../../../src/utils';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
 import ContainerFluid from '../../../../src/components/ContainerFluid';
 import FormCard from '../../../../src/components/FormBloc';
-import {
-  ButtonWithNumber,
-  CollectionTypesPermissions,
-  Tabs,
-  SingleTypesPermissions,
-  PluginsPermissions,
-  SettingsPermissions,
-} from '../../../../src/components/Roles';
+import { ButtonWithNumber, Permissions } from '../../../../src/components/Roles';
 import SizedInput from '../../../../src/components/SizedInput';
 
 import schema from './utils/schema';
@@ -126,12 +118,7 @@ const CreatePage = () => {
             </FormCard>
 
             <Padded top size="md">
-              <Tabs tabsLabel={roleTabsLabel}>
-                <CollectionTypesPermissions />
-                <SingleTypesPermissions />
-                <PluginsPermissions />
-                <SettingsPermissions />
-              </Tabs>
+              <Permissions />
             </Padded>
           </ContainerFluid>
         </form>

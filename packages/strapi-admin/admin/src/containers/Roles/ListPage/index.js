@@ -7,9 +7,8 @@ import { useHistory } from 'react-router-dom';
 import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
 
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
+import { useRolesList, useSettingsHeaderSearchContext } from '../../../hooks';
 import BaselineAlignment from './BaselineAlignment';
-import useRolesList from '../../../hooks/useRolesList';
-import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
