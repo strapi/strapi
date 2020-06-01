@@ -118,7 +118,7 @@ describe('Role CRUD End to End', () => {
                 id: role.id,
                 name: role.name,
                 description: role.description,
-                usersCount: role.usersCount
+                usersCount: role.usersCount,
               }),
             ])
           );
@@ -338,7 +338,7 @@ describe('Role CRUD End to End', () => {
     describe('get & update Permissions', () => {
       test('get permissions on empty role', async () => {
         const res = await rq({
-          url: `/admin/roles/${data.roles[0].id}/permissions`,
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
           method: 'GET',
         });
 
@@ -350,7 +350,7 @@ describe('Role CRUD End to End', () => {
 
       test('assign permissions on role', async () => {
         const res = await rq({
-          url: `/admin/roles/${data.roles[0].id}/permissions`,
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
           method: 'PUT',
           body: {
             permissions: [
@@ -386,7 +386,7 @@ describe('Role CRUD End to End', () => {
 
       test('get permissions role', async () => {
         const res = await rq({
-          url: `/admin/roles/${data.roles[0].id}/permissions`,
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
           method: 'GET',
         });
 
