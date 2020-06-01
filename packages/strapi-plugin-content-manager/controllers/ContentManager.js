@@ -55,6 +55,10 @@ module.exports = {
       entities = await contentManagerService.fetchAll({ model }, ctx.request.query);
     }
 
+    if (!entities) {
+      return ctx.notFound();
+    }
+
     ctx.body = entities;
   },
 

@@ -94,7 +94,6 @@ module.exports = strapi => {
 
       strapi.app.use(async (ctx, next) => {
         await next();
-
         // Empty body is considered as `notFound` response.
         if (_.isNil(ctx.body) && _.isNil(ctx.status)) {
           ctx.notFound();
