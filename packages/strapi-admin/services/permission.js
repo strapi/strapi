@@ -21,7 +21,7 @@ const find = (params = {}) => {
 };
 
 /**
- * Assigns permissions to a role
+ * Assign permissions to a role
  * @param {string|int} roleID - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */

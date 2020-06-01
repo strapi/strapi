@@ -1,8 +1,7 @@
 'use strict';
 
 const findModelByAssoc = ({ assoc }) => {
-  const target = assoc.collection || assoc.model;
-  return strapi.db.getModel(target, assoc.plugin);
+  return strapi.db.getModelByAssoc(assoc);
 };
 
 const isPolymorphic = ({ assoc }) => {
