@@ -1,6 +1,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
+import NameInput from 'ee_else_ce/components/Roles/NameInput';
 
 import FormCard from '../FormBloc';
 import SizedInput from '../SizedInput';
@@ -28,9 +29,10 @@ const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
         id: 'Settings.roles.form.description',
       })}
     >
-      <SizedInput
-        label="Name"
-        disabled
+      <NameInput
+        label={formatMessage({
+          id: 'Settings.roles.form.input.name',
+        })}
         name="name"
         type="text"
         error={errors.name ? { id: errors.name } : null}
@@ -40,7 +42,9 @@ const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
       />
 
       <SizedInput
-        label="Description"
+        label={formatMessage({
+          id: 'Settings.roles.form.input.description',
+        })}
         name="description"
         type="textarea"
         onBlur={onBlur}

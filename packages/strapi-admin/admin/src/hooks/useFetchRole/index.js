@@ -1,29 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import { request } from 'strapi-helper-plugin';
 
+import reducer, { initialState } from './reducer';
+
 const useFetchRole = id => {
-  const [data, setData] = useState({});
-  const [isLoading, setLoading] = useState(true);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    fetchRole();
+    fetchRole(id);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id]);
 
-  const fetchRole = async () => {
+  const fetchRole = async roleId => {
     try {
-      const { data } = await request(`/admin/roles/${id}`, { method: 'GET' });
+      const { data } = await request(`/admin/roles/${roleId}`, { method: 'GET' });
 
-      setData(data);
-      setLoading(false);
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
     } catch (err) {
-      setLoading(false);
+      dispatch({
+        type: 'GET_DATA_ERROR',
+      });
       strapi.notification.error('notification.error');
     }
   };
 
-  return { data, isLoading };
+  return state;
 };
 
 export default useFetchRole;

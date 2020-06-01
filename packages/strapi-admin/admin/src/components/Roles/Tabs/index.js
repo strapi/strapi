@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { LoadingIndicator } from 'strapi-helper-plugin';
+import { useIntl } from 'react-intl';
 
 import TabsWrapper from './TabsWrapper';
 import Tab from './Tab';
 
-const Tabs = ({ children, tabsLabel, isLoading }) => {
+const Tabs = ({ children, isLoading, tabsLabel }) => {
+  const { formatMessage } = useIntl();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   const handleSelectedTab = index => {
@@ -26,16 +28,17 @@ const Tabs = ({ children, tabsLabel, isLoading }) => {
           <Flex alignItems="stretch">
             {tabsLabel.map((tab, index) => (
               <Tab
-                // eslint-disable-next-line react/no-array-index-key
-                key={`${tab}-${index}`}
-                onClick={() => handleSelectedTab(index)}
                 isActive={index === selectedTabIndex}
+                key={tab.id}
+                onClick={() => handleSelectedTab(index)}
               >
-                <Text fontWeight={index === selectedTabIndex ? 'bold' : 'semiBold'}>{tab}</Text>
+                <Text fontWeight={index === selectedTabIndex ? 'bold' : 'semiBold'}>
+                  {formatMessage(tab)}
+                </Text>
               </Tab>
             ))}
           </Flex>
-          {children && children[selectedTabIndex]}
+          {children[selectedTabIndex]}
         </>
       )}
     </TabsWrapper>
@@ -48,8 +51,14 @@ Tabs.defaultProps = {
 
 Tabs.propTypes = {
   children: PropTypes.node.isRequired,
-  tabsLabel: PropTypes.array.isRequired,
   isLoading: PropTypes.bool,
+  tabsLabel: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+      labelId: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };
 
 export default Tabs;
