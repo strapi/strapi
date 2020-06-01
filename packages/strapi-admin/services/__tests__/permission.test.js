@@ -51,7 +51,13 @@ describe('Permission Service', () => {
       await permissionService.assign(1, permissions);
 
       expect(create).toHaveBeenCalledTimes(5);
-      expect(create).toHaveBeenCalledWith({ action: 'test', role: 1 });
+      expect(create).toHaveBeenCalledWith({
+        action: 'test',
+        role: 1,
+        conditions: [],
+        fields: [],
+        subject: null,
+      });
     });
   });
 });
