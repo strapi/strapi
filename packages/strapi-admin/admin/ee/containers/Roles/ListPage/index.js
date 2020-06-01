@@ -12,9 +12,10 @@ import {
   request,
 } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
+
 import useSettingsHeaderSearchContext from '../../../../src/hooks/useSettingsHeaderSearchContext';
 import { EmptyRole, RoleListWrapper } from '../../../../src/components/Roles';
-import useRolesList from '../../../../src/hooks/useRolesList';
+import { useRolesList } from '../../../../src/hooks';
 import RoleRow from './RoleRow';
 import BaselineAlignment from './BaselineAlignment';
 import reducer, { initialState } from './reducer';

@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
-import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
+
+import { useFetchPluginsFromMarketPlace } from '../../hooks';
 import PageTitle from '../../components/PageTitle';
 import PluginCard from './PluginCard';
 import Wrapper from './Wrapper';

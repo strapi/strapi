@@ -6,17 +6,10 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
-import { roleTabsLabel } from '../../../utils';
 import RoleForm from '../../../components/Roles/RoleForm';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
-import {
-  CollectionTypesPermissions,
-  PluginsPermissions,
-  SettingsPermissions,
-  SingleTypesPermissions,
-  Tabs,
-} from '../../../components/Roles';
+import { Permissions } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 
 import schema from './utils/schema';
@@ -113,12 +106,7 @@ const EditPage = () => {
               onBlur={handleBlur}
             />
             <Padded top size="md">
-              <Tabs isLoading={isLayoutLoading} tabsLabel={roleTabsLabel}>
-                <CollectionTypesPermissions />
-                <SingleTypesPermissions />
-                <PluginsPermissions />
-                <SettingsPermissions />
-              </Tabs>
+              <Permissions />
             </Padded>
           </ContainerFluid>
         </form>

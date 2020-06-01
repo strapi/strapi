@@ -2,12 +2,13 @@ import React from 'react';
 import { BackHeader, auth } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
+
 import BaselineAlignement from '../../components/BaselineAlignement';
 import ContainerFluid from '../../components/ContainerFluid';
 import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
-import Header from '../../components/Users/Header';
-import useUsersForm from '../../hooks/useUsersForm';
+import { Header } from '../../components/Users';
+import { useUsersForm } from '../../hooks';
 import { form, schema } from './utils';
 
 const ProfilePage = () => {
