@@ -17,7 +17,7 @@ const RoleRow = ({ role, onClick, links, prefix }) => {
       </td>
       <td>
         <Text>
-          {role.usersCount} user{role.usersCount === 1 ? '' : 's'}
+          {role.usersCount} user{role.usersCount > 1 ? '' : 's'}
         </Text>
       </td>
       <td>

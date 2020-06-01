@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
+describe('ADMIN | ee | CONTAINERS | ROLES | ListPage | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -18,34 +18,12 @@ describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
         id: 2,
       };
       const initialState = {
-        roles: [
-          {
-            id: 1,
-            name: 'Super admin',
-            description: 'This is the super admin role',
-          },
-          {
-            id: 2,
-            name: 'Writter',
-            description: 'This is the writter role',
-          },
-        ],
         selectedRoles: [],
+        shouldRefetchData: false,
       };
       const expected = {
-        roles: [
-          {
-            id: 1,
-            name: 'Super admin',
-            description: 'This is the super admin role',
-          },
-          {
-            id: 2,
-            name: 'Writter',
-            description: 'This is the writter role',
-          },
-        ],
         selectedRoles: [2],
+        shouldRefetchData: false,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
@@ -57,34 +35,67 @@ describe('ADMIN | CONTAINERS | ROLES | ListPage | reducer', () => {
         id: 2,
       };
       const initialState = {
-        roles: [
-          {
-            id: 1,
-            name: 'Super admin',
-            description: 'This is the super admin role',
-          },
-          {
-            id: 2,
-            name: 'Writter',
-            description: 'This is the writter role',
-          },
-        ],
         selectedRoles: [1, 2],
+        shouldRefetchData: false,
       };
       const expected = {
-        roles: [
-          {
-            id: 1,
-            name: 'Super admin',
-            description: 'This is the super admin role',
-          },
-          {
-            id: 2,
-            name: 'Writter',
-            description: 'This is the writter role',
-          },
-        ],
         selectedRoles: [1],
+        shouldRefetchData: false,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_REMOVE_ROLES_SUCCEEDED', () => {
+    it('should set the shouldRefetchData to true', () => {
+      const action = {
+        type: 'ON_REMOVE_ROLES_SUCCEEDED',
+      };
+      const initialState = {
+        selectedRoles: [],
+        shouldRefetchData: false,
+      };
+      const expected = {
+        selectedRoles: [],
+        shouldRefetchData: true,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('RESET_DATA_TO_DELETE', () => {
+    it('should empty the selected role array and set the shouldRefetchData to false', () => {
+      const action = {
+        type: 'RESET_DATA_TO_DELETE',
+      };
+      const initialState = {
+        selectedRoles: [1, 2, 4],
+        shouldRefetchData: true,
+      };
+      const expected = {
+        selectedRoles: [],
+        shouldRefetchData: false,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('SET_ROLE_TO_DELETE', () => {
+    it('should set the selected roles property correctly', () => {
+      const action = {
+        type: 'SET_ROLE_TO_DELETE',
+        id: 6,
+      };
+      const initialState = {
+        selectedRoles: [1, 2, 4],
+        shouldRefetchData: false,
+      };
+      const expected = {
+        selectedRoles: [6],
+        shouldRefetchData: false,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

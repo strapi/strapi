@@ -13,8 +13,21 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
   const { settingsBaseURL } = useGlobalContext();
 
   const handleRoleSelection = e => {
-    onRoleToggle(role.id);
     e.stopPropagation();
+
+    if (role.usersCount) {
+      strapi.notification.info('Roles.ListPage.notification.delete-not-allowed');
+    } else {
+      onRoleToggle(role.id);
+    }
+  };
+
+  const handleClickDelete = () => {
+    if (role.usersCount) {
+      strapi.notification.info('Roles.ListPage.notification.delete-not-allowed');
+    } else {
+      onRoleRemove(role.id);
+    }
   };
 
   const prefix = (
@@ -41,7 +54,7 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
         },
         {
           icon: <FontAwesomeIcon icon="trash-alt" />,
-          onClick: () => onRoleRemove(role.id),
+          onClick: handleClickDelete,
         },
       ]}
     />

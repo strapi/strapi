@@ -2,33 +2,18 @@
 import produce from 'immer';
 
 export const initialState = {
-  // TODO : TEMP => Remove after role creation is done.
-  roles: [
-    {
-      id: 1,
-      name: 'Super admin',
-      description: 'This is the fake description of the super admin role.',
-      usersCounts: 3,
-    },
-    {
-      id: 2,
-      name: 'Editor',
-      description:
-        'This is the fake description of the editor role. This is the fake description of the editor role.',
-      usersCounts: 1,
-    },
-    {
-      id: 3,
-      name: 'Author',
-      usersCounts: 0,
-    },
-  ],
+  roles: [],
   isLoading: true,
 };
 
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'GET_DATA': {
+        draftState.isLoading = true;
+        draftState.roles = [];
+        break;
+      }
       case 'GET_DATA_SUCCEEDED': {
         draftState.roles = action.data;
         draftState.isLoading = false;
