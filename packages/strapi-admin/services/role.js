@@ -36,7 +36,7 @@ const findOne = (params = {}, populate = []) => {
  * @param params query params to find the role
  * @returns {Promise<role>}
  */
-const findOneWithUsersCounts = async (params = {}, populate = []) => {
+const findOneWithUsersCount = async (params = {}, populate = []) => {
   const role = await strapi.query('role', 'admin').findOne(params, populate);
 
   if (role) {
@@ -130,7 +130,7 @@ const deleteByIds = async (ids = []) => {
 
 /** Count the number of users for some roles
  * @param rolesIds
- * @returns {Promise<array>}
+ * @returns {Promise<integer>}
  */
 const getUsersCount = async roleId => {
   return strapi.query('user', 'admin').count({ 'roles.id': roleId });
@@ -140,7 +140,7 @@ module.exports = {
   sanitizeRole,
   create,
   findOne,
-  findOneWithUsersCounts,
+  findOneWithUsersCount,
   find,
   findAllWithUsersCount,
   update,

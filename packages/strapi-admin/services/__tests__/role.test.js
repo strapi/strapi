@@ -54,7 +54,7 @@ describe('Role', () => {
         query: () => ({ findOne: dbFindOne, count: dbCount }),
       };
 
-      const foundRole = await roleService.findOneWithUsersCounts({ id: role.id });
+      const foundRole = await roleService.findOneWithUsersCount({ id: role.id });
 
       expect(dbFindOne).toHaveBeenCalledWith({ id: role.id }, []);
       expect(dbCount).toHaveBeenCalledWith({ 'roles.id': role.id });
