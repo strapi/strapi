@@ -14,7 +14,10 @@ const headers = [
     value: 'email',
   },
   {
-    cellFormatter: cellData => cellData.join(',\n'),
+    cellFormatter: cellData => {
+      // Only display the role's name
+      return cellData.map(role => role.name).join(',\n');
+    },
     name: 'roles',
     value: 'roles',
   },
