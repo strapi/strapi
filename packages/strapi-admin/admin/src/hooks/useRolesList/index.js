@@ -13,15 +13,15 @@ const useRolesList = () => {
 
   const fetchRolesList = async () => {
     try {
+      dispatch({
+        type: 'GET_DATA',
+      });
+
       const { data } = await request('/admin/roles', { method: 'GET' });
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
-        // TODO : TEMP => Uncomment after role creation is done.
-        // data,
-
-        // TODO : TEMP => Remove after role creation is done.
-        data: data.length > 0 ? data : initialState.roles,
+        data,
       });
     } catch (err) {
       const message = get(err, ['response', 'payload', 'message'], 'An error occured');
@@ -33,7 +33,7 @@ const useRolesList = () => {
     }
   };
 
-  return { roles, isLoading };
+  return { roles, isLoading, getData: fetchRolesList };
 };
 
 export default useRolesList;

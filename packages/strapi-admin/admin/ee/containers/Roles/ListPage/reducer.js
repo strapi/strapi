@@ -3,6 +3,7 @@ import produce from 'immer';
 
 export const initialState = {
   selectedRoles: [],
+  shouldRefetchData: false,
 };
 
 const reducer = (state, action) =>
@@ -19,16 +20,20 @@ const reducer = (state, action) =>
         }
         break;
       }
-      // case 'ON_REMOVE_ROLE': {
-      //   const { id } = action;
-      //   draftState.roles = state.roles.filter(role => role.id !== id);
-      //   break;
-      // }
-      // case 'ON_REMOVE_ROLES': {
-      //   const comparator = (first, second) => first.id === second;
-      //   draftState.roles = differenceWith(state.roles, state.selectedRoles, comparator);
-      //   break;
-      // }
+      case 'ON_REMOVE_ROLES_SUCCEEDED': {
+        draftState.shouldRefetchData = true;
+        break;
+      }
+      case 'RESET_DATA_TO_DELETE': {
+        draftState.shouldRefetchData = false;
+        draftState.selectedRoles = [];
+        break;
+      }
+      case 'SET_ROLE_TO_DELETE': {
+        draftState.selectedRoles = [action.id];
+        break;
+      }
+      // Leaving this code for the moment
       // case 'ON_DUPLICATION': {
       //   const { id } = action;
       //   draftState.roles = state.roles.reduce((acc, c) => {

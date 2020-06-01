@@ -1,9 +1,9 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from '@buffetjs/core';
 import { List, Header } from '@buffetjs/custom';
 import { Plus } from '@buffetjs/icons';
-import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { useGlobalContext, ListButton, PopUpWarning, request } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { RoleListWrapper } from '../../../../src/components/Roles';
@@ -14,17 +14,66 @@ import reducer, { initialState } from './reducer';
 
 const RoleListPage = () => {
   const { settingsBaseURL } = useGlobalContext();
+  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { formatMessage } = useIntl();
   const { push } = useHistory();
-  const [reducerState] = useReducer(reducer, initialState);
-  const { selectedRoles } = reducerState;
-  const { roles, isLoading } = useRolesList();
+  const [{ selectedRoles, shouldRefetchData }, dispath] = useReducer(reducer, initialState);
+  const { getData, roles, isLoading } = useRolesList();
+
+  const handleClosedModal = () => {
+    if (shouldRefetchData) {
+      getData();
+    }
+
+    // Empty the selected ids when the modal closes
+    dispath({
+      type: 'RESET_DATA_TO_DELETE',
+    });
+  };
+
+  const handleConfirmDeleteData = async () => {
+    try {
+      await request('/admin/roles/batch-delete', {
+        method: 'POST',
+        body: {
+          ids: selectedRoles,
+        },
+      });
+
+      // Empty the selectedRolesId and set the shouldRefetchData to true so the
+      // list is updated when closing the modal
+      dispath({
+        type: 'ON_REMOVE_ROLES_SUCCEEDED',
+      });
+    } catch (err) {
+      console.error(err);
+      strapi.notification.error('notification.error');
+    } finally {
+      handleToggleModal();
+    }
+  };
+
+  const handleDuplicateRole = () => console.log('duplicate');
 
   const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
-  const handleDuplicateRole = () => console.log('duplicate');
-  const handleRemoveRoles = () => console.log('remove roles');
-  const handleRemoveRole = () => console.log('remove role');
-  const handleRoleToggle = () => console.log('remove toggle');
+
+  const handleRemoveRole = roleId => {
+    dispath({
+      type: 'SET_ROLE_TO_DELETE',
+      id: roleId,
+    });
+
+    handleToggleModal();
+  };
+
+  const handleRoleToggle = roleId => {
+    dispath({
+      type: 'ON_SELECTION',
+      id: roleId,
+    });
+  };
+
+  const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
 
   const headerActions = [
     {
@@ -50,6 +99,7 @@ const RoleListPage = () => {
           id: 'Settings.roles.list.description',
         })}
         actions={headerActions}
+        isLoading={isLoading}
       />
       <BaselineAlignment />
       <RoleListWrapper>
@@ -62,7 +112,7 @@ const RoleListPage = () => {
             color: 'primary',
             disabled: selectedRoles.length === 0,
             label: formatMessage({ id: 'app.utils.delete' }),
-            onClick: handleRemoveRoles,
+            onClick: handleToggleModal,
             type: 'button',
           }}
           items={roles}
@@ -86,6 +136,12 @@ const RoleListPage = () => {
           />
         </ListButton>
       </RoleListWrapper>
+      <PopUpWarning
+        isOpen={isWarningDeleteAllOpened}
+        onClosed={handleClosedModal}
+        onConfirm={handleConfirmDeleteData}
+        toggleModal={handleToggleModal}
+      />
     </>
   );
 };
