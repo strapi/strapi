@@ -127,14 +127,14 @@ Please note that by default the `strapi` user **cannot run sudo commands** this 
 
 Once you are in the Strapi service account you can now use [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/#managing-processes) to manage the Strapi process and view the logs.
 
-The default service is called `strapi-develop` and should be running with an ID of `0`. Below are some example commands for PM2:
+The default service is called `strapi-development` and should be running with an ID of `0`. Below are some example commands for PM2:
 
 ```bash
 pm2 list # Will show you a list of all running processes
-pm2 restart strapi-develop # Restart the Strapi process manually
-pm2 stop strapi-develop # Stop the Strapi process
-pm2 start strapi-develop # Start the Strapi process
-pm2 logs strapi-develop # Show the logs in real time (to exit use ctrl +c)
+pm2 restart strapi-development # Restart the Strapi process manually
+pm2 stop strapi-development # Stop the Strapi process
+pm2 start strapi-development # Start the Strapi process
+pm2 logs strapi-development # Show the logs in real time (to exit use ctrl +c)
 ```
 
 Strapi will automatically start if the virtual machine is rebooted, you can also manually view the log files under `/srv/strapi/.pm2/logs` if you encounter any errors during the bootup.
@@ -147,7 +147,7 @@ Use the following steps to change the PostgreSQL password and update Strapi's co
 - Stop the current strapi process and change the password for the `strapi` database user
 
 ```bash
-pm2 stop strapi-develop
+pm2 stop strapi-development
 psql -c "ALTER USER strapi with password 'your-new-password';"
 ```
 
@@ -160,6 +160,6 @@ DATABASE_PASSWORD=your-new-password
 - Restart Strapi and confirm the password change was successful
 
 ```bash
-pm2 start strapi-develop
-pm2 logs strapi-develop
+pm2 start strapi-development
+pm2 logs strapi-development
 ```
