@@ -24,7 +24,6 @@ import TestEE from 'ee_else_ce/containers/TestEE';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
-import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
 import InstalledPluginsPage from '../InstalledPluginsPage';
@@ -36,6 +35,7 @@ import OnboardingVideos from '../Onboarding';
 import SettingsPage from '../SettingsPage';
 import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
+import Logout from './Logout';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
