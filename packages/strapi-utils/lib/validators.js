@@ -20,9 +20,18 @@ function arrayRequiredAllowEmpty(message) {
   return this.test('field is required', message || '', value => _.isArray(value));
 }
 
+function isAPluginName(message) {
+  return this.test('is not a plugin name', message, function(value) {
+    return ['admin', ...Object.keys(strapi.plugins)].includes(value)
+      ? true
+      : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
+  });
+}
+
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
 yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
+yup.addMethod(yup.string, 'isAPluginName', isAPluginName);
 
 class StrapiIDSchema extends MixedSchemaType {
   constructor() {
