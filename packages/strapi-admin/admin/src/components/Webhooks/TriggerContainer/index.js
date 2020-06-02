@@ -71,10 +71,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                 <td>
                   <p className="fail-label">
                     <Fail fill="#f64d0a" width="15px" height="15px" />
-                    <FormattedMessage
-                      id="Settings.error"
-                      defaultMessage="error"
-                    />
+                    <FormattedMessage id="Settings.error" defaultMessage="error" />
                     &nbsp;
                     {statusCode}
                   </p>

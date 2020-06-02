@@ -58,8 +58,7 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
       option: (base, state) => {
         return {
           ...base,
-          backgroundColor:
-            state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
+          backgroundColor: state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
           color: '#000000',
           fontSize: '13px',
           fontWeight: state.isSelected ? '600' : '400',
@@ -77,18 +76,12 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
         <li>
           <section>
             <p>
-              <FormattedMessage
-                id="Settings.webhooks.key"
-                defaultMessage="Key"
-              />
+              <FormattedMessage id="Settings.webhooks.key" defaultMessage="Key" />
             </p>
           </section>
           <section>
             <p>
-              <FormattedMessage
-                id="Settings.webhooks.value"
-                defaultMessage="Value"
-              />
+              <FormattedMessage id="Settings.webhooks.value" defaultMessage="Value" />
             </p>
           </section>
         </li>
@@ -103,28 +96,20 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
                   onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
                   name={`${name}.${index}.key`}
                   options={options}
-                  styles={customStyles(
-                    get(errors, `headers.${index}.key`, null)
-                  )}
+                  styles={customStyles(get(errors, `headers.${index}.key`, null))}
                   value={formatOption(key)}
                 />
               </section>
               <section>
                 <InputText
-                  className={
-                    get(errors, `headers.${index}.value`, null) && 'bordered'
-                  }
+                  className={get(errors, `headers.${index}.value`, null) && 'bordered'}
                   onChange={onChange}
                   name={`${name}.${index}.value`}
                   value={value}
                 />
               </section>
               <div>
-                <CircleButton
-                  type="button"
-                  isRemoveButton
-                  onClick={() => onRemove(index)}
-                />
+                <CircleButton type="button" isRemoveButton onClick={() => onRemove(index)} />
               </div>
             </li>
           );
