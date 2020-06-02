@@ -2,10 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CustomRow } from '@buffetjs/styles';
 import { IconLinks, Text } from '@buffetjs/core';
-
+import { useIntl } from 'react-intl';
 import RoleDescription from './RoleDescription';
 
 const RoleRow = ({ role, onClick, links, prefix }) => {
+  const { formatMessage } = useIntl();
+  const number = role.usersCount;
+  const text = formatMessage(
+    { id: `Roles.RoleRow.user-count.${number > 1 ? 'plural' : 'singular'}` },
+    { number }
+  );
+
   return (
     <CustomRow onClick={onClick}>
       {prefix && <td>{prefix}</td>}
@@ -16,9 +23,7 @@ const RoleRow = ({ role, onClick, links, prefix }) => {
         <RoleDescription>{role.description}</RoleDescription>
       </td>
       <td>
-        <Text>
-          {role.usersCount} user{role.usersCount > 1 ? '' : 's'}
-        </Text>
+        <Text>{text}</Text>
       </td>
       <td>
         <IconLinks links={links} />
