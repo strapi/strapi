@@ -13,7 +13,7 @@ import {
 } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import useSettingsHeaderSearchContext from '../../../../src/hooks/useSettingsHeaderSearchContext';
-import { RoleListWrapper } from '../../../../src/components/Roles';
+import { EmptyRole, RoleListWrapper } from '../../../../src/components/Roles';
 import useRolesList from '../../../../src/hooks/useRolesList';
 import RoleRow from './RoleRow';
 import BaselineAlignment from './BaselineAlignment';
@@ -124,8 +124,8 @@ const RoleListPage = () => {
       <BaselineAlignment />
       <RoleListWrapper>
         <List
-          title={`${roles.length} ${formatMessage({
-            id: 'Settings.roles.title',
+          title={`${results.length} ${formatMessage({
+            id: `Settings.roles.title${results.length > 1 ? '' : '.singular'}`,
           })}`}
           isLoading={isLoading}
           button={{
@@ -146,6 +146,7 @@ const RoleListPage = () => {
             />
           )}
         />
+        {!results.length && !isLoading && <EmptyRole />}
         <ListButton>
           <Button
             onClick={handleNewRoleClick}
