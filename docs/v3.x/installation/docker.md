@@ -28,7 +28,7 @@ services:
 
 :::
 
-::: tab Postgres
+::: tab PostgreSQL
 
 ```yaml
 version: '3'

@@ -40,7 +40,7 @@ First require the utility functions
 const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 ```
 
-- `parseMultipartData`: This function parses strapi's formData format.
+- `parseMultipartData`: This function parses Strapi's formData format.
 - `sanitizeEntity`: This function removes all private fields from the model and its relations.
 
 :::: tabs
