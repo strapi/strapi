@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { IconLinks } from '@buffetjs/core';
+import { IconLinks, Text } from '@buffetjs/core';
+import { CustomRow } from '@buffetjs/styles';
 import { useGlobalContext, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import Text from '../../components/Text';
-import CustomRow from './CustomRow';
 import LogoContainer from './Logo';
 
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
@@ -32,7 +30,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   return (
     <CustomRow>
-      <td style={{ paddingLeft: 30, paddingTop: 0, width: 100, verticalAlign: 'bottom' }}>
+      <td style={{ paddingTop: 0, width: 100, verticalAlign: 'bottom' }}>
         <LogoContainer>
           {logo && <img src={logo} alt="icon" />}
           {!logo && (
@@ -43,7 +41,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
         </LogoContainer>
       </td>
       <td>
-        <p>
+        <Text>
           <Text
             as="span"
             fontSize="xs"
@@ -59,7 +57,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
               defaultMessage: description,
             })}
           </Text>
-        </p>
+        </Text>
       </td>
 
       <td>
