@@ -16,7 +16,7 @@ const StyledListRow = styled(Row)`
       white-space: nowrap;
     }
     &:first-of-type {
-      width: 65px;
+      width: 55px;
       padding-left: 30px;
       > div {
         height: 16px;

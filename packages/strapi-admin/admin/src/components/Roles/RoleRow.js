@@ -15,9 +15,9 @@ const RoleRow = ({ role, onClick, links, prefix }) => {
 
   return (
     <CustomRow onClick={onClick}>
-      {prefix && <td>{prefix}</td>}
+      {prefix && <td style={{ width: 55 }}>{prefix}</td>}
       <td>
-        <Text>{role.name}</Text>
+        <Text fontWeight="semiBold">{role.name}</Text>
       </td>
       <td>
         <RoleDescription>{role.description}</RoleDescription>

@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox } from '@buffetjs/core';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { Pencil, Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { RoleRow as RoleRowBase } from '../../../../src/components/Roles';
+import Checkbox from './CustomCheckbox';
 
 const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRoles }) => {
   const { push } = useHistory();
