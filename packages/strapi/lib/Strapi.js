@@ -372,6 +372,13 @@ class Strapi {
       }
     };
 
+    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
+    await execBootstrap(adminBootstrap).catch(err => {
+      strapi.log.error(`Bootstrap function in admin failed`);
+      strapi.log.error(err);
+      strapi.stop();
+    });
+
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
