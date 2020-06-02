@@ -1,11 +1,18 @@
-import React, { useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from '@buffetjs/core';
 import { List, Header } from '@buffetjs/custom';
 import { Plus } from '@buffetjs/icons';
-import { useGlobalContext, ListButton, PopUpWarning, request } from 'strapi-helper-plugin';
+import matchSorter from 'match-sorter';
+import {
+  useGlobalContext,
+  useQuery,
+  ListButton,
+  PopUpWarning,
+  request,
+} from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
-
+import useSettingsHeaderSearchContext from '../../../../src/hooks/useSettingsHeaderSearchContext';
 import { RoleListWrapper } from '../../../../src/components/Roles';
 import useRolesList from '../../../../src/hooks/useRolesList';
 import RoleRow from './RoleRow';
@@ -19,6 +26,19 @@ const RoleListPage = () => {
   const { push } = useHistory();
   const [{ selectedRoles, shouldRefetchData }, dispath] = useReducer(reducer, initialState);
   const { getData, roles, isLoading } = useRolesList();
+  const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
+  const query = useQuery();
+  const _q = decodeURIComponent(query.get('_q') || '');
+  const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
+
+  useEffect(() => {
+    toggleHeaderSearch({ id: 'Settings.permissions.menu.link.roles.label' });
+
+    return () => {
+      toggleHeaderSearch();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleClosedModal = () => {
     if (shouldRefetchData) {
@@ -115,7 +135,7 @@ const RoleListPage = () => {
             onClick: handleToggleModal,
             type: 'button',
           }}
-          items={roles}
+          items={results}
           customRowComponent={role => (
             <RoleRow
               selectedRoles={selectedRoles}
