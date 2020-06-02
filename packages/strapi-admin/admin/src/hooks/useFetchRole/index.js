@@ -14,7 +14,7 @@ const useFetchRole = id => {
 
   const fetchRole = async roleId => {
     try {
-      const requestURL = roleId ? `/admin/roles/${roleId}` : '/admin/roles';
+      const requestURL = `/admin/roles/${roleId}`;
 
       const { data } = await request(requestURL, { method: 'GET' });
 
