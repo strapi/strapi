@@ -6,9 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import LeftMenuHeader from '../../components/LeftMenuHeader';
-import LeftMenuLinkContainer from '../../components/LeftMenuLinkContainer';
-import LeftMenuFooter from '../../components/LeftMenuFooter';
+import { LeftMenuFooter, LeftMenuHeader, LeftMenuLinkContainer } from '../../components/LeftMenu';
+
 import Wrapper from './Wrapper';
 
 const LeftMenu = ({ version, plugins }) => (

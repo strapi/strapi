@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, snakeCase, isEmpty } from 'lodash';
 
-import { SETTINGS_BASE_URL } from '../../config';
+import { SETTINGS_BASE_URL } from '../../../config';
 import Wrapper from './Wrapper';
 import messages from './messages.json';
 
