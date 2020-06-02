@@ -70,6 +70,18 @@ Manual guides for deployment on various platforms, for One-click and docker plea
 	</InstallLink>
 </div>
 
+<div>
+	<InstallLink link="../deployment/ibm-cloud">
+    <template #icon>
+			<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32" preserveAspectRatio="xMidYMid meet"><path d="M24.5805,13.65A9.7327,9.7327,0,0,0,6.286,17.5387,6.75,6.75,0,0,0,7,31H23a8.7465,8.7465,0,0,0,1.5805-17.35ZM23,29.5H7a5.2373,5.2373,0,0,1-.6993-10.4293,9.7265,9.7265,0,0,0,1.1036,3.7838.75.75,0,1,0,1.3213-.709A8.25,8.25,0,0,1,22.752,13.5133a8.754,8.754,0,0,0-6.315,2.95.75.75,0,1,0,1.1245.9922A7.25,7.25,0,1,1,23,29.5Z" fill="#fff"/></svg>
+    </template>
+		<template #title>IBM Cloud</template>
+		<template #description>
+			Step by step guide for deploying on IBM Cloud
+		</template>
+	</InstallLink>
+</div>
+
 ## Optional Software Guides
 
 Additional guides for optional software additions that compliment or improve the deployment process when using Strapi in a production or production-like environment.
