@@ -302,7 +302,14 @@ You can find [supported database and versions](../installation/cli.html#database
         "password": "root",
         "database": "strapi"
       },
-      "options": {}
+      "options": {
+        "pool":{
+            "min":0,
+             "max":15,
+              "idleTimeoutMillis":30000,
+              "createTimeoutMillis":30000,
+             "acquireTimeoutMillis":30000
+      }
     }
   }
 }
@@ -510,7 +517,6 @@ In any JSON configuration file in your project, you can inject dynamic values li
         "password": "${process.env.DATABASE_PASSWORD || ''}"
       },
       "options": {}
-    }
   }
 }
 ```

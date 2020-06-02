@@ -21,7 +21,7 @@ plugin/
 |               └─── fr.json
 └─── config/ # Contains the configurations of the plugin
 |     └─── functions/
-|     |    └─── bootstrap.js # Asynchronous bootstrap function that runs before the app gets started
+|     |    └───  # Asynchronous bootstrap function that runs before the app gets started
 |     └─── policies/ # Folder containing the plugin's policies
 |     └─── queries/ # Folder containing the plugin's models queries
 |     └─── routes.json # Contains the plugin's API routes
