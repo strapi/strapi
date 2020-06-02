@@ -107,6 +107,8 @@ const RoleListPage = () => {
     },
   ];
 
+  const resultsCount = results.length;
+
   return (
     <>
       <Header
@@ -124,9 +126,12 @@ const RoleListPage = () => {
       <BaselineAlignment />
       <RoleListWrapper>
         <List
-          title={`${results.length} ${formatMessage({
-            id: `Settings.roles.title${results.length > 1 ? '' : '.singular'}`,
-          })}`}
+          title={formatMessage(
+            {
+              id: `Settings.roles.list.title${resultsCount > 1 ? '.plural' : '.singular'}`,
+            },
+            { number: resultsCount }
+          )}
           isLoading={isLoading}
           button={{
             color: 'primary',
@@ -146,7 +151,7 @@ const RoleListPage = () => {
             />
           )}
         />
-        {!results.length && !isLoading && <EmptyRole />}
+        {!resultsCount && !isLoading && <EmptyRole />}
         <ListButton>
           <Button
             onClick={handleNewRoleClick}

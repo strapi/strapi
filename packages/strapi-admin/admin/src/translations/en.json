@@ -278,6 +278,8 @@
   "Settings.roles.form.button.users-with-role": "Users with this role",
   "Settings.roles.list.button.add": "Add new role",
   "Settings.roles.title.singular": "role",
+  "Settings.roles.list.title.singular": "{number} role",
+  "Settings.roles.list.title.plural": "{number} roles",
   "Settings.roles.list.description": "This is a very great description that needs to be done.",
   "Settings.webhooks.title": "Webhooks",
   "Settings.webhooks.singular": "webhook",
@@ -345,5 +347,5 @@
   "Roles.ListPage.notification.delete-not-allowed": "A role cannot be deleted if associated with users",
   "Roles.RoleRow.user-count.plural": "{number} users",
   "Roles.RoleRow.user-count.singular": "{number} user",
-  "Roles.components.List.empty.withSearch": "There is no roles corresponding to the search ({search})..."
+  "Roles.components.List.empty.withSearch": "There is no role corresponding to the search ({search})..."
 }

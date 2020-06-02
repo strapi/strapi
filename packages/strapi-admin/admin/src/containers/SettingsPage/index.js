@@ -19,7 +19,7 @@ import HeaderSearch from '../../components/HeaderSearch';
 import UsersEditPage from '../Users/EditPage';
 import UsersListPage from '../Users/ListPage';
 import RolesEditPage from '../Roles/EditPage';
-// TODO remove this line when finished
+// TODO remove this line when feature finished
 // import RolesListPage from '../Roles/ListPage';
 import EditView from '../Webhooks/EditView';
 import ListView from '../Webhooks/ListView';
