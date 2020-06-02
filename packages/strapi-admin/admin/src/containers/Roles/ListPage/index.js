@@ -30,6 +30,8 @@ const RoleListPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const resultsCount = results.length;
+
   return (
     <>
       <Header
@@ -46,9 +48,12 @@ const RoleListPage = () => {
       <BaselineAlignment />
       <RoleListWrapper>
         <List
-          title={`${results.length} ${formatMessage({
-            id: `Settings.roles.title${results.length > 1 ? '' : '.singular'}`,
-          })}`}
+          title={formatMessage(
+            {
+              id: `Settings.roles.list.title${results.length > 1 ? '.plural' : '.singular'}`,
+            },
+            { number: resultsCount }
+          )}
           items={results}
           isLoading={isLoading}
           customRowComponent={role => (
@@ -63,7 +68,7 @@ const RoleListPage = () => {
             />
           )}
         />
-        {!results.length && !isLoading && <EmptyRole />}
+        {!resultsCount && !isLoading && <EmptyRole />}
       </RoleListWrapper>
     </>
   );
