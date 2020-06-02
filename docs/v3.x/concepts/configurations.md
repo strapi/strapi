@@ -52,7 +52,7 @@ module.exports = ({ env }) => {
 
 In most use cases you will have different configurations between your environments. For example: your database credentials.
 
-Instead of writting those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
+Instead of writing those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
 
 **Example**
 
@@ -116,9 +116,9 @@ What if you need to specific static configurations for specific environments and
 Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base configurations defined in the `./config` folder.
 The environment is based on the `NODE_ENV` environment variable (defaults to `development`).
 
-When starting strapi with `NODE_ENV=production` it will load the configuration from `./config/*` and `./config/env/production/*`. Everything defined in the production config will override the default config.
+When starting Strapi with `NODE_ENV=production` it will load the configuration from `./config/*` and `./config/env/production/*`. Everything defined in the production config will override the default config.
 
-In combination with environment variables this pattern becomes really powerfull:
+In combination with environment variables this pattern becomes really powerful:
 
 **Example**
 

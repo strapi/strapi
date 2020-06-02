@@ -479,7 +479,7 @@ Result
 }
 ```
 
-## Customise the GraphQL schema
+## Customize the GraphQL schema
 
 If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql.js` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql.js` or plugin `./extensions/*/config/schema.graphql.js`.
 
@@ -567,7 +567,7 @@ module.exports = {
 Edit the `definition` attribute in one of the `schema.graphql.js` files of your project by using the GraphQL Type language string.
 
 ::: tip
-The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customise anything.
+The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customize anything.
 :::
 
 ```js
@@ -856,7 +856,7 @@ To do that, we need to use the `schema.graphql.js` like below:
 ```js
 module.exports = {
   type: {
-    Restaurant: false, // The Restaurant type won't be "queriable" or "mutable".
+    Restaurant: false, // The Restaurant type won't be "queryable" or "mutable".
   },
   resolver: {
     Query: {

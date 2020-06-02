@@ -98,7 +98,7 @@ If you never configured any middlewares you can delete the file all together. Yo
 
 We applied the same logic from the `middleware` configuration to the `hook` configuration.
 
-First you can create a file `./config/hook.js`, and you can move the content of `./config/.hook.json` into it.
+First you can create a file `./config/hook.js`, and you can move the content of `./config/hook.json` into it.
 
 ::: tip
 If you never configured any hook you can delete the file all together. You can also only set the configurations you want to customize and leave the others out.
