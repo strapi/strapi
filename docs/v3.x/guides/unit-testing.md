@@ -26,6 +26,7 @@ In this example we will use [Jest](https://jestjs.io/) Testing Framework with a 
 ::: tab npm
 `npm install jest supertest`
 :::
+::::
 
 Once this is done add this to `package.json` file
 
@@ -55,7 +56,6 @@ and add those line at the bottom of file
 ```
 
 Those will inform `Jest` not to look for test inside the folder where it shouldn't.
-::::
 
 ## Introduction
 
