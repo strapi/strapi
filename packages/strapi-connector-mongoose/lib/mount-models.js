@@ -225,6 +225,10 @@ module.exports = ({ models, target }, ctx) => {
       },
     };
 
+    if (_.isFunction(_.get(target, [model.toLowerCase(), 'lifecycles', 'onSchemaLoad']))) {
+      _.get(target, [model.toLowerCase(), 'lifecycles', 'onSchemaLoad'])(schema);
+    }
+
     // Instantiate model.
     const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
