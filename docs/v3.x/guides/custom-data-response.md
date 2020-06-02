@@ -19,7 +19,7 @@ And that is what we will do to manage our custom data response.
 In our example we will use a restaurant type with a chef. By default when you fetch restaurants, you will get all information for the chef.
 Let's consider you don't want to expose the chef's email for privacy reasons.
 
-To enforce this rule we will customize the action that fetchs all restaurants and remove the email from the returned data.
+To enforce this rule we will customize the action that fetches all restaurants and remove the email from the returned data.
 
 To follow the example your will have to create a content type `restaurant` and add the following field definition:
 

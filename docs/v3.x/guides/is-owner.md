@@ -57,7 +57,7 @@ module.exports = {
 };
 ```
 
-Now, when an article is created, the authenticated user is automaticaly set as author of the article.
+Now, when an article is created, the authenticated user is automatically set as author of the article.
 
 ## Limit the update
 
