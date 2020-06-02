@@ -10,7 +10,7 @@ By following this tutorial, you install and create your first Strapi project.
 
 ::: tip NOTE
 
-You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [installation requirements](install-requirements.md).
+You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [installation requirements](../installation/cli.md).
 
 :::
 
