@@ -590,6 +590,11 @@ module.exports = ({ models, target }, ctx) => {
           'columnName'
         )
       );
+
+      if (_.isFunction(_.get(target, [model.toLowerCase(), 'lifecycles', 'onSchemaLoad']))) {
+        _.get(target, [model.toLowerCase(), 'lifecycles', 'onSchemaLoad'])(loadedModel);
+      }
+
       GLOBALS[definition.globalId] = ORM.Model.extend(loadedModel);
 
       // Expose ORM functions through the `strapi.models[xxx]`

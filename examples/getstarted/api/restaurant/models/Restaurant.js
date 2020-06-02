@@ -7,7 +7,7 @@
 module.exports = {
   lifecycles: {
     onSchemaLoad(...args) {
-      // console.log('onLoad', ...args);
+      // console.log('onSchemaLoad', ...args);
     },
     beforeCreate(...args) {
       // console.log('beforeCreate', ...args);
