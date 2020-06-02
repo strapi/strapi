@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { Padded } from '@buffetjs/core';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import { useFetchRole } from '../../../hooks';
+import { useRolesList } from '../../../hooks';
 import styles from './utils/styles';
 import ClearIndicator from './ClearIndicator';
 import DropdownIndicator from './DropdownIndicator';
@@ -14,7 +14,7 @@ import MultiValueContainer from './MultiValueContainer';
 const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
   const { formatMessage } = useGlobalContext();
   const translatedError = error && error.id ? formatMessage(error) : null;
-  const { data, isLoading } = useFetchRole();
+  const { roles: data, isLoading } = useRolesList();
 
   return (
     <>
