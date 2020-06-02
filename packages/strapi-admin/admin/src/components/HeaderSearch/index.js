@@ -12,7 +12,10 @@ const HeaderSearch = ({ label, queryParameter }) => {
   const searchValue = query.get(queryParameter) || '';
   const [value, setValue] = useState(searchValue);
   const { push } = useHistory();
-  const displayedLabel = typeof label === 'object' ? formatMessage(label) : label;
+  const displayedLabel =
+    typeof label === 'object'
+      ? formatMessage({ ...label, defaultMessage: label.defaultMessage || label.id })
+      : label;
   const capitalizedLabel = upperFirst(displayedLabel);
 
   useEffect(() => {
@@ -31,9 +34,21 @@ const HeaderSearch = ({ label, queryParameter }) => {
         currentSearch = new URLSearchParams('');
 
         // Keep the previous params _sort, pageSize, page
-        currentSearch.set('pageSize', query.get('pageSize'));
-        currentSearch.set('page', query.get('page'));
-        currentSearch.set('_sort', query.get('_sort'));
+        const pageSize = query.get('pageSize');
+        const page = query.get('page');
+        const _sort = query.get('_sort');
+
+        if (page) {
+          currentSearch.set('page', page);
+        }
+
+        if (pageSize) {
+          currentSearch.set('pageSize', pageSize);
+        }
+
+        if (_sort) {
+          currentSearch.set('_sort', _sort);
+        }
 
         currentSearch.set(queryParameter, encodeURIComponent(value));
       } else {
@@ -75,6 +90,7 @@ HeaderSearch.propTypes = {
     PropTypes.string,
     PropTypes.shape({
       id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string,
     }),
   ]).isRequired,
   queryParameter: PropTypes.string,

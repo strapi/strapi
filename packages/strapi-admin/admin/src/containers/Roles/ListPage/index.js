@@ -1,19 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { List, Header } from '@buffetjs/custom';
 import { Pencil } from '@buffetjs/icons';
+import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
 
 import { RoleListWrapper, RoleRow } from '../../../components/Roles';
 import BaselineAlignment from './BaselineAlignment';
 import useRolesList from '../../../hooks/useRolesList';
+import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const { settingsBaseURL } = useGlobalContext();
   const { roles, isLoading } = useRolesList();
+  const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
+  const query = useQuery();
+  const _q = decodeURIComponent(query.get('_q') || '');
+  const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
+
+  useEffect(() => {
+    toggleHeaderSearch({ id: 'Settings.permissions.menu.link.roles.label' });
+
+    return () => {
+      toggleHeaderSearch();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -34,7 +49,7 @@ const RoleListPage = () => {
           title={`${roles.length} ${formatMessage({
             id: 'Settings.roles.title',
           })}`}
-          items={roles}
+          items={results}
           isLoading={isLoading}
           customRowComponent={role => (
             <RoleRow
