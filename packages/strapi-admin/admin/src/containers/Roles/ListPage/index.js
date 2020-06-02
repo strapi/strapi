@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
 
-import { RoleListWrapper, RoleRow } from '../../../components/Roles';
+import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
 import BaselineAlignment from './BaselineAlignment';
 import useRolesList from '../../../hooks/useRolesList';
 import useSettingsHeaderSearchContext from '../../../hooks/useSettingsHeaderSearchContext';
@@ -46,8 +46,8 @@ const RoleListPage = () => {
       <BaselineAlignment />
       <RoleListWrapper>
         <List
-          title={`${roles.length} ${formatMessage({
-            id: 'Settings.roles.title',
+          title={`${results.length} ${formatMessage({
+            id: `Settings.roles.title${results.length > 1 ? '' : '.singular'}`,
           })}`}
           items={results}
           isLoading={isLoading}
@@ -63,6 +63,7 @@ const RoleListPage = () => {
             />
           )}
         />
+        {!results.length && !isLoading && <EmptyRole />}
       </RoleListWrapper>
     </>
   );
