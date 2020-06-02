@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-import Logo from '../../assets/images/logo-strapi.png';
+import Logo from '../../../assets/images/logo-strapi.png';
 
 const Wrapper = styled.div`
   background-color: #007eff;

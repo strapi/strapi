@@ -4,7 +4,7 @@ import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-p
 import { Header } from '@buffetjs/custom';
 import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
 import PageTitle from '../../components/PageTitle';
-import PluginCard from '../../components/PluginCard';
+import PluginCard from './PluginCard';
 import Wrapper from './Wrapper';
 
 const MarketPlacePage = ({ history }) => {

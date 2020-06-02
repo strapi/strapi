@@ -11,6 +11,7 @@ import { isObject } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Remove } from '@buffetjs/icons';
 import Li, { GlobalNotification } from './Li';
+
 class Notification extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   handleCloseClicked = () => {
