@@ -6,17 +6,12 @@
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-
 import { Header, List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
-
 import { request, useGlobalContext, ListButton, PopUpWarning } from 'strapi-helper-plugin';
-
-import ListRow from '../../../components/ListRow';
-import EmptyList from '../../../components/EmptyList';
+import { EmptyList, ListRow } from '../../../components/Webhooks';
 import Wrapper from './Wrapper';
-
 import reducer, { initialState } from './reducer';
 
 function ListView() {

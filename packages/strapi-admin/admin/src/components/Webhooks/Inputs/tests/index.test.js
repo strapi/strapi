@@ -3,7 +3,7 @@ import renderer from 'react-test-renderer';
 import { shallow } from 'enzyme';
 import { IntlProvider } from 'react-intl';
 
-import translationMessages from '../../../translations/en.json';
+import translationMessages from '../../../../translations/en.json';
 
 import Inputs from '../index';
 

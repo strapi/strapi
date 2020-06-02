@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage, Label } from '@buffetjs/styles';
 import { Error } from '@buffetjs/core';
-
 import HeadersInput from '../HeadersInput';
 import EventInput from '../EventInput';
 import Wrapper from './Wrapper';
@@ -45,12 +44,7 @@ function Inputs({
           )}
         </>
       ) : (
-        <Error
-          inputError={inputError}
-          name={name}
-          type="text"
-          validations={validations}
-        >
+        <Error inputError={inputError} name={name} type="text" validations={validations}>
           {({ canCheck, error, dispatch }) => {
             const hasError = error && error !== null;
 

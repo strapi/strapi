@@ -19,8 +19,7 @@ function Switch({ name, value, onChange }) {
       <Toggle
         checked={value}
         name={name}
-        onChange={({ target: { checked } }) =>
-          onChange({ target: { name, value: checked } })}
+        onChange={({ target: { checked } }) => onChange({ target: { name, value: checked } })}
       />
       <div className="button">
         <div className="button-rect" />

@@ -11,8 +11,8 @@ import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import { request, useGlobalContext, getYupInnerErrors, BackHeader } from 'strapi-helper-plugin';
 
-import Inputs from '../../../components/Inputs';
-import TriggerContainer from '../../../components/TriggerContainer';
+// import Inputs from '../../../components/Webhooks/Inputs';
+import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 
 import reducer, { initialState } from './reducer';
 import { cleanData, form, schema } from './utils';

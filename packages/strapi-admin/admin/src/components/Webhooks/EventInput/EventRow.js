@@ -2,20 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 
-const EventRow = ({
-  disabledEvents,
-  name,
-  events,
-  inputValue,
-  handleChange,
-  handleChangeAll,
-}) => {
+const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {
   const enabledCheckboxes = events.filter(event => {
     return !disabledEvents.includes(event);
   });
 
-  const areAllCheckboxesSelected =
-    inputValue.length === enabledCheckboxes.length;
+  const areAllCheckboxesSelected = inputValue.length === enabledCheckboxes.length;
   const hasSomeCheckboxSelected = inputValue.length > 0;
 
   const onChangeAll = ({ target: { name } }) => {
