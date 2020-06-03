@@ -55,7 +55,7 @@ services:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - ./data:/data/postgres
     ports:
       - '5432:5432'
 ```

@@ -151,10 +151,19 @@ pm2 stop strapi-develop
 psql -c "ALTER USER strapi with password 'your-new-password';"
 ```
 
-- Update the `/srv/strapi/strapi/config/.env` file with the new password.
+- Update the `/srv/strapi/strapi/config/environments/development/database.json` file with the new password.
 
-```
-DATABASE_PASSWORD=your-new-password
+```json
+...
+"settings": {
+  "client": "postgres",
+  "host": "127.0.0.1",
+  "port": "5432",
+  "database": "strapi",
+  "username": "strapi",
+  "password": "your-new-password"
+},
+...
 ```
 
 - Restart Strapi and confirm the password change was successful

@@ -18,7 +18,7 @@ const checkReservedAttributeNames = (model, { manager }) => {
       model.connection
     ).defaultTimestamps;
 
-    if (Array.isArray(model.options.timestamps)) {
+    if (_.has(model, 'options.timestamps') && Array.isArray(model.options.timestamps)) {
       const [
         createdAtAttribute = connectorCreatedAt,
         updatedAtAttribute = connectorUpdatedAt,

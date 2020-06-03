@@ -35,12 +35,6 @@ module.exports = strapi => {
           extension: '.json',
         })
       );
-
-      strapi.app.use((ctx, next) => {
-        console.log(ctx.i18n.__('someKey'));
-
-        next();
-      });
     },
   };
 };

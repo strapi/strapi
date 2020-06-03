@@ -22,7 +22,7 @@ Fill out the form on the [Support page](https://strapi.io/support) of the Strapi
 
 ## Frequently Asked Questions
 
-### Why can't I create or update content-types in production/staging?
+### Why can't I create or update content-types in production/staging
 
 Strapi stores model configuration files (what defines the model schema) in files such as `api/restaurant/models/restaurant.settings.json`. Due to how Node.js works, in order for changes to take effect, that would require Node to restart the server. This could potentionally cause downtime of your production service and likewise these changes should be tracked in some kind of source control.
 
@@ -35,9 +35,11 @@ Generally your "flow" of development would follow the following path:
 
 At this time and in the future there is no plan to allow model creating or updating while in a production environment, and there is currently no plans to move model settings into the database. There is no known nor recommended workarounds for this.
 
-### Does Strapi handle deploying or migrating of content?
+### Does Strapi handle deploying or migrating of content
 
 Strapi does not currently provide any tools for migrating or deploying your data changes between different environments (_ie. from development to production_).
+
+With the release of the stable version (current ETA end of May 2020), there will be a CLI based migration command, and eventually this will be expanded into the AdminUI [migration feature](https://portal.productboard.com/strapi/1-public-roadmap/c/12-migrate-across-environments) as well as a [data import and export](https://portal.productboard.com/strapi/1-public-roadmap/c/23-import-export-data) option in the future, current ETA is around Q3 of 2020.
 
 ### User can't login to the admin panel
 
@@ -50,7 +52,7 @@ When this new plugin release, there will be two versions:
 - Community Edition
 - Enterprise Edition
 
-By default, the Community Edition will include 3 administrators and 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited number of administrators and roles.
+By default, the Community Edition will be limited to 3 pre-defined roles (Super Admin, Editor & Author). The roles can be customized to restrict the permissions' scope on specific collections or single types. Upgrading to the Enterprise Edition will unlock an unlimited number of roles, increase the permissions granularity to the field-level and allow full customization of roles.
 
 ### Relations aren't maintaining their sort order
 
@@ -62,7 +64,7 @@ For the time being there is no recommended way to handle this automatically and 
 
 If you used `--quickstart` to create your Strapi project, by default this uses the SQLite database. Heroku's file system is [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem) meaning that each time a dyno (container) is reset all filesystem changes are lost. And since both SQLite and local uploads are stored on the filesystem, any changes made to these since the last dyno reset will be deleted. Typically dynos are reset at least once a day, and in most cases multiple times per day or when new code is pushed to Heroku.
 
-It is recommended you use the Heroku PostgreSQL plugin or use something like MongoDB's Atlas for your database. For file uploads, you will need to use one of the 3rd party providers such as Cloudinary or AWS S3.
+It is recommended you use the Heroku PostgreSQL plugin or use something like MongoDB's Atlas for your database. For file uploads, you will need to use one of the 3rd party providers such as Cloudinary or AWS S3. **Even if you are not using SQLite as your database, you will still need some 3rd party upload provider** as Strapi does not store binary files in any database.
 
 ### How do I customize a plugin
 
@@ -84,7 +86,11 @@ On Linux based operating systems you need root permissions to bind to any port b
 
 Likewise since Strapi is Node.js based, in order for changes with the SSL certificate to take place (say when it expires) you would need to restart your application for that change to take effect.
 
-Due to these two issues, it is recommended you use a proxy application such as Nginx, Apache, Traefik, or many others to handle your edge routing to Strapi. There are settings in the environment [server.json](../concepts/configurations.md#server) to handle upstream proxies. The proxy block requires all settings to be filled out and will modify any backend plugins such as authentication providers and the upload plugin to replace your standard `localhost:1337` with the proxy URL.
+Due to these two issues, it is recommended you use a proxy application such as Nginx, Apache, Traefik, or many others to handle your edge routing to Strapi. You can view some example options on the [deployment](./deployment.md#optional-software-guides) documentation, and likewise you will need to make Strapi aware of the proxy, please see the [server configuration](../concepts/configurations.md#server) documentation.
+
+### Does Strapi allow me to change the default ID type or name
+
+No, currently does not have the ability to allow for changing the default `id` name nor does it allow you to switch the data type (such as UUID on bookshelf and integer on mongoose), support for this is being looked at for Strapi v4.
 
 ### Is X feature available yet
 
