@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | COMPONENTS | ROLES | PERMISSIONS | reducer', () => {
+describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -18,7 +18,15 @@ describe('ADMIN | COMPONENTS | ROLES | PERMISSIONS | reducer', () => {
       };
       const initialState = {
         collectionTypes: [],
-        singleTypes: [],
+        singleTypes: [
+          {
+            uid: 'app.homepage',
+            isDisplayed: true,
+            schema: {
+              kind: 'singleType',
+            },
+          },
+        ],
         isLoading: true,
       };
       const expected = {

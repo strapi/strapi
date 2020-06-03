@@ -34,12 +34,6 @@ const rolePermissions = [
     fields: ['email', 'firstname', 'lastname', 'roles'], // or ["*"] or ["**"]
     conditions: [],
   },
-  {
-    action: 'plugins::content-manager.anAction',
-    subject: null,
-    fields: null,
-    conditions: [],
-  },
 ];
 
 export { permissions, rolePermissions };
