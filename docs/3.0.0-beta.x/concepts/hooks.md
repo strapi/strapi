@@ -82,9 +82,11 @@ To activate and configure your hook with custom options, you need to edit your `
 ```javascript
 {
   ...
-  "hook-name": {
-    "enabled": true,
-    ...
+  "settings": {
+    "hook-name": {
+      "enabled": true,
+      ...
+    }
   }
 }
 ```
