@@ -37,7 +37,7 @@ module.exports = async function(strapi) {
  */
 const createLoaders = strapi => {
   const loadMiddlewaresInDir = async (dir, middlewares) => {
-    const files = await glob('*/*(index|defaults).*(js|json)', {
+    const files = await glob('*/*(index|defaults).*(js|json|ts)', {
       cwd: dir,
     });
 
@@ -79,7 +79,7 @@ const createLoaders = strapi => {
   const loadMiddlewareDependencies = async (packages, middlewares) => {
     for (let packageName of packages) {
       const baseDir = path.dirname(require.resolve(`strapi-middleware-${packageName}`));
-      const files = await glob('*(index|defaults).*(js|json)', {
+      const files = await glob('*(index|defaults).*(js|json|ts)', {
         cwd: baseDir,
         absolute: true,
       });
@@ -92,7 +92,10 @@ const createLoaders = strapi => {
     files.forEach(file => {
       middlewares[name] = middlewares[name] || { loaded: false };
 
-      if (_.endsWith(file, 'index.js') && !middlewares[name].load) {
+      if (
+        (_.endsWith(file, 'index.js') || _.endsWith(file, 'index.ts')) &&
+        !middlewares[name].load
+      ) {
         return Object.defineProperty(middlewares[name], 'load', {
           configurable: false,
           enumerable: true,

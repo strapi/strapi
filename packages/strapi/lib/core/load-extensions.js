@@ -15,15 +15,13 @@ module.exports = async function({ appPath }) {
   const extensionsDir = path.resolve(appPath, 'extensions');
 
   if (!existsSync(extensionsDir)) {
-    throw new Error(
-      `Missing extensions folder. Please create one in your app root directory`
-    );
+    throw new Error(`Missing extensions folder. Please create one in your app root directory`);
   }
 
-  const configs = await loadConfig(extensionsDir, '*/config/**/*.+(js|json)');
+  const configs = await loadConfig(extensionsDir, '*/config/**/*.+(js|json|ts)');
   const controllersAndServices = await loadFiles(
     extensionsDir,
-    '*/{controllers,services}/*.+(js|json)'
+    '*/{controllers,services}/*.+(js|json|ts)'
   );
 
   const overwrites = await loadOverwrites(extensionsDir);
@@ -37,7 +35,7 @@ module.exports = async function({ appPath }) {
 const OVERWRITABLE_FOLDERS_GLOB = 'models';
 // returns a list of path and module to overwrite
 const loadOverwrites = async extensionsDir => {
-  const files = await glob(`*/${OVERWRITABLE_FOLDERS_GLOB}/*.*(js|json)`, {
+  const files = await glob(`*/${OVERWRITABLE_FOLDERS_GLOB}/*.*(js|json|ts)`, {
     cwd: extensionsDir,
   });
 

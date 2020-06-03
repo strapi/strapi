@@ -34,8 +34,8 @@ const loadLocalPlugins = async ({ dir }) => {
   if (!existsSync(pluginsDir)) return {};
 
   const [files, configs] = await Promise.all([
-    loadFiles(pluginsDir, '{*/!(config)/*.*(js|json),*/package.json}'),
-    loadConfig(pluginsDir, '*/config/**/*.+(js|json)'),
+    loadFiles(pluginsDir, '{*/!(config)/*.*(js|json|ts),*/package.json}'),
+    loadConfig(pluginsDir, '*/config/**/*.+(js|json|ts)'),
   ]);
 
   return _.merge(files, configs);
@@ -49,7 +49,7 @@ const loadPlugins = async ({ installedPlugins, config }) => {
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)/*.*(js|json),package.json}'
+      '{!(config|node_modules|test)/*.*(js|json|ts),package.json}'
     );
 
     const { config: pluginConfig } = await loadConfig(pluginPath);

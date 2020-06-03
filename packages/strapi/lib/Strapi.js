@@ -63,9 +63,9 @@ class Strapi {
   }
 
   requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
+    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap');
 
-    if (fse.existsSync(bootstrapPath)) {
+    if (fse.existsSync(`${bootstrapPath}.js`) || fse.existsSync(`${bootstrapPath}.ts`)) {
       require(bootstrapPath);
     }
   }

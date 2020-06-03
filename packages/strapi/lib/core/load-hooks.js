@@ -27,7 +27,7 @@ module.exports = async function({ installedHooks, installedPlugins, appPath }) {
 };
 
 const loadHooksInDir = async (dir, hooks) => {
-  const files = await glob('*/*(index|defaults).*(js|json)', {
+  const files = await glob('*/*(index|defaults).*(js|json|ts)', {
     cwd: dir,
   });
 
@@ -37,15 +37,11 @@ const loadHooksInDir = async (dir, hooks) => {
   });
 };
 
-const loadLocalHooks = (appPath, hooks) =>
-  loadHooksInDir(path.resolve(appPath, 'hooks'), hooks);
+const loadLocalHooks = (appPath, hooks) => loadHooksInDir(path.resolve(appPath, 'hooks'), hooks);
 
 const loadPluginsHooks = async (plugins, hooks) => {
   for (let pluginName of plugins) {
-    const dir = path.resolve(
-      findPackagePath(`strapi-plugin-${pluginName}`),
-      'hooks'
-    );
+    const dir = path.resolve(findPackagePath(`strapi-plugin-${pluginName}`), 'hooks');
     await loadHooksInDir(dir, hooks);
   }
 };
@@ -70,7 +66,7 @@ const loadHookDependencies = async (installedHooks, hooks) => {
   for (let hook of installedHooks) {
     const hookDir = path.dirname(require.resolve(`strapi-hook-${hook}`));
 
-    const files = await glob('*(index|defaults).*(js|json)', {
+    const files = await glob('*(index|defaults).*(js|json|ts)', {
       cwd: hookDir,
       absolute: true,
     });
@@ -85,16 +81,12 @@ const mountHooks = (name, files, hooks) => {
 
     let dependencies = [];
     try {
-      dependencies = _.get(
-        require(`strapi-hook-${name}/package.json`),
-        'strapi.dependencies',
-        []
-      );
+      dependencies = _.get(require(`strapi-hook-${name}/package.json`), 'strapi.dependencies', []);
     } catch (err) {
       // Silent
     }
 
-    if (_.endsWith(file, 'index.js') && !hooks[name].load) {
+    if ((_.endsWith(file, 'index.js') || _.endsWith(file, 'index.ts')) && !hooks[name].load) {
       Object.defineProperty(hooks[name], 'load', {
         configurable: false,
         enumerable: true,
