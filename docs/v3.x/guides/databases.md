@@ -1,7 +1,14 @@
 # Databases
 
-Strapi gives you the option to choose the most appropriate database for your project. It currently supports **PostgreSQL**, **MongoDB**, **SQLite**, **MySQL** and
-**MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
+Strapi gives you the option to choose the most appropriate database for your project, it currently supports:
+
+- **PostgreSQL**
+- **MySQL**
+- **MariaDB**
+- **SQLite**
+- **MongoDB**
+
+The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
 ::: tip
 Deploying **Strapi** itself is covered in the [Deployment Guide](../getting-started/deployment.md).
@@ -13,7 +20,7 @@ SQLite is the default ([Quick Start](../getting-started/quick-start.md)) and rec
 
 ### Install SQLite locally
 
-Simply use one of the following commands.
+As SQLite requires no additional software to be installed on your operating system you can simply use one of the following commands to create a Strapi project using a SQLite file. By default this file is created in `.tmp/data.db`.
 
 :::: tabs
 
@@ -41,11 +48,405 @@ This will create a new project and launch it in the browser.
 The [Quick Start Guide](../getting-started/quick-start.md) is a complete step-by-step tutorial
 :::
 
+## PostgreSQL
+
+### Install PostgreSQL locally
+
+#### Install PostgreSQL on your development environment
+
+If you already have PostgreSQL installed locally and running as a background service, you may skip to creating the user and database.
+
+Please complete the installation steps appropriate to your operating system.
+
+:::: tabs
+
+::: tab "Windows 10"
+
+##### Install PostgreSQL on Windows 10
+
+Follow these steps to [install PostgreSQL onto your Windows 10](https://www.postgresql.org/download/windows/) environment:
+
+1. Download the interactive installer for Windows [here](https://www.postgresql.org/download/windows/). Verify which version you need based on your platform, then follow the link to the installer page and download that version.
+2. Run the installer and follow any install prompts.
+3. After successfully installing PostgreSQL, the PostgreSQL service is started.
+
+:::
+
+::: tab "Mac OS"
+
+##### Install PostgreSQL on Mac
+
+Follow these steps to [install PostgreSQL onto your Mac](https://www.postgresql.org/download/macosx/) environment:
+
+1. Download the interactive installer for Mac [here](https://www.postgresql.org/download/windows/). Verify which version you need based on your platform, then follow the link to the installer page and download that version.
+2. Run the installer and follow any install prompts.
+3. After successfully installing PostgreSQL, the PostgreSQL service is started.
+
+:::
+
+::: tab "Linux - Ubuntu"
+
+##### Install PostgreSQL on Ubuntu
+
+Follow these steps to [install PostgreSQL onto your Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) environment:
+
+1. Using the interactive documentation linked above, select your Ubuntu version (we will be using 18.04).
+2. Add the apt repository:
+
+```bash
+echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
+```
+
+3. Import the repository signing key:
+
+```bash
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+```
+
+4. Update your apt cache:
+
+```bash
+sudo apt update
+```
+
+5. Install the default default PostgreSQL package:
+
+```bash
+sudo apt install postgresql-12 -y
+```
+
+6. Confirm the PostgreSQL status:
+
+```bash
+systemctl status postgresql
+```
+
+:::
+
+::::
+
+#### Create a local PostgreSQL user and database for Strapi
+
+<!-- Add tabs for commands on different OSes -->
+blah blah blah
+
+#### Install Strapi locally with PostgreSQL
+
+Follow these steps to create a Strapi project locally using the PostgreSQL database.
+::: tip
+PostgreSQL must already be running in the background.
+:::
+
+1. Create a new Strapi project
+
+:::: tabs
+
+::: tab yarn
+
+```bash
+yarn create strapi-app my-project
+```
+
+:::
+
+::: tab npx
+
+```bash
+npx create-strapi-app my-project
+```
+
+:::
+
+::::
+
+- Use your `down arrow` key and select `Custom (manual settings)` and press `enter`:
+
+```bash
+? Choose your installation type
+  Quickstart (recommended)
+❯ Custom (manual settings)
+```
+
+2. Select `Postgres` and press `enter`:
+
+```bash
+? Choose your installation type Custom (manual settings)
+? Choose your main database:
+  SQLite
+  MongoDB
+  MySQL
+❯ Postgres
+```
+
+3. Press `enter` to select the remaining default options. It will look something like this:
+
+```bash
+? Choose your installation type Custom (manual settings)
+? Choose your default database client postgres
+? Database name: strapi
+? Host: 127.0.0.1
+? Port: 5432
+? Username: strapi
+? Password: ******
+? Enable SSL connection: No
+Creating a project with custom database options.
+Creating files.
+Dependencies installed successfully.
+Your application was created at /home/dmehaffy/my-project.
+Available commands in your project:
+  yarn develop
+  Start Strapi in watch mode.
+  yarn start
+  Start Strapi without watch mode.
+  yarn build
+  Build Strapi admin panel.
+  yarn strapi
+  Display all available commands.
+You can start by doing:
+  cd /home/dmehaffy/my-project
+  yarn develop
+```
+
+You have successfully installed Strapi with PostgreSQL on your local development environment. You are now ready to [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
+
+## MySQL/MariaDB
+
+### Install MySQL/MariaDB locally
+
+#### Install MySQL/MariaDB on your development environment
+
+If you already have MySQL or MariaDB installed locally and running as a background service, you may skip to creating the user and database.
+
+::: tip
+
+MariaDB is a free and open source drop in replacement for Oracle's MySQL. Where possible, it is recommended to use MariaDB instead of MySQL to promote other open source software like Strapi.
+
+:::
+
+Please complete the installation steps appropriate to your operating system.
+
+:::: tabs
+
+::: tab "Windows 10 - MySQL"
+
+##### Install MySQL on Windows 10
+
+Follow these steps to [install MySQL onto your Windows 10]() environment:
+
+1. Download the interactive installer for Windows [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version.
+2. Run the installer and follow any install prompts.
+3. After successfully installing MySQL, the MySQL service is started.
+
+:::
+
+::: tab "Windows 10 - MariaDB"
+
+##### Install MariaDB on Windows 10
+
+Follow these steps to [install MariaDB onto your Windows 10]() environment:
+
+1. Download the interactive installer for Windows [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version.
+2. Run the installer and follow any install prompts.
+3. After successfully installing MariaDB, the MariaDB service is started.
+
+:::
+
+::: tab "Mac OS - MySQL"
+
+##### Install MySQL on Mac OS
+
+Follow these steps to [install MySQL onto your Mac]() environment:
+
+1. Download the interactive installer for Mac [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version.
+2. Run the installer and follow any install prompts.
+3. After successfully installing MySQL, the MySQL service is started.
+
+:::
+
+::: tab "Mac OS - MariaDB"
+
+##### Install MariaDB on Mac OS
+
+Follow these steps to [install MariaDB onto your Mac]() environment:
+
+1. Download the interactive installer for Mac [here](). Verify which version you need based on your platform, then follow the link to the installer page and download that version.
+2. Run the installer and follow any install prompts.
+3. After successfully installing MariaDB, the MariaDB service is started.
+
+:::
+
+::: tab "Ubuntu - MySQL"
+
+##### Install MySQL on Ubuntu
+
+Follow these steps to [install MySQL onto your Ubuntu]() environment:
+
+1. Using the interactive documentation linked above, select your Ubuntu version (we will be using 18.04).
+
+2. Add the apt repository:
+
+```bash
+echo ""
+```
+
+3. Import the repository signing key:
+
+```bash
+wget --quiet -O -
+```
+
+4. Update your apt cache:
+
+```bash
+sudo apt update
+```
+
+5. Install the default default MySQL package:
+
+```bash
+sudo apt install -y
+```
+
+6. Confirm the MySQL status:
+
+```bash
+systemctl status mysql
+```
+
+:::
+
+::: tab "Ubuntu - MariaDB"
+
+##### Install MariaDB on Ubuntu
+
+Follow these steps to [install MariaDB onto your Ubuntu]() environment:
+
+1. Using the interactive documentation linked above, select your Ubuntu version (we will be using 18.04).
+
+2. Add the apt repository:
+
+```bash
+echo ""
+```
+
+3. Import the repository signing key:
+
+```bash
+wget --quiet -O -
+```
+
+4. Update your apt cache:
+
+```bash
+sudo apt update
+```
+
+5. Install the default default MySQL package:
+
+```bash
+sudo apt install -y
+```
+
+6. Confirm the MySQL status:
+
+```bash
+systemctl status mariadb
+```
+
+:::
+
+::::
+
+#### Create a local MySQL/MariaDB user and database for Strapi
+
+<!-- Add tabs for commands on different OSes -->
+blah blah blah
+
+#### Install Strapi locally with MySQL/MariaDB
+
+Follow these steps to create a Strapi project locally using the MySQL database.
+
+::: tip
+MySQL must already be running in the background.
+:::
+
+1. Create a new Strapi project
+
+:::: tabs
+
+::: tab yarn
+
+```
+yarn create strapi-app my-project
+```
+
+:::
+
+::: tab npx
+
+```
+npx create-strapi-app my-project
+```
+
+:::
+
+::::
+
+2. Use your `down arrow` key and select `Custom (manual settings)` and press `enter`:
+
+```bash
+? Choose your installation type
+  Quickstart (recommended)
+❯ Custom (manual settings)
+```
+
+3. Select `Postgres` and press `enter`:
+
+```bash
+? Choose your installation type Custom (manual settings)
+? Choose your main database:
+  SQLite
+  MongoDB
+❯ MySQL
+  Postgres
+```
+
+- Press `enter` to select the remaining default options. It will look something like this:
+
+```bash
+? Choose your installation type Custom (manual settings)
+? Choose your default database client mysql
+? Database name: strapi
+? Host: 127.0.0.1
+? Port: 3306
+? Username: strapi
+? Password: ******
+? Enable SSL connection: No
+Creating a project with custom database options.
+Creating files.
+Dependencies installed successfully.
+Your application was created at /home/dmehaffy/my-project.
+Available commands in your project:
+  yarn develop
+  Start Strapi in watch mode.
+  yarn start
+  Start Strapi without watch mode.
+  yarn build
+  Build Strapi admin panel.
+  yarn strapi
+  Display all available commands.
+You can start by doing:
+  cd /home/dmehaffy/my-project
+  yarn develop
+```
+
+You have successfully installed Strapi with MySQL on your local development environment. You are now ready to [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
+
 ## MongoDB Installation
 
 ### Install MongoDB locally
 
-#### 1. Install MongoDB on your development environment
+#### Install MongoDB on your development environment
 
 If you already have MongoDB installed locally and running as a background service, you may skip to [Install Strapi locally with MongoDB](#install-strapi-locally-with-mongodb). (If you have additional questions, please see the official [MongoDB documentation](https://docs.mongodb.com/manual/installation/#tutorial-installation). )
 
@@ -101,7 +502,7 @@ You have now installed MongoDB for _Mac_. You are now ready to [install Strapi w
 
 :::
 
-::: tab "Ubuntu 18.04"
+::: tab "Ubuntu"
 
 #### Install MongoDB on Ubuntu
 
@@ -155,7 +556,7 @@ You have now installed MongoDB for _Linux_. You are now ready to [install Strapi
 
 ::::
 
-#### 2. Install Strapi locally with MongoDB
+#### Install Strapi locally with MongoDB
 
 Follow these steps to create a Strapi project locally using the MongoDB database.
 
@@ -249,7 +650,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
 - You must have already [created your Strapi project using MongoDB](databases.md#install-strapi-locally-with-mongodb).
 - You must have already created a [free MongoDB Atlas account](https://www.mongodb.com/cloud/atlas).
 
-#### 1. Log in to your account to create a **Project** and a **Cluster**
+#### Log in to your account to create a **Project** and a **Cluster**
 
 - First you need to `Create a new Project`.
 - Then click `Build a Cluster`, from the options page:
@@ -259,14 +660,14 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
   - In **Cluster Name**, name your cluster.
 - Click the green `Create Cluster` button. You will get a message that says, "_Your cluster is being created..._"
 
-#### 2. Next, click on the `Database Access` in the left menu (under `Overview`):
+#### Next, click on the `Database Access` in the left menu (under `Overview`):
 
 - Click the green `+ ADD NEW USER` button:
   - Enter a `username`.
   - Enter a `password`.
   - Under `User Privileges` ensure **`Read and write to any database`** is selected. Then click `Add User` to save.
 
-#### 3. Then `whitelist` your IP address. Click into `Network Access`, under `Security` in the left menu:
+#### Then `whitelist` your IP address. Click into `Network Access`, under `Security` in the left menu:
 
 - Click the green `+ ADD IP ADDRESS`
 
@@ -292,7 +693,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
   - Leave a comment to label this IP Address. E.g. `Heroku Server`
   - Then click the green `Confirm` button.
 
-#### 4. Retrieve database credentials
+#### Retrieve database credentials
 
 MongoDB Atlas automatically exposes the database credentials into a single environment variable accessible by your app. To locate it, follow these steps:
 
@@ -309,7 +710,7 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
 Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.
 :::
 
-#### 5. Update and replace your existing `/database.js` config file for the appropriate environment (development | production).
+#### Update and replace your existing `/database.js` config file for the appropriate environment (development | production).
 
 Replace the contents of `/database.json` with the following and replace **< password >** with the password of the user of your database you created earlier:
 
@@ -339,9 +740,9 @@ DATABASE_URI=mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.m
 ```
 
 ::: warning NOTE
-The above configuration will create a database called `strapi`, the _default database_ Strapi sets for any **MongoDB** database. If you would like to name your database something else, add the following **key:value pair** into your **"settings":** located in your `database.json` file.
+The above configuration will create a database called `strapi`, the _default database_ Strapi sets for any **MongoDB** database. If you would like to name your database something else, add the following **key:value pair** into your **settings:** located in your `database.js` file.
 
-`"database": "my-database-name"`
+`database: "my-database-name"`
 
 :::
 
