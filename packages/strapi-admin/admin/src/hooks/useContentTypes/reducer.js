@@ -22,6 +22,8 @@ const reducer = (state, action) =>
         break;
       }
       case 'GET_CONTENT_TYPES_ERROR': {
+        draftState.collectionTypes = initialState.collectionTypes;
+        draftState.singleTypes = initialState.singleTypes;
         draftState.isLoading = false;
         break;
       }
