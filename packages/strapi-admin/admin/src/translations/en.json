@@ -345,6 +345,7 @@
   "app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin": "If you do not receive this link, please contact your administrator.",
   "app.containers.AuthPage.ForgotPasswordSuccess.title": "Email sent",
   "Roles.ListPage.notification.delete-not-allowed": "A role cannot be deleted if associated with users",
+  "Roles.ListPage.notification.delete-all-not-allowed": "Some roles could not be deleted since they are associated with users",
   "Roles.RoleRow.user-count.plural": "{number} users",
   "Roles.RoleRow.user-count.singular": "{number} user",
   "Roles.components.List.empty.withSearch": "There is no role corresponding to the search ({search})..."

@@ -53,10 +53,20 @@ const RoleListPage = () => {
 
   const handleConfirmDeleteData = async () => {
     try {
+      const filteredRoles = selectedRoles.filter(currentId => {
+        const currentRole = roles.find(role => role.id === currentId);
+
+        return currentRole.usersCount === 0;
+      });
+
+      if (selectedRoles.length !== filteredRoles.length) {
+        strapi.notification.info('Roles.ListPage.notification.delete-all-not-allowed');
+      }
+
       await request('/admin/roles/batch-delete', {
         method: 'POST',
         body: {
-          ids: selectedRoles,
+          ids: filteredRoles,
         },
       });
 
