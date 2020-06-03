@@ -84,7 +84,7 @@ Follow these steps to [install PostgreSQL onto your Mac](https://www.postgresql.
 
 :::
 
-::: tab "Linux - Ubuntu"
+::: tab "Ubuntu"
 
 ##### Install PostgreSQL on Ubuntu
 
@@ -127,12 +127,32 @@ systemctl status postgresql
 
 #### Create a local PostgreSQL user and database for Strapi
 
-<!-- Add tabs for commands on different OSes -->
-blah blah blah
+:::: tabs
+
+::: "Windows 10"
+
+1. Open a CMD or Powershell prompt
+
+:::
+
+::: tab "Mac OS"
+
+1. Open a terminal
+
+:::
+
+::: tab "Ubuntu"
+
+1. Open a terminal
+
+:::
+
+::::
 
 #### Install Strapi locally with PostgreSQL
 
 Follow these steps to create a Strapi project locally using the PostgreSQL database.
+
 ::: tip
 PostgreSQL must already be running in the background.
 :::
@@ -359,15 +379,52 @@ systemctl status mariadb
 
 #### Create a local MySQL/MariaDB user and database for Strapi
 
-<!-- Add tabs for commands on different OSes -->
-blah blah blah
+:::: tabs
+
+::: "Windows 10 - MySQL"
+
+1. Open a CMD or Powershell prompt
+
+:::
+
+::: "Windows 10 - MariaDB"
+
+1. Open a CMD or Powershell prompt
+
+:::
+
+::: tab "Mac OS - MySQL"
+
+1. Open a terminal
+
+:::
+
+::: tab "Mac OS - MariaDB"
+
+1. Open a terminal
+
+:::
+
+::: tab "Ubuntu - MySQL"
+
+1. Open a terminal
+
+:::
+
+::: tab "Ubuntu - MariaDB"
+
+1. Open a terminal
+
+:::
+
+::::
 
 #### Install Strapi locally with MySQL/MariaDB
 
-Follow these steps to create a Strapi project locally using the MySQL database.
+Follow these steps to create a Strapi project locally using the MySQL/MariaDB database.
 
 ::: tip
-MySQL must already be running in the background.
+MySQL or MariaDB must already be running in the background.
 :::
 
 1. Create a new Strapi project
@@ -400,7 +457,7 @@ npx create-strapi-app my-project
 ❯ Custom (manual settings)
 ```
 
-3. Select `Postgres` and press `enter`:
+3. Select `MySQL` (even if you are using MariaDB) and press `enter`:
 
 ```bash
 ? Choose your installation type Custom (manual settings)
