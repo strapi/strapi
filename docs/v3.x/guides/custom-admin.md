@@ -97,7 +97,7 @@ Here is the code you have to find:
 ```js
 const dateFormats = {
   ...defaultDateFormats,
-  // Customise the format by uncommenting the one you wan to override it corresponds to the type of your field
+  // Customize the format by un-commenting the one you wan to override it corresponds to the type of your field
   // date: 'dddd, MMMM Do YYYY',
   // datetime: 'dddd, MMMM Do YYYY HH:mm',
   // time: 'HH:mm A',

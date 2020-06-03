@@ -39,7 +39,7 @@ You can also SSH into the virtual machine using `root` as the SSH user and your 
 
 ## Default server configuration
 
-From the inital startup you should not need to configure anything to get started, there is some included software that is configured:
+From the initial startup you should not need to configure anything to get started, there is some included software that is configured:
 
 - Node.js v12 (installed via the offical [apt repository](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions))
 - Yarn Latest Stable (installed via the official [apt repository](https://classic.yarnpkg.com/en/docs/install/#debian-stable))
@@ -107,7 +107,7 @@ upstream strapi {
 
 In the DigitalOcean one-click application a service user is used in which it's home directory is located at `/srv/strapi`. Likewise the actual Strapi application is located within this home directory at `/srv/strapi/strapi-development`.
 
-Please note that with this application it is intially created and ran in the `development` environment to allow for creating models. **You should not use this directly in production**, it is recommended that you configure a private git repository to commit changes into and create a new application directory within the service user's home (Example: `/srv/strapi/strapi-production`). To run the new `production` or `staging` environments you can refer to the [PM2 Documentation](https://pm2.keymetrics.io/docs/usage/quick-start/#managing-processes).
+Please note that with this application it is initially created and ran in the `development` environment to allow for creating models. **You should not use this directly in production**, it is recommended that you configure a private git repository to commit changes into and create a new application directory within the service user's home (Example: `/srv/strapi/strapi-production`). To run the new `production` or `staging` environments you can refer to the [PM2 Documentation](https://pm2.keymetrics.io/docs/usage/quick-start/#managing-processes).
 
 ## Using the Service Account
 
@@ -117,7 +117,7 @@ By default the Strapi application will be running under a "service account", thi
 
 The first step in accessing your service account is to SSH into the root user, depending on your Operating System or your SSH client there may be multiple ways to do this. You should refer to your SSH clients documentation for clarification on using SSH keys.
 
-After you have successfully logged into the root user you can now run `sudo su strapi` and this will take you to the `strapi` user's shell. To go back to the root user simplely run `exit`.
+After you have successfully logged into the root user you can now run `sudo su strapi` and this will take you to the `strapi` user's shell. To go back to the root user simply run `exit`.
 
 ::: warning
 Please note that by default the `strapi` user **cannot run sudo commands** this is intended!

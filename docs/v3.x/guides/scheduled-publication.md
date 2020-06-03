@@ -46,7 +46,7 @@ Please note that Strapi's built in CRON feature will not work if you plan to use
 
 ## Business logic
 
-Now we can start writting the publishing logic. The code that will fetch all `draft` **Articles** with a `published_at` that is before the current date.
+Now we can start writing the publishing logic. The code that will fetch all `draft` **Articles** with a `published_at` that is before the current date.
 
 Then we will update the `status` of all these articles to `published`.
 
