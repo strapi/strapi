@@ -14,11 +14,7 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
   const handleRoleSelection = e => {
     e.stopPropagation();
 
-    if (role.usersCount) {
-      strapi.notification.info('Roles.ListPage.notification.delete-not-allowed');
-    } else {
-      onRoleToggle(role.id);
-    }
+    onRoleToggle(role.id);
   };
 
   const handleClickDelete = () => {
