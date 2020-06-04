@@ -79,12 +79,4 @@ declare namespace Strapi {
 
 declare function Strapi(opts?: {}): Strapi;
 
-declare global {
-  namespace NodeJS {
-    interface Global {
-      strapi: typeof Strapi;
-    }
-  }
-}
-
 export = Strapi;

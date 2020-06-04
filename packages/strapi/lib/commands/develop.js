@@ -14,7 +14,12 @@ const strapi = require('../index');
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin }) {
+module.exports = async function({ build, watchAdmin, typescript }) {
+  if (typescript) {
+    require('ts-node/register');
+    require('tsconfig-paths/register');
+  }
+
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 

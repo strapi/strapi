@@ -1,5 +1,6 @@
 import { Context } from 'koa';
-import strapi from 'strapi';
+
+const { strapi } = global;
 
 export async function verifyJWT(ctx: Context) {
   // get token from the POST request

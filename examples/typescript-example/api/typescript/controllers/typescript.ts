@@ -1,7 +1,9 @@
 import { Context } from 'koa';
 
+const { strapi } = global;
+
 export async function helloWorld(ctx: Context) {
-  global.strapi.log.info('Hello World API');
+  strapi.log.info('Hello World API');
 
   ctx.send('Hello World');
 }

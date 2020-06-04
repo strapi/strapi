@@ -21,7 +21,11 @@
     "esModuleInterop": true,
     "watch": false
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "types"],
   "exclude": [
-    "node_modules", "build", ".cache", ".tmp"]
+    "node_modules", "build", ".cache", ".tmp"
+  ],
+  "ts-node": {
+    "files": true
+  }
 }

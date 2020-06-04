@@ -4,8 +4,8 @@
   "version": "3.0.1",
   "description": "A Strapi application.",
   "scripts": {
-    "develop": "TS_NODE_FILES=true NODE_OPTIONS=\"--require ts-node/register --inspect\" strapi develop",
-    "start": "strapi start",
+    "develop": "strapi develop --typescript",
+    "start": "strapi start --typescript",
     "build": "strapi build",
     "strapi": "strapi"
   },
