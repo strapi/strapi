@@ -102,9 +102,9 @@ describe('User Controller', () => {
 
     test('User not found', async () => {
       const fakeId = 42;
-      const badRequest = jest.fn();
+      const notFound = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(null));
-      const ctx = createContext({ params: { id: fakeId } }, { badRequest });
+      const ctx = createContext({ params: { id: fakeId } }, { notFound });
 
       global.strapi = {
         admin: {
@@ -117,7 +117,7 @@ describe('User Controller', () => {
       await userController.findOne(ctx);
 
       expect(findOne).toHaveBeenCalledWith({ id: fakeId });
-      expect(badRequest).toHaveBeenCalledWith('User does not exist');
+      expect(notFound).toHaveBeenCalledWith('User does not exist');
     });
   });
 
@@ -201,7 +201,7 @@ describe('User Controller', () => {
 
     test('User not found', async () => {
       const fakeId = 42;
-      const exists = jest.fn(() => false);
+      const update = jest.fn(() => null);
       const notFound = jest.fn();
       const body = { username: 'Foo' };
 
@@ -210,15 +210,14 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { exists },
+            user: { update },
           },
         },
       };
 
       await userController.update(ctx);
 
-      expect(exists).toHaveBeenCalledWith({ id: fakeId });
-      expect(exists).toHaveReturnedWith(false);
+      expect(update).toHaveReturnedWith(null);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
     });
 
@@ -236,7 +235,6 @@ describe('User Controller', () => {
     });
 
     test('Update a user correctly', async () => {
-      const exists = jest.fn(() => true);
       const update = jest.fn((_, input) => ({ ...user, ...input }));
       const sanitizeUser = jest.fn(user => user);
       const body = { firstname: 'Foo' };
@@ -246,15 +244,13 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { update, sanitizeUser, exists },
+            user: { update, sanitizeUser },
           },
         },
       };
 
       await userController.update(ctx);
 
-      expect(exists).toHaveBeenCalledWith({ id: user.id });
-      expect(exists).toHaveReturnedWith(true);
       expect(update).toHaveBeenCalledWith({ id: user.id }, body);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(ctx.body).toStrictEqual({ data: { ...user, ...body } });
