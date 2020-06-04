@@ -68,6 +68,17 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
+    if (_.has(input, 'email')) {
+      const uniqueEmailCheck = await strapi.admin.services.user.exists({
+        id_ne: id,
+        email: input.email,
+      });
+
+      if (uniqueEmailCheck) {
+        return ctx.badRequest('A user with this email address already exists');
+      }
+    }
+
     const updatedUser = await strapi.admin.services.user.update({ id }, input);
 
     if (!updatedUser) {
@@ -81,10 +92,6 @@ module.exports = {
 
   async delete(ctx) {
     const { id } = ctx.params;
-
-    if (!id) {
-      return ctx.badRequest('Invalid ID');
-    }
 
     const deletedUser = await strapi.admin.services.user.deleteOne({ id });
 
