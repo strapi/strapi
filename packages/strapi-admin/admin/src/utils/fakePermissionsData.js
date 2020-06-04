@@ -4,19 +4,19 @@ const data = [
     action: 'admin::marketplace.read',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::marketplace.plugins.install',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::marketplace.plugins.uninstall',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
 
   // Admin webhooks
@@ -24,25 +24,25 @@ const data = [
     action: 'admin::webhooks.create',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::webhooks.read',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::webhooks.update',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::webhooks.delete',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
 
   // Admin users
@@ -50,25 +50,25 @@ const data = [
     action: 'admin::users.create',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::users.read',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::users.update',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::users.delete',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
 
   // Admin roles
@@ -76,25 +76,25 @@ const data = [
     action: 'admin::roles.create',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::roles.read',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::roles.update',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
   {
     action: 'admin::roles.delete',
     subject: null,
     fields: null,
-    conditions: null,
+    conditions: [],
   },
 
   // Content type builder
