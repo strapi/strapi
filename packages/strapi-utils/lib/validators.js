@@ -28,10 +28,22 @@ function isAPluginName(message) {
   });
 }
 
+function isAContentTypeId(message) {
+  return this.test('is not a content-type id', message, function(value) {
+    return Object.keys(strapi.contentTypes).includes(value)
+      ? true
+      : this.createError({
+          path: this.path,
+          message: `${this.path} is not an existing content-type id`,
+        });
+  });
+}
+
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
 yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
 yup.addMethod(yup.string, 'isAPluginName', isAPluginName);
+yup.addMethod(yup.string, 'isAContentTypeId', isAContentTypeId);
 
 class StrapiIDSchema extends MixedSchemaType {
   constructor() {

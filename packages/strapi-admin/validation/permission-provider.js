@@ -15,29 +15,29 @@ const registerProviderPermissionSchema = yup
           .string()
           .oneOf(['contentTypes', 'plugins', 'settings'])
           .required(),
-        pluginName: yup.mixed().when('section', {
+        pluginName: yup
+          .string()
+          .required()
+          .isAPluginName(),
+        subjects: yup.mixed().when('section', {
           is: 'contentTypes',
-          then: yup.mixed().oneOf([undefined]),
-          otherwise: yup
-            .string()
-            .required()
-            .isAPluginName(),
+          then: yup
+            .array()
+            .of(yup.string().isAContentTypeId())
+            .required(),
+          otherwise: yup.mixed().oneOf([undefined]),
         }),
         displayName: yup.string().required(),
-        category: yup
-          .mixed()
-          .when('section', {
-            is: val => ['plugins', 'contentTypes'].includes(val),
-            then: yup.mixed().oneOf([undefined]),
-            otherwise: yup.string().required(),
-          }),
-        subCategory: yup
-          .mixed()
-          .when('section', {
-            is: 'contentTypes',
-            then: yup.mixed().oneOf([undefined]),
-            otherwise: yup.string(),
-          }),
+        category: yup.mixed().when('section', {
+          is: val => ['plugins', 'contentTypes'].includes(val),
+          then: yup.mixed().oneOf([undefined]),
+          otherwise: yup.string().required(),
+        }),
+        subCategory: yup.mixed().when('section', {
+          is: 'contentTypes',
+          then: yup.mixed().oneOf([undefined]),
+          otherwise: yup.string(),
+        }),
         conditions: yup.array().of(yup.string()),
       })
       .noUnknown()
@@ -47,7 +47,11 @@ const validateRegisterProviderPermission = data => {
   try {
     registerProviderPermissionSchema.validateSync(data, { strict: true, abortEarly: false });
   } catch (e) {
-    strapi.stopWithError(e);
+    if (e.errors.length > 0) {
+      throw new yup.ValidationError(e.errors.join(', '));
+    } else {
+      throw e;
+    }
   }
 };
 

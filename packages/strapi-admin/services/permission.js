@@ -26,9 +26,20 @@ const find = (params = {}) => {
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
 const assign = async (roleID, permissions = []) => {
-  // TODO: verify the data once we have the permissions registry
+  const existingPermissions = strapi.admin.permissionProvider.getAll();
+  for (let permission of permissions) {
+    const permissionExists = existingPermissions.find(
+      ep =>
+        ep.permissionId === permission.action &&
+        (ep.section !== 'contentTypes' || ep.subjects.includes(permission.subject))
+    );
+    if (!permissionExists) {
+      throw strapi.errors.badRequest(
+        `ValidationError', 'This permission doesn't exist: ${JSON.stringify(permission)}`
+      );
+    }
+  }
 
-  // clear previous permissions
   await strapi.query('permission', 'admin').delete({ role: roleID });
 
   const permissionsWithRole = permissions.map(permission => {

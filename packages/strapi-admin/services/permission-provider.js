@@ -4,7 +4,7 @@ const { validateRegisterProviderPermission } = require('../validation/permission
 
 const calculateId = permission => {
   let id = '';
-  const sanitizedname = _.snakeCase(permission.name).replace('_', '.');
+  const sanitizedname = _.snakeCase(permission.name).replace(/_/g, '.');
   if (permission.pluginName === 'admin') {
     id = `admin::${sanitizedname}`;
   } else {
@@ -13,12 +13,12 @@ const calculateId = permission => {
   return id;
 };
 
-const formatPermission = permission => {
+const formatPermissionToBeRegistered = permission => {
   const formattedPermission = _.clone(permission);
   formattedPermission.permissionId = calculateId(permission);
   formattedPermission.conditions = permission.conditions || [];
 
-  if (permission.section === 'settings') {
+  if (['settings', 'plugins'].includes(permission.section)) {
     formattedPermission.subCategory = permission.subCategory || 'general';
   }
 
@@ -39,18 +39,58 @@ const getDuplicatedIds = permissions => {
   return duplicatedIds;
 };
 
+const formatPermissionsToNestedFormat = formattedPermissions => {
+  const sections = formattedPermissions.reduce((result, p) => {
+    const checkboxItem = {
+      displayName: p.displayName,
+      action: p.permissionId,
+    };
+
+    switch (p.section) {
+      case 'contentTypes':
+        checkboxItem.subjects = p.subjects;
+        break;
+      case 'plugins':
+        checkboxItem.subCategory = p.subCategory;
+        checkboxItem.plugin = `plugin::${p.pluginName}`;
+        break;
+      case 'settings':
+        checkboxItem.category = p.category;
+        checkboxItem.subCategory = p.subCategory;
+        break;
+      case 'default':
+        throw new Error(`Unknown section ${p.section}`);
+    }
+
+    result[p.section] = result[p.section] || [];
+    result[p.section].push(checkboxItem);
+
+    return result;
+  }, {});
+
+  return {
+    sections,
+    conditions: [],
+  };
+};
+
 class PermissionProvider {
   constructor() {
     this.permissions = [];
+    this.permissionsWithNestedFormat = {};
   }
 
-  getPermissions() {
+  getAll() {
     return _.cloneDeep(this.permissions);
+  }
+
+  getAllWithNestedFormat() {
+    return _.cloneDeep(this.permissionsWithNestedFormat);
   }
 
   register(newPermissions) {
     validateRegisterProviderPermission(newPermissions);
-    const newPermissionsWithIds = newPermissions.map(formatPermission);
+    const newPermissionsWithIds = newPermissions.map(formatPermissionToBeRegistered);
     const mergedPermissions = [...this.permissions, ...newPermissionsWithIds];
     const duplicatedIds = getDuplicatedIds(mergedPermissions);
 
@@ -65,6 +105,7 @@ class PermissionProvider {
     }
 
     this.permissions = mergedPermissions;
+    this.permissionsWithNestedFormat = formatPermissionsToNestedFormat(mergedPermissions);
   }
 }
 

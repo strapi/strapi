@@ -20,6 +20,7 @@ module.exports = () => {
 async function syncSchemas() {
   await syncContentTypesSchemas();
   await syncComponentsSchemas();
+  registerPermissions();
 }
 
 /**
@@ -58,14 +59,10 @@ async function updateContentTypes(configurations) {
   const contentTypesToDelete = _.difference(DBUIDs, currentUIDS);
 
   // delette old schemas
-  await Promise.all(
-    contentTypesToDelete.map(uid => contentTypeService.deleteConfiguration(uid))
-  );
+  await Promise.all(contentTypesToDelete.map(uid => contentTypeService.deleteConfiguration(uid)));
 
   // create new schemas
-  await Promise.all(
-    contentTypesToAdd.map(uid => generateNewConfiguration(uid))
-  );
+  await Promise.all(contentTypesToAdd.map(uid => generateNewConfiguration(uid)));
 
   // update current schemas
   await Promise.all(contentTypesToUpdate.map(uid => updateConfiguration(uid)));
@@ -102,13 +99,69 @@ async function syncComponentsSchemas() {
   const componentsToDelete = _.difference(DBUIDs, realUIDs);
 
   // delette old schemas
-  await Promise.all(
-    componentsToDelete.map(uid => componentService.deleteConfiguration(uid))
-  );
+  await Promise.all(componentsToDelete.map(uid => componentService.deleteConfiguration(uid)));
 
   // create new schemas
   await Promise.all(componentsToAdd.map(uid => generateNewConfiguration(uid)));
 
   // update current schemas
   await Promise.all(componentsToUpdate.map(uid => updateConfiguration(uid)));
+}
+
+function registerPermissions() {
+  const contentTypesUids = Object.keys(strapi.contentTypes); // TODO: filter to not have internal contentTypes
+
+  const permissions = [
+    {
+      section: 'contentTypes',
+      displayName: 'Create',
+      name: 'create',
+      pluginName: 'content-manager',
+      subjects: contentTypesUids,
+    },
+    {
+      section: 'contentTypes',
+      displayName: 'Read',
+      name: 'read',
+      pluginName: 'content-manager',
+      subjects: contentTypesUids,
+    },
+    {
+      section: 'contentTypes',
+      displayName: 'Update',
+      name: 'update',
+      pluginName: 'content-manager',
+      subjects: contentTypesUids,
+    },
+    {
+      section: 'contentTypes',
+      displayName: 'Delete',
+      name: 'delete',
+      pluginName: 'content-manager',
+      subjects: contentTypesUids,
+    },
+    {
+      section: 'plugins',
+      displayName: 'Configure view',
+      name: 'single-types.configure-view',
+      subCategory: 'single types',
+      pluginName: 'content-manager',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Configure view',
+      name: 'collection-types.configure-view',
+      subCategory: 'collection types',
+      pluginName: 'content-manager',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Configure Layout',
+      name: 'components.configure-layout',
+      subCategory: 'components',
+      pluginName: 'content-manager',
+    },
+  ];
+
+  strapi.admin.permissionProvider.register(permissions);
 }

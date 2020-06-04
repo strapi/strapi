@@ -22,8 +22,10 @@ describe('Permission Service', () => {
     test('Delete previous permissions', async () => {
       const deleteFn = jest.fn(() => Promise.resolve([]));
       const create = jest.fn(() => Promise.resolve({}));
+      const getAll = jest.fn(() => []);
 
       global.strapi = {
+        admin: { permissionProvider: { getAll } },
         query() {
           return { delete: deleteFn, create };
         },
@@ -37,8 +39,14 @@ describe('Permission Service', () => {
     test('Create new permissions', async () => {
       const deleteFn = jest.fn(() => Promise.resolve([]));
       const create = jest.fn(() => Promise.resolve({}));
+      const getAll = jest.fn(() =>
+        Array(5)
+          .fill(0)
+          .map((v, i) => ({ permissionId: `action-${i}` }))
+      );
 
       global.strapi = {
+        admin: { permissionProvider: { getAll } },
         query() {
           return { delete: deleteFn, create };
         },
@@ -46,13 +54,13 @@ describe('Permission Service', () => {
 
       const permissions = Array(5)
         .fill(0)
-        .map(() => ({ action: 'test' }));
+        .map((v, i) => ({ action: `action-${i}` }));
 
       await permissionService.assign(1, permissions);
 
       expect(create).toHaveBeenCalledTimes(5);
-      expect(create).toHaveBeenCalledWith({
-        action: 'test',
+      expect(create).toHaveBeenNthCalledWith(1, {
+        action: 'action-0',
         role: 1,
         conditions: [],
         fields: [],

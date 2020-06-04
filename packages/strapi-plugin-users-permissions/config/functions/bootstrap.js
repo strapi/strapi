@@ -10,6 +10,8 @@
 const _ = require('lodash');
 const uuid = require('uuid/v4');
 
+const usersPermissionsPermissions = require('../users-permissions-permissions');
+
 module.exports = async () => {
   const pluginStore = strapi.store({
     environment: '',
@@ -180,4 +182,6 @@ module.exports = async () => {
 
     strapi.reload.isWatching = true;
   }
+
+  strapi.admin.permissionProvider.register(usersPermissionsPermissions.permissions);
 };

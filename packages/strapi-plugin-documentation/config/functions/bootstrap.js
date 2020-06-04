@@ -107,4 +107,30 @@ module.exports = async () => {
       'utf8'
     );
   }
+
+  // Add permissions
+  const permissions = [
+    {
+      section: 'plugins',
+      displayName: 'Can access to the Documentation',
+      name: 'read',
+      pluginName: 'documentation',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Update and delete',
+      name: 'settings.update',
+      subCategory: 'settings',
+      pluginName: 'documentation',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Regenerate',
+      name: 'settings.regenerate',
+      subCategory: 'settings',
+      pluginName: 'documentation',
+    },
+  ];
+
+  strapi.admin.permissionProvider.register(permissions);
 };
