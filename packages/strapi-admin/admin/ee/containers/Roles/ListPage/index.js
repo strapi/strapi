@@ -144,7 +144,7 @@ const RoleListPage = () => {
           )}
           isLoading={isLoading}
           button={{
-            color: 'primary',
+            color: 'delete',
             disabled: selectedRoles.length === 0,
             label: formatMessage({ id: 'app.utils.delete' }),
             onClick: handleToggleModal,
