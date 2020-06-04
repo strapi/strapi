@@ -1,7 +1,10 @@
 'use strict';
 
+const _ = require('lodash');
 const { login, registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
+
+const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
 
 const getAuthToken = async () => {
   let token = await login();
@@ -151,10 +154,9 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).not.toBeNull();
-    expect({ updatedAt: null, ...res.body.data }).toMatchObject({
-      ...testData.user,
+    expect(omitTimestamps(res.body.data)).toMatchObject({
+      ...omitTimestamps(testData.user),
       ...body,
-      updatedAt: expect.stringOrNull(),
     });
 
     // Update the local copy of the user
@@ -172,7 +174,7 @@ describe('Admin User CRUD (e2e)', () => {
   });
 
   describe('6. Finds a list of users (contains user)', () => {
-    const expectedResults = () => ({
+    const expectedBodyFormat = () => ({
       data: {
         pagination: {
           page: 1,
@@ -191,7 +193,7 @@ describe('Admin User CRUD (e2e)', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(expectedResults());
+      expect(res.body).toMatchObject(expectedBodyFormat());
       expect(res.body.data.results).toContainEqual(testData.user);
     });
 
@@ -202,7 +204,7 @@ describe('Admin User CRUD (e2e)', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(expectedResults());
+      expect(res.body).toMatchObject(expectedBodyFormat());
       expect(res.body.data.results).toContainEqual(testData.user);
     });
   });
@@ -252,10 +254,14 @@ describe('Admin User CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.body.data).toBeUndefined();
+    expect(res.body).toMatchObject({
+      error: 'Not Found',
+      message: 'User does not exist',
+      statusCode: 404,
+    });
   });
 
-  test('12. Finds a list of users (missing user)', async () => {
+  test('11. Finds a list of users (missing user)', async () => {
     const res = await rq({
       url: `/admin/users?email=${testData.user.email}`,
       method: 'GET',
@@ -271,6 +277,6 @@ describe('Admin User CRUD (e2e)', () => {
       },
       results: expect.any(Array),
     });
-    expect(res.body.data.results).not.toContainEqual(testData.user);
+    expect(res.body.data.results).toHaveLength(0);
   });
 });
