@@ -50,7 +50,7 @@ module.exports = {
     const user = await strapi.admin.services.user.findOne({ id });
 
     if (!user) {
-      return ctx.badRequest('User does not exist');
+      return ctx.notFound('User does not exist');
     }
 
     ctx.body = {
@@ -68,16 +68,32 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const userExists = await strapi.admin.services.user.exists({ id });
+    const updatedUser = await strapi.admin.services.user.update({ id }, input);
 
-    if (!userExists) {
+    if (!updatedUser) {
       return ctx.badRequest('User does not exist');
     }
-
-    const updatedUser = await strapi.admin.services.user.update({ id }, input);
 
     ctx.body = {
       data: strapi.admin.services.user.sanitizeUser(updatedUser),
     };
+  },
+
+  async delete(ctx) {
+    const { id } = ctx.params;
+
+    if (!id) {
+      return ctx.badRequest('Invalid ID');
+    }
+
+    const deletedUser = await strapi.admin.services.user.deleteOne({ id });
+
+    if (!deletedUser) {
+      return ctx.notFound('User not found');
+    }
+
+    return ctx.deleted({
+      data: strapi.admin.services.user.sanitizeUser(deletedUser),
+    });
   },
 };

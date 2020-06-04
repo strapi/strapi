@@ -202,10 +202,10 @@ describe('User Controller', () => {
     test('User not found', async () => {
       const fakeId = 42;
       const exists = jest.fn(() => false);
-      const badRequest = jest.fn();
+      const notFound = jest.fn();
       const body = { username: 'Foo' };
 
-      const ctx = createContext({ params: { id: fakeId }, body }, { badRequest });
+      const ctx = createContext({ params: { id: fakeId }, body }, { notFound });
 
       global.strapi = {
         admin: {
@@ -219,7 +219,7 @@ describe('User Controller', () => {
 
       expect(exists).toHaveBeenCalledWith({ id: fakeId });
       expect(exists).toHaveReturnedWith(false);
-      expect(badRequest).toHaveBeenCalledWith('User does not exist');
+      expect(notFound).toHaveBeenCalledWith('User does not exist');
     });
 
     test('Validation error', async () => {

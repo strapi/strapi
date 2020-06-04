@@ -22,11 +22,11 @@ const validateUserCreationInput = data => {
 const profileUpdateSchema = yup
   .object()
   .shape({
-    email: validators.email,
-    firstname: validators.firstname,
-    lastname: validators.lastname,
+    email: validators.email.notNull(),
+    firstname: validators.firstname.notNull(),
+    lastname: validators.lastname.notNull(),
     username: validators.username.nullable(),
-    password: validators.password,
+    password: validators.password.notNull(),
   })
   .noUnknown();
 
@@ -39,13 +39,13 @@ const validateProfileUpdateInput = data => {
 const userUpdateSchema = yup
   .object()
   .shape({
-    email: validators.email,
-    firstname: validators.firstname,
-    lastname: validators.lastname,
+    email: validators.email.notNull(),
+    firstname: validators.firstname.notNull(),
+    lastname: validators.lastname.notNull(),
     username: validators.username.nullable(),
-    password: validators.password,
-    isActive: yup.bool(),
-    roles: validators.roles.min(1),
+    password: validators.password.notNull(),
+    isActive: yup.bool().notNull(),
+    roles: validators.roles.min(1).notNull(),
   })
   .noUnknown();
 

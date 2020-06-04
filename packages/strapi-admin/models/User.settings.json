@@ -29,7 +29,8 @@
       "type": "email",
       "minLength": 6,
       "configurable": false,
-      "required": true
+      "required": true,
+      "unique": true
     },
     "password": {
       "type": "password",

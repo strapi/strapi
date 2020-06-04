@@ -284,7 +284,7 @@ describe('User', () => {
       };
     });
 
-    test('Find and returns a user by its ID', async () => {
+    test('Finds and returns a user by its ID', async () => {
       const input = { id: 1 };
       const res = await userService.findOne(input);
 
@@ -292,7 +292,7 @@ describe('User', () => {
       expect(res).toStrictEqual(user);
     });
 
-    test('Fail to find a user with provided params', async () => {
+    test('Fails to find a user with provided params', async () => {
       const input = { id: 27 };
       const res = await userService.findOne(input);
 

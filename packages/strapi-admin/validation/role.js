@@ -7,7 +7,7 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 const roleUpdateSchema = yup
   .object()
   .shape({
-    description: yup.string(),
+    description: yup.string().nullable(),
   })
   .noUnknown();
 
