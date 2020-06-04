@@ -30,7 +30,7 @@ class StrapiIDSchema extends MixedSchemaType {
   }
 
   _typeCheck(value) {
-    return typeof value === 'string' || (Number.isInteger(value) && value > 0);
+    return typeof value === 'string' || (Number.isInteger(value) && value >= 0);
   }
 }
 
