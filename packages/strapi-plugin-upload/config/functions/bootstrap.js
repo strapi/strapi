@@ -28,6 +28,7 @@ module.exports = async () => {
   }
 
   await pruneObsoleteRelations();
+  registerPermissions();
 };
 
 const createProvider = ({ provider, providerOptions }) => {
@@ -78,4 +79,45 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
     { related: { $elemMatch: { kind: { $nin: modelsId } } } },
     { $pull: { related: { kind: { $nin: modelsId } } } }
   );
+};
+
+const registerPermissions = () => {
+  const permissions = [
+    {
+      section: 'plugins',
+      displayName: 'Can access to the Media Library',
+      name: 'read',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Create (upload)',
+      name: 'assets.create',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Update (crop, details, replace)',
+      name: 'assets.update',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Download',
+      name: 'assets.download',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Copy link',
+      name: 'assets.copy-link',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+  ];
+
+  strapi.admin.permissionProvider.register(permissions);
 };

@@ -194,6 +194,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/permissions",
+      "handler": "permission.getAll",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

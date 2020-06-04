@@ -3,8 +3,14 @@ const bootstrap = require('../../config/functions/bootstrap');
 describe('Upload plugin bootstrap function', () => {
   test('Sets default config if id does not exist', async () => {
     const setStore = jest.fn(() => {});
+    const register = jest.fn(() => {});
 
     global.strapi = {
+      admin: {
+        permissionProvider: {
+          register,
+        },
+      },
       log: {
         error() {},
       },

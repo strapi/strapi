@@ -25,7 +25,7 @@ describe('Permission Provider Service', () => {
       };
 
       await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getPermissions();
+      const permissions = permissionProvider.getAll();
 
       expect(permissions).toMatchObject([
         {
@@ -46,7 +46,7 @@ describe('Permission Provider Service', () => {
       };
 
       await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getPermissions();
+      const permissions = permissionProvider.getAll();
 
       expect(permissions).toMatchObject([
         {
@@ -68,7 +68,7 @@ describe('Permission Provider Service', () => {
       };
 
       await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getPermissions();
+      const permissions = permissionProvider.getAll();
 
       expect(permissions).toMatchObject([
         {
@@ -89,7 +89,7 @@ describe('Permission Provider Service', () => {
       };
 
       await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getPermissions();
+      const permissions = permissionProvider.getAll();
 
       expect(permissions).toMatchObject([
         {
@@ -136,13 +136,8 @@ describe('Permission Provider Service', () => {
         category: 'plugins and marketplace',
       };
 
-      await permissionProvider.register([permission]);
-
-      expect(global.strapi.stopWithError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'ValidationError',
-          message: '[0].pluginName is not an existing plugin',
-        })
+      expect(() => permissionProvider.register([permission])).toThrow(
+        '[0].pluginName is not an existing plugin'
       );
     });
 
@@ -154,13 +149,8 @@ describe('Permission Provider Service', () => {
         section: 'settings',
       };
 
-      await permissionProvider.register([permission]);
-
-      expect(global.strapi.stopWithError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'ValidationError',
-          message: '[0].category is a required field',
-        })
+      expect(() => permissionProvider.register([permission])).toThrow(
+        '[0].category is a required field'
       );
     });
   });

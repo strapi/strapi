@@ -4,13 +4,21 @@ const { yup, formatYupErrors } = require('strapi-utils');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
-const roleCreateUpdateSchema = yup
+const roleCreateSchema = yup
   .object()
   .shape({
     name: yup
       .string()
       .min(1)
       .required(),
+    description: yup.string().nullable(),
+  })
+  .noUnknown();
+
+const roleUpdateSchema = yup
+  .object()
+  .shape({
+    name: yup.string().min(1),
     description: yup.string().nullable(),
   })
   .noUnknown();
@@ -27,15 +35,11 @@ const roleDeleteSchema = yup
   .noUnknown();
 
 const validateRoleCreateInput = async data => {
-  return roleCreateUpdateSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+  return roleCreateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
 const validateRoleUpdateInput = async data => {
-  return roleCreateUpdateSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+  return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
 const validateRoleDeleteInput = async data => {

@@ -355,11 +355,11 @@ describe('Role CRUD End to End', () => {
           body: {
             permissions: [
               {
-                action: 'test.action',
+                action: 'plugins::users-permissions.roles.update',
               },
               {
-                action: 'test.action2',
-                subject: 'model1',
+                action: 'plugins::content-manager.create',
+                subject: 'plugins::upload.file',
                 conditions: ['isOwner'],
               },
             ],
@@ -381,6 +381,29 @@ describe('Role CRUD End to End', () => {
           if (permission.fields.length > 0) {
             expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
           }
+        });
+      });
+
+      test("can't assign non-existing permissions on role", async () => {
+        const res = await rq({
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
+          method: 'PUT',
+          body: {
+            permissions: [
+              {
+                action: 'non.existing.action',
+              },
+            ],
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        console.log('res.body', res.body);
+        expect(res.body).toMatchObject({
+          statusCode: 400,
+          error: 'Bad Request',
+          message:
+            'ValidationError\', \'This permission doesn\'t exist: {"action":"non.existing.action"}',
         });
       });
 
