@@ -318,7 +318,7 @@ module.exports = {
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
-        URL: advanced.email_reset_password,
+        URL: strapi.config.server.url + advanced.email_reset_password,
         USER: _.omit(user.toJSON ? user.toJSON() : user, [
           'password',
           'resetPasswordToken',
