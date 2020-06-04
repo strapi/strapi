@@ -40,7 +40,13 @@ module.exports = {
     await register();
 
     // login
-    const { token } = await login();
-    return token;
+    const user = await login();
+
+    return user && user.token;
+  },
+  async login() {
+    const user = await login();
+
+    return user && user.token;
   },
 };

@@ -151,6 +151,11 @@
       "handler": "user.update"
     },
     {
+      "method": "DELETE",
+      "path": "/users/:id",
+      "handler": "user.delete"
+    },
+    {
       "method": "GET",
       "path": "/roles/:id/permissions",
       "handler": "role.getPermissions",

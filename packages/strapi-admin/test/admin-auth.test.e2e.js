@@ -4,25 +4,50 @@ const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 
-const createUser = data => {
-  return rq({
-    url: '/admin/users',
+const createAuthRole = async () => {
+  const res = await rq({
+    url: '/admin/roles',
     method: 'POST',
     body: {
-      roles: [1],
-      ...data,
+      name: 'auth_test_role',
+      description: 'Only used for auth crud test (e2e)',
     },
   });
+
+  return res && res.body && res.body.data;
 };
 
 describe('Admin Auth End to End', () => {
+  const testData = {
+    role: null,
+  };
+
+  const createUser = data => {
+    return rq({
+      url: '/admin/users',
+      method: 'POST',
+      body: {
+        roles: [testData.role.id],
+        ...data,
+      },
+    });
+  };
+
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
+    testData.role = await createAuthRole();
+  }, 60000);
+
+  afterAll(async () => {
+    await rq({
+      url: `/admin/roles/${testData.role.id}`,
+      method: 'DELETE',
+    });
   }, 60000);
 
   describe('Login', () => {
-    test('Can connect successfuklly', async () => {
+    test('Can connect successfully', async () => {
       const res = await rq({
         url: '/admin/login',
         method: 'POST',

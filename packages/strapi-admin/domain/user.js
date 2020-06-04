@@ -8,6 +8,7 @@ function createUser(attributes) {
   return {
     roles: [],
     isActive: false,
+    username: null,
     ...attributes,
   };
 }

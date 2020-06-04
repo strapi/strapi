@@ -132,6 +132,14 @@ const searchPage = async query => {
   return strapi.query('user', 'admin').searchPage(query);
 };
 
+/** Delete a user
+ * @param query
+ * @returns {Promise<user>}
+ */
+const deleteOne = async query => {
+  return strapi.query('user', 'admin').delete(query);
+};
+
 module.exports = {
   create,
   update,
@@ -142,4 +150,5 @@ module.exports = {
   findOne,
   findPage,
   searchPage,
+  deleteOne,
 };

@@ -1,7 +1,6 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('strapi-utils');
-const { strapiId } = require('../../validation/common-validators');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -21,7 +20,7 @@ const roleDeleteSchema = yup
   .shape({
     ids: yup
       .array()
-      .of(strapiId)
+      .of(yup.strapiID())
       .min(1)
       .required(),
   })
