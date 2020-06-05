@@ -67,26 +67,6 @@ describe('ADMIN | ee | CONTAINERS | ROLES | ListPage | reducer', () => {
     });
   });
 
-  describe('ON_REMOVE_ROLES_ERROR', () => {
-    it('should set the showModalConfirmButtonLoading to false', () => {
-      const action = {
-        type: 'ON_REMOVE_ROLES_ERROR',
-      };
-      const initialState = {
-        selectedRoles: [],
-        shouldRefetchData: false,
-        showModalConfirmButtonLoading: true,
-      };
-      const expected = {
-        selectedRoles: [],
-        shouldRefetchData: false,
-        showModalConfirmButtonLoading: false,
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
   describe('ON_REMOVE_ROLES_SUCCEEDED', () => {
     it('should set the shouldRefetchData to true', () => {
       const action = {
@@ -100,7 +80,7 @@ describe('ADMIN | ee | CONTAINERS | ROLES | ListPage | reducer', () => {
       const expected = {
         selectedRoles: [],
         shouldRefetchData: true,
-        showModalConfirmButtonLoading: false,
+        showModalConfirmButtonLoading: true,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
@@ -115,10 +95,12 @@ describe('ADMIN | ee | CONTAINERS | ROLES | ListPage | reducer', () => {
       const initialState = {
         selectedRoles: [1, 2, 4],
         shouldRefetchData: true,
+        showModalConfirmButtonLoading: true,
       };
       const expected = {
         selectedRoles: [],
         shouldRefetchData: false,
+        showModalConfirmButtonLoading: false,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

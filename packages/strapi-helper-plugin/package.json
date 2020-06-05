@@ -50,11 +50,11 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "@buffetjs/core": "3.1.1-next.10",
-    "@buffetjs/hooks": "3.1.1-next.10",
-    "@buffetjs/icons": "3.1.1-next.10",
-    "@buffetjs/styles": "3.1.1-next.10",
-    "@buffetjs/utils": "3.1.1-next.10",
+    "@buffetjs/core": "3.1.1-next.11",
+    "@buffetjs/hooks": "3.1.1-next.11",
+    "@buffetjs/icons": "3.1.1-next.11",
+    "@buffetjs/styles": "3.1.1-next.11",
+    "@buffetjs/utils": "3.1.1-next.11",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
