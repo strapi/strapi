@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
@@ -21,6 +21,7 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
+  const [isSubmiting, setIsSubmiting] = useState(false);
 
   // Retrieve the view's layout
   const { isLoading: isLayoutLoading } = useFetchPermissionsLayout();
@@ -46,6 +47,7 @@ const EditPage = () => {
             onClick: handleSubmit,
             color: 'success',
             type: 'submit',
+            isLoading: isSubmiting,
           },
         ];
   /* eslint-enable indent */
@@ -53,6 +55,7 @@ const EditPage = () => {
   const handleEditRoleSubmit = async data => {
     try {
       strapi.lockAppWithOverlay();
+      setIsSubmiting(true);
 
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
@@ -71,6 +74,7 @@ const EditPage = () => {
       // }
       strapi.notification.error('notification.error');
     } finally {
+      setIsSubmiting(false);
       strapi.unlockApp();
     }
   };
@@ -96,6 +100,7 @@ const EditPage = () => {
                 id: 'Settings.roles.create.description',
               })}
               actions={headerActions(handleSubmit, handleReset)}
+              isLoading={isLayoutLoading || isRoleLoading}
             />
             <BaselineAlignement top size="3px" />
             <RoleForm
@@ -106,9 +111,11 @@ const EditPage = () => {
               onBlur={handleBlur}
               usersCount={role.usersCount}
             />
-            <Padded top size="md">
-              <Permissions />
-            </Padded>
+            {!isLayoutLoading && !isRoleLoading && (
+              <Padded top size="md">
+                <Permissions />
+              </Padded>
+            )}
           </ContainerFluid>
         </form>
       )}

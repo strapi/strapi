@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { request } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
-
+import { useFetchPermissionsLayout } from '../../../../src/hooks';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
 import ContainerFluid from '../../../../src/components/ContainerFluid';
 import FormCard from '../../../../src/components/FormBloc';
@@ -16,6 +16,9 @@ import schema from './utils/schema';
 
 const CreatePage = () => {
   const { formatMessage } = useIntl();
+  const [isSubmiting, setIsSubmiting] = useState(false);
+  // @HichamELBSI Adding the layout since you might need it for the plugins sections
+  const { isLoading: isLayoutLoading } = useFetchPermissionsLayout();
   const { goBack } = useHistory();
 
   const headerActions = (handleSubmit, handleReset) => [
@@ -34,11 +37,13 @@ const CreatePage = () => {
       onClick: handleSubmit,
       color: 'success',
       type: 'submit',
+      isLoading: isSubmiting,
     },
   ];
 
   const handleCreateRoleSubmit = async data => {
     try {
+      setIsSubmiting(true);
       const res = await request('/admin/roles', {
         method: 'POST',
         body: data,
@@ -54,6 +59,7 @@ const CreatePage = () => {
       // const apiErrors = formatAPIErrors(data);
       // }
       strapi.notification.error('notification.error');
+      setIsSubmiting(false);
     }
   };
 
@@ -84,6 +90,7 @@ const CreatePage = () => {
                 id: 'Settings.roles.create.description',
               })}
               actions={headerActions(handleSubmit, handleReset)}
+              isLoading={isLayoutLoading}
             />
             <BaselineAlignement top size="3px" />
             <FormCard
@@ -116,10 +123,11 @@ const CreatePage = () => {
                 style={{ height: 115 }}
               />
             </FormCard>
-
-            <Padded top size="md">
-              <Permissions />
-            </Padded>
+            {!isLayoutLoading && (
+              <Padded top size="md">
+                <Permissions />
+              </Padded>
+            )}
           </ContainerFluid>
         </form>
       )}
