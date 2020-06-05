@@ -21,7 +21,7 @@ services:
   strapi:
     image: strapi/strapi
     volumes:
-      - ./:/srv/app
+      - ./app:/srv/app
     ports:
       - '1337:1337'
 ```
