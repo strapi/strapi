@@ -2,21 +2,31 @@ const _ = require('lodash');
 const { yup } = require('strapi-utils');
 const { validateRegisterProviderPermission } = require('../validation/permission-provider');
 
-const calculateId = permission => {
+// Utils
+const prefixId = ({ pluginName, uid }) => {
   let id = '';
-  const sanitizedname = _.snakeCase(permission.name).replace(/_/g, '.');
-  if (permission.pluginName === 'admin') {
-    id = `admin::${sanitizedname}`;
+  if (pluginName === 'admin') {
+    id = `admin::${uid}`;
   } else {
-    id = `plugins::${permission.pluginName}.${sanitizedname}`;
+    id = `plugins::${pluginName}.${uid}`;
   }
   return id;
 };
 
+const formattedPermissionFields = [
+  'section',
+  'displayName',
+  'category',
+  'subCategory',
+  'pluginName',
+  'subjects',
+  'conditions',
+];
+
 const formatPermissionToBeRegistered = permission => {
-  const formattedPermission = _.clone(permission);
-  formattedPermission.permissionId = calculateId(permission);
-  formattedPermission.conditions = permission.conditions || [];
+  const formattedPermission = _.cloneDeep(_.pick(permission, formattedPermissionFields));
+  formattedPermission.permissionId = prefixId(permission);
+  formattedPermission.conditions = formattedPermission.conditions || [];
 
   if (['settings', 'plugins'].includes(permission.section)) {
     formattedPermission.subCategory = permission.subCategory || 'general';
@@ -74,43 +84,43 @@ const formatPermissionsToNestedFormat = formattedPermissions => {
   };
 };
 
-class PermissionProvider {
-  constructor() {
-    this.permissions = [];
-    this.permissionsWithNestedFormat = {};
+// Private variables
+let _permissions = [];
+let _permissionsWithNestedFormat = {};
+
+// Exported functions
+const get = (pluginName, uid) => {
+  const permissionId = prefixId({ pluginName, uid });
+  return _permissions.find(p => p.permissionId === permissionId);
+};
+
+const getAll = () => _.cloneDeep(_permissions);
+
+const getAllWithNestedFormat = () => _.cloneDeep(_permissionsWithNestedFormat);
+
+const register = newPermissions => {
+  validateRegisterProviderPermission(newPermissions);
+  const newPermissionsWithIds = newPermissions.map(formatPermissionToBeRegistered);
+  const mergedPermissions = [..._permissions, ...newPermissionsWithIds];
+  const duplicatedIds = getDuplicatedIds(mergedPermissions);
+
+  if (duplicatedIds.length > 0) {
+    strapi.stopWithError(
+      new yup.ValidationError(
+        `Duplicated permission keys: ${duplicatedIds.join(
+          ', '
+        )}. You may want to change the permissions name.`
+      )
+    );
   }
 
-  getAll() {
-    return _.cloneDeep(this.permissions);
-  }
-
-  getAllWithNestedFormat() {
-    return _.cloneDeep(this.permissionsWithNestedFormat);
-  }
-
-  register(newPermissions) {
-    validateRegisterProviderPermission(newPermissions);
-    const newPermissionsWithIds = newPermissions.map(formatPermissionToBeRegistered);
-    const mergedPermissions = [...this.permissions, ...newPermissionsWithIds];
-    const duplicatedIds = getDuplicatedIds(mergedPermissions);
-
-    if (duplicatedIds.length > 0) {
-      strapi.stopWithError(
-        new yup.ValidationError(
-          `Duplicated permission keys: ${duplicatedIds.join(
-            ', '
-          )}. You may want to change the permissions name.`
-        )
-      );
-    }
-
-    this.permissions = mergedPermissions;
-    this.permissionsWithNestedFormat = formatPermissionsToNestedFormat(mergedPermissions);
-  }
-}
-
-const createPermissionProvider = () => new PermissionProvider();
+  _permissions = mergedPermissions;
+  _permissionsWithNestedFormat = formatPermissionsToNestedFormat(mergedPermissions);
+};
 
 module.exports = {
-  createPermissionProvider,
+  get,
+  getAll,
+  getAllWithNestedFormat,
+  register,
 };

@@ -26,7 +26,7 @@ const find = (params = {}) => {
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
 const assign = async (roleID, permissions = []) => {
-  const existingPermissions = strapi.admin.permissionProvider.getAll();
+  const existingPermissions = strapi.admin.services['permission-provider'].getAll();
   for (let permission of permissions) {
     const permissionExists = existingPermissions.find(
       ep =>

@@ -86,38 +86,39 @@ const registerPermissions = () => {
     {
       section: 'plugins',
       displayName: 'Can access to the Media Library',
-      name: 'read',
+      uid: 'read',
       pluginName: 'upload',
     },
     {
       section: 'plugins',
       displayName: 'Create (upload)',
-      name: 'assets.create',
+      uid: 'assets.create',
       subCategory: 'assets',
       pluginName: 'upload',
     },
     {
       section: 'plugins',
       displayName: 'Update (crop, details, replace)',
-      name: 'assets.update',
+      uid: 'assets.update',
       subCategory: 'assets',
       pluginName: 'upload',
     },
     {
       section: 'plugins',
       displayName: 'Download',
-      name: 'assets.download',
+      uid: 'assets.download',
       subCategory: 'assets',
       pluginName: 'upload',
     },
     {
       section: 'plugins',
       displayName: 'Copy link',
-      name: 'assets.copy-link',
+      uid: 'assets.copy-link',
       subCategory: 'assets',
       pluginName: 'upload',
     },
   ];
 
-  strapi.admin.permissionProvider.register(permissions);
+  const permissionProvider = strapi.admin.services['permission-provider'];
+  permissionProvider.register(permissions);
 };

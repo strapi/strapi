@@ -115,53 +115,54 @@ function registerPermissions() {
     {
       section: 'contentTypes',
       displayName: 'Create',
-      name: 'create',
+      uid: 'create',
       pluginName: 'content-manager',
       subjects: contentTypesUids,
     },
     {
       section: 'contentTypes',
       displayName: 'Read',
-      name: 'read',
+      uid: 'read',
       pluginName: 'content-manager',
       subjects: contentTypesUids,
     },
     {
       section: 'contentTypes',
       displayName: 'Update',
-      name: 'update',
+      uid: 'update',
       pluginName: 'content-manager',
       subjects: contentTypesUids,
     },
     {
       section: 'contentTypes',
       displayName: 'Delete',
-      name: 'delete',
+      uid: 'delete',
       pluginName: 'content-manager',
       subjects: contentTypesUids,
     },
     {
       section: 'plugins',
       displayName: 'Configure view',
-      name: 'single-types.configure-view',
+      uid: 'single-types.configure-view',
       subCategory: 'single types',
       pluginName: 'content-manager',
     },
     {
       section: 'plugins',
       displayName: 'Configure view',
-      name: 'collection-types.configure-view',
+      uid: 'collection-types.configure-view',
       subCategory: 'collection types',
       pluginName: 'content-manager',
     },
     {
       section: 'plugins',
       displayName: 'Configure Layout',
-      name: 'components.configure-layout',
+      uid: 'components.configure-layout',
       subCategory: 'components',
       pluginName: 'content-manager',
     },
   ];
 
-  strapi.admin.permissionProvider.register(permissions);
+  const permissionProvider = strapi.admin.services['permission-provider'];
+  permissionProvider.register(permissions);
 }

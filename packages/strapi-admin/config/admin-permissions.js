@@ -1,7 +1,7 @@
 module.exports = {
   permissions: [
     {
-      name: 'marketplace.read',
+      uid: 'marketplace.read',
       displayName: 'Can access to the marketplace',
       pluginName: 'admin',
       section: 'settings',
@@ -9,7 +9,7 @@ module.exports = {
       subCategory: 'marketplace',
     },
     {
-      name: 'marketplace.plugins.install',
+      uid: 'marketplace.plugins.install',
       displayName: 'Install (only for dev env)',
       pluginName: 'admin',
       section: 'settings',
@@ -17,7 +17,7 @@ module.exports = {
       subCategory: 'plugins',
     },
     {
-      name: 'marketplace.plugins.uninstall',
+      uid: 'marketplace.plugins.uninstall',
       displayName: 'Uninstall (only for dev env)',
       pluginName: 'admin',
       section: 'settings',
@@ -25,35 +25,35 @@ module.exports = {
       subCategory: 'plugins',
     },
     {
-      name: 'webhooks.create',
+      uid: 'webhooks.create',
       displayName: 'Create',
       pluginName: 'admin',
       section: 'settings',
       category: 'webhooks',
     },
     {
-      name: 'webhooks.read',
+      uid: 'webhooks.read',
       displayName: 'Read',
       pluginName: 'admin',
       section: 'settings',
       category: 'webhooks',
     },
     {
-      name: 'webhooks.update',
+      uid: 'webhooks.update',
       displayName: 'Update',
       pluginName: 'admin',
       section: 'settings',
       category: 'webhooks',
     },
     {
-      name: 'webhooks.delete',
+      uid: 'webhooks.delete',
       displayName: 'Delete',
       pluginName: 'admin',
       section: 'settings',
       category: 'webhooks',
     },
     {
-      name: 'users.create',
+      uid: 'users.create',
       displayName: 'Create (invite)',
       pluginName: 'admin',
       section: 'settings',
@@ -61,7 +61,7 @@ module.exports = {
       subCategory: 'users',
     },
     {
-      name: 'users.read',
+      uid: 'users.read',
       displayName: 'Read',
       pluginName: 'admin',
       section: 'settings',
@@ -69,7 +69,7 @@ module.exports = {
       subCategory: 'users',
     },
     {
-      name: 'users.update',
+      uid: 'users.update',
       displayName: 'Update',
       pluginName: 'admin',
       section: 'settings',
@@ -77,7 +77,7 @@ module.exports = {
       subCategory: 'users',
     },
     {
-      name: 'users.delete',
+      uid: 'users.delete',
       displayName: 'Delete',
       pluginName: 'admin',
       section: 'settings',
@@ -85,7 +85,7 @@ module.exports = {
       subCategory: 'users',
     },
     {
-      name: 'roles.create',
+      uid: 'roles.create',
       displayName: 'Create',
       pluginName: 'admin',
       section: 'settings',
@@ -93,7 +93,7 @@ module.exports = {
       subCategory: 'roles',
     },
     {
-      name: 'roles.read',
+      uid: 'roles.read',
       displayName: 'Read',
       pluginName: 'admin',
       section: 'settings',
@@ -101,7 +101,7 @@ module.exports = {
       subCategory: 'roles',
     },
     {
-      name: 'roles.update',
+      uid: 'roles.update',
       displayName: 'Update',
       pluginName: 'admin',
       section: 'settings',
@@ -109,7 +109,7 @@ module.exports = {
       subCategory: 'roles',
     },
     {
-      name: 'roles.delete',
+      uid: 'roles.delete',
       displayName: 'Delete',
       pluginName: 'admin',
       section: 'settings',

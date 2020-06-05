@@ -143,25 +143,25 @@
       },
       {
         "displayName": "Copy link",
-        "action": "plugins::upload.assets.copy.link",
+        "action": "plugins::upload.assets.copy-link",
         "subCategory": "assets",
         "plugin": "plugin::upload"
       },
       {
         "displayName": "Configure view",
-        "action": "plugins::content-manager.single.types.configure.view",
+        "action": "plugins::content-manager.single-types.configure-view",
         "subCategory": "single types",
         "plugin": "plugin::content-manager"
       },
       {
         "displayName": "Configure view",
-        "action": "plugins::content-manager.collection.types.configure.view",
+        "action": "plugins::content-manager.collection-types.configure-view",
         "subCategory": "collection types",
         "plugin": "plugin::content-manager"
       },
       {
         "displayName": "Configure Layout",
-        "action": "plugins::content-manager.components.configure.layout",
+        "action": "plugins::content-manager.components.configure-layout",
         "subCategory": "components",
         "plugin": "plugin::content-manager"
       },
@@ -203,25 +203,25 @@
       },
       {
         "displayName": "Read",
-        "action": "plugins::users-permissions.email.templates.read",
+        "action": "plugins::users-permissions.email-templates.read",
         "subCategory": "emailTemplates",
         "plugin": "plugin::users-permissions"
       },
       {
         "displayName": "Edit",
-        "action": "plugins::users-permissions.email.templates.update",
+        "action": "plugins::users-permissions.email-templates.update",
         "subCategory": "emailTemplates",
         "plugin": "plugin::users-permissions"
       },
       {
         "displayName": "Read",
-        "action": "plugins::users-permissions.advanced.settings.read",
+        "action": "plugins::users-permissions.advanced-settings.read",
         "subCategory": "advancedSettings",
         "plugin": "plugin::users-permissions"
       },
       {
         "displayName": "Edit",
-        "action": "plugins::users-permissions.advanced.settings.update",
+        "action": "plugins::users-permissions.advanced-settings.update",
         "subCategory": "advancedSettings",
         "plugin": "plugin::users-permissions"
       }

@@ -1,155 +1,154 @@
 'use strict';
-
+const _ = require('lodash');
 const permissionProviderService = require('../permission-provider');
 
 describe('Permission Provider Service', () => {
-  let permissionProvider;
+  const createdPermissions = [];
 
   beforeEach(() => {
     global.strapi = {
-      stopWithError: jest.fn(() => {}),
       plugins: { aPlugin: {} },
     };
-    permissionProvider = permissionProviderService.createPermissionProvider();
   });
 
   describe('settings', () => {
     test('Can register a settings permission', async () => {
       const permission = {
-        name: 'marketplace.read',
-        displayName: 'Can access to the marketplace',
+        uid: 'marketplace.read',
+        displayName: 'Can read',
         pluginName: 'admin',
         section: 'settings',
         category: 'plugins and marketplace',
         subCategory: 'marketplace',
       };
 
-      await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getAll();
+      await permissionProviderService.register([permission]);
+      const createdPermission = permissionProviderService.get(
+        permission.pluginName,
+        permission.uid
+      );
 
-      expect(permissions).toMatchObject([
-        {
-          ...permission,
-          permissionId: 'admin::marketplace.read',
-          conditions: [],
-        },
-      ]);
+      expect(createdPermission).toMatchObject({
+        ..._.omit(permission, ['uid']),
+        permissionId: 'admin::marketplace.read',
+        conditions: [],
+      });
+
+      createdPermissions.push(createdPermission);
     });
 
     test('Can register a settings permission without subCategory', async () => {
       const permission = {
-        name: 'marketplace.read',
-        displayName: 'Can access to the marketplace',
+        uid: 'marketplace.create',
+        displayName: 'Can create',
         pluginName: 'admin',
         section: 'settings',
         category: 'plugins and marketplace',
       };
 
-      await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getAll();
+      await permissionProviderService.register([permission]);
+      const createdPermission = permissionProviderService.get(
+        permission.pluginName,
+        permission.uid
+      );
 
-      expect(permissions).toMatchObject([
-        {
-          ...permission,
-          permissionId: 'admin::marketplace.read',
-          subCategory: 'general',
-          conditions: [],
-        },
-      ]);
+      expect(createdPermission).toMatchObject({
+        ..._.omit(permission, ['uid']),
+        permissionId: 'admin::marketplace.create',
+        subCategory: 'general',
+        conditions: [],
+      });
+      createdPermissions.push(createdPermission);
     });
 
     test('Can register a settings permission with a pluginName other than "admin"', async () => {
       const permission = {
-        name: 'marketplace.read',
-        displayName: 'Can access to the marketplace',
+        uid: 'marketplace.update',
+        displayName: 'Can update',
         pluginName: 'aPlugin',
         section: 'settings',
         category: 'plugins and marketplace',
       };
 
-      await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getAll();
+      await permissionProviderService.register([permission]);
+      const createdPermission = permissionProviderService.get(
+        permission.pluginName,
+        permission.uid
+      );
 
-      expect(permissions).toMatchObject([
-        {
-          ...permission,
-          permissionId: 'plugins::aPlugin.marketplace.read',
-          conditions: [],
-        },
-      ]);
+      expect(createdPermission).toMatchObject({
+        ..._.omit(permission, ['uid']),
+        permissionId: 'plugins::aPlugin.marketplace.update',
+        conditions: [],
+      });
     });
 
-    test('Can register a settings permission with a non standard name', async () => {
+    test('Cannot register a settings permission with a non standard name', async () => {
       const permission = {
-        name: 'Marketplace Read',
+        uid: 'Marketplace Read',
         displayName: 'Can access to the marketplace',
         pluginName: 'aPlugin',
         section: 'settings',
         category: 'plugins and marketplace',
       };
 
-      await permissionProvider.register([permission]);
-      const permissions = permissionProvider.getAll();
-
-      expect(permissions).toMatchObject([
-        {
-          ...permission,
-          permissionId: 'plugins::aPlugin.marketplace.read',
-          conditions: [],
-        },
-      ]);
+      expect(() => permissionProviderService.register([permission])).toThrow(
+        '[0].uid: The id can only contain lowercase letters, dots and hyphens.'
+      );
     });
 
-    test('Cannot register permissions with same permssionId', async () => {
+    test('Cannot register permissions with same permissionId', async () => {
+      global.strapi.stopWithError = jest.fn(() => {});
+
       const permission1 = {
-        name: 'marketplace.read',
-        displayName: 'Can access to the marketplace',
+        uid: 'marketplace.delete',
+        displayName: 'Can delete',
         pluginName: 'aPlugin',
         section: 'settings',
         category: 'plugins and marketplace',
       };
 
       const permission2 = {
-        name: permission1.name,
-        displayName: 'read',
+        uid: permission1.uid,
+        displayName: 'delete',
         pluginName: 'aPlugin',
         section: 'plugins',
       };
 
-      await permissionProvider.register([permission1, permission2]);
+      await permissionProviderService.register([permission1, permission2]);
 
       expect(global.strapi.stopWithError).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'ValidationError',
           message:
-            'Duplicated permission keys: plugins::aPlugin.marketplace.read. You may want to change the permissions name.',
+            'Duplicated permission keys: plugins::aPlugin.marketplace.delete. You may want to change the permissions name.',
         })
       );
     });
 
     test("Cannot register a settings permission with a pluginName that doesn't exist", async () => {
       const permission = {
-        name: 'marketplace.read',
+        uid: 'marketplace.read',
         displayName: 'Can access to the marketplace',
         pluginName: 'plugin-name-that-doesnt-exist',
         section: 'settings',
         category: 'plugins and marketplace',
       };
 
-      expect(() => permissionProvider.register([permission])).toThrow(
+      expect(() => permissionProviderService.register([permission])).toThrow(
         '[0].pluginName is not an existing plugin'
       );
     });
 
     test('Cannot register a settings permission without category', async () => {
       const permission = {
-        name: 'marketplace.read',
+        uid: 'marketplace.read',
         displayName: 'Can access to the marketplace',
         pluginName: 'admin',
         section: 'settings',
       };
 
-      expect(() => permissionProvider.register([permission])).toThrow(
+      expect(() => permissionProviderService.register([permission])).toThrow(
         '[0].category is a required field'
       );
     });
