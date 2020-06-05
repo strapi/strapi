@@ -39,6 +39,26 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
     });
   });
 
+  describe('GET_DATA', () => {
+    it('should set isLoading to true to start getting the data', () => {
+      const action = {
+        type: 'GET_CONTENT_TYPES',
+      };
+      const initialState = {
+        collectionTypes: [],
+        singleTypes: [],
+        isLoading: true,
+      };
+      const expected = {
+        collectionTypes: [],
+        singleTypes: [],
+        isLoading: true,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
   describe('GET_CONTENT_TYPES_SUCCEDED', () => {
     it('should return the state with the collectionTypes and singleTypes', () => {
       const action = {

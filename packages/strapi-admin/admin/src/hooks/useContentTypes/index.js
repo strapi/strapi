@@ -3,7 +3,7 @@ import { request } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 
-const Permissions = () => {
+const useContentTypes = () => {
   const [{ collectionTypes, singleTypes }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -11,6 +11,10 @@ const Permissions = () => {
   }, []);
 
   const fetchContentTypes = async () => {
+    dispatch({
+      type: 'GET_CONTENT_TYPES',
+    });
+
     try {
       const { data } = await request('/content-manager/content-types', {
         method: 'GET',
@@ -31,7 +35,8 @@ const Permissions = () => {
   return {
     singleTypes,
     collectionTypes,
+    getData: fetchContentTypes,
   };
 };
 
-export default Permissions;
+export default useContentTypes;

@@ -124,7 +124,7 @@ const CreatePage = () => {
               />
             </FormCard>
             {!isLayoutLoading && (
-              <Padded top size="md">
+              <Padded top bottom size="md">
                 <Permissions />
               </Padded>
             )}
