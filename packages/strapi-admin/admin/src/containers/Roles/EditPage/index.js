@@ -112,7 +112,7 @@ const EditPage = () => {
               role={role}
             />
             {!isLayoutLoading && !isRoleLoading && (
-              <Padded top size="md">
+              <Padded top bottom size="md">
                 <Permissions />
               </Padded>
             )}

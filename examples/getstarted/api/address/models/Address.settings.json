@@ -22,8 +22,8 @@
       "type": "string"
     },
     "categories": {
-      "via": "addresses",
       "collection": "category",
+      "via": "addresses",
       "dominant": true
     },
     "cover": {

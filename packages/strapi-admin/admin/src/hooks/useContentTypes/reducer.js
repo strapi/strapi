@@ -10,6 +10,12 @@ export const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'GET_CONTENT_TYPES': {
+        draftState.collectionTypes = initialState.collectionTypes;
+        draftState.singleTypes = initialState.singleTypes;
+        draftState.isLoading = true;
+        break;
+      }
       case 'GET_CONTENT_TYPES_SUCCEDED': {
         const getContentTypeByKind = kind =>
           action.data.filter(

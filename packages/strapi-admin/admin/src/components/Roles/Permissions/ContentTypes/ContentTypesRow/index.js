@@ -1,23 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Checkbox, Flex, Text, Padded } from '@buffetjs/core';
-
+import Chevron from './Chevron';
 import PermissionCheckbox from '../PermissionCheckbox';
 import PermissionName from './PermissionName';
-import Chevron from './Chevron';
 import StyledRow from './StyledRow';
-
-// No need to create an other file for this style. It will be used only in this file.
-const CollapseLabel = styled(Flex)`
-  cursor: pointer;
-`;
+import Attributes from './Attributes';
+import PermissionWrapper from './PermissionWrapper';
+import CollapseLabel from '../CollapseLabel';
 
 const ContentTypeRow = ({
-  openContentTypeAttributes,
-  openedContentTypeAttributes,
   contentType,
   index,
+  openContentTypeAttributes,
+  openedContentTypeAttributes,
 }) => {
   const isActive = openedContentTypeAttributes === contentType.name;
 
@@ -26,31 +22,40 @@ const ContentTypeRow = ({
   };
 
   return (
-    <StyledRow isActive={isActive} isGrey={index % 2 === 0}>
-      <Flex>
-        <Padded left size="sm" />
-        <PermissionName>
-          <Checkbox someChecked />
-          <CollapseLabel alignItems="center" onClick={handleToggleAttributes}>
-            <Text
-              color="grey"
-              fontWeight="bold"
-              fontSize="xs"
-              textTransform="uppercase"
-              lineHeight="20px"
+    <>
+      <StyledRow isActive={isActive} isGrey={index % 2 === 0}>
+        <Flex style={{ flex: 1 }}>
+          <Padded left size="sm" />
+          <PermissionName>
+            <Checkbox someChecked />
+            <CollapseLabel
+              title={contentType.name}
+              alignItems="center"
+              onClick={handleToggleAttributes}
             >
-              {contentType.name}
-            </Text>
-            <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
-          </CollapseLabel>
-        </PermissionName>
-        <PermissionCheckbox />
-        <PermissionCheckbox />
-        <PermissionCheckbox />
-        <PermissionCheckbox />
-        <PermissionCheckbox />
-      </Flex>
-    </StyledRow>
+              <Text
+                color="grey"
+                ellipsis
+                fontSize="xs"
+                fontWeight="bold"
+                lineHeight="20px"
+                textTransform="uppercase"
+              >
+                {contentType.name}
+              </Text>
+              <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
+            </CollapseLabel>
+          </PermissionName>
+          <PermissionWrapper>
+            <PermissionCheckbox />
+            <PermissionCheckbox />
+            <PermissionCheckbox />
+            <PermissionCheckbox />
+          </PermissionWrapper>
+        </Flex>
+      </StyledRow>
+      {isActive && <Attributes attributes={contentType.schema.attributes} />}
+    </>
   );
 };
 

@@ -4,3 +4,4 @@ export { default as retrieveGlobalLinks } from './retrieveGlobalLinks';
 export { default as retrievePluginsMenu } from './retrievePluginsMenu';
 export { default as roleTabsLabel } from './roleTabsLabel';
 export { default as fakePermissionsData } from './fakePermissionsData';
+export { default as getAttributesToDisplay } from './getAttributesToDisplay';

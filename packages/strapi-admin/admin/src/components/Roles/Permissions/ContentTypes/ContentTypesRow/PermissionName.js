@@ -8,7 +8,7 @@ const PermissionName = styled.div`
 `;
 
 PermissionName.defaultProps = {
-  width: '20rem',
+  width: '18rem',
 };
 PermissionName.propTypes = {
   width: PropTypes.string,
