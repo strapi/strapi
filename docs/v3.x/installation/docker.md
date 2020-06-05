@@ -52,6 +52,7 @@ services:
   postgres:
     image: postgres
     environment:
+      POSTGRES_DB: strapi
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
     volumes:
@@ -86,6 +87,7 @@ services:
   mongo:
     image: mongo
     environment:
+      MONGO_INITDB_DATABASE: strapi
       MONGO_INITDB_ROOT_USERNAME: strapi
       MONGO_INITDB_ROOT_PASSWORD: strapi
     volumes:
