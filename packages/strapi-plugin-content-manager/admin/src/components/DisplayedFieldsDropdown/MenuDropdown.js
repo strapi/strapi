@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { DropdownMenu } from 'reactstrap';
 
+/* eslint-disable indent */
 const MenuDropdown = styled(DropdownMenu)`
   min-width: 230px;
   padding-top: 9px;
@@ -11,7 +12,7 @@ const MenuDropdown = styled(DropdownMenu)`
   transform: translate3d(-178px, 28px, 0px) !important;
 
   ${({ isopen }) =>
-  isopen === 'true' &&
+    isopen === 'true' &&
     `
     border-top-color: #aed4fb !important;
     border-top-right-radius: 0;

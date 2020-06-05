@@ -4,7 +4,7 @@ Thanks to the plugin `Upload`, you can upload any kind of file on your server or
 
 ## Configuration
 
-Currently the strapi middleware in charge of parsing request needs to be configured to support bigger file sizes if you need to upload file with a size greater than 200MB.
+Currently the Strapi middleware in charge of parsing request needs to be configured to support bigger file sizes if you need to upload file with a size greater than 200MB.
 
 The library we use is [`koa-body`](https://github.com/dlau/koa-body), and itself uses the [`node-formidable`](https://github.com/felixge/node-formidable) library to process files.
 
@@ -315,9 +315,9 @@ To enable the provider, create or edit the file at `./config/plugins.js`
 ```js
 module.exports = ({ env }) => ({
   upload: {
-    provider: 'aws-s3'
+    provider: 'aws-s3',
     providerOptions: {
-      accessKeyId: env('AWS_ACCESS_KEY_ID')',
+      accessKeyId: env('AWS_ACCESS_KEY_ID'),
       secretAccessKey: env('AWS_ACCESS_SECRET'),
       region: 'aws-region',
       params: {
@@ -330,7 +330,7 @@ module.exports = ({ env }) => ({
 
 Make sure to read the provider's `README` to know what are the possible parameters.
 
-### Configuration per envrionment
+### Configuration per environment
 
 When configuring your upload provider you might want to change the configuration based on the `NODE_ENV` environment variable or use environment specific credentials.
 
