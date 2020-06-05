@@ -85,9 +85,6 @@ const RoleListPage = () => {
     } catch (err) {
       console.error(err);
 
-      dispath({
-        type: 'ON_REMOVE_ROLES_ERROR',
-      });
       strapi.notification.error('notification.error');
     } finally {
       handleToggleModal();

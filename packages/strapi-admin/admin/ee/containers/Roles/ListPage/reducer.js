@@ -25,22 +25,19 @@ const reducer = (state, action) =>
         draftState.showModalConfirmButtonLoading = true;
         break;
       }
-      case 'ON_REMOVE_ROLES_ERROR': {
-        draftState.showModalConfirmButtonLoading = false;
-        break;
-      }
       case 'ON_REMOVE_ROLES_SUCCEEDED': {
         draftState.shouldRefetchData = true;
-        draftState.showModalConfirmButtonLoading = false;
         break;
       }
       case 'RESET_DATA_TO_DELETE': {
         draftState.shouldRefetchData = false;
         draftState.selectedRoles = [];
+        draftState.showModalConfirmButtonLoading = false;
         break;
       }
       case 'SET_ROLE_TO_DELETE': {
         draftState.selectedRoles = [action.id];
+
         break;
       }
       // Leaving this code for the moment
