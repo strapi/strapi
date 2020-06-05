@@ -7,11 +7,15 @@ import FormCard from '../FormBloc';
 import SizedInput from '../SizedInput';
 import ButtonWithNumber from './ButtonWithNumber';
 
-const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
+const RoleForm = ({ usersCount, values, errors, onChange, onBlur, isLoading }) => {
   const { formatMessage } = useIntl();
 
   const actions = [
-    <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')} key="user-button">
+    <ButtonWithNumber
+      number={usersCount}
+      onClick={() => console.log('Open user modal')}
+      key="user-button"
+    >
       {formatMessage({
         id: 'Settings.roles.form.button.users-with-role',
       })}
@@ -59,14 +63,16 @@ const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
 
 RoleForm.defaultProps = {
   isLoading: false,
+  usersCount: 0,
   values: { name: '', description: '' },
 };
 RoleForm.propTypes = {
-  values: PropTypes.object,
   errors: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
-  onBlur: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
+  onBlur: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  usersCount: PropTypes.number,
+  values: PropTypes.object,
 };
 
 export default RoleForm;
