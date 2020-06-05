@@ -57,8 +57,6 @@ services:
       POSTGRES_PASSWORD: strapi
     volumes:
       - ./data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
 ```
 
 :::
@@ -92,8 +90,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: strapi
     volumes:
       - ./db:/data/db
-    ports:
-      - '27017:27017'
 ```
 
 :::
