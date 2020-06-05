@@ -73,7 +73,7 @@ const CreatePage = () => {
 
   return (
     <Formik
-      initialValues={{ name: null, description: null }}
+      initialValues={{ name: '', description: '' }}
       onSubmit={handleCreateRoleSubmit}
       validationSchema={schema}
     >

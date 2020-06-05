@@ -109,7 +109,7 @@ const EditPage = () => {
               values={values}
               onChange={handleChange}
               onBlur={handleBlur}
-              usersCount={role.usersCount}
+              role={role}
             />
             {!isLayoutLoading && !isRoleLoading && (
               <Padded top size="md">
