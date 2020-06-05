@@ -46,6 +46,8 @@ services:
       - ./app:/srv/app
     ports:
       - '1337:1337'
+    depends_on:
+      - postgres
 
   postgres:
     image: postgres
@@ -78,6 +80,8 @@ services:
       - ./app:/srv/app
     ports:
       - '1337:1337'
+    depends_on:
+      - mongo
 
   mongo:
     image: mongo
