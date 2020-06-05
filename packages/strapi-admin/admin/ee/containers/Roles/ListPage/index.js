@@ -25,7 +25,10 @@ const RoleListPage = () => {
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { formatMessage } = useIntl();
   const { push } = useHistory();
-  const [{ selectedRoles, shouldRefetchData }, dispath] = useReducer(reducer, initialState);
+  const [{ selectedRoles, showModalConfirmButtonLoading, shouldRefetchData }, dispath] = useReducer(
+    reducer,
+    initialState
+  );
   const { getData, roles, isLoading } = useRolesList();
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const query = useQuery();
@@ -54,6 +57,9 @@ const RoleListPage = () => {
 
   const handleConfirmDeleteData = async () => {
     try {
+      dispath({
+        type: 'ON_REMOVE_ROLES',
+      });
       const filteredRoles = selectedRoles.filter(currentId => {
         const currentRole = roles.find(role => role.id === currentId);
 
@@ -78,6 +84,10 @@ const RoleListPage = () => {
       });
     } catch (err) {
       console.error(err);
+
+      dispath({
+        type: 'ON_REMOVE_ROLES_ERROR',
+      });
       strapi.notification.error('notification.error');
     } finally {
       handleToggleModal();
@@ -178,6 +188,7 @@ const RoleListPage = () => {
         onClosed={handleClosedModal}
         onConfirm={handleConfirmDeleteData}
         toggleModal={handleToggleModal}
+        isConfirmButtonLoading={showModalConfirmButtonLoading}
       />
     </>
   );

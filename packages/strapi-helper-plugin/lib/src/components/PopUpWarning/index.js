@@ -36,6 +36,7 @@ const icons = {
 function PopUpWarning({
   content,
   isOpen,
+  isConfirmButtonLoading,
   onConfirm,
   onlyConfirmButton,
   popUpWarningType,
@@ -51,6 +52,7 @@ function PopUpWarning({
     {
       color: 'delete',
       onClick: onConfirm,
+      isLoading: isConfirmButtonLoading,
       message: content.confirm || 'components.popUpWarning.button.confirm',
     },
   ];
@@ -104,6 +106,7 @@ PopUpWarning.propTypes = {
     message: PropTypes.string,
     title: PropTypes.string,
   }),
+  isConfirmButtonLoading: PropTypes.bool,
   isOpen: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onlyConfirmButton: PropTypes.bool,
@@ -118,6 +121,7 @@ PopUpWarning.defaultProps = {
     message: 'components.popUpWarning.message',
     title: 'components.popUpWarning.title',
   },
+  isConfirmButtonLoading: false,
   onlyConfirmButton: false,
   popUpWarningType: 'danger',
 };

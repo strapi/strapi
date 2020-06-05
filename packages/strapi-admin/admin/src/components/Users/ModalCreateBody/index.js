@@ -18,7 +18,7 @@ import BaselineAlignment from '../../BaselineAlignement';
 
 // This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(
-  ({ isDisabled, onSubmit, registrationToken, showMagicLink }, ref) => {
+  ({ isDisabled, onSubmit, registrationToken, setIsSubmiting, showMagicLink }, ref) => {
     const [reducerState, dispatch] = useReducer(reducer, initialState, init);
     const { formErrors, modifiedData } = reducerState;
     const buttonSubmitRef = useRef(null);
@@ -41,6 +41,7 @@ const ModalCreateBody = forwardRef(
       e.persist();
       e.preventDefault();
       const errors = await checkFormValidity(modifiedData, schema);
+      setIsSubmiting(true);
 
       if (!errors) {
         try {
@@ -62,6 +63,7 @@ const ModalCreateBody = forwardRef(
           strapi.notification.error(message);
         } finally {
           strapi.unlockApp();
+          setIsSubmiting(false);
         }
       }
 
@@ -149,6 +151,7 @@ ModalCreateBody.defaultProps = {
   isDisabled: false,
   onSubmit: e => e.preventDefault(),
   registrationToken: '',
+  setIsSubmiting: () => {},
   showMagicLink: false,
 };
 
@@ -156,6 +159,7 @@ ModalCreateBody.propTypes = {
   isDisabled: PropTypes.bool,
   onSubmit: PropTypes.func,
   registrationToken: PropTypes.string,
+  setIsSubmiting: PropTypes.func,
   showMagicLink: PropTypes.bool,
 };
 

@@ -187,18 +187,20 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
   });
 
   describe('ON_SUBMIT', () => {
-    it('should change the showHeaderLoader property to true', () => {
+    it('should change the showHeaderButtonLoader property to true', () => {
       const initialState = {
         initialData: {},
         modifiedData: {},
         isLoading: false,
         showHeaderLoader: false,
+        showHeaderButtonLoader: false,
       };
       const expected = {
         initialData: {},
         modifiedData: {},
         isLoading: false,
-        showHeaderLoader: true,
+        showHeaderLoader: false,
+        showHeaderButtonLoader: true,
       };
 
       const action = {
@@ -220,7 +222,8 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
           ok: false,
         },
         isLoading: false,
-        showHeaderLoader: true,
+        showHeaderLoader: false,
+        showHeaderButtonLoader: true,
       };
       const expected = {
         fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
@@ -238,6 +241,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         },
         isLoading: false,
         showHeaderLoader: false,
+        showHeaderButtonLoader: false,
       };
 
       const action = {
@@ -268,7 +272,8 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         modifiedData: {
           ok: true,
         },
-        showHeaderLoader: true,
+        showHeaderLoader: false,
+        showHeaderButtonLoader: true,
       };
       const expected = {
         formErrors: {
@@ -278,6 +283,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
           ok: true,
         },
         showHeaderLoader: false,
+        showHeaderButtonLoader: false,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
