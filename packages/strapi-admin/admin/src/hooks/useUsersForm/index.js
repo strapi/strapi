@@ -7,7 +7,7 @@ import init from './init';
 
 const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
+    { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     dispatch,
   ] = useReducer(reducer, initialState, () => init(initialState, fieldsToPick));
 
@@ -99,7 +99,7 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   };
 
   return [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
+    { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     dispatch,
     { handleCancel, handleChange, handleSubmit },
   ];

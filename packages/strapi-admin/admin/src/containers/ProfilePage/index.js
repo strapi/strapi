@@ -16,7 +16,7 @@ const ProfilePage = () => {
   const onSubmitSuccessCb = data => auth.setUserInfo(data);
 
   const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
+    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader, showHeaderButtonLoader },
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
@@ -40,6 +40,7 @@ const ProfilePage = () => {
             label={headerLabel}
             modifiedData={modifiedData}
             onCancel={handleCancel}
+            showHeaderButtonLoader={showHeaderButtonLoader}
           />
           <BaselineAlignement top size="3px" />
           <FormBloc isLoading={isLoading}>

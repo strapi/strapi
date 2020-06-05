@@ -8,6 +8,7 @@ const initialState = {
   initialData: {},
   isLoading: true,
   modifiedData: {},
+  showHeaderButtonLoader: false,
   showHeaderLoader: true,
 };
 
@@ -37,18 +38,18 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_SUBMIT': {
-        draftState.showHeaderLoader = true;
+        draftState.showHeaderButtonLoader = true;
         break;
       }
       case 'ON_SUBMIT_SUCCEEDED': {
         draftState.initialData = pick(action.data, state.fieldsToPick);
         draftState.modifiedData = pick(action.data, state.fieldsToPick);
-        draftState.showHeaderLoader = false;
+        draftState.showHeaderButtonLoader = false;
         break;
       }
       case 'SET_ERRORS': {
         draftState.formErrors = action.errors;
-        draftState.showHeaderLoader = false;
+        draftState.showHeaderButtonLoader = false;
         break;
       }
       default:

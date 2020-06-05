@@ -33,7 +33,7 @@ const EditPage = () => {
     }
   };
   const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader },
+    { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
@@ -67,6 +67,7 @@ const EditPage = () => {
             label={headerLabel}
             modifiedData={modifiedData}
             onCancel={handleCancel}
+            showHeaderButtonLoader={showHeaderButtonLoader}
           />
           {hasRegistrationToken ? (
             <>

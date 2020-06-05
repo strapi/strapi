@@ -3,6 +3,7 @@ import produce from 'immer';
 
 export const initialState = {
   selectedRoles: [],
+  showModalConfirmButtonLoading: false,
   shouldRefetchData: false,
 };
 
@@ -20,8 +21,17 @@ const reducer = (state, action) =>
         }
         break;
       }
+      case 'ON_REMOVE_ROLES': {
+        draftState.showModalConfirmButtonLoading = true;
+        break;
+      }
+      case 'ON_REMOVE_ROLES_ERROR': {
+        draftState.showModalConfirmButtonLoading = false;
+        break;
+      }
       case 'ON_REMOVE_ROLES_SUCCEEDED': {
         draftState.shouldRefetchData = true;
+        draftState.showModalConfirmButtonLoading = false;
         break;
       }
       case 'RESET_DATA_TO_DELETE': {
