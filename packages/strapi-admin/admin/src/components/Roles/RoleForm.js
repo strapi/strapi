@@ -7,12 +7,12 @@ import FormCard from '../FormBloc';
 import SizedInput from '../SizedInput';
 import ButtonWithNumber from './ButtonWithNumber';
 
-const RoleForm = ({ usersCount, values, errors, onChange, onBlur, isLoading }) => {
+const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
   const { formatMessage } = useIntl();
 
   const actions = [
     <ButtonWithNumber
-      number={usersCount}
+      number={role.usersCount}
       onClick={() => console.log('Open user modal')}
       key="user-button"
     >
@@ -26,12 +26,20 @@ const RoleForm = ({ usersCount, values, errors, onChange, onBlur, isLoading }) =
     <FormCard
       actions={actions}
       isLoading={isLoading}
-      title={formatMessage({
-        id: 'Settings.roles.form.title',
-      })}
-      subtitle={formatMessage({
-        id: 'Settings.roles.form.description',
-      })}
+      title={
+        role
+          ? role.name
+          : formatMessage({
+            id: 'Settings.roles.form.title',
+          })
+      }
+      subtitle={
+        role
+          ? role.description
+          : formatMessage({
+            id: 'Settings.roles.form.description',
+          })
+      }
     >
       <NameInput
         label={formatMessage({
@@ -63,7 +71,7 @@ const RoleForm = ({ usersCount, values, errors, onChange, onBlur, isLoading }) =
 
 RoleForm.defaultProps = {
   isLoading: false,
-  usersCount: 0,
+  role: null,
   values: { name: '', description: '' },
 };
 RoleForm.propTypes = {
@@ -71,7 +79,7 @@ RoleForm.propTypes = {
   isLoading: PropTypes.bool,
   onBlur: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  usersCount: PropTypes.number,
+  role: PropTypes.object,
   values: PropTypes.object,
 };
 
