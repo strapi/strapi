@@ -24,7 +24,7 @@ Fill out the form on the [Support page](https://strapi.io/support) of the Strapi
 
 ### Why can't I create or update content-types in production/staging?
 
-Strapi stores model configuration files (what defines the model schema) in files such as `api/restaurant/models/restaurant.settings.json`. Due to how Node.js works, in order for changes to take effect, that would require Node to restart the server. This could potentionally cause downtime of your production service and likewise these changes should be tracked in some kind of source control.
+Strapi stores model configuration files (what defines the model schema) in files such as `api/restaurant/models/restaurant.settings.json`. Due to how Node.js works, in order for changes to take effect, that would require Node to restart the server. This could potentially cause downtime of your production service and likewise these changes should be tracked in some kind of source control.
 
 Generally your "flow" of development would follow the following path:
 
@@ -37,7 +37,7 @@ At this time and in the future there is no plan to allow model creating or updat
 
 ### Does Strapi handle deploying or migrating of content?
 
-Strapi does not currently provide any tools for migrating or deploying your data changes between different environments (_ie. from development to production_).
+Strapi does not currently provide any tools for migrating or deploying your data changes between different environments (_ie. from development to production_). With the exception being the Content-Manager settings, to read more about this option please see the following [CLI documentation](../cli/CLI.md#strapi-configuration-dump-config-dump).
 
 ### User can't login to the admin panel
 
@@ -64,6 +64,18 @@ If you used `--quickstart` to create your Strapi project, by default this uses t
 
 It is recommended you use the Heroku PostgreSQL plugin or use something like MongoDB's Atlas for your database. For file uploads, you will need to use one of the 3rd party providers such as Cloudinary or AWS S3.
 
+### Can I store my Content Manager layout configurations in the model settings
+
+Currently Strapi does not support this, a `config:dump` and `config:restore` command has been added to make migration of these settings easier when moving between different deployments and environments.
+
+We don't offer the ability to store these configurations in the model settings for several reasons:
+
+- It will create conflicts in case of content internationalization and translations in the admin interface.
+- The layout might be different according to the roles and permissions.
+- While the model is the same whatever the content created, the contribution interface can be different. For instance, we have an idea to create a mobile application for contributors only. The labels and layout configurations could be different according the device & interface.
+
+For all these reasons, and others, we think it'll be a mistake and might confuse users if we store the configuration in the model settings file. The final solution is to make the migration and deployment across environment easier.
+
 ### How do I customize a plugin
 
 Strapi uses a system called [extensions](../concepts/customization.md#plugin-extensions) as plugins are stored in the `node_modules` folder. Due to this extensions work by Strapi detecting newer versions of files and using that as a replacement for the ones stored within the `node_modules`. If you are familiar with React and "ejecting" a file, the concept is similar.
@@ -75,6 +87,10 @@ You gain the ability to modify these files without forking the plugin package, h
 Yes you can either follow the following [guide](../plugins/users-permissions.md#adding-a-new-provider-to-your-project) or you can take a look at the [users-permissions](https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-users-permissions) and submit a pull request to include the provider for everyone. Eventually Strapi does plan to move from the current grant/purest provider to a split natured system similar to the upload providers.
 
 There is currently no ETA on this migration however.
+
+### Does Strapi allow me to change the default ID type or name
+
+No, currently does not have the ability to allow for changing the default id name nor does it allow you to switch the data type (such as UUID on bookshelf and integer on mongoose), support for this is being looked at for Strapi v4.
 
 ### How do I setup SSL with Strapi
 

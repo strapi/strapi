@@ -1,12 +1,12 @@
 # Create is owner policy
 
-This guide will explain how to restrict content edition to content authors only.
+This guide will explain how to restrict content editing to content authors only.
 
 ## Introduction
 
 It is often required that the author of an entry is the only user allowed to edit or delete the entry.
 
-This is a feature that is requested a lot and in this guide we will see how to implement it.
+This is a feature that is requested a lot and in this guide we will show how to implement it.
 
 ## Example
 
@@ -57,7 +57,7 @@ module.exports = {
 };
 ```
 
-Now, when an article is created, the authenticated user is automaticaly set as author of the article.
+Now, when an article is created, the authenticated user is automatically set as author of the article.
 
 ## Limit the update
 

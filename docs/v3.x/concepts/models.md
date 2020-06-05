@@ -103,7 +103,7 @@ When you create a new API using the CLI (`strapi generate:api <name>`), a model 
 
 To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
 
-Or you can create your component manually by following the file path discribed previously and by following the file structure discribed bellow.
+Or you can create your component manually by following the file path described previously and by following the file structure described below.
 
 ## Model settings
 
@@ -215,7 +215,10 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Exceptions
 
-- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+**uid**
+
+- `targetField`(string) — The value is the name of an attribute thas has `string` of `text` type.
+- `options` (string) — The value is a set of options passed to [the underlying `uid` generator](https://github.com/sindresorhus/slugify). A caveat is that the resulting `uid` must abide to the following RegEx `/^[A-Za-z0-9-_.~]*$`.
 
 ### Example
 
