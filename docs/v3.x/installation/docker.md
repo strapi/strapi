@@ -42,8 +42,6 @@ services:
       DATABASE_PORT: 5432
       DATABASE_USERNAME: strapi
       DATABASE_PASSWORD: strapi
-    links:
-      - postgres:postgres
     volumes:
       - ./app:/srv/app
     ports:
@@ -76,8 +74,6 @@ services:
       DATABASE_PORT: 27017
       DATABASE_USERNAME: strapi
       DATABASE_PASSWORD: strapi
-    links:
-      - mongo:mongo
     volumes:
       - ./app:/srv/app
     ports:
