@@ -70,18 +70,20 @@ const RoleListPage = () => {
         strapi.notification.info('Roles.ListPage.notification.delete-all-not-allowed');
       }
 
-      await request('/admin/roles/batch-delete', {
-        method: 'POST',
-        body: {
-          ids: filteredRoles,
-        },
-      });
+      if (filteredRoles.length) {
+        await request('/admin/roles/batch-delete', {
+          method: 'POST',
+          body: {
+            ids: filteredRoles,
+          },
+        });
 
-      // Empty the selectedRolesId and set the shouldRefetchData to true so the
-      // list is updated when closing the modal
-      dispath({
-        type: 'ON_REMOVE_ROLES_SUCCEEDED',
-      });
+        // Empty the selectedRolesId and set the shouldRefetchData to true so the
+        // list is updated when closing the modal
+        dispath({
+          type: 'ON_REMOVE_ROLES_SUCCEEDED',
+        });
+      }
     } catch (err) {
       console.error(err);
 
