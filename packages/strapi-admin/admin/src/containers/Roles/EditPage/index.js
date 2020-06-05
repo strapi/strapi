@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -50,19 +50,17 @@ const EditPage = () => {
         ];
   /* eslint-enable indent */
 
-  const handleEditRoleSubmit = async () => {
+  const handleEditRoleSubmit = async data => {
     try {
-      // TODO : Uncomment when the API is done.
+      const res = await request(`/admin/roles/${id}`, {
+        method: 'PUT',
+        body: data,
+      });
 
-      // const res = await request(`/admin/roles/${id}`, {
-      //   method: 'POST',
-      //   body: data,
-      // });
-
-      // if (res.data.id) {
-      strapi.notification.success('notification.success.saved');
-      goBack();
-      // }
+      if (res.data.id) {
+        strapi.notification.success('notification.success.saved');
+        goBack();
+      }
     } catch (err) {
       // TODO : Uncomment when the API handle clean errors
 
@@ -78,7 +76,7 @@ const EditPage = () => {
   return (
     <Formik
       enableReinitialize
-      initialValues={role}
+      initialValues={{ name: role.name, description: role.description }}
       onSubmit={handleEditRoleSubmit}
       validationSchema={schema}
     >
@@ -104,6 +102,7 @@ const EditPage = () => {
               values={values}
               onChange={handleChange}
               onBlur={handleBlur}
+              usersCount={role.usersCount}
             />
             <Padded top size="md">
               <Permissions />
