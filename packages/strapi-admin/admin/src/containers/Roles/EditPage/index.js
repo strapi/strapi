@@ -52,15 +52,15 @@ const EditPage = () => {
 
   const handleEditRoleSubmit = async data => {
     try {
-      const res = await request(`/admin/roles/${id}`, {
+      strapi.lockAppWithOverlay();
+
+      await request(`/admin/roles/${id}`, {
         method: 'PUT',
         body: data,
       });
 
-      if (res.data.id) {
-        strapi.notification.success('notification.success.saved');
-        goBack();
-      }
+      strapi.notification.success('notification.success.saved');
+      goBack();
     } catch (err) {
       // TODO : Uncomment when the API handle clean errors
 
@@ -70,6 +70,8 @@ const EditPage = () => {
       // strapi.notification.error(apiErrorsMessage);
       // }
       strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
