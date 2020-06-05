@@ -10,7 +10,13 @@ const registerProviderPermissionSchema = yup
     yup
       .object()
       .shape({
-        name: yup.string().required(),
+        uid: yup
+          .string()
+          .matches(
+            /^[a-z]([a-z|.|-]+)[a-z]$/,
+            v => `${v.path}: The id can only contain lowercase letters, dots and hyphens.`
+          )
+          .required(),
         section: yup
           .string()
           .oneOf(['contentTypes', 'plugins', 'settings'])

@@ -6,7 +6,9 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async getAll(ctx) {
-    const allWithNestedFormat = await strapi.admin.permissionProvider.getAllWithNestedFormat();
+    const allWithNestedFormat = strapi.admin.services[
+      'permission-provider'
+    ].getAllWithNestedFormat();
 
     ctx.body = {
       data: allWithNestedFormat,

@@ -113,24 +113,25 @@ module.exports = async () => {
     {
       section: 'plugins',
       displayName: 'Can access to the Documentation',
-      name: 'read',
+      uid: 'read',
       pluginName: 'documentation',
     },
     {
       section: 'plugins',
       displayName: 'Update and delete',
-      name: 'settings.update',
+      uid: 'settings.update',
       subCategory: 'settings',
       pluginName: 'documentation',
     },
     {
       section: 'plugins',
       displayName: 'Regenerate',
-      name: 'settings.regenerate',
+      uid: 'settings.regenerate',
       subCategory: 'settings',
       pluginName: 'documentation',
     },
   ];
 
-  strapi.admin.permissionProvider.register(permissions);
+  const permissionProvider = strapi.admin.services['permission-provider'];
+  permissionProvider.register(permissions);
 };

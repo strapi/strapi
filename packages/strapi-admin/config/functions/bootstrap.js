@@ -1,8 +1,6 @@
 const adminPermissions = require('../admin-permissions');
 
 module.exports = async () => {
-  strapi.admin.permissionProvider = strapi.admin.services[
-    'permission-provider'
-  ].createPermissionProvider();
-  strapi.admin.permissionProvider.register(adminPermissions.permissions);
+  const permissionProvider = strapi.admin.services['permission-provider'];
+  permissionProvider.register(adminPermissions.permissions);
 };

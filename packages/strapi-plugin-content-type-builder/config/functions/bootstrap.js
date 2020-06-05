@@ -5,10 +5,11 @@ module.exports = () => {
     {
       section: 'plugins',
       displayName: 'Read',
-      name: 'read',
+      uid: 'read',
       pluginName: 'content-type-builder',
     },
   ];
 
-  strapi.admin.permissionProvider.register(permissions);
+  const permissionProvider = strapi.admin.services['permission-provider'];
+  permissionProvider.register(permissions);
 };
