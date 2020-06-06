@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MongoDB, MySQL, MariaDB, PostgreSQL, SQLite",
   "homepage": "http://strapi.io",
   "directories": {
@@ -53,15 +53,15 @@
     "rimraf": "^2.6.2",
     "shelljs": "^0.8.3",
     "strapi-database": "3.0.0",
-    "strapi-generate": "3.0.0",
-    "strapi-generate-api": "3.0.0",
-    "strapi-generate-controller": "3.0.0",
-    "strapi-generate-model": "3.0.0",
-    "strapi-generate-new": "3.0.0",
-    "strapi-generate-plugin": "3.0.0",
-    "strapi-generate-policy": "3.0.0",
-    "strapi-generate-service": "3.0.0",
-    "strapi-utils": "3.0.0"
+    "strapi-generate": "3.0.1",
+    "strapi-generate-api": "3.0.1",
+    "strapi-generate-controller": "3.0.1",
+    "strapi-generate-model": "3.0.1",
+    "strapi-generate-new": "3.0.1",
+    "strapi-generate-plugin": "3.0.1",
+    "strapi-generate-policy": "3.0.1",
+    "strapi-generate-service": "3.0.1",
+    "strapi-utils": "3.0.1"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js"

@@ -87,10 +87,11 @@ function EditView() {
       return obj;
     }, {});
 
+  /* eslint-disable indent */
   const headerTitle = isCreating
     ? formatMessage({
-      id: 'Settings.webhooks.create',
-    })
+        id: 'Settings.webhooks.create',
+      })
     : name;
   const headersActions = [
     {
@@ -102,8 +103,8 @@ function EditView() {
       onClick: () => handleTrigger(),
       title: isTriggerActionDisabled
         ? formatMessage({
-          id: 'Settings.webhooks.trigger.save',
-        })
+            id: 'Settings.webhooks.trigger.save',
+          })
         : null,
       type: 'button',
       icon: (
@@ -135,6 +136,7 @@ function EditView() {
       type: 'submit',
     },
   ];
+  /* eslint-enable indent */
 
   const headerProps = {
     title: {

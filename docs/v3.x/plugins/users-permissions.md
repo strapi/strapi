@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Pemissions** link in the left menu.
+To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
 
 ## Concept
 
@@ -189,7 +189,7 @@ Then fill the informations:
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **GitHub** provider
 
-Then fill the informations:
+Then fill the information:
 
 - **Enable**: `ON`
 - **Client ID**: 53de5258f8472c140917
@@ -409,7 +409,7 @@ Then fill the informations:
 - **Deauthorize**: `https://c6a8cc7c.ngrok.io`
 - **Data Deletion Requests**: `https://c6a8cc7c.ngrok.io`
 
-On the **App Review for Instagram Basic Display** click on **Add to submition** for **instagram_graph_user_profile**.
+On the **App Review for Instagram Basic Display** click on **Add to submission** for **instagram_graph_user_profile**.
 
 Make sure your Application information are well completed.
 
@@ -566,7 +566,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.error('An error occured:', error.response);
+    console.error('An error occurred:', error.response);
   });
 ```
 
@@ -682,7 +682,7 @@ from the `query` parameter to authenticate.
 
 That way, you should be able to retrieve the user info you need.
 
-Now, you can simply call the `callback` function with the username and email of your user. That way, strapi will be able
+Now, you can simply call the `callback` function with the username and email of your user. That way, Strapi will be able
 to retrieve your user from the database and log you in.
 
 ### Configure the new provider model onto database
