@@ -19,9 +19,11 @@ import {
   GlobalContextProvider,
   LoadingIndicatorPage,
   OverlayBlocker,
+  UserProvider,
 } from 'strapi-helper-plugin';
 import TestEE from 'ee_else_ce/containers/TestEE';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
+import { fakePermissionsData } from '../../utils';
 
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -176,52 +178,54 @@ export class Admin extends React.Component {
         settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
         updatePlugin={updatePlugin}
       >
-        <Wrapper>
-          <LeftMenu version={strapiVersion} plugins={plugins} />
-          <NavTopRightWrapper>
-            {/* Injection zone not ready yet */}
-            <Logout />
-            <LocaleToggle isLogged />
-          </NavTopRightWrapper>
-          <div className="adminPageRightWrapper">
-            <Header />
-            <Content>
-              <Switch>
-                <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
-                <Route path="/me" component={ProfilePage} />
-                {/* TODO remove this Route it is just made for the test */}
-                <Route path="/test" component={TestEE} />
-                <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
-                <Route
-                  path="/list-plugins"
-                  render={props => this.renderRoute(props, InstalledPluginsPage)}
-                  exact
-                />
-                <Route
-                  path="/marketplace"
-                  render={props => this.renderRoute(props, MarketplacePage)}
-                />
-                <Route
-                  path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
-                  render={props => this.renderRoute(props, SettingsPage)}
-                />
-                <Route
-                  path={SETTINGS_BASE_URL || '/settings'}
-                  render={props => this.renderRoute(props, SettingsPage)}
-                  exact
-                />
-                <Route key="7" path="" component={NotFoundPage} />
-                <Route key="8" path="404" component={NotFoundPage} />
-              </Switch>
-            </Content>
-          </div>
-          <OverlayBlocker
-            key="overlayBlocker"
-            isOpen={blockApp && showGlobalAppBlocker}
-            {...overlayBlockerData}
-          />
-          {SHOW_TUTORIALS && <OnboardingVideos />}
-        </Wrapper>
+        <UserProvider value={fakePermissionsData.user2}>
+          <Wrapper>
+            <LeftMenu version={strapiVersion} plugins={plugins} />
+            <NavTopRightWrapper>
+              {/* Injection zone not ready yet */}
+              <Logout />
+              <LocaleToggle isLogged />
+            </NavTopRightWrapper>
+            <div className="adminPageRightWrapper">
+              <Header />
+              <Content>
+                <Switch>
+                  <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                  <Route path="/me" component={ProfilePage} />
+                  {/* TODO remove this Route it is just made for the test */}
+                  <Route path="/test" component={TestEE} />
+                  <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
+                  <Route
+                    path="/list-plugins"
+                    render={props => this.renderRoute(props, InstalledPluginsPage)}
+                    exact
+                  />
+                  <Route
+                    path="/marketplace"
+                    render={props => this.renderRoute(props, MarketplacePage)}
+                  />
+                  <Route
+                    path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
+                    render={props => this.renderRoute(props, SettingsPage)}
+                  />
+                  <Route
+                    path={SETTINGS_BASE_URL || '/settings'}
+                    render={props => this.renderRoute(props, SettingsPage)}
+                    exact
+                  />
+                  <Route key="7" path="" component={NotFoundPage} />
+                  <Route key="8" path="404" component={NotFoundPage} />
+                </Switch>
+              </Content>
+            </div>
+            <OverlayBlocker
+              key="overlayBlocker"
+              isOpen={blockApp && showGlobalAppBlocker}
+              {...overlayBlockerData}
+            />
+            {SHOW_TUTORIALS && <OnboardingVideos />}
+          </Wrapper>
+        </UserProvider>
       </GlobalContextProvider>
     );
   }
