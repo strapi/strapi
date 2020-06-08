@@ -10,7 +10,7 @@
 const _ = require('lodash');
 const uuid = require('uuid/v4');
 
-const usersPermissionsPermissions = require('../users-permissions-permissions');
+const usersPermissionsActions = require('../users-permissions-actions');
 
 module.exports = async () => {
   const pluginStore = strapi.store({
@@ -183,6 +183,6 @@ module.exports = async () => {
     strapi.reload.isWatching = true;
   }
 
-  const permissionProvider = strapi.admin.services['permission-provider'];
-  permissionProvider.register(usersPermissionsPermissions.permissions);
+  const actionProvider = strapi.admin.services.permission.provider;
+  actionProvider.register(usersPermissionsActions.actions);
 };

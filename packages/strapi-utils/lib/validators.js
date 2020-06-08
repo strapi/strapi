@@ -22,7 +22,7 @@ function arrayRequiredAllowEmpty(message) {
 
 function isAPluginName(message) {
   return this.test('is not a plugin name', message, function(value) {
-    return ['admin', ...Object.keys(strapi.plugins)].includes(value)
+    return [undefined, 'admin', ...Object.keys(strapi.plugins)].includes(value)
       ? true
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
   });

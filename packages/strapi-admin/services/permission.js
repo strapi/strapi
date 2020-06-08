@@ -1,6 +1,7 @@
 'use strict';
 
 const { createPermission } = require('../domain/permission');
+const actionProvider = require('./action-provider');
 
 /**
  * Delete permissions of roles in database
@@ -26,16 +27,16 @@ const find = (params = {}) => {
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
 const assign = async (roleID, permissions = []) => {
-  const existingPermissions = strapi.admin.services['permission-provider'].getAll();
+  const existingActions = strapi.admin.services.permission.provider.getAll();
   for (let permission of permissions) {
-    const permissionExists = existingPermissions.find(
-      ep =>
-        ep.permissionId === permission.action &&
-        (ep.section !== 'contentTypes' || ep.subjects.includes(permission.subject))
+    const actionExists = existingActions.find(
+      ea =>
+        ea.actionId === permission.action &&
+        (ea.section !== 'contentTypes' || ea.subjects.includes(permission.subject))
     );
-    if (!permissionExists) {
+    if (!actionExists) {
       throw strapi.errors.badRequest(
-        `ValidationError', 'This permission doesn't exist: ${JSON.stringify(permission)}`
+        `ValidationError', 'This action doesn't exist: ${JSON.stringify(permission)}`
       );
     }
   }
@@ -59,4 +60,5 @@ module.exports = {
   find,
   deleteByRolesIds,
   assign,
+  provider: actionProvider,
 };

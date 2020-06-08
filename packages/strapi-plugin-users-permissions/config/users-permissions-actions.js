@@ -1,5 +1,5 @@
 module.exports = {
-  permissions: [
+  actions: [
     {
       // Roles
       section: 'plugins',

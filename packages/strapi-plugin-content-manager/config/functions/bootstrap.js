@@ -111,7 +111,7 @@ async function syncComponentsSchemas() {
 function registerPermissions() {
   const contentTypesUids = Object.keys(strapi.contentTypes); // TODO: filter to not have internal contentTypes
 
-  const permissions = [
+  const actions = [
     {
       section: 'contentTypes',
       displayName: 'Create',
@@ -163,6 +163,6 @@ function registerPermissions() {
     },
   ];
 
-  const permissionProvider = strapi.admin.services['permission-provider'];
-  permissionProvider.register(permissions);
+  const actionProvider = strapi.admin.services.permission.provider;
+  actionProvider.register(actions);
 }

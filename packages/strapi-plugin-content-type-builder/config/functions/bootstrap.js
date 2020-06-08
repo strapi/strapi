@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = () => {
-  const permissions = [
+  const actions = [
     {
       section: 'plugins',
       displayName: 'Read',
@@ -10,6 +10,6 @@ module.exports = () => {
     },
   ];
 
-  const permissionProvider = strapi.admin.services['permission-provider'];
-  permissionProvider.register(permissions);
+  const actionProvider = strapi.admin.services.permission.provider;
+  actionProvider.register(actions);
 };

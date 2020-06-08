@@ -109,7 +109,7 @@ module.exports = async () => {
   }
 
   // Add permissions
-  const permissions = [
+  const actions = [
     {
       section: 'plugins',
       displayName: 'Can access to the Documentation',
@@ -132,6 +132,6 @@ module.exports = async () => {
     },
   ];
 
-  const permissionProvider = strapi.admin.services['permission-provider'];
-  permissionProvider.register(permissions);
+  const actionProvider = strapi.admin.services.permission.provider;
+  actionProvider.register(actions);
 };
