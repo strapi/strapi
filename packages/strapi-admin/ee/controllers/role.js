@@ -5,8 +5,13 @@ const {
   validateRoleUpdateInput,
   validateRoleDeleteInput,
 } = require('../validation/role');
+const { validatedUpdatePermissionsInput } = require('../../validation/permission');
 
 module.exports = {
+  /**
+   * Create a new role
+   * @param {KoaContext} ctx - koa context
+   */
   async create(ctx) {
     try {
       await validateRoleCreateInput(ctx.request.body);
@@ -19,6 +24,11 @@ module.exports = {
     const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
     ctx.created({ data: sanitizedRole });
   },
+
+  /**
+   * Update a role
+   * @param {KoaContext} ctx - koa context
+   */
   async update(ctx) {
     const { id } = ctx.params;
 
@@ -39,6 +49,11 @@ module.exports = {
       data: sanitizedRole,
     };
   },
+
+  /**
+   * Delete a role
+   * @param {KoaContext} ctx - koa context
+   */
   async deleteOne(ctx) {
     const { id } = ctx.params;
 
@@ -50,6 +65,11 @@ module.exports = {
       data: sanitizedRole,
     };
   },
+
+  /**
+   * delete several roles
+   * @param {KoaContext} ctx - koa context
+   */
   async deleteMany(ctx) {
     const { body } = ctx.request;
     try {
@@ -63,6 +83,33 @@ module.exports = {
 
     ctx.body = {
       data: sanitizedRoles,
+    };
+  },
+
+  /**
+   * Updates the permissions assigned to a role
+   * @param {KoaContext} ctx - koa context
+   */
+  async updatePermissions(ctx) {
+    const { id } = ctx.params;
+    const input = ctx.request.body;
+
+    try {
+      await validatedUpdatePermissionsInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const role = await strapi.admin.services.role.findOne({ id });
+
+    if (!role) {
+      return ctx.notFound('role.notFound');
+    }
+
+    const permissions = await strapi.admin.services.permission.assign(role.id, input.permissions);
+
+    ctx.body = {
+      data: permissions,
     };
   },
 };
