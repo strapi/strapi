@@ -106,14 +106,8 @@ describe('Action Provider Service', () => {
         section: 'plugins',
       };
 
-      await actionProviderService.register([action1, action2]);
-
-      expect(global.strapi.stopWithError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'ValidationError',
-          message:
-            'Duplicated action keys: plugins::aPlugin.marketplace.delete. You may want to change the actions name.',
-        })
+      expect(() => actionProviderService.register([action1, action2])).toThrow(
+        'Duplicated action id: plugins::aPlugin.marketplace.delete. You may want to change the actions name.'
       );
     });
 

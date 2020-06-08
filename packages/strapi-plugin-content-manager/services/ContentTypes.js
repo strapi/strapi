@@ -128,10 +128,14 @@ const createTimestampsSchema = contentType => {
   };
 };
 
+const getDisplayedContentTypesUids = () =>
+  Object.keys(strapi.contentTypes).filter(ct => !HIDDEN_CONTENT_TYPES.includes(ct));
+
 module.exports = {
   getConfiguration,
   setConfiguration,
   deleteConfiguration,
   formatContentType,
   formatContentTypeSchema,
+  getDisplayedContentTypesUids,
 };

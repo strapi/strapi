@@ -9,7 +9,7 @@ const actionProviderFactory = () => {
   return {
     get(uid, pluginName) {
       const actionId = getActionId({ pluginName, uid });
-      const action = actions.find(p => p.actionId === actionId);
+      const action = actions.get(actionId);
       return _.cloneDeep(action);
     },
     getAll() {
