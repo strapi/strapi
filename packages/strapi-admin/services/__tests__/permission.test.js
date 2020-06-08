@@ -25,7 +25,7 @@ describe('Permission Service', () => {
       const getAll = jest.fn(() => []);
 
       global.strapi = {
-        admin: { permissionProvider: { getAll } },
+        admin: { services: { permission: { provider: { getAll } } } },
         query() {
           return { delete: deleteFn, create };
         },
@@ -42,11 +42,11 @@ describe('Permission Service', () => {
       const getAll = jest.fn(() =>
         Array(5)
           .fill(0)
-          .map((v, i) => ({ permissionId: `action-${i}` }))
+          .map((v, i) => ({ actionId: `action-${i}` }))
       );
 
       global.strapi = {
-        admin: { permissionProvider: { getAll } },
+        admin: { services: { permission: { provider: { getAll } } } },
         query() {
           return { delete: deleteFn, create };
         },

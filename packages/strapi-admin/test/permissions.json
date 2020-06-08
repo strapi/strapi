@@ -234,10 +234,7 @@
           "strapi::permission",
           "strapi::role",
           "strapi::user",
-          "plugins::users-permissions.permission",
-          "plugins::users-permissions.role",
-          "plugins::users-permissions.user",
-          "plugins::upload.file"
+          "plugins::users-permissions.user"
         ]
       },
       {
@@ -247,10 +244,7 @@
           "strapi::permission",
           "strapi::role",
           "strapi::user",
-          "plugins::users-permissions.permission",
-          "plugins::users-permissions.role",
-          "plugins::users-permissions.user",
-          "plugins::upload.file"
+          "plugins::users-permissions.user"
         ]
       },
       {
@@ -260,10 +254,7 @@
           "strapi::permission",
           "strapi::role",
           "strapi::user",
-          "plugins::users-permissions.permission",
-          "plugins::users-permissions.role",
-          "plugins::users-permissions.user",
-          "plugins::upload.file"
+          "plugins::users-permissions.user"
         ]
       },
       {
@@ -273,10 +264,7 @@
           "strapi::permission",
           "strapi::role",
           "strapi::user",
-          "plugins::users-permissions.permission",
-          "plugins::users-permissions.role",
-          "plugins::users-permissions.user",
-          "plugins::upload.file"
+          "plugins::users-permissions.user"
         ]
       }
     ]

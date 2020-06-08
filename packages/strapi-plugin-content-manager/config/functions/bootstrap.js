@@ -109,7 +109,9 @@ async function syncComponentsSchemas() {
 }
 
 function registerPermissions() {
-  const contentTypesUids = Object.keys(strapi.contentTypes); // TODO: filter to not have internal contentTypes
+  const contentTypesUids = strapi.plugins[
+    'content-manager'
+  ].services.contenttypes.getDisplayedContentTypesUids();
 
   const actions = [
     {

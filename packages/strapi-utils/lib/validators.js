@@ -30,7 +30,10 @@ function isAPluginName(message) {
 
 function isAContentTypeId(message) {
   return this.test('is not a content-type id', message, function(value) {
-    return Object.keys(strapi.contentTypes).includes(value)
+    const contentTypesUids = strapi.plugins[
+      'content-manager'
+    ].services.contenttypes.getDisplayedContentTypesUids();
+    return contentTypesUids.includes(value)
       ? true
       : this.createError({
           path: this.path,

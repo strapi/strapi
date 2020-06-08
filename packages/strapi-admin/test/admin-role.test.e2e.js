@@ -359,7 +359,7 @@ describe('Role CRUD End to End', () => {
               },
               {
                 action: 'plugins::content-manager.create',
-                subject: 'plugins::upload.file',
+                subject: 'plugins::users-permissions.user',
                 conditions: ['isOwner'],
               },
             ],
