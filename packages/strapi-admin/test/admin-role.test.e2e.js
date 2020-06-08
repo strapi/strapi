@@ -398,12 +398,11 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        console.log('res.body', res.body);
         expect(res.body).toMatchObject({
           statusCode: 400,
           error: 'Bad Request',
           message:
-            'ValidationError\', \'This permission doesn\'t exist: {"action":"non.existing.action"}',
+            'ValidationError\', \'This action doesn\'t exist: {"action":"non.existing.action"}',
         });
       });
 

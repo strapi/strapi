@@ -1,5 +1,5 @@
 module.exports = {
-  permissions: [
+  actions: [
     {
       uid: 'marketplace.read',
       displayName: 'Can access to the marketplace',

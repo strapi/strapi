@@ -28,7 +28,7 @@ module.exports = async () => {
   }
 
   await pruneObsoleteRelations();
-  registerPermissions();
+  registerPermissionActions();
 };
 
 const createProvider = ({ provider, providerOptions }) => {
@@ -81,8 +81,8 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
   );
 };
 
-const registerPermissions = () => {
-  const permissions = [
+const registerPermissionActions = () => {
+  const actions = [
     {
       section: 'plugins',
       displayName: 'Can access to the Media Library',
@@ -119,6 +119,6 @@ const registerPermissions = () => {
     },
   ];
 
-  const permissionProvider = strapi.admin.services['permission-provider'];
-  permissionProvider.register(permissions);
+  const actionProvider = strapi.admin.services.permission.provider;
+  actionProvider.register(actions);
 };

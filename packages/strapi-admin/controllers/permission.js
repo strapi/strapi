@@ -1,17 +1,20 @@
 'use strict';
 
+const { formatActionsBySections } = require('./formatters');
+
 module.exports = {
   /**
    * Returns every permissions, in nested format
    * @param {KoaContext} ctx - koa context
    */
   async getAll(ctx) {
-    const allWithNestedFormat = strapi.admin.services[
-      'permission-provider'
-    ].getAllWithNestedFormat();
+    const allActions = strapi.admin.services.permission.provider.getAll();
 
     ctx.body = {
-      data: allWithNestedFormat,
+      data: {
+        conditions: [],
+        sections: formatActionsBySections(allActions),
+      },
     };
   },
 };
