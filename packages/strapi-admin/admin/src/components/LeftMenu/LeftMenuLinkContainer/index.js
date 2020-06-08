@@ -4,8 +4,6 @@ import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, snakeCase, isEmpty } from 'lodash';
 
-import { SETTINGS_BASE_URL } from '../../../config';
-import Wrapper from './Wrapper';
 import messages from './messages.json';
 
 import LeftMenuLinkSection from '../LeftMenuLinkSection';
@@ -59,43 +57,39 @@ const LeftMenuLinkContainer = ({ plugins }) => {
       emptyLinksListMessage: messages.noPluginsInstalled.id,
       links: pluginsLinks,
     },
-    general: {
-      searchable: false,
-      name: 'general',
-      links: [
-        {
-          icon: 'list',
-          label: messages.listPlugins.id,
-          destination: '/list-plugins',
-        },
-        {
-          icon: 'shopping-basket',
-          label: messages.installNewPlugin.id,
-          destination: '/marketplace',
-        },
-        {
-          icon: 'cog',
-          label: messages.settings.id,
-          destination: SETTINGS_BASE_URL,
-        },
-      ],
-    },
+    // general: {
+    //   searchable: false,
+    //   name: 'general',
+    //   links: [
+    //     {
+    //       icon: 'list',
+    //       label: messages.listPlugins.id,
+    //       destination: '/list-plugins',
+    //     },
+    //     {
+    //       icon: 'shopping-basket',
+    //       label: messages.installNewPlugin.id,
+    //       destination: '/marketplace',
+    //     },
+    //     {
+    //       icon: 'cog',
+    //       label: messages.settings.id,
+    //       destination: SETTINGS_BASE_URL,
+    //     },
+    //   ],
+    // },
   };
 
-  return (
-    <Wrapper>
-      {Object.keys(menu).map(current => (
-        <LeftMenuLinkSection
-          key={current}
-          links={menu[current].links}
-          section={current}
-          location={location}
-          searchable={menu[current].searchable}
-          emptyLinksListMessage={menu[current].emptyLinksListMessage}
-        />
-      ))}
-    </Wrapper>
-  );
+  return Object.keys(menu).map(current => (
+    <LeftMenuLinkSection
+      key={current}
+      links={menu[current].links}
+      section={current}
+      location={location}
+      searchable={menu[current].searchable}
+      emptyLinksListMessage={menu[current].emptyLinksListMessage}
+    />
+  ));
 };
 
 LeftMenuLinkContainer.propTypes = {
