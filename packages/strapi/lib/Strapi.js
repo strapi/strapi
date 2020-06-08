@@ -372,13 +372,7 @@ class Strapi {
       }
     };
 
-    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
-    await execBootstrap(adminBootstrap).catch(err => {
-      strapi.log.error(`Bootstrap function in admin failed`);
-      strapi.log.error(err);
-      strapi.stop();
-    });
-
+    // plugins bootstrap
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
@@ -386,10 +380,18 @@ class Strapi {
         strapi.stop();
       });
     });
-
     await Promise.all(pluginBoostraps);
 
-    return execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // user bootstrap
+    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+
+    // admin bootstrap : should always run after the others
+    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
+    return execBootstrap(adminBootstrap).catch(err => {
+      strapi.log.error(`Bootstrap function in admin failed`);
+      strapi.log.error(err);
+      strapi.stop();
+    });
   }
 
   async freeze() {
