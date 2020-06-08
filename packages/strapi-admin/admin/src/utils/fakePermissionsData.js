@@ -17,7 +17,7 @@ const data = {
       action: 'admin::marketplace.plugins.uninstall',
       subject: null,
       fields: null,
-      conditions: [],
+      conditions: ['customCondition'],
     },
 
     // Admin webhooks
@@ -222,24 +222,24 @@ const data = {
   ],
   user2: [
     // Admin marketplace
-    {
-      action: 'admin::marketplace.read',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::marketplace.read',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     {
       action: 'admin::marketplace.plugins.install',
       subject: null,
       fields: null,
-      conditions: [],
+      conditions: ['some condition'],
     },
-    {
-      action: 'admin::marketplace.plugins.uninstall',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::marketplace.plugins.uninstall',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
 
     // Admin webhooks
     {
@@ -324,7 +324,7 @@ const data = {
       action: 'plugins::content-type-builder.read',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
 
     // Documentation plugin
@@ -332,19 +332,19 @@ const data = {
     //   action: 'plugins::documentation.read',
     //   subject: null,
     //   fields: null,
-    //   conditions: null,
+    //   conditions:[],
     // },
     // {
     //   action: 'plugins::documentation.settings.update',
     //   subject: null,
     //   fields: null,
-    //   conditions: null,
+    //   conditions:[],
     // },
     // {
     //   action: 'plugins::documentation.settings.regenerate',
     //   subject: null,
     //   fields: null,
-    //   conditions: null,
+    //   conditions:[],
     // },
 
     // Upload plugin
@@ -352,31 +352,31 @@ const data = {
       action: 'plugins::upload.read',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::upload.assets.create',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::upload.assets.update',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::upload.assets.dowload',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::upload.assets.copy-link',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
 
     // Users-permissions
@@ -384,61 +384,61 @@ const data = {
       action: 'plugins::users-permissions.roles.create',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.roles.read',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.roles.update',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.roles.delete',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.email-templates.read',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.email-templates.update',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.providers.read',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.providers.update',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.advanced-settings.read',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
     {
       action: 'plugins::users-permissions.advanced-settings.update',
       subject: null,
       fields: null,
-      conditions: null,
+      conditions: [],
     },
   ],
 };
