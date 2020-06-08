@@ -5,11 +5,20 @@ const actionProvider = require('./action-provider');
 
 /**
  * Delete permissions of roles in database
- * @param params ids of roles
+ * @param rolesIds ids of roles
  * @returns {Promise<array>}
  */
 const deleteByRolesIds = rolesIds => {
   return strapi.query('permission', 'admin').delete({ role_in: rolesIds });
+};
+
+/**
+ * Delete permissions
+ * @param ids ids of permissions
+ * @returns {Promise<array>}
+ */
+const deleteByIds = ids => {
+  return strapi.query('permission', 'admin').delete({ id_in: ids });
 };
 
 /**
@@ -59,6 +68,7 @@ const assign = async (roleID, permissions = []) => {
 module.exports = {
   find,
   deleteByRolesIds,
+  deleteByIds,
   assign,
   provider: actionProvider,
 };
