@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 
@@ -91,6 +93,41 @@ module.exports = {
       await validatedUpdatePermissionsInput(input);
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
+    }
+
+    const bondedActions = [
+      'plugins::content-manager.read',
+      'plugins::content-manager.create',
+      'plugins::content-manager.update',
+      'plugins::content-manager.delete',
+    ];
+
+    const subjectMap = {};
+    let areNotBond = false;
+    input.permissions
+      .filter(perm => bondedActions.includes(perm.action))
+      .forEach(perm => {
+        subjectMap[perm.subject] = subjectMap[perm.subject] || {};
+        perm.fields.forEach(field => {
+          subjectMap[perm.subject][field] = subjectMap[perm.subject][field] || new Set();
+          subjectMap[perm.subject][field].add(perm.action);
+        });
+      });
+
+    _.forIn(subjectMap, subject => {
+      _.forIn(subject, field => {
+        if (field.size !== bondedActions.length) {
+          areNotBond = true;
+          return false;
+        }
+      });
+      if (areNotBond) return false;
+    });
+
+    if (areNotBond) {
+      return ctx.badRequest(
+        'Read, Create, Update and Delete have to be defined all together for a subject field or not at all'
+      );
     }
 
     const role = await strapi.admin.services.role.findOne({ id });
