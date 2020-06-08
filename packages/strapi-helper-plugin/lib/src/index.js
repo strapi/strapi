@@ -77,10 +77,12 @@ export { default as Row } from './components/Row';
 export { default as SearchInfo } from './components/SearchInfo';
 export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
+export { default as UserProvider } from './components/UserProvider';
 export { default as ViewContainer } from './components/ViewContainer';
 
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
+export { default as UserContext } from './contexts/UserContext';
 
 // Hooks
 export { default as useQuery } from './hooks/useQuery';
