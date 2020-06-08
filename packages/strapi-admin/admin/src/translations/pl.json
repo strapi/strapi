@@ -55,7 +55,7 @@
   "app.components.InstallPluginPage.Download.title": "Pobieranie...",
   "app.components.InstallPluginPage.Download.description": "Pobranie i instalacja wtyczki może zająć kilka sekund.",
   "app.components.InstallPluginPage.InputSearch.label": " ",
-  "app.components.InstallPluginPage.InputSearch.placeholder": "Wyszukaj wtyczkę... (np: authentication)",
+  "app.components.InstallPluginPage.InputSearch.placeholder": "Wyszukaj wtyczkę... (np.: authentication)",
   "app.components.InstallPluginPage.description": "Rozszerz swoją aplikację bez wysiłku",
   "app.components.InstallPluginPage.helmet": "Sklep – Wtyczki",
   "app.components.InstallPluginPage.plugin.support-us.description": "Wesprzyj nas kupując koszulkę Strapi. Pozwoli nam to kontynuuować pracę nad projektem i wzbogacanie go, tak aby dać ci jak najlepsze wrażenia.",
