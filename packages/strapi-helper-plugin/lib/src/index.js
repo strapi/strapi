@@ -97,6 +97,7 @@ export { default as cleanData } from './utils/cleanData';
 export { default as difference } from './utils/difference';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
+export { default as hasPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
 export { default as getFileExtension } from './utils/getFileExtension';

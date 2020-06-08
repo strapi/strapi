@@ -1,7 +1,7 @@
 import { transform } from 'lodash';
 
-const hasPermissions = async (userPermissions, permissions) => {
-  const matchingPermissions = transform(
+const findMatchingPermissions = (userPermissions, permissions) => {
+  return transform(
     userPermissions,
     (result, value) => {
       const associatedPermission = permissions.find(
@@ -14,13 +14,23 @@ const hasPermissions = async (userPermissions, permissions) => {
     },
     []
   );
+};
 
+const shouldCheckPermissions = permissions =>
+  permissions.some(perm => perm.conditions && perm.conditions.length);
+
+const hasPermissions = async (userPermissions, permissions) => {
   if (!permissions.length) {
     return true;
   }
 
-  if (matchingPermissions.some(perm => perm.conditions && perm.conditions.length)) {
+  const matchingPermissions = findMatchingPermissions(userPermissions, permissions);
+
+  // TODO test when API ready
+  if (shouldCheckPermissions(matchingPermissions)) {
+    // TODO
     console.log('should do something');
+
     const hasPermission = await new Promise(resolve =>
       setTimeout(() => {
         resolve(true);
@@ -34,3 +44,4 @@ const hasPermissions = async (userPermissions, permissions) => {
 };
 
 export default hasPermissions;
+export { findMatchingPermissions, shouldCheckPermissions };

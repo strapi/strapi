@@ -57,27 +57,6 @@ const LeftMenuLinkContainer = ({ plugins }) => {
       emptyLinksListMessage: messages.noPluginsInstalled.id,
       links: pluginsLinks,
     },
-    // general: {
-    //   searchable: false,
-    //   name: 'general',
-    //   links: [
-    //     {
-    //       icon: 'list',
-    //       label: messages.listPlugins.id,
-    //       destination: '/list-plugins',
-    //     },
-    //     {
-    //       icon: 'shopping-basket',
-    //       label: messages.installNewPlugin.id,
-    //       destination: '/marketplace',
-    //     },
-    //     {
-    //       icon: 'cog',
-    //       label: messages.settings.id,
-    //       destination: SETTINGS_BASE_URL,
-    //     },
-    //   ],
-    // },
   };
 
   return Object.keys(menu).map(current => (

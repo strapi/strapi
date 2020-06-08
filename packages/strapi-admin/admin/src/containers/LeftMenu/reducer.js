@@ -53,6 +53,7 @@ const initialState = {
       ],
     },
   ],
+  isLoading: true,
 };
 
 const reducer = (state, action) =>
@@ -60,6 +61,10 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'SET_LINK_PERMISSION': {
         set(draftState, ['generalSectionLinks', action.index, 'isDisplayed'], action.hasPermission);
+        break;
+      }
+      case 'TOGGLE_IS_LOADING': {
+        draftState.isLoading = !state.isLoading;
         break;
       }
       default:
