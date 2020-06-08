@@ -28,7 +28,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
+    <img src="https://img.shields.io/npm/v/strapi/latest.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
@@ -51,10 +51,10 @@
 
 <br>
 
-Strapi is a free and open source headless CMS delivering your content anywhere you need.
+Strapi is a free and open-source headless CMS delivering your content anywhere you need.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
+- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
 - **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
 
@@ -113,13 +113,11 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 
-This project is currently in **Beta**. Significant breaking changes are unlikely at this stage of the project, but using the latest version of Strapi ensures you have all the latest features and updates. New releases are usually shipped every two weeks to fix/enhance the project.
-
 ## Features
 
 - **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
 - **Secure by default:** Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
-- **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
+- **Plugins Oriented:** Install the auth system, content management, custom plugins, and more, in seconds.
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
