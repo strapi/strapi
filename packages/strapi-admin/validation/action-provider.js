@@ -55,7 +55,6 @@ const registerProviderActionSchema = yup
             ),
           otherwise: yup.string(),
         }),
-        conditions: yup.array().of(yup.string()),
       })
       .noUnknown()
   );

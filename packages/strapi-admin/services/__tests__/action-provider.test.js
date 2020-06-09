@@ -28,7 +28,6 @@ describe('Action Provider Service', () => {
       expect(createdAction).toMatchObject({
         ..._.omit(action, ['uid']),
         actionId: 'admin::marketplace.read',
-        conditions: [],
       });
 
       createdActions.push(createdAction);
@@ -50,7 +49,6 @@ describe('Action Provider Service', () => {
         ..._.omit(action, ['uid']),
         actionId: 'admin::marketplace.create',
         subCategory: 'general',
-        conditions: [],
       });
       createdActions.push(createdAction);
     });
@@ -70,7 +68,6 @@ describe('Action Provider Service', () => {
       expect(createdAction).toMatchObject({
         ..._.omit(action, ['uid']),
         actionId: 'plugins::aPlugin.marketplace.update',
-        conditions: [],
       });
     });
 
