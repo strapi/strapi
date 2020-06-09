@@ -3,12 +3,12 @@
 const adminActions = require('../admin-actions');
 
 const registerPermissionActions = () => {
-  const actionProvider = strapi.admin.services.permission.provider;
+  const { actionProvider } = strapi.admin.services.permission;
   actionProvider.register(adminActions.actions);
 };
 
 const cleanPermissionInDatabase = async () => {
-  const actionProvider = strapi.admin.services.permission.provider;
+  const actionProvider = strapi.admin.services.permission;
   const dbPermissions = await strapi.admin.services.permission.find();
   const allActionsMap = actionProvider.getAllByMap();
   const permissionsToRemoveIds = [];

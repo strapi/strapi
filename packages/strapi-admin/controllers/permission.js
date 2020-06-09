@@ -8,7 +8,7 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async getAll(ctx) {
-    const allActions = strapi.admin.services.permission.provider.getAll();
+    const allActions = strapi.admin.services.permission.actionProvider.getAll();
 
     ctx.body = {
       data: {
