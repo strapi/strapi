@@ -1155,6 +1155,13 @@
   dependencies:
     yup "^0.27.0"
 
+"@casl/ability@^4.1.3":
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-4.1.3.tgz#cd94392e1efaec8812335273b9cea0cbe9fe1021"
+  integrity sha512-kcoH01WpOvSC4ExYKKAvGLChQ32aM/kE1J9lRTLt0tIq8EJtv4FLNyLH4BQ+V6XlkHUV0SnjRxn0P0wK8/UzBw==
+  dependencies:
+    sift "^13.0.0"
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -16565,6 +16572,11 @@ sift@7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/sift/-/sift-7.0.1.tgz#47d62c50b159d316f1372f8b53f9c10cd21a4b08"
   integrity sha512-oqD7PMJ+uO6jV9EQCl0LrRw1OwsiPsiFQR5AR30heR+4Dl7jBBbDLnNvWiak20tzZlSE1H7RB30SX/1j/YYT7g==
+
+sift@^13.0.0:
+  version "13.0.3"
+  resolved "https://registry.yarnpkg.com/sift/-/sift-13.0.3.tgz#f2dbb5d33cd8de2169fd05117212bc5dfd2c9e52"
+  integrity sha512-+07q8msAbbsY5rGQw61hEbAcDl+e1rBzDWqJC3juipQCGAO+bBLUPxrGJ1o5IM16hbRVf8JrlyqUvSDFOSoOgA==
 
 sigmund@^1.0.1, sigmund@~1.0.0:
   version "1.0.1"
