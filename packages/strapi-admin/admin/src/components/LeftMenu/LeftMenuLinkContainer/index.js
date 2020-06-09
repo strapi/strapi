@@ -36,6 +36,9 @@ const LeftMenuLinkContainer = ({ plugins }) => {
     ...contentTypesSections,
   };
 
+  // console.log(menu);
+  // TODO delete this file
+
   return Object.keys(menu).map(current => (
     <LeftMenuLinkSection
       key={current}
