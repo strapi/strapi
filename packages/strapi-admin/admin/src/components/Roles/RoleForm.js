@@ -18,6 +18,7 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
     >
       {formatMessage({
         id: 'Settings.roles.form.button.users-with-role',
+        defaultMessage: 'Users with this role',
       })}
     </ButtonWithNumber>,
   ];
@@ -27,24 +28,27 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
       actions={actions}
       isLoading={isLoading}
       title={
+        /* eslint-disable indent */
         role
           ? role.name
           : formatMessage({
-            id: 'Settings.roles.form.title',
-          })
+              id: 'Settings.roles.form.title',
+              defaultMessage: 'Details',
+            })
       }
       subtitle={
         role
           ? role.description
           : formatMessage({
-            id: 'Settings.roles.form.description',
-          })
+              id: 'Settings.roles.form.description',
+              defaultMessage: 'Name and description of the role',
+            })
       }
+      /* eslint-enable indent */
     >
       <NameInput
-        label={formatMessage({
-          id: 'Settings.roles.form.input.name',
-        })}
+        label="Settings.roles.form.input.name"
+        defaultMessage="Name"
         name="name"
         type="text"
         error={errors.name ? { id: errors.name } : null}
@@ -54,9 +58,8 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
       />
 
       <SizedInput
-        label={formatMessage({
-          id: 'Settings.roles.form.input.description',
-        })}
+        label="Settings.roles.form.input.description"
+        defaultMessage="Description"
         name="description"
         type="textarea"
         onBlur={onBlur}

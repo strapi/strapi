@@ -6,8 +6,8 @@ const roleTabsLabel = [
   },
   {
     labelId: 'app.components.LeftMenuLinkContainer.singleTypes',
-    defaultMessage: 'Single Types',
     id: 'singleTypes',
+    defaultMessage: 'Single Types',
   },
   {
     labelId: 'app.components.LeftMenuLinkContainer.plugins',

@@ -13,6 +13,7 @@ const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
     <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')} key="user-button">
       {formatMessage({
         id: 'Settings.roles.form.button.users-with-role',
+        defaultMessage: 'Users with this role',
       })}
     </ButtonWithNumber>,
   ];
@@ -23,13 +24,16 @@ const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
       isLoading={isLoading}
       title={formatMessage({
         id: 'Settings.roles.form.title',
+        defaultMessage: 'Details',
       })}
       subtitle={formatMessage({
         id: 'Settings.roles.form.description',
+        defaultMessage: 'Name and description of the role',
       })}
     >
       <SizedInput
-        label="Name"
+        label="Settings.roles.form.input.name"
+        defaultMessage="Name"
         name="name"
         type="text"
         error={errors.name ? { id: errors.name } : null}
@@ -39,7 +43,8 @@ const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
       />
 
       <SizedInput
-        label="Description"
+        label="Settings.roles.form.input.description"
+        defaultMessage="Description"
         name="description"
         type="textarea"
         onBlur={onBlur}

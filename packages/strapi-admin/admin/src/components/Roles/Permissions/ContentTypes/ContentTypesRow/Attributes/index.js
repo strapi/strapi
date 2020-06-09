@@ -2,10 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Padded, Flex, Text } from '@buffetjs/core';
-import { useGlobalContext } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { getAttributesToDisplay } from '../../../../../../utils';
 import AttributeRow from './AttributeRow';
 import Wrapper from './Wrapper';
 
@@ -24,9 +22,7 @@ const FieldsTitleWrapper = styled.div`
 `;
 
 const Attributes = ({ attributes }) => {
-  const { plugins } = useGlobalContext();
   const { formatMessage } = useIntl();
-  const attributesToDisplay = getAttributesToDisplay(plugins, attributes);
 
   return (
     <Wrapper>
@@ -65,7 +61,7 @@ const Attributes = ({ attributes }) => {
         </ActionTitle>
       </Flex>
       <Padded left size="md">
-        {attributesToDisplay.map(attribute => (
+        {attributes.map(attribute => (
           <AttributeRow attribute={attribute} key={attribute.attributeName} />
         ))}
       </Padded>
@@ -74,7 +70,7 @@ const Attributes = ({ attributes }) => {
 };
 
 Attributes.propTypes = {
-  attributes: PropTypes.object.isRequired,
+  attributes: PropTypes.array.isRequired,
 };
 
 export default Attributes;

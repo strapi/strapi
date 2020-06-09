@@ -119,6 +119,7 @@ const RoleListPage = () => {
     {
       label: formatMessage({
         id: 'Settings.roles.list.button.add',
+        defaultMessage: 'Add new role',
       }),
       onClick: handleNewRoleClick,
       color: 'primary',
@@ -135,10 +136,12 @@ const RoleListPage = () => {
         title={{
           label: formatMessage({
             id: 'Settings.roles.title',
+            defaultMessage: 'roles',
           }),
         }}
         content={formatMessage({
           id: 'Settings.roles.list.description',
+          defaultMessage: 'List of roles',
         })}
         actions={headerActions}
         isLoading={isLoading}
@@ -149,6 +152,7 @@ const RoleListPage = () => {
           title={formatMessage(
             {
               id: `Settings.roles.list.title${resultsCount > 1 ? '.plural' : '.singular'}`,
+              defaultMessage: `{number} ${resultsCount > 1 ? 'roles' : 'role'}`,
             },
             { number: resultsCount }
           )}
@@ -156,7 +160,7 @@ const RoleListPage = () => {
           button={{
             color: 'delete',
             disabled: selectedRoles.length === 0,
-            label: formatMessage({ id: 'app.utils.delete' }),
+            label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
             onClick: handleToggleModal,
             type: 'button',
           }}
@@ -178,6 +182,7 @@ const RoleListPage = () => {
             icon={<Plus fill="#007eff" width="11px" height="11px" />}
             label={formatMessage({
               id: 'Settings.roles.list.button.add',
+              defaultMessage: 'Add new role',
             })}
           />
         </ListButton>

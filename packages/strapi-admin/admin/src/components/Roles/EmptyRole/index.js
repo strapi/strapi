@@ -15,7 +15,13 @@ const EmptyRole = () => {
       <Padded top bottom size="md">
         <Flex justifyContent="center">
           <Text fontSize="lg" fontWeight="bold">
-            {formatMessage({ id: 'Roles.components.List.empty.withSearch' }, { search })}
+            {formatMessage(
+              {
+                id: 'Roles.components.List.empty.withSearch',
+                defaultMessage: 'There is no role corresponding to the search ({search})...',
+              },
+              { search }
+            )}
           </Text>
         </Flex>
       </Padded>

@@ -12,24 +12,28 @@ const PermissionsHeader = () => {
     <Wrapper>
       <Flex>
         <PermissionCheckbox
+          name="create"
           message={formatMessage({
             id: 'Settings.roles.form.permissions.create',
             defaultMessage: 'Create',
           })}
         />
         <PermissionCheckbox
+          name="read"
           message={formatMessage({
             id: 'Settings.roles.form.permissions.read',
             defaultMessage: 'Read',
           })}
         />
         <PermissionCheckbox
+          name="update"
           message={formatMessage({
             id: 'Settings.roles.form.permissions.update',
             defaultMessage: 'Update',
           })}
         />
         <PermissionCheckbox
+          name="delete"
           message={formatMessage({
             id: 'Settings.roles.form.permissions.delete',
             defaultMessage: 'Delete',

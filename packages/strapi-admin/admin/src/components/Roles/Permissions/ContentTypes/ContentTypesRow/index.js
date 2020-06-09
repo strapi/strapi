@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox, Flex, Text, Padded } from '@buffetjs/core';
+
+import { getAttributesToDisplay } from '../../../../../utils';
 import Chevron from './Chevron';
 import PermissionCheckbox from '../PermissionCheckbox';
 import PermissionName from './PermissionName';
@@ -21,13 +23,17 @@ const ContentTypeRow = ({
     openContentTypeAttributes(contentType.name);
   };
 
+  const attributesToDisplay = useMemo(() => {
+    return getAttributesToDisplay(contentType);
+  }, [contentType]);
+
   return (
     <>
       <StyledRow isActive={isActive} isGrey={index % 2 === 0}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
           <PermissionName>
-            <Checkbox someChecked />
+            <Checkbox name={contentType.name} someChecked />
             <CollapseLabel
               title={contentType.name}
               alignItems="center"
@@ -47,14 +53,14 @@ const ContentTypeRow = ({
             </CollapseLabel>
           </PermissionName>
           <PermissionWrapper>
-            <PermissionCheckbox />
-            <PermissionCheckbox />
-            <PermissionCheckbox />
-            <PermissionCheckbox />
+            <PermissionCheckbox name={`${contentType.name}-create`} />
+            <PermissionCheckbox name={`${contentType.name}-read`} />
+            <PermissionCheckbox name={`${contentType.name}-update`} />
+            <PermissionCheckbox name={`${contentType.name}-delete`} />
           </PermissionWrapper>
         </Flex>
       </StyledRow>
-      {isActive && <Attributes attributes={contentType.schema.attributes} />}
+      {isActive && <Attributes attributes={attributesToDisplay} />}
     </>
   );
 };

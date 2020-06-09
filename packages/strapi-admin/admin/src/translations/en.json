@@ -285,7 +285,7 @@
   "Settings.roles.title.singular": "role",
   "Settings.roles.list.title.singular": "{number} role",
   "Settings.roles.list.title.plural": "{number} roles",
-  "Settings.roles.list.description": "This is a very great description that needs to be done.",
+  "Settings.roles.list.description": "List of roles",
   "Settings.webhooks.title": "Webhooks",
   "Settings.webhooks.singular": "webhook",
   "Settings.webhooks.list.description": "Get POST changes notifications.",
