@@ -117,6 +117,12 @@ const registerPermissionActions = () => {
       subCategory: 'assets',
       pluginName: 'upload',
     },
+    {
+      section: 'settings',
+      displayName: 'Can access the Media Library settings page',
+      uid: 'settings.read',
+      category: 'media library',
+    },
   ];
 
   const actionProvider = strapi.admin.services.permission.provider;
