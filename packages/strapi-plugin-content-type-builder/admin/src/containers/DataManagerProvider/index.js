@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, size, chain } from 'lodash';
+import { get, groupBy, set, size } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
@@ -33,13 +33,7 @@ import {
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const {
-    autoReload,
-    currentEnvironment,
-    emitEvent,
-    formatMessage,
-    updatePlugin,
-  } = useGlobalContext();
+  const { autoReload, currentEnvironment, emitEvent, formatMessage, menu } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -436,25 +430,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
     toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
   };
 
-  // Really temporary until menu API
+  // Update the menu using the internal API
   const updateAppMenu = async () => {
-    const requestURL = '/content-manager/content-types';
-
-    try {
-      const { data } = await request(requestURL, { method: 'GET' });
-
-      updatePlugin(
-        'content-manager',
-        'leftMenuSections',
-        chain(data)
-          .groupBy('schema.kind')
-          .map((value, key) => ({ name: key, links: value }))
-          .sortBy('name')
-          .value()
-      );
-    } catch (err) {
-      console.error({ err });
-      strapi.notification.error('notification.error');
+    if (menu.getModels) {
+      await menu.getModels();
     }
   };
 

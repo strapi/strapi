@@ -4,30 +4,43 @@
  *
  */
 
-import React, { useContext, useEffect, useMemo, useReducer } from 'react';
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useReducer,
+} from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
-import { UserContext, hasPermissions } from 'strapi-helper-plugin';
+
+import { UserContext, hasPermissions, request } from 'strapi-helper-plugin';
 import {
   LeftMenuLinksSection,
   LeftMenuFooter,
   LeftMenuHeader,
-  LeftMenuLinkContainer,
   LinksContainer,
 } from '../../components/LeftMenu';
+import { generateModelsLinks } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
 
-const LeftMenu = ({ version, plugins }) => {
+const LeftMenu = forwardRef(({ version, plugins }, ref) => {
   const location = useLocation();
   const permissions = useContext(UserContext);
-  const [{ generalSectionLinks, isLoading, pluginsSectionLinks }, dispatch] = useReducer(
-    reducer,
-    initialState,
-    () => init(initialState, plugins)
-  );
+  const [
+    {
+      collectionTypesSectionLinks,
+      generalSectionLinks,
+      isLoading,
+      pluginsSectionLinks,
+      singleTypesSectionLinks,
+    },
+    dispatch,
+  ] = useReducer(reducer, initialState, () => init(initialState, plugins));
   const generalSectionLinksFiltered = useMemo(
     () => generalSectionLinks.filter(link => link.isDisplayed),
     [generalSectionLinks]
@@ -36,6 +49,40 @@ const LeftMenu = ({ version, plugins }) => {
     () => pluginsSectionLinks.filter(link => link.isDisplayed),
     [pluginsSectionLinks]
   );
+
+  const singleTypesSectionLinksFiltered = useMemo(
+    () => singleTypesSectionLinks.filter(link => link.isDisplayed),
+    [singleTypesSectionLinks]
+  );
+  const collectTypesSectionLinksFiltered = useMemo(
+    () => collectionTypesSectionLinks.filter(link => link.isDisplayed),
+    [collectionTypesSectionLinks]
+  );
+
+  const getModels = async () => {
+    const requestURL = '/content-manager/content-types';
+
+    try {
+      const { data } = await request(requestURL, { method: 'GET' });
+      const formattedData = generateModelsLinks(data);
+
+      // TODO maybe we should display a loader while permissions are being checked
+      dispatch({
+        type: 'GET_MODELS_SUCCEEDED',
+        data: formattedData,
+      });
+    } catch (err) {
+      console.log(err);
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  // Make the getModels method available for all the other plugins
+  // So they can regenerate the menu when they need
+  // It's specially used in the content type builder
+  useImperativeHandle(ref, () => ({
+    getModels,
+  }));
 
   useEffect(() => {
     const getLinksPermissions = async () => {
@@ -50,6 +97,9 @@ const LeftMenu = ({ version, plugins }) => {
 
       const generalSectionLinksArrayOfPromises = generateArrayOfPromises(generalSectionLinks);
       const pluginsSectionLinksArrayOfPromises = generateArrayOfPromises(pluginsSectionLinks);
+
+      await getModels();
+      // TODO check permissions form models
 
       const generalSectionResults = await Promise.all(generalSectionLinksArrayOfPromises);
       const pluginsSectionResults = await Promise.all(pluginsSectionLinksArrayOfPromises);
@@ -76,7 +126,24 @@ const LeftMenu = ({ version, plugins }) => {
       <Loader show={isLoading} />
       <LeftMenuHeader />
       <LinksContainer>
-        <LeftMenuLinkContainer plugins={plugins} />
+        {collectTypesSectionLinksFiltered.length && (
+          <LeftMenuLinksSection
+            section="collectionType"
+            name="collectionType"
+            links={collectTypesSectionLinksFiltered}
+            location={location}
+            searchable
+          />
+        )}
+        {singleTypesSectionLinksFiltered.length && (
+          <LeftMenuLinksSection
+            section="singleType"
+            name="singleType"
+            links={singleTypesSectionLinksFiltered}
+            location={location}
+            searchable
+          />
+        )}
         <LeftMenuLinksSection
           section="plugins"
           name="plugins"
@@ -98,7 +165,7 @@ const LeftMenu = ({ version, plugins }) => {
       <LeftMenuFooter key="footer" version={version} />
     </Wrapper>
   );
-};
+});
 
 LeftMenu.propTypes = {
   version: PropTypes.string.isRequired,

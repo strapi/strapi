@@ -4,6 +4,7 @@ import { set } from 'lodash';
 import { SETTINGS_BASE_URL } from '../../config';
 
 const initialState = {
+  collectionTypesSectionLinks: [],
   generalSectionLinks: [
     {
       icon: 'list',
@@ -50,6 +51,7 @@ const initialState = {
       ],
     },
   ],
+  singleTypesSectionLinks: [],
   pluginsSectionLinks: [],
   isLoading: true,
 };
@@ -57,6 +59,12 @@ const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'GET_MODELS_SUCCEEDED': {
+        Object.keys(action.data).forEach(modelType => {
+          set(draftState, [modelType], action.data[modelType]);
+        });
+        break;
+      }
       case 'SET_LINK_PERMISSIONS': {
         Object.keys(action.data).forEach(sectionName => {
           const sectionData = action.data[sectionName];

@@ -27,17 +27,6 @@ const LeftMenuLinksSection = ({
     'label'
   );
 
-  const getLinkDestination = link => {
-    if (['plugins', 'general'].includes(section)) {
-      return link.destination;
-    }
-    if (link.schema && link.schema.kind) {
-      return `/plugins/${link.plugin}/${link.schema.kind}/${link.destination || link.uid}`;
-    }
-
-    return `/plugins/${link.plugin}/${link.destination || link.uid}`;
-  };
-
   return (
     <>
       <LeftMenuLinkHeader
@@ -56,7 +45,7 @@ const LeftMenuLinksSection = ({
               key={index}
               iconName={link.icon}
               label={link.label}
-              destination={getLinkDestination(link)}
+              destination={link.destination}
             />
           ))
         ) : (
