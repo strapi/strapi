@@ -62,10 +62,7 @@
     "strapi-generate-plugin": "3.0.1",
     "strapi-generate-policy": "3.0.1",
     "strapi-generate-service": "3.0.1",
-    "strapi-utils": "3.0.1",
-    "ts-node": "^8.10.2",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.9.3"
+    "strapi-utils": "3.0.1"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js"
@@ -136,9 +133,5 @@
     "lernajs",
     "react",
     "reactjs"
-  ],
-  "devDependencies": {
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.3"
-  }
+  ]
 }

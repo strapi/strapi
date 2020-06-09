@@ -4,10 +4,11 @@
   "version": "3.0.1",
   "description": "A Strapi application.",
   "scripts": {
-    "develop": "strapi develop --typescript",
-    "start": "strapi start --typescript",
+    "develop": "NODE_OPTIONS=\"--require ts-node/register --require tsconfig-paths/register\" strapi develop",
+    "start": "strapi start",
     "build": "strapi build",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "typescript-compile": "tsc -p ./tsconfig.json  --listEmittedFiles --extendedDiagnostics"
   },
   "dependencies": {
     "knex": "^0.20.0",
@@ -30,7 +31,10 @@
     "strapi-provider-email-mailgun": "3.0.1",
     "strapi-provider-upload-aws-s3": "3.0.0",
     "strapi-provider-upload-cloudinary": "3.0.0",
-    "strapi-utils": "3.0.1"
+    "strapi-utils": "3.0.1",
+    "ts-node": "^8.10.2",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^3.9.3"
   },
   "strapi": {
     "uuid": "getstarted"

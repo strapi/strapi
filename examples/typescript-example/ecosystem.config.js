@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'strapi-getstarted',
+      name: 'strapi-typescript-example',
       script: 'npm',
       args: 'start',
       env: {

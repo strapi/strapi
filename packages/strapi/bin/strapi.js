@@ -118,7 +118,6 @@ program
 // `$ strapi start`
 program
   .command('start')
-  .option('--typescript', 'Enable TypeScript', false)
   .description('Start your Strapi application')
   .action(getLocalScript('start'));
 
@@ -128,7 +127,6 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build', false)
   .option('--watch-admin', 'Enable watch', true)
-  .option('--typescript', 'Enable TypeScript', false)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
