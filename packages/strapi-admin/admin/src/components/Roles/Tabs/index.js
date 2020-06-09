@@ -33,7 +33,7 @@ const Tabs = ({ children, isLoading, tabsLabel }) => {
                 onClick={() => handleSelectedTab(index)}
               >
                 <Text fontWeight={index === selectedTabIndex ? 'bold' : 'semiBold'}>
-                  {formatMessage(tab)}
+                  {formatMessage({ id: tab.labelId, defaultMessage: tab.defaultMessage })}
                 </Text>
               </Tab>
             ))}

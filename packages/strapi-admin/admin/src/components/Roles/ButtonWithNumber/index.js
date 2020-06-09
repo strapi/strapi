@@ -23,8 +23,11 @@ const ButtonWithNumber = ({ number, onClick }) => (
   </Button>
 );
 
+ButtonWithNumber.defaultProps = {
+  number: 0,
+};
 ButtonWithNumber.propTypes = {
-  number: PropTypes.number.isRequired,
+  number: PropTypes.number,
   onClick: PropTypes.func.isRequired,
 };
 

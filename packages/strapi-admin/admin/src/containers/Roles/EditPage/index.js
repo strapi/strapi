@@ -35,6 +35,7 @@ const EditPage = () => {
           {
             label: formatMessage({
               id: 'app.components.Button.reset',
+              defaultMessage: 'Reset',
             }),
             onClick: handleReset,
             color: 'cancel',
@@ -43,6 +44,7 @@ const EditPage = () => {
           {
             label: formatMessage({
               id: 'app.components.Button.save',
+              defaultMessage: 'Save',
             }),
             onClick: handleSubmit,
             color: 'success',
@@ -94,10 +96,12 @@ const EditPage = () => {
                 label: formatMessage({
                   // TODO change trad
                   id: 'Settings.roles.edit.title',
+                  defaultMessage: 'Edit a role',
                 }),
               }}
               content={formatMessage({
                 id: 'Settings.roles.create.description',
+                defaultMessage: 'Define the rights given to the role',
               })}
               actions={headerActions(handleSubmit, handleReset)}
               isLoading={isLayoutLoading || isRoleLoading}

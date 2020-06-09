@@ -21,7 +21,7 @@ const AttributeRow = ({ attribute }) => {
       <Flex style={{ flex: 1 }}>
         <Padded left size="sm" />
         <PermissionName width="15rem">
-          <Checkbox someChecked />
+          <Checkbox name={attribute.attributeName} someChecked />
           <CollapseLabel
             title={attribute.attributeName}
             alignItems="center"
@@ -41,9 +41,9 @@ const AttributeRow = ({ attribute }) => {
           </CollapseLabel>
         </PermissionName>
         <PermissionWrapper>
-          <PermissionCheckbox />
-          <PermissionCheckbox />
-          <PermissionCheckbox />
+          <PermissionCheckbox name={`${attribute.attributeName}-create`} />
+          <PermissionCheckbox name={`${attribute.attributeName}-read`} />
+          <PermissionCheckbox name={`${attribute.attributeName}-update`} />
         </PermissionWrapper>
       </Flex>
     </AttributeRowWrapper>

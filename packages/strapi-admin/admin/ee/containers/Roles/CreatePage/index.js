@@ -25,6 +25,7 @@ const CreatePage = () => {
     {
       label: formatMessage({
         id: 'app.components.Button.reset',
+        defaultMessage: 'Reset',
       }),
       onClick: handleReset,
       color: 'cancel',
@@ -33,6 +34,7 @@ const CreatePage = () => {
     {
       label: formatMessage({
         id: 'app.components.Button.save',
+        defaultMessage: 'Save',
       }),
       onClick: handleSubmit,
       color: 'success',
@@ -67,6 +69,7 @@ const CreatePage = () => {
     <ButtonWithNumber number={0} onClick={() => console.log('Open user modal')} key="user-button">
       {formatMessage({
         id: 'Settings.roles.form.button.users-with-role',
+        defaultMessage: 'Users with this role',
       })}
     </ButtonWithNumber>,
   ];
@@ -84,10 +87,12 @@ const CreatePage = () => {
               title={{
                 label: formatMessage({
                   id: 'Settings.roles.create.title',
+                  defaultMessage: 'Create a role',
                 }),
               }}
               content={formatMessage({
                 id: 'Settings.roles.create.description',
+                defaultMessage: 'Define the rights given to the role',
               })}
               actions={headerActions(handleSubmit, handleReset)}
               isLoading={isLayoutLoading}
@@ -97,13 +102,16 @@ const CreatePage = () => {
               actions={actions}
               title={formatMessage({
                 id: 'Settings.roles.form.title',
+                defaultMessage: 'Details',
               })}
               subtitle={formatMessage({
                 id: 'Settings.roles.form.description',
+                defaultMessage: 'Name and description of the role',
               })}
             >
               <SizedInput
-                label="Name"
+                label="Settings.roles.form.input.name"
+                defaultMessage="Name"
                 name="name"
                 type="text"
                 error={errors.name ? { id: errors.name } : null}
@@ -113,7 +121,8 @@ const CreatePage = () => {
               />
 
               <SizedInput
-                label="Description"
+                label="Settings.roles.form.input.description"
+                defaultMessage="Description"
                 name="description"
                 type="textarea"
                 onBlur={handleBlur}

@@ -39,7 +39,7 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
     });
   });
 
-  describe('GET_DATA', () => {
+  describe('GET_CONTENT_TYPES', () => {
     it('should set isLoading to true to start getting the data', () => {
       const action = {
         type: 'GET_CONTENT_TYPES',

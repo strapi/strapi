@@ -38,10 +38,12 @@ const RoleListPage = () => {
         title={{
           label: formatMessage({
             id: 'Settings.roles.title',
+            defaultMessage: 'roles',
           }),
         }}
         content={formatMessage({
           id: 'Settings.roles.list.description',
+          defaultMessage: 'List of roles',
         })}
       />
       <BaselineAlignment />
