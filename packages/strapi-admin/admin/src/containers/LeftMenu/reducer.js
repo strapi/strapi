@@ -47,9 +47,7 @@ const initialState = {
         { action: 'admin::roles.read', subject: null },
         { action: 'admin::roles.delete', subject: null },
         // media library
-        { action: 'plugins::upload.read', subject: null },
-        { action: 'plugins::upload.assets.create', subject: null },
-        { action: 'plugins::upload.assets.update', subject: null },
+        { action: 'plugins::upload.settings.read', subject: null },
       ],
     },
   ],
