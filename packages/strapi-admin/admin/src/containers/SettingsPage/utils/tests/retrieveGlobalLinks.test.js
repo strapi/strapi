@@ -10,18 +10,22 @@ describe('ADMIN | containers | SettingsPage | utils', () => {
       const plugins = {
         test: {
           settings: {
-            global: [],
+            global: {
+              links: [],
+            },
           },
         },
         noSettings: {},
         foo: {
           settings: {
-            global: ['test'],
+            global: {
+              links: ['test'],
+            },
           },
         },
         bar: {
           settings: {
-            global: ['test2'],
+            global: { links: ['test2'] },
           },
         },
       };
