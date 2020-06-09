@@ -2,7 +2,6 @@
 
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const expectedPermissions = require('./permissions');
 
 let rq;
 
@@ -19,6 +18,6 @@ describe('Role CRUD End to End', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject(expectedPermissions);
+    expect(res.body.data).toMatchSnapshot();
   });
 });

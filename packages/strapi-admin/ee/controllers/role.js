@@ -5,7 +5,7 @@ const {
   validateRoleUpdateInput,
   validateRoleDeleteInput,
 } = require('../validation/role');
-const { validatedUpdatePermissionsInput } = require('../../validation/permission');
+const { validatedUpdatePermissionsInput } = require('../validation/permission');
 
 module.exports = {
   /**

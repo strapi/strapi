@@ -10,31 +10,7 @@ const {
 const contentTypeService = require('../../services/ContentTypes');
 const componentService = require('../../services/Components');
 
-/**
- * Synchronize content manager schemas
- */
-module.exports = () => {
-  return syncSchemas();
-};
-
-async function syncSchemas() {
-  await syncContentTypesSchemas();
-  await syncComponentsSchemas();
-  registerPermissions();
-}
-
-/**
- * Sync content types schemas
- */
-async function syncContentTypesSchemas() {
-  const configurations = await storeUtils.findByKey(
-    'plugin_content_manager_configuration_content_types'
-  );
-
-  await updateContentTypes(configurations);
-}
-
-async function updateContentTypes(configurations) {
+const updateContentTypes = async configurations => {
   const updateConfiguration = async uid => {
     const conf = configurations.find(conf => conf.uid === uid);
 
@@ -66,12 +42,17 @@ async function updateContentTypes(configurations) {
 
   // update current schemas
   await Promise.all(contentTypesToUpdate.map(uid => updateConfiguration(uid)));
-}
+};
 
-/**
- * sync components schemas
- */
-async function syncComponentsSchemas() {
+const syncContentTypesSchemas = async () => {
+  const configurations = await storeUtils.findByKey(
+    'plugin_content_manager_configuration_content_types'
+  );
+
+  await updateContentTypes(configurations);
+};
+
+const syncComponentsSchemas = async () => {
   const updateConfiguration = async uid => {
     const conf = configurations.find(conf => conf.uid === uid);
 
@@ -106,9 +87,9 @@ async function syncComponentsSchemas() {
 
   // update current schemas
   await Promise.all(componentsToUpdate.map(uid => updateConfiguration(uid)));
-}
+};
 
-function registerPermissions() {
+const registerPermissions = () => {
   const contentTypesUids = strapi.plugins[
     'content-manager'
   ].services.contenttypes.getDisplayedContentTypesUids();
@@ -167,4 +148,10 @@ function registerPermissions() {
 
   const actionProvider = strapi.admin.services.permission.provider;
   actionProvider.register(actions);
-}
+};
+
+module.exports = async () => {
+  await syncContentTypesSchemas();
+  await syncComponentsSchemas();
+  registerPermissions();
+};

@@ -22,10 +22,10 @@ const getActionId = ({ pluginName, uid }) => {
   let id = '';
   if (pluginName === 'admin') {
     id = `admin::${uid}`;
-  } else if (_.isNil(pluginName)) {
-    id = `plugins::application.${uid}`;
-  } else {
+  } else if (pluginName) {
     id = `plugins::${pluginName}.${uid}`;
+  } else {
+    id = `application::${uid}`;
   }
   return id;
 };
