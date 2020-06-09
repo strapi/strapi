@@ -17,11 +17,13 @@ import pluginId from './pluginId';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+  const icon = pluginPkg.strapi.icon;
+  const name = pluginPkg.strapi.name;
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
+    icon,
     id: pluginId,
     initializer: Initializer,
     injectedComponents: [
@@ -50,10 +52,24 @@ export default strapi => {
     leftMenuLinks: [],
     leftMenuSections: [],
     mainComponent: App,
-    name: pluginPkg.strapi.name,
+    name,
     pluginLogo,
     preventComponentRendering: false,
     trads,
+    menu: {
+      pluginsSectionLinks: [
+        {
+          destination: `/plugins/${pluginId}`,
+          icon,
+          label: {
+            id: `${pluginId}.plugin.name`,
+            defaultMessage: 'Content-Types Builder',
+          },
+          name,
+          permissions: [{ action: 'plugins::content-type-builder.read', subject: null }],
+        },
+      ],
+    },
   };
 
   return strapi.registerPlugin(plugin);

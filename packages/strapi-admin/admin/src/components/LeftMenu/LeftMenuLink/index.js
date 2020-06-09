@@ -5,29 +5,11 @@
  */
 
 import React from 'react';
-import { upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 
 import LeftMenuLinkContent from './LeftMenuLinkContent';
-import Plugin from './Plugin';
 
-const LeftMenuLink = ({
-  destination,
-  iconName,
-  label,
-  location,
-  source,
-  suffixUrlToReplaceForLeftMenuHighlight,
-}) => {
-  const plugin =
-    source !== 'content-manager' && source !== '' ? (
-      <Plugin>
-        <span>{upperFirst(source.split('-').join(' '))}</span>
-      </Plugin>
-    ) : (
-      ''
-    );
-
+const LeftMenuLink = ({ destination, iconName, label, location }) => {
   return (
     <>
       <LeftMenuLinkContent
@@ -35,10 +17,7 @@ const LeftMenuLink = ({
         iconName={iconName}
         label={label}
         location={location}
-        source={source}
-        suffixUrlToReplaceForLeftMenuHighlight={suffixUrlToReplaceForLeftMenuHighlight}
       />
-      {plugin}
     </>
   );
 };
@@ -46,18 +25,14 @@ const LeftMenuLink = ({
 LeftMenuLink.propTypes = {
   destination: PropTypes.string.isRequired,
   iconName: PropTypes.string,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
-  source: PropTypes.string,
-  suffixUrlToReplaceForLeftMenuHighlight: PropTypes.string,
 };
 
 LeftMenuLink.defaultProps = {
   iconName: 'circle',
-  source: '',
-  suffixUrlToReplaceForLeftMenuHighlight: '',
 };
 
 export default LeftMenuLink;

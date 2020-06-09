@@ -22,34 +22,29 @@ const LinkLabel = styled.span`
   padding-left: 2.5rem;
 `;
 
-const LeftMenuLinkContent = ({
-  destination,
-  iconName,
-  label,
-  location,
-  source,
-  suffixUrlToReplaceForLeftMenuHighlight,
-}) => {
+// TODO: refacto this file
+const LeftMenuLinkContent = ({ destination, iconName, label, location }) => {
   const isLinkActive = startsWith(
     location.pathname.replace('/admin', '').concat('/'),
-
-    destination.replace(suffixUrlToReplaceForLeftMenuHighlight, '').concat('/')
+    destination.concat('/')
   );
 
   // Check if messageId exists in en locale to prevent warning messages
-  const content = en[label] ? (
-    <FormattedMessage
-      id={label}
-      defaultMessage="{label}"
-      values={{
-        label: `${label}`,
-      }}
-    >
-      {message => <LinkLabel>{message}</LinkLabel>}
-    </FormattedMessage>
-  ) : (
-    <LinkLabel>{label}</LinkLabel>
-  );
+  const labelId = label.id || label;
+  const content =
+    en[labelId] || label.defaultMessage ? (
+      <FormattedMessage
+        id={labelId}
+        defaultMessage={label.defaultMessage || '{label}'}
+        values={{
+          label: `${label.id || label}`,
+        }}
+      >
+        {message => <LinkLabel>{message}</LinkLabel>}
+      </FormattedMessage>
+    ) : (
+      <LinkLabel>{labelId}</LinkLabel>
+    );
 
   // Create external or internal link.
   return destination.includes('http') ? (
@@ -68,7 +63,6 @@ const LeftMenuLinkContent = ({
       className={isLinkActive ? 'linkActive' : ''}
       to={{
         pathname: destination,
-        search: source ? `?source=${source}` : '',
       }}
     >
       <LeftMenuIcon icon={iconName} />
@@ -80,17 +74,10 @@ const LeftMenuLinkContent = ({
 LeftMenuLinkContent.propTypes = {
   destination: PropTypes.string.isRequired,
   iconName: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
-  source: PropTypes.string,
-  suffixUrlToReplaceForLeftMenuHighlight: PropTypes.string,
-};
-
-LeftMenuLinkContent.defaultProps = {
-  source: '',
-  suffixUrlToReplaceForLeftMenuHighlight: '',
 };
 
 export default withRouter(LeftMenuLinkContent);

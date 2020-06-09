@@ -62,23 +62,59 @@ describe('ADMIN | LeftMenu | reducer', () => {
             permissions: [],
           },
         ],
+        pluginsSectionLinks: [
+          {
+            destination: '/plugins/content-type-builder',
+            icon: 'paint-brush',
+            isDisplayed: false,
+            label: {
+              id: 'content-type-builder.plugin.name',
+              defaultMessage: 'Content-Types Builder',
+            },
+            permissions: [
+              {
+                action: 'plugins::content-type-builder.read',
+                subject: null,
+              },
+            ],
+          },
+          {
+            destination: '/plugins/documentation',
+            icon: 'book',
+            isDisplayed: false,
+            label: { id: 'documentation.plugin.name', defaultMessage: 'Documentation' },
+            permissions: [
+              { action: 'plugins::documentation.read', subject: null },
+              { action: 'plugins::documentation.regenerate', subject: null },
+              { action: 'plugins::documentation.update', subject: null },
+            ],
+          },
+        ],
       };
       const action = {
         type: 'SET_LINK_PERMISSIONS',
-        results: [
-          {
-            index: 1,
-            hasPermission: true,
-          },
-          {
-            index: 0,
-            hasPermission: false,
-          },
-          {
-            index: 2,
-            hasPermission: true,
-          },
-        ],
+        data: {
+          generalSectionLinks: [
+            {
+              index: 1,
+              hasPermission: true,
+            },
+            {
+              index: 0,
+              hasPermission: false,
+            },
+            {
+              index: 2,
+              hasPermission: true,
+            },
+          ],
+          pluginsSectionLinks: [
+            {
+              index: 0,
+              hasPermission: true,
+            },
+          ],
+        },
       };
 
       const expected = {
@@ -110,6 +146,34 @@ describe('ADMIN | LeftMenu | reducer', () => {
             isDisplayed: true,
             destination: '/test',
             permissions: [],
+          },
+        ],
+        pluginsSectionLinks: [
+          {
+            destination: '/plugins/content-type-builder',
+            icon: 'paint-brush',
+            isDisplayed: true,
+            label: {
+              id: 'content-type-builder.plugin.name',
+              defaultMessage: 'Content-Types Builder',
+            },
+            permissions: [
+              {
+                action: 'plugins::content-type-builder.read',
+                subject: null,
+              },
+            ],
+          },
+          {
+            destination: '/plugins/documentation',
+            icon: 'book',
+            isDisplayed: false,
+            label: { id: 'documentation.plugin.name', defaultMessage: 'Documentation' },
+            permissions: [
+              { action: 'plugins::documentation.read', subject: null },
+              { action: 'plugins::documentation.regenerate', subject: null },
+              { action: 'plugins::documentation.update', subject: null },
+            ],
           },
         ],
       };

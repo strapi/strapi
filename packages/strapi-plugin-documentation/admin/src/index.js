@@ -16,11 +16,13 @@ import trads from './translations';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+  const icon = pluginPkg.strapi.icon;
+  const name = pluginPkg.strapi.name;
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
+    icon,
     id: pluginId,
     initializer: Initializer,
     injectedComponents: [],
@@ -31,11 +33,29 @@ export default strapi => {
     leftMenuLinks: [],
     leftMenuSections: [],
     mainComponent: App,
-    name: pluginPkg.strapi.name,
+    name,
     pluginLogo,
     preventComponentRendering: false,
     reducers,
     trads,
+    menu: {
+      pluginsSectionLinks: [
+        {
+          destination: `/plugins/${pluginId}`,
+          icon,
+          label: {
+            id: `${pluginId}.plugin.name`,
+            defaultMessage: 'Documentation',
+          },
+          name,
+          permissions: [
+            { action: 'plugins::documentation.read', subject: null },
+            { action: 'plugins::documentation.regenerate', subject: null },
+            { action: 'plugins::documentation.update', subject: null },
+          ],
+        },
+      ],
+    },
   };
 
   return strapi.registerPlugin(plugin);

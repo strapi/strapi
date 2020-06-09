@@ -46,11 +46,14 @@ const initialState = {
         { action: 'admin::roles.update', subject: null },
         { action: 'admin::roles.read', subject: null },
         { action: 'admin::roles.delete', subject: null },
+
+        // TODO this should be set by the plugin directly
         // media library
         { action: 'plugins::upload.settings.read', subject: null },
       ],
     },
   ],
+  pluginsSectionLinks: [],
   isLoading: true,
 };
 
@@ -58,12 +61,12 @@ const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'SET_LINK_PERMISSIONS': {
-        action.results.forEach(result => {
-          set(
-            draftState,
-            ['generalSectionLinks', result.index, 'isDisplayed'],
-            result.hasPermission
-          );
+        Object.keys(action.data).forEach(sectionName => {
+          const sectionData = action.data[sectionName];
+
+          sectionData.forEach(result => {
+            set(draftState, [sectionName, result.index, 'isDisplayed'], result.hasPermission);
+          });
         });
         break;
       }

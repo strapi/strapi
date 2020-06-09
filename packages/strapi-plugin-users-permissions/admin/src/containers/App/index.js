@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Redirect, Route, useRouteMatch } from 'react-router-dom';
 import { NotFound } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
@@ -14,6 +14,13 @@ import EditPage from '../EditPage';
 import HomePage from '../HomePage';
 
 const App = () => {
+  const settingType = useRouteMatch(`/plugins/${pluginId}/:settingType`);
+
+  // Todo check if the settingType is allowed
+  if (!settingType) {
+    return <Redirect to={`/plugins/${pluginId}/roles`} />;
+  }
+
   return (
     <div className={pluginId}>
       <Switch>
@@ -22,11 +29,7 @@ const App = () => {
           component={EditPage}
           exact
         />
-        <Route
-          path={`/plugins/${pluginId}/:settingType`}
-          component={HomePage}
-          exact
-        />
+        <Route path={`/plugins/${pluginId}/:settingType`} component={HomePage} exact />
         <Route component={NotFound} />
       </Switch>
     </div>

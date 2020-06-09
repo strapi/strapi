@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useMemo, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import { UserContext, hasPermissions } from 'strapi-helper-plugin';
@@ -15,6 +15,7 @@ import {
   LeftMenuLinkContainer,
   LinksContainer,
 } from '../../components/LeftMenu';
+import init from './init';
 import reducer, { initialState } from './reducer';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
@@ -22,8 +23,21 @@ import Wrapper from './Wrapper';
 const LeftMenu = ({ version, plugins }) => {
   const location = useLocation();
   const permissions = useContext(UserContext);
-  const [{ generalSectionLinks, isLoading }, dispatch] = useReducer(reducer, initialState);
-  const filteredLinks = generalSectionLinks.filter(link => link.isDisplayed);
+  const [{ generalSectionLinks, isLoading, pluginsSectionLinks }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    () => init(initialState, plugins)
+  );
+  const generalSectionLinksFiltered = useMemo(
+    () => generalSectionLinks.filter(link => link.isDisplayed),
+    [generalSectionLinks]
+  );
+  const pluginsSectionLinksFiltered = useMemo(
+    () => pluginsSectionLinks.filter(link => link.isDisplayed),
+    [pluginsSectionLinks]
+  );
+
+  console.log(pluginsSectionLinks);
 
   useEffect(() => {
     const getLinksPermissions = async () => {
@@ -33,15 +47,21 @@ const LeftMenu = ({ version, plugins }) => {
         return { index, hasPermission };
       };
 
-      const generalSectionLinksArrayOfPromises = generalSectionLinks.map((_, index) =>
-        checkPermissions(index, generalSectionLinks[index].permissions)
-      );
+      const generateArrayOfPromises = array =>
+        array.map((_, index) => checkPermissions(index, array[index].permissions));
 
-      const results = await Promise.all(generalSectionLinksArrayOfPromises);
+      const generalSectionLinksArrayOfPromises = generateArrayOfPromises(generalSectionLinks);
+      const pluginsSectionLinksArrayOfPromises = generateArrayOfPromises(pluginsSectionLinks);
+
+      const generalSectionResults = await Promise.all(generalSectionLinksArrayOfPromises);
+      const pluginsSectionResults = await Promise.all(pluginsSectionLinksArrayOfPromises);
 
       dispatch({
         type: 'SET_LINK_PERMISSIONS',
-        results,
+        data: {
+          generalSectionLinks: generalSectionResults,
+          pluginsSectionLinks: pluginsSectionResults,
+        },
       });
 
       dispatch({
@@ -59,11 +79,19 @@ const LeftMenu = ({ version, plugins }) => {
       <LeftMenuHeader />
       <LinksContainer>
         <LeftMenuLinkContainer plugins={plugins} />
-        {filteredLinks.length && (
+        <LeftMenuLinksSection
+          section="plugins"
+          name="plugins"
+          links={pluginsSectionLinksFiltered}
+          location={location}
+          searchable={false}
+          emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
+        />
+        {generalSectionLinksFiltered.length && (
           <LeftMenuLinksSection
             section="general"
             name="general"
-            links={filteredLinks}
+            links={generalSectionLinksFiltered}
             location={location}
             searchable={false}
           />
