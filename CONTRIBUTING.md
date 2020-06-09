@@ -26,6 +26,10 @@ Before contributing, you will probably have to create a RFC on this [strapi/rfcs
 
 This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
+## Documentation
+
+Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation branch](https://github.com/strapi/strapi/tree/documentation) **not** towards the master branch. Any PRs made towards the master branch will not be released until the next Strapi version release.
+
 ## Bugs
 
 We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filing a new issue, try to make sure the problem does not already exist.
