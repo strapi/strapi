@@ -1,23 +1,3 @@
-import React from 'react';
-import { createPortal } from 'react-dom';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-
-// No need to create a component here
-const Wrapper = styled.div`
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1140;
-  /* This color is not in the theme */
-  background: #fff;
-`;
-
-const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
-
 /*
  *
  * This component is used to show a global loader while permissions are being checked
@@ -26,12 +6,20 @@ const MOUNT_NODE = document.getElementById('app') || document.createElement('div
  *
  */
 
+import React from 'react';
+import { createPortal } from 'react-dom';
+import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import PropTypes from 'prop-types';
+import LoaderWrapper from './LoaderWrapper';
+
+const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
+
 const Loader = ({ show }) => {
   if (show) {
     return createPortal(
-      <Wrapper>
+      <LoaderWrapper>
         <LoadingIndicatorPage />
-      </Wrapper>,
+      </LoaderWrapper>,
       MOUNT_NODE
     );
   }

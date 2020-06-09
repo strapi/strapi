@@ -29,7 +29,7 @@ describe('ADMIN | LeftMenu | reducer', () => {
     });
   });
 
-  describe('SET_LINK_PERMISSION', () => {
+  describe('SET_LINK_PERMISSIONS', () => {
     it('should set the isDisplayed property correctly', () => {
       const state = {
         isLoading: true,
@@ -64,9 +64,21 @@ describe('ADMIN | LeftMenu | reducer', () => {
         ],
       };
       const action = {
-        type: 'SET_LINK_PERMISSION',
-        index: 1,
-        hasPermission: true,
+        type: 'SET_LINK_PERMISSIONS',
+        results: [
+          {
+            index: 1,
+            hasPermission: true,
+          },
+          {
+            index: 0,
+            hasPermission: false,
+          },
+          {
+            index: 2,
+            hasPermission: true,
+          },
+        ],
       };
 
       const expected = {
@@ -95,7 +107,7 @@ describe('ADMIN | LeftMenu | reducer', () => {
           {
             icon: 'cog',
             label: 'app.components.LeftMenuLinkContainer.settings',
-            isDisplayed: false,
+            isDisplayed: true,
             destination: '/test',
             permissions: [],
           },
