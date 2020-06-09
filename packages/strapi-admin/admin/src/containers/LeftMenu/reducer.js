@@ -59,8 +59,14 @@ const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'SET_LINK_PERMISSION': {
-        set(draftState, ['generalSectionLinks', action.index, 'isDisplayed'], action.hasPermission);
+      case 'SET_LINK_PERMISSIONS': {
+        action.results.forEach(result => {
+          set(
+            draftState,
+            ['generalSectionLinks', result.index, 'isDisplayed'],
+            result.hasPermission
+          );
+        });
         break;
       }
       case 'TOGGLE_IS_LOADING': {

@@ -7,7 +7,7 @@ const LoaderWrapper = styled.div`
   bottom: 0;
   left: 0;
   z-index: 1140;
-  background: #fff;
+  background: ${({ theme }) => theme.main.colors.white};
 `;
 
 export default LoaderWrapper;

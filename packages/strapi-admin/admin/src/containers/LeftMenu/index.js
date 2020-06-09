@@ -39,11 +39,9 @@ const LeftMenu = ({ version, plugins }) => {
 
       const results = await Promise.all(generalSectionLinksArrayOfPromises);
 
-      results.forEach(result => {
-        dispatch({
-          type: 'SET_LINK_PERMISSION',
-          ...result,
-        });
+      dispatch({
+        type: 'SET_LINK_PERMISSIONS',
+        results,
       });
 
       dispatch({
