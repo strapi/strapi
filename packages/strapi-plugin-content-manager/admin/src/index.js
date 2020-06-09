@@ -43,8 +43,6 @@ export default strapi => {
     pluginLogo,
     preventComponentRendering: false,
     reducers,
-    suffixUrl: () => '/ctm-configurations/models',
-    suffixUrlToReplaceForLeftMenuHighlight: '/models',
     trads,
   };
 

@@ -176,5 +176,6 @@
   "relation.oneToOne": "has and belongs to one",
   "relation.oneWay": "has one",
   "table.attributes.title.plural": "{number} fields",
-  "table.attributes.title.singular": "{number} field"
+  "table.attributes.title.singular": "{number} field",
+  "plugin.name": "Content-Types Builder"
 }

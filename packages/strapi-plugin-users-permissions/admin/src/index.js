@@ -17,12 +17,14 @@ import trads from './translations';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+  const icon = pluginPkg.strapi.icon;
+  const name = pluginPkg.strapi.name;
 
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
+    icon,
     id: pluginId,
     initializer: Initializer,
     injectedComponents: [],
@@ -32,14 +34,35 @@ export default strapi => {
     leftMenuLinks: [],
     leftMenuSections: [],
     mainComponent: App,
-    name: pluginPkg.strapi.name,
+    name,
     pluginLogo,
     preventComponentRendering: false,
     reducers,
     settings: {},
-    suffixUrl: () => '/roles',
-    suffixUrlToReplaceForLeftMenuHighlight: '/roles',
     trads,
+    menu: {
+      pluginsSectionLinks: [
+        {
+          destination: `/plugins/${pluginId}`,
+          icon,
+          label: {
+            id: `${pluginId}.plugin.name`,
+            defaultMessage: 'Roles & Permissions',
+          },
+          name,
+          permissions: [
+            { action: 'plugins::users-permissions.advanced-settings.read', subject: null },
+            { action: 'plugins::users-permissions.advanced-settings.update', subject: null },
+            { action: 'plugins::users-permissions.email-templates.read', subject: null },
+            { action: 'plugins::users-permissions.email-templates.update', subject: null },
+            { action: 'plugins::users-permissions.providers.read', subject: null },
+            { action: 'plugins::users-permissions.providers.update', subject: null },
+            { action: 'plugins::users-permissions.roles.create', subject: null },
+            { action: 'plugins::users-permissions.roles.read', subject: null },
+          ],
+        },
+      ],
+    },
   };
 
   return strapi.registerPlugin(plugin);

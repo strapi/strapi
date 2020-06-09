@@ -4,8 +4,6 @@ import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, snakeCase, isEmpty } from 'lodash';
 
-import messages from './messages.json';
-
 import LeftMenuLinkSection from '../LeftMenuLinkSection';
 
 const LeftMenuLinkContainer = ({ plugins }) => {
@@ -34,29 +32,8 @@ const LeftMenuLinkContainer = ({ plugins }) => {
     return acc;
   }, {});
 
-  // Generate the list of plugin links (plugins without a mainComponent should not appear in the left menu)
-  const pluginsLinks = Object.values(plugins)
-    .filter(
-      plugin => plugin.id !== 'email' && plugin.id !== 'content-manager' && !!plugin.mainComponent
-    )
-    .map(plugin => {
-      const pluginSuffixUrl = plugin.suffixUrl ? plugin.suffixUrl(plugins) : '';
-
-      return {
-        icon: get(plugin, 'icon') || 'plug',
-        label: get(plugin, 'name'),
-        destination: `/plugins/${get(plugin, 'id')}${pluginSuffixUrl}`,
-      };
-    });
-
   const menu = {
     ...contentTypesSections,
-    plugins: {
-      searchable: false,
-      name: 'plugins',
-      emptyLinksListMessage: messages.noPluginsInstalled.id,
-      links: pluginsLinks,
-    },
   };
 
   return Object.keys(menu).map(current => (

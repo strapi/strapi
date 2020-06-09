@@ -214,7 +214,7 @@ export class Admin extends React.Component {
                     exact
                   />
                   <Route key="7" path="" component={NotFoundPage} />
-                  <Route key="8" path="404" component={NotFoundPage} />
+                  <Route key="8" path="/404" component={NotFoundPage} />
                 </Switch>
               </Content>
             </div>
