@@ -1,3 +1,5 @@
+'use strict';
+
 const formatActionsBySections = actions =>
   actions.reduce((result, p) => {
     const checkboxItem = {
