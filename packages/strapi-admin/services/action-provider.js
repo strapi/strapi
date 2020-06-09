@@ -5,7 +5,7 @@ const { yup } = require('strapi-utils');
 const { validateRegisterProviderAction } = require('../validation/action-provider');
 const { getActionId, createAction } = require('../domain/action');
 
-const actionProviderFactory = () => {
+const createActionProvider = () => {
   const actions = new Map();
 
   return {
@@ -60,4 +60,4 @@ const actionProviderFactory = () => {
   };
 };
 
-module.exports = actionProviderFactory();
+module.exports = createActionProvider();
