@@ -10,6 +10,6 @@ module.exports = () => {
     },
   ];
 
-  const actionProvider = strapi.admin.services.permission.provider;
+  const { actionProvider } = strapi.admin.services.permission;
   actionProvider.register(actions);
 };

@@ -78,7 +78,7 @@ const validatedUpdatePermissionsInput = data => {
 // validatePermissionsExist
 
 const checkPermissionsExist = function(permissions) {
-  const existingActions = strapi.admin.services.permission.provider.getAll();
+  const existingActions = strapi.admin.services.permission.actionProvider.getAll();
   const failIndex = permissions.findIndex(
     permission =>
       !existingActions.find(

@@ -146,7 +146,7 @@ const registerPermissions = () => {
     },
   ];
 
-  const actionProvider = strapi.admin.services.permission.provider;
+  const actionProvider = strapi.admin.services.permission.actionProvider;
   actionProvider.register(actions);
 };
 

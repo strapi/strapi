@@ -3,6 +3,11 @@
 const { createPermission } = require('../domain/permission');
 const actionProvider = require('./action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
+const createConditionProvider = require('./permission/condition-provider');
+const createPermissionEngine = require('./permission/engine');
+
+const conditionProvider = createConditionProvider();
+const engine = createPermissionEngine(conditionProvider);
 
 /**
  * Delete permissions of roles in database
@@ -63,5 +68,7 @@ module.exports = {
   deleteByRolesIds,
   deleteByIds,
   assign,
-  provider: actionProvider,
+  actionProvider,
+  engine,
+  conditionProvider,
 };
