@@ -403,8 +403,8 @@ describe('Role CRUD End to End', () => {
         expect(res.body).toMatchObject({
           statusCode: 400,
           error: 'Bad Request',
-          message:
-            'ValidationError\', \'This action doesn\'t exist: {"action":"non.existing.action"}',
+          message: 'ValidationError',
+          data: { permissions: ['[0] is not an existing permission action'] },
         });
       });
 

@@ -2,6 +2,7 @@
 
 const { createPermission } = require('../domain/permission');
 const actionProvider = require('./action-provider');
+const { validatePermissionsExist } = require('../validation/permission');
 
 /**
  * Delete permissions of roles in database
@@ -36,18 +37,10 @@ const find = (params = {}) => {
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
 const assign = async (roleID, permissions = []) => {
-  const existingActions = strapi.admin.services.permission.provider.getAll();
-  for (let permission of permissions) {
-    const actionExists = existingActions.find(
-      ea =>
-        ea.actionId === permission.action &&
-        (ea.section !== 'contentTypes' || ea.subjects.includes(permission.subject))
-    );
-    if (!actionExists) {
-      throw strapi.errors.badRequest(
-        `ValidationError', 'This action doesn't exist: ${JSON.stringify(permission)}`
-      );
-    }
+  try {
+    await validatePermissionsExist(permissions);
+  } catch (err) {
+    throw strapi.errors.badRequest('ValidationError', err);
   }
 
   await strapi.query('permission', 'admin').delete({ role: roleID });

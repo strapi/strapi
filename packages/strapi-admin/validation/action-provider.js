@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup } = require('strapi-utils');
+const validators = require('./common-validators');
 
 const registerProviderActionSchema = yup
   .array()
@@ -23,17 +24,14 @@ const registerProviderActionSchema = yup
           .required(),
         pluginName: yup.mixed().when('section', {
           is: 'plugins',
-          then: yup
-            .string()
-            .isAPluginName()
-            .required(),
-          otherwise: yup.string().isAPluginName(),
+          then: validators.isAPluginName.required(),
+          otherwise: validators.isAPluginName,
         }),
         subjects: yup.mixed().when('section', {
           is: 'contentTypes',
           then: yup
             .array()
-            .of(yup.string().isAContentTypeId())
+            .of(validators.isAContentTypeId)
             .required(),
           otherwise: yup
             .mixed()
