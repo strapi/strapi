@@ -1,3 +1,5 @@
+'use strict';
+
 const adminActions = require('../admin-actions');
 
 const registerPermissionActions = () => {

@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 const { yup } = require('strapi-utils');
 const { validateRegisterProviderAction } = require('../validation/action-provider');
