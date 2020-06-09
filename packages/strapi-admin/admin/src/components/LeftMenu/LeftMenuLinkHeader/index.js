@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import messages from '../LeftMenuLinkContainer/messages.json';
+// TODO remove this
+import messages from './messages.json';
 import Search from './Search';
 import Title from './Title';
 import SearchButton from './SearchButton';
