@@ -5,9 +5,10 @@ describe('ADMIN | LeftMenu | init', () => {
     it('should return the initialState if the plugins are empty', () => {
       const initialState = {
         ok: true,
+        generalSectionLinks: [],
       };
 
-      expect(init(initialState)).toEqual({ ok: true });
+      expect(init(initialState)).toEqual({ ok: true, generalSectionLinks: [] });
     });
 
     it('should create the pluginsSectionLinks correctly', () => {

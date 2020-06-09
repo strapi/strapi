@@ -50,6 +50,8 @@ export default strapi => {
           name: 'media-library',
           to: `${strapi.settingsBaseURL}/media-library`,
           Component: SettingsPage,
+          // TODO write documentation
+          permissions: [{ action: 'plugins::upload.settings.read', subject: null }],
         },
       ],
     },
