@@ -157,6 +157,12 @@ const data = {
       fields: null,
       conditions: null,
     },
+    {
+      action: 'plugins::upload.settings.read',
+      subject: null,
+      fields: null,
+      conditions: null,
+    },
 
     // Users-permissions
     {
@@ -377,6 +383,12 @@ const data = {
       subject: null,
       fields: null,
       conditions: [],
+    },
+    {
+      action: 'plugins::upload.settings.read',
+      subject: null,
+      fields: null,
+      conditions: null,
     },
 
     // Users-permissions
