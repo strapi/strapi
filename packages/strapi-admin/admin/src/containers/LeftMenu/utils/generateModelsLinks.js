@@ -9,7 +9,6 @@ const generateLinks = links => {
         destination: `/plugins/content-manager/${link.schema.kind}/${link.uid}`,
         isDisplayed: false,
         label: link.label,
-        // TODO set the permissions
         permissions: [
           { action: 'plugins::content-manager.explorer.create', subject: link.uid },
           { action: 'plugins::content-manager.explorer.read', subject: link.uid },
@@ -19,7 +18,7 @@ const generateLinks = links => {
     });
 };
 
-const generateModelLinks = models => {
+const generateModelsLinks = models => {
   const [collectionTypes, singleTypes] = chain(models)
     .groupBy('schema.kind')
     .map((value, key) => ({ name: key, links: value }))
@@ -32,5 +31,5 @@ const generateModelLinks = models => {
   };
 };
 
-export default generateModelLinks;
+export default generateModelsLinks;
 export { generateLinks };

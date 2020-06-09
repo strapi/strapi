@@ -325,6 +325,18 @@ const data = {
     //   conditions: [],
     // },
 
+    // Content Manager
+    {
+      action: 'plugins::content-manager.explorer.create',
+      subject: 'application::address.address',
+      conditions: [],
+    },
+    {
+      action: 'plugins::content-manager.explorer.create',
+      subject: 'application::homepage.homepage',
+      conditions: [],
+    },
+
     // Content type builder
     {
       action: 'plugins::content-type-builder.read',

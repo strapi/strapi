@@ -6,6 +6,7 @@
 
 import React, {
   forwardRef,
+  memo,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -59,17 +60,46 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
     [collectionTypesSectionLinks]
   );
 
+  const checkPermissions = async (index, permissionsToCheck) => {
+    const hasPermission = await hasPermissions(permissions, permissionsToCheck);
+
+    return { index, hasPermission };
+  };
+
+  const generateArrayOfPromises = array =>
+    array.map((_, index) => checkPermissions(index, array[index].permissions));
+
   const getModels = async () => {
     const requestURL = '/content-manager/content-types';
 
     try {
       const { data } = await request(requestURL, { method: 'GET' });
-      const formattedData = generateModelsLinks(data);
 
-      // TODO maybe we should display a loader while permissions are being checked
+      const formattedData = generateModelsLinks(data);
+      const collectionTypesSectionLinksArrayOfPromises = generateArrayOfPromises(
+        formattedData.collectionTypesSectionLinks
+      );
+      const collectionTypesSectionResults = await Promise.all(
+        collectionTypesSectionLinksArrayOfPromises
+      );
+      const singleTypesSectionLinksArrayOfPromises = generateArrayOfPromises(
+        formattedData.singleTypesSectionLinks
+      );
+      const singleTypesSectionResults = await Promise.all(singleTypesSectionLinksArrayOfPromises);
+
       dispatch({
         type: 'GET_MODELS_SUCCEEDED',
         data: formattedData,
+      });
+
+      // TODO maybe we should display a loader while permissions are being checked
+      dispatch({
+        type: 'SET_LINK_PERMISSIONS',
+        data: {
+          collectionTypesSectionLinks: collectionTypesSectionResults,
+          singleTypesSectionLinks: singleTypesSectionResults,
+          // pluginsSectionLinks: pluginsSectionResults,
+        },
       });
     } catch (err) {
       console.log(err);
@@ -86,15 +116,6 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
 
   useEffect(() => {
     const getLinksPermissions = async () => {
-      const checkPermissions = async (index, permissionsToCheck) => {
-        const hasPermission = await hasPermissions(permissions, permissionsToCheck);
-
-        return { index, hasPermission };
-      };
-
-      const generateArrayOfPromises = array =>
-        array.map((_, index) => checkPermissions(index, array[index].permissions));
-
       const generalSectionLinksArrayOfPromises = generateArrayOfPromises(generalSectionLinks);
       const pluginsSectionLinksArrayOfPromises = generateArrayOfPromises(pluginsSectionLinks);
 
@@ -172,4 +193,4 @@ LeftMenu.propTypes = {
   plugins: PropTypes.object.isRequired,
 };
 
-export default LeftMenu;
+export default memo(LeftMenu);
