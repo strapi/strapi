@@ -37,7 +37,6 @@ const getActionId = ({ pluginName, uid }) => {
 function createAction(attributes) {
   const action = _.cloneDeep(_.pick(attributes, actionFields));
   action.actionId = getActionId(attributes);
-  action.conditions = action.conditions || [];
 
   if (['settings', 'plugins'].includes(attributes.section)) {
     action.subCategory = attributes.subCategory || 'general';
