@@ -2,6 +2,12 @@
   "sections": {
     "settings": [
       {
+        "displayName": "Can access the Media Library settings page",
+        "action": "plugins::application.settings.read",
+        "category": "media library",
+        "subCategory": "general"
+      },
+      {
         "displayName": "Can access to the marketplace",
         "action": "admin::marketplace.read",
         "category": "plugins and marketplace",
