@@ -46,10 +46,7 @@ const initialState = {
         { action: 'admin::roles.update', subject: null },
         { action: 'admin::roles.read', subject: null },
         { action: 'admin::roles.delete', subject: null },
-
-        // TODO this should be set by the plugin directly
-        // media library
-        { action: 'plugins::upload.settings.read', subject: null },
+        // Here are added the plugins settings permissions during the init phase
       ],
     },
   ],

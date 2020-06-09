@@ -37,8 +37,6 @@ const LeftMenu = ({ version, plugins }) => {
     [pluginsSectionLinks]
   );
 
-  console.log(pluginsSectionLinks);
-
   useEffect(() => {
     const getLinksPermissions = async () => {
       const checkPermissions = async (index, permissionsToCheck) => {
