@@ -42,6 +42,7 @@ export default strapi => {
         title: 'Setting page 1',
         to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
         name: 'setting1',
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
       },
       {
         // Using i18n with a corresponding translation key
@@ -51,6 +52,7 @@ export default strapi => {
         },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
       },
     ],
   };
@@ -147,6 +149,7 @@ export default strapi => {
         title: 'Setting page 1',
         to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
         name: 'setting1',
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
       },
       {
         title: {
@@ -155,6 +158,7 @@ export default strapi => {
         },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
       },
     ],
   };
@@ -240,16 +244,19 @@ export default strapi => {
     preventComponentRendering: false,
     settings: {
       // Add a link into the global section of the settings view
-      global: [
-        {
-          title: 'Setting link 1',
-          to: `${strapi.settingsBaseURL}/setting-link-1`,
-          name: 'settingLink1',
-          Component: SettingLink,
-          // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
-          exact: false,
-        },
-      ],
+      global: {
+        links: [
+          {
+            title: 'Setting link 1',
+            to: `${strapi.settingsBaseURL}/setting-link-1`,
+            name: 'settingLink1',
+            Component: SettingLink,
+            // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
+            exact: false,
+            permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
+          },
+        ],
+      },
       mainComponent: Settings,
       menuSection,
     },

@@ -1,22 +1,6 @@
-import { get, omit, set, sortBy } from 'lodash';
+import { get, omit, set } from 'lodash';
 import { SETTINGS_BASE_URL } from '../../config';
-
-const getPluginsSettingsPermissions = plugins =>
-  Object.values(plugins).reduce((acc, current) => {
-    const pluginSettings = get(current, 'settings.global', []);
-
-    pluginSettings.forEach(setting => {
-      const permissions = get(setting, 'permissions', []);
-
-      permissions.forEach(permission => {
-        acc.push(permission);
-      });
-    });
-
-    return acc;
-  }, []);
-
-const sortLinks = links => sortBy(links, object => object.name);
+import { getPluginsSettingsPermissions, sortLinks } from './utils';
 
 const init = (initialState, plugins = {}) => {
   // For each plugin retrieve the permissions associated to each injected link
@@ -50,4 +34,3 @@ const init = (initialState, plugins = {}) => {
 };
 
 export default init;
-export { sortLinks };

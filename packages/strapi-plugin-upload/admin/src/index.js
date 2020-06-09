@@ -21,6 +21,7 @@ export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const icon = pluginPkg.strapi.icon;
   const name = pluginPkg.strapi.name;
+
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
@@ -41,19 +42,20 @@ export default strapi => {
     pluginLogo,
     preventComponentRendering: false,
     settings: {
-      global: [
-        {
-          title: {
-            id: getTrad('plugin.name'),
-            defaultMessage: 'Media Library',
+      global: {
+        links: [
+          {
+            title: {
+              id: getTrad('plugin.name'),
+              defaultMessage: 'Media Library',
+            },
+            name: 'media-library',
+            to: `${strapi.settingsBaseURL}/media-library`,
+            Component: SettingsPage,
+            permissions: [{ action: 'plugins::upload.settings.read', subject: null }],
           },
-          name: 'media-library',
-          to: `${strapi.settingsBaseURL}/media-library`,
-          Component: SettingsPage,
-          // TODO write documentation
-          permissions: [{ action: 'plugins::upload.settings.read', subject: null }],
-        },
-      ],
+        ],
+      },
     },
     trads,
     menu: {
