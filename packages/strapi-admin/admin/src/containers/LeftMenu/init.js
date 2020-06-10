@@ -1,10 +1,9 @@
 import { get, omit, set } from 'lodash';
 import { SETTINGS_BASE_URL } from '../../config';
-import { getPluginsSettingsPermissions, sortLinks } from './utils';
+import { getSettingsMenuLinksPermissions, sortLinks } from './utils';
 
-const init = (initialState, plugins = {}) => {
-  // For each plugin retrieve the permissions associated to each injected link
-  const settingsPermissions = getPluginsSettingsPermissions(plugins);
+const init = (initialState, plugins = {}, settingsMenu = []) => {
+  const settingsLinkPermissions = getSettingsMenuLinksPermissions(settingsMenu);
 
   const pluginsLinks = Object.values(plugins).reduce((acc, current) => {
     const pluginsSectionLinks = get(current, 'menu.pluginsSectionLinks', []);
@@ -19,11 +18,10 @@ const init = (initialState, plugins = {}) => {
     obj => obj.destination === SETTINGS_BASE_URL
   );
 
-  if (settingsPermissions.length && settingsLinkIndex !== -1) {
+  if (!settingsLinkPermissions.filter(perm => perm === null).length && settingsLinkIndex !== -1) {
     const permissionsPath = ['generalSectionLinks', settingsLinkIndex, 'permissions'];
-    const alreadyCreatedPermissions = get(initialState, permissionsPath, []);
 
-    set(initialState, permissionsPath, [...alreadyCreatedPermissions, ...settingsPermissions]);
+    set(initialState, permissionsPath, settingsLinkPermissions);
   }
 
   if (sortedLinks.length) {
