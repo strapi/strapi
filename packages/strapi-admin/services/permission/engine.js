@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { map, filter, forEach } = require('lodash/fp');
+const { map, filter, each } = require('lodash/fp');
 const { defineAbility } = require('@casl/ability');
 
 module.exports = conditionProvider => ({
@@ -45,34 +45,48 @@ module.exports = conditionProvider => ({
   async evaluatePermission({ permission, user, options, registerFn }) {
     const { action, subject, fields, conditions } = permission;
 
-    // Transform a conditionName into its associated value in the conditionProvider
-    const resolve = conditionProvider.get;
-
-    // A valid condition is either a function or an object
-    const isValidCondition = condition => _.isFunction(condition) || _.isObject(condition);
-
-    // If the resolved condition is a function, we need to call it and return its result
-    const evaluate = async cond =>
-      _.isFunction(cond) ? await cond(user, options) : Promise.resolve(cond);
-
-    // A final valid result (for a condition) is either a 'true' boolean or an object
-    const isValidResult = result => result === true || _.isObject(result);
-
-    // Transform a final valid result into a registerFn options's object
-    const toRegisterOptions = result => ({ action, subject, fields, condition: result });
-
     // Directly registers the permission if there is no condition to check/evaluate
     if (_.isUndefined(conditions) || _.isEmpty(conditions)) {
-      return registerFn(toRegisterOptions(true));
+      return registerFn({ action, subject, fields, condition: true });
     }
 
+    // Replace each condition name by its associated value
+    const resolveConditions = map(conditionProvider.get);
+
+    // Filter conditions, only keeps objects and functions
+    const filterValidConditions = filter(
+      condition => _.isFunction(condition) || _.isObject(condition)
+    );
+
+    // Evaluate the conditions if they're a function, returns the object otherwise
+    const evaluateConditions = conditions =>
+      Promise.all(
+        conditions.map(async cond =>
+          _.isFunction(cond) ? await cond(user, options) : Promise.resolve(cond)
+        )
+      );
+
+    // Only keeps 'true' booleans or objects as condition's result
+    const filterValidResults = filter(result => result === true || _.isObject(result));
+
+    // Transform each result into registerFn options
+    const transformToRegisterOptions = map(result => ({
+      action,
+      subject,
+      fields,
+      condition: result,
+    }));
+
+    // Register each result using the registerFn
+    const registerResults = each(registerFn);
+
     await Promise.resolve(conditions)
-      .then(map(resolve))
-      .then(filter(isValidCondition))
-      .then(conditions => Promise.all(conditions.map(evaluate)))
-      .then(filter(isValidResult))
-      .then(map(toRegisterOptions))
-      .then(forEach(registerFn));
+      .then(resolveConditions)
+      .then(filterValidConditions)
+      .then(evaluateConditions)
+      .then(filterValidResults)
+      .then(transformToRegisterOptions)
+      .then(registerResults);
   },
 
   /**
@@ -96,4 +110,11 @@ module.exports = conditionProvider => ({
     return ({ action, subject, fields, condition }) =>
       can(action, subject, fields, _.isObject(condition) ? condition : undefined);
   },
+
+  /**
+   * Check many permissions based on an ability
+   */
+  checkMany: _.curry((ability, permissions) => {
+    return permissions.map(({ action, subject, field }) => ability.can(action, subject, field));
+  }),
 });

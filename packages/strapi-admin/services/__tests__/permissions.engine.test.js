@@ -1,11 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const createConditionsProvider = require('../permission/conditions-provider');
+const createConditionProvider = require('../permission/condition-provider');
 const createPermissionsEngine = require('../permission/engine');
 
 describe('Permissions Engine', () => {
-  let conditionsProvider;
+  let conditionProvider;
   let engine;
 
   const localTestData = {
@@ -45,10 +45,10 @@ describe('Permissions Engine', () => {
   const getUser = name => localTestData.users[name];
 
   beforeEach(() => {
-    conditionsProvider = createConditionsProvider();
-    conditionsProvider.registerMany(localTestData.conditions);
+    conditionProvider = createConditionProvider();
+    conditionProvider.registerMany(localTestData.conditions);
 
-    engine = createPermissionsEngine(conditionsProvider);
+    engine = createPermissionsEngine(conditionProvider);
 
     jest.spyOn(engine, 'evaluatePermission');
     jest.spyOn(engine, 'createRegisterFunction');

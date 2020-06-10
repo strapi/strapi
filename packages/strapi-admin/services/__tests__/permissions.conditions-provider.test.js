@@ -1,12 +1,12 @@
 'use strict';
 
-const createConditionsProvider = require('../permission/conditions-provider');
+const createConditionProvider = require('../permission/condition-provider');
 
-describe('Conditions Provider', () => {
+describe('Condition Provider', () => {
   let provider;
 
   beforeEach(() => {
-    provider = createConditionsProvider();
+    provider = createConditionProvider();
 
     jest.spyOn(provider, 'register');
     jest.spyOn(provider, 'has');
