@@ -7,8 +7,8 @@
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { LoadingIndicatorPage, WithPagePermissions } from 'strapi-helper-plugin';
+import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
-import pluginPermissions from '../../utils/permissions';
 import DataManagerProvider from '../DataManagerProvider';
 import RecursivePath from '../RecursivePath';
 import icons from './utils/icons.json';

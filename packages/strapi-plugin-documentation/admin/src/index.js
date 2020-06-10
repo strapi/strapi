@@ -6,6 +6,7 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import pluginPkg from '../../package.json';
+import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
@@ -46,11 +47,7 @@ export default strapi => {
             defaultMessage: 'Documentation',
           },
           name,
-          permissions: [
-            { action: 'plugins::documentation.read', subject: null },
-            { action: 'plugins::documentation.regenerate', subject: null },
-            { action: 'plugins::documentation.update', subject: null },
-          ],
+          permissions: pluginPermissions.main,
         },
       ],
     },
