@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import getTrad from '../../utils/getTrad';
-import pluginPermissions from '../../utils/permissions';
+import pluginPermissions from '../../permissions';
 
 // Create link from content-type-builder to content-manager
 function EditViewButton(props) {

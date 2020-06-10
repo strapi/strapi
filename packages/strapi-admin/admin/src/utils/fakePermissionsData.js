@@ -351,12 +351,12 @@ const data = {
     // },
 
     // Documentation plugin
-    // {
-    //   action: 'plugins::documentation.read',
-    //   subject: null,
-    //   fields: null,
-    //   conditions:[],
-    // },
+    {
+      action: 'plugins::documentation.read',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
     // {
     //   action: 'plugins::documentation.settings.update',
     //   subject: null,

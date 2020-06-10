@@ -11,9 +11,9 @@ import App from './containers/App';
 import Initializer from './containers/Initializer';
 import Link from './InjectedComponents/ContentManager/EditViewLink';
 import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
-import pluginPermissions from './utils/permissions';
 import lifecycles from './lifecycles';
 import trads from './translations';
+import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 
 export default strapi => {
