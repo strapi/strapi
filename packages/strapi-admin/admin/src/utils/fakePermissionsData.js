@@ -372,12 +372,12 @@ const data = {
       fields: null,
       conditions: [],
     },
-    {
-      action: 'plugins::documentation.settings.update',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'plugins::documentation.settings.update',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     {
       action: 'plugins::documentation.settings.regenerate',
       subject: null,

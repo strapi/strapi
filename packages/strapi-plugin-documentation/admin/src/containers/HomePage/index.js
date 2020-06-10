@@ -11,13 +11,14 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
 import { Header } from '@buffetjs/custom';
+import { Button } from '@buffetjs/core';
 import {
   auth,
   PopUpWarning,
   LoadingIndicatorPage,
   InputsIndex as Input,
   GlobalContext,
-  hasPermissions,
+  WithPermissions,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -43,36 +44,9 @@ import selectHomePage from './selectors';
 import saga from './saga';
 
 export class HomePage extends React.Component {
-  state = { canOpen: false, canUpdate: false };
-
   componentDidMount() {
     this.props.getDocInfos();
-    this.getPermissions();
   }
-
-  getPermissions = async () => {
-    const { userPermissions } = this.props;
-
-    const checkPermissions = async permissionName => {
-      const hasPermission = await hasPermissions(
-        userPermissions,
-        pluginPermissions[permissionName]
-      );
-
-      return hasPermission;
-    };
-
-    const generateArrayOfPromises = array =>
-      array.map(permissionName => checkPermissions(permissionName));
-
-    try {
-      const [canOpen, canUpdate] = await Promise.all(generateArrayOfPromises(['open', 'update']));
-
-      this.setState({ canOpen, canUpdate });
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   getRestrictedAccessValue = () => {
     const { form } = this.props;
@@ -81,11 +55,8 @@ export class HomePage extends React.Component {
   };
 
   getPluginHeaderActions = () => {
-    const { canOpen, canUpdate } = this.state;
-    const actions = [];
-
-    if (canOpen) {
-      actions.push({
+    const actions = [
+      {
         color: 'none',
         label: this.context.formatMessage({
           id: getTrad('containers.HomePage.Button.open'),
@@ -94,11 +65,13 @@ export class HomePage extends React.Component {
         onClick: this.openCurrentDocumentation,
         type: 'button',
         key: 'button-open',
-      });
-    }
-
-    if (canUpdate) {
-      actions.push({
+        Component: props => (
+          <WithPermissions permissions={pluginPermissions.open}>
+            <Button {...props} />
+          </WithPermissions>
+        ),
+      },
+      {
         label: this.context.formatMessage({
           id: getTrad('containers.HomePage.Button.update'),
         }),
@@ -106,8 +79,13 @@ export class HomePage extends React.Component {
         onClick: () => {},
         type: 'submit',
         key: 'button-submit',
-      });
-    }
+        Component: props => (
+          <WithPermissions permissions={pluginPermissions.update}>
+            <Button {...props} />
+          </WithPermissions>
+        ),
+      },
+    ];
 
     return actions;
   };
@@ -258,7 +236,6 @@ HomePage.defaultProps = {
   onSubmit: () => {},
   onUpdateDoc: () => {},
   prefix: '/documentation',
-  userPermissions: [],
   versionToDelete: '',
 };
 
@@ -276,7 +253,6 @@ HomePage.propTypes = {
   onSubmit: PropTypes.func,
   onUpdateDoc: PropTypes.func,
   prefix: PropTypes.string,
-  userPermissions: PropTypes.array,
   versionToDelete: PropTypes.string,
 };
 
