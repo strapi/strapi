@@ -5,7 +5,6 @@ const getSettingsMenuLinksPermissions = menu =>
     const links = get(current, 'links', []);
 
     const permissions = links.reduce((acc, current) => {
-      // console.log({ c: current });
       let currentPermissions = get(current, 'permissions', null);
 
       if (isEmpty(currentPermissions)) {

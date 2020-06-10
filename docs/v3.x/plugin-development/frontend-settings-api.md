@@ -42,7 +42,7 @@ export default strapi => {
         title: 'Setting page 1',
         to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
         name: 'setting1',
-        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is not mandatory it can be null, undefined or an empty array
       },
       {
         // Using i18n with a corresponding translation key
@@ -52,7 +52,6 @@ export default strapi => {
         },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
-        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
       },
     ],
   };
@@ -149,7 +148,7 @@ export default strapi => {
         title: 'Setting page 1',
         to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
         name: 'setting1',
-        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }],
       },
       {
         title: {
@@ -158,7 +157,6 @@ export default strapi => {
         },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
-        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
       },
     ],
   };
@@ -253,7 +251,7 @@ export default strapi => {
             Component: SettingLink,
             // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
             exact: false,
-            permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is required
+            permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }],
           },
         ],
       },
