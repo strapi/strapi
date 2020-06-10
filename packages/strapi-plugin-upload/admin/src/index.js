@@ -7,6 +7,7 @@
 
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
+import pluginPermissions from './permissions';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
@@ -50,7 +51,7 @@ export default strapi => {
             name: 'media-library',
             to: `${strapi.settingsBaseURL}/media-library`,
             Component: SettingsPage,
-            permissions: [{ action: 'plugins::upload.settings.read', subject: null }],
+            permissions: pluginPermissions.settings,
           },
         ],
       },
@@ -66,7 +67,7 @@ export default strapi => {
             defaultMessage: 'Media Library',
           },
           name,
-          permissions: [{ action: 'plugins::upload.read', subject: null }],
+          permissions: pluginPermissions.main,
         },
       ],
     },

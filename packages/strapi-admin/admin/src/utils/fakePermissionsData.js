@@ -343,12 +343,12 @@ const data = {
     },
 
     // Content type builder
-    // {
-    //   action: 'plugins::content-type-builder.read',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'plugins::content-type-builder.read',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
 
     // Documentation plugin
     {
@@ -371,12 +371,12 @@ const data = {
     // },
 
     // Upload plugin
-    // {
-    //   action: 'plugins::upload.read',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'plugins::upload.read',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
     {
       action: 'plugins::upload.assets.create',
       subject: null,
