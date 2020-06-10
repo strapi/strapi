@@ -9,9 +9,6 @@ Object {
         "action": "plugins::content-manager.create",
         "displayName": "Create",
         "subjects": Array [
-          "strapi::permission",
-          "strapi::role",
-          "strapi::user",
           "plugins::users-permissions.user",
         ],
       },
@@ -19,9 +16,6 @@ Object {
         "action": "plugins::content-manager.read",
         "displayName": "Read",
         "subjects": Array [
-          "strapi::permission",
-          "strapi::role",
-          "strapi::user",
           "plugins::users-permissions.user",
         ],
       },
@@ -29,9 +23,6 @@ Object {
         "action": "plugins::content-manager.update",
         "displayName": "Update",
         "subjects": Array [
-          "strapi::permission",
-          "strapi::role",
-          "strapi::user",
           "plugins::users-permissions.user",
         ],
       },
@@ -39,9 +30,6 @@ Object {
         "action": "plugins::content-manager.delete",
         "displayName": "Delete",
         "subjects": Array [
-          "strapi::permission",
-          "strapi::role",
-          "strapi::user",
           "plugins::users-permissions.user",
         ],
       },

@@ -27,6 +27,9 @@ const HIDDEN_CONTENT_TYPES = [
   'plugins::upload.file',
   'plugins::users-permissions.permission',
   'plugins::users-permissions.role',
+  'strapi::permission',
+  'strapi::role',
+  'strapi::user',
 ];
 
 const getConfiguration = uid => {

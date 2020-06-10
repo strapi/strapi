@@ -5,7 +5,7 @@ const { yup, formatYupErrors } = require('strapi-utils');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
-// --- validatedUpdatePermissionsInput
+// validatedUpdatePermissionsInput
 
 const BONDED_ACTIONS = [
   'plugins::content-manager.read',
@@ -75,7 +75,7 @@ const validatedUpdatePermissionsInput = data => {
     .catch(handleReject);
 };
 
-// --- validatePermissionsExist
+// validatePermissionsExist
 
 const checkPermissionsExist = function(permissions) {
   const existingActions = strapi.admin.services.permission.provider.getAll();
