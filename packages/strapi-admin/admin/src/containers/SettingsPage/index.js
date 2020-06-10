@@ -14,8 +14,9 @@ import { BackHeader, useGlobalContext, LeftMenuList } from 'strapi-helper-plugin
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 import RolesListPage from 'ee_else_ce/containers/Roles/ListPage';
 import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
-import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import HeaderSearch from '../../components/HeaderSearch';
+import { useSettingsMenu } from '../../hooks';
+import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import UsersEditPage from '../Users/EditPage';
 import UsersListPage from '../Users/ListPage';
 import RolesEditPage from '../Roles/EditPage';
@@ -26,20 +27,13 @@ import ListView from '../Webhooks/ListView';
 import SettingDispatcher from './SettingDispatcher';
 import LeftMenu from './StyledLeftMenu';
 import Wrapper from './Wrapper';
-import retrieveGlobalLinks from './utils/retrieveGlobalLinks';
-import retrievePluginsMenu from './utils/retrievePluginsMenu';
 
 function SettingsPage() {
   const { settingId } = useParams();
   const { goBack } = useHistory();
-  const { formatMessage, plugins, settingsBaseURL } = useGlobalContext();
+  const { settingsBaseURL } = useGlobalContext();
   const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
-
-  // Retrieve the links that will be injected into the global section
-  const globalLinks = retrieveGlobalLinks(plugins);
-  // Create the plugins settings section
-  // Note it is currently not possible to add a link into a plugin section
-  const pluginsMenu = retrievePluginsMenu(plugins);
+  const { menu, globalLinks } = useSettingsMenu();
 
   const createdRoutes = globalLinks
     .map(({ to, Component, exact }) => (
@@ -48,39 +42,6 @@ function SettingsPage() {
     .filter((route, index, refArray) => {
       return refArray.findIndex(obj => obj.key === route.key) === index;
     });
-
-  const menuItems = [
-    {
-      id: 'global',
-      title: { id: 'Settings.global' },
-      links: [
-        {
-          title: formatMessage({ id: 'Settings.webhooks.title' }),
-          to: `${settingsBaseURL}/webhooks`,
-          name: 'webhooks',
-        },
-        ...globalLinks,
-      ],
-    },
-    {
-      id: 'permissions',
-      title: 'Settings.permissions',
-      links: [
-        {
-          title: formatMessage({ id: 'Settings.permissions.menu.link.roles.label' }),
-          to: `${settingsBaseURL}/roles`,
-          name: 'roles',
-        },
-        {
-          title: formatMessage({ id: 'Settings.permissions.menu.link.users.label' }),
-          // Init the search params directly
-          to: `${settingsBaseURL}/users?pageSize=10&page=1&_sort=firstname%3AASC`,
-          name: 'users',
-        },
-      ],
-    },
-    ...pluginsMenu,
-  ];
 
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {
@@ -109,7 +70,7 @@ function SettingsPage() {
         <div className="row">
           <div className="col-md-3">
             <LeftMenu>
-              {menuItems.map(item => {
+              {menu.map(item => {
                 return <LeftMenuList {...item} key={item.id} />;
               })}
             </LeftMenu>

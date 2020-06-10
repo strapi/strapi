@@ -23,6 +23,7 @@ import {
   LeftMenuHeader,
   LinksContainer,
 } from '../../components/LeftMenu';
+import { useSettingsMenu } from '../../hooks';
 import { generateModelsLinks } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -32,6 +33,7 @@ import Wrapper from './Wrapper';
 const LeftMenu = forwardRef(({ version, plugins }, ref) => {
   const location = useLocation();
   const permissions = useContext(UserContext);
+  const { menu: settingsMenu } = useSettingsMenu();
   const [
     {
       collectionTypesSectionLinks,
@@ -41,7 +43,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
       singleTypesSectionLinks,
     },
     dispatch,
-  ] = useReducer(reducer, initialState, () => init(initialState, plugins));
+  ] = useReducer(reducer, initialState, () => init(initialState, plugins, settingsMenu));
   const generalSectionLinksFiltered = useMemo(
     () => generalSectionLinks.filter(link => link.isDisplayed),
     [generalSectionLinks]

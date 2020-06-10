@@ -1,3 +1,3 @@
 export { default as generateModelsLinks } from './generateModelsLinks';
-export { default as getPluginsSettingsPermissions } from './getPluginsSettingsPermissions';
+export { default as getSettingsMenuLinksPermissions } from './getSettingsMenuLinksPermissions';
 export { default as sortLinks } from './sortLinks';
