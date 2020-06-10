@@ -1,8 +1,31 @@
 'use strict';
 
 const { formatActionsBySections } = require('./formatters');
+const { validateCheckPermissionsInput } = require('../validation/permission');
 
 module.exports = {
+  /**
+   * Check each permissions from `request.body.permissions` and returns an array of booleans
+   * @param {KoaContext} ctx - koa context
+   */
+  async check(ctx) {
+    const { body: input } = ctx.request;
+
+    try {
+      await validateCheckPermissionsInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const checkPermissions = strapi.admin.services.permission.engine.checkMany(
+      ctx.state.userAbility
+    );
+
+    ctx.body = {
+      data: checkPermissions(input.permissions),
+    };
+  },
+
   /**
    * Returns every permissions, in nested format
    * @param {KoaContext} ctx - koa context

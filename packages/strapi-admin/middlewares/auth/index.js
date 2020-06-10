@@ -44,6 +44,9 @@ module.exports = strapi => ({
 
           ctx.state.admin = admin;
           ctx.state.user = admin;
+          ctx.state.userAbility = await strapi.admin.services.permission.engine.generateUserAbility(
+            admin
+          );
           ctx.state.isAuthenticatedAdmin = true;
           return next();
         }

@@ -69,6 +69,25 @@ const updatePermissionsSchema = yup
   .required()
   .noUnknown();
 
+const checkPermissionsSchema = yup.object().shape({
+  permissions: yup.array().of(
+    yup
+      .object()
+      .shape({
+        action: yup.string().required(),
+        subject: yup.string(),
+        field: yup.string(),
+      })
+      .noUnknown()
+  ),
+});
+
+const validateCheckPermissionsInput = data => {
+  return checkPermissionsSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(handleReject);
+};
+
 const validatedUpdatePermissionsInput = data => {
   return updatePermissionsSchema
     .validate(data, { strict: true, abortEarly: true })
@@ -110,4 +129,5 @@ const validatePermissionsExist = data => {
 module.exports = {
   validatedUpdatePermissionsInput,
   validatePermissionsExist,
+  validateCheckPermissionsInput,
 };
