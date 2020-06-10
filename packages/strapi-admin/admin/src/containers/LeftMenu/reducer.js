@@ -31,24 +31,9 @@ const initialState = {
       label: 'app.components.LeftMenuLinkContainer.settings',
       isDisplayed: false,
       destination: SETTINGS_BASE_URL,
-      permissions: [
-        // webhooks
-        // { action: 'admin::webhook.create', subject: null },
-        // { action: 'admin::webhook.read', subject: null },
-        // { action: 'admin::webhook.update', subject: null },
-        // { action: 'admin::webhook.delete', subject: null },
-        // // users
-        // { action: 'admin::users.create', subject: null },
-        // { action: 'admin::users.read', subject: null },
-        // { action: 'admin::users.update', subject: null },
-        // { action: 'admin::users.delete', subject: null },
-        // // roles
-        // { action: 'admin::roles.create', subject: null },
-        // { action: 'admin::roles.update', subject: null },
-        // { action: 'admin::roles.read', subject: null },
-        // { action: 'admin::roles.delete', subject: null },
-        // Here are added the plugins settings permissions during the init phase
-      ],
+      // Permissions of this link are retrieved in the init phase
+      // using the settings menu
+      permissions: [],
     },
   ],
   singleTypesSectionLinks: [],
