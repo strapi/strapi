@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "apollo-server-koa": "2.9.12",
+    "apollo-server-plugin-response-cache": "^0.5.2",
     "dataloader": "^1.4.0",
     "glob": "^7.1.4",
     "graphql": "^14.3.0",

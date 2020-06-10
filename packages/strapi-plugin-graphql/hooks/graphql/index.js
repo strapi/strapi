@@ -9,6 +9,7 @@ const _ = require('lodash');
 const { ApolloServer } = require('apollo-server-koa');
 const depthLimit = require('graphql-depth-limit');
 const loadConfigs = require('./load-config');
+const responseCachePlugin = require('apollo-server-plugin-response-cache');
 
 const attachMetadataToResolvers = (schema, { api, plugin }) => {
   const { resolver = {} } = schema;
@@ -103,7 +104,13 @@ module.exports = strapi => {
         cors: false,
         bodyParserConfig: true,
         introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
+        cacheControls: _.get(strapi.plugin.graphql, 'config.cacheControls', false),
       };
+
+      // Add cache plugin if it enabled in server params.
+      if (serverParams.cacheControls) {
+        serverParams.plugins = [responseCachePlugin()]
+      }
 
       // Disable GraphQL Playground in production environment.
       if (
