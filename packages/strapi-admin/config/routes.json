@@ -198,9 +198,14 @@
     {
       "method": "GET",
       "path": "/permissions",
-      "handler": "permission.getAll",
+      "handler": "permission.getAll"
+    },
+    {
+      "method": "POST",
+      "path": "/permissions/check",
+      "handler": "permission.check",
       "config": {
-        "policies": []
+        "policies": ["admin::isAuthenticatedAdmin"]
       }
     }
   ]

@@ -14,6 +14,10 @@ const get = (policy, plugin, apiName) => {
     return parsePolicy(getPluginPolicy(policy));
   }
 
+  if (adminPolicyExists(policy)) {
+    return parsePolicy(getAdminPolicy(policy));
+  }
+
   if (APIPolicyExists(policy)) {
     return parsePolicy(getAPIPolicy(policy));
   }
@@ -63,6 +67,7 @@ const parsePolicy = policy => {
 
 const GLOBAL_PREFIX = 'global::';
 const PLUGIN_PREFIX = 'plugins::';
+const ADMIN_PREFIX = 'admin::';
 const APPLICATION_PREFIX = 'application::';
 
 const getPolicyIn = (container, policy) => {
@@ -90,11 +95,19 @@ const getPluginPolicy = policy => {
   return getPolicyIn(_.get(strapi, ['plugins', plugin]), policyName);
 };
 
-const pluginPolicyExists = policy => {
-  return isPluginPolicy(policy) && !_.isUndefined(getPluginPolicy(policy));
-};
+const pluginPolicyExists = policy =>
+  isPluginPolicy(policy) && !_.isUndefined(getPluginPolicy(policy));
 
 const isPluginPolicy = policy => _.startsWith(policy, PLUGIN_PREFIX);
+
+const getAdminPolicy = policy => {
+  const strippedPolicy = policy.replace(ADMIN_PREFIX, '');
+  return getPolicyIn(_.get(strapi, 'admin'), strippedPolicy);
+};
+
+const isAdminPolicy = policy => _.startsWith(policy, ADMIN_PREFIX);
+
+const adminPolicyExists = policy => isAdminPolicy(policy) && !_.isUndefined(getAdminPolicy(policy));
 
 const getAPIPolicy = policy => {
   const [, policyWithoutPrefix] = policy.split('::');
