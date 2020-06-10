@@ -108,6 +108,8 @@
   "app.components.listPlugins.title.none": "No plugins installed",
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
+  "app.components.ListPluginsPage.deletePlugin.title": "Uninstalling",
+  "app.components.ListPluginsPage.deletePlugin.description": "It might take a few seconds to uninstall the plugin.",
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
 
   "app.links.configure-view": "Configure the view",

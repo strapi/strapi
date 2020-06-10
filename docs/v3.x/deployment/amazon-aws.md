@@ -330,7 +330,7 @@ module.exports = ({ env }) => ({
 This plugin will allow configurations for each active environment.
 
 ```bash
-npm install strapi-provider-upload-aws-s3@beta
+npm install strapi-provider-upload-aws-s3
 ```
 
 #### 4. Push your local changes to your project's GitHub repository.

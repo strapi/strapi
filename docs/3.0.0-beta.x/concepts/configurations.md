@@ -67,7 +67,6 @@ Here are some use cases:
 
 - Create an admin user if there isn't one.
 - Fill the database with some necessary data.
-- Check that the database is up-and-running.
 - Load some environment variables.
 
 The bootstrap function can be synchronous or asynchronous.
