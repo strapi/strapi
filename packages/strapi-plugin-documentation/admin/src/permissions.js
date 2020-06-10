@@ -5,9 +5,15 @@ const pluginPermissions = {
   // plugin directly in the browser
   main: [
     { action: 'plugins::documentation.read', subject: null },
-    { action: 'plugins::documentation.regenerate', subject: null },
-    { action: 'plugins::documentation.update', subject: null },
+    { action: 'plugins::documentation.settings.regenerate', subject: null },
+    { action: 'plugins::documentation.settings.update', subject: null },
   ],
+  open: [
+    { action: 'plugins::documentation.read', subject: null },
+    { action: 'plugins::documentation.settings.regenerate', subject: null },
+  ],
+  regenerate: [{ action: 'plugins::documentation.settings.regenerate', subject: null }],
+  update: [{ action: 'plugins::documentation.settings.update', subject: null }],
 };
 
 export default pluginPermissions;
