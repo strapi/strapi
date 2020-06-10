@@ -30,20 +30,6 @@ const isAPluginName = yup
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
   });
 
-const isAContentTypeId = yup
-  .string()
-  .test('is-a-contentType-id', 'is not a content-type id', function(value) {
-    const contentTypesUids = strapi.plugins[
-      'content-manager'
-    ].services.contenttypes.getDisplayedContentTypesUids();
-    return contentTypesUids.includes(value)
-      ? true
-      : this.createError({
-          path: this.path,
-          message: `${this.path} is not an existing content-type id`,
-        });
-  });
-
 module.exports = {
   email,
   firstname,
@@ -52,5 +38,4 @@ module.exports = {
   password,
   roles,
   isAPluginName,
-  isAContentTypeId,
 };

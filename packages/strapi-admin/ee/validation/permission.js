@@ -14,7 +14,7 @@ const updatePermissionsSchema = yup
           .object()
           .shape({
             action: yup.string().required(),
-            subject: yup.string(),
+            subject: yup.string().nullable(),
             fields: yup.array().of(yup.string()),
             conditions: yup.array().of(yup.string()),
           })

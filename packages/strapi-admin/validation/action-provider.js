@@ -31,7 +31,7 @@ const registerProviderActionSchema = yup
           is: 'contentTypes',
           then: yup
             .array()
-            .of(validators.isAContentTypeId)
+            .of(yup.string())
             .required(),
           otherwise: yup
             .mixed()
@@ -39,21 +39,28 @@ const registerProviderActionSchema = yup
         }),
         displayName: yup.string().required(),
         category: yup.mixed().when('section', {
-          is: val => ['plugins', 'contentTypes'].includes(val),
-          then: yup
+          is: 'settings',
+          then: yup.string().required(),
+          otherwise: yup
             .mixed()
-            .oneOf([undefined], 'category should only be defined for the "settings" section'),
-          otherwise: yup.string().required(),
+            .test(
+              'settingsCategory',
+              'category should only be defined for the "settings" section',
+              cat => cat === undefined
+            ),
         }),
         subCategory: yup.mixed().when('section', {
-          is: 'contentTypes',
-          then: yup
+          is: section => ['settings', 'plugins'].includes(section),
+          then: yup.string(),
+          otherwise: yup
             .mixed()
-            .oneOf(
-              [undefined],
-              'subCategory should only be defined for "plugins" and "settings" sections'
+            .test(
+              'settingsSubCategory',
+              'subCategory should only be defined for "plugins" and "settings" sections',
+              subCat => {
+                return subCat === undefined;
+              }
             ),
-          otherwise: yup.string(),
         }),
       })
       .noUnknown()
