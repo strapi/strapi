@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { subject } = require('@casl/ability');
 const createConditionProvider = require('../permission/condition-provider');
 const createPermissionsEngine = require('../permission/engine');
 
@@ -18,7 +19,12 @@ describe('Permissions Engine', () => {
       alice: {
         firstname: 'Alice',
         title: 'admin',
-        roles: [{ id: 1 }, { id: 3 }],
+        roles: [{ id: 1 }],
+      },
+      john: {
+        firstname: 'John',
+        title: 'admin',
+        roles: [{ id: 3 }],
       },
     },
     roles: {
@@ -32,13 +38,16 @@ describe('Permissions Engine', () => {
         permissions: [{ action: 'post', subject: 'article', fields: ['*'], conditions: ['isBob'] }],
       },
       3: {
-        permissions: [],
+        permissions: [
+          { action: 'read', subject: 'user', fields: ['title'], conditions: ['isContainedIn'] },
+        ],
       },
     },
     conditions: {
       isBob: user => user.firstname === 'Bob',
       isAdmin: user => user.title === 'admin',
       isCreatedBy: user => ({ created_by: user.firstname }),
+      isContainedIn: { firstname: { $in: ['Alice', 'Foo'] } },
     },
   };
 
@@ -141,6 +150,33 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'user', 'title')).toBeTruthy();
       expect(ability.can('read', 'user', 'title.nested')).toBeFalsy();
     });
+
+    describe('Use objects as subject', () => {
+      let ability;
+
+      beforeAll(async () => {
+        const user = getUser('john');
+        ability = await engine.generateUserAbility(user);
+      });
+
+      test('Fails to validate the object condition', () => {
+        const args = ['read', subject('user', { firstname: 'Bar' }), 'title'];
+
+        expect(ability.can(...args)).toBeFalsy();
+      });
+
+      test('Fails to read a restricted field', () => {
+        const args = ['read', subject('user', { firstname: 'Foo' }), 'bar'];
+
+        expect(ability.can(...args)).toBeFalsy();
+      });
+
+      test('Successfully validate the permission', () => {
+        const args = ['read', subject('user', { firstname: 'Foo' }), 'title'];
+
+        expect(ability.can(...args)).toBeTruthy();
+      });
+    });
   });
 
   describe('Generate Ability Creator For', () => {
@@ -230,10 +266,7 @@ describe('Permissions Engine', () => {
       const user = getUser('alice');
       const permissions = await engine.findPermissionsForUser(user);
 
-      const expected = sort([
-        ...localTestData.roles['1'].permissions,
-        ...localTestData.roles['3'].permissions,
-      ]);
+      const expected = sort(localTestData.roles['1'].permissions);
 
       expect(sort(permissions)).toStrictEqual(expected);
     });
@@ -272,6 +305,38 @@ describe('Permissions Engine', () => {
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', { created_by: 1 });
+    });
+  });
+
+  describe('Check Many', () => {
+    let ability;
+    const permissions = [
+      { action: 'read', subject: 'user', field: 'title' },
+      { action: 'post', subject: 'article' },
+    ];
+
+    beforeEach(() => {
+      ability = { can: jest.fn(() => true) };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('Using curried version of checkMany', () => {
+      const checkMany = engine.checkMany(ability);
+
+      const res = checkMany(permissions);
+
+      expect(res).toHaveLength(permissions.length);
+      expect(ability.can).toHaveBeenCalledTimes(2);
+    });
+
+    test('Using raw version of checkMany', () => {
+      const res = engine.checkMany(ability, permissions);
+
+      expect(res).toHaveLength(permissions.length);
+      expect(ability.can).toHaveBeenCalledTimes(2);
     });
   });
 });
