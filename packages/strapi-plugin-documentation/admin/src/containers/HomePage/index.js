@@ -17,9 +17,11 @@ import {
   LoadingIndicatorPage,
   InputsIndex as Input,
   GlobalContext,
+  hasPermissions,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import pluginPermissions from '../../permissions';
 import getTrad from '../../utils/getTrad';
 
 import Block from '../../components/Block';
@@ -41,9 +43,36 @@ import selectHomePage from './selectors';
 import saga from './saga';
 
 export class HomePage extends React.Component {
+  state = { canOpen: false, canUpdate: false };
+
   componentDidMount() {
     this.props.getDocInfos();
+    this.getPermissions();
   }
+
+  getPermissions = async () => {
+    const { userPermissions } = this.props;
+
+    const checkPermissions = async permissionName => {
+      const hasPermission = await hasPermissions(
+        userPermissions,
+        pluginPermissions[permissionName]
+      );
+
+      return hasPermission;
+    };
+
+    const generateArrayOfPromises = array =>
+      array.map(permissionName => checkPermissions(permissionName));
+
+    try {
+      const [canOpen, canUpdate] = await Promise.all(generateArrayOfPromises(['open', 'update']));
+
+      this.setState({ canOpen, canUpdate });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   getRestrictedAccessValue = () => {
     const { form } = this.props;
@@ -52,8 +81,11 @@ export class HomePage extends React.Component {
   };
 
   getPluginHeaderActions = () => {
-    return [
-      {
+    const { canOpen, canUpdate } = this.state;
+    const actions = [];
+
+    if (canOpen) {
+      actions.push({
         color: 'none',
         label: this.context.formatMessage({
           id: getTrad('containers.HomePage.Button.open'),
@@ -62,8 +94,11 @@ export class HomePage extends React.Component {
         onClick: this.openCurrentDocumentation,
         type: 'button',
         key: 'button-open',
-      },
-      {
+      });
+    }
+
+    if (canUpdate) {
+      actions.push({
         label: this.context.formatMessage({
           id: getTrad('containers.HomePage.Button.update'),
         }),
@@ -71,8 +106,10 @@ export class HomePage extends React.Component {
         onClick: () => {},
         type: 'submit',
         key: 'button-submit',
-      },
-    ];
+      });
+    }
+
+    return actions;
   };
 
   handleCopy = () => {
@@ -142,6 +179,7 @@ export class HomePage extends React.Component {
       onSubmit,
       versionToDelete,
     } = this.props;
+
     const { formatMessage } = this.context;
 
     if (isLoading) {
@@ -220,6 +258,7 @@ HomePage.defaultProps = {
   onSubmit: () => {},
   onUpdateDoc: () => {},
   prefix: '/documentation',
+  userPermissions: [],
   versionToDelete: '',
 };
 
@@ -237,6 +276,7 @@ HomePage.propTypes = {
   onSubmit: PropTypes.func,
   onUpdateDoc: PropTypes.func,
   prefix: PropTypes.string,
+  userPermissions: PropTypes.array,
   versionToDelete: PropTypes.string,
 };
 
