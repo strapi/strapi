@@ -341,6 +341,21 @@ const data = {
       subject: 'application::homepage.homepage',
       conditions: [],
     },
+    {
+      action: 'plugins::content-manager.single-types.configure-view',
+      subject: null,
+      conditions: [],
+    },
+    {
+      action: 'plugins::content-manager.collection-types.configure-view',
+      subject: null,
+      conditions: [],
+    },
+    {
+      action: 'plugins::content-manager.components.configure-layout',
+      subject: null,
+      conditions: [],
+    },
 
     // Content type builder
     {

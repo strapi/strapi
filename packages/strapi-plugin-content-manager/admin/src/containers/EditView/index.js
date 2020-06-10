@@ -2,8 +2,9 @@ import React, { memo, useCallback, useMemo, useEffect, useReducer, useRef } from
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-import { BackHeader, LiLink } from 'strapi-helper-plugin';
+import { BackHeader, LiLink, WithPermissions } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
+import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
@@ -231,19 +232,27 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
               )}
               <LinkWrapper>
                 <ul>
-                  <LiLink
-                    message={{
-                      id: 'app.links.configure-view',
-                    }}
-                    icon="layout"
-                    key={`${pluginId}.link`}
-                    url={`${
-                      isSingleType ? `${pathname}/` : ''
-                    }ctm-configurations/edit-settings/content-types`}
-                    onClick={() => {
-                      // emitEvent('willEditContentTypeLayoutFromEditView');
-                    }}
-                  />
+                  <WithPermissions
+                    permissions={
+                      isSingleType
+                        ? pluginPermissions.singleTypesConfigurations
+                        : pluginPermissions.collectionTypesConfigurations
+                    }
+                  >
+                    <LiLink
+                      message={{
+                        id: 'app.links.configure-view',
+                      }}
+                      icon="layout"
+                      key={`${pluginId}.link`}
+                      url={`${
+                        isSingleType ? `${pathname}/` : ''
+                      }ctm-configurations/edit-settings/content-types`}
+                      onClick={() => {
+                        // emitEvent('willEditContentTypeLayoutFromEditView');
+                      }}
+                    />
+                  </WithPermissions>
                   {getInjectedComponents(
                     'editView',
                     'right.links',
