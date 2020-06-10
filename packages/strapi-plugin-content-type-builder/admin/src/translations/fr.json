@@ -77,5 +77,6 @@
   "relation.oneToOne": "a un ",
   "relation.oneWay": "a un",
   "table.attributes.title.plural": "{number} champs",
-  "table.attributes.title.singular": "{number} champ"
+  "table.attributes.title.singular": "{number} champ",
+  "plugin.name": "Content Types Builder"
 }

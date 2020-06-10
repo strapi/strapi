@@ -109,5 +109,6 @@
   "notification.success.delete": "该项已被删除",
   "notification.success.submit": "设置已被更新",
   "plugin.description.long": "使用基于 JWT 的完整身份验证过程来保护 API。这个插件还有一个 ACL 策略，允许你管理用户组之间的权限。",
-  "plugin.description.short": "使用基于 JWT 的完整身份验证过程保护 API"
+  "plugin.description.short": "使用基于 JWT 的完整身份验证过程保护 API",
+  "plugin.name": "角色 & 权限"
 }

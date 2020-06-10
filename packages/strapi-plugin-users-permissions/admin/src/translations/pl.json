@@ -110,5 +110,6 @@
   "notification.success.submit": "Ustawienia zostały zaktualizowane",
   "plugin.description.long": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT. Ta wtyczka zawiera również strategię ACL, która pozwala zarządzać uprawnieniami między grupami użytkowników.",
   "plugin.description.short": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT",
-  "PopUpForm.Providers.vk.providerConfig.redirectURL": "Adres URL przekierowania do dodania w konfiguracji aplikacji VK"
+  "PopUpForm.Providers.vk.providerConfig.redirectURL": "Adres URL przekierowania do dodania w konfiguracji aplikacji VK",
+  "plugin.name": "Role i uprawnienia"
 }

@@ -109,5 +109,6 @@
   "notification.success.delete": "L'élément a bien été supprimé",
   "notification.success.submit": "Les configurations ont bien été sauvegardés",
   "plugin.description.long": "Protégez votre API avec un système d'authentification complet basé sur JWT (JSON Web Token). Ce plugin ajoute aussi une stratégie ACL (Access Control Layer) qui vous permet de gérer les permissions entre les groupes d'utilisateurs.",
-  "plugin.description.short": "Protégez votre API avec un système d'authentification complet basé sur JWT"
+  "plugin.description.short": "Protégez votre API avec un système d'authentification complet basé sur JWT",
+  "plugin.name": "Rôles et autorisations"
 }

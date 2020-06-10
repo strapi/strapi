@@ -8,7 +8,7 @@
   "containers.HomePage.PopUpWarning.message": "Вы уверены что хотите удалить эту версию?",
   "containers.HomePage.PopUpWarning.confirm": "Я понимаю",
 
- "containers.HomePage.form.jwtToken": "Получите ваш JWT токен",
+  "containers.HomePage.form.jwtToken": "Получите ваш JWT токен",
   "containers.HomePage.form.jwtToken.description": "Скопируйте этот токен и используйте его в swagger, чтобы делать запросы",
   "containers.HomePage.form.restrictedAccess": "Закрытый доступ",
   "containers.HomePage.form.restrictedAccess.inputDescription": "Сделайте вашу документацию приватной. По умолчанию доступ открыт",
@@ -25,5 +25,6 @@
   "error.noVersion": "Необходимо указать версию",
   "error.regenerateDoc.versionMissing": "Версии, которую вы пытаетесь сгенерировать, не существует",
   "error.deleteDoc.versionMissing": "Версии, которую вы пытаетесь удалить, не существует.",
-  "notification.update.success": "Настройки успешно обновлены"
+  "notification.update.success": "Настройки успешно обновлены",
+  "plugin.name": "Документация"
 }

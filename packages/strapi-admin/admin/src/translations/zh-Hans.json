@@ -1,8 +1,7 @@
 {
   "Analytics": "分析",
   "Content Manager": "内容管理",
-  "Content Type Builder": "内容类型生成器",
-  "Documentation": "文档",
+
   "Email": "邮件",
   "Files Upload": "文件上传",
   "HomePage.notification.newsLetter.success": "已成功订阅简讯",
@@ -11,7 +10,7 @@
   "Provider": "供应商",
   "ResetPasswordToken": "密码重置",
   "Role": "角色",
-  "Roles & Permissions": "角色 & 权限",
+
   "Settings Manager": "设置管理",
   "Username": "用户名",
   "Users": "用户",

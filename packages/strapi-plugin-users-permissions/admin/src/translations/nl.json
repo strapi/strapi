@@ -106,5 +106,6 @@
   "notification.success.delete": "Het item is verwijderd",
   "notification.success.submit": "Instellingen zijn geüpdatet",
   "plugin.description.long": "Beveilig je API met een volledig authenticatie proces op JWT. Deze extensie komt ook met een ACL strategie welke ervoor zorgt dat je de permissies tussen groepen van gebruikers kan beheren.",
-  "plugin.description.short": "Beveilig je API met een volledig authenticatie proces op JWT"
+  "plugin.description.short": "Beveilig je API met een volledig authenticatie proces op JWT",
+  "plugin.name": "Rollen & Permissies"
 }

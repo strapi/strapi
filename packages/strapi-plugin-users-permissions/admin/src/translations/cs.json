@@ -109,5 +109,6 @@
   "notification.success.delete": "E-mail byl odstraněn",
   "notification.success.submit": "Nastavení bylo aktualizování",
   "plugin.description.long": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT. Tento zásuvný modul obsahuje ACL strategii, která vám umožní spravovat oprávnění mezi skupinami uživatelů.",
-  "plugin.description.short": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT"
+  "plugin.description.short": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT",
+  "plugin.name": "Role a oprávnění"
 }

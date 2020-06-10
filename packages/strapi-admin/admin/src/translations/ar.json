@@ -1,5 +1,4 @@
 {
-  "Analytics": "إحصائيات",
   "Content Manager": "مدير محتوى",
   "Email": "البريد الإلكتروني",
   "Files Upload": "رفع الملفات",
@@ -9,7 +8,7 @@
   "Provider": "مزود",
   "ResetPasswordToken": "إعادة تعيين كلمة المرور",
   "Role": "قاعدة",
-  "Roles & Permissions": "الأدوار والصلاحية",
+
   "Settings Manager": "مدير الإعدادات",
   "Username": "اسم المستخدم",
   "Users": "المستخدمين",

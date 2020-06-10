@@ -98,5 +98,6 @@
   "notification.success.submit": "Impostazioni aggiornate",
   "opUpForm.Providers.key.label": "Client ID",
   "plugin.description.long": "Proteggi le tue API con un processo completo di autenticazione basato su JWT. Questo plugin è implementato con una strategia ACL che ti consente di gestire i permessi tra i gruppi di utenti.",
-  "plugin.description.short": "Proteggi le tue API con un processo completo di autenticazione basato su JWT"
+  "plugin.description.short": "Proteggi le tue API con un processo completo di autenticazione basato su JWT",
+  "plugin.name": "Ruoli e Permessi"
 }

@@ -113,5 +113,5 @@
   "notification.success.submit": "Settings have been updated",
   "plugin.description.long": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
   "plugin.description.short": "Protect your API with a full authentication process based on JWT",
-  "plugin.name": "Roles & Permission"
+  "plugin.name": "Roles & Permissions"
 }

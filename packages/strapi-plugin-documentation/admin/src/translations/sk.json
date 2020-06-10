@@ -25,5 +25,6 @@
   "error.noVersion": "Verzia je povinná",
   "error.regenerateDoc.versionMissing": "Verzia, ktorú sa snažíte vygenerovať, neexistuje.",
   "error.deleteDoc.versionMissing": "Verzia, ktorú sa snažíte vymazať, neexistuje.",
-  "notification.update.success": "Nastavenia boli upravené"
+  "notification.update.success": "Nastavenia boli upravené",
+  "plugin.name": "Dokumentácia"
 }

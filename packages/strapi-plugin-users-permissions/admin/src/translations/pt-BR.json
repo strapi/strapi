@@ -98,5 +98,6 @@
   "notification.success.delete": "O item foi excluído",
   "notification.success.submit": "As configurações foram atualizadas",
   "plugin.description.long": "Proteja sua API com um processo de autenticação completo baseado no JWT. Esse plugin também vem com uma estratégia de ACL que permite gerenciar as permissões entre os grupos de usuários.",
-  "plugin.description.short": "Proteja sua API com um processo de autenticação completo baseado no JWT"
+  "plugin.description.short": "Proteja sua API com um processo de autenticação completo baseado no JWT",
+  "plugin.name": "Papéis e permissões"
 }

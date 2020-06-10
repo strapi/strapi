@@ -1,7 +1,7 @@
 {
   "Analytics": "Analityka",
   "Content Manager": "Treści",
-  "Documentation": "Dokumentacja",
+
   "Email": "Email",
   "Files Upload": "Upload plików",
   "HomePage.notification.newsLetter.success": "Pomyślnie zapisano do biuletynu",
@@ -10,7 +10,7 @@
   "Provider": "Dostawca",
   "ResetPasswordToken": "Token resetu hasła",
   "Role": "Rola",
-  "Roles & Permissions": "Role i uprawnienia",
+
   "Settings Manager": "Ustawienia",
   "Username": "Nazwa użytkownika",
   "Users": "Użytkownicy",

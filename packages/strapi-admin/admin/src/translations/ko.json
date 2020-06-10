@@ -1,7 +1,6 @@
 {
   "Analytics": "통계",
   "Content Manager": "콘텐츠 관리",
-  "Documentation": "문서",
   "Email": "이메일",
   "Files Upload": "파일 업로드",
   "HomePage.notification.newsLetter.success": "뉴스레터 구독을 완료했습니다.",
@@ -10,7 +9,7 @@
   "Provider": "프로바이더(provider)",
   "ResetPasswordToken": "패스워트 토큰 재설정",
   "Role": "역할",
-  "Roles & Permissions": "역할(roles) & 권한(permissions)",
+
   "Settings Manager": "설정 관리",
   "Username": "사용자 이름(Username)",
   "Users": "User",

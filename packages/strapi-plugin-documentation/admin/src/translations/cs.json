@@ -22,5 +22,6 @@
   "error.noVersion": "Verze je vyžadována",
   "error.regenerateDoc.versionMissing": "Verze kterou se snažíte vygenerovat neexistuje.",
   "error.deleteDoc.versionMissing": "Verze kterou se snažíte odstranit neexistuje.",
-  "notification.update.success": "Nastavení bylo úspěšně uloženo"
+  "notification.update.success": "Nastavení bylo úspěšně uloženo",
+  "plugin.name": "Dokumentace"
 }

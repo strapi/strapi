@@ -98,5 +98,6 @@
   "notification.success.delete": "تم حذف هذا العنصر",
   "notification.success.submit": "تم تحديث الإعدادات",
   "plugin.description.long": "حماية الـAPI الخاص بك مع عملية مصادقة كاملة استناداً إلى JWT. يأتي هذا الملحق أيضًا مع إستراتيجية ACL التي تسمح لك بإدارة الأذونات بين مجموعات المستخدمين.",
-  "plugin.description.short": "حماية الـAPI الخاص بك مع عملية مصادقة كاملة استناداً إلى JWT"
+  "plugin.description.short": "حماية الـAPI الخاص بك مع عملية مصادقة كاملة استناداً إلى JWT",
+  "plugin.name": "الأدوار والصلاحية"
 }

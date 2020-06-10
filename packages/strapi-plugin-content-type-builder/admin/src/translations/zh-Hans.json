@@ -151,5 +151,6 @@
   "relation.oneToOne": "有一个",
   "relation.oneWay": "有一个",
   "table.attributes.title.plural": "{number} 字段",
-  "table.attributes.title.singular": "{number} 字段"
+  "table.attributes.title.singular": "{number} 字段",
+  "plugin.name": "内容类型生成器"
 }
