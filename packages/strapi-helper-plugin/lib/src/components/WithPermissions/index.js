@@ -15,6 +15,8 @@ const WithPermissions = ({ permissions, children }) => {
   useEffect(() => {
     const checkPermission = async () => {
       try {
+        setState({ isLoading: true, canAccess: false });
+
         const canAccess = await hasPermissions(userPermissions, permissions);
 
         if (isMounted.current) {
@@ -32,7 +34,9 @@ const WithPermissions = ({ permissions, children }) => {
 
     checkPermission();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permissions]);
 
+  useEffect(() => {
     return () => {
       isMounted.current = false;
     };

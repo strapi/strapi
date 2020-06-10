@@ -269,9 +269,11 @@ const ListView = () => {
     return getComponents('listView', 'list.link', plugins, {
       onClick: goToCMSettingsPage,
       isTemporary,
+      isInContentTypeView,
+      contentTypeKind,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTemporary]);
+  }, [isTemporary, isInContentTypeView, contentTypeKind]);
 
   const listActions = isInDevelopmentMode
     ? [...listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]
