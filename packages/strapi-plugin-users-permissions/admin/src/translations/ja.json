@@ -105,5 +105,6 @@
   "notification.success.delete": "アイテムが削除されました",
   "notification.success.submit": "設定が更新されました",
   "plugin.description.long": "JWTに基づいた完全な認証プロセスでAPIを保護します。このプラグインには、ユーザーのグループ間で権限を管理できるACL戦略もあります。",
-  "plugin.description.short": "JWTに基づく完全な認証プロセスでAPIを保護する"
+  "plugin.description.short": "JWTに基づく完全な認証プロセスでAPIを保護する",
+  "plugin.name": "ロールと権限"
 }

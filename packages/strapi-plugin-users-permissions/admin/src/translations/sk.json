@@ -109,5 +109,6 @@
   "notification.success.delete": "Položka bola odstránená",
   "notification.success.submit": "Nastavenia boli uložené",
   "plugin.description.long": "Zabezpečte vaše API pomocou JWT tokenov. Tento plugin taktiež podporuje ACL záznamy, ktoré umožňujú spravovať oprávnenia v rámci skupín používateľov.",
-  "plugin.description.short": "Zabezpečte vaše API pomocou JWT tokenov"
+  "plugin.description.short": "Zabezpečte vaše API pomocou JWT tokenov",
+  "plugin.name": "Roly a oprávnenia"
 }

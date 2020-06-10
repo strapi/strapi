@@ -25,5 +25,6 @@
   "error.noVersion": "Une version de documentation est nécessaire",
   "error.regenerateDoc.versionMissing": "La version que vous essayer de créer n'existe pas.",
   "error.deleteDoc.versionMissing": "La version que vous essayer de supprimer n'existe pas.",
-  "notification.update.success": "Vos paramètre ont été enregistré"
+  "notification.update.success": "Vos paramètre ont été enregistré",
+  "plugin.name": "Documentation"
 }

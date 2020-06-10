@@ -25,5 +25,6 @@
   "error.noVersion": "需要一个版本",
   "error.regenerateDoc.versionMissing": "您尝试重新生成的版本不存在",
   "error.deleteDoc.versionMissing": "您尝试删除的版本不存在。",
-  "notification.update.success": "设置更新成功"
+  "notification.update.success": "设置更新成功",
+  "plugin.name": "文档"
 }

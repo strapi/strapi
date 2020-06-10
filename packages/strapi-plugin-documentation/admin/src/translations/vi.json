@@ -25,5 +25,6 @@
   "error.noVersion": "Bắt buộc phải có một phiên bản",
   "error.regenerateDoc.versionMissing": "Phiên bản bạn đang cố sinh ra không tồn tại",
   "error.deleteDoc.versionMissing": "Phiên bản bạn đang cố xóa không tồn tại.",
-  "notification.update.success": "Các cài đặt đã được cập nhật thành công"
+  "notification.update.success": "Các cài đặt đã được cập nhật thành công",
+  "plugin.name": "Tài liệu"
 }

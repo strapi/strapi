@@ -19,6 +19,7 @@ import vi from './vi.json';
 import zhHans from './zh-Hans.json';
 import zh from './zh.json';
 import sk from './sk.json';
+import sv from './sv.json';
 
 const trads = {
   ar,
@@ -42,6 +43,7 @@ const trads = {
   'zh-Hans': zhHans,
   zh,
   sk,
+  sv,
 };
 
 export default trads;

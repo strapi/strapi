@@ -1,7 +1,7 @@
 {
   "Analytics": "Analýzy",
   "Content Manager": "Správca obsahu",
-  "Documentation": "Dokumentácia",
+
   "Email": "E-mailová adresa",
   "Files Upload": "Nahrať súbory",
   "HomePage.notification.newsLetter.success": "Prihlásenie k odberu noviniek bolo úspešné",
@@ -10,7 +10,7 @@
   "Provider": "Poskytovateľ",
   "ResetPasswordToken": "Token pre obnovu hesla",
   "Role": "Rola",
-  "Roles & Permissions": "Roly a oprávnenia",
+
   "Settings Manager": "Správca nastavení",
   "Username": "Používateľské meno",
   "Users": "Používateľ",

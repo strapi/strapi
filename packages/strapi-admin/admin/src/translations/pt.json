@@ -2,7 +2,7 @@
   "Analytics": "Estatísticas",
   "Content Manager": "Gestor de Conteúdo",
   "Content Type Builder": "Construtor de Tipos de Conteúdo",
-  "Documentation": "Documentação",
+
   "Email": "Email",
   "Files Upload": "Carregamento de Ficheiros",
   "HomePage.notification.newsLetter.success": "Subscrição à newsletter efetuada com sucesso",
@@ -11,7 +11,7 @@
   "Provider": "Provedor",
   "ResetPasswordToken": "Código de redefinição da palavra-passe",
   "Role": "Função",
-  "Roles & Permissions": "Grupos & Permissões",
+
   "Settings Manager": "Gestor de Configurações",
   "Username": "Nome de utilizador",
   "Users": "Utilizadores",

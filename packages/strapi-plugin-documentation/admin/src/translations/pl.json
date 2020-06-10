@@ -25,5 +25,6 @@
   "error.noVersion": "Wersja jest wymagana",
   "error.regenerateDoc.versionMissing": "Wersja, którą prubujesz wygenerować nie istnieje.",
   "error.deleteDoc.versionMissing": "Wersja, którą próbujesz usunąć nie istnieje.",
-  "notification.update.success": "Ustawienia zaktualizowane pomyślnie"
+  "notification.update.success": "Ustawienia zaktualizowane pomyślnie",
+  "plugin.name": "Dokumentacja"
 }

@@ -22,5 +22,6 @@
   "error.noVersion": "A version is required",
   "error.regenerateDoc.versionMissing": "The version you are trying to generate doesn't exist",
   "error.deleteDoc.versionMissing": "The version you are trying to delete does not exist.",
-  "notification.update.success": "Settings updated successfully"
+  "notification.update.success": "Settings updated successfully",
+  "plugin.name": "Documentazione"
 }

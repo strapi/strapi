@@ -106,5 +106,6 @@
   "notification.success.delete": "Das Objekt wurde gelöscht",
   "notification.success.submit": "Einstellungen aktualisiert",
   "plugin.description.long": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT. Zudem bietet dieses Plugin eine ACL-Strategie, die erlaubt, die Befugnisse zwischen Benutzergruppen festzulegen.",
-  "plugin.description.short": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT."
+  "plugin.description.short": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT.",
+  "plugin.name": "Rollen & Berechtigungen"
 }

@@ -108,5 +108,6 @@
   "notification.success.delete": "Bản ghi đã được xoá",
   "notification.success.submit": "Các cấu hình đã được cập nhật",
   "plugin.description.long": "Bảo vệ API của bạn với quá trình chứng thực đầy đủ dựa trên JWT. Plugin này cũng kèm với chiến lược ACL cho phép bạn quản lý quyền giữa các nhóm người dùng.",
-  "plugin.description.short": "Bảo vệ API của bạn với quá trình chứng thực đầy đủ dựa trên JWT"
+  "plugin.description.short": "Bảo vệ API của bạn với quá trình chứng thực đầy đủ dựa trên JWT",
+  "plugin.name": "Vai trò và Quyền"
 }

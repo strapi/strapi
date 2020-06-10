@@ -108,5 +108,6 @@
   "notification.success.delete": "항목을 삭제했습니다.",
   "notification.success.submit": "설정을 업데이트했습니다.",
   "plugin.description.long": "JWT 기반의 인증 프로세스로 API를 보호하세요. 이 플러그인에서 사용자 그룹간 권한을 관리할 수 있는 ACL 전략도 설정할 수 있습니다.",
-  "plugin.description.short": "JWT 기반의 인증 프로세스로 API를 보호하세요."
+  "plugin.description.short": "JWT 기반의 인증 프로세스로 API를 보호하세요.",
+  "plugin.name": "역할(roles) & 권한(permissions)"
 }
