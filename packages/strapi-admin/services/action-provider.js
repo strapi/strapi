@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { yup } = require('strapi-utils');
 const { validateRegisterProviderAction } = require('../validation/action-provider');
 const { getActionId, createAction } = require('../domain/action');
@@ -18,7 +17,7 @@ const createActionProvider = () => {
     get(uid, pluginName) {
       const actionId = getActionId({ pluginName, uid });
       const action = actions.get(actionId);
-      return _.cloneDeep(action);
+      return action;
     },
 
     /**
@@ -26,7 +25,7 @@ const createActionProvider = () => {
      * @returns {Promise<Array<Action>>}
      */
     getAll() {
-      return _.cloneDeep(Array.from(actions.values()));
+      return Array.from(actions.values());
     },
 
     /**
@@ -34,7 +33,7 @@ const createActionProvider = () => {
      * @returns {Promise<Map<uid, Action>>}
      */
     getAllByMap() {
-      return _.cloneDeep(actions);
+      return actions;
     },
 
     /**
