@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import PropTypes from 'prop-types';
 import useUser from '../../hooks/useUser';
@@ -10,23 +10,32 @@ import hasPermissions from '../../utils/hasPermissions';
 const WithPermissions = ({ permissions, children }) => {
   const userPermissions = useUser();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const checkPermission = async () => {
       try {
         const canAccess = await hasPermissions(userPermissions, permissions);
 
-        setState({ isLoading: false, canAccess });
+        if (isMounted.current) {
+          setState({ isLoading: false, canAccess });
+        }
       } catch (err) {
-        console.error(err);
-        strapi.notification.error('notification.error');
+        if (isMounted.current) {
+          console.error(err);
+          strapi.notification.error('notification.error');
 
-        setState({ isLoading: false });
+          setState({ isLoading: false });
+        }
       }
     };
 
     checkPermission();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   if (state.isLoading) {

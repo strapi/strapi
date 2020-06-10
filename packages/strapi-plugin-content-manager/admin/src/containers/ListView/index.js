@@ -13,9 +13,11 @@ import {
   getQueryParameters,
   useGlobalContext,
   request,
+  WithPermissions,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import pluginPermissions from '../../permissions';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
@@ -385,16 +387,18 @@ function ListView({
                 </div>
               </div>
               <div className="col-2">
-                <DisplayedFieldsDropdown
-                  isOpen={isLabelPickerOpen}
-                  items={getAllLabels()}
-                  onChange={handleChangeListLabels}
-                  onClickReset={() => {
-                    resetListLabels(slug);
-                  }}
-                  slug={slug}
-                  toggle={toggleLabelPickerState}
-                />
+                <WithPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+                  <DisplayedFieldsDropdown
+                    isOpen={isLabelPickerOpen}
+                    items={getAllLabels()}
+                    onChange={handleChangeListLabels}
+                    onClickReset={() => {
+                      resetListLabels(slug);
+                    }}
+                    slug={slug}
+                    toggle={toggleLabelPickerState}
+                  />
+                </WithPermissions>
               </div>
             </div>
             <div className="row" style={{ paddingTop: '12px' }}>
