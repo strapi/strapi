@@ -11,6 +11,7 @@ import App from './containers/App';
 import Initializer from './containers/Initializer';
 import Link from './InjectedComponents/ContentManager/EditViewLink';
 import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
+import pluginPermissions from './utils/permissions';
 import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';
@@ -64,7 +65,7 @@ export default strapi => {
             defaultMessage: 'Content-Types Builder',
           },
           name,
-          permissions: [{ action: 'plugins::content-type-builder.read', subject: null }],
+          permissions: pluginPermissions.main,
         },
       ],
     },

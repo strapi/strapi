@@ -333,17 +333,22 @@ const data = {
     },
     {
       action: 'plugins::content-manager.explorer.create',
+      subject: 'application::restaurant.restaurant',
+      conditions: [],
+    },
+    {
+      action: 'plugins::content-manager.explorer.create',
       subject: 'application::homepage.homepage',
       conditions: [],
     },
 
     // Content type builder
-    {
-      action: 'plugins::content-type-builder.read',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'plugins::content-type-builder.read',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
 
     // Documentation plugin
     // {
