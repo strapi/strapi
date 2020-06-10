@@ -104,7 +104,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
         },
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       strapi.notification.error('notification.error');
     }
   };

@@ -11,14 +11,12 @@ import LeftMenuLinkContent from './LeftMenuLinkContent';
 
 const LeftMenuLink = ({ destination, iconName, label, location }) => {
   return (
-    <>
-      <LeftMenuLinkContent
-        destination={destination}
-        iconName={iconName}
-        label={label}
-        location={location}
-      />
-    </>
+    <LeftMenuLinkContent
+      destination={destination}
+      iconName={iconName}
+      label={label}
+      location={location}
+    />
   );
 };
 
