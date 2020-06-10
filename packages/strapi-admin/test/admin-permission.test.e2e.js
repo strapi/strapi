@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
@@ -18,6 +20,13 @@ describe('Role CRUD End to End', () => {
     });
 
     expect(res.statusCode).toBe(200);
+
+    // Data is sorted to avoid error with snapshot when the data is not in the same order
+    const sortedData = _.cloneDeep(res.body.data);
+    Object.keys(sortedData.sections).forEach(sectionName => {
+      sortedData.sections[sectionName] = _.sortBy(sortedData.sections[sectionName], ['action']);
+    });
+    sortedData.conditions = sortedData.conditions.sort();
     expect(res.body.data).toMatchSnapshot();
   });
 });
