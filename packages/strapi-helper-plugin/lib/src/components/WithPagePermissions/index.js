@@ -13,6 +13,8 @@ const WithPagePermissions = ({ permissions, children }) => {
   useEffect(() => {
     const checkPermission = async () => {
       try {
+        setState({ isLoading: true, canAccess: false });
+
         const canAccess = await hasPermissions(userPermissions, permissions);
 
         if (isMounted.current) {
@@ -31,10 +33,13 @@ const WithPagePermissions = ({ permissions, children }) => {
 
     checkPermission();
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permissions]);
+
+  useEffect(() => {
     return () => {
       isMounted.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (state.isLoading) {
