@@ -79,6 +79,8 @@ export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
 export { default as UserProvider } from './components/UserProvider';
 export { default as ViewContainer } from './components/ViewContainer';
+export { default as WithPagePermissions } from './components/WithPagePermissions';
+export { default as WithPermissions } from './components/WithPermissions';
 
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
@@ -87,6 +89,7 @@ export { default as UserContext } from './contexts/UserContext';
 // Hooks
 export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
+export { default as useUser } from './hooks/useUser';
 
 // Providers
 export { default as StrapiProvider } from './providers/StrapiProvider';
