@@ -73,7 +73,7 @@ If you plan to use **MongoDB** with your project, [refer to the create a Strapi 
 Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
 
 ```bash
-yarn create strapi-app my-project --quickstart
+yarn create strapi-app my-project
 ```
 
 :::
@@ -83,7 +83,7 @@ yarn create strapi-app my-project --quickstart
 Use **npm/npx** to install the Strapi project
 
 ```bash
-npx create-strapi-app my-project --quickstart
+npx create-strapi-app my-project
 ```
 
 :::
