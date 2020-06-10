@@ -7,6 +7,7 @@
 
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
+import pluginPermissions from './permissions';
 import layout from '../../config/layout';
 import pluginId from './pluginId';
 import App from './containers/App';
@@ -48,16 +49,7 @@ export default strapi => {
             defaultMessage: 'Roles & Permissions',
           },
           name,
-          permissions: [
-            { action: 'plugins::users-permissions.advanced-settings.read', subject: null },
-            { action: 'plugins::users-permissions.advanced-settings.update', subject: null },
-            { action: 'plugins::users-permissions.email-templates.read', subject: null },
-            { action: 'plugins::users-permissions.email-templates.update', subject: null },
-            { action: 'plugins::users-permissions.providers.read', subject: null },
-            { action: 'plugins::users-permissions.providers.update', subject: null },
-            { action: 'plugins::users-permissions.roles.create', subject: null },
-            { action: 'plugins::users-permissions.roles.read', subject: null },
-          ],
+          permissions: pluginPermissions.main,
         },
       ],
     },
