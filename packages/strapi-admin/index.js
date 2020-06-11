@@ -198,13 +198,13 @@ async function createCacheDir(dir) {
   // copy plugins code
   await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
 
-  // create plugins.js with plugins requires
-  await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
-
   // override admin code with user customizations
   if (fs.pathExistsSync(path.join(dir, 'admin'))) {
     await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
   }
+
+  // create plugins.js with plugins requires
+  await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
 
   // override plugins' admin code with user customizations
   const pluginsToOverride = pluginsToCopy.reduce((acc, current) => {
