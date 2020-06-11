@@ -23,7 +23,7 @@ strapi.config.get('server.host', 'defaultValueIfUndefined');
 Nested keys are accessible with `dot-notation`.
 
 :::tip NOTE
-You can notice the filename is used as prefix to access the configurations.
+Notice that the filename is used as a prefix to access the configurations.
 :::
 
 ## Formats
@@ -50,9 +50,9 @@ module.exports = ({ env }) => {
 
 ## Environment variables
 
-In most usecases you will have different configurations between your environments. For example: your database credentials.
+In most use cases you will have different configurations between your environments. For example: your database credentials.
 
-Instead of writting those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
+Instead of writing those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
 
 **Example**
 
@@ -111,14 +111,14 @@ env.date('VAR', new Date());
 
 ## Environments
 
-What if you need to specific static configurations for specific environments and using environement variables becomes tedious ?
+What if you need to specific static configurations for specific environments and using environment variables becomes tedious?
 
-Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base ones defined in the `./config` folder.
+Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base configurations defined in the `./config` folder.
 The environment is based on the `NODE_ENV` environment variable (defaults to `development`).
 
-When starting strapi with `NODE_ENV=production` it will load the configuration from `./config/*` and `./config/env/production/*`. Everything defined in the production config will override the default config.
+When starting Strapi with `NODE_ENV=production` it will load the configuration from `./config/*` and `./config/env/production/*`. Everything defined in the production config will override the default config.
 
-In combination with environment variables this pattern becomes really powerfull:
+In combination with environment variables this pattern becomes really powerful:
 
 **Example**
 
@@ -142,7 +142,7 @@ When you start your application
 
 ```bash
 yarn start
-# uses host 127.0.0.0
+# uses host 127.0.0.1
 ```
 
 ```bash
@@ -172,14 +172,14 @@ module.exports = ({ env }) => ({
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ----------- |
 | `host`                   | Host name                                                                                                                                                                                        | string        | `localhost` |
 | `port`                   | Port on which the server should be running.                                                                                                                                                      | integer       | `1337`      |
-| `emitErrors`             | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                                                           | boolean       | `false      |
+| `emitErrors`             | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                                                           | boolean       | `false`     |
 | `url`                    | Url of the server. Enable proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. | string        | `''`        |
 | `cron`                   | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule))                                                                                                | Object        |             |
 | `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                                                                 | boolean       | `false`     |
 | `admin`                  | Admin panel configuration                                                                                                                                                                        | Object        |             |
 | `admin.url`              | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`.                                                                              | string        | `/admin`    |
 | `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                                                              | boolean       | `true`      |
-| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`).                                      | Array(string) | `[]`.       |
+| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`).                                      | Array(string) | `[]`        |
 
 ## Functions
 
@@ -197,7 +197,6 @@ Here are some use cases:
 
 - Create an admin user if there isn't one.
 - Fill the database with some necessary data.
-- Check that the database is up-and-running.
 - Load some environment variables.
 
 The bootstrap function can be synchronous or asynchronous.

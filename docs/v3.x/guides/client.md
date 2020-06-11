@@ -42,7 +42,7 @@ module.exports = strapi => {
 };
 ```
 
-When the hook is created, we have set it to `enabled` in order for Strapi to laod it. You will need to create or edit the file `./config/hook.js`.
+When the hook is created, we have set it to `enabled` in order for Strapi to load it. You will need to create or edit the file `./config/hook.js`.
 
 **Path —** `./config/hook.js`
 

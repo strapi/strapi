@@ -159,7 +159,7 @@ You need to complete the following fields:
 
 After your **Administrator** registration is complete, you see the Strapi _Administration Dashboard_:
 
-![Strapi Admininstration Dashboard](../assets/getting-started/tutorial/strapi-dashboard.png 'Strapi Admin Dashboard')
+![Strapi Administration Dashboard](../assets/getting-started/tutorial/strapi-dashboard.png 'Strapi Admin Dashboard')
 
 **Administrators** and front-end **Users** are separate roles.
 
@@ -235,13 +235,13 @@ You may add your first field, a **Text** field for the **Restaurant** name.
 - Click on the `Text` field.
 - In the **Name** field, type `name`.
 
-![Restaurant Name Input Field](../assets/getting-started/tutorial/restaurant-name-input-field.png 'Restuarant Name Input Field')
+![Restaurant Name Input Field](../assets/getting-started/tutorial/restaurant-name-input-field.png 'Restaurant Name Input Field')
 
 - Click on the `ADVANCED SETTINGS` tab.
 - Check the `Required field` checkbox.
 - Check the `Unique field` checkbox.
 
-![Restaurant Name Advanced Settings](../assets/getting-started/tutorial/restaurant-name-advanced-settings.png 'Restuarant Name Advanced Settings')
+![Restaurant Name Advanced Settings](../assets/getting-started/tutorial/restaurant-name-advanced-settings.png 'Restaurant Name Advanced Settings')
 
 - Click the `+ Add another field` button.
 
@@ -253,7 +253,7 @@ You are now ready to add the second field, a **Rich Text** field for the **Resta
 
 - In the **Name** field, type `description`.
 
-![Restaurant Rich Text Field](../assets/getting-started/tutorial/restaurant-rich-text-field.png 'Restuarant Rich Text Field')
+![Restaurant Rich Text Field](../assets/getting-started/tutorial/restaurant-rich-text-field.png 'Restaurant Rich Text Field')
 
 - Click the `+ Add another field` button.
 
@@ -265,12 +265,12 @@ You are now ready to add the third field, a **Media** field for the **Restaurant
 
 - In the **Name** field, type `image`.
 
-![Restaurant Rich Image Field](../assets/getting-started/tutorial/restaurant-image-field.png 'Restuarant Rich Image Field')
+![Restaurant Rich Image Field](../assets/getting-started/tutorial/restaurant-image-field.png 'Restaurant Rich Image Field')
 
 - Click on the **ADVANCED SETTINGS** tab.
 - Check the `Required field` checkbox.
 
-![Restaurant Rich Image Field Advanced Settings](../assets/getting-started/tutorial/restaurant-image-field-advanced-settings.png 'Restuarant Rich Image Field Advanced Settings')
+![Restaurant Rich Image Field Advanced Settings](../assets/getting-started/tutorial/restaurant-image-field-advanced-settings.png 'Restaurant Rich Image Field Advanced Settings')
 
 - Click the `Finish` button.
 

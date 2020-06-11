@@ -87,6 +87,7 @@ function EditView() {
       return obj;
     }, {});
 
+  /* eslint-disable indent */
   const headerTitle = isCreating
     ? formatMessage({
         id: 'Settings.webhooks.create',
@@ -135,6 +136,7 @@ function EditView() {
       type: 'submit',
     },
   ];
+  /* eslint-enable indent */
 
   const headerProps = {
     title: {
