@@ -11,6 +11,12 @@ const pluginPermissions = {
       fields: null,
       conditions: null,
     },
+    {
+      action: 'plugins::upload.assets.update',
+      subject: null,
+      fields: null,
+      conditions: null,
+    },
   ],
   create: [
     {
@@ -20,8 +26,16 @@ const pluginPermissions = {
       conditions: null,
     },
   ],
-  filters: [{ action: 'plugins::upload.read', subject: null }],
-  sort: [{ action: 'plugins::upload.read', subject: null }],
+  read: [
+    { action: 'plugins::upload.read', subject: null },
+
+    {
+      action: 'plugins::upload.assets.update',
+      subject: null,
+      fields: null,
+      conditions: null,
+    },
+  ],
   settings: [{ action: 'plugins::upload.settings.read', subject: null }],
   update: [
     { action: 'plugins::upload.assets.update', subject: null, fields: null, conditions: null },

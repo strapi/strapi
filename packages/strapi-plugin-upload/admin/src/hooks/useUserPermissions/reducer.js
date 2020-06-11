@@ -2,7 +2,7 @@ import produce from 'immer';
 
 const initialState = {
   isLoading: true,
-  allowedActions: [],
+  allowedActions: {},
 };
 
 const reducer = (state, action) =>

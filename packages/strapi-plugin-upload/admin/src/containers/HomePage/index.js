@@ -18,15 +18,21 @@ import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
 import Padded from '../../components/Padded';
+import { useAppContext } from '../../hooks';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const HomePage = () => {
+  const { allowedActions } = useAppContext();
+  const { canRead } = allowedActions;
+  console.log({ allowedActions });
   const { formatMessage, plugins } = useGlobalContext();
   const [, updated_at] = getFileModelTimestamps(plugins);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, allowedActions)
+  );
   const query = useQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -109,16 +115,18 @@ const HomePage = () => {
   };
 
   const fetchListData = async () => {
-    dispatch({ type: 'GET_DATA' });
+    if (canRead) {
+      dispatch({ type: 'GET_DATA' });
 
-    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+      const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
 
-    if (isMounted.current) {
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-        count,
-      });
+      if (isMounted.current) {
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data,
+          count,
+        });
+      }
     }
   };
 
@@ -174,11 +182,13 @@ const HomePage = () => {
   };
 
   const handleClickEditFile = id => {
-    const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+    if (allowedActions.canUpdate) {
+      const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
 
-    setFileToEdit(file);
-    setModalInitialStep('edit');
-    handleClickToggleModal();
+      setFileToEdit(file);
+      setModalInitialStep('edit');
+      handleClickToggleModal();
+    }
   };
 
   const handleClickToggleModal = (refetch = false) => {
@@ -276,12 +286,16 @@ const HomePage = () => {
     title: {
       label: pluginName,
     },
-    content: formatMessage(
-      {
-        id: getTrad(getHeaderLabel(dataCount)),
-      },
-      { number: dataCount }
-    ),
+    /* eslint-disable indent */
+    content: canRead
+      ? formatMessage(
+          {
+            id: getTrad(getHeaderLabel(dataCount)),
+          },
+          { number: dataCount }
+        )
+      : null,
+    /* eslint-enable indent */
     actions: [
       {
         disabled: dataToDelete.length === 0,
@@ -311,6 +325,20 @@ const HomePage = () => {
     ],
   };
 
+  const content = canRead ? (
+    <HomePageContent
+      data={data}
+      dataCount={dataCount}
+      dataToDelete={dataToDelete}
+      onCardCheck={handleChangeCheck}
+      onCardClick={handleClickEditFile}
+      onClick={handleClickToggleModal}
+      onFilterDelete={handleDeleteFilter}
+      onParamsChange={handleChangeParams}
+      onSelectAll={handleSelectAll}
+    />
+  ) : null;
+
   return (
     <Container>
       <Header {...headerProps} isLoading={isLoading} />
@@ -320,17 +348,7 @@ const HomePage = () => {
           <LoadingIndicator />
         </>
       ) : (
-        <HomePageContent
-          data={data}
-          dataCount={dataCount}
-          dataToDelete={dataToDelete}
-          onCardCheck={handleChangeCheck}
-          onCardClick={handleClickEditFile}
-          onClick={handleClickToggleModal}
-          onFilterDelete={handleDeleteFilter}
-          onParamsChange={handleChangeParams}
-          onSelectAll={handleSelectAll}
-        />
+        content
       )}
       <ModalStepper
         initialFileToEdit={fileToEdit}

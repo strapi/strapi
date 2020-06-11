@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-
+// import { CheckPermissions } from 'strapi-helper-plugin';
 import { createMatrix, getTrad } from '../../utils';
-
+// import pluginPermissions from '../../permissions';
 import ModalSection from '../ModalSection';
 import IntlText from '../IntlText';
 import Container from './Container';
