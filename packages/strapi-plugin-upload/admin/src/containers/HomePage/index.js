@@ -27,7 +27,6 @@ import reducer, { initialState } from './reducer';
 const HomePage = () => {
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
-  console.log({ allowedActions });
   const { formatMessage, plugins } = useGlobalContext();
   const [, updated_at] = getFileModelTimestamps(plugins);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>

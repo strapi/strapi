@@ -18,9 +18,25 @@ const pluginPermissions = {
       conditions: null,
     },
   ],
+  copyLink: [
+    {
+      action: 'plugins::upload.assets.copy-link',
+      subject: null,
+      fields: null,
+      conditions: null,
+    },
+  ],
   create: [
     {
       action: 'plugins::upload.assets.create',
+      subject: null,
+      fields: null,
+      conditions: null,
+    },
+  ],
+  download: [
+    {
+      action: 'plugins::upload.assets.download',
       subject: null,
       fields: null,
       conditions: null,

@@ -13,6 +13,7 @@ import {
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
+import { useAppContext } from '../../hooks';
 import ModalHeader from '../../components/ModalHeader';
 import stepper from './stepper';
 import init from './init';
@@ -26,6 +27,7 @@ const ModalStepper = ({
   onDeleteMedia,
   onToggle,
 }) => {
+  const { allowedActions } = useAppContext();
   const { emitEvent, formatMessage } = useGlobalContext();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
@@ -479,6 +481,7 @@ const ModalStepper = ({
         {/* body of the modal */}
         {Component && (
           <Component
+            {...allowedActions}
             onAbortUpload={handleAbortUpload}
             addFilesToUpload={addFilesToUpload}
             fileToEdit={fileToEdit}
