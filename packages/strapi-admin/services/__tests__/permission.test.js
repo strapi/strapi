@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const permissionService = require('../permission');
 
 describe('Permission Service', () => {
@@ -66,6 +67,50 @@ describe('Permission Service', () => {
         fields: [],
         subject: null,
       });
+    });
+  });
+
+  describe('Find User Permissions', () => {
+    test('Find calls the right db query', async () => {
+      const find = jest.fn(({ role_in }) => role_in);
+
+      global.strapi = {
+        query() {
+          return { find };
+        },
+      };
+
+      const rolesId = [1, 2];
+
+      const res = await permissionService.findUserPermissions({
+        roles: rolesId.map(id => ({ id })),
+      });
+
+      expect(find).toHaveBeenCalledWith({ role_in: rolesId });
+      expect(res).toStrictEqual(rolesId);
+    });
+
+    test('Returns default result when no roles provided', async () => {
+      const res = await permissionService.findUserPermissions({});
+
+      expect(res).toStrictEqual([]);
+    });
+  });
+
+  describe('Sanitize Permission', () => {
+    test('Removes unwanted properties', () => {
+      const permission = {
+        action: 'read',
+        subject: 'article',
+        fields: ['*'],
+        conditions: ['cond'],
+        foo: 'bar',
+      };
+
+      const sanitizedPermission = permissionService.sanitizePermission(permission);
+
+      expect(sanitizedPermission.foo).toBeUndefined();
+      expect(sanitizedPermission).toMatchObject(_.omit(permission, 'foo'));
     });
   });
 });

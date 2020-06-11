@@ -123,12 +123,26 @@
     {
       "method": "GET",
       "path": "/users/me",
-      "handler": "authenticated-user.getMe"
+      "handler": "authenticated-user.getMe",
+      "config": {
+        "policies": ["admin::isAuthenticatedAdmin"]
+      }
     },
     {
       "method": "PUT",
       "path": "/users/me",
-      "handler": "authenticated-user.updateMe"
+      "handler": "authenticated-user.updateMe",
+      "config": {
+        "policies": ["admin::isAuthenticatedAdmin"]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/permissions",
+      "handler": "authenticated-user.getOwnPermissions",
+      "config": {
+        "policies": ["admin::isAuthenticatedAdmin"]
+      }
     },
     {
       "method": "POST",

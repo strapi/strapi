@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const { createPermission } = require('../domain/permission');
 const actionProvider = require('./action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
@@ -63,11 +64,24 @@ const assign = async (roleID, permissions = []) => {
   return newPermissions;
 };
 
+const findUserPermissions = async ({ roles }) => {
+  if (!_.isArray(roles)) {
+    return [];
+  }
+
+  return strapi.query('permission', 'admin').find({ role_in: roles.map(_.property('id')) });
+};
+
+const sanitizePermission = permission =>
+  _.pick(permission, ['action', 'subject', 'fields', 'conditions']);
+
 module.exports = {
   find,
   deleteByRolesIds,
   deleteByIds,
   assign,
+  sanitizePermission,
+  findUserPermissions,
   actionProvider,
   engine,
   conditionProvider,

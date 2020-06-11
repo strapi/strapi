@@ -8,7 +8,7 @@ const registerPermissionActions = () => {
 };
 
 const cleanPermissionInDatabase = async () => {
-  const actionProvider = strapi.admin.services.permission;
+  const { actionProvider } = strapi.admin.services.permission;
   const dbPermissions = await strapi.admin.services.permission.find();
   const allActionsMap = actionProvider.getAllByMap();
   const permissionsToRemoveIds = [];
