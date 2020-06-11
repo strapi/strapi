@@ -149,7 +149,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
       <Loader show={isLoading} />
       <LeftMenuHeader />
       <LinksContainer>
-        {collectTypesSectionLinksFiltered.length && (
+        {collectTypesSectionLinksFiltered.length > 0 && (
           <LeftMenuLinksSection
             section="collectionType"
             name="collectionType"
@@ -158,7 +158,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
             searchable
           />
         )}
-        {singleTypesSectionLinksFiltered.length && (
+        {singleTypesSectionLinksFiltered.length > 0 && (
           <LeftMenuLinksSection
             section="singleType"
             name="singleType"
@@ -175,7 +175,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
           searchable={false}
           emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
         />
-        {generalSectionLinksFiltered.length && (
+        {generalSectionLinksFiltered.length > 0 && (
           <LeftMenuLinksSection
             section="general"
             name="general"
