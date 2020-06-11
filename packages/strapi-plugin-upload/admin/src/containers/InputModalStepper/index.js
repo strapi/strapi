@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useUserPermissions } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import DragLayer from '../../components/DragLayer';
-import { useUserPermissions } from '../../hooks';
+
+import pluginPermissions from '../../permissions';
 import InputModalStepper from './InputModalStepper';
 import InputModalStepperProvider from '../InputModalStepperProvider';
 
@@ -21,7 +23,7 @@ const InputModal = ({
   step,
 }) => {
   const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
-  const { allowedActions, isLoading } = useUserPermissions();
+  const { allowedActions, isLoading } = useUserPermissions(pluginPermissions);
 
   if (isLoading) {
     return null;

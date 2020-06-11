@@ -1,6 +1,6 @@
 import init from '../init';
 
-describe('UPLOAD | hooks | useUserPermissions | init', () => {
+describe('HELPER_PLUGIN | hooks | useUserPermissions | init', () => {
   it('should return the initialState and the allowedActions', () => {
     const initialState = {
       isLoading: true,

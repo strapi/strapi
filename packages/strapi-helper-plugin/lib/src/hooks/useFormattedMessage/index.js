@@ -1,4 +1,4 @@
-import { useGlobalContext } from '../contexts/GlobalContext';
+import { useGlobalContext } from '../../contexts/GlobalContext';
 import { isObject } from 'lodash';
 
 const useFormattedMessage = message => {
