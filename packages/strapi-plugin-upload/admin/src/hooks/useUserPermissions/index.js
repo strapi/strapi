@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import { hasPermissions, useUser } from 'strapi-helper-plugin';
+
 import pluginPermissions from '../../permissions';
 import generateResultsObject from './utils/generateResultsObject';
 import reducer, { initialState } from './reducer';
