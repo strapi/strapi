@@ -398,12 +398,12 @@ const data = {
       fields: null,
       conditions: [],
     },
-    {
-      action: 'plugins::upload.assets.update',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'plugins::upload.assets.update',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     {
       action: 'plugins::upload.assets.dowload',
       subject: null,
