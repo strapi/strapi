@@ -61,21 +61,26 @@ describe('Permissions Engine', () => {
 
     jest.spyOn(engine, 'evaluatePermission');
     jest.spyOn(engine, 'createRegisterFunction');
-    jest.spyOn(engine, 'findPermissionsForUser');
     jest.spyOn(engine, 'generateAbilityCreatorFor');
 
-    const findRole = jest.fn(({ id_in }) =>
-      _.reduce(
-        localTestData.roles,
-        (acc, value, key) => (id_in.includes(_.toNumber(key)) ? [...acc, value] : acc),
-        []
-      )
-    );
-
     global.strapi = {
-      query: () => ({
-        find: findRole,
-      }),
+      admin: {
+        services: {
+          permission: {
+            findUserPermissions: jest.fn(({ roles }) =>
+              _.reduce(
+                localTestData.roles,
+                (acc, { permissions: value }, key) => {
+                  return roles.map(_.property('id')).includes(_.toNumber(key))
+                    ? [...acc, ...value]
+                    : acc;
+                },
+                []
+              )
+            ),
+          },
+        },
+      },
     };
   });
 
@@ -102,7 +107,6 @@ describe('Permissions Engine', () => {
         },
       ];
 
-      expect(engine.findPermissionsForUser).toHaveBeenCalledWith(user);
       expect(engine.generateAbilityCreatorFor).toHaveBeenCalledWith(user);
       expect(_.orderBy(ability.rules, ['subject'], ['asc'])).toMatchObject(expected);
 
@@ -133,7 +137,6 @@ describe('Permissions Engine', () => {
         },
       ];
 
-      expect(engine.findPermissionsForUser).toHaveBeenCalledWith(user);
       expect(engine.generateAbilityCreatorFor).toHaveBeenCalledWith(user);
       expect(_.orderBy(ability.rules, ['action'], ['asc'])).toMatchObject(expected);
 
@@ -256,31 +259,6 @@ describe('Permissions Engine', () => {
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);
-    });
-  });
-
-  describe('Finds permissions For User', () => {
-    const sort = collection => _.orderBy(collection, ['action', 'subject'], ['asc', 'asc']);
-
-    test('Finds permissions for Alice', async () => {
-      const user = getUser('alice');
-      const permissions = await engine.findPermissionsForUser(user);
-
-      const expected = sort(localTestData.roles['1'].permissions);
-
-      expect(sort(permissions)).toStrictEqual(expected);
-    });
-
-    test('Finds permissions for Bob', async () => {
-      const user = getUser('bob');
-      const permissions = await engine.findPermissionsForUser(user);
-
-      const expected = sort([
-        ...localTestData.roles['1'].permissions,
-        ...localTestData.roles['2'].permissions,
-      ]);
-
-      expect(sort(permissions)).toStrictEqual(expected);
     });
   });
 
