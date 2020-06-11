@@ -8,7 +8,7 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
-import App from './containers/App';
+import Main from './containers/Main';
 import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import InputMedia from './components/InputMedia';
@@ -36,7 +36,7 @@ export default strapi => {
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles: null,
-    mainComponent: App,
+    mainComponent: Main,
     name,
     pluginLogo,
     preventComponentRendering: false,
