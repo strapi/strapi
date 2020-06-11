@@ -17,7 +17,7 @@ const findMatchingPermissions = (userPermissions, permissions) => {
 };
 
 const shouldCheckPermissions = permissions =>
-  permissions.some(perm => perm.conditions && perm.conditions.length);
+  permissions.every(perm => perm.conditions && perm.conditions.length);
 
 const hasPermissions = async (userPermissions, permissions) => {
   if (!permissions.length) {
