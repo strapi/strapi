@@ -386,24 +386,24 @@ const data = {
     },
 
     // Upload plugin
-    // {
-    //   action: 'plugins::upload.read',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'plugins::upload.read',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
     {
       action: 'plugins::upload.assets.create',
       subject: null,
       fields: null,
       conditions: [],
     },
-    // {
-    //   action: 'plugins::upload.assets.update',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'plugins::upload.assets.update',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
     {
       action: 'plugins::upload.assets.dowload',
       subject: null,
