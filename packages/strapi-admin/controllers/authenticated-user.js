@@ -4,10 +4,6 @@ const { validateProfileUpdateInput } = require('../validation/user');
 
 module.exports = {
   async getMe(ctx) {
-    if (!ctx.state.user || !ctx.state.isAuthenticatedAdmin) {
-      return ctx.forbidden();
-    }
-
     const userInfo = strapi.admin.services.user.sanitizeUser(ctx.state.user);
 
     ctx.body = {
@@ -17,10 +13,6 @@ module.exports = {
 
   async updateMe(ctx) {
     const input = ctx.request.body;
-
-    if (!ctx.state.user || !ctx.state.isAuthenticatedAdmin) {
-      return ctx.forbidden();
-    }
 
     try {
       await validateProfileUpdateInput(input);
@@ -32,6 +24,16 @@ module.exports = {
 
     ctx.body = {
       data: strapi.admin.services.user.sanitizeUser(updatedUser),
+    };
+  },
+
+  async getOwnPermissions(ctx) {
+    const { findUserPermissions, sanitizePermission } = strapi.admin.services.permission;
+
+    const userPermissions = await findUserPermissions(ctx.state.user);
+
+    ctx.body = {
+      data: userPermissions.map(sanitizePermission),
     };
   },
 };
