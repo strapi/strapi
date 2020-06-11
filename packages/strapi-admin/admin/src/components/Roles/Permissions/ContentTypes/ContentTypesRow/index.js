@@ -3,24 +3,21 @@ import PropTypes from 'prop-types';
 import { Checkbox, Flex, Text, Padded } from '@buffetjs/core';
 
 import { getAttributesToDisplay } from '../../../../../utils';
+import { usePermissionsContext } from '../../../../../hooks';
 import Chevron from './Chevron';
 import PermissionCheckbox from '../PermissionCheckbox';
 import PermissionName from './PermissionName';
 import StyledRow from './StyledRow';
-import Attributes from './Attributes';
+import ContentTypesAttributes from './ContentTypesAttributes';
 import PermissionWrapper from './PermissionWrapper';
 import CollapseLabel from '../CollapseLabel';
 
-const ContentTypeRow = ({
-  contentType,
-  index,
-  openContentTypeAttributes,
-  openedContentTypeAttributes,
-}) => {
-  const isActive = openedContentTypeAttributes === contentType.name;
+const ContentTypeRow = ({ index, contentType }) => {
+  const { collapsePath, onCollapse } = usePermissionsContext();
+  const isActive = collapsePath[0] === contentType.name;
 
   const handleToggleAttributes = () => {
-    openContentTypeAttributes(contentType.name);
+    onCollapse(0, contentType.name);
   };
 
   const attributesToDisplay = useMemo(() => {
@@ -37,6 +34,7 @@ const ContentTypeRow = ({
             <CollapseLabel
               title={contentType.name}
               alignItems="center"
+              isCollapsable
               onClick={handleToggleAttributes}
             >
               <Text
@@ -53,26 +51,21 @@ const ContentTypeRow = ({
             </CollapseLabel>
           </PermissionName>
           <PermissionWrapper>
-            <PermissionCheckbox name={`${contentType.name}-create`} />
+            <PermissionCheckbox hasConditions name={`${contentType.name}-create`} />
             <PermissionCheckbox name={`${contentType.name}-read`} />
             <PermissionCheckbox name={`${contentType.name}-update`} />
             <PermissionCheckbox name={`${contentType.name}-delete`} />
           </PermissionWrapper>
         </Flex>
       </StyledRow>
-      {isActive && <Attributes attributes={attributesToDisplay} />}
+      {isActive && <ContentTypesAttributes attributes={attributesToDisplay} />}
     </>
   );
 };
 
-ContentTypeRow.defaultProps = {
-  openedContentTypeAttributes: null,
-};
 ContentTypeRow.propTypes = {
   contentType: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  openContentTypeAttributes: PropTypes.func.isRequired,
-  openedContentTypeAttributes: PropTypes.string,
 };
 
 export default ContentTypeRow;
