@@ -10,7 +10,7 @@ import CardEmpty from '../CardEmpty';
 import Wrapper from './Wrapper';
 import IntlText from '../IntlText';
 
-const ListEmpty = ({ hasSearchApplied, onClick, numberOfRows }) => {
+const ListEmpty = ({ canCreate, hasSearchApplied, onClick, numberOfRows }) => {
   const rows = generateRows(numberOfRows);
   const titleId = hasSearchApplied
     ? 'list.assets-empty.title-withSearch'
@@ -34,30 +34,34 @@ const ListEmpty = ({ hasSearchApplied, onClick, numberOfRows }) => {
           </div>
         );
       })}
-      <div className="btn-wrapper">
-        <IntlText id={prefixedTitleId} fontSize="lg" fontWeight="semiBold" />
+      {canCreate && (
+        <div className="btn-wrapper">
+          <IntlText id={prefixedTitleId} fontSize="lg" fontWeight="semiBold" />
 
-        {!hasSearchApplied && (
-          <>
-            <IntlText id={prefixedSubtitleId} fontSize="md" lineHeight="19px" />
-            <div style={{ paddingBottom: '1.1rem' }} />
-            <Button color="primary" onClick={onClick} type="button">
-              <FormattedMessage id={getTrad('header.actions.upload-assets')} />
-            </Button>
-          </>
-        )}
-      </div>
+          {!hasSearchApplied && (
+            <>
+              <IntlText id={prefixedSubtitleId} fontSize="md" lineHeight="19px" />
+              <div style={{ paddingBottom: '1.1rem' }} />
+              <Button color="primary" onClick={onClick} type="button">
+                <FormattedMessage id={getTrad('header.actions.upload-assets')} />
+              </Button>
+            </>
+          )}
+        </div>
+      )}
     </Wrapper>
   );
 };
 
 ListEmpty.defaultProps = {
+  canCreate: true,
   hasSearchApplied: false,
   onClick: () => {},
   numberOfRows: 3,
 };
 
 ListEmpty.propTypes = {
+  canCreate: PropTypes.bool,
   hasSearchApplied: PropTypes.bool,
   onClick: PropTypes.func,
   numberOfRows: PropTypes.number,

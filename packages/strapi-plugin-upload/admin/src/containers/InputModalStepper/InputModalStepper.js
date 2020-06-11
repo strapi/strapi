@@ -9,7 +9,13 @@ import pluginId from '../../pluginId';
 import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';
 
-const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange }) => {
+const InputModalStepper = ({
+  allowedActions,
+  isOpen,
+  onToggle,
+  noNavigation,
+  onInputMediaChange,
+}) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
@@ -308,6 +314,7 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
         {/* body of the modal */}
         {Component && (
           <Component
+            {...allowedActions}
             addFilesToUpload={addFilesToUploadList}
             components={components}
             filesToDownload={filesToDownload}
@@ -418,11 +425,29 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
 };
 
 InputModalStepper.defaultProps = {
+  allowedActions: PropTypes.shape({
+    canCopyLink: PropTypes.bool,
+    canCreate: PropTypes.bool,
+    canDownload: PropTypes.bool,
+    canMain: PropTypes.bool,
+    canRead: PropTypes.bool,
+    canSettings: PropTypes.bool,
+    canUpdate: PropTypes.bool,
+  }),
   noNavigation: false,
   onToggle: () => {},
 };
 
 InputModalStepper.propTypes = {
+  allowedActions: {
+    canCopyLink: true,
+    canCreate: true,
+    canDownload: true,
+    canMain: true,
+    canRead: true,
+    canSettings: true,
+    canUpdate: true,
+  },
   isOpen: PropTypes.bool.isRequired,
   noNavigation: PropTypes.bool,
   onInputMediaChange: PropTypes.func.isRequired,
