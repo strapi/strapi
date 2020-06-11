@@ -1,6 +1,8 @@
+import { upperFirst } from 'lodash';
+
 const init = (initialState, permissionsNames) => {
   const allowedActions = permissionsNames.reduce((acc, current) => {
-    acc[current] = false;
+    acc[`can${upperFirst(current)}`] = false;
 
     return acc;
   }, {});

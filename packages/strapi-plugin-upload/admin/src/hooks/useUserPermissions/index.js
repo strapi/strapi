@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import { hasPermissions, useUser } from 'strapi-helper-plugin';
-import { upperFirst } from 'lodash';
 import pluginPermissions from '../../permissions';
+import generateResultsObject from './utils/generateResultsObject';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
@@ -30,11 +30,7 @@ const useUserPermissions = () => {
     const getData = async () => {
       try {
         const results = await Promise.all(arrayOfPromises);
-        const data = results.reduce((acc, current) => {
-          acc[`can${upperFirst(current.permissionName)}`] = current.hasPermission;
-
-          return acc;
-        }, {});
+        const data = generateResultsObject(results);
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
