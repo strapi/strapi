@@ -1,4 +1,4 @@
-import { transform } from 'lodash';
+import { isEmpty, transform } from 'lodash';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
   return transform(
@@ -17,7 +17,7 @@ const findMatchingPermissions = (userPermissions, permissions) => {
 };
 
 const shouldCheckPermissions = permissions =>
-  permissions.every(perm => perm.conditions && perm.conditions.length) && permissions.length;
+  !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
 
 const hasPermissions = async (userPermissions, permissions) => {
   if (!permissions.length) {
