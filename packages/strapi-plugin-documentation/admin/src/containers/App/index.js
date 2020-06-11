@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { NotFound, WithPagePermissions } from 'strapi-helper-plugin';
+import { NotFound, CheckPagePermissions } from 'strapi-helper-plugin';
 // Utils
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
@@ -16,14 +16,14 @@ import HomePage from '../HomePage';
 
 function App() {
   return (
-    <WithPagePermissions permissions={pluginPermissions.main}>
+    <CheckPagePermissions permissions={pluginPermissions.main}>
       <div className={pluginId}>
         <Switch>
           <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
           <Route component={NotFound} />
         </Switch>
       </div>
-    </WithPagePermissions>
+    </CheckPagePermissions>
   );
 }
 

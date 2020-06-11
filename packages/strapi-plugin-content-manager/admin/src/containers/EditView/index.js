@@ -2,7 +2,7 @@ import React, { memo, useCallback, useMemo, useEffect, useReducer, useRef } from
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-import { BackHeader, LiLink, WithPermissions } from 'strapi-helper-plugin';
+import { BackHeader, LiLink, CheckPermissions } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
@@ -232,7 +232,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
               )}
               <LinkWrapper>
                 <ul>
-                  <WithPermissions
+                  <CheckPermissions
                     permissions={
                       isSingleType
                         ? pluginPermissions.singleTypesConfigurations
@@ -252,7 +252,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                         // emitEvent('willEditContentTypeLayoutFromEditView');
                       }}
                     />
-                  </WithPermissions>
+                  </CheckPermissions>
                   {getInjectedComponents(
                     'editView',
                     'right.links',

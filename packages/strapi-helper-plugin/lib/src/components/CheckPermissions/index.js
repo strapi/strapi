@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 import useUser from '../../hooks/useUser';
 import hasPermissions from '../../utils/hasPermissions';
 
-// NOTE: this component is very similar to the WithPagePermissions
+// NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state
 
-const WithPermissions = ({ permissions, children }) => {
+const CheckPermissions = ({ permissions, children }) => {
   const userPermissions = useUser();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
@@ -53,13 +53,13 @@ const WithPermissions = ({ permissions, children }) => {
   return children;
 };
 
-WithPermissions.defaultProps = {
+CheckPermissions.defaultProps = {
   permissions: [],
 };
 
-WithPermissions.propTypes = {
+CheckPermissions.propTypes = {
   children: PropTypes.node.isRequired,
   permissions: PropTypes.array,
 };
 
-export default WithPermissions;
+export default CheckPermissions;

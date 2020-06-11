@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
-import { LoadingIndicatorPage, WithPagePermissions } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 
 const EditView = lazy(() => import('../EditView'));
@@ -16,9 +16,9 @@ const SingleTypeRecursivePath = props => {
         <Route
           path={`${url}/ctm-configurations/edit-settings/:type`}
           render={routeProps => (
-            <WithPagePermissions permissions={pluginPermissions.singleTypesConfigurations}>
+            <CheckPagePermissions permissions={pluginPermissions.singleTypesConfigurations}>
               <EditSettingsView {...props} {...routeProps} slug={slug} />
-            </WithPagePermissions>
+            </CheckPagePermissions>
           )}
         />
         <Route

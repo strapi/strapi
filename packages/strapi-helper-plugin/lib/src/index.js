@@ -79,8 +79,8 @@ export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
 export { default as UserProvider } from './components/UserProvider';
 export { default as ViewContainer } from './components/ViewContainer';
-export { default as WithPagePermissions } from './components/WithPagePermissions';
-export { default as WithPermissions } from './components/WithPermissions';
+export { default as CheckPagePermissions } from './components/CheckPagePermissions';
+export { default as CheckPermissions } from './components/CheckPermissions';
 
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';

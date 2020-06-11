@@ -5,7 +5,7 @@ import useUser from '../../hooks/useUser';
 import hasPermissions from '../../utils/hasPermissions';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
 
-const WithPagePermissions = ({ permissions, children }) => {
+const CheckPagePermissions = ({ permissions, children }) => {
   const userPermissions = useUser();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
@@ -53,13 +53,13 @@ const WithPagePermissions = ({ permissions, children }) => {
   return children;
 };
 
-WithPagePermissions.defaultProps = {
+CheckPagePermissions.defaultProps = {
   permissions: [],
 };
 
-WithPagePermissions.propTypes = {
+CheckPagePermissions.propTypes = {
   children: PropTypes.node.isRequired,
   permissions: PropTypes.array,
 };
 
-export default WithPagePermissions;
+export default CheckPagePermissions;

@@ -13,7 +13,7 @@ import {
   getQueryParameters,
   useGlobalContext,
   request,
-  WithPermissions,
+  CheckPermissions,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -387,7 +387,7 @@ function ListView({
                 </div>
               </div>
               <div className="col-2">
-                <WithPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+                <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
                   <DisplayedFieldsDropdown
                     isOpen={isLabelPickerOpen}
                     items={getAllLabels()}
@@ -398,7 +398,7 @@ function ListView({
                     slug={slug}
                     toggle={toggleLabelPickerState}
                   />
-                </WithPermissions>
+                </CheckPermissions>
               </div>
             </div>
             <div className="row" style={{ paddingTop: '12px' }}>

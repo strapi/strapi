@@ -7,7 +7,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   request,
-  WithPagePermissions,
+  CheckPagePermissions,
 } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -134,7 +134,7 @@ function Main({
           <Route
             path={`/plugins/${pluginId}/ctm-configurations/edit-settings/:type/:componentSlug`}
             render={routeProps => (
-              <WithPagePermissions permissions={pluginPermissions.componentsConfigurations}>
+              <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
                 <EditSettingsView
                   currentEnvironment={currentEnvironment}
                   deleteLayout={deleteLayout}
@@ -149,7 +149,7 @@ function Main({
                   plugins={plugins}
                   {...routeProps}
                 />
-              </WithPagePermissions>
+              </CheckPagePermissions>
             )}
           />
           {routes}
