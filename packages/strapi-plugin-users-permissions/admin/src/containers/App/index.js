@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { WithPagePermissions } from 'strapi-helper-plugin';
+import { CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import Main from '../Main';
 
 const App = () => {
   return (
-    <WithPagePermissions permissions={pluginPermissions.main}>
+    <CheckPagePermissions permissions={pluginPermissions.main}>
       <Main />
-    </WithPagePermissions>
+    </CheckPagePermissions>
   );
 };
 

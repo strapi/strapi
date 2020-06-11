@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext, WithPermissions } from 'strapi-helper-plugin';
+import { useGlobalContext, CheckPermissions } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -48,7 +48,7 @@ function EditViewButton(props) {
   }
 
   return (
-    <WithPermissions permissions={pluginPermissions.main}>
+    <CheckPermissions permissions={pluginPermissions.main}>
       <Button
         {...props}
         onClick={handleClick}
@@ -63,7 +63,7 @@ function EditViewButton(props) {
           fontWeight: 600,
         }}
       />
-    </WithPermissions>
+    </CheckPermissions>
   );
 }
 

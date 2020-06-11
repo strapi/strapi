@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
-import { LoadingIndicatorPage, WithPagePermissions } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 
 const EditView = lazy(() => import('../EditView'));
@@ -17,9 +17,9 @@ const CollectionTypeRecursivePath = props => {
   };
   const renderPermissionsRoute = (routeProps, Component) => {
     return (
-      <WithPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+      <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
         <Component {...props} {...routeProps} slug={slug} />
-      </WithPagePermissions>
+      </CheckPagePermissions>
     );
   };
 

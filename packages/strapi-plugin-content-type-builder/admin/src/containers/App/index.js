@@ -6,7 +6,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { LoadingIndicatorPage, WithPagePermissions } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
 import DataManagerProvider from '../DataManagerProvider';
@@ -18,7 +18,7 @@ const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
   return (
-    <WithPagePermissions permissions={pluginPermissions.main}>
+    <CheckPagePermissions permissions={pluginPermissions.main}>
       <Wrapper>
         <DataManagerProvider allIcons={icons}>
           <Suspense fallback={<LoadingIndicatorPage />}>
@@ -32,7 +32,7 @@ const App = () => {
           </Suspense>
         </DataManagerProvider>
       </Wrapper>
-    </WithPagePermissions>
+    </CheckPagePermissions>
   );
 };
 

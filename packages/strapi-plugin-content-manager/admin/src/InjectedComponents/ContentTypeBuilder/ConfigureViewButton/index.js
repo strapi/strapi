@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { LayoutIcon, WithPermissions } from 'strapi-helper-plugin';
+import { LayoutIcon, CheckPermissions } from 'strapi-helper-plugin';
 import { Button as Base } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import pluginPermissions from '../../../permissions';
@@ -31,7 +31,7 @@ const Button = ({ onClick, isTemporary, isInContentTypeView, contentTypeKind }) 
   }
 
   return (
-    <WithPermissions permissions={permissionsToApply}>
+    <CheckPermissions permissions={permissionsToApply}>
       <StyledButton
         icon={icon}
         label={label}
@@ -40,7 +40,7 @@ const Button = ({ onClick, isTemporary, isInContentTypeView, contentTypeKind }) 
         style={{ marginTop: '2px' }}
         disabled={isTemporary}
       />
-    </WithPermissions>
+    </CheckPermissions>
   );
 };
 

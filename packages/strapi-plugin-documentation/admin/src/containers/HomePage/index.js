@@ -18,7 +18,7 @@ import {
   LoadingIndicatorPage,
   InputsIndex as Input,
   GlobalContext,
-  WithPermissions,
+  CheckPermissions,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -66,9 +66,9 @@ export class HomePage extends React.Component {
         type: 'button',
         key: 'button-open',
         Component: props => (
-          <WithPermissions permissions={pluginPermissions.open}>
+          <CheckPermissions permissions={pluginPermissions.open}>
             <Button {...props} />
-          </WithPermissions>
+          </CheckPermissions>
         ),
       },
       {
@@ -80,9 +80,9 @@ export class HomePage extends React.Component {
         type: 'submit',
         key: 'button-submit',
         Component: props => (
-          <WithPermissions permissions={pluginPermissions.update}>
+          <CheckPermissions permissions={pluginPermissions.update}>
             <Button {...props} />
-          </WithPermissions>
+          </CheckPermissions>
         ),
       },
     ];
