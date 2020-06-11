@@ -73,7 +73,7 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
       expect(shouldCheckPermissions([])).toBeFalsy();
     });
 
-    it('should return false if there is no condition in the array of permissions', () => {
+    it('should return true if there is no condition in the array of permissions', () => {
       const data = [
         {
           action: 'admin::marketplace.read',
@@ -83,7 +83,7 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
         },
       ];
 
-      expect(shouldCheckPermissions(data)).toBeFalsy();
+      expect(shouldCheckPermissions(data)).toBeTruthy();
     });
 
     it('should return true if there is at least one item that has a condition in the array of permissions', () => {

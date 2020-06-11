@@ -182,7 +182,7 @@ export class Admin extends React.Component {
         menu={this.menuRef.current}
         updatePlugin={updatePlugin}
       >
-        <UserProvider value={fakePermissionsData.user1}>
+        <UserProvider value={fakePermissionsData.user2}>
           <Wrapper>
             <LeftMenu version={strapiVersion} plugins={plugins} ref={this.menuRef} />
             <NavTopRightWrapper>
