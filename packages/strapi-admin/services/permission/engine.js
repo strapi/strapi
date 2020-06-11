@@ -12,7 +12,7 @@ module.exports = conditionProvider => ({
    * @returns {Promise<Ability>}
    */
   async generateUserAbility(user, options) {
-    const permissions = await this.findPermissionsForUser(user);
+    const permissions = await strapi.admin.services.permission.findUserPermissions(user);
     const abilityCreator = this.generateAbilityCreatorFor(user);
 
     return abilityCreator(permissions, options);
@@ -87,18 +87,6 @@ module.exports = conditionProvider => ({
       .then(filterValidResults)
       .then(transformToRegisterOptions)
       .then(registerResults);
-  },
-
-  /**
-   * Use the user's roles to find and flatten associated permissions.
-   * @param user
-   * @returns {Promise<Array>}
-   */
-  async findPermissionsForUser(user) {
-    const rolesId = user.roles.map(_.property('id'));
-    const roles = await strapi.query('role', 'admin').find({ id_in: rolesId }, ['permissions']);
-
-    return _.flatMap(roles, _.property('permissions'));
   },
 
   /**
