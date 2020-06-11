@@ -1,19 +1,23 @@
-import { useEffect, useReducer } from 'react';
-import { hasPermissions, useUser } from 'strapi-helper-plugin';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
+import hasPermissions from '../../utils/hasPermissions';
+import useUser from '../useUser';
 
-import pluginPermissions from '../../permissions';
 import generateResultsObject from './utils/generateResultsObject';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
-const useUserPermissions = () => {
-  const permissionNames = Object.keys(pluginPermissions);
+const useUserPermissions = pluginPermissions => {
+  const permissionNames = useMemo(() => {
+    return Object.keys(pluginPermissions);
+  }, [pluginPermissions]);
   const currentUserPermissions = useUser();
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, permissionNames)
   );
+  const checkPermissionsRef = useRef();
+  const generateArrayOfPromisesRef = useRef();
 
-  const checkPermissions = async permissionName => {
+  checkPermissionsRef.current = async permissionName => {
     const hasPermission = await hasPermissions(
       currentUserPermissions,
       pluginPermissions[permissionName]
@@ -22,14 +26,13 @@ const useUserPermissions = () => {
     return { permissionName, hasPermission };
   };
 
-  const generateArrayOfPromises = array =>
-    array.map(permissionName => checkPermissions(permissionName));
-
-  const arrayOfPromises = generateArrayOfPromises(permissionNames);
+  generateArrayOfPromisesRef.current = array =>
+    array.map(permissionName => checkPermissionsRef.current(permissionName));
 
   useEffect(() => {
     const getData = async () => {
       try {
+        const arrayOfPromises = generateArrayOfPromisesRef.current(permissionNames);
         const results = await Promise.all(arrayOfPromises);
         const data = generateResultsObject(results);
 
@@ -43,8 +46,7 @@ const useUserPermissions = () => {
     };
 
     getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [permissionNames]);
 
   return state;
 };

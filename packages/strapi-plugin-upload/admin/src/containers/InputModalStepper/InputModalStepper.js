@@ -425,20 +425,6 @@ const InputModalStepper = ({
 };
 
 InputModalStepper.defaultProps = {
-  allowedActions: PropTypes.shape({
-    canCopyLink: PropTypes.bool,
-    canCreate: PropTypes.bool,
-    canDownload: PropTypes.bool,
-    canMain: PropTypes.bool,
-    canRead: PropTypes.bool,
-    canSettings: PropTypes.bool,
-    canUpdate: PropTypes.bool,
-  }),
-  noNavigation: false,
-  onToggle: () => {},
-};
-
-InputModalStepper.propTypes = {
   allowedActions: {
     canCopyLink: true,
     canCreate: true,
@@ -448,6 +434,20 @@ InputModalStepper.propTypes = {
     canSettings: true,
     canUpdate: true,
   },
+  noNavigation: false,
+  onToggle: () => {},
+};
+
+InputModalStepper.propTypes = {
+  allowedActions: PropTypes.shape({
+    canCopyLink: PropTypes.bool,
+    canCreate: PropTypes.bool,
+    canDownload: PropTypes.bool,
+    canMain: PropTypes.bool,
+    canRead: PropTypes.bool,
+    canSettings: PropTypes.bool,
+    canUpdate: PropTypes.bool,
+  }),
   isOpen: PropTypes.bool.isRequired,
   noNavigation: PropTypes.bool,
   onInputMediaChange: PropTypes.func.isRequired,

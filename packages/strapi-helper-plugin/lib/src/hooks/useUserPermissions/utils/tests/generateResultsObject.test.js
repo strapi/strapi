@@ -1,6 +1,6 @@
 import generateResultsObject from '../generateResultsObject';
 
-describe('UPLOAD | hooks | useUserPermissions | | utils | generateResultsObject', () => {
+describe('HELPER_PLUGIN | hooks | useUserPermissions | | utils | generateResultsObject', () => {
   it('should return an object with { key: can<PermissionName>, value: bool }', () => {
     const data = [
       { permissionName: 'read', hasPermission: true },

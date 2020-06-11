@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import StrapiContext from '../contexts/StrapiContext';
+import StrapiContext from '../../contexts/StrapiContext';
 
 const useStrapi = () => useContext(StrapiContext);
 
