@@ -3,34 +3,37 @@ import produce from 'immer';
 
 export const initialState = {
   collectionTypes: [],
-  singleTypes: [],
+  components: [],
   isLoading: true,
+  singleTypes: [],
 };
 
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'GET_CONTENT_TYPES': {
+      case 'GET_MODELS': {
         draftState.collectionTypes = initialState.collectionTypes;
         draftState.singleTypes = initialState.singleTypes;
         draftState.isLoading = true;
         break;
       }
-      case 'GET_CONTENT_TYPES_SUCCEDED': {
+      case 'GET_MODELS_ERROR': {
+        draftState.collectionTypes = initialState.collectionTypes;
+        draftState.singleTypes = initialState.singleTypes;
+        draftState.components = initialState.components;
+        draftState.isLoading = false;
+        break;
+      }
+      case 'GET_MODELS_SUCCEDED': {
         const getContentTypeByKind = kind =>
-          action.data.filter(
+          action.contentTypes.filter(
             contentType => contentType.isDisplayed && contentType.schema.kind === kind
           );
 
         draftState.isLoading = false;
         draftState.collectionTypes = getContentTypeByKind('collectionType');
         draftState.singleTypes = getContentTypeByKind('singleType');
-        break;
-      }
-      case 'GET_CONTENT_TYPES_ERROR': {
-        draftState.collectionTypes = initialState.collectionTypes;
-        draftState.singleTypes = initialState.singleTypes;
-        draftState.isLoading = false;
+        draftState.components = action.components;
         break;
       }
       default:

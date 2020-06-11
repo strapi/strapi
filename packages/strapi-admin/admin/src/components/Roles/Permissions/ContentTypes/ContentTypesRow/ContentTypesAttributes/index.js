@@ -21,7 +21,7 @@ const FieldsTitleWrapper = styled.div`
   padding-left: 3.5rem;
 `;
 
-const Attributes = ({ attributes }) => {
+const ContentTypesAttributes = ({ attributes }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -69,8 +69,8 @@ const Attributes = ({ attributes }) => {
   );
 };
 
-Attributes.propTypes = {
+ContentTypesAttributes.propTypes = {
   attributes: PropTypes.array.isRequired,
 };
 
-export default Attributes;
+export default ContentTypesAttributes;

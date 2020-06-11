@@ -14,7 +14,7 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
   describe('GET_DATA_ERROR', () => {
     it('should set isLoading to false is an error occured', () => {
       const action = {
-        type: 'GET_CONTENT_TYPES_ERROR',
+        type: 'GET_MODELS_ERROR',
       };
       const initialState = {
         collectionTypes: [],
@@ -39,10 +39,10 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
     });
   });
 
-  describe('GET_CONTENT_TYPES', () => {
+  describe('GET_MODELS', () => {
     it('should set isLoading to true to start getting the data', () => {
       const action = {
-        type: 'GET_CONTENT_TYPES',
+        type: 'GET_MODELS',
       };
       const initialState = {
         collectionTypes: [],
@@ -59,10 +59,10 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
     });
   });
 
-  describe('GET_CONTENT_TYPES_SUCCEDED', () => {
+  describe('GET_MODELS_SUCCEDED', () => {
     it('should return the state with the collectionTypes and singleTypes', () => {
       const action = {
-        type: 'GET_CONTENT_TYPES_SUCCEDED',
+        type: 'GET_MODELS_SUCCEDED',
         data: [
           {
             uid: 'app.homepage',

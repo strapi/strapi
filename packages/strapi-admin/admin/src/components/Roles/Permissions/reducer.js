@@ -2,17 +2,19 @@
 import produce from 'immer';
 
 export const initialState = {
-  collapseContentTypeAttribute: null,
+  collapsePath: [],
 };
 
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'OPEN_CONTENT_TYPE_ATTRIBUTES': {
-        if (state.collapseContentTypeAttribute === action.contentTypeToOpen) {
-          draftState.collapseContentTypeAttribute = null;
+      case 'COLLAPSE_PATH': {
+        const { index, value } = action;
+
+        if (state.collapsePath[index] === value) {
+          draftState.collapsePath = state.collapsePath.slice().splice(0, index);
         } else {
-          draftState.collapseContentTypeAttribute = action.contentTypeToOpen;
+          draftState.collapsePath = [...state.collapsePath.slice().splice(0, index), value];
         }
         break;
       }

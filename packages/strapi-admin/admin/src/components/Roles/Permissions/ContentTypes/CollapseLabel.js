@@ -4,8 +4,8 @@ import { Flex } from '@buffetjs/core';
 const CollapseLabel = styled(Flex)`
   padding-right: 10px;
   overflow: hidden;
-  cursor: pointer;
   flex: 1;
+  ${({ isCollapsable }) => isCollapsable && 'cursor: pointer;'}
 `;
 
 export default CollapseLabel;
