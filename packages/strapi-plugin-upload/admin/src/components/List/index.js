@@ -20,7 +20,6 @@ const List = ({
   smallCards,
   canSelect,
   renderCardControl,
-  showCheckbox,
 }) => {
   const selectedAssets = selectedItems.length;
 
@@ -58,7 +57,7 @@ const List = ({
               >
                 {(checked || canSelect) && (
                   <>
-                    {(checked || isAllowed) && showCheckbox && (
+                    {(checked || isAllowed) && (
                       <CardControlsWrapper leftAlign className="card-control-wrapper">
                         <Checkbox
                           name={`${id}`}
@@ -93,7 +92,6 @@ List.defaultProps = {
   renderCardControl: null,
   selectedItems: [],
   smallCards: false,
-  showCheckbox: true,
 };
 
 List.propTypes = {
@@ -105,7 +103,6 @@ List.propTypes = {
   renderCardControl: PropTypes.func,
   selectedItems: PropTypes.array,
   smallCards: PropTypes.bool,
-  showCheckbox: PropTypes.bool,
 };
 
 export default List;

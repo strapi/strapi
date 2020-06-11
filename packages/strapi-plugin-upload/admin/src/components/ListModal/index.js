@@ -1,10 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-import { CheckPermissions } from 'strapi-helper-plugin';
 import useModalContext from '../../hooks/useModalContext';
 import { getTrad } from '../../utils';
-import pluginPermissions from '../../permissions';
 import BrowseAssets from '../BrowseAssets';
 import ModalNavWrapper from '../ModalNavWrapper';
 import ModalSection from '../ModalSection';
@@ -25,15 +23,13 @@ const ListModal = ({ noNavigation }) => {
 
   const renderUploadModalButton = () => (
     <BaselineAlignmentWrapper>
-      <CheckPermissions permissions={pluginPermissions.create}>
-        <Button type="button" color="primary" onClick={handleGoToUpload}>
-          <IntlText
-            id={getTrad('modal.upload-list.sub-header.button')}
-            fontWeight="bold"
-            color="white"
-          />
-        </Button>
-      </CheckPermissions>
+      <Button type="button" color="primary" onClick={handleGoToUpload}>
+        <IntlText
+          id={getTrad('modal.upload-list.sub-header.button')}
+          fontWeight="bold"
+          color="white"
+        />
+      </Button>
     </BaselineAlignmentWrapper>
   );
 
