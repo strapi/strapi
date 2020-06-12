@@ -23,16 +23,30 @@ const roleUpdateSchema = yup
   })
   .noUnknown();
 
-const roleDeleteSchema = yup
+const rolesDeleteSchema = yup
   .object()
   .shape({
     ids: yup
       .array()
       .of(yup.strapiID())
       .min(1)
-      .required(),
+      .required()
+      .test('no-admin-many-delete', 'you cannot delete the super admin role', async ids => {
+        const adminRole = await strapi.admin.services.role.getAdmin();
+        return !ids.map(String).includes(String(adminRole.id));
+      }),
   })
   .noUnknown();
+
+const roleDeleteSchema = yup
+  .strapiID()
+  .required()
+  .test('no-admin-single-delete', 'you cannot delete the super admin role', async function(id) {
+    const adminRole = await strapi.admin.services.role.getAdmin();
+    return String(id) !== String(adminRole.id)
+      ? true
+      : this.createError({ path: 'id', message: `you cannot delete the super admin role` });
+  });
 
 const validateRoleCreateInput = async data => {
   return roleCreateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
@@ -42,6 +56,10 @@ const validateRoleUpdateInput = async data => {
   return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
+const validateRolesDeleteInput = async data => {
+  return rolesDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+};
+
 const validateRoleDeleteInput = async data => {
   return roleDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
@@ -49,5 +67,6 @@ const validateRoleDeleteInput = async data => {
 module.exports = {
   validateRoleCreateInput,
   validateRoleUpdateInput,
+  validateRolesDeleteInput,
   validateRoleDeleteInput,
 };

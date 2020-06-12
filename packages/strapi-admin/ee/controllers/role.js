@@ -3,6 +3,7 @@
 const {
   validateRoleCreateInput,
   validateRoleUpdateInput,
+  validateRolesDeleteInput,
   validateRoleDeleteInput,
 } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
@@ -57,6 +58,12 @@ module.exports = {
   async deleteOne(ctx) {
     const { id } = ctx.params;
 
+    try {
+      await validateRoleDeleteInput(id);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
     const roles = await strapi.admin.services.role.deleteByIds([id]);
 
     const sanitizedRole = roles.map(strapi.admin.services.role.sanitizeRole)[0] || null;
@@ -73,7 +80,7 @@ module.exports = {
   async deleteMany(ctx) {
     const { body } = ctx.request;
     try {
-      await validateRoleDeleteInput(body);
+      await validateRolesDeleteInput(body);
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
     }
