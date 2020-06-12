@@ -194,7 +194,7 @@ export class HomePage extends React.Component {
       dataToEdit,
       tabs,
     } = this.props;
-    console.log(tabs);
+
     const { formatMessage } = this.context;
     const headerActions =
       match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData)

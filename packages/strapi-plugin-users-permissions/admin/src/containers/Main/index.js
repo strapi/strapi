@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { Switch, Redirect, Route, useRouteMatch } from 'react-router-dom';
-import { NotFound } from 'strapi-helper-plugin';
+import { CheckPagePermissions, NotFound } from 'strapi-helper-plugin';
 import { get, upperFirst, camelCase } from 'lodash';
 import pluginId from '../../pluginId';
+import pluginPermissions from '../../permissions';
 import getTrad from '../../utils/getTrad';
 import EditPage from '../EditPage';
 import HomePage from '../HomePage';
@@ -43,7 +44,11 @@ const Main = ({ allowedActions }) => {
       <Switch>
         <Route
           path={`/plugins/${pluginId}/:settingType/:actionType/:id?`}
-          component={EditPage}
+          render={props => (
+            <CheckPagePermissions permissions={pluginPermissions.updateRole}>
+              <EditPage {...props} />
+            </CheckPagePermissions>
+          )}
           exact
         />
         <Route
