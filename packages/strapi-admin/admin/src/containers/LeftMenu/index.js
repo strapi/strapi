@@ -116,15 +116,12 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
     getModels,
   }));
 
-  // console.log({ generalSectionLinks });
-
   useEffect(() => {
     const getLinksPermissions = async () => {
       const generalSectionLinksArrayOfPromises = generateArrayOfPromises(generalSectionLinks);
       const pluginsSectionLinksArrayOfPromises = generateArrayOfPromises(pluginsSectionLinks);
 
       await getModels();
-      // TODO check permissions form models
 
       const generalSectionResults = await Promise.all(generalSectionLinksArrayOfPromises);
       const pluginsSectionResults = await Promise.all(pluginsSectionLinksArrayOfPromises);

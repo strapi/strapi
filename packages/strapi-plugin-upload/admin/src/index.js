@@ -55,8 +55,6 @@ export default strapi => {
           },
         ],
       },
-
-      mainComponent: SettingsPage,
     },
     trads,
     menu: {

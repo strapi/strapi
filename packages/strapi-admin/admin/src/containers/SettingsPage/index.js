@@ -57,7 +57,7 @@ function SettingsPage() {
     [pluginsGlobalLinks]
   );
 
-  const pluginsLinksRoute = useMemo(() => {
+  const pluginsLinksRoutes = useMemo(() => {
     return menu.reduce((acc, current) => {
       if (current.id === 'global') {
         return acc;
@@ -126,7 +126,7 @@ function SettingsPage() {
               <Route exact path={`${settingsBaseURL}/webhooks`} component={ListView} />
               <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={EditView} />
               {createdRoutes}
-              {pluginsLinksRoute}
+              {pluginsLinksRoutes}
               <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />
             </Switch>
           </div>
