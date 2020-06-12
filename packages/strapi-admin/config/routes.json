@@ -212,7 +212,10 @@
     {
       "method": "GET",
       "path": "/permissions",
-      "handler": "permission.getAll"
+      "handler": "permission.getAll",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "POST",
