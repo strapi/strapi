@@ -1,21 +1,22 @@
 import { retrieveGlobalLinks, retrievePluginsMenu, sortLinks } from '../../utils';
+import { SETTINGS_BASE_URL } from '../../config';
 import formatLinks from './utils/formatLinks';
 
-const init = (initialState, plugins, formatMessage, settingsBaseURL) => {
+const init = (initialState, plugins) => {
   // Retrieve the links that will be injected into the global section
   const pluginsGlobalLinks = retrieveGlobalLinks(plugins);
   // Sort the links by name
   const sortedGlobalLinks = sortLinks([
     {
-      title: formatMessage({ id: 'Settings.webhooks.title' }),
-      to: `${settingsBaseURL}/webhooks`,
+      title: { id: 'Settings.webhooks.title' },
+      to: `${SETTINGS_BASE_URL}/webhooks`,
       name: 'webhooks',
       isDisplayed: false,
       permissions: [
-        { action: 'admin::webhook.create', subject: null },
-        { action: 'admin::webhook.read', subject: null },
-        { action: 'admin::webhook.update', subject: null },
-        { action: 'admin::webhook.delete', subject: null },
+        { action: 'admin::webhooks.create', subject: null },
+        { action: 'admin::webhooks.read', subject: null },
+        { action: 'admin::webhooks.update', subject: null },
+        { action: 'admin::webhooks.delete', subject: null },
       ],
     },
     ...pluginsGlobalLinks,
@@ -35,8 +36,8 @@ const init = (initialState, plugins, formatMessage, settingsBaseURL) => {
       title: 'Settings.permissions',
       links: [
         {
-          title: formatMessage({ id: 'Settings.permissions.menu.link.roles.label' }),
-          to: `${settingsBaseURL}/roles`,
+          title: { id: 'Settings.permissions.menu.link.roles.label' },
+          to: `${SETTINGS_BASE_URL}/roles`,
           name: 'roles',
           isDisplayed: false,
           permissions: [
@@ -47,9 +48,9 @@ const init = (initialState, plugins, formatMessage, settingsBaseURL) => {
           ],
         },
         {
-          title: formatMessage({ id: 'Settings.permissions.menu.link.users.label' }),
+          title: { id: 'Settings.permissions.menu.link.users.label' },
           // Init the search params directly
-          to: `${settingsBaseURL}/users?pageSize=10&page=1&_sort=firstname%3AASC`,
+          to: `${SETTINGS_BASE_URL}/users?pageSize=10&page=1&_sort=firstname%3AASC`,
           name: 'users',
           isDisplayed: false,
           permissions: [

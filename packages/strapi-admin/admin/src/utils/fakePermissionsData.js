@@ -248,38 +248,38 @@ const data = {
     // },
 
     // Admin webhooks
-    // {
-    //   action: 'admin::webhooks.create',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
-    // {
-    //   action: 'admin::webhooks.read',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
-    // {
-    //   action: 'admin::webhooks.update',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
-    // {
-    //   action: 'admin::webhooks.delete',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'admin::webhooks.create',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
+    {
+      action: 'admin::webhooks.read',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
+    {
+      action: 'admin::webhooks.update',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
+    {
+      action: 'admin::webhooks.delete',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
 
     // // Admin users
-    // {
-    //   action: 'admin::users.create',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'admin::users.create',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
     // {
     //   action: 'admin::users.read',
     //   subject: null,

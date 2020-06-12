@@ -1,17 +1,15 @@
 import { useContext, useEffect, useReducer } from 'react';
-import { useIntl } from 'react-intl';
 import { useGlobalContext, hasPermissions, UserContext } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import init from './init';
 
 const useSettingsMenu = () => {
-  const { formatMessage } = useIntl();
   const permissions = useContext(UserContext);
-  const { plugins, settingsBaseURL } = useGlobalContext();
+  const { plugins } = useGlobalContext();
 
   const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, plugins, formatMessage, settingsBaseURL)
+    init(initialState, plugins)
   );
 
   useEffect(() => {
