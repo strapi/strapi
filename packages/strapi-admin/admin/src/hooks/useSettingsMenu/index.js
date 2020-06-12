@@ -14,22 +14,17 @@ const useSettingsMenu = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const checkPermissions = async (link, permissionsToCheck, sectionId, path) => {
+      const checkPermissions = async (permissionsToCheck, path) => {
         const hasPermission = await hasPermissions(permissions, permissionsToCheck);
 
-        return { linkId: link.to, hasPermission, sectionId, path };
+        return { hasPermission, path };
       };
 
       const generateArrayOfPromises = array => {
         return array.reduce((acc, current, sectionIndex) => {
           const generateArrayOfPromises = array =>
             array.map((link, index) =>
-              checkPermissions(
-                link,
-                array[index].permissions,
-                current.id,
-                `${sectionIndex}.links.${index}`
-              )
+              checkPermissions(array[index].permissions, `${sectionIndex}.links.${index}`)
             );
 
           return [...acc, ...generateArrayOfPromises(current.links)];

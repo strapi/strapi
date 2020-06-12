@@ -45,7 +45,9 @@ function SettingsPage() {
   const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
   const firstAvailableEndpoint = useMemo(() => findFirstAllowedEndpoint(menu), [menu]);
 
-  const createdRoutes = useMemo(
+  // Create all the <Route /> that needs to be created by the plugins
+  // For instance the upload plugin needs to create a <Route />
+  const globalSectionCreatedRoutes = useMemo(
     () =>
       pluginsGlobalLinks
         .map(({ to, Component, exact }) => (
@@ -57,6 +59,7 @@ function SettingsPage() {
     [pluginsGlobalLinks]
   );
 
+  // Same here for the plugins sections
   const pluginsLinksRoutes = useMemo(() => {
     return menu.reduce((acc, current) => {
       if (current.id === 'global') {
@@ -79,6 +82,7 @@ function SettingsPage() {
     }, []);
   }, [menu]);
 
+  // Only display accessible sections
   const filteredMenu = useMemo(() => {
     return menu.filter(section => !section.links.every(link => link.isDisplayed === false));
   }, [menu]);
@@ -95,6 +99,8 @@ function SettingsPage() {
       return { label, show: true };
     });
 
+  // Since the useSettingsMenu hook can make API calls in order to check the links permissions
+  // We need to add a loading state to prevent redirecting the user while permissions are being checked
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -125,7 +131,7 @@ function SettingsPage() {
               <Route exact path={`${settingsBaseURL}/users/:id`} component={UsersEditPage} />
               <Route exact path={`${settingsBaseURL}/webhooks`} component={ListView} />
               <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={EditView} />
-              {createdRoutes}
+              {globalSectionCreatedRoutes}
               {pluginsLinksRoutes}
               <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />
             </Switch>
