@@ -425,7 +425,7 @@ const data = {
 
     // Users-permissions
     {
-      action: 'plugins::users-permissions.roles.create',
+      action: 'plugins::users-permissions.roles.createe',
       subject: null,
       fields: null,
       conditions: [],
@@ -466,12 +466,12 @@ const data = {
       fields: null,
       conditions: [],
     },
-    {
-      action: 'plugins::users-permissions.providers.update',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'plugins::users-permissions.providers.update',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     {
       action: 'plugins::users-permissions.advanced-settings.read',
       subject: null,
@@ -479,7 +479,7 @@ const data = {
       conditions: [],
     },
     {
-      action: 'plugins::users-permissions.advanced-settings.update',
+      action: 'plugins::users-permissions.advanced-settings.eupdate',
       subject: null,
       fields: null,
       conditions: [],
