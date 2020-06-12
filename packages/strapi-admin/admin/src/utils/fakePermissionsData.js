@@ -306,12 +306,12 @@ const data = {
     //   fields: null,
     //   conditions: [],
     // },
-    // {
-    //   action: 'admin::roles.read',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'admin::roles.read',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
     // {
     //   action: 'admin::roles.update',
     //   subject: null,

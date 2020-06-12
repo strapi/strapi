@@ -52,6 +52,8 @@ export default strapi => {
         },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
+        // Define a specific component if needed:
+        Component: () => <div />,
       },
     ],
   };

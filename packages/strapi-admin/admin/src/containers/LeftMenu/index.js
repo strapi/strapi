@@ -116,6 +116,8 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
     getModels,
   }));
 
+  // console.log({ generalSectionLinks });
+
   useEffect(() => {
     const getLinksPermissions = async () => {
       const generalSectionLinksArrayOfPromises = generateArrayOfPromises(generalSectionLinks);
