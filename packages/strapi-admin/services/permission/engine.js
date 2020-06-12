@@ -54,17 +54,11 @@ module.exports = conditionProvider => ({
     const resolveConditions = map(conditionProvider.get);
 
     // Filter conditions, only keeps objects and functions
-    const filterValidConditions = filter(
-      condition => _.isFunction(condition) || _.isObject(condition)
-    );
+    const filterValidConditions = filter(_.isObject);
 
     // Evaluate the conditions if they're a function, returns the object otherwise
     const evaluateConditions = conditions =>
-      Promise.all(
-        conditions.map(async cond =>
-          _.isFunction(cond) ? await cond(user, options) : Promise.resolve(cond)
-        )
-      );
+      Promise.all(conditions.map(cond => (_.isFunction(cond) ? cond(user, options) : cond)));
 
     // Only keeps 'true' booleans or objects as condition's result
     const filterValidResults = filter(result => result === true || _.isObject(result));

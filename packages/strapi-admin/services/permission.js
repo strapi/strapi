@@ -64,6 +64,11 @@ const assign = async (roleID, permissions = []) => {
   return newPermissions;
 };
 
+/**
+ * Find all permissions for a user
+ * @param roles
+ * @returns {Promise<*[]|*>}
+ */
 const findUserPermissions = async ({ roles }) => {
   if (!_.isArray(roles)) {
     return [];
@@ -72,6 +77,11 @@ const findUserPermissions = async ({ roles }) => {
   return strapi.query('permission', 'admin').find({ role_in: roles.map(_.property('id')) });
 };
 
+/**
+ * Removes unwanted fields from a permission
+ * @param permission
+ * @returns {*}
+ */
 const sanitizePermission = permission =>
   _.pick(permission, ['action', 'subject', 'fields', 'conditions']);
 

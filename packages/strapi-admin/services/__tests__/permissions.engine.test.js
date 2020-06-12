@@ -44,7 +44,7 @@ describe('Permissions Engine', () => {
       },
     },
     conditions: {
-      isBob: user => user.firstname === 'Bob',
+      isBob: async user => new Promise(resolve => resolve(user.firstname === 'Bob')),
       isAdmin: user => user.title === 'admin',
       isCreatedBy: user => ({ created_by: user.firstname }),
       isContainedIn: { firstname: { $in: ['Alice', 'Foo'] } },
