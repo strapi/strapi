@@ -425,7 +425,7 @@ const data = {
 
     // Users-permissions
     {
-      action: 'plugins::users-permissions.roles.createe',
+      action: 'plugins::users-permissions.roles.create',
       subject: null,
       fields: null,
       conditions: [],
