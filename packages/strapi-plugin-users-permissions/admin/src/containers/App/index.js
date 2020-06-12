@@ -6,16 +6,23 @@
  */
 
 import React from 'react';
-import { CheckPagePermissions } from 'strapi-helper-plugin';
+import { Redirect } from 'react-router-dom';
+import { LoadingIndicatorPage, useUserPermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import Main from '../Main';
 
 const App = () => {
-  return (
-    <CheckPagePermissions permissions={pluginPermissions.main}>
-      <Main />
-    </CheckPagePermissions>
-  );
+  const { isLoading, allowedActions } = useUserPermissions(pluginPermissions);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  if (allowedActions.canMain) {
+    return <Main allowedActions={allowedActions} />;
+  }
+
+  return <Redirect to="/" />;
 };
 
 export default App;
