@@ -133,8 +133,19 @@ const deleteByIds = async (ids = []) => {
  * @returns {Promise<integer>}
  */
 const getUsersCount = async roleId => {
-  return strapi.query('user', 'admin').count({ 'roles.id': roleId });
+  return strapi.query('user', 'admin').count({ roles: [roleId] });
 };
+
+/** Returns admin role
+ * @returns {Promise<role>}
+ */
+const getAdmin = () => findOne({ code: strapi.admin.config.superAdminCode });
+
+/** Returns admin role with userCount
+ * @returns {Promise<role>}
+ */
+const getAdminWithUsersCount = () =>
+  findOneWithUsersCount({ code: strapi.admin.config.superAdminCode });
 
 module.exports = {
   sanitizeRole,
@@ -147,4 +158,6 @@ module.exports = {
   exists,
   deleteByIds,
   getUsersCount,
+  getAdmin,
+  getAdminWithUsersCount,
 };

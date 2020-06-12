@@ -140,6 +140,35 @@ const deleteOne = async query => {
   return strapi.query('user', 'admin').delete(query);
 };
 
+/** Count the users that don't have any associated roles
+ * @returns {Promise<number>}
+ */
+const countUsersWithoutRole = async () => {
+  const userModel = strapi.query('user', 'admin').model;
+  const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
+  let count;
+
+  if (userModel.orm === 'bookshelf') {
+    const result = await userModel
+      .query(qb => {
+        qb.count()
+          .leftJoin(assocTable, `${userModel.collectionName}.id`, `${assocTable}.user_id`)
+          .where(`${assocTable}.role_id`, null);
+      })
+      .fetch();
+    count = result.toJSON()['count(*)'];
+  } else if (userModel.orm === 'mongoose') {
+    count = await strapi.query('user', 'admin').model.countDocuments({ roles: { $size: 0 } });
+  } else {
+    const allRoles = await strapi.query('role', 'admin').find();
+    count = await strapi.query('user', 'admin').count({
+      roles_nin: allRoles.map(r => r.id),
+    });
+  }
+
+  return count;
+};
+
 module.exports = {
   create,
   update,
@@ -151,4 +180,5 @@ module.exports = {
   findPage,
   searchPage,
   deleteOne,
+  countUsersWithoutRole,
 };

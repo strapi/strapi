@@ -15,6 +15,12 @@
       "configurable": false,
       "required": true
     },
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "unique": true,
+      "configurable": false
+    },
     "description": {
       "type": "string",
       "configurable": false
