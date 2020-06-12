@@ -87,7 +87,7 @@ export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contex
 export { default as UserContext } from './contexts/UserContext';
 
 // Hooks
-export { default as useQuery } from './hooks/useQuery/useQuery';
+export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
