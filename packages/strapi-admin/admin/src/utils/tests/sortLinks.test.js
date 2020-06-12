@@ -1,6 +1,6 @@
 import sortLinks from '../sortLinks';
 
-describe('ADMIN | LeftMenu | utils | sortLinks', () => {
+describe('ADMIN | utils | sortLinks', () => {
   it('should return an empty array', () => {
     expect(sortLinks([])).toEqual([]);
   });

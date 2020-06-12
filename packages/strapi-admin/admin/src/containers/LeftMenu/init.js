@@ -1,6 +1,7 @@
 import { get, omit, set } from 'lodash';
 import { SETTINGS_BASE_URL } from '../../config';
-import { getSettingsMenuLinksPermissions, sortLinks } from './utils';
+import { sortLinks } from '../../utils';
+import { getSettingsMenuLinksPermissions } from './utils';
 
 const init = (initialState, plugins = {}, settingsMenu = []) => {
   const settingsLinkPermissions = getSettingsMenuLinksPermissions(settingsMenu);
