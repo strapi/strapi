@@ -59,7 +59,7 @@ function InputCheckboxPlugin({
   };
 
   return (
-    <Wrapper className="col-md-4">
+    <Wrapper className="col-md-4" onClick={handleClick}>
       <div
         className={`form-check ${
           isSelected && policiesShown ? 'highlighted' : ''
@@ -79,7 +79,7 @@ function InputCheckboxPlugin({
           />
           {label}
         </Label>
-        <i className="fa fa-cog" onClick={handleClick} />
+        <i className="fa fa-cog" />
       </div>
     </Wrapper>
   );
