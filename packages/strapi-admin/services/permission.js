@@ -4,10 +4,11 @@ const _ = require('lodash');
 const { createPermission } = require('../domain/permission');
 const actionProvider = require('./action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
+const defaultConditions = require('./permission/default-conditions');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
 
-const conditionProvider = createConditionProvider();
+const conditionProvider = createConditionProvider(defaultConditions);
 const engine = createPermissionEngine(conditionProvider);
 
 /**
