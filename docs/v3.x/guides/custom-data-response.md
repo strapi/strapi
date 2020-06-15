@@ -21,7 +21,7 @@ Let's consider you don't want to expose the chef's email for privacy reasons.
 
 To enforce this rule we will customize the action that fetches all restaurants and remove the email from the returned data.
 
-To follow the example your will have to create a content type `restaurant` and add the following field definition:
+To follow the example you will have to create a content type `restaurant` and add the following field definition:
 
 - `string` attribute named `name`
 - `text` attribute named `description`
