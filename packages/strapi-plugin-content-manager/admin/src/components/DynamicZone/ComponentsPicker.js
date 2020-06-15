@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const ComponentsPicker = styled.div`
   overflow: hidden;
   max-height: 0;

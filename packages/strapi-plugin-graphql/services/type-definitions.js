@@ -373,7 +373,7 @@ const buildCollectionType = model => {
   if (isQueryEnabled(_schema, singularName)) {
     const resolverOpts = {
       resolver: `${uid}.findOne`,
-      ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
+      ..._.get(_schema, `resolver.Query.${singularName}`, {}),
     };
     if (actionExists(resolverOpts)) {
       _.merge(localSchema, {
