@@ -1,10 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
+import { Button } from '@buffetjs/core';
 import { Header as HeaderCompo } from '@buffetjs/custom';
 import { Envelope } from '@buffetjs/icons';
 
-const Header = ({ count, dataToDelete, isLoading, onClickAddUser }) => {
+const Header = ({
+  canCreate,
+  canDelete,
+  canRead,
+  count,
+  dataToDelete,
+  isLoading,
+  onClickAddUser,
+}) => {
   const { formatMessage } = useGlobalContext();
   const tradBaseId = 'Settings.permissions.users.listview.';
   const headerDescriptionSuffix =
@@ -20,6 +29,7 @@ const Header = ({ count, dataToDelete, isLoading, onClickAddUser }) => {
             disabled: !dataToDelete.length,
             label: formatMessage({ id: 'app.utils.delete' }),
             type: 'button',
+            Component: props => (canDelete ? <Button {...props} /> : null),
           },
 
           {
@@ -28,9 +38,12 @@ const Header = ({ count, dataToDelete, isLoading, onClickAddUser }) => {
             label: formatMessage({ id: 'Settings.permissions.users.create' }),
             onClick: onClickAddUser,
             type: 'button',
+            Component: props => (canCreate ? <Button {...props} /> : null),
           },
         ],
-    content: formatMessage({ id: `${tradBaseId}${headerDescriptionSuffix}` }, { number: count }),
+    content: canRead
+      ? formatMessage({ id: `${tradBaseId}${headerDescriptionSuffix}` }, { number: count })
+      : null,
     title: { label: formatMessage({ id: `${tradBaseId}header.title` }) },
   };
   /* eslint-enable indent */
@@ -39,6 +52,9 @@ const Header = ({ count, dataToDelete, isLoading, onClickAddUser }) => {
 };
 
 Header.defaultProps = {
+  canCreate: false,
+  canDelete: false,
+  canRead: false,
   count: 0,
   dataToDelete: [],
   isLoading: false,
@@ -46,6 +62,9 @@ Header.defaultProps = {
 };
 
 Header.propTypes = {
+  canCreate: PropTypes.bool,
+  canDelete: PropTypes.bool,
+  canRead: PropTypes.bool,
   count: PropTypes.number,
   dataToDelete: PropTypes.array,
   isLoading: PropTypes.bool,

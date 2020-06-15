@@ -24,8 +24,8 @@ import HeaderSearch from '../../components/HeaderSearch';
 import { useSettingsMenu } from '../../hooks';
 import { retrieveGlobalLinks } from '../../utils';
 import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
-import UsersEditPage from '../Users/EditPage';
-import UsersListPage from '../Users/ListPage';
+import UsersEditPage from '../Users/ProtectedEditPage';
+import UsersListPage from '../Users/ProtectedListPage';
 import RolesEditPage from '../Roles/EditPage';
 // TODO remove this line when feature finished
 // import RolesListPage from '../Roles/ListPage';

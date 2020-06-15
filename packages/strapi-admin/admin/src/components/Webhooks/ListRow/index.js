@@ -26,24 +26,19 @@ function ListRow({
   onDeleteCLick,
   onEditClick,
 }) {
-  const links = [];
-
-  if (canUpdate) {
-    links.push({
-      icon: <FontAwesomeIcon icon={faPencilAlt} />,
+  const links = [
+    {
+      icon: canUpdate ? <FontAwesomeIcon icon={faPencilAlt} /> : null,
       onClick: () => onEditClick(id),
-    });
-  }
-
-  if (canDelete) {
-    links.push({
-      icon: <FontAwesomeIcon icon={faTrashAlt} />,
+    },
+    {
+      icon: canDelete ? <FontAwesomeIcon icon={faTrashAlt} /> : null,
       onClick: e => {
         e.stopPropagation();
         onDeleteCLick(id);
       },
-    });
-  }
+    },
+  ];
 
   const handleClick = () => {
     if (canUpdate) {

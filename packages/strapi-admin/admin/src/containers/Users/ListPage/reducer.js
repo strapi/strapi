@@ -29,6 +29,10 @@ const reducer = (state, action) =>
         draftState.dataToDelete = action.dataToDelete;
         break;
       }
+      case 'UNSET_IS_LOADING': {
+        draftState.isLoading = false;
+        break;
+      }
       default:
         return draftState;
     }

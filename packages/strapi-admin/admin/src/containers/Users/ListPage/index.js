@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useQuery, request } from 'strapi-helper-plugin';
+import { useQuery, request, useUserPermissions, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
-
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import { useSettingsHeaderSearchContext } from '../../../hooks';
 import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
+import adminPermissions from '../../../permissions';
 import Header from './Header';
 import ModalForm from './ModalForm';
 import getFilters from './utils/getFilters';
@@ -13,6 +13,10 @@ import init from './init';
 import { initialState, reducer } from './reducer';
 
 const ListPage = () => {
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canCreate, canDelete, canRead, canUpdate },
+  } = useUserPermissions(adminPermissions.settings.users);
   const [isModalOpened, setIsModalOpened] = useState(false);
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const query = useQuery();
@@ -37,6 +41,13 @@ const ListPage = () => {
   const _q = decodeURIComponent(query.get('_q') || '');
   const getDataRef = useRef();
   getDataRef.current = async () => {
+    if (!canRead) {
+      dispatch({
+        type: 'UNSET_IS_LOADING',
+      });
+
+      return;
+    }
     // Show the loading state and reset the state
     dispatch({
       type: 'GET_DATA',
@@ -59,8 +70,10 @@ const ListPage = () => {
   };
 
   useEffect(() => {
-    getDataRef.current();
-  }, [search]);
+    if (!isLoadingForPermissions) {
+      getDataRef.current();
+    }
+  }, [search, isLoadingForPermissions]);
 
   useEffect(() => {
     toggleHeaderSearch({ id: 'Settings.permissions.menu.link.users.label' });
@@ -127,6 +140,10 @@ const ListPage = () => {
     });
   };
 
+  if (isLoadingForPermissions) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <div>
       <Header
@@ -134,37 +151,46 @@ const ListPage = () => {
         dataToDelete={dataToDelete}
         onClickAddUser={handleToggle}
         isLoading={isLoading}
+        canCreate={canCreate}
+        canDelete={canDelete}
+        canRead={canRead}
       />
-      <BaselineAlignement top size="1px">
-        <Flex flexWrap="wrap">
-          <SortPicker onChange={handleChangeSort} value={_sort} />
-          <Padded right size="10px" />
-          <BaselineAlignement bottom size="6px">
-            <FilterPicker onChange={handleChangeFilter} />
+      {canRead && (
+        <>
+          <BaselineAlignement top size="1px">
+            <Flex flexWrap="wrap">
+              <SortPicker onChange={handleChangeSort} value={_sort} />
+              <Padded right size="10px" />
+              <BaselineAlignement bottom size="6px">
+                <FilterPicker onChange={handleChangeFilter} />
+              </BaselineAlignement>
+              <Padded right size="10px" />
+              {filters.map((filter, i) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
+              ))}
+            </Flex>
           </BaselineAlignement>
-          <Padded right size="10px" />
-          {filters.map((filter, i) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
-          ))}
-        </Flex>
-      </BaselineAlignement>
+          <BaselineAlignement top size="8px" />
+          <Padded top size="sm">
+            <List
+              canDelete={canDelete}
+              canUpdate={canUpdate}
+              isLoading={isLoading}
+              data={data}
+              onChange={handleChangeDataToDelete}
+              searchParam={_q}
+              filters={filters}
+            />
+          </Padded>
+          <Footer
+            count={total}
+            onChange={handleChangeFooterParams}
+            params={{ _limit: pageSize, _page: page }}
+          />
+        </>
+      )}
       <ModalForm isOpen={isModalOpened} onClosed={handleCloseModal} onToggle={handleToggle} />
-      <BaselineAlignement top size="8px" />
-      <Padded top size="sm">
-        <List
-          isLoading={isLoading}
-          data={data}
-          onChange={handleChangeDataToDelete}
-          searchParam={_q}
-          filters={filters}
-        />
-      </Padded>
-      <Footer
-        count={total}
-        onChange={handleChangeFooterParams}
-        params={{ _limit: pageSize, _page: page }}
-      />
     </div>
   );
 };

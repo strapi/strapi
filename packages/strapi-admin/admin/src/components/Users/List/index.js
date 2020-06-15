@@ -13,7 +13,7 @@ import Wrapper from './Wrapper';
 
 // TODO this component should handle the users that are already selected
 // we need to add this logic
-const List = ({ data, filters, isLoading, onChange, searchParam }) => {
+const List = ({ canDelete, canUpdate, data, filters, isLoading, onChange, searchParam }) => {
   const { push } = useHistory();
   const [{ rows }, dispatch] = useReducer(reducer, initialState, init);
 
@@ -80,26 +80,28 @@ const List = ({ data, filters, isLoading, onChange, searchParam }) => {
         rows={rows}
         rowLinks={[
           {
-            icon: <FontAwesomeIcon icon={faPencilAlt} />,
+            icon: canUpdate ? <FontAwesomeIcon icon={faPencilAlt} /> : null,
             onClick: data => {
               handleClick(data.id);
             },
           },
           {
-            icon: <FontAwesomeIcon icon={faTrashAlt} />,
+            icon: canDelete ? <FontAwesomeIcon icon={faTrashAlt} /> : null,
             onClick: data => {
               console.log(data);
             },
           },
         ]}
         tableEmptyText={tableEmptyTextTranslated}
-        withBulkAction
+        withBulkAction={canDelete}
       />
     </Wrapper>
   );
 };
 
 List.defaultProps = {
+  canDelete: false,
+  canUpdate: false,
   data: [],
   filters: [],
   isLoading: false,
@@ -108,6 +110,8 @@ List.defaultProps = {
 };
 
 List.propTypes = {
+  canDelete: PropTypes.bool,
+  canUpdate: PropTypes.bool,
   data: PropTypes.array,
   filters: PropTypes.array,
   isLoading: PropTypes.bool,
