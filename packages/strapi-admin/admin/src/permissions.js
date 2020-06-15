@@ -33,6 +33,7 @@ const permissions = {
       read: [
         { action: 'admin::users.read', subject: null },
         { action: 'admin::users.update', subject: null },
+        { action: 'admin::users.delete', subject: null },
       ],
       update: [{ action: 'admin::users.update', subject: null }],
     },

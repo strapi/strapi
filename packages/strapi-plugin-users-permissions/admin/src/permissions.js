@@ -12,24 +12,27 @@ const pluginPermissions = {
   createRole: [{ action: 'plugins::users-permissions.roles.create', subject: null }],
   readAdvancedSettings: [
     { action: 'plugins::users-permissions.advanced-settings.read', subject: null },
-    // { action: 'plugins::users-permissions.advanced-settings.update', subject: null },
+    { action: 'plugins::users-permissions.advanced-settings.update', subject: null },
   ],
   updateAdvancedSettings: [
     { action: 'plugins::users-permissions.advanced-settings.update', subject: null },
   ],
   readEmailTemplates: [
     { action: 'plugins::users-permissions.email-templates.read', subject: null },
-    // { action: 'plugins::users-permissions.email-templates.update', subject: null },
+    { action: 'plugins::users-permissions.email-templates.update', subject: null },
   ],
   updateEmailTemplates: [
     { action: 'plugins::users-permissions.email-templates.update', subject: null },
   ],
   readProviders: [
     { action: 'plugins::users-permissions.providers.read', subject: null },
-    // { action: 'plugins::users-permissions.providers.update', subject: null },
+    { action: 'plugins::users-permissions.providers.update', subject: null },
   ],
   updateProviders: [{ action: 'plugins::users-permissions.providers.update', subject: null }],
-  readRoles: [{ action: 'plugins::users-permissions.roles.read', subject: null }],
+  readRoles: [
+    { action: 'plugins::users-permissions.roles.read', subject: null },
+    { action: 'plugins::users-permissions.roles.update', subject: null },
+  ],
   updateRole: [{ action: 'plugins::users-permissions.roles.update', subject: null }],
   deleteRole: [{ action: 'plugins::users-permissions.roles.delete', subject: null }],
 };

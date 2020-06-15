@@ -248,24 +248,24 @@ const data = {
     // },
 
     // Admin webhooks
-    {
-      action: 'admin::webhooks.create',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
-    {
-      action: 'admin::webhooks.read',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
-    {
-      action: 'admin::webhooks.update',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::webhooks.create',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
+    // {
+    //   action: 'admin::webhooks.read',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
+    // {
+    //   action: 'admin::webhooks.update',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     // {
     //   action: 'admin::webhooks.delete',
     //   subject: null,
@@ -274,30 +274,30 @@ const data = {
     // },
 
     // // Admin users
-    {
-      action: 'admin::users.create',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::users.create',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     // {
     //   action: 'admin::users.read',
     //   subject: null,
     //   fields: null,
     //   conditions: [],
     // },
-    {
-      action: 'admin::users.update',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
-    {
-      action: 'admin::users.delete',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::users.update',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
+    // {
+    //   action: 'admin::users.delete',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
 
     // // Admin roles
     // {
@@ -306,12 +306,12 @@ const data = {
     //   fields: null,
     //   conditions: [],
     // },
-    {
-      action: 'admin::roles.read',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::roles.read',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
     // {
     //   action: 'admin::roles.update',
     //   subject: null,
@@ -416,12 +416,12 @@ const data = {
     //   fields: null,
     //   conditions: [],
     // },
-    {
-      action: 'plugins::upload.settings.read',
-      subject: null,
-      fields: null,
-      conditions: null,
-    },
+    // {
+    //   action: 'plugins::upload.settings.read',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: null,
+    // },
 
     // Users-permissions
     {

@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { set, unset } from 'lodash';
+import { set } from 'lodash';
 
 const initialState = {
   menu: [],
@@ -18,9 +18,14 @@ const reducer = (state, action) =>
               ['menu', ...checkedPermissions.path.split('.'), 'isDisplayed'],
               checkedPermissions.hasPermission
             );
-          } else {
-            unset(draftState, ['menu', ...checkedPermissions.path.split('.')]);
           }
+        });
+
+        // Remove the not needed links in each section
+        draftState.menu.forEach((section, sectionIndex) => {
+          draftState.menu[sectionIndex].links = section.links.filter(
+            link => link.isDisplayed === true
+          );
         });
 
         draftState.isLoading = false;

@@ -166,6 +166,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
             searchable
           />
         )}
+
         <LeftMenuLinksSection
           section="plugins"
           name="plugins"
