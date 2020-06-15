@@ -249,8 +249,7 @@ module.exports = {
       .get();
 
     const [requestPath] = ctx.request.url.split('?');
-    const provider =
-      process.platform === 'win32' ? requestPath.split('\\')[2] : requestPath.split('/')[2];
+    const provider = requestPath.split('/')[2];
 
     if (!_.get(grantConfig[provider], 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
