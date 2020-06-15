@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-plugin",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Generate an plugin for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   "dependencies": {
     "fs-extra": "^8.0.1",
     "lodash": "^4.17.11",
-    "strapi-utils": "3.0.1"
+    "strapi-utils": "3.0.2"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
