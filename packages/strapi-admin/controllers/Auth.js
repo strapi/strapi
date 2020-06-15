@@ -9,7 +9,6 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
@@ -188,12 +187,13 @@ module.exports = {
       });
     } catch (err) {
       strapi.log.error(err);
-      const adminError = _.includes(err.message, 'username')
+      const registerError = err.stack.split('\n')[0];
+      const adminError = _.includes(registerError, 'username')
         ? {
             id: 'Auth.form.error.username.taken',
             message: 'Username already taken',
           }
-        : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
+        : { id: 'Auth.form.register.error', message: registerError };
 
       ctx.badRequest(null, formatError(adminError));
     }

@@ -390,6 +390,17 @@ module.exports = {
       provider: 'local',
     };
 
+    // Username is required
+    if (!params.username) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.username.provide',
+          message: 'Please provide your username.',
+        })
+      );
+    }
+
     // Password is required.
     if (!params.password) {
       return ctx.badRequest(
@@ -556,12 +567,13 @@ module.exports = {
         });
       }
     } catch (err) {
-      const adminError = _.includes(err.message, 'username')
+      const registerError = err.stack.split('\n')[0];
+      const adminError = _.includes(registerError, 'username')
         ? {
             id: 'Auth.form.error.username.taken',
             message: 'Username already taken',
           }
-        : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
+        : { id: 'Auth.form.register.error', message: registerError };
 
       ctx.badRequest(null, formatError(adminError));
     }
