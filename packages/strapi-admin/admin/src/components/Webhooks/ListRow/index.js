@@ -14,6 +14,8 @@ import Switch from '../Switch';
 import StyledListRow from './StyledListRow';
 
 function ListRow({
+  canDelete,
+  canUpdate,
   id,
   isEnabled,
   itemsToDelete,
@@ -24,41 +26,55 @@ function ListRow({
   onDeleteCLick,
   onEditClick,
 }) {
-  const links = [
-    {
+  const links = [];
+
+  if (canUpdate) {
+    links.push({
       icon: <FontAwesomeIcon icon={faPencilAlt} />,
       onClick: () => onEditClick(id),
-    },
-    {
+    });
+  }
+
+  if (canDelete) {
+    links.push({
       icon: <FontAwesomeIcon icon={faTrashAlt} />,
       onClick: e => {
         e.stopPropagation();
         onDeleteCLick(id);
       },
-    },
-  ];
+    });
+  }
+
+  const handleClick = () => {
+    if (canUpdate) {
+      onEditClick(id);
+    }
+  };
 
   const isChecked = itemsToDelete.includes(id);
 
   return (
-    <StyledListRow onClick={() => onEditClick(id)}>
-      <td>
-        <Checkbox
-          name={name}
-          value={isChecked}
-          onClick={e => e.stopPropagation()}
-          onChange={({ target: { value } }) => onCheckChange(value, id)}
-        />
-      </td>
-      <td>
+    <StyledListRow onClick={handleClick} disabled={!canUpdate}>
+      {canDelete && (
+        <td className="checkboxWrapper">
+          <Checkbox
+            name={name}
+            value={isChecked}
+            onClick={e => e.stopPropagation()}
+            onChange={({ target: { value } }) => onCheckChange(value, id)}
+          />
+        </td>
+      )}
+      <td className="nameWrapper">
         <p>{name}</p>
       </td>
-      <td>
+      <td className="urlWrapper">
         <p title={url}>{url}</p>
       </td>
-      <td>
+      <td className="switchWrapper">
         <div onClick={e => e.stopPropagation()} role="button" aria-hidden="true">
           <Switch
+            disabled={!canUpdate}
             name={name}
             value={isEnabled}
             onChange={({ target: { value } }) => onEnabledChange(value, id)}
@@ -73,6 +89,8 @@ function ListRow({
 }
 
 ListRow.defaultProps = {
+  canDelete: false,
+  canUpdate: false,
   itemsToDelete: [],
   isEnabled: false,
   name: null,
@@ -84,6 +102,8 @@ ListRow.defaultProps = {
 };
 
 ListRow.propTypes = {
+  canDelete: PropTypes.bool,
+  canUpdate: PropTypes.bool,
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   itemsToDelete: PropTypes.instanceOf(Array),
   isEnabled: PropTypes.bool,

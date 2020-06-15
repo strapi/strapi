@@ -11,12 +11,13 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 import Toggle from './Toggle';
 import Wrapper from './Wrapper';
 
-function Switch({ name, value, onChange }) {
+function Switch({ disabled, name, value, onChange }) {
   const { formatMessage } = useGlobalContext();
 
   return (
     <Wrapper>
       <Toggle
+        disabled={disabled}
         checked={value}
         name={name}
         onChange={({ target: { checked } }) => onChange({ target: { name, value: checked } })}
@@ -35,11 +36,13 @@ function Switch({ name, value, onChange }) {
 }
 
 Switch.defaultProps = {
+  disabled: true,
   onChange: () => {},
   value: false,
 };
 
 Switch.propTypes = {
+  disabled: PropTypes.bool,
   onChange: PropTypes.func,
   name: PropTypes.string.isRequired,
   value: PropTypes.bool,
