@@ -7,8 +7,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Button, PopUpWarning } from 'strapi-helper-plugin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button, PopUpWarning, CheckPermissions } from 'strapi-helper-plugin';
+import adminPermissions from '../../../permissions';
 import Wrapper from './Wrapper';
 
 /* eslint-disable react/no-unused-state */
@@ -41,26 +41,6 @@ class PluginCard extends React.Component {
     }
 
     this.setState({ boostrapCol });
-  };
-
-  handleClick = () => {
-    if (this.props.plugin.id !== 'support-us') {
-      this.props.history.push({
-        pathname: this.props.history.location.pathname,
-        hash: `${this.props.plugin.id}::description`,
-      });
-    } else {
-      this.aTag.click();
-    }
-  };
-
-  handleClickSettings = e => {
-    const settingsPath = `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    this.props.history.push(settingsPath);
   };
 
   handleDownloadPlugin = e => {
@@ -117,38 +97,28 @@ class PluginCard extends React.Component {
               <span className="helper" />
               <img src={this.props.plugin.logo} alt="icon" />
             </div>
-            <div>
-              {this.props.plugin.name}{' '}
-              <i
-                className="fa fa-external-link-alt"
-                onClick={() =>
-                  window.open(
-                    `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
-                    '_blank'
-                  )
-                }
-              />
+            <div
+              onClick={e => {
+                window.open(
+                  `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
+                  '_blank'
+                );
+              }}
+            >
+              {this.props.plugin.name} <i className="fa fa-external-link-alt" />
             </div>
           </div>
           <div className="cardDescription">{descriptions.long}</div>
           <div className="cardFooter" onClick={e => e.stopPropagation()}>
             <div className="cardFooterButton">
-              <Button
-                className={`${buttonClass} button`}
-                label={buttonLabel}
-                type="button"
-                onClick={this.handleDownloadPlugin}
-              />
-              <a
-                href="https://strapi.io/shop"
-                style={{ display: 'none' }}
-                ref={a => {
-                  this.aTag = a;
-                }}
-                target="_blank"
-              >
-                &nbsp;
-              </a>
+              <CheckPermissions permissions={adminPermissions.marketplace.install}>
+                <Button
+                  className={`${buttonClass} button`}
+                  label={buttonLabel}
+                  type="button"
+                  onClick={this.handleDownloadPlugin}
+                />
+              </CheckPermissions>
             </div>
             {this.props.isAlreadyInstalled ? (
               settingsComponent
