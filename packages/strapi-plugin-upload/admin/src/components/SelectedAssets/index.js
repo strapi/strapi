@@ -13,6 +13,7 @@ import ListWrapper from './ListWrapper';
 
 const SelectedAssets = () => {
   const {
+    allowedActions,
     selectedFiles,
     handleFileSelection,
     handleGoToEditFile,
@@ -39,6 +40,7 @@ const SelectedAssets = () => {
       </Flex>
       <ListWrapper>
         <SortableList
+          allowedActions={allowedActions}
           data={selectedFiles}
           moveAsset={moveAsset}
           noNavigation={noNavigation}

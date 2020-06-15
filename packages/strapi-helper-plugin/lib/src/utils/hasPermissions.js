@@ -20,7 +20,7 @@ const shouldCheckPermissions = permissions =>
   !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
 
 const hasPermissions = async (userPermissions, permissions) => {
-  if (!permissions.length) {
+  if (!permissions || !permissions.length) {
     return true;
   }
 
