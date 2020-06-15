@@ -1,5 +1,6 @@
 import { retrieveGlobalLinks, retrievePluginsMenu, sortLinks } from '../../utils';
 import { SETTINGS_BASE_URL } from '../../config';
+import adminPermissions from '../../permissions';
 import formatLinks from './utils/formatLinks';
 
 const init = (initialState, plugins) => {
@@ -12,12 +13,7 @@ const init = (initialState, plugins) => {
       to: `${SETTINGS_BASE_URL}/webhooks`,
       name: 'webhooks',
       isDisplayed: false,
-      permissions: [
-        { action: 'admin::webhooks.create', subject: null },
-        { action: 'admin::webhooks.read', subject: null },
-        { action: 'admin::webhooks.update', subject: null },
-        { action: 'admin::webhooks.delete', subject: null },
-      ],
+      permissions: adminPermissions.settings.webhooks.main,
     },
     ...pluginsGlobalLinks,
   ]);
@@ -40,12 +36,7 @@ const init = (initialState, plugins) => {
           to: `${SETTINGS_BASE_URL}/roles`,
           name: 'roles',
           isDisplayed: false,
-          permissions: [
-            { action: 'admin::roles.create', subject: null },
-            { action: 'admin::roles.update', subject: null },
-            { action: 'admin::roles.read', subject: null },
-            { action: 'admin::roles.delete', subject: null },
-          ],
+          permissions: adminPermissions.settings.roles.main,
         },
         {
           title: { id: 'Settings.permissions.menu.link.users.label' },
@@ -53,12 +44,7 @@ const init = (initialState, plugins) => {
           to: `${SETTINGS_BASE_URL}/users?pageSize=10&page=1&_sort=firstname%3AASC`,
           name: 'users',
           isDisplayed: false,
-          permissions: [
-            { action: 'admin::users.create', subject: null },
-            { action: 'admin::users.read', subject: null },
-            { action: 'admin::users.update', subject: null },
-            { action: 'admin::users.delete', subject: null },
-          ],
+          permissions: adminPermissions.settings.users.main,
         },
       ],
     },

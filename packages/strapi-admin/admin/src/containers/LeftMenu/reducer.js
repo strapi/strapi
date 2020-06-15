@@ -2,6 +2,7 @@
 import produce from 'immer';
 import { set } from 'lodash';
 import { SETTINGS_BASE_URL } from '../../config';
+import adminPermissions from '../../permissions';
 
 const initialState = {
   collectionTypesSectionLinks: [],
@@ -11,20 +12,14 @@ const initialState = {
       label: 'app.components.LeftMenuLinkContainer.listPlugins',
       destination: '/list-plugins',
       isDisplayed: false,
-      permissions: [
-        { action: 'admin::marketplace.read', subject: null },
-        { action: 'admin::marketplace.plugins.uninstall', subject: null },
-      ],
+      permissions: adminPermissions.marketplace.main,
     },
     {
       icon: 'shopping-basket',
       label: 'app.components.LeftMenuLinkContainer.installNewPlugin',
       destination: '/marketplace',
       isDisplayed: false,
-      permissions: [
-        { action: 'admin::marketplace.read', subject: null },
-        { action: 'admin::marketplace.plugins.install', subject: null },
-      ],
+      permissions: adminPermissions.marketplace.main,
     },
     {
       icon: 'cog',
