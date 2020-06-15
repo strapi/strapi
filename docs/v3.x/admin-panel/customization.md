@@ -19,7 +19,7 @@ module.exports = ({ env }) => ({
   admin: {
     url: '/dashboard',
   },
-};
+});
 ```
 
 The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
@@ -93,7 +93,7 @@ import React from 'react';
 import MyNewWYSIWYG from 'my-awesome-lib';
 
 // This is a dummy example
-const WysiwygWithErrors = props => <MyNewWYSIWYG {...props} />;
+const WysiwygWithErrors = (props) => <MyNewWYSIWYG {...props} />;
 
 export default WysiwygWithErrors;
 ```
