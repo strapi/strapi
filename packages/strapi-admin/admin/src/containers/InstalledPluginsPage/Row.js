@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { IconLinks, Text } from '@buffetjs/core';
 import { CustomRow } from '@buffetjs/styles';
-import { useGlobalContext, PopUpWarning } from 'strapi-helper-plugin';
+import { useGlobalContext, PopUpWarning, CheckPermissions } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import adminPermissions from '../../permissions';
 import LogoContainer from './Logo';
 
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
@@ -23,7 +24,11 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   if (!isRequired) {
     links.push({
-      icon: <FontAwesomeIcon icon={faTrashAlt} />,
+      icon: (
+        <CheckPermissions permissions={adminPermissions.marketplace.uninstall}>
+          <FontAwesomeIcon icon={faTrashAlt} />
+        </CheckPermissions>
+      ),
       onClick: handleToggle,
     });
   }

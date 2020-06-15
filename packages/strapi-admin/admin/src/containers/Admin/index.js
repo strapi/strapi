@@ -20,11 +20,12 @@ import {
   LoadingIndicatorPage,
   OverlayBlocker,
   UserProvider,
+  CheckPagePermissions,
 } from 'strapi-helper-plugin';
 import TestEE from 'ee_else_ce/containers/TestEE';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
 import { fakePermissionsData } from '../../utils';
-
+import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
@@ -199,24 +200,21 @@ export class Admin extends React.Component {
                   {/* TODO remove this Route it is just made for the test */}
                   <Route path="/test" component={TestEE} />
                   <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
-                  <Route
-                    path="/list-plugins"
-                    render={props => this.renderRoute(props, InstalledPluginsPage)}
-                    exact
-                  />
-                  <Route
-                    path="/marketplace"
-                    render={props => this.renderRoute(props, MarketplacePage)}
-                  />
+                  <Route path="/list-plugins" exact>
+                    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                      <InstalledPluginsPage />
+                    </CheckPagePermissions>
+                  </Route>
+                  <Route path="/marketplace">
+                    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                      <MarketplacePage />
+                    </CheckPagePermissions>
+                  </Route>
                   <Route
                     path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
-                    render={props => this.renderRoute(props, SettingsPage)}
+                    component={SettingsPage}
                   />
-                  <Route
-                    path={SETTINGS_BASE_URL || '/settings'}
-                    render={props => this.renderRoute(props, SettingsPage)}
-                    exact
-                  />
+                  <Route path={SETTINGS_BASE_URL || '/settings'} component={SettingsPage} exact />
                   <Route key="7" path="" component={NotFoundPage} />
                   <Route key="8" path="/404" component={NotFoundPage} />
                 </Switch>
