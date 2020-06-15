@@ -184,7 +184,7 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
+- `params` (object): it should look like this `{id: 1}`
 
 :::
 
@@ -206,7 +206,7 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
+- `params` (object): it should look like this `{id: 1}`
 
 :::
 
