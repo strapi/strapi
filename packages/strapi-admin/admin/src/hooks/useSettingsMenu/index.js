@@ -4,7 +4,7 @@ import { useGlobalContext, hasPermissions, UserContext } from 'strapi-helper-plu
 import reducer, { initialState } from './reducer';
 import init from './init';
 
-const useSettingsMenu = () => {
+const useSettingsMenu = (noCheck = false) => {
   const permissions = useContext(UserContext);
   const { plugins } = useGlobalContext();
 
@@ -41,9 +41,14 @@ const useSettingsMenu = () => {
       });
     };
 
-    getData();
+    // This hook is also used by the main LeftMenu component in order to know which sections it needs to display/hide
+    // Therefore, we don't need to make the checking all the times when the hook is used.
+    if (!noCheck) {
+      getData();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [permissions]);
+  }, [permissions, noCheck]);
 
   return { isLoading, menu };
 };

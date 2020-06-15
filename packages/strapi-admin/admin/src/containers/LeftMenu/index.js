@@ -33,7 +33,7 @@ import Wrapper from './Wrapper';
 const LeftMenu = forwardRef(({ version, plugins }, ref) => {
   const location = useLocation();
   const permissions = useContext(UserContext);
-  const { menu: settingsMenu } = useSettingsMenu();
+  const { menu: settingsMenu } = useSettingsMenu(true);
   const [
     {
       collectionTypesSectionLinks,
