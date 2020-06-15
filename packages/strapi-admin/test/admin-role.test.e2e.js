@@ -15,6 +15,8 @@ const data = {
   users: [],
   deleteRolesIds: [],
   superAdminRole: undefined,
+  authorRole: undefined,
+  aditorRole: undefined,
 };
 
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
@@ -25,48 +27,209 @@ describe('Role CRUD End to End', () => {
     rq = createAuthRequest(token);
   }, 60000);
 
-  if (edition === 'EE') {
-    describe('Default roles', () => {
-      test('Default roles are created', async () => {
-        const defaultsRoles = [
-          {
-            name: 'Super Admin',
-            code: 'strapi-super-admin',
-            description: 'Super Admins can access and manage all features and settings.',
-            usersCount: 1,
-          },
-          {
-            name: 'Editor',
-            code: 'strapi-editor',
-            description: 'Editors can manage and publish contents including those of other users.',
-            usersCount: 0,
-          },
-          {
-            name: 'Author',
-            code: 'strapi-author',
-            description: 'Authors can manage and publish their own content.',
-            usersCount: 0,
-          },
-        ];
+  describe('Default roles', () => {
+    test('Default roles are created', async () => {
+      const defaultsRoles = [
+        {
+          name: 'Super Admin',
+          code: 'strapi-super-admin',
+          description: 'Super Admins can access and manage all features and settings.',
+          usersCount: 1,
+        },
+        {
+          name: 'Editor',
+          code: 'strapi-editor',
+          description: 'Editors can manage and publish contents including those of other users.',
+          usersCount: 0,
+        },
+        {
+          name: 'Author',
+          code: 'strapi-author',
+          description: 'Authors can manage and publish their own content.',
+          usersCount: 0,
+        },
+      ];
 
-        const res = await rq({
-          url: '/admin/roles',
-          method: 'GET',
-        });
+      const res = await rq({
+        url: '/admin/roles',
+        method: 'GET',
+      });
 
-        expect(res.statusCode).toBe(200);
-        expect(res.body.data).toHaveLength(3);
-        expect(res.body.data).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining(defaultsRoles[0]),
-            expect.objectContaining(defaultsRoles[1]),
-            expect.objectContaining(defaultsRoles[2]),
-          ])
-        );
-        data.superAdminRole = res.body.data.find(r => r.code === 'strapi-super-admin');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toHaveLength(3);
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining(defaultsRoles[0]),
+          expect.objectContaining(defaultsRoles[1]),
+          expect.objectContaining(defaultsRoles[2]),
+        ])
+      );
+      data.superAdminRole = res.body.data.find(r => r.code === 'strapi-super-admin');
+      data.authorRole = res.body.data.find(r => r.code === 'strapi-author');
+      data.editorRole = res.body.data.find(r => r.code === 'strapi-editor');
+    });
+
+    test('Author have isOwner condition for every permission', async () => {
+      const res = await rq({
+        url: `/admin/roles/${data.authorRole.id}/permissions`,
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data).toHaveLength(4);
+      res.body.data.forEach(permission => {
+        expect(permission.conditions).toEqual(['isOwner']);
       });
     });
 
+    test("Editor's permissions don't have any conditions", async () => {
+      const res = await rq({
+        url: `/admin/roles/${data.editorRole.id}/permissions`,
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data).toHaveLength(4);
+      res.body.data.forEach(permission => {
+        expect(permission.conditions).toEqual([]);
+      });
+    });
+
+    if (edition === 'EE') {
+      const newPermissions = [
+        {
+          action: 'plugins::users-permissions.roles.update',
+        },
+        {
+          action: 'plugins::content-manager.create',
+          subject: 'plugins::users-permissions.user',
+          conditions: ['isOwner'],
+        },
+      ];
+
+      test('Conditions of editors and author can be modified', async () => {
+        let res = await rq({
+          url: `/admin/roles/${data.editorRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: newPermissions },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body).toEqual({
+          data: expect.arrayContaining([
+            expect.objectContaining({
+              action: 'plugins::users-permissions.roles.update',
+              conditions: [],
+            }),
+            expect.objectContaining({
+              action: 'plugins::content-manager.create',
+              subject: 'plugins::users-permissions.user',
+              fields: ['username'],
+              conditions: ['isOwner'],
+            }),
+          ]),
+        });
+
+        res = await rq({
+          url: `/admin/roles/${data.authorRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: newPermissions },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body).toEqual({
+          data: expect.arrayContaining([
+            expect.objectContaining({
+              action: 'plugins::users-permissions.roles.update',
+              conditions: [],
+            }),
+            expect.objectContaining({
+              action: 'plugins::content-manager.create',
+              subject: 'plugins::users-permissions.user',
+              fields: ['username'],
+              conditions: ['isOwner'],
+            }),
+          ]),
+        });
+      });
+    } else if (edition === 'CE') {
+      const newPermissions = [
+        {
+          action: 'plugins::users-permissions.roles.update',
+        },
+        {
+          action: 'plugins::users-permissions.roles.read',
+          conditions: ['isOwner'],
+        },
+        {
+          action: 'plugins::content-manager.create',
+          subject: 'plugins::users-permissions.user',
+          fields: ['username'],
+          conditions: ['isOwner'],
+        },
+        {
+          action: 'plugins::content-manager.update',
+          subject: 'plugins::users-permissions.user',
+          fields: ['username'],
+          conditions: ['isOwner'],
+        },
+        {
+          action: 'plugins::content-manager.delete',
+          subject: 'plugins::users-permissions.user',
+          fields: ['username'],
+          conditions: ['isOwner'],
+        },
+        {
+          action: 'plugins::content-manager.read',
+          subject: 'plugins::users-permissions.user',
+          fields: ['username'],
+          conditions: ['isOwner'],
+        },
+      ];
+
+      test("Conditions of editors and author can't be modified", async () => {
+        let res = await rq({
+          url: `/admin/roles/${data.editorRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: newPermissions },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(6);
+        expect(res.body).toEqual({
+          data: expect.arrayContaining(
+            newPermissions
+              .slice(3, 6)
+              .map(p => ({ ...p, conditions: [] }))
+              .map(expect.objectContaining)
+          ),
+        });
+
+        res = await rq({
+          url: `/admin/roles/${data.authorRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: newPermissions },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(6);
+        expect(res.body).toEqual({
+          data: expect.arrayContaining(
+            newPermissions
+              .slice(3, 6)
+              .map(p => ({ ...p, conditions: ['isOwner'] }))
+              .map(expect.objectContaining)
+          ),
+        });
+      });
+    }
+  });
+
+  if (edition === 'EE') {
     describe('Create some roles', () => {
       const rolesToCreate = [
         [{ name: 'new role 0', description: 'description' }],
@@ -510,12 +673,7 @@ describe('Role CRUD End to End', () => {
           body: role,
         });
 
-        expect(res.statusCode).toBe(404);
-        expect(res.body).toMatchObject({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'entry.notFound',
-        });
+        expect(res.statusCode).toBe(405);
       });
     });
   }

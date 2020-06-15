@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('strapi-utils');
+const validators = require('../../validation/common-validators');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -16,7 +17,7 @@ const updatePermissionsSchema = yup
             action: yup.string().required(),
             subject: yup.string().nullable(),
             fields: yup.array().of(yup.string()),
-            conditions: yup.array().of(yup.string()),
+            conditions: validators.arrayOfConditions,
           })
           .noUnknown()
       )

@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 
@@ -85,18 +86,28 @@ module.exports = {
    */
   async updatePermissions(ctx) {
     const { id } = ctx.params;
-    const input = ctx.request.body;
+    const input = _.cloneDeep(ctx.request.body);
 
     try {
       await validatedUpdatePermissionsInput(input);
     } catch (err) {
-      return ctx.badRequest('ValidationError', err);
+      ctx.badRequest('ValidationError', err);
+      return;
     }
 
     const role = await strapi.admin.services.role.findOne({ id });
 
     if (!role) {
       return ctx.notFound('role.notFound');
+    }
+
+    let existingPermissions = strapi.admin.services.permission.actionProvider.getAllByMap();
+    if (['strapi-author', 'strapi-editor'].includes(role.code)) {
+      input.permissions
+        .filter(p => existingPermissions.get(p.action).section === 'contentTypes')
+        .forEach(p => {
+          p.conditions = role.code === 'strapi-author' ? ['isOwner'] : [];
+        });
     }
 
     const permissions = await strapi.admin.services.permission.assign(role.id, input.permissions);

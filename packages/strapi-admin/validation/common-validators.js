@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup } = require('strapi-utils');
+const _ = require('lodash');
 
 const email = yup
   .string()
@@ -30,6 +31,16 @@ const isAPluginName = yup
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
   });
 
+const arrayOfConditions = yup
+  .array()
+  .of(yup.string())
+  .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
+    const ids = strapi.admin.services.permission.conditionProvider.conditions();
+    return _.isUndefined(value) || _.difference(value, ids).length === 0
+      ? true
+      : this.createError({ path: this.path, message: `contains conditions that don't exist` });
+  });
+
 module.exports = {
   email,
   firstname,
@@ -38,4 +49,5 @@ module.exports = {
   password,
   roles,
   isAPluginName,
+  arrayOfConditions,
 };
