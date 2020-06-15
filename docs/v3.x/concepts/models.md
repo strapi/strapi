@@ -14,7 +14,7 @@ module.exports = {
     // Called before an entry is created
     beforeCreate(data) {},
     // Called after an entry is created
-    afterCreated(result) {},
+    afterCreate(result) {},
   },
 };
 ```
