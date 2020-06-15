@@ -28,6 +28,13 @@ const permissions = {
         { action: 'admin::users.update', subject: null },
         { action: 'admin::users.delete', subject: null },
       ],
+      create: [{ action: 'admin::users.create', subject: null }],
+      delete: [{ action: 'admin::users.delete', subject: null }],
+      read: [
+        { action: 'admin::users.read', subject: null },
+        { action: 'admin::users.update', subject: null },
+      ],
+      update: [{ action: 'admin::users.update', subject: null }],
     },
     webhooks: {
       main: [

@@ -286,18 +286,18 @@ const data = {
     //   fields: null,
     //   conditions: [],
     // },
-    // {
-    //   action: 'admin::users.update',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
-    // {
-    //   action: 'admin::users.delete',
-    //   subject: null,
-    //   fields: null,
-    //   conditions: [],
-    // },
+    {
+      action: 'admin::users.update',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
+    {
+      action: 'admin::users.delete',
+      subject: null,
+      fields: null,
+      conditions: [],
+    },
 
     // // Admin roles
     // {
