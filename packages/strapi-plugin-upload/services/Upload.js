@@ -11,14 +11,14 @@ const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
-const filenamify = require('filenamify');
+const { nameToSlug } = require('strapi-utils');
 const mime = require('mime-types');
 
 const { bytesToKbytes } = require('../utils/file');
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 const generateFileName = name => {
-  const baseName = filenamify(name, { replacement: '_' }).replace(/\s/g, '_');
+  const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
 };

@@ -10,6 +10,7 @@
   "components.DraggableAttr.edit": "Click to edit",
   "components.DynamicZone.add-compo": "Add to {componentName}",
   "components.DynamicZone.pick-compo": "Pick one component",
+  "components.DynamicZone.required": "Component is required",
   "components.DynamicZone.missing.singular": "There is {count} missing component",
   "components.DynamicZone.missing.plural": "There is {count} missing components",
   "components.EmptyAttributesBlock.button": "Go to settings page",

@@ -53,6 +53,7 @@ const ListView = () => {
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
+  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
@@ -243,7 +244,6 @@ const ListView = () => {
 
   const addButtonProps = {
     icon: true,
-    className: 'add-button',
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     onClick: () => {
@@ -260,16 +260,18 @@ const ListView = () => {
       ? `/plugins/content-manager/${contentTypeKind}/${targetUid}/ctm-configurations/edit-settings/content-types`
       : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
 
-    push(endPoint);
+    if (!isTemporary) {
+      push(endPoint);
+    }
   };
 
   const configureButtonProps = {
-    icon: <LayoutIcon className="colored" fill="#007eff" />,
+    icon: <LayoutIcon className="colored" fill={isTemporary ? '#B4B6BA' : '#007eff'} />,
     color: 'secondary',
     label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
     onClick: goToCMSettingsPage,
-    style: { height: '30px', marginTop: '1px' },
-    className: 'button-secondary',
+    style: { marginTop: '2px' },
+    disabled: isTemporary,
   };
 
   const listActions = isInDevelopmentMode

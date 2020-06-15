@@ -9,15 +9,14 @@ const Wrapper = styled.div`
   }
 
   .count-info {
-    margin-top: 2px;
-    padding: 1px 3px;
+    position: relative;
+    display: inline-block;
     height: 14px;
     min-width: 14px;
-    display: inline-block;
-
+    margin-top: 2px;
+    padding: 1px 3px;
     text-align: center;
     border-radius: 2px;
-    position: relative;
     &:before {
       content: attr(datadescr);
       position: absolute;
@@ -36,7 +35,7 @@ const Wrapper = styled.div`
     }
     // Title
     h3 {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       padding-right: 20px;
       padding-top: 2px;
       font-family: Lato;
@@ -45,9 +44,6 @@ const Wrapper = styled.div`
       letter-spacing: 0.1rem;
       font-weight: bold;
       text-transform: uppercase;
-      // span:last-of-type {
-
-      // }
       & + button {
         position: absolute;
         top: 2px;
@@ -62,7 +58,6 @@ const Wrapper = styled.div`
     }
     // Search
     .search-wrapper {
-      // margin-bottom: 16px;
       margin-bottom: 7px;
       &::after {
         display: block;
@@ -92,6 +87,7 @@ const Wrapper = styled.div`
   }
   ul {
     list-style: none;
+    padding-top: 2px;
     li {
       a {
         text-transform: capitalize;

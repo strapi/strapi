@@ -12,7 +12,6 @@ export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
 export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
-export { default as EmptyAttributesBlock } from './components/EmptyAttributesBlock';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as FilterButton } from './components/FilterButton';
@@ -27,8 +26,6 @@ export { default as InputAddon } from './components/InputAddon';
 export { default as InputAddonWithErrors } from './components/InputAddonWithErrors';
 export { default as InputCheckbox } from './components/InputCheckbox';
 export { default as InputCheckboxWithErrors } from './components/InputCheckboxWithErrors';
-export { default as InputDate } from './components/InputDate';
-export { default as InputDateWithErrors } from './components/InputDateWithErrors';
 export { default as InputDescription } from './components/InputDescription';
 export { default as InputEmail } from './components/InputEmail';
 export { default as InputEmailWithErrors } from './components/InputEmailWithErrors';
@@ -77,7 +74,6 @@ export { default as PopUpWarning } from './components/PopUpWarning';
 export { default as SearchInfo } from './components/SearchInfo';
 export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
-export { default as TrashButton } from './components/TrashButton';
 export { default as ViewContainer } from './components/ViewContainer';
 
 // Contexts

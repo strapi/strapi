@@ -33,7 +33,6 @@ const ComponentIcon = styled.div`
       border: 1px solid white;
       background-color: #e6f0fb;
 
-      i,
       svg {
         margin: auto;
         color: #007eff;

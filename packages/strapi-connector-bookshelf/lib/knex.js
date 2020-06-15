@@ -76,13 +76,9 @@ module.exports = strapi => {
       try {
         client = require(connection.settings.client);
       } catch (err) {
+        strapi.log.error('The client `' + connection.settings.client + '` is not installed.');
         strapi.log.error(
-          'The client `' + connection.settings.client + '` is not installed.'
-        );
-        strapi.log.error(
-          'You can install it with `$ npm install ' +
-            connection.settings.client +
-            ' --save`.'
+          'You can install it with `$ npm install ' + connection.settings.client + ' --save`.'
         );
         strapi.stop();
       }
@@ -92,9 +88,7 @@ module.exports = strapi => {
           client: connection.settings.client,
           connection: {
             host: _.get(connection.settings, 'host'),
-            user:
-              _.get(connection.settings, 'username') ||
-              _.get(connection.settings, 'user'),
+            user: _.get(connection.settings, 'username') || _.get(connection.settings, 'user'),
             password: _.get(connection.settings, 'password'),
             database: _.get(connection.settings, 'database'),
             charset: _.get(connection.settings, 'charset'),
@@ -105,55 +99,16 @@ module.exports = strapi => {
             timezone: _.get(connection.settings, 'timezone', 'utc'),
             filename: _.get(connection.settings, 'filename', '.tmp/data.db'),
           },
+          ...connection.options,
           debug: _.get(connection.options, 'debug', false),
-          acquireConnectionTimeout: _.get(
-            connection.options,
-            'acquireConnectionTimeout'
-          ),
-          migrations: _.get(connection.options, 'migrations'),
-          useNullAsDefault: _.get(connection.options, 'useNullAsDefault'),
         },
         strapi.config.hook.settings.knex,
         defaultConfig
       );
 
-      if (connection.settings.client !== 'sqlite3') {
-        options.pool = {
-          min: _.get(connection.options, 'pool.min', 0),
-          max: _.get(connection.options, 'pool.max', 10),
-          acquireTimeoutMillis: _.get(
-            connection.options,
-            'pool.acquireTimeoutMillis',
-            2000
-          ),
-          createTimeoutMillis: _.get(
-            connection.options,
-            'pool.createTimeoutMillis',
-            2000
-          ),
-          idleTimeoutMillis: _.get(
-            connection.options,
-            'pool.idleTimeoutMillis',
-            30000
-          ),
-          reapIntervalMillis: _.get(
-            connection.options,
-            'pool.reapIntervalMillis',
-            1000
-          ),
-          createRetryIntervalMillis: _.get(
-            connection.options,
-            'pool.createRetryIntervalMillis',
-            200
-          ),
-        };
-      }
-
       // Resolve path to the directory containing the database file.
       const fileDirectory = options.connection.filename
-        ? path.dirname(
-            path.resolve(strapi.config.appPath, options.connection.filename)
-          )
+        ? path.dirname(path.resolve(strapi.config.appPath, options.connection.filename))
         : '';
 
       switch (options.client) {
@@ -178,15 +133,11 @@ module.exports = strapi => {
 
           if (_.isString(_.get(options.connection, 'schema'))) {
             options.pool = {
-              min: _.get(connection.options, 'pool.min') || 0,
-              max: _.get(connection.options, 'pool.max') || 10,
+              ...options.pool,
               afterCreate: (conn, cb) => {
-                conn.query(
-                  `SET SESSION SCHEMA '${options.connection.schema}';`,
-                  err => {
-                    cb(err, conn);
-                  }
-                );
+                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, err => {
+                  cb(err, conn);
+                });
               },
             };
           } else {
@@ -228,9 +179,7 @@ module.exports = strapi => {
       } catch (err) {
         strapi.log.error('Impossible to use the `' + name + '` connection...');
         strapi.log.warn(
-          'Be sure that your client `' +
-            name +
-            '` are in the same node_modules directory'
+          'Be sure that your client `' + name + '` are in the same node_modules directory'
         );
         strapi.log.error(err);
         strapi.stop();

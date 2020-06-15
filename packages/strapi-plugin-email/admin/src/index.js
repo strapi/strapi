@@ -8,9 +8,6 @@
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
-import App from './containers/App';
-import Initializer from './containers/Initializer';
-import lifecycles from './lifecycles';
 import trads from './translations';
 
 export default strapi => {
@@ -22,14 +19,15 @@ export default strapi => {
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: Initializer,
+    isReady: true,
+    initializer: () => null,
     injectedComponents: [],
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
-    lifecycles,
+    lifecycles: () => {},
     leftMenuLinks: [],
     leftMenuSections: [],
-    mainComponent: App,
+    mainComponent: null,
     name: pluginPkg.strapi.name,
     pluginLogo,
     preventComponentRendering: false,

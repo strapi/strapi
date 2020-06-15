@@ -74,15 +74,10 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
-        ? strapi.config.currentEnvironment.server.admin.path
-        : '/admin';
-
       const buildDir = path.resolve(strapi.dir, 'build');
 
-      // Serve admin assets.
       strapi.router.get(
-        `${basename}/*`,
+        `${strapi.config.admin.path}/*`,
         async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
           await next();
@@ -94,7 +89,7 @@ module.exports = strapi => {
         })
       );
 
-      strapi.router.get(`${basename}*`, ctx => {
+      strapi.router.get(`${strapi.config.admin.path}*`, ctx => {
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       });

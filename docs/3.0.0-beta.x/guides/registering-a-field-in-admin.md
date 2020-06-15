@@ -222,7 +222,6 @@ Wysiwyg.propTypes = {
 };
 
 export default Wysiwyg;
-
 ```
 
 #### Implementing CKEditor

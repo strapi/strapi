@@ -9,16 +9,16 @@ const Router = require('koa-router');
 const _ = require('lodash');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
-const { logger, models } = require('strapi-utils');
+const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
+const loadConfiguration = require('./core/app-configuration');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
-const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
@@ -26,21 +26,6 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
-
-const CONFIG_PATHS = {
-  admin: 'admin',
-  api: 'api',
-  config: 'config',
-  controllers: 'controllers',
-  models: 'models',
-  plugins: 'plugins',
-  policies: 'policies',
-  tmp: '.tmp',
-  services: 'services',
-  static: 'public',
-  validators: 'validators',
-  views: 'views',
-};
 
 /**
  * Construct an Strapi instance.
@@ -67,58 +52,14 @@ class Strapi {
     this.dir = opts.dir || process.cwd();
     this.admin = {};
     this.plugins = {};
-    this.config = this.initConfig(opts);
+    this.config = loadConfiguration(this.dir, opts);
+    this.isLoaded = false;
 
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
-  }
-
-  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
-    const pkgJSON = require(path.resolve(this.dir, 'package.json'));
-
-    const config = {
-      serveAdminPanel,
-      launchedAt: Date.now(),
-      appPath: this.dir,
-      autoReload,
-      host: process.env.HOST || process.env.HOSTNAME || 'localhost',
-      port: process.env.PORT || 1337,
-      environment: _.toLower(process.env.NODE_ENV) || 'development',
-      environments: {},
-      admin: {},
-      paths: CONFIG_PATHS,
-      middleware: {},
-      hook: {},
-      functions: {},
-      routes: {},
-      info: pkgJSON,
-      installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
-      installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
-      installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
-    };
-
-    Object.defineProperty(config, 'get', {
-      value(path, defaultValue = null) {
-        return _.get(config, path, defaultValue);
-      },
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    Object.defineProperty(config, 'set', {
-      value(path, value) {
-        return _.set(config, path, value);
-      },
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    return config;
   }
 
   requireProjectBootstrap() {
@@ -145,7 +86,7 @@ class Strapi {
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node v${this.config.info.node})`]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`]
     );
 
     console.log(infoTable.toString());
@@ -164,7 +105,10 @@ class Strapi {
     console.log();
 
     const addressTable = new CLITable();
-    addressTable.push([chalk.bold(this.config.admin.url)]);
+
+    const adminUrl = getAbsoluteAdminUrl(strapi.config);
+    addressTable.push([chalk.bold(adminUrl)]);
+
     console.log(`${addressTable.toString()}`);
     console.log();
   }
@@ -176,23 +120,22 @@ class Strapi {
 
     if (this.config.serveAdminPanel === true) {
       console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      console.log(chalk.bold(this.config.admin.url));
+      const adminUrl = getAbsoluteAdminUrl(strapi.config);
+      console.log(chalk.bold(adminUrl));
       console.log();
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    console.log(chalk.bold(this.config.url));
+    const serverUrl = getAbsoluteServerUrl(strapi.config);
+    console.log(chalk.bold(serverUrl));
     console.log();
   }
 
   async start(cb) {
     try {
-      await this.load();
-
-      // Run bootstrap function.
-      await this.runBootstrapFunctions();
-      // Freeze object.
-      await this.freeze();
+      if (!this.isLoaded) {
+        await this.load();
+      }
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
@@ -260,14 +203,16 @@ class Strapi {
 
       if (
         (this.config.environment === 'development' &&
-          _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
+          this.config.get('server.admin.autoOpen', true) !== false) ||
         !isInitialised
       ) {
         await utils.openBrowser.call(this);
       }
     };
 
-    this.server.listen(this.config.port, this.config.host, err => onListen(err));
+    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), err =>
+      onListen(err).catch(err => this.stopWithError(err))
+    );
   }
 
   stopWithError(err, customMessage) {
@@ -305,8 +250,6 @@ class Strapi {
 
     const modules = await loadModules(this);
 
-    _.merge(this.config, modules.config);
-
     this.api = modules.api;
     this.admin = modules.admin;
     this.components = modules.components;
@@ -320,7 +263,7 @@ class Strapi {
     this.webhookRunner = createWebhookRunner({
       eventHub: this.eventHub,
       logger: this.log,
-      configuration: this.config.get('currentEnvironment.server.webhooks', {}),
+      configuration: this.config.get('server.webhooks', {}),
     });
 
     // Init core store
@@ -354,6 +297,13 @@ class Strapi {
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+
+    await this.runBootstrapFunctions();
+    await this.freeze();
+
+    this.isLoaded = true;
+
+    return this;
   }
 
   async startWebhooks() {
