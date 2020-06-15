@@ -91,4 +91,26 @@ describe('ADMIN | CONTAINERS | USERS | ListPage | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expected);
     });
   });
+
+  describe('UNSET_IS_LOADING', () => {
+    it('should set the isLoading to false', () => {
+      const action = {
+        type: 'UNSET_IS_LOADING',
+      };
+      const initialState = {
+        data: [],
+        dataToDelete: [],
+        isLoading: true,
+        pagination: {},
+      };
+      const expected = {
+        data: [],
+        dataToDelete: [],
+        isLoading: false,
+        pagination: {},
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
 });

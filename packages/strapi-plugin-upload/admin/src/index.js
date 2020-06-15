@@ -50,7 +50,7 @@ export default strapi => {
               defaultMessage: 'Media Library',
             },
             name: 'media-library',
-            to: `${strapi.settingsBaseURL}/media-library`,
+            to: `${strapi.settingsBaseURL}/upload`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.settings}>
                 <SettingsPage />
