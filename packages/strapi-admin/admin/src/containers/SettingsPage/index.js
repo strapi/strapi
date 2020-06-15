@@ -30,8 +30,9 @@ import RolesEditPage from '../Roles/EditPage';
 // TODO remove this line when feature finished
 // import RolesListPage from '../Roles/ListPage';
 import findFirstAllowedEndpoint from './utils/findFirstAllowedEndpoint';
-import EditView from '../Webhooks/EditView';
-import ListView from '../Webhooks/ListView';
+import WebhooksCreateView from '../Webhooks/ProtectedCreateView';
+import WebhooksEditView from '../Webhooks/ProtectedEditView';
+import WebhooksListView from '../Webhooks/ProtectedListView';
 import SettingDispatcher from './SettingDispatcher';
 import LeftMenu from './StyledLeftMenu';
 import Wrapper from './Wrapper';
@@ -129,8 +130,16 @@ function SettingsPage() {
               <Route exact path={`${settingsBaseURL}/roles/:id`} component={RolesEditPage} />
               <Route exact path={`${settingsBaseURL}/users`} component={UsersListPage} />
               <Route exact path={`${settingsBaseURL}/users/:id`} component={UsersEditPage} />
-              <Route exact path={`${settingsBaseURL}/webhooks`} component={ListView} />
-              <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={EditView} />
+
+              <Route
+                exact
+                path={`${settingsBaseURL}/webhooks/create`}
+                component={WebhooksCreateView}
+              />
+
+              <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={WebhooksEditView} />
+
+              <Route exact path={`${settingsBaseURL}/webhooks`} component={WebhooksListView} />
               {globalSectionCreatedRoutes}
               {pluginsLinksRoutes}
               <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />

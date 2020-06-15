@@ -14,11 +14,12 @@ const Toggle = styled.input`
   margin: 0;
   width: 100%;
   height: 100%;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')} !important;
   opacity: 0;
 `;
 
 Toggle.defaultProps = {
+  disabled: true,
   type: 'checkbox',
 };
 

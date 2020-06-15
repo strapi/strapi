@@ -36,6 +36,14 @@ const permissions = {
         { action: 'admin::webhooks.update', subject: null },
         { action: 'admin::webhooks.delete', subject: null },
       ],
+      create: [{ action: 'admin::webhooks.create', subject: null }],
+      delete: [{ action: 'admin::webhooks.delete', subject: null }],
+      read: [
+        { action: 'admin::webhooks.read', subject: null },
+        { action: 'admin::webhooks.update', subject: null },
+        { action: 'admin::webhooks.delete', subject: null },
+      ],
+      update: [{ action: 'admin::webhooks.update', subject: null }],
     },
   },
 };

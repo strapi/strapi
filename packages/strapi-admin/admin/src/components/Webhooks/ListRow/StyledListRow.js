@@ -9,39 +9,41 @@ import { CustomRow as Row } from '@buffetjs/styles';
 import { sizes } from 'strapi-helper-plugin';
 
 const StyledListRow = styled(Row)`
+  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+  .checkboxWrapper {
+    width: 55px;
+    padding-left: 30px;
+    > div {
+      height: 16px;
+    }
+  }
+  .nameWrapper {
+    max-width: 158px;
+  }
+  .urlWrapper {
+    max-width: 300px;
+  }
+
+  .switchWrapper {
+    min-width: 125px;
+  }
+
+  @media (min-width: ${sizes.wide}) {
+    .urlWrapper {
+      max-width: 400px;
+    }
+  }
   td {
     p {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    &:first-of-type {
-      width: 55px;
-      padding-left: 30px;
-      > div {
-        height: 16px;
-      }
-    }
-    &:nth-of-type(2) {
-      max-width: 158px;
-    }
-    &:nth-of-type(3) {
-      max-width: 300px;
-    }
-    &:nth-of-type(4) {
-      min-width: 125px;
-    }
-    &:nth-of-type(5) {
-      .popup-wrapper {
-        width: 0;
-      }
-    }
-    @media (min-width: ${sizes.wide}) {
-      &:nth-of-type(3) {
-        max-width: 400px;
-      }
-    }
   }
 `;
+
+StyledListRow.defaultProps = {
+  disabled: true,
+};
 
 export default StyledListRow;

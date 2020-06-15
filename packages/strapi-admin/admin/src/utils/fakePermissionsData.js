@@ -266,12 +266,12 @@ const data = {
       fields: null,
       conditions: [],
     },
-    {
-      action: 'admin::webhooks.delete',
-      subject: null,
-      fields: null,
-      conditions: [],
-    },
+    // {
+    //   action: 'admin::webhooks.delete',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: [],
+    // },
 
     // // Admin users
     {
@@ -416,12 +416,12 @@ const data = {
     //   fields: null,
     //   conditions: [],
     // },
-    {
-      action: 'plugins::upload.settings.read',
-      subject: null,
-      fields: null,
-      conditions: null,
-    },
+    // {
+    //   action: 'plugins::upload.settings.read',
+    //   subject: null,
+    //   fields: null,
+    //   conditions: null,
+    // },
 
     // Users-permissions
     {
