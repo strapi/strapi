@@ -106,8 +106,11 @@ const createRolesIfNeeded = async () => {
     });
   });
 
+  const authorPermissions = _.cloneDeep(editorPermissions);
+  authorPermissions.forEach(p => (p.conditions = ['isOwner']));
+
   await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);
-  await strapi.admin.services.permission.assign(authorRole.id, editorPermissions);
+  await strapi.admin.services.permission.assign(authorRole.id, authorPermissions);
 };
 
 const displayWarningIfNoSuperAdmin = async () => {

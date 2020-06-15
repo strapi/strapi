@@ -39,20 +39,25 @@ const find = (params = {}) => {
 
 /**
  * Assign permissions to a role
- * @param {string|int} roleID - role ID
+ * @param {string|int} roleId - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
-const assign = async (roleID, permissions = []) => {
+const assign = async (roleId, permissions = []) => {
+  const superAdminRole = await strapi.admin.services.role.getAdmin();
+  if (String(superAdminRole.id) === String(roleId)) {
+    throw strapi.errors.badRequest('ValidationError', "Super admin permissions can't be edited.");
+  }
+
   try {
     await validatePermissionsExist(permissions);
   } catch (err) {
     throw strapi.errors.badRequest('ValidationError', err);
   }
 
-  await strapi.query('permission', 'admin').delete({ role: roleID });
+  await strapi.query('permission', 'admin').delete({ role: roleId });
 
   const permissionsWithRole = permissions.map(permission => {
-    return createPermission({ ...permission, role: roleID });
+    return createPermission({ ...permission, role: roleId });
   });
 
   const newPermissions = [];
