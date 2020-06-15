@@ -6,7 +6,7 @@ Upgrading your Strapi application to `3.0.0`.
 
 ## Upgrading your dependencies
 
-Start by upgrading your dependencies. Make sure to use exact versions.
+Start by upgrading your dependencies. Make sure to use exact versions, however please note that the version listed below may not be the current "latest" release.
 
 Update your package.json accordingly:
 
@@ -32,7 +32,7 @@ Then run either `yarn install` or `npm install`.
 
 ## New configuration loader
 
-We have reworked the way a strapi project is configured to make it simpler yet more powerful.
+We have reworked the way a Strapi project is configured to make it simpler yet more powerful.
 
 Some of the improvements are:
 
@@ -40,23 +40,23 @@ Some of the improvements are:
 - Less files.
 - Environment overwrites.
 
-Before migrating, you should first read the new [configuration documentation](../concepts/configurations.md).
+Before migrating, you should first read the new [configuration documentation](../concepts/configurations.md) to fully understand the changes.
 
 ### Migrating
 
 #### Server
 
-Your server configuration can move from `./config/environments/{env}/server.json` to `./config/server.js` like shown [here](../concepts/configurations.md#server).
+Your server configuration should move from `./config/environments/{env}/server.json` to `./config/server.js` like shown [here](../concepts/configurations.md#server).
 
 #### Database configuration
 
-Your database configuration can move from `./config/environments/{env}/database.json` to `./config/database.js` like shown [here](../concepts/configurations.md#database).
+Your database configuration should move from `./config/environments/{env}/database.json` to `./config/database.js` like shown [here](../concepts/configurations.md#database).
 
 #### Middlewares
 
 We have moved all the middleware related configurations into one place: `./config/middleware.js`.
 
-The middlewares were configured in multiple files:
+The middlewares were previously configured in mutliple files:
 
 - `./config/middleware.json`
 - `./config/application.json`
@@ -65,9 +65,10 @@ The middlewares were configured in multiple files:
 - `./config/environments/{env}/response.json`
 - `./config/environments/{env}/security.json`
 
-First you can create a file `./config/middleware.js`.
+First you should create a file `./config/middleware.js`.
 
 ```js
+// This is just an example, and is not required
 module.exports = {
   timeout: 100,
   load: {
@@ -88,17 +89,17 @@ module.exports = {
 
 You can now move the middleware configurations from `application.json`, `language.json`, `security.json`, `request.json` and `response.json` files directly into the `settings` property.
 
-You can review all possible options the [middleware documentation](../concepts/middlewares.md#configuration-and-activation).
+You can review all possible options in the [middleware documentation](../concepts/middlewares.md#configuration-and-activation).
 
 ::: tip
-If you never configured any middlewares you can delete the file all together. You can also only set the configurations you want to customize and leave the others out.
+If you never configured any middlewares you can delete this file all together. You can also only set the configurations you want to customize and leave the others out.
 :::
 
 #### Hook
 
 We applied the same logic from the `middleware` configuration to the `hook` configuration.
 
-First you can create a file `./config/hook.js`, and you can move the content of `./config/hook.json` into it.
+First you should create a file `./config/hook.js`, and you can move the content of `./config/hook.json` into it.
 
 ::: tip
 If you never configured any hook you can delete the file all together. You can also only set the configurations you want to customize and leave the others out.
@@ -118,7 +119,7 @@ Any custom configuration you have can still be used. You can read the [configura
 
 #### Plugin
 
-From now on, you can set your plugin configurations in `./config/plugins.js` or `./config/env/{env}/plugin.js`.
+From now on, you will set your plugin configurations in `./config/plugins.js` or `./config/env/{env}/plugin.js`. Instead of using the extensions system to directly modify the plugin configuration.
 
 **Example**
 
@@ -201,7 +202,7 @@ config
 
 ## Database lifecycles
 
-We have replaced the old lifecycles that add a lot of issues with a new simpler lifecycle layer.
+We have replaced the old lifecycles that had a lot of issues with a new simpler lifecycle layer.
 
 You can read more [here](../concepts/models.md#lifecycle-hooks).
 
@@ -223,11 +224,11 @@ The `changePassword` mutation got renamed to `resetPassword` to reflect what it 
 
 Currently using the idAttribute and idAttributeType options can break strapi in many ways. Fixing this is going to require a lot of work on the database and content management layer.
 
-In an effort to make strapi more stable we have decided to remove those broken options for the time being. For users who want unique uuid fields for examples we recommend you create a uuid attribute and use the lifecycles function to populate it.
+In an effort to make Strapi more stable we have decided to remove those broken options for the time being. For users who want unique uuid fields for examples we recommend you create a uuid attribute and use the lifecycles function to populate it.
 
 ## Proxy configuration
 
-In order to support hosting strapi with more flexibility, we have changed the way to configure the server proxy options and the admin panel path.
+In order to support hosting strapi with more flexibility, we have changed the way you configure the server proxy options and the admin panel path.
 
 ### Proxy
 
@@ -276,7 +277,7 @@ module.exports = {
 Adding a sub path to the url doesn't mean your api is going to be prefixed. You will need to host your app behind a proxy and remove the prefix so strapi receives request like if they where made on the root `/` path.
 :::
 
-You can see this option in action in the following [deployment guide](../getting-started/deployment.md#optional-software-guides).
+You can see this option in action in the following [deployment guides](../getting-started/deployment.md#optional-software-guides).
 
 ### Admin path
 
@@ -309,7 +310,7 @@ module.exports = {
 };
 ```
 
-You can see this option in action in the following [deployment guide](../getting-started/deployment.md#optional-software-guides).
+You can see this option in action in the following [deployment guides](../getting-started/deployment.md#optional-software-guides).
 
 ## Rebuilding your administration panel
 
