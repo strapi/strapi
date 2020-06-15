@@ -71,7 +71,7 @@ const createRolesIfNeeded = async () => {
     'plugins::content-manager.update',
     'plugins::content-manager.delete',
   ];
-  const allActions = strapi.admin.services.permission.provider.getAll();
+  const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => defaultActionsIds.includes(a.actionId));
 
   await strapi.admin.services.role.create({

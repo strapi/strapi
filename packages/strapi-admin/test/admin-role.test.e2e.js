@@ -14,6 +14,7 @@ const data = {
   rolesWithoutUsers: [],
   users: [],
   deleteRolesIds: [],
+  superAdminRole: undefined,
 };
 
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
@@ -25,6 +26,47 @@ describe('Role CRUD End to End', () => {
   }, 60000);
 
   if (edition === 'EE') {
+    describe('Default roles', () => {
+      test('Default roles are created', async () => {
+        const defaultsRoles = [
+          {
+            name: 'Super Admin',
+            code: 'strapi-super-admin',
+            description: 'Super Admins can access and manage all features and settings.',
+            usersCount: 1,
+          },
+          {
+            name: 'Editor',
+            code: 'strapi-editor',
+            description: 'Editors can manage and publish contents including those of other users.',
+            usersCount: 0,
+          },
+          {
+            name: 'Author',
+            code: 'strapi-author',
+            description: 'Authors can manage and publish their own content.',
+            usersCount: 0,
+          },
+        ];
+
+        const res = await rq({
+          url: '/admin/roles',
+          method: 'GET',
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(3);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(defaultsRoles[0]),
+            expect.objectContaining(defaultsRoles[1]),
+            expect.objectContaining(defaultsRoles[2]),
+          ])
+        );
+        data.superAdminRole = res.body.data.find(r => r.code === 'strapi-super-admin');
+      });
+    });
+
     describe('Create some roles', () => {
       const rolesToCreate = [
         [{ name: 'new role 0', description: 'description' }],
@@ -97,6 +139,7 @@ describe('Role CRUD End to End', () => {
           name: data.rolesWithoutUsers[0].name,
           description: data.rolesWithoutUsers[0].description,
           usersCount: 0,
+          code: null,
         });
       });
     });
@@ -121,6 +164,7 @@ describe('Role CRUD End to End', () => {
                 name: role.name,
                 description: role.description,
                 usersCount: role.usersCount,
+                code: null,
               }),
             ])
           );
@@ -292,6 +336,25 @@ describe('Role CRUD End to End', () => {
           expect(res.statusCode).toBe(200);
           expect(res.body.data).toMatchObject(data.rolesWithUsers[0]);
         });
+
+        test("Can't delete super admin role", async () => {
+          let res = await rq({
+            url: `/admin/roles/${data.superAdminRole.id}`,
+            method: 'DELETE',
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.data).toMatchObject({
+            id: ['You cannot delete the super admin role'],
+          });
+
+          res = await rq({
+            url: `/admin/roles/${data.rolesWithUsers[0].id}`,
+            method: 'GET',
+          });
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toMatchObject(data.rolesWithUsers[0]);
+        });
       });
     });
 
@@ -324,17 +387,16 @@ describe('Role CRUD End to End', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.data).toEqual(null);
       });
-    });
+      test("Batch Delete - No error if deleting a role that doesn't exist", async () => {
+        const res = await rq({
+          url: '/admin/roles/batch-delete',
+          method: 'POST',
+          body: { ids: [data.deleteRolesIds[0]] },
+        });
 
-    test("Batch Delete - No error if deleting a role that doesn't exist", async () => {
-      const res = await rq({
-        url: '/admin/roles/batch-delete',
-        method: 'POST',
-        body: { ids: [data.deleteRolesIds[0]] },
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toEqual([]);
       });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual([]);
     });
 
     describe('get & update Permissions', () => {
