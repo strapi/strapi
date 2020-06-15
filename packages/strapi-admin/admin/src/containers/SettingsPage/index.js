@@ -44,7 +44,14 @@ function SettingsPage() {
   const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
   const { isLoading, menu } = useSettingsMenu();
   const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
-  const firstAvailableEndpoint = useMemo(() => findFirstAllowedEndpoint(menu), [menu]);
+  const firstAvailableEndpoint = useMemo(() => {
+    // Don't need to compute while permissions are being checked
+    if (isLoading) {
+      return '';
+    }
+
+    return findFirstAllowedEndpoint(menu);
+  }, [menu, isLoading]);
 
   // Create all the <Route /> that needs to be created by the plugins
   // For instance the upload plugin needs to create a <Route />
