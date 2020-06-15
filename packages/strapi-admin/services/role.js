@@ -77,7 +77,23 @@ const findAllWithUsersCount = async (populate = []) => {
  * @returns {Promise<role>}
  */
 const update = async (params, attributes) => {
-  if (_.has(params, 'id')) {
+  if (_.has(attributes, 'code')) {
+    const rolesToBeUpdated = await find(params);
+    const rolesToBeUpdatedIds = rolesToBeUpdated.map(r => r.id).map(String);
+    const adminRole = await getAdmin();
+
+    console.log('rolesToBeUpdatedIds', rolesToBeUpdatedIds);
+    console.log(adminRole, adminRole.id);
+
+    if (rolesToBeUpdatedIds.includes(String(adminRole.id))) {
+      throw strapi.errors.badRequest(
+        'ValidationError',
+        'You cannot modify the code of  the super admin role'
+      );
+    }
+  }
+
+  if (_.has(params, 'id') && _.has(attributes, 'name')) {
     const alreadyExists = await exists({ name: attributes.name, id_ne: params.id });
     if (alreadyExists) {
       throw strapi.errors.badRequest('ValidationError', {
@@ -108,6 +124,13 @@ const exists = async params => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async (ids = []) => {
+  const adminRole = await getAdmin();
+  if (ids.map(String).includes(String(adminRole.id))) {
+    throw strapi.errors.badRequest('ValidationError', {
+      ids: ['You cannot delete the super admin role'],
+    });
+  }
+
   for (let roleId of ids) {
     const usersCount = await getUsersCount(roleId);
     if (usersCount !== 0) {
