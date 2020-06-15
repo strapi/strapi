@@ -12,7 +12,6 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
 const { nameToSlug } = require('strapi-utils');
-const mime = require('mime-types');
 
 const { bytesToKbytes } = require('../utils/file');
 
