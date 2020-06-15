@@ -1168,5 +1168,5 @@ module.exports = {
 ```
 
 ::: tip
-When calling a lifecycle function directly, you will need to make sur you call it with the expected parameters.
+When calling a lifecycle function directly, you will need to make sure you call it with the expected parameters.
 :::
