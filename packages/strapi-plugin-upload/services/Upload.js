@@ -43,7 +43,7 @@ const combineFilters = params => {
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
-    const basename = path.basename(filename, ext);
+    const basename = path.basename(fileInfo.name || filename, ext);
 
     const usedName = fileInfo.name || filename;
 
