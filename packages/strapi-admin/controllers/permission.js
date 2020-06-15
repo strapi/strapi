@@ -32,10 +32,11 @@ module.exports = {
    */
   async getAll(ctx) {
     const allActions = strapi.admin.services.permission.actionProvider.getAll();
+    const conditions = strapi.admin.services.permission.conditionProvider.conditions();
 
     ctx.body = {
       data: {
-        conditions: [],
+        conditions,
         sections: formatActionsBySections(allActions),
       },
     };
