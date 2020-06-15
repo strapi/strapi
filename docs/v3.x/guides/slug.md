@@ -63,17 +63,15 @@ When it's done, you have to update the life cycle of the **Article** Content Typ
 const slugify = require('slugify');
 
 module.exports = {
-  beforeSave: async model => {
-    if (model.title) {
-      model.slug = slugify(model.title);
-    }
-  },
-  beforeUpdate: async model => {
-    if (model.getUpdate() && model.getUpdate().title) {
-      model.update({
-        slug: slugify(model.getUpdate().title),
-      });
-    }
+  lifecycles: {
+    beforeCreate: async (data) => {
+      if (data.title) {
+        data.slug = slugify(data.title);
+      }
+    },
+    beforeUpdate: async (params, data) => {
+      data.slug = slugify(data.title);
+    },
   },
 };
 ```
@@ -86,12 +84,20 @@ module.exports = {
 const slugify = require('slugify');
 
 module.exports = {
-  beforeSave: async (model, attrs, options) => {
-    if (options.method === 'insert' && attrs.title) {
-      model.set('slug', slugify(attrs.title));
-    } else if (options.method === 'update' && attrs.title) {
-      attrs.slug = slugify(attrs.title);
-    }
+  /**
+   * Triggered before user creation.
+   */
+  lifecycles: {
+    async beforeCreate(data) {
+      if (data.title) {
+        data.slug = slugify(data.title, {lower: true});
+      }
+    },
+    async beforeUpdate(params, data) {
+      if (data.title) {
+        data.slug = slugify(data.title, {lower: true});
+      }
+    },
   },
 };
 ```

@@ -262,25 +262,7 @@ yarn add strapi-provider-upload-google-cloud-storage
 
 Deploy so that the server app includes the dependency from `package.json`.
 
-Create a Google service account key.
-
-<https://console.cloud.google.com/apis/credentials/serviceaccountkey>
-
-Save the JSON credentials file.
-
-Plugins > File Upload > Settings > Production tab
-
-By default `localhost` is selected. Select the `Google Cloud Storage` plugin.
-
-Copy the JSON key and set the regions.
-
-Open the `Cloud Console > Storage > Browser` menu.
-
-Copy the bucket name to the plugin settings, the default is the app ID, such as `myapi-123456.appspot.com`.
-
-(Note that the `Access control` setting of the bucket has to be `Fine-grained`, which is the default.)
-
-Click `Save`, and it's ready to go!
+Follow the [documentation of the plugin](https://github.com/Lith/strapi-provider-upload-google-cloud-storage/blob/master/README.md) for the full configuration.
 
 ### Post-setup configuration
 

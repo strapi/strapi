@@ -7,6 +7,7 @@
  */
 
 const _ = require('lodash');
+const { isValidEmailTemplate } = require('./validation/email-template');
 
 module.exports = {
   /**
@@ -196,6 +197,16 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
+    const emailTemplates = ctx.request.body['email-templates'];
+
+    for (let key in emailTemplates) {
+      const template = emailTemplates[key].options.message;
+
+      if (!isValidEmailTemplate(template)) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Invalid template' }] }]);
+      }
+    }
+
     await strapi
       .store({
         environment: '',
@@ -203,7 +214,7 @@ module.exports = {
         name: 'users-permissions',
         key: 'email',
       })
-      .set({ value: ctx.request.body['email-templates'] });
+      .set({ value: emailTemplates });
 
     ctx.send({ ok: true });
   },

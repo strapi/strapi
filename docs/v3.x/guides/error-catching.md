@@ -65,14 +65,15 @@ It's important to call `throw(error);` to avoid stopping the middleware stack. I
 
 ## Configure the middleware
 
-Make sure your middleware is added at the end of the middleware stack.
+Make sure your middleware is added at the beginning of the middleware stack.
 
 **Path —** `./config/middleware.js`
 
 ```js
 module.exports = {
   load: {
-    after: ['parser', 'router', 'sentry'],
+    before: ['sentry', 'responseTime', 'logger', ...],
+    ...
   },
 };
 ```

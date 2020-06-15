@@ -6,7 +6,7 @@ These settings can be declared directly into the main plugin object so they will
 
 ## Adding a setting
 
-The front-end part of a plugin exports a function which registers the plugin in the administration panel. The argument is composed of two main paramenters:
+The front-end part of a plugin exports a function which registers the plugin in the administration panel. The argument is composed of two main parameters:
 
 - `registerPlugin`: `Function`
 - `settingsBaseURL`: `String`

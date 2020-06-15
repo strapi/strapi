@@ -16,6 +16,15 @@ This repository contains the core of Strapi. It means the admin panel, core plug
 
 This is the code used to generate the official Docker images for Strapi. These images are available through our [Docker Hub](https://hub.docker.com/r/strapi/strapi).
 
+## Request for Comments (RFC)
+
+Many changes, including bug fixes and documentation improvements can be implemented and reviewed via the normal GitHub pull request workflow.
+
+Some changes though are “substantial”, and we ask that these be put through a bit of a design process and produce a consensus among the Strapi core team.
+
+The “RFC” (request for comments) process is intended to provide a consistent and controlled path for new features to enter the project. You can contribute by visiting the [rfcs repository](https://github.com/strapi/rfcs).
+
+
 ## Contributing guide
 
 To contribute to the project please follow instructions present in the [`CONTRIBUTING.md`](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) file on GitHub.
