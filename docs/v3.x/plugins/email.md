@@ -35,7 +35,7 @@ To install a new provider run:
 ::: tab yarn
 
 ```
-yarn add strapi-provider-email-sendgrid@beta --save
+yarn add strapi-provider-email-sendgrid --save
 ```
 
 :::
@@ -43,7 +43,7 @@ yarn add strapi-provider-email-sendgrid@beta --save
 ::: tab npm
 
 ```
-npm install strapi-provider-email-sendgrid@beta --save
+npm install strapi-provider-email-sendgrid --save
 ```
 
 :::

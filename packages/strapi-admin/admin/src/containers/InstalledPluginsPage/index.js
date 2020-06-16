@@ -15,8 +15,8 @@ const InstalledPluginsPage = () => {
       // Force the Overlayblocker to be displayed
       const overlayblockerParams = {
         enabled: true,
-        title: 'app.components.InstallPluginPage.Download.title',
-        description: 'app.components.InstallPluginPage.Download.description',
+        title: 'app.components.ListPluginsPage.deletePlugin.title',
+        description: 'app.components.ListPluginsPage.deletePlugin.description',
       };
       // Lock the app
       strapi.lockApp(overlayblockerParams);

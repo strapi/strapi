@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 import { IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import getTrad from '../../utils/getTrad';
 import { PopUpWarning } from 'strapi-helper-plugin';
 import en from '../../translations/en.json';
 import { HomePageContext } from '../../contexts/HomePage';
@@ -93,9 +93,13 @@ class ListRow extends React.Component {
             </div>
             <div className="col-md-6" style={{ fontWeight: '500' }}>
               {get(this.props.values, [get(this.props.item, 'name'), 'enabled']) ? (
-                <span style={{ color: '#5A9E06' }}>Enabled</span>
+                <span style={{ color: '#5A9E06' }}>
+                  <FormattedMessage id={getTrad('ListRow.enabled')} />
+                </span>
               ) : (
-                <span style={{ color: '#F64D0A' }}>Disabled</span>
+                <span style={{ color: '#F64D0A' }}>
+                  <FormattedMessage id={getTrad('ListRow.disabled')} />
+                </span>
               )}
             </div>
             <div className="col-md-2">

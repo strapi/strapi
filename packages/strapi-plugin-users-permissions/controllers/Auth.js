@@ -249,8 +249,7 @@ module.exports = {
       .get();
 
     const [requestPath] = ctx.request.url.split('?');
-    const provider =
-      process.platform === 'win32' ? requestPath.split('\\')[2] : requestPath.split('/')[2];
+    const provider = requestPath.split('/')[2];
 
     if (!_.get(grantConfig[provider], 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
@@ -315,16 +314,13 @@ module.exports = {
       key: 'advanced',
     });
 
+    const userInfo = _.omit(user, ['password', 'resetPasswordToken', 'role', 'provider']);
+
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
         URL: advanced.email_reset_password,
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
         TOKEN: resetPasswordToken,
       }
     );
@@ -332,12 +328,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.object,
       {
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
       }
     );
 
@@ -647,16 +638,13 @@ module.exports = {
       }
     });
 
+    const userInfo = _.omit(user, ['password', 'resetPasswordToken', 'role', 'provider']);
+
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
         URL: `${strapi.config.server.url}/auth/email-confirmation`,
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
         CODE: jwt,
       }
     );
@@ -664,12 +652,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.object,
       {
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
       }
     );
 
