@@ -91,7 +91,7 @@ describe('Condition Provider', () => {
 
       provider.registerMany(conditions);
 
-      expect(provider.conditions().sort()).toMatchObject(expected);
+      expect(provider.getAll().sort()).toMatchObject(expected);
     });
   });
 
@@ -116,12 +116,12 @@ describe('Condition Provider', () => {
 
       provider.register(key);
 
-      expect(provider.conditions()).toHaveLength(1);
+      expect(provider.getAll()).toHaveLength(1);
 
       provider.delete(key);
 
       expect(provider.has).toHaveBeenCalledWith(key);
-      expect(provider.conditions()).toHaveLength(0);
+      expect(provider.getAll()).toHaveLength(0);
     });
 
     test('Do nothing when the key does not exists', () => {
@@ -130,7 +130,7 @@ describe('Condition Provider', () => {
       provider.delete(key);
 
       expect(provider.has).toHaveBeenCalledWith(key);
-      expect(provider.conditions()).toHaveLength(0);
+      expect(provider.getAll()).toHaveLength(0);
     });
   });
 });
