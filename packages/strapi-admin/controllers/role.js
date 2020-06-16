@@ -91,14 +91,13 @@ module.exports = {
 
     try {
       const superAdminRole = await strapi.admin.services.role.getAdmin();
-      if (String(superAdminRole.id) === String(id)) {
+      if (superAdminRole && String(superAdminRole.id) === String(id)) {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);
       }
       await validatedUpdatePermissionsInput(input);
     } catch (err) {
-      ctx.badRequest('ValidationError', err);
-      return;
+      return ctx.badRequest('ValidationError', err);
     }
 
     const role = await strapi.admin.services.role.findOne({ id });

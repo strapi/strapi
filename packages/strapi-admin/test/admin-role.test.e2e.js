@@ -105,6 +105,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.create',
           subject: 'plugins::users-permissions.user',
+          fields: ['username'],
           conditions: ['isOwner'],
         },
       ];
@@ -587,6 +588,7 @@ describe('Role CRUD End to End', () => {
               {
                 action: 'plugins::content-manager.create',
                 subject: 'plugins::users-permissions.user',
+                fields: ['username'],
                 conditions: ['admin::is-creator'],
               },
             ],
