@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
+describe('ADMIN | HOOKS | useModels | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -11,13 +11,14 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
     });
   });
 
-  describe('GET_DATA_ERROR', () => {
+  describe('GET_MODELS_ERROR', () => {
     it('should set isLoading to false is an error occured', () => {
       const action = {
         type: 'GET_MODELS_ERROR',
       };
       const initialState = {
         collectionTypes: [],
+        components: [],
         singleTypes: [
           {
             uid: 'app.homepage',
@@ -31,6 +32,7 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
       };
       const expected = {
         collectionTypes: [],
+        components: [],
         singleTypes: [],
         isLoading: false,
       };
@@ -45,12 +47,37 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
         type: 'GET_MODELS',
       };
       const initialState = {
-        collectionTypes: [],
-        singleTypes: [],
-        isLoading: true,
+        collectionTypes: [
+          {
+            uid: 'app.category',
+            isDisplayed: true,
+            schema: {
+              kind: 'collectionType',
+            },
+          },
+          {
+            uid: 'app.category',
+            isDisplayed: true,
+            schema: {
+              kind: 'collectionType',
+            },
+          },
+        ],
+        singleTypes: [
+          {
+            uid: 'app.homepage',
+            isDisplayed: true,
+            schema: {
+              kind: 'singleType',
+            },
+          },
+        ],
+        components: [{}],
+        isLoading: false,
       };
       const expected = {
         collectionTypes: [],
+        components: [],
         singleTypes: [],
         isLoading: true,
       };
@@ -63,7 +90,7 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
     it('should return the state with the collectionTypes and singleTypes', () => {
       const action = {
         type: 'GET_MODELS_SUCCEDED',
-        data: [
+        contentTypes: [
           {
             uid: 'app.homepage',
             isDisplayed: true,
@@ -86,9 +113,11 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
             },
           },
         ],
+        components: [],
       };
       const initialState = {
         collectionTypes: [],
+        components: [],
         singleTypes: [],
         isLoading: true,
       };
@@ -111,6 +140,7 @@ describe('ADMIN | HOOKS | useContentTypes | reducer', () => {
             },
           },
         ],
+        components: [],
         isLoading: false,
       };
 

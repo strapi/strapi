@@ -141,7 +141,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
 
     getLinksPermissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [permissions]);
 
   return (
     <Wrapper>

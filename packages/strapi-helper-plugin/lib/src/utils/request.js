@@ -77,8 +77,7 @@ function serverRestartWatcher(response) {
         if (res.status >= 400) {
           throw new Error('not available');
         }
-        // Hide the global OverlayBlocker
-        strapi.unlockApp();
+
         resolve(response);
       })
       .catch(() => {
@@ -146,9 +145,6 @@ export default function request(...args) {
     .then(parseJSON)
     .then(response => {
       if (shouldWatchServerRestart) {
-        // Display the global OverlayBlocker
-        strapi.lockApp(shouldWatchServerRestart);
-
         return serverRestartWatcher(response);
       }
 
