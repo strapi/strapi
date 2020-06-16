@@ -152,14 +152,6 @@ const searchPage = async query => {
   return strapi.query('user', 'admin').searchPage(query);
 };
 
-/** Delete a user
- * @param query
- * @returns {Promise<user>}
- */
-const deleteFn = async query => {
-  return strapi.query('user', 'admin').delete(query);
-};
-
 /** Count the users that don't have any associated roles
  * @returns {Promise<number>}
  */
@@ -199,6 +191,5 @@ module.exports = {
   findOne,
   findPage,
   searchPage,
-  delete: deleteFn,
   countUsersWithoutRole,
 };
