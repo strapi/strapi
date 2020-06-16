@@ -98,7 +98,9 @@ module.exports = strapi => {
           };
         },
         formatError: err => {
-          return strapi.plugins.graphql.services['format-error'].formatError(err);
+          const formatError = _.get(strapi.plugins.graphql, 'config.formatError', null);
+
+          return typeof formatError === 'function' ? formatError(err) : err;
         },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
         tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
