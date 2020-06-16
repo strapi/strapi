@@ -153,6 +153,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
   - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
+  - `policy` (string): Configures the `Content-Security-Policy` header. If not specified uses default value. Default value: `undefined`.
 - [`p3p`](https://en.wikipedia.org/wiki/P3P)
   - `enabled` (boolean): Enable or disable p3p.
 - [`hsts`](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security)

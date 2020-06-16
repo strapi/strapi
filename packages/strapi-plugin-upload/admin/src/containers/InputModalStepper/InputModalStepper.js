@@ -385,7 +385,7 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
                   onClick={handleReplaceMedia}
                   style={{ marginRight: 10 }}
                 >
-                  Replace media
+                  {formatMessage({ id: getTrad('control-card.replace-media') })}
                 </Button>
 
                 <Button
