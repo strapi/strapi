@@ -89,18 +89,4 @@ module.exports = {
       data: strapi.admin.services.user.sanitizeUser(updatedUser),
     };
   },
-
-  async delete(ctx) {
-    const { id } = ctx.params;
-
-    const deletedUser = await strapi.admin.services.user.delete({ id });
-
-    if (!deletedUser) {
-      return ctx.notFound('User not found');
-    }
-
-    return ctx.deleted({
-      data: strapi.admin.services.user.sanitizeUser(deletedUser),
-    });
-  },
 };
