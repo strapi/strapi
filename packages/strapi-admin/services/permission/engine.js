@@ -51,7 +51,10 @@ module.exports = conditionProvider => ({
     }
 
     // Replace each condition name by its associated value
-    const resolveConditions = map(conditionProvider.get);
+    const resolveConditions = map(conditionProvider.getById);
+
+    // Only keep the handler of each condition
+    const pickHandlers = map(_.property('handler'));
 
     // Filter conditions, only keeps objects and functions
     const filterValidConditions = filter(_.isObject);
@@ -76,6 +79,7 @@ module.exports = conditionProvider => ({
 
     await Promise.resolve(conditions)
       .then(resolveConditions)
+      .then(pickHandlers)
       .then(filterValidConditions)
       .then(evaluateConditions)
       .then(filterValidResults)
