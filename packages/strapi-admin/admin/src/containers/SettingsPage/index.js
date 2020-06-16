@@ -17,7 +17,7 @@ import {
   LoadingIndicatorPage,
 } from 'strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
-import { get } from 'lodash';
+
 import RolesListPage from 'ee_else_ce/containers/Roles/ListPage';
 import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
 import HeaderSearch from '../../components/HeaderSearch';
@@ -29,7 +29,13 @@ import UsersListPage from '../Users/ProtectedListPage';
 import RolesEditPage from '../Roles/EditPage';
 // TODO remove this line when feature finished
 // import RolesListPage from '../Roles/ListPage';
-import findFirstAllowedEndpoint from './utils/findFirstAllowedEndpoint';
+import {
+  createRoute,
+  findFirstAllowedEndpoint,
+  createPluginsLinksRoutes,
+  makeUniqueRoutes,
+  getSectionsToDisplay,
+} from './utils';
 import WebhooksCreateView from '../Webhooks/ProtectedCreateView';
 import WebhooksEditView from '../Webhooks/ProtectedEditView';
 import WebhooksListView from '../Webhooks/ProtectedListView';
@@ -55,45 +61,21 @@ function SettingsPage() {
 
   // Create all the <Route /> that needs to be created by the plugins
   // For instance the upload plugin needs to create a <Route />
-  const globalSectionCreatedRoutes = useMemo(
-    () =>
-      pluginsGlobalLinks
-        .map(({ to, Component, exact }) => (
-          <Route path={to} key={to} component={Component} exact={exact || false} />
-        ))
-        .filter((route, index, refArray) => {
-          return refArray.findIndex(obj => obj.key === route.key) === index;
-        }),
-    [pluginsGlobalLinks]
-  );
+  const globalSectionCreatedRoutes = useMemo(() => {
+    const routesToCreate = pluginsGlobalLinks.map(({ to, Component, exact }) =>
+      createRoute(Component, to, exact)
+    );
+
+    return makeUniqueRoutes(routesToCreate);
+  }, [pluginsGlobalLinks]);
 
   // Same here for the plugins sections
   const pluginsLinksRoutes = useMemo(() => {
-    return menu.reduce((acc, current) => {
-      if (current.id === 'global') {
-        return acc;
-      }
-
-      const currentLinks = get(current, 'links', []);
-
-      const createRoute = (Component, to, exact) => {
-        return <Route component={Component} key={to} path={to} exact={exact || false} />;
-      };
-
-      const routes = currentLinks
-        .filter(link => typeof link.Component === 'function')
-        .map(link => {
-          return createRoute(link.Component, link.to, link.exact);
-        });
-
-      return [...acc, ...routes];
-    }, []);
+    return createPluginsLinksRoutes(menu);
   }, [menu]);
 
   // Only display accessible sections
-  const filteredMenu = useMemo(() => {
-    return menu.filter(section => !section.links.every(link => link.isDisplayed === false));
-  }, [menu]);
+  const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
 
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {
@@ -113,7 +95,7 @@ function SettingsPage() {
     return <LoadingIndicatorPage />;
   }
 
-  if (!settingId) {
+  if (!settingId && firstAvailableEndpoint) {
     return <Redirect to={firstAvailableEndpoint} />;
   }
 

@@ -201,8 +201,6 @@ export class Admin extends React.Component {
     }
 
     // Show a loader while permissions are being fetched
-    // TODO: we might need to improve this behavior for the ctb
-    // since we will need to update the permissions
     if (isLoading) {
       return <LoadingIndicatorPage />;
     }
