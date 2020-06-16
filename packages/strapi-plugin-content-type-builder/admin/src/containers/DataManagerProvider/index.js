@@ -33,7 +33,14 @@ import {
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { autoReload, currentEnvironment, emitEvent, formatMessage, menu } = useGlobalContext();
+  const {
+    autoReload,
+    currentEnvironment,
+    emitEvent,
+    fetchUserPermissions,
+    formatMessage,
+    menu,
+  } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -214,11 +221,18 @@ const DataManagerProvider = ({ allIcons, children }) => {
       push({ search: '' });
 
       if (userConfirm) {
+        strapi.lockApp();
+
         await request(requestURL, { method: 'DELETE' }, true);
+
+        await updatePermissions();
+
         // Reload the plugin so the cycle is new again
         dispatch({ type: 'RELOAD_PLUGIN' });
         // Refetch all the data
         getDataRef.current();
+
+        strapi.unlockApp();
       }
     } catch (err) {
       console.error({ err });
@@ -252,15 +266,22 @@ const DataManagerProvider = ({ allIcons, children }) => {
           return;
         }
 
+        strapi.lockApp();
+
         await request(requestURL, { method: 'DELETE' }, true);
 
         // Reload the plugin so the cycle is new again
         dispatch({ type: 'RELOAD_PLUGIN' });
 
+        // Refetch the permissions
+        await updatePermissions();
+
         // Update the app menu
         await updateAppMenu();
         // Refetch all the data
         getDataRef.current();
+
+        strapi.unlockApp();
       }
     } catch (err) {
       console.error({ err });
@@ -275,13 +296,20 @@ const DataManagerProvider = ({ allIcons, children }) => {
       // Close the modal
       push({ search: '' });
 
+      // Lock the app
+      strapi.lockApp();
+
       // Update the category
       await request(requestURL, { method: 'PUT', body }, true);
+
+      await updatePermissions();
 
       // Reload the plugin so the cycle is new again
       dispatch({ type: 'RELOAD_PLUGIN' });
       // Refetch all the data
       getDataRef.current();
+
+      strapi.unlockApp();
     } catch (err) {
       console.error({ err });
       strapi.notification.error('notification.error');
@@ -394,7 +422,13 @@ const DataManagerProvider = ({ allIcons, children }) => {
       const baseURL = `/${pluginId}/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
+      // Lock the app
+      strapi.lockApp();
+
       await request(requestURL, { method, body }, true);
+
+      await updatePermissions();
+
       // Update the app menu
       await updateAppMenu();
 
@@ -416,6 +450,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       dispatch({ type: 'RELOAD_PLUGIN' });
       // Refetch all the data
       getDataRef.current();
+
+      strapi.unlockApp();
     } catch (err) {
       if (!isInContentTypeView) {
         emitEvent('didNotSaveComponent');
@@ -435,6 +471,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
     if (menu.getModels) {
       await menu.getModels();
     }
+  };
+
+  const updatePermissions = async () => {
+    await fetchUserPermissions('user2');
   };
 
   const updateSchema = (data, schemaType, componentUID) => {

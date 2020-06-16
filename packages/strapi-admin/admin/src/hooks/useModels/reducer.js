@@ -14,6 +14,7 @@ const reducer = (state, action) =>
       case 'GET_MODELS': {
         draftState.collectionTypes = initialState.collectionTypes;
         draftState.singleTypes = initialState.singleTypes;
+        draftState.components = initialState.components;
         draftState.isLoading = true;
         break;
       }

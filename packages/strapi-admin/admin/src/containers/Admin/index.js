@@ -45,7 +45,12 @@ import {
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-import { setAppError } from './actions';
+import {
+  getUserPermissions,
+  getUserPermissionsError,
+  getUserPermissionsSucceeded,
+  setAppError,
+} from './actions';
 import makeSelectAdmin from './selectors';
 import Wrapper from './Wrapper';
 import Content from './Content';
@@ -62,6 +67,9 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     this.emitEvent('didAccessAuthenticatedAdministration');
+    // TODO: remove the user1 it is just for testing until
+    // Api is ready
+    this.fetchUserPermissions('user1', true);
   }
 
   shouldComponentUpdate(prevProps) {
@@ -97,6 +105,28 @@ export class Admin extends React.Component {
       } catch (err) {
         // Silent
       }
+    }
+  };
+
+  fetchUserPermissions = async (user = 'user1', resetState = false) => {
+    const { getUserPermissions, getUserPermissionsError, getUserPermissionsSucceeded } = this.props;
+
+    if (resetState) {
+      // Show a loader
+      getUserPermissions();
+    }
+
+    try {
+      const data = await new Promise(resolve =>
+        setTimeout(() => {
+          resolve(fakePermissionsData[user]);
+        }, 2000)
+      );
+
+      getUserPermissionsSucceeded(data);
+    } catch (err) {
+      console.error(err);
+      getUserPermissionsError(err);
     }
   };
 
@@ -144,6 +174,7 @@ export class Admin extends React.Component {
 
   render() {
     const {
+      admin: { isLoading, userPermissions },
       global: {
         autoReload,
         blockApp,
@@ -169,6 +200,13 @@ export class Admin extends React.Component {
       );
     }
 
+    // Show a loader while permissions are being fetched
+    // TODO: we might need to improve this behavior for the ctb
+    // since we will need to update the permissions
+    if (isLoading) {
+      return <LoadingIndicatorPage />;
+    }
+
     return (
       <GlobalContextProvider
         autoReload={autoReload}
@@ -177,13 +215,14 @@ export class Admin extends React.Component {
         currentLocale={locale}
         disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+        fetchUserPermissions={this.fetchUserPermissions}
         formatMessage={formatMessage}
+        menu={this.menuRef.current}
         plugins={plugins}
         settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
-        menu={this.menuRef.current}
         updatePlugin={updatePlugin}
       >
-        <UserProvider value={fakePermissionsData.user2}>
+        <UserProvider value={userPermissions}>
           <Wrapper>
             <LeftMenu version={strapiVersion} plugins={plugins} ref={this.menuRef} />
             <NavTopRightWrapper>
@@ -243,9 +282,14 @@ Admin.defaultProps = {
 Admin.propTypes = {
   admin: PropTypes.shape({
     appError: PropTypes.bool,
+    isLoading: PropTypes.bool,
+    userPermissions: PropTypes.array,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  getUserPermissions: PropTypes.func.isRequired,
+  getUserPermissionsError: PropTypes.func.isRequired,
+  getUserPermissionsSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
     autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
@@ -275,6 +319,9 @@ export function mapDispatchToProps(dispatch) {
     {
       disableGlobalOverlayBlocker,
       enableGlobalOverlayBlocker,
+      getUserPermissions,
+      getUserPermissionsError,
+      getUserPermissionsSucceeded,
       setAppError,
       updatePlugin,
     },

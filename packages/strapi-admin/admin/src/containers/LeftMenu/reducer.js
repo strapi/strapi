@@ -56,7 +56,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'TOGGLE_IS_LOADING': {
-        draftState.isLoading = !state.isLoading;
+        draftState.isLoading = false;
         break;
       }
       default:

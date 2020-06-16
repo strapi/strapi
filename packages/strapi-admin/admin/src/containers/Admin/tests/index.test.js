@@ -22,6 +22,9 @@ describe('<Admin />', () => {
       disableGlobalOverlayBlocker: jest.fn(),
       emitEvent: jest.fn(),
       enableGlobalOverlayBlocker: jest.fn(),
+      getUserPermissions: jest.fn(),
+      getUserPermissionsError: jest.fn(),
+      getUserPermissionsSucceeded: jest.fn(),
       global: {
         autoReload: false,
         blockApp: false,
