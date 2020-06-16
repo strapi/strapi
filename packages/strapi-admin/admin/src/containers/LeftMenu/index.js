@@ -24,7 +24,7 @@ import {
   LinksContainer,
 } from '../../components/LeftMenu';
 import { useSettingsMenu } from '../../hooks';
-import { generateModelsLinks } from './utils';
+import { generateModelsLinks, filterLinks } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import Loader from './Loader';
@@ -44,23 +44,19 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
     },
     dispatch,
   ] = useReducer(reducer, initialState, () => init(initialState, plugins, settingsMenu));
-  const generalSectionLinksFiltered = useMemo(
-    () => generalSectionLinks.filter(link => link.isDisplayed),
-    [generalSectionLinks]
-  );
-  const pluginsSectionLinksFiltered = useMemo(
-    () => pluginsSectionLinks.filter(link => link.isDisplayed),
-    [pluginsSectionLinks]
-  );
+  const generalSectionLinksFiltered = useMemo(() => filterLinks(generalSectionLinks), [
+    generalSectionLinks,
+  ]);
+  const pluginsSectionLinksFiltered = useMemo(() => filterLinks(pluginsSectionLinks), [
+    pluginsSectionLinks,
+  ]);
 
-  const singleTypesSectionLinksFiltered = useMemo(
-    () => singleTypesSectionLinks.filter(link => link.isDisplayed),
-    [singleTypesSectionLinks]
-  );
-  const collectTypesSectionLinksFiltered = useMemo(
-    () => collectionTypesSectionLinks.filter(link => link.isDisplayed),
-    [collectionTypesSectionLinks]
-  );
+  const singleTypesSectionLinksFiltered = useMemo(() => filterLinks(singleTypesSectionLinks), [
+    singleTypesSectionLinks,
+  ]);
+  const collectTypesSectionLinksFiltered = useMemo(() => filterLinks(collectionTypesSectionLinks), [
+    collectionTypesSectionLinks,
+  ]);
 
   const checkPermissions = async (index, permissionsToCheck) => {
     const hasPermission = await hasPermissions(permissions, permissionsToCheck);
@@ -94,13 +90,11 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
         data: formattedData,
       });
 
-      // TODO maybe we should display a loader while permissions are being checked
       dispatch({
         type: 'SET_LINK_PERMISSIONS',
         data: {
           collectionTypesSectionLinks: collectionTypesSectionResults,
           singleTypesSectionLinks: singleTypesSectionResults,
-          // pluginsSectionLinks: pluginsSectionResults,
         },
       });
     } catch (err) {
