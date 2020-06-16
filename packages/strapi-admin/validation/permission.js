@@ -70,15 +70,19 @@ const updatePermissionsSchemaArray = [
               conditions: validators.arrayOfConditions,
             })
             .noUnknown()
-        )
-        .test(
-          'contentTypes-have-fields',
-          'Your permissions are missing fields "subject" and/or "fields"',
-          checkBoundActionsHaveFields
         ),
     })
     .required()
     .noUnknown(),
+  yup.object().shape({
+    permissions: yup
+      .array()
+      .test(
+        'contentTypes-have-fields',
+        'Your permissions are missing fields "subject" and/or "fields"',
+        checkBoundActionsHaveFields
+      ),
+  }),
   yup.object().shape({
     permissions: yup
       .array()

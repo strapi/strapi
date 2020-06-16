@@ -47,7 +47,16 @@ describe('Permission Service', () => {
       );
 
       global.strapi = {
-        admin: { services: { permission: { actionProvider: { getAll } } } },
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { getAll },
+              conditionProvider: {
+                conditions: jest.fn(() => ['someCondition']),
+              },
+            },
+          },
+        },
         query() {
           return { delete: deleteFn, create };
         },

@@ -95,6 +95,16 @@ describe('Role controller', () => {
         { badRequest }
       );
 
+      global.strapi = {
+        admin: {
+          services: {
+            role: {
+              getAdmin: jest.fn(() => undefined),
+            },
+          },
+        },
+      };
+
       await roleController.updatePermissions(ctx);
 
       expect(badRequest).toHaveBeenCalledWith(
@@ -117,6 +127,14 @@ describe('Role controller', () => {
         },
         { badRequest }
       );
+      global.strapi = {
+        admin: {
+          services: {
+            role: { getAdmin: jest.fn(() => undefined) },
+            permission: { conditionProvider: { conditions: jest.fn(() => []) } },
+          },
+        },
+      };
 
       await roleController.updatePermissions(ctx);
 
@@ -155,9 +173,16 @@ describe('Role controller', () => {
           services: {
             role: {
               findOne: findOneRole,
+              getAdmin: jest.fn(() => undefined),
             },
             permission: {
               assign: assignPermissions,
+              conditionProvider: {
+                conditions: jest.fn(() => ['someCondition']),
+              },
+              actionProvider: {
+                getAllByMap: jest.fn(),
+              },
             },
           },
         },
