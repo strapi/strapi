@@ -65,14 +65,8 @@ const createRolesIfNeeded = async () => {
     return;
   }
 
-  const defaultActionsIds = [
-    'plugins::content-manager.read',
-    'plugins::content-manager.create',
-    'plugins::content-manager.update',
-    'plugins::content-manager.delete',
-  ];
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
-  const contentTypesActions = allActions.filter(a => defaultActionsIds.includes(a.actionId));
+  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
   await strapi.admin.services.role.create({
     name: 'Super Admin',
@@ -131,11 +125,48 @@ const displayWarningIfUsersDontHaveRole = async () => {
   }
 };
 
+const resetSuperAdminPermissions = async () => {
+  const adminRole = await strapi.admin.services.role.getAdmin();
+  if (!adminRole) {
+    return;
+  }
+
+  const allActions = strapi.admin.services.permission.actionProvider.getAll();
+  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+
+  const permissions = [];
+  contentTypesActions.forEach(action => {
+    _.forIn(strapi.contentTypes, contentType => {
+      if (action.subjects.includes(contentType.uid)) {
+        const fields = getNestedFields(contentType.attributes, '', 1);
+        permissions.push({
+          action: action.actionId,
+          subject: contentType.uid,
+          fields,
+        });
+      }
+    });
+  });
+
+  const otherActions = allActions.filter(a => a.section !== 'contentTypes');
+  otherActions.forEach(action => {
+    if (action.subjects) {
+      const newPerms = action.subjects.map(subject => ({ action: action.actionId, subject }));
+      permissions.push(...newPerms);
+    } else {
+      permissions.push({ action: action.actionId });
+    }
+  });
+
+  await strapi.admin.services.permission.assign(adminRole.id, permissions);
+};
+
 module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
   await cleanPermissionInDatabase();
   await createRolesIfNeeded();
+  await resetSuperAdminPermissions();
   await displayWarningIfNoSuperAdmin();
   await displayWarningIfUsersDontHaveRole();
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const PromisePool = require('es6-promise-pool');
 const { createPermission } = require('../domain/permission');
 const actionProvider = require('./action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
@@ -43,14 +44,10 @@ const find = (params = {}) => {
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
 const assign = async (roleId, permissions = []) => {
-  const superAdminRole = await strapi.admin.services.role.getAdmin();
-  if (String(superAdminRole.id) === String(roleId)) {
-    throw strapi.errors.badRequest('ValidationError', "Super admin permissions can't be edited.");
-  }
-
   try {
     await validatePermissionsExist(permissions);
   } catch (err) {
+    console.log('err', err);
     throw strapi.errors.badRequest('ValidationError', err);
   }
 
@@ -61,9 +58,19 @@ const assign = async (roleId, permissions = []) => {
   });
 
   const newPermissions = [];
-  for (const permission of permissionsWithRole) {
-    const result = await strapi.query('permission', 'admin').create(permission);
-    newPermissions.push(result);
+  const errors = [];
+  const generatePromises = function*() {
+    for (let permission of permissionsWithRole) {
+      yield strapi.query('permission', 'admin').create(permission);
+    }
+  };
+  const pool = new PromisePool(generatePromises(), 100);
+  pool.addEventListener('fulfilled', e => newPermissions.push(e.data.result));
+  pool.addEventListener('reject', e => errors.push(e.error));
+  await pool.start();
+
+  if (errors.length > 0) {
+    throw errors[0];
   }
 
   return newPermissions;
