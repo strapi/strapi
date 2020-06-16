@@ -82,9 +82,6 @@ const update = async (params, attributes) => {
     const rolesToBeUpdatedIds = rolesToBeUpdated.map(r => r.id).map(String);
     const adminRole = await getAdmin();
 
-    console.log('rolesToBeUpdatedIds', rolesToBeUpdatedIds);
-    console.log(adminRole, adminRole.id);
-
     if (rolesToBeUpdatedIds.includes(String(adminRole.id))) {
       throw strapi.errors.badRequest(
         'ValidationError',

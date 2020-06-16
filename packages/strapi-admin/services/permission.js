@@ -47,7 +47,6 @@ const assign = async (roleId, permissions = []) => {
   try {
     await validatePermissionsExist(permissions);
   } catch (err) {
-    console.log('err', err);
     throw strapi.errors.badRequest('ValidationError', err);
   }
 

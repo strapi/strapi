@@ -93,7 +93,7 @@ module.exports = {
   async delete(ctx) {
     const { id } = ctx.params;
 
-    const deletedUser = await strapi.admin.services.user.deleteOne({ id });
+    const deletedUser = await strapi.admin.services.user.delete({ id });
 
     if (!deletedUser) {
       return ctx.notFound('User not found');

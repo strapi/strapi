@@ -47,6 +47,26 @@ const create = async attributes => {
  * @returns {Promise<user>}
  */
 const update = async (params, attributes) => {
+  // Check at least one super admin remains
+  if (_.has(attributes, 'roles')) {
+    const superAdminRole = await strapi.admin.services.role.getAdmin();
+    if (superAdminRole && !attributes.roles.map(String).includes(String(superAdminRole.id))) {
+      const usersWithAdminRole = await strapi
+        .query('user', 'admin')
+        .find({ roles: [superAdminRole.id] });
+      const usersWithAdminRoleIds = usersWithAdminRole.map(u => u.id).map(String);
+      const usersToBeModified = await strapi.query('user', 'admin').find(params);
+      const usersToBeModifiedIds = usersToBeModified.map(u => u.id).map(String);
+
+      if (_.difference(usersWithAdminRoleIds, usersToBeModifiedIds).length < 1) {
+        throw strapi.errors.badRequest(
+          'ValidationError',
+          'You must have at least one user with super admin role.'
+        );
+      }
+    }
+  }
+
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await strapi.admin.services.auth.hashPassword(attributes.password);
@@ -136,7 +156,7 @@ const searchPage = async query => {
  * @param query
  * @returns {Promise<user>}
  */
-const deleteOne = async query => {
+const deleteFn = async query => {
   return strapi.query('user', 'admin').delete(query);
 };
 
@@ -179,6 +199,6 @@ module.exports = {
   findOne,
   findPage,
   searchPage,
-  deleteOne,
+  delete: deleteFn,
   countUsersWithoutRole,
 };
