@@ -30,40 +30,74 @@ describe('Permissions Engine', () => {
     roles: {
       1: {
         permissions: [
-          { action: 'read', subject: 'article', fields: ['**'], conditions: ['isBob'] },
-          { action: 'read', subject: 'user', fields: ['title'], conditions: ['isAdmin'] },
+          {
+            action: 'read',
+            subject: 'article',
+            fields: ['**'],
+            conditions: ['plugins::test.isBob'],
+          },
+          {
+            action: 'read',
+            subject: 'user',
+            fields: ['title'],
+            conditions: ['plugins::test.isAdmin'],
+          },
         ],
       },
       2: {
-        permissions: [{ action: 'post', subject: 'article', fields: ['*'], conditions: ['isBob'] }],
+        permissions: [
+          {
+            action: 'post',
+            subject: 'article',
+            fields: ['*'],
+            conditions: ['plugins::test.isBob'],
+          },
+        ],
       },
       3: {
         permissions: [
-          { action: 'read', subject: 'user', fields: ['title'], conditions: ['isContainedIn'] },
+          {
+            action: 'read',
+            subject: 'user',
+            fields: ['title'],
+            conditions: ['plugins::test.isContainedIn'],
+          },
         ],
       },
     },
-    conditions: {
-      isBob: async user => new Promise(resolve => resolve(user.firstname === 'Bob')),
-      isAdmin: user => user.title === 'admin',
-      isCreatedBy: user => ({ created_by: user.firstname }),
-      isContainedIn: { firstname: { $in: ['Alice', 'Foo'] } },
-    },
+    conditions: [
+      {
+        plugin: 'test',
+        name: 'isBob',
+        category: 'default',
+        handler: async user => new Promise(resolve => resolve(user.firstname === 'Bob')),
+      },
+      {
+        plugin: 'test',
+        name: 'isAdmin',
+        category: 'default',
+        handler: user => user.title === 'admin',
+      },
+      {
+        plugin: 'test',
+        name: 'isCreatedBy',
+        category: 'default',
+        handler: user => ({ created_by: user.firstname }),
+      },
+      {
+        plugin: 'test',
+        name: 'isContainedIn',
+        category: 'default',
+        handler: { firstname: { $in: ['Alice', 'Foo'] } },
+      },
+    ],
   };
 
   const getUser = name => localTestData.users[name];
 
   beforeEach(() => {
-    conditionProvider = createConditionProvider();
-    conditionProvider.registerMany(localTestData.conditions);
-
-    engine = createPermissionsEngine(conditionProvider);
-
-    jest.spyOn(engine, 'evaluatePermission');
-    jest.spyOn(engine, 'createRegisterFunction');
-    jest.spyOn(engine, 'generateAbilityCreatorFor');
-
     global.strapi = {
+      isLoaded: false,
       admin: {
         services: {
           permission: {
@@ -82,6 +116,15 @@ describe('Permissions Engine', () => {
         },
       },
     };
+
+    conditionProvider = createConditionProvider();
+    conditionProvider.registerMany(localTestData.conditions);
+
+    engine = createPermissionsEngine(conditionProvider);
+
+    jest.spyOn(engine, 'evaluatePermission');
+    jest.spyOn(engine, 'createRegisterFunction');
+    jest.spyOn(engine, 'generateAbilityCreatorFor');
   });
 
   afterEach(() => {
@@ -211,7 +254,7 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         fields: ['title'],
-        conditions: ['isAdmin'],
+        conditions: ['plugins::test.isAdmin'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
@@ -231,7 +274,7 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         fields: ['title'],
-        conditions: ['isBob'],
+        conditions: ['plugins::test.isBob'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
@@ -246,7 +289,7 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         fields: ['title'],
-        conditions: ['isCreatedBy'],
+        conditions: ['plugins::test.isCreatedBy'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
