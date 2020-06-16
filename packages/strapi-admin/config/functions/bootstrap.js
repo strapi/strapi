@@ -26,7 +26,16 @@ const cleanPermissionInDatabase = async () => {
   await strapi.admin.services.permission.deleteByIds(permissionsToRemoveIds);
 };
 
+const registerAdminConditions = () => {
+  const { conditionProvider } = strapi.admin.services.permission;
+
+  conditionProvider.registerMany({
+    'strapi-admin::isOwner': user => ({ 'strapi_created_by.id': user.id }),
+  });
+};
+
 module.exports = async () => {
+  registerAdminConditions();
   registerPermissionActions();
   await cleanPermissionInDatabase();
 };

@@ -2,8 +2,8 @@
 
 const _ = require('lodash');
 
-module.exports = (defaultConditions = {}) => {
-  const _registry = new Map(Object.entries(defaultConditions));
+module.exports = () => {
+  const _registry = new Map();
 
   return {
     /**
@@ -66,7 +66,5 @@ module.exports = (defaultConditions = {}) => {
     has(name) {
       return _registry.has(name);
     },
-
-    defaultConditions,
   };
 };
