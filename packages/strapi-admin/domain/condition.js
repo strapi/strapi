@@ -1,16 +1,13 @@
 'use strict';
 
 const getConditionId = ({ name, plugin }) => {
-  let id;
-
   if (plugin === 'admin') {
-    id = `admin::${name}`;
+    return `admin::${name}`;
   } else if (plugin) {
-    id = `plugins::${plugin}.${name}`;
-  } else {
-    id = `application::${name}`;
+    return `plugins::${plugin}.${name}`;
   }
-  return id;
+
+  return `application::${name}`;
 };
 
 const createCondition = condition => ({
