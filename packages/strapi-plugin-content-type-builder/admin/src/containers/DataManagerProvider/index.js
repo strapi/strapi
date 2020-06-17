@@ -231,12 +231,12 @@ const DataManagerProvider = ({ allIcons, children }) => {
         dispatch({ type: 'RELOAD_PLUGIN' });
         // Refetch all the data
         getDataRef.current();
-
-        strapi.unlockApp();
       }
     } catch (err) {
       console.error({ err });
       strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
@@ -280,12 +280,12 @@ const DataManagerProvider = ({ allIcons, children }) => {
         await updateAppMenu();
         // Refetch all the data
         getDataRef.current();
-
-        strapi.unlockApp();
       }
     } catch (err) {
       console.error({ err });
       strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
@@ -308,11 +308,11 @@ const DataManagerProvider = ({ allIcons, children }) => {
       dispatch({ type: 'RELOAD_PLUGIN' });
       // Refetch all the data
       getDataRef.current();
-
-      strapi.unlockApp();
     } catch (err) {
       console.error({ err });
       strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
@@ -450,14 +450,15 @@ const DataManagerProvider = ({ allIcons, children }) => {
       dispatch({ type: 'RELOAD_PLUGIN' });
       // Refetch all the data
       getDataRef.current();
-
-      strapi.unlockApp();
     } catch (err) {
       if (!isInContentTypeView) {
         emitEvent('didNotSaveComponent');
       }
+
       console.error({ err: err.response });
       strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
