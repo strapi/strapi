@@ -29,7 +29,7 @@ module.exports = {
 
           mailgun.messages().send(removeUndefined(msg), function(err) {
             if (err) {
-              reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
+              reject(err);
             } else {
               resolve();
             }

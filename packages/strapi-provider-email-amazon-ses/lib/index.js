@@ -19,14 +19,14 @@ module.exports = {
             bcc,
             replyTo: replyTo || settings.defaultReplyTo,
             subject,
-            text,
-            html,
+            altText: text,
+            message: html,
             ...rest,
           };
 
           client.sendEmail(removeUndefined(msg), function(err) {
             if (err) {
-              reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
+              reject(err);
             } else {
               resolve();
             }

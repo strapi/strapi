@@ -211,6 +211,7 @@ const forms = {
           return yup.object().shape({
             name: yup
               .string()
+              .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes)
               .unique(errorsTrads.unique, alreadyTakenAttributes)
               .matches(ENUM_REGEX, errorsTrads.regex)
               .required(errorsTrads.required),
@@ -291,11 +292,14 @@ const forms = {
           return yup.object().shape({
             name: yup
               .string()
+              .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes)
               .matches(NAME_REGEX, errorsTrads.regex)
               .unique(errorsTrads.unique, alreadyTakenAttributes)
               .required(errorsTrads.required),
             targetAttribute: yup.lazy(() => {
-              let schema = yup.string();
+              let schema = yup
+                .string()
+                .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes);
 
               if (!['oneWay', 'manyWay'].includes(dataToValidate.nature)) {
                 schema = schema.matches(NAME_REGEX, errorsTrads.regex);
@@ -488,10 +492,11 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
-              type: 'date',
+              type: data.type || 'date',
               value: null,
               withDefaultValue: false,
-              disabled: data.type !== 'date',
+              disabled: !data.type,
+              autoFocus: false,
             },
           ]);
         } else if (type === 'richtext') {
@@ -500,6 +505,7 @@ const forms = {
           const uidItems = [
             [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
             [fields.divider],
+            [fields.private],
             [fields.required],
           ];
 
