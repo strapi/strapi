@@ -30,13 +30,16 @@ const Wrapper = styled.div`
       }
     }}
 
+    &:hover {
+      background-color: #e9eaeb;
+    }
     &.highlighted {
       border-radius: 3px;
       background-color: #e9eaeb;
       font-weight: 600;
     }
     &.highlighted,
-    &.is-checked:hover {
+    &:hover {
       > i,
       > svg {
         display: block;
