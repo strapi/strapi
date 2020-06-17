@@ -2,7 +2,7 @@ import createPluginsLinksRoutes, { retrieveRoutes } from '../createPluginsLinksR
 
 describe('ADMIN | CONTAINERS | SettingsPage | utils', () => {
   describe('createPluginsLinksRoutes', () => {
-    it('should return an array', () => {
+    it('should return an empty array', () => {
       expect(createPluginsLinksRoutes([])).toEqual([]);
     });
 
@@ -39,7 +39,7 @@ describe('ADMIN | CONTAINERS | SettingsPage | utils', () => {
   });
 
   describe('retrieveRoutes', () => {
-    it('should filter the links correctly', () => {
+    it('should return links that have a component', () => {
       const data = [
         {
           Component: () => 'test',
