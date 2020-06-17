@@ -76,13 +76,17 @@ const ListPage = () => {
   }, [search, isLoadingForPermissions]);
 
   useEffect(() => {
-    toggleHeaderSearch({ id: 'Settings.permissions.menu.link.users.label' });
+    if (canRead) {
+      toggleHeaderSearch({ id: 'Settings.permissions.menu.link.users.label' });
+    }
 
     return () => {
-      toggleHeaderSearch();
+      if (canRead) {
+        toggleHeaderSearch();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [canRead]);
 
   const handleChangeDataToDelete = ids => {
     dispatch({
