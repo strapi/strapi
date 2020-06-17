@@ -1,7 +1,7 @@
 import filterLinks from '../filterLinks';
 
 describe('ADMIN | CONTAINERS | LeftMenu | utils | filterLinks', () => {
-  it('should filter the links correctly', () => {
+  it('should return the displayable links', () => {
     const data = [
       {
         isDisplayed: false,
