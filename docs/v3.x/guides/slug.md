@@ -84,12 +84,20 @@ module.exports = {
 const slugify = require('slugify');
 
 module.exports = {
-  beforeSave: async (model, attrs, options) => {
-    if (options.method === 'insert' && attrs.title) {
-      model.set('slug', slugify(attrs.title));
-    } else if (options.method === 'update' && attrs.title) {
-      attrs.slug = slugify(attrs.title);
-    }
+  /**
+   * Triggered before user creation.
+   */
+  lifecycles: {
+    async beforeCreate(data) {
+      if (data.title) {
+        data.slug = slugify(data.title, {lower: true});
+      }
+    },
+    async beforeUpdate(params, data) {
+      if (data.title) {
+        data.slug = slugify(data.title, {lower: true});
+      }
+    },
   },
 };
 ```
