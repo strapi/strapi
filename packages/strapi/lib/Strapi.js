@@ -1,6 +1,14 @@
 'use strict';
 
 // Dependencies.
+const dotenv = require('dotenv');
+
+if(process.env.ENV_PATH) {
+  dotenv.config({ path: process.env.ENV_PATH });
+} else {
+  dotenv.config();
+}
+
 const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');
