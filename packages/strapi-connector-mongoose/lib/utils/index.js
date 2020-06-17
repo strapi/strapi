@@ -83,7 +83,7 @@ module.exports = (mongoose = Mongoose) => {
         };
       }
       default:
-        return undefined;
+        return { type: 'Mixed' };
     }
   };
 
