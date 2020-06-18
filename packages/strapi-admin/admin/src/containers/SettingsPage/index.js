@@ -18,17 +18,17 @@ import {
 } from 'strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 
-import RolesListPage from 'ee_else_ce/containers/Roles/ListPage';
 import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
+import ProtectedRolesListPage from 'ee_else_ce/containers/Roles/ProtectedListPage';
+// TODO remove this line when feature finished
+// import ProtectedRolesListPage from '../Roles/ProtectedListPage';
 import HeaderSearch from '../../components/HeaderSearch';
 import { useSettingsMenu } from '../../hooks';
 import { retrieveGlobalLinks } from '../../utils';
 import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import UsersEditPage from '../Users/ProtectedEditPage';
 import UsersListPage from '../Users/ProtectedListPage';
-import RolesEditPage from '../Roles/EditPage';
-// TODO remove this line when feature finished
-// import RolesListPage from '../Roles/ListPage';
+import RolesEditPage from '../Roles/ProtectedEditPage';
 import {
   createRoute,
   findFirstAllowedEndpoint,
@@ -114,7 +114,7 @@ function SettingsPage() {
           </div>
           <div className="col-md-9">
             <Switch>
-              <Route exact path={`${settingsBaseURL}/roles`} component={RolesListPage} />
+              <Route exact path={`${settingsBaseURL}/roles`} component={ProtectedRolesListPage} />
               <Route exact path={`${settingsBaseURL}/roles/new`} component={RolesCreatePage} />
               <Route exact path={`${settingsBaseURL}/roles/:id`} component={RolesEditPage} />
               <Route exact path={`${settingsBaseURL}/users`} component={UsersListPage} />

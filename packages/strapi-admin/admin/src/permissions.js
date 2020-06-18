@@ -20,6 +20,14 @@ const permissions = {
         { action: 'admin::roles.read', subject: null },
         { action: 'admin::roles.delete', subject: null },
       ],
+      create: [{ action: 'admin::roles.create', subject: null }],
+      delete: [{ action: 'admin::roles.delete', subject: null }],
+      read: [
+        { action: 'admin::roles.read', subject: null },
+        { action: 'admin::roles.delete', subject: null },
+        { action: 'admin::roles.update', subject: null },
+      ],
+      update: [{ action: 'admin::roles.update', subject: null }],
     },
     users: {
       main: [

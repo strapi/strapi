@@ -3,8 +3,9 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { request } from 'strapi-helper-plugin';
+import { CheckPagePermissions, request } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
+import adminPermissions from '../../../../src/permissions';
 import { useFetchPermissionsLayout } from '../../../../src/hooks';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
 import ContainerFluid from '../../../../src/components/ContainerFluid';
@@ -144,4 +145,10 @@ const CreatePage = () => {
   );
 };
 
-export default CreatePage;
+export default () => (
+  <CheckPagePermissions permissions={adminPermissions.settings.roles.create}>
+    <CreatePage />
+  </CheckPagePermissions>
+);
+
+export { CreatePage };

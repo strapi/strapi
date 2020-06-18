@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button } from '@buffetjs/core';
 import { List, Header } from '@buffetjs/custom';
@@ -10,9 +10,11 @@ import {
   ListButton,
   PopUpWarning,
   request,
+  useUserPermissions,
+  LoadingIndicatorPage,
 } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
-
+import adminPermissions from '../../../../src/permissions';
 import useSettingsHeaderSearchContext from '../../../../src/hooks/useSettingsHeaderSearchContext';
 import { EmptyRole, RoleListWrapper } from '../../../../src/components/Roles';
 import { useRolesList } from '../../../../src/hooks';
@@ -29,20 +31,37 @@ const RoleListPage = () => {
     reducer,
     initialState
   );
-  const { getData, roles, isLoading } = useRolesList();
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canCreate, canDelete, canRead, canUpdate },
+  } = useUserPermissions(adminPermissions.settings.roles);
+  const { getData, roles, isLoading } = useRolesList(false);
+  const getDataRef = useRef(getData);
+  // console.log({ roles });
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
   const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
   useEffect(() => {
-    toggleHeaderSearch({ id: 'Settings.permissions.menu.link.roles.label' });
+    // Show the search bar only if the user is allowed to read
+    if (canRead) {
+      toggleHeaderSearch({ id: 'Settings.permissions.menu.link.roles.label' });
+    }
 
     return () => {
-      toggleHeaderSearch();
+      if (canRead) {
+        toggleHeaderSearch();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [canRead]);
+
+  useEffect(() => {
+    if (!isLoadingForPermissions && canRead) {
+      getDataRef.current();
+    }
+  }, [isLoadingForPermissions, canRead]);
 
   const handleClosedModal = () => {
     if (shouldRefetchData) {
@@ -115,20 +134,28 @@ const RoleListPage = () => {
 
   const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
 
-  const headerActions = [
-    {
-      label: formatMessage({
-        id: 'Settings.roles.list.button.add',
-        defaultMessage: 'Add new role',
-      }),
-      onClick: handleNewRoleClick,
-      color: 'primary',
-      type: 'button',
-      icon: true,
-    },
-  ];
+  /* eslint-disable indent */
+  const headerActions = canCreate
+    ? [
+        {
+          label: formatMessage({
+            id: 'Settings.roles.list.button.add',
+            defaultMessage: 'Add new role',
+          }),
+          onClick: handleNewRoleClick,
+          color: 'primary',
+          type: 'button',
+          icon: true,
+        },
+      ]
+    : [];
+  /* eslint-enable indent */
 
   const resultsCount = results.length;
+
+  if (isLoadingForPermissions) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <>
@@ -147,46 +174,59 @@ const RoleListPage = () => {
         isLoading={isLoading}
       />
       <BaselineAlignment />
-      <RoleListWrapper>
-        <List
-          title={formatMessage(
-            {
-              id: `Settings.roles.list.title${resultsCount > 1 ? '.plural' : '.singular'}`,
-              defaultMessage: `{number} ${resultsCount > 1 ? 'roles' : 'role'}`,
-            },
-            { number: resultsCount }
-          )}
-          isLoading={isLoading}
-          button={{
-            color: 'delete',
-            disabled: selectedRoles.length === 0,
-            label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
-            onClick: handleToggleModal,
-            type: 'button',
-          }}
-          items={results}
-          customRowComponent={role => (
-            <RoleRow
-              selectedRoles={selectedRoles}
-              onRoleDuplicate={handleDuplicateRole}
-              onRoleRemove={handleRemoveRole}
-              onRoleToggle={handleRoleToggle}
-              role={role}
-            />
-          )}
-        />
-        {!resultsCount && !isLoading && <EmptyRole />}
-        <ListButton>
-          <Button
-            onClick={handleNewRoleClick}
-            icon={<Plus fill="#007eff" width="11px" height="11px" />}
-            label={formatMessage({
-              id: 'Settings.roles.list.button.add',
-              defaultMessage: 'Add new role',
-            })}
+      {canRead && (
+        <RoleListWrapper>
+          <List
+            title={formatMessage(
+              {
+                id: `Settings.roles.list.title${resultsCount > 1 ? '.plural' : '.singular'}`,
+                defaultMessage: `{number} ${resultsCount > 1 ? 'roles' : 'role'}`,
+              },
+              { number: resultsCount }
+            )}
+            isLoading={isLoading}
+            /* eslint-disable indent */
+            button={
+              canDelete
+                ? {
+                    color: 'delete',
+                    disabled: selectedRoles.length === 0,
+                    label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
+                    onClick: handleToggleModal,
+                    type: 'button',
+                  }
+                : null
+            }
+            /* eslint-enable indent */
+            items={results}
+            customRowComponent={role => (
+              <RoleRow
+                canCreate={canCreate}
+                canDelete={canDelete}
+                canUpdate={canUpdate}
+                selectedRoles={selectedRoles}
+                onRoleDuplicate={handleDuplicateRole}
+                onRoleRemove={handleRemoveRole}
+                onRoleToggle={handleRoleToggle}
+                role={role}
+              />
+            )}
           />
-        </ListButton>
-      </RoleListWrapper>
+          {!resultsCount && !isLoading && <EmptyRole />}
+          {canCreate && (
+            <ListButton>
+              <Button
+                onClick={handleNewRoleClick}
+                icon={<Plus fill="#007eff" width="11px" height="11px" />}
+                label={formatMessage({
+                  id: 'Settings.roles.list.button.add',
+                  defaultMessage: 'Add new role',
+                })}
+              />
+            </ListButton>
+          )}
+        </RoleListWrapper>
+      )}
       <PopUpWarning
         isOpen={isWarningDeleteAllOpened}
         onClosed={handleClosedModal}
