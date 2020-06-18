@@ -60,13 +60,10 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
       const expected = [
         {
           action: 'admin::marketplace.read',
-          subject: null,
           fields: ['test'],
         },
         {
           action: 'admin::marketplace.plugins.uninstall',
-          subject: null,
-          fields: null,
         },
       ];
 

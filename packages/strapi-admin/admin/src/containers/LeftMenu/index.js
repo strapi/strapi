@@ -58,6 +58,11 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
     collectionTypesSectionLinks,
   ]);
 
+  // TODO:
+  // This is making a lot of request especially for the Author role as all permissions are being sent to
+  // to the backend.
+  // We should improve this by sending one request in with all permissions in bulk using the
+  // findMatchingPermissions util from the helper plugin and the /users/me/permissions endPoint
   const checkPermissions = async (index, permissionsToCheck) => {
     const hasPermission = await hasPermissions(permissions, permissionsToCheck);
 
@@ -81,7 +86,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
       const collectionTypesSectionResults = await Promise.all(
         collectionTypesSectionLinksArrayOfPromises
       );
-      console.log({ collectionTypesSectionResults });
+
       const singleTypesSectionLinksArrayOfPromises = generateArrayOfPromises(
         formattedData.singleTypesSectionLinks
       );
