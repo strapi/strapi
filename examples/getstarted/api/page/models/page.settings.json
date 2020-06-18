@@ -14,11 +14,10 @@
       "type": "string",
       "required": true
     },
-    "parent_id": {
-      "type": "integer"
-    },
-    "child_order": {
-      "type": "integer"
+    "menu": {
+      "via": "page",
+      "plugin": "menu",
+      "model": "item"
     }
   }
 }

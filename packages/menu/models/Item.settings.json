@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "connection": "default",
+  "collectionName": "menu",
+  "info": {
+    "name": "Menu",
+    "description": ""
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "menu_type": {
+      "plugin": "menu",
+      "model": "type"
+    },
+    "menu_state": {
+      "plugin": "menu",
+      "model": "state"
+    },
+    "page": {
+      "model": "page",
+      "via": "menu"
+    },
+    "parent": {
+      "plugin": "menu",
+      "model": "item",
+      "via": "children"
+    },
+    "children": {
+      "plugin": "menu",
+      "collection": "item",
+      "via": "parent"
+    }
+  }
+}

@@ -8,9 +8,12 @@
 const { sanitizeEntity } = require('strapi-utils');
 
 module.exports = {
-  async updateMany(ctx) {
-    const entity = await strapi.services.page.editMany(ctx.params, ctx.request.body);
+    async updateMany(ctx) {
+        const entity = await strapi.services.page.editMany(
+            ctx.params,
+            ctx.request.body,
+        );
 
-    return sanitizeEntity(entity, { model: strapi.models.page });
-  },
+        return sanitizeEntity(entity, { model: strapi.models.page });
+    },
 };

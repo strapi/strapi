@@ -4056,7 +4056,7 @@ aws4@^1.6.0, aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.9.1.tgz#7e33d8f7d449b3f673cd72deb9abdc552dbe528e"
   integrity sha512-wMHVg2EOHaMRxbzgFJ9gtjOOCrI80OHLG14rxi28XwOW8ux6IiEbRCGGGqCtdAIg4FQCbW20k9RsT4y3gJlFug==
 
-axios-hooks@^1.9.0:
+axios-hooks@^1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/axios-hooks/-/axios-hooks-1.10.0.tgz#73f857b8c6ddc365e8c08db9f05c184b48328139"
   integrity sha512-kh9FNRFxE7P1t+4SM4yKZNhDo+NYdws1Mt/bUTnmzBh2qVQzfDObwmHklw2zZ+9QDaSyEHlyMHzboWk5joVVWg==
