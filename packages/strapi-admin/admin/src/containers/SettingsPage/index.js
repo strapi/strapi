@@ -103,7 +103,7 @@ function SettingsPage() {
     <SettingsSearchHeaderProvider value={{ toggleHeaderSearch }}>
       <Wrapper>
         <BackHeader onClick={goBack} />
-        {headerSearchState.show && <HeaderSearch label={headerSearchState.label} />}
+
         <div className="row">
           <div className="col-md-3">
             <LeftMenu>
@@ -135,6 +135,7 @@ function SettingsPage() {
             </Switch>
           </div>
         </div>
+        {headerSearchState.show && <HeaderSearch label={headerSearchState.label} />}
       </Wrapper>
     </SettingsSearchHeaderProvider>
   );
