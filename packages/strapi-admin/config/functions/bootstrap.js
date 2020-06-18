@@ -33,7 +33,6 @@ const registerAdminConditions = () => {
     displayName: 'Is Creator',
     name: 'is-creator',
     plugin: 'admin',
-    category: 'default',
     handler: user => ({ 'created_by.id': user.id }),
   });
 };

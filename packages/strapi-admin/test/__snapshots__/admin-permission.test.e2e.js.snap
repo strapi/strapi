@@ -2,7 +2,13 @@
 
 exports[`Role CRUD End to End Can get the existing permissions 1`] = `
 Object {
-  "conditions": Array [],
+  "conditions": Array [
+    Object {
+      "category": "default",
+      "displayName": "Is Creator",
+      "id": "admin::is-creator",
+    },
+  ],
   "sections": Object {
     "contentTypes": Array [
       Object {

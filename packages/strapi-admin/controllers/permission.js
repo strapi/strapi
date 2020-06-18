@@ -1,7 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
-const { formatActionsBySections } = require('./formatters');
+const { formatActionsBySections, formatConditions } = require('./formatters');
 const { validateCheckPermissionsInput } = require('../validation/permission');
 
 module.exports = {
@@ -37,9 +36,7 @@ module.exports = {
 
     ctx.body = {
       data: {
-        conditions: conditions.map(condition =>
-          _.pick(condition, 'id', 'name', 'plugin', 'category')
-        ),
+        conditions: formatConditions(conditions),
         sections: formatActionsBySections(allActions),
       },
     };
