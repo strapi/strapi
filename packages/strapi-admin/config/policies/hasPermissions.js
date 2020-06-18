@@ -9,7 +9,7 @@ module.exports = permissions => {
     throw new Error('Invalid objects submitted to admin::hasPermissions policy.');
   }
 
-  return async (ctx, next) => {
+  return (ctx, next) => {
     const { userAbility: ability } = ctx.state;
 
     const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));
