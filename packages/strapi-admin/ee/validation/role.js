@@ -32,8 +32,8 @@ const rolesDeleteSchema = yup
       .min(1)
       .required()
       .test('no-admin-many-delete', 'You cannot delete the super admin role', async ids => {
-        const adminRole = await strapi.admin.services.role.getAdmin();
-        return !adminRole || !ids.map(String).includes(String(adminRole.id));
+        const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
+        return !superAdminRole || !ids.map(String).includes(String(superAdminRole.id));
       }),
   })
   .noUnknown();
@@ -42,8 +42,8 @@ const roleDeleteSchema = yup
   .strapiID()
   .required()
   .test('no-admin-single-delete', 'You cannot delete the super admin role', async function(id) {
-    const adminRole = await strapi.admin.services.role.getAdmin();
-    return !adminRole || String(id) !== String(adminRole.id)
+    const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
+    return !superAdminRole || String(id) !== String(superAdminRole.id)
       ? true
       : this.createError({ path: 'id', message: `You cannot delete the super admin role` });
   });

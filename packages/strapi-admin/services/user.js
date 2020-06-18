@@ -49,14 +49,14 @@ const create = async attributes => {
 const update = async (params, attributes) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
-    const superAdminRole = await strapi.admin.services.role.getAdmin();
+    const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
     if (superAdminRole && !attributes.roles.map(String).includes(String(superAdminRole.id))) {
       const usersWithAdminRole = await strapi
         .query('user', 'admin')
         .find({ roles: [superAdminRole.id] });
-      const usersWithAdminRoleIds = usersWithAdminRole.map(u => u.id).map(String);
+      const usersWithAdminRoleIds = usersWithAdminRole.map(u => String(u.id));
       const usersToBeModified = await strapi.query('user', 'admin').find(params);
-      const usersToBeModifiedIds = usersToBeModified.map(u => u.id).map(String);
+      const usersToBeModifiedIds = usersToBeModified.map(u => String(u.id));
 
       if (_.difference(usersWithAdminRoleIds, usersToBeModifiedIds).length < 1) {
         throw strapi.errors.badRequest(
@@ -152,25 +152,27 @@ const searchPage = async query => {
   return strapi.query('user', 'admin').searchPage(query);
 };
 
+/** Delete users
+ * @param query
+ * @returns {Promise<user>}
+ */
+const deleteFn = async query => {
+  return strapi.query('user', 'admin').delete(query);
+};
+
 /** Count the users that don't have any associated roles
  * @returns {Promise<number>}
  */
 const countUsersWithoutRole = async () => {
   const userModel = strapi.query('user', 'admin').model;
-  const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
   let count;
 
   if (userModel.orm === 'bookshelf') {
-    const result = await userModel
-      .query(qb => {
-        qb.count()
-          .leftJoin(assocTable, `${userModel.collectionName}.id`, `${assocTable}.user_id`)
-          .where(`${assocTable}.role_id`, null);
-      })
-      .fetch();
-    count = result.toJSON()['count(*)'];
+    count = await strapi.query('user', 'admin').count({ roles_null: true });
   } else if (userModel.orm === 'mongoose') {
-    count = await strapi.query('user', 'admin').model.countDocuments({ roles: { $size: 0 } });
+    count = await strapi.query('user', 'admin').model.countDocuments({
+      $or: [{ roles: { $exists: false } }, { roles: { $size: 0 } }],
+    });
   } else {
     const allRoles = await strapi.query('role', 'admin').find();
     count = await strapi.query('user', 'admin').count({
@@ -191,5 +193,6 @@ module.exports = {
   findOne,
   findPage,
   searchPage,
+  delete: deleteFn,
   countUsersWithoutRole,
 };

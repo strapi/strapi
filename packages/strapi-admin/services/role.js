@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { SUPER_ADMIN_CODE } = require('./constants');
 
 const sanitizeRole = role => {
   return _.omit(role, ['users', 'permissions']);
@@ -79,8 +80,8 @@ const findAllWithUsersCount = async (populate = []) => {
 const update = async (params, attributes) => {
   if (_.has(attributes, 'code')) {
     const rolesToBeUpdated = await find(params);
-    const rolesToBeUpdatedIds = rolesToBeUpdated.map(r => r.id).map(String);
-    const adminRole = await getAdmin();
+    const rolesToBeUpdatedIds = rolesToBeUpdated.map(r => String(r.id));
+    const adminRole = await getSuperAdmin();
 
     if (rolesToBeUpdatedIds.includes(String(adminRole.id))) {
       throw strapi.errors.badRequest(
@@ -121,8 +122,8 @@ const exists = async params => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async (ids = []) => {
-  const adminRole = await getAdmin();
-  if (ids.map(String).includes(String(adminRole.id))) {
+  const superAdminRole = await getSuperAdmin();
+  if (superAdminRole && ids.map(String).includes(String(superAdminRole.id))) {
     throw strapi.errors.badRequest('ValidationError', {
       ids: ['You cannot delete the super admin role'],
     });
@@ -159,13 +160,12 @@ const getUsersCount = async roleId => {
 /** Returns admin role
  * @returns {Promise<role>}
  */
-const getAdmin = () => findOne({ code: strapi.admin.config.superAdminCode });
+const getSuperAdmin = () => findOne({ code: SUPER_ADMIN_CODE });
 
 /** Returns admin role with userCount
  * @returns {Promise<role>}
  */
-const getAdminWithUsersCount = () =>
-  findOneWithUsersCount({ code: strapi.admin.config.superAdminCode });
+const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_ADMIN_CODE });
 
 module.exports = {
   sanitizeRole,
@@ -178,6 +178,6 @@ module.exports = {
   exists,
   deleteByIds,
   getUsersCount,
-  getAdmin,
-  getAdminWithUsersCount,
+  getSuperAdmin,
+  getSuperAdminWithUsersCount,
 };

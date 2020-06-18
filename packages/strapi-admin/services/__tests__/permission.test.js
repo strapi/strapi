@@ -73,7 +73,7 @@ describe('Permission Service', () => {
         action: 'action-0',
         role: 1,
         conditions: [],
-        fields: [],
+        fields: null,
         subject: null,
       });
     });

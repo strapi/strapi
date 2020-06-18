@@ -103,7 +103,7 @@ module.exports = {
     const input = ctx.request.body;
 
     try {
-      const superAdminRole = await strapi.admin.services.role.getAdmin();
+      const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
       if (superAdminRole && String(superAdminRole.id) === String(id)) {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);

@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 const validators = require('./common-validators');
+const { checkFieldsAreCorrectlyNested } = require('./common-functions');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -66,8 +67,15 @@ const updatePermissionsSchemaArray = [
             .shape({
               action: yup.string().required(),
               subject: yup.string(),
-              fields: yup.array().of(yup.string()),
-              conditions: validators.arrayOfConditions,
+              fields: yup
+                .array()
+                .of(yup.string())
+                .test(
+                  'field-nested',
+                  'Fields format are incorrect (duplicates or bad nesting).',
+                  checkFieldsAreCorrectlyNested
+                ),
+              conditions: validators.arrayOfConditionNames,
             })
             .noUnknown()
         ),
@@ -149,7 +157,7 @@ const actionsExistSchema = yup
   .array()
   .of(
     yup.object().shape({
-      conditions: validators.arrayOfConditions,
+      conditions: validators.arrayOfConditionNames,
     })
   )
   .test('actions-exist', '', checkPermissionsExist);

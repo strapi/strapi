@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const roleService = require('../role');
+const { SUPER_ADMIN_CODE } = require('../constants');
 
 describe('Role', () => {
   describe('create', () => {
@@ -149,12 +150,12 @@ describe('Role', () => {
     });
     test('Cannot update code of super admin role', async () => {
       const dbFind = jest.fn(() => [{ id: '1' }]);
-      const dbFindOne = jest.fn(() => ({ id: '1', code: 'strapi_super_admin' }));
+      const dbFindOne = jest.fn(() => ({ id: '1', code: SUPER_ADMIN_CODE }));
       const badRequest = jest.fn(() => {});
 
       global.strapi = {
         query: () => ({ find: dbFind, findOne: dbFindOne }),
-        admin: { config: { superAdminCode: 'strapi_super_admin' } },
+        admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
       };
 
@@ -193,7 +194,7 @@ describe('Role', () => {
         users: [],
       };
       const dbCount = jest.fn(() => Promise.resolve(0));
-      const dbFindOne = jest.fn(() => ({ id: 1, code: 'strapi_super_admin' }));
+      const dbFindOne = jest.fn(() => ({ id: 1, code: SUPER_ADMIN_CODE }));
       const dbDelete = jest.fn(() => Promise.resolve(role));
       const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
@@ -203,7 +204,7 @@ describe('Role', () => {
           services: {
             permission: { deleteByRolesIds: dbDeleteByRolesIds },
           },
-          config: { superAdminCode: 'strapi_super_admin' },
+          config: { superAdminCode: SUPER_ADMIN_CODE },
         },
       };
 
@@ -229,7 +230,7 @@ describe('Role', () => {
         },
       ];
       const dbCount = jest.fn(() => Promise.resolve(0));
-      const dbFindOne = jest.fn(() => ({ id: 3, code: 'strapi_super_admin' }));
+      const dbFindOne = jest.fn(() => ({ id: 3, code: SUPER_ADMIN_CODE }));
       const rolesIds = roles.map(r => r.id);
       const dbDelete = jest.fn(() => Promise.resolve(roles));
       const dbGetUsersCount = jest.fn(() => Promise.resolve(0));
@@ -242,7 +243,7 @@ describe('Role', () => {
             permission: { deleteByRolesIds: dbDeleteByRolesIds },
             role: { getUsersCount: dbGetUsersCount },
           },
-          config: { superAdminCode: 'strapi_super_admin' },
+          config: { superAdminCode: SUPER_ADMIN_CODE },
         },
       };
 
@@ -256,12 +257,12 @@ describe('Role', () => {
     });
     test('Cannot delete super admin role', async () => {
       const dbFind = jest.fn(() => [{ id: '1' }]);
-      const dbFindOne = jest.fn(() => ({ id: '1', code: 'strapi_super_admin' }));
+      const dbFindOne = jest.fn(() => ({ id: '1', code: SUPER_ADMIN_CODE }));
       const badRequest = jest.fn(() => {});
 
       global.strapi = {
         query: () => ({ find: dbFind, findOne: dbFindOne }),
-        admin: { config: { superAdminCode: 'strapi_super_admin' } },
+        admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
       };
 
