@@ -70,7 +70,7 @@ exports.connect = (provider, query) => {
         }
 
         if (
-          !_.isEmpty(_.find(users, user => user.provider !== provider)) &&
+          !_.isEmpty(_.find(users, (user) => user.provider !== provider)) &&
           advanced.unique_email
         ) {
           return resolve([
@@ -111,7 +111,7 @@ exports.connect = (provider, query) => {
 
 const getProfile = async (provider, query, callback) => {
   const access_token = query.access_token || query.code || query.oauth_token;
-  
+
   const grant = await strapi
     .store({
       environment: '',
@@ -121,9 +121,11 @@ const getProfile = async (provider, query, callback) => {
     })
     .get();
 
-  const client_id = strapi.config.provider[provider].client_id || grant[provider].key || ''
-  const client_secret = strapi.config.provider[provider].client_secret || grant[provider].secret || ''
-  let redirect_uri = strapi.config.provider[provider].redirect_url || grant[provider].callback || ''
+  const client_id = strapi.config.provider[provider].client_id || grant[provider].key || '';
+  const client_secret =
+    strapi.config.provider[provider].client_secret || grant[provider].secret || '';
+  let redirect_uri =
+    strapi.config.provider[provider].redirect_url || grant[provider].callback || '';
 
   switch (provider) {
     case 'discord': {
@@ -167,112 +169,163 @@ const getProfile = async (provider, query, callback) => {
     case 'facebook': {
       const facebook = purest({
         provider: 'facebook',
-        config: {  "facebook": {
-            "https://graph.facebook.com": {
-              "__domain": {
-                "auth": {
-                  "auth": {"bearer": "[0]"}
-                }
+        config: {
+          facebook: {
+            'https://graph.facebook.com': {
+              __domain: {
+                auth: {
+                  auth: { bearer: '[0]' },
+                },
               },
-              "{endpoint}": {
-                "__path": {
-                  "alias": "__default"
-                }
+              '{endpoint}': {
+                __path: {
+                  alias: '__default',
+                },
               },
-              "[version]/oauth/access_{endpoint}": {
-                "__path": {
-                  "alias": "oauth",
-                  "version":"v7.0"
-                }
-              }
-            }
-          }},
+              '[version]/oauth/access_{endpoint}': {
+                __path: {
+                  alias: 'oauth',
+                  version: 'v7.0',
+                },
+              },
+            },
+          },
+        },
       });
 
-      
-
-        if(query.code){
-            facebook
-                .query('oauth')
-                .get('token')
-                .qs({client_id,client_secret,code:query.code,redirect_uri})
-                .request((err, res, {access_token}) => {
-                if (err) {
-                    return callback(err);
-                }
-                getProfileFromFacebook(facebook,access_token,callback)
-                });
+      if (query.code) {
+        facebook
+          .query('oauth')
+          .get('token')
+          .qs({ client_id, client_secret, code: query.code, redirect_uri })
+          .request((err, res, { access_token }) => {
+            if (err) {
+              return callback(err);
             }
-        else{
-            getProfileFromFacebook(facebook,access_token,callback)
-        }
+            getProfileFromFacebook(facebook, access_token, callback);
+          });
+      } else {
+        getProfileFromFacebook(facebook, access_token, callback);
+      }
       break;
     }
     case 'google': {
-      const google = purest({ provider: 'google', config: purestConfig });
+      const google = purest({
+        provider: 'google',
+        config: {
+          google: {
+            'https://www.googleapis.com': {
+              __domain: {
+                auth: {
+                  auth: { bearer: '[0]' },
+                },
+              },
+              '{endpoint}': {
+                __path: {
+                  alias: '__default',
+                },
+              },
+              'auth/userinfo.email': {
+                __path: {
+                  alias: 'email',
+                },
+              },
+            },
+            'https://accounts.google.com': {
+              __domain: {
+                auth: {
+                  auth: { user: '[0]', pass: '[1]' },
+                },
+              },
+              'o/oauth2/[version]/{endpoint}': {
+                __path: {
+                  alias: 'oauth',
+                  version: 'v2',
+                },
+              },
+            },
+            'https://oauth2.googleapis.com': {
+              __domain: {},
+              token: {
+                __path: {
+                  alias: 'code',
+                },
+              },
+            },
+          },
+        },
+      });
 
-      google
-        .query('oauth')
-        .get('tokeninfo')
-        .qs({ access_token })
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.email.split('@')[0],
-              email: body.email,
-            });
-          }
-        });
+      if (query.code) {
+        google
+          .query('code')
+          .post()
+          .json({
+            code: query.code,
+            client_id,
+            client_secret,
+            redirect_uri,
+            grant_type: 'authorization_code',
+          })
+          .request((err, res, body) => {
+            if (err) {
+              callback(err);
+            } else {
+              getProfileFromGoogle(body.id_token, callback);
+            }
+          });
+      } else {
+        getProfileFromGoogle(access_token, callback);
+      }
+
       break;
     }
     case 'github': {
       const github = purest({
         provider: 'github',
-        config: {github: {
-            "https://api.github.com": {
-              "__domain": {
-                "auth": {
-                  "auth": {"bearer": "[0]"}
-                }
+        config: {
+          github: {
+            'https://api.github.com': {
+              __domain: {
+                auth: {
+                  auth: { bearer: '[0]' },
+                },
               },
-              "{endpoint}": {
-                "__path": {
-                  "alias": "__default"
-                }
-              }
+              '{endpoint}': {
+                __path: {
+                  alias: '__default',
+                },
+              },
             },
-            "https://github.com": {
-              "__domain": {
+            'https://github.com': {
+              __domain: {},
+              'login/oauth/access_token': {
+                __path: {
+                  alias: 'code',
+                },
               },
-              "login/oauth/access_token": {
-                "__path": {
-                  "alias": "code"
-                }
-              }
-            }
-          }},
+            },
+          },
+        },
         defaults: {
           headers: {
             'user-agent': 'strapi',
           },
         },
       });
-      
-      if(query.code){
+      if (query.code) {
         github
-        .query('code')
-        .post()
-        .json({code:query.code,client_id,client_secret}).request((err, res, {access_token}) => {
-          if (err) {
-            return callback(err);
-          }
-          getProfileFromGithub(github,access_token,callback)
-        });
-      }
-      else{
-        getProfileFromGithub(github,access_token,callback)
+          .query('code')
+          .post()
+          .json({ code: query.code, client_id, client_secret })
+          .request((err, res, { access_token }) => {
+            if (err) {
+              return callback(err);
+            }
+            getProfileFromGithub(github, access_token, callback);
+          });
+      } else {
+        getProfileFromGithub(github, access_token, callback);
       }
       break;
     }
@@ -420,57 +473,63 @@ const getProfile = async (provider, query, callback) => {
   }
 };
 
-const getProfileFromGithub = (github,access_token,callback)=>{
-    github
+const getProfileFromGithub = (github, access_token, callback) => {
+  github
+    .query()
+    .get('user')
+    .auth(access_token)
+    .request((err, res, userbody) => {
+      if (err) {
+        return callback(err);
+      }
+
+      // This is the public email on the github profile
+      if (userbody.email) {
+        return callback(null, {
+          username: userbody.login,
+          email: userbody.email,
+        });
+      }
+
+      // Get the email with Github's user/emails API
+      github
         .query()
-        .get('user')
+        .get('user/emails')
         .auth(access_token)
-        .request((err, res, userbody) => {
+        .request((err, res, emailsbody) => {
           if (err) {
             return callback(err);
           }
 
-          // This is the public email on the github profile
-          if (userbody.email) {
-            return callback(null, {
-              username: userbody.login,
-              email: userbody.email,
-            });
-          }
-
-          // Get the email with Github's user/emails API
-          github
-            .query()
-            .get('user/emails')
-            .auth(access_token)
-            .request((err, res, emailsbody) => {
-              if (err) {
-                return callback(err);
-              }
-
-              return callback(null, {
-                username: userbody.login,
-                email: Array.isArray(emailsbody)
-                  ? emailsbody.find(email => email.primary === true).email
-                  : null,
-              });
-            });
+          return callback(null, {
+            username: userbody.login,
+            email: Array.isArray(emailsbody)
+              ? emailsbody.find((email) => email.primary === true).email
+              : null,
+          });
         });
-}
+    });
+};
 
-const getProfileFromFacebook=(facebook,access_token,callback)=>{
-    facebook
-        .query()
-        .get('me?fields=name,email')
-        .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.name,
-              email: body.email,
-            });
-          }
+const getProfileFromFacebook = (facebook, access_token, callback) => {
+  facebook
+    .query()
+    .get('me?fields=name,email')
+    .auth(access_token)
+    .request((err, res, body) => {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, {
+          username: body.name,
+          email: body.email,
         });
-}
+      }
+    });
+};
+
+const getProfileFromGoogle = (access_token, callback) => {
+  const jwt = require('jsonwebtoken');
+  var decoded = jwt.decode(access_token);
+  callback(null, { ...decoded, username: decoded.email });
+};
