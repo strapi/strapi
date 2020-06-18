@@ -121,6 +121,9 @@ const getProfile = async (provider, query, callback) => {
     })
     .get();
 
+  const client_id = strapi.config.provider[provider].client_id || grant[provider].key || ''
+  const client_secret = strapi.config.provider[provider].client_secret || grant[provider].secret || ''
+
   switch (provider) {
     case 'discord': {
       const discord = purest({
@@ -204,49 +207,49 @@ const getProfile = async (provider, query, callback) => {
     case 'github': {
       const github = purest({
         provider: 'github',
-        config: purestConfig,
+        config: {github: {
+            "https://api.github.com": {
+              "__domain": {
+                "auth": {
+                  "auth": {"bearer": "[0]"}
+                }
+              },
+              "{endpoint}": {
+                "__path": {
+                  "alias": "__default"
+                }
+              }
+            },
+            "https://github.com": {
+              "__domain": {
+              },
+              "login/oauth/access_token": {
+                "__path": {
+                  "alias": "code"
+                }
+              }
+            }
+          }},
         defaults: {
           headers: {
             'user-agent': 'strapi',
           },
         },
       });
-
-      github
-        .query()
-        .get('user')
-        .auth(access_token)
-        .request((err, res, userbody) => {
+      
+      if(query.code){
+        github
+        .query('code')
+        .post()
+        .json({code:query.code,client_id,client_secret}).request((err, res, {access_token}) => {
           if (err) {
             return callback(err);
           }
-
-          // This is the public email on the github profile
-          if (userbody.email) {
-            return callback(null, {
-              username: userbody.login,
-              email: userbody.email,
-            });
-          }
-
-          // Get the email with Github's user/emails API
-          github
-            .query()
-            .get('user/emails')
-            .auth(access_token)
-            .request((err, res, emailsbody) => {
-              if (err) {
-                return callback(err);
-              }
-
-              return callback(null, {
-                username: userbody.login,
-                email: Array.isArray(emailsbody)
-                  ? emailsbody.find(email => email.primary === true).email
-                  : null,
-              });
-            });
+          getProfileFromGithub(github,access_token,callback)
         });
+      }
+      else
+        getProfileFromGithub(github,access_token,callback)
       break;
     }
     case 'microsoft': {
@@ -392,3 +395,42 @@ const getProfile = async (provider, query, callback) => {
       break;
   }
 };
+
+const getProfileFromGithub = (github,access_token,callback)=>{
+
+    github
+        .query()
+        .get('user')
+        .auth(access_token)
+        .request((err, res, userbody) => {
+          if (err) {
+            return callback(err);
+          }
+
+          // This is the public email on the github profile
+          if (userbody.email) {
+            return callback(null, {
+              username: userbody.login,
+              email: userbody.email,
+            });
+          }
+
+          // Get the email with Github's user/emails API
+          github
+            .query()
+            .get('user/emails')
+            .auth(access_token)
+            .request((err, res, emailsbody) => {
+              if (err) {
+                return callback(err);
+              }
+
+              return callback(null, {
+                username: userbody.login,
+                email: Array.isArray(emailsbody)
+                  ? emailsbody.find(email => email.primary === true).email
+                  : null,
+              });
+            });
+        });
+}
