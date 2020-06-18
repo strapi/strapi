@@ -1,4 +1,5 @@
-import { isEmpty, transform } from 'lodash';
+import { isEmpty, pick, transform } from 'lodash';
+import request from './request';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
   return transform(
@@ -16,6 +17,9 @@ const findMatchingPermissions = (userPermissions, permissions) => {
   );
 };
 
+const formatPermissionsForRequest = permissions =>
+  permissions.map(permission => pick(permission, ['action', 'subject', 'fields']));
+
 const shouldCheckPermissions = permissions =>
   !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
 
@@ -26,16 +30,19 @@ const hasPermissions = async (userPermissions, permissions) => {
 
   const matchingPermissions = findMatchingPermissions(userPermissions, permissions);
 
-  // TODO test when API ready
   if (shouldCheckPermissions(matchingPermissions)) {
-    // TODO
-    console.log('should do something');
+    let hasPermission = false;
 
-    const hasPermission = await new Promise(resolve =>
-      setTimeout(() => {
-        resolve(true);
-      }, 2000)
-    );
+    try {
+      hasPermission = await request('/admin/permissions/check', {
+        method: 'POST',
+        body: {
+          permissions: formatPermissionsForRequest(matchingPermissions),
+        },
+      });
+    } catch (err) {
+      console.error('Error while checking permissions', err);
+    }
 
     return hasPermission;
   }
@@ -44,4 +51,4 @@ const hasPermissions = async (userPermissions, permissions) => {
 };
 
 export default hasPermissions;
-export { findMatchingPermissions, shouldCheckPermissions };
+export { findMatchingPermissions, formatPermissionsForRequest, shouldCheckPermissions };

@@ -74,12 +74,14 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
       const { data } = await request(requestURL, { method: 'GET' });
 
       const formattedData = generateModelsLinks(data);
+
       const collectionTypesSectionLinksArrayOfPromises = generateArrayOfPromises(
         formattedData.collectionTypesSectionLinks
       );
       const collectionTypesSectionResults = await Promise.all(
         collectionTypesSectionLinksArrayOfPromises
       );
+      console.log({ collectionTypesSectionResults });
       const singleTypesSectionLinksArrayOfPromises = generateArrayOfPromises(
         formattedData.singleTypesSectionLinks
       );
@@ -161,14 +163,16 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
           />
         )}
 
-        <LeftMenuLinksSection
-          section="plugins"
-          name="plugins"
-          links={pluginsSectionLinksFiltered}
-          location={location}
-          searchable={false}
-          emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
-        />
+        {pluginsSectionLinksFiltered.length > 0 && (
+          <LeftMenuLinksSection
+            section="plugins"
+            name="plugins"
+            links={pluginsSectionLinksFiltered}
+            location={location}
+            searchable={false}
+            emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
+          />
+        )}
         {generalSectionLinksFiltered.length > 0 && (
           <LeftMenuLinksSection
             section="general"
