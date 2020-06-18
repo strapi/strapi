@@ -79,7 +79,7 @@ Object {
       },
       Object {
         "action": "plugins::upload.assets.update",
-        "displayName": "Update (crop, details, replace)",
+        "displayName": "Update (crop, details, replace) + delete",
         "plugin": "plugin::upload",
         "subCategory": "assets",
       },
@@ -176,7 +176,7 @@ Object {
     ],
     "settings": Array [
       Object {
-        "action": "application::settings.read",
+        "action": "plugins::upload.settings.read",
         "category": "media library",
         "displayName": "Can access the Media Library settings page",
         "subCategory": "general",

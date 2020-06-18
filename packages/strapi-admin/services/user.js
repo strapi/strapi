@@ -46,19 +46,18 @@ const create = async attributes => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const update = async (params, attributes) => {
+const updateById = async (id, attributes) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
-    const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
-    if (superAdminRole && !attributes.roles.map(String).includes(String(superAdminRole.id))) {
-      const usersWithAdminRole = await strapi
+    const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
+    if (
+      _.get(superAdminRole, 'usersCount') === 1 &&
+      !attributes.roles.map(String).includes(String(superAdminRole.id))
+    ) {
+      const userWithAdminRole = await strapi
         .query('user', 'admin')
-        .find({ roles: [superAdminRole.id] });
-      const usersWithAdminRoleIds = usersWithAdminRole.map(u => String(u.id));
-      const usersToBeModified = await strapi.query('user', 'admin').find(params);
-      const usersToBeModifiedIds = usersToBeModified.map(u => String(u.id));
-
-      if (_.difference(usersWithAdminRoleIds, usersToBeModifiedIds).length < 1) {
+        .findOne({ roles: [superAdminRole.id] });
+      if (String(userWithAdminRole.id) === String(id)) {
         throw strapi.errors.badRequest(
           'ValidationError',
           'You must have at least one user with super admin role.'
@@ -71,13 +70,16 @@ const update = async (params, attributes) => {
   if (_.has(attributes, 'password')) {
     const hashedPassword = await strapi.admin.services.auth.hashPassword(attributes.password);
 
-    return strapi.query('user', 'admin').update(params, {
-      ...attributes,
-      password: hashedPassword,
-    });
+    return strapi.query('user', 'admin').update(
+      { id },
+      {
+        ...attributes,
+        password: hashedPassword,
+      }
+    );
   }
 
-  return strapi.query('user', 'admin').update(params, attributes);
+  return strapi.query('user', 'admin').update({ id }, attributes);
 };
 
 /**
@@ -117,16 +119,13 @@ const register = async ({ registrationToken, userInfo }) => {
     throw strapi.errors.badRequest('Invalid registration info');
   }
 
-  return strapi.admin.services.user.update(
-    { id: matchingUser.id },
-    {
-      password: userInfo.password,
-      firstname: userInfo.firstname,
-      lastname: userInfo.lastname,
-      registrationToken: null,
-      isActive: true,
-    }
-  );
+  return strapi.admin.services.user.updateById(matchingUser.id, {
+    password: userInfo.password,
+    firstname: userInfo.firstname,
+    lastname: userInfo.lastname,
+    registrationToken: null,
+    isActive: true,
+  });
 };
 
 /**
@@ -185,7 +184,7 @@ const countUsersWithoutRole = async () => {
 
 module.exports = {
   create,
-  update,
+  updateById,
   exists,
   findRegistrationInfo,
   register,

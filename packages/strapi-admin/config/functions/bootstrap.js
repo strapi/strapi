@@ -65,6 +65,25 @@ const createRolesIfNeeded = async () => {
     return;
   }
 
+  const defaultPluginPermissions = [
+    {
+      action: 'plugins::upload.settings.read',
+    },
+    {
+      action: 'plugins::upload.assets.create',
+    },
+    {
+      action: 'plugins::upload.assets.update',
+      conditions: ['admin::is-creator'],
+    },
+    {
+      action: 'plugins::upload.assets.download',
+    },
+    {
+      action: 'plugins::upload.assets.copy-link',
+    },
+  ];
+
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
@@ -100,10 +119,13 @@ const createRolesIfNeeded = async () => {
     });
   });
 
-  const authorPermissions = _.cloneDeep(editorPermissions).map(p => ({
+  const authorPermissions = editorPermissions.map(p => ({
     ...p,
     conditions: ['admin::is-creator'],
   }));
+
+  editorPermissions.push(...defaultPluginPermissions);
+  authorPermissions.push(...defaultPluginPermissions);
 
   await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);
   await strapi.admin.services.permission.assign(authorRole.id, authorPermissions);

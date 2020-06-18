@@ -98,7 +98,7 @@ const registerPermissionActions = () => {
     },
     {
       section: 'plugins',
-      displayName: 'Update (crop, details, replace)',
+      displayName: 'Update (crop, details, replace) + delete',
       uid: 'assets.update',
       subCategory: 'assets',
       pluginName: 'upload',
@@ -122,6 +122,7 @@ const registerPermissionActions = () => {
       displayName: 'Can access the Media Library settings page',
       uid: 'settings.read',
       category: 'media library',
+      pluginName: 'upload',
     },
   ];
 

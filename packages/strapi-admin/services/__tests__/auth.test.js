@@ -160,7 +160,7 @@ describe('Auth', () => {
 
       const findOne = jest.fn(() => Promise.resolve(user));
       const send = jest.fn(() => Promise.resolve());
-      const update = jest.fn(() => Promise.resolve());
+      const updateById = jest.fn(() => Promise.resolve());
       const createToken = jest.fn(() => resetPasswordToken);
 
       global.strapi = {
@@ -170,7 +170,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-        admin: { services: { user: { update }, token: { createToken } } },
+        admin: { services: { user: { updateById }, token: { createToken } } },
         plugins: { email: { services: { email: { send } } } },
       };
 
@@ -179,7 +179,7 @@ describe('Auth', () => {
 
       expect(findOne).toHaveBeenCalled();
       expect(createToken).toHaveBeenCalled();
-      expect(update).toHaveBeenCalledWith({ id: user.id }, { resetPasswordToken });
+      expect(updateById).toHaveBeenCalledWith(user.id, { resetPasswordToken });
     });
 
     test('Will call the send service', async () => {
@@ -191,7 +191,7 @@ describe('Auth', () => {
 
       const findOne = jest.fn(() => Promise.resolve(user));
       const send = jest.fn(() => Promise.resolve());
-      const update = jest.fn(() => Promise.resolve());
+      const updateById = jest.fn(() => Promise.resolve());
       const createToken = jest.fn(() => resetPasswordToken);
 
       global.strapi = {
@@ -201,7 +201,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-        admin: { services: { user: { update }, token: { createToken } } },
+        admin: { services: { user: { updateById }, token: { createToken } } },
         plugins: { email: { services: { email: { send } } } },
       };
 
@@ -261,22 +261,22 @@ describe('Auth', () => {
       const user = { id: 1 };
 
       const findOne = jest.fn(() => Promise.resolve(user));
-      const update = jest.fn(() => Promise.resolve());
+      const updateById = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         query() {
           return { findOne };
         },
-        admin: { services: { user: { update } } },
+        admin: { services: { user: { updateById } } },
       };
 
       const input = { resetPasswordToken, password: 'Test1234' };
       await resetPassword(input);
 
-      expect(update).toHaveBeenCalledWith(
-        { id: user.id },
-        { password: input.password, resetPasswordToken: null }
-      );
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        password: input.password,
+        resetPasswordToken: null,
+      });
     });
   });
 });

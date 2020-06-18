@@ -115,6 +115,12 @@ module.exports = {
 
     const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
 
+    if (!superAdminRole) {
+      throw new Error(
+        "Cannot register the first admin because the super admin role doesn't exist."
+      );
+    }
+
     const user = await strapi.admin.services.user.create({
       ...input,
       registrationToken: null,

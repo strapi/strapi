@@ -79,7 +79,7 @@ module.exports = {
       }
     }
 
-    const updatedUser = await strapi.admin.services.user.update({ id }, input);
+    const updatedUser = await strapi.admin.services.user.updateById(id, input);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

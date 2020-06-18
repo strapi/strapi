@@ -1,4 +1,4 @@
-const checkFieldsAreCorrectlNested = fields => {
+const checkFieldsAreCorrectlyNested = fields => {
   if (!Array.isArray(fields)) {
     return true;
   }
@@ -14,4 +14,4 @@ const checkFieldsAreCorrectlNested = fields => {
   return !failed;
 };
 
-module.exports = checkFieldsAreCorrectlNested;
+module.exports = checkFieldsAreCorrectlyNested;

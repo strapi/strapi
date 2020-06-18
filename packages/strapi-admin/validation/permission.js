@@ -127,7 +127,7 @@ const validatedUpdatePermissionsInput = async data => {
       await schema.validate(data, { strict: true, abortEarly: false });
     }
   } catch (e) {
-    await handleReject(e);
+    return handleReject(e);
   }
 };
 
