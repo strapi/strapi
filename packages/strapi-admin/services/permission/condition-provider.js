@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { getConditionId, createCondition } = require('../../domain/condition');
 
 module.exports = () => {
-  const _registry = new Map();
+  const registry = new Map();
 
   return {
     /**
@@ -23,7 +23,8 @@ module.exports = () => {
         throw new Error(`Duplicated condition id: ${getConditionId(condition)}.`);
       }
 
-      _registry.set(conditionId, createCondition(condition));
+      registry.set(conditionId, createCondition(condition));
+      return this;
     },
 
     /**
@@ -32,7 +33,8 @@ module.exports = () => {
      * @param conditions
      */
     registerMany(conditions) {
-      _.each(conditions, this.register.bind(this));
+      _.each(conditions, condition => this.register(condition));
+      return this;
     },
 
     /**
@@ -42,7 +44,7 @@ module.exports = () => {
      * @returns {boolean} true if the condition is present in the registry, false otherwise.
      */
     has(name, plugin) {
-      return _registry.has(getConditionId({ name, plugin }));
+      return registry.has(getConditionId({ name, plugin }));
     },
 
     /**
@@ -52,7 +54,7 @@ module.exports = () => {
      * @returns {any}
      */
     get(name, plugin) {
-      return _registry.get(getConditionId({ name, plugin }));
+      return registry.get(getConditionId({ name, plugin }));
     },
 
     /**
@@ -61,7 +63,7 @@ module.exports = () => {
      * @returns {any}
      */
     getById(id) {
-      return _registry.get(id);
+      return registry.get(id);
     },
 
     /**
@@ -69,7 +71,7 @@ module.exports = () => {
      * @returns {any[]}
      */
     getAll() {
-      return Array.from(_registry.values());
+      return Array.from(registry.values());
     },
   };
 };

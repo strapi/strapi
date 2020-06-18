@@ -29,14 +29,13 @@ const cleanPermissionInDatabase = async () => {
 const registerAdminConditions = () => {
   const { conditionProvider } = strapi.admin.services.permission;
 
-  conditionProvider.registerMany([
-    {
-      name: 'isOwner',
-      plugin: 'admin',
-      category: 'default',
-      handler: user => ({ 'strapi_created_by.id': user.id }),
-    },
-  ]);
+  conditionProvider.register({
+    displayName: 'Is Creator',
+    name: 'is-creator',
+    plugin: 'admin',
+    category: 'default',
+    handler: user => ({ 'created_by.id': user.id }),
+  });
 };
 
 module.exports = async () => {
