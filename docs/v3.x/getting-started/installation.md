@@ -1,6 +1,12 @@
-# ⚙️ Installation
+# Installation
 
-### Installation guides
+Strapi gives you many possible installation options for your project or application. Strapi can be installed on your computer or services such as Digital Ocean or Platform.sh. The following documentation covers differents options to install strapi and getting sttarted.
+
+::: tip
+For a more detailed overview of deployment please see the [related documentation](./deployment).
+:::
+
+## Installation guides
 
 <div>
 	<InstallLink link="../installation/cli">
@@ -49,7 +55,3 @@
 		</template>
 	</InstallLink>
 </div>
-
-### Deployment guides
-
-For a more detailed overview of deployment please see the [related documentation](./deployment).

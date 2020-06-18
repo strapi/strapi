@@ -1,4 +1,4 @@
-# 💬 Troubleshooting
+# Troubleshooting
 
 Below are solutions to some common issues that you may experience when working with Strapi. You can also post questions to [Github Discussions](https://github.com/strapi/strapi/discussions) or reach out to the members of our [Slack](https://slack.strapi.io) community!
 

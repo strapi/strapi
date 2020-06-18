@@ -1,4 +1,4 @@
-# 🚀 Welcome to the Strapi documentation!
+# Welcome to the Strapi documentation!
 
 **Strapi is the open-source [Headless CMS](https://strapi.io) developers love.**
 
@@ -62,7 +62,7 @@ To help you get started with Strapi, we and the community have provided you with
 
 ### Demo
 
-Want to see Strapi in action? check out the [demo video](https://strapi.io/demo) or request a live demo via the form present on the page.
+Want to see Strapi in action? check out the [demo video](https://youtu.be/zd0_S_FPzKg) or request a [live demo](https://strapi.io/demo) via the form present on the page.
 
 ### Blog
 
