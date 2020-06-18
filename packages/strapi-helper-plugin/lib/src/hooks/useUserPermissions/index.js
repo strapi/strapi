@@ -32,6 +32,9 @@ const useUserPermissions = pluginPermissions => {
   useEffect(() => {
     const getData = async () => {
       try {
+        dispatch({
+          type: 'GET_DATA',
+        });
         const arrayOfPromises = generateArrayOfPromisesRef.current(permissionNames);
         const results = await Promise.all(arrayOfPromises);
         const data = generateResultsObject(results);
