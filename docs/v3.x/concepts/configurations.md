@@ -63,7 +63,7 @@ DATABASE_PASSWORD=acme
 If you want to customize the path of the `.env` file to load you can set an environment variable called `ENV_PATH` before starting your application:
 
 ```sh
-$ ENV_PATH=/absolute/path/to/.env npm run start
+$ ENV_PATH=/absolute/path/to/.env && npm run start
 ```
 
 Now you can access those variables in your configuration files and application. You can use `process.env.{varName}` to access those variables anywhere.
