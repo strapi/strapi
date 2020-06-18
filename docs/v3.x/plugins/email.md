@@ -76,7 +76,7 @@ module.exports = ({ env }) => ({
 ```
 
 ::: tip
-If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations#environments)
+If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations.md#environments)
 :::
 
 ## Create new provider

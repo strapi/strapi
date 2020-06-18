@@ -39,7 +39,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.html).
 
 ```json
 {
@@ -75,7 +75,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.html).
 
 ```json
 {
@@ -110,7 +110,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.html).
 
 ```json
 {
@@ -229,7 +229,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.html).
 
 ```json
 {
@@ -261,7 +261,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.html).
 
 ```json
 {

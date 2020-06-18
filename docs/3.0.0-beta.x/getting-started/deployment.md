@@ -8,7 +8,7 @@ Deploying **databases** along with Strapi is covered in the [Databases Guide](..
 
 ## Hosting Provider Guides
 
-Manual guides for deployment on various platforms, for One-click and docker please see the [installation](./installation) guides.
+Manual guides for deployment on various platforms, for One-click and docker please see the [installation](..getting-started/installation.md) guides.
 
 <div>
 	<InstallLink link="../deployment/amazon-aws.html">
