@@ -10,9 +10,9 @@ But we don't want to use [parameters](../content-api/parameters.md) (eg. /articl
 
 To be able to do that, you have first to understand some concepts.
 
-When you create a content type, it generates an API with the following list of [endpoints](../content-api/endpoint.md).
+When you create a content type, it generates an API with the following list of [endpoints](../content-api/api-endpoints.md).
 
-Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
+Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controllers.md) that exist by default when a content type is created.
 
 If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It is because all the default logic is managed by Strapi. But you can override these actions with your own code.
 
