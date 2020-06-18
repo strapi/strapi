@@ -103,7 +103,7 @@ describe('Role CRUD End to End', () => {
           action: 'plugins::users-permissions.roles.update',
         },
         {
-          action: 'plugins::content-manager.create',
+          action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
           conditions: ['isOwner'],
@@ -126,7 +126,7 @@ describe('Role CRUD End to End', () => {
               conditions: [],
             }),
             expect.objectContaining({
-              action: 'plugins::content-manager.create',
+              action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
               fields: ['username'],
               conditions: ['isOwner'],
@@ -149,7 +149,7 @@ describe('Role CRUD End to End', () => {
               conditions: [],
             }),
             expect.objectContaining({
-              action: 'plugins::content-manager.create',
+              action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
               fields: ['username'],
               conditions: ['isOwner'],
@@ -167,25 +167,25 @@ describe('Role CRUD End to End', () => {
           conditions: ['isOwner'],
         },
         {
-          action: 'plugins::content-manager.create',
+          action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
           conditions: ['isOwner'],
         },
         {
-          action: 'plugins::content-manager.update',
+          action: 'plugins::content-manager.explorer.update',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
           conditions: ['isOwner'],
         },
         {
-          action: 'plugins::content-manager.delete',
+          action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
           conditions: ['isOwner'],
         },
         {
-          action: 'plugins::content-manager.read',
+          action: 'plugins::content-manager.explorer.read',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
           conditions: ['isOwner'],
@@ -586,7 +586,7 @@ describe('Role CRUD End to End', () => {
                 action: 'plugins::users-permissions.roles.update',
               },
               {
-                action: 'plugins::content-manager.create',
+                action: 'plugins::content-manager.explorer.create',
                 subject: 'plugins::users-permissions.user',
                 fields: ['username'],
                 conditions: ['admin::is-creator'],

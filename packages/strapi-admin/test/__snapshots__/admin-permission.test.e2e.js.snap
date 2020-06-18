@@ -12,28 +12,28 @@ Object {
   "sections": Object {
     "contentTypes": Array [
       Object {
-        "action": "plugins::content-manager.create",
+        "action": "plugins::content-manager.explorer.create",
         "displayName": "Create",
         "subjects": Array [
           "plugins::users-permissions.user",
         ],
       },
       Object {
-        "action": "plugins::content-manager.read",
+        "action": "plugins::content-manager.explorer.read",
         "displayName": "Read",
         "subjects": Array [
           "plugins::users-permissions.user",
         ],
       },
       Object {
-        "action": "plugins::content-manager.update",
+        "action": "plugins::content-manager.explorer.update",
         "displayName": "Update",
         "subjects": Array [
           "plugins::users-permissions.user",
         ],
       },
       Object {
-        "action": "plugins::content-manager.delete",
+        "action": "plugins::content-manager.explorer.delete",
         "displayName": "Delete",
         "subjects": Array [
           "plugins::users-permissions.user",
