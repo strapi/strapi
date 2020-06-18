@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/vegetables",
+      "handler": "vegetable.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vegetables/count",
+      "handler": "vegetable.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vegetables/:id",
+      "handler": "vegetable.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/vegetables",
+      "handler": "vegetable.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/vegetables/:id",
+      "handler": "vegetable.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/vegetables/:id",
+      "handler": "vegetable.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

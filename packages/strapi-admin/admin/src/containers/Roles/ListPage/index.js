@@ -4,8 +4,8 @@ import { Pencil } from '@buffetjs/icons';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
-
+import { useGlobalContext, useQuery, useUserPermissions } from 'strapi-helper-plugin';
+import adminPermissions from '../../../permissions';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
 import { useRolesList, useSettingsHeaderSearchContext } from '../../../hooks';
 import BaselineAlignment from './BaselineAlignment';
@@ -16,6 +16,9 @@ const RoleListPage = () => {
   const { settingsBaseURL } = useGlobalContext();
   const { roles, isLoading } = useRolesList();
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
+  const {
+    allowedActions: { canUpdate },
+  } = useUserPermissions(adminPermissions.settings.roles);
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
   const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
@@ -45,6 +48,8 @@ const RoleListPage = () => {
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
+        // Show a loader in the header while requesting data
+        isLoading={isLoading}
       />
       <BaselineAlignment />
       <RoleListWrapper>
@@ -59,9 +64,10 @@ const RoleListPage = () => {
           isLoading={isLoading}
           customRowComponent={role => (
             <RoleRow
+              canUpdate={canUpdate}
               links={[
                 {
-                  icon: <Pencil fill="#0e1622" />,
+                  icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
                   onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
                 },
               ]}

@@ -7,7 +7,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RoleRow as RoleRowBase } from '../../../../src/components/Roles';
 import Checkbox from './CustomCheckbox';
 
-const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRoles }) => {
+const RoleRow = ({
+  canCreate,
+  canDelete,
+  canUpdate,
+  role,
+  onRoleToggle,
+  onRoleDuplicate,
+  onRoleRemove,
+  selectedRoles,
+}) => {
   const { push } = useHistory();
   const { settingsBaseURL } = useGlobalContext();
 
@@ -25,13 +34,13 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
     }
   };
 
-  const prefix = (
+  const prefix = canDelete ? (
     <Checkbox
       value={selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1}
       onClick={handleRoleSelection}
       name="role-checkbox"
     />
-  );
+  ) : null;
 
   return (
     <RoleRowBase
@@ -40,15 +49,15 @@ const RoleRow = ({ role, onRoleToggle, onRoleDuplicate, onRoleRemove, selectedRo
       role={role}
       links={[
         {
-          icon: <Duplicate fill="#0e1622" />,
+          icon: canCreate ? <Duplicate fill="#0e1622" /> : null,
           onClick: () => onRoleDuplicate(role.id),
         },
         {
-          icon: <Pencil fill="#0e1622" />,
+          icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
           onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
         },
         {
-          icon: <FontAwesomeIcon icon="trash-alt" />,
+          icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
           onClick: handleClickDelete,
         },
       ]}
@@ -61,6 +70,9 @@ RoleRow.defaultProps = {
 };
 
 RoleRow.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
+  canDelete: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   onRoleToggle: PropTypes.func.isRequired,
   onRoleDuplicate: PropTypes.func.isRequired,
   onRoleRemove: PropTypes.func.isRequired,

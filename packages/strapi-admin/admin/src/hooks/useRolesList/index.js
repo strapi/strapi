@@ -1,15 +1,19 @@
 import { useEffect, useReducer } from 'react';
 import { request } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-
+import init from './init';
 import reducer, { initialState } from './reducer';
 
-const useRolesList = () => {
-  const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState);
+const useRolesList = (shouldFetchData = true) => {
+  const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, shouldFetchData)
+  );
 
   useEffect(() => {
-    fetchRolesList();
-  }, []);
+    if (shouldFetchData) {
+      fetchRolesList();
+    }
+  }, [shouldFetchData]);
 
   const fetchRolesList = async () => {
     try {
