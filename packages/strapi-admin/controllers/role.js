@@ -112,7 +112,7 @@ module.exports = {
       input.permissions
         .filter(p => existingPermissions.get(p.action).section === 'contentTypes')
         .forEach(p => {
-          p.conditions = role.code === AUTHOR_CODE ? ['isOwner'] : [];
+          p.conditions = role.code === AUTHOR_CODE ? ['admin::is-creator'] : [];
         });
     }
 

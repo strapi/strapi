@@ -131,7 +131,7 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: { getSuperAdmin: jest.fn(() => undefined) },
-            permission: { conditionProvider: { conditions: jest.fn(() => []) } },
+            permission: { conditionProvider: { getAll: jest.fn(() => []) } },
           },
         },
       };
@@ -157,7 +157,7 @@ describe('Role controller', () => {
           action: 'test',
           subject: 'model1',
           fields: ['title'],
-          conditions: ['someCondition'],
+          conditions: ['admin::is-creator'],
         },
       ];
 
@@ -178,7 +178,7 @@ describe('Role controller', () => {
             permission: {
               assign: assignPermissions,
               conditionProvider: {
-                conditions: jest.fn(() => ['someCondition']),
+                getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
               actionProvider: {
                 getAllByMap: jest.fn(),

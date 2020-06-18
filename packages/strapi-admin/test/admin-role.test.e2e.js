@@ -69,7 +69,7 @@ describe('Role CRUD End to End', () => {
       data.editorRole = res.body.data.find(r => r.code === 'strapi-editor');
     });
 
-    test('Author have isOwner condition for every permission', async () => {
+    test('Author have admin::is-creator condition for every permission', async () => {
       const res = await rq({
         url: `/admin/roles/${data.authorRole.id}/permissions`,
         method: 'GET',
@@ -79,7 +79,7 @@ describe('Role CRUD End to End', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data).toHaveLength(4);
       res.body.data.forEach(permission => {
-        expect(permission.conditions).toEqual(['isOwner']);
+        expect(permission.conditions).toEqual(['admin::is-creator']);
       });
     });
 
@@ -106,7 +106,7 @@ describe('Role CRUD End to End', () => {
           action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
-          conditions: ['isOwner'],
+          conditions: ['admin::is-creator'],
         },
       ];
 
@@ -129,7 +129,7 @@ describe('Role CRUD End to End', () => {
               action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
               fields: ['username'],
-              conditions: ['isOwner'],
+              conditions: ['admin::is-creator'],
             }),
           ]),
         });
@@ -152,7 +152,7 @@ describe('Role CRUD End to End', () => {
               action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
               fields: ['username'],
-              conditions: ['isOwner'],
+              conditions: ['admin::is-creator'],
             }),
           ]),
         });
@@ -164,31 +164,31 @@ describe('Role CRUD End to End', () => {
         },
         {
           action: 'plugins::users-permissions.roles.read',
-          conditions: ['isOwner'],
+          conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
-          conditions: ['isOwner'],
+          conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.update',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
-          conditions: ['isOwner'],
+          conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
-          conditions: ['isOwner'],
+          conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.read',
           subject: 'plugins::users-permissions.user',
           fields: ['username'],
-          conditions: ['isOwner'],
+          conditions: ['admin::is-creator'],
         },
       ];
 
@@ -222,7 +222,7 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining(
             newPermissions
               .slice(3, 6)
-              .map(p => ({ ...p, conditions: ['isOwner'] }))
+              .map(p => ({ ...p, conditions: ['admin::is-creator'] }))
               .map(expect.objectContaining)
           ),
         });
