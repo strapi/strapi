@@ -1,4 +1,4 @@
-import { isEmpty, pick, transform } from 'lodash';
+import { isEmpty, pickBy, transform } from 'lodash';
 import request from './request';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
@@ -18,7 +18,11 @@ const findMatchingPermissions = (userPermissions, permissions) => {
 };
 
 const formatPermissionsForRequest = permissions =>
-  permissions.map(permission => pick(permission, ['action', 'subject', 'fields']));
+  permissions.map(permission =>
+    pickBy(permission, (value, key) => {
+      return ['action', 'subject', 'fields'].includes(key) && !isEmpty(value);
+    })
+  );
 
 const shouldCheckPermissions = permissions =>
   !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
@@ -34,12 +38,14 @@ const hasPermissions = async (userPermissions, permissions) => {
     let hasPermission = false;
 
     try {
-      hasPermission = await request('/admin/permissions/check', {
+      const { data } = await request('/admin/permissions/check', {
         method: 'POST',
         body: {
           permissions: formatPermissionsForRequest(matchingPermissions),
         },
       });
+
+      hasPermission = data.every(v => v === true);
     } catch (err) {
       console.error('Error while checking permissions', err);
     }

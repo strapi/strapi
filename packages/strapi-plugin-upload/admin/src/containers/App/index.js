@@ -1,10 +1,6 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useUserPermissions,
-} from 'strapi-helper-plugin';
+import { Switch, Route, Redirect } from 'react-router-dom';
+import { LoadingIndicatorPage, useUserPermissions } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { AppContext } from '../../contexts';
@@ -19,15 +15,17 @@ const App = () => {
     return <LoadingIndicatorPage />;
   }
 
-  return (
-    <CheckPagePermissions permissions={pluginPermissions.main}>
+  if (state.allowedActions.canMain) {
+    return (
       <AppContext.Provider value={state}>
         <Switch>
           <Route path={`/plugins/${pluginId}`} component={HomePage} />
         </Switch>
       </AppContext.Provider>
-    </CheckPagePermissions>
-  );
+    );
+  }
+
+  return <Redirect to="/" />;
 };
 
 export default App;

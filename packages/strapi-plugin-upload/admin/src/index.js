@@ -9,7 +9,7 @@ import { CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
-import Main from './containers/Main';
+import App from './containers/App';
 import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import InputMedia from './components/InputMedia';
@@ -37,7 +37,7 @@ export default strapi => {
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles: null,
-    mainComponent: Main,
+    mainComponent: App,
     name,
     pluginLogo,
     preventComponentRendering: false,
