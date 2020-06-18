@@ -161,7 +161,6 @@ module.exports = {
             ['/v3.x/getting-started/contributing', 'Contributing'],
             ['/v3.x/getting-started/troubleshooting', 'Troubleshooting'],
             '/v3.x/getting-started/quick-start',
-            '/v3.x/getting-started/quick-start-tutorial',
           ],
         },
         {
