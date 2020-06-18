@@ -21,7 +21,9 @@ module.exports = async function createQuickStartProject(scope) {
 
   await createProject(scope, configuration);
 
-  if (scope.runQuickstartApp !== true) return;
+  if (scope.runQuickstartApp !== true) {
+    process.exit(1);
+  }
 
   try {
     await trackUsage({ event: 'willBuildAdmin', scope });
