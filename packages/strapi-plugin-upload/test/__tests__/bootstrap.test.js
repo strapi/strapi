@@ -7,7 +7,7 @@ describe('Upload plugin bootstrap function', () => {
 
     global.strapi = {
       admin: {
-        services: { permission: { provider: { register } } },
+        services: { permission: { actionProvider: { register } } },
       },
       log: {
         error() {},

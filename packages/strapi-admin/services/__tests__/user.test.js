@@ -49,7 +49,7 @@ describe('User', () => {
 
       expect(create).toHaveBeenCalled();
       expect(createToken).toHaveBeenCalled();
-      expect(result).toStrictEqual(expected);
+      expect(result).toMatchObject(expected);
     });
 
     test('Creates a user and hash password if provided', async () => {
@@ -88,7 +88,7 @@ describe('User', () => {
       expect(create).toHaveBeenCalled();
       expect(hashPassword).toHaveBeenCalledWith(input.password);
       expect(createToken).toHaveBeenCalled();
-      expect(result).toStrictEqual(expected);
+      expect(result).toMatchObject(expected);
       expect(result.password !== input.password).toBe(true);
     });
 
@@ -120,7 +120,7 @@ describe('User', () => {
       const expected = _.clone(input);
       const result = await userService.create(input);
 
-      expect(result).toStrictEqual(expected);
+      expect(result).toMatchObject(expected);
     });
   });
 
@@ -289,7 +289,7 @@ describe('User', () => {
       const res = await userService.findOne(input);
 
       expect(res).not.toBeNull();
-      expect(res).toStrictEqual(user);
+      expect(res).toMatchObject(user);
     });
 
     test('Fails to find a user with provided params', async () => {
