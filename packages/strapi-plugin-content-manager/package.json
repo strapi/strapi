@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -27,8 +27,8 @@
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "showdown": "^1.9.0",
-    "strapi-helper-plugin": "3.0.2",
-    "strapi-utils": "3.0.2",
+    "strapi-helper-plugin": "3.0.3",
+    "strapi-utils": "3.0.3",
     "yup": "^0.27.0"
   },
   "author": {
