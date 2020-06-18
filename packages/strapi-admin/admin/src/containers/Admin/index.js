@@ -21,10 +21,11 @@ import {
   OverlayBlocker,
   UserProvider,
   CheckPagePermissions,
+  request,
 } from 'strapi-helper-plugin';
 import TestEE from 'ee_else_ce/containers/TestEE';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
-import { fakePermissionsData } from '../../utils';
+
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -67,9 +68,7 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     this.emitEvent('didAccessAuthenticatedAdministration');
-    // TODO: remove the user1 it is just for testing until
-    // Api is ready
-    this.fetchUserPermissions('user1', true);
+    this.fetchUserPermissions(true);
   }
 
   shouldComponentUpdate(prevProps) {
@@ -108,7 +107,7 @@ export class Admin extends React.Component {
     }
   };
 
-  fetchUserPermissions = async (user = 'user1', resetState = false) => {
+  fetchUserPermissions = async (resetState = false) => {
     const { getUserPermissions, getUserPermissionsError, getUserPermissionsSucceeded } = this.props;
 
     if (resetState) {
@@ -117,11 +116,7 @@ export class Admin extends React.Component {
     }
 
     try {
-      const data = await new Promise(resolve =>
-        setTimeout(() => {
-          resolve(fakePermissionsData[user]);
-        }, 2000)
-      );
+      const { data } = await request('/admin/users/me/permissions', { method: 'GET' });
 
       getUserPermissionsSucceeded(data);
     } catch (err) {
@@ -204,6 +199,8 @@ export class Admin extends React.Component {
     if (isLoading) {
       return <LoadingIndicatorPage />;
     }
+
+    console.log({ userPermissions });
 
     return (
       <GlobalContextProvider

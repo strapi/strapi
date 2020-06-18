@@ -1,4 +1,8 @@
-import hasPermissions, { findMatchingPermissions, shouldCheckPermissions } from '../hasPermissions';
+import hasPermissions, {
+  findMatchingPermissions,
+  formatPermissionsForRequest,
+  shouldCheckPermissions,
+} from '../hasPermissions';
 import hasPermissionsTestData from './hasPermissionsTestData';
 
 describe('STRAPI-HELPER_PLUGIN | utils ', () => {
@@ -34,6 +38,39 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           conditions: ['customCondition'],
         },
       ]);
+    });
+  });
+
+  describe('formatPermissionsForRequest', () => {
+    it('should create an array of object containing only the action, subject & fields keys', () => {
+      const data = [
+        {
+          action: 'admin::marketplace.read',
+          subject: null,
+          fields: ['test'],
+          conditions: [],
+        },
+        {
+          action: 'admin::marketplace.plugins.uninstall',
+          subject: null,
+          fields: null,
+          conditions: ['customCondition'],
+        },
+      ];
+      const expected = [
+        {
+          action: 'admin::marketplace.read',
+          subject: null,
+          fields: ['test'],
+        },
+        {
+          action: 'admin::marketplace.plugins.uninstall',
+          subject: null,
+          fields: null,
+        },
+      ];
+
+      expect(formatPermissionsForRequest(data)).toEqual(expected);
     });
   });
 

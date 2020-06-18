@@ -475,7 +475,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   };
 
   const updatePermissions = async () => {
-    await fetchUserPermissions('user2');
+    await fetchUserPermissions();
   };
 
   const updateSchema = (data, schemaType, componentUID) => {
