@@ -1,5 +1,7 @@
 'use strict';
 
+const DEFAULT_CATEGORY = 'default';
+
 const getConditionId = ({ name, plugin }) => {
   if (plugin === 'admin') {
     return `admin::${name}`;
@@ -11,6 +13,7 @@ const getConditionId = ({ name, plugin }) => {
 };
 
 const createCondition = condition => ({
+  category: DEFAULT_CATEGORY,
   ...condition,
   id: getConditionId(condition),
 });
