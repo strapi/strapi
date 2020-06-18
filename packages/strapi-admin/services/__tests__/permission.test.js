@@ -52,7 +52,7 @@ describe('Permission Service', () => {
             permission: {
               actionProvider: { getAll },
               conditionProvider: {
-                conditions: jest.fn(() => ['someCondition']),
+                getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
             },
           },

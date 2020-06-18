@@ -102,7 +102,7 @@ const createRolesIfNeeded = async () => {
 
   const authorPermissions = _.cloneDeep(editorPermissions).map(p => ({
     ...p,
-    conditions: ['isOwner'],
+    conditions: ['admin::is-creator'],
   }));
 
   await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);

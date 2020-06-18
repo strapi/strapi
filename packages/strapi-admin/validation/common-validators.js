@@ -35,7 +35,7 @@ const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
-    const ids = strapi.admin.services.permission.conditionProvider.conditions();
+    const ids = strapi.admin.services.permission.conditionProvider.getAll().map(c => c.id);
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
