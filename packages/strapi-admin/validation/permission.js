@@ -10,10 +10,10 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 // validatedUpdatePermissionsInput
 
 const BOUND_ACTIONS = [
-  'plugins::content-manager.read',
-  'plugins::content-manager.create',
-  'plugins::content-manager.update',
-  'plugins::content-manager.delete',
+  'plugins::content-manager.explorer.read',
+  'plugins::content-manager.explorer.create',
+  'plugins::content-manager.explorer.update',
+  'plugins::content-manager.explorer.delete',
 ];
 
 const checkBoundActionsHaveFields = function(permissions) {

@@ -1,6 +1,6 @@
 'use strict';
 
-const formatActionsBySections = require('./formatActionsBySections');
+const formatActionsBySections = require('./format-actions-by-sections');
 const { formatConditions } = require('./conditions');
 
 module.exports = {
