@@ -4,7 +4,8 @@ After you need to set the provider values in the admin panel, you can override t
 
 Create a file `provider.js` on the `./config` folder
 
-```module.exports = ({ env }) => ({
+```
+module.exports = ({ env }) => ({
     github:{
         redirect_url:env('GITHUB_CALLBACK_HOST', ''),
         client_secret:env('GITHUB_CLIENT_SECRET', ''),
@@ -14,7 +15,9 @@ Create a file `provider.js` on the `./config` folder
         ...
     },
     ...
-  });```
-  
+  });
+
+```
+
 Update the redirect url to the one you want strapi to really use.
 In this example, you can even override the client secret/id
