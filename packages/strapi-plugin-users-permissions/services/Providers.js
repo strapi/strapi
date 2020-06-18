@@ -111,7 +111,7 @@ exports.connect = (provider, query) => {
 
 const getProfile = async (provider, query, callback) => {
   const access_token = query.access_token || query.code || query.oauth_token;
-
+  
   const grant = await strapi
     .store({
       environment: '',
@@ -123,6 +123,7 @@ const getProfile = async (provider, query, callback) => {
 
   const client_id = strapi.config.provider[provider].client_id || grant[provider].key || ''
   const client_secret = strapi.config.provider[provider].client_secret || grant[provider].secret || ''
+  let redirect_uri = strapi.config.provider[provider].redirect_url || grant[provider].callback || ''
 
   switch (provider) {
     case 'discord': {
@@ -166,23 +167,45 @@ const getProfile = async (provider, query, callback) => {
     case 'facebook': {
       const facebook = purest({
         provider: 'facebook',
-        config: purestConfig,
+        config: {  "facebook": {
+            "https://graph.facebook.com": {
+              "__domain": {
+                "auth": {
+                  "auth": {"bearer": "[0]"}
+                }
+              },
+              "{endpoint}": {
+                "__path": {
+                  "alias": "__default"
+                }
+              },
+              "[version]/oauth/access_{endpoint}": {
+                "__path": {
+                  "alias": "oauth",
+                  "version":"v7.0"
+                }
+              }
+            }
+          }},
       });
 
-      facebook
-        .query()
-        .get('me?fields=name,email')
-        .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.name,
-              email: body.email,
-            });
-          }
-        });
+      
+
+        if(query.code){
+            facebook
+                .query('oauth')
+                .get('token')
+                .qs({client_id,client_secret,code:query.code,redirect_uri})
+                .request((err, res, {access_token}) => {
+                if (err) {
+                    return callback(err);
+                }
+                getProfileFromFacebook(facebook,access_token,callback)
+                });
+            }
+        else{
+            getProfileFromFacebook(facebook,access_token,callback)
+        }
       break;
     }
     case 'google': {
@@ -248,8 +271,9 @@ const getProfile = async (provider, query, callback) => {
           getProfileFromGithub(github,access_token,callback)
         });
       }
-      else
+      else{
         getProfileFromGithub(github,access_token,callback)
+      }
       break;
     }
     case 'microsoft': {
@@ -397,7 +421,6 @@ const getProfile = async (provider, query, callback) => {
 };
 
 const getProfileFromGithub = (github,access_token,callback)=>{
-
     github
         .query()
         .get('user')
@@ -432,5 +455,22 @@ const getProfileFromGithub = (github,access_token,callback)=>{
                   : null,
               });
             });
+        });
+}
+
+const getProfileFromFacebook=(facebook,access_token,callback)=>{
+    facebook
+        .query()
+        .get('me?fields=name,email')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.name,
+              email: body.email,
+            });
+          }
         });
 }
