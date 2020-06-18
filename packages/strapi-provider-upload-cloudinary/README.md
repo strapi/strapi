@@ -4,19 +4,25 @@
 
 Your configuration is passed down to the cloudinary configuration. (e.g: `cloudinary.config(config)`). You can see the complete list of options [here](https://cloudinary.com/documentation/cloudinary_sdks#configuration_parameters)
 
+See the [using a provider](https://strapi.io/documentation/v3.x/plugins/upload.html#using-a-provider) documentation for information on installing and using a provider. And see the [environment variables](https://strapi.io/documentation/v3.x/concepts/configurations.html#environment-variables) for setting and using environment variables in your configs.
+
 **Example**
 
-`./extensions/upload/config/settings.json`
+`./config/plugins.js`
 
-```json
-{
-  "provider": "cloudinary",
-  "providerOptions": {
-    "cloud_name": "cloud-name",
-    "api_key": "api-key",
-    "api_secret": "api-secret"
-  }
-}
+```js
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    provider: "cloudinary",
+    providerOptions: {
+      cloud_name: env('CLOUDINARY_NAME'),
+      api_key: env('CLOUDINARY_KEY'),
+      api_secret: env('CLOUDINARY_SECRET')
+    }
+  },
+  // ...
+});
 ```
 
 ## Resources
