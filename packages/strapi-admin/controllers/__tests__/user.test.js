@@ -201,7 +201,7 @@ describe('User Controller', () => {
 
     test('User not found', async () => {
       const fakeId = 42;
-      const update = jest.fn(() => null);
+      const updateById = jest.fn(() => null);
       const notFound = jest.fn();
       const body = { username: 'Foo' };
 
@@ -210,14 +210,14 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { update },
+            user: { updateById },
           },
         },
       };
 
       await userController.update(ctx);
 
-      expect(update).toHaveReturnedWith(null);
+      expect(updateById).toHaveReturnedWith(null);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
     });
 
@@ -235,7 +235,7 @@ describe('User Controller', () => {
     });
 
     test('Update a user correctly', async () => {
-      const update = jest.fn((_, input) => ({ ...user, ...input }));
+      const updateById = jest.fn((_, input) => ({ ...user, ...input }));
       const sanitizeUser = jest.fn(user => user);
       const body = { firstname: 'Foo' };
 
@@ -244,14 +244,14 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { update, sanitizeUser },
+            user: { updateById, sanitizeUser },
           },
         },
       };
 
       await userController.update(ctx);
 
-      expect(update).toHaveBeenCalledWith({ id: user.id }, body);
+      expect(updateById).toHaveBeenCalledWith(user.id, body);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(ctx.body).toStrictEqual({ data: { ...user, ...body } });
     });

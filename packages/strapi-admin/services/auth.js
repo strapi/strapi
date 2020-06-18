@@ -65,7 +65,7 @@ const forgotPassword = async ({ email } = {}) => {
   }
 
   const resetPasswordToken = strapi.admin.services.token.createToken();
-  await strapi.admin.services.user.update({ id: user.id }, { resetPasswordToken });
+  await strapi.admin.services.user.updateById(user.id, { resetPasswordToken });
 
   const url = `${strapi.config.admin.url}/auth/reset-password?code=${resetPasswordToken}`;
   const body = resetEmailTemplate(url);
@@ -99,13 +99,10 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
     throw strapi.errors.badRequest();
   }
 
-  return strapi.admin.services.user.update(
-    { id: matchingUser.id },
-    {
-      password,
-      resetPasswordToken: null,
-    }
-  );
+  return strapi.admin.services.user.updateById(matchingUser.id, {
+    password,
+    resetPasswordToken: null,
+  });
 };
 
 module.exports = {

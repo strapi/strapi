@@ -77,10 +77,12 @@ describe('Role CRUD End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data).toHaveLength(4);
-      res.body.data.forEach(permission => {
-        expect(permission.conditions).toEqual(['admin::is-creator']);
-      });
+      expect(res.body.data).toHaveLength(9);
+      res.body.data
+        .filter(p => !p.action.includes('plugins::upload'))
+        .forEach(permission => {
+          expect(permission.conditions).toEqual(['admin::is-creator']);
+        });
     });
 
     test("Editor's permissions don't have any conditions", async () => {
@@ -91,10 +93,12 @@ describe('Role CRUD End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data).toHaveLength(4);
-      res.body.data.forEach(permission => {
-        expect(permission.conditions).toEqual([]);
-      });
+      expect(res.body.data).toHaveLength(9);
+      res.body.data
+        .filter(p => !p.action.includes('plugins::upload'))
+        .forEach(permission => {
+          expect(permission.conditions).toEqual([]);
+        });
     });
 
     if (edition === 'EE') {

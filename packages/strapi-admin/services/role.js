@@ -78,31 +78,23 @@ const findAllWithUsersCount = async (populate = []) => {
  * @returns {Promise<role>}
  */
 const update = async (params, attributes) => {
-  if (_.has(attributes, 'code')) {
-    const rolesToBeUpdated = await find(params);
-    const rolesToBeUpdatedIds = rolesToBeUpdated.map(r => String(r.id));
-    const adminRole = await getSuperAdmin();
+  const sanitizedAttributes = _.omit(attributes, ['code']);
 
-    if (rolesToBeUpdatedIds.includes(String(adminRole.id))) {
-      throw strapi.errors.badRequest(
-        'ValidationError',
-        'You cannot modify the code of  the super admin role'
-      );
-    }
-  }
-
-  if (_.has(params, 'id') && _.has(attributes, 'name')) {
-    const alreadyExists = await exists({ name: attributes.name, id_ne: params.id });
+  if (_.has(params, 'id') && _.has(sanitizedAttributes, 'name')) {
+    const alreadyExists = await exists({
+      name: sanitizedAttributes.name,
+      id_ne: params.id,
+    });
     if (alreadyExists) {
       throw strapi.errors.badRequest('ValidationError', {
         name: [
-          `The name must be unique and a role with name \`${attributes.name}\` already exists.`,
+          `The name must be unique and a role with name \`${sanitizedAttributes.name}\` already exists.`,
         ],
       });
     }
   }
 
-  return strapi.query('role', 'admin').update(params, attributes);
+  return strapi.query('role', 'admin').update(params, sanitizedAttributes);
 };
 
 /**

@@ -128,7 +128,7 @@ describe('User', () => {
     test('Hash password', async () => {
       const hash = 'aoizdnoaizndoainzodiaz';
 
-      const params = { id: 1 };
+      const id = 1;
       const input = { email: 'test@strapi.io', password: '123' };
 
       const update = jest.fn((_, user) => Promise.resolve(user));
@@ -145,10 +145,10 @@ describe('User', () => {
         },
       };
 
-      const result = await userService.update(params, input);
+      const result = await userService.updateById(id, input);
 
       expect(hashPassword).toHaveBeenCalledWith(input.password);
-      expect(update).toHaveBeenCalledWith(params, { email: input.email, password: hash });
+      expect(update).toHaveBeenCalledWith({ id }, { email: input.email, password: hash });
       expect(result).toEqual({
         email: 'test@strapi.io',
         password: 'aoizdnoaizndoainzodiaz',
@@ -166,11 +166,11 @@ describe('User', () => {
           return { update };
         },
       };
-      const params = { id: 1 };
+      const id = 1;
       const input = { email: 'test@strapi.io' };
-      const result = await userService.update(params, input);
+      const result = await userService.updateById(id, input);
 
-      expect(update).toHaveBeenCalledWith(params, input);
+      expect(update).toHaveBeenCalledWith({ id }, input);
       expect(result).toBe(user);
     });
   });
@@ -372,7 +372,7 @@ describe('User', () => {
 
     test('Calls udpate service', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const update = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn(user => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -382,7 +382,7 @@ describe('User', () => {
         },
         admin: {
           services: {
-            user: { update },
+            user: { updateById },
           },
         },
       };
@@ -398,15 +398,15 @@ describe('User', () => {
 
       await userService.register(input);
 
-      expect(update).toHaveBeenCalledWith(
-        { id: 1 },
+      expect(updateById).toHaveBeenCalledWith(
+        1,
         expect.objectContaining({ firstname: 'test', lastname: 'Strapi', password: 'Test1234' })
       );
     });
 
     test('Set user to active', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const update = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn(user => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -416,7 +416,7 @@ describe('User', () => {
         },
         admin: {
           services: {
-            user: { update },
+            user: { updateById },
           },
         },
       };
@@ -432,12 +432,12 @@ describe('User', () => {
 
       await userService.register(input);
 
-      expect(update).toHaveBeenCalledWith({ id: 1 }, expect.objectContaining({ isActive: true }));
+      expect(updateById).toHaveBeenCalledWith(1, expect.objectContaining({ isActive: true }));
     });
 
     test('Reset registrationToken', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const update = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn(user => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -447,7 +447,7 @@ describe('User', () => {
         },
         admin: {
           services: {
-            user: { update },
+            user: { updateById },
           },
         },
       };
@@ -463,8 +463,8 @@ describe('User', () => {
 
       await userService.register(input);
 
-      expect(update).toHaveBeenCalledWith(
-        { id: 1 },
+      expect(updateById).toHaveBeenCalledWith(
+        1,
         expect.objectContaining({ registrationToken: null })
       );
     });

@@ -149,26 +149,20 @@ describe('Role', () => {
       expect(updatedRole).toStrictEqual(expectedUpdatedRole);
     });
     test('Cannot update code of super admin role', async () => {
+      const dbUpdate = jest.fn();
       const dbFind = jest.fn(() => [{ id: '1' }]);
       const dbFindOne = jest.fn(() => ({ id: '1', code: SUPER_ADMIN_CODE }));
       const badRequest = jest.fn(() => {});
 
       global.strapi = {
-        query: () => ({ find: dbFind, findOne: dbFindOne }),
+        query: () => ({ find: dbFind, findOne: dbFindOne, update: dbUpdate }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
       };
 
-      try {
-        await roleService.update({ id: 1 }, { code: 'new_code' });
-      } catch (e) {
-        // nothing
-      }
+      await roleService.update({ id: 1 }, { code: 'new_code' });
 
-      expect(badRequest).toHaveBeenCalledWith(
-        'ValidationError',
-        'You cannot modify the code of  the super admin role'
-      );
+      expect(dbUpdate).toHaveBeenCalledWith({ id: 1 }, {});
     });
   });
   describe('count', () => {
