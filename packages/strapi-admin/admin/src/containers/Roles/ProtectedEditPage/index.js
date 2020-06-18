@@ -3,10 +3,10 @@ import { CheckPagePermissions } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import EditPage from '../EditPage';
 
-const ProtectedListPage = () => (
+const ProtectedEditPage = () => (
   <CheckPagePermissions permissions={adminPermissions.settings.roles.update}>
     <EditPage />
   </CheckPagePermissions>
 );
 
-export default ProtectedListPage;
+export default ProtectedEditPage;

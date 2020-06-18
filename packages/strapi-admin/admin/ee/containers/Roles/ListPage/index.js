@@ -37,7 +37,6 @@ const RoleListPage = () => {
   } = useUserPermissions(adminPermissions.settings.roles);
   const { getData, roles, isLoading } = useRolesList(false);
   const getDataRef = useRef(getData);
-  // console.log({ roles });
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
