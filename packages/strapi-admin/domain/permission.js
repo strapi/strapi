@@ -10,7 +10,7 @@ function createPermission(attributes) {
     action: attributes.action || null,
     subject: attributes.subject || null,
     conditions: attributes.conditions || [],
-    fields: attributes.fields || [],
+    fields: attributes.fields || null,
   };
 }
 

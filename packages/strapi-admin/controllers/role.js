@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
+const { EDITOR_CODE, AUTHOR_CODE } = require('../services/constants');
 
 module.exports = {
   /**
@@ -90,7 +91,7 @@ module.exports = {
     const input = _.cloneDeep(ctx.request.body);
 
     try {
-      const superAdminRole = await strapi.admin.services.role.getAdmin();
+      const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
       if (superAdminRole && String(superAdminRole.id) === String(id)) {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);
@@ -107,11 +108,11 @@ module.exports = {
     }
 
     let existingPermissions = strapi.admin.services.permission.actionProvider.getAllByMap();
-    if (['strapi-author', 'strapi-editor'].includes(role.code)) {
+    if ([EDITOR_CODE, AUTHOR_CODE].includes(role.code)) {
       input.permissions
         .filter(p => existingPermissions.get(p.action).section === 'contentTypes')
         .forEach(p => {
-          p.conditions = role.code === 'strapi-author' ? ['isOwner'] : [];
+          p.conditions = role.code === AUTHOR_CODE ? ['isOwner'] : [];
         });
     }
 

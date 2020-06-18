@@ -36,9 +36,6 @@ const deleteUserRole = async id => {
   });
 };
 
-const createFakeId = id =>
-  Number.isInteger(Number(id)) ? Number(id) + 1000 : ['f', 'f', ...id.slice(2)].join('');
-
 let rq;
 
 /**
@@ -51,9 +48,12 @@ let rq;
  * 3.   Update a user (success)
  * 4.   Update a user (fail/body)
  * 5.   Get a user (success)
- * 6.   Update a user (fail/notFound)
- * 7.  Get a user (fail/notFound)
- * 8.  Get a list of users (success/empty)
+ * 6.   Get a list of users (success/full)
+ * 7.   Delete a user (success)
+ * 8.   Delete a user (fail/notFound)
+ * 9.   Update a user (fail/notFound)
+ * 10.  Get a user (fail/notFound)
+ * 11.  Get a list of users (success/empty)
  */
 describe('Admin User CRUD (e2e)', () => {
   // Local test data used across the test suite
@@ -209,13 +209,32 @@ describe('Admin User CRUD (e2e)', () => {
     });
   });
 
-  test('7. Updates a user (not found)', async () => {
+  test('7. Deletes a user (successfully)', async () => {
+    const res = await rq({
+      url: `/admin/users/${testData.user.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject(testData.user);
+  });
+
+  test('8. Deletes a user (not found)', async () => {
+    const res = await rq({
+      url: `/admin/users/${testData.user.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(404);
+  });
+
+  test('9. Updates a user (not found)', async () => {
     const body = {
       lastname: 'doe',
     };
 
     const res = await rq({
-      url: `/admin/users/${createFakeId(testData.user.id)}`,
+      url: `/admin/users/${testData.user.id}`,
       method: 'PUT',
       body,
     });
@@ -228,9 +247,9 @@ describe('Admin User CRUD (e2e)', () => {
     });
   });
 
-  test('8. Finds a user (not found)', async () => {
+  test('10. Finds a user (not found)', async () => {
     const res = await rq({
-      url: `/admin/users/${createFakeId(testData.user.id)}`,
+      url: `/admin/users/${testData.user.id}`,
       method: 'GET',
     });
 
@@ -242,9 +261,9 @@ describe('Admin User CRUD (e2e)', () => {
     });
   });
 
-  test('9. Finds a list of users (missing user)', async () => {
+  test('11. Finds a list of users (missing user)', async () => {
     const res = await rq({
-      url: `/admin/users?email=non.existing.address@strapi.io`,
+      url: `/admin/users?email=${testData.user.email}`,
       method: 'GET',
     });
 

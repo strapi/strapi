@@ -31,7 +31,7 @@ const isAPluginName = yup
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
   });
 
-const arrayOfConditions = yup
+const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
@@ -49,5 +49,5 @@ module.exports = {
   password,
   roles,
   isAPluginName,
-  arrayOfConditions,
+  arrayOfConditionNames,
 };

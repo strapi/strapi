@@ -83,7 +83,7 @@ const createRolesIfNeeded = async () => {
   const authorRole = await strapi.admin.services.role.create({
     name: 'Author',
     code: 'strapi-author',
-    description: 'Authors can manage and publish their own content.',
+    description: 'Authors can manage and publish the content they created.',
   });
 
   const editorPermissions = [];
@@ -100,19 +100,21 @@ const createRolesIfNeeded = async () => {
     });
   });
 
-  const authorPermissions = _.cloneDeep(editorPermissions);
-  authorPermissions.forEach(p => (p.conditions = ['isOwner']));
+  const authorPermissions = _.cloneDeep(editorPermissions).map(p => ({
+    ...p,
+    conditions: ['isOwner'],
+  }));
 
   await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);
   await strapi.admin.services.permission.assign(authorRole.id, authorPermissions);
 };
 
 const displayWarningIfNoSuperAdmin = async () => {
-  const adminRole = await strapi.admin.services.role.getAdminWithUsersCount();
+  const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
   const someUsersExists = await strapi.admin.services.user.exists();
-  if (!adminRole) {
+  if (!superAdminRole) {
     return strapi.log.warn("Your application doesn't have a super admin role.");
-  } else if (someUsersExists && adminRole.usersCount === 0) {
+  } else if (someUsersExists && superAdminRole.usersCount === 0) {
     return strapi.log.warn("Your application doesn't have a super admin user.");
   }
 };
@@ -121,13 +123,13 @@ const displayWarningIfUsersDontHaveRole = async () => {
   const count = await strapi.admin.services.user.countUsersWithoutRole();
 
   if (count > 0) {
-    strapi.log.warn(`You have ${count} user${count === 1 ? '' : 's'} without any role.`);
+    strapi.log.warn(`Some users (${count}) don't have any role.`);
   }
 };
 
 const resetSuperAdminPermissions = async () => {
-  const adminRole = await strapi.admin.services.role.getAdmin();
-  if (!adminRole) {
+  const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
+  if (!superAdminRole) {
     return;
   }
 
@@ -158,7 +160,7 @@ const resetSuperAdminPermissions = async () => {
     }
   });
 
-  await strapi.admin.services.permission.assign(adminRole.id, permissions);
+  await strapi.admin.services.permission.assign(superAdminRole.id, permissions);
 };
 
 module.exports = async () => {

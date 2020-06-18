@@ -45,7 +45,7 @@ describe('Role CRUD End to End', () => {
         {
           name: 'Author',
           code: 'strapi-author',
-          description: 'Authors can manage and publish their own content.',
+          description: 'Authors can manage and publish the content they created.',
           usersCount: 0,
         },
       ];
@@ -607,7 +607,7 @@ describe('Role CRUD End to End', () => {
           if (permission.conditions.length > 0) {
             expect(permission.conditions).toEqual(expect.arrayContaining([expect.any(String)]));
           }
-          if (permission.fields.length > 0) {
+          if (permission.fields && permission.fields.length > 0) {
             expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
           }
         });
@@ -653,7 +653,7 @@ describe('Role CRUD End to End', () => {
           if (permission.conditions.length > 0) {
             expect(permission.conditions).toEqual(expect.arrayContaining([expect.any(String)]));
           }
-          if (permission.fields.length > 0) {
+          if (permission.fields && permission.fields.length > 0) {
             expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
           }
         });

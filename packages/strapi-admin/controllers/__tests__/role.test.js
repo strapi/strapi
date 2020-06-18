@@ -99,7 +99,7 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: {
-              getAdmin: jest.fn(() => undefined),
+              getSuperAdmin: jest.fn(() => undefined),
             },
           },
         },
@@ -130,7 +130,7 @@ describe('Role controller', () => {
       global.strapi = {
         admin: {
           services: {
-            role: { getAdmin: jest.fn(() => undefined) },
+            role: { getSuperAdmin: jest.fn(() => undefined) },
             permission: { conditionProvider: { conditions: jest.fn(() => []) } },
           },
         },
@@ -173,7 +173,7 @@ describe('Role controller', () => {
           services: {
             role: {
               findOne: findOneRole,
-              getAdmin: jest.fn(() => undefined),
+              getSuperAdmin: jest.fn(() => undefined),
             },
             permission: {
               assign: assignPermissions,

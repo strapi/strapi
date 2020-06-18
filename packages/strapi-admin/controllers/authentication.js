@@ -113,13 +113,13 @@ module.exports = {
       return ctx.badRequest('You cannot register a new super admin');
     }
 
-    const adminRole = await strapi.admin.services.role.getAdmin();
+    const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
 
     const user = await strapi.admin.services.user.create({
       ...input,
       registrationToken: null,
       isActive: true,
-      roles: adminRole ? [adminRole.id] : [],
+      roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
     ctx.body = {
