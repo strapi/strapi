@@ -11,13 +11,15 @@ const CheckPermissions = ({ permissions, children }) => {
   const userPermissions = useUser();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
+  const abortController = new AbortController();
+  const { signal } = abortController;
 
   useEffect(() => {
     const checkPermission = async () => {
       try {
         setState({ isLoading: true, canAccess: false });
 
-        const canAccess = await hasPermissions(userPermissions, permissions);
+        const canAccess = await hasPermissions(userPermissions, permissions, signal);
 
         if (isMounted.current) {
           setState({ isLoading: false, canAccess });
@@ -33,6 +35,10 @@ const CheckPermissions = ({ permissions, children }) => {
     };
 
     checkPermission();
+
+    return () => {
+      abortController.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissions]);
 
