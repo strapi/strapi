@@ -307,8 +307,9 @@ describe('Role CRUD End to End', () => {
           name: data.rolesWithoutUsers[0].name,
           description: data.rolesWithoutUsers[0].description,
           usersCount: 0,
-          code: null,
+          code: expect.anything(),
         });
+        expect(res.body.data.code.startsWith('new-role-0')).toBe(true);
       });
     });
 
@@ -332,7 +333,7 @@ describe('Role CRUD End to End', () => {
                 name: role.name,
                 description: role.description,
                 usersCount: role.usersCount,
-                code: null,
+                code: expect.anything(),
               }),
             ])
           );

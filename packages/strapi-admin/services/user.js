@@ -182,6 +182,32 @@ const countUsersWithoutRole = async () => {
   return count;
 };
 
+/** Assign some roles to several users
+ * @returns {undefined}
+ */
+const assignARoleToAll = async roleId => {
+  const userModel = strapi.query('user', 'admin').model;
+  const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
+  const userTable = userModel.collectionName;
+
+  if (userModel.orm === 'bookshelf') {
+    const knex = strapi.connections[userModel.connection];
+    const usersIds = await knex
+      .select(`${userTable}.id`)
+      .from(userTable)
+      .leftJoin(assocTable, `${userTable}.id`, `${assocTable}.user_id`)
+      .where(`${assocTable}.role_id`, null)
+      .pluck(`${userTable}.id`);
+
+    if (usersIds.length > 0) {
+      const newRelations = usersIds.map(userId => ({ user_id: userId, role_id: roleId }));
+      await knex.insert(newRelations).into(assocTable);
+    }
+  } else if (userModel.orm === 'mongoose') {
+    await strapi.query('user', 'admin').model.updateMany({}, { roles: [roleId] });
+  }
+};
+
 module.exports = {
   create,
   updateById,
@@ -194,4 +220,5 @@ module.exports = {
   searchPage,
   delete: deleteFn,
   countUsersWithoutRole,
+  assignARoleToAll,
 };
