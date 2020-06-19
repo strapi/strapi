@@ -1,13 +1,10 @@
 import { upperFirst } from 'lodash';
+import generateAllowedActions from './utils/generateAllowedActions';
 
-const init = (initialState, permissionsNames) => {
-  const allowedActions = permissionsNames.reduce((acc, current) => {
-    acc[`can${upperFirst(current)}`] = false;
+const init = permissionsNames => {
+  const allowedActions = generateAllowedActions(permissionsNames);
 
-    return acc;
-  }, {});
-
-  return { ...initialState, allowedActions };
+  return { isLoading: true, allowedActions };
 };
 
 export default init;

@@ -68,7 +68,7 @@ const getDisplayedValue = (type, value, name) => {
   }
 };
 
-function Row({ goTo, isBulkable, row, headers }) {
+function Row({ canDelete, canUpdate, goTo, isBulkable, row, headers }) {
   const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
@@ -84,14 +84,14 @@ function Row({ goTo, isBulkable, row, headers }) {
 
   const links = [
     {
-      icon: <FontAwesomeIcon icon="pencil-alt" />,
+      icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
       onClick: () => {
         emitEvent('willEditEntryFromList');
         goTo(row.id);
       },
     },
     {
-      icon: <FontAwesomeIcon icon="trash-alt" />,
+      icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
       onClick: e => {
         e.stopPropagation();
         emitEvent('willDeleteEntryFromList');
@@ -132,6 +132,8 @@ function Row({ goTo, isBulkable, row, headers }) {
 }
 
 Row.propTypes = {
+  canDelete: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   goTo: PropTypes.func.isRequired,
   headers: PropTypes.array.isRequired,
   isBulkable: PropTypes.bool.isRequired,

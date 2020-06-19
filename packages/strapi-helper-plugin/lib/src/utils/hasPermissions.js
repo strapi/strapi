@@ -27,7 +27,7 @@ const formatPermissionsForRequest = permissions =>
 const shouldCheckPermissions = permissions =>
   !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
 
-const hasPermissions = async (userPermissions, permissions) => {
+const hasPermissions = async (userPermissions, permissions, signal) => {
   if (!permissions || !permissions.length) {
     return true;
   }
@@ -43,6 +43,7 @@ const hasPermissions = async (userPermissions, permissions) => {
         body: {
           permissions: formatPermissionsForRequest(matchingPermissions),
         },
+        signal,
       });
 
       hasPermission = data.every(v => v === true);

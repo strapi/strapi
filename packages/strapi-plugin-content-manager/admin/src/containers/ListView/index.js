@@ -14,10 +14,11 @@ import {
   useGlobalContext,
   request,
   CheckPermissions,
+  useUserPermissions,
 } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
+import getRequestUrl from '../../utils/getRequestUrl';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
@@ -40,7 +41,8 @@ import {
 } from './actions';
 
 import makeSelectListView from './selectors';
-import getRequestUrl from '../../utils/getRequestUrl';
+
+import { generatePermissionsObject } from '../../utils';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -68,6 +70,13 @@ function ListView({
   showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
+  const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canCreate, canRead, canUpdate, canDelete },
+    setIsLoading,
+  } = useUserPermissions(viewPermissions);
+
   const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const getDataRef = useRef();
@@ -78,7 +87,7 @@ function ListView({
     return [slug, 'contentType'];
   }, [slug]);
 
-  getDataRef.current = async (uid, params) => {
+  getDataRef.current = async (uid = slug, params = getSearchParams()) => {
     try {
       const generatedSearch = generateSearchFromObject(params);
       const [{ count }, data] = await Promise.all([
@@ -95,6 +104,23 @@ function ListView({
       strapi.notification.error(`${pluginId}.error.model.fetch`);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      // Reset the useUserPermissions hook loading state
+      setIsLoading();
+      resetProps();
+      setFilterPickerState(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  useEffect(() => {
+    if (!isLoadingForPermissions && canRead) {
+      getDataRef.current(slug, getSearchParams());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadingForPermissions, canRead, shouldRefetchData]);
 
   getLayoutSettingRef.current = settingName => {
     return get(layouts, [...contentTypePath, 'settings', settingName], '');
@@ -210,16 +236,6 @@ function ListView({
     );
   }, [getMetaDatas, listLayout, listSchema]);
 
-  useEffect(() => {
-    getDataRef.current(slug, getSearchParams());
-
-    return () => {
-      resetProps();
-      setFilterPickerState(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, shouldRefetchData]);
-
   const toggleLabelPickerState = () => {
     if (!isLabelPickerOpen) {
       emitEvent('willChangeListFieldsSettings');
@@ -305,55 +321,65 @@ function ListView({
   ];
 
   const headerAction = useMemo(
-    () => [
-      {
-        label: formatMessage(
-          {
-            id: 'content-manager.containers.List.addAnEntry',
+    () => {
+      if (!canCreate) {
+        return [];
+      }
+
+      return [
+        {
+          label: formatMessage(
+            {
+              id: 'content-manager.containers.List.addAnEntry',
+            },
+            {
+              entity: label || 'Content Manager',
+            }
+          ),
+          onClick: () => {
+            emitEvent('willCreateEntry');
+            push({
+              pathname: `${pathname}/create`,
+              search: `redirectUrl=${pathname}${search}`,
+            });
           },
-          {
-            entity: label || 'Content Manager',
-          }
-        ),
-        onClick: () => {
-          emitEvent('willCreateEntry');
-          push({
-            pathname: `${pathname}/create`,
-            search: `redirectUrl=${pathname}${search}`,
-          });
+          color: 'primary',
+          type: 'button',
+          icon: true,
+          style: {
+            paddingLeft: 15,
+            paddingRight: 15,
+            fontWeight: 600,
+          },
         },
-        color: 'primary',
-        type: 'button',
-        icon: true,
-        style: {
-          paddingLeft: 15,
-          paddingRight: 15,
-          fontWeight: 600,
-        },
-      },
-    ],
+      ];
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [label, pathname, search]
+    [label, pathname, search, canCreate]
   );
 
   const headerProps = useMemo(() => {
+    /* eslint-disable indent */
     return {
       title: {
         label: label || 'Content Manager',
       },
-      content: formatMessage(
-        {
-          id:
-            count > 1
-              ? `${pluginId}.containers.List.pluginHeaderDescription`
-              : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
-        },
-        { label: count }
-      ),
+      content: canRead
+        ? formatMessage(
+            {
+              id:
+                count > 1
+                  ? `${pluginId}.containers.List.pluginHeaderDescription`
+                  : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+            },
+            { label: count }
+          )
+        : null,
       actions: headerAction,
     };
+    /* eslint-enable indent */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, headerAction, label]);
+  }, [count, headerAction, label, canRead]);
 
   return (
     <>
@@ -381,8 +407,8 @@ function ListView({
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading} />}
-          {getLayoutSettingRef.current('searchable') && (
+          {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading && canRead} />}
+          {getLayoutSettingRef.current('searchable') && canRead && (
             <Search
               changeParams={handleChangeParams}
               initValue={searchValue}
@@ -390,60 +416,64 @@ function ListView({
               value={searchValue}
             />
           )}
-          <Wrapper>
-            <div className="row" style={{ marginBottom: '5px' }}>
-              <div className="col-10">
-                <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-                  {getLayoutSettingRef.current('filterable') && (
-                    <>
-                      <AddFilterCta type="button" onClick={toggleFilterPickerState}>
-                        <FilterIcon />
-                        <FormattedMessage id="app.utils.filters" />
-                      </AddFilterCta>
-                      {getSearchParams().filters.map((filter, key) => (
-                        <Filter
-                          {...filter}
-                          changeParams={handleChangeParams}
-                          filters={getSearchParams().filters}
-                          index={key}
-                          schema={listSchema}
-                          key={key}
-                          toggleFilterPickerState={toggleFilterPickerState}
-                          isFilterPickerOpen={isFilterPickerOpen}
-                        />
-                      ))}
-                    </>
-                  )}
+          {canRead && (
+            <Wrapper>
+              <div className="row" style={{ marginBottom: '5px' }}>
+                <div className="col-10">
+                  <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+                    {getLayoutSettingRef.current('filterable') && (
+                      <>
+                        <AddFilterCta type="button" onClick={toggleFilterPickerState}>
+                          <FilterIcon />
+                          <FormattedMessage id="app.utils.filters" />
+                        </AddFilterCta>
+                        {getSearchParams().filters.map((filter, key) => (
+                          <Filter
+                            {...filter}
+                            changeParams={handleChangeParams}
+                            filters={getSearchParams().filters}
+                            index={key}
+                            schema={listSchema}
+                            key={key}
+                            toggleFilterPickerState={toggleFilterPickerState}
+                            isFilterPickerOpen={isFilterPickerOpen}
+                          />
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="col-2">
+                  <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+                    <DisplayedFieldsDropdown
+                      isOpen={isLabelPickerOpen}
+                      items={allLabels}
+                      onChange={handleChangeListLabels}
+                      onClickReset={() => {
+                        resetListLabels(slug);
+                      }}
+                      slug={slug}
+                      toggle={toggleLabelPickerState}
+                    />
+                  </CheckPermissions>
                 </div>
               </div>
-              <div className="col-2">
-                <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-                  <DisplayedFieldsDropdown
-                    isOpen={isLabelPickerOpen}
-                    items={allLabels}
-                    onChange={handleChangeListLabels}
-                    onClickReset={() => {
-                      resetListLabels(slug);
-                    }}
-                    slug={slug}
-                    toggle={toggleLabelPickerState}
+              <div className="row" style={{ paddingTop: '12px' }}>
+                <div className="col-12">
+                  <CustomTable
+                    data={data}
+                    canDelete={canDelete}
+                    canUpdate={canUpdate}
+                    headers={tableHeaders}
+                    isBulkable={getLayoutSettingRef.current('bulkable')}
+                    onChangeParams={handleChangeParams}
+                    showLoader={isLoading}
                   />
-                </CheckPermissions>
+                  <Footer />
+                </div>
               </div>
-            </div>
-            <div className="row" style={{ paddingTop: '12px' }}>
-              <div className="col-12">
-                <CustomTable
-                  data={data}
-                  headers={tableHeaders}
-                  isBulkable={getLayoutSettingRef.current('bulkable')}
-                  onChangeParams={handleChangeParams}
-                  showLoader={isLoading}
-                />
-                <Footer />
-              </div>
-            </div>
-          </Wrapper>
+            </Wrapper>
+          )}
         </Container>
         <PopUpWarning
           isOpen={showWarningDelete}
@@ -491,6 +521,7 @@ ListView.propTypes = {
     search: PropTypes.string.isRequired,
   }).isRequired,
   models: PropTypes.array.isRequired,
+
   getDataSucceeded: PropTypes.func.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
