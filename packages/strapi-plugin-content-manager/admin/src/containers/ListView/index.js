@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -74,7 +74,9 @@ function ListView({
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
-  const contentTypePath = [slug, 'contentType'];
+  const contentTypePath = useMemo(() => {
+    return [slug, 'contentType'];
+  }, [slug]);
 
   getDataRef.current = async (uid, params) => {
     try {
@@ -94,8 +96,51 @@ function ListView({
     }
   };
 
-  getLayoutSettingRef.current = settingName =>
-    get(layouts, [...contentTypePath, 'settings', settingName], '');
+  getLayoutSettingRef.current = settingName => {
+    return get(layouts, [...contentTypePath, 'settings', settingName], '');
+  };
+
+  const getMetaDatas = useCallback(
+    (path = []) => {
+      return get(layouts, [...contentTypePath, 'metadatas', ...path], {});
+    },
+    [contentTypePath, layouts]
+  );
+
+  const listLayout = useMemo(() => {
+    return get(layouts, [...contentTypePath, 'layouts', 'list'], []);
+  }, [contentTypePath, layouts]);
+
+  const listSchema = useMemo(() => {
+    return get(layouts, [...contentTypePath, 'schema'], {});
+  }, [layouts, contentTypePath]);
+
+  const label = useMemo(() => {
+    return get(listSchema, ['info', 'name'], '');
+  }, [listSchema]);
+
+  const tableHeaders = useMemo(() => {
+    return listLayout.map(label => {
+      return { ...getMetaDatas([label, 'list']), name: label };
+    });
+  }, [getMetaDatas, listLayout]);
+
+  const searchValue = useMemo(() => {
+    return getQueryParameters(search, '_q') || '';
+  }, [search]);
+
+  const getFirstSortableElement = useCallback(
+    (name = '') => {
+      return get(
+        listLayout.filter(h => {
+          return h !== name && getMetaDatas([h, 'list', 'sortable']) === true;
+        }),
+        ['0'],
+        'id'
+      );
+    },
+    [getMetaDatas, listLayout]
+  );
 
   const getSearchParams = useCallback(
     (updatedParams = {}) => {
@@ -148,6 +193,23 @@ function ListView({
     }
   }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug]);
 
+  const allLabels = useMemo(() => {
+    return sortBy(
+      Object.keys(getMetaDatas())
+        .filter(
+          key =>
+            !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
+              get(listSchema, ['attributes', key, 'type'], '')
+            )
+        )
+        .map(label => ({
+          name: label,
+          value: listLayout.includes(label),
+        })),
+      ['label', 'name']
+    );
+  }, [getMetaDatas, listLayout, listSchema]);
+
   useEffect(() => {
     getDataRef.current(slug, getSearchParams());
 
@@ -165,6 +227,7 @@ function ListView({
 
     setLabelPickerState(prevState => !prevState);
   };
+
   const toggleFilterPickerState = () => {
     if (!isFilterPickerOpen) {
       emitEvent('willFilterEntries');
@@ -173,52 +236,10 @@ function ListView({
     setFilterPickerState(prevState => !prevState);
   };
 
-  // Helpers
-  const getMetaDatas = (path = []) => get(layouts, [...contentTypePath, 'metadatas', ...path], {});
-
-  const getListLayout = () => get(layouts, [...contentTypePath, 'layouts', 'list'], []);
-
-  const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
-
-  const getName = () => {
-    return get(getListSchema(), ['info', 'name'], '');
-  };
-
-  const getAllLabels = () => {
-    return sortBy(
-      Object.keys(getMetaDatas())
-        .filter(
-          key =>
-            !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
-              get(getListSchema(), ['attributes', key, 'type'], '')
-            )
-        )
-        .map(label => ({
-          name: label,
-          value: getListLayout().includes(label),
-        })),
-      ['label', 'name']
-    );
-  };
-
-  const getFirstSortableElement = (name = '') => {
-    return get(
-      getListLayout().filter(h => {
-        return h !== name && getMetaDatas([h, 'list', 'sortable']) === true;
-      }),
-      ['0'],
-      'id'
-    );
-  };
-  const getTableHeaders = () => {
-    return getListLayout().map(label => {
-      return { ...getMetaDatas([label, 'list']), name: label };
-    });
-  };
   const handleChangeListLabels = ({ name, value }) => {
     const currentSort = getSearchParams()._sort;
 
-    if (value && getListLayout().length === 1) {
+    if (value && listLayout.length === 1) {
       strapi.notification.error('content-manager.notification.error.displayedFields');
 
       return;
@@ -255,10 +276,12 @@ function ListView({
     resetProps();
     getDataRef.current(slug, updatedSearch);
   };
+
   const handleClickDelete = id => {
     setIdToDelete(id);
     toggleModalDelete();
   };
+
   const handleSubmit = (filters = []) => {
     emitEvent('didFilterEntries');
     toggleFilterPickerState();
@@ -281,49 +304,56 @@ function ListView({
     },
   ];
 
-  const headerAction = [
-    {
-      label: formatMessage(
-        {
-          id: 'content-manager.containers.List.addAnEntry',
-        },
-        {
-          entity: getName() || 'Content Manager',
-        }
-      ),
-      onClick: () => {
-        emitEvent('willCreateEntry');
-        push({
-          pathname: `${pathname}/create`,
-          search: `redirectUrl=${pathname}${search}`,
-        });
-      },
-      color: 'primary',
-      type: 'button',
-      icon: true,
-      style: {
-        paddingLeft: 15,
-        paddingRight: 15,
-        fontWeight: 600,
-      },
-    },
-  ];
-
-  const headerProps = {
-    title: {
-      label: getName() || 'Content Manager',
-    },
-    content: formatMessage(
+  const headerAction = useMemo(
+    () => [
       {
-        id:
-          count > 1
-            ? `${pluginId}.containers.List.pluginHeaderDescription`
-            : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+        label: formatMessage(
+          {
+            id: 'content-manager.containers.List.addAnEntry',
+          },
+          {
+            entity: label || 'Content Manager',
+          }
+        ),
+        onClick: () => {
+          emitEvent('willCreateEntry');
+          push({
+            pathname: `${pathname}/create`,
+            search: `redirectUrl=${pathname}${search}`,
+          });
+        },
+        color: 'primary',
+        type: 'button',
+        icon: true,
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
       },
-      { label: count }
-    ),
-    actions: headerAction,
-  };
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [label, pathname, search]
+  );
+
+  const headerProps = useMemo(() => {
+    return {
+      title: {
+        label: label || 'Content Manager',
+      },
+      content: formatMessage(
+        {
+          id:
+            count > 1
+              ? `${pluginId}.containers.List.pluginHeaderDescription`
+              : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+        },
+        { label: count }
+      ),
+      actions: headerAction,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count, headerAction, label]);
 
   return (
     <>
@@ -333,12 +363,12 @@ function ListView({
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
         firstSortableElement={getFirstSortableElement()}
-        label={getName()}
+        label={label}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
-        schema={getListSchema()}
+        schema={listSchema}
         searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
@@ -346,7 +376,7 @@ function ListView({
         <FilterPicker
           actions={filterPickerActions}
           isOpen={isFilterPickerOpen}
-          name={getName()}
+          name={label}
           toggleFilterPickerState={toggleFilterPickerState}
           onSubmit={handleSubmit}
         />
@@ -355,9 +385,9 @@ function ListView({
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
-              initValue={getQueryParameters(search, '_q') || ''}
-              model={getName()}
-              value={getQueryParameters(search, '_q') || ''}
+              initValue={searchValue}
+              model={label}
+              value={searchValue}
             />
           )}
           <Wrapper>
@@ -376,7 +406,7 @@ function ListView({
                           changeParams={handleChangeParams}
                           filters={getSearchParams().filters}
                           index={key}
-                          schema={getListSchema()}
+                          schema={listSchema}
                           key={key}
                           toggleFilterPickerState={toggleFilterPickerState}
                           isFilterPickerOpen={isFilterPickerOpen}
@@ -390,7 +420,7 @@ function ListView({
                 <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
                   <DisplayedFieldsDropdown
                     isOpen={isLabelPickerOpen}
-                    items={getAllLabels()}
+                    items={allLabels}
                     onChange={handleChangeListLabels}
                     onClickReset={() => {
                       resetListLabels(slug);
@@ -405,7 +435,7 @@ function ListView({
               <div className="col-12">
                 <CustomTable
                   data={data}
-                  headers={getTableHeaders()}
+                  headers={tableHeaders}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
                   showLoader={isLoading}
