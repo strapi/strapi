@@ -10,7 +10,7 @@ const PLUGIN_PREFIX = 'plugins::';
 const ADMIN_PREFIX = 'admin::';
 const APPLICATION_PREFIX = 'application::';
 
-const isPolicyGenerator = _.isArray;
+const isPolicyFactory = _.isArray;
 
 const getPolicyIn = (container, policy) =>
   _.get(container, ['config', 'policies', _.toLower(policy)]);
@@ -24,21 +24,18 @@ const createPolicy = (policyName, args) => ({ policyName, args });
 const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
 
 const parsePolicy = policy =>
-  isPolicyGenerator(policy) ? createPolicy(...policy) : createPolicy(policy);
+  isPolicyFactory(policy) ? createPolicy(...policy) : createPolicy(policy);
 
 const resolvePolicy = policyName => {
-  for (const policyModel of Object.values(policyModelsProvider)) {
-    if (policyModel.exists(policyName)) {
-      return resolveHandler(policyModel.get)(policyName);
-    }
-  }
+  const resolver = policyResolvers.find(resolver => resolver.exists(policyName));
 
-  return undefined;
+  return resolver ? resolveHandler(resolver.get)(policyName) : undefined;
 };
 
-const getLegacyPolicy = (policy, plugin, apiName) => {
+const searchLocalPolicy = (policy, plugin, apiName) => {
   let [absoluteApiName, policyName] = policy.split('.');
   let absoluteApi = _.get(strapi.api, absoluteApiName);
+  const resolver = policyResolvers.find(({ name }) => name === 'plugin');
 
   if (policyExistsIn(absoluteApi, policyName)) {
     return resolveHandler(getPolicyIn(absoluteApi, policyName));
@@ -46,8 +43,8 @@ const getLegacyPolicy = (policy, plugin, apiName) => {
 
   const pluginPolicy = `${PLUGIN_PREFIX}${plugin}.${policy}`;
 
-  if (plugin && policyModelsProvider.plugin.exists(pluginPolicy)) {
-    return resolveHandler(policyModelsProvider.plugin.get(pluginPolicy));
+  if (plugin && resolver.exists(pluginPolicy)) {
+    return resolveHandler(resolver.get(pluginPolicy));
   }
 
   const api = _.get(strapi.api, apiName);
@@ -64,7 +61,6 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
       endpoint: `${method} ${endpoint}`,
       controller: _.toLower(controller),
       action: _.toLower(action),
-      splitEndpoint: endpoint,
       verb: _.toLower(method),
       plugin,
     };
@@ -73,8 +69,9 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
   };
 };
 
-const createPolicyModelsProvider = () => ({
-  APIPolicy: {
+const policyResolvers = [
+  {
+    name: 'api',
     is(policy) {
       return _.startsWith(policy, APPLICATION_PREFIX);
     },
@@ -87,7 +84,8 @@ const createPolicyModelsProvider = () => ({
       return getPolicyIn(_.get(strapi, ['api', api]), policyName);
     },
   },
-  admin: {
+  {
+    name: 'admin',
     is(policy) {
       return _.startsWith(policy, ADMIN_PREFIX);
     },
@@ -98,7 +96,8 @@ const createPolicyModelsProvider = () => ({
       return getPolicyIn(_.get(strapi, 'admin'), stripPolicy(policy, ADMIN_PREFIX));
     },
   },
-  plugin: {
+  {
+    name: 'plugin',
     is(policy) {
       return _.startsWith(policy, PLUGIN_PREFIX);
     },
@@ -110,7 +109,8 @@ const createPolicyModelsProvider = () => ({
       return getPolicyIn(_.get(strapi, ['plugins', plugin]), policyName);
     },
   },
-  global: {
+  {
+    name: 'global',
     is(policy) {
       return _.startsWith(policy, GLOBAL_PREFIX);
     },
@@ -121,9 +121,7 @@ const createPolicyModelsProvider = () => ({
       return getPolicyIn(strapi, stripPolicy(policy, GLOBAL_PREFIX));
     },
   },
-});
-
-const policyModelsProvider = createPolicyModelsProvider();
+];
 
 const get = (policy, plugin, apiName) => {
   const { policyName, args } = parsePolicy(policy);
@@ -131,19 +129,40 @@ const get = (policy, plugin, apiName) => {
   const resolvedPolicy = resolvePolicy(policyName);
 
   if (resolvedPolicy !== undefined) {
-    return isPolicyGenerator(policy) ? resolvedPolicy(args) : resolvedPolicy;
+    return isPolicyFactory(policy) ? resolvedPolicy(args) : resolvedPolicy;
   }
 
-  const legacyPolicy = getLegacyPolicy(policy, plugin, apiName);
+  const localPolicy = searchLocalPolicy(policy, plugin, apiName);
 
-  if (legacyPolicy !== undefined) {
-    return legacyPolicy;
+  if (localPolicy !== undefined) {
+    return localPolicy;
   }
 
   throw new Error(`Could not find policy "${policy}"`);
 };
 
+const createPolicyFactory = (factoryCallback, options) => {
+  const { validator, name = 'unnamed' } = options;
+
+  const validate = args => {
+    try {
+      validator(args);
+    } catch (e) {
+      throw new Error(`Invalid objects submitted to "${name}" policy.`);
+    }
+  };
+
+  return args => {
+    if (validator) {
+      validate(args);
+    }
+
+    return factoryCallback(args);
+  };
+};
+
 module.exports = {
   get,
   globalPolicy,
+  createPolicyFactory,
 };
