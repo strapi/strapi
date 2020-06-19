@@ -52,19 +52,13 @@ function listViewReducer(state = initialState, action) {
         return state.get('data').map(value => toString(value.id));
       });
     case ON_DELETE_DATA_SUCCEEDED:
-      return state
-        .update('shouldRefetchData', v => !v)
-        .update('showWarningDelete', () => false);
+      return state.update('shouldRefetchData', v => !v).update('showWarningDelete', () => false);
     case ON_DELETE_SEVERAL_DATA_SUCCEEDED:
-      return state
-        .update('shouldRefetchData', v => !v)
-        .update('showWarningDeleteAll', () => false);
+      return state.update('shouldRefetchData', v => !v).update('showWarningDeleteAll', () => false);
     case RESET_PROPS:
       return initialState;
     case TOGGLE_MODAL_DELETE:
-      return state
-        .update('entriesToDelete', () => List([]))
-        .update('showWarningDelete', v => !v);
+      return state.update('entriesToDelete', () => List([])).update('showWarningDelete', v => !v);
     case TOGGLE_MODAL_DELETE_ALL:
       return state.update('showWarningDeleteAll', v => !v);
     default:

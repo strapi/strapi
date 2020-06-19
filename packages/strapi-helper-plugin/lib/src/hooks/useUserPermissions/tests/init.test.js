@@ -1,22 +1,16 @@
 import init from '../init';
 
 describe('HELPER_PLUGIN | hooks | useUserPermissions | init', () => {
-  it('should return the initialState and the allowedActions', () => {
-    const initialState = {
-      isLoading: true,
-    };
+  it('should return the correct state with an empty allowedActions object', () => {
     const expected = {
       isLoading: true,
       allowedActions: {},
     };
 
-    expect(init(initialState, [])).toEqual(expected);
+    expect(init([])).toEqual(expected);
   });
 
   it('should return an object with the allowedActions set properly', () => {
-    const initialState = {
-      isLoading: true,
-    };
     const expected = {
       isLoading: true,
       allowedActions: {
@@ -27,6 +21,6 @@ describe('HELPER_PLUGIN | hooks | useUserPermissions | init', () => {
 
     const data = ['read', 'update'];
 
-    expect(init(initialState, data)).toEqual(expected);
+    expect(init(data)).toEqual(expected);
   });
 });
