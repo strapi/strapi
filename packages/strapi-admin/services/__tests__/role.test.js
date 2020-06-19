@@ -14,7 +14,11 @@ describe('Role', () => {
         query: () => ({ create: dbCreate, count: dbCount }),
       };
 
-      const input = { name: 'super_admin', description: "Have all permissions. Can't be delete" };
+      const input = {
+        name: 'super_admin',
+        description: "Have all permissions. Can't be delete",
+        code: 'super-admin',
+      };
 
       const createdRole = await roleService.create(input);
 

@@ -20,6 +20,7 @@
     "date-fns": "^2.8.1",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.11",
+    "p-map": "^4.0.0",
     "pluralize": "^7.0.0",
     "rimraf": "3.0.0",
     "strapi-utils": "3.0.5"

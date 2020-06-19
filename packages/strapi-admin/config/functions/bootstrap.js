@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const adminActions = require('../admin-actions');
 
 const registerPermissionActions = () => {
@@ -38,26 +37,22 @@ const cleanPermissionInDatabase = async () => {
   await strapi.admin.services.permission.deleteByIds(permissionsToRemoveIds);
 };
 
-const getNestedFields = (attributes, fieldPath = '', nestingLevel = 3) => {
-  if (nestingLevel === 0) {
-    return fieldPath ? [fieldPath] : [];
-  }
-
-  const fields = [];
-  _.forIn(attributes, (attribute, attributeName) => {
-    const newFieldPath = fieldPath ? `${fieldPath}.${attributeName}` : attributeName;
-
-    if (attribute.type === 'component') {
-      const component = strapi.components[attribute.component];
-      const componentFields = getNestedFields(component.attributes, newFieldPath, nestingLevel - 1);
-      fields.push(...componentFields);
-    } else {
-      fields.push(newFieldPath);
-    }
-  });
-
-  return fields;
-};
+const getFieldsForActions = (actions, nestingLevel = 3) =>
+  actions.reduce((perms, action) => {
+    const newPerms = [];
+    action.subjects.forEach(contentTypeUid => {
+      const fields = strapi.admin.services['content-type'].getNestedFields(contentTypeUid, {
+        components: { ...strapi.components, ...strapi.contentTypes },
+        nestingLevel,
+      });
+      newPerms.push({
+        action: action.actionId,
+        subject: contentTypeUid,
+        fields,
+      });
+    });
+    return perms.concat(newPerms);
+  }, []);
 
 const createRolesIfNeeded = async () => {
   const someRolesExist = await strapi.admin.services.role.exists();
@@ -87,11 +82,13 @@ const createRolesIfNeeded = async () => {
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
-  await strapi.admin.services.role.create({
+  const superAdminRole = await strapi.admin.services.role.create({
     name: 'Super Admin',
     code: 'strapi-super-admin',
     description: 'Super Admins can access and manage all features and settings.',
   });
+
+  await strapi.admin.services.user.assignARoleToAll(superAdminRole.id);
 
   const editorRole = await strapi.admin.services.role.create({
     name: 'Editor',
@@ -105,19 +102,7 @@ const createRolesIfNeeded = async () => {
     description: 'Authors can manage and publish the content they created.',
   });
 
-  const editorPermissions = [];
-  contentTypesActions.forEach(action => {
-    _.forIn(strapi.contentTypes, contentType => {
-      if (action.subjects.includes(contentType.uid)) {
-        const fields = getNestedFields(contentType.attributes);
-        editorPermissions.push({
-          action: action.actionId,
-          subject: contentType.uid,
-          fields,
-        });
-      }
-    });
-  });
+  const editorPermissions = getFieldsForActions(contentTypesActions);
 
   const authorPermissions = editorPermissions.map(p => ({
     ...p,
@@ -158,19 +143,7 @@ const resetSuperAdminPermissions = async () => {
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
-  const permissions = [];
-  contentTypesActions.forEach(action => {
-    _.forIn(strapi.contentTypes, contentType => {
-      if (action.subjects.includes(contentType.uid)) {
-        const fields = getNestedFields(contentType.attributes, '', 1);
-        permissions.push({
-          action: action.actionId,
-          subject: contentType.uid,
-          fields,
-        });
-      }
-    });
-  });
+  const permissions = getFieldsForActions(contentTypesActions, 1);
 
   const otherActions = allActions.filter(a => a.section !== 'contentTypes');
   otherActions.forEach(action => {

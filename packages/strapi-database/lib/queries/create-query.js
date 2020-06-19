@@ -1,5 +1,7 @@
 'use strict';
 
+const pmap = require('p-map');
+
 const { createQueryWithLifecycles, withLifecycles } = require('./helpers');
 const { createFindPageQuery, createSearchPageQuery } = require('./paginated-queries');
 
@@ -10,6 +12,12 @@ const { createFindPageQuery, createSearchPageQuery } = require('./paginated-quer
  */
 module.exports = function createQuery(opts) {
   const { model, connectorQuery } = opts;
+
+  const createFn = createQueryWithLifecycles({
+    query: 'create',
+    model,
+    connectorQuery,
+  });
 
   return {
     get model() {
@@ -47,7 +55,13 @@ module.exports = function createQuery(opts) {
       return mapping[this.model.orm].call(this, { model: this.model });
     },
 
-    create: createQueryWithLifecycles({ query: 'create', model, connectorQuery }),
+    create: createFn,
+    createMany: (entities, { concurrency = 100 } = {}, ...rest) => {
+      return pmap(entities, entity => createFn(entity, ...rest), {
+        concurrency,
+        stopOnError: true,
+      });
+    },
     update: createQueryWithLifecycles({ query: 'update', model, connectorQuery }),
     delete: createQueryWithLifecycles({ query: 'delete', model, connectorQuery }),
     find: createQueryWithLifecycles({ query: 'find', model, connectorQuery }),

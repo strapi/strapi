@@ -4,6 +4,7 @@
  */
 
 const _ = require('lodash');
+const pmap = require('p-map');
 const {
   convertRestQueryParams,
   buildQuery,
@@ -22,15 +23,15 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   const timestamps = _.get(model, ['options', 'timestamps'], []);
 
   // Returns an object with relation keys only to create relations in DB
-  const pickRelations = values => {
-    return _.pick(values, assocKeys);
+  const pickRelations = attributes => {
+    return _.pick(attributes, assocKeys);
   };
 
   // keys to exclude to get attribute keys
   const excludedKeys = assocKeys.concat(componentKeys);
   // Returns an object without relational keys to persist in DB
-  const selectAttributes = values => {
-    return _.pickBy(values, (value, key) => {
+  const selectAttributes = attributes => {
+    return _.pickBy(attributes, (value, key) => {
       if (Array.isArray(timestamps) && timestamps.includes(key)) {
         return false;
       }
@@ -81,14 +82,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       .then(Number);
   }
 
-  async function create(values, { transacting } = {}) {
-    const relations = pickRelations(values);
-    const data = selectAttributes(values);
+  async function create(attributes, { transacting } = {}) {
+    const relations = pickRelations(attributes);
+    const data = selectAttributes(attributes);
 
     const runCreate = async trx => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
-      await createComponents(entry, values, { transacting: trx });
+      await createComponents(entry, attributes, { transacting: trx });
 
       return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
     };
@@ -96,7 +97,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return wrapTransaction(runCreate, { transacting });
   }
 
-  async function update(params, values, { transacting } = {}) {
+  async function update(params, attributes, { transacting } = {}) {
     const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
@@ -105,9 +106,9 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       throw err;
     }
 
-    // Extract values related to relational data.
-    const relations = pickRelations(values);
-    const data = selectAttributes(values);
+    // Extract attributes related to relational data.
+    const relations = pickRelations(attributes);
+    const data = selectAttributes(attributes);
 
     const runUpdate = async trx => {
       const updatedEntry =
@@ -118,7 +119,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
               patch: true,
             })
           : entry;
-      await updateComponents(updatedEntry, values, { transacting: trx });
+      await updateComponents(updatedEntry, attributes, { transacting: trx });
 
       if (Object.keys(relations).length > 0) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
@@ -160,7 +161,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
 
     const entries = await find(params, null, { transacting });
-    return Promise.all(entries.map(entry => deleteOne(entry.id, { transacting })));
+    return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
+      concurrency: 100,
+      stopOnError: true,
+    });
   }
 
   function search(params, populate) {
@@ -183,7 +187,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       .then(Number);
   }
 
-  async function createComponents(entry, values, { transacting }) {
+  async function createComponents(entry, attributes, { transacting }) {
     if (componentKeys.length === 0) return;
 
     const joinModel = model.componentsJoinModel;
@@ -216,15 +220,15 @@ module.exports = function createQueryBuilder({ model, strapi }) {
           const { component, required = false, repeatable = false } = attr;
           const componentModel = strapi.components[component];
 
-          if (required === true && !_.has(values, key)) {
+          if (required === true && !_.has(attributes, key)) {
             const err = new Error(`Component ${key} is required`);
             err.status = 400;
             throw err;
           }
 
-          if (!_.has(values, key)) continue;
+          if (!_.has(attributes, key)) continue;
 
-          const componentValue = values[key];
+          const componentValue = attributes[key];
 
           if (repeatable === true) {
             validateRepeatableInput(componentValue, { key, ...attr });
@@ -254,15 +258,15 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         case 'dynamiczone': {
           const { required = false } = attr;
 
-          if (required === true && !_.has(values, key)) {
+          if (required === true && !_.has(attributes, key)) {
             const err = new Error(`Dynamiczone ${key} is required`);
             err.status = 400;
             throw err;
           }
 
-          if (!_.has(values, key)) continue;
+          if (!_.has(attributes, key)) continue;
 
-          const dynamiczoneValues = values[key];
+          const dynamiczoneValues = attributes[key];
 
           validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
 
@@ -284,7 +288,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
   }
 
-  async function updateComponents(entry, values, { transacting }) {
+  async function updateComponents(entry, attributes, { transacting }) {
     if (componentKeys.length === 0) return;
 
     const joinModel = model.componentsJoinModel;
@@ -338,7 +342,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
     for (let key of componentKeys) {
       // if key isn't present then don't change the current component data
-      if (!_.has(values, key)) continue;
+      if (!_.has(attributes, key)) continue;
 
       const attr = model.attributes[key];
       const { type } = attr;
@@ -349,7 +353,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
           const componentModel = strapi.components[component];
 
-          const componentValue = values[key];
+          const componentValue = attributes[key];
 
           if (repeatable === true) {
             validateRepeatableInput(componentValue, { key, ...attr });
@@ -394,7 +398,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
           break;
         }
         case 'dynamiczone': {
-          const dynamiczoneValues = values[key];
+          const dynamiczoneValues = attributes[key];
 
           validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
 
@@ -423,8 +427,12 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return;
   }
 
-  async function deleteDynamicZoneOldComponents(entry, values, { key, joinModel, transacting }) {
-    const idsToKeep = values.reduce((acc, value) => {
+  async function deleteDynamicZoneOldComponents(
+    entry,
+    attributes,
+    { key, joinModel, transacting }
+  ) {
+    const idsToKeep = attributes.reduce((acc, value) => {
       const component = value.__component;
       const componentModel = strapi.components[component];
       if (_.has(value, componentModel.primaryKey)) {

@@ -19,7 +19,8 @@
       "type": "string",
       "minLength": 1,
       "unique": true,
-      "configurable": false
+      "configurable": false,
+      "required": true
     },
     "description": {
       "type": "string",

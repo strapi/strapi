@@ -22,13 +22,13 @@ describe('Permission Service', () => {
   describe('Assign permissions', () => {
     test('Delete previous permissions', async () => {
       const deleteFn = jest.fn(() => Promise.resolve([]));
-      const create = jest.fn(() => Promise.resolve({}));
+      const createMany = jest.fn(() => Promise.resolve([]));
       const getAll = jest.fn(() => []);
 
       global.strapi = {
         admin: { services: { permission: { actionProvider: { getAll } } } },
         query() {
-          return { delete: deleteFn, create };
+          return { delete: deleteFn, createMany };
         },
       };
 
@@ -39,7 +39,7 @@ describe('Permission Service', () => {
 
     test('Create new permissions', async () => {
       const deleteFn = jest.fn(() => Promise.resolve([]));
-      const create = jest.fn(() => Promise.resolve({}));
+      const createMany = jest.fn(() => Promise.resolve([]));
       const getAll = jest.fn(() =>
         Array(5)
           .fill(0)
@@ -58,7 +58,7 @@ describe('Permission Service', () => {
           },
         },
         query() {
-          return { delete: deleteFn, create };
+          return { delete: deleteFn, createMany };
         },
       };
 
@@ -68,14 +68,14 @@ describe('Permission Service', () => {
 
       await permissionService.assign(1, permissions);
 
-      expect(create).toHaveBeenCalledTimes(5);
-      expect(create).toHaveBeenNthCalledWith(1, {
-        action: 'action-0',
-        role: 1,
-        conditions: [],
-        fields: null,
-        subject: null,
-      });
+      expect(createMany).toHaveBeenCalledTimes(1);
+      expect(createMany).toHaveBeenCalledWith([
+        { action: 'action-0', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-1', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-2', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-3', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-4', conditions: [], fields: null, role: 1, subject: null },
+      ]);
     });
   });
 
