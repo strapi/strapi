@@ -116,6 +116,7 @@ describe('Upload plugin end to end tests', () => {
           provider: 'local',
           formats: {
             thumbnail: {
+              name: 'thumbnail_thumbnail_target.png',
               hash: expect.any(String),
               ext: '.png',
               mime: 'image/png',
