@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Flex, Text, Checkbox, Padded } from '@buffetjs/core';
 
-import { usePermissionsContext } from '../../../../../../hooks';
-import { getAttributesToDisplay } from '../../../../../../utils';
+import { usePermissionsContext } from '../../../../../../../src/hooks';
+import { getAttributesToDisplay } from '../../../../../../../src/utils';
 import {
   contentManagerPermissionPrefix,
   getRecursivePermissionsByAction,
@@ -12,15 +12,15 @@ import {
   getAllAttributesActionsSize,
   getRecursivePermissions,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
-} from '../../../utils';
-import PermissionCheckbox from '../../PermissionCheckbox';
-import PermissionName from '../PermissionName';
-import CollapseLabel from '../../CollapseLabel';
-import ComponentsAttributes from '../ComponentsAttributes';
-import Chevron from '../Chevron';
-import PermissionWrapper from '../PermissionWrapper';
-import AttributeRowWrapper from './AttributeRowWrapper';
-import Required from '../Required';
+} from '../../../../../../../src/components/Roles/Permissions/utils';
+import PermissionCheckbox from '../../../../../../../src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
+import PermissionName from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionName';
+import CollapseLabel from '../../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
+import ComponentsAttributes from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes';
+import Chevron from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/Chevron';
+import PermissionWrapper from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
+import AttributeRowWrapper from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ContentTypesAttributes/AttributeRowWrapper';
+import Required from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/Required';
 
 const AttributeRow = ({ attribute, contentType }) => {
   const {
@@ -28,8 +28,10 @@ const AttributeRow = ({ attribute, contentType }) => {
     collapsePath,
     components,
     permissions,
+    onAttributePermissionSelect,
     onAllContentTypeActions,
     onAllAttributeActionsSelect,
+    onContentTypeAttributesActionSelect,
   } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const isActive = collapsePath[1] === attribute.attributeName;
@@ -107,6 +109,27 @@ const AttributeRow = ({ attribute, contentType }) => {
     [permissions, attribute, contentType]
   );
 
+  const handleCheck = useCallback(
+    action => {
+      if (isCollapsable) {
+        onContentTypeAttributesActionSelect({
+          action,
+          subject: collapsePath[0],
+          attributes: getRecursiveAttributes(),
+          shouldEnable: !allRecursiveChecked(action),
+        });
+      } else {
+        onAttributePermissionSelect({
+          subject: contentType.uid,
+          action,
+          attribute: attribute.attributeName,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [attribute, collapsePath, contentType, isCollapsable, permissions]
+  );
+
   const handleToggleAttributes = () => {
     if (isCollapsable) {
       onCollapse(1, attribute.attributeName);
@@ -174,12 +197,13 @@ const AttributeRow = ({ attribute, contentType }) => {
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={action}
-                disabled
+                disabled={attribute.required}
                 value={
                   allRecursiveChecked(`${contentManagerPermissionPrefix}.${action}`) ||
                   checkPermission(`${contentManagerPermissionPrefix}.${action}`)
                 }
                 name={`${attribute.attributeName}-${action}`}
+                onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
               />
             ))}

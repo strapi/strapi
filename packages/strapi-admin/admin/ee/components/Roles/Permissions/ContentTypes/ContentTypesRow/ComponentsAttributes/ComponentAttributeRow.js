@@ -4,23 +4,22 @@ import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
 import styled from 'styled-components';
 
-import { usePermissionsContext } from '../../../../../../hooks';
-import { getAttributesToDisplay } from '../../../../../../utils';
+import { usePermissionsContext } from '../../../../../../../src/hooks';
+import { getAttributesToDisplay } from '../../../../../../../src/utils';
 import {
   contentManagerPermissionPrefix,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
   getAttributesByModel,
   getRecursivePermissionsByAction,
-} from '../../../utils';
-import CollapseLabel from '../../CollapseLabel';
-import PermissionCheckbox from '../../PermissionCheckbox';
-import PermissionWrapper from '../PermissionWrapper';
-import Chevron from '../Chevron';
-import Required from '../Required';
-import Curve from './Curve';
-// eslint-disable-next-line import/no-cycle
-import ComponentsAttributes from './index';
-import RowStyle from './RowStyle';
+} from '../../../../../../../src/components/Roles/Permissions/utils';
+import CollapseLabel from '../../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
+import PermissionCheckbox from '../../../../../../../src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
+import PermissionWrapper from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
+import Chevron from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/Chevron';
+import Required from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/Required';
+import Curve from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/Curve';
+import ComponentsAttributes from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes';
+import RowStyle from '../../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/RowStyle';
 
 // Those styles will be used only in this file.
 const LeftBorderTimeline = styled.div`
@@ -34,7 +33,14 @@ const AttributeRowWrapper = styled(Flex)`
 `;
 
 const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursiveLevel }) => {
-  const { components, onCollapse, permissions, collapsePath } = usePermissionsContext();
+  const {
+    components,
+    onCollapse,
+    permissions,
+    collapsePath,
+    onAttributePermissionSelect,
+    onContentTypeAttributesActionSelect,
+  } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const contentTypeUid = collapsePath[0];
   const isActive = collapsePath[recursiveLevel + 2] === attribute.attributeName;
@@ -72,6 +78,27 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
     return number;
   };
+
+  const handleCheck = useCallback(
+    action => {
+      if (isCollapsable) {
+        onContentTypeAttributesActionSelect({
+          action,
+          subject: contentTypeUid,
+          attributes: getRecursiveAttributes(),
+          shouldEnable: !allRecursiveChecked(action),
+        });
+      } else {
+        onAttributePermissionSelect({
+          subject: contentTypeUid,
+          action,
+          attribute: attributePermissionName,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [attribute, permissions]
+  );
 
   const checkPermission = useCallback(
     action => {
@@ -147,7 +174,8 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={`${attribute.attributeName}-${action}`}
-                disabled
+                disabled={attribute.required}
+                onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
                 value={allRecursiveChecked(action) || checkPermission(action)}
                 name={`${attribute.attributeName}-${action}`}

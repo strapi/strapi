@@ -1,27 +1,22 @@
 import { useEffect, useReducer } from 'react';
-// TODO
-// import { request } from 'strapi-helper-plugin'
-import tempData from './utils/tempData';
+import { request } from 'strapi-helper-plugin';
+
 import reducer, { initialState } from './reducer';
 
 const useFetchPermissionsLayout = () => {
   const [{ data, error, isLoading }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const getData = () => {
+    const getData = async () => {
       dispatch({
         type: 'GET_DATA',
       });
 
-      return new Promise(resolve => {
-        setTimeout(() => {
-          dispatch({
-            type: 'GET_DATA_SUCCEEDED',
-            data: tempData,
-          });
+      const { data } = await request('/admin/permissions', { method: 'GET' });
 
-          resolve();
-        }, 1000);
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
       });
     };
 

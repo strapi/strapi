@@ -21,15 +21,6 @@ const RowStyle = styled.div`
   ${Chevron} {
     width: 13px;
   }
-  ${({ isRequired, theme }) =>
-    isRequired &&
-    `
-      ${Text}:after {
-        content: '*';
-        padding-left: 1px;
-        color: ${theme.main.colors.red};
-      }
-  `}
   ${({ isCollapsable, theme }) =>
     isCollapsable &&
     `

@@ -12,6 +12,7 @@ import ContainerFluid from '../../../../src/components/ContainerFluid';
 import FormCard from '../../../../src/components/FormBloc';
 import { ButtonWithNumber, Permissions } from '../../../../src/components/Roles';
 import SizedInput from '../../../../src/components/SizedInput';
+import { formatPermissionsToApi } from '../../../../src/utils';
 
 import schema from './utils/schema';
 
@@ -19,8 +20,8 @@ const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
   // @HichamELBSI Adding the layout since you might need it for the plugins sections
-  const { isLoading: isLayoutLoading } = useFetchPermissionsLayout();
   const { goBack } = useHistory();
+  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -44,26 +45,35 @@ const CreatePage = () => {
     },
   ];
 
-  const handleCreateRoleSubmit = async data => {
-    try {
-      setIsSubmiting(true);
-      const res = await request('/admin/roles', {
-        method: 'POST',
-        body: data,
-      });
+  const handleCreateRoleSubmit = data => {
+    setIsSubmiting(true);
 
-      if (res.data.id) {
+    Promise.resolve(
+      request('/admin/roles', {
+        method: 'POST',
+        body: { name: data.name, description: data.description },
+      })
+    )
+      .then(res => {
+        if (res.data.id && data.permissions) {
+          return request(`/admin/roles/${res.data.id}/permissions`, {
+            method: 'PUT',
+            body: { permissions: formatPermissionsToApi(data.permissions) },
+          });
+        }
+
+        return res;
+      })
+      .then(() => {
         strapi.notification.success('Settings.roles.created');
         goBack();
-      }
-    } catch (err) {
-      //   if (err.response) {
-      // const data = get(err, 'response.payload', { data: {} });
-      // const apiErrors = formatAPIErrors(data);
-      // }
-      strapi.notification.error('notification.error');
-      setIsSubmiting(false);
-    }
+      })
+      .catch(() => {
+        strapi.notification.error('notification.error');
+      })
+      .finally(() => {
+        setIsSubmiting(false);
+      });
   };
 
   const actions = [
@@ -77,11 +87,12 @@ const CreatePage = () => {
 
   return (
     <Formik
-      initialValues={{ name: '', description: '' }}
+      initialValues={{ name: '', description: '', permissions: {} }}
       onSubmit={handleCreateRoleSubmit}
       validationSchema={schema}
+      validateOnChange={false}
     >
-      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
+      {({ handleSubmit, values, errors, setFieldValue, handleReset, handleChange, handleBlur }) => (
         <form onSubmit={handleSubmit}>
           <ContainerFluid padding="0">
             <Header
@@ -135,7 +146,11 @@ const CreatePage = () => {
             </FormCard>
             {!isLayoutLoading && (
               <Padded top bottom size="md">
-                <Permissions />
+                <Permissions
+                  onChange={setFieldValue}
+                  permissionsLayout={permissionsLayout}
+                  rolePermissions={values.permissions}
+                />
               </Padded>
             )}
           </ContainerFluid>

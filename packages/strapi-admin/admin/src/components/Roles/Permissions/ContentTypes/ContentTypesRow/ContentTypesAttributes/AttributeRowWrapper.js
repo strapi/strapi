@@ -25,10 +25,10 @@ const AttributeRowWrapper = styled(Flex)`
   ${({ isRequired, theme }) =>
     isRequired &&
     `
-      ${Text}:after {
-        content: '*';
-        padding-left: 1px;
-        color: ${theme.main.colors.red};
+      input[type='checkbox'] {
+        &:after {
+          color: ${theme.main.colors.grey};
+        }
       }
   `}
   ${({ isCollapsable, theme }) =>

@@ -11,6 +11,7 @@ import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
+import { formatPermissionsToApi } from '../../../utils';
 
 import schema from './utils/schema';
 
@@ -23,9 +24,8 @@ const EditPage = () => {
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
   const [isSubmiting, setIsSubmiting] = useState(false);
 
-  // Retrieve the view's layout
-  const { isLoading: isLayoutLoading } = useFetchPermissionsLayout();
-  const { data: role, isLoading: isRoleLoading } = useFetchRole(id);
+  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
+  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -61,19 +61,18 @@ const EditPage = () => {
 
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
-        body: data,
+        body: { name: data.name, description: data.description },
+      });
+
+      await request(`/admin/roles/${id}/permissions`, {
+        method: 'PUT',
+        body: { permissions: formatPermissionsToApi(data.permissions) },
       });
 
       strapi.notification.success('notification.success.saved');
       goBack();
     } catch (err) {
-      // TODO : Uncomment when the API handle clean errors
-
-      //   if (err.response) {
-      // const data = get(err, 'response.payload', { data: {} });
-      // const apiErrorsMessage = formatAPIErrors(data);
-      // strapi.notification.error(apiErrorsMessage);
-      // }
+      console.error(err);
       strapi.notification.error('notification.error');
     } finally {
       setIsSubmiting(false);
@@ -84,17 +83,21 @@ const EditPage = () => {
   return (
     <Formik
       enableReinitialize
-      initialValues={{ name: role.name, description: role.description }}
+      initialValues={{
+        name: role.name,
+        description: role.description,
+        permissions: rolePermissions,
+      }}
       onSubmit={handleEditRoleSubmit}
       validationSchema={schema}
+      validateOnChange={false}
     >
-      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
+      {({ handleSubmit, values, errors, setFieldValue, handleReset, handleChange, handleBlur }) => (
         <form onSubmit={handleSubmit}>
           <ContainerFluid padding="0">
             <Header
               title={{
                 label: formatMessage({
-                  // TODO change trad
                   id: 'Settings.roles.edit.title',
                   defaultMessage: 'Edit a role',
                 }),
@@ -117,7 +120,11 @@ const EditPage = () => {
             />
             {!isLayoutLoading && !isRoleLoading && (
               <Padded top bottom size="md">
-                <Permissions />
+                <Permissions
+                  onChange={setFieldValue}
+                  permissionsLayout={permissionsLayout}
+                  rolePermissions={rolePermissions}
+                />
               </Padded>
             )}
           </ContainerFluid>

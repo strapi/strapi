@@ -2,6 +2,7 @@ import { useReducer, useEffect } from 'react';
 import { request } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
+import { formatPermissionsFromApi } from '../../utils';
 
 const useFetchRole = id => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -14,13 +15,19 @@ const useFetchRole = id => {
 
   const fetchRole = async roleId => {
     try {
-      const requestURL = `/admin/roles/${roleId}`;
+      // const requestURL = `/admin/roles/${roleId}`;
 
-      const { data } = await request(requestURL, { method: 'GET' });
+      // const { data } = await request(requestURL, { method: 'GET' });
+      const [{ data: role }, { data: permissions }] = await Promise.all(
+        [`roles/${roleId}`, `roles/${roleId}/permissions`].map(endPoint =>
+          request(`/admin/${endPoint}`, { method: 'GET' })
+        )
+      );
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
-        data,
+        role,
+        permissions: formatPermissionsFromApi(permissions),
       });
     } catch (err) {
       dispatch({
