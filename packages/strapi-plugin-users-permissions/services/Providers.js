@@ -121,11 +121,24 @@ const getProfile = async (provider, query, callback) => {
     })
     .get();
 
-  const client_id = strapi.config.provider[provider].client_id || grant[provider].key || '';
+  const client_id =
+    (strapi.config.provider &&
+      strapi.config.provider[provider] &&
+      strapi.config.provider[provider].client_id) ||
+    grant[provider].key ||
+    '';
   const client_secret =
-    strapi.config.provider[provider].client_secret || grant[provider].secret || '';
+    (strapi.config.provider &&
+      strapi.config.provider[provider] &&
+      strapi.config.provider[provider].client_secret) ||
+    grant[provider].secret ||
+    '';
   let redirect_uri =
-    strapi.config.provider[provider].redirect_url || grant[provider].callback || '';
+    (strapi.config.provider &&
+      strapi.config.provider[provider] &&
+      strapi.config.provider[provider].redirect_url) ||
+    grant[provider].callback ||
+    '';
 
   switch (provider) {
     case 'discord': {
