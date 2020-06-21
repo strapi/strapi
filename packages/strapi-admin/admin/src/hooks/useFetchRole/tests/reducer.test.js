@@ -17,11 +17,13 @@ describe('ADMIN | HOOKS | USEFETCHROLE | reducer', () => {
         type: 'GET_DATA_ERROR',
       };
       const initialState = {
-        data: {},
+        role: {},
+        permissions: {},
         isLoading: true,
       };
       const expected = {
-        data: {},
+        role: {},
+        permissions: {},
         isLoading: false,
       };
 
@@ -33,22 +35,59 @@ describe('ADMIN | HOOKS | USEFETCHROLE | reducer', () => {
     it('should return the state with the data', () => {
       const action = {
         type: 'GET_DATA_SUCCEEDED',
-        data: {
+        role: {
           id: 1,
           name: 'Super admin',
           description: 'This is the super admin role',
         },
+        permissions: [
+          {
+            action: 'plugins::content-manager.explorer.read',
+            conditions: [],
+            fields: ['name', 'addresses'],
+            id: 3,
+            role: 12,
+            subject: 'application::category.category',
+          },
+          {
+            action: 'plugins::content-manager.explorer.delete',
+            conditions: [],
+            fields: [],
+            id: 4,
+            role: 12,
+            subject: 'application::category.category',
+          },
+        ],
       };
       const initialState = {
-        data: {},
+        role: {},
+        permissions: {},
         isLoading: true,
       };
       const expected = {
-        data: {
+        role: {
           id: 1,
           name: 'Super admin',
           description: 'This is the super admin role',
         },
+        permissions: [
+          {
+            action: 'plugins::content-manager.explorer.read',
+            conditions: [],
+            fields: ['name', 'addresses'],
+            id: 3,
+            role: 12,
+            subject: 'application::category.category',
+          },
+          {
+            action: 'plugins::content-manager.explorer.delete',
+            conditions: [],
+            fields: [],
+            id: 4,
+            role: 12,
+            subject: 'application::category.category',
+          },
+        ],
         isLoading: false,
       };
 

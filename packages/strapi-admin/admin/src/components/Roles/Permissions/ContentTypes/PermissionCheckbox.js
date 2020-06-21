@@ -18,6 +18,15 @@ const PermissionCheckbox = styled(Checkbox)`
       color: ${theme.main.colors.mediumBlue};
     }
   `}
+  ${({ disabled, theme }) =>
+    disabled &&
+    `
+    input[type='checkbox'] {
+        &:after {
+          color: ${theme.main.colors.grey};
+        }
+      }
+    `}
 `;
 
 export default PermissionCheckbox;

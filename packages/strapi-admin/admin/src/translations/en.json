@@ -277,7 +277,7 @@
   "Settings.roles.form.description": "Name and description of the role",
   "Settings.roles.form.button.users-with-role": "Users with this role",
   "Settings.roles.form.permissions.create": "Create",
-  "Settings.roles.form.permissions.fieldsPermissions": "Fields permissions",
+  "Settings.roles.form.permissions.attributesPermissions": "Fields permissions",
   "Settings.roles.form.permissions.read": "Read",
   "Settings.roles.form.permissions.update": "Update",
   "Settings.roles.form.permissions.delete": "Delete",

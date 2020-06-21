@@ -3,22 +3,23 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Checkbox, Flex, Text, Padded } from '@buffetjs/core';
 
-import { getAttributesToDisplay } from '../../../../../utils';
-import { usePermissionsContext } from '../../../../../hooks';
+// TODO : This is why we need the babel module resolver plugin.
+import { getAttributesToDisplay } from '../../../../../../src/utils';
+import { usePermissionsContext } from '../../../../../../src/hooks';
 import {
   ATTRIBUTES_PERMISSIONS_ACTIONS,
   isAttributeAction,
   getAttributePermissionsSizeByContentTypeAction,
   getAllAttributesActionsSize,
   getAttributesByModel,
-} from '../../utils';
-import Chevron from './Chevron';
-import PermissionCheckbox from '../PermissionCheckbox';
-import PermissionName from './PermissionName';
-import StyledRow from './StyledRow';
-import ContentTypesAttributes from './ContentTypesAttributes';
-import PermissionWrapper from './PermissionWrapper';
-import CollapseLabel from '../CollapseLabel';
+} from '../../../../../../src/components/Roles/Permissions/utils';
+import Chevron from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/Chevron';
+import PermissionCheckbox from '../../../../../../src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
+import PermissionName from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionName';
+import StyledRow from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/StyledRow';
+import ContentTypesAttributes from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ContentTypesAttributes';
+import PermissionWrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
+import CollapseLabel from '../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
 
 const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) => {
   const {
@@ -26,6 +27,8 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
     onCollapse,
     permissions,
     components,
+    onContentTypeActionSelect,
+    onContentTypeAttributesActionSelect,
     onAllContentTypeActions,
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
@@ -73,6 +76,22 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
     onCollapse(0, contentType.uid);
   };
 
+  const handleActionSelect = action => {
+    onContentTypeAttributesActionSelect({
+      action,
+      subject: contentType.uid,
+      attributes: getAttributes(),
+      shouldEnable: !hasAllAttributeByAction(action),
+    });
+  };
+
+  const handleContentTypeActionSelect = action => {
+    onContentTypeActionSelect({
+      action,
+      subject: contentType.uid,
+    });
+  };
+
   const handleAllContentTypeActions = () => {
     onAllContentTypeActions({
       subject: contentType.uid,
@@ -118,19 +137,19 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
               !isAttributeAction(permissionLayout.action) ? (
                 <PermissionCheckbox
                   key={permissionLayout.action}
-                  disabled
                   value={canSelectContentTypeActions(permissionLayout.action)}
                   hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
+                  onChange={() => handleContentTypeActionSelect(permissionLayout.action)}
                 />
               ) : (
                 <PermissionCheckbox
                   key={permissionLayout.action}
-                  disabled
                   value={hasAllAttributeByAction(permissionLayout.action)}
                   someChecked={hasSomeAttributeByAction(permissionLayout.action)}
                   hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
+                  onChange={() => handleActionSelect(permissionLayout.action)}
                 />
               )
             )}

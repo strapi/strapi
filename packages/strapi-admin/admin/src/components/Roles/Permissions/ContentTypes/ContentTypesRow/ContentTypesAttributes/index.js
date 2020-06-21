@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Padded, Flex, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
+import AttributeRow from 'ee_else_ce/components/Roles/Permissions/ContentTypes/ContentTypesRow/ContentTypesAttributes/AttributeRow';
 
-import AttributeRow from './AttributeRow';
+import { ATTRIBUTES_PERMISSIONS_ACTIONS } from '../../../utils/permissonsConstantsActions';
 import Wrapper from './Wrapper';
 
 // Those styles are very specific.
@@ -14,55 +15,45 @@ const ActionTitle = styled.div`
   padding-top: 1rem;
   padding-bottom: 1rem;
 `;
-const FieldsTitleWrapper = styled.div`
+const AttributesTitleWrapper = styled.div`
   width: 18rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
   padding-left: 3.5rem;
 `;
 
-const ContentTypesAttributes = ({ attributes }) => {
+const ContentTypesAttributes = ({ attributes, contentType }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Wrapper>
       <Flex>
-        <FieldsTitleWrapper>
+        <AttributesTitleWrapper>
           <Text fontWeight="bold">
             {formatMessage({
-              id: 'Settings.roles.form.permissions.fieldsPermissions',
-              defaultMessage: 'Fields permissions',
+              id: 'Settings.roles.form.permissions.attributesPermissions',
+              defaultMessage: 'Attributes permissions',
             })}
           </Text>
-        </FieldsTitleWrapper>
-        <ActionTitle>
-          <Text fontWeight="bold">
-            {formatMessage({
-              id: 'Settings.roles.form.permissions.create',
-              defaultMessage: 'Create',
-            })}
-          </Text>
-        </ActionTitle>
-        <ActionTitle>
-          <Text fontWeight="bold">
-            {formatMessage({
-              id: 'Settings.roles.form.permissions.read',
-              defaultMessage: 'Read',
-            })}
-          </Text>
-        </ActionTitle>
-        <ActionTitle>
-          <Text fontWeight="bold">
-            {formatMessage({
-              id: 'Settings.roles.form.permissions.update',
-              defaultMessage: 'Update',
-            })}
-          </Text>
-        </ActionTitle>
+        </AttributesTitleWrapper>
+        {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
+          <ActionTitle key={action}>
+            <Text textTransform="capitalize" fontWeight="bold">
+              {formatMessage({
+                id: `Settings.roles.form.permissions.${action}`,
+                defaultMessage: action,
+              })}
+            </Text>
+          </ActionTitle>
+        ))}
       </Flex>
       <Padded left size="md">
         {attributes.map(attribute => (
-          <AttributeRow attribute={attribute} key={attribute.attributeName} />
+          <AttributeRow
+            contentType={contentType}
+            attribute={attribute}
+            key={attribute.attributeName}
+          />
         ))}
       </Padded>
     </Wrapper>
@@ -71,6 +62,7 @@ const ContentTypesAttributes = ({ attributes }) => {
 
 ContentTypesAttributes.propTypes = {
   attributes: PropTypes.array.isRequired,
+  contentType: PropTypes.object.isRequired,
 };
 
 export default ContentTypesAttributes;

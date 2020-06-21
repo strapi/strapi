@@ -5,7 +5,7 @@ import { Padded } from '@buffetjs/core';
 
 // Here is the recursive component.
 // eslint-disable-next-line import/no-cycle
-import ComponentAttributeRow from './ComponentAttributeRow';
+import ComponentAttributeRow from 'ee_else_ce/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/ComponentAttributeRow';
 
 // Custom timeline header style used only in this file.
 const TopTimeline = styled.div`
