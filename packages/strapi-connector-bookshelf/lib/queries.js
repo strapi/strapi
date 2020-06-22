@@ -428,12 +428,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return;
   }
 
-  async function deleteDynamicZoneOldComponents(
-    entry,
-    attributes,
-    { key, joinModel, transacting }
-  ) {
-    const idsToKeep = attributes.reduce((acc, value) => {
+  async function deleteDynamicZoneOldComponents(entry, values, { key, joinModel, transacting }) {
+    const idsToKeep = values.reduce((acc, value) => {
       const component = value.__component;
       const componentModel = strapi.components[component];
       if (_.has(value, componentModel.primaryKey)) {
