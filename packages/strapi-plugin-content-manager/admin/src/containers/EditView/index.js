@@ -31,8 +31,12 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
-  const isSingleType = contentType === 'singleType';
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () => init(initialState));
+  const isSingleType = useMemo(() => contentType === 'singleType', [contentType]);
+  const [{ formattedContentTypeLayout, isDraggingComponent }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    () => init(initialState)
+  );
   const allLayoutData = useMemo(() => get(layouts, [slug], {}), [layouts, slug]);
   const currentContentTypeLayoutData = useMemo(() => get(allLayoutData, ['contentType'], {}), [
     allLayoutData,
@@ -100,14 +104,13 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentContentTypeLayout, currentContentTypeSchema.attributes]);
 
-  const { formattedContentTypeLayout, isDraggingComponent } = reducerState.toJS();
-
   return (
     <EditViewProvider
       allLayoutData={allLayoutData}
       components={components}
       layout={currentContentTypeLayoutData}
       isDraggingComponent={isDraggingComponent}
+      isSingleType={isSingleType}
       setIsDraggingComponent={() => {
         dispatch({
           type: 'SET_IS_DRAGGING_COMPONENT',
@@ -122,6 +125,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
       <EditViewDataManagerProvider
         allLayoutData={allLayoutData}
         redirectToPreviousPage={goBack}
+        isSingleType={isSingleType}
         slug={slug}
       >
         <BackHeader onClick={goBack} />
