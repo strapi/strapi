@@ -17,7 +17,8 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import getRequestUrl from '../../utils/getRequestUrl';
+import { generatePermissionsObject, getRequestUrl } from '../../utils';
+
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
@@ -42,8 +43,6 @@ import {
 } from './actions';
 
 import makeSelectListView from './selectors';
-
-import { generatePermissionsObject } from '../../utils';
 
 /* eslint-disable react/no-array-index-key */
 
