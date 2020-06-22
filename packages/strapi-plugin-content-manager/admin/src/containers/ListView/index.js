@@ -4,17 +4,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
   PopUpWarning,
   generateFiltersFromSearch,
-  generateSearchFromFilters,
-  generateSearchFromObject,
-  getQueryParameters,
   useGlobalContext,
   request,
   CheckPermissions,
   useUserPermissions,
+  useQuery,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
@@ -30,6 +29,7 @@ import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import Filter from './Filter';
 import Footer from './Footer';
 import {
+  getData,
   getDataSucceeded,
   onChangeBulk,
   onChangeBulkSelectall,
@@ -49,10 +49,12 @@ import { generatePermissionsObject } from '../../utils';
 function ListView({
   count,
   data,
+  didDeleteData,
   emitEvent,
   entriesToDelete,
   isLoading,
-  location: { pathname, search },
+  location: { pathname },
+  getData,
   getDataSucceeded,
   layouts,
   history: { push },
@@ -63,7 +65,6 @@ function ListView({
   onDeleteSeveralDataSucceeded,
   resetListLabels,
   resetProps,
-  shouldRefetchData,
   showWarningDelete,
   slug,
   toggleModalDelete,
@@ -74,12 +75,12 @@ function ListView({
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
-    setIsLoading,
   } = useUserPermissions(viewPermissions);
-
+  const query = useQuery();
+  const { search } = useLocation();
+  const isFirstRender = useRef(true);
   const { formatMessage } = useGlobalContext();
-  const getLayoutSettingRef = useRef();
-  const getDataRef = useRef();
+
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
@@ -87,43 +88,93 @@ function ListView({
     return [slug, 'contentType'];
   }, [slug]);
 
-  getDataRef.current = async (uid = slug, params = getSearchParams()) => {
+  const getLayoutSetting = useCallback(
+    settingName => {
+      return get(layouts, [...contentTypePath, 'settings', settingName], '');
+    },
+    [contentTypePath, layouts]
+  );
+
+  // Related to the search
+  const defaultSort = useMemo(() => {
+    return `${getLayoutSetting('defaultSortBy')}:${getLayoutSetting('defaultSortOrder')}`;
+  }, [getLayoutSetting]);
+
+  const filters = useMemo(() => {
+    const currentSearch = new URLSearchParams(search);
+
+    // Delete all params that are not related to the filters
+    const paramsToDelete = ['_limit', '_page', '_sort', '_q'];
+
+    for (let i = 0; i < paramsToDelete.length; i++) {
+      currentSearch.delete(paramsToDelete[i]);
+    }
+
+    return generateFiltersFromSearch(currentSearch.toString());
+  }, [search]);
+  const _limit = useMemo(() => {
+    return parseInt(query.get('_limit') || getLayoutSetting('pageSize'), 10);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getLayoutSetting, query.get('_limit')]);
+  const _q = useMemo(() => {
+    return query.get('_q') || '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.get('_q')]);
+  const _page = useMemo(() => {
+    return parseInt(query.get('_page') || 1, 10);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.get('_page')]);
+  const _sort = useMemo(() => {
+    return query.get('_sort') || defaultSort;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultSort, query.get('_sort')]);
+  const _start = useMemo(() => {
+    return (_page - 1) * parseInt(_limit, 10);
+  }, [_limit, _page]);
+  const searchToSendForRequest = useMemo(() => {
+    const currentSearch = new URLSearchParams(search);
+
+    currentSearch.set('_limit', _limit);
+    currentSearch.set('_sort', _sort);
+    currentSearch.set('_start', _start);
+    currentSearch.delete('_page');
+
+    return currentSearch.toString();
+  }, [_limit, _sort, _start, search]);
+
+  const getDataActionRef = useRef(getData);
+  const getDataSucceededRef = useRef(getDataSucceeded);
+
+  // Settings
+  const isBulkable = useMemo(() => {
+    return getLayoutSetting('bulkable');
+  }, [getLayoutSetting]);
+  const isFilterable = useMemo(() => {
+    return getLayoutSetting('filterable');
+  }, [getLayoutSetting]);
+  const isSearchable = useMemo(() => {
+    return getLayoutSetting('searchable');
+  }, [getLayoutSetting]);
+  const shouldSendRequest = useMemo(() => {
+    return !isLoadingForPermissions && canRead;
+  }, [canRead, isLoadingForPermissions]);
+
+  const fetchData = async (search = searchToSendForRequest) => {
     try {
-      const generatedSearch = generateSearchFromObject(params);
+      getDataActionRef.current();
       const [{ count }, data] = await Promise.all([
-        request(getRequestUrl(`explorer/${uid}/count?${generatedSearch}`), {
+        request(getRequestUrl(`explorer/${slug}/count?${search}`), {
           method: 'GET',
         }),
-        request(getRequestUrl(`explorer/${uid}?${generatedSearch}`), {
+        request(getRequestUrl(`explorer/${slug}?${search}`), {
           method: 'GET',
         }),
       ]);
 
-      getDataSucceeded(count, data);
+      getDataSucceededRef.current(count, data);
     } catch (err) {
       strapi.notification.error(`${pluginId}.error.model.fetch`);
     }
-  };
-
-  useEffect(() => {
-    return () => {
-      // Reset the useUserPermissions hook loading state
-      setIsLoading();
-      resetProps();
-      setFilterPickerState(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
-
-  useEffect(() => {
-    if (!isLoadingForPermissions && canRead) {
-      getDataRef.current(slug, getSearchParams());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingForPermissions, canRead, shouldRefetchData]);
-
-  getLayoutSettingRef.current = settingName => {
-    return get(layouts, [...contentTypePath, 'settings', settingName], '');
   };
 
   const getMetaDatas = useCallback(
@@ -151,10 +202,6 @@ function ListView({
     });
   }, [getMetaDatas, listLayout]);
 
-  const searchValue = useMemo(() => {
-    return getQueryParameters(search, '_q') || '';
-  }, [search]);
-
   const getFirstSortableElement = useCallback(
     (name = '') => {
       return get(
@@ -168,23 +215,54 @@ function ListView({
     [getMetaDatas, listLayout]
   );
 
-  const getSearchParams = useCallback(
-    (updatedParams = {}) => {
-      return {
-        _limit: getQueryParameters(search, '_limit') || getLayoutSettingRef.current('pageSize'),
-        _page: getQueryParameters(search, '_page') || 1,
-        _q: getQueryParameters(search, '_q') || '',
-        _sort:
-          getQueryParameters(search, '_sort') ||
-          `${getLayoutSettingRef.current('defaultSortBy')}:${getLayoutSettingRef.current(
-            'defaultSortOrder'
-          )}`,
-        filters: generateFiltersFromSearch(search),
-        ...updatedParams,
-      };
-    },
-    [getLayoutSettingRef, search]
-  );
+  const allLabels = useMemo(() => {
+    return sortBy(
+      Object.keys(getMetaDatas())
+        .filter(
+          key =>
+            !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
+              get(listSchema, ['attributes', key, 'type'], '')
+            )
+        )
+        .map(label => ({
+          name: label,
+          value: listLayout.includes(label),
+        })),
+      ['label', 'name']
+    );
+  }, [getMetaDatas, listLayout, listSchema]);
+
+  useEffect(() => {
+    return () => {
+      isFirstRender.current = true;
+    };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!isFirstRender.current) {
+      fetchData(searchToSendForRequest);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchToSendForRequest]);
+
+  useEffect(() => {
+    return () => {
+      resetProps();
+      setFilterPickerState(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  useEffect(() => {
+    if (shouldSendRequest) {
+      fetchData();
+    }
+
+    return () => {
+      isFirstRender.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldSendRequest]);
 
   const handleConfirmDeleteData = useCallback(async () => {
     try {
@@ -219,29 +297,87 @@ function ListView({
     }
   }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug]);
 
-  const allLabels = useMemo(() => {
-    return sortBy(
-      Object.keys(getMetaDatas())
-        .filter(
-          key =>
-            !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
-              get(listSchema, ['attributes', key, 'type'], '')
-            )
-        )
-        .map(label => ({
-          name: label,
-          value: listLayout.includes(label),
-        })),
-      ['label', 'name']
-    );
-  }, [getMetaDatas, listLayout, listSchema]);
+  const handleChangeListLabels = ({ name, value }) => {
+    const currentSort = _sort;
 
-  const toggleLabelPickerState = () => {
-    if (!isLabelPickerOpen) {
-      emitEvent('willChangeListFieldsSettings');
+    // Display a notification if trying to remove the last displayed field
+    if (value && listLayout.length === 1) {
+      strapi.notification.error('content-manager.notification.error.displayedFields');
+
+      return;
     }
 
-    setLabelPickerState(prevState => !prevState);
+    // Update the sort when removing the displayed one
+    if (currentSort.split(':')[0] === name && value) {
+      emitEvent('didChangeDisplayedFields');
+      handleChangeSearch({
+        target: {
+          name: '_sort',
+          value: `${getFirstSortableElement(name)}:ASC`,
+        },
+      });
+    }
+
+    // Update the Main reducer
+    onChangeListLabels({
+      target: {
+        name,
+        slug,
+        value: !value,
+      },
+    });
+  };
+
+  const handleChangeFilters = ({ target: { value } }) => {
+    const newSearch = new URLSearchParams();
+
+    // Set the default params
+    newSearch.set('_limit', _limit);
+    newSearch.set('_sort', _sort);
+    newSearch.set('_page', 1);
+
+    value.forEach(({ filter, name, value: filterValue }) => {
+      const filterType = filter === '=' ? '' : filter;
+      const filterName = `${name}${filterType}`;
+
+      newSearch.append(filterName, filterValue);
+    });
+
+    push({ search: newSearch.toString() });
+  };
+
+  const handleChangeSearch = async ({ target: { name, value } }) => {
+    const currentSearch = new URLSearchParams(searchToSendForRequest);
+
+    // Pagination
+    currentSearch.delete('_start');
+
+    if (value === '') {
+      currentSearch.delete(name);
+    } else {
+      currentSearch.set(name, value);
+    }
+
+    const searchToString = currentSearch.toString();
+
+    push({ search: searchToString });
+  };
+
+  const handleClickDelete = id => {
+    setIdToDelete(id);
+    toggleModalDelete();
+  };
+
+  const handleModalClose = () => {
+    if (didDeleteData) {
+      fetchData();
+    }
+  };
+
+  const handleSubmit = (filters = []) => {
+    emitEvent('didFilterEntries');
+    toggleFilterPickerState();
+    handleChangeFilters({ target: { name: 'filters', value: filters } });
   };
 
   const toggleFilterPickerState = () => {
@@ -252,56 +388,12 @@ function ListView({
     setFilterPickerState(prevState => !prevState);
   };
 
-  const handleChangeListLabels = ({ name, value }) => {
-    const currentSort = getSearchParams()._sort;
-
-    if (value && listLayout.length === 1) {
-      strapi.notification.error('content-manager.notification.error.displayedFields');
-
-      return;
+  const toggleLabelPickerState = () => {
+    if (!isLabelPickerOpen) {
+      emitEvent('willChangeListFieldsSettings');
     }
 
-    if (currentSort.split(':')[0] === name && value) {
-      emitEvent('didChangeDisplayedFields');
-      handleChangeParams({
-        target: {
-          name: '_sort',
-          value: `${getFirstSortableElement(name)}:ASC`,
-        },
-      });
-    }
-
-    onChangeListLabels({
-      target: {
-        name,
-        slug,
-        value: !value,
-      },
-    });
-  };
-
-  const handleChangeParams = ({ target: { name, value } }) => {
-    const updatedSearch = getSearchParams({ [name]: value });
-    const newSearch = generateSearchFromFilters(updatedSearch);
-
-    if (name === '_limit') {
-      emitEvent('willChangeNumberOfEntriesPerPage');
-    }
-
-    push({ search: newSearch });
-    resetProps();
-    getDataRef.current(slug, updatedSearch);
-  };
-
-  const handleClickDelete = id => {
-    setIdToDelete(id);
-    toggleModalDelete();
-  };
-
-  const handleSubmit = (filters = []) => {
-    emitEvent('didFilterEntries');
-    toggleFilterPickerState();
-    handleChangeParams({ target: { name: 'filters', value: filters } });
+    setLabelPickerState(prevState => !prevState);
   };
 
   const filterPickerActions = [
@@ -310,7 +402,8 @@ function ListView({
       kind: 'secondary',
       onClick: () => {
         toggleFilterPickerState();
-        handleChangeParams({ target: { name: 'filters', value: [] } });
+        // Delete all filters
+        handleChangeFilters({ target: { name: 'filters', value: [] } });
       },
     },
     {
@@ -392,12 +485,16 @@ function ListView({
         label={label}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
-        onChangeParams={handleChangeParams}
+        onChangeSearch={handleChangeSearch}
         onClickDelete={handleClickDelete}
         schema={listSchema}
-        searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
+        _limit={_limit}
+        _page={_page}
+        filters={filters}
+        _q={_q}
+        _sort={_sort}
       >
         <FilterPicker
           actions={filterPickerActions}
@@ -408,30 +505,25 @@ function ListView({
         />
         <Container className="container-fluid">
           {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading && canRead} />}
-          {getLayoutSettingRef.current('searchable') && canRead && (
-            <Search
-              changeParams={handleChangeParams}
-              initValue={searchValue}
-              model={label}
-              value={searchValue}
-            />
+          {isSearchable && canRead && (
+            <Search changeParams={handleChangeSearch} initValue={_q} model={label} value={_q} />
           )}
           {canRead && (
             <Wrapper>
               <div className="row" style={{ marginBottom: '5px' }}>
                 <div className="col-10">
                   <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-                    {getLayoutSettingRef.current('filterable') && (
+                    {isFilterable && (
                       <>
                         <AddFilterCta type="button" onClick={toggleFilterPickerState}>
                           <FilterIcon />
                           <FormattedMessage id="app.utils.filters" />
                         </AddFilterCta>
-                        {getSearchParams().filters.map((filter, key) => (
+                        {filters.map((filter, key) => (
                           <Filter
                             {...filter}
-                            changeParams={handleChangeParams}
-                            filters={getSearchParams().filters}
+                            changeParams={handleChangeFilters}
+                            filters={filters}
                             index={key}
                             schema={listSchema}
                             key={key}
@@ -465,8 +557,8 @@ function ListView({
                     canDelete={canDelete}
                     canUpdate={canUpdate}
                     headers={tableHeaders}
-                    isBulkable={getLayoutSettingRef.current('bulkable')}
-                    onChangeParams={handleChangeParams}
+                    isBulkable={isBulkable}
+                    onChangeParams={handleChangeSearch}
                     showLoader={isLoading}
                   />
                   <Footer />
@@ -486,6 +578,7 @@ function ListView({
           }}
           onConfirm={handleConfirmDeleteData}
           popUpWarningType="danger"
+          onClosed={handleModalClose}
         />
         <PopUpWarning
           isOpen={showWarningDeleteAll}
@@ -500,6 +593,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={handleConfirmDeleteAllData}
+          onClosed={handleModalClose}
         />
       </ListViewProvider>
     </>
@@ -512,6 +606,7 @@ ListView.defaultProps = {
 ListView.propTypes = {
   count: PropTypes.number.isRequired,
   data: PropTypes.array.isRequired,
+  didDeleteData: PropTypes.bool.isRequired,
   emitEvent: PropTypes.func.isRequired,
   entriesToDelete: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
@@ -521,7 +616,7 @@ ListView.propTypes = {
     search: PropTypes.string.isRequired,
   }).isRequired,
   models: PropTypes.array.isRequired,
-
+  getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
@@ -533,7 +628,6 @@ ListView.propTypes = {
   onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   resetListLabels: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
-  shouldRefetchData: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
   showWarningDeleteAll: PropTypes.bool.isRequired,
   slug: PropTypes.string.isRequired,
@@ -546,6 +640,7 @@ const mapStateToProps = makeSelectListView();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      getData,
       getDataSucceeded,
       onChangeBulk,
       onChangeBulkSelectall,

@@ -6,6 +6,7 @@
 import { fromJS, List } from 'immutable';
 import { toString } from 'lodash';
 import {
+  GET_DATA,
   GET_DATA_SUCCEEDED,
   RESET_PROPS,
   ON_CHANGE_BULK,
@@ -19,15 +20,17 @@ import {
 export const initialState = fromJS({
   count: 0,
   data: List([]),
+  didDeleteData: false,
   entriesToDelete: List([]),
   isLoading: true,
-  shouldRefetchData: false,
   showWarningDelete: false,
   showWarningDeleteAll: false,
 });
 
 function listViewReducer(state = initialState, action) {
   switch (action.type) {
+    case GET_DATA:
+      return initialState;
     case GET_DATA_SUCCEEDED:
       return state
         .update('count', () => action.count)
@@ -52,15 +55,32 @@ function listViewReducer(state = initialState, action) {
         return state.get('data').map(value => toString(value.id));
       });
     case ON_DELETE_DATA_SUCCEEDED:
-      return state.update('shouldRefetchData', v => !v).update('showWarningDelete', () => false);
+      return state.update('didDeleteData', () => true).update('showWarningDelete', () => false);
     case ON_DELETE_SEVERAL_DATA_SUCCEEDED:
-      return state.update('shouldRefetchData', v => !v).update('showWarningDeleteAll', () => false);
+      return state.update('didDeleteData', () => true).update('showWarningDeleteAll', () => false);
     case RESET_PROPS:
       return initialState;
     case TOGGLE_MODAL_DELETE:
-      return state.update('entriesToDelete', () => List([])).update('showWarningDelete', v => !v);
+      return state
+        .update('didDeleteData', v => {
+          if (state.showWarningDelete) {
+            return v;
+          }
+
+          return false;
+        })
+        .update('entriesToDelete', () => List([]))
+        .update('showWarningDelete', v => !v);
     case TOGGLE_MODAL_DELETE_ALL:
-      return state.update('showWarningDeleteAll', v => !v);
+      return state
+        .update('didDeleteData', v => {
+          if (state.showWarningDeleteAll) {
+            return v;
+          }
+
+          return false;
+        })
+        .update('showWarningDeleteAll', v => !v);
     default:
       return state;
   }

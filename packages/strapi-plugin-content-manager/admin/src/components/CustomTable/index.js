@@ -11,12 +11,7 @@ import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
 const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoader }) => {
-  const {
-    emitEvent,
-    entriesToDelete,
-    label,
-    searchParams: { filters, _q },
-  } = useListView();
+  const { emitEvent, entriesToDelete, label, filters, _q } = useListView();
   const { pathname, search } = useLocation();
   const { push } = useHistory();
 
