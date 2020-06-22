@@ -1,6 +1,7 @@
 'use strict';
 
 const adminActions = require('../admin-actions');
+const { createPermission } = require('../../domain/permission');
 
 const registerPermissionActions = () => {
   const { actionProvider } = strapi.admin.services.permission;
@@ -37,7 +38,7 @@ const cleanPermissionInDatabase = async () => {
   await strapi.admin.services.permission.deleteByIds(permissionsToRemoveIds);
 };
 
-const getFieldsForActions = (actions, nestingLevel = 3) =>
+const getPermissionsWithNestedFields = (actions, nestingLevel = 3) =>
   actions.reduce((perms, action) => {
     const newPerms = [];
     action.subjects.forEach(contentTypeUid => {
@@ -49,6 +50,7 @@ const getFieldsForActions = (actions, nestingLevel = 3) =>
         action: action.actionId,
         subject: contentTypeUid,
         fields,
+        conditions: [],
       });
     });
     return perms.concat(newPerms);
@@ -102,7 +104,7 @@ const createRolesIfNeeded = async () => {
     description: 'Authors can manage and publish the content they created.',
   });
 
-  const editorPermissions = getFieldsForActions(contentTypesActions);
+  const editorPermissions = getPermissionsWithNestedFields(contentTypesActions);
 
   const authorPermissions = editorPermissions.map(p => ({
     ...p,
@@ -143,15 +145,17 @@ const resetSuperAdminPermissions = async () => {
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
-  const permissions = getFieldsForActions(contentTypesActions, 1);
+  const permissions = getPermissionsWithNestedFields(contentTypesActions, 1);
 
   const otherActions = allActions.filter(a => a.section !== 'contentTypes');
   otherActions.forEach(action => {
     if (action.subjects) {
-      const newPerms = action.subjects.map(subject => ({ action: action.actionId, subject }));
+      const newPerms = action.subjects.map(subject =>
+        createPermission({ action: action.actionId, subject })
+      );
       permissions.push(...newPerms);
     } else {
-      permissions.push({ action: action.actionId });
+      permissions.push(createPermission({ action: action.actionId }));
     }
   });
 

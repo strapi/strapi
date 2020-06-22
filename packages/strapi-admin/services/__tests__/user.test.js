@@ -469,4 +469,69 @@ describe('User', () => {
       );
     });
   });
+
+  describe('Assign a role to all', () => {
+    test('mongoose', async () => {
+      const updateMany = jest.fn();
+
+      global.strapi = {
+        query: () => ({
+          model: {
+            orm: 'mongoose',
+            updateMany,
+          },
+        }),
+      };
+
+      await userService.assignARoleToAll(3);
+
+      expect(updateMany).toHaveBeenCalledWith({}, { roles: [3] });
+    });
+
+    test('bookshelf', async () => {
+      const knexFunctions = {};
+      const select = jest.fn(() => knexFunctions);
+      const from = jest.fn(() => knexFunctions);
+      const leftJoin = jest.fn(() => knexFunctions);
+      const where = jest.fn(() => knexFunctions);
+      const pluck = jest.fn(() => [1, 2]);
+      Object.assign(knexFunctions, { select, from, leftJoin, where, pluck });
+      const into = jest.fn();
+      const insert = jest.fn(() => ({ into }));
+
+      global.strapi = {
+        connections: {
+          default: {
+            select,
+            insert,
+          },
+        },
+        query: () => ({
+          model: {
+            orm: 'bookshelf',
+            connection: 'default',
+            associations: [{ alias: 'roles', tableCollectionName: 'strapi_users_roles' }],
+            collectionName: 'strapi_administrators',
+          },
+        }),
+      };
+
+      await userService.assignARoleToAll(3);
+
+      expect(select).toHaveBeenCalledWith('strapi_administrators.id');
+      expect(from).toHaveBeenCalledWith('strapi_administrators');
+      expect(leftJoin).toHaveBeenCalledWith(
+        'strapi_users_roles',
+        'strapi_administrators.id',
+        'strapi_users_roles.user_id'
+      );
+      expect(where).toHaveBeenCalledWith('strapi_users_roles.role_id', null);
+      expect(pluck).toHaveBeenCalledWith('strapi_administrators.id');
+      expect(insert).toHaveBeenCalledWith([
+        { role_id: 3, user_id: 1 },
+        { role_id: 3, user_id: 2 },
+      ]);
+      expect(into).toHaveBeenCalledWith('strapi_users_roles');
+    });
+  });
 });

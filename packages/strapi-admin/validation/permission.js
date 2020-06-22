@@ -16,18 +16,6 @@ const BOUND_ACTIONS = [
   'plugins::content-manager.explorer.delete',
 ];
 
-const checkBoundActionsHaveFields = function(permissions) {
-  const haveFields = permissions
-    .filter(perm => BOUND_ACTIONS.includes(perm.action))
-    .every(perm => typeof perm.subject === 'string' && Array.isArray(perm.fields));
-
-  return haveFields
-    ? true
-    : this.createError({
-        message: 'Your permissions are missing fields "subject" and/or "fields"',
-      });
-};
-
 const checkPermissionsAreBound = function(permissions) {
   const subjectMap = {};
   let areBond = true;
@@ -70,6 +58,7 @@ const updatePermissionsSchemaArray = [
               fields: yup
                 .array()
                 .of(yup.string())
+                .nullable()
                 .test(
                   'field-nested',
                   'Fields format are incorrect (duplicates or bad nesting).',
@@ -82,15 +71,6 @@ const updatePermissionsSchemaArray = [
     })
     .required()
     .noUnknown(),
-  yup.object().shape({
-    permissions: yup
-      .array()
-      .test(
-        'contentTypes-have-fields',
-        'Your permissions are missing fields "subject" and/or "fields"',
-        checkBoundActionsHaveFields
-      ),
-  }),
   yup.object().shape({
     permissions: yup
       .array()

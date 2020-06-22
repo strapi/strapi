@@ -1,8 +1,8 @@
 'use strict';
 
 const { yup } = require('strapi-utils');
-const { validateRegisterProviderAction } = require('../validation/action-provider');
-const { getActionId, createAction } = require('../domain/action');
+const { validateRegisterProviderAction } = require('../../validation/action-provider');
+const { getActionId, createAction } = require('../../domain/action');
 
 const createActionProvider = () => {
   const actions = new Map();

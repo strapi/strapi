@@ -1,6 +1,6 @@
 'use strict';
 const _ = require('lodash');
-const actionProviderService = require('../action-provider');
+const actionProviderService = require('../permission/action-provider');
 
 describe('Action Provider Service', () => {
   const createdActions = [];

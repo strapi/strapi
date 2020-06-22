@@ -1,5 +1,6 @@
 const checkFieldsAreCorrectlyNested = fields => {
   if (!Array.isArray(fields)) {
+    // Only check if the fields exist
     return true;
   }
 

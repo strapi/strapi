@@ -21,25 +21,27 @@ describe('Permission Service', () => {
 
   describe('Assign permissions', () => {
     test('Delete previous permissions', async () => {
-      const deleteFn = jest.fn(() => Promise.resolve([]));
       const createMany = jest.fn(() => Promise.resolve([]));
+      const find = jest.fn(() => Promise.resolve([{ id: 3 }]));
+      const deleteFn = jest.fn();
       const getAll = jest.fn(() => []);
 
       global.strapi = {
         admin: { services: { permission: { actionProvider: { getAll } } } },
         query() {
-          return { delete: deleteFn, createMany };
+          return { delete: deleteFn, createMany, find };
         },
       };
 
       await permissionService.assign(1, []);
 
-      expect(deleteFn).toHaveBeenCalledWith({ role: 1 });
+      expect(deleteFn).toHaveBeenCalledWith({ id_in: [3] });
     });
 
     test('Create new permissions', async () => {
       const deleteFn = jest.fn(() => Promise.resolve([]));
       const createMany = jest.fn(() => Promise.resolve([]));
+      const find = jest.fn(() => Promise.resolve([]));
       const getAll = jest.fn(() =>
         Array(5)
           .fill(0)
@@ -58,7 +60,7 @@ describe('Permission Service', () => {
           },
         },
         query() {
-          return { delete: deleteFn, createMany };
+          return { delete: deleteFn, createMany, find };
         },
       };
 
@@ -95,7 +97,7 @@ describe('Permission Service', () => {
         roles: rolesId.map(id => ({ id })),
       });
 
-      expect(find).toHaveBeenCalledWith({ role_in: rolesId });
+      expect(find).toHaveBeenCalledWith({ role_in: rolesId, _limit: -1 });
       expect(res).toStrictEqual(rolesId);
     });
 

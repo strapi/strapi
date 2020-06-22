@@ -160,7 +160,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return null;
     }
 
-    const entries = await find(params, null, { transacting });
+    const paramsWithDefaults = _.defaults(params, { _limit: -1 });
+    const entries = await find(paramsWithDefaults, null, { transacting });
     return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
       concurrency: 100,
       stopOnError: true,
