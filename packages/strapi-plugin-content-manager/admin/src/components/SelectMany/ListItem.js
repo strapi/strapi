@@ -9,16 +9,8 @@ import ItemTypes from '../../utils/ItemTypes';
 import { Li } from './components';
 import Relation from './Relation';
 
-function ListItem({
-  data,
-  findRelation,
-  mainField,
-  moveRelation,
-  nextSearch,
-  onRemove,
-  targetModel,
-}) {
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}?redirectUrl=${nextSearch}`;
+function ListItem({ data, findRelation, mainField, moveRelation, onRemove, targetModel }) {
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({
@@ -60,7 +52,6 @@ function ListItem({
 ListItem.defaultProps = {
   findRelation: () => {},
   moveRelation: () => {},
-  nextSearch: '',
   onRemove: () => {},
   targetModel: '',
 };
@@ -70,7 +61,6 @@ ListItem.propTypes = {
   findRelation: PropTypes.func,
   mainField: PropTypes.string.isRequired,
   moveRelation: PropTypes.func,
-  nextSearch: PropTypes.string,
   onRemove: PropTypes.func,
   targetModel: PropTypes.string,
 };

@@ -12,17 +12,15 @@ import Row from './Row';
 
 const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoader }) => {
   const { emitEvent, entriesToDelete, label, filters, _q } = useListView();
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const { push } = useHistory();
 
-  const redirectUrl = `redirectUrl=${pathname}${search}`;
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
   const handleGoTo = id => {
     emitEvent('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
-      search: redirectUrl,
     });
   };
 

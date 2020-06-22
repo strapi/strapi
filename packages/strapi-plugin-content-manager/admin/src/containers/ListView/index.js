@@ -439,7 +439,6 @@ function ListView({
             emitEvent('willCreateEntry');
             push({
               pathname: `${pathname}/create`,
-              search: `redirectUrl=${pathname}${search}`,
             });
           },
           color: 'primary',
