@@ -1,4 +1,5 @@
 import {
+  GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_BULK,
   ON_CHANGE_BULK_SELECT_ALL,
@@ -8,6 +9,12 @@ import {
   TOGGLE_MODAL_DELETE,
   TOGGLE_MODAL_DELETE_ALL,
 } from './constants';
+
+export function getData() {
+  return {
+    type: GET_DATA,
+  };
+}
 
 export function getDataSucceeded(count, data) {
   return {

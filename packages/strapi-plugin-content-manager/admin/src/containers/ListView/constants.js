@@ -1,3 +1,4 @@
+export const GET_DATA = 'ContentManager/ListView/GET_DATA';
 export const GET_DATA_SUCCEEDED = 'ContentManager/ListView/GET_DATA_SUCCEEDED';
 export const ON_CHANGE_BULK = 'ContentManager/ListView/ON_CHANGE_BULK';
 export const ON_CHANGE_BULK_SELECT_ALL = 'ContentManager/ListView/ON_CHANGE_BULK_SELECT_ALL';

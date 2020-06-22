@@ -9,17 +9,15 @@ import { PluginHeader, getFilterType } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import Container from '../Container';
-
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
-
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext'];
+const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
 
 function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState }) {
-  const { schema, searchParams } = useListView();
+  const { schema, filters } = useListView();
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {
       const current = get(schema, ['attributes', attr], {});
@@ -81,7 +79,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
   };
   // Set the filters when the collapse is opening
   const handleEntering = () => {
-    const currentFilters = searchParams.filters;
+    const currentFilters = filters;
     const initialFilters = currentFilters.length > 0 ? currentFilters : [getInitialFilter()];
 
     dispatch({
