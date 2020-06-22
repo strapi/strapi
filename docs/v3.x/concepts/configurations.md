@@ -56,6 +56,8 @@ Instead of writing those credentials into your configuration files, you can defi
 
 **Example**
 
+**Path —** `.env`
+
 ```
 DATABASE_PASSWORD=acme
 ```
@@ -70,7 +72,7 @@ Now you can access those variables in your configuration files and application. 
 
 In your configuration files you will have access to a `env` utility that allows defining defaults and casting values.
 
-`config/database.js`
+**Path —** `./config/database.js`
 
 ```js
 module.exports = ({ env }) => ({
