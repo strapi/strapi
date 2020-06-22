@@ -25,11 +25,10 @@ export function getDataSucceeded(count, data) {
   };
 }
 
-export function onChangeBulk({ target: { name, value } }) {
+export function onChangeBulk({ target: { name } }) {
   return {
     type: ON_CHANGE_BULK,
     name,
-    value,
   };
 }
 

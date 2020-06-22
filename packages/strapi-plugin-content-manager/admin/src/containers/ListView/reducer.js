@@ -75,10 +75,17 @@ const listViewReducer = (state = initialState, action) =>
         drafState.showWarningDeleteAll = false;
         break;
       }
+      case RESET_PROPS: {
+        return initialState;
+      }
+      case SET_MODAL_LOADING_STATE: {
+        drafState.showModalConfirmButtonLoading = true;
+        break;
+      }
       case TOGGLE_MODAL_DELETE: {
         drafState.showModalConfirmButtonLoading = false;
 
-        // Only change this value when the modal is closing
+        // Only change this value when the modal is opening
         if (!state.showWarningDelete) {
           drafState.didDeleteData = false;
         }
@@ -98,14 +105,6 @@ const listViewReducer = (state = initialState, action) =>
 
         drafState.showWarningDeleteAll = !state.showWarningDeleteAll;
 
-        break;
-      }
-
-      case RESET_PROPS: {
-        return initialState;
-      }
-      case SET_MODAL_LOADING_STATE: {
-        drafState.showModalConfirmButtonLoading = true;
         break;
       }
 
