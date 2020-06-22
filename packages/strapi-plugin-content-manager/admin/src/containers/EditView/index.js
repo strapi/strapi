@@ -25,10 +25,9 @@ import reducer, { initialState } from './reducer';
 const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugins, slug }) => {
   const formatLayoutRef = useRef();
   formatLayoutRef.current = createAttributesLayout;
-  // Retrieve push to programmatically navigate between views
-  const { push } = useHistory();
+  const { goBack } = useHistory();
   // Retrieve the search and the pathname
-  const { search, pathname } = useLocation();
+  const { pathname } = useLocation();
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -103,15 +102,6 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
 
   const { formattedContentTypeLayout, isDraggingComponent } = reducerState.toJS();
 
-  // We can't use the getQueryParameters helper here because the search
-  // can contain 'redirectUrl' several times since we can navigate between documents
-  const redirectURL = search
-    .split('redirectUrl=')
-    .filter((_, index) => index !== 0)
-    .join('redirectUrl=');
-
-  const redirectToPreviousPage = () => push(redirectURL);
-
   return (
     <EditViewProvider
       allLayoutData={allLayoutData}
@@ -131,10 +121,10 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
     >
       <EditViewDataManagerProvider
         allLayoutData={allLayoutData}
-        redirectToPreviousPage={redirectToPreviousPage}
+        redirectToPreviousPage={goBack}
         slug={slug}
       >
-        <BackHeader onClick={redirectToPreviousPage} />
+        <BackHeader onClick={goBack} />
         <Container className="container-fluid">
           <Header />
           <div className="row" style={{ paddingTop: 3 }}>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cloneDeep, findIndex, get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
@@ -23,7 +23,6 @@ function SelectWrapper({
   targetModel,
   placeholder,
 }) {
-  const { pathname, search } = useLocation();
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
@@ -154,10 +153,8 @@ function SelectWrapper({
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
     relationType
   );
-  const nextSearch = `${pathname}${search}`;
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${
-    value ? value.id : null
-  }?redirectUrl=${nextSearch}`;
+
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
   const link =
     value === null ||
     value === undefined ||
@@ -208,7 +205,6 @@ function SelectWrapper({
         mainField={mainField}
         move={moveRelation}
         name={name}
-        nextSearch={nextSearch}
         options={filteredOptions}
         onChange={value => {
           onChange({ target: { name, value: value ? value.value : value } });
