@@ -6,6 +6,7 @@ import {
   ON_DELETE_DATA_SUCCEEDED,
   ON_DELETE_SEVERAL_DATA_SUCCEEDED,
   RESET_PROPS,
+  SET_MODAL_LOADING_STATE,
   TOGGLE_MODAL_DELETE,
   TOGGLE_MODAL_DELETE_ALL,
 } from './constants';
@@ -52,6 +53,12 @@ export function onDeleteSeveralDataSucceeded() {
 
 export function resetProps() {
   return { type: RESET_PROPS };
+}
+
+export function setModalLoadingState() {
+  return {
+    type: SET_MODAL_LOADING_STATE,
+  };
 }
 
 export function toggleModalDeleteAll() {
