@@ -2,9 +2,10 @@ import React, { memo, useCallback, useMemo, useEffect, useReducer, useRef } from
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-import { BackHeader, LiLink, CheckPermissions } from 'strapi-helper-plugin';
+import { BackHeader, LiLink, CheckPermissions, useUserPermissions } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
+import { generatePermissionsObject } from '../../utils';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
@@ -31,6 +32,9 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
+  const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
+  const { allowedActions } = useUserPermissions(viewPermissions);
+
   const isSingleType = useMemo(() => contentType === 'singleType', [contentType]);
   const [{ formattedContentTypeLayout, isDraggingComponent }, dispatch] = useReducer(
     reducer,
@@ -106,6 +110,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
 
   return (
     <EditViewProvider
+      allowedActions={allowedActions}
       allLayoutData={allLayoutData}
       components={components}
       layout={currentContentTypeLayoutData}

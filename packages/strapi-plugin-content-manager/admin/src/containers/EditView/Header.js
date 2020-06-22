@@ -7,6 +7,7 @@ import { PopUpWarning, request, templateObject, useGlobalContext } from 'strapi-
 
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -29,6 +30,9 @@ const Header = () => {
     slug,
     clearData,
   } = useDataManager();
+  const {
+    allowedActions: { canDelete, canUpdate, canCreate },
+  } = useEditView();
 
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
     layout,
@@ -52,38 +56,42 @@ const Header = () => {
   }, [currentContentTypeName, entryHeaderTitle, isSingleType]);
 
   const headerActions = useMemo(() => {
-    const headerActions = [
-      {
-        disabled: !didChangeData,
-        onClick: () => {
-          toggleWarningCancel();
-        },
-        color: 'cancel',
-        label: formatMessageRef.current({
-          id: `${pluginId}.containers.Edit.reset`,
-        }),
-        type: 'button',
-        style: {
-          paddingLeft: 15,
-          paddingRight: 15,
-          fontWeight: 600,
-        },
-      },
-      {
-        disabled: !didChangeData,
-        color: 'success',
-        label: formatMessageRef.current({
-          id: `${pluginId}.containers.Edit.submit`,
-        }),
-        type: 'submit',
-        style: {
-          minWidth: 150,
-          fontWeight: 600,
-        },
-      },
-    ];
+    let headerActions = [];
 
-    if (!isCreatingEntry) {
+    if ((isCreatingEntry && canCreate) || (!isCreatingEntry && canUpdate)) {
+      headerActions = [
+        {
+          disabled: !didChangeData,
+          onClick: () => {
+            toggleWarningCancel();
+          },
+          color: 'cancel',
+          label: formatMessageRef.current({
+            id: `${pluginId}.containers.Edit.reset`,
+          }),
+          type: 'button',
+          style: {
+            paddingLeft: 15,
+            paddingRight: 15,
+            fontWeight: 600,
+          },
+        },
+        {
+          disabled: !didChangeData,
+          color: 'success',
+          label: formatMessageRef.current({
+            id: `${pluginId}.containers.Edit.submit`,
+          }),
+          type: 'submit',
+          style: {
+            minWidth: 150,
+            fontWeight: 600,
+          },
+        },
+      ];
+    }
+
+    if (!isCreatingEntry && canDelete) {
       headerActions.unshift({
         label: formatMessageRef.current({
           id: 'app.utils.delete',
@@ -102,7 +110,7 @@ const Header = () => {
     }
 
     return headerActions;
-  }, [didChangeData, isCreatingEntry]);
+  }, [canCreate, canDelete, canUpdate, didChangeData, isCreatingEntry]);
 
   const headerProps = useMemo(() => {
     return {
