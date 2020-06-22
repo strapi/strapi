@@ -111,3 +111,4 @@ coverage
 exports
 .cache
 build
+!api/icon
