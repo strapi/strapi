@@ -36,6 +36,7 @@ import {
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
   resetProps,
+  setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
 } from './actions';
@@ -65,10 +66,12 @@ function ListView({
   onDeleteSeveralDataSucceeded,
   resetListLabels,
   resetProps,
+  setModalLoadingState,
   showWarningDelete,
+  showModalConfirmButtonLoading,
+  showWarningDeleteAll,
   slug,
   toggleModalDelete,
-  showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
@@ -267,6 +270,7 @@ function ListView({
   const handleConfirmDeleteData = useCallback(async () => {
     try {
       emitEvent('willDeleteEntry');
+      setModalLoadingState();
 
       await request(getRequestUrl(`explorer/${slug}/${idToDelete}`), {
         method: 'DELETE',
@@ -280,12 +284,14 @@ function ListView({
     } catch (err) {
       strapi.notification.error(`${pluginId}.error.record.delete`);
     }
-  }, [emitEvent, idToDelete, onDeleteDataSucceeded, slug]);
+  }, [emitEvent, idToDelete, onDeleteDataSucceeded, slug, setModalLoadingState]);
 
   const handleConfirmDeleteAllData = useCallback(async () => {
     const params = Object.assign(entriesToDelete);
 
     try {
+      setModalLoadingState();
+
       await request(getRequestUrl(`explorer/deleteAll/${slug}`), {
         method: 'DELETE',
         params,
@@ -295,7 +301,7 @@ function ListView({
     } catch (err) {
       strapi.notification.error(`${pluginId}.error.record.delete`);
     }
-  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug]);
+  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
 
   const handleChangeListLabels = ({ name, value }) => {
     const currentSort = _sort;
@@ -579,6 +585,7 @@ function ListView({
           onConfirm={handleConfirmDeleteData}
           popUpWarningType="danger"
           onClosed={handleModalClose}
+          isConfirmButtonLoading={showModalConfirmButtonLoading}
         />
         <PopUpWarning
           isOpen={showWarningDeleteAll}
@@ -594,6 +601,7 @@ function ListView({
           popUpWarningType="danger"
           onConfirm={handleConfirmDeleteAllData}
           onClosed={handleModalClose}
+          isConfirmButtonLoading={showModalConfirmButtonLoading}
         />
       </ListViewProvider>
     </>
@@ -628,6 +636,8 @@ ListView.propTypes = {
   onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   resetListLabels: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
+  setModalLoadingState: PropTypes.func.isRequired,
+  showModalConfirmButtonLoading: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
   showWarningDeleteAll: PropTypes.bool.isRequired,
   slug: PropTypes.string.isRequired,
@@ -649,6 +659,7 @@ export function mapDispatchToProps(dispatch) {
       onDeleteSeveralDataSucceeded,
       resetListLabels,
       resetProps,
+      setModalLoadingState,
       toggleModalDelete,
       toggleModalDeleteAll,
     },

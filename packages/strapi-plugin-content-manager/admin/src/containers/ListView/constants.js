@@ -8,3 +8,4 @@ export const ON_DELETE_SEVERAL_DATA_SUCCEEDED =
 export const RESET_PROPS = 'ContentManager/ListView/RESET_PROPS';
 export const TOGGLE_MODAL_DELETE_ALL = 'ContentManager/ListView/TOGGLE_MODAL_DELETE_ALL';
 export const TOGGLE_MODAL_DELETE = 'ContentManager/ListView/TOGGLE_MODAL_DELETE';
+export const SET_MODAL_LOADING_STATE = 'ContentManager/ListView/SET_MODAL_LOADING_STATE';
