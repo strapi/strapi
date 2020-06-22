@@ -52,6 +52,17 @@ const getInputType = (type = '') => {
   }
 };
 
+const validationsToOmit = [
+  'type',
+  'model',
+  'via',
+  'collection',
+  'default',
+  'plugin',
+  'enum',
+  'regex',
+];
+
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   const {
     strapi: { fieldApi },
@@ -63,26 +74,60 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
   const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
-  const value = get(modifiedData, keys, null);
+  const value = useMemo(() => get(modifiedData, keys, null), [keys, modifiedData]);
   const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
-  const errorId = get(
-    formErrors,
-    [keys, 'id'],
-    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
-  );
+  const errorId = useMemo(() => {
+    return get(formErrors, [keys, 'id'], temporaryErrorIdUntilBuffetjsSupportsFormattedMessage);
+  }, [formErrors, keys]);
 
-  let validationsToOmit = [
-    'type',
-    'model',
-    'via',
-    'collection',
-    'default',
-    'plugin',
-    'enum',
-    'regex',
-  ];
+  const validations = useMemo(() => omit(attribute, validationsToOmit), [attribute]);
 
-  const validations = omit(attribute, validationsToOmit);
+  const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
+
+  const inputType = useMemo(() => {
+    return getInputType(type);
+  }, [type]);
+
+  const inputValue = useMemo(() => {
+    // Fix for input file multipe
+    if (type === 'media' && !value) {
+      return [];
+    }
+
+    return value;
+  }, [type, value]);
+
+  const step = useMemo(() => {
+    let step;
+
+    if (type === 'float' || type === 'decimal') {
+      step = 'any';
+    } else if (type === 'time' || type === 'datetime') {
+      step = 30;
+    } else {
+      step = '1';
+    }
+
+    return step;
+  }, [type]);
+
+  const isMultiple = useMemo(() => {
+    return get(attribute, 'multiple', false);
+  }, [attribute]);
+
+  const options = useMemo(() => {
+    return get(attribute, 'enum', []).map(v => {
+      return (
+        <option key={v} value={v}>
+          {v}
+        </option>
+      );
+    });
+  }, [attribute]);
+
+  const otherFields = useMemo(() => {
+    return fieldApi.getFields();
+  }, [fieldApi]);
 
   if (regexpString) {
     const regexp = new RegExp(regexpString);
@@ -98,8 +143,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     return null;
   }
 
-  const isRequired = get(validations, ['required'], false);
-
   if (type === 'relation') {
     return (
       <div key={keys}>
@@ -109,36 +152,11 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
           plugin={attribute.plugin}
           relationType={attribute.relationType}
           targetModel={attribute.targetModel}
-          value={get(modifiedData, keys)}
+          value={value}
         />
       </div>
     );
   }
-
-  let inputValue = value;
-
-  // Fix for input file multipe
-  if (type === 'media' && !value) {
-    inputValue = [];
-  }
-
-  let step;
-
-  if (type === 'float' || type === 'decimal') {
-    step = 'any';
-  } else if (type === 'time' || type === 'datetime') {
-    step = 30;
-  } else {
-    step = '1';
-  }
-
-  const options = get(attribute, 'enum', []).map(v => {
-    return (
-      <option key={v} value={v}>
-        {v}
-      </option>
-    );
-  });
 
   const enumOptions = [
     <FormattedMessage id="components.InputSelect.option.placeholder" key="__enum_option_null">
@@ -173,16 +191,16 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
               uid: InputUID,
-              ...fieldApi.getFields(),
+              ...otherFields,
             }}
-            multiple={get(attribute, 'multiple', false)}
+            multiple={isMultiple}
             attribute={attribute}
             name={keys}
             onBlur={onBlur}
             onChange={onChange}
             options={enumOptions}
             step={step}
-            type={getInputType(type)}
+            type={inputType}
             validations={validations}
             value={inputValue}
             withDefaultValue={false}

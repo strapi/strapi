@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useParams, useRouteMatch } from 'react-router-dom';
+import React, { useMemo, useRef, useState } from 'react';
+import { useIntl } from 'react-intl';
 import { Header as PluginHeader } from '@buffetjs/custom';
+import { get, isEqual, toString } from 'lodash';
 
 import { PopUpWarning, request, templateObject, useGlobalContext } from 'strapi-helper-plugin';
-import { get } from 'lodash';
+
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 
@@ -12,27 +13,31 @@ const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
-
-  const { formatMessage, emitEvent } = useGlobalContext();
-  const { id } = useParams();
+  const { formatMessage } = useIntl();
+  const formatMessageRef = useRef(formatMessage);
+  const { emitEvent } = useGlobalContext();
   const {
     deleteSuccess,
     initialData,
+    isCreatingEntry,
+    isSingleType,
     layout,
+    modifiedData,
     redirectToPreviousPage,
     resetData,
     setIsSubmitting,
     slug,
     clearData,
   } = useDataManager();
-  const {
-    params: { contentType },
-  } = useRouteMatch('/plugins/content-manager/:contentType');
-  const isSingleType = contentType === 'singleType';
 
-  const currentContentTypeMainField = get(layout, ['settings', 'mainField'], 'id');
-  const currentContentTypeName = get(layout, ['schema', 'info', 'name']);
-  const isCreatingEntry = id === 'create' || (isSingleType && !initialData.created_at);
+  const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
+    layout,
+  ]);
+  const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
+  const didChangeData = useMemo(() => {
+    return !isEqual(initialData, modifiedData);
+  }, [initialData, modifiedData]);
+  const apiID = useMemo(() => layout.apiID, [layout.apiID]);
 
   /* eslint-disable indent */
   const entryHeaderTitle = isCreatingEntry
@@ -41,16 +46,20 @@ const Header = () => {
       })
     : templateObject({ mainField: currentContentTypeMainField }, initialData).mainField;
   /* eslint-enable indent */
-  const headerTitle = isSingleType ? currentContentTypeName : entryHeaderTitle;
 
-  const getHeaderActions = () => {
+  const headerTitle = useMemo(() => {
+    return isSingleType ? currentContentTypeName : entryHeaderTitle;
+  }, [currentContentTypeName, entryHeaderTitle, isSingleType]);
+
+  const headerActions = useMemo(() => {
     const headerActions = [
       {
+        disabled: !didChangeData,
         onClick: () => {
           toggleWarningCancel();
         },
         color: 'cancel',
-        label: formatMessage({
+        label: formatMessageRef.current({
           id: `${pluginId}.containers.Edit.reset`,
         }),
         type: 'button',
@@ -61,8 +70,9 @@ const Header = () => {
         },
       },
       {
+        disabled: !didChangeData,
         color: 'success',
-        label: formatMessage({
+        label: formatMessageRef.current({
           id: `${pluginId}.containers.Edit.submit`,
         }),
         type: 'submit',
@@ -75,7 +85,7 @@ const Header = () => {
 
     if (!isCreatingEntry) {
       headerActions.unshift({
-        label: formatMessage({
+        label: formatMessageRef.current({
           id: 'app.utils.delete',
         }),
         color: 'delete',
@@ -92,15 +102,17 @@ const Header = () => {
     }
 
     return headerActions;
-  };
+  }, [didChangeData, isCreatingEntry]);
 
-  const headerProps = {
-    title: {
-      label: headerTitle && headerTitle.toString(),
-    },
-    content: `${formatMessage({ id: `${pluginId}.api.id` })} : ${layout.apiID}`,
-    actions: getHeaderActions(),
-  };
+  const headerProps = useMemo(() => {
+    return {
+      title: {
+        label: toString(headerTitle),
+      },
+      content: `${formatMessageRef.current({ id: `${pluginId}.api.id` })} : ${apiID}`,
+      actions: headerActions,
+    };
+  }, [headerActions, headerTitle, apiID]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
@@ -112,14 +124,17 @@ const Header = () => {
   const handleConfirmDelete = async () => {
     toggleWarningDelete();
     setIsSubmitting();
+
     try {
       emitEvent('willDeleteEntry');
+
       await request(getRequestUrl(`${slug}/${initialData.id}`), {
         method: 'DELETE',
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
       deleteSuccess();
+
       emitEvent('didDeleteEntry');
 
       if (!isSingleType) {

@@ -1,7 +1,7 @@
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useEffect, useReducer, useState } from 'react';
-import { Prompt, useParams, useRouteMatch } from 'react-router-dom';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import { Prompt, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, request, useGlobalContext } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import pluginId from '../../pluginId';
@@ -18,9 +18,14 @@ import {
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
-const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPreviousPage, slug }) => {
+const EditViewDataManagerProvider = ({
+  allLayoutData,
+  children,
+  isSingleType,
+  redirectToPreviousPage,
+  slug,
+}) => {
   const { id } = useParams();
-  // Retrieve the search
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
     formErrors,
@@ -36,10 +41,6 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
   const abortController = new AbortController();
   const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
-  const {
-    params: { contentType },
-  } = useRouteMatch('/plugins/content-manager/:contentType');
-  const isSingleType = contentType === 'singleType';
 
   useEffect(() => {
     if (!isLoading) {
@@ -436,7 +437,9 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
     });
   };
 
-  const showLoader = !isCreatingEntry && isLoading;
+  const showLoader = useMemo(() => {
+    return !isCreatingEntry && isLoading;
+  }, [isCreatingEntry, isLoading]);
 
   return (
     <EditViewDataManagerContext.Provider
@@ -451,6 +454,8 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
         deleteSuccess,
         formErrors,
         initialData,
+        isCreatingEntry,
+        isSingleType,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -492,6 +497,7 @@ EditViewDataManagerProvider.defaultProps = {
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
   children: PropTypes.node.isRequired,
+  isSingleType: PropTypes.bool.isRequired,
   redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,
 };
