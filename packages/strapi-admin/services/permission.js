@@ -2,13 +2,17 @@
 
 const _ = require('lodash');
 const { createPermission } = require('../domain/permission');
-const actionProvider = require('./action-provider');
+const actionProvider = require('./permission/action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
+
+const fieldsToCompare = ['action', 'subject', 'fields', 'conditions'];
+const arePermissionsEqual = (perm1, perm2) =>
+  _.isEqual(_.pick(perm1, fieldsToCompare), _.pick(perm2, fieldsToCompare));
 
 /**
  * Delete permissions of roles in database
@@ -49,12 +53,30 @@ const assign = async (roleId, permissions = []) => {
     throw strapi.errors.badRequest('ValidationError', err);
   }
 
-  await strapi.query('permission', 'admin').delete({ role: roleId });
+  const permissionsWithRole = permissions.map(permission =>
+    createPermission({ ...permission, role: roleId })
+  );
 
-  const permissionsWithRole = permissions.map(permission => {
-    return createPermission({ ...permission, role: roleId });
-  });
-  return strapi.query('permission', 'admin').createMany(permissionsWithRole);
+  const existingPermissions = await find({ role: roleId, _limit: -1 });
+  const permissionsToAdd = _.differenceWith(
+    permissionsWithRole,
+    existingPermissions,
+    arePermissionsEqual
+  );
+  const permissionsToDelete = _.differenceWith(
+    existingPermissions,
+    permissionsWithRole,
+    arePermissionsEqual
+  );
+
+  if (permissionsToDelete.length > 0) {
+    await deleteByIds(permissionsToDelete.map(p => p.id));
+  }
+  if (permissionsToAdd.length > 0) {
+    await strapi.query('permission', 'admin').createMany(permissionsToAdd);
+  }
+
+  return find({ role: roleId, _limit: -1 });
 };
 
 /**
@@ -67,7 +89,9 @@ const findUserPermissions = async ({ roles }) => {
     return [];
   }
 
-  return strapi.query('permission', 'admin').find({ role_in: roles.map(_.property('id')) });
+  return strapi
+    .query('permission', 'admin')
+    .find({ role_in: roles.map(_.property('id')), _limit: -1 });
 };
 
 /**

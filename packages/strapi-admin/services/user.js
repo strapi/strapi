@@ -173,7 +173,7 @@ const countUsersWithoutRole = async () => {
       $or: [{ roles: { $exists: false } }, { roles: { $size: 0 } }],
     });
   } else {
-    const allRoles = await strapi.query('role', 'admin').find();
+    const allRoles = await strapi.query('role', 'admin').find({ _limit: -1 });
     count = await strapi.query('user', 'admin').count({
       roles_nin: allRoles.map(r => r.id),
     });
@@ -187,10 +187,10 @@ const countUsersWithoutRole = async () => {
  */
 const assignARoleToAll = async roleId => {
   const userModel = strapi.query('user', 'admin').model;
-  const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
-  const userTable = userModel.collectionName;
 
   if (userModel.orm === 'bookshelf') {
+    const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
+    const userTable = userModel.collectionName;
     const knex = strapi.connections[userModel.connection];
     const usersIds = await knex
       .select(`${userTable}.id`)
