@@ -14,7 +14,7 @@
   </head>
   <body lang="en">
     <section class="wrapper">
-      <h1><img class="logo" src="https://strapi.io/assets/images/logo_login.png" /></h1>
+      <h1><img class="logo" src="<%= strapi.config.server.url %>/assets/images/logo_login.png" /></h1>
       <% if (strapi.config.environment === 'development' && isInitialised) { %>
         <div class="informations">
           <div>
@@ -34,9 +34,9 @@
           <p>To discover the power provided by Strapi, you need to create an administrator.</p>
           <a class="cta cta-secondary" href="<%= strapi.config.admin.url %>" target="_blank" title="Click to create the first administration" ><i class="fas fa-external-link-alt"></i>Create the first administrator</a>
           <div class="people-saying-hello">
-            <img class="visible" src="https://strapi.io/assets/images/group_people_1.png" alt="People saying hello" />
-            <img src="https://strapi.io/assets/images/group_people_2.png" alt="People saying hello" />
-            <img src="https://strapi.io/assets/images/group_people_3.png" alt="People saying hello" />
+            <img class="visible" src="<%= strapi.config.server.url %>/assets/images/group_people_1.png" alt="People saying hello" />
+            <img src="<%= strapi.config.server.url %>/assets/images/group_people_2.png" alt="People saying hello" />
+            <img src="<%= strapi.config.server.url %>/assets/images/group_people_3.png" alt="People saying hello" />
           </div>
         </div>
       <% } else { %>
