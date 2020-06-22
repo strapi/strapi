@@ -63,7 +63,9 @@ module.exports = {
    * @return {Promise}
    */
   fetch(params, populate) {
-    return strapi.query('user', 'users-permissions').findOne(params, populate);
+    const defaultPopulate = [...populate, 'role'];
+
+    return strapi.query('user', 'users-permissions').findOne(params, defaultPopulate);
   },
 
   /**
