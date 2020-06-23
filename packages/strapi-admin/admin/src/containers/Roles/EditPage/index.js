@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
+import { isEmpty } from 'lodash';
 import { useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
-import RoleForm from '../../../components/Roles/RoleForm';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
-import { Permissions } from '../../../components/Roles';
+import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 import { formatPermissionsToApi } from '../../../utils';
 
@@ -23,6 +23,7 @@ const EditPage = () => {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
   const [isSubmiting, setIsSubmiting] = useState(false);
+  const permissionsRef = useRef();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
@@ -59,15 +60,19 @@ const EditPage = () => {
       strapi.lockAppWithOverlay();
       setIsSubmiting(true);
 
+      const permissionsToSend = permissionsRef.current.getPermissions();
+
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
-        body: { name: data.name, description: data.description },
+        body: data,
       });
 
-      await request(`/admin/roles/${id}/permissions`, {
-        method: 'PUT',
-        body: { permissions: formatPermissionsToApi(data.permissions) },
-      });
+      if (!isEmpty(permissionsToSend)) {
+        await request(`/admin/roles/${id}/permissions`, {
+          method: 'PUT',
+          body: { permissions: formatPermissionsToApi(permissionsToSend) },
+        });
+      }
 
       strapi.notification.success('notification.success.saved');
       goBack();
@@ -86,13 +91,12 @@ const EditPage = () => {
       initialValues={{
         name: role.name,
         description: role.description,
-        permissions: rolePermissions,
       }}
       onSubmit={handleEditRoleSubmit}
       validationSchema={schema}
       validateOnChange={false}
     >
-      {({ handleSubmit, values, errors, setFieldValue, handleReset, handleChange, handleBlur }) => (
+      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
         <form onSubmit={handleSubmit}>
           <ContainerFluid padding="0">
             <Header
@@ -121,9 +125,9 @@ const EditPage = () => {
             {!isLayoutLoading && !isRoleLoading && (
               <Padded top bottom size="md">
                 <Permissions
-                  onChange={setFieldValue}
                   permissionsLayout={permissionsLayout}
                   rolePermissions={rolePermissions}
+                  ref={permissionsRef}
                 />
               </Padded>
             )}

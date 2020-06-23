@@ -7,7 +7,7 @@ import { usePermissionsContext } from '../../../../../../hooks';
 import { getAttributesToDisplay } from '../../../../../../utils';
 import {
   contentManagerPermissionPrefix,
-  getRecursivePermissionsByAction,
+  getNumberOfRecursivePermissionsByAction,
   getAttributesByModel,
   getAllAttributesActionsSize,
   getRecursivePermissions,
@@ -88,7 +88,7 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const getRecursiveAttributesPermissions = useCallback(
     action => {
-      return getRecursivePermissionsByAction(
+      return getNumberOfRecursivePermissionsByAction(
         collapsePath[0],
         action,
         attribute.attributeName,

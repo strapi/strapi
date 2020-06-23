@@ -1,10 +1,9 @@
 /* eslint-disable indent */
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { get, difference } from 'lodash';
+import { get } from 'lodash';
 
-import { getAttributesToDisplay } from '../../../utils';
-import { isAttributeAction, staticAttributeActions } from './utils';
+import { staticAttributeActions } from './utils';
 
 export const initialState = {
   collapsePath: [],
@@ -25,41 +24,46 @@ const reducer = (state, action) =>
         }
         break;
       }
+      // This reducer action is used to enable/disable all actions for the payload attributes
       case 'SET_ATTRIBUTES_PERMISSIONS': {
-        const { attributes, action: permissionAction, shouldEnable } = action;
-        const attributesToSet =
-          !shouldEnable && permissionAction
-            ? attributes.filter(attribute => !attribute.required)
-            : attributes;
+        const { attributes, action: permissionAction, contentTypeAction, shouldEnable } = action;
 
-        const actionsToSet = (contentTypeUid, attributeName) => {
+        const actionsToSet = (contentTypeUid, attribute) => {
+          const attributeActions = get(
+            state.permissions,
+            [contentTypeUid, attribute.attributeName, 'actions'],
+            []
+          );
+
           if (shouldEnable) {
             if (permissionAction) {
-              return Array.from(
-                new Set([
-                  ...get(state.permissions, [contentTypeUid, attributeName, 'actions'], []),
-                  permissionAction,
-                ])
-              );
+              return Array.from(new Set([...attributeActions, permissionAction]));
             }
 
             return staticAttributeActions;
           }
 
-          return get(state.permissions, [contentTypeUid, attributeName, 'actions'], []).filter(
-            action => action !== permissionAction
-          );
+          // Don't remove an action of a required field
+          return !attribute.required
+            ? attributeActions.filter(action => action !== permissionAction)
+            : attributeActions;
         };
 
-        const permissions = attributesToSet.reduce((acc, current) => {
+        const permissions = attributes.reduce((acc, current) => {
           return {
             ...acc,
             [current.contentTypeUid]: {
               ...acc[current.contentTypeUid],
               [current.attributeName]: {
-                ...get(state.permissions, [current.contentTypeUid, current.attributeName], {}),
-                actions: actionsToSet(current.contentTypeUid, current.attributeName),
+                ...get(state.permissions, [current.contentTypeUid, current], {}),
+                actions: actionsToSet(current.contentTypeUid, current),
               },
+              contentTypeActions: contentTypeAction
+                ? {
+                    ...get(state.permissions, [current.contentTypeUid, 'contentTypeActions'], {}),
+                    [permissionAction]: shouldEnable,
+                  }
+                : get(state.permissions, [current.contentTypeUid, 'contentTypeActions'], {}),
             },
           };
         }, state.permissions);
@@ -67,6 +71,7 @@ const reducer = (state, action) =>
         draftState.permissions = permissions;
         break;
       }
+      // This reducer action is used to enable/disable a single attribute action
       case 'ALL_ATTRIBUTE_ACTIONS_SELECT': {
         const { subject, attribute } = action;
         const isAll =
@@ -88,6 +93,7 @@ const reducer = (state, action) =>
         }
         break;
       }
+      // This reducer action is used to enable/disable a single attribute action
       case 'ATTRIBUTE_PERMISSION_SELECT': {
         const { subject, action: permissionAction, attribute } = action;
         const attributeActions = get(state.permissions, [subject, attribute, 'actions'], []);
@@ -116,9 +122,16 @@ const reducer = (state, action) =>
 
         break;
       }
+      // This reducer action is used to enable/disable
+      // the content type attributes permissions for an action
       case 'CONTENT_TYPE_ATTRIBUTES_ACTION_SELECT': {
-        const { attributes, subject, action: permissionAction, shouldEnable } = action;
-
+        const {
+          attributes,
+          subject,
+          contentTypeAction,
+          action: permissionAction,
+          shouldEnable,
+        } = action;
         let attributesPermissions = attributes.reduce((acc, attribute) => {
           return {
             ...acc,
@@ -157,10 +170,19 @@ const reducer = (state, action) =>
         draftState.permissions[subject] = {
           ...state.permissions[subject],
           ...attributesPermissions,
+          ...(contentTypeAction
+            ? {
+                contentTypeActions: {
+                  ...get(state.permissions, [subject, 'contentTypeActions'], {}),
+                  [permissionAction]: shouldEnable,
+                },
+              }
+            : null),
         };
 
         break;
       }
+      // This reducer action is used to enable/disable a single content type action
       case 'CONTENT_TYPE_ACTION_SELECT': {
         const { subject, action: permissionAction } = action;
 
@@ -186,14 +208,15 @@ const reducer = (state, action) =>
 
         break;
       }
+      // This reducer action is used to enable/disable all
+      // content type attributes actions recursively
       case 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT': {
-        const { subject, attributes, shouldEnable, addContentTypeActions } = action;
+        const { subject, attributes, shouldEnable } = action;
         const staticActionsName = get(
           state.permissionsLayout,
           ['sections', 'contentTypes'],
           []
         ).map(contentTypeAction => contentTypeAction.action);
-        const onlyContentTypeActions = difference(staticActionsName, staticAttributeActions);
         let permissionsToSet = attributes.reduce((acc, attribute) => {
           return {
             ...acc,
@@ -203,7 +226,7 @@ const reducer = (state, action) =>
             },
           };
         }, {});
-        const contentTypeActions = onlyContentTypeActions.reduce((acc, current) => {
+        const contentTypeActions = staticActionsName.reduce((acc, current) => {
           return {
             ...acc,
             [current]: shouldEnable,
@@ -213,57 +236,22 @@ const reducer = (state, action) =>
         draftState.permissions[subject] = {
           ...get(state.permissions, [subject]),
           ...permissionsToSet,
-          ...(addContentTypeActions ? { contentTypeActions } : null),
+          contentTypeActions,
         };
         break;
       }
+      // This reducer action is used to handle the global permissions header actions
       case 'GLOBAL_PERMISSIONS_SELECT': {
         const { action: permissionAction, contentTypes, shouldEnable } = action;
-
-        const shouldSetAttributesActions = isAttributeAction(permissionAction);
-
-        /* eslint-disable indent */
-        const addAttributesMissingActions = contentType => {
-          return getAttributesToDisplay(contentType)
-            .filter(attribute => !attribute.required)
-            .reduce((acc, current) => {
-              return {
-                ...acc,
-                [current.attributeName]: {
-                  actions: shouldEnable
-                    ? Array.from(
-                        new Set([
-                          ...get(
-                            state.permissions,
-                            [contentType.uid, current.attributeName, 'actions'],
-                            []
-                          ),
-                          permissionAction,
-                        ])
-                      )
-                    : get(
-                        state.permissions,
-                        [contentType.uid, current.attributeName, 'actions'],
-                        []
-                      ).filter(action => action !== permissionAction),
-                },
-              };
-            }, {});
-        };
-
         const permissions = contentTypes.reduce((acc, current) => {
           return {
             ...acc,
             [current.uid]: {
               ...state.permissions[current.uid],
-              ...(shouldSetAttributesActions
-                ? addAttributesMissingActions(current)
-                : {
-                    contentTypeActions: {
-                      ...get(state.permissions, [current.uid, 'contentTypeActions'], {}),
-                      [permissionAction]: shouldEnable,
-                    },
-                  }),
+              contentTypeActions: {
+                ...get(state.permissions, [current.uid, 'contentTypeActions'], {}),
+                [permissionAction]: shouldEnable,
+              },
             },
           };
         }, {});

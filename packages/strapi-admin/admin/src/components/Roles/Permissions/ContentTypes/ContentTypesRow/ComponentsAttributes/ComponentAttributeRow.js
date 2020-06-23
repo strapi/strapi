@@ -10,7 +10,7 @@ import {
   contentManagerPermissionPrefix,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
   getAttributesByModel,
-  getRecursivePermissionsByAction,
+  getNumberOfRecursivePermissionsByAction,
 } from '../../../utils';
 import CollapseLabel from '../../CollapseLabel';
 import PermissionCheckbox from '../../PermissionCheckbox';
@@ -51,6 +51,8 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     []
   );
 
+  // Get the recursive component attributes
+  // ans add the current attribute as it is a permission too.
   const getRecursiveAttributes = useCallback(() => {
     const component = components.find(component => component.uid === attribute.component);
 
@@ -60,8 +62,8 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     ];
   }, [attribute, attributePermissionName, components]);
 
-  const getRecursiveAttributesPermissions = action => {
-    const number = getRecursivePermissionsByAction(
+  const countRecursivePermissions = action => {
+    const number = getNumberOfRecursivePermissionsByAction(
       contentTypeUid,
       action,
       isCollapsable
@@ -97,7 +99,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   };
 
   const someChecked = action => {
-    const recursivePermissions = getRecursiveAttributesPermissions(action);
+    const recursivePermissions = countRecursivePermissions(action);
 
     return (
       isCollapsable &&
@@ -107,7 +109,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   };
 
   const allRecursiveChecked = action => {
-    const recursivePermissions = getRecursiveAttributesPermissions(action);
+    const recursivePermissions = countRecursivePermissions(action);
 
     return isCollapsable && recursivePermissions === getRecursiveAttributes().length;
   };

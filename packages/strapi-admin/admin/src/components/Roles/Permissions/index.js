@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, forwardRef, useMemo, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 
 import Tabs from '../Tabs';
@@ -10,20 +10,27 @@ import { useModels } from '../../../hooks';
 import PermissionsProvider from './PermissionsProvider';
 import reducer, { initialState } from './reducer';
 import init from './init';
+import { getAllAttributes } from './utils';
 
-const Permissions = ({ permissionsLayout, rolePermissions, onChange }) => {
+const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => {
   const { singleTypes, collectionTypes, components } = useModels();
   const [state, dispatch] = useReducer(reducer, initialState, state =>
     init(state, permissionsLayout, rolePermissions)
   );
 
-  useEffect(() => {
-    if (state.permissions) {
-      // Manually trigger formk.setFieldValue to keep the form state update.
-      onChange('permissions', state.permissions);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.permissions]);
+  useImperativeHandle(ref, () => ({
+    getPermissions: () => {
+      return state.permissions;
+    },
+  }));
+
+  const allSingleTypesAttributes = useMemo(() => {
+    return getAllAttributes(singleTypes, components);
+  }, [components, singleTypes]);
+
+  const allCollectionTypesAttributes = useMemo(() => {
+    return getAllAttributes(collectionTypes, components);
+  }, [components, collectionTypes]);
 
   const handleCollapse = (index, value) => {
     dispatch({
@@ -42,20 +49,27 @@ const Permissions = ({ permissionsLayout, rolePermissions, onChange }) => {
     });
   };
 
-  const handleSetAttributesPermissions = ({ attributes, action, shouldEnable }) => {
+  const handleSetAttributesPermissions = ({
+    attributes,
+    action,
+    shouldEnable,
+    contentTypeAction,
+  }) => {
     dispatch({
       type: 'SET_ATTRIBUTES_PERMISSIONS',
       attributes,
       action,
       shouldEnable,
+      contentTypeAction,
     });
   };
 
-  const handleContentTypeAttributesActionSelect = ({
+  const handleAttributesSelect = ({
     subject,
     action,
     attributes,
     shouldEnable,
+    contentTypeAction,
   }) => {
     dispatch({
       type: 'CONTENT_TYPE_ATTRIBUTES_ACTION_SELECT',
@@ -63,6 +77,7 @@ const Permissions = ({ permissionsLayout, rolePermissions, onChange }) => {
       action,
       attributes,
       shouldEnable,
+      contentTypeAction,
     });
   };
 
@@ -113,7 +128,7 @@ const Permissions = ({ permissionsLayout, rolePermissions, onChange }) => {
     onAttributePermissionSelect: handleAttributePermissionSelect,
     onAllAttributeActionsSelect: handleAllAttributeActionsSelect,
     onContentTypeActionSelect: handleContentTypeActionSelect,
-    onContentTypeAttributesActionSelect: handleContentTypeAttributesActionSelect,
+    onAttributesSelect: handleAttributesSelect,
     onAllContentTypeActions: handleAllContentTypeActions,
     onGlobalPermissionsActionSelect: handleGlobalPermissionsActionSelect,
     onSetAttributesPermissions: handleSetAttributesPermissions,
@@ -122,18 +137,23 @@ const Permissions = ({ permissionsLayout, rolePermissions, onChange }) => {
   return (
     <PermissionsProvider value={providerValues}>
       <Tabs tabsLabel={roleTabsLabel}>
-        <ContentTypes contentTypes={collectionTypes} />
-        <ContentTypes contentTypes={singleTypes} />
+        <ContentTypes
+          allContentTypesAttributes={allCollectionTypesAttributes}
+          contentTypes={collectionTypes}
+        />
+        <ContentTypes
+          allContentTypesAttributes={allSingleTypesAttributes}
+          contentTypes={singleTypes}
+        />
         <PluginsPermissions />
         <SettingsPermissions />
       </Tabs>
     </PermissionsProvider>
   );
-};
+});
 
 Permissions.propTypes = {
   permissionsLayout: PropTypes.object.isRequired,
   rolePermissions: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
 };
 export default Permissions;

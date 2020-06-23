@@ -3,9 +3,9 @@ import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
 import NameInput from 'ee_else_ce/components/Roles/NameInput';
 
-import FormCard from '../FormBloc';
-import SizedInput from '../SizedInput';
-import ButtonWithNumber from './ButtonWithNumber';
+import FormCard from '../../FormBloc';
+import SizedInput from '../../SizedInput';
+import ButtonWithNumber from '../ButtonWithNumber';
 
 const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
   const { formatMessage } = useIntl();

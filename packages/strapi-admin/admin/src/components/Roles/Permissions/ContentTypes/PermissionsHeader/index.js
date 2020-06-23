@@ -1,38 +1,32 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 
 import { usePermissionsContext } from '../../../../../hooks';
 import PermissionCheckbox from '../PermissionCheckbox';
-import {
-  getContentTypesActionsSize,
-  getAllAttributes,
-  getPermissionsCountByAction,
-  isAttributeAction,
-} from '../../utils';
+import { getContentTypesActionsSize, isAttributeAction } from '../../utils';
 import Wrapper from './Wrapper';
 
-const PermissionsHeader = ({ contentTypes }) => {
+const PermissionsHeader = ({ allAttributes, contentTypes }) => {
   const { formatMessage } = useIntl();
   const {
     onSetAttributesPermissions,
     onGlobalPermissionsActionSelect,
     permissionsLayout,
     permissions,
-    components,
   } = usePermissionsContext();
 
-  const allAttributes = useMemo(() => {
-    return getAllAttributes(contentTypes, components);
-  }, [contentTypes, components]);
-
   const handleCheck = action => {
+    // If the action is present in the actions of the attributes
+    // Then we set all the attributes permissions otherwise,
+    // we only set the global content type actions
     if (isAttributeAction(action)) {
       onSetAttributesPermissions({
         attributes: allAttributes,
         action,
         shouldEnable: !hasAllActions(action),
+        contentTypeAction: true,
       });
     } else {
       onGlobalPermissionsActionSelect({
@@ -43,24 +37,22 @@ const PermissionsHeader = ({ contentTypes }) => {
     }
   };
 
-  const permissionsCount = useCallback(
-    action => {
-      return getPermissionsCountByAction(contentTypes, permissions, action);
-    },
-    [contentTypes, permissions]
-  );
-
-  const contentTypesActionsSize = useCallback(
+  // Get the count of content type permissions by action.
+  const countContentTypesActionPermissions = useCallback(
     action => {
       return getContentTypesActionsSize(contentTypes, permissions, action);
     },
     [contentTypes, permissions]
   );
 
+  const hasSomeActions = action => {
+    return (
+      countContentTypesActionPermissions(action) > 0 &&
+      countContentTypesActionPermissions(action) < contentTypes.length
+    );
+  };
   const hasAllActions = action => {
-    return isAttributeAction(action)
-      ? permissionsCount(action) === allAttributes.length
-      : contentTypesActionsSize(action) === contentTypes.length;
+    return countContentTypesActionPermissions(action) === contentTypes.length;
   };
 
   return (
@@ -71,10 +63,7 @@ const PermissionsHeader = ({ contentTypes }) => {
             key={permissionLayout.action}
             name={permissionLayout.action}
             value={hasAllActions(permissionLayout.action)}
-            someChecked={
-              permissionsCount(permissionLayout.action) > 0 &&
-              permissionsCount(permissionLayout.action) < allAttributes.length
-            }
+            someChecked={hasSomeActions(permissionLayout.action)}
             message={formatMessage({
               id: `Settings.roles.form.permissions.${permissionLayout.displayName.toLowerCase()}`,
               defaultMessage: permissionLayout.displayName,
@@ -89,6 +78,7 @@ const PermissionsHeader = ({ contentTypes }) => {
 
 PermissionsHeader.propTypes = {
   contentTypes: PropTypes.array.isRequired,
+  allAttributes: PropTypes.array.isRequired,
 };
 
 export default PermissionsHeader;
