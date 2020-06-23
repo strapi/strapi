@@ -86,6 +86,7 @@ describe('Role controller', () => {
   describe('updatePermissions', () => {
     test('Fails on missing permissions input', async () => {
       const badRequest = jest.fn();
+      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
 
       const ctx = createContext(
         {
@@ -99,7 +100,7 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: {
-              getSuperAdmin: jest.fn(() => undefined),
+              findOne,
             },
           },
         },
@@ -117,6 +118,7 @@ describe('Role controller', () => {
 
     test('Fails on missing action permission', async () => {
       const badRequest = jest.fn();
+      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
 
       const ctx = createContext(
         {
@@ -130,7 +132,7 @@ describe('Role controller', () => {
       global.strapi = {
         admin: {
           services: {
-            role: { getSuperAdmin: jest.fn(() => undefined) },
+            role: { findOne },
             permission: { conditionProvider: { getAll: jest.fn(() => []) } },
           },
         },

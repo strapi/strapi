@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { stringIncludes, stringEquals } = require('strapi-utils');
 const { createUser } = require('../domain/user');
 
 const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description']);
@@ -50,14 +51,14 @@ const updateById = async (id, attributes) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
-    if (
-      _.get(superAdminRole, 'usersCount') === 1 &&
-      !attributes.roles.map(String).includes(String(superAdminRole.id))
-    ) {
+    const nbOfSuperAdminUsers = _.get(superAdminRole, 'usersCount');
+    const mayRemoveSuperAdmins = !stringIncludes(attributes.roles, superAdminRole.id);
+
+    if (nbOfSuperAdminUsers === 1 && mayRemoveSuperAdmins) {
       const userWithAdminRole = await strapi
         .query('user', 'admin')
         .findOne({ roles: [superAdminRole.id] });
-      if (String(userWithAdminRole.id) === String(id)) {
+      if (stringEquals(userWithAdminRole.id, id)) {
         throw strapi.errors.badRequest(
           'ValidationError',
           'You must have at least one user with super admin role.'

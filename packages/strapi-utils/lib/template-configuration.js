@@ -12,14 +12,13 @@ const templateConfiguration = (obj, configPath = '') => {
   return Object.keys(obj).reduce((acc, key) => {
     if (isPlainObject(obj[key]) && !isString(obj[key])) {
       acc[key] = templateConfiguration(obj[key], `${configPath}.${key}`);
-
-    } else if (isString(obj[key])
-      && !excludeConfigPaths.includes(configPath.substr(1))
-      && obj[key].match(regex) !== null
+    } else if (
+      isString(obj[key]) &&
+      !excludeConfigPaths.includes(configPath.substr(1)) &&
+      obj[key].match(regex) !== null
     ) {
       // eslint-disable-next-line prefer-template
       acc[key] = eval('`' + obj[key] + '`');
-
     } else {
       acc[key] = obj[key];
     }

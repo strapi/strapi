@@ -2,6 +2,7 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
+const { checkFieldsAreCorrectlyNested } = require('./common-functions');
 
 const email = yup
   .string()
@@ -41,6 +42,35 @@ const arrayOfConditionNames = yup
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
+const updatePermissions = yup
+  .object()
+  .shape({
+    permissions: yup
+      .array()
+      .requiredAllowEmpty()
+      .of(
+        yup
+          .object()
+          .shape({
+            action: yup.string().required(),
+            subject: yup.string().nullable(),
+            fields: yup
+              .array()
+              .of(yup.string())
+              .nullable()
+              .test(
+                'field-nested',
+                'Fields format are incorrect (duplicates or bad nesting).',
+                checkFieldsAreCorrectlyNested
+              ),
+            conditions: arrayOfConditionNames,
+          })
+          .noUnknown()
+      ),
+  })
+  .required()
+  .noUnknown();
+
 module.exports = {
   email,
   firstname,
@@ -50,4 +80,5 @@ module.exports = {
   roles,
   isAPluginName,
   arrayOfConditionNames,
+  updatePermissions,
 };

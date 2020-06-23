@@ -124,4 +124,51 @@ describe('Permission Service', () => {
       expect(sanitizedPermission).toMatchObject(_.omit(permission, 'foo'));
     });
   });
+
+  describe('cleanPermissionInDatabase', () => {
+    test("Clean only the permissions that don't exist anymore", async () => {
+      const permsInDb = [
+        {
+          id: 1,
+          action: 'action-1',
+        },
+        {
+          id: 2,
+          action: 'action-2',
+        },
+        {
+          id: 3,
+          action: 'action-3',
+          subject: 'country',
+        },
+        {
+          id: 4,
+          action: 'action-3',
+          subject: 'planet',
+        },
+      ];
+
+      const dbFind = jest.fn(() => Promise.resolve(permsInDb));
+      const dbDelete = jest.fn(() => Promise.resolve());
+      const registeredPerms = new Map();
+      registeredPerms.set('action-1', {});
+      registeredPerms.set('action-3', { subjects: ['country'] });
+      const getAllByMap = jest.fn(() => registeredPerms);
+      const prevGetAllByMap = permissionService.actionProvider.getAllByMap;
+      permissionService.actionProvider.getAllByMap = getAllByMap;
+
+      global.strapi = {
+        query: () => ({ find: dbFind, delete: dbDelete }),
+      };
+
+      await permissionService.cleanPermissionInDatabase();
+
+      expect(dbFind).toHaveBeenCalledWith({}, []);
+      expect(getAllByMap).toHaveBeenCalledWith();
+      expect(dbDelete).toHaveBeenCalledWith({ id_in: [2, 4] });
+
+      // restauring actionProvider
+      permissionService.actionProvider.getAllByMap = prevGetAllByMap;
+    });
+  });
 });

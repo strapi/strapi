@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 const validators = require('./common-validators');
-const { checkFieldsAreCorrectlyNested } = require('./common-functions');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -42,35 +41,8 @@ const checkPermissionsAreBound = function(permissions) {
   return areBond;
 };
 
-const updatePermissionsSchemaArray = [
-  yup
-    .object()
-    .shape({
-      permissions: yup
-        .array()
-        .requiredAllowEmpty()
-        .of(
-          yup
-            .object()
-            .shape({
-              action: yup.string().required(),
-              subject: yup.string(),
-              fields: yup
-                .array()
-                .of(yup.string())
-                .nullable()
-                .test(
-                  'field-nested',
-                  'Fields format are incorrect (duplicates or bad nesting).',
-                  checkFieldsAreCorrectlyNested
-                ),
-              conditions: validators.arrayOfConditionNames,
-            })
-            .noUnknown()
-        ),
-    })
-    .required()
-    .noUnknown(),
+const updatePermissionsSchemaWithBoundConstraint = [
+  validators.updatePermissions,
   yup.object().shape({
     permissions: yup
       .array()
@@ -103,7 +75,7 @@ const validateCheckPermissionsInput = data => {
 
 const validatedUpdatePermissionsInput = async data => {
   try {
-    for (const schema of updatePermissionsSchemaArray) {
+    for (const schema of updatePermissionsSchemaWithBoundConstraint) {
       await schema.validate(data, { strict: true, abortEarly: false });
     }
   } catch (e) {
@@ -120,8 +92,7 @@ const checkPermissionsExist = function(permissions) {
       !existingActions.some(
         ea =>
           ea.actionId === permission.action &&
-          (ea.section !== 'contentTypes' ||
-            (ea.subjects.includes(permission.subject) && Array.isArray(permission.fields)))
+          (ea.section !== 'contentTypes' || ea.subjects.includes(permission.subject))
       )
   );
 

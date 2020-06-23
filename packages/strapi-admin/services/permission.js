@@ -11,8 +11,18 @@ const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
 
 const fieldsToCompare = ['action', 'subject', 'fields', 'conditions'];
+const getPermissionWithSortedFields = perm => {
+  const sortedPerm = _.cloneDeep(perm);
+  if (Array.isArray(sortedPerm.fields)) {
+    sortedPerm.fields.sort();
+  }
+  return sortedPerm;
+};
 const arePermissionsEqual = (perm1, perm2) =>
-  _.isEqual(_.pick(perm1, fieldsToCompare), _.pick(perm2, fieldsToCompare));
+  _.isEqual(
+    _.pick(getPermissionWithSortedFields(perm1), fieldsToCompare),
+    _.pick(getPermissionWithSortedFields(perm2), fieldsToCompare)
+  );
 
 /**
  * Delete permissions of roles in database
@@ -68,15 +78,19 @@ const assign = async (roleId, permissions = []) => {
     permissionsWithRole,
     arePermissionsEqual
   );
+  const permissionsToReturn = _.differenceBy(existingPermissions, permissionsToDelete, 'id');
 
   if (permissionsToDelete.length > 0) {
     await deleteByIds(permissionsToDelete.map(p => p.id));
   }
   if (permissionsToAdd.length > 0) {
-    await strapi.query('permission', 'admin').createMany(permissionsToAdd);
+    const createdPermissions = await strapi
+      .query('permission', 'admin')
+      .createMany(permissionsToAdd);
+    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
   }
 
-  return find({ role: roleId, _limit: -1 });
+  return permissionsToReturn;
 };
 
 /**
@@ -102,6 +116,27 @@ const findUserPermissions = async ({ roles }) => {
 const sanitizePermission = permission =>
   _.pick(permission, ['action', 'subject', 'fields', 'conditions']);
 
+/**
+ * Removes permissions in database that don't exist anymore
+ */
+const cleanPermissionInDatabase = async () => {
+  const dbPermissions = await find();
+  const allActionsMap = actionProvider.getAllByMap();
+  const permissionsToRemoveIds = [];
+
+  dbPermissions.forEach(perm => {
+    if (
+      !allActionsMap.has(perm.action) ||
+      (Array.isArray(allActionsMap.get(perm.action).subjects) &&
+        !allActionsMap.get(perm.action).subjects.includes(perm.subject))
+    ) {
+      permissionsToRemoveIds.push(perm.id);
+    }
+  });
+
+  await deleteByIds(permissionsToRemoveIds);
+};
+
 module.exports = {
   find,
   deleteByRolesIds,
@@ -112,4 +147,5 @@ module.exports = {
   actionProvider,
   engine,
   conditionProvider,
+  cleanPermissionInDatabase,
 };
