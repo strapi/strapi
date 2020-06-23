@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
+import { isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
 import { CheckPagePermissions, request } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
+
 import adminPermissions from '../../../../src/permissions';
 import { useFetchPermissionsLayout } from '../../../../src/hooks';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
@@ -19,8 +21,8 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  // @HichamELBSI Adding the layout since you might need it for the plugins sections
   const { goBack } = useHistory();
+  const permissionsRef = useRef();
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
 
   const headerActions = (handleSubmit, handleReset) => [
@@ -46,19 +48,22 @@ const CreatePage = () => {
   ];
 
   const handleCreateRoleSubmit = data => {
+    strapi.lockAppWithOverlay();
     setIsSubmiting(true);
 
     Promise.resolve(
       request('/admin/roles', {
         method: 'POST',
-        body: { name: data.name, description: data.description },
+        body: data,
       })
     )
       .then(res => {
-        if (res.data.id && data.permissions) {
+        const permissionsToSend = permissionsRef.current.getPermissions();
+
+        if (res.data.id && !isEmpty(permissionsToSend)) {
           return request(`/admin/roles/${res.data.id}/permissions`, {
             method: 'PUT',
-            body: { permissions: formatPermissionsToApi(data.permissions) },
+            body: { permissions: formatPermissionsToApi(permissionsToSend) },
           });
         }
 
@@ -68,11 +73,13 @@ const CreatePage = () => {
         strapi.notification.success('Settings.roles.created');
         goBack();
       })
-      .catch(() => {
+      .catch(err => {
+        console.error(err);
         strapi.notification.error('notification.error');
       })
       .finally(() => {
         setIsSubmiting(false);
+        strapi.unlockApp();
       });
   };
 
@@ -87,12 +94,12 @@ const CreatePage = () => {
 
   return (
     <Formik
-      initialValues={{ name: '', description: '', permissions: {} }}
+      initialValues={{ name: '', description: '' }}
       onSubmit={handleCreateRoleSubmit}
       validationSchema={schema}
       validateOnChange={false}
     >
-      {({ handleSubmit, values, errors, setFieldValue, handleReset, handleChange, handleBlur }) => (
+      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
         <form onSubmit={handleSubmit}>
           <ContainerFluid padding="0">
             <Header
@@ -147,9 +154,9 @@ const CreatePage = () => {
             {!isLayoutLoading && (
               <Padded top bottom size="md">
                 <Permissions
-                  onChange={setFieldValue}
                   permissionsLayout={permissionsLayout}
-                  rolePermissions={values.permissions}
+                  rolePermissions={{}}
+                  ref={permissionsRef}
                 />
               </Padded>
             )}

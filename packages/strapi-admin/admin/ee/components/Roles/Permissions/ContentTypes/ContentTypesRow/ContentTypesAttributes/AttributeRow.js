@@ -7,9 +7,8 @@ import { usePermissionsContext } from '../../../../../../../src/hooks';
 import { getAttributesToDisplay } from '../../../../../../../src/utils';
 import {
   contentManagerPermissionPrefix,
-  getRecursivePermissionsByAction,
+  getNumberOfRecursivePermissionsByAction,
   getAttributesByModel,
-  getAllAttributesActionsSize,
   getRecursivePermissions,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
 } from '../../../../../../../src/components/Roles/Permissions/utils';
@@ -31,7 +30,7 @@ const AttributeRow = ({ attribute, contentType }) => {
     onAttributePermissionSelect,
     onAllContentTypeActions,
     onAllAttributeActionsSelect,
-    onContentTypeAttributesActionSelect,
+    onAttributesSelect,
   } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const isActive = collapsePath[1] === attribute.attributeName;
@@ -69,15 +68,13 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const handleCheckAllAction = () => {
     if (isCollapsable) {
-      const allCurrentActionsSize = getAllAttributesActionsSize(contentType.uid, permissions);
-      const attributeToAdd = getRecursiveAttributes();
-
-      const allActionsSize = attributeToAdd.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const attributesToAdd = getRecursiveAttributes();
+      const allActionsSize = attributesToAdd.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
 
       onAllContentTypeActions({
         subject: contentType.uid,
-        attributes: attributeToAdd,
-        shouldEnable: allCurrentActionsSize >= 0 && allCurrentActionsSize < allActionsSize,
+        attributes: attributesToAdd,
+        shouldEnable: recursivePermissions >= 0 && recursivePermissions < allActionsSize,
         addContentTypeActions: false,
       });
     } else {
@@ -90,7 +87,7 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const getRecursiveAttributesPermissions = useCallback(
     action => {
-      return getRecursivePermissionsByAction(
+      return getNumberOfRecursivePermissionsByAction(
         collapsePath[0],
         action,
         attribute.attributeName,
@@ -112,7 +109,7 @@ const AttributeRow = ({ attribute, contentType }) => {
   const handleCheck = useCallback(
     action => {
       if (isCollapsable) {
-        onContentTypeAttributesActionSelect({
+        onAttributesSelect({
           action,
           subject: collapsePath[0],
           attributes: getRecursiveAttributes(),

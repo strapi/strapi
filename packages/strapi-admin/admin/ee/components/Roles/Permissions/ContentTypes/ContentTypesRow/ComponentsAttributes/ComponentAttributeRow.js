@@ -10,7 +10,7 @@ import {
   contentManagerPermissionPrefix,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
   getAttributesByModel,
-  getRecursivePermissionsByAction,
+  getNumberOfRecursivePermissionsByAction,
 } from '../../../../../../../src/components/Roles/Permissions/utils';
 import CollapseLabel from '../../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
 import PermissionCheckbox from '../../../../../../../src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
@@ -39,7 +39,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     permissions,
     collapsePath,
     onAttributePermissionSelect,
-    onContentTypeAttributesActionSelect,
+    onAttributesSelect,
   } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const contentTypeUid = collapsePath[0];
@@ -67,7 +67,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   }, [attribute, attributePermissionName, components]);
 
   const getRecursiveAttributesPermissions = action => {
-    const number = getRecursivePermissionsByAction(
+    const number = getNumberOfRecursivePermissionsByAction(
       contentTypeUid,
       action,
       isCollapsable
@@ -81,8 +81,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const handleCheck = useCallback(
     action => {
+      // If the current attribute is a component,
+      // we need select all the component attributes.
+      // Otherwhise, we just need to select the current attribute
       if (isCollapsable) {
-        onContentTypeAttributesActionSelect({
+        onAttributesSelect({
           action,
           subject: contentTypeUid,
           attributes: getRecursiveAttributes(),

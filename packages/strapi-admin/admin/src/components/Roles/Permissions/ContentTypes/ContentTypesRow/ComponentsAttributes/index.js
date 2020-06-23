@@ -2,9 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Padded } from '@buffetjs/core';
-
-// Here is the recursive component.
-// eslint-disable-next-line import/no-cycle
 import ComponentAttributeRow from 'ee_else_ce/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/ComponentAttributeRow';
 
 // Custom timeline header style used only in this file.

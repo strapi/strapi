@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { CustomRow } from '@buffetjs/styles';
 import { IconLinks, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
+
 import RoleDescription from './RoleDescription';
 
 const RoleRow = ({ role, onClick, links, prefix }) => {

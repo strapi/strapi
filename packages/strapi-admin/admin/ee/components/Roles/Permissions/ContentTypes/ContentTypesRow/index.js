@@ -28,48 +28,60 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
     permissions,
     components,
     onContentTypeActionSelect,
-    onContentTypeAttributesActionSelect,
+    onAttributesSelect,
     onAllContentTypeActions,
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
-  const allCurrentActionsSize =
-    getAllAttributesActionsSize(contentType.uid, permissions) +
-    Object.values(get(permissions, [contentType.uid, 'contentTypeActions'], {})).filter(
-      action => !!action
-    ).length;
 
+  const contentTypeActions = Object.values(
+    get(permissions, [contentType.uid, 'contentTypeActions'], {})
+  ).filter(action => !!action);
+
+  // Number of all actions in the current content type.
+  const allCurrentActionsSize = useMemo(() => {
+    return getAllAttributesActionsSize(contentType.uid, permissions) + contentTypeActions.length;
+  }, [contentType, contentTypeActions, permissions]);
+
+  // Attributes to display : Liste of attributes of in the content type without timestamps and id
+  // Used to display the first level of attributes.
   const attributesToDisplay = useMemo(() => {
     return getAttributesToDisplay(contentType);
   }, [contentType]);
 
-  const getAttributes = useCallback(() => {
+  // All recursive attributes.
+  // Used to recursively set the global content type action
+  const attributes = useMemo(() => {
     return getAttributesByModel(contentType, components);
   }, [contentType, components]);
 
   const allActionsSize =
-    getAttributes().length * ATTRIBUTES_PERMISSIONS_ACTIONS.length -
-    (ATTRIBUTES_PERMISSIONS_ACTIONS.length - contentTypesPermissionsLayout.length);
+    attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length +
+    contentTypesPermissionsLayout.length;
 
-  const canSelectContentTypeActions = useCallback(
+  const hasContentTypeAction = useCallback(
     action => get(permissions, [contentType.uid, 'contentTypeActions', action], false),
     [permissions, contentType]
   );
 
   const hasAllAttributeByAction = useCallback(
     action =>
+      getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) > 0 &&
       getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) ===
-      getAttributes().length,
+        attributes.length,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, contentType]
+    [permissions, contentType, attributes]
   );
 
+  // Check if an attribute have the passed action
+  // Used to set the someChecked props of an action checkbox
   const hasSomeAttributeByAction = useCallback(
     action =>
       getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) > 0 &&
       getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) <
-        getAttributes().length,
+        attributes.length &&
+      hasContentTypeAction(action),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, contentType]
+    [permissions, contentType, attributes]
   );
 
   const handleToggleAttributes = () => {
@@ -77,11 +89,12 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
   };
 
   const handleActionSelect = action => {
-    onContentTypeAttributesActionSelect({
+    onAttributesSelect({
       action,
       subject: contentType.uid,
-      attributes: getAttributes(),
-      shouldEnable: !hasAllAttributeByAction(action),
+      attributes,
+      shouldEnable: !hasAllAttributeByAction(action) || !hasContentTypeAction(action),
+      contentTypeAction: true,
     });
   };
 
@@ -92,6 +105,8 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
     });
   };
 
+  // Check/Uncheck all the actions for all
+  // attributes of the current content type
   const handleAllContentTypeActions = () => {
     onAllContentTypeActions({
       subject: contentType.uid,
@@ -110,7 +125,10 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
             <Checkbox
               onChange={handleAllContentTypeActions}
               name={contentType.name}
-              someChecked={allCurrentActionsSize > 0 && allCurrentActionsSize < allActionsSize}
+              someChecked={
+                contentTypeActions.length > 0 &&
+                contentTypeActions.length < contentTypesPermissionsLayout.length > 0
+              }
               value={allCurrentActionsSize === allActionsSize}
             />
             <CollapseLabel
@@ -137,7 +155,7 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
               !isAttributeAction(permissionLayout.action) ? (
                 <PermissionCheckbox
                   key={permissionLayout.action}
-                  value={canSelectContentTypeActions(permissionLayout.action)}
+                  value={hasContentTypeAction(permissionLayout.action)}
                   hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
                   onChange={() => handleContentTypeActionSelect(permissionLayout.action)}
@@ -145,7 +163,7 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
               ) : (
                 <PermissionCheckbox
                   key={permissionLayout.action}
-                  value={hasAllAttributeByAction(permissionLayout.action)}
+                  value={hasContentTypeAction(permissionLayout.action)}
                   someChecked={hasSomeAttributeByAction(permissionLayout.action)}
                   hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}

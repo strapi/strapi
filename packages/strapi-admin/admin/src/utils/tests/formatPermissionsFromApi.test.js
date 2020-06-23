@@ -40,6 +40,10 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
     const formattedPermissions = formatPermissionsFromApi(data);
     const expected = {
       'plugins::users-permissions.user': {
+        contentTypeActions: {
+          'plugins::content-manager.explorer.create': true,
+          'plugins::content-manager.explorer.update': true,
+        },
         email: {
           actions: [
             'plugins::content-manager.explorer.create',
@@ -63,7 +67,8 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
         },
       },
       'application::category.category': {
-        contentTypesActions: {
+        contentTypeActions: {
+          'plugins::content-manager.explorer.read': true,
           'plugins::content-manager.explorer.delete': true,
         },
         name: {

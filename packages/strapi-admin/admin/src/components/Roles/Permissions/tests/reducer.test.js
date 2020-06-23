@@ -115,6 +115,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         permissions: {
           place: {
+            contentTypeActions: {},
             'address.city': {
               actions: ['create'],
             },
@@ -126,6 +127,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
           like: {
+            contentTypeActions: {},
             number: {
               actions: ['create'],
             },
@@ -176,6 +178,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         permissions: {
           place: {
+            contentTypeActions: {},
             'address.city': {
               actions: ['read'],
             },
@@ -599,6 +602,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const expected = {
         permissions: {
           place: {
+            contentTypeActions: {},
             address: {
               actions: staticAttributeActions,
             },
@@ -689,7 +693,10 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissions: {
           place: {
             contentTypeActions: {
+              'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
+              'plugins::content-manager.explorer.read': true,
+              'plugins::content-manager.explorer.update': true,
             },
             address: {
               actions: staticAttributeActions,
@@ -747,6 +754,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
+              'plugins::content-manager.explorer.read': true,
+              'plugins::content-manager.explorer.create': true,
+              'plugins::content-manager.explorer.update': true,
             },
             address: {
               actions: staticAttributeActions,
@@ -785,6 +795,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': false,
+              'plugins::content-manager.explorer.read': false,
+              'plugins::content-manager.explorer.update': false,
+              'plugins::content-manager.explorer.create': false,
             },
             address: {
               actions: [],
