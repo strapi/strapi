@@ -193,7 +193,7 @@ Then fill the information:
 
 - **Enable**: `ON`
 - **Client ID**: 53de5258f8472c140917
-- **Client ID**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
+- **Client Secret**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/github`
 
 :::
