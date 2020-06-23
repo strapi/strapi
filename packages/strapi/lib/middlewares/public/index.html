@@ -25,7 +25,9 @@
           </div>
           <div class="text-align-right">
             <p><%= serverTime %></p>
+            <% if (strapi.config.serveAdminPanel) { %>
             <a class="cta cta-primary" href="<%= strapi.config.admin.url %>" target="_blank" title="Click to open the administration" ><i class="fas fa-external-link-alt"></i>Open the administration</a>
+            <% } %>
           </div>
         </div>
       <% } else if (strapi.config.environment === 'development' && !isInitialised) { %>
