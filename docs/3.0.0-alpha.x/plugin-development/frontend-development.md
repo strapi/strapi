@@ -10,7 +10,7 @@ The admin panel is a [React](https://facebook.github.io/react/) application whic
 
 ## Routing
 
-The routing is based on the [React Router V4](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/index.js` file.
+The routing is based on the [React Router V4](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/EditPage.js` file.
 
 Also, we chose to use the [Switch Router](https://reacttraining.com/react-router/web/api/Switch) because it renders a route exclusively.
 
@@ -20,7 +20,7 @@ Let's say that you want to create a route `/user` with params `/:id` associated 
 
 The declaration would be as followed :
 
-**Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
+**Path —** `plugins/my-plugin/admin/src/containers/App/EditPage.js`.
 
 ```js
 import React from 'react';
@@ -35,11 +35,7 @@ class App extends React.Component {
     return (
       <div className={styles.myPlugin}>
         <Switch>
-          <Route
-            exact
-            path="/plugins/my-plugin/user/:id"
-            component={UserPage}
-          />
+          <Route exact path="/plugins/my-plugin/user/:id" component={UserPage} />
         </Switch>
       </div>
     );
@@ -66,7 +62,7 @@ The [Bootstrap styles](http://getbootstrap.com/) are inherited by the plugins. H
 To style a plugin component:
 
 - Add a `styles.scss` file in the component directory
-- Require it from the `index.js` file (`import styles from './styles.scss';`)
+- Require it from the `EditPage.js` file (`import styles from './styles.scss';`)
 - Add some styles in the `styles.scss` file
 
 ```
@@ -90,11 +86,7 @@ import styles from './styles.scss';
 
 // ...
 
-return (
-  <div className={cn(styles.wrapper, styles.otherClass)}>
-    {this.props.children}
-  </div>
-);
+return <div className={cn(styles.wrapper, styles.otherClass)}>{this.props.children}</div>;
 
 // ...
 ```
@@ -129,7 +121,7 @@ The example below shows how to use i18n inside your plugin.
 
 **Usage inside a component**
 
-**Path —** `./plugins/my-plugin/admin/src/components/Foo/index.js`.
+**Path —** `./plugins/my-plugin/admin/src/components/Foo/EditPage.js`.
 
 ```js
 import { FormattedMessage } from 'react-intl';

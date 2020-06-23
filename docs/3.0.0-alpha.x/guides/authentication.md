@@ -139,8 +139,7 @@ import axios from 'axios';
 axios
   .post('http://localhost:1337/auth/forgot-password', {
     email: 'user@strapi.io',
-    url:
-      'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
+    url: 'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
   })
   .then(response => {
     // Handle success.
@@ -212,7 +211,7 @@ To add a new provider on Strapi, you will need to perform changes onto the follo
 ```
 packages/strapi-plugin-users-permissions/services/Providers.js
 packages/strapi-plugin-users-permissions/config/functions/bootstrap.js
-packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js
+packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/EditPage.js
 packages/strapi-plugin-users-permissions/admin/src/translations/en.json
 ```
 
@@ -324,7 +323,7 @@ For our discord provider it will look like:
 ### Configure frontend for your new provider
 
 To make the new provider available on the front end of the application,
-edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
+edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/EditPage.js`
 Add the new provider info. For our discord provider it will look like:
 
 ```js

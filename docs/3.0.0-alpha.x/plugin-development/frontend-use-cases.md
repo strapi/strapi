@@ -26,7 +26,7 @@ export function onToggleShowLorem() {
 }
 ```
 
-**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`.
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/EditPage.js`.
 
 ```js
 import React from 'react';
@@ -59,12 +59,7 @@ class FooPage extends React.Component {
     return (
       <div>
         <h1>This is FooPage container</h1>
-        <ExtendComponent
-          area="top"
-          container="FooPage"
-          plugin="my-plugin"
-          {...props}
-        />
+        <ExtendComponent area="top" container="FooPage" plugin="my-plugin" {...props} />
         {lorem}
       </div>
     );
@@ -89,16 +84,10 @@ const mapStateToProps = createStructuredSelector({
   showLorem: makeSelectShowLorem(),
 });
 
-const withConnect = connect(
-  mapDispatchToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapDispatchToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'fooPage', reducer });
 
-export default compose(
-  withReducer,
-  withConnect
-)(FooPage);
+export default compose(withReducer, withConnect)(FooPage);
 ```
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/reducer.js`.
@@ -139,10 +128,7 @@ const selectFooPageDomain = () => state => state.get('fooPage');
  */
 
 const makeSelectShowLorem = () =>
-  createSelector(
-    selectFooPageDomain(),
-    substate => substate.get('showLorem')
-  );
+  createSelector(selectFooPageDomain(), substate => substate.get('showLorem'));
 
 export { makeSelectShowLorem };
 ```
@@ -153,7 +139,7 @@ Let's see how to inject a React Component from a plugin into another.
 
 ### Create your injectedComponent
 
-**Path -** `./plugins/another-plugin/admin/src/extendables/BarContainer/index.js`;
+**Path -** `./plugins/another-plugin/admin/src/extendables/BarContainer/EditPage.js`;
 
 ```js
 import React from 'react';
@@ -213,9 +199,9 @@ Just by doing so, the `another-plugin` will add a `Button` which toggles the `lo
 
 ## Routeless container store injection
 
-If you have a container which can be a child of several other containers (i.e. it doesn't have a route); you'll have to inject it directly in the `./plugins/my-plugin/admin/src/containers/App/index.js` file as follows :
+If you have a container which can be a child of several other containers (i.e. it doesn't have a route); you'll have to inject it directly in the `./plugins/my-plugin/admin/src/containers/App/EditPage.js` file as follows :
 
-**Path —** `./plugins/my-plugin/admin/src/containers/App/index.js`.
+**Path —** `./plugins/my-plugin/admin/src/containers/App/EditPage.js`.
 
 ```js
 // ...
@@ -472,11 +458,7 @@ export const DATA_FETCH_SUCCEEDED = 'MyPlugin/FooPage/DATA_FETCH_SUCCEEDED';
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/actions.js`
 
 ```js
-import {
-  DATA_FETCH,
-  DATA_FETCH_ERROR,
-  DATA_FETCH_SUCCEEDED,
-} from './constants';
+import { DATA_FETCH, DATA_FETCH_ERROR, DATA_FETCH_SUCCEEDED } from './constants';
 
 export function dataFetch(params) {
   return {
@@ -632,20 +614,13 @@ const selectFooPageDomain = () => state => state.get('fooPage');
  */
 
 const makeSelectLoading = () =>
-  createSelector(
-    selectFooPageDomain(),
-    substate => substate.get('loading')
-  );
+  createSelector(selectFooPageDomain(), substate => substate.get('loading'));
 
 /**
  * Default selector used by FooPage
  */
 
-const selectFooPage = () =>
-  createSelector(
-    selectFooDomain(),
-    substate => substate.toJS()
-  );
+const selectFooPage = () => createSelector(selectFooDomain(), substate => substate.toJS());
 
 export default selectFooPage;
 export { makeSelectLoading };
@@ -653,7 +628,7 @@ export { makeSelectLoading };
 
 #### Example
 
-**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`
+**Path —** `./plugins/my-plugin/admin/src/containers/FooPage/EditPage.js`
 
 ```js
 import React from 'react';

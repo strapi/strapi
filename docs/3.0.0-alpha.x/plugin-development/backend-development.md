@@ -112,7 +112,7 @@ The queries are accessible through the `strapi.query()` method, which automatica
 
 Mongoose ORM queries definition:
 
-**Path —** `./plugins/my-plugin/api/config/queries/mongoose/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/mongoose/EditPage.js`.
 
 ```js
 module.exports = {
@@ -124,7 +124,7 @@ module.exports = {
 
 Bookshelf ORM queries definition:
 
-**Path —** `./plugins/my-plugin/api/config/queries/bookshelf/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/bookshelf/EditPage.js`.
 
 ```js
 module.exports = {
@@ -136,7 +136,7 @@ module.exports = {
 
 Usage from the plugin:
 
-**Path —** `./plugins/my-plugin/api/controllers/index.js`.
+**Path —** `./plugins/my-plugin/api/controllers/EditPage.js`.
 
 ```js
 module.exports = {
@@ -159,7 +159,7 @@ Each function in the query file is bound with the ORM's model. It means that you
 
 Mongoose ORM generic queries:
 
-**Path —** `./plugins/my-plugin/api/config/queries/mongoose/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/mongoose/EditPage.js`.
 
 ```js
 module.exports = {
@@ -173,7 +173,7 @@ module.exports = {
 
 Bookshelf ORM generic queries:
 
-**Path —** `./plugins/my-plugin/api/config/queries/bookshelf/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/bookshelf/EditPage.js`.
 
 ```js
 module.exports = {
@@ -187,7 +187,7 @@ module.exports = {
 
 Usage from the plugin:
 
-**Path —** `./plugins/my-plugin/api/controllers/index.js`.
+**Path —** `./plugins/my-plugin/api/controllers/EditPage.js`.
 
 ```js
 module.exports = {

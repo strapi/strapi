@@ -48,13 +48,13 @@ A hook needs to follow the structure below:
 ```
 /strapi-hook-[...]
 └─── lib
-     - index.js
+     - EditPage.js
 - LICENSE.md
 - package.json
 - README.md
 ```
 
-The `index.js` is the entry point to your hook. It should look like the example above.
+The `EditPage.js` is the entry point to your hook. It should look like the example above.
 
 ## Custom hooks
 
@@ -67,9 +67,9 @@ The framework allows to load hooks from the project directly without having to i
 └─── config
 └─── hooks
 │   └─── strapi-documentation
-│        - index.js
+│        - EditPage.js
 │   └─── strapi-server-side-rendering
-│        - index.js
+│        - EditPage.js
 └─── public
 - favicon.ico
 - package.json

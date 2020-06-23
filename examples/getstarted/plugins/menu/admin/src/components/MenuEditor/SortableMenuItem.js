@@ -1,11 +1,59 @@
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, useContext, memo } from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDrag, useDrop } from 'react-sortly';
 import { faPen, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
+import { useHistory } from 'react-router-dom';
+import EditViewContext from '../../contexts/EditView';
+
+const SortableMenuItem = ({ id, depth, name }) => {
+  const { editMode } = useContext(EditViewContext);
+
+  // History for redirection back from create/edit pages
+  const history = useHistory();
+  const location = '/plugins/menu';
+
+  // Details
+  const detail = 'plugins/content-manager/collectionType/plugins::menu.item';
+  const handleClick_menuItemEdit = useCallback(() => {
+    history.push(`/${detail}/${id}?redirectUrl=${location}`);
+  }, []);
+
+  // DnD for Sortly
+  const [{ isDragging }, drag, preview] = useDrag({
+    collect: monitor => ({ isDragging: monitor.isDragging() }),
+  });
+  const [, drop] = useDrop();
+
+  return (
+    <div ref={ref => drop(preview(ref))}>
+      <Item key={id} {...{ editMode, depth }}>
+        <DraggingIcon ref={editMode ? drag : null} {...{ editMode, depth }}>
+          <FontAwesomeIcon icon={faArrowsAlt} />
+        </DraggingIcon>
+        {!editMode && (
+          <EditIcon onClick={handleClick_menuItemEdit} {...{ editMode }}>
+            <FontAwesomeIcon icon={faPen} />
+          </EditIcon>
+        )}
+        <div>{name}</div>
+      </Item>
+    </div>
+  );
+};
+
+SortableMenuItem.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  depth: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+};
+
+export default memo(SortableMenuItem);
 
 const Item = styled.div`
   margin-top: 5px;
+  margin-left: ${({ depth }) => `${depth * 30}px`};
   display: flex;
   flex: 1 0 auto;
   border: solid 1px #e2e2e2;
@@ -14,13 +62,6 @@ const Item = styled.div`
   align-items: center;
   padding: 5px;
   background: rgb(255, 255, 255);
-  input {
-    width: 100%;
-    padding: 5px 10px;
-    &:hover {
-      outline: ${props => (false ? '1px solid #6c757d' : 'none')};
-    }
-  }
   &:hover {
     background: #cccccc;
   }
@@ -60,65 +101,3 @@ const EditIcon = styled.div`
     background: #6c757d;
   }
 `;
-
-export default memo(function SortableMenuItem({
-  id,
-  depth,
-  value,
-  onChange,
-  onClick,
-  onKeyDown,
-  editMode,
-  myRef,
-  isNew,
-}) {
-  // DnD for Sortly
-  const [{ isDragging }, drag, preview] = useDrag({
-    collect: monitor => ({ isDragging: monitor.isDragging() }),
-  });
-  const [, drop] = useDrop();
-
-  // Collect events here and invoke callbacks with usefull arguments
-  const handleClickItemDetail = useCallback(
-    e => {
-      onClick(id);
-    },
-    [onClick]
-  );
-
-  const handleChangeInputValue = useCallback(
-    e => {
-      onChange(id, e.target.value);
-    },
-    [onChange]
-  );
-
-  const handleKeyDownInput = useCallback(
-    e => {
-      onKeyDown(id, e);
-    },
-    [onKeyDown]
-  );
-
-  return (
-    <div ref={ref => drop(preview(ref))}>
-      <Item style={{ marginLeft: depth * 30 }} key={id} editMode={editMode}>
-        <DraggingIcon ref={editMode ? drag : null} depth={depth} editMode={editMode}>
-          <FontAwesomeIcon icon={faArrowsAlt} />
-        </DraggingIcon>
-        {!editMode && (
-          <EditIcon onClick={handleClickItemDetail} editMode={editMode}>
-            <FontAwesomeIcon icon={faPen} />
-          </EditIcon>
-        )}
-        <input
-          disabled={true}
-          value={value}
-          onChange={handleChangeInputValue}
-          onKeyDown={handleKeyDownInput}
-          ref={myRef}
-        />
-      </Item>
-    </div>
-  );
-});

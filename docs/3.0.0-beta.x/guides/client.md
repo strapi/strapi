@@ -30,7 +30,7 @@ Hooks are loaded one time, at the server start.
 
 Lets create our GitHub hook.
 
-**Path —** `./hooks/github/index.js`
+**Path —** `./hooks/github/EditPage.js`
 
 ```js
 module.exports = strapi => {
@@ -76,7 +76,7 @@ By following the [documentation](https://octokit.github.io/rest.js/#authenticati
 
 Now we have to load the GitHub client.
 
-**Path —** `./hooks/github/index.js`
+**Path —** `./hooks/github/EditPage.js`
 
 ```js
 const GitHubAPI = require('@octokit/rest');
@@ -133,7 +133,7 @@ And in your GitHub hook, you will have to replace `strapi.config.hook.github` by
 }
 ```
 
-**Path —** `./hooks/github/index.js`
+**Path —** `./hooks/github/EditPage.js`
 
 ```js
 const GitHubAPI = require('@octokit/rest');

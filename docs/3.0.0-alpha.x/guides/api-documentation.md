@@ -41,7 +41,7 @@ This plugin follows the OpenApi Specifications ([0AS.3.0.2](https://swagger.io/s
 |   |   |   └─── bootstrap.js // Logic to create the documentation file (if needed) when the server starts
 |   |   |
 |   |   └─── policies
-|   |   |   └─── index.js // The plugin's policies
+|   |   |   └─── EditPage.js // The plugin's policies
 |   |   |
 |   |   └─── routes.json // The plugin's available end-points
 |   |   └─── settings.json // The OpenAPI Document basic settings
@@ -58,7 +58,7 @@ This plugin follows the OpenApi Specifications ([0AS.3.0.2](https://swagger.io/s
 |   └─── middlewares
 |   |   └─── documentation
 |   |        └─── default.json
-|   |        └─── index.js
+|   |        └─── EditPage.js
 |   |
 |   └─── public
 |   |    └─── index.html // SWAGGER UI

@@ -17,7 +17,7 @@ Each plugin that comes with a setting object will create a new section into the 
 
 The menu section can be declared as follows:
 
-**Path —** `plugins/my-plugin/admin/src/index.js`.
+**Path —** `plugins/my-plugin/admin/src/EditPage.js`.
 
 ```
 import pluginPkg from '../../package.json';
@@ -88,7 +88,7 @@ The exported Setting component which receives `settingsBaseURL` as props in orde
 
 With the configuration from above we could easily create our plugin Settings view.
 
-**Path —** `plugins/my-plugin/admin/src/containers/Settings/index.js`.
+**Path —** `plugins/my-plugin/admin/src/containers/Settings/EditPage.js`.
 
 ```
 import React from 'react';
@@ -131,7 +131,7 @@ export default Settings;
 
 Now that the `Settings` component is declared in your plugin the only thing left is to add it to your settings configuration:
 
-**Path —** `plugins/my-plugin/admin/src/index.js`.
+**Path —** `plugins/my-plugin/admin/src/EditPage.js`.
 
 ```
 import pluginPkg from '../../package.json';

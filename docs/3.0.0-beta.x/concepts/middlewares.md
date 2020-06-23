@@ -14,7 +14,7 @@ Enable the middleware in environments settings
 }
 ```
 
-**Path —** [`strapi/lib/middlewares/responseTime/index.js`](https://github.com/strapi/strapi/blob/master/packages/strapi/lib/middlewares/responseTime/index.js).
+**Path —** [`strapi/lib/middlewares/responseTime/EditPage.js`](https://github.com/strapi/strapi/blob/master/packages/strapi/lib/middlewares/responseTime/index.js).
 
 ```js
 module.exports = strapi => {
@@ -71,13 +71,13 @@ A middleware needs to follow the structure below:
 ```
 /middleware
 └─── lib
-     - index.js
+     - EditPage.js
 - LICENSE.md
 - package.json
 - README.md
 ```
 
-The `index.js` is the entry point to your middleware. It should look like the example above.
+The `EditPage.js` is the entry point to your middleware. It should look like the example above.
 
 ## Custom middlewares structure
 
@@ -89,9 +89,9 @@ The framework allows the application to override the default middlewares and add
 └─── config
 └─── middlewares
 │   └─── responseTime // It will override the core default responseTime middleware.
-│        - index.js
+│        - EditPage.js
 │   └─── views // It will be added into the stack of middleware.
-│        - index.js
+│        - EditPage.js
 └─── public
 - favicon.ico
 - package.json

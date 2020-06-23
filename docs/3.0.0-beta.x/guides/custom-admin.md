@@ -22,7 +22,7 @@ Here is the [HomePage container](https://github.com/strapi/strapi/tree/master/pa
 
 Let's eject this file to be able to customize it.
 
-**Path —** `./admin/src/containers/HomePage/index.js`
+**Path —** `./admin/src/containers/HomePage/EditPage.js`
 
 In this new file, paste the current [HomePage container](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin/src/containers/HomePage/index.js) code.
 
@@ -34,7 +34,7 @@ If you visit the admin, nothing will have changed in the home page. And it's nor
 
 To keep this example really simple, we will just reduce the HomePage to a more simple design.
 
-**Path —** `./admin/src/containers/HomePage/index.js`
+**Path —** `./admin/src/containers/HomePage/EditPage.js`
 
 ```js
 import React, { memo } from 'react';

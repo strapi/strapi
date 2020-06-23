@@ -10,9 +10,9 @@ In this example we will use [Sentry](https://sentry.io).
 
 A [middleware](../concepts/middlewares.md) will be used in order to catch the errors which will then be sent to Sentry.
 
-- Create a `./middlewares/sentry/index.js` file.
+- Create a `./middlewares/sentry/EditPage.js` file.
 
-**Path —** `./middlewares/sentry/index.js`
+**Path —** `./middlewares/sentry/EditPage.js`
 
 ```js
 module.exports = strapi => {
@@ -34,7 +34,7 @@ Install it with `yarn add @sentry/node` or `npm install @sentry/node --save`.
 
 - Now add the logic that will catch errors.
 
-**Path —** `./middlewares/sentry/index.js`
+**Path —** `./middlewares/sentry/EditPage.js`
 
 ```js
 const Sentry = require('@sentry/node');

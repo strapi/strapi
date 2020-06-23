@@ -9,13 +9,13 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { NotFound } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-import HomePage from '../HomePage';
+import EditView from '../EditView';
 
 const App = () => {
   return (
     <div className={pluginId}>
       <Switch>
-        <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
+        <Route path={`/plugins/${pluginId}`} component={EditView} exact />
         <Route component={NotFound} />
       </Switch>
     </div>

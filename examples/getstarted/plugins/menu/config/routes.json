@@ -10,6 +10,14 @@
     },
     {
       "method": "PUT",
+      "path": "/item",
+      "handler": "item.updateMany",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
       "path": "/item/:id",
       "handler": "item.update",
       "config": {

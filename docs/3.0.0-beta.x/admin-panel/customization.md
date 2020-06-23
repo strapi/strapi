@@ -69,10 +69,10 @@ cd my-app && mkdir -p admin/src/translations
 # Change the available locales of the administration panel
 touch admin/src/i18n.js
 # Change the import and exports of the translations files
-touch admin/src/translations/index.js
+touch admin/src/translations/EditPage.js
 ```
 
-**Path --** `my-app/admin/src/translations/index.js`
+**Path --** `my-app/admin/src/translations/EditPage.js`
 
 ```js
 import en from './en.json';
@@ -141,11 +141,11 @@ mkdir content-manager && cd content-manager
 mkdir -p admin/src
 # Create the components folder and the WysiwygWithErrors one
 cd admin/src && mkdir -p components/WysiwygWithErrors
-# Create the index.js so the original file is overridden
-touch components/WysiwygWithErrors/index.js
+# Create the EditPage.js so the original file is overridden
+touch components/WysiwygWithErrors/EditPage.js
 ```
 
-**Path --** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
+**Path --** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/EditPage.js`
 
 ```js
 import React from 'react';

@@ -108,7 +108,7 @@ Let's say that we have a container that fetches Content Type configurations depe
 
 Here we want to create a route `/content-type/:contentTypeName` for the `ContentTypePage` container.
 
-**Path —** `./plugins/my-plugin/admin/src/container/App/index.js`.
+**Path —** `./plugins/my-plugin/admin/src/container/App/EditPage.js`.
 
 ```js
 import React from 'react';
@@ -148,10 +148,7 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const mapStateToProps = createStructuredSelector({});
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 export default compose(withConnect)(App);
 ```
@@ -167,8 +164,7 @@ Let's declare the needed constants to handle fetching data:
 ```js
 export const DATA_FETCH = 'myPlugin/ContentTypePage/DATA_FETCH';
 export const DATA_FETCH_ERROR = 'myPlugin/ContentTypePage/DATA_FETCH_ERROR';
-export const DATA_FETCH_SUCCEEDED =
-  'myPlugin/ContentTypePage/DATA_FETCH_SUCCEEDED';
+export const DATA_FETCH_SUCCEEDED = 'myPlugin/ContentTypePage/DATA_FETCH_SUCCEEDED';
 ```
 
 ---
@@ -180,11 +176,7 @@ Let's declare our actions.
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/actions.js`.
 
 ```js
-import {
-  DATA_FETCH,
-  DATA_FETCH_ERROR,
-  DATA_FETCH_SUCCEEDED,
-} from './constants';
+import { DATA_FETCH, DATA_FETCH_ERROR, DATA_FETCH_SUCCEEDED } from './constants';
 
 export function dataFetch(contentTypeName) {
   return {
@@ -219,11 +211,7 @@ Please refer to the [Immutable documentation](https://facebook.github.io/immutab
 
 ```js
 import { fromJS, Map } from 'immutable';
-import {
-  DATA_FETCH,
-  DATA_FETCH_ERROR,
-  DATA_FETCH_SUCCEEDED,
-} from './constants';
+import { DATA_FETCH, DATA_FETCH_ERROR, DATA_FETCH_SUCCEEDED } from './constants';
 
 const initialState = fromJS({
   contentTypeName,
@@ -288,7 +276,7 @@ export { makeSelectContentTypeName, selectContentTypePageDomain };
 
 #### Handling route change:
 
-**Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/index.js`.
+**Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/EditPage.js`.
 
 ```js
 import React from 'react';
@@ -331,10 +319,7 @@ export class ContentTypePage extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (
-      nextProps.match.params.contentTypeName !==
-      this.props.match.params.contentTypeName
-    ) {
+    if (nextProps.match.params.contentTypeName !== this.props.match.params.contentTypeName) {
       this.props.dataFetch(nextProps.match.params.contentTypeName);
     }
   }
@@ -377,18 +362,11 @@ ContentTypePage.propTypes = {
   match: PropTypes.object.isRequired,
 };
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withSaga = injectSaga({ key: 'contentTypePage', saga });
 const withReducer = injectReducer({ key: 'contentTypePage', reducer });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(ContentTypePage);
+export default compose(withReducer, withSaga, withConnect)(ContentTypePage);
 ```
 
 ---
@@ -401,15 +379,7 @@ The `sagas.js` file is in charge of fetching data.
 
 ```js
 import { LOCATION_CHANGE } from 'react-router-redux';
-import {
-  takeLatest,
-  call,
-  take,
-  put,
-  fork,
-  cancel,
-  select,
-} from 'redux-saga/effects';
+import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
 import request from 'utils/request';
 import { dataFetchError, dataFetchSucceeded } from './actions';
 import { DATA_FETCH } from './constants';
@@ -451,15 +421,7 @@ Let's say that you want to develop a plugin that needs server restart on file ch
 **Path —** `./plugins/my-plugin/admin/src/containers/**/sagas.js`.
 
 ```js
-import {
-  takeLatest,
-  call,
-  take,
-  put,
-  fork,
-  cancel,
-  select,
-} from 'redux-saga/effects';
+import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
 import request from 'utils/request';
 import { submitSucceeded, submitError } from './actions';
 import { SUBMIT } from './constants';

@@ -580,7 +580,7 @@ To add a new provider on Strapi, you will need to perform changes onto the follo
 ```
 extensions/users-permissions/services/Providers.js
 extensions/users-permissions/config/functions/bootstrap.js
-extensions/users-permissions/admin/src/components/PopUpForm/index.js
+extensions/users-permissions/admin/src/components/PopUpForm/EditPage.js
 extensions/users-permissions/admin/src/translations/en.json
 ```
 
@@ -694,7 +694,7 @@ discord: {
 ### Configure frontend for your new provider
 
 To make the new provider available on the front end of the application,
-edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
+edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/EditPage.js`
 Add the new provider info. For our discord provider it will look like:
 
 ```js

@@ -56,7 +56,7 @@ The administration url (e.g. `http://localhost:4000/admin`).
 
 ### Main plugin object
 
-Each plugin exports all its configurations in an object. This object is located in `my-plugin/admin/src/index.js`
+Each plugin exports all its configurations in an object. This object is located in `my-plugin/admin/src/EditPage.js`
 
 Here are its properties:
 
@@ -126,16 +126,8 @@ class Initializer extends React.PureComponent {
     }
 
     // Prevent the plugin from being rendered if currentEnvironment === PRODUCTION
-    this.props.updatePlugin(
-      pluginId,
-      'preventComponentRendering',
-      preventComponentRendering
-    );
-    this.props.updatePlugin(
-      pluginId,
-      'blockerComponentProps',
-      blockerComponentProps
-    );
+    this.props.updatePlugin(pluginId, 'preventComponentRendering', preventComponentRendering);
+    this.props.updatePlugin(pluginId, 'blockerComponentProps', blockerComponentProps);
     // Emit the event plugin ready
     this.props.updatePlugin(pluginId, 'isReady', true);
   }
@@ -159,7 +151,7 @@ export default Initializer;
 
 ### Routing
 
-The routing is based on the [React Router V5](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/index.js` file.
+The routing is based on the [React Router V5](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/EditPage.js` file.
 
 ::: tip
 Each route defined in a plugin must be prefixed by the plugin's id.
@@ -171,7 +163,7 @@ Let's say that you want to create a route `/user` with params `/:id` associated 
 
 The declaration would be as follows :
 
-**Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
+**Path —** `plugins/my-plugin/admin/src/containers/App/EditPage.js`.
 
 ```js
 import React from 'react';
@@ -188,11 +180,7 @@ class App extends React.Component {
     return (
       <div>
         <Switch>
-          <Route
-            exact
-            path={`/plugins/${pluginId}/user/:id`}
-            component={UserPage}
-          />
+          <Route exact path={`/plugins/${pluginId}/user/:id`} component={UserPage} />
         </Switch>
       </div>
     );
@@ -236,7 +224,7 @@ The example below shows how to use i18n inside your plugin.
 
 **Usage inside a component**
 
-**Path —** `./plugins/my-plugin/admin/src/components/Foo/index.js`.
+**Path —** `./plugins/my-plugin/admin/src/components/Foo/EditPage.js`.
 
 ```js
 import { FormattedMessage } from 'react-intl';

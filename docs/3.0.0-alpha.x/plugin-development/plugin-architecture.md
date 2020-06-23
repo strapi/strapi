@@ -15,7 +15,7 @@ The folders and files structure is the following:
 |          |    └─── HomePage
 |          |         └─── action.js // List of Redux actions used by the current container
 |          |         └─── constants.js // List of actions constants
-|          |         └─── index.js // React component of the current container
+|          |         └─── EditPage.js // React component of the current container
 |          |         └─── reducer.js // Redux reducer used by the current container
 |          |         └─── sagas.js // List of sagas functions
 |          |         └─── selectors.js // List of selectors
