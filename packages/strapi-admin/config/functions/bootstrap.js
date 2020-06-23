@@ -19,43 +19,6 @@ const registerAdminConditions = () => {
   });
 };
 
-const cleanPermissionInDatabase = async () => {
-  const { actionProvider } = strapi.admin.services.permission;
-  const dbPermissions = await strapi.admin.services.permission.find();
-  const allActionsMap = actionProvider.getAllByMap();
-  const permissionsToRemoveIds = [];
-
-  dbPermissions.forEach(perm => {
-    if (
-      !allActionsMap.has(perm.action) ||
-      (allActionsMap.get(perm.action).section === 'contentTypes' &&
-        !allActionsMap.get(perm.action).subjects.includes(perm.subject))
-    ) {
-      permissionsToRemoveIds.push(perm.id);
-    }
-  });
-
-  await strapi.admin.services.permission.deleteByIds(permissionsToRemoveIds);
-};
-
-const getPermissionsWithNestedFields = (actions, nestingLevel = 3) =>
-  actions.reduce((perms, action) => {
-    const newPerms = [];
-    action.subjects.forEach(contentTypeUid => {
-      const fields = strapi.admin.services['content-type'].getNestedFields(contentTypeUid, {
-        components: { ...strapi.components, ...strapi.contentTypes },
-        nestingLevel,
-      });
-      newPerms.push({
-        action: action.actionId,
-        subject: contentTypeUid,
-        fields,
-        conditions: [],
-      });
-    });
-    return perms.concat(newPerms);
-  }, []);
-
 const createRolesIfNeeded = async () => {
   const someRolesExist = await strapi.admin.services.role.exists();
   if (someRolesExist) {
@@ -104,7 +67,9 @@ const createRolesIfNeeded = async () => {
     description: 'Authors can manage and publish the content they created.',
   });
 
-  const editorPermissions = getPermissionsWithNestedFields(contentTypesActions);
+  const editorPermissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
+    contentTypesActions
+  );
 
   const authorPermissions = editorPermissions.map(p => ({
     ...p,
@@ -145,7 +110,10 @@ const resetSuperAdminPermissions = async () => {
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
-  const permissions = getPermissionsWithNestedFields(contentTypesActions, 1);
+  const permissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
+    contentTypesActions,
+    1
+  );
 
   const otherActions = allActions.filter(a => a.section !== 'contentTypes');
   otherActions.forEach(action => {
@@ -165,7 +133,7 @@ const resetSuperAdminPermissions = async () => {
 module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
-  await cleanPermissionInDatabase();
+  await strapi.admin.services.permission.cleanPermissionInDatabase();
   await createRolesIfNeeded();
   await resetSuperAdminPermissions();
   await displayWarningIfNoSuperAdmin();

@@ -1,10 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
-const { EDITOR_CODE, AUTHOR_CODE } = require('../services/constants');
+const { EDITOR_CODE, AUTHOR_CODE, SUPER_ADMIN_CODE } = require('../services/constants');
 
 module.exports = {
   /**
@@ -88,11 +87,15 @@ module.exports = {
    */
   async updatePermissions(ctx) {
     const { id } = ctx.params;
-    const input = _.cloneDeep(ctx.request.body);
+    const input = ctx.request.body;
+
+    const role = await strapi.admin.services.role.findOne({ id });
+    if (!role) {
+      return ctx.notFound('role.notFound');
+    }
 
     try {
-      const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
-      if (superAdminRole && String(superAdminRole.id) === String(id)) {
+      if (role.code === SUPER_ADMIN_CODE) {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);
       }
@@ -101,22 +104,24 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const role = await strapi.admin.services.role.findOne({ id });
-
-    if (!role) {
-      return ctx.notFound('role.notFound');
-    }
-
     let existingPermissions = strapi.admin.services.permission.actionProvider.getAllByMap();
+    let permissionsToAssign;
     if ([EDITOR_CODE, AUTHOR_CODE].includes(role.code)) {
-      input.permissions
+      permissionsToAssign = input.permissions.filter(
+        p => existingPermissions.get(p.action).section !== 'contentTypes'
+      );
+      const modifiedPermissions = input.permissions
         .filter(p => existingPermissions.get(p.action).section === 'contentTypes')
-        .forEach(p => {
-          p.conditions = role.code === AUTHOR_CODE ? ['admin::is-creator'] : [];
-        });
+        .map(p => ({
+          ...p,
+          conditions: role.code === AUTHOR_CODE ? ['admin::is-creator'] : [],
+        }));
+      permissionsToAssign.push(...modifiedPermissions);
+    } else {
+      permissionsToAssign = input.permissions;
     }
 
-    const permissions = await strapi.admin.services.permission.assign(role.id, input.permissions);
+    const permissions = await strapi.admin.services.permission.assign(role.id, permissionsToAssign);
 
     ctx.body = {
       data: permissions,

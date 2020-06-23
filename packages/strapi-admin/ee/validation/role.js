@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('strapi-utils');
+const { yup, formatYupErrors, stringIncludes, stringEquals } = require('strapi-utils');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -33,7 +33,7 @@ const rolesDeleteSchema = yup
       .required()
       .test('no-admin-many-delete', 'You cannot delete the super admin role', async ids => {
         const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
-        return !superAdminRole || !ids.map(String).includes(String(superAdminRole.id));
+        return !superAdminRole || !stringIncludes(ids, superAdminRole.id);
       }),
   })
   .noUnknown();
@@ -43,7 +43,7 @@ const roleDeleteSchema = yup
   .required()
   .test('no-admin-single-delete', 'You cannot delete the super admin role', async function(id) {
     const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
-    return !superAdminRole || String(id) !== String(superAdminRole.id)
+    return !superAdminRole || !stringEquals(id, superAdminRole.id)
       ? true
       : this.createError({ path: 'id', message: `You cannot delete the super admin role` });
   });

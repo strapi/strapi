@@ -8,6 +8,7 @@ const {
   validateRoleDeleteInput,
 } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
+const { SUPER_ADMIN_CODE } = require('../../services/constants');
 
 module.exports = {
   /**
@@ -102,9 +103,13 @@ module.exports = {
     const { id } = ctx.params;
     const input = ctx.request.body;
 
+    const role = await strapi.admin.services.role.findOne({ id });
+    if (!role) {
+      return ctx.notFound('role.notFound');
+    }
+
     try {
-      const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
-      if (superAdminRole && String(superAdminRole.id) === String(id)) {
+      if (role.code === SUPER_ADMIN_CODE) {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);
       }
@@ -112,8 +117,6 @@ module.exports = {
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
     }
-
-    const role = await strapi.admin.services.role.findOne({ id });
 
     if (!role) {
       return ctx.notFound('role.notFound');

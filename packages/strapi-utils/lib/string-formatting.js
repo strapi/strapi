@@ -32,9 +32,14 @@ const escapeQuery = (query, charsToEscape, escapeChar = '\\') => {
     );
 };
 
+const stringIncludes = (arr, val) => arr.map(String).includes(String(val));
+const stringEquals = (a, b) => String(a) === String(b);
+
 module.exports = {
   nameToSlug,
   nameToCollectionName,
   getCommonBeginning,
   escapeQuery,
+  stringIncludes,
+  stringEquals,
 };
