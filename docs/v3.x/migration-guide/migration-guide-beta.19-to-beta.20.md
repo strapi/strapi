@@ -38,13 +38,13 @@ To allow customizations, the server will now serve the files in your `./public` 
 
 From now on, if you don't have any `index.html` file in your `./public` folder, the server will render the default Strapi homepage.
 
-You can now also disable this behavior with the `public.defaultIndex` option. Read the documentation [here](../concepts/configurations.md#application).
+You can now also disable this behavior with the `public.defaultIndex` option. Read the documentation [here](../../3.0.0-beta.x/concepts/configurations.md#application).
 
 ## Upload plugin settings
 
 A lot of our users have been requesting that we move some back-end specific configurations to files. While implementing the media library feature, we decided to move the upload plugin settings to files.
 
-This means that you now have to configure your provider directly in the files. You can read the documentation [here](../plugins/upload.md#using-a-provider) to update.
+This means that you now have to configure your provider directly in the files. You can read the documentation [here](../../3.0.0-beta.x/plugins/upload.md#using-a-provider) to update.
 
 ## MongoDB Media relation changes
 
