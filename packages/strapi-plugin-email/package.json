@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "lodash": "^4.17.11",
-    "strapi-provider-email-sendmail": "3.0.4",
-    "strapi-utils": "3.0.4"
+    "strapi-provider-email-sendmail": "3.0.5",
+    "strapi-utils": "3.0.5"
   },
   "devDependencies": {
     "rimraf": "3.0.0",
-    "strapi-helper-plugin": "3.0.4"
+    "strapi-helper-plugin": "3.0.5"
   },
   "author": {
     "name": "Strapi team",
