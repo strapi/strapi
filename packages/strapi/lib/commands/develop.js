@@ -129,8 +129,6 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
       '**/index.html',
       '**/public',
       '**/public/**',
-      '**/cypress',
-      '**/cypress/**',
       '**/*.db*',
       '**/exports/**',
       ...watchIgnoreFiles,

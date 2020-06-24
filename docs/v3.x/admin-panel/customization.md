@@ -20,7 +20,7 @@ module.exports = {
     enabled: false,
   },
   admin: {
-    path: '/dashboard',
+    url: '/dashboard',
   },
 };
 ```

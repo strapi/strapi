@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, omit, set, upperFirst } from 'lodash';
+import { get, isEmpty, omit, set, upperFirst, pick } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link, Redirect } from 'react-router-dom';
 import { Button } from '@buffetjs/core';
@@ -65,16 +65,14 @@ const AuthPage = ({
     try {
       await schema.validate(modifiedData, { abortEarly: false });
 
-      try {
-        if (modifiedData.news === true) {
-          await request('https://analytics.strapi.io/register', {
-            method: 'POST',
-            body: omit(modifiedData, ['password', 'confirmPassword']),
-            signal,
-          });
-        }
-      } catch (err) {
-        // Do nothing
+      if (modifiedData.news === true) {
+        request('https://analytics.strapi.io/register', {
+          method: 'POST',
+          body: pick(modifiedData, ['email', 'username']),
+          signal,
+        }).catch(() => {
+          // ignore error
+        });
       }
 
       try {
