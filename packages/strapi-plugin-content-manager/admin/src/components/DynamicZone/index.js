@@ -142,7 +142,9 @@ const DynamicZone = ({ max, min, name }) => {
           }}
         />
         {hasRequiredError && !isOpen && !hasMaxError && (
-          <div className="error-label">Component is required</div>
+          <div className="error-label">
+            <FormattedMessage id={`${pluginId}.components.DynamicZone.required`} />
+          </div>
         )}
         {hasMaxError && !isOpen && (
           <div className="error-label">

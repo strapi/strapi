@@ -213,6 +213,7 @@ module.exports = {
             '/v3.x/guides/registering-a-field-in-admin',
             '/v3.x/guides/client',
             '/v3.x/guides/update-version',
+            '/v3.x/guides/unit-testing',
           ],
         },
         {
