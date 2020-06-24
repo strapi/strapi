@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Padded } from '@buffetjs/core';
 import ContentTypeRow from 'ee_else_ce/components/Roles/Permissions/ContentTypes/ContentTypesRow';
+// import ContentTypeRow from './ContentTypesRow';
 
 import Wrapper from './Wrapper';
 import PermissionsHeader from './PermissionsHeader';

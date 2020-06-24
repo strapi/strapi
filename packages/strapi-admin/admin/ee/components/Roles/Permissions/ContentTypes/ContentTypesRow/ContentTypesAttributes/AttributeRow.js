@@ -8,6 +8,7 @@ import { getAttributesToDisplay } from '../../../../../../../src/utils';
 import {
   contentManagerPermissionPrefix,
   getNumberOfRecursivePermissionsByAction,
+  getAttributePermissionsSizeByContentTypeAction,
   getAttributesByModel,
   getRecursivePermissions,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
@@ -36,7 +37,7 @@ const AttributeRow = ({ attribute, contentType }) => {
   const isActive = collapsePath[1] === attribute.attributeName;
   const attributeActions = get(
     permissions,
-    [contentType.uid, attribute.attributeName, 'actions'],
+    [contentType.uid, 'attributes', attribute.attributeName, 'actions'],
     []
   );
 
@@ -44,7 +45,7 @@ const AttributeRow = ({ attribute, contentType }) => {
     return getRecursivePermissions(contentType.uid, attribute.attributeName, permissions);
   }, [contentType, permissions, attribute]);
 
-  const getRecursiveAttributes = useCallback(() => {
+  const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
 
     return [...getAttributesByModel(component, components, attribute.attributeName), attribute];
@@ -52,8 +53,7 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const hasAllActions = useMemo(() => {
     return (
-      recursivePermissions ===
-      ATTRIBUTES_PERMISSIONS_ACTIONS.length * getRecursiveAttributes().length
+      recursivePermissions === ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissions]);
@@ -61,21 +61,22 @@ const AttributeRow = ({ attribute, contentType }) => {
   const hasSomeActions = useMemo(() => {
     return (
       recursivePermissions > 0 &&
-      recursivePermissions < ATTRIBUTES_PERMISSIONS_ACTIONS.length * getRecursiveAttributes().length
+      recursivePermissions < ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissions]);
 
   const handleCheckAllAction = () => {
     if (isCollapsable) {
-      const attributesToAdd = getRecursiveAttributes();
-      const allActionsSize = attributesToAdd.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const attributes = recursiveAttributes;
+      const allActionsSize = attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const shouldEnable = recursivePermissions >= 0 && recursivePermissions < allActionsSize;
 
       onAllContentTypeActions({
         subject: contentType.uid,
-        attributes: attributesToAdd,
-        shouldEnable: recursivePermissions >= 0 && recursivePermissions < allActionsSize,
-        addContentTypeActions: false,
+        attributes,
+        shouldEnable,
+        shouldSetAllContentTypes: false,
       });
     } else {
       onAllAttributeActionsSelect({
@@ -88,7 +89,7 @@ const AttributeRow = ({ attribute, contentType }) => {
   const getRecursiveAttributesPermissions = useCallback(
     action => {
       return getNumberOfRecursivePermissionsByAction(
-        collapsePath[0],
+        contentType.uid,
         action,
         attribute.attributeName,
         permissions
@@ -96,6 +97,13 @@ const AttributeRow = ({ attribute, contentType }) => {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [attribute, permissions]
+  );
+
+  const getContentTypePermissions = useCallback(
+    action => {
+      return getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action);
+    },
+    [contentType, permissions]
   );
 
   const checkPermission = useCallback(
@@ -109,11 +117,18 @@ const AttributeRow = ({ attribute, contentType }) => {
   const handleCheck = useCallback(
     action => {
       if (isCollapsable) {
+        const shouldEnable = !allRecursiveChecked(action);
+        const hasContentTypeAction =
+          (!shouldEnable &&
+            getContentTypePermissions(action) === getRecursiveAttributesPermissions(action)) ||
+          (shouldEnable && getContentTypePermissions(action) === 0);
+
         onAttributesSelect({
           action,
-          subject: collapsePath[0],
-          attributes: getRecursiveAttributes(),
-          shouldEnable: !allRecursiveChecked(action),
+          subject: contentType.uid,
+          attributes: recursiveAttributes,
+          shouldEnable,
+          hasContentTypeAction,
         });
       } else {
         onAttributePermissionSelect({
@@ -142,20 +157,20 @@ const AttributeRow = ({ attribute, contentType }) => {
     return (
       isCollapsable &&
       getRecursiveAttributesPermissions(action) > 0 &&
-      getRecursiveAttributesPermissions(action) < getRecursiveAttributes().length
+      getRecursiveAttributesPermissions(action) < recursiveAttributes.length
     );
   };
 
   const allRecursiveChecked = action => {
     return (
-      isCollapsable && getRecursiveAttributesPermissions(action) === getRecursiveAttributes().length
+      isCollapsable && getRecursiveAttributesPermissions(action) === recursiveAttributes.length
     );
   };
 
   return (
     <>
       <AttributeRowWrapper
-        isRequired={attribute.required}
+        isRequired={attribute.required && !isCollapsable}
         isActive={isActive}
         isCollapsable={isCollapsable}
         alignItems="center"
@@ -164,7 +179,7 @@ const AttributeRow = ({ attribute, contentType }) => {
           <Padded left size="sm" />
           <PermissionName width="15rem">
             <Checkbox
-              disabled={attribute.required}
+              disabled={attribute.required && !isCollapsable}
               name={attribute.attributeName}
               value={hasAllActions}
               someChecked={hasSomeActions}
@@ -194,7 +209,7 @@ const AttributeRow = ({ attribute, contentType }) => {
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={action}
-                disabled={attribute.required}
+                disabled={attribute.required && !isCollapsable}
                 value={
                   allRecursiveChecked(`${contentManagerPermissionPrefix}.${action}`) ||
                   checkPermission(`${contentManagerPermissionPrefix}.${action}`)

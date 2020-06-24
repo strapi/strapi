@@ -8,3 +8,4 @@ export { default as sortLinks } from './sortLinks';
 export { default as fakePermissionsData } from './fakePermissionsData';
 export { default as formatPermissionsFromApi } from './formatPermissionsFromApi';
 export { default as formatPermissionsToApi } from './formatPermissionsToApi';
+export { default as getExistingActions } from './getExistingActions';

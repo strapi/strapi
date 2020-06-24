@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_default_comp2_s",
+  "info": {
+    "name": "comp2",
+    "icon": "ambulance"
+  },
+  "options": {},
+  "attributes": {
+    "azd": {
+      "type": "string"
+    },
+    "dzadaz": {
+      "type": "datetime"
+    },
+    "dazdz": {
+      "type": "biginteger"
+    }
+  }
+}

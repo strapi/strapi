@@ -1,69 +1,20 @@
 import formatPermissionsToApi from '../formatPermissionsToApi';
-
-const data = {
-  'plugins::users-permissions.user': {
-    contentTypeActions: {
-      'plugins::content-manager.explorer.read': false,
-      'plugins::content-manager.explorer.update': true,
-      'plugins::content-manager.explorer.create': true,
-    },
-    email: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.update',
-      ],
-    },
-    firstname: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.update',
-      ],
-    },
-    lastname: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.update',
-      ],
-    },
-    'role.data.name': {
-      actions: ['plugins::content-manager.explorer.read'],
-    },
-    roles: {
-      actions: ['plugins::content-manager.explorer.create'],
-    },
-  },
-  'application::category.category': {
-    contentTypeActions: {
-      'plugins::content-manager.explorer.delete': true,
-      'plugins::content-manager.explorer.read': true,
-      'plugins::content-manager.explorer.update': false,
-    },
-    name: {
-      actions: ['plugins::content-manager.explorer.read'],
-    },
-    addresses: {
-      actions: ['plugins::content-manager.explorer.read'],
-    },
-    postal_code: {
-      actions: ['plugins::content-manager.explorer.update'],
-    },
-  },
-};
+import data from './data';
 
 describe('ADMIN | utils | formatPermissionsToApi', () => {
   it('should format permissions to fit the api format', () => {
     const formattedPermissions = formatPermissionsToApi(data);
     const expected = [
       {
-        action: 'plugins::content-manager.explorer.update',
-        conditions: [],
-        fields: ['email', 'firstname', 'lastname'],
-        subject: 'plugins::users-permissions.user',
-      },
-      {
         action: 'plugins::content-manager.explorer.create',
         conditions: [],
         fields: ['email', 'firstname', 'lastname', 'roles'],
+        subject: 'plugins::users-permissions.user',
+      },
+      {
+        action: 'plugins::content-manager.explorer.update',
+        conditions: [],
+        fields: ['email', 'firstname', 'lastname'],
         subject: 'plugins::users-permissions.user',
       },
       {

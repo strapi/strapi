@@ -53,14 +53,14 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     attributes,
     action,
     shouldEnable,
-    contentTypeAction,
+    hasContentTypeAction,
   }) => {
     dispatch({
       type: 'SET_ATTRIBUTES_PERMISSIONS',
       attributes,
       action,
       shouldEnable,
-      contentTypeAction,
+      hasContentTypeAction,
     });
   };
 
@@ -69,15 +69,15 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     action,
     attributes,
     shouldEnable,
-    contentTypeAction,
+    hasContentTypeAction,
   }) => {
     dispatch({
-      type: 'CONTENT_TYPE_ATTRIBUTES_ACTION_SELECT',
+      type: 'ON_ATTRIBUTES_SELECT',
       subject,
       action,
       attributes,
       shouldEnable,
-      contentTypeAction,
+      hasContentTypeAction,
     });
   };
 
@@ -93,14 +93,14 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     subject,
     attributes,
     shouldEnable,
-    addContentTypeActions,
+    shouldSetAllContentTypes,
   }) => {
     dispatch({
       type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
       subject,
       attributes,
       shouldEnable,
-      addContentTypeActions,
+      shouldSetAllContentTypes,
     });
   };
 

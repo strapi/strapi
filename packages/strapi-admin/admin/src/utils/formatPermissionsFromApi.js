@@ -6,9 +6,9 @@ const formatPermissionsFromApi = data => {
       return {
         ...acc,
         [field]: {
-          ...get(permissionsAcc, [permission.subject, field], {}),
+          ...get(permissionsAcc, [permission.subject, 'attributes', field], {}),
           actions: [
-            ...get(permissionsAcc, [permission.subject, field, 'actions'], []),
+            ...get(permissionsAcc, [permission.subject, 'attributes', field, 'actions'], []),
             permission.action,
           ],
         },
@@ -21,7 +21,10 @@ const formatPermissionsFromApi = data => {
       ...acc,
       [current.subject]: {
         ...acc[current.subject],
-        ...getFieldsPermissions(acc, current),
+        attributes: {
+          ...get(acc, [current.subject, 'attributes'], {}),
+          ...getFieldsPermissions(acc, current),
+        },
         contentTypeActions: {
           ...get(acc, [current.subject, 'contentTypeActions'], {}),
           [current.action]: true,

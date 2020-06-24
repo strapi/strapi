@@ -47,12 +47,10 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const attributeActions = get(
     permissions,
-    [contentTypeUid, attributePermissionName, 'actions'],
+    [contentTypeUid, 'attributes', attributePermissionName, 'actions'],
     []
   );
 
-  // Get the recursive component attributes
-  // ans add the current attribute as it is a permission too.
   const getRecursiveAttributes = useCallback(() => {
     const component = components.find(component => component.uid === attribute.component);
 
@@ -62,7 +60,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     ];
   }, [attribute, attributePermissionName, components]);
 
-  const countRecursivePermissions = action => {
+  const getRecursiveAttributesPermissions = action => {
     const number = getNumberOfRecursivePermissionsByAction(
       contentTypeUid,
       action,
@@ -99,7 +97,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   };
 
   const someChecked = action => {
-    const recursivePermissions = countRecursivePermissions(action);
+    const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return (
       isCollapsable &&
@@ -109,7 +107,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   };
 
   const allRecursiveChecked = action => {
-    const recursivePermissions = countRecursivePermissions(action);
+    const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return isCollapsable && recursivePermissions === getRecursiveAttributes().length;
   };
@@ -121,7 +119,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
         <Flex style={{ flex: 1 }}>
           <RowStyle
             isActive={isActive}
-            isRequired={attribute.required}
+            isRequired={attribute.required && !isCollapsable}
             isCollapsable={attribute.component}
             level={recursiveLevel}
           >
@@ -145,11 +143,12 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
               <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
             </CollapseLabel>
           </RowStyle>
-          <PermissionWrapper>
+          <PermissionWrapper disabled>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
-                key={`${attribute.attributeName}-${action}`}
                 disabled
+                key={`${attribute.attributeName}-${action}`}
+                // onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
                 value={allRecursiveChecked(action) || checkPermission(action)}
                 name={`${attribute.attributeName}-${action}`}

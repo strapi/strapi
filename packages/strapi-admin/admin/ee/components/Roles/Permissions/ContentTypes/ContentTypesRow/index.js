@@ -33,9 +33,11 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
 
-  const contentTypeActions = Object.values(
-    get(permissions, [contentType.uid, 'contentTypeActions'], {})
-  ).filter(action => !!action);
+  const contentTypeActions = useMemo(() => {
+    return Object.values(get(permissions, [contentType.uid, 'contentTypeActions'], {})).filter(
+      action => !!action
+    );
+  }, [contentType, permissions]);
 
   // Number of all actions in the current content type.
   const allCurrentActionsSize = useMemo(() => {
@@ -94,7 +96,7 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
       subject: contentType.uid,
       attributes,
       shouldEnable: !hasAllAttributeByAction(action) || !hasContentTypeAction(action),
-      contentTypeAction: true,
+      hasContentTypeAction: true,
     });
   };
 
@@ -112,7 +114,7 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
       subject: contentType.uid,
       attributes: getAttributesByModel(contentType, components),
       shouldEnable: allCurrentActionsSize < allActionsSize,
-      addContentTypeActions: true,
+      shouldSetAllContentTypes: true,
     });
   };
 
@@ -127,7 +129,8 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
               name={contentType.name}
               someChecked={
                 contentTypeActions.length > 0 &&
-                contentTypeActions.length < contentTypesPermissionsLayout.length > 0
+                allCurrentActionsSize > 0 &&
+                allCurrentActionsSize < allActionsSize
               }
               value={allCurrentActionsSize === allActionsSize}
             />
