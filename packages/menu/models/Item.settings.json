@@ -23,17 +23,14 @@
     },
     "page": {
       "model": "page",
-      "via": "menu"
+      "via": "menus"
     },
     "parent": {
       "plugin": "menu",
-      "model": "item",
-      "via": "children"
+      "model": "item"
     },
-    "children": {
-      "plugin": "menu",
-      "collection": "item",
-      "via": "parent"
+    "child_order": {
+      "type": "integer"
     }
   }
 }

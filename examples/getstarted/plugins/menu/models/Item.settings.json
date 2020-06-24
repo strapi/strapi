@@ -23,7 +23,7 @@
     },
     "page": {
       "model": "page",
-      "via": "menu"
+      "via": "menus"
     },
     "parent": {
       "plugin": "menu",

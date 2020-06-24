@@ -101,7 +101,7 @@ const EditView = () => {
     return () => {
       abortController.abort();
     };
-  }, [shouldSaveData, signal, abortController]);
+  }, [shouldSaveData, signal, abortController, modifiedData.menuItems]);
 
   const handleMove_menuItem = items => {
     dispatch({
@@ -110,7 +110,7 @@ const EditView = () => {
     });
   };
 
-  const handleAdd_menuItem = ({ title, type, state }) => {
+  const handleAdd_menuItem = ({ title, type, state, page }) => {
     dispatch({
       type: 'ADD_ITEM',
       value: {
@@ -122,6 +122,7 @@ const EditView = () => {
         depth: 0,
         type,
         state,
+        page,
         // Add property new item for post instead of put
         newItem: true,
       },

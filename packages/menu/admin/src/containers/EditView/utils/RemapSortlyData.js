@@ -1,6 +1,14 @@
 export const remapSortlyInput = databaseOutput => {
   return databaseOutput.map(row => {
-    const { id, child_order = 0, parent = null, title = '', state = null, type = null } = row;
+    const {
+      id,
+      child_order = 0,
+      parent = null,
+      title = '',
+      state = null,
+      type = null,
+      page = null,
+    } = row;
 
     return {
       id,
@@ -9,13 +17,23 @@ export const remapSortlyInput = databaseOutput => {
       name: title,
       state: state ? state.id : null,
       type: type ? type.id : null,
+      page: page ? page.id : null,
     };
   });
 };
 
 export const remapSortlyOutput = sortlyOutput => {
   return sortlyOutput.map(row => {
-    const { id, index, parentId = null, name, state = null, type = null, newItem = false } = row;
+    const {
+      id,
+      index,
+      parentId = null,
+      name,
+      state = null,
+      type = null,
+      page = null,
+      newItem = false,
+    } = row;
 
     return {
       id,
@@ -38,6 +56,12 @@ export const remapSortlyOutput = sortlyOutput => {
           ? null
           : {
             id: parseInt(state, 10),
+          },
+      page:
+        page === null
+          ? null
+          : {
+            id: parseInt(page, 10),
           },
       newItem,
     };

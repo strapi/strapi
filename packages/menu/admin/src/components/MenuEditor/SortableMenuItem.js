@@ -18,7 +18,7 @@ const SortableMenuItem = ({ id, depth, name }) => {
   const detail = 'plugins/content-manager/collectionType/plugins::menu.item';
   const handleClick_menuItemEdit = useCallback(() => {
     history.push(`/${detail}/${id}?redirectUrl=${location}`);
-  }, []);
+  }, [history, id]);
 
   // DnD for Sortly
   const [{ isDragging }, drag, preview] = useDrag({

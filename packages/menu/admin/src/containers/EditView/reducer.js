@@ -9,7 +9,6 @@ const initialState = fromJS({
 });
 
 const reducer = (state = initialState, action) => {
-  console.log(action.type);
   switch (action.type) {
     case 'GET_DATA_SUCCEEDED':
       return state

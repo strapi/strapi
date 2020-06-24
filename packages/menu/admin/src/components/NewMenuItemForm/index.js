@@ -23,10 +23,11 @@ const NewMenuItemForm = ({
     type: 1,
     state: 1,
     title: '',
+    page: null,
   });
 
   const contentTypeId = useMemo(() => {
-    const contentType_menuType = menuTypes.find(item => item.code === 'contentType');
+    const contentType_menuType = menuTypes.find(item => item.code === 'symlink');
 
     if (contentType_menuType) {
       return contentType_menuType.id || null;
