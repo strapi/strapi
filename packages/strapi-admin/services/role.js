@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
+const { createPermission } = require('../domain/permission');
 
 const sanitizeRole = role => {
   return _.omit(role, ['users', 'permissions']);
@@ -168,6 +169,85 @@ const getSuperAdmin = () => findOne({ code: SUPER_ADMIN_CODE });
  */
 const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_ADMIN_CODE });
 
+/** Create superAdmin, Author and Editor role is no role already exist
+ * @returns {Promise<>}
+ */
+const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}) => {
+  const someRolesExist = await exists();
+  if (someRolesExist) {
+    return;
+  }
+
+  const allActions = strapi.admin.services.permission.actionProvider.getAll();
+  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+
+  // create 3 roles
+  const superAdminRole = await create({
+    name: 'Super Admin',
+    code: 'strapi-super-admin',
+    description: 'Super Admins can access and manage all features and settings.',
+  });
+
+  await strapi.admin.services.user.assignARoleToAll(superAdminRole.id);
+
+  const editorRole = await create({
+    name: 'Editor',
+    code: 'strapi-editor',
+    description: 'Editors can manage and publish contents including those of other users.',
+  });
+
+  const authorRole = await create({
+    name: 'Author',
+    code: 'strapi-author',
+    description: 'Authors can manage and publish the content they created.',
+  });
+
+  // create content-type permissions for each role
+  const editorPermissions = strapi.admin.services[
+    'content-type'
+  ].getPermissionsWithNestedFields(contentTypesActions, 3, {
+    fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+  });
+
+  const authorPermissions = editorPermissions.map(p => ({
+    ...p,
+    conditions: ['admin::is-creator'],
+  }));
+
+  // add plugin permissions for each role
+  const defaultPluginPermissions = [
+    { action: 'plugins::upload.settings.read' },
+    { action: 'plugins::upload.assets.create' },
+    { action: 'plugins::upload.assets.update', conditions: ['admin::is-creator'] },
+    { action: 'plugins::upload.assets.download' },
+    { action: 'plugins::upload.assets.copy-link' },
+  ].map(createPermission);
+  editorPermissions.push(...defaultPluginPermissions);
+  authorPermissions.push(...defaultPluginPermissions);
+
+  // assign permissions to roles
+  await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);
+  await strapi.admin.services.permission.assign(authorRole.id, authorPermissions);
+
+  if (createPermissionsForAdmin) {
+    await strapi.admin.services.permission.resetSuperAdminPermissions();
+  }
+};
+
+/** Display a warning if the role superAdmin doesn't exist
+ *  or if the role is not assigned to at least one user
+ * @returns {Promise<>}
+ */
+const displayWarningIfNoSuperAdmin = async () => {
+  const superAdminRole = await getSuperAdminWithUsersCount();
+  const someUsersExists = await strapi.admin.services.user.exists();
+  if (!superAdminRole) {
+    strapi.log.warn("Your application doesn't have a super admin role.");
+  } else if (someUsersExists && superAdminRole.usersCount === 0) {
+    strapi.log.warn("Your application doesn't have a super admin user.");
+  }
+};
+
 module.exports = {
   sanitizeRole,
   create,
@@ -181,4 +261,6 @@ module.exports = {
   getUsersCount,
   getSuperAdmin,
   getSuperAdminWithUsersCount,
+  createRolesIfNoneExist,
+  displayWarningIfNoSuperAdmin,
 };

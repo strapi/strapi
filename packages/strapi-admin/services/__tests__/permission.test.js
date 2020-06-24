@@ -171,4 +171,68 @@ describe('Permission Service', () => {
       permissionService.actionProvider.getAllByMap = prevGetAllByMap;
     });
   });
+
+  describe('resetSuperAdminPermissions', () => {
+    test('No superAdmin role exist', async () => {
+      const getSuperAdmin = jest.fn(() => Promise.resolve(undefined));
+      const createMany = jest.fn();
+
+      global.strapi = {
+        query: () => ({ createMany }),
+        admin: { services: { role: { getSuperAdmin } } },
+      };
+
+      await permissionService.resetSuperAdminPermissions();
+
+      expect(createMany).toHaveBeenCalledTimes(0);
+    });
+    test('Reset super admin permissions', async () => {
+      const actions = [
+        {
+          actionId: 'action-1',
+          subjects: ['country'],
+          section: 'contentTypes',
+        },
+      ];
+      const permissions = [
+        {
+          action: 'action-1',
+          subject: 'country',
+          fields: ['name'],
+          conditions: [],
+        },
+      ];
+      const getAll = jest.fn(() => actions);
+      const getAllConditions = jest.fn(() => []);
+      const find = jest.fn(() => [{ action: 'action-2', id: 2 }]);
+      const deleteFn = jest.fn(() => []);
+      const getPermissionsWithNestedFields = jest.fn(() => [...permissions]); // cloned, otherwise it is modified inside resetSuperAdminPermissions()
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 1 }));
+      const createMany = jest.fn(() => Promise.resolve([{ ...permissions[0], role: { id: 1 } }]));
+
+      global.strapi = {
+        query: () => ({ createMany, find, delete: deleteFn }),
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { getAll },
+              conditionProvider: { getAll: getAllConditions },
+            },
+            'content-type': { getPermissionsWithNestedFields },
+            role: { getSuperAdmin },
+          },
+        },
+      };
+
+      await permissionService.resetSuperAdminPermissions();
+
+      expect(deleteFn).toHaveBeenCalledWith({ id_in: [2] });
+      expect(createMany).toHaveBeenCalledWith([
+        {
+          ...permissions[0],
+          role: 1,
+        },
+      ]);
+    });
+  });
 });

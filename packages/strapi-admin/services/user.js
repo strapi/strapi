@@ -209,6 +209,17 @@ const assignARoleToAll = async roleId => {
   }
 };
 
+/** Display a warning if some users don't have at least one role
+ * @returns {Promise<>}
+ */
+const displayWarningIfUsersDontHaveRole = async () => {
+  const count = await countUsersWithoutRole();
+
+  if (count > 0) {
+    strapi.log.warn(`Some users (${count}) don't have any role.`);
+  }
+};
+
 module.exports = {
   create,
   updateById,
@@ -222,4 +233,5 @@ module.exports = {
   delete: deleteFn,
   countUsersWithoutRole,
   assignARoleToAll,
+  displayWarningIfUsersDontHaveRole,
 };

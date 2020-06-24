@@ -4,6 +4,16 @@ const contentTypeService = require('../content-type');
 
 describe('Content-Type', () => {
   describe('getNestedFields', () => {
+    const contentTypes = {
+      user: {
+        uid: 'user',
+        attributes: {
+          firstname: { type: 'text' },
+          restaurant: { type: 'component', component: 'restaurant' },
+          car: { type: 'component', component: 'car' },
+        },
+      },
+    };
     const components = {
       restaurant: {
         uid: 'restaurant',
@@ -34,18 +44,10 @@ describe('Content-Type', () => {
           long: { type: 'text' },
         },
       },
-      user: {
-        uid: 'user',
-        attributes: {
-          firstname: { type: 'text' },
-          restaurant: { type: 'component', component: 'restaurant' },
-          car: { type: 'component', component: 'car' },
-        },
-      },
     };
 
     test('1 level', async () => {
-      const resultLevel1 = contentTypeService.getNestedFields('user', {
+      const resultLevel1 = contentTypeService.getNestedFields(contentTypes.user, {
         nestingLevel: 1,
         components,
       });
@@ -53,7 +55,7 @@ describe('Content-Type', () => {
     });
 
     test('2 levels', async () => {
-      const resultLevel1 = contentTypeService.getNestedFields('user', {
+      const resultLevel1 = contentTypeService.getNestedFields(contentTypes.user, {
         nestingLevel: 2,
         components,
       });
@@ -67,7 +69,7 @@ describe('Content-Type', () => {
     });
 
     test('3 levels', async () => {
-      const resultLevel1 = contentTypeService.getNestedFields('user', {
+      const resultLevel1 = contentTypeService.getNestedFields(contentTypes.user, {
         nestingLevel: 3,
         components,
       });
@@ -83,7 +85,7 @@ describe('Content-Type', () => {
     });
 
     test('4 levels', async () => {
-      const resultLevel1 = contentTypeService.getNestedFields('user', {
+      const resultLevel1 = contentTypeService.getNestedFields(contentTypes.user, {
         nestingLevel: 4,
         components,
       });
@@ -100,7 +102,7 @@ describe('Content-Type', () => {
     });
 
     test('5 levels (deeper than needed)', async () => {
-      const resultLevel1 = contentTypeService.getNestedFields('user', {
+      const resultLevel1 = contentTypeService.getNestedFields(contentTypes.user, {
         nestingLevel: 5,
         components,
       });

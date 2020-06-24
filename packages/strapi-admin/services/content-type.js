@@ -11,23 +11,20 @@ const _ = require('lodash');
  * @param {object} options.components cotent-types and component where "contentTypeUid" can be found
  * @returns {array<string>}
  */
-const getNestedFields = (contentTypeUid, { fieldPath = '', nestingLevel = 3, components = {} }) => {
+const getNestedFields = (model, { fieldPath = '', nestingLevel = 3, components = {} }) => {
   if (nestingLevel === 0) {
     return fieldPath ? [fieldPath] : [];
   }
-  if (!components[contentTypeUid]) {
-    throw new Error(`${contentTypeUid} doesn't exist`);
-  }
 
   return _.reduce(
-    components[contentTypeUid].attributes,
+    model.attributes,
     (fields, attribute, attributeName) => {
       const newFieldPath = fieldPath ? `${fieldPath}.${attributeName}` : attributeName;
 
       if (attribute.type !== 'component') {
         return fields.concat([newFieldPath]);
       } else {
-        const componentFields = getNestedFields(components[attribute.component].uid, {
+        const componentFields = getNestedFields(components[attribute.component], {
           fieldPath: newFieldPath,
           nestingLevel: nestingLevel - 1,
           components,
@@ -45,13 +42,15 @@ const getNestedFields = (contentTypeUid, { fieldPath = '', nestingLevel = 3, com
  * @param {number} nestingLevel level of nesting
  * @returns {array<permissions>}
  */
-const getPermissionsWithNestedFields = (actions, nestingLevel = 3) =>
+const getPermissionsWithNestedFields = (actions, nestingLevel = 3, { fieldsNullFor = [] } = {}) =>
   actions.reduce((perms, action) => {
     action.subjects.forEach(contentTypeUid => {
-      const fields = getNestedFields(contentTypeUid, {
-        components: { ...strapi.components, ...strapi.contentTypes },
-        nestingLevel,
-      });
+      const fields = fieldsNullFor.includes(action.actionId)
+        ? null
+        : getNestedFields(strapi.contentTypes[contentTypeUid], {
+            components: strapi.components,
+            nestingLevel,
+          });
       perms.push({
         action: action.actionId,
         subject: contentTypeUid,
