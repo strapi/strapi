@@ -118,6 +118,7 @@ const sanitizePermission = permission =>
 
 /**
  * Removes permissions in database that don't exist anymore
+ * @returns {Promise<>}
  */
 const cleanPermissionInDatabase = async () => {
   const dbPermissions = await find();
@@ -137,6 +138,40 @@ const cleanPermissionInDatabase = async () => {
   await deleteByIds(permissionsToRemoveIds);
 };
 
+/**
+ * Reset super admin permissions (giving it all permissions)
+ * @returns {Promise<>}
+ */
+const resetSuperAdminPermissions = async () => {
+  const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
+  if (!superAdminRole) {
+    return;
+  }
+
+  const allActions = strapi.admin.services.permission.actionProvider.getAll();
+  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+
+  const permissions = strapi.admin.services[
+    'content-type'
+  ].getPermissionsWithNestedFields(contentTypesActions, 1, {
+    fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+  });
+
+  const otherActions = allActions.filter(a => a.section !== 'contentTypes');
+  otherActions.forEach(action => {
+    if (action.subjects) {
+      const newPerms = action.subjects.map(subject =>
+        createPermission({ action: action.actionId, subject })
+      );
+      permissions.push(...newPerms);
+    } else {
+      permissions.push(createPermission({ action: action.actionId }));
+    }
+  });
+
+  await assign(superAdminRole.id, permissions);
+};
+
 module.exports = {
   find,
   deleteByRolesIds,
@@ -148,4 +183,5 @@ module.exports = {
   engine,
   conditionProvider,
   cleanPermissionInDatabase,
+  resetSuperAdminPermissions,
 };

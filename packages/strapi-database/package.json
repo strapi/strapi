@@ -29,7 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.11",
-    "p-map": "^4.0.0",
+    "p-map": "4.0.0",
     "verror": "^1.10.0"
   }
 }

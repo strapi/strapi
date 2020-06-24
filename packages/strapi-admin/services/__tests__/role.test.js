@@ -275,4 +275,164 @@ describe('Role', () => {
       });
     });
   });
+
+  describe('createRolesIfNoneExist', () => {
+    test("Don't create roles if one already exist", async () => {
+      const count = jest.fn(() => Promise.resolve(1));
+      const create = jest.fn();
+      global.strapi = {
+        query: () => ({ count, create }),
+      };
+      await roleService.createRolesIfNoneExist();
+
+      expect(create).toHaveBeenCalledTimes(0);
+    });
+    test('Create 3 roles if none exist', async () => {
+      const actions = [
+        {
+          actionId: 'action-1',
+          subjects: ['country'],
+          section: 'contentTypes',
+        },
+      ];
+      const permissions = [
+        {
+          action: 'action-1',
+          subject: 'country',
+          fields: ['name'],
+          conditions: [],
+        },
+      ];
+      const defaultPermissions = [
+        {
+          action: 'plugins::upload.settings.read',
+          conditions: [],
+          fields: null,
+          subject: null,
+        },
+        {
+          action: 'plugins::upload.assets.create',
+          conditions: [],
+          fields: null,
+          subject: null,
+        },
+        {
+          action: 'plugins::upload.assets.update',
+          conditions: ['admin::is-creator'],
+          fields: null,
+          subject: null,
+        },
+        {
+          action: 'plugins::upload.assets.download',
+          conditions: [],
+          fields: null,
+          subject: null,
+        },
+        {
+          action: 'plugins::upload.assets.copy-link',
+          conditions: [],
+          fields: null,
+          subject: null,
+        },
+      ];
+
+      const count = jest.fn(() => Promise.resolve(0));
+      let id = 1;
+      const create = jest.fn(role => ({ ...role, id: id++ }));
+      const getAll = jest.fn(() => actions);
+      const assign = jest.fn();
+      const assignARoleToAll = jest.fn();
+      const getPermissionsWithNestedFields = jest.fn(() => [...permissions]); // cloned, otherwise it is modified inside createRolesIfNoneExist()
+
+      global.strapi = {
+        query: () => ({ count, create }),
+        admin: {
+          services: {
+            permission: { actionProvider: { getAll }, assign },
+            'content-type': { getPermissionsWithNestedFields },
+            user: { assignARoleToAll },
+          },
+        },
+      };
+      await roleService.createRolesIfNoneExist();
+
+      expect(create).toHaveBeenCalledTimes(3);
+      expect(create).toHaveBeenNthCalledWith(1, {
+        name: 'Super Admin',
+        code: 'strapi-super-admin',
+        description: 'Super Admins can access and manage all features and settings.',
+      });
+      expect(assignARoleToAll).toHaveBeenCalledWith(1);
+      expect(create).toHaveBeenNthCalledWith(2, {
+        name: 'Editor',
+        code: 'strapi-editor',
+        description: 'Editors can manage and publish contents including those of other users.',
+      });
+      expect(create).toHaveBeenNthCalledWith(3, {
+        name: 'Author',
+        code: 'strapi-author',
+        description: 'Authors can manage and publish the content they created.',
+      });
+      expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, 3, {
+        fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+      });
+      expect(assign).toHaveBeenCalledTimes(2);
+      expect(assign).toHaveBeenNthCalledWith(1, 2, [...permissions, ...defaultPermissions]);
+      expect(assign).toHaveBeenNthCalledWith(2, 3, [
+        { ...permissions[0], conditions: ['admin::is-creator'] },
+        ...defaultPermissions,
+      ]);
+    });
+  });
+
+  describe('displayWarningIfNoSuperAdmin', () => {
+    test('superAdmin role exists & a user is superAdmin', async () => {
+      const findOne = jest.fn(() => ({ id: 1 }));
+      const count = jest.fn(() => Promise.resolve(1));
+      const exists = jest.fn(() => Promise.resolve(true));
+      const warn = jest.fn();
+
+      global.strapi = {
+        query: () => ({ findOne, count }),
+        admin: { services: { user: { exists } } },
+        log: { warn },
+      };
+
+      await roleService.displayWarningIfNoSuperAdmin();
+
+      expect(warn).toHaveBeenCalledTimes(0);
+    });
+    test("superAdmin role doesn't exist", async () => {
+      const findOne = jest.fn(() => undefined);
+      const count = jest.fn(() => Promise.resolve(0));
+      const exists = jest.fn(() => Promise.resolve(false));
+      const warn = jest.fn();
+
+      global.strapi = {
+        query: () => ({ findOne, count }),
+        admin: { services: { user: { exists } } },
+        log: { warn },
+      };
+
+      await roleService.displayWarningIfNoSuperAdmin();
+
+      expect(warn).toHaveBeenCalledWith("Your application doesn't have a super admin role.");
+    });
+    test('superAdmin role exist & no user is superAdmin', async () => {
+      const findOne = jest.fn(() => ({ id: 1 }));
+      const count = jest.fn(() => Promise.resolve(0));
+      const exists = jest.fn(() => Promise.resolve(true));
+      const warn = jest.fn();
+
+      global.strapi = {
+        query: () => ({ findOne, count }),
+        admin: { services: { user: { exists } } },
+        log: { warn },
+      };
+
+      await roleService.displayWarningIfNoSuperAdmin();
+
+      expect(warn).toHaveBeenCalledWith("Your application doesn't have a super admin user.");
+    });
+  });
 });

@@ -534,4 +534,33 @@ describe('User', () => {
       expect(into).toHaveBeenCalledWith('strapi_users_roles');
     });
   });
+
+  describe('displayWarningIfUsersDontHaveRole', () => {
+    test('All users have at least one role', async () => {
+      const count = jest.fn(() => Promise.resolve(0));
+      const warn = jest.fn();
+
+      global.strapi = {
+        query: () => ({ model: { orm: 'bookshelf' }, count }),
+        log: { warn },
+      };
+
+      await userService.displayWarningIfUsersDontHaveRole();
+
+      expect(warn).toHaveBeenCalledTimes(0);
+    });
+    test('2 users have 0 roles', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      const warn = jest.fn();
+
+      global.strapi = {
+        query: () => ({ model: { orm: 'bookshelf' }, count }),
+        log: { warn },
+      };
+
+      await userService.displayWarningIfUsersDontHaveRole();
+
+      expect(warn).toHaveBeenCalledWith("Some users (2) don't have any role.");
+    });
+  });
 });
