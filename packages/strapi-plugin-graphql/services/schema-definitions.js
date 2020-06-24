@@ -28,7 +28,7 @@ const getTypeDescription = (type, model = {}) => {
  * @param {string} type the type of object we are converting to SQL (query, mutation, or fields)
  */
 const toSDL = (fields, configurations = {}, model = {}, type = 'field') => {
-  if (['query', 'mutation'].includes(type)) {
+  if (['query', 'mutation', 'subscription'].includes(type)) {
     return operationToSDL({ fields, configurations });
   }
 

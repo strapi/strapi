@@ -8,12 +8,13 @@ const _ = require('lodash');
 const mergeSchemas = (root, ...subs) => {
   subs.forEach(sub => {
     if (_.isEmpty(sub)) return;
-    const { definition = '', query = {}, mutation = {}, resolvers = {} } = sub;
+    const { definition = '', query = {}, mutation = {}, subscription = {}, resolvers = {} } = sub;
 
     root.definition += '\n' + definition;
     _.merge(root, {
       query,
       mutation,
+      subscription,
       resolvers,
     });
   });
@@ -25,6 +26,7 @@ const createDefaultSchema = () => ({
   definition: '',
   query: {},
   mutation: {},
+  subscription: {},
   resolvers: {},
 });
 
@@ -136,14 +138,14 @@ const getActionDetails = resolver => {
     const [, path] = resolver.split('::');
     const [plugin, controller, action] = path.split('.');
 
-    return { plugin, controller, action };
+    return { source: 'plugins', plugin, controller, action };
   }
 
   if (resolver.startsWith('application::')) {
     const [, path] = resolver.split('::');
     const [api, controller, action] = path.split('.');
 
-    return { api, controller, action };
+    return { source: 'application', api, controller, action };
   }
 
   const args = resolver.split('.');

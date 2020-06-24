@@ -275,7 +275,7 @@ module.exports = {
     return inputs;
   },
 
-  generateInputPayloadArguments({ model, name, mutationName, action }) {
+  generateInputPayloadArguments({ model, name, payloadName, action }) {
     const singularName = toSingular(name);
     const inputName = toInputName(name);
 
@@ -284,31 +284,63 @@ module.exports = {
     switch (action) {
       case 'create':
         return `
-          input ${mutationName}Input { data: ${inputName} }
-          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+          input ${payloadName}Input { data: ${inputName} }
+          type ${payloadName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'update':
         if (kind === 'singleType') {
           return `
-          input ${mutationName}Input  { data: edit${inputName} }
-          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+          input ${payloadName}Input  { data: edit${inputName} }
+          type ${payloadName}Payload { ${singularName}: ${model.globalId} }
         `;
         }
 
         return `
-          input ${mutationName}Input  { where: InputID, data: edit${inputName} }
-          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+          input ${payloadName}Input  { where: InputID, data: edit${inputName} }
+          type ${payloadName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'delete':
         if (kind === 'singleType') {
           return `
-          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+          type ${payloadName}Payload { ${singularName}: ${model.globalId} }
         `;
         }
 
         return `
-          input ${mutationName}Input  { where: InputID }
-          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+          input ${payloadName}Input  { where: InputID }
+          type ${payloadName}Payload { ${singularName}: ${model.globalId} }
+          `;
+
+      case 'beforeFind':
+      case 'afterFind':
+      case 'beforeDeleteAll':
+      case 'afterDeleteAll':
+      case 'beforeSearch':
+      case 'afterSearch':
+        return `
+          input ${payloadName}Input { data: ${inputName} }
+          type ${payloadName}Payload { ${singularName}: [${model.globalId}] }
+        `;
+
+      case 'beforeCount':
+      case 'afterCount':
+      case 'beforeCountSearch':
+      case 'afterCountSearch':
+        return `
+          input ${payloadName}Input { data: ${inputName} }
+          type ${payloadName}Payload { count: Int }
+        `;
+      case 'beforeCreate':
+      case 'afterCreate':
+      case 'beforeFindOne':
+      case 'afterFindOne':
+      case 'beforeUpdate':
+      case 'afterUpdate':
+      case 'beforeDelete':
+      case 'afterDelete':
+        return `
+          input ${payloadName}Input { data: ${inputName} }
+          type ${payloadName}Payload { ${singularName}: ${model.globalId} }
         `;
       default:
       // Nothing
