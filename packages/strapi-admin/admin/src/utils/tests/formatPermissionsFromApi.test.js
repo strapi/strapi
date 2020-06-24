@@ -44,26 +44,28 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
           'plugins::content-manager.explorer.create': true,
           'plugins::content-manager.explorer.update': true,
         },
-        email: {
-          actions: [
-            'plugins::content-manager.explorer.create',
-            'plugins::content-manager.explorer.update',
-          ],
-        },
-        firstname: {
-          actions: [
-            'plugins::content-manager.explorer.create',
-            'plugins::content-manager.explorer.update',
-          ],
-        },
-        lastname: {
-          actions: [
-            'plugins::content-manager.explorer.create',
-            'plugins::content-manager.explorer.update',
-          ],
-        },
-        roles: {
-          actions: ['plugins::content-manager.explorer.create'],
+        attributes: {
+          email: {
+            actions: [
+              'plugins::content-manager.explorer.create',
+              'plugins::content-manager.explorer.update',
+            ],
+          },
+          firstname: {
+            actions: [
+              'plugins::content-manager.explorer.create',
+              'plugins::content-manager.explorer.update',
+            ],
+          },
+          lastname: {
+            actions: [
+              'plugins::content-manager.explorer.create',
+              'plugins::content-manager.explorer.update',
+            ],
+          },
+          roles: {
+            actions: ['plugins::content-manager.explorer.create'],
+          },
         },
       },
       'application::category.category': {
@@ -71,11 +73,13 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
           'plugins::content-manager.explorer.read': true,
           'plugins::content-manager.explorer.delete': true,
         },
-        name: {
-          actions: ['plugins::content-manager.explorer.read'],
-        },
-        addresses: {
-          actions: ['plugins::content-manager.explorer.read'],
+        attributes: {
+          name: {
+            actions: ['plugins::content-manager.explorer.read'],
+          },
+          addresses: {
+            actions: ['plugins::content-manager.explorer.read'],
+          },
         },
       },
     };

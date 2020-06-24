@@ -10,6 +10,7 @@ import {
   contentManagerPermissionPrefix,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
   getAttributesByModel,
+  getAttributePermissionsSizeByContentTypeAction,
   getNumberOfRecursivePermissionsByAction,
 } from '../../../../../../../src/components/Roles/Permissions/utils';
 import CollapseLabel from '../../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
@@ -53,11 +54,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const attributeActions = get(
     permissions,
-    [contentTypeUid, attributePermissionName, 'actions'],
+    [contentTypeUid, 'attributes', attributePermissionName, 'actions'],
     []
   );
 
-  const getRecursiveAttributes = useCallback(() => {
+  const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
 
     return [
@@ -65,6 +66,13 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
       { ...attribute, attributeName: attributePermissionName },
     ];
   }, [attribute, attributePermissionName, components]);
+
+  const getContentTypePermissions = useCallback(
+    action => {
+      return getAttributePermissionsSizeByContentTypeAction(permissions, contentTypeUid, action);
+    },
+    [contentTypeUid, permissions]
+  );
 
   const getRecursiveAttributesPermissions = action => {
     const number = getNumberOfRecursivePermissionsByAction(
@@ -84,12 +92,20 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
       // If the current attribute is a component,
       // we need select all the component attributes.
       // Otherwhise, we just need to select the current attribute
+
       if (isCollapsable) {
+        const shouldEnable = !allRecursiveChecked(action);
+        const hasContentTypeAction =
+          (!shouldEnable &&
+            getContentTypePermissions(action) === getRecursiveAttributesPermissions(action)) ||
+          (shouldEnable && getContentTypePermissions(action) === 0);
+
         onAttributesSelect({
           action,
           subject: contentTypeUid,
-          attributes: getRecursiveAttributes(),
+          attributes: recursiveAttributes,
           shouldEnable: !allRecursiveChecked(action),
+          hasContentTypeAction,
         });
       } else {
         onAttributePermissionSelect({
@@ -130,16 +146,14 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return (
-      isCollapsable &&
-      recursivePermissions > 0 &&
-      recursivePermissions < getRecursiveAttributes().length
+      isCollapsable && recursivePermissions > 0 && recursivePermissions < recursiveAttributes.length
     );
   };
 
   const allRecursiveChecked = action => {
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
-    return isCollapsable && recursivePermissions === getRecursiveAttributes().length;
+    return isCollapsable && recursivePermissions === recursiveAttributes.length;
   };
 
   return (
@@ -149,7 +163,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
         <Flex style={{ flex: 1 }}>
           <RowStyle
             isActive={isActive}
-            isRequired={attribute.required}
+            isRequired={attribute.required && !isCollapsable}
             isCollapsable={attribute.component}
             level={recursiveLevel}
           >
@@ -176,8 +190,8 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
           <PermissionWrapper>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
+                disabled={attribute.required && !isCollapsable}
                 key={`${attribute.attributeName}-${action}`}
-                disabled={attribute.required}
                 onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
                 value={allRecursiveChecked(action) || checkPermission(action)}

@@ -1,40 +1,19 @@
-const existingActions = permissions => {
-  return Array.from(
-    new Set(
-      Object.entries(permissions).reduce((acc, current) => {
-        const actionsPermission = permission =>
-          permission.reduce((accAction, currentAction) => {
-            let actionsToReturn = accAction;
-
-            if (currentAction.actions) {
-              actionsToReturn = [...actionsToReturn, ...currentAction.actions];
-            }
-
-            if (typeof currentAction === 'object' && !currentAction.actions) {
-              actionsToReturn = [...actionsToReturn, ...Object.keys(currentAction)];
-            }
-
-            return actionsToReturn;
-          }, []);
-
-        return [...acc, ...actionsPermission(Object.values(current[1]))];
-      }, [])
-    )
-  );
-};
+import getExistingActions from './getExistingActions';
 
 const formatPermissionsToApi = permissions => {
+  const existingActions = getExistingActions(permissions);
+
   return Object.entries(permissions).reduce((acc, current) => {
     const formatPermission = permission =>
-      existingActions(permissions).reduce((actionAcc, currentAction) => {
+      existingActions.reduce((actionAcc, currentAction) => {
         if (permission[1].contentTypeActions && permission[1].contentTypeActions[currentAction]) {
           const hasAction =
-            Object.values(permission[1]).findIndex(
+            Object.values(permission[1].attributes).findIndex(
               item => item.actions && item.actions.includes(currentAction)
             ) !== -1;
           const hasContentTypeAction =
             permission[1].contentTypeActions && permission[1].contentTypeActions[currentAction];
-          const fields = Object.entries(permission[1])
+          const fields = Object.entries(permission[1].attributes)
             .map(item => {
               if (item[1].actions && item[1].actions.includes(currentAction)) {
                 return item[0];

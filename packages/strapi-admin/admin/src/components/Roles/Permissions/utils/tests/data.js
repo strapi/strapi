@@ -3,46 +3,50 @@ export const permissions = {
     contentTypeActions: {
       'plugins::content-manager.explorer.delete': true,
     },
-    city: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.read',
-      ],
-    },
-    cover: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.read',
-      ],
-    },
-    closing_period: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.read',
-      ],
-    },
-    'closing_period.start_date': {
-      actions: ['plugins::content-manager.explorer.create'],
-    },
-    'closing_period.dish.description': {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.read',
-      ],
+    attributes: {
+      city: {
+        actions: [
+          'plugins::content-manager.explorer.create',
+          'plugins::content-manager.explorer.read',
+        ],
+      },
+      cover: {
+        actions: [
+          'plugins::content-manager.explorer.create',
+          'plugins::content-manager.explorer.read',
+        ],
+      },
+      closing_period: {
+        actions: [
+          'plugins::content-manager.explorer.create',
+          'plugins::content-manager.explorer.read',
+        ],
+      },
+      'closing_period.start_date': {
+        actions: ['plugins::content-manager.explorer.create'],
+      },
+      'closing_period.dish.description': {
+        actions: [
+          'plugins::content-manager.explorer.create',
+          'plugins::content-manager.explorer.read',
+        ],
+      },
     },
   },
   'application::places.places': {
-    like: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.read',
-      ],
-    },
-    country: {
-      actions: [
-        'plugins::content-manager.explorer.create',
-        'plugins::content-manager.explorer.read',
-      ],
+    attributes: {
+      like: {
+        actions: [
+          'plugins::content-manager.explorer.create',
+          'plugins::content-manager.explorer.read',
+        ],
+      },
+      country: {
+        actions: [
+          'plugins::content-manager.explorer.create',
+          'plugins::content-manager.explorer.read',
+        ],
+      },
     },
   },
 };

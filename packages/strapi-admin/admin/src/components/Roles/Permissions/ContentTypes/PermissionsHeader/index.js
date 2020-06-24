@@ -26,7 +26,7 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
         attributes: allAttributes,
         action,
         shouldEnable: !hasAllActions(action),
-        contentTypeAction: true,
+        hasContentTypeAction: true,
       });
     } else {
       onGlobalPermissionsActionSelect({

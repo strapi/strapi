@@ -9,7 +9,6 @@ import {
   contentManagerPermissionPrefix,
   getNumberOfRecursivePermissionsByAction,
   getAttributesByModel,
-  getAllAttributesActionsSize,
   getRecursivePermissions,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
 } from '../../../utils';
@@ -35,7 +34,7 @@ const AttributeRow = ({ attribute, contentType }) => {
   const isActive = collapsePath[1] === attribute.attributeName;
   const attributeActions = get(
     permissions,
-    [contentType.uid, attribute.attributeName, 'actions'],
+    [contentType.uid, 'attributes', attribute.attributeName, 'actions'],
     []
   );
 
@@ -67,16 +66,14 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const handleCheckAllAction = () => {
     if (isCollapsable) {
-      const allCurrentActionsSize = getAllAttributesActionsSize(contentType.uid, permissions);
-      const attributeToAdd = getRecursiveAttributes();
-
-      const allActionsSize = attributeToAdd.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const attributesToAdd = getRecursiveAttributes();
+      const allActionsSize = attributesToAdd.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
 
       onAllContentTypeActions({
         subject: contentType.uid,
-        attributes: attributeToAdd,
-        shouldEnable: allCurrentActionsSize >= 0 && allCurrentActionsSize < allActionsSize,
-        addContentTypeActions: false,
+        attributes: attributesToAdd,
+        shouldEnable: recursivePermissions >= 0 && recursivePermissions < allActionsSize,
+        shouldSetAllContentTypes: false,
       });
     } else {
       onAllAttributeActionsSelect({
@@ -135,7 +132,7 @@ const AttributeRow = ({ attribute, contentType }) => {
   return (
     <>
       <AttributeRowWrapper
-        isRequired={attribute.required}
+        isRequired={attribute.required && !isCollapsable}
         isActive={isActive}
         isCollapsable={isCollapsable}
         alignItems="center"
@@ -144,7 +141,7 @@ const AttributeRow = ({ attribute, contentType }) => {
           <Padded left size="sm" />
           <PermissionName width="15rem">
             <Checkbox
-              disabled={attribute.required}
+              disabled={attribute.required && !isCollapsable}
               name={attribute.attributeName}
               value={hasAllActions}
               someChecked={hasSomeActions}
@@ -170,7 +167,7 @@ const AttributeRow = ({ attribute, contentType }) => {
               <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
             </CollapseLabel>
           </PermissionName>
-          <PermissionWrapper>
+          <PermissionWrapper disabled>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={action}

@@ -2,7 +2,7 @@ import { get } from 'lodash';
 
 const getContentTypesActionsSize = (contentTypes, permissions, action) => {
   const count = contentTypes.reduce((acc, current) => {
-    if (get(permissions, [current.uid, 'contentTypeActions', action], null)) {
+    if (get(permissions, [current.uid, 'contentTypeActions', action], false)) {
       return acc + 1;
     }
 

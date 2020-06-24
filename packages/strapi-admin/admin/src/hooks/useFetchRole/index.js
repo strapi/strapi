@@ -15,9 +15,6 @@ const useFetchRole = id => {
 
   const fetchRole = async roleId => {
     try {
-      // const requestURL = `/admin/roles/${roleId}`;
-
-      // const { data } = await request(requestURL, { method: 'GET' });
       const [{ data: role }, { data: permissions }] = await Promise.all(
         [`roles/${roleId}`, `roles/${roleId}/permissions`].map(endPoint =>
           request(`/admin/${endPoint}`, { method: 'GET' })
