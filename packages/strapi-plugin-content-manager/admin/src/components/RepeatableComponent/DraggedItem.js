@@ -1,11 +1,11 @@
 /* eslint-disable import/no-cycle */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import useDataManager from '../../hooks/useDataManager';
+import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import useEditView from '../../hooks/useEditView';
 import ItemTypes from '../../utils/ItemTypes';
 import Inputs from '../Inputs';
@@ -32,21 +32,15 @@ const DraggedItem = ({
   removeCollapse,
   schema,
   toggleCollapses,
+
+  // Retrieved from the select function
+  moveComponentField,
+  removeRepeatableField,
+  triggerFormValidation,
+  checkFormErrors,
+  displayedValue,
 }) => {
-  const {
-    checkFormErrors,
-    modifiedData,
-    moveComponentField,
-    removeRepeatableField,
-    triggerFormValidation,
-  } = useDataManager();
   const { setIsDraggingComponent, unsetIsDraggingComponent } = useEditView();
-  const mainField = get(schema, ['settings', 'mainField'], 'id');
-  const displayedValue = get(
-    modifiedData,
-    [...componentFieldName.split('.'), mainField],
-    null
-  );
   const dragRef = useRef(null);
   const dropRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
@@ -93,8 +87,7 @@ const DraggedItem = ({
       // Determine rectangle on screen
       const hoverBoundingRect = dropRef.current.getBoundingClientRect();
       // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
       // Get pixels to the top
@@ -149,10 +142,8 @@ const DraggedItem = ({
     preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
-  const getField = fieldName =>
-    get(schema, ['schema', 'attributes', fieldName], {});
-  const getMeta = fieldName =>
-    get(schema, ['metadatas', fieldName, 'edit'], {});
+  const getField = fieldName => get(schema, ['schema', 'attributes', fieldName], {});
+  const getMeta = fieldName => get(schema, ['metadatas', fieldName, 'edit'], {});
 
   // Create the refs
   // We need 1 for the drop target
@@ -170,9 +161,7 @@ const DraggedItem = ({
         hasMinError={hasMinError}
         isFirst={isFirst}
         displayedValue={displayedValue}
-        doesPreviousFieldContainErrorsAndIsOpen={
-          doesPreviousFieldContainErrorsAndIsOpen
-        }
+        doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
         isDragging={isDragging}
         isOpen={isOpen}
         onClickToggle={onClickToggle}
@@ -195,8 +184,7 @@ const DraggedItem = ({
                   <div className="row" key={key}>
                     {fieldRow.map(field => {
                       const currentField = getField(field.name);
-                      const isComponent =
-                        get(currentField, 'type', '') === 'component';
+                      const isComponent = get(currentField, 'type', '') === 'component';
                       const keys = `${componentFieldName}.${field.name}`;
 
                       if (isComponent) {
@@ -224,7 +212,6 @@ const DraggedItem = ({
                             keys={keys}
                             layout={schema}
                             name={field.name}
-                            onChange={() => {}}
                             onBlur={hasErrors ? checkFormErrors : null}
                           />
                         </div>
@@ -264,6 +251,47 @@ DraggedItem.propTypes = {
   removeCollapse: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   toggleCollapses: PropTypes.func,
+  moveComponentField: PropTypes.func.isRequired,
+  removeRepeatableField: PropTypes.func.isRequired,
+  triggerFormValidation: PropTypes.func.isRequired,
+  checkFormErrors: PropTypes.func.isRequired,
+  displayedValue: PropTypes.string.isRequired,
 };
 
-export default DraggedItem;
+function select({ schema, componentFieldName }) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const {
+    checkFormErrors,
+    modifiedData,
+    moveComponentField,
+    removeRepeatableField,
+    triggerFormValidation,
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+  } = useContext(EditViewDataManagerContext);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
+  const displayedValue = get(modifiedData, [...componentFieldName.split('.'), mainField], null);
+
+  return {
+    displayedValue,
+    mainField,
+    checkFormErrors,
+    moveComponentField,
+    removeRepeatableField,
+    triggerFormValidation,
+  };
+}
+
+function connect(WrappedComponent, select) {
+  return function(props) {
+    const selectors = select(props);
+
+    return <WrappedComponent {...props} {...selectors} />;
+  };
+}
+
+const Memoized = memo(DraggedItem);
+
+export default connect(Memoized, select);
+
+export { DraggedItem };

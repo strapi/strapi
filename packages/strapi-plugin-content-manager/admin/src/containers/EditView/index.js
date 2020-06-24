@@ -187,7 +187,6 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                                   keys={name}
                                   layout={currentContentTypeLayoutData}
                                   name={name}
-                                  onChange={() => {}}
                                 />
                               </div>
                             );

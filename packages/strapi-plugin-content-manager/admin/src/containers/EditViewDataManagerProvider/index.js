@@ -1,6 +1,6 @@
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import { Prompt, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, request, useGlobalContext } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
@@ -113,7 +113,7 @@ const EditViewDataManagerProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, slug, isCreatingEntry]);
 
-  const addComponentToDynamicZone = (keys, componentUid, shouldCheckErrors = false) => {
+  const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('addComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
@@ -121,32 +121,36 @@ const EditViewDataManagerProvider = ({
       componentUid,
       shouldCheckErrors,
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const addNonRepeatableComponentToField = (keys, componentUid) => {
+  const addNonRepeatableComponentToField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
       keys: keys.split('.'),
       componentUid,
     });
-  };
+  }, []);
 
-  const addRelation = ({ target: { name, value } }) => {
+  const addRelation = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'ADD_RELATION',
       keys: name.split('.'),
       value,
     });
-  };
+  }, []);
 
-  const addRepeatableComponentToField = (keys, componentUid, shouldCheckErrors = false) => {
-    dispatch({
-      type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-      keys: keys.split('.'),
-      componentUid,
-      shouldCheckErrors,
-    });
-  };
+  const addRepeatableComponentToField = useCallback(
+    (keys, componentUid, shouldCheckErrors = false) => {
+      dispatch({
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        keys: keys.split('.'),
+        componentUid,
+        shouldCheckErrors,
+      });
+    },
+    []
+  );
 
   const checkFormErrors = async (dataToSet = {}) => {
     const schema = createYupSchema(
@@ -188,41 +192,44 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const handleChange = ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
-    let inputValue = value;
+  const handleChange = useCallback(
+    ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
+      let inputValue = value;
 
-    // Empty string is not a valid date,
-    // Set the date to null when it's empty
-    if (type === 'date' && value === '') {
-      inputValue = null;
-    }
+      // Empty string is not a valid date,
+      // Set the date to null when it's empty
+      if (type === 'date' && value === '') {
+        inputValue = null;
+      }
 
-    if (type === 'password' && !value) {
+      if (type === 'password' && !value) {
+        dispatch({
+          type: 'REMOVE_PASSWORD_FIELD',
+          keys: name.split('.'),
+        });
+
+        return;
+      }
+
+      // Allow to reset enum
+      if (type === 'select-one' && value === '') {
+        inputValue = null;
+      }
+
+      // Allow to reset number input
+      if (type === 'number' && value === '') {
+        inputValue = null;
+      }
+
       dispatch({
-        type: 'REMOVE_PASSWORD_FIELD',
+        type: 'ON_CHANGE',
         keys: name.split('.'),
+        value: inputValue,
+        shouldSetInitialValue,
       });
-
-      return;
-    }
-
-    // Allow to reset enum
-    if (type === 'select-one' && value === '') {
-      inputValue = null;
-    }
-
-    // Allow to reset number input
-    if (type === 'number' && value === '') {
-      inputValue = null;
-    }
-
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name.split('.'),
-      value: inputValue,
-      shouldSetInitialValue,
-    });
-  };
+    },
+    []
+  );
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -328,57 +335,71 @@ const EditViewDataManagerProvider = ({
     }
   };
 
-  const moveComponentDown = (dynamicZoneName, currentIndex) => {
-    emitEvent('changeComponentsOrder');
-    dispatch({
-      type: 'MOVE_COMPONENT_DOWN',
-      dynamicZoneName,
-      currentIndex,
-      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
-    });
-  };
-  const moveComponentUp = (dynamicZoneName, currentIndex) => {
-    emitEvent('changeComponentsOrder');
-    dispatch({
-      type: 'MOVE_COMPONENT_UP',
-      dynamicZoneName,
-      currentIndex,
-      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
-    });
-  };
-  const moveComponentField = (pathToComponent, dragIndex, hoverIndex) => {
+  const shouldCheckDZErrors = useCallback(
+    dzName => {
+      const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
+      const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
+
+      return shouldCheckErrors;
+    },
+    [formErrors]
+  );
+
+  const moveComponentDown = useCallback(
+    (dynamicZoneName, currentIndex) => {
+      emitEvent('changeComponentsOrder');
+      dispatch({
+        type: 'MOVE_COMPONENT_DOWN',
+        dynamicZoneName,
+        currentIndex,
+        shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shouldCheckDZErrors]
+  );
+
+  const moveComponentUp = useCallback(
+    (dynamicZoneName, currentIndex) => {
+      emitEvent('changeComponentsOrder');
+      dispatch({
+        type: 'MOVE_COMPONENT_UP',
+        dynamicZoneName,
+        currentIndex,
+        shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shouldCheckDZErrors]
+  );
+
+  const moveComponentField = useCallback((pathToComponent, dragIndex, hoverIndex) => {
     dispatch({
       type: 'MOVE_COMPONENT_FIELD',
       pathToComponent,
       dragIndex,
       hoverIndex,
     });
-  };
+  }, []);
 
-  const moveRelation = (dragIndex, overIndex, name) => {
+  const moveRelation = useCallback((dragIndex, overIndex, name) => {
     dispatch({
       type: 'MOVE_FIELD',
       dragIndex,
       overIndex,
       keys: name.split('.'),
     });
-  };
+  }, []);
 
-  const onRemoveRelation = keys => {
+  const onRemoveRelation = useCallback(keys => {
     dispatch({
       type: 'REMOVE_RELATION',
       keys,
     });
-  };
+  }, []);
 
-  const shouldCheckDZErrors = dzName => {
-    const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
-    const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
-
-    return shouldCheckErrors;
-  };
-
-  const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
+  const removeComponentFromDynamicZone = useCallback((dynamicZoneName, index) => {
     emitEvent('removeComponentFromDynamicZone');
 
     dispatch({
@@ -387,22 +408,23 @@ const EditViewDataManagerProvider = ({
       index,
       shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
     });
-  };
-  const removeComponentFromField = (keys, componentUid) => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const removeComponentFromField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_FIELD',
       keys: keys.split('.'),
       componentUid,
     });
-  };
+  }, []);
 
-  const removeRepeatableField = (keys, componentUid) => {
+  const removeRepeatableField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'REMOVE_REPEATABLE_FIELD',
       keys: keys.split('.'),
       componentUid,
     });
-  };
+  }, []);
 
   const setIsSubmitting = (value = true) => {
     dispatch({ type: 'IS_SUBMITTING', value });
