@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { stringIncludes, stringEquals } = require('strapi-utils');
 const { createUser } = require('../domain/user');
+const { SUPER_ADMIN_CODE } = require('./constants');
 
 const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description']);
 
@@ -156,8 +157,24 @@ const searchPage = async query => {
  * @param query
  * @returns {Promise<user>}
  */
-const deleteFn = async query => {
-  return strapi.query('user', 'admin').delete(query);
+const deleteById = async id => {
+  // Check at least one super admin remains
+  const userToDelete = await strapi.query('user', 'admin').findOne({ id });
+  if (userToDelete) {
+    if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
+      const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
+      if (superAdminRole.usersCount === 1) {
+        throw strapi.errors.badRequest(
+          'ValidationError',
+          'You must have at least one user with super admin role.'
+        );
+      }
+    }
+  } else {
+    return null;
+  }
+
+  return strapi.query('user', 'admin').delete({ id });
 };
 
 /** Count the users that don't have any associated roles
@@ -230,7 +247,7 @@ module.exports = {
   findOne,
   findPage,
   searchPage,
-  delete: deleteFn,
+  deleteById,
   countUsersWithoutRole,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
