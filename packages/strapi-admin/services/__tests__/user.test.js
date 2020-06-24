@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const userService = require('../user');
+const { SUPER_ADMIN_CODE } = require('../constants');
 
 describe('User', () => {
   describe('sanitizeUser', () => {
@@ -172,6 +173,45 @@ describe('User', () => {
 
       expect(update).toHaveBeenCalledWith({ id }, input);
       expect(result).toBe(user);
+    });
+  });
+
+  describe('updateById', () => {
+    test('Cannot delete last super admin', async () => {
+      const findOne = jest.fn(() =>
+        Promise.resolve({ id: 11, roles: [{ code: SUPER_ADMIN_CODE }] })
+      );
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
+      const badRequest = jest.fn();
+      global.strapi = {
+        query: () => ({ findOne }),
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        errors: { badRequest },
+      };
+      try {
+        await userService.deleteById(2);
+      } catch (e) {
+        //nothing
+      }
+
+      expect(badRequest).toHaveBeenCalledWith(
+        'ValidationError',
+        'You must have at least one user with super admin role.'
+      );
+    });
+    test('Can delete a super admin if he/she is not the last one', async () => {
+      const user = { id: 11, roles: [{ code: SUPER_ADMIN_CODE }] };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
+      const deleteFn = jest.fn(() => user);
+      global.strapi = {
+        query: () => ({ findOne, delete: deleteFn }),
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      };
+
+      const res = await userService.deleteById(user.id);
+      expect(deleteFn).toHaveBeenCalledWith({ id: user.id });
+      expect(res).toEqual(user);
     });
   });
 
