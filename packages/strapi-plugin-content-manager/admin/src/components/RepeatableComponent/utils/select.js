@@ -1,8 +1,7 @@
 import { useContext } from 'react';
 import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
 
-function select() {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+function useSelect() {
   const { addRepeatableComponentToField, formErrors } = useContext(EditViewDataManagerContext);
 
   return {
@@ -11,4 +10,4 @@ function select() {
   };
 }
 
-export default select;
+export default useSelect;

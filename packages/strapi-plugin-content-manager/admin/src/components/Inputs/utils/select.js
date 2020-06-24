@@ -2,8 +2,7 @@ import { useContext } from 'react';
 import { get } from 'lodash';
 import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
 
-function select(keys) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+function useSelect(keys) {
   const { modifiedData, formErrors, onChange } = useContext(EditViewDataManagerContext);
   const value = get(modifiedData, keys, null);
 
@@ -14,4 +13,4 @@ function select(keys) {
   };
 }
 
-export default select;
+export default useSelect;

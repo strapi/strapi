@@ -2,8 +2,7 @@ import { useContext } from 'react';
 import { get } from 'lodash';
 import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
 
-function select(name) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+function useSelect(name) {
   const { modifiedData, removeComponentFromField } = useContext(EditViewDataManagerContext);
   const componentValue = get(modifiedData, name, null);
 
@@ -13,4 +12,4 @@ function select(name) {
   };
 }
 
-export default select;
+export default useSelect;
