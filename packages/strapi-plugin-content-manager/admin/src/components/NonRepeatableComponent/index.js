@@ -8,16 +8,9 @@ import NonRepeatableWrapper from '../NonRepeatableWrapper';
 import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
 
-const NonRepeatableComponent = ({
-  fields,
-  isFromDynamicZone,
-  name,
-  schema,
-}) => {
-  const getField = fieldName =>
-    get(schema, ['schema', 'attributes', fieldName], {});
-  const getMeta = fieldName =>
-    get(schema, ['metadatas', fieldName, 'edit'], {});
+const NonRepeatableComponent = ({ fields, isFromDynamicZone, name, schema }) => {
+  const getField = fieldName => get(schema, ['schema', 'attributes', fieldName], {});
+  const getMeta = fieldName => get(schema, ['metadatas', fieldName, 'edit'], {});
 
   return (
     <NonRepeatableWrapper isFromDynamicZone={isFromDynamicZone}>
@@ -48,12 +41,7 @@ const NonRepeatableComponent = ({
 
               return (
                 <div key={field.name} className={`col-${field.size}`}>
-                  <Inputs
-                    keys={keys}
-                    layout={schema}
-                    name={field.name}
-                    onChange={() => {}}
-                  />
+                  <Inputs keys={keys} layout={schema} name={field.name} />
                 </div>
               );
             })}

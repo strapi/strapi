@@ -1,15 +1,17 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, omit, toLower } from 'lodash';
+import isEqual from 'react-fast-compare';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
 
-import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
+import connect from './utils/connect';
+import select from './utils/select';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -63,18 +65,17 @@ const validationsToOmit = [
   'regex',
 ];
 
-function Inputs({ autoFocus, keys, layout, name, onBlur }) {
+function Inputs({ autoFocus, keys, layout, name, onBlur, formErrors, onChange, value }) {
   const {
     strapi: { fieldApi },
   } = useStrapi();
-
-  const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
+  // const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
   const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
-  const value = useMemo(() => get(modifiedData, keys, null), [keys, modifiedData]);
+  // const value = useMemo(() => get(modifiedData, keys, null), [keys, modifiedData]);
   const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
   const errorId = useMemo(() => {
     return get(formErrors, [keys, 'id'], temporaryErrorIdUntilBuffetjsSupportsFormattedMessage);
@@ -177,7 +178,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             {...metadatas}
             autoComplete="new-password"
             autoFocus={autoFocus}
-            didCheckErrors={didCheckErrors}
+            // didCheckErrors={didCheckErrors}
             disabled={disabled}
             error={
               isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
@@ -213,16 +214,22 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
 Inputs.defaultProps = {
   autoFocus: false,
+  formErrors: {},
   onBlur: null,
+  value: null,
 };
 
 Inputs.propTypes = {
   autoFocus: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
+  formErrors: PropTypes.object,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
+  value: PropTypes.any,
 };
 
-export default memo(Inputs);
+const Memoized = memo(Inputs, isEqual);
+
+export default connect(Memoized, select);

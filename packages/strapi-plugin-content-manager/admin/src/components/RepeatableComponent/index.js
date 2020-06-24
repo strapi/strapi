@@ -1,13 +1,15 @@
 /* eslint-disable import/no-cycle */
-import React, { useReducer } from 'react';
+import React, { memo, useReducer } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
+// import useDataManager from '../../hooks/useDataManager';
 import ItemTypes from '../../utils/ItemTypes';
+import connect from './utils/connect';
+import select from './utils/select';
 import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
 import EmptyComponent from './EmptyComponent';
@@ -15,6 +17,8 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const RepeatableComponent = ({
+  addRepeatableComponentToField,
+  formErrors,
   componentUid,
   componentValue,
   componentValueLength,
@@ -25,7 +29,6 @@ const RepeatableComponent = ({
   name,
   schema,
 }) => {
-  const { addRepeatableComponentToField, formErrors } = useDataManager();
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
 
   const componentErrorKeys = Object.keys(formErrors)
@@ -156,16 +159,19 @@ RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
   fields: [],
+  formErrors: {},
   isNested: false,
   max: Infinity,
   min: -Infinity,
 };
 
 RepeatableComponent.propTypes = {
+  addRepeatableComponentToField: PropTypes.func.isRequired,
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   fields: PropTypes.array,
+  formErrors: PropTypes.object,
   isNested: PropTypes.bool,
   max: PropTypes.number,
   min: PropTypes.number,
@@ -173,4 +179,8 @@ RepeatableComponent.propTypes = {
   schema: PropTypes.object.isRequired,
 };
 
-export default RepeatableComponent;
+const Memoized = memo(RepeatableComponent);
+
+export default connect(Memoized, select);
+
+export { RepeatableComponent };
