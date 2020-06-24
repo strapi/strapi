@@ -19,7 +19,8 @@ module.exports = {
             { resource_type: 'auto', public_id: file.hash, ...customConfig },
             (err, image) => {
               if (err) {
-                return reject(err);
+                strapi.log.error(`Error uploading to cloudinary: ${err.message}`);
+                return reject(new Error('Upload to cloudinary failed'));
               }
 
               if (image.resource_type === 'video') {
