@@ -130,6 +130,8 @@ const VALID_OPERATORS = [
   'null',
 ];
 
+const BOOLEAN_OPERATORS = ['or'];
+
 /**
  * Parse where params
  */
@@ -174,6 +176,10 @@ const convertWhereClause = (whereClause, value) => {
   // split field and operator
   const field = whereClause.substring(0, separatorIndex);
   const operator = whereClause.slice(separatorIndex + 1);
+
+  if (BOOLEAN_OPERATORS.includes(operator) && field === '') {
+    return { field: null, operator, value: [].concat(value).map(convertWhereParams) };
+  }
 
   // the field as underscores
   if (!VALID_OPERATORS.includes(operator)) {
