@@ -14,6 +14,9 @@ const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');
 const defaultSettings = require('../config/settings.json');
 const parametersOptions = require('./utils/parametersOptions.json');
+const parameterSuffixes = require('./utils/parameterSuffixes.json');
+
+const pluralize = require('pluralize');
 
 // keys to pick from the extended config
 const defaultSettingsKeys = Object.keys(defaultSettings);
@@ -300,7 +303,7 @@ module.exports = {
 
   /**
    * Format a plugin model for example users-permissions, user => Users-Permissions - User
-   * @param {Sting} plugin
+   * @param {String} plugin
    * @param {String} name
    * @param {Boolean} withoutSpace
    * @return {String}
@@ -1077,9 +1080,8 @@ module.exports = {
    * Its schema is either a component when we know what the routes returns otherwise, it returns a dummy schema
    * that the user will modify later
    * @param {String} verb
-   * @param {Object} route
+   * @param {Object} routeObject
    * @param {String} tag
-   * @param {String} endPoint
    * @returns {Object}
    */
   generateResponseSchema: function(verb, routeObject, tag) {
@@ -1260,7 +1262,7 @@ module.exports = {
   /**
    * Generate the verb parameters object
    * Refer to https://swagger.io/specification/#pathItemObject
-   * @param {Sting} verb
+   * @param {String} verb
    * @param {String} controllerMethod
    * @param {String} endPoint
    */
@@ -1284,10 +1286,57 @@ module.exports = {
     if (verb === 'get' && controllerMethod === 'find') {
       // parametersOptions corresponds to this section
       // of the documentation https://strapi.io/documentation/guides/filters.html
+
+      const apiElement = this.extractAPIElement(endPoint);
+      if (this.hasAPIElement(apiElement)) {
+        return this.combineMembersAndParameters(apiElement, params);
+      }
       return [...params, ...parametersOptions];
     }
-
     return params;
+  },
+
+  /**
+   * Extract the api route from the endpoint.
+   * @param endPoint
+   * @return the API route.
+   */
+  extractAPIElement: endPoint => pluralize.singular(endPoint.replace(/^\//, '')),
+
+  /**
+   * Checks if a candidate element is part of the API.
+   * @param apiElement The candidate API element.
+   * @return true if the strapi api element contains the candidate else false.
+   */
+  hasAPIElement: apiElement => _.has(strapi, ['api', apiElement]),
+
+  /**
+   * The parameters for the get and find verbs need to be generated from the model
+   * as a combination of the member names and some pre-determined parameter suffixes.
+   * This was implemented so that you have useful parameters in the Swagger UI
+   * like e.g: city_eq, city_ne, city_lt, city_lte, or country_eq, country_contains.
+   * So the parameter are always a combination of the name of the member (e.g. 'city', 'country') and
+   * a list of parameter suffixes you can find in parameterSuffixes.json and parameterOptions.json.
+   * @param apiElement The actual entity, like e.g: address, country
+   * @param params Generated parameter, might be empty.
+   * @return {*[]} The list with all parameters for a get or find verb of an entity
+   */
+  combineMembersAndParameters: (apiElement, params) => {
+    const apiElementAttrs = _.get(
+      strapi,
+      ['api', apiElement, 'models', apiElement, 'attributes'],
+      []
+    );
+    const apiElementsWithType = Object.entries(apiElementAttrs).filter(kv => kv[1].type);
+    const combinedParameters = apiElementsWithType.flatMap(kv => {
+      return parameterSuffixes.map(ap => {
+        const fullPo = { ...parametersOptions.find(po => po.name === ap) };
+        // Combining the name of the member in an entity with the parameter suffixes, creating something like e.g: country_ne
+        fullPo['name'] = `${kv[0]}${ap}`;
+        return fullPo;
+      });
+    });
+    return [...params, ...combinedParameters];
   },
 
   /**
@@ -1409,7 +1458,7 @@ module.exports = {
 
   /**
    * Retrieve the model's attributes
-   * @param {Objet} modelAttributes
+   * @param {Object} modelAttributes
    * @returns {Object} { associations: [{ name: 'foo', getter: [], tag: 'foos' }], attributes }
    */
   getModelAttributes: function(modelAttributes) {
