@@ -87,6 +87,7 @@ const NewMenuItemForm = ({
               </FormattedMessage>
             </div>
             <div className="col-12" style={{ marginBottom: 0 }}>
+              {/* use translation hook */}
               <FormattedMessage id={`${pluginId}.MenuEditor.createForm.state`}>
                 {label => (
                   <Input

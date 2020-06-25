@@ -28,7 +28,6 @@ export const remapSortlyOutput = sortlyOutput => {
       id,
       index,
       parentId = null,
-      name,
       state = null,
       type = null,
       page = null,
@@ -42,27 +41,26 @@ export const remapSortlyOutput = sortlyOutput => {
         parentId === 0
           ? null
           : {
-              id: parseInt(parentId, 10),
-            },
-      title: name,
+            id: parseInt(parentId, 10),
+          },
       menu_type:
         type === null
           ? null
           : {
-              id: parseInt(type, 10),
-            },
+            id: parseInt(type, 10),
+          },
       menu_state:
         state === null
           ? null
           : {
-              id: parseInt(state, 10),
-            },
+            id: parseInt(state, 10),
+          },
       page:
         page === null
           ? null
           : {
-              id: parseInt(page, 10),
-            },
+            id: parseInt(page, 10),
+          },
       newItem,
     };
   });

@@ -4,6 +4,7 @@
   "version": "3.0.0-beta.19.5",
   "description": "A Strapi application.",
   "scripts": {
+    "dev": "yarn develop --watch-admin",
     "develop": "strapi develop",
     "start": "strapi start",
     "build": "strapi build",
