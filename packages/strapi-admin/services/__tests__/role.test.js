@@ -305,12 +305,6 @@ describe('Role', () => {
       ];
       const defaultPermissions = [
         {
-          action: 'plugins::upload.settings.read',
-          conditions: [],
-          fields: null,
-          subject: null,
-        },
-        {
           action: 'plugins::upload.assets.create',
           conditions: [],
           fields: null,
