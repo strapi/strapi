@@ -88,6 +88,50 @@ const normalizeFieldName = ({ model, field }) => {
     : fieldPath.join('.');
 };
 
+const BOOLEAN_OPERATORS = ['or'];
+
+const hasDeepFilters = whereClauses => {
+  return (
+    whereClauses.filter(({ field, operator, value }) => {
+      if (BOOLEAN_OPERATORS.includes(operator)) {
+        return value.filter(hasDeepFilters).length > 0;
+      }
+
+      return field.split('.').length > 1;
+    }).length > 0
+  );
+};
+
+const normalizeClauses = (whereClauses, { model }) => {
+  return whereClauses
+    .filter(({ value }) => !_.isNil(value))
+    .map(({ field, operator, value }) => {
+      if (BOOLEAN_OPERATORS.includes(operator)) {
+        return {
+          field,
+          operator,
+          value: value.map(clauses => normalizeClauses(clauses, { model })),
+        };
+      }
+
+      const { model: assocModel, attribute } = getAssociationFromFieldKey({
+        model,
+        field,
+      });
+
+      const { type } = _.get(assocModel, ['allAttributes', attribute], {});
+
+      // cast value or array of values
+      const castedValue = castInput({ type, operator, value });
+
+      return {
+        field: normalizeFieldName({ model, field }),
+        operator,
+        value: castedValue,
+      };
+    });
+};
+
 /**
  *
  * @param {Object} options - Options
@@ -98,33 +142,14 @@ const normalizeFieldName = ({ model, field }) => {
 const buildQuery = ({ model, filters = {}, ...rest }) => {
   // Validate query clauses
   if (filters.where && Array.isArray(filters.where)) {
-    const deepFilters = filters.where.filter(({ field }) => field.split('.').length > 1);
-    if (deepFilters.length > 0) {
+    if (hasDeepFilters(filters.where)) {
       strapi.log.warn(
         'Deep filtering queries should be used carefully (e.g Can cause performance issues).\nWhen possible build custom routes which will in most case be more optimised.'
       );
     }
 
     // cast where clauses to match the inner types
-    filters.where = filters.where
-      .filter(({ value }) => !_.isNil(value))
-      .map(({ field, operator, value }) => {
-        const { model: assocModel, attribute } = getAssociationFromFieldKey({
-          model,
-          field,
-        });
-
-        const { type } = _.get(assocModel, ['allAttributes', attribute], {});
-
-        // cast value or array of values
-        const castedValue = castInput({ type, operator, value });
-
-        return {
-          field: normalizeFieldName({ model, field }),
-          operator,
-          value: castedValue,
-        };
-      });
+    filters.where = normalizeClauses(filters.where, { model });
   }
 
   // call the orm's buildQuery implementation
