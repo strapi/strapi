@@ -159,7 +159,7 @@ const searchPage = async query => {
  */
 const deleteById = async id => {
   // Check at least one super admin remains
-  const userToDelete = await strapi.query('user', 'admin').findOne({ id });
+  const userToDelete = await strapi.query('user', 'admin').findOne({ id }, ['roles']);
   if (userToDelete) {
     if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
