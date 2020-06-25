@@ -133,4 +133,4 @@ packages/strapi-generate-new/files/public/
 front-workspace.code-workspace
 
 ##### dont add absolute symlink to .git repo
-example/getstarted/plugins/menu
+examples/getstarted/plugins/menu

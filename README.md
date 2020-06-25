@@ -1,6 +1,6 @@
 # strapi menu plugin dev environment
 
-dev repo for starpi-plugin-menu
+dev repo for strapi-plugin-menu
 
 ## installation & run dev
 
@@ -23,7 +23,6 @@ New-Item -ItemType SymbolicLink -Name .\examples\getstarted\plugins\menu -Target
 
 ```sh
 # cd {{ROOT_PATH}}/
-yarn setup v rootu,
 
 # cd {{ROOT_PATH}}/examples/getstarted
 yarn build
