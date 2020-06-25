@@ -7,6 +7,7 @@ import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
 
 import InputJSONWithErrors from '../InputJSONWithErrors';
+
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
