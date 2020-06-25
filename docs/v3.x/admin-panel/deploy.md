@@ -19,9 +19,6 @@ You might want to change the path to access to the administration panel. Here th
 module.exports = {
   host: 'localhost',
   port: 1337,
-  cron: {
-    enabled: false,
-  },
   admin: {
     path: '/dashboard', // We change the path to access to the admin (highly recommended for security reasons).
   },
@@ -40,9 +37,6 @@ It's very common to deploy the front-end and the back-end on different servers. 
 module.exports = {
   host: 'localhost',
   port: 1337,
-  cron: {
-    enabled: false,
-  },
   admin: {
     path: '/', // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
     serveAdminPanel: false, // http://yourbackend.com will not serve any static admin files

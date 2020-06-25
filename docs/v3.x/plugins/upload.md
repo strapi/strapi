@@ -300,15 +300,25 @@ You can check all the available providers developed by the community on npmjs.or
 
 To install a new provider run:
 
-```
-$ npm install strapi-provider-upload-aws-s3 --save
-```
+:::: tabs
 
-or
+::: tab yarn
 
 ```
-$ yarn add strapi-provider-upload-aws-s3
+yarn add strapi-provider-upload-aws-s3
 ```
+
+:::
+
+::: tab npm
+
+```
+npm install strapi-provider-upload-aws-s3 --save
+```
+
+:::
+
+::::
 
 To enable the provider, create or edit the file at `./config/plugins.js`
 
@@ -324,7 +334,7 @@ module.exports = ({ env }) => ({
         Bucket: 'my-bucket',
       },
     },
-  }
+  },
 });
 ```
 
@@ -336,7 +346,7 @@ When configuring your upload provider you might want to change the configuration
 
 You can set a specific configuration in the `./config/env/{env}/plugins.js` configuration file and it will be used to overwrite the one in the default configuration.
 
-## Create providers
+## Create a providers
 
 You can create a Node.js module to implement a custom provider. Read the official documentation [here](https://docs.npmjs.com/creating-node-js-modules).
 
