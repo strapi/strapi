@@ -33,55 +33,85 @@ const data = [
     role: 12,
     subject: 'application::category.category',
   },
+  {
+    action: 'plugins::upload.assets.update',
+    conditions: ['admin::is-creator'],
+    fields: null,
+    subject: null,
+  },
+  {
+    action: 'plugins::upload.assets.create',
+    conditions: [],
+    fields: null,
+    subject: null,
+  },
 ];
 
 describe('ADMIN | utils | formatPermissionsFromApi', () => {
   it('should format api permissions data', () => {
     const formattedPermissions = formatPermissionsFromApi(data);
     const expected = {
-      'plugins::users-permissions.user': {
-        contentTypeActions: {
-          'plugins::content-manager.explorer.create': true,
-          'plugins::content-manager.explorer.update': true,
+      contentTypesPermissions: {
+        'plugins::users-permissions.user': {
+          conditions: [],
+          contentTypeActions: {
+            'plugins::content-manager.explorer.create': true,
+            'plugins::content-manager.explorer.update': true,
+          },
+          attributes: {
+            email: {
+              actions: [
+                'plugins::content-manager.explorer.create',
+                'plugins::content-manager.explorer.update',
+              ],
+            },
+            firstname: {
+              actions: [
+                'plugins::content-manager.explorer.create',
+                'plugins::content-manager.explorer.update',
+              ],
+            },
+            lastname: {
+              actions: [
+                'plugins::content-manager.explorer.create',
+                'plugins::content-manager.explorer.update',
+              ],
+            },
+            roles: {
+              actions: ['plugins::content-manager.explorer.create'],
+            },
+          },
         },
-        attributes: {
-          email: {
-            actions: [
-              'plugins::content-manager.explorer.create',
-              'plugins::content-manager.explorer.update',
-            ],
+        'application::category.category': {
+          conditions: [],
+          contentTypeActions: {
+            'plugins::content-manager.explorer.read': true,
+            'plugins::content-manager.explorer.delete': true,
           },
-          firstname: {
-            actions: [
-              'plugins::content-manager.explorer.create',
-              'plugins::content-manager.explorer.update',
-            ],
-          },
-          lastname: {
-            actions: [
-              'plugins::content-manager.explorer.create',
-              'plugins::content-manager.explorer.update',
-            ],
-          },
-          roles: {
-            actions: ['plugins::content-manager.explorer.create'],
+          attributes: {
+            name: {
+              actions: ['plugins::content-manager.explorer.read'],
+            },
+            addresses: {
+              actions: ['plugins::content-manager.explorer.read'],
+            },
           },
         },
       },
-      'application::category.category': {
-        contentTypeActions: {
-          'plugins::content-manager.explorer.read': true,
-          'plugins::content-manager.explorer.delete': true,
+      pluginsAndSettingsPermissions: [
+        {
+          action: 'plugins::upload.assets.update',
+          conditions: ['admin::is-creator'],
+          fields: null,
+          subject: null,
         },
-        attributes: {
-          name: {
-            actions: ['plugins::content-manager.explorer.read'],
-          },
-          addresses: {
-            actions: ['plugins::content-manager.explorer.read'],
-          },
+        {
+          action: 'plugins::upload.assets.create',
+          conditions: [],
+          fields: null,
+          subject: null,
         },
-      },
+      ],
     };
 
     expect(formattedPermissions).toEqual(expected);

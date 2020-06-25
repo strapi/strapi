@@ -34,7 +34,7 @@ const AttributeRowWrapper = styled(Flex)`
 `;
 
 const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursiveLevel }) => {
-  const { components, onCollapse, permissions, collapsePath } = usePermissionsContext();
+  const { components, onCollapse, contentTypesPermissions, collapsePath } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const contentTypeUid = collapsePath[0];
   const isActive = collapsePath[recursiveLevel + 2] === attribute.attributeName;
@@ -46,7 +46,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   );
 
   const attributeActions = get(
-    permissions,
+    contentTypesPermissions,
     [contentTypeUid, 'attributes', attributePermissionName, 'actions'],
     []
   );
@@ -54,24 +54,24 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   const getRecursiveAttributes = useCallback(() => {
     const component = components.find(component => component.uid === attribute.component);
 
-    return [
-      ...getAttributesByModel(component, components, attributePermissionName),
-      { ...attribute, attributeName: attributePermissionName },
-    ];
-  }, [attribute, attributePermissionName, components]);
+    return isCollapsable
+      ? getAttributesByModel(component, components, attributePermissionName)
+      : [attribute];
+  }, [components, isCollapsable, attributePermissionName, attribute]);
 
-  const getRecursiveAttributesPermissions = action => {
-    const number = getNumberOfRecursivePermissionsByAction(
-      contentTypeUid,
-      action,
-      isCollapsable
-        ? attributePermissionName
-        : attributePermissionName.substr(0, attributePermissionName.lastIndexOf('.')),
-      permissions
-    );
+  const getRecursiveAttributesPermissions = useCallback(
+    action => {
+      const number = getNumberOfRecursivePermissionsByAction(
+        contentTypeUid,
+        action,
+        isCollapsable ? `${attributePermissionName}.` : attributePermissionName,
+        contentTypesPermissions
+      );
 
-    return number;
-  };
+      return number;
+    },
+    [attributePermissionName, contentTypeUid, isCollapsable, contentTypesPermissions]
+  );
 
   const checkPermission = useCallback(
     action => {
@@ -82,7 +82,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, attribute]
+    [contentTypesPermissions, attribute]
   );
 
   const attributesToDisplay = useMemo(() => {

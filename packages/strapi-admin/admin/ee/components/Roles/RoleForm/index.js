@@ -2,9 +2,9 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import SizedInput from '../../../src/components/SizedInput';
-import { ButtonWithNumber } from '../../../src/components/Roles';
-import FormCard from '../../../src/components/FormBloc';
+import SizedInput from '../../../../src/components/SizedInput';
+import { ButtonWithNumber } from '../../../../src/components/Roles';
+import FormCard from '../../../../src/components/FormBloc';
 
 const RoleForm = ({ values, errors, onChange, onBlur, isLoading }) => {
   const { formatMessage } = useIntl();

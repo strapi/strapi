@@ -1,46 +1,52 @@
 import getExistingActions from './getExistingActions';
 
 const formatPermissionsToApi = permissions => {
-  const existingActions = getExistingActions(permissions);
+  const existingActions = getExistingActions(permissions.contentTypesPermissions);
 
-  return Object.entries(permissions).reduce((acc, current) => {
-    const formatPermission = permission =>
-      existingActions.reduce((actionAcc, currentAction) => {
-        if (permission[1].contentTypeActions && permission[1].contentTypeActions[currentAction]) {
-          const hasAction =
-            Object.values(permission[1].attributes).findIndex(
-              item => item.actions && item.actions.includes(currentAction)
-            ) !== -1;
-          const hasContentTypeAction =
-            permission[1].contentTypeActions && permission[1].contentTypeActions[currentAction];
-          const fields = Object.entries(permission[1].attributes)
-            .map(item => {
-              if (item[1].actions && item[1].actions.includes(currentAction)) {
-                return item[0];
-              }
+  const formattedPermissions = Object.entries(permissions.contentTypesPermissions).reduce(
+    (acc, current) => {
+      const formatPermission = permission =>
+        existingActions.reduce((actionAcc, currentAction) => {
+          const { contentTypeActions, attributes, conditions } = permission[1];
 
-              return null;
-            })
-            .filter(item => item && item !== 'contentTypeActions');
+          if (contentTypeActions && contentTypeActions[currentAction]) {
+            const hasAction =
+              Object.values(attributes).findIndex(
+                item => item.actions && item.actions.includes(currentAction)
+              ) !== -1;
+            const hasContentTypeAction = contentTypeActions && contentTypeActions[currentAction];
+            const fields = Object.entries(permission[1].attributes)
+              .map(item => {
+                if (item[1].actions && item[1].actions.includes(currentAction)) {
+                  return item[0];
+                }
 
-          if (hasAction || hasContentTypeAction) {
-            return [
-              ...actionAcc,
-              {
-                action: currentAction,
-                subject: permission[0],
-                fields,
-                conditions: [],
-              },
-            ];
+                return null;
+              })
+              .filter(item => item && item !== 'contentTypeActions');
+
+            if (hasAction || hasContentTypeAction) {
+              return [
+                ...actionAcc,
+                {
+                  action: currentAction,
+                  subject: permission[0],
+                  fields,
+                  conditions,
+                },
+              ];
+            }
           }
-        }
 
-        return actionAcc;
-      }, []);
+          return actionAcc;
+        }, []);
 
-    return [...acc, ...formatPermission(current)];
-  }, []);
+      return [...acc, ...formatPermission(current)];
+    },
+    []
+  );
+
+  return [...formattedPermissions, ...(permissions.pluginsAndSettingsPermissions || [])];
 };
 
 export default formatPermissionsToApi;

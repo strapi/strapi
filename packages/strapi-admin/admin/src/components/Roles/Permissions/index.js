@@ -20,7 +20,10 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
 
   useImperativeHandle(ref, () => ({
     getPermissions: () => {
-      return state.permissions;
+      return {
+        contentTypesPermissions: state.contentTypesPermissions,
+        pluginsAndSettingsPermissions: state.pluginsAndSettingsPermissions,
+      };
     },
   }));
 

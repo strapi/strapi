@@ -1,4 +1,5 @@
-import { get } from 'lodash';
+import { get, pick } from 'lodash';
+import { contentManagerPermissionPrefix } from '../components/Roles/Permissions/utils/permissonsConstantsActions';
 
 const formatPermissionsFromApi = data => {
   const getFieldsPermissions = (permissionsAcc, permission) => {
@@ -17,19 +18,38 @@ const formatPermissionsFromApi = data => {
   };
 
   const formattedPermissions = data.reduce((acc, current) => {
+    if (current.action.startsWith(contentManagerPermissionPrefix)) {
+      const subjectAcc = get(acc, ['contentTypesPermissions', current.subject], {});
+
+      return {
+        ...acc,
+        contentTypesPermissions: {
+          ...acc.contentTypesPermissions,
+          [current.subject]: {
+            ...subjectAcc,
+            attributes: {
+              ...subjectAcc.attributes,
+              ...getFieldsPermissions(acc.contentTypesPermissions, current),
+            },
+            contentTypeActions: {
+              ...subjectAcc.contentTypeActions,
+              [current.action]: true,
+            },
+            conditions: current.conditions,
+          },
+        },
+      };
+    }
+
     return {
       ...acc,
-      [current.subject]: {
-        ...acc[current.subject],
-        attributes: {
-          ...get(acc, [current.subject, 'attributes'], {}),
-          ...getFieldsPermissions(acc, current),
-        },
-        contentTypeActions: {
-          ...get(acc, [current.subject, 'contentTypeActions'], {}),
-          [current.action]: true,
-        },
-      },
+      // As we do not need any manupulation for others permissions, we just add them in the
+      // pluginsAndSettingsPermissions section.
+      // This can be changed in the futur so we don't need to create a complexe data structure for those permissions
+      pluginsAndSettingsPermissions: [
+        ...(acc.pluginsAndSettingsPermissions || []),
+        pick(current, ['fields', 'conditions', 'subject', 'action']),
+      ],
     };
   }, {});
 

@@ -21,28 +21,32 @@ import ContentTypesAttributes from '../../../../../../src/components/Roles/Permi
 import PermissionWrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
 import CollapseLabel from '../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
 
-const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) => {
+const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   const {
     collapsePath,
     onCollapse,
-    permissions,
+    contentTypesPermissions,
     components,
     onContentTypeActionSelect,
     onAttributesSelect,
     onAllContentTypeActions,
+    isSuperAdmin,
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
 
   const contentTypeActions = useMemo(() => {
-    return Object.values(get(permissions, [contentType.uid, 'contentTypeActions'], {})).filter(
-      action => !!action
-    );
-  }, [contentType, permissions]);
+    return Object.values(
+      get(contentTypesPermissions, [contentType.uid, 'contentTypeActions'], {})
+    ).filter(action => !!action);
+  }, [contentType, contentTypesPermissions]);
 
   // Number of all actions in the current content type.
   const allCurrentActionsSize = useMemo(() => {
-    return getAllAttributesActionsSize(contentType.uid, permissions) + contentTypeActions.length;
-  }, [contentType, contentTypeActions, permissions]);
+    return (
+      getAllAttributesActionsSize(contentType.uid, contentTypesPermissions) +
+      contentTypeActions.length
+    );
+  }, [contentType, contentTypeActions, contentTypesPermissions]);
 
   // Attributes to display : Liste of attributes of in the content type without timestamps and id
   // Used to display the first level of attributes.
@@ -56,34 +60,34 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
     return getAttributesByModel(contentType, components);
   }, [contentType, components]);
 
-  const allActionsSize =
-    attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length +
-    contentTypesPermissionsLayout.length;
+  const allActionsSize = useMemo(() => {
+    return attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length + permissionsLayout.length;
+  }, [attributes, permissionsLayout]);
 
   const hasContentTypeAction = useCallback(
-    action => get(permissions, [contentType.uid, 'contentTypeActions', action], false),
-    [permissions, contentType]
+    action => get(contentTypesPermissions, [contentType.uid, 'contentTypeActions', action], false),
+    [contentTypesPermissions, contentType]
   );
 
   const hasAllAttributeByAction = useCallback(
     action =>
-      getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) > 0 &&
-      getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) ===
+      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) > 0 &&
+      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) ===
         attributes.length,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, contentType, attributes]
+    [contentTypesPermissions, contentType, attributes]
   );
 
   // Check if an attribute have the passed action
   // Used to set the someChecked props of an action checkbox
   const hasSomeAttributeByAction = useCallback(
     action =>
-      getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) > 0 &&
-      getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action) <
+      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) > 0 &&
+      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) <
         attributes.length &&
       hasContentTypeAction(action),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, contentType, attributes]
+    [contentTypesPermissions, contentType, attributes]
   );
 
   const handleToggleAttributes = () => {
@@ -120,13 +124,14 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
 
   return (
     <>
-      <StyledRow isActive={isActive} isGrey={index % 2 === 0}>
+      <StyledRow disabled={isSuperAdmin} isActive={isActive} isGrey={index % 2 === 0}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <PermissionName>
+          <PermissionName disabled={isSuperAdmin}>
             <Checkbox
               onChange={handleAllContentTypeActions}
               name={contentType.name}
+              disabled={isSuperAdmin}
               someChecked={
                 contentTypeActions.length > 0 &&
                 allCurrentActionsSize > 0 &&
@@ -153,11 +158,12 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
               <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
             </CollapseLabel>
           </PermissionName>
-          <PermissionWrapper>
-            {contentTypesPermissionsLayout.map(permissionLayout =>
+          <PermissionWrapper disabled={isSuperAdmin}>
+            {permissionsLayout.map(permissionLayout =>
               !isAttributeAction(permissionLayout.action) ? (
                 <PermissionCheckbox
                   key={permissionLayout.action}
+                  disabled={isSuperAdmin}
                   value={hasContentTypeAction(permissionLayout.action)}
                   hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
@@ -166,6 +172,7 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
               ) : (
                 <PermissionCheckbox
                   key={permissionLayout.action}
+                  disabled={isSuperAdmin}
                   value={hasContentTypeAction(permissionLayout.action)}
                   someChecked={hasSomeAttributeByAction(permissionLayout.action)}
                   hasConditions={false}
@@ -187,7 +194,7 @@ const ContentTypeRow = ({ index, contentType, contentTypesPermissionsLayout }) =
 ContentTypeRow.propTypes = {
   contentType: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  contentTypesPermissionsLayout: PropTypes.array.isRequired,
+  permissionsLayout: PropTypes.array.isRequired,
 };
 
 export default ContentTypeRow;

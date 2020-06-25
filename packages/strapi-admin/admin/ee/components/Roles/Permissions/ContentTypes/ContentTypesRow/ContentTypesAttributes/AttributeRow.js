@@ -27,23 +27,28 @@ const AttributeRow = ({ attribute, contentType }) => {
     onCollapse,
     collapsePath,
     components,
-    permissions,
+    contentTypesPermissions,
     onAttributePermissionSelect,
     onAllContentTypeActions,
     onAllAttributeActionsSelect,
     onAttributesSelect,
+    isSuperAdmin,
   } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const isActive = collapsePath[1] === attribute.attributeName;
   const attributeActions = get(
-    permissions,
+    contentTypesPermissions,
     [contentType.uid, 'attributes', attribute.attributeName, 'actions'],
     []
   );
 
   const recursivePermissions = useMemo(() => {
-    return getRecursivePermissions(contentType.uid, attribute.attributeName, permissions);
-  }, [contentType, permissions, attribute]);
+    return getRecursivePermissions(
+      contentType.uid,
+      attribute.attributeName,
+      contentTypesPermissions
+    );
+  }, [contentType, contentTypesPermissions, attribute]);
 
   const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
@@ -56,7 +61,7 @@ const AttributeRow = ({ attribute, contentType }) => {
       recursivePermissions === ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [permissions]);
+  }, [contentTypesPermissions]);
 
   const hasSomeActions = useMemo(() => {
     return (
@@ -64,7 +69,7 @@ const AttributeRow = ({ attribute, contentType }) => {
       recursivePermissions < ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [permissions]);
+  }, [contentTypesPermissions]);
 
   const handleCheckAllAction = () => {
     if (isCollapsable) {
@@ -91,19 +96,25 @@ const AttributeRow = ({ attribute, contentType }) => {
       return getNumberOfRecursivePermissionsByAction(
         contentType.uid,
         action,
-        attribute.attributeName,
-        permissions
+        isCollapsable
+          ? `${attribute.attributeName}.`
+          : attribute.attributeName.substr(0, attribute.attributeName.lastIndexOf('.')),
+        contentTypesPermissions
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [attribute, permissions]
+    [attribute, contentTypesPermissions]
   );
 
   const getContentTypePermissions = useCallback(
     action => {
-      return getAttributePermissionsSizeByContentTypeAction(permissions, contentType.uid, action);
+      return getAttributePermissionsSizeByContentTypeAction(
+        contentTypesPermissions,
+        contentType.uid,
+        action
+      );
     },
-    [contentType, permissions]
+    [contentType, contentTypesPermissions]
   );
 
   const checkPermission = useCallback(
@@ -111,7 +122,7 @@ const AttributeRow = ({ attribute, contentType }) => {
       return attributeActions.findIndex(permAction => permAction === action) !== -1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, attribute, contentType]
+    [contentTypesPermissions, attribute, contentType]
   );
 
   const handleCheck = useCallback(
@@ -139,7 +150,7 @@ const AttributeRow = ({ attribute, contentType }) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [attribute, collapsePath, contentType, isCollapsable, permissions]
+    [attribute, collapsePath, contentType, isCollapsable, contentTypesPermissions]
   );
 
   const handleToggleAttributes = () => {
@@ -169,17 +180,15 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   return (
     <>
-      <AttributeRowWrapper
-        isRequired={attribute.required && !isCollapsable}
-        isActive={isActive}
-        isCollapsable={isCollapsable}
-        alignItems="center"
-      >
+      <AttributeRowWrapper isActive={isActive} isCollapsable={isCollapsable} alignItems="center">
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <PermissionName width="15rem">
+          <PermissionName
+            disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
+            width="15rem"
+          >
             <Checkbox
-              disabled={attribute.required && !isCollapsable}
+              disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
               name={attribute.attributeName}
               value={hasAllActions}
               someChecked={hasSomeActions}
@@ -205,11 +214,11 @@ const AttributeRow = ({ attribute, contentType }) => {
               <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
             </CollapseLabel>
           </PermissionName>
-          <PermissionWrapper>
+          <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={action}
-                disabled={attribute.required && !isCollapsable}
+                disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
                 value={
                   allRecursiveChecked(`${contentManagerPermissionPrefix}.${action}`) ||
                   checkPermission(`${contentManagerPermissionPrefix}.${action}`)

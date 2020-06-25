@@ -29,6 +29,18 @@ describe('ADMIN | utils | formatPermissionsToApi', () => {
         fields: [],
         subject: 'application::category.category',
       },
+      {
+        action: 'plugins::upload.assets.update',
+        conditions: ['admin::is-creator'],
+        fields: null,
+        subject: null,
+      },
+      {
+        action: 'plugins::upload.assets.create',
+        conditions: [],
+        fields: null,
+        subject: null,
+      },
     ];
 
     expect(formattedPermissions).toEqual(expected);

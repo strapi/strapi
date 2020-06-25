@@ -37,10 +37,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   const {
     components,
     onCollapse,
-    permissions,
+    contentTypesPermissions,
     collapsePath,
     onAttributePermissionSelect,
     onAttributesSelect,
+    isSuperAdmin,
   } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const contentTypeUid = collapsePath[0];
@@ -52,40 +53,46 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     [attribute]
   );
 
-  const attributeActions = get(
-    permissions,
-    [contentTypeUid, 'attributes', attributePermissionName, 'actions'],
-    []
-  );
+  const attributeActions = useMemo(() => {
+    return get(
+      contentTypesPermissions,
+      [contentTypeUid, 'attributes', attributePermissionName, 'actions'],
+      []
+    );
+  }, [attributePermissionName, contentTypeUid, contentTypesPermissions]);
 
   const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
 
-    return [
-      ...getAttributesByModel(component, components, attributePermissionName),
-      { ...attribute, attributeName: attributePermissionName },
-    ];
-  }, [attribute, attributePermissionName, components]);
+    return isCollapsable
+      ? getAttributesByModel(component, components, attributePermissionName)
+      : [attribute];
+  }, [components, attribute, attributePermissionName, isCollapsable]);
 
   const getContentTypePermissions = useCallback(
     action => {
-      return getAttributePermissionsSizeByContentTypeAction(permissions, contentTypeUid, action);
+      return getAttributePermissionsSizeByContentTypeAction(
+        contentTypesPermissions,
+        contentTypeUid,
+        action
+      );
     },
-    [contentTypeUid, permissions]
+    [contentTypeUid, contentTypesPermissions]
   );
 
-  const getRecursiveAttributesPermissions = action => {
-    const number = getNumberOfRecursivePermissionsByAction(
-      contentTypeUid,
-      action,
-      isCollapsable
-        ? attributePermissionName
-        : attributePermissionName.substr(0, attributePermissionName.lastIndexOf('.')),
-      permissions
-    );
+  const getRecursiveAttributesPermissions = useCallback(
+    action => {
+      const number = getNumberOfRecursivePermissionsByAction(
+        contentTypeUid,
+        action,
+        isCollapsable ? `${attributePermissionName}.` : attributePermissionName,
+        contentTypesPermissions
+      );
 
-    return number;
-  };
+      return number;
+    },
+    [attributePermissionName, contentTypeUid, isCollapsable, contentTypesPermissions]
+  );
 
   const handleCheck = useCallback(
     action => {
@@ -116,7 +123,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [attribute, permissions]
+    [attribute, contentTypesPermissions]
   );
 
   const checkPermission = useCallback(
@@ -128,7 +135,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissions, attribute]
+    [contentTypesPermissions, attribute]
   );
 
   const attributesToDisplay = useMemo(() => {
@@ -154,6 +161,10 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return isCollapsable && recursivePermissions === recursiveAttributes.length;
+  };
+
+  const isChecked = action => {
+    return allRecursiveChecked(action) || checkPermission(action);
   };
 
   return (
@@ -187,14 +198,14 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
               <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
             </CollapseLabel>
           </RowStyle>
-          <PermissionWrapper>
+          <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
-                disabled={attribute.required && !isCollapsable}
+                disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
                 key={`${attribute.attributeName}-${action}`}
                 onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
-                value={allRecursiveChecked(action) || checkPermission(action)}
+                value={isChecked(`${contentManagerPermissionPrefix}.${action}`)}
                 name={`${attribute.attributeName}-${action}`}
               />
             ))}

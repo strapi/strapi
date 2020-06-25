@@ -5,7 +5,7 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | getContentTypesActionsSize', () =
   it('should return the number of content type actions', () => {
     const actual = getContentTypesActionsSize(
       contentTypes,
-      permissions,
+      permissions.contentTypesPermissions,
       'plugins::content-manager.explorer.delete'
     );
 
