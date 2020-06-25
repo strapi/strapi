@@ -1,9 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
+import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { Prompt, useParams } from 'react-router-dom';
-import { LoadingIndicatorPage, request, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  LoadingIndicatorPage,
+  request,
+  useGlobalContext,
+  findMatchingPermissions,
+  useUser,
+} from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
+import { generatePermissionsObject } from '../../utils';
 import pluginId from '../../pluginId';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -41,6 +48,49 @@ const EditViewDataManagerProvider = ({
   const abortController = new AbortController();
   const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
+  const userPermissions = useUser();
+  const generatedPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
+  console.log({ generatedPermissions });
+  const permissionsToApply = useMemo(() => {
+    const fieldsToPick = isCreatingEntry ? ['create'] : ['read', 'update'];
+
+    return pick(generatedPermissions, fieldsToPick);
+  }, [isCreatingEntry, generatedPermissions]);
+
+  console.log({ permissionsToApply });
+
+  const createMatchingPermissions = useMemo(
+    () =>
+      findMatchingPermissions(userPermissions, [
+        {
+          action: 'plugins::content-manager.explorer.create',
+          subject: slug,
+        },
+      ]),
+    [userPermissions, slug]
+  );
+  // TODO
+  // const updateMatchingPermissions = useMemo(
+  //   () =>
+  //     findMatchingPermissions(userPermissions, [
+  //       {
+  //         action: 'plugins::content-manager.explorer.update',
+  //         subject: slug,
+  //       },
+  //     ]),
+  //   [slug, userPermissions]
+  // );
+  // const readMatchingPermissions = useMemo(
+  //   () =>
+  //     findMatchingPermissions(userPermissions, [
+  //       {
+  //         action: 'plugins::content-manager.explorer.read',
+  //         subject: slug,
+  //       },
+  //     ]),
+  //   [slug, userPermissions]
+  // );
+  console.log({ createMatchingPermissions });
 
   useEffect(() => {
     if (!isLoading) {
