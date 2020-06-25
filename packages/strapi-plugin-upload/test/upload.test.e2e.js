@@ -71,8 +71,8 @@ describe('Upload plugin end to end tests', () => {
       expect(res.body[0]).toEqual(
         expect.objectContaining({
           id: expect.anything(),
-          name: 'rec',
-          ext: '.jpeg',
+          name: 'rec.jpg',
+          ext: '.jpg',
           mime: 'image/jpeg',
           hash: expect.any(String),
           size: expect.any(Number),
@@ -105,7 +105,7 @@ describe('Upload plugin end to end tests', () => {
       expect(res.body[0]).toEqual(
         expect.objectContaining({
           id: expect.anything(),
-          name: 'thumbnail_target',
+          name: 'thumbnail_target.png',
           ext: '.png',
           mime: 'image/png',
           hash: expect.any(String),
@@ -116,6 +116,7 @@ describe('Upload plugin end to end tests', () => {
           provider: 'local',
           formats: {
             thumbnail: {
+              name: 'thumbnail_thumbnail_target.png',
               hash: expect.any(String),
               ext: '.png',
               mime: 'image/png',

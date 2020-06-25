@@ -12,7 +12,6 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
 const { nameToSlug } = require('strapi-utils');
-const mime = require('mime-types');
 
 const { bytesToKbytes } = require('../utils/file');
 
@@ -43,16 +42,16 @@ const combineFilters = params => {
 
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const ext = '.' + mime.extension(type) || path.extname(filename);
-    const baseName = path.basename(filename, path.extname(filename));
+    const ext = path.extname(filename);
+    const basename = path.basename(fileInfo.name || filename, ext);
 
-    const usedName = fileInfo.name || baseName;
+    const usedName = fileInfo.name || filename;
 
     const entity = {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
-      hash: generateFileName(usedName),
+      hash: generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),
