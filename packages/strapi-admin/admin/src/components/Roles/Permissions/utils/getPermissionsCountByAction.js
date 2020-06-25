@@ -1,9 +1,9 @@
 import { get } from 'lodash';
 
-const getPermissionsCountByAction = (contentTypes, permissions, action) => {
+const getPermissionsCountByAction = (contentTypes, contentTypesPermissions, action) => {
   const count = contentTypes.reduce((contentTypeAcc, currentContentType) => {
     const attributeCount = Object.values(
-      get(permissions, [currentContentType.uid, 'attributes'], [])
+      get(contentTypesPermissions, [currentContentType.uid, 'attributes'], [])
     ).reduce((attributeAcc, currentAttribute) => {
       return (
         attributeAcc +

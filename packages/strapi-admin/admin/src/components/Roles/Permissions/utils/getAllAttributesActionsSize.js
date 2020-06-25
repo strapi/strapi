@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 
-const getAllAttributesActionsSize = (contentTypeUid, permissions) => {
-  return Object.entries(get(permissions, [contentTypeUid, 'attributes'], {})).reduce(
+const getAllAttributesActionsSize = (contentTypeUid, contentTypesPermissions) => {
+  return Object.entries(get(contentTypesPermissions, [contentTypeUid, 'attributes'], {})).reduce(
     (acc, current) => {
       return acc + get(current[1], ['actions'], []).length;
     },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import NameInput from 'ee_else_ce/components/Roles/NameInput';
+import NameInput from 'ee_else_ce/components/Roles/RoleForm/NameInput';
 
 import FormCard from '../../FormBloc';
 import SizedInput from '../../SizedInput';

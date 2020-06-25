@@ -4,7 +4,7 @@ import getAttributePermissionsSizeByContentTypeAction from '../getAttributePermi
 describe('ADMIN | COMPONENTS | ROLE | UTILS | getAttributePermissionsSizeByContentTypeAction', () => {
   it('should return the number of permissions of a content type by action', () => {
     const actual = getAttributePermissionsSizeByContentTypeAction(
-      permissions,
+      permissions.contentTypesPermissions,
       contentTypes[0].uid,
       'plugins::content-manager.explorer.read'
     );

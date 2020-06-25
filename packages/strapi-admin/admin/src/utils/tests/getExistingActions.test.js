@@ -3,7 +3,7 @@ import data from './data';
 
 describe('ADMIN | utils | getExistingActions', () => {
   it('should return the existing actions', () => {
-    const existingActions = getExistingActions(data);
+    const existingActions = getExistingActions(data.contentTypesPermissions);
 
     expect(existingActions).toEqual([
       'plugins::content-manager.explorer.create',

@@ -22,15 +22,6 @@ const AttributeRowWrapper = styled(Flex)`
   ${Chevron} {
     width: 13px;
   }
-  ${({ isRequired, theme }) =>
-    isRequired &&
-    `
-      input[type='checkbox'] {
-        &:after {
-          color: ${theme.main.colors.grey};
-        }
-      }
-  `}
   ${({ isCollapsable, theme }) =>
     isCollapsable &&
     `

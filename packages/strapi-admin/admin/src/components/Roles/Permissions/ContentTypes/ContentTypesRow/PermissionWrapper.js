@@ -3,12 +3,11 @@ import { Flex } from '@buffetjs/core';
 
 const PermissionWrapper = styled(Flex)`
   flex: 1;
-  ${({ isDisabled, theme }) =>
-  isDisabled &&
+  ${({ disabled, theme }) =>
     `
       input[type='checkbox'] {
         &:after {
-          color: ${theme.main.colors.grey};
+          color: ${disabled ? theme.main.colors.grey : theme.main.colors.mediumBlue};
         }
         cursor: pointer;
       }

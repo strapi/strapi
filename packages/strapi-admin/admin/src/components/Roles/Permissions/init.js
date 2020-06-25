@@ -1,8 +1,9 @@
-const init = (state, permissionsLayout, permissions) => {
+const init = (state, permissionsLayout, permissions, role) => {
   return {
     ...state,
+    ...permissions,
     permissionsLayout,
-    permissions,
+    isSuperAdmin: role && role.code === 'strapi-super-admin',
   };
 };
 

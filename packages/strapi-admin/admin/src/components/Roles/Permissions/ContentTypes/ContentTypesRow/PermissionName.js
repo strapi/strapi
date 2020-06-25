@@ -5,6 +5,14 @@ const PermissionName = styled.div`
   display: flex;
   align-items: center;
   width: ${({ width }) => width};
+  ${({ disabled, theme }) =>
+    `
+    input[type='checkbox'] {
+        &:after {
+          color: ${!disabled ? theme.main.colors.mediumBlue : theme.main.colors.grey};
+        }
+      }
+    `}
 `;
 
 PermissionName.defaultProps = {

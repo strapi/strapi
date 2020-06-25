@@ -70,7 +70,9 @@ const EditPage = () => {
       if (!isEmpty(permissionsToSend)) {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
-          body: { permissions: formatPermissionsToApi(permissionsToSend) },
+          body: {
+            permissions: formatPermissionsToApi(permissionsToSend),
+          },
         });
       }
 

@@ -1,8 +1,12 @@
 import { get } from 'lodash';
 
-const getAttributePermissionsSizeByContentTypeAction = (permissions, subject, action) => {
+const getAttributePermissionsSizeByContentTypeAction = (
+  contentTypesPermissions,
+  subject,
+  action
+) => {
   const permissionsOccurencesByAction = Object.values(
-    get(permissions, [subject, 'attributes'], {})
+    get(contentTypesPermissions, [subject, 'attributes'], {})
   ).filter(attribute => {
     return get(attribute, 'actions', []).findIndex(permAction => permAction === action) !== -1;
   });

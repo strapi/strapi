@@ -31,7 +31,7 @@ const ContentTypesPermissions = ({ contentTypes, allContentTypesAttributes }) =>
         {contentTypes &&
           contentTypes.map((contentType, index) => (
             <ContentTypeRow
-              contentTypesPermissionsLayout={permissionsLayout.sections.contentTypes}
+              permissionsLayout={permissionsLayout.sections.contentTypes}
               key={contentType.uid}
               index={index}
               contentType={contentType}

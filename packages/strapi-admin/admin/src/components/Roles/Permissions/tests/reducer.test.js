@@ -109,11 +109,11 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {},
+        contentTypesPermissions: {},
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {},
             attributes: {
@@ -156,7 +156,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             attributes: {
               'address.city': {
@@ -184,7 +184,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {},
             attributes: {
@@ -230,7 +230,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             attributes: {
               'address.city': {
@@ -258,7 +258,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               create: true,
@@ -307,7 +307,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               create: true,
@@ -339,7 +339,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               create: false,
@@ -372,6 +372,167 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
+
+    it('should set all the static actions to all attributes', () => {
+      const action = {
+        type: 'SET_ATTRIBUTES_PERMISSIONS',
+        attributes: [
+          { attributeName: 'address.city', contentTypeUid: 'place' },
+          { attributeName: 'address.street', contentTypeUid: 'place' },
+          { attributeName: 'picture', contentTypeUid: 'place' },
+          { attributeName: 'number', contentTypeUid: 'like' },
+        ],
+        shouldEnable: true,
+        hasContentTypeAction: false,
+      };
+      const initialState = {
+        collapsePath: [],
+        contentTypesPermissions: {
+          place: {
+            contentTypeActions: {
+              create: true,
+            },
+            attributes: {
+              'address.city': {
+                actions: ['read'],
+              },
+              'address.street': {
+                actions: ['read'],
+              },
+              picture: {
+                actions: [],
+              },
+            },
+          },
+          like: {
+            contentTypeActions: {
+              delete: true,
+              create: true,
+            },
+            attributes: {
+              number: {
+                actions: ['create'],
+              },
+            },
+          },
+        },
+      };
+      const expected = {
+        collapsePath: [],
+        contentTypesPermissions: {
+          place: {
+            contentTypeActions: {
+              create: true,
+            },
+            attributes: {
+              'address.city': {
+                actions: staticAttributeActions,
+              },
+              'address.street': {
+                actions: staticAttributeActions,
+              },
+              picture: {
+                actions: staticAttributeActions,
+              },
+            },
+          },
+          like: {
+            contentTypeActions: {
+              delete: true,
+              create: true,
+            },
+            attributes: {
+              number: {
+                actions: staticAttributeActions,
+              },
+            },
+          },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should unset attributes and content type actions correctly', () => {
+      const action = {
+        type: 'SET_ATTRIBUTES_PERMISSIONS',
+        attributes: [
+          { attributeName: 'address.city', contentTypeUid: 'place' },
+          { attributeName: 'address.street', contentTypeUid: 'place', required: true },
+          { attributeName: 'picture', contentTypeUid: 'place' },
+          { attributeName: 'number', contentTypeUid: 'like', required: true },
+        ],
+        action: 'create',
+        shouldEnable: false,
+        hasContentTypeAction: true,
+      };
+      const initialState = {
+        collapsePath: [],
+        contentTypesPermissions: {
+          place: {
+            contentTypeActions: {
+              create: true,
+            },
+            attributes: {
+              'address.city': {
+                actions: ['read'],
+              },
+              'address.street': {
+                actions: ['read', 'create'],
+              },
+              picture: {
+                actions: [],
+              },
+            },
+          },
+          like: {
+            contentTypeActions: {
+              delete: true,
+              create: true,
+            },
+            attributes: {
+              number: {
+                actions: ['create'],
+              },
+            },
+          },
+        },
+      };
+      const expected = {
+        collapsePath: [],
+        contentTypesPermissions: {
+          place: {
+            contentTypeActions: {
+              create: false,
+            },
+            attributes: {
+              'address.city': {
+                actions: ['read'],
+              },
+              'address.street': {
+                actions: ['read', 'create'],
+              },
+              picture: {
+                actions: [],
+              },
+            },
+          },
+          like: {
+            contentTypeActions: {
+              delete: true,
+              create: false,
+            },
+            attributes: {
+              number: {
+                actions: ['create'],
+              },
+            },
+          },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
   });
 
   describe('ALL_ATTRIBUTE_ACTIONS_SELECT', () => {
@@ -383,7 +544,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -400,7 +561,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -427,7 +588,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             attributes: {
               picture: {
@@ -439,7 +600,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -466,7 +627,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
@@ -488,7 +649,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -522,7 +683,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -546,7 +707,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
@@ -580,7 +741,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -596,7 +757,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -626,7 +787,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -641,7 +802,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -668,7 +829,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -696,7 +857,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -735,7 +896,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -764,7 +925,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -811,7 +972,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -826,7 +987,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -867,7 +1028,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -885,7 +1046,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -894,6 +1055,66 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             attributes: {
               city: {
                 actions: [],
+              },
+              postal_code: {
+                actions: ['create'],
+              },
+              picture: {
+                actions: ['read'],
+              },
+            },
+          },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should set attributes permission action and set the content type action', () => {
+      const action = {
+        type: 'ON_ATTRIBUTES_SELECT',
+        subject: 'place',
+        action: 'create',
+        attributes: [
+          { attributeName: 'address' },
+          { attributeName: 'city' },
+          { attributeName: 'postal_code' },
+        ],
+        shouldEnable: true,
+        hasContentTypeAction: true,
+      };
+      const initialState = {
+        collapsePath: [],
+        contentTypesPermissions: {
+          place: {
+            contentTypeActions: {
+              delete: true,
+            },
+            attributes: {
+              postal_code: {
+                actions: ['create'],
+              },
+              picture: {
+                actions: ['read'],
+              },
+            },
+          },
+        },
+      };
+      const expected = {
+        collapsePath: [],
+        contentTypesPermissions: {
+          place: {
+            contentTypeActions: {
+              delete: true,
+              create: true,
+            },
+            attributes: {
+              address: {
+                actions: ['create'],
+              },
+              city: {
+                actions: ['create'],
               },
               postal_code: {
                 actions: ['create'],
@@ -919,7 +1140,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             attributes: {
               postal_code: {
@@ -934,7 +1155,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -962,7 +1183,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const initialState = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: true,
@@ -980,7 +1201,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
       const expected = {
         collapsePath: [],
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               delete: false,
@@ -1019,7 +1240,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
 
       const initialState = {
-        permissions: {
+        contentTypesPermissions: {
           place: {
             attributes: {
               address: {
@@ -1046,7 +1267,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
 
       const expected = {
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -1107,7 +1328,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             ],
           },
         },
-        permissions: {
+        contentTypesPermissions: {
           place: {
             attributes: {
               address: {
@@ -1144,7 +1365,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             ],
           },
         },
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
@@ -1206,7 +1427,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             ],
           },
         },
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
@@ -1249,7 +1470,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             ],
           },
         },
-        permissions: {
+        contentTypesPermissions: {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': false,
@@ -1294,7 +1515,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         shouldEnable: true,
       };
       const initialState = {
-        permissions: {
+        contentTypesPermissions: {
           places: {
             attributes: {
               image: {
@@ -1318,7 +1539,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         },
       };
       const expected = {
-        permissions: {
+        contentTypesPermissions: {
           places: {
             attributes: {
               image: {
@@ -1360,7 +1581,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         shouldEnable: false,
       };
       const initialState = {
-        permissions: {
+        contentTypesPermissions: {
           places: {
             attributes: {
               image: {
@@ -1391,7 +1612,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         },
       };
       const expected = {
-        permissions: {
+        contentTypesPermissions: {
           places: {
             attributes: {
               image: {

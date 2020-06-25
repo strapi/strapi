@@ -3,10 +3,13 @@ import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 
-import { usePermissionsContext } from '../../../../../hooks';
-import PermissionCheckbox from '../PermissionCheckbox';
-import { getContentTypesActionsSize, isAttributeAction } from '../../utils';
-import Wrapper from './Wrapper';
+import { usePermissionsContext } from '../../../../../../src/hooks';
+import PermissionCheckbox from '../../../../../../src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
+import {
+  getContentTypesActionsSize,
+  isAttributeAction,
+} from '../../../../../../src/components/Roles/Permissions/utils';
+import Wrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/PermissionsHeader/Wrapper';
 
 const PermissionsHeader = ({ allAttributes, contentTypes }) => {
   const { formatMessage } = useIntl();
@@ -15,11 +18,12 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
     onGlobalPermissionsActionSelect,
     permissionsLayout,
     contentTypesPermissions,
+    isSuperAdmin,
   } = usePermissionsContext();
 
   const handleCheck = action => {
     // If the action is present in the actions of the attributes
-    // Then we set all the attributes permissions otherwise,
+    // Then we set all the attributes contentTypesPermissions otherwise,
     // we only set the global content type actions
     if (isAttributeAction(action)) {
       onSetAttributesPermissions({
@@ -51,17 +55,19 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
       countContentTypesActionPermissions(action) < contentTypes.length
     );
   };
+
   const hasAllActions = action => {
     return countContentTypesActionPermissions(action) === contentTypes.length;
   };
 
   return (
-    <Wrapper>
+    <Wrapper disabled={isSuperAdmin}>
       <Flex>
         {permissionsLayout.sections.contentTypes.map(permissionLayout => (
           <PermissionCheckbox
             key={permissionLayout.action}
             name={permissionLayout.action}
+            disabled={isSuperAdmin}
             value={hasAllActions(permissionLayout.action)}
             someChecked={hasSomeActions(permissionLayout.action)}
             message={formatMessage({
