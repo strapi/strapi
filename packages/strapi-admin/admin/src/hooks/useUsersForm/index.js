@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import { request } from 'strapi-helper-plugin';
-import { get, omit } from 'lodash';
+import { get, has, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
 import init from './init';
@@ -86,6 +86,13 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         strapi.notification.success('notification.success.saved');
       } catch (err) {
         const data = get(err, 'response.payload', { data: {} });
+
+        if (has(data, 'data') && typeof data.data === 'string') {
+          strapi.notification.error(data.data);
+        } else {
+          strapi.notification.error(data.message);
+        }
+
         const apiErrors = formatAPIErrors(data);
 
         dispatch({
