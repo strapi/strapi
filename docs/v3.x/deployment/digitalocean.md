@@ -3,7 +3,7 @@
 This is a step-by-step guide for deploying a Strapi project to [DigitalOcean](https://www.digitalocean.com/). Databases can be on a [DigitalOcean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md). And have read through the [configuration](../getting-started/deployment.md#configuration) section.
 
 ::: tip
-Strapi does have a [One-Click](../installation/digitalocean-one-click) deployment option for DigitalOcean
+Strapi does have a [One-Click](../installation/digitalocean-one-click.md) deployment option for DigitalOcean
 :::
 
 ### DigitalOcean Install Requirements
