@@ -62,6 +62,20 @@ const buildSearchOr = (model, query) => {
   return searchOr;
 };
 
+const BOOLEAN_OPERATORS = ['or'];
+
+const hasDeepFilters = (whereClauses = []) => {
+  return (
+    whereClauses.filter(({ field, operator, value }) => {
+      if (BOOLEAN_OPERATORS.includes(operator)) {
+        return value.filter(hasDeepFilters).length > 0;
+      }
+
+      return field.split('.').length > 1;
+    }).length > 0
+  );
+};
+
 /**
  * Build a mongo query
  * @param {Object} options - Query options
@@ -77,10 +91,9 @@ const buildQuery = ({
   populate = [],
   aggregate = false,
 } = {}) => {
-  const deepFilters = (filters.where || []).filter(({ field }) => field.split('.').length > 1);
   const search = buildSearchOr(model, searchParam);
 
-  if (deepFilters.length === 0 && aggregate === false) {
+  if (!hasDeepFilters(filters.where) && aggregate === false) {
     return buildSimpleQuery({ model, filters, search, populate });
   }
 
@@ -246,14 +259,24 @@ const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
     })
     .reduce((acc, paths) => acc.concat(paths), []);
 
-  const castedWherePaths = where
-    .map(({ field }) => findModelPath({ rootModel: model, path: field }))
-    .filter(path => !!path);
+  const castedWherePaths = recursiveCastedWherePaths(where, { model });
 
   return {
     populatePaths: pathsToTree(castedPopulatePaths),
     wherePaths: pathsToTree(castedWherePaths),
   };
+};
+
+const recursiveCastedWherePaths = (whereClauses, { model }) => {
+  const paths = whereClauses.map(({ field, operator, value }) => {
+    if (BOOLEAN_OPERATORS.includes(operator)) {
+      return value.map(where => recursiveCastedWherePaths(where, { model }));
+    }
+
+    return findModelPath({ rootModel: model, path: field });
+  });
+
+  return _.flattenDeep(paths).filter(path => !!path);
 };
 
 /**
@@ -436,7 +459,7 @@ const formatValue = value => utils.valueToId(value);
  * @param {*} options.value - Where clause alue
  */
 const buildWhereClause = ({ field, operator, value }) => {
-  if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
     return {
       $or: value.map(val => buildWhereClause({ field, operator, value: val })),
     };
@@ -445,6 +468,19 @@ const buildWhereClause = ({ field, operator, value }) => {
   const val = formatValue(value);
 
   switch (operator) {
+    case 'or': {
+      return {
+        $or: value.map(orClause => {
+          if (Array.isArray(orClause)) {
+            return {
+              $and: orClause.map(buildWhereClause),
+            };
+          } else {
+            return buildWhereClause(orClause);
+          }
+        }),
+      };
+    }
     case 'eq':
       return { [field]: val };
     case 'ne':
@@ -513,6 +549,14 @@ const buildWhereClause = ({ field, operator, value }) => {
  * @param {*} whereClause.value - Where clause alue
  */
 const formatWhereClause = (model, { field, operator, value }) => {
+  if (BOOLEAN_OPERATORS.includes(operator)) {
+    return {
+      field,
+      operator,
+      value: value.map(v => v.map(whereClause => formatWhereClause(model, whereClause))),
+    };
+  }
+
   const { assoc, model: assocModel } = getAssociationFromFieldKey(model, field);
 
   const shouldFieldBeSuffixed =
