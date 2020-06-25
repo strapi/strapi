@@ -30,7 +30,7 @@
     "deprecated": false
   },
   {
-    "name": "=",
+    "name": "_eq",
     "in": "query",
     "required": false,
     "description": "Get entries that matches exactly your input",
