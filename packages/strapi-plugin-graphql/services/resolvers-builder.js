@@ -139,6 +139,7 @@ const buildQueryContext = ({ options, graphqlContext }) => {
   const _options = _.cloneDeep(options);
 
   const ctx = context.app.createContext(_.clone(context.req), _.clone(context.res));
+  ctx.session = context.session;
 
   // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
   // cause a lost of the Object prototype.
