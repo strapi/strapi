@@ -3,6 +3,7 @@
 const _ = require('lodash');
 var semver = require('semver');
 const utils = require('./utils')();
+const { hasDeepFilters } = require('strapi-utils');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -63,18 +64,6 @@ const buildSearchOr = (model, query) => {
 };
 
 const BOOLEAN_OPERATORS = ['or'];
-
-const hasDeepFilters = (whereClauses = []) => {
-  return (
-    whereClauses.filter(({ field, operator, value }) => {
-      if (BOOLEAN_OPERATORS.includes(operator)) {
-        return value.filter(hasDeepFilters).length > 0;
-      }
-
-      return field.split('.').length > 1;
-    }).length > 0
-  );
-};
 
 /**
  * Build a mongo query
