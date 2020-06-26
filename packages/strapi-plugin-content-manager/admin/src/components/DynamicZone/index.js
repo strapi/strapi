@@ -86,7 +86,7 @@ const DynamicZone = ({
 
   return (
     <DynamicZoneWrapper>
-      {dynamicDisplayedComponents.length > 0 && (
+      {dynamicDisplayedComponentsLength > 0 && (
         <Label>
           <p>{metas.label}</p>
           <p>{metas.description}</p>
