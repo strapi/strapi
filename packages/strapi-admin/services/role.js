@@ -203,11 +203,13 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   });
 
   // create content-type permissions for each role
-  const editorPermissions = strapi.admin.services[
-    'content-type'
-  ].getPermissionsWithNestedFields(contentTypesActions, 3, {
-    fieldsNullFor: ['plugins::content-manager.explorer.delete'],
-  });
+  const editorPermissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
+    contentTypesActions,
+    3,
+    {
+      fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+    }
+  );
 
   const authorPermissions = editorPermissions.map(p => ({
     ...p,
@@ -216,7 +218,6 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
 
   // add plugin permissions for each role
   const defaultPluginPermissions = [
-    { action: 'plugins::upload.settings.read' },
     { action: 'plugins::upload.assets.create' },
     { action: 'plugins::upload.assets.update', conditions: ['admin::is-creator'] },
     { action: 'plugins::upload.assets.download' },
