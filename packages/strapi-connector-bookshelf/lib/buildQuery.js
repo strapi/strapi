@@ -138,7 +138,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     };
   };
 
-  // tree made to create the joins strucutre
+  // tree made to create the joins structure
   const tree = {
     alias: model.collectionName,
     assoc: null,

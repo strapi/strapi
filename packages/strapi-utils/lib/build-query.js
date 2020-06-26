@@ -90,7 +90,7 @@ const normalizeFieldName = ({ model, field }) => {
 
 const BOOLEAN_OPERATORS = ['or'];
 
-const hasDeepFilters = whereClauses => {
+const hasDeepFilters = (whereClauses = []) => {
   return (
     whereClauses.filter(({ field, operator, value }) => {
       if (BOOLEAN_OPERATORS.includes(operator)) {
@@ -156,4 +156,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
   return strapi.db.connectors.get(model.orm).buildQuery({ model, filters, ...rest });
 };
 
-module.exports = buildQuery;
+module.exports = {
+  buildQuery,
+  hasDeepFilters,
+};
