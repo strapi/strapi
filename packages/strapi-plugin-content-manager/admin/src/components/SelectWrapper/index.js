@@ -8,15 +8,17 @@ import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
-
+import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import { Nav, Wrapper } from './components';
+import { connect, select } from './utils';
 
 function SelectWrapper({
   description,
   editable,
   label,
+  isFieldAllowed,
   mainField,
   name,
   relationType,
@@ -180,6 +182,10 @@ function SelectWrapper({
     },
   };
 
+  if (!isFieldAllowed) {
+    return <NotAllowedInput label={label} />;
+  }
+
   return (
     <Wrapper className="form-group">
       <Nav>
@@ -235,6 +241,7 @@ SelectWrapper.defaultProps = {
   editable: true,
   description: '',
   label: '',
+  isFieldAllowed: true,
   placeholder: '',
 };
 
@@ -242,6 +249,7 @@ SelectWrapper.propTypes = {
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
+  isFieldAllowed: PropTypes.bool,
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
@@ -249,4 +257,6 @@ SelectWrapper.propTypes = {
   targetModel: PropTypes.string.isRequired,
 };
 
-export default memo(SelectWrapper);
+const Memoized = memo(SelectWrapper);
+
+export default connect(Memoized, select);

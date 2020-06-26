@@ -7,7 +7,7 @@ import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
 
 import InputJSONWithErrors from '../InputJSONWithErrors';
-
+import NotAllowedInput from '../NotAllowedInput';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
@@ -66,17 +66,26 @@ const validationsToOmit = [
   'regex',
 ];
 
-function Inputs({ autoFocus, keys, layout, name, onBlur, formErrors, onChange, value }) {
+function Inputs({
+  allowedFields,
+  autoFocus,
+  keys,
+  layout,
+  name,
+  onBlur,
+  formErrors,
+  onChange,
+  value,
+}) {
   const {
     strapi: { fieldApi },
   } = useStrapi();
-  // const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
+
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
   const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
-  // const value = useMemo(() => get(modifiedData, keys, null), [keys, modifiedData]);
   const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
   const errorId = useMemo(() => {
     return get(formErrors, [keys, 'id'], temporaryErrorIdUntilBuffetjsSupportsFormattedMessage);
@@ -117,6 +126,11 @@ function Inputs({ autoFocus, keys, layout, name, onBlur, formErrors, onChange, v
     return get(attribute, 'multiple', false);
   }, [attribute]);
 
+  const isUserAllowedToEditField = useMemo(() => {
+    // TODO
+    return allowedFields.includes(name);
+  }, [allowedFields, name]);
+
   const options = useMemo(() => {
     return get(attribute, 'enum', []).map(v => {
       return (
@@ -143,6 +157,10 @@ function Inputs({ autoFocus, keys, layout, name, onBlur, formErrors, onChange, v
 
   if (visible === false) {
     return null;
+  }
+
+  if (!isUserAllowedToEditField) {
+    return <NotAllowedInput label={metadatas.label} />;
   }
 
   if (type === 'relation') {
@@ -220,6 +238,7 @@ Inputs.defaultProps = {
 };
 
 Inputs.propTypes = {
+  allowedFields: PropTypes.array.isRequired,
   autoFocus: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,

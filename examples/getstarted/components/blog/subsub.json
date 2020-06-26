@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_blog_subsubs",
+  "info": {
+    "name": "subsub",
+    "icon": "air-freshener"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}
