@@ -7,15 +7,15 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, drafState => {
+  produce(state, draftState => {
     switch (action.type) {
       case 'ON_CHANGE': {
-        drafState.rows.forEach((row, index) => {
+        draftState.rows.forEach((row, index) => {
           if (index === action.index) {
-            const currentRow = drafState.rows[index];
+            const currentRow = draftState.rows[index];
             const value = currentRow._isChecked;
 
-            drafState.rows[index]._isChecked = !value;
+            draftState.rows[index]._isChecked = !value;
           }
         });
         break;
@@ -23,17 +23,33 @@ const reducer = (state, action) =>
       case 'ON_CHANGE_ALL': {
         const areAllEntriesSelected = checkIfAllEntriesAreSelected(state.rows);
 
-        drafState.rows = updateRows(drafState.rows, !areAllEntriesSelected);
+        draftState.rows = updateRows(draftState.rows, !areAllEntriesSelected);
+        break;
+      }
+      case 'ON_CLICK_DELETE': {
+        draftState.rows.forEach((row, index) => {
+          if (index === action.index) {
+            draftState.rows[index]._isChecked = true;
+          } else {
+            draftState.rows[index]._isChecked = false;
+          }
+        });
         break;
       }
       case 'SET_DATA': {
         const rows = updateRows(action.data, false);
 
-        drafState.rows = rows;
+        draftState.rows = rows;
+        break;
+      }
+      case 'RESET_DATA_TO_DELETE': {
+        draftState.rows.forEach((row, index) => {
+          draftState.rows[index]._isChecked = false;
+        });
         break;
       }
       default:
-        return drafState;
+        return draftState;
     }
   });
 

@@ -1,5 +1,12 @@
-import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useQuery, request, useUserPermissions, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import {
+  useQuery,
+  request,
+  useUserPermissions,
+  LoadingIndicatorPage,
+  PopUpWarning,
+} from 'strapi-helper-plugin';
+import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
 import BaselineAlignement from '../../../components/BaselineAlignement';
@@ -8,7 +15,7 @@ import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../compone
 import adminPermissions from '../../../permissions';
 import Header from './Header';
 import ModalForm from './ModalForm';
-import getFilters from './utils/getFilters';
+import { getFilters, retrieveAdminUsers, retrieveNonAdminUsers } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -17,6 +24,7 @@ const ListPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useUserPermissions(adminPermissions.settings.users);
+  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
   const [isModalOpened, setIsModalOpened] = useState(false);
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const query = useQuery();
@@ -32,6 +40,8 @@ const ListPage = () => {
       dataToDelete,
       isLoading,
       pagination: { total },
+      shouldRefetchData,
+      showModalConfirmButtonLoading,
     },
     dispatch,
   ] = useReducer(reducer, initialState, init);
@@ -40,6 +50,8 @@ const ListPage = () => {
   const _sort = decodeURIComponent(query.get('_sort'));
   const _q = decodeURIComponent(query.get('_q') || '');
   const getDataRef = useRef();
+  const listRef = useRef();
+
   getDataRef.current = async () => {
     if (!canRead) {
       dispatch({
@@ -123,12 +135,88 @@ const ListPage = () => {
     push({ search: currentSearch.toString() });
   };
 
+  const handleClickDelete = useCallback(id => {
+    handleToggleModal();
+
+    dispatch({
+      type: 'ON_CHANGE_DATA_TO_DELETE',
+      dataToDelete: [id],
+    });
+  }, []);
+
   const handleCloseModal = () => {
     // Refetch data
     getDataRef.current();
   };
 
+  const handleClosedModalDelete = () => {
+    if (shouldRefetchData) {
+      getDataRef.current();
+    } else {
+      // Empty the selected ids when the modal closes
+      dispatch({
+        type: 'RESET_DATA_TO_DELETE',
+      });
+
+      // Reset the list's reducer dataToDelete state using a ref so we don't need an effect
+      listRef.current.resetDataToDelete();
+    }
+  };
+
+  const handleConfirmDeleteData = useCallback(async () => {
+    dispatch({
+      type: 'ON_DELETE_USERS',
+    });
+
+    let shouldDispatchSucceededAction = false;
+
+    // Retrieve the users that have the admin role
+    const adminUsersIdToDelete = retrieveAdminUsers(dataToDelete, data);
+
+    // Retrieve the users that don't have the admin role
+    const nonAdminUsersToDelete = retrieveNonAdminUsers(dataToDelete, adminUsersIdToDelete);
+
+    // Delete all users that are not admin at the same time
+    const requests = nonAdminUsersToDelete.map(async dataId => {
+      try {
+        await request(`/admin/users/${dataId}`, { method: 'DELETE' });
+
+        shouldDispatchSucceededAction = true;
+      } catch (err) {
+        const errorMessage = get(err, 'response.payload.data', 'An error occured');
+
+        strapi.notification.error(errorMessage);
+      }
+    });
+
+    await Promise.all(requests);
+
+    for (let i = 0; i < adminUsersIdToDelete.length; i++) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await request(`/admin/users/${adminUsersIdToDelete[i]}`, { method: 'DELETE' });
+
+        shouldDispatchSucceededAction = true;
+      } catch (err) {
+        const errorMessage = get(err, 'response.payload.data', 'An error occured');
+
+        strapi.notification.error(errorMessage);
+      }
+    }
+
+    // Only dispatch the action once
+    if (shouldDispatchSucceededAction) {
+      dispatch({
+        type: 'ON_DELETE_USERS_SUCCEEDED',
+      });
+    }
+
+    handleToggleModal();
+  }, [dataToDelete, data]);
+
   const handleToggle = () => setIsModalOpened(prev => !prev);
+
+  const handleToggleModal = () => setIsWarningDeleteAllOpened(prev => !prev);
 
   const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
     const currentSearch = new URLSearchParams(search);
@@ -151,13 +239,14 @@ const ListPage = () => {
   return (
     <div>
       <Header
-        count={total}
-        dataToDelete={dataToDelete}
-        onClickAddUser={handleToggle}
-        isLoading={isLoading}
         canCreate={canCreate}
         canDelete={canDelete}
         canRead={canRead}
+        count={total}
+        dataToDelete={dataToDelete}
+        onClickAddUser={handleToggle}
+        onClickDelete={handleToggleModal}
+        isLoading={isLoading}
       />
       {canRead && (
         <>
@@ -180,11 +269,14 @@ const ListPage = () => {
             <List
               canDelete={canDelete}
               canUpdate={canUpdate}
+              dataToDelete={dataToDelete}
               isLoading={isLoading}
               data={data}
               onChange={handleChangeDataToDelete}
+              onClickDelete={handleClickDelete}
               searchParam={_q}
               filters={filters}
+              ref={listRef}
             />
           </Padded>
           <Footer
@@ -195,6 +287,13 @@ const ListPage = () => {
         </>
       )}
       <ModalForm isOpen={isModalOpened} onClosed={handleCloseModal} onToggle={handleToggle} />
+      <PopUpWarning
+        isOpen={isWarningDeleteAllOpened}
+        onClosed={handleClosedModalDelete}
+        onConfirm={handleConfirmDeleteData}
+        toggleModal={handleToggleModal}
+        isConfirmButtonLoading={showModalConfirmButtonLoading}
+      />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
@@ -13,6 +13,7 @@ const Header = ({
   dataToDelete,
   isLoading,
   onClickAddUser,
+  onClickDelete,
 }) => {
   const { formatMessage } = useGlobalContext();
   const tradBaseId = 'Settings.permissions.users.listview.';
@@ -28,6 +29,7 @@ const Header = ({
             color: 'delete',
             disabled: !dataToDelete.length,
             label: formatMessage({ id: 'app.utils.delete' }),
+            onClick: onClickDelete,
             type: 'button',
             Component: props => (canDelete ? <Button {...props} /> : null),
           },
@@ -59,6 +61,7 @@ Header.defaultProps = {
   dataToDelete: [],
   isLoading: false,
   onClickAddUser: () => {},
+  onClickDelete: () => {},
 };
 
 Header.propTypes = {
@@ -69,6 +72,7 @@ Header.propTypes = {
   dataToDelete: PropTypes.array,
   isLoading: PropTypes.bool,
   onClickAddUser: PropTypes.func,
+  onClickDelete: PropTypes.func,
 };
 
-export default Header;
+export default memo(Header);
