@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "name": "article"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "content": {
+      "type": "component",
+      "repeatable": false,
+      "component": "blog.content"
+    },
+    "content2repet": {
+      "type": "component",
+      "repeatable": true,
+      "component": "blog.content"
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "blog.content",
+        "blog.sub"
+      ]
+    },
+    "address": {
+      "model": "address"
+    },
+    "address2": {
+      "model": "address"
+    }
+  }
+}

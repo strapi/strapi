@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_blog_contents",
+  "info": {
+    "name": "content",
+    "icon": "ad"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "text"
+    },
+    "sub": {
+      "type": "component",
+      "repeatable": false,
+      "component": "blog.sub"
+    }
+  }
+}

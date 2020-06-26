@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
 import PropTypes from 'prop-types';
-import { Prompt, useParams } from 'react-router-dom';
+import { Prompt, Redirect, useParams } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   request,
   useGlobalContext,
   findMatchingPermissions,
   useUser,
+  useUserPermissions,
 } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import { generatePermissionsObject } from '../../utils';
+import { generatePermissionsObject, getTrad } from '../../utils';
 import pluginId from '../../pluginId';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -50,27 +51,42 @@ const EditViewDataManagerProvider = ({
   const { emitEvent, formatMessage } = useGlobalContext();
   const userPermissions = useUser();
   const generatedPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-  console.log({ generatedPermissions });
+
   const permissionsToApply = useMemo(() => {
     const fieldsToPick = isCreatingEntry ? ['create'] : ['read', 'update'];
 
     return pick(generatedPermissions, fieldsToPick);
   }, [isCreatingEntry, generatedPermissions]);
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canCreate },
+  } = useUserPermissions(permissionsToApply);
 
-  console.log({ permissionsToApply });
+  const createActionAllowedFields = useMemo(() => {
+    const matchingPermissions = findMatchingPermissions(userPermissions, [
+      {
+        action: 'plugins::content-manager.explorer.create',
+        subject: slug,
+      },
+    ]);
 
-  const createMatchingPermissions = useMemo(
-    () =>
-      findMatchingPermissions(userPermissions, [
-        {
-          action: 'plugins::content-manager.explorer.create',
-          subject: slug,
-        },
-      ]),
-    [userPermissions, slug]
-  );
+    return get(matchingPermissions, ['0', 'fields'], []);
+  }, [userPermissions, slug]);
+
+  const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
+    if (isLoadingForPermissions) {
+      return false;
+    }
+
+    if (isCreatingEntry && !canCreate) {
+      return true;
+    }
+
+    return false;
+  }, [isLoadingForPermissions, isCreatingEntry, canCreate]);
+
   // TODO
-  // const updateMatchingPermissions = useMemo(
+  // const updateActionMatchingPermissions = useMemo(
   //   () =>
   //     findMatchingPermissions(userPermissions, [
   //       {
@@ -90,7 +106,6 @@ const EditViewDataManagerProvider = ({
   //     ]),
   //   [slug, userPermissions]
   // );
-  console.log({ createMatchingPermissions });
 
   useEffect(() => {
     if (!isLoading) {
@@ -513,6 +528,13 @@ const EditViewDataManagerProvider = ({
     return !isCreatingEntry && isLoading;
   }, [isCreatingEntry, isLoading]);
 
+  // Redirect the user to the homepage if he is not allowed to create a document
+  if (shouldRedirectToHomepageWhenCreatingEntry) {
+    strapi.notification.info(getTrad('content-manager.permissions.not-allowed.create'));
+
+    return <Redirect to="/" />;
+  }
+
   return (
     <EditViewDataManagerContext.Provider
       value={{
@@ -523,6 +545,7 @@ const EditViewDataManagerProvider = ({
         allLayoutData,
         checkFormErrors,
         clearData,
+        createActionAllowedFields,
         deleteSuccess,
         formErrors,
         initialData,
