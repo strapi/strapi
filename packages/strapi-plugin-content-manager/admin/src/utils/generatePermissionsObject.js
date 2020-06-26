@@ -2,18 +2,13 @@ const addSubjectToPermissionsArray = (array, uid) => array.map(data => ({ ...dat
 
 const generatePermissionsObject = uid => {
   const permissions = {
-    // main: [
-    //   { action: 'plugins::content-manager.explorer.create', subject: null },
-    //   { action: 'plugins::content-manager.explorer.read', subject: null },
-    //   { action: 'plugins::content-manager.explorer.update', subject: null },
-    //   { action: 'plugins::content-manager.explorer.delete', subject: null },
-    // ],
     create: [{ action: 'plugins::content-manager.explorer.create', subject: null }],
     delete: [{ action: 'plugins::content-manager.explorer.delete', subject: null }],
     read: [
       { action: 'plugins::content-manager.explorer.read', subject: null },
-      { action: 'plugins::content-manager.explorer.update', subject: null },
-      { action: 'plugins::content-manager.explorer.delete', subject: null },
+      // Commenting this on purpose
+      // { action: 'plugins::content-manager.explorer.update', subject: null },
+      // { action: 'plugins::content-manager.explorer.delete', subject: null },
     ],
     update: [{ action: 'plugins::content-manager.explorer.update', subject: null }],
   };
