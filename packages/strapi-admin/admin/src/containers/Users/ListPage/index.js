@@ -171,13 +171,13 @@ const ListPage = () => {
     let shouldDispatchSucceededAction = false;
 
     // Retrieve the users that have the admin role
-    const adminUsersIdToDelete = retrieveAdminUsers(dataToDelete, data);
+    const adminUsersIdsToDelete = retrieveAdminUsers(dataToDelete, data);
 
     // Retrieve the users that don't have the admin role
-    const nonAdminUsersToDelete = retrieveNonAdminUsers(dataToDelete, adminUsersIdToDelete);
+    const nonAdminUsersIdsToDelete = retrieveNonAdminUsers(dataToDelete, adminUsersIdsToDelete);
 
     // Delete all users that are not admin at the same time
-    const requests = nonAdminUsersToDelete.map(async dataId => {
+    const requests = nonAdminUsersIdsToDelete.map(async dataId => {
       try {
         await request(`/admin/users/${dataId}`, { method: 'DELETE' });
 
@@ -191,10 +191,10 @@ const ListPage = () => {
 
     await Promise.all(requests);
 
-    for (let i = 0; i < adminUsersIdToDelete.length; i++) {
+    for (let i = 0; i < adminUsersIdsToDelete.length; i++) {
       try {
         // eslint-disable-next-line no-await-in-loop
-        await request(`/admin/users/${adminUsersIdToDelete[i]}`, { method: 'DELETE' });
+        await request(`/admin/users/${adminUsersIdsToDelete[i]}`, { method: 'DELETE' });
 
         shouldDispatchSucceededAction = true;
       } catch (err) {
