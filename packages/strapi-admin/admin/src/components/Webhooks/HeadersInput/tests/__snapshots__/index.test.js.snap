@@ -59,7 +59,6 @@ exports[`Admin | components | HeadersInput should render properly should match t
 }
 
 .c1 span {
-  z-index: 0;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }

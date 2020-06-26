@@ -9,8 +9,10 @@ import pluginId from '../../pluginId';
 import useEditView from '../../hooks/useEditView';
 import DynamicComponentCard from '../DynamicComponentCard';
 import FieldComponent from '../FieldComponent';
+import NotAllowedInput from '../NotAllowedInput';
 import connect from './utils/connect';
 import select from './utils/select';
+import BaselineAlignement from './BaselineAlignement';
 import Button from './Button';
 import ComponentsPicker from './ComponentsPicker';
 import ComponentWrapper from './ComponentWrapper';
@@ -29,6 +31,7 @@ const DynamicZone = ({
   // Passed with the select function
   addComponentToDynamicZone,
   formErrors,
+  isFieldAllowed,
   layout,
   moveComponentUp,
   moveComponentDown,
@@ -83,6 +86,14 @@ const DynamicZone = ({
   const hasRequiredError = hasError && !hasMinError;
   const hasMaxError =
     hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
+
+  if (!isFieldAllowed) {
+    return (
+      <BaselineAlignement>
+        <NotAllowedInput label={metas.label} spacerHeight="3px" />
+      </BaselineAlignement>
+    );
+  }
 
   return (
     <DynamicZoneWrapper>
@@ -217,6 +228,7 @@ DynamicZone.propTypes = {
   addComponentToDynamicZone: PropTypes.func.isRequired,
   dynamicDisplayedComponents: PropTypes.array,
   formErrors: PropTypes.object.isRequired,
+  isFieldAllowed: PropTypes.bool.isRequired,
   layout: PropTypes.object.isRequired,
   moveComponentUp: PropTypes.func.isRequired,
   moveComponentDown: PropTypes.func.isRequired,
