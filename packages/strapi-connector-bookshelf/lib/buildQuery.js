@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
+const BOOLEAN_OPERATORS = ['or'];
+
 /**
  * Build filters on a bookshelf query
  * @param {Object} options - Options
@@ -136,6 +138,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     };
   };
 
+  // tree made to create the joins strucutre
   const tree = {
     alias: model.collectionName,
     assoc: null,
@@ -143,6 +146,12 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     joins: {},
   };
 
+  /**
+   * Returns the SQL path for a qery field.
+   * Adds table to the joins tree
+   * @param {string} field a field used to filter
+   * @param {Object} tree joins tree
+   */
   const generateNestedJoins = (field, tree) => {
     let [key, ...parts] = field.split('.');
 
@@ -168,11 +177,18 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     return generateNestedJoins(parts.join('.'), tree.joins[key]);
   };
 
+  /**
+   * Format every where clauses whith the right table name aliases.
+   * Add table joins to the joins list
+   * @param {Array<{field, operator, value}>} whereClauses a list of where clauses
+   * @param {Object} context
+   * @param {Object} context.model model on which the query is run
+   */
   const buildWhereClauses = (whereClauses, { model }) => {
     return whereClauses.map(whereClause => {
       const { field, operator, value } = whereClause;
 
-      if (operator === 'or') {
+      if (BOOLEAN_OPERATORS.includes(operator)) {
         return { field, operator, value: value.map(v => buildWhereClauses(v, { model })) };
       }
 
@@ -216,13 +232,13 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     case 'or':
       return qb.where(orQb => {
         value.forEach(orClause => {
-          orQb.orWhere(q => {
+          orQb.orWhere(subQb => {
             if (Array.isArray(orClause)) {
               orClause.forEach(orClause =>
-                q.where(qq => buildWhereClause({ qb: qq, ...orClause }))
+                subQb.where(andQb => buildWhereClause({ qb: andQb, ...orClause }))
               );
             } else {
-              buildWhereClause({ qb: q, ...orClause });
+              buildWhereClause({ qb: subQb, ...orClause });
             }
           });
         });
