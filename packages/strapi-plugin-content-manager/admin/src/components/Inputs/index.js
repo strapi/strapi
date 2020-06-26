@@ -1,10 +1,11 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, omit, toLower } from 'lodash';
+import { get, isEmpty, omit, toLower, isNaN, take } from 'lodash';
 import isEqual from 'react-fast-compare';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
+import useEditView from '../../hooks/useEditView';
 
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import NotAllowedInput from '../NotAllowedInput';
@@ -80,7 +81,7 @@ function Inputs({
   const {
     strapi: { fieldApi },
   } = useStrapi();
-
+  const { layout: currentContentTypeLayout } = useEditView();
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -90,6 +91,14 @@ function Inputs({
   const errorId = useMemo(() => {
     return get(formErrors, [keys, 'id'], temporaryErrorIdUntilBuffetjsSupportsFormattedMessage);
   }, [formErrors, keys]);
+  const fieldName = useMemo(() => {
+    return keys.split('.').filter(string => isNaN(parseInt(string, 10)));
+  }, [keys]);
+  const isChildOfDynamicZone = useMemo(() => {
+    const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
+
+    return Object.keys(attributes).findIndex(attrName => attrName === fieldName[0]) !== -1;
+  }, [currentContentTypeLayout, fieldName]);
 
   const validations = useMemo(() => omit(attribute, validationsToOmit), [attribute]);
 
@@ -127,9 +136,27 @@ function Inputs({
   }, [attribute]);
 
   const isUserAllowedToEditField = useMemo(() => {
-    // TODO
-    return allowedFields.includes(name);
-  }, [allowedFields, name]);
+    const joinedName = fieldName.join('.');
+
+    if (allowedFields.includes(joinedName)) {
+      return true;
+    }
+
+    if (isChildOfDynamicZone) {
+      // TODO we can simply return true here if we block the dynamic zone
+      return allowedFields.includes(fieldName[0]);
+    }
+
+    const isChildOfComponent = fieldName.length > 1;
+
+    if (isChildOfComponent) {
+      const parentFieldName = take(fieldName, fieldName.length - 1).join('.');
+
+      return allowedFields.includes(parentFieldName);
+    }
+
+    return false;
+  }, [allowedFields, fieldName, isChildOfDynamicZone]);
 
   const options = useMemo(() => {
     return get(attribute, 'enum', []).map(v => {
