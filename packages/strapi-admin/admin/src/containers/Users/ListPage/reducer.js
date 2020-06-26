@@ -11,6 +11,8 @@ const initialState = {
     pageCount: 0,
     total: 0,
   },
+  showModalConfirmButtonLoading: false,
+  shouldRefetchData: false,
 };
 
 const reducer = (state, action) =>
@@ -27,6 +29,20 @@ const reducer = (state, action) =>
       }
       case 'ON_CHANGE_DATA_TO_DELETE': {
         draftState.dataToDelete = action.dataToDelete;
+        break;
+      }
+      case 'ON_DELETE_USERS': {
+        draftState.showModalConfirmButtonLoading = true;
+        break;
+      }
+      case 'ON_DELETE_USERS_SUCCEEDED': {
+        draftState.shouldRefetchData = true;
+        break;
+      }
+      case 'RESET_DATA_TO_DELETE': {
+        draftState.shouldRefetchData = false;
+        draftState.dataToDelete = [];
+        draftState.showModalConfirmButtonLoading = false;
         break;
       }
       case 'UNSET_IS_LOADING': {

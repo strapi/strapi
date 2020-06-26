@@ -5,7 +5,7 @@ const { stringIncludes, stringEquals } = require('strapi-utils');
 const { createUser } = require('../domain/user');
 const { SUPER_ADMIN_CODE } = require('./constants');
 
-const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description']);
+const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
 
 /**
  * Remove private user fields
