@@ -5,6 +5,8 @@ import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
 function useSelect(name) {
   const {
     addComponentToDynamicZone,
+    createActionAllowedFields,
+    isCreatingEntry,
     formErrors,
     layout,
     modifiedData,
@@ -18,11 +20,17 @@ function useSelect(name) {
     [modifiedData, name]
   );
 
+  const isFieldAllowed = useMemo(() => {
+    const allowedFields = isCreatingEntry ? createActionAllowedFields : [];
+
+    return allowedFields.includes(name);
+  }, [name, isCreatingEntry, createActionAllowedFields]);
+
   return {
     addComponentToDynamicZone,
     formErrors,
     layout,
-
+    isFieldAllowed,
     moveComponentUp,
     moveComponentDown,
     removeComponentFromDynamicZone,

@@ -5,7 +5,7 @@ import EyeSlashed from '../../icons/EyeSlashed';
 import BaselineAlignement from './BaselineAlignement';
 import Field from './Field';
 
-const NotAllowedInput = ({ label }) => {
+const NotAllowedInput = ({ label, spacerHeight }) => {
   return (
     <Padded bottom size="smd">
       <Text fontWeight="semiBold" lineHeight="18px">
@@ -24,17 +24,19 @@ const NotAllowedInput = ({ label }) => {
           </Flex>
         </Padded>
       </Field>
-      <BaselineAlignement />
+      <BaselineAlignement height={spacerHeight} />
     </Padded>
   );
 };
 
 NotAllowedInput.defaultProps = {
   label: '',
+  spacerHeight: '7px',
 };
 
 NotAllowedInput.propTypes = {
   label: PropTypes.string,
+  spacerHeight: PropTypes.string,
 };
 
 export default NotAllowedInput;

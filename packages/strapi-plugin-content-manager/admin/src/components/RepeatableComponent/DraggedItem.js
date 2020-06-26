@@ -270,7 +270,7 @@ function select({ schema, componentFieldName }) {
   } = useContext(EditViewDataManagerContext);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
-  const displayedValue = get(modifiedData, [...componentFieldName.split('.'), mainField], null);
+  const displayedValue = get(modifiedData, [...componentFieldName.split('.'), mainField], '');
 
   return {
     displayedValue,

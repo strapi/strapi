@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, omit, toLower, isNaN, take } from 'lodash';
+import { get, isEmpty, omit, toLower, take } from 'lodash';
 import isEqual from 'react-fast-compare';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
@@ -12,8 +12,7 @@ import NotAllowedInput from '../NotAllowedInput';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
-import connect from './utils/connect';
-import select from './utils/select';
+import { connect, getFieldName, select } from './utils';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -82,6 +81,7 @@ function Inputs({
     strapi: { fieldApi },
   } = useStrapi();
   const { layout: currentContentTypeLayout } = useEditView();
+
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -91,23 +91,22 @@ function Inputs({
   const errorId = useMemo(() => {
     return get(formErrors, [keys, 'id'], temporaryErrorIdUntilBuffetjsSupportsFormattedMessage);
   }, [formErrors, keys]);
+
   const fieldName = useMemo(() => {
-    return keys.split('.').filter(string => isNaN(parseInt(string, 10)));
+    return getFieldName(keys);
   }, [keys]);
+
   const isChildOfDynamicZone = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
+    const foundAttributeType = get(attributes, [fieldName[0], 'type'], null);
 
-    return Object.keys(attributes).findIndex(attrName => attrName === fieldName[0]) !== -1;
+    return foundAttributeType === 'dynamiczone';
   }, [currentContentTypeLayout, fieldName]);
-
   const validations = useMemo(() => omit(attribute, validationsToOmit), [attribute]);
-
   const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
-
   const inputType = useMemo(() => {
     return getInputType(type);
   }, [type]);
-
   const inputValue = useMemo(() => {
     // Fix for input file multipe
     if (type === 'media' && !value) {
@@ -144,6 +143,8 @@ function Inputs({
 
     if (isChildOfDynamicZone) {
       // TODO we can simply return true here if we block the dynamic zone
+      console.log('opooooo');
+
       return allowedFields.includes(fieldName[0]);
     }
 
@@ -195,6 +196,7 @@ function Inputs({
       <div key={keys}>
         <SelectWrapper
           {...metadatas}
+          isUserAllowedToEditField={isUserAllowedToEditField}
           name={keys}
           plugin={attribute.plugin}
           relationType={attribute.relationType}

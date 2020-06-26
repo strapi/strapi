@@ -553,7 +553,6 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 }
 
 .c3 span {
-  z-index: 0;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }

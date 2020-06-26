@@ -70,6 +70,8 @@ const EditViewDataManagerProvider = ({
       },
     ]);
 
+    console.log({ dataManager: get(matchingPermissions, ['0', 'fields'], []) });
+
     return get(matchingPermissions, ['0', 'fields'], []);
   }, [userPermissions, slug]);
 
