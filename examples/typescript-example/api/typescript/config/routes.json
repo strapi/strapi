@@ -7,6 +7,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/typescript/greeting/:name",
+      "handler": "typescript.greeting",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

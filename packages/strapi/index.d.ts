@@ -5,6 +5,8 @@ declare namespace Strapi {
   import { Application, Context } from 'koa';
   import { Logger } from 'pino';
 
+  export type ContextWithParams<P> = { params: P } & Context;
+
   export interface HandlerCollectionBase<THandler> {
     [collectionName: string]: {
       [handlerName: string]: THandler;
