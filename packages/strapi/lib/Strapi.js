@@ -257,6 +257,10 @@ class Strapi {
     this.middleware = modules.middlewares;
     this.hook = modules.hook;
 
+    // set admin config in strapi.config.server.admin
+    const userAdminConfig = this.config.get('server.admin');
+    strapi.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
+
     await bootstrap(this);
 
     // init webhook runner
