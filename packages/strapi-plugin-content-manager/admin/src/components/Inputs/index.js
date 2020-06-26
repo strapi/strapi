@@ -178,7 +178,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur, formErrors, onChange, v
             {...metadatas}
             autoComplete="new-password"
             autoFocus={autoFocus}
-            // didCheckErrors={didCheckErrors}
             disabled={disabled}
             error={
               isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
