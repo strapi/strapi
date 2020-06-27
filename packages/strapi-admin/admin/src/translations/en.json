@@ -256,6 +256,7 @@
   "Settings.global": "Global Settings",
   "Settings.permissions": "Permissions",
   "Settings.error": "Error",
+  "Settings.permissions.category": "Permissions settings for the {category}",
   "Settings.permissions.menu.link.roles.label": "Roles",
   "Settings.permissions.menu.link.users.label": "Users",
   "Settings.permissions.users.add-new": "Add new user",

@@ -1646,4 +1646,282 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expected);
     });
   });
+
+  describe('ON_PLUGIN_SETTING_ACTION', () => {
+    it('should add a single plugin/setting action', () => {
+      const action = {
+        type: 'ON_PLUGIN_SETTING_ACTION',
+        action: 'plugins::upload.assets.create',
+      };
+      const initialState = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: ['admin::is-creator'],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+      const expected = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: ['admin::is-creator'],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.create',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should remove a single plugin/setting action if already exist in the state', () => {
+      const action = {
+        type: 'ON_PLUGIN_SETTING_ACTION',
+        action: 'plugins::upload.assets.create',
+      };
+      const initialState = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: ['admin::is-creator'],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.create',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+      const expected = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: ['admin::is-creator'],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS', () => {
+    it('should add all plugin/setting actions of a subcategory', () => {
+      const action = {
+        type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
+        actions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.copy-link',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.delete',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+        shouldEnable: true,
+      };
+      const initialState = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.create',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+      const expected = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.create',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.copy-link',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.delete',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should remove all plugin/setting actions of a subcategory', () => {
+      const action = {
+        type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
+        actions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.copy-link',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.delete',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+        shouldEnable: false,
+      };
+      const initialState = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.update',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.create',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.copy-link',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+          {
+            action: 'plugins::upload.assets.delete',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+      const expected = {
+        collapsePath: ['subject1'],
+        contentTypesPermissions: {
+          subject1: {
+            field1: {
+              actions: ['create'],
+            },
+          },
+        },
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'plugins::upload.assets.create',
+            conditions: [],
+            fields: null,
+            subject: null,
+          },
+        ],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
 });

@@ -8,4 +8,5 @@ export { default as getNumberOfRecursivePermissionsByAction } from './getNumberO
 export { default as getRecursivePermissionsBySubject } from './getRecursivePermissionsBySubject';
 export { default as getRecursivePermissions } from './getRecursivePermissions';
 export { default as getAllAttributesActionsSize } from './getAllAttributesActionsSize';
+export { default as formatPermissionsLayout } from './formatPermissionsLayout';
 export * from './permissonsConstantsActions';
