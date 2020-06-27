@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { get, set } from 'lodash';
+import { get, set, differenceWith } from 'lodash';
 
 import { staticAttributeActions, getAttributePermissionsSizeByContentTypeAction } from './utils';
 import generateContentTypeActions from './utils/generateContentTypeActions';
@@ -375,6 +375,62 @@ const reducer = (state, action) =>
           ...state.contentTypesPermissions,
           ...permissions,
         };
+        break;
+      }
+      // This reducer action is used to handle an action of a plugin/setting permission
+      case 'ON_PLUGIN_SETTING_ACTION': {
+        const { action: permissionAction } = action;
+        const permissionIndex = state.pluginsAndSettingsPermissions.findIndex(
+          permission => permission.action === permissionAction
+        );
+
+        if (permissionIndex === -1) {
+          draftState.pluginsAndSettingsPermissions.push({
+            action: permissionAction,
+            // For the moment, this will reset the conditions object
+            // but it will be changed after the conditions US
+            // TODO : To fix for the conditions US
+            conditions: [],
+            fields: null,
+            subject: null,
+          });
+        } else {
+          draftState.pluginsAndSettingsPermissions.splice(permissionIndex, 1);
+        }
+
+        break;
+      }
+      // This reducer action is used to handle all actions of a subcategory of a plugin/setting permissions
+      case 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS': {
+        const { actions, shouldEnable } = action;
+
+        const actionsToAdd = actions.map(permission => ({
+          action: permission.action,
+          // For the moment, this will reset the conditions object
+          // but it will be changed after the conditions US
+          // TODO : To fix for the conditions US
+          conditions: [],
+          fields: null,
+          subject: null,
+        }));
+
+        if (!shouldEnable) {
+          draftState.pluginsAndSettingsPermissions = differenceWith(
+            state.pluginsAndSettingsPermissions,
+            actionsToAdd,
+            (x, y) => x.action === y.action
+          );
+        } else {
+          draftState.pluginsAndSettingsPermissions = [
+            ...differenceWith(
+              state.pluginsAndSettingsPermissions,
+              actionsToAdd,
+              (x, y) => x.action === y.action
+            ),
+            ...actionsToAdd,
+          ];
+        }
+
         break;
       }
       default:

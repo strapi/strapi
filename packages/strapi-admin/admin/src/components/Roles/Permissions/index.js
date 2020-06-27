@@ -3,14 +3,13 @@ import PropTypes from 'prop-types';
 
 import Tabs from '../Tabs';
 import ContentTypes from './ContentTypes';
-import PluginsPermissions from './Plugins';
-import SettingsPermissions from './Settings';
+import PluginsAndSettingsPermissions from './PluginsAndSettingsPermissions';
 import { roleTabsLabel } from '../../../utils';
 import { useModels } from '../../../hooks';
 import PermissionsProvider from './PermissionsProvider';
 import reducer, { initialState } from './reducer';
 import init from './init';
-import { getAllAttributes } from './utils';
+import { getAllAttributes, formatPermissionsLayout } from './utils';
 
 const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => {
   const { singleTypes, collectionTypes, components } = useModels();
@@ -34,6 +33,14 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
   const allCollectionTypesAttributes = useMemo(() => {
     return getAllAttributes(collectionTypes, components);
   }, [components, collectionTypes]);
+
+  const pluginsPermissionsLayout = useMemo(() => {
+    return formatPermissionsLayout(permissionsLayout.sections.plugins, 'plugin');
+  }, [permissionsLayout]);
+
+  const settingsPermissionsLayout = useMemo(() => {
+    return formatPermissionsLayout(permissionsLayout.sections.settings, 'category');
+  }, [permissionsLayout]);
 
   const handleCollapse = (index, value) => {
     dispatch({
@@ -124,6 +131,21 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     });
   };
 
+  const handlePluginSettingPermission = action => {
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_ACTION',
+      action,
+    });
+  };
+
+  const handlePluginSettingSubCategoryPermission = ({ actions, shouldEnable }) => {
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
+      actions,
+      shouldEnable,
+    });
+  };
+
   const providerValues = {
     ...state,
     components,
@@ -135,6 +157,8 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     onAllContentTypeActions: handleAllContentTypeActions,
     onGlobalPermissionsActionSelect: handleGlobalPermissionsActionSelect,
     onSetAttributesPermissions: handleSetAttributesPermissions,
+    onPluginSettingPermission: handlePluginSettingPermission,
+    onPluginSettingSubCategoryPermission: handlePluginSettingSubCategoryPermission,
   };
 
   return (
@@ -148,8 +172,11 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
           allContentTypesAttributes={allSingleTypesAttributes}
           contentTypes={singleTypes}
         />
-        <PluginsPermissions />
-        <SettingsPermissions />
+        <PluginsAndSettingsPermissions
+          permissionType="plugin"
+          pluginsPermissionsLayout={pluginsPermissionsLayout}
+        />
+        <PluginsAndSettingsPermissions pluginsPermissionsLayout={settingsPermissionsLayout} />
       </Tabs>
     </PermissionsProvider>
   );
