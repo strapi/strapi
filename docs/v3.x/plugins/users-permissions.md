@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Pemissions** link in the left menu.
+To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
 
 ## Concept
 
@@ -189,11 +189,11 @@ Then fill the informations:
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **GitHub** provider
 
-Then fill the informations:
+Then fill the information:
 
 - **Enable**: `ON`
 - **Client ID**: 53de5258f8472c140917
-- **Client ID**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
+- **Client Secret**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/github`
 
 :::
@@ -234,7 +234,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 2408954435875229
-- **Client ID**: 4fe04b740b69f31ea410b9391ff3b5b0
+- **Client Secret**: 4fe04b740b69f31ea410b9391ff3b5b0
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/facebook`
 
 :::
@@ -318,7 +318,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: yfN4ycGGmKXiS1njtIYxuN5IH
-- **Client ID**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
+- **Client Secret**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/twitter`
 
 :::
@@ -347,7 +347,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 665118465148846081
-- **Client ID**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
+- **Client Secret**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/discord`
 
 :::
@@ -379,7 +379,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: amuy279g8wt68qlht3u4gek4oykh5j
-- **Client ID**: dapssh10uo97gg2l25qufr8wen3yr6
+- **Client Secret**: dapssh10uo97gg2l25qufr8wen3yr6
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitch`
 
 :::
@@ -409,7 +409,7 @@ Then fill the informations:
 - **Deauthorize**: `https://c6a8cc7c.ngrok.io`
 - **Data Deletion Requests**: `https://c6a8cc7c.ngrok.io`
 
-On the **App Review for Instagram Basic Display** click on **Add to submition** for **instagram_graph_user_profile**.
+On the **App Review for Instagram Basic Display** click on **Add to submission** for **instagram_graph_user_profile**.
 
 Make sure your Application information are well completed.
 
@@ -422,7 +422,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 563883201184965
-- **Client ID**: f5ba10a7dd78c2410ab6b8a35ab28226
+- **Client Secret**: f5ba10a7dd78c2410ab6b8a35ab28226
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/instagram`
 
 :::
@@ -459,7 +459,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 7276416
-- **Client ID**: cFBUSghLXGuxqnCyw1N3
+- **Client Secret**: cFBUSghLXGuxqnCyw1N3
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/vk`
 
 :::
@@ -566,7 +566,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.error('An error occured:', error.response);
+    console.error('An error occurred:', error.response);
   });
 ```
 
@@ -682,7 +682,7 @@ from the `query` parameter to authenticate.
 
 That way, you should be able to retrieve the user info you need.
 
-Now, you can simply call the `callback` function with the username and email of your user. That way, strapi will be able
+Now, you can simply call the `callback` function with the username and email of your user. That way, Strapi will be able
 to retrieve your user from the database and log you in.
 
 ### Configure the new provider model onto database

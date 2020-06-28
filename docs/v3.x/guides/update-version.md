@@ -4,7 +4,7 @@ How to upgrade your application to the latest version of Strapi.
 
 ## Upgrading your dependencies
 
-Start by upgrading all your strapi package version.
+Start by upgrading all your Strapi package version.
 
 For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 

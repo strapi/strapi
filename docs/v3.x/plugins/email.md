@@ -5,7 +5,7 @@ Thanks to the plugin `Email`, you can send email from your server or externals p
 ## Programmatic usage
 
 In your custom controllers or services you may want to send email.
-By using the following function, strapi will use the configured provider to send an email.
+By using the following function, Strapi will use the configured provider to send an email.
 
 ```js
 await strapi.plugins['email'].services.email.send({
@@ -35,7 +35,7 @@ To install a new provider run:
 ::: tab yarn
 
 ```
-yarn add strapi-provider-email-sendgrid@beta --save
+yarn add strapi-provider-email-sendgrid --save
 ```
 
 :::
@@ -43,7 +43,7 @@ yarn add strapi-provider-email-sendgrid@beta --save
 ::: tab npm
 
 ```
-npm install strapi-provider-email-sendgrid@beta --save
+npm install strapi-provider-email-sendgrid --save
 ```
 
 :::
@@ -124,7 +124,7 @@ If you want to create your own provider without publishing it on **npm** you can
 
 - Finally, run `yarn install` or `npm install` to install your new custom provider.
 
-## Trouble shooting
+## Troubleshooting
 
 You received an `Auth.form.error.email.invalid` error even though the email is valid and exists in the database.
 

@@ -53,6 +53,8 @@
   "List.title.providers.enabled.singular": "{number} provider is enabled and",
   "List.title.roles.plural": "{number} roles are available",
   "List.title.roles.singular": "{number} role is available",
+  "ListRow.enabled": "Enabled",
+  "ListRow.disabled": "Disabled",
   "Plugin.permissions.application.description": "Define all your project's allowed actions.",
   "Plugin.permissions.plugins.description": "Define all allowed actions for the {name} plugin.",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
