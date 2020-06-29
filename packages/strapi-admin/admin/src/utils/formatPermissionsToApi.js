@@ -23,7 +23,7 @@ const formatPermissionsToApi = permissions => {
 
                 return null;
               })
-              .filter(item => item && item !== 'contentTypeActions');
+              .filter(item => !!item);
 
             if (hasAction || hasContentTypeAction) {
               return [

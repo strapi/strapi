@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Checkbox, Flex, Text, Padded } from '@buffetjs/core';
@@ -20,8 +20,12 @@ import StyledRow from '../../../../../../src/components/Roles/Permissions/Conten
 import ContentTypesAttributes from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ContentTypesAttributes';
 import PermissionWrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
 import CollapseLabel from '../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
+import SettingsButton from '../../../../../../src/components/Roles/SettingsButton';
+
+import ConditionsModal from './ConditionsModal';
 
 const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
+  const [modalOpened, setOpenModal] = useState(false);
   const {
     collapsePath,
     onCollapse,
@@ -34,19 +38,31 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
 
-  const contentTypeActions = useMemo(() => {
+  const numberOfContentTypeActions = useMemo(() => {
     return Object.values(
       get(contentTypesPermissions, [contentType.uid, 'contentTypeActions'], {})
-    ).filter(action => !!action);
+    ).filter(action => !!action).length;
+  }, [contentType, contentTypesPermissions]);
+
+  const contentTypeActions = useMemo(() => {
+    const contentTypesActionObject = get(
+      contentTypesPermissions,
+      [contentType.uid, 'contentTypeActions'],
+      {}
+    );
+
+    return Object.keys(contentTypesActionObject).filter(
+      action => !!contentTypesActionObject[action]
+    );
   }, [contentType, contentTypesPermissions]);
 
   // Number of all actions in the current content type.
   const allCurrentActionsSize = useMemo(() => {
     return (
       getAllAttributesActionsSize(contentType.uid, contentTypesPermissions) +
-      contentTypeActions.length
+      numberOfContentTypeActions
     );
-  }, [contentType, contentTypeActions, contentTypesPermissions]);
+  }, [contentType, numberOfContentTypeActions, contentTypesPermissions]);
 
   // Attributes to display : Liste of attributes of in the content type without timestamps and id
   // Used to display the first level of attributes.
@@ -133,7 +149,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
               name={contentType.name}
               disabled={isSuperAdmin}
               someChecked={
-                contentTypeActions.length > 0 &&
+                numberOfContentTypeActions > 0 &&
                 allCurrentActionsSize > 0 &&
                 allCurrentActionsSize < allActionsSize
               }
@@ -182,11 +198,17 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
               )
             )}
           </PermissionWrapper>
+          <SettingsButton onClick={() => setOpenModal(true)} />
         </Flex>
       </StyledRow>
       {isActive && (
         <ContentTypesAttributes contentType={contentType} attributes={attributesToDisplay} />
       )}
+      <ConditionsModal
+        actions={contentTypeActions}
+        toggle={() => setOpenModal(!modalOpened)}
+        isOpen={modalOpened}
+      />
     </>
   );
 };

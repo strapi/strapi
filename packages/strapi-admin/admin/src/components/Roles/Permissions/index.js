@@ -1,4 +1,4 @@
-import React, { useReducer, forwardRef, useMemo, useImperativeHandle } from 'react';
+import React, { useReducer, useEffect, forwardRef, useMemo, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 
 import Tabs from '../Tabs';
@@ -16,6 +16,10 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
   const [state, dispatch] = useReducer(reducer, initialState, state =>
     init(state, permissionsLayout, rolePermissions)
   );
+
+  useEffect(() => {
+    console.log(state.contentTypesPermissions);
+  }, [state.contentTypesPermissions]);
 
   useImperativeHandle(ref, () => ({
     getPermissions: () => {

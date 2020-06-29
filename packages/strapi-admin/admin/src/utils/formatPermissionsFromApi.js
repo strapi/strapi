@@ -35,7 +35,13 @@ const formatPermissionsFromApi = data => {
               ...subjectAcc.contentTypeActions,
               [current.action]: true,
             },
-            conditions: current.conditions,
+            conditions: {
+              ...subjectAcc.conditions,
+              [current.action]: [
+                ...get(subjectAcc, ['conditions', current.action], []),
+                ...current.conditions,
+              ],
+            },
           },
         },
       };
