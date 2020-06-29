@@ -9,6 +9,7 @@ import pluginId from '../../pluginId';
 import useEditView from '../../hooks/useEditView';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
+import NotAllowedInput from '../NotAllowedInput';
 import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
 import select from './utils/select';
@@ -29,6 +30,7 @@ const FieldComponent = ({
   min,
   name,
   // Passed thanks to the connect function
+  hasChildrenAllowedFields,
   componentValue,
   removeComponentFromField,
 }) => {
@@ -40,6 +42,14 @@ const FieldComponent = ({
   const currentComponentSchema = get(allLayoutData, ['components', componentUid], {});
 
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
+
+  if (!hasChildrenAllowedFields) {
+    return (
+      <div className="col-12">
+        <NotAllowedInput label={label} />
+      </div>
+    );
+  }
 
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
@@ -102,6 +112,7 @@ const FieldComponent = ({
 FieldComponent.defaultProps = {
   componentValue: null,
   componentFriendlyName: null,
+  hasChildrenAllowedFields: false,
   icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
@@ -114,6 +125,7 @@ FieldComponent.propTypes = {
   componentFriendlyName: PropTypes.string,
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  hasChildrenAllowedFields: PropTypes.bool,
   icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
   isRepeatable: PropTypes.bool,
