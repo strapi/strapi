@@ -8,6 +8,7 @@ function useSelect({ isFromDynamicZone, name }) {
     isCreatingEntry,
     modifiedData,
     removeComponentFromField,
+    readActionAllowedFields,
     updateActionAllowedFields,
   } = useDataManager();
 
@@ -31,8 +32,39 @@ function useSelect({ isFromDynamicZone, name }) {
     return relatedChildrenAllowedFields.length > 0;
   }, [allowedFields, isFromDynamicZone, name]);
 
+  const hasChildrenReadableFields = useMemo(() => {
+    if (isFromDynamicZone) {
+      return true;
+    }
+
+    const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
+
+    const relatedChildrenAllowedFields = allowedFields
+      .map(fieldName => {
+        return fieldName.split('.')[0];
+      })
+      .filter(fieldName => fieldName === name.split('.')[0]);
+
+    return relatedChildrenAllowedFields.length > 0;
+  }, [readActionAllowedFields, isFromDynamicZone, name, isCreatingEntry]);
+
+  const isReadOnly = useMemo(() => {
+    if (isCreatingEntry) {
+      return false;
+    }
+
+    if (hasChildrenAllowedFields) {
+      return false;
+    }
+
+    return hasChildrenReadableFields;
+  }, [hasChildrenAllowedFields, hasChildrenReadableFields, isCreatingEntry]);
+
   return {
     hasChildrenAllowedFields,
+    hasChildrenReadableFields,
+    isCreatingEntry,
+    isReadOnly,
     removeComponentFromField,
     componentValue,
   };

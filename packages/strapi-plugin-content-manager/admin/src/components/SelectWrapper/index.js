@@ -18,7 +18,9 @@ function SelectWrapper({
   description,
   editable,
   label,
+  isCreatingEntry,
   isFieldAllowed,
+  isFieldReadable,
   mainField,
   name,
   relationType,
@@ -182,7 +184,23 @@ function SelectWrapper({
     },
   };
 
-  if (!isFieldAllowed) {
+  const isDisabled = useMemo(() => {
+    if (isMorph) {
+      return true;
+    }
+
+    if (!isCreatingEntry) {
+      return !isFieldAllowed && isFieldReadable;
+    }
+
+    return !editable;
+  });
+
+  if (!isFieldAllowed && isCreatingEntry) {
+    return <NotAllowedInput label={label} />;
+  }
+
+  if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
     return <NotAllowedInput label={label} />;
   }
 
@@ -205,7 +223,7 @@ function SelectWrapper({
           addRelation({ target: { name, value } });
         }}
         id={name}
-        isDisabled={!editable || isMorph}
+        isDisabled={isDisabled}
         isLoading={isLoading}
         isClearable
         mainField={mainField}
@@ -249,7 +267,9 @@ SelectWrapper.propTypes = {
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
+  isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
+  isFieldReadable: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,

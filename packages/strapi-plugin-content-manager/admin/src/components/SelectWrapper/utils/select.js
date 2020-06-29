@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import useDataManager from '../../../hooks/useDataManager';
 
-function useSelect({ isUserAllowedToEditField, name }) {
+function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name }) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
+    readActionAllowedFields,
     updateActionAllowedFields,
   } = useDataManager();
 
@@ -24,8 +25,20 @@ function useSelect({ isUserAllowedToEditField, name }) {
     updateActionAllowedFields,
   ]);
 
+  const isFieldReadable = useMemo(() => {
+    if (isUserAllowedToReadField) {
+      return true;
+    }
+
+    const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
+
+    return allowedFields.includes(name);
+  }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
+
   return {
+    isCreatingEntry,
     isFieldAllowed,
+    isFieldReadable,
   };
 }
 

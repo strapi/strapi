@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_blog_reps",
+  "info": {
+    "name": "rep",
+    "icon": "american-sign-language-interpreting"
+  },
+  "options": {},
+  "attributes": {
+    "reprep": {
+      "type": "component",
+      "repeatable": true,
+      "component": "blog.reprep"
+    }
+  }
+}

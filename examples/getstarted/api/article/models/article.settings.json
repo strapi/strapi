@@ -33,8 +33,18 @@
     "address": {
       "model": "address"
     },
-    "address2": {
-      "model": "address"
+    "category": {
+      "model": "category"
+    },
+    "rep": {
+      "type": "component",
+      "repeatable": true,
+      "component": "blog.rep"
+    },
+    "not": {
+      "type": "component",
+      "repeatable": false,
+      "component": "blog.sub"
     }
   }
 }

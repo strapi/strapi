@@ -8,6 +8,9 @@
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "email": {
+      "type": "email"
     }
   }
 }

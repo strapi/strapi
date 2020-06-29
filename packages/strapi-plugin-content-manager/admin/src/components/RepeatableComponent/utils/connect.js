@@ -2,7 +2,7 @@ import React from 'react';
 
 function connect(WrappedComponent, select) {
   return function(props) {
-    const selectors = select();
+    const selectors = select(props);
 
     return <WrappedComponent {...props} {...selectors} />;
   };
