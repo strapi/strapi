@@ -78,7 +78,7 @@ const EditViewDataManagerProvider = ({
       return false;
     }
 
-    if (isCreatingEntry && !canCreate) {
+    if (isCreatingEntry && canCreate === false) {
       return true;
     }
 
