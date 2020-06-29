@@ -22,6 +22,9 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | getRecursivePermissions', () => {
           'componentAttribute.picture': {
             actions: ['create', 'edit', 'update'],
           },
+          componentAttribute2: {
+            actions: ['create', 'edit', 'update'],
+          },
         },
       },
     };
