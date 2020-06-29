@@ -71,7 +71,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
         ]
       }
     },
@@ -82,7 +82,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
         ]
       }
     },
@@ -93,7 +93,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
         ]
       }
     },
@@ -104,7 +104,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.create"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.create"]]
         ]
       }
     },
@@ -115,7 +115,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.update"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
         ]
       }
     },
@@ -126,7 +126,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.delete"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
         ]
       }
     },
@@ -137,7 +137,7 @@
       "config": {
         "policies": [
           "routing",
-          ["admin::hasPermissions", ["plugins::content-manager.explorer.delete"]]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
         ]
       }
     }
