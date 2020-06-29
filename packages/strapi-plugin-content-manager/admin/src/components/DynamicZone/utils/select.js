@@ -13,6 +13,7 @@ function useSelect(name) {
     moveComponentUp,
     moveComponentDown,
     removeComponentFromDynamicZone,
+    updateActionAllowedFields,
   } = useDataManager();
 
   const dynamicDisplayedComponents = useMemo(
@@ -21,10 +22,10 @@ function useSelect(name) {
   );
 
   const isFieldAllowed = useMemo(() => {
-    const allowedFields = isCreatingEntry ? createActionAllowedFields : [];
+    const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
 
     return allowedFields.includes(name);
-  }, [name, isCreatingEntry, createActionAllowedFields]);
+  }, [name, isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
 
   return {
     addComponentToDynamicZone,

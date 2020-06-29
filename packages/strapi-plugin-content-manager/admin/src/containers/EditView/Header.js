@@ -52,7 +52,9 @@ const Header = () => {
   /* eslint-enable indent */
 
   const headerTitle = useMemo(() => {
-    return isSingleType ? currentContentTypeName : entryHeaderTitle;
+    const title = isSingleType ? currentContentTypeName : entryHeaderTitle;
+
+    return title || currentContentTypeName;
   }, [currentContentTypeName, entryHeaderTitle, isSingleType]);
 
   const headerActions = useMemo(() => {
