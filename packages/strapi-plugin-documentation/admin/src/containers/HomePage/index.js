@@ -209,7 +209,9 @@ export class HomePage extends React.Component {
                 </div>
               </CopyToClipboard>
             </Block>
-            <Block>{form.map(this.renderForm)}</Block>
+            <CheckPermissions permissions={pluginPermissions.update}>
+              <Block>{form.map(this.renderForm)}</Block>
+            </CheckPermissions>
             <Block title={getTrad('containers.HomePage.Block.title')}>
               <VersionWrapper>
                 <Row isHeader />
