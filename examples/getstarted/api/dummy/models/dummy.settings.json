@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "dummies",
+  "info": {
+    "name": "dummy"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "notrequired": {
+      "type": "string"
+    },
+    "required": {
+      "type": "component",
+      "repeatable": true,
+      "component": "default.dish",
+      "required": false,
+      "min": 1
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "default.dish"
+      ],
+      "required": true,
+      "min": 1
+    },
+    "dz2": {
+      "type": "dynamiczone",
+      "components": [
+        "blog.subsub"
+      ],
+      "min": 2
+    }
+  }
+}

@@ -8,7 +8,7 @@
   "attributes": {
     "name": {
       "type": "string",
-      "required": true,
+      "required": false,
       "default": "My super dish"
     },
     "description": {

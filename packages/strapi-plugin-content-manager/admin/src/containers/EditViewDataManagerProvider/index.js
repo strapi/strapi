@@ -70,8 +70,6 @@ const EditViewDataManagerProvider = ({
       },
     ]);
 
-    console.log({ dataManager: get(matchingPermissions, ['0', 'fields'], []) });
-
     return get(matchingPermissions, ['0', 'fields'], []);
   }, [userPermissions, slug]);
 
@@ -88,16 +86,19 @@ const EditViewDataManagerProvider = ({
   }, [isLoadingForPermissions, isCreatingEntry, canCreate]);
 
   // TODO
-  // const updateActionMatchingPermissions = useMemo(
-  //   () =>
-  //     findMatchingPermissions(userPermissions, [
-  //       {
-  //         action: 'plugins::content-manager.explorer.update',
-  //         subject: slug,
-  //       },
-  //     ]),
-  //   [slug, userPermissions]
-  // );
+  const updateActionAllowedFields = useMemo(() => {
+    const matchingPermissions = findMatchingPermissions(userPermissions, [
+      {
+        action: 'plugins::content-manager.explorer.update',
+        subject: slug,
+      },
+    ]);
+
+    return get(matchingPermissions, ['0', 'fields'], []);
+  }, [slug, userPermissions]);
+
+  console.log('dataManager', { createActionAllowedFields, updateActionAllowedFields });
+
   // const readMatchingPermissions = useMemo(
   //   () =>
   //     findMatchingPermissions(userPermissions, [
@@ -115,6 +116,8 @@ const EditViewDataManagerProvider = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldCheckErrors]);
+
+  console.log({ modifiedData });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -537,6 +540,8 @@ const EditViewDataManagerProvider = ({
     return <Redirect to="/" />;
   }
 
+  console.log({ modifiedData });
+
   return (
     <EditViewDataManagerContext.Provider
       value={{
@@ -570,6 +575,7 @@ const EditViewDataManagerProvider = ({
         shouldShowLoadingState,
         slug,
         triggerFormValidation,
+        updateActionAllowedFields,
       }}
     >
       {showLoader ? (

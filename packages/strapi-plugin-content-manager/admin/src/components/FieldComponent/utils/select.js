@@ -8,11 +8,12 @@ function useSelect({ isFromDynamicZone, name }) {
     isCreatingEntry,
     modifiedData,
     removeComponentFromField,
+    updateActionAllowedFields,
   } = useDataManager();
 
   const allowedFields = useMemo(() => {
-    return isCreatingEntry ? createActionAllowedFields : [];
-  }, [isCreatingEntry, createActionAllowedFields]);
+    return isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
+  }, [isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
 
   const componentValue = get(modifiedData, name, null);
 
