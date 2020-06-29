@@ -41,12 +41,13 @@ const ModalCreateBody = forwardRef(
       e.persist();
       e.preventDefault();
       const errors = await checkFormValidity(modifiedData, schema);
-      setIsSubmiting(true);
 
       if (!errors) {
         try {
           // Prevent user interactions until the request is completed
           strapi.lockAppWithOverlay();
+
+          setIsSubmiting(true);
 
           const requestURL = '/admin/users';
           const cleanedRoles = modifiedData.roles.map(role => role.id);
