@@ -128,7 +128,7 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
               onClick={handleClickToggleModal}
             />
           )}
-          {!hasNoValue && (
+          {!hasNoValue && !disabled && (
             <>
               <CheckPermissions permissions={pluginPermissions.update}>
                 <CardControl
@@ -155,7 +155,7 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
           )}
         </CardControlWrapper>
         {hasNoValue ? (
-          <EmptyInputMedia onClick={handleClickToggleModal}>
+          <EmptyInputMedia onClick={handleClickToggleModal} disabled={disabled}>
             <IconUpload />
             <EmptyText id={getTrad('input.placeholder')} />
           </EmptyInputMedia>
