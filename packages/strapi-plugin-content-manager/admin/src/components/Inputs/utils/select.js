@@ -4,16 +4,18 @@ import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
 
 function useSelect(keys) {
   const {
-    modifiedData,
-    formErrors,
-    onChange,
-    isCreatingEntry,
     createActionAllowedFields,
+    formErrors,
+    isCreatingEntry,
+    modifiedData,
+    onChange,
   } = useContext(EditViewDataManagerContext);
-  const value = get(modifiedData, keys, null);
+
   const allowedFields = useMemo(() => {
     return isCreatingEntry ? createActionAllowedFields : [];
   }, [isCreatingEntry, createActionAllowedFields]);
+
+  const value = get(modifiedData, keys, null);
 
   return {
     allowedFields,
