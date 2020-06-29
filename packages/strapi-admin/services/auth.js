@@ -1,6 +1,8 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const _ = require('lodash');
+const { getAbsoluteAdminUrl } = require('strapi-utils');
 
 /**
  * hashes a password
@@ -43,15 +45,6 @@ const checkCredentials = async ({ email, password }) => {
   return [null, user];
 };
 
-const resetEmailTemplate = url => `
-<p>We heard that you lost your password. Sorry about that!</p>
-
-<p>But don’t worry! You can use the following link to reset your password:</p>
-
-<p>${url}</p>
-
-<p>Thanks.</p>`;
-
 /**
  * Send an email to the user if it exists or do nothing
  * @param {Object} param params
@@ -67,17 +60,23 @@ const forgotPassword = async ({ email } = {}) => {
   const resetPasswordToken = strapi.admin.services.token.createToken();
   await strapi.admin.services.user.updateById(user.id, { resetPasswordToken });
 
-  const url = `${strapi.config.admin.url}/auth/reset-password?code=${resetPasswordToken}`;
-  const body = resetEmailTemplate(url);
-
   // Send an email to the admin.
-  return strapi.plugins['email'].services.email
-    .send({
-      to: user.email,
-      subject: 'Reset password',
-      text: body,
-      html: body,
-    })
+  const url = `${getAbsoluteAdminUrl(
+    strapi.config
+  )}/auth/reset-password?code=${resetPasswordToken}`;
+  return strapi.plugins.email.services.email
+    .sendTemplatedEmail(
+      {
+        to: user.email,
+        from: strapi.config.get('server.admin.forgotPassword', {}).from,
+        replyTo: strapi.config.get('server.admin.forgotPassword', {}).replyTo,
+      },
+      strapi.config.get('server.admin.forgotPassword', {}).emailTemplate,
+      {
+        url,
+        user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
+      }
+    )
     .catch(err => {
       // log error server side but do not disclose it to the user to avoid leaking informations
       strapi.log.error(err);
