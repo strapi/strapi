@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
+  auth,
   useQuery,
   request,
   useUserPermissions,
@@ -15,7 +16,7 @@ import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../compone
 import adminPermissions from '../../../permissions';
 import Header from './Header';
 import ModalForm from './ModalForm';
-import { getFilters, retrieveAdminUsers, retrieveNonAdminUsers } from './utils';
+import { getFilters, retrieveAdminUsers, retrieveNonAdminUsers, sortIds } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -173,6 +174,10 @@ const ListPage = () => {
     // Retrieve the users that have the admin role
     const adminUsersIdsToDelete = retrieveAdminUsers(dataToDelete, data);
 
+    const currentUserId = get(auth.getUserInfo(), 'id', null);
+    // Sort the ids by adding the current user one to the last index
+    const sortedAdminUsersIdsToDelete = sortIds(adminUsersIdsToDelete, currentUserId);
+
     // Retrieve the users that don't have the admin role
     const nonAdminUsersIdsToDelete = retrieveNonAdminUsers(dataToDelete, adminUsersIdsToDelete);
 
@@ -191,10 +196,10 @@ const ListPage = () => {
 
     await Promise.all(requests);
 
-    for (let i = 0; i < adminUsersIdsToDelete.length; i++) {
+    for (let i = 0; i < sortedAdminUsersIdsToDelete.length; i++) {
       try {
         // eslint-disable-next-line no-await-in-loop
-        await request(`/admin/users/${adminUsersIdsToDelete[i]}`, { method: 'DELETE' });
+        await request(`/admin/users/${sortedAdminUsersIdsToDelete[i]}`, { method: 'DELETE' });
 
         shouldDispatchSucceededAction = true;
       } catch (err) {
@@ -235,6 +240,8 @@ const ListPage = () => {
   if (isLoadingForPermissions) {
     return <LoadingIndicatorPage />;
   }
+
+  console.log(auth.getUserInfo());
 
   return (
     <div>
