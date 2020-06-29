@@ -1,6 +1,6 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { get } from 'lodash';
-import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
+import useDataManager from '../../../hooks/useDataManager';
 
 function useSelect(name) {
   const {
@@ -13,7 +13,7 @@ function useSelect(name) {
     moveComponentUp,
     moveComponentDown,
     removeComponentFromDynamicZone,
-  } = useContext(EditViewDataManagerContext);
+  } = useDataManager();
 
   const dynamicDisplayedComponents = useMemo(
     () => get(modifiedData, [name], []).map(data => data.__component),

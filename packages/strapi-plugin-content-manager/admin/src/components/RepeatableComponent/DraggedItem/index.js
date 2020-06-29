@@ -1,17 +1,17 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import useEditView from '../../hooks/useEditView';
-import ItemTypes from '../../utils/ItemTypes';
-import Inputs from '../Inputs';
-import FieldComponent from '../FieldComponent';
-import Banner from './Banner';
-import FormWrapper from './FormWrapper';
+import useEditView from '../../../hooks/useEditView';
+import ItemTypes from '../../../utils/ItemTypes';
+import Inputs from '../../Inputs';
+import FieldComponent from '../../FieldComponent';
+import Banner from '../Banner';
+import FormWrapper from '../FormWrapper';
+import { connect, select } from './utils';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -257,38 +257,6 @@ DraggedItem.propTypes = {
   checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
 };
-
-function select({ schema, componentFieldName }) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const {
-    checkFormErrors,
-    modifiedData,
-    moveComponentField,
-    removeRepeatableField,
-    triggerFormValidation,
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-  } = useContext(EditViewDataManagerContext);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
-  const displayedValue = get(modifiedData, [...componentFieldName.split('.'), mainField], '');
-
-  return {
-    displayedValue,
-    mainField,
-    checkFormErrors,
-    moveComponentField,
-    removeRepeatableField,
-    triggerFormValidation,
-  };
-}
-
-function connect(WrappedComponent, select) {
-  return function(props) {
-    const selectors = select(props);
-
-    return <WrappedComponent {...props} {...selectors} />;
-  };
-}
 
 const Memoized = memo(DraggedItem);
 

@@ -1,9 +1,8 @@
-import { useContext, useMemo } from 'react';
-
-import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
+import { useMemo } from 'react';
+import useDataManager from '../../../hooks/useDataManager';
 
 function useSelect({ isUserAllowedToEditField, name }) {
-  const { isCreatingEntry, createActionAllowedFields } = useContext(EditViewDataManagerContext);
+  const { isCreatingEntry, createActionAllowedFields } = useDataManager();
 
   const isFieldAllowed = useMemo(() => {
     if (isUserAllowedToEditField === true) {

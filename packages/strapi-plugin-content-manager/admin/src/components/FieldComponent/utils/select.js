@@ -1,6 +1,6 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { get } from 'lodash';
-import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
+import useDataManager from '../../../hooks/useDataManager';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {
@@ -8,7 +8,7 @@ function useSelect({ isFromDynamicZone, name }) {
     isCreatingEntry,
     modifiedData,
     removeComponentFromField,
-  } = useContext(EditViewDataManagerContext);
+  } = useDataManager();
 
   const allowedFields = useMemo(() => {
     return isCreatingEntry ? createActionAllowedFields : [];
