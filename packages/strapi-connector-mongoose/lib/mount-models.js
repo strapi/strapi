@@ -27,6 +27,20 @@ module.exports = ({ models, target }, ctx) => {
       primaryKeyType: 'string',
     });
 
+    if (!definition.uid.startsWith('strapi::')) {
+      definition.attributes['created_by'] = {
+        autoPopulate: false,
+        model: 'user',
+        plugin: 'admin',
+      };
+
+      definition.attributes['updated_by'] = {
+        autoPopulate: false,
+        model: 'user',
+        plugin: 'admin',
+      };
+    }
+
     const componentAttributes = Object.keys(definition.attributes).filter(key =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );

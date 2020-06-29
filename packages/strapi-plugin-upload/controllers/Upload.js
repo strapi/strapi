@@ -41,6 +41,34 @@ const emptyFileError = () =>
     errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
   });
 
+// Assign created_by and updated_by on medias
+const setCreatorInfo = (ctx, files, { edition = false } = {}) => {
+  if (!Array.isArray(files)) files = [files];
+
+  return Promise.all(
+    files.map(file => {
+      if (ctx.state.isAuthenticatedAdmin) {
+        if (edition) {
+          return strapi.query('file', 'upload').update(
+            { id: file.id },
+            {
+              updated_by: ctx.state.user.id,
+            }
+          );
+        }
+
+        return strapi.query('file', 'upload').update(
+          { id: file.id },
+          {
+            created_by: ctx.state.user.id,
+            updated_by: ctx.state.user.id,
+          }
+        );
+      }
+    })
+  );
+};
+
 module.exports = {
   async upload(ctx) {
     if (isUploadDisabled()) {
@@ -54,8 +82,10 @@ module.exports = {
     if (id && (_.isEmpty(files) || files.size === 0)) {
       const data = await validateUploadBody(uploadSchema, ctx.request.body);
 
-      ctx.body = await strapi.plugins.upload.services.upload.updateFileInfo(id, data.fileInfo);
-      return;
+      const file = await strapi.plugins.upload.services.upload.updateFileInfo(id, data.fileInfo);
+
+      await setCreatorInfo(ctx, file, { edition: true });
+      return (ctx.body = file);
     }
 
     if (_.isEmpty(files) || files.size === 0) {
@@ -77,9 +107,13 @@ module.exports = {
         });
       }
 
-      ctx.body = await uploadService.replace(id, { data, file: files });
+      const file = await uploadService.replace(id, { data, file: files });
+      await setCreatorInfo(ctx, file, { edition: true });
+      ctx.body = file;
     } else {
-      ctx.body = await uploadService.upload({ data, files });
+      const file = await uploadService.upload({ data, files });
+      await setCreatorInfo(ctx, file);
+      ctx.body = file;
     }
   },
 

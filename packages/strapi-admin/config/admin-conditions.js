@@ -6,7 +6,7 @@ module.exports = {
       displayName: 'Is Creator',
       name: 'is-creator',
       plugin: 'admin',
-      handler: user => ({ 'created_by.id': user.id }),
+      handler: user => ({ created_by: user.id }),
     },
   ],
 };

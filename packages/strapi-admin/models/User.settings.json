@@ -30,14 +30,15 @@
       "minLength": 6,
       "configurable": false,
       "required": true,
-      "unique": true
+      "unique": true,
+      "private": true
     },
     "password": {
       "type": "password",
       "minLength": 6,
       "configurable": false,
-      "private": true,
-      "required": false
+      "required": false,
+      "private": true
     },
     "resetPasswordToken": {
       "type": "string",
@@ -46,12 +47,14 @@
     },
     "registrationToken": {
       "type": "string",
-      "configurable": false
+      "configurable": false,
+      "private": true
     },
     "isActive": {
       "type": "boolean",
       "default": false,
-      "configurable": false
+      "configurable": false,
+      "private": true
     },
     "roles": {
       "collection": "role",
@@ -64,7 +67,8 @@
     "blocked": {
       "type": "boolean",
       "default": false,
-      "configurable": false
+      "configurable": false,
+      "private": true
     }
   }
 }

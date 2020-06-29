@@ -3,7 +3,16 @@
 // contentTypes and components reserved names
 const RESERVED_MODEL_NAMES = ['admin', 'boolean', 'date', 'date-time', 'time', 'upload'];
 // attribute reserved names
-const RESERVED_ATTRIBUTE_NAMES = ['_id', 'id', 'length', 'attributes', 'relations', 'changed'];
+const RESERVED_ATTRIBUTE_NAMES = [
+  '_id',
+  'id',
+  'length',
+  'attributes',
+  'relations',
+  'changed',
+  'created_by',
+  'updated_by',
+];
 
 module.exports = {
   RESERVED_MODEL_NAMES,
