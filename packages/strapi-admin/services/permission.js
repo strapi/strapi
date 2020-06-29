@@ -151,11 +151,12 @@ const resetSuperAdminPermissions = async () => {
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
-  const permissions = strapi.admin.services[
-    'content-type'
-  ].getPermissionsWithNestedFields(contentTypesActions, 1, {
-    fieldsNullFor: ['plugins::content-manager.explorer.delete'],
-  });
+  const permissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
+    contentTypesActions,
+    {
+      fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+    }
+  );
 
   const otherActions = allActions.filter(a => a.section !== 'contentTypes');
   otherActions.forEach(action => {

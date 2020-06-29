@@ -11,7 +11,7 @@ const _ = require('lodash');
  * @param {object} options.components cotent-types and component where "contentTypeUid" can be found
  * @returns {array<string>}
  */
-const getNestedFields = (model, { fieldPath = '', nestingLevel = 3, components = {} }) => {
+const getNestedFields = (model, { fieldPath = '', nestingLevel = 15, components = {} }) => {
   if (nestingLevel === 0) {
     return fieldPath ? [fieldPath] : [];
   }
@@ -42,7 +42,7 @@ const getNestedFields = (model, { fieldPath = '', nestingLevel = 3, components =
  * @param {number} nestingLevel level of nesting
  * @returns {array<permissions>}
  */
-const getPermissionsWithNestedFields = (actions, nestingLevel = 3, { fieldsNullFor = [] } = {}) =>
+const getPermissionsWithNestedFields = (actions, { nestingLevel, fieldsNullFor = [] } = {}) =>
   actions.reduce((perms, action) => {
     action.subjects.forEach(contentTypeUid => {
       const fields = fieldsNullFor.includes(action.actionId)

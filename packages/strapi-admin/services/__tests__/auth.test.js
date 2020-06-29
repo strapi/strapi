@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const {
   validatePassword,
   hashPassword,
@@ -163,15 +165,25 @@ describe('Auth', () => {
       const updateById = jest.fn(() => Promise.resolve());
       const createToken = jest.fn(() => resetPasswordToken);
 
+      const config = {
+        server: {
+          host: '0.0.0.0',
+        },
+        admin: { url: '/admin' },
+      };
+
       global.strapi = {
         config: {
-          admin: { url: '/admin' },
+          ...config,
+          get(path, def) {
+            return _.get(path, def);
+          },
         },
         query() {
           return { findOne };
         },
         admin: { services: { user: { updateById }, token: { createToken } } },
-        plugins: { email: { services: { email: { send } } } },
+        plugins: { email: { services: { email: { send, sendTemplatedEmail: send } } } },
       };
 
       const input = { email: user.email };
@@ -191,18 +203,34 @@ describe('Auth', () => {
 
       const findOne = jest.fn(() => Promise.resolve(user));
       const send = jest.fn(() => Promise.resolve());
+      const sendTemplatedEmail = jest.fn(() => Promise.resolve());
       const updateById = jest.fn(() => Promise.resolve());
       const createToken = jest.fn(() => resetPasswordToken);
 
+      const config = {
+        server: {
+          host: '0.0.0.0',
+          admin: { url: '/admin', forgotPassword: { emailTemplate: {} } },
+        },
+      };
+
       global.strapi = {
         config: {
-          admin: { url: '/admin' },
+          ...config,
+          get(path, def) {
+            return _.get(path, def);
+          },
         },
         query() {
           return { findOne };
         },
-        admin: { services: { user: { updateById }, token: { createToken } } },
-        plugins: { email: { services: { email: { send } } } },
+        admin: {
+          services: {
+            user: { updateById },
+            token: { createToken },
+          },
+        },
+        plugins: { email: { services: { email: { send, sendTemplatedEmail } } } },
       };
 
       const input = { email: user.email };
@@ -210,11 +238,7 @@ describe('Auth', () => {
 
       expect(findOne).toHaveBeenCalled();
       expect(createToken).toHaveBeenCalled();
-      expect(send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: user.email,
-        })
-      );
+      expect(sendTemplatedEmail).toHaveBeenCalled();
     });
   });
 

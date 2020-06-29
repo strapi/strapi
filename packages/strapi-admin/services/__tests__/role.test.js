@@ -367,7 +367,7 @@ describe('Role', () => {
         code: 'strapi-author',
         description: 'Authors can manage and publish the content they created.',
       });
-      expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, 3, {
+      expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
         fieldsNullFor: ['plugins::content-manager.explorer.delete'],
       });
       expect(assign).toHaveBeenCalledTimes(2);
