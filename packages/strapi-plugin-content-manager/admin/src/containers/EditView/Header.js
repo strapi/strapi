@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header as PluginHeader } from '@buffetjs/custom';
-import { get, isEqual, toString } from 'lodash';
+import { get, isEqual, isEmpty, toString } from 'lodash';
 
 import { PopUpWarning, request, templateObject, useGlobalContext } from 'strapi-helper-plugin';
 
@@ -39,8 +39,8 @@ const Header = () => {
   ]);
   const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
   const didChangeData = useMemo(() => {
-    return !isEqual(initialData, modifiedData);
-  }, [initialData, modifiedData]);
+    return !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));
+  }, [initialData, isCreatingEntry, modifiedData]);
   const apiID = useMemo(() => layout.apiID, [layout.apiID]);
 
   /* eslint-disable indent */
