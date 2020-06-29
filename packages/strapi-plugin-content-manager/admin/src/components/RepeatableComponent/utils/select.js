@@ -1,8 +1,7 @@
-import { useContext } from 'react';
-import EditViewDataManagerContext from '../../../contexts/EditViewDataManager';
+import useDataManager from '../../../hooks/useDataManager';
 
 function useSelect() {
-  const { addRepeatableComponentToField, formErrors } = useContext(EditViewDataManagerContext);
+  const { addRepeatableComponentToField, formErrors } = useDataManager();
 
   return {
     addRepeatableComponentToField,
