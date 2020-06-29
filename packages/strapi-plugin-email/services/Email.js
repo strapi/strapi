@@ -26,12 +26,13 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
     );
   }
 
-  const templatedAttributes = {};
-  for (let attribute of attributes) {
-    if (emailTemplate[attribute]) {
-      templatedAttributes[attribute] = _.template(emailTemplate[attribute])(data);
-    }
-  }
+  const templatedAttributes = attributes.reduce(
+    (compiled, attribute) =>
+      emailTemplate[attribute]
+        ? Object.assign(compiled, { [attribute]: _.template(emailTemplate[attribute])(data) })
+        : compiled,
+    {}
+  );
 
   return strapi.plugins.email.provider.send({ ...emailOptions, ...templatedAttributes });
 };
