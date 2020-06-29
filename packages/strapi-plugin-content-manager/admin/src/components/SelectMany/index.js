@@ -95,10 +95,15 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
+                isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
                 moveRelation={moveRelation}
-                onRemove={() => onRemove(`${name}.${index}`)}
+                onRemove={() => {
+                  if (!isDisabled) {
+                    onRemove(`${name}.${index}`);
+                  }
+                }}
                 targetModel={targetModel}
               />
             ))}

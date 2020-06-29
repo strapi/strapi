@@ -26,6 +26,7 @@ const DraggedItem = ({
   hasErrors,
   hasMinError,
   isFirst,
+  isReadOnly,
   isOpen,
   moveCollapse,
   onClickToggle,
@@ -164,6 +165,7 @@ const DraggedItem = ({
         doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
         isDragging={isDragging}
         isOpen={isOpen}
+        isReadOnly={isReadOnly}
         onClickToggle={onClickToggle}
         onClickRemove={() => {
           removeRepeatableField(componentFieldName);
@@ -246,6 +248,7 @@ DraggedItem.propTypes = {
   hasMinError: PropTypes.bool,
   isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
+  isReadOnly: PropTypes.bool.isRequired,
   moveCollapse: PropTypes.func,
   onClickToggle: PropTypes.func.isRequired,
   removeCollapse: PropTypes.func.isRequired,

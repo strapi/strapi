@@ -5,7 +5,7 @@ const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
   padding: 0 20px !important;
 
-  ${({ isEmpty, isFromDynamicZone }) => {
+  ${({ isEmpty, isFromDynamicZone, isReadOnly }) => {
     if (isEmpty) {
       return `
       position: relative;
@@ -13,7 +13,7 @@ const NonRepeatableWrapper = styled.div`
       margin-bottom: 25px !important;
       background-color: #fafafb;
       text-align: center;
-      cursor: pointer;
+      cursor: ${isReadOnly ? 'not-allowed' : 'pointer'};
       border-radius: 2px;
 
       > button {
@@ -25,7 +25,7 @@ const NonRepeatableWrapper = styled.div`
         line-height: 38px;
         border-radius: 50%;
         background-color: #f3f4f4;
-        cursor: pointer;
+        cursor: ${isReadOnly ? 'not-allowed !important' : 'pointer'};
       }
       border: 1px solid transparent;
 
@@ -61,5 +61,9 @@ const NonRepeatableWrapper = styled.div`
   `;
   }}
 `;
+
+NonRepeatableWrapper.defaultProps = {
+  isReadOnly: false,
+};
 
 export default NonRepeatableWrapper;

@@ -6,13 +6,13 @@ import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
 import useEditView from '../../hooks/useEditView';
-
+import { getFieldName } from '../../utils';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
-import { connect, getFieldName, select } from './utils';
+import { connect, select } from './utils';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -69,12 +69,14 @@ const validationsToOmit = [
 function Inputs({
   allowedFields,
   autoFocus,
+  isCreatingEntry,
   keys,
   layout,
   name,
   onBlur,
   formErrors,
   onChange,
+  readableFields,
   value,
 }) {
   const {
@@ -157,6 +159,48 @@ function Inputs({
     return false;
   }, [allowedFields, fieldName, isChildOfDynamicZone]);
 
+  const isUserAllowedToReadField = useMemo(() => {
+    const joinedName = fieldName.join('.');
+
+    if (readableFields.includes(joinedName)) {
+      return true;
+    }
+
+    if (isChildOfDynamicZone) {
+      // TODO we can simply return true here if we block the dynamic zone
+
+      return readableFields.includes(fieldName[0]);
+    }
+
+    const isChildOfComponent = fieldName.length > 1;
+
+    if (isChildOfComponent) {
+      const parentFieldName = take(fieldName, fieldName.length - 1).join('.');
+
+      return readableFields.includes(parentFieldName);
+    }
+
+    return false;
+  }, [readableFields, fieldName, isChildOfDynamicZone]);
+
+  const shouldDisplayNotAllowedInput = useMemo(() => {
+    return isUserAllowedToReadField || isUserAllowedToEditField;
+  }, [isUserAllowedToEditField, isUserAllowedToReadField]);
+
+  const shouldDisableField = useMemo(() => {
+    if (!isCreatingEntry) {
+      const doesNotHaveRight = isUserAllowedToReadField && !isUserAllowedToEditField;
+
+      if (doesNotHaveRight) {
+        return true;
+      }
+
+      return disabled;
+    }
+
+    return disabled;
+  }, [disabled, isCreatingEntry, isUserAllowedToEditField, isUserAllowedToReadField]);
+
   const options = useMemo(() => {
     return get(attribute, 'enum', []).map(v => {
       return (
@@ -185,7 +229,7 @@ function Inputs({
     return null;
   }
 
-  if (!isUserAllowedToEditField) {
+  if (!shouldDisplayNotAllowedInput) {
     return <NotAllowedInput label={metadatas.label} />;
   }
 
@@ -195,6 +239,7 @@ function Inputs({
         <SelectWrapper
           {...metadatas}
           isUserAllowedToEditField={isUserAllowedToEditField}
+          isUserAllowedToReadField={isUserAllowedToReadField}
           name={keys}
           plugin={attribute.plugin}
           relationType={attribute.relationType}
@@ -224,7 +269,7 @@ function Inputs({
             {...metadatas}
             autoComplete="new-password"
             autoFocus={autoFocus}
-            disabled={disabled}
+            disabled={shouldDisableField}
             error={
               isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
                 ? null
@@ -269,10 +314,12 @@ Inputs.propTypes = {
   autoFocus: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
+  isCreatingEntry: PropTypes.bool.isRequired,
   formErrors: PropTypes.object,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
+  readableFields: PropTypes.array.isRequired,
   value: PropTypes.any,
 };
 

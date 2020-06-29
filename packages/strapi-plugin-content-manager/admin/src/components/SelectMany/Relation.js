@@ -9,10 +9,12 @@ import { Span } from './components';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
-const Relation = ({ data, mainField, onRemove, to }) => {
+const Relation = ({ data, isDisabled, mainField, onRemove, to }) => {
+  const cursor = isDisabled ? 'not-allowed' : 'pointer';
+
   return (
     <>
-      <div style={{ cursor: 'pointer' }}>
+      <div style={{ cursor }}>
         <div className="dragHandle">
           <span />
         </div>
@@ -24,7 +26,7 @@ const Relation = ({ data, mainField, onRemove, to }) => {
           )}
         </FormattedMessage>
       </div>
-      <div style={{ cursor: 'pointer' }}>
+      <div style={{ cursor }}>
         <img src={IconRemove} alt="Remove Icon" onClick={onRemove} />
       </div>
     </>
@@ -38,6 +40,7 @@ Relation.defaultProps = {
 
 Relation.propTypes = {
   data: PropTypes.object.isRequired,
+  isDisabled: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   onRemove: PropTypes.func,
   to: PropTypes.string,

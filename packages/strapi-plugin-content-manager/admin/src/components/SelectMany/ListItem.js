@@ -9,7 +9,15 @@ import ItemTypes from '../../utils/ItemTypes';
 import { Li } from './components';
 import Relation from './Relation';
 
-function ListItem({ data, findRelation, mainField, moveRelation, onRemove, targetModel }) {
+function ListItem({
+  data,
+  findRelation,
+  isDisabled,
+  mainField,
+  moveRelation,
+  onRemove,
+  targetModel,
+}) {
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
 
   const originalIndex = findRelation(data.id).index;
@@ -43,8 +51,21 @@ function ListItem({ data, findRelation, mainField, moveRelation, onRemove, targe
   const opacity = isDragging ? 0.2 : 1;
 
   return (
-    <Li ref={node => drag(drop(node))} style={{ opacity }}>
-      <Relation mainField={mainField} onRemove={onRemove} data={data} to={to} />
+    <Li
+      ref={node => {
+        if (!isDisabled) {
+          drag(drop(node));
+        }
+      }}
+      style={{ opacity }}
+    >
+      <Relation
+        mainField={mainField}
+        onRemove={onRemove}
+        data={data}
+        to={to}
+        isDisabled={isDisabled}
+      />
     </Li>
   );
 }
@@ -59,6 +80,7 @@ ListItem.defaultProps = {
 ListItem.propTypes = {
   data: PropTypes.object.isRequired,
   findRelation: PropTypes.func,
+  isDisabled: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   moveRelation: PropTypes.func,
   onRemove: PropTypes.func,

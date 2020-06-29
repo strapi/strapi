@@ -24,6 +24,7 @@ const RepeatableComponent = ({
   componentValueLength,
   fields,
   isNested,
+  isReadOnly,
   max,
   min,
   name,
@@ -88,6 +89,7 @@ const RepeatableComponent = ({
                 hasErrors={hasErrors}
                 hasMinError={hasMinError}
                 isFirst={index === 0}
+                isReadOnly={isReadOnly}
                 isOpen={get(collapses, [index, 'isOpen'], false)}
                 key={get(collapses, [index, '_temp__id'], null)}
                 onClickToggle={() => {
@@ -116,6 +118,7 @@ const RepeatableComponent = ({
       </div>
       <Button
         hasMinError={hasMinError}
+        disabled={isReadOnly}
         withBorderRadius={false}
         doesPreviousFieldContainErrorsAndIsClosed={
           componentValueLength > 0 &&
@@ -124,17 +127,19 @@ const RepeatableComponent = ({
         }
         type="button"
         onClick={() => {
-          if (componentValueLength < max) {
-            const shouldCheckErrors = hasMinError;
+          if (!isReadOnly) {
+            if (componentValueLength < max) {
+              const shouldCheckErrors = hasMinError;
 
-            addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
-            dispatch({
-              type: 'ADD_NEW_FIELD',
-            });
-          } else if (componentValueLength >= max) {
-            strapi.notification.info(
-              `${pluginId}.components.notification.info.maximum-requirement`
-            );
+              addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
+              dispatch({
+                type: 'ADD_NEW_FIELD',
+              });
+            } else if (componentValueLength >= max) {
+              strapi.notification.info(
+                `${pluginId}.components.notification.info.maximum-requirement`
+              );
+            }
           }
         }}
       >
@@ -173,6 +178,7 @@ RepeatableComponent.propTypes = {
   fields: PropTypes.array,
   formErrors: PropTypes.object,
   isNested: PropTypes.bool,
+  isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,

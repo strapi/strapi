@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { get } from 'lodash';
+import { get, toString } from 'lodash';
 import useDataManager from '../../../../hooks/useDataManager';
 
 function useSelect({ schema, componentFieldName }) {
@@ -12,7 +12,9 @@ function useSelect({ schema, componentFieldName }) {
   } = useDataManager();
 
   const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
-  const displayedValue = get(modifiedData, [...componentFieldName.split('.'), mainField], '');
+  const displayedValue = toString(
+    get(modifiedData, [...componentFieldName.split('.'), mainField], '')
+  );
 
   return {
     displayedValue,

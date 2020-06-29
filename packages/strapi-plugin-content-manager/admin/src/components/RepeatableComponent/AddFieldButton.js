@@ -40,7 +40,7 @@ const Button = styled.button`
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
   line-height: normal;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background-color: #fff;

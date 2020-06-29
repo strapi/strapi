@@ -9,6 +9,7 @@ function useSelect(keys) {
     isCreatingEntry,
     modifiedData,
     onChange,
+    readActionAllowedFields,
     updateActionAllowedFields,
   } = useDataManager();
 
@@ -16,12 +17,18 @@ function useSelect(keys) {
     return isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
   }, [isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
 
+  const readableFields = useMemo(() => {
+    return isCreatingEntry ? [] : readActionAllowedFields;
+  }, [isCreatingEntry, readActionAllowedFields]);
+
   const value = get(modifiedData, keys, null);
 
   return {
     allowedFields,
     formErrors,
+    isCreatingEntry,
     onChange,
+    readableFields,
     value,
   };
 }

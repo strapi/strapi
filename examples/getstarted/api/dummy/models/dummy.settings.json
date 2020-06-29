@@ -11,7 +11,7 @@
   "attributes": {
     "name": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "notrequired": {
       "type": "string"
@@ -27,16 +27,12 @@
       "type": "dynamiczone",
       "components": [
         "default.dish"
-      ],
-      "required": true,
-      "min": 1
+      ]
     },
-    "dz2": {
-      "type": "dynamiczone",
-      "components": [
-        "blog.subsub"
-      ],
-      "min": 2
+    "not": {
+      "type": "component",
+      "repeatable": false,
+      "component": "blog.sub"
     }
   }
 }

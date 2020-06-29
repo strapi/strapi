@@ -1,6 +1,6 @@
 import getFieldName from '../getFieldName';
 
-describe('CONTENT MANAGER | COMPONENTS | INPUTS | UTILS | getFieldName', () => {
+describe('CONTENT MANAGER | UTILS | getFieldName', () => {
   it('should return an array with path of the field name', () => {
     expect(getFieldName('test')).toEqual(['test']);
 

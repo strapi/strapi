@@ -13,6 +13,7 @@ function useSelect(name) {
     moveComponentUp,
     moveComponentDown,
     removeComponentFromDynamicZone,
+    readActionAllowedFields,
     updateActionAllowedFields,
   } = useDataManager();
 
@@ -27,11 +28,19 @@ function useSelect(name) {
     return allowedFields.includes(name);
   }, [name, isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
 
+  const isFieldReadable = useMemo(() => {
+    const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
+
+    return allowedFields.includes(name);
+  }, [name, isCreatingEntry, readActionAllowedFields]);
+
   return {
     addComponentToDynamicZone,
     formErrors,
     layout,
+    isCreatingEntry,
     isFieldAllowed,
+    isFieldReadable,
     moveComponentUp,
     moveComponentDown,
     removeComponentFromDynamicZone,
