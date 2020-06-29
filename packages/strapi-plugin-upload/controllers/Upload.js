@@ -178,11 +178,9 @@ module.exports = {
   async search(ctx) {
     const { id } = ctx.params;
 
-    const data = await strapi.query('file', 'upload').custom(searchQueries)({
+    ctx.body = await strapi.query('file', 'upload').custom(searchQueries)({
       id,
     });
-
-    ctx.body = data;
   },
 };
 

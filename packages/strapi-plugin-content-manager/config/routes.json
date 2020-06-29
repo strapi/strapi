@@ -69,7 +69,10 @@
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.read"]]
+        ]
       }
     },
     {
@@ -77,7 +80,10 @@
       "path": "/explorer/:model/count",
       "handler": "ContentManager.count",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.read"]]
+        ]
       }
     },
     {
@@ -85,7 +91,10 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.read"]]
+        ]
       }
     },
     {
@@ -93,7 +102,10 @@
       "path": "/explorer/:model",
       "handler": "ContentManager.create",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.create"]]
+        ]
       }
     },
     {
@@ -101,7 +113,10 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.update",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.edit"]]
+        ]
       }
     },
     {
@@ -109,7 +124,10 @@
       "path": "/explorer/deleteAll/:model",
       "handler": "ContentManager.deleteMany",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.delete"]]
+        ]
       }
     },
     {
@@ -117,7 +135,10 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.delete",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          ["admin::hasPermissions", ["plugins::content-manager.delete"]]
+        ]
       }
     }
   ]

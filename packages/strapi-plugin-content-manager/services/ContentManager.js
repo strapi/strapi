@@ -6,7 +6,7 @@ const _ = require('lodash');
  * A set of functions called "actions" for `ContentManager`
  */
 module.exports = {
-  fetchAll(params, query) {
+  fetchAll(model, query, params = {}) {
     const { query: request, populate, ...filters } = query;
 
     const queryFilter = !_.isEmpty(request)
@@ -16,17 +16,21 @@ module.exports = {
         }
       : filters;
 
-    return strapi.entityService.find({ params: queryFilter, populate }, { model: params.model });
+    return strapi.entityService.find(
+      {
+        params: { ...queryFilter, ...params },
+        populate,
+      },
+      { model }
+    );
   },
 
-  fetch(params, populate) {
-    const { id, model } = params;
+  fetch(model, id, config = {}) {
+    const { params = {}, populate } = config;
 
     return strapi.entityService.findOne(
       {
-        params: {
-          id,
-        },
+        params: { ...params, id },
         populate,
       },
       { model }
@@ -48,24 +52,26 @@ module.exports = {
     return strapi.entityService.update({ params, data, files }, { model });
   },
 
-  delete(params) {
-    const { id, model } = params;
-    return strapi.entityService.delete({ params: { id } }, { model });
+  delete(model, id, params) {
+    return strapi.entityService.delete({ params: { _where: [{ id }, params] } }, { model });
   },
 
-  deleteMany(params, query) {
-    const { model } = params;
-
+  deleteMany(model, query, params) {
     const { primaryKey } = strapi.query(model);
-    const filter = { [`${primaryKey}_in`]: Object.values(query), _limit: 100 };
 
-    return strapi.entityService.delete({ params: filter }, { model });
+    return strapi.entityService.delete(
+      {
+        params: {
+          _limit: 100,
+          _where: [{ [`${primaryKey}_in`]: Object.values(query) }, params],
+        },
+      },
+      { model }
+    );
   },
 
-  search(params, query) {
-    const { model } = params;
-
-    return strapi.entityService.search({ params: query }, { model });
+  search(model, query, params) {
+    return strapi.entityService.search({ params: { ...query, ...params } }, { model });
   },
 
   countSearch(params, query) {
