@@ -100,7 +100,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-- NodeJS >= 10.x
+- NodeJS >= 10.10
 - NPM >= 6.x
 
 **Database:**

@@ -1,12 +1,12 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=10.0.0",
+    "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
   "author": {
