@@ -66,6 +66,11 @@ const generateSchema = () => {
 
       ${Types.addInput()}
 
+      type AdminUser {
+        id: ID!
+        username: String
+      }
+
       type Query {
         ${queryFields}
         ${query}

@@ -102,18 +102,18 @@ module.exports = {
    * Creates an entity of a content type
    */
   async create(ctx) {
+    const { model } = ctx.params;
+    const { body } = ctx.request;
+
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
-    const { model } = ctx.params;
+    const userId = ctx.state.user.id;
+    const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
     try {
-      if (ctx.is('multipart')) {
-        const { data, files } = parseMultipartBody(ctx);
-        ctx.body = await contentManagerService.create(data, { files, model });
-      } else {
-        // Create an entry using `queries` system
-        ctx.body = await contentManagerService.create(ctx.request.body, { model });
-      }
+      data.created_by = userId;
+      data.updated_by = userId;
+      ctx.body = await contentManagerService.create({ data, files }, { model });
 
       await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
     } catch (error) {
@@ -132,22 +132,16 @@ module.exports = {
    */
   async update(ctx) {
     const { id, model } = ctx.params;
+    const { body } = ctx.request;
 
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
+    const userId = ctx.state.user.id;
+    const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
+
     try {
-      if (ctx.is('multipart')) {
-        const { data, files } = parseMultipartBody(ctx);
-        ctx.body = await contentManagerService.edit({ id }, data, {
-          files,
-          model,
-        });
-      } else {
-        // Return the last one which is the current model.
-        ctx.body = await contentManagerService.edit({ id }, ctx.request.body, {
-          model,
-        });
-      }
+      data.updated_by = userId;
+      ctx.body = await contentManagerService.edit({ id }, { data, files }, { model });
     } catch (error) {
       strapi.log.error(error);
       ctx.badRequest(null, [

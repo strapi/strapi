@@ -115,6 +115,20 @@ module.exports = ({ models, target }, ctx) => {
       GLOBALS,
     });
 
+    if (!definition.uid.startsWith('strapi::')) {
+      definition.attributes['created_by'] = {
+        autoPopulate: false,
+        model: 'user',
+        plugin: 'admin',
+      };
+
+      definition.attributes['updated_by'] = {
+        autoPopulate: false,
+        model: 'user',
+        plugin: 'admin',
+      };
+    }
+
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
     Object.keys(definition.attributes).forEach(name => {

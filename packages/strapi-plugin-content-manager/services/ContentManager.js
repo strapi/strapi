@@ -16,10 +16,7 @@ module.exports = {
         }
       : filters;
 
-    return strapi.entityService.find(
-      { params: queryFilter, populate },
-      { model: params.model }
-    );
+    return strapi.entityService.find({ params: queryFilter, populate }, { model: params.model });
   },
 
   fetch(params, populate) {
@@ -43,11 +40,11 @@ module.exports = {
     return strapi.entityService.count({ params: filters }, { model });
   },
 
-  create(data, { files, model } = {}) {
+  create({ data, files }, { model } = {}) {
     return strapi.entityService.create({ data, files }, { model });
   },
 
-  edit(params, data, { model, files } = {}) {
+  edit(params, { data, files }, { model } = {}) {
     return strapi.entityService.update({ params, data, files }, { model });
   },
 
