@@ -18,7 +18,7 @@ import Wrapper from './Wrapper';
 import Input from '../Input';
 import ErrorMessage from './ErrorMessage';
 
-const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }) => {
+const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, id, error }) => {
   const [modal, setModal] = useState({
     isOpen: false,
     step: 'list',
@@ -40,7 +40,14 @@ const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }
   }, [modal.isOpen]);
 
   const handleClickToggleModal = () => {
-    setModal(prev => ({ isDisplayed: true, step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));
+    if (!disabled) {
+      setModal(prev => ({
+        isDisplayed: true,
+        step: 'list',
+        isOpen: !prev.isOpen,
+        fileToEdit: null,
+      }));
+    }
   };
 
   const handleClosed = () => setModal(prev => ({ ...prev, isDisplayed: false }));
@@ -112,13 +119,15 @@ const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }
 
       <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
         <CardControlWrapper>
-          <CardControl
-            small
-            title="add"
-            color="#9EA7B8"
-            type="plus"
-            onClick={handleClickToggleModal}
-          />
+          {!disabled && (
+            <CardControl
+              small
+              title="add"
+              color="#9EA7B8"
+              type="plus"
+              onClick={handleClickToggleModal}
+            />
+          )}
           {!hasNoValue && (
             <>
               <CheckPermissions permissions={pluginPermissions.update}>
@@ -185,6 +194,7 @@ InputMedia.propTypes = {
     required: PropTypes.bool,
     type: PropTypes.string,
   }).isRequired,
+  disabled: PropTypes.bool,
   error: PropTypes.string,
   id: PropTypes.string,
   label: PropTypes.string,
@@ -194,6 +204,7 @@ InputMedia.propTypes = {
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 InputMedia.defaultProps = {
+  disabled: false,
   id: null,
   error: null,
   label: '',
