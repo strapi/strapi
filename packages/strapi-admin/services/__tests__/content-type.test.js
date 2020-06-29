@@ -189,7 +189,7 @@ describe('Content-Type', () => {
     test('2 actions (with nesting level 1)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
         [{ actionId: 'action-1', subjects: ['country', 'user'] }],
-        1
+        { nestingLevel: 1 }
       );
       expect(resultLevel1).toEqual([
         {
@@ -210,7 +210,7 @@ describe('Content-Type', () => {
     test('2 actions (with nesting level 2)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
         [{ actionId: 'action-1', subjects: ['country', 'user'] }],
-        2
+        { nestingLevel: 2 }
       );
       expect(resultLevel1).toEqual([
         {
@@ -235,10 +235,9 @@ describe('Content-Type', () => {
     });
 
     test('2 actions (with nesting level 100)', async () => {
-      const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
-        [{ actionId: 'action-1', subjects: ['country', 'user'] }],
-        100
-      );
+      const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
+        { actionId: 'action-1', subjects: ['country', 'user'] },
+      ]);
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',

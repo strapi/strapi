@@ -205,7 +205,6 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   // create content-type permissions for each role
   const editorPermissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
     contentTypesActions,
-    3,
     {
       fieldsNullFor: ['plugins::content-manager.explorer.delete'],
     }
