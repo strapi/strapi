@@ -10,10 +10,10 @@ const {
 } = require('./validation');
 
 const ACTIONS = {
-  read: 'plugins::content-manager.read',
-  create: 'plugins::content-manager.create',
-  edit: 'plugins::content-manager.edit',
-  delete: 'plugins::content-manager.delete',
+  read: 'plugins::content-manager.explorer.read',
+  create: 'plugins::content-manager.explorer.create',
+  edit: 'plugins::content-manager.explorer.update',
+  delete: 'plugins::content-manager.explorer.delete',
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
