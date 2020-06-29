@@ -6,8 +6,9 @@
 const _ = require('lodash');
 
 /**
- * Global convertor
+ * Global converter
  * @param {Object} params
+ * @param defaults
  */
 const convertRestQueryParams = (params = {}, defaults = {}) => {
   if (typeof params !== 'object' || params === null) {
@@ -114,7 +115,7 @@ const convertLimitQueryParams = limitQuery => {
 };
 
 // List of all the possible filters
-const VALID_OPERATORS = [
+const VALID_REST_OPERATORS = [
   'eq',
   'ne',
   'in',
@@ -182,11 +183,14 @@ const convertWhereClause = (whereClause, value) => {
   }
 
   // the field as underscores
-  if (!VALID_OPERATORS.includes(operator)) {
+  if (!VALID_REST_OPERATORS.includes(operator)) {
     return { field: whereClause, value };
   }
 
   return { field, operator, value };
 };
 
-module.exports = convertRestQueryParams;
+module.exports = {
+  convertRestQueryParams,
+  VALID_REST_OPERATORS,
+};

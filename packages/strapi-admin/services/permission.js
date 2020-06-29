@@ -3,10 +3,11 @@
 const _ = require('lodash');
 const pmap = require('p-map');
 const { createPermission } = require('../domain/permission');
-const actionProvider = require('./permission/action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
+const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
+const actionProvider = require('./permission/action-provider');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
@@ -219,6 +220,7 @@ module.exports = {
   sanitizePermission,
   findUserPermissions,
   actionProvider,
+  createPermissionsManager,
   engine,
   conditionProvider,
   cleanPermissionInDatabase,

@@ -9,6 +9,30 @@ const {
   validateUIDField,
 } = require('./validation');
 
+const ACTIONS = {
+  read: 'plugins::content-manager.read',
+  create: 'plugins::content-manager.create',
+  edit: 'plugins::content-manager.edit',
+  delete: 'plugins::content-manager.delete',
+};
+
+const findEntityAndCheckPermissions = async (ability, action, model, id) => {
+  const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+  const entity = await contentManagerService.fetch(model, id);
+
+  if (_.isNil(entity)) {
+    throw strapi.errors.notFound();
+  }
+
+  const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
+
+  if (pm.ability.cannot(pm.action, pm.toSubject(entity))) {
+    throw strapi.errors.forbidden();
+  }
+
+  return { pm, entity };
+};
+
 module.exports = {
   async generateUID(ctx) {
     const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
@@ -45,38 +69,54 @@ module.exports = {
    * Returns a list of entities of a content-type matching the query parameters
    */
   async find(ctx) {
-    const { model } = ctx.params;
+    const {
+      state: { userAbility },
+      params: { model },
+    } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const pm = strapi.admin.services.permission.createPermissionsManager(
+      userAbility,
+      ACTIONS.read,
+      model
+    );
 
     let entities = [];
     if (_.has(ctx.request.query, '_q')) {
-      entities = await contentManagerService.search({ model }, ctx.request.query);
+      entities = await contentManagerService.search(model, ctx.request.query, pm.query);
     } else {
-      entities = await contentManagerService.fetchAll({ model }, ctx.request.query);
+      entities = await contentManagerService.fetchAll(model, ctx.request.query, pm.query);
     }
 
     if (!entities) {
       return ctx.notFound();
     }
 
-    ctx.body = entities;
+    ctx.body = entities.map(entity => pm.sanitize(entity));
   },
 
   /**
    * Returns an entity of a content type by id
    */
   async findOne(ctx) {
-    const { model, id } = ctx.params;
+    const {
+      state: { userAbility },
+      params: { model, id },
+    } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const pm = strapi.admin.services.permission.createPermissionsManager(
+      userAbility,
+      ACTIONS.read,
+      model
+    );
 
-    const entry = await contentManagerService.fetch({ model, id });
+    const entry = await contentManagerService.fetch(model, id, { params: pm.query });
 
     // Entry not found
     if (!entry) {
       return ctx.notFound('Entry not found');
     }
 
-    ctx.body = entry;
+    ctx.body = pm.sanitize(entry);
   },
 
   /**
@@ -102,18 +142,35 @@ module.exports = {
    * Creates an entity of a content type
    */
   async create(ctx) {
-    const { model } = ctx.params;
-    const { body } = ctx.request;
-
+    const {
+      state: { userAbility, user },
+      params: { model },
+      request: { body },
+    } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
-    const userId = ctx.state.user.id;
+    const pm = strapi.admin.services.permission.createPermissionsManager(
+      userAbility,
+      ACTIONS.create,
+      model
+    );
+
+    if (pm.ability.cannot(pm.action, pm.model)) {
+      throw strapi.errors.forbidden();
+    }
+
+    const sanitize = e => pm.sanitize(e, { subject: ACTIONS.create });
+
+    const userId = user.id;
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
     try {
       data.created_by = userId;
       data.updated_by = userId;
-      ctx.body = await contentManagerService.create({ data, files }, { model });
+
+      const result = await contentManagerService.create({ data: sanitize(data), files }, { model });
+
+      ctx.body = pm.sanitize(result, { action: ACTIONS.read });
 
       await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
     } catch (error) {
@@ -131,17 +188,32 @@ module.exports = {
    * Updates an entity of a content type
    */
   async update(ctx) {
-    const { id, model } = ctx.params;
-    const { body } = ctx.request;
+    const {
+      state: { userAbility, user },
+      params: { id, model },
+      request: { body },
+    } = ctx;
 
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
-    const userId = ctx.state.user.id;
+    const { pm, entity } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.edit,
+      model,
+      id
+    );
+
+    const sanitize = e => pm.sanitize(e, { subject: pm.toSubject(entity) });
+
+    const userId = user.id;
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
     try {
       data.updated_by = userId;
-      ctx.body = await contentManagerService.edit({ id }, { data, files }, { model });
+
+      const result = await contentManagerService.edit({ id }, { data: sanitize(data), files }, { model });
+
+      ctx.body = pm.sanitize(result, { action: ACTIONS.read });
     } catch (error) {
       strapi.log.error(error);
       ctx.badRequest(null, [
@@ -157,19 +229,36 @@ module.exports = {
    * Deletes one entity of a content type matching a query
    */
   async delete(ctx) {
-    const { id, model } = ctx.params;
+    const {
+      state: { userAbility },
+      params: { id, model },
+    } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
-    ctx.body = await contentManagerService.delete({ id, model });
+    const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.delete, model, id);
+
+    const result = await contentManagerService.delete(model, id, pm.query);
+
+    ctx.body = pm.sanitize(result, { action: ACTIONS.read });
   },
 
   /**
    * Deletes multiple entities of a content type matching a query
    */
   async deleteMany(ctx) {
-    const { model } = ctx.params;
+    const {
+      state: userAbility,
+      params: { model },
+    } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const pm = strapi.admin.services.permission.createPermissionsManager(
+      userAbility,
+      ACTIONS.delete,
+      model
+    );
 
-    ctx.body = await contentManagerService.deleteMany({ model }, ctx.request.query);
+    const results = await contentManagerService.deleteMany(model, ctx.request.query, pm.query);
+
+    ctx.body = results.map(result => pm.sanitize(result, { action: ACTIONS.read }));
   },
 };
