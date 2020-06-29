@@ -4,10 +4,10 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 
-import { usePermissionsContext } from '../../../../../../hooks';
-import CheckboxWrapper from '../CheckboxWrapper';
-import BaselineAlignment from '../BaselineAlignment';
-import SubCategoryWrapper from './SubCategoryWrapper';
+import { usePermissionsContext } from '../../../../../../../src/hooks';
+import CheckboxWrapper from '../../../../../../../src/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/CheckboxWrapper';
+import BaselineAlignment from '../../../../../../../src/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/BaselineAlignment';
+import SubCategoryWrapper from '../../../../../../../src/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/SubCategory/SubCategoryWrapper';
 
 const Border = styled.div`
   flex: 1;
@@ -17,7 +17,12 @@ const Border = styled.div`
 `;
 
 const SubCategory = ({ subCategory }) => {
-  const { pluginsAndSettingsPermissions } = usePermissionsContext();
+  const {
+    pluginsAndSettingsPermissions,
+    onPluginSettingPermission,
+    onPluginSettingSubCategoryPermission,
+    isSuperAdmin,
+  } = usePermissionsContext();
 
   const checkPermission = useCallback(
     action => {
@@ -27,6 +32,10 @@ const SubCategory = ({ subCategory }) => {
     },
     [pluginsAndSettingsPermissions]
   );
+
+  const handlePermission = action => {
+    onPluginSettingPermission(action);
+  };
 
   const hasAllCategoryActions = useMemo(() => {
     return (
@@ -48,8 +57,15 @@ const SubCategory = ({ subCategory }) => {
     return numberOfCurrentActions > 0 && numberOfCurrentActions < subCategory.actions.length;
   }, [pluginsAndSettingsPermissions, subCategory]);
 
+  const handleSubCategoryPermissions = () => {
+    onPluginSettingSubCategoryPermission({
+      actions: subCategory.actions,
+      shouldEnable: !hasAllCategoryActions,
+    });
+  };
+
   return (
-    <SubCategoryWrapper disabled>
+    <SubCategoryWrapper disabled={isSuperAdmin}>
       <Flex justifyContent="space-between" alignItems="center">
         <Padded right size="sm">
           <Text
@@ -66,9 +82,10 @@ const SubCategory = ({ subCategory }) => {
         <Padded left size="sm">
           <BaselineAlignment />
           <Checkbox
-            disabled
+            disabled={isSuperAdmin}
             name={`select-all-${subCategory.subCategory}`}
             message="Select all"
+            onChange={handleSubCategoryPermissions}
             someChecked={hasSomeCategoryActions}
             value={hasAllCategoryActions}
           />
@@ -80,10 +97,11 @@ const SubCategory = ({ subCategory }) => {
           {subCategory.actions.map(sc => (
             <CheckboxWrapper key={sc.action}>
               <Checkbox
-                disabled
+                disabled={isSuperAdmin}
                 value={checkPermission(sc.action)}
                 name={sc.action}
                 message={sc.displayName}
+                onChange={() => handlePermission(sc.action)}
               />
             </CheckboxWrapper>
           ))}

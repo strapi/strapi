@@ -3,11 +3,10 @@ import { Flex, Text } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import SubCategory from 'ee_else_ce/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/SubCategory';
 
 import RowStyle from './RowStyle';
 import PermissionsWrapper from './PermissionsWrapper';
-
-import SubCategory from './SubCategory';
 
 const PermissionRow = ({
   openedCategory,
