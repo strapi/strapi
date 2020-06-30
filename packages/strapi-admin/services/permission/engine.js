@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { map, filter, each } = require('lodash/fp');
-const { defineAbility } = require('@casl/ability');
+const { AbilityBuilder, Ability } = require('@casl/ability');
 
 module.exports = conditionProvider => ({
   /**
@@ -24,14 +24,16 @@ module.exports = conditionProvider => ({
    * @returns {function(*, *): Promise<Ability>}
    */
   generateAbilityCreatorFor(user) {
-    return async (permissions, options) =>
-      defineAbility(async can => {
-        const registerFn = this.createRegisterFunction(can);
+    return async (permissions, options) => {
+      const { can, build } = new AbilityBuilder(Ability);
+      const registerFn = this.createRegisterFunction(can);
 
-        for (const permission of permissions) {
-          await this.evaluatePermission({ permission, user, options, registerFn });
-        }
-      });
+      for (const permission of permissions) {
+        await this.evaluatePermission({ permission, user, options, registerFn });
+      }
+
+      return build();
+    };
   },
 
   /**

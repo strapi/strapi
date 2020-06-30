@@ -159,7 +159,7 @@ module.exports = {
       throw strapi.errors.forbidden();
     }
 
-    const sanitize = e => pm.sanitize(e, { subject: ACTIONS.create });
+    const sanitize = e => pm.sanitize(e, { subject: model });
 
     const userId = user.id;
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
