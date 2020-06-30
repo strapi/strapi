@@ -25,7 +25,9 @@ function checkStatus(response, checkToken = true) {
     return response;
   }
 
-  if ((response.status === 401 || response.status === 403) && auth.getToken() && checkToken) {
+  // TODO handle 403...
+
+  if (response.status === 401 && auth.getToken() && checkToken) {
     // Temporary fix until we create a new request helper
     auth.clearAppStorage();
     window.location.reload();
