@@ -43,10 +43,19 @@ function PopUpWarning({
   toggleModal,
   ...rest
 }) {
+  const handleToggle = e => {
+    // Prevent user interactions while requests are being submitted
+    if (isConfirmButtonLoading) {
+      return;
+    }
+
+    toggleModal(e);
+  };
+
   const buttons = [
     {
       color: 'cancel',
-      onClick: toggleModal,
+      onClick: handleToggle,
       message: content.cancel || 'components.popUpWarning.button.cancel',
     },
     {
@@ -69,11 +78,11 @@ function PopUpWarning({
 
   return (
     <Wrapper>
-      <StyledModal isOpen={isOpen} toggle={toggleModal} {...rest}>
-        <CloseButton onClick={toggleModal}>
+      <StyledModal isOpen={isOpen} toggle={handleToggle} {...rest}>
+        <CloseButton onClick={handleToggle}>
           <Close fill="#c3c5c8" />
         </CloseButton>
-        <StyledHeader toggle={toggleModal}>
+        <StyledHeader toggle={handleToggle}>
           <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
         </StyledHeader>
         <StyledBody>
