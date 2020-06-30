@@ -91,7 +91,9 @@ module.exports = {
       return ctx.notFound();
     }
 
-    ctx.body = entities.map(entity => pm.sanitize(entity));
+    ctx.body = _.isArray(entities)
+      ? entities.map(entity => pm.sanitize(entity))
+      : pm.sanitize(entities);
   },
 
   /**
@@ -211,7 +213,11 @@ module.exports = {
     try {
       data.updated_by = userId;
 
-      const result = await contentManagerService.edit({ id }, { data: sanitize(data), files }, { model });
+      const result = await contentManagerService.edit(
+        { id },
+        { data: sanitize(data), files },
+        { model }
+      );
 
       ctx.body = pm.sanitize(result, { action: ACTIONS.read });
     } catch (error) {
