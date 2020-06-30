@@ -275,7 +275,15 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
             schema = schema.test('required', errorsTrads.required, value => {
               if (isCreatingEntry) {
                 // Handle integer and other cases
-                return value !== null && value !== undefined;
+                if (!value) {
+                  return false;
+                }
+
+                if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                  return true;
+                }
+
+                return !isEmpty(value);
               }
 
               // Field is not touched and the user is editing the entry
@@ -283,7 +291,12 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
                 return true;
               }
 
-              return value !== null && value !== undefined;
+              // TODO this might break some validations
+              if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                return true;
+              }
+
+              return !isEmpty(value);
             });
           }
 

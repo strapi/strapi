@@ -49,6 +49,10 @@
     "full_name": {
       "type": "string",
       "required": true
+    },
+    "num": {
+      "type": "integer",
+      "required": true
     }
   }
 }
