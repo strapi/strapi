@@ -9,6 +9,7 @@ import {
   findMatchingPermissions,
   useUser,
   useUserPermissions,
+  OverlayBlocker,
 } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import { generatePermissionsObject, getTrad } from '../../utils';
@@ -41,10 +42,10 @@ const EditViewDataManagerProvider = ({
     isLoading,
     modifiedData,
     modifiedDZName,
-    shouldShowLoadingState,
     shouldCheckErrors,
   } = reducerState.toJS();
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -311,6 +312,10 @@ const EditViewDataManagerProvider = ({
     try {
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
+
+      // Show a loading button in the EditView/Header.js
+      setIsSubmitting(true);
+
       // Set the loading state in the plugin header
       const filesToUpload = getFilesToUpload(modifiedData);
       // Remove keys that are not needed
@@ -365,6 +370,9 @@ const EditViewDataManagerProvider = ({
           false
         );
         emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
+
+        setIsSubmitting(false);
+
         dispatch({
           type: 'SUBMIT_SUCCESS',
         });
@@ -377,13 +385,14 @@ const EditViewDataManagerProvider = ({
         }
       } catch (err) {
         console.error({ err });
+        setIsSubmitting(false);
+
         const error = get(
           err,
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
           'SERVER ERROR'
         );
 
-        setIsSubmitting(false);
         emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
           error: err,
         });
@@ -392,6 +401,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       const errors = getYupInnerErrors(err);
       console.error({ err, errors });
+      setIsSubmitting(false);
 
       dispatch({
         type: 'SUBMIT_ERRORS',
@@ -491,10 +501,6 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const setIsSubmitting = (value = true) => {
-    dispatch({ type: 'IS_SUBMITTING', value });
-  };
-
   const deleteSuccess = () => {
     dispatch({
       type: 'DELETE_SUCCEEDED',
@@ -528,6 +534,14 @@ const EditViewDataManagerProvider = ({
     return !isCreatingEntry && isLoading;
   }, [isCreatingEntry, isLoading]);
 
+  const overlayBlockerParams = useMemo(
+    () => ({
+      children: <div />,
+      noGradient: true,
+    }),
+    []
+  );
+
   // Redirect the user to the homepage if he is not allowed to create a document
   if (shouldRedirectToHomepageWhenCreatingEntry) {
     strapi.notification.info(getTrad('content-manager.permissions.not-allowed.create'));
@@ -551,6 +565,7 @@ const EditViewDataManagerProvider = ({
         initialData,
         isCreatingEntry,
         isSingleType,
+        isSubmitting,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -565,24 +580,25 @@ const EditViewDataManagerProvider = ({
         removeComponentFromField,
         removeRepeatableField,
         resetData,
-        setIsSubmitting,
-        shouldShowLoadingState,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,
       }}
     >
-      {showLoader ? (
-        <LoadingIndicatorPage />
-      ) : (
-        <>
-          <Prompt
-            when={!isEqual(modifiedData, initialData)}
-            message={formatMessage({ id: 'global.prompt.unsaved' })}
-          />
-          <form onSubmit={handleSubmit}>{children}</form>
-        </>
-      )}
+      <>
+        <OverlayBlocker key="overlayBlocker" isOpen={isSubmitting} {...overlayBlockerParams} />
+        {showLoader ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <>
+            <Prompt
+              when={!isEqual(modifiedData, initialData)}
+              message={formatMessage({ id: 'global.prompt.unsaved' })}
+            />
+            <form onSubmit={handleSubmit}>{children}</form>
+          </>
+        )}
+      </>
     </EditViewDataManagerContext.Provider>
   );
 };
