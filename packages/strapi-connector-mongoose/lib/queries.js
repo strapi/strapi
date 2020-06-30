@@ -539,7 +539,7 @@ const buildSearchOr = (model, query) => {
               },
             });
           } else {
-            return acc.concat({ [curr]: query });
+            return acc.concat({ [curr]: _.toNumber(query) });
           }
         }
         return acc;
