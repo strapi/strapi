@@ -6,8 +6,8 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-
 import BaselineAlignement from '../../../components/BaselineAlignement';
+import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
@@ -88,55 +88,59 @@ const EditPage = () => {
   };
 
   return (
-    <Formik
-      enableReinitialize
-      initialValues={{
-        name: role.name,
-        description: role.description,
-      }}
-      onSubmit={handleEditRoleSubmit}
-      validationSchema={schema}
-      validateOnChange={false}
-    >
-      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
-        <form onSubmit={handleSubmit}>
-          <ContainerFluid padding="0">
-            <Header
-              title={{
-                label: formatMessage({
-                  id: 'Settings.roles.edit.title',
-                  defaultMessage: 'Edit a role',
-                }),
-              }}
-              content={formatMessage({
-                id: 'Settings.roles.create.description',
-                defaultMessage: 'Define the rights given to the role',
-              })}
-              actions={headerActions(handleSubmit, handleReset)}
-              isLoading={isLayoutLoading || isRoleLoading}
-            />
-            <BaselineAlignement top size="3px" />
-            <RoleForm
-              isLoading={isRoleLoading}
-              errors={errors}
-              values={values}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              role={role}
-            />
-            {!isLayoutLoading && !isRoleLoading && (
-              <Padded top bottom size="md">
-                <Permissions
-                  permissionsLayout={permissionsLayout}
-                  rolePermissions={rolePermissions}
-                  ref={permissionsRef}
-                />
-              </Padded>
-            )}
-          </ContainerFluid>
-        </form>
-      )}
-    </Formik>
+    <>
+      <PageTitle name="Roles" />
+      <Formik
+        enableReinitialize
+        initialValues={{
+          name: role.name,
+          description: role.description,
+        }}
+        onSubmit={handleEditRoleSubmit}
+        validationSchema={schema}
+        validateOnChange={false}
+      >
+        {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
+          <form onSubmit={handleSubmit}>
+            <ContainerFluid padding="0">
+              <Header
+                title={{
+                  label: formatMessage({
+                    id: 'Settings.roles.edit.title',
+                    defaultMessage: 'Edit a role',
+                  }),
+                }}
+                content={formatMessage({
+                  id: 'Settings.roles.create.description',
+                  defaultMessage: 'Define the rights given to the role',
+                })}
+                actions={headerActions(handleSubmit, handleReset)}
+                isLoading={isLayoutLoading || isRoleLoading}
+              />
+              <BaselineAlignement top size="3px" />
+              <RoleForm
+                isLoading={isRoleLoading}
+                errors={errors}
+                values={values}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                role={role}
+              />
+              {!isLayoutLoading && !isRoleLoading && (
+                <Padded top bottom size="md">
+                  <Permissions
+                    permissionsLayout={permissionsLayout}
+                    rolePermissions={rolePermissions}
+                    role={role}
+                    ref={permissionsRef}
+                  />
+                </Padded>
+              )}
+            </ContainerFluid>
+          </form>
+        )}
+      </Formik>
+    </>
   );
 };
 

@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import adminPermissions from '../../../../src/permissions';
 import { useFetchPermissionsLayout } from '../../../../src/hooks';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
+import PageTitle from '../../../../src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../src/components/ContainerFluid';
 import FormCard from '../../../../src/components/FormBloc';
 import { ButtonWithNumber, Permissions } from '../../../../src/components/Roles';
@@ -93,77 +94,80 @@ const CreatePage = () => {
   ];
 
   return (
-    <Formik
-      initialValues={{ name: '', description: '' }}
-      onSubmit={handleCreateRoleSubmit}
-      validationSchema={schema}
-      validateOnChange={false}
-    >
-      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
-        <form onSubmit={handleSubmit}>
-          <ContainerFluid padding="0">
-            <Header
-              title={{
-                label: formatMessage({
-                  id: 'Settings.roles.create.title',
-                  defaultMessage: 'Create a role',
-                }),
-              }}
-              content={formatMessage({
-                id: 'Settings.roles.create.description',
-                defaultMessage: 'Define the rights given to the role',
-              })}
-              actions={headerActions(handleSubmit, handleReset)}
-              isLoading={isLayoutLoading}
-            />
-            <BaselineAlignement top size="3px" />
-            <FormCard
-              actions={actions}
-              title={formatMessage({
-                id: 'Settings.roles.form.title',
-                defaultMessage: 'Details',
-              })}
-              subtitle={formatMessage({
-                id: 'Settings.roles.form.description',
-                defaultMessage: 'Name and description of the role',
-              })}
-            >
-              <SizedInput
-                label="Settings.roles.form.input.name"
-                defaultMessage="Name"
-                name="name"
-                type="text"
-                error={errors.name ? { id: errors.name } : null}
-                onBlur={handleBlur}
-                value={values.name}
-                onChange={handleChange}
+    <>
+      <PageTitle name="Roles" />
+      <Formik
+        initialValues={{ name: '', description: '' }}
+        onSubmit={handleCreateRoleSubmit}
+        validationSchema={schema}
+        validateOnChange={false}
+      >
+        {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
+          <form onSubmit={handleSubmit}>
+            <ContainerFluid padding="0">
+              <Header
+                title={{
+                  label: formatMessage({
+                    id: 'Settings.roles.create.title',
+                    defaultMessage: 'Create a role',
+                  }),
+                }}
+                content={formatMessage({
+                  id: 'Settings.roles.create.description',
+                  defaultMessage: 'Define the rights given to the role',
+                })}
+                actions={headerActions(handleSubmit, handleReset)}
+                isLoading={isLayoutLoading}
               />
-
-              <SizedInput
-                label="Settings.roles.form.input.description"
-                defaultMessage="Description"
-                name="description"
-                type="textarea"
-                onBlur={handleBlur}
-                value={values.description}
-                onChange={handleChange}
-                // Override the default height of the textarea
-                style={{ height: 115 }}
-              />
-            </FormCard>
-            {!isLayoutLoading && (
-              <Padded top bottom size="md">
-                <Permissions
-                  permissionsLayout={permissionsLayout}
-                  rolePermissions={{}}
-                  ref={permissionsRef}
+              <BaselineAlignement top size="3px" />
+              <FormCard
+                actions={actions}
+                title={formatMessage({
+                  id: 'Settings.roles.form.title',
+                  defaultMessage: 'Details',
+                })}
+                subtitle={formatMessage({
+                  id: 'Settings.roles.form.description',
+                  defaultMessage: 'Name and description of the role',
+                })}
+              >
+                <SizedInput
+                  label="Settings.roles.form.input.name"
+                  defaultMessage="Name"
+                  name="name"
+                  type="text"
+                  error={errors.name ? { id: errors.name } : null}
+                  onBlur={handleBlur}
+                  value={values.name}
+                  onChange={handleChange}
                 />
-              </Padded>
-            )}
-          </ContainerFluid>
-        </form>
-      )}
-    </Formik>
+
+                <SizedInput
+                  label="Settings.roles.form.input.description"
+                  defaultMessage="Description"
+                  name="description"
+                  type="textarea"
+                  onBlur={handleBlur}
+                  value={values.description}
+                  onChange={handleChange}
+                  // Override the default height of the textarea
+                  style={{ height: 115 }}
+                />
+              </FormCard>
+              {!isLayoutLoading && (
+                <Padded top bottom size="md">
+                  <Permissions
+                    permissionsLayout={permissionsLayout}
+                    rolePermissions={{}}
+                    ref={permissionsRef}
+                  />
+                </Padded>
+              )}
+            </ContainerFluid>
+          </form>
+        )}
+      </Formik>
+    </>
   );
 };
 

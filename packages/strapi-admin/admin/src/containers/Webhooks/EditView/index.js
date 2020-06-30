@@ -10,6 +10,7 @@ import { get, isEmpty, isEqual, omit } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import { request, useGlobalContext, getYupInnerErrors, BackHeader } from 'strapi-helper-plugin';
+import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 import reducer, { initialState } from './reducer';
 import { cleanData, form, schema } from './utils';
@@ -346,6 +347,7 @@ function EditView() {
 
   return (
     <Wrapper>
+      <PageTitle name="Webhooks" />
       <BackHeader onClick={goBack} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />

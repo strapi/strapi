@@ -15,6 +15,7 @@ import {
 } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import adminPermissions from '../../../../src/permissions';
+import PageTitle from '../../../../src/components/SettingsPageTitle';
 import useSettingsHeaderSearchContext from '../../../../src/hooks/useSettingsHeaderSearchContext';
 import { EmptyRole, RoleListWrapper } from '../../../../src/components/Roles';
 import { useRolesList } from '../../../../src/hooks';
@@ -158,6 +159,7 @@ const RoleListPage = () => {
 
   return (
     <>
+      <PageTitle name="Roles" />
       <Header
         title={{
           label: formatMessage({
