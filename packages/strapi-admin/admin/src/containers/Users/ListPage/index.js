@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
 import BaselineAlignement from '../../../components/BaselineAlignement';
+import PageTitle from '../../../components/SettingsPageTitle';
 import { useSettingsHeaderSearchContext } from '../../../hooks';
 import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
 import adminPermissions from '../../../permissions';
@@ -243,6 +244,7 @@ const ListPage = () => {
 
   return (
     <div>
+      <PageTitle name="Users" />
       <Header
         canCreate={canCreate}
         canDelete={canDelete}

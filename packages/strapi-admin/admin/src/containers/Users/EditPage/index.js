@@ -5,8 +5,8 @@ import { get, isEmpty } from 'lodash';
 import { useGlobalContext, auth } from 'strapi-helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
-
 import BaselineAlignement from '../../../components/BaselineAlignement';
+import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
 import SizedInput from '../../../components/SizedInput';
@@ -59,6 +59,7 @@ const EditPage = () => {
 
   return (
     <>
+      <PageTitle name="Users" />
       <form onSubmit={handleSubmit}>
         <ContainerFluid padding="0">
           <Header

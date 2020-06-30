@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { useGlobalContext, useQuery, useUserPermissions } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
+import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
 import { useRolesList, useSettingsHeaderSearchContext } from '../../../hooks';
 import BaselineAlignment from './BaselineAlignment';
@@ -36,6 +37,7 @@ const RoleListPage = () => {
 
   return (
     <>
+      <PageTitle name="Roles" />
       <Header
         icon
         title={{

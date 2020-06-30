@@ -10,15 +10,16 @@ import { Header, List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import { omit } from 'lodash';
+import { useIntl } from 'react-intl';
 import {
   request,
-  useGlobalContext,
   ListButton,
   PopUpWarning,
   useUserPermissions,
   LoadingIndicatorPage,
 } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
+import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyList, ListRow } from '../../../components/Webhooks';
 import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
@@ -30,7 +31,7 @@ function ListView() {
   } = useUserPermissions(adminPermissions.settings.webhooks);
 
   const isMounted = useRef(true);
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [showModal, setShowModal] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { push } = useHistory();
@@ -260,6 +261,7 @@ function ListView() {
 
   return (
     <Wrapper>
+      <PageTitle name="Webhooks" />
       <Header {...headerProps} />
       {canRead && (
         <div className="list-wrapper">

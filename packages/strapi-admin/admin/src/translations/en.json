@@ -354,5 +354,6 @@
   "Roles.ListPage.notification.delete-all-not-allowed": "Some roles could not be deleted since they are associated with users",
   "Roles.RoleRow.user-count.plural": "{number} users",
   "Roles.RoleRow.user-count.singular": "{number} user",
-  "Roles.components.List.empty.withSearch": "There is no role corresponding to the search ({search})..."
+  "Roles.components.List.empty.withSearch": "There is no role corresponding to the search ({search})...",
+  "Settings.PageTitle": "Settings - {name}"
 }
