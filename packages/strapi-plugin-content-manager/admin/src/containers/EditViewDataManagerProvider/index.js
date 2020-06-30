@@ -420,6 +420,8 @@ const EditViewDataManagerProvider = ({
     [formErrors]
   );
 
+  console.log({ modifiedData });
+
   const moveComponentDown = useCallback(
     (dynamicZoneName, currentIndex) => {
       emitEvent('changeComponentsOrder');

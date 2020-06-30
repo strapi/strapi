@@ -274,7 +274,8 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
           if (type !== 'password') {
             schema = schema.test('required', errorsTrads.required, value => {
               if (isCreatingEntry) {
-                return !isEmpty(value);
+                // Handle integer and other cases
+                return value !== null && value !== undefined;
               }
 
               // Field is not touched and the user is editing the entry
@@ -282,7 +283,7 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
                 return true;
               }
 
-              return !isEmpty(value);
+              return value !== null && value !== undefined;
             });
           }
 
