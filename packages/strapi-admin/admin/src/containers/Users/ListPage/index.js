@@ -241,8 +241,6 @@ const ListPage = () => {
     return <LoadingIndicatorPage />;
   }
 
-  console.log(auth.getUserInfo());
-
   return (
     <div>
       <Header
