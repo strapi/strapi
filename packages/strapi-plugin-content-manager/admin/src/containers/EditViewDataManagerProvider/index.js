@@ -393,14 +393,30 @@ const EditViewDataManagerProvider = ({
           'SERVER ERROR'
         );
 
-        emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
-          error: err,
-        });
+        // Handle validations errors from the API
+        if (error === 'ValidationError') {
+          const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
+          const formattedErrors = Object.keys(errors).reduce((acc, current) => {
+            acc[current] = { id: errors[current][0] };
+
+            return acc;
+          }, {});
+
+          dispatch({
+            type: 'SUBMIT_ERRORS',
+            errors: formattedErrors,
+          });
+        } else {
+          emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
+            error: err,
+          });
+        }
+
         strapi.notification.error(error);
       }
     } catch (err) {
+      console.error({ err });
       const errors = getYupInnerErrors(err);
-      console.error({ err, errors });
       setIsSubmitting(false);
 
       dispatch({
