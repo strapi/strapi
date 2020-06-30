@@ -262,7 +262,7 @@ function Inputs({
   ];
 
   return (
-    <FormattedMessage id={errorId}>
+    <FormattedMessage id={errorId} defaultMessage={errorId}>
       {error => {
         return (
           <InputsIndex

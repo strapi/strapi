@@ -272,32 +272,22 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
           }
 
           if (type !== 'password') {
-            schema = schema.test('required', errorsTrads.required, value => {
-              if (isCreatingEntry) {
-                // Handle integer and other cases
-                if (!value) {
-                  return false;
-                }
-
-                if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+            if (isCreatingEntry) {
+              schema = schema.required(errorsTrads.required);
+            } else {
+              schema = schema.test('required', errorsTrads.required, value => {
+                // Field is not touched and the user is editing the entry
+                if (value === undefined) {
                   return true;
                 }
 
+                if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                  return !!value;
+                }
+
                 return !isEmpty(value);
-              }
-
-              // Field is not touched and the user is editing the entry
-              if (value === undefined) {
-                return true;
-              }
-
-              // TODO this might break some validations
-              if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
-                return true;
-              }
-
-              return !isEmpty(value);
-            });
+              });
+            }
           }
 
           break;
