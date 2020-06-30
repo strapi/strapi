@@ -7,7 +7,6 @@ const initialState = fromJS({
   isLoading: true,
   initialData: {},
   modifiedData: {},
-  shouldShowLoadingState: false,
   shouldCheckErrors: false,
   modifiedDZName: null,
 });
@@ -82,8 +81,6 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
-    case 'IS_SUBMITTING':
-      return state.update('shouldShowLoadingState', () => action.value);
     case 'MOVE_COMPONENT_FIELD':
       return state.updateIn(['modifiedData', ...action.pathToComponent], list => {
         return list

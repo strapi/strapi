@@ -14,19 +14,20 @@ const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
+  const [didDeleteEntry, setDidDeleteEntry] = useState(false);
+  const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
   const { emitEvent } = useGlobalContext();
   const {
-    deleteSuccess,
     initialData,
     isCreatingEntry,
     isSingleType,
+    isSubmitting,
     layout,
     modifiedData,
     redirectToPreviousPage,
     resetData,
-    setIsSubmitting,
     slug,
     clearData,
   } = useDataManager();
@@ -84,6 +85,7 @@ const Header = () => {
           label: formatMessageRef.current({
             id: `${pluginId}.containers.Edit.submit`,
           }),
+          isLoading: isSubmitting,
           type: 'submit',
           style: {
             minWidth: 150,
@@ -112,7 +114,7 @@ const Header = () => {
     }
 
     return headerActions;
-  }, [canCreate, canDelete, canUpdate, didChangeData, isCreatingEntry]);
+  }, [canCreate, canDelete, canUpdate, didChangeData, isCreatingEntry, isSubmitting]);
 
   const headerProps = useMemo(() => {
     return {
@@ -131,11 +133,12 @@ const Header = () => {
     toggleWarningCancel();
     resetData();
   };
-  const handleConfirmDelete = async () => {
-    toggleWarningDelete();
-    setIsSubmitting();
 
+  const handleConfirmDelete = async () => {
     try {
+      // Show the loading state
+      setIsModalConfirmButtonLoading(true);
+
       emitEvent('willDeleteEntry');
 
       await request(getRequestUrl(`${slug}/${initialData.id}`), {
@@ -143,20 +146,32 @@ const Header = () => {
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
-      deleteSuccess();
 
       emitEvent('didDeleteEntry');
 
+      // This is used to perform action after the modal is closed
+      // so the transitions are smoother
+      // Actions will be performed in the handleClosed function
+      setDidDeleteEntry(true);
+    } catch (err) {
+      emitEvent('didNotDeleteEntry', { error: err });
+      strapi.notification.error(`${pluginId}.error.record.delete`);
+    } finally {
+      setIsModalConfirmButtonLoading(false);
+      toggleWarningDelete();
+    }
+  };
+
+  const handleClosed = () => {
+    if (didDeleteEntry) {
       if (!isSingleType) {
         redirectToPreviousPage();
       } else {
         clearData();
       }
-    } catch (err) {
-      setIsSubmitting(false);
-      emitEvent('didNotDeleteEntry', { error: err });
-      strapi.notification.error(`${pluginId}.error.record.delete`);
     }
+
+    setDidDeleteEntry(false);
   };
 
   return (
@@ -185,6 +200,8 @@ const Header = () => {
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmDelete}
+        onClosed={handleClosed}
+        isConfirmButtonLoading={isModalConfirmButtonLoading}
       />
     </>
   );
