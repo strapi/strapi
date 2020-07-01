@@ -7,14 +7,13 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import getInitialValues from 'ee_else_ce/containers/Roles/EditPage/utils/getInitialValues';
+import schema from 'ee_else_ce/containers/Roles/EditPage/utils/schema';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 import { formatPermissionsToApi } from '../../../utils';
-
-import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
