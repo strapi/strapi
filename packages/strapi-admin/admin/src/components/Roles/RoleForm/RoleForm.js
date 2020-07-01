@@ -53,7 +53,7 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
         type="text"
         error={errors.name ? { id: errors.name } : null}
         onBlur={onBlur}
-        value={values.name}
+        value={values.name || role.name}
         onChange={onChange}
       />
 
