@@ -9,6 +9,7 @@ import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
 import { useRolesList, useSettingsHeaderSearchContext } from '../../../hooks';
+import UpgradePlanModal from '../../../components/UpgradePlanModal';
 import BaselineAlignment from './BaselineAlignment';
 
 const RoleListPage = () => {
@@ -79,6 +80,7 @@ const RoleListPage = () => {
         />
         {!resultsCount && !isLoading && <EmptyRole />}
       </RoleListWrapper>
+      <UpgradePlanModal />
     </>
   );
 };
