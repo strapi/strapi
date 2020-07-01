@@ -12,12 +12,12 @@ import Wrapper from './Wrapper';
 
 import Close from '../../svgs/Close';
 
-function WrapperModal({ children, isOpen, onToggle, ...rest }) {
+function WrapperModal({ children, isOpen, onToggle, shouldDisplayCloseButton, ...rest }) {
   return (
     <Wrapper>
       <StyledModal isOpen={isOpen} toggle={onToggle} {...rest}>
         <HeaderModal toggle={onToggle} style={{ display: 'none' }} />
-        <Close onClick={onToggle} style={{ cursor: 'pointer' }} />
+        {shouldDisplayCloseButton && <Close onClick={onToggle} style={{ cursor: 'pointer' }} />}
         {children}
       </StyledModal>
     </Wrapper>
@@ -26,12 +26,14 @@ function WrapperModal({ children, isOpen, onToggle, ...rest }) {
 
 WrapperModal.defaultProps = {
   children: null,
+  shouldDisplayCloseButton: true,
 };
 
 WrapperModal.propTypes = {
   children: PropTypes.node,
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
+  shouldDisplayCloseButton: PropTypes.bool,
 };
 
 export default memo(WrapperModal);
