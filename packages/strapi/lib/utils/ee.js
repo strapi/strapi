@@ -51,9 +51,9 @@ module.exports = ({ dir, logger = noLog }) => {
     const isValid = verifier.verify(publicKey, signature);
     if (!isValid) return warnAndReturn();
 
-    const ctx = JSON.parse(content);
+    const licenseInfo = JSON.parse(content);
 
-    if (ctx.expireAt < new Date().getTime()) {
+    if (licenseInfo.expire_at < new Date().getTime()) {
       return warnAndReturn('License expired');
     }
   } catch (err) {
