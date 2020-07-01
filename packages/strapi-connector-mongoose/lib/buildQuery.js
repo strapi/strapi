@@ -1,7 +1,66 @@
 'use strict';
 
 const _ = require('lodash');
+var semver = require('semver');
 const utils = require('./utils')();
+
+const combineSearchAndWhere = (search = [], wheres = []) => {
+  const criterias = {};
+  if (search.length > 0 && wheres.length > 0) {
+    criterias.$and = [{ $and: wheres }, { $or: search }];
+  } else if (search.length > 0) {
+    criterias.$or = search;
+  } else if (wheres.length > 0) {
+    criterias.$and = wheres;
+  }
+  return criterias;
+};
+
+const buildSearchOr = (model, query) => {
+  if (typeof query !== 'string') {
+    return [];
+  }
+
+  const searchOr = Object.keys(model.attributes).reduce((acc, curr) => {
+    switch (model.attributes[curr].type) {
+      case 'biginteger':
+      case 'integer':
+      case 'float':
+      case 'decimal':
+        if (!_.isNaN(_.toNumber(query))) {
+          const mongoVersion = model.db.base.mongoDBVersion;
+          if (semver.valid(mongoVersion) && semver.gt(mongoVersion, '4.2.0')) {
+            return acc.concat({
+              $expr: {
+                $regexMatch: {
+                  input: { $toString: `$${curr}` },
+                  regex: _.escapeRegExp(query),
+                },
+              },
+            });
+          } else {
+            return acc.concat({ [curr]: _.toNumber(query) });
+          }
+        }
+        return acc;
+      case 'string':
+      case 'text':
+      case 'richtext':
+      case 'email':
+      case 'enumeration':
+      case 'uid':
+        return acc.concat({ [curr]: { $regex: _.escapeRegExp(query), $options: 'i' } });
+      default:
+        return acc;
+    }
+  }, []);
+
+  if (utils.isMongoId(query)) {
+    searchOr.push({ _id: query });
+  }
+
+  return searchOr;
+};
 
 /**
  * Build a mongo query
@@ -14,11 +73,12 @@ const utils = require('./utils')();
 const buildQuery = ({
   model,
   filters = {},
-  search = [],
+  searchParam,
   populate = [],
   aggregate = false,
 } = {}) => {
   const deepFilters = (filters.where || []).filter(({ field }) => field.split('.').length > 1);
+  const search = buildSearchOr(model, searchParam);
 
   if (deepFilters.length === 0 && aggregate === false) {
     return buildSimpleQuery({ model, filters, search, populate });
@@ -40,15 +100,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
 
   const wheres = where.map(buildWhereClause);
 
-  const findCriteria = {};
-  if (search.length > 0 && wheres.length > 0) {
-    findCriteria.$and = [{ $and: wheres }, { $or: search }];
-  } else if (search.length > 0) {
-    findCriteria.$or = search;
-  } else if (wheres.length > 0) {
-    findCriteria.$and = wheres;
-  }
-
+  const findCriteria = combineSearchAndWhere(search, wheres);
   let query = model.find(findCriteria).populate(populate);
   query = applyQueryParams({ query, filters });
 
@@ -363,16 +415,8 @@ const buildQueryMatches = (model, filters, search = []) => {
       return buildWhereClause(formatWhereClause(model, whereClause));
     });
 
-    let aggregation;
-    if (search.length > 0 && wheres.length > 0) {
-      aggregation = { $and: [{ $and: wheres }, { $or: search }] };
-    } else if (search.length > 0) {
-      aggregation = { $or: search };
-    } else if (wheres.length > 0) {
-      aggregation = { $and: wheres };
-    }
-
-    return [{ $match: aggregation }];
+    const criterias = combineSearchAndWhere(search, wheres);
+    return [{ $match: criterias }];
   }
 
   return [];
