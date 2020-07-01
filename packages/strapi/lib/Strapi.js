@@ -352,24 +352,10 @@ class Strapi {
   }
 
   async runBootstrapFunctions() {
-    const timeoutMs = this.config.bootstrapTimeout || 3500;
-    const warnOnTimeout = () =>
-      setTimeout(() => {
-        this.log.warn(
-          `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
-        );
-        this.log.warn('Make sure you call it?');
-      }, timeoutMs);
-
     const execBootstrap = async fn => {
       if (!fn) return;
 
-      const timer = warnOnTimeout();
-      try {
-        await fn();
-      } finally {
-        clearTimeout(timer);
-      }
+      return fn();
     };
 
     // plugins bootstrap

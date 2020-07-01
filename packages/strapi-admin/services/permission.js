@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const pmap = require('p-map');
 const { createPermission } = require('../domain/permission');
 const actionProvider = require('./permission/action-provider');
 const { validatePermissionsExist } = require('../validation/permission');
@@ -121,21 +122,58 @@ const sanitizePermission = permission =>
  * @returns {Promise<>}
  */
 const cleanPermissionInDatabase = async () => {
-  const dbPermissions = await find();
-  const allActionsMap = actionProvider.getAllByMap();
-  const permissionsToRemoveIds = [];
+  const pageSize = 200;
+  let page = 0;
+  let total = 1;
 
-  dbPermissions.forEach(perm => {
-    if (
-      !allActionsMap.has(perm.action) ||
-      (Array.isArray(allActionsMap.get(perm.action).subjects) &&
-        !allActionsMap.get(perm.action).subjects.includes(perm.subject))
-    ) {
-      permissionsToRemoveIds.push(perm.id);
-    }
-  });
+  while (page * pageSize < total) {
+    // First, delete permission that don't exist anymore
+    page += 1;
+    const res = await strapi.query('permission', 'admin').findPage({ page, pageSize }, []);
+    total = res.pagination.total;
 
-  await deleteByIds(permissionsToRemoveIds);
+    const dbPermissions = res.results;
+    const allActionsMap = actionProvider.getAllByMap();
+    const permissionsToRemoveIds = dbPermissions.reduce((idsToDelete, perm) => {
+      if (
+        !allActionsMap.has(perm.action) ||
+        (Array.isArray(allActionsMap.get(perm.action).subjects) &&
+          !allActionsMap.get(perm.action).subjects.includes(perm.subject))
+      ) {
+        idsToDelete.push(perm.id);
+      }
+      return idsToDelete;
+    }, []);
+
+    const deletePromise = deleteByIds(permissionsToRemoveIds);
+
+    // Second, clean fields of permissions (add required ones, remove the non-existing anymore ones)
+    const permissionsInDb = dbPermissions.filter(perm => !permissionsToRemoveIds.includes(perm.id));
+    const permissionsWithCleanFields = strapi.admin.services['content-type'].cleanPermissionFields(
+      permissionsInDb,
+      {
+        fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+      }
+    );
+
+    // Update only the ones that need to be updated
+    const permissionsNeedingToBeUpdated = _.differenceWith(
+      permissionsWithCleanFields,
+      permissionsInDb,
+      (a, b) => a.id === b.id && _.xor(a.fields, b.fields).length === 0
+    );
+    const promiseProvider = perm =>
+      strapi.query('permission', 'admin').update({ id: perm.id }, perm);
+
+    //Update the database
+    await Promise.all([
+      deletePromise,
+      pmap(permissionsNeedingToBeUpdated, promiseProvider, {
+        concurrency: 100,
+        stopOnError: true,
+      }),
+    ]);
+  }
 };
 
 /**
