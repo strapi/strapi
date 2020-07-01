@@ -26,7 +26,7 @@ describe('ADMIN | utils | formatPermissionsToApi', () => {
       {
         action: 'plugins::content-manager.explorer.delete',
         conditions: [],
-        fields: [],
+        fields: null,
         subject: 'application::category.category',
       },
       {
