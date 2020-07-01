@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import { useGlobalContext, request } from 'strapi-helper-plugin';
@@ -6,6 +6,7 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
+import getInitialValues from 'ee_else_ce/containers/Roles/EditPage/utils/getInitialValues';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -27,7 +28,9 @@ const EditPage = () => {
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
-
+  const initialValues = useMemo(() => {
+    return getInitialValues(role);
+  }, [role]);
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
     isLayoutLoading && isRoleLoading
@@ -67,7 +70,7 @@ const EditPage = () => {
         body: data,
       });
 
-      if (!isEmpty(permissionsToSend)) {
+      if (role.code !== 'strapi-super-admin' && !isEmpty(permissionsToSend)) {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
           body: {
@@ -92,10 +95,7 @@ const EditPage = () => {
       <PageTitle name="Roles" />
       <Formik
         enableReinitialize
-        initialValues={{
-          name: role.name,
-          description: role.description,
-        }}
+        initialValues={initialValues}
         onSubmit={handleEditRoleSubmit}
         validationSchema={schema}
         validateOnChange={false}
