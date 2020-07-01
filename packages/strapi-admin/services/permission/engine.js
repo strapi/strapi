@@ -3,6 +3,26 @@
 const _ = require('lodash');
 const { map, filter, each } = require('lodash/fp');
 const { AbilityBuilder, Ability } = require('@casl/ability');
+const sift = require('sift');
+
+const allowedOperations = [
+  '$or',
+  '$eq',
+  '$ne',
+  '$in',
+  '$nin',
+  '$lt',
+  '$lte',
+  '$gt',
+  '$gte',
+  '$exists',
+  '$elemMatch,',
+];
+const operations = _.pick(sift, allowedOperations);
+
+const conditionsMatcher = conditions => {
+  return sift.createQueryTester(conditions, { operations });
+};
 
 module.exports = conditionProvider => ({
   /**
@@ -32,7 +52,7 @@ module.exports = conditionProvider => ({
         await this.evaluatePermission({ permission, user, options, registerFn });
       }
 
-      return build();
+      return build({ conditionsMatcher });
     };
   },
 
