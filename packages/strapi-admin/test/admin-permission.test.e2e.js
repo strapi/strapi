@@ -27,6 +27,6 @@ describe('Role CRUD End to End', () => {
       sortedData.sections[sectionName] = _.sortBy(sortedData.sections[sectionName], ['action']);
     });
     sortedData.conditions = sortedData.conditions.sort();
-    expect(res.body.data).toMatchSnapshot();
+    expect(sortedData).toMatchSnapshot();
   });
 });
