@@ -112,7 +112,9 @@ const RoleListPage = () => {
     }
   };
 
-  const handleDuplicateRole = () => console.log('duplicate');
+  const handleDuplicateRole = id => {
+    push(`${settingsBaseURL}/roles/duplicate/${id}`);
+  };
 
   const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
 

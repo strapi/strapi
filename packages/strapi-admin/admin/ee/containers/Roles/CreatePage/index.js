@@ -2,13 +2,12 @@ import React, { useState, useRef } from 'react';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
-import { CheckPagePermissions, request } from 'strapi-helper-plugin';
-import { useHistory } from 'react-router-dom';
-
+import { CheckPagePermissions, request, useGlobalContext } from 'strapi-helper-plugin';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../src/permissions';
-import { useFetchPermissionsLayout } from '../../../../src/hooks';
+import { useFetchPermissionsLayout, useFetchRole } from '../../../../src/hooks';
 import BaselineAlignement from '../../../../src/components/BaselineAlignement';
 import PageTitle from '../../../../src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../src/components/ContainerFluid';
@@ -24,7 +23,11 @@ const CreatePage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { goBack } = useHistory();
   const permissionsRef = useRef();
+  const { settingsBaseURL } = useGlobalContext();
+  const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
+  const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
+  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -154,12 +157,12 @@ const CreatePage = () => {
                   style={{ height: 115 }}
                 />
               </FormCard>
-              {!isLayoutLoading && (
+              {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
                   <Permissions
                     permissionsLayout={permissionsLayout}
-                    rolePermissions={{}}
                     ref={permissionsRef}
+                    rolePermissions={rolePermissions}
                   />
                 </Padded>
               )}

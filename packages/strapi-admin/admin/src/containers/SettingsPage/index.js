@@ -120,6 +120,11 @@ function SettingsPage() {
           <div className="col-md-9">
             <Switch>
               <Route exact path={`${settingsBaseURL}/roles`} component={ProtectedRolesListPage} />
+              <Route
+                exact
+                path={`${settingsBaseURL}/roles/duplicate/:id`}
+                component={RolesCreatePage}
+              />
               <Route exact path={`${settingsBaseURL}/roles/new`} component={RolesCreatePage} />
               <Route exact path={`${settingsBaseURL}/roles/:id`} component={RolesEditPage} />
               <Route exact path={`${settingsBaseURL}/users`} component={UsersListPage} />
