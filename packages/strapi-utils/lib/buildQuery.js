@@ -9,9 +9,7 @@ const findModelByAssoc = assoc => {
 };
 
 const isAttribute = (model, field) =>
-  _.has(model.allAttributes, field) ||
-  model.primaryKey === field ||
-  field === 'id';
+  _.has(model.allAttributes, field) || model.primaryKey === field || field === 'id';
 
 /**
  * Returns the model, attribute name and association from a path of relation
@@ -38,10 +36,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
       continue;
     }
 
-    if (
-      !assoc &&
-      (!isAttribute(tmpModel, part) || i !== fieldParts.length - 1)
-    ) {
+    if (!assoc && (!isAttribute(tmpModel, part) || i !== fieldParts.length - 1)) {
       const err = new Error(
         `Your filters contain a field '${field}' that doesn't appear on your model definition nor it's relations`
       );
@@ -108,9 +103,7 @@ const normalizeFieldName = ({ model, field }) => {
 const buildQuery = ({ model, filters = {}, ...rest }) => {
   // Validate query clauses
   if (filters.where && Array.isArray(filters.where)) {
-    const deepFilters = filters.where.filter(
-      ({ field }) => field.split('.').length > 1
-    );
+    const deepFilters = filters.where.filter(({ field }) => field.split('.').length > 1);
     if (deepFilters.length > 0) {
       strapi.log.warn(
         'Deep filtering queries should be used carefully (e.g Can cause performance issues).\nWhen possible build custom routes which will in most case be more optimised.'
@@ -140,9 +133,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
   }
 
   // call the orm's buildQuery implementation
-  return strapi.db.connectors
-    .get(model.orm)
-    .buildQuery({ model, filters, ...rest });
+  return strapi.db.connectors.get(model.orm).buildQuery({ model, filters, ...rest });
 };
 
 module.exports = buildQuery;
