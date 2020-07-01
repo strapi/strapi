@@ -14,7 +14,9 @@ const checkFieldsAreCorrectlyNested = fields => {
   for (let indexA = 0; indexA < fields.length; indexA++) {
     failed = fields
       .slice(indexA + 1)
-      .some(fieldB => fieldB.startsWith(fields[indexA]) || fields[indexA].startsWith(fieldB));
+      .some(
+        fieldB => fieldB.startsWith(`${fields[indexA]}.`) || fields[indexA].startsWith(`${fieldB}.`)
+      );
     if (failed) break;
   }
 

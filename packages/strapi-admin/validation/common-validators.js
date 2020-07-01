@@ -2,7 +2,10 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
-const { checkFieldsAreCorrectlyNested } = require('./common-functions');
+const {
+  checkFieldsAreCorrectlyNested,
+  checkFieldsDontHaveDuplicates,
+} = require('./common-functions');
 
 const email = yup
   .string()
@@ -60,8 +63,13 @@ const updatePermissions = yup
               .nullable()
               .test(
                 'field-nested',
-                'Fields format are incorrect (duplicates or bad nesting).',
+                'Fields format are incorrect (bad nesting).',
                 checkFieldsAreCorrectlyNested
+              )
+              .test(
+                'field-nested',
+                'Fields format are incorrect (duplicates).',
+                checkFieldsDontHaveDuplicates
               ),
             conditions: arrayOfConditionNames,
           })
