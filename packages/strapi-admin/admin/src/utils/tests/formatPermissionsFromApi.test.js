@@ -53,7 +53,10 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
     const expected = {
       contentTypesPermissions: {
         'plugins::users-permissions.user': {
-          conditions: [],
+          conditions: {
+            'plugins::content-manager.explorer.create': [],
+            'plugins::content-manager.explorer.update': [],
+          },
           contentTypeActions: {
             'plugins::content-manager.explorer.create': true,
             'plugins::content-manager.explorer.update': true,
@@ -83,7 +86,10 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
           },
         },
         'application::category.category': {
-          conditions: [],
+          conditions: {
+            'plugins::content-manager.explorer.delete': [],
+            'plugins::content-manager.explorer.read': [],
+          },
           contentTypeActions: {
             'plugins::content-manager.explorer.read': true,
             'plugins::content-manager.explorer.delete': true,

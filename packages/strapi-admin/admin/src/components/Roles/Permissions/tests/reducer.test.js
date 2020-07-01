@@ -1924,4 +1924,112 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expected);
     });
   });
+
+  describe('ON_CONTENT_TYPE_CONDITIONS_SELECT', () => {
+    it('should set the content type conditions properly', () => {
+      const action = {
+        type: 'ON_CONTENT_TYPE_CONDITIONS_SELECT',
+        subject: 'subject1',
+        conditions: {
+          create: ['admin::is-creator'],
+          edit: [],
+          update: ['admin::is-creator'],
+          delete: ['admin::is-creator'],
+        },
+      };
+      const initialState = {
+        contentTypesPermissions: {
+          subject1: {
+            attributes: {
+              attribute1: {
+                actions: ['create'],
+              },
+            },
+            contentTypeActions: {
+              create: true,
+            },
+            conditions: {
+              create: ['admin::is-creator'],
+              edit: ['admin::is-creator'],
+              update: ['admin::is-creator'],
+              delete: ['admin::is-creator'],
+            },
+          },
+        },
+      };
+      const expected = {
+        contentTypesPermissions: {
+          subject1: {
+            attributes: {
+              attribute1: {
+                actions: ['create'],
+              },
+            },
+            contentTypeActions: {
+              create: true,
+            },
+            conditions: {
+              create: ['admin::is-creator'],
+              edit: [],
+              update: ['admin::is-creator'],
+              delete: ['admin::is-creator'],
+            },
+          },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_PLUGIN_SETTING_CONDITIONS_SELECT', () => {
+    it('should set conditions for plugin and settings permissions', () => {
+      const action = {
+        type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
+        conditions: {
+          action1: ['is_creator'],
+        },
+      };
+      const initialState = {
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'action1',
+            conditions: [],
+            subject: null,
+          },
+          {
+            action: 'action2',
+            conditions: [],
+            subject: null,
+          },
+          {
+            action: 'action3',
+            conditions: ['is_someone_else'],
+            subject: null,
+          },
+        ],
+      };
+      const expected = {
+        pluginsAndSettingsPermissions: [
+          {
+            action: 'action1',
+            conditions: ['is_creator'],
+            subject: null,
+          },
+          {
+            action: 'action2',
+            conditions: [],
+            subject: null,
+          },
+          {
+            action: 'action3',
+            conditions: ['is_someone_else'],
+            subject: null,
+          },
+        ],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
 });

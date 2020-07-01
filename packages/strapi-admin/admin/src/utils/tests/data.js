@@ -35,7 +35,10 @@ const data = {
       },
     },
     'application::category.category': {
-      conditions: [],
+      conditions: {
+        'plugins::content-manager.explorer.delete': ['is_creator'],
+        'plugins::content-manager.explorer.read': ['is_someone', 'is_someone_else'],
+      },
       contentTypeActions: {
         'plugins::content-manager.explorer.delete': true,
         'plugins::content-manager.explorer.read': true,

@@ -3,11 +3,11 @@ import styled from 'styled-components';
 
 const Ul = styled.ul`
   max-height: 150px;
-  padding: 0 15px;
-  background-color: #fff;
-  list-style: none;
   font-size: 13px;
+  padding: 0 15px;
   margin-bottom: 0px;
+  list-style: none;
+  background-color: #fff;
   > li {
     label {
       flex-shrink: 1;

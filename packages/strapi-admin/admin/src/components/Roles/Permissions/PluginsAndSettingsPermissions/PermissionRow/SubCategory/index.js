@@ -1,13 +1,16 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { intersectionWith } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 
 import { usePermissionsContext } from '../../../../../../hooks';
+import ConditionsModal from '../../../../ConditionsModal';
+import ConditionsButton from '../../../../ConditionsButton';
 import CheckboxWrapper from '../CheckboxWrapper';
 import BaselineAlignment from '../BaselineAlignment';
 import SubCategoryWrapper from './SubCategoryWrapper';
+import ConditionsButtonWrapper from './ConditionsButtonWrapper';
 
 const Border = styled.div`
   flex: 1;
@@ -17,7 +20,13 @@ const Border = styled.div`
 `;
 
 const SubCategory = ({ subCategory }) => {
-  const { pluginsAndSettingsPermissions } = usePermissionsContext();
+  const [modal, setModal] = useState({ isOpen: false, isMounted: false });
+  const {
+    pluginsAndSettingsPermissions,
+    onPluginSettingPermission,
+    onPluginSettingSubCategoryPermission,
+    onPluginSettingConditionsSelect,
+  } = usePermissionsContext();
 
   const checkPermission = useCallback(
     action => {
@@ -28,68 +37,136 @@ const SubCategory = ({ subCategory }) => {
     [pluginsAndSettingsPermissions]
   );
 
-  const hasAllCategoryActions = useMemo(() => {
-    return (
-      intersectionWith(
-        pluginsAndSettingsPermissions,
-        subCategory.actions,
-        (x, y) => x.action === y.action
-      ).length === subCategory.actions.length
-    );
-  }, [pluginsAndSettingsPermissions, subCategory]);
+  const handlePermission = action => {
+    onPluginSettingPermission(action);
+  };
 
-  const hasSomeCategoryActions = useMemo(() => {
-    const numberOfCurrentActions = intersectionWith(
+  const currentPermissions = useMemo(() => {
+    return intersectionWith(
       pluginsAndSettingsPermissions,
       subCategory.actions,
       (x, y) => x.action === y.action
-    ).length;
+    );
+  }, [pluginsAndSettingsPermissions, subCategory.actions]);
 
-    return numberOfCurrentActions > 0 && numberOfCurrentActions < subCategory.actions.length;
-  }, [pluginsAndSettingsPermissions, subCategory]);
+  const hasAllCategoryActions = useMemo(() => {
+    return currentPermissions.length === subCategory.actions.length;
+  }, [currentPermissions, subCategory.actions]);
+
+  const hasSomeCategoryActions = useMemo(() => {
+    return currentPermissions.length > 0 && currentPermissions.length < subCategory.actions.length;
+  }, [currentPermissions, subCategory.actions]);
+
+  const categoryConditions = useMemo(() => {
+    return currentPermissions.reduce((acc, current) => {
+      return {
+        ...acc,
+        [current.action]: current.conditions,
+      };
+    }, {});
+  }, [currentPermissions]);
+
+  const hasCategoryConditions = useMemo(() => {
+    return Object.values(categoryConditions).flat().length > 0;
+  }, [categoryConditions]);
+
+  const handleSubCategoryPermissions = () => {
+    onPluginSettingSubCategoryPermission({
+      actions: subCategory.actions,
+      shouldEnable: !hasAllCategoryActions,
+    });
+  };
+
+  const handleModalOpen = () => {
+    setModal({
+      isMounted: true,
+      isOpen: true,
+    });
+  };
+
+  const handleToggleModal = () => {
+    setModal(prev => ({
+      ...prev,
+      isOpen: !prev.isOpen,
+    }));
+  };
+
+  const actionsForConditions = useMemo(() => {
+    return currentPermissions.map(permission => ({
+      id: permission.action,
+      displayName: subCategory.actions.find(perm => perm.action === permission.action).displayName,
+    }));
+  }, [currentPermissions, subCategory.actions]);
+
+  const checkCategory = useCallback(
+    action => {
+      return categoryConditions[action] ? categoryConditions[action].length > 0 : false;
+    },
+    [categoryConditions]
+  );
+
+  const handleConditionsSubmit = conditions => {
+    onPluginSettingConditionsSelect(conditions);
+  };
 
   return (
-    <SubCategoryWrapper disabled>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Padded right size="sm">
-          <Text
-            lineHeight="18px"
-            color="#919bae"
-            fontWeight="bold"
-            fontSize="xs"
-            textTransform="uppercase"
-          >
-            {subCategory.subCategory}
-          </Text>
-        </Padded>
-        <Border />
-        <Padded left size="sm">
-          <BaselineAlignment />
-          <Checkbox
-            disabled
-            name={`select-all-${subCategory.subCategory}`}
-            message="Select all"
-            someChecked={hasSomeCategoryActions}
-            value={hasAllCategoryActions}
-          />
-        </Padded>
-      </Flex>
-      <BaselineAlignment />
-      <Padded top size="xs">
-        <Flex flexWrap="wrap">
-          {subCategory.actions.map(sc => (
-            <CheckboxWrapper key={sc.action}>
-              <Checkbox
-                disabled
-                value={checkPermission(sc.action)}
-                name={sc.action}
-                message={sc.displayName}
-              />
-            </CheckboxWrapper>
-          ))}
+    <>
+      <SubCategoryWrapper disabled>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Padded right size="sm">
+            <Text
+              lineHeight="18px"
+              color="#919bae"
+              fontWeight="bold"
+              fontSize="xs"
+              textTransform="uppercase"
+            >
+              {subCategory.subCategory}
+            </Text>
+          </Padded>
+          <Border />
+          <Padded left size="sm">
+            <BaselineAlignment />
+            <Checkbox
+              name={`select-all-${subCategory.subCategory}`}
+              message="Select all"
+              disabled
+              onChange={handleSubCategoryPermissions}
+              someChecked={hasSomeCategoryActions}
+              value={hasAllCategoryActions}
+            />
+          </Padded>
         </Flex>
-      </Padded>
-    </SubCategoryWrapper>
+        <BaselineAlignment />
+        <Padded top size="xs">
+          <Flex flexWrap="wrap">
+            {subCategory.actions.map(sc => (
+              <CheckboxWrapper hasConditions={checkCategory(sc.action)} key={sc.action}>
+                <Checkbox
+                  value={checkPermission(sc.action)}
+                  name={sc.action}
+                  disabled
+                  message={sc.displayName}
+                  onChange={() => handlePermission(sc.action)}
+                />
+              </CheckboxWrapper>
+            ))}
+          </Flex>
+          <ConditionsButtonWrapper hasConditions={hasCategoryConditions}>
+            <ConditionsButton hasConditions={hasCategoryConditions} onClick={handleModalOpen} />
+          </ConditionsButtonWrapper>
+        </Padded>
+      </SubCategoryWrapper>
+      {modal.isMounted && (
+        <ConditionsModal
+          actions={actionsForConditions}
+          initialConditions={categoryConditions}
+          onSubmit={handleConditionsSubmit}
+          onToggle={handleToggleModal}
+          isOpen={modal.isOpen}
+        />
+      )}
+    </>
   );
 };
 

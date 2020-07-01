@@ -1,22 +1,28 @@
 /* eslint-disable indent */
 import styled from 'styled-components';
 
-const CheckboxWrapper = styled.div`
-  min-width: 33%;
-  padding: 0.9rem;
-  height: 3.6rem;
+const Wrapper = styled.div`
   position: relative;
+  cursor: pointer;
+  color: ${({ theme }) => theme.main.colors.mediumBlue};
+  ${({ isRight }) =>
+    isRight &&
+    `
+    position: absolute;
+    right: 5rem;
+  `}
   ${({ hasConditions, theme }) =>
     hasConditions &&
     `
     &:before {
       content: '•';
       position: absolute;
-      top: 2px;
-      left: 0px;
+      top: -4px;
+      left: -15px;
+      font-size: 18px;
       color: ${theme.main.colors.mediumBlue};
     }
   `}
 `;
 
-export default CheckboxWrapper;
+export default Wrapper;

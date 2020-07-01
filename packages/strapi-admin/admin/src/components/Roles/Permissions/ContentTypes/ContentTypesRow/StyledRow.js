@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Text } from '@buffetjs/core';
 import Chevron from './Chevron';
-import SettingsButton from '../../../SettingsButton';
+import ConditionsButton from '../../../ConditionsButton';
 
 const activeRowStyle = theme => `
   border: 1px solid ${theme.main.colors.darkBlue};
@@ -13,7 +13,7 @@ const activeRowStyle = theme => `
   ${Chevron} {
     display: block;
   }
-  ${SettingsButton} {
+  ${ConditionsButton} {
     display: block;
   }
 `;
@@ -25,7 +25,7 @@ const StyledRow = styled.div`
   background-color: ${({ isGrey, theme }) =>
     isGrey ? theme.main.colors.content.background : theme.main.colors.white};
   border: 1px solid transparent;
-  ${SettingsButton} {
+  ${ConditionsButton} {
     display: none;
   }
   ${({ isActive, theme }) => isActive && activeRowStyle(theme)}

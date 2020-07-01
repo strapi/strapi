@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { groupBy } from 'lodash';
+import { groupBy, intersectionWith } from 'lodash';
 import { Checkbox, Flex } from '@buffetjs/core';
 import { Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,67 +21,57 @@ const MenuList = ({ selectProps, ...rest }) => {
     setCollapses(prevState => ({ ...prevState, [collapseName]: !collapses[collapseName] }));
   };
 
-  const handleChange = action => {
-    selectProps.onChange(action);
-  };
-
-  const handleCategoryChange = categoryActions => {
-    selectProps.onCategoryChange(categoryActions);
-  };
-
   const hasAction = useCallback(
-    action => {
-      return selectProps.value.findIndex(option => option.id === action.id) !== -1;
+    condition => {
+      return selectProps.value.includes(condition.id);
     },
     [selectProps.value]
   );
 
   const hasSomeCategoryAction = useCallback(
-    categoryName => {
-      const categoryActions = selectProps.value.filter(option => option.category === categoryName)
-        .length;
+    category => {
+      const formattedCategories = category[1].map(condition => condition.id);
 
-      return categoryActions > 0 && categoryActions < optionsGroupByCategory[categoryName].length;
+      const categoryActions = intersectionWith(formattedCategories, selectProps.value).length;
+
+      return categoryActions > 0 && categoryActions < formattedCategories.length;
     },
-    [optionsGroupByCategory, selectProps.value]
+    [selectProps.value]
   );
 
   const hasAllCategoryAction = useCallback(
-    categoryName => {
-      const categoryActions = selectProps.value.filter(option => option.category === categoryName)
-        .length;
+    category => {
+      const formattedCategories = category[1].map(condition => condition.id);
 
-      return categoryActions === optionsGroupByCategory[categoryName].length;
+      const categoryActions = intersectionWith(formattedCategories, selectProps.value).length;
+
+      return categoryActions === formattedCategories.length;
     },
-    [optionsGroupByCategory, selectProps.value]
+    [selectProps.value]
   );
 
   return (
     <Component {...rest}>
       <Ul>
-        {Object.values(optionsGroupByCategory) === 0 && <div>zdazd</div>}
         {Object.entries(optionsGroupByCategory).map((category, index) => {
           return (
             <li key={category[0]}>
               <div>
                 <Flex justifyContent="space-between">
-                  <Label
-                    htmlFor="overrideReactSelectBehavior"
-                    onClick={() => handleCategoryChange(category[1])}
-                  >
+                  <Label htmlFor="overrideReactSelectBehavior">
                     <Flex>
                       <Checkbox
                         id="checkCategory"
                         name={category[0]}
                         onChange={() => {}}
-                        value={hasAllCategoryAction(category[0])}
-                        someChecked={hasSomeCategoryAction(category[0])}
+                        value={hasAllCategoryAction(category)}
+                        someChecked={hasSomeCategoryAction(category)}
                       />
                       <UpperFirst content={category[0]} />
                     </Flex>
                   </Label>
                   <div
-                    style={{ flex: 1, textAlign: 'end' }}
+                    style={{ flex: 1, textAlign: 'end', cursor: 'pointer' }}
                     onClick={() => toggleCollapse(category[0])}
                   >
                     <FontAwesomeIcon
@@ -100,11 +90,7 @@ const MenuList = ({ selectProps, ...rest }) => {
                   return (
                     <li key={action.id}>
                       <Flex>
-                        <Label
-                          htmlFor={action.id}
-                          message={action.displayName}
-                          onClick={() => handleChange(action)}
-                        >
+                        <Label htmlFor={action.id} message={action.displayName}>
                           <Flex>
                             <Checkbox
                               id="check"
