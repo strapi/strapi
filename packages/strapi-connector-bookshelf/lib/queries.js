@@ -163,7 +163,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(buildSearchQuery({ model, params }))
+      .query(qb => qb.where(buildSearchQuery({ model, params })))
       .query(buildQuery({ model, filters }))
       .fetchAll({ withRelated: populate })
       .then(results => results.toJSON());
@@ -173,7 +173,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(buildSearchQuery({ model, params }))
+      .query(qb => qb.where(buildSearchQuery({ model, params })))
       .query(buildQuery({ model, filters }))
       .count()
       .then(Number);
@@ -631,58 +631,54 @@ module.exports = function createQueryBuilder({ model, strapi }) {
  * @param {*} params
  */
 const buildSearchQuery = ({ model, params }) => qb => {
-  function setSearchColumn() {
-    const query = params._q;
+  const query = params._q;
 
-    const associations = model.associations.map(x => x.alias);
-    const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
-    const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
+  const associations = model.associations.map(x => x.alias);
+  const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
+  const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
 
-    const searchColumns = Object.keys(model._attributes)
+  const searchColumns = Object.keys(model._attributes)
+    .filter(attribute => !associations.includes(attribute))
+    .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
+
+  if (!_.isNaN(_.toNumber(query))) {
+    const numberColumns = Object.keys(model._attributes)
       .filter(attribute => !associations.includes(attribute))
-      .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
-
-    if (!_.isNaN(_.toNumber(query))) {
-      const numberColumns = Object.keys(model._attributes)
-        .filter(attribute => !associations.includes(attribute))
-        .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
-      searchColumns.push(...numberColumns);
-    }
-
-    if ([...numberTypes, ...stringTypes].includes(model.primaryKeyType)) {
-      searchColumns.push(model.primaryKey);
-    }
-
-    // Search in columns with text using index.
-    switch (model.client) {
-      case 'pg':
-        searchColumns.forEach(attr =>
-          this.orWhereRaw(
-            `"${model.collectionName}"."${attr}"::text ILIKE ?`,
-            `%${escapeQuery(query, '*%\\')}%`
-          )
-        );
-        break;
-      case 'sqlite3':
-        searchColumns.forEach(attr =>
-          this.orWhereRaw(
-            `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
-            `%${escapeQuery(query, '*%\\')}%`
-          )
-        );
-        break;
-      case 'mysql':
-        searchColumns.forEach(attr =>
-          this.orWhereRaw(
-            `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
-            `%${escapeQuery(query, '*%\\')}%`
-          )
-        );
-        break;
-    }
+      .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
+    searchColumns.push(...numberColumns);
   }
 
-  qb.where(setSearchColumn);
+  if ([...numberTypes, ...stringTypes].includes(model.primaryKeyType)) {
+    searchColumns.push(model.primaryKey);
+  }
+
+  // Search in columns with text using index.
+  switch (model.client) {
+    case 'pg':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(
+          `"${model.collectionName}"."${attr}"::text ILIKE ?`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
+      );
+      break;
+    case 'sqlite3':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(
+          `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
+      );
+      break;
+    case 'mysql':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(
+          `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
+      );
+      break;
+  }
 };
 
 function validateRepeatableInput(value, { key, min, max, required }) {
