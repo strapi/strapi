@@ -72,6 +72,7 @@ module.exports = {
     const {
       state: { userAbility },
       params: { model },
+      request,
     } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
     const pm = strapi.admin.services.permission.createPermissionsManager(
@@ -81,10 +82,11 @@ module.exports = {
     );
 
     let entities = [];
+
     if (_.has(ctx.request.query, '_q')) {
-      entities = await contentManagerService.search(model, ctx.request.query, pm.query);
+      entities = await contentManagerService.search(model, request.query, pm.query);
     } else {
-      entities = await contentManagerService.fetchAll(model, ctx.request.query, pm.query);
+      entities = await contentManagerService.fetchAll(model, request.query, pm.query);
     }
 
     if (!entities) {
@@ -161,16 +163,18 @@ module.exports = {
       throw strapi.errors.forbidden();
     }
 
-    const sanitize = e => pm.sanitize(e, { subject: model });
+    const sanitize = e => pm.pickPermittedFieldsOf(e, { subject: model });
 
-    const userId = user.id;
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
     try {
-      data.created_by = userId;
-      data.updated_by = userId;
-
-      const result = await contentManagerService.create({ data: sanitize(data), files }, { model });
+      const result = await contentManagerService.create(
+        {
+          data: { ...sanitize(data), created_by: user.id, updated_by: user.id },
+          files,
+        },
+        { model }
+      );
 
       ctx.body = pm.sanitize(result, { action: ACTIONS.read });
 
@@ -205,17 +209,14 @@ module.exports = {
       id
     );
 
-    const sanitize = e => pm.sanitize(e, { subject: pm.toSubject(entity) });
+    const sanitize = e => pm.pickPermittedFieldsOf(e, { subject: pm.toSubject(entity) });
 
-    const userId = user.id;
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
     try {
-      data.updated_by = userId;
-
       const result = await contentManagerService.edit(
         { id },
-        { data: sanitize(data), files },
+        { data: { ...sanitize(data), updated_by: user.id }, files },
         { model }
       );
 
@@ -253,7 +254,7 @@ module.exports = {
    */
   async deleteMany(ctx) {
     const {
-      state: userAbility,
+      state: { userAbility },
       params: { model },
     } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;

@@ -47,6 +47,11 @@ module.exports = conditionProvider => ({
   async evaluatePermission({ permission, user, options, registerFn }) {
     const { action, subject, fields, conditions } = permission;
 
+    // Permissions with empty fields array should be removed
+    if (Array.isArray(fields) && fields.length === 0) {
+      return;
+    }
+
     // Directly registers the permission if there is no condition to check/evaluate
     if (_.isUndefined(conditions) || _.isEmpty(conditions)) {
       return registerFn({ action, subject, fields, condition: true });
@@ -95,8 +100,9 @@ module.exports = conditionProvider => ({
    * @returns {function({action?: *, subject?: *, fields?: *, condition?: *}): *}
    */
   createRegisterFunction(can) {
-    return ({ action, subject, fields, condition }) =>
-      can(action, subject, fields, _.isObject(condition) ? condition : undefined);
+    return ({ action, subject, fields, condition }) => {
+      return can(action, subject, fields, _.isObject(condition) ? condition : undefined);
+    };
   },
 
   /**

@@ -27,7 +27,7 @@ module.exports = ({ models, target }, ctx) => {
       primaryKeyType: 'string',
     });
 
-    if (!definition.uid.startsWith('strapi::')) {
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
       definition.attributes['created_by'] = {
         autoPopulate: false,
         model: 'user',
@@ -226,15 +226,13 @@ module.exports = ({ models, target }, ctx) => {
           }
 
           if (type === 'dynamiczone') {
-            if(returned[name]){
-              const components = returned[name].map(el => {
+            if (returned[name]) {
+              returned[name] = returned[name].map(el => {
                 return {
                   __component: findComponentByGlobalId(el.kind).uid,
                   ...el.ref,
                 };
               });
-
-              returned[name] = components;
             }
           }
         });
