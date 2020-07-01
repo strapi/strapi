@@ -4,4 +4,4 @@ const fs = require('fs-extra');
 const path = require('path');
 const appAdminPath = path.join(__dirname, 'admin');
 
-module.exports = fs.existsSync(path.join(appAdminPath, 'eee'));
+module.exports = fs.existsSync(path.join(appAdminPath, 'ee'));

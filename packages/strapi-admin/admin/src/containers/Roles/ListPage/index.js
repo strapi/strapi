@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { List, Header } from '@buffetjs/custom';
-import { Pencil } from '@buffetjs/icons';
+import { Button } from '@buffetjs/core';
+import { Duplicate, Pencil, Plus } from '@buffetjs/icons';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext, useQuery, useUserPermissions } from 'strapi-helper-plugin';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ListButton, useGlobalContext, useQuery, useUserPermissions } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
@@ -15,6 +17,7 @@ import BaselineAlignment from './BaselineAlignment';
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
+  const [isOpen, setIsOpen] = useState(false);
   const { settingsBaseURL } = useGlobalContext();
   const { roles, isLoading } = useRolesList();
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
@@ -33,6 +36,21 @@ const RoleListPage = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleToggle = useCallback(() => setIsOpen(prev => !prev), []);
+
+  const headerActions = [
+    {
+      label: formatMessage({
+        id: 'Settings.roles.list.button.add',
+        defaultMessage: 'Add new role',
+      }),
+      onClick: handleToggle,
+      color: 'primary',
+      type: 'button',
+      icon: true,
+    },
+  ];
 
   const resultsCount = results.length;
 
@@ -53,6 +71,7 @@ const RoleListPage = () => {
         })}
         // Show a loader in the header while requesting data
         isLoading={isLoading}
+        actions={headerActions}
       />
       <BaselineAlignment />
       <RoleListWrapper>
@@ -70,8 +89,16 @@ const RoleListPage = () => {
               canUpdate={canUpdate}
               links={[
                 {
+                  icon: <Duplicate fill="#0e1622" />,
+                  onClick: handleToggle,
+                },
+                {
                   icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
                   onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
+                },
+                {
+                  icon: <FontAwesomeIcon icon="trash-alt" />,
+                  onClick: handleToggle,
                 },
               ]}
               role={role}
@@ -79,8 +106,18 @@ const RoleListPage = () => {
           )}
         />
         {!resultsCount && !isLoading && <EmptyRole />}
+        <ListButton>
+          <Button
+            onClick={handleToggle}
+            icon={<Plus fill="#007eff" width="11px" height="11px" />}
+            label={formatMessage({
+              id: 'Settings.roles.list.button.add',
+              defaultMessage: 'Add new role',
+            })}
+          />
+        </ListButton>
       </RoleListWrapper>
-      <UpgradePlanModal />
+      <UpgradePlanModal isOpen={isOpen} onToggle={handleToggle} />
     </>
   );
 };
