@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, forwardRef, useMemo, useImperativeHandle } from 'react';
+import React, { useReducer, forwardRef, useMemo, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 
 import Tabs from '../Tabs';
@@ -16,10 +16,6 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
   const [state, dispatch] = useReducer(reducer, initialState, state =>
     init(state, permissionsLayout, rolePermissions)
   );
-
-  useEffect(() => {
-    console.log(state.contentTypesPermissions);
-  }, [state.contentTypesPermissions]);
 
   useImperativeHandle(ref, () => ({
     getPermissions: () => {
@@ -150,6 +146,21 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     });
   };
 
+  const handleContentTypeConditionsSelect = ({ subject, conditions }) => {
+    dispatch({
+      type: 'ON_CONTENT_TYPE_CONDITIONS_SELECT',
+      subject,
+      conditions,
+    });
+  };
+
+  const handlePluginSettingConditionsSelect = conditions => {
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
+      conditions,
+    });
+  };
+
   const providerValues = {
     ...state,
     components,
@@ -162,7 +173,9 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
     onGlobalPermissionsActionSelect: handleGlobalPermissionsActionSelect,
     onSetAttributesPermissions: handleSetAttributesPermissions,
     onPluginSettingPermission: handlePluginSettingPermission,
+    onContentTypeConditionsSelect: handleContentTypeConditionsSelect,
     onPluginSettingSubCategoryPermission: handlePluginSettingSubCategoryPermission,
+    onPluginSettingConditionsSelect: handlePluginSettingConditionsSelect,
   };
 
   return (

@@ -20,12 +20,12 @@ import StyledRow from '../../../../../../src/components/Roles/Permissions/Conten
 import ContentTypesAttributes from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ContentTypesAttributes';
 import PermissionWrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
 import CollapseLabel from '../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
-import SettingsButton from '../../../../../../src/components/Roles/SettingsButton';
+import ConditionsButton from '../../../../../../src/components/Roles/ConditionsButton';
 
-import ConditionsModal from './ConditionsModal';
+import ConditionsModal from '../../../../../../src/components/Roles/ConditionsModal';
 
 const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
-  const [modalOpened, setOpenModal] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, isMounted: false });
   const {
     collapsePath,
     onCollapse,
@@ -35,14 +35,9 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     onAttributesSelect,
     onAllContentTypeActions,
     isSuperAdmin,
+    onContentTypeConditionsSelect,
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
-
-  const numberOfContentTypeActions = useMemo(() => {
-    return Object.values(
-      get(contentTypesPermissions, [contentType.uid, 'contentTypeActions'], {})
-    ).filter(action => !!action).length;
-  }, [contentType, contentTypesPermissions]);
 
   const contentTypeActions = useMemo(() => {
     const contentTypesActionObject = get(
@@ -56,13 +51,24 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     );
   }, [contentType, contentTypesPermissions]);
 
+  const conditions = useMemo(() => {
+    return get(contentTypesPermissions, [contentType.uid, 'conditions'], {});
+  }, [contentType, contentTypesPermissions]);
+
+  const actionsForConditions = useMemo(() => {
+    return contentTypeActions.map(action => ({
+      id: action,
+      displayName: action.split('.')[action.split('.').length - 1],
+    }));
+  }, [contentTypeActions]);
+
   // Number of all actions in the current content type.
   const allCurrentActionsSize = useMemo(() => {
     return (
       getAllAttributesActionsSize(contentType.uid, contentTypesPermissions) +
-      numberOfContentTypeActions
+      contentTypeActions.length
     );
-  }, [contentType, numberOfContentTypeActions, contentTypesPermissions]);
+  }, [contentType, contentTypeActions.length, contentTypesPermissions]);
 
   // Attributes to display : Liste of attributes of in the content type without timestamps and id
   // Used to display the first level of attributes.
@@ -106,6 +112,17 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     [contentTypesPermissions, contentType, attributes]
   );
 
+  const checkConditions = useCallback(
+    action => {
+      return get(conditions, [action], []).length > 0;
+    },
+    [conditions]
+  );
+
+  const subjectHasConditions = useMemo(() => {
+    return Object.values(conditions).flat().length > 0;
+  }, [conditions]);
+
   const handleToggleAttributes = () => {
     onCollapse(0, contentType.uid);
   };
@@ -138,6 +155,24 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     });
   };
 
+  const handleModalOpen = () => {
+    setModal({
+      isMounted: true,
+      isOpen: true,
+    });
+  };
+
+  const handleToggleModal = () => {
+    setModal(prev => ({
+      ...prev,
+      isOpen: !prev.isOpen,
+    }));
+  };
+
+  const handleModalSubmit = conditions => {
+    onContentTypeConditionsSelect({ subject: contentType.uid, conditions });
+  };
+
   return (
     <>
       <StyledRow disabled={isSuperAdmin} isActive={isActive} isGrey={index % 2 === 0}>
@@ -149,7 +184,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
               name={contentType.name}
               disabled={isSuperAdmin}
               someChecked={
-                numberOfContentTypeActions > 0 &&
+                contentTypeActions.length > 0 &&
                 allCurrentActionsSize > 0 &&
                 allCurrentActionsSize < allActionsSize
               }
@@ -179,36 +214,44 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
               !isAttributeAction(permissionLayout.action) ? (
                 <PermissionCheckbox
                   key={permissionLayout.action}
+                  hasConditions={checkConditions(permissionLayout.action)}
                   disabled={isSuperAdmin}
                   value={hasContentTypeAction(permissionLayout.action)}
-                  hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
                   onChange={() => handleContentTypeActionSelect(permissionLayout.action)}
                 />
               ) : (
                 <PermissionCheckbox
                   key={permissionLayout.action}
+                  hasConditions={checkConditions(permissionLayout.action)}
                   disabled={isSuperAdmin}
                   value={hasContentTypeAction(permissionLayout.action)}
                   someChecked={hasSomeAttributeByAction(permissionLayout.action)}
-                  hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
                   onChange={() => handleActionSelect(permissionLayout.action)}
                 />
               )
             )}
           </PermissionWrapper>
-          <SettingsButton onClick={() => setOpenModal(true)} />
+          <ConditionsButton
+            isRight
+            hasConditions={subjectHasConditions}
+            onClick={handleModalOpen}
+          />
         </Flex>
       </StyledRow>
       {isActive && (
         <ContentTypesAttributes contentType={contentType} attributes={attributesToDisplay} />
       )}
-      <ConditionsModal
-        actions={contentTypeActions}
-        toggle={() => setOpenModal(!modalOpened)}
-        isOpen={modalOpened}
-      />
+      {modal.isMounted && (
+        <ConditionsModal
+          actions={actionsForConditions}
+          initialConditions={conditions}
+          onToggle={handleToggleModal}
+          onSubmit={handleModalSubmit}
+          isOpen={modal.isOpen}
+        />
+      )}
     </>
   );
 };

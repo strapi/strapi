@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import getExistingActions from './getExistingActions';
 
 const formatPermissionsToApi = permissions => {
@@ -32,7 +33,7 @@ const formatPermissionsToApi = permissions => {
                   action: currentAction,
                   subject: permission[0],
                   fields: fields.length > 0 ? fields : null,
-                  conditions,
+                  conditions: get(conditions, [currentAction], []),
                 },
               ];
             }

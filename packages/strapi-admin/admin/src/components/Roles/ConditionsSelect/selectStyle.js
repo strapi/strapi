@@ -30,7 +30,7 @@ const selectStyle = {
     ...base,
     display: 'none',
   }),
-  control: base => ({
+  control: (base, state) => ({
     ...base,
     fontSize: 13,
     outline: 0,
@@ -39,6 +39,7 @@ const selectStyle = {
     height: 36,
     minHeight: 36,
     overflow: 'hidden',
+    backgroundColor: state.isDisabled ? '#292b2c' : 'white',
     borderColor: '#e3e9f3',
     '&:hover': {
       borderColor: '#007eff',
@@ -49,6 +50,10 @@ const selectStyle = {
     padding: '2px 4px 4px 10px',
     lineHeight: '18px',
     minWidth: 200,
+  }),
+  placeholder: base => ({
+    ...base,
+    color: 'black',
   }),
 };
 

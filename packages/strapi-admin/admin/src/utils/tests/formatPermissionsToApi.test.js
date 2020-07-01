@@ -19,13 +19,13 @@ describe('ADMIN | utils | formatPermissionsToApi', () => {
       },
       {
         action: 'plugins::content-manager.explorer.read',
-        conditions: [],
+        conditions: ['is_someone', 'is_someone_else'],
         fields: ['name', 'addresses'],
         subject: 'application::category.category',
       },
       {
         action: 'plugins::content-manager.explorer.delete',
-        conditions: [],
+        conditions: ['is_creator'],
         fields: null,
         subject: 'application::category.category',
       },

@@ -1,10 +1,12 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Checkbox, Flex, Text, Padded } from '@buffetjs/core';
 
 import { getAttributesToDisplay } from '../../../../../utils';
 import { usePermissionsContext } from '../../../../../hooks';
+import ConditionsButton from '../../../ConditionsButton';
+import ConditionsModal from '../../../ConditionsModal';
 import {
   ATTRIBUTES_PERMISSIONS_ACTIONS,
   isAttributeAction,
@@ -21,6 +23,7 @@ import PermissionWrapper from './PermissionWrapper';
 import CollapseLabel from '../CollapseLabel';
 
 const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
+  const [modal, setModal] = useState({ isOpen: false, isMounted: false });
   const {
     collapsePath,
     onCollapse,
@@ -28,14 +31,32 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     components,
     onAllContentTypeActions,
     isSuperAdmin,
+    onContentTypeConditionsSelect,
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
 
   const contentTypeActions = useMemo(() => {
-    return Object.values(
-      get(contentTypesPermissions, [contentType.uid, 'contentTypeActions'], {})
-    ).filter(action => !!action);
+    const contentTypesActionObject = get(
+      contentTypesPermissions,
+      [contentType.uid, 'contentTypeActions'],
+      {}
+    );
+
+    return Object.keys(contentTypesActionObject).filter(
+      action => !!contentTypesActionObject[action]
+    );
   }, [contentType, contentTypesPermissions]);
+
+  const conditions = useMemo(() => {
+    return get(contentTypesPermissions, [contentType.uid, 'conditions'], {});
+  }, [contentType, contentTypesPermissions]);
+
+  const actionsForConditions = useMemo(() => {
+    return contentTypeActions.map(action => ({
+      id: action,
+      displayName: action.split('.')[action.split('.').length - 1],
+    }));
+  }, [contentTypeActions]);
 
   // Number of all actions in the current content type.
   const allCurrentActionsSize = useMemo(() => {
@@ -43,7 +64,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
       getAllAttributesActionsSize(contentType.uid, contentTypesPermissions) +
       contentTypeActions.length
     );
-  }, [contentType, contentTypeActions, contentTypesPermissions]);
+  }, [contentType, contentTypeActions.length, contentTypesPermissions]);
 
   // Attributes to display : Liste of attributes of in the content type without timestamps and id
   // Used to display the first level of attributes.
@@ -66,27 +87,43 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     [contentTypesPermissions, contentType]
   );
 
+  const getAttributesPermissions = useCallback(
+    action => {
+      return getAttributePermissionsSizeByContentTypeAction(
+        contentTypesPermissions,
+        contentType.uid,
+        action
+      );
+    },
+    [contentType, contentTypesPermissions]
+  );
+
   // Check if an attribute have the passed action
   // Used to set the someChecked props of an action checkbox
   const hasSomeAttributeByAction = useCallback(
     action => {
+      const attributesPermissionsCount = getAttributesPermissions(action);
+
       return (
-        getAttributePermissionsSizeByContentTypeAction(
-          contentTypesPermissions,
-          contentType.uid,
-          action
-        ) > 0 &&
-        getAttributePermissionsSizeByContentTypeAction(
-          contentTypesPermissions,
-          contentType.uid,
-          action
-        ) < attributes.length &&
+        attributesPermissionsCount > 0 &&
+        attributesPermissionsCount < attributes.length &&
         hasContentTypeAction(action)
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [contentTypesPermissions, contentType, attributes]
+    [attributes, hasContentTypeAction]
   );
+
+  const checkConditions = useCallback(
+    action => {
+      return get(conditions, [action], []).length > 0;
+    },
+    [conditions]
+  );
+
+  const subjectHasConditions = useMemo(() => {
+    return Object.values(conditions).flat().length > 0;
+  }, [conditions]);
 
   const handleToggleAttributes = () => {
     onCollapse(0, contentType.uid);
@@ -103,12 +140,30 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     });
   };
 
+  const handleModalOpen = () => {
+    setModal({
+      isMounted: true,
+      isOpen: true,
+    });
+  };
+
+  const handleToggleModal = () => {
+    setModal(prev => ({
+      ...prev,
+      isOpen: !prev.isOpen,
+    }));
+  };
+
+  const handleModalSubmit = conditions => {
+    onContentTypeConditionsSelect({ subject: contentType.uid, conditions });
+  };
+
   return (
     <>
       <StyledRow disabled={isSuperAdmin} isActive={isActive} isGrey={index % 2 === 0}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <PermissionName>
+          <PermissionName disabled>
             <Checkbox
               onChange={handleAllContentTypeActions}
               name={contentType.name}
@@ -143,28 +198,42 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
             {permissionsLayout.map(permissionLayout =>
               !isAttributeAction(permissionLayout.action) ? (
                 <PermissionCheckbox
-                  disabled
                   key={permissionLayout.action}
+                  hasConditions={checkConditions(permissionLayout.action)}
+                  disabled
                   value={hasContentTypeAction(permissionLayout.action)}
-                  hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
                 />
               ) : (
                 <PermissionCheckbox
-                  disabeld
                   key={permissionLayout.action}
+                  hasConditions={checkConditions(permissionLayout.action)}
+                  disabled
                   value={hasContentTypeAction(permissionLayout.action)}
                   someChecked={hasSomeAttributeByAction(permissionLayout.action)}
-                  hasConditions={false}
                   name={`${contentType.name}-${permissionLayout.action}`}
                 />
               )
             )}
           </PermissionWrapper>
+          <ConditionsButton
+            isRight
+            hasConditions={subjectHasConditions}
+            onClick={handleModalOpen}
+          />
         </Flex>
       </StyledRow>
       {isActive && (
         <ContentTypesAttributes contentType={contentType} attributes={attributesToDisplay} />
+      )}
+      {modal.isMounted && (
+        <ConditionsModal
+          actions={actionsForConditions}
+          initialConditions={conditions}
+          onToggle={handleToggleModal}
+          onSubmit={handleModalSubmit}
+          isOpen={modal.isOpen}
+        />
       )}
     </>
   );

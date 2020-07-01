@@ -7,6 +7,9 @@ const PermissionCheckbox = styled(Checkbox)`
   max-width: 12rem;
   flex: 1;
   position: relative;
+  input[type='checkbox'] {
+    z-index: 10;
+  }
   ${({ hasConditions, theme }) =>
     hasConditions &&
     `

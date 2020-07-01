@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import { Collapse } from 'reactstrap';
 
 const ToggleUl = styled(Collapse)`
-  padding: 12px 15px 0 15px;
-  background-color: #fff;
-  list-style: none;
   font-size: 13px;
+  padding: 12px 15px 0 15px;
+  list-style: none;
+  background-color: #fff;
   > li {
     padding-top: 5px;
     padding-bottom: 12px;

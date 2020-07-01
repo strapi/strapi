@@ -433,6 +433,24 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'ON_CONTENT_TYPE_CONDITIONS_SELECT': {
+        const { subject, conditions } = action;
+
+        draftState.contentTypesPermissions[subject].conditions = conditions;
+        break;
+      }
+      case 'ON_PLUGIN_SETTING_CONDITIONS_SELECT': {
+        const { conditions } = action;
+
+        state.pluginsAndSettingsPermissions.forEach((permission, index) => {
+          if (conditions[permission.action]) {
+            draftState.pluginsAndSettingsPermissions[index].conditions =
+              conditions[permission.action];
+          }
+        });
+
+        break;
+      }
       default:
         return draftState;
     }

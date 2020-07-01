@@ -1,9 +1,12 @@
+/* eslint-disable indent */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { Text } from '@buffetjs/core';
+import { useIntl } from 'react-intl';
 
 const Value = ({ children, selectProps, ...props }) => {
+  const { formatMessage } = useIntl();
   const SingleValue = components.SingleValue;
 
   return (
@@ -11,7 +14,14 @@ const Value = ({ children, selectProps, ...props }) => {
       <Text>
         {selectProps.value.length === 0
           ? 'Anytime'
-          : `${selectProps.value.length} conditions selected`}
+          : formatMessage(
+              {
+                id: `Settings.permissions.conditions.selected.${
+                  selectProps.value.length > 1 ? 'plural' : 'singular'
+                }`,
+              },
+              { number: selectProps.value.length }
+            )}
       </Text>
     </SingleValue>
   );
