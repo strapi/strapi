@@ -1155,10 +1155,10 @@
   dependencies:
     yup "^0.27.0"
 
-"@casl/ability@^4.1.3":
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-4.1.3.tgz#cd94392e1efaec8812335273b9cea0cbe9fe1021"
-  integrity sha512-kcoH01WpOvSC4ExYKKAvGLChQ32aM/kE1J9lRTLt0tIq8EJtv4FLNyLH4BQ+V6XlkHUV0SnjRxn0P0wK8/UzBw==
+"@casl/ability@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-4.1.5.tgz#c34fedc1fd7e631f9f70309eecd5c8a2a7550ead"
+  integrity sha512-9nY2ear3CfCi0ckRZ4V6dRiy+f0wxj/aUPkelmGrZuEJusXfhROKahRHFGxXf5xLi3oA10SS/vbSLK4RAy7ttA==
   dependencies:
     sift "^13.0.0"
 
@@ -16579,6 +16579,11 @@ side-channel@^1.0.2:
   dependencies:
     es-abstract "^1.17.0-next.1"
     object-inspect "^1.7.0"
+
+sift@13.1.10:
+  version "13.1.10"
+  resolved "https://registry.yarnpkg.com/sift/-/sift-13.1.10.tgz#53cd1052c0214dc5d28a931e154191cce5cba942"
+  integrity sha512-Z+7ZMTbnmbuVCwER+8jNerXpuJNYsxFSZf1er8VUqF/qYdgTrG5o5TQ7C6nWDycQY/TA1pczVCj58y5RvrUtrA==
 
 sift@7.0.1:
   version "7.0.1"

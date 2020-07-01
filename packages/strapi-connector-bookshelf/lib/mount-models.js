@@ -115,7 +115,7 @@ module.exports = ({ models, target }, ctx) => {
       GLOBALS,
     });
 
-    if (!definition.uid.startsWith('strapi::')) {
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
       definition.attributes['created_by'] = {
         model: 'user',
         plugin: 'admin',

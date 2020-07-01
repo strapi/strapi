@@ -14,14 +14,8 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
       return acc;
     }
 
-    if (
-      attribute &&
-      (attribute.model ||
-        attribute.collection ||
-        attribute.type === 'component')
-    ) {
-      const targetName =
-        attribute.model || attribute.collection || attribute.component;
+    if (attribute && (attribute.model || attribute.collection || attribute.type === 'component')) {
+      const targetName = attribute.model || attribute.collection || attribute.component;
 
       const targetModel = strapi.getModel(targetName, attribute.plugin);
 
@@ -34,6 +28,14 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
 
         return acc;
       }
+    }
+
+    if (attribute && attribute.components && plainData[key] !== null) {
+      acc[key] = plainData[key].map(data => {
+        const model = strapi.getModel(data.__component);
+        return model ? sanitizeEntity(data, { model, withPrivate }) : null;
+      });
+      return acc;
     }
 
     acc[key] = plainData[key];
