@@ -65,7 +65,7 @@ const UpgradePlanModal = ({ isOpen, onToggle }) => {
 };
 
 UpgradePlanModal.defaultProps = {
-  isOpen: true,
+  isOpen: false,
   onToggle: () => {},
 };
 
