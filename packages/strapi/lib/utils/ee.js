@@ -1,30 +1,41 @@
+'use strict';
+
+const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
 const publicKey = fs.readFileSync(path.join(__dirname, '../utils/resources/key.pub'));
 
-const defaultLogger = {
-  warn: console.warn.bind(console),
-  info: console.log.bind(console),
+const noop = () => {};
+
+const noLog = {
+  warn: noop,
+  info: noop,
 };
 
-module.exports = ({ dir, logger = defaultLogger }) => {
+module.exports = ({ dir, logger = noLog }) => {
   const warnAndReturn = (msg = 'Invalid license. Starting in CE.') => {
     logger.warn(msg);
     return false;
   };
 
+  if (process.env.STRAPI_DISABLE_EE === 'true') {
+    return false;
+  }
+
   const licensePath = path.join(dir, 'license.txt');
 
   let license;
-  if (process.env.STRAPI_LICENSE) {
+  if (_.has(process.env, 'STRAPI_LICENSE')) {
     license = process.env.STRAPI_LICENSE;
   } else if (fs.existsSync(licensePath)) {
     license = fs.readFileSync(licensePath);
   }
 
-  if (!license) return false;
+  if (_.isNil(license)) {
+    return false;
+  }
 
   try {
     const plainLicense = Buffer.from(license, 'base64').toString();
@@ -49,6 +60,5 @@ module.exports = ({ dir, logger = defaultLogger }) => {
     return warnAndReturn();
   }
 
-  logger.info('License checked. Starting in EE.');
   return true;
 };
