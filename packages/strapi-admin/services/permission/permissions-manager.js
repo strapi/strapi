@@ -5,6 +5,12 @@ const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf, rulesToQuery } = require('@casl/ability/extra');
 const { VALID_REST_OPERATORS } = require('strapi-utils');
 
+const ops = {
+  common: VALID_REST_OPERATORS,
+  boolean: ['$or'],
+  cleanable: ['$elemMatch'],
+};
+
 module.exports = (ability, action, model) => ({
   ability,
   action,
@@ -145,72 +151,52 @@ module.exports = (ability, action, model) => ({
 
 const buildCaslQuery = (ability, action, model) => {
   const query = rulesToQuery(ability, action, model, o => o.conditions);
-  return query && _.has(query, '$or') ? query.$or : [];
+  return query && _.has(query, '$or') ? _.pick(query, '$or') : {};
 };
 
 const buildStrapiQuery = caslQuery => {
-  return mergeProperties(caslQuery.map(flattenDeepProperties).map(transformOperators));
+  const transform = _.flow([flattenDeep, cleanupUnwantedProperties]);
+  return transform(caslQuery);
 };
 
-const flattenDeepProperties = condition => {
-  const shouldIgnore = e => !!VALID_REST_OPERATORS.find(o => e === `$${o}`);
+const flattenDeep = condition => {
+  if (_.isArray(condition)) {
+    return _.map(condition, flattenDeep);
+  }
+
+  const shouldIgnore = e => !!ops.common.includes(e);
+  const shouldPerformTransformation = (v, k) => _.isObject(v) && !_.isArray(v) && !shouldIgnore(k);
+
   const result = {};
+  const set = (key, value) => (result[key] = value);
+
+  const getTransformParams = (prevKey, v, k) =>
+    shouldIgnore(k) ? [`${prevKey}_${k.replace('$', '')}`, v] : [`${prevKey}.${k}`, v];
 
   _.each(condition, (value, key) => {
-    // If the value is a regular object and the key is not an operator
-    if (_.isObject(value) && !_.isArray(value) && !shouldIgnore(key)) {
-      // Recursively flatten its properties
-      _.each(flattenDeepProperties(value), (nestedValue, nestedKey) => {
-        // We need to flatten the key/value only if the key is not an operator
-        if (shouldIgnore(nestedKey)) {
-          result[key] = _.merge(result[key], { [nestedKey]: nestedValue });
-        } else {
-          result[`${key}.${nestedKey}`] = nestedValue;
-        }
+    if (ops.boolean.includes(key)) {
+      set(key.replace('$', '_'), _.map(value, flattenDeep));
+    } else if (shouldPerformTransformation(value, key)) {
+      _.each(flattenDeep(value), (v, k) => {
+        set(...getTransformParams(key, v, k));
       });
     } else {
-      result[key] = condition[key];
+      set(key, value);
     }
   });
 
   return result;
 };
 
-const transformOperators = obj =>
-  _.reduce(
-    obj,
-    (acc, elem, key) => ({
+const cleanupUnwantedProperties = condition => {
+  const shouldClean = e => ops.cleanable.find(o => e.includes(`.${o}`));
+
+  return _.reduce(
+    condition,
+    (acc, value, key) => ({
       ...acc,
-      // If the element is an object, then replace nested operators with root-level properties
-      ...(_.isObject(elem) && !_.isArray(elem)
-        ? _.reduce(
-            elem,
-            (localAcc, val, op) => ({
-              ...localAcc,
-              [`${key}_${op.replace('$', '')}`]: val,
-            }),
-            {}
-          )
-        : // Otherwise, transform the expression into an equal check
-          { [`${key}_eq`]: elem }),
+      [shouldClean(key) ? key.split(`.${shouldClean(key)}`).join('') : key]: value,
     }),
     {}
   );
-
-const mergeProperties = conditions => {
-  return _.mergeWith(...conditions, (a, b, key) => {
-    const op = VALID_REST_OPERATORS.find(o => key.endsWith(`_${o}`));
-
-    if (op !== undefined) {
-      if (_.some([a, b], _.isUndefined)) {
-        return _.isUndefined(a) ? b : a;
-      }
-
-      if (_.isEqual(a, b)) {
-        return a;
-      }
-
-      return _.concat(a, b);
-    }
-  });
 };
