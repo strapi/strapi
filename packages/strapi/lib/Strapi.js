@@ -26,6 +26,7 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const ee = require('./utils/ee');
 
 /**
  * Construct an Strapi instance.
@@ -50,11 +51,13 @@ class Strapi {
     };
 
     this.dir = opts.dir || process.cwd();
+
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
     this.isLoaded = false;
 
+    this.EE = ee({ dir: this.dir, logger });
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();

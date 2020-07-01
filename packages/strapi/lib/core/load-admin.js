@@ -23,7 +23,8 @@ module.exports = async strapi => {
   // load ee files if they exist
   let eeFiles = {};
   let eeConfig = {};
-  if (process.env.STRAPI_DISABLE_EE !== 'true') {
+
+  if (process.env.STRAPI_DISABLE_EE !== 'true' && strapi.EE) {
     const eeAdminPath = `${adminPath}/ee`;
     [eeFiles, eeConfig] = await Promise.all([
       loadFiles(eeAdminPath, '!(config|test)/*.*(js|json)'),
