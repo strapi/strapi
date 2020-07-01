@@ -98,6 +98,17 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/explorer/:model/relation-list/:targetField",
+      "handler": "ContentManager.findRelationList",
+      "config": {
+        "policies": [
+          "routing",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
+      }
+    },
+    {
       "method": "POST",
       "path": "/explorer/:model",
       "handler": "ContentManager.create",

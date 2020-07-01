@@ -12,11 +12,11 @@
   },
   "attributes": {
     "name": {
-      "type": "text"
+      "type": "string"
     },
     "addresses": {
-      "via": "categories",
-      "collection": "address"
+      "collection": "address",
+      "via": "categories"
     }
   }
 }

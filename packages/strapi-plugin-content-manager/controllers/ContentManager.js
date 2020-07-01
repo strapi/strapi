@@ -268,4 +268,50 @@ module.exports = {
 
     ctx.body = results.map(result => pm.sanitize(result, { action: ACTIONS.read }));
   },
+
+  async findRelationList(ctx) {
+    const { model, targetField } = ctx.params;
+    const { query } = ctx.request;
+
+    if (!targetField) {
+      return ctx.badRequest();
+    }
+
+    const modelDef = strapi.db.getModel(model);
+
+    if (!model) {
+      return ctx.notFound('model.notFound');
+    }
+
+    const attr = modelDef.attributes[targetField];
+    if (!attr) {
+      return ctx.badRequest('targetField.invalid');
+    }
+
+    const target = strapi.db.getModelByAssoc(attr);
+
+    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+
+    let entities = [];
+
+    if (_.has(ctx.request.query, '_q')) {
+      entities = await contentManagerService.search(target.uid, query);
+    } else {
+      entities = await contentManagerService.fetchAll(target.uid, query);
+    }
+
+    if (!entities) {
+      return ctx.notFound();
+    }
+
+    const modelConfig = await strapi.plugins[
+      'content-manager'
+    ].services.contenttypes.getConfiguration(model);
+
+    const field = _.get(modelConfig, `metadatas.${targetField}.edit.mainField`, 'id');
+    const pickFields = [field, 'id', target.primaryKey];
+    const sanitize = d => _.pick(d, pickFields);
+
+    ctx.body = _.isArray(entities) ? entities.map(sanitize) : sanitize(entities);
+  },
 };
