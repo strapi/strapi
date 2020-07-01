@@ -8,7 +8,15 @@ const useFetchRole = id => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    fetchRole(id);
+    if (id) {
+      fetchRole(id);
+    } else {
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        role: {},
+        permissions: {},
+      });
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
