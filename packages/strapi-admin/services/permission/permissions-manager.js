@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf, rulesToQuery } = require('@casl/ability/extra');
-const { VALID_REST_OPERATORS } = require('strapi-utils');
+const { VALID_REST_OPERATORS, sanitizeEntity } = require('strapi-utils');
 
 const ops = {
   common: VALID_REST_OPERATORS,
@@ -20,16 +20,12 @@ module.exports = (ability, action, model) => ({
     return buildStrapiQuery(buildCaslQuery(ability, action, model));
   },
 
-  queryFrom(otherQuery = {}) {
-    return { ...otherQuery, _where: { ...otherQuery._where, ...this.query } };
-  },
-
   toSubject(target, subjectType = model) {
     return asSubject(subjectType, target);
   },
 
   pickPermittedFieldsOf(data, options = {}) {
-    return this.sanitize(data, { ...options, isInput: true });
+    return this.sanitize(data, { ...options, isOutput: false });
   },
 
   sanitize(data, options = {}) {
@@ -37,7 +33,7 @@ module.exports = (ability, action, model) => ({
       subject = this.toSubject(data),
       action: actionOverride = action,
       withPrivate = true,
-      isInput = false,
+      isOutput = true,
     } = options;
 
     if (_.isArray(data)) {
@@ -46,105 +42,11 @@ module.exports = (ability, action, model) => ({
 
     const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
 
-    const sanitizeDeep = (
-      data,
-      { modelName, modelPlugin, withPrivate, fields, isInput = false }
-    ) => {
-      if (typeof data !== 'object' || _.isNil(data)) return data;
-
-      const plainData = typeof data.toJSON === 'function' ? data.toJSON() : data;
-      if (typeof plainData !== 'object') return plainData;
-
-      const modelDef = strapi.getModel(modelName, modelPlugin);
-
-      if (!modelDef) return null;
-
-      const { attributes, options, primaryKey } = modelDef;
-
-      const timestamps = options.timestamps || [];
-      const creatorFields = ['created_by', 'updated_by'];
-      const componentFields = ['__component'];
-
-      const inputFields = [primaryKey, componentFields];
-      const outputFields = [primaryKey, timestamps, creatorFields, componentFields];
-
-      const allowedFields = _.concat(fields, ...(isInput ? inputFields : outputFields));
-
-      const filterFields = (fields, key) =>
-        fields
-          .filter(field => field.startsWith(`${key}.`))
-          .map(field => field.replace(`${key}.`, ''));
-
-      return _.reduce(
-        plainData,
-        (acc, value, key) => {
-          const attribute = attributes[key];
-          const isAllowedField = !fields || allowedFields.includes(key);
-
-          // Always remove password fields from entities in output mode
-          if (attribute && attribute.type === 'password' && !isInput) {
-            return acc;
-          }
-
-          // Removes private fields if needed
-          if (attribute && attribute.private === true && !withPrivate && !isInput) {
-            return acc;
-          }
-
-          const relation =
-            attribute && (attribute.model || attribute.collection || attribute.component);
-          // Attribute is a relation
-          if (relation && value !== null) {
-            const filteredFields = filterFields(allowedFields, key);
-
-            const isAllowed = allowedFields.includes(key) || filteredFields.length > 0;
-            if (!isAllowed) {
-              return acc;
-            }
-
-            const nextFields = allowedFields.includes(key) ? null : filteredFields;
-
-            const opts = {
-              modelName: relation,
-              modelPlugin: attribute.plugin,
-              withPrivate,
-              fields: nextFields,
-              isInput,
-            };
-
-            const val = Array.isArray(value)
-              ? value.map(entity => sanitizeDeep(entity, opts))
-              : sanitizeDeep(value, opts);
-
-            return { ...acc, [key]: val };
-          }
-
-          // Attribute is a dynamic zone
-          if (attribute && attribute.components && value !== null && allowedFields.includes(key)) {
-            return {
-              ...acc,
-              [key]: value.map(data =>
-                sanitizeDeep(data, { modelName: data.__component, withPrivate, isInput })
-              ),
-            };
-          }
-
-          // Add the key & value if we have the permission
-          if (isAllowedField) {
-            return { ...acc, [key]: value };
-          }
-
-          return acc;
-        },
-        {}
-      );
-    };
-
-    return sanitizeDeep(data, {
-      modelName: model,
+    return sanitizeEntity(data, {
+      model: strapi.getModel(model),
+      includeFields: _.isEmpty(permittedFields) ? null : permittedFields,
       withPrivate,
-      fields: _.isEmpty(permittedFields) ? null : permittedFields,
-      isInput,
+      isOutput,
     });
   },
 });
