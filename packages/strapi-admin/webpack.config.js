@@ -10,7 +10,6 @@ const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
 const alias = require('./webpack.alias.js');
-const loadEE = require('./is_ee_env');
 
 // TODO: parametrize
 const URLs = {
@@ -18,7 +17,7 @@ const URLs = {
 };
 
 module.exports = ({
-  dir,
+  useEE,
   entry,
   dest,
   env,
@@ -28,7 +27,6 @@ module.exports = ({
     publicPath: '/admin/',
   },
 }) => {
-  const isEE = loadEE(dir);
   const isProduction = env === 'production';
   const webpackPlugins = isProduction
     ? [
@@ -195,7 +193,7 @@ module.exports = ({
         const wantedPath =
           containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
 
-        if (isEE) {
+        if (useEE) {
           resource.request = resource.request.replace(
             /ee_else_ce/,
             path.join(wantedPath, '..', 'ee')

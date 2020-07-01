@@ -7,12 +7,15 @@ const getWebpackConfig = require('./webpack.config.js');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
+// eslint-disable-next-line node/no-extraneous-require
+const hasEE = require('strapi/lib/utils/ee');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
-  let webpackConfig = getWebpackConfig({ dir, ...config });
+
+  let webpackConfig = getWebpackConfig({ useEE: hasEE({ dir }), ...config });
 
   if (fs.existsSync(adminConfigPath)) {
     const adminConfig = require(path.resolve(adminConfigPath));
