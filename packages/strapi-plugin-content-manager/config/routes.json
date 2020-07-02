@@ -69,11 +69,7 @@
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {
-        "policies": [
-          "routing",
-          "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
-        ]
+        "policies": ["routing", "admin::isAuthenticatedAdmin"]
       }
     },
     {

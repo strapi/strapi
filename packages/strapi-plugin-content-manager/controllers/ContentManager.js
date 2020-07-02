@@ -69,34 +69,47 @@ module.exports = {
    * Returns a list of entities of a content-type matching the query parameters
    */
   async find(ctx) {
-    const {
-      state: { userAbility },
-      params: { model },
-      request,
-    } = ctx;
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { query } = ctx.request;
+
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+
+    const { kind } = strapi.getModel(model);
     const pm = strapi.admin.services.permission.createPermissionsManager(
       userAbility,
       ACTIONS.read,
       model
     );
 
-    const method = _.has(request.query, '_q') ? 'search' : 'fetchAll';
-    const query = pm.queryFrom(request.query);
-
-    const { kind } = strapi.getModel(model);
-
-    let results;
-
     if (kind === 'singleType') {
       // fetchAll for a singleType only return on entity
-      const results = await contentManagerService.fetchAll(model, query);
-      if (results && pm.ability.cannot(pm.action, pm.toSubject(results))) {
+      const entity = await contentManagerService.fetchAll(model, query);
+
+      // allow user with create permission to know a single type is not created
+      if (!entity) {
+        if (pm.ability.cannot(ACTIONS.create, model)) {
+          return ctx.forbidden();
+        }
+
+        return ctx.notFound();
+      }
+
+      if (entity && pm.ability.cannot(ACTIONS.read, pm.toSubject(entity))) {
         return ctx.forbidden();
       }
+
+      return (ctx.body = entity);
     }
 
-    results = await contentManagerService[method](model, query);
+    if (pm.ability.cannot(ACTIONS.read, model)) {
+      return ctx.forbidden();
+    }
+
+    const method = _.has(query, '_q') ? 'search' : 'fetchAll';
+    const queryParameters = pm.queryFrom(query);
+
+    const results = await contentManagerService[method](model, queryParameters);
 
     if (!results) {
       return ctx.notFound();
