@@ -33,7 +33,9 @@ const sanitizeEntity = (dataSource, options) => {
     // Relations
     const relation = attribute && (attribute.model || attribute.collection || attribute.component);
     if (relation && value !== null) {
-      const [nextFields, isAllowed] = getNextFields(allowedFields, key, { allowedFieldsHasKey });
+      const [nextFields, isAllowed] = includeFields
+        ? getNextFields(allowedFields, key, { allowedFieldsHasKey })
+        : [null, true];
 
       if (!isAllowed) {
         return acc;
@@ -54,7 +56,7 @@ const sanitizeEntity = (dataSource, options) => {
     }
 
     // Dynamic zones
-    if (attribute && attribute.components && value !== null && allowedFieldsHasKey) {
+    if (attribute && attribute.type === 'dynamiczone' && value !== null && allowedFieldsHasKey) {
       const nextVal = value.map(elem =>
         sanitizeEntity(elem, {
           model: strapi.getModel(elem.__component),

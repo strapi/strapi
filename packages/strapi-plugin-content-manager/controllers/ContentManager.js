@@ -237,7 +237,7 @@ module.exports = {
     try {
       const result = await contentManagerService.edit(
         { id },
-        { data: { ...sanitize(data), updated_by: user.id }, files },
+        { data: { ...sanitize(_.omit(data, ['created_by'])), updated_by: user.id }, files },
         { model }
       );
 
