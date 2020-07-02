@@ -101,21 +101,15 @@ module.exports = {
       state: { userAbility },
       params: { model, id },
     } = ctx;
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
-    const pm = strapi.admin.services.permission.createPermissionsManager(
+
+    const { pm, entity } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.read,
-      model
+      model,
+      id
     );
 
-    const entry = await contentManagerService.fetch(model, id, { query: pm.query });
-
-    // Entry not found
-    if (!entry) {
-      return ctx.notFound('Entry not found');
-    }
-
-    ctx.body = pm.sanitize(entry);
+    ctx.body = pm.sanitize(entity);
   },
 
   /**

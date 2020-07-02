@@ -97,7 +97,7 @@ const hasDeepFilters = (whereClauses = []) => {
         return value.filter(hasDeepFilters).length > 0;
       }
 
-      return field.split('.').length > 1;
+      return field.split('.').length > 2;
     }).length > 0
   );
 };

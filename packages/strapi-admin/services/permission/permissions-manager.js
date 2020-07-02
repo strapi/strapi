@@ -35,7 +35,7 @@ module.exports = (ability, action, model) => ({
   queryFrom(query) {
     return {
       ...query,
-      _where: _.concat(this.query, query._where),
+      _where: _.concat(this.query, query._where || {}),
     };
   },
 
