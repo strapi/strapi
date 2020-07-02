@@ -286,6 +286,8 @@ module.exports = {
     const { model, targetField } = ctx.params;
     const { _component, ...query } = ctx.request.query;
 
+    const contentManagerServices = strapi.plugins['content-manager'].services;
+
     if (!targetField) {
       return ctx.badRequest();
     }
@@ -307,7 +309,7 @@ module.exports = {
       return ctx.notFound('target.notFound');
     }
 
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = contentManagerServices.contentmanager;
 
     let entities = [];
 
@@ -321,9 +323,9 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const modelConfig = await strapi.plugins[
-      'content-manager'
-    ].services.contenttypes.getConfiguration(model);
+    const modelConfig = _component
+      ? await contentManagerServices.components.getConfiguration(modelDef.uid)
+      : await contentManagerServices.contenttypes.getConfiguration(modelDef.uid);
 
     const field = _.get(modelConfig, `metadatas.${targetField}.edit.mainField`, 'id');
     const pickFields = [field, 'id', target.primaryKey];
