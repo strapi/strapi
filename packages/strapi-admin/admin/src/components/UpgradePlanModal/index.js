@@ -16,7 +16,7 @@ const UpgradePlanModal = ({ isOpen, onToggle }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onToggle={onToggle} shouldDisplayCloseButton={false}>
+    <Modal isOpen={isOpen} onToggle={onToggle} closeButtonColor="#fff">
       <Wrapper>
         <Padded>
           <Option />
@@ -43,7 +43,7 @@ const UpgradePlanModal = ({ isOpen, onToggle }) => {
             </Text>
           </Padded>
           <Padded top size="md">
-            <Button color="primary" onClick={handleClick}>
+            <Button color="primary" onClick={handleClick} style={{ paddingRight: 0 }}>
               {formatMessage({ id: 'app.components.UpgradePlanModal.button' })}
               <Download />
             </Button>
