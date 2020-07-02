@@ -107,7 +107,15 @@
       "config": {
         "policies": [
           "routing",
-          "admin::isAuthenticatedAdmin"
+          "admin::isAuthenticatedAdmin",
+          [
+            "plugins::content-manager.hasPermissions",
+            [
+              "plugins::content-manager.explorer.create",
+              "plugins::content-manager.explorer.update"
+            ],
+            { "hasAtLeastOne": true }
+          ]
         ]
       }
     },

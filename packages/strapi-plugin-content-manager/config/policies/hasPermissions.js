@@ -6,7 +6,7 @@ const {
 const { validateHasPermissionsInput } = require('../../validation/policies/hasPermissions');
 
 module.exports = createPolicyFactory(
-  actions => (ctx, next) => {
+  (actions, { hasAtLeastOne = false } = {}) => (ctx, next) => {
     const {
       state: { userAbility, isAuthenticatedAdmin },
       params: { model },
@@ -16,7 +16,9 @@ module.exports = createPolicyFactory(
       return next();
     }
 
-    const isAuthorized = actions.every(action => userAbility.can(action, model));
+    const isAuthorized = hasAtLeastOne
+      ? actions.some(action => userAbility.can(action, model))
+      : actions.every(action => userAbility.can(action, model));
 
     if (!isAuthorized) {
       throw strapi.errors.forbidden();

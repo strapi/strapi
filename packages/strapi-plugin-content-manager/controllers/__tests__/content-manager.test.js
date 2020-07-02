@@ -17,7 +17,14 @@ describe('ContentManager', () => {
       );
 
       const getModel = jest.fn();
-      global.strapi = { db: { getModel } };
+      global.strapi = {
+        db: { getModel },
+        plugins: {
+          'content-manager': {
+            services: {},
+          },
+        },
+      };
 
       await ContentManager.findRelationList(ctx);
 
@@ -39,7 +46,14 @@ describe('ContentManager', () => {
         attributes: {},
       }));
 
-      global.strapi = { db: { getModel } };
+      global.strapi = {
+        db: { getModel },
+        plugins: {
+          'content-manager': {
+            services: {},
+          },
+        },
+      };
 
       await ContentManager.findRelationList(ctx);
 
@@ -61,7 +75,14 @@ describe('ContentManager', () => {
       const getModel = jest.fn(() => ({
         attributes: { target: { model: 'test' } },
       }));
-      global.strapi = { db: { getModel, getModelByAssoc } };
+      global.strapi = {
+        db: { getModel, getModelByAssoc },
+        plugins: {
+          'content-manager': {
+            services: {},
+          },
+        },
+      };
 
       await ContentManager.findRelationList(ctx);
 
