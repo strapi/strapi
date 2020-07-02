@@ -16,6 +16,7 @@ const inputModifiers = [
     transform: arr => ({ action: arr[0], subject: arr[1] }),
   },
   {
+    // Has to be after the isArray check since _.isObject also matches arrays
     check: _.isObject,
     transform: perm => perm,
   },
