@@ -161,5 +161,6 @@
   "notification.info.minimumFields": "You need to have at least one field displayed",
   "notification.upload.error": "An error has occurred while uploading your files",
   "permissions.not-allowed.create": "You are not allowed to create a document",
+  "permissions.not-allowed.update": "You are not allowed to see this document",
   "components.NotAllowedInput.text": "No permissions to see this field"
 }

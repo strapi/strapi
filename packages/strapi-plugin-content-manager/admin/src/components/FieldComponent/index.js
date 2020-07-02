@@ -97,6 +97,7 @@ const FieldComponent = ({
 
       {!isRepeatable && isInitialized && (
         <NonRepeatableComponent
+          componentUid={componentUid}
           fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
           name={name}

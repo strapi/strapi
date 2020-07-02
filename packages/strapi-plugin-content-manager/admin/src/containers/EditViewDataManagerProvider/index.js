@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
 import PropTypes from 'prop-types';
-import { Prompt, Redirect, useParams } from 'react-router-dom';
+import { Prompt, Redirect, useParams, useLocation, useHistory } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   request,
@@ -36,6 +36,10 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { id } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const { state } = useLocation();
+  const { push } = useHistory();
+
+  const from = get(state, 'from', '/');
   const {
     formErrors,
     initialData,
@@ -60,9 +64,8 @@ const EditViewDataManagerProvider = ({
   }, [isCreatingEntry, generatedPermissions]);
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate },
+    allowedActions: { canCreate, canRead, canUpdate },
   } = useUserPermissions(permissionsToApply);
-
   const createActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
       {
@@ -79,12 +82,33 @@ const EditViewDataManagerProvider = ({
       return false;
     }
 
-    if (isCreatingEntry && canCreate === false) {
+    if (!isCreatingEntry) {
+      return false;
+    }
+
+    // if (isCreatingEntry && canCreate === false) {
+    if (canCreate === false) {
       return true;
     }
 
     return false;
   }, [isLoadingForPermissions, isCreatingEntry, canCreate]);
+
+  const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
+    if (isLoadingForPermissions) {
+      return false;
+    }
+
+    if (isCreatingEntry) {
+      return false;
+    }
+
+    if (canRead === false && canUpdate === false) {
+      return true;
+    }
+
+    return false;
+  }, [isLoadingForPermissions, isCreatingEntry, canRead, canUpdate]);
 
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
@@ -132,9 +156,18 @@ const EditViewDataManagerProvider = ({
           ),
         });
       } catch (err) {
+        if (id && err.response.status === 404) {
+          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+
+          push(from);
+
+          return;
+        }
+
         if (id && err.code !== 20) {
           strapi.notification.error(`${pluginId}.error.record.fetch`);
         }
+
         if (!id && err.response.status === 404) {
           setIsCreatingEntry(true);
         }
@@ -155,29 +188,31 @@ const EditViewDataManagerProvider = ({
       allLayoutData.components
     );
 
-    // Force state to be cleared when navigation from one entry to another
-    dispatch({ type: 'RESET_PROPS' });
-    dispatch({
-      type: 'SET_DEFAULT_DATA_STRUCTURES',
-      componentsDataStructure,
-      contentTypeDataStructure,
-    });
-
-    if (!isCreatingEntry) {
-      fetchData();
-    } else {
-      // Will create default form
+    if (!isLoadingForPermissions) {
+      // Force state to be cleared when navigation from one entry to another
+      dispatch({ type: 'RESET_PROPS' });
       dispatch({
-        type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
+        type: 'SET_DEFAULT_DATA_STRUCTURES',
+        componentsDataStructure,
         contentTypeDataStructure,
       });
+
+      if (!isCreatingEntry) {
+        fetchData();
+      } else {
+        // Will create default form
+        dispatch({
+          type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
+          contentTypeDataStructure,
+        });
+      }
     }
 
     return () => {
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isCreatingEntry]);
+  }, [id, slug, isCreatingEntry, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('addComponentToDynamicZone');
@@ -560,9 +595,16 @@ const EditViewDataManagerProvider = ({
 
   // Redirect the user to the homepage if he is not allowed to create a document
   if (shouldRedirectToHomepageWhenCreatingEntry) {
-    strapi.notification.info(getTrad('content-manager.permissions.not-allowed.create'));
+    strapi.notification.info(getTrad('permissions.not-allowed.create'));
 
     return <Redirect to="/" />;
+  }
+
+  // Redirect the user to the previous page if he is not allowed to read/update a document
+  if (shouldRedirectToHomepageWhenEditingEntry) {
+    strapi.notification.info(getTrad('permissions.not-allowed.update'));
+
+    return <Redirect to={from} />;
   }
 
   return (
