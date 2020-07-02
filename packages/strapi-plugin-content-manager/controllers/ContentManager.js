@@ -84,7 +84,19 @@ module.exports = {
     const method = _.has(request.query, '_q') ? 'search' : 'fetchAll';
     const query = pm.queryFrom(request.query);
 
-    const results = await contentManagerService[method](model, query);
+    const { kind } = strapi.getModel(model);
+
+    let results;
+
+    if (kind === 'singleType') {
+      // fetchAll for a singleType only return on entity
+      const results = await contentManagerService.fetchAll(model, query);
+      if (results && pm.ability.cannot(pm.action, pm.toSubject(results))) {
+        return ctx.forbidden();
+      }
+    }
+
+    results = await contentManagerService[method](model, query);
 
     if (!results) {
       return ctx.notFound();

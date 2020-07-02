@@ -51,7 +51,7 @@ module.exports = {
 
   delete(model, id, query) {
     return strapi.entityService.delete(
-      { params: { ...query, _where: _.concat({ id }, query._where) } },
+      { params: { ...query, _where: _.concat({ id }, query._where || {}) } },
       { model }
     );
   },
@@ -64,7 +64,7 @@ module.exports = {
         params: {
           _limit: 100,
           ...query,
-          _where: _.concat({ [`${primaryKey}_in`]: ids }, query._where),
+          _where: _.concat({ [`${primaryKey}_in`]: ids }, query._where || {}),
         },
       },
       { model }
