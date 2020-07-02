@@ -278,13 +278,13 @@ module.exports = {
 
   async findRelationList(ctx) {
     const { model, targetField } = ctx.params;
-    const { query } = ctx.request;
+    const { _component, ...query } = ctx.request.query;
 
     if (!targetField) {
       return ctx.badRequest();
     }
 
-    const modelDef = strapi.db.getModel(model);
+    const modelDef = _component ? strapi.db.getModel(_component) : strapi.db.getModel(model);
 
     if (!modelDef) {
       return ctx.notFound('model.notFound');
