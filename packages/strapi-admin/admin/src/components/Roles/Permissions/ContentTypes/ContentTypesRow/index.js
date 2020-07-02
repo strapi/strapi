@@ -154,6 +154,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     }));
   };
 
+  const handleClosed = () => {
+    setModal(prev => ({ ...prev, isMounted: false }));
+  };
+
   const handleModalSubmit = conditions => {
     onContentTypeConditionsSelect({ subject: contentType.uid, conditions });
   };
@@ -233,6 +237,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onToggle={handleToggleModal}
           onSubmit={handleModalSubmit}
           isOpen={modal.isOpen}
+          onClosed={handleClosed}
         />
       )}
     </>
