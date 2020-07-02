@@ -1,15 +1,7 @@
 'use strict';
 
+const createContext = require('../../../../test/helpers/create-context');
 const roleController = require('../role');
-
-const createContext = ({ params = {}, query = {}, body = {} }, overrides = {}) => ({
-  params,
-  query,
-  request: {
-    body,
-  },
-  ...overrides,
-});
 
 describe('Role controller', () => {
   describe('getPermissions', () => {

@@ -1,15 +1,7 @@
 'use strict';
 
+const createContext = require('../../../../test/helpers/create-context');
 const permissionController = require('../permission');
-
-const createContext = ({ params = {}, query = {}, body = {} }, overrides = {}) => ({
-  params,
-  query,
-  request: {
-    body,
-  },
-  ...overrides,
-});
 
 describe('Permission Controller', () => {
   const localTestData = {
