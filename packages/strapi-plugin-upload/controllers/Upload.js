@@ -8,7 +8,6 @@
 const _ = require('lodash');
 const apiUploadController = require('./upload/api');
 const adminUploadController = require('./upload/admin');
-const validateUploadBody = require('./validation/upload');
 
 const resolveController = ctx => {
   const {
@@ -48,8 +47,8 @@ module.exports = {
 
     const {
       query: { id },
-      request: { body, files: { files } = {} },
-    } = ctx.query;
+      request: { files: { files } = {} },
+    } = ctx;
     const controller = resolveController(ctx);
 
     if (id && (_.isEmpty(files) || files.size === 0)) {
@@ -62,9 +61,7 @@ module.exports = {
       });
     }
 
-    const data = await validateUploadBody(body);
-
-    await (id ? controller.replaceFile : controller.uploadFiles)(ctx, data, files);
+    await (id ? controller.replaceFile : controller.uploadFiles)(ctx);
   },
 
   async search(ctx) {
