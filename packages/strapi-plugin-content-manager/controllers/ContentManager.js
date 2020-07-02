@@ -286,7 +286,7 @@ module.exports = {
 
     const modelDef = strapi.db.getModel(model);
 
-    if (!model) {
+    if (!modelDef) {
       return ctx.notFound('model.notFound');
     }
 
@@ -296,6 +296,10 @@ module.exports = {
     }
 
     const target = strapi.db.getModelByAssoc(attr);
+
+    if (!target) {
+      return ctx.notFound('target.notFound');
+    }
 
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 

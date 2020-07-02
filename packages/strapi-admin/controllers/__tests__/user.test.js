@@ -1,15 +1,7 @@
 'use strict';
 
+const createContext = require('../../../../test/helpers/create-context');
 const userController = require('../user');
-
-const createContext = ({ params = {}, query = {}, body = {} }, overrides = {}) => ({
-  params,
-  query,
-  request: {
-    body,
-  },
-  ...overrides,
-});
 
 describe('User Controller', () => {
   describe('Create User', () => {

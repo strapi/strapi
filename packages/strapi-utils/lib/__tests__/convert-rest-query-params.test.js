@@ -1,4 +1,4 @@
-const convertRestQueryParams = require('../convert-rest-query-params');
+const { convertRestQueryParams } = require('../convert-rest-query-params');
 
 describe('convertRestQueryParams', () => {
   test('Throws on invalid input', () => {
