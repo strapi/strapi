@@ -8,9 +8,13 @@ const { validateHasPermissionsInput } = require('../../validation/policies/hasPe
 module.exports = createPolicyFactory(
   actions => (ctx, next) => {
     const {
-      state: { userAbility },
+      state: { userAbility, isAuthenticatedAdmin },
       params: { model },
     } = ctx;
+
+    if (!isAuthenticatedAdmin || !userAbility) {
+      return next();
+    }
 
     const isAuthorized = actions.every(action => userAbility.can(action, model));
 
