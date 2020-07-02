@@ -27,7 +27,7 @@ const NotAllowedInput = ({ label, spacerHeight }) => {
               <EyeSlashed />
             </Padded>
 
-            <Text fontSize="md" color="grey" as="div" lineHeight="18px">
+            <Text fontSize="md" color="grey" as="div" lineHeight="18px" ellipsis>
               {text}
             </Text>
           </Flex>
