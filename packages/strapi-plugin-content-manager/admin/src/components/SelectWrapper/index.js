@@ -8,6 +8,7 @@ import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
+import { getFieldName } from '../../utils';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -24,6 +25,7 @@ function SelectWrapper({
   mainField,
   name,
   relationType,
+  slug,
   targetModel,
   placeholder,
 }) {
@@ -31,6 +33,7 @@ function SelectWrapper({
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
   const { isDraggingComponent } = useEditView();
+  const fieldName = useMemo(() => getFieldName(name).join('.'), [name]);
 
   const value = get(modifiedData, name, null);
   const [state, setState] = useState({
@@ -72,7 +75,8 @@ function SelectWrapper({
 
     if (!isDraggingComponent) {
       try {
-        const requestUrl = `/${pluginId}/explorer/${targetModel}`;
+        // const requestUrl = `/${pluginId}/explorer/${targetModel}`;
+        const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
 
         const containsKey = `${mainField}_contains`;
         const { _contains, ...restState } = cloneDeep(state);
@@ -274,6 +278,7 @@ SelectWrapper.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
+  slug: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
 };
 
