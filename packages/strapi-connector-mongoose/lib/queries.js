@@ -4,16 +4,14 @@
  */
 
 const _ = require('lodash');
-var semver = require('semver');
-const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
-const utils = require('./utils')();
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
 
-module.exports = ({ model, modelKey, strapi }) => {
+module.exports = ({ model, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
@@ -482,25 +480,26 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const populateOpt = populate || defaultPopulate;
 
-    const $or = buildSearchOr(model, params._q);
-    if ($or.length === 0) return Promise.resolve([]);
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
 
-    return model
-      .find({ $or })
-      .sort(filters.sort)
-      .skip(filters.start)
-      .limit(filters.limit)
-      .populate(populate || defaultPopulate)
-      .then(results => results.map(result => (result ? result.toObject() : null)));
+    return buildQuery({
+      model,
+      filters,
+      searchParam: params._q,
+      populate: populateOpt,
+    }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
   function countSearch(params) {
-    const $or = buildSearchOr(model, params._q);
-    if ($or.length === 0) return Promise.resolve(0);
-    return model.find({ $or }).countDocuments();
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
+
+    return buildQuery({
+      model,
+      filters,
+      searchParam: params._q,
+    }).count();
   }
 
   return {
@@ -513,48 +512,6 @@ module.exports = ({ model, modelKey, strapi }) => {
     search,
     countSearch,
   };
-};
-
-const buildSearchOr = (model, query) => {
-  const searchOr = Object.keys(model.attributes).reduce((acc, curr) => {
-    switch (model.attributes[curr].type) {
-      case 'biginteger':
-      case 'integer':
-      case 'float':
-      case 'decimal':
-        if (!_.isNaN(_.toNumber(query))) {
-          const mongoVersion = model.db.base.mongoDBVersion;
-          if (semver.valid(mongoVersion) && semver.gt(mongoVersion, '4.2.0')) {
-            return acc.concat({
-              $expr: {
-                $regexMatch: {
-                  input: { $toString: `$${curr}` },
-                  regex: _.escapeRegExp(query),
-                },
-              },
-            });
-          } else {
-            return acc.concat({ [curr]: query });
-          }
-        }
-        return acc;
-      case 'string':
-      case 'text':
-      case 'richtext':
-      case 'email':
-      case 'enumeration':
-      case 'uid':
-        return acc.concat({ [curr]: { $regex: _.escapeRegExp(query), $options: 'i' } });
-      default:
-        return acc;
-    }
-  }, []);
-
-  if (utils.isMongoId(query)) {
-    searchOr.push({ _id: query });
-  }
-
-  return searchOr;
 };
 
 function validateRepeatableInput(value, { key, min, max, required }) {

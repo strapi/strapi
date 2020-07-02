@@ -4,14 +4,9 @@
  */
 
 const _ = require('lodash');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  models: modelUtils,
-  escapeQuery,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 
-module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
+module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
   // association key
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -165,36 +160,21 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Bookshelf.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(qb => {
-        buildSearchQuery(qb, model, params);
-
-        if (filters.sort) {
-          qb.orderBy(filters.sort.key, filters.sort.order);
-        }
-
-        if (filters.start) {
-          qb.offset(_.toNumber(filters.start));
-        }
-
-        if (filters.limit) {
-          qb.limit(_.toNumber(filters.limit));
-        }
-      })
-      .fetchAll({
-        withRelated: populate,
-      })
+      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query(buildQuery({ model, filters }))
+      .fetchAll({ withRelated: populate })
       .then(results => results.toJSON());
   }
 
   function countSearch(params) {
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
+
     return model
-      .query(qb => {
-        buildSearchQuery(qb, model, params);
-      })
+      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query(buildQuery({ model, filters }))
       .count()
       .then(Number);
   }
@@ -647,11 +627,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
 /**
  * util to build search query
- * @param {*} qb
  * @param {*} model
  * @param {*} params
  */
-const buildSearchQuery = (qb, model, params) => {
+const buildSearchQuery = ({ model, params }) => qb => {
   const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
@@ -677,17 +656,26 @@ const buildSearchQuery = (qb, model, params) => {
   switch (model.client) {
     case 'pg':
       searchColumns.forEach(attr =>
-        qb.orWhereRaw(`"${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+        qb.orWhereRaw(
+          `"${model.collectionName}"."${attr}"::text ILIKE ?`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
       );
       break;
     case 'sqlite3':
       searchColumns.forEach(attr =>
-        qb.orWhereRaw(`"${attr}" LIKE ? ESCAPE '\\'`, `%${escapeQuery(query, '*%\\')}%`)
+        qb.orWhereRaw(
+          `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
       );
       break;
     case 'mysql':
       searchColumns.forEach(attr =>
-        qb.orWhereRaw(`\`${attr}\` LIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+        qb.orWhereRaw(
+          `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
       );
       break;
   }

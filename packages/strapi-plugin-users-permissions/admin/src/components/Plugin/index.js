@@ -17,7 +17,7 @@ import { Banner, Chevron, ControllerWrapper, Description, Icon, Name, Wrapper } 
 
 class Plugin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { collapse: false };
+  state = { collapse: false, inputSelected: '' };
 
   static contextType = EditPageContext;
 
@@ -49,6 +49,10 @@ class Plugin extends React.Component {
     if (this.state.collapse) {
       this.context.resetShouldDisplayPoliciesHint();
     }
+  };
+
+  setInputSelectedState = name => {
+    this.setState({ inputSelected: name });
   };
 
   render() {
@@ -101,6 +105,8 @@ class Plugin extends React.Component {
                 inputNamePath={`permissions.${this.props.name}`}
                 isOpen={this.state.collapse}
                 key={key}
+                inputSelected={this.state.inputSelected}
+                setInputSelected={this.setInputSelectedState}
                 name={key}
                 actions={controllerActions}
                 resetInputBackground={this.state.resetInputBackground}

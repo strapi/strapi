@@ -23,10 +23,7 @@ module.exports = (projectDirectory, cliArguments) => {
 
   const rootPath = resolve(projectDirectory);
 
-  const tmpPath = join(
-    os.tmpdir(),
-    `strapi${crypto.randomBytes(6).toString('hex')}`
-  );
+  const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
 
   const useNpm = cliArguments.useNpm !== undefined;
 
@@ -40,7 +37,7 @@ module.exports = (projectDirectory, cliArguments) => {
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
     docker: process.env.DOCKER === 'true',
-    uuid: uuid(),
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
     deviceId: machineIdSync(),
     tmpPath,
     // use yarn if available and --use-npm isn't true
