@@ -32,12 +32,12 @@ const HeaderModal = styled(ModalHeader)`
     position: absolute;
     top: 24px;
     right: 30px;
-    fill: ${({ closeButtonColor }) => closeButtonColor};
+    fill: ${({ fill }) => fill};
   }
 `;
 
 HeaderModal.defaultProps = {
-  closeButtonColor: '#c3c5c8',
+  fill: '#c3c5c8',
 };
 
 export default HeaderModal;

@@ -16,11 +16,7 @@ function WrapperModal({ children, isOpen, onToggle, closeButtonColor, ...rest })
   return (
     <Wrapper>
       <StyledModal isOpen={isOpen} toggle={onToggle} {...rest}>
-        <HeaderModal
-          toggle={onToggle}
-          style={{ display: 'none' }}
-          closeButtonColor={closeButtonColor}
-        />
+        <HeaderModal toggle={onToggle} style={{ display: 'none' }} fill={closeButtonColor} />
         <Close onClick={onToggle} style={{ cursor: 'pointer' }} />
         {children}
       </StyledModal>
