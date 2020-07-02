@@ -11,7 +11,7 @@ const Value = ({ children, selectProps, ...props }) => {
 
   return (
     <SingleValue {...props}>
-      <Text>
+      <Text style={{ paddingTop: 1 }}>
         {selectProps.value.length === 0
           ? 'Anytime'
           : formatMessage(
