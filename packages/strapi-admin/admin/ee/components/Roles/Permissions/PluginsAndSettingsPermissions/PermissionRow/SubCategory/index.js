@@ -92,6 +92,10 @@ const SubCategory = ({ subCategory }) => {
     }));
   };
 
+  const handleClosed = () => {
+    setModal(prev => ({ ...prev, isMounted: false }));
+  };
+
   const actionsForConditions = useMemo(() => {
     return currentPermissions.map(permission => ({
       id: permission.action,
@@ -165,6 +169,7 @@ const SubCategory = ({ subCategory }) => {
           onSubmit={handleConditionsSubmit}
           onToggle={handleToggleModal}
           isOpen={modal.isOpen}
+          onClosed={handleClosed}
         />
       )}
     </>

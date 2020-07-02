@@ -3,19 +3,11 @@ import PropTypes from 'prop-types';
 import { Modal, ModalHeader, ModalFooter } from 'strapi-helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import Separator from './Separator';
 import ActionRow from './ActionRow';
 
-// Let the react-select container to be visible
-const CustomModal = styled(Modal)`
-  .modal-content {
-    overflow: visible;
-  }
-`;
-
-const ConditionsModal = ({ isOpen, onToggle, actions, initialConditions, onSubmit }) => {
+const ConditionsModal = ({ isOpen, onToggle, actions, onClosed, initialConditions, onSubmit }) => {
   const { formatMessage } = useIntl();
   const [conditions, setConditions] = useState(initialConditions);
 
@@ -32,7 +24,7 @@ const ConditionsModal = ({ isOpen, onToggle, actions, initialConditions, onSubmi
   };
 
   return (
-    <CustomModal isOpen={isOpen} onToggle={onToggle}>
+    <Modal withoverflow="true" onClosed={onClosed} isOpen={isOpen} onToggle={onToggle}>
       <ModalHeader
         headerBreadcrumbs={[
           'Settings.permissions.conditions.links',
@@ -74,7 +66,7 @@ const ConditionsModal = ({ isOpen, onToggle, actions, initialConditions, onSubmi
           </Button>
         </section>
       </ModalFooter>
-    </CustomModal>
+    </Modal>
   );
 };
 
@@ -88,5 +80,6 @@ ConditionsModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
+  onClosed: PropTypes.func.isRequired,
 };
 export default ConditionsModal;
