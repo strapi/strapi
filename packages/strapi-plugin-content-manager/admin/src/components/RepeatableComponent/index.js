@@ -85,6 +85,7 @@ const RepeatableComponent = ({
               <DraggedItem
                 fields={fields}
                 componentFieldName={componentFieldName}
+                componentUid={componentUid}
                 doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
                 hasErrors={hasErrors}
                 hasMinError={hasMinError}

@@ -69,6 +69,7 @@ const validationsToOmit = [
 function Inputs({
   allowedFields,
   autoFocus,
+  componentUid,
   isCreatingEntry,
   keys,
   layout,
@@ -238,6 +239,7 @@ function Inputs({
       <div key={keys}>
         <SelectWrapper
           {...metadatas}
+          componentUid={componentUid}
           isUserAllowedToEditField={isUserAllowedToEditField}
           isUserAllowedToReadField={isUserAllowedToReadField}
           name={keys}
@@ -304,6 +306,7 @@ function Inputs({
 
 Inputs.defaultProps = {
   autoFocus: false,
+  componentUid: null,
   formErrors: {},
   onBlur: null,
   value: null,
@@ -312,6 +315,7 @@ Inputs.defaultProps = {
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
   autoFocus: PropTypes.bool,
+  componentUid: PropTypes.string,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,

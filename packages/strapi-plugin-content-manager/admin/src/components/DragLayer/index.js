@@ -35,21 +35,16 @@ function getItemStyles(initialOffset, currentOffset, mouseOffset) {
 }
 
 const CustomDragLayer = () => {
-  const {
-    itemType,
-    isDragging,
-    item,
-    initialOffset,
-    currentOffset,
-    mouseOffset,
-  } = useDragLayer(monitor => ({
-    item: monitor.getItem(),
-    itemType: monitor.getItemType(),
-    initialOffset: monitor.getInitialSourceClientOffset(),
-    currentOffset: monitor.getSourceClientOffset(),
-    isDragging: monitor.isDragging(),
-    mouseOffset: monitor.getClientOffset(),
-  }));
+  const { itemType, isDragging, item, initialOffset, currentOffset, mouseOffset } = useDragLayer(
+    monitor => ({
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      initialOffset: monitor.getInitialSourceClientOffset(),
+      currentOffset: monitor.getSourceClientOffset(),
+      isDragging: monitor.isDragging(),
+      mouseOffset: monitor.getClientOffset(),
+    })
+  );
 
   function renderItem() {
     switch (itemType) {
@@ -60,6 +55,7 @@ const CustomDragLayer = () => {
           <ComponentBanner
             {...item}
             isOpen
+            isReadOnly={false}
             style={{
               width: '40vw',
               border: '1px solid #AED4FB',
@@ -70,14 +66,12 @@ const CustomDragLayer = () => {
       case ItemTypes.RELATION:
         return (
           <Li>
-            <RelationItem data={item.data} mainField={item.mainField} />
+            <RelationItem data={item.data} mainField={item.mainField} isDisabled={false} />
           </Li>
         );
       case ItemTypes.EDIT_FIELD:
       case ItemTypes.EDIT_RELATION:
-        return (
-          <DraggedField name={item.name} size={12} selectedItem={item.name} />
-        );
+        return <DraggedField name={item.name} size={12} selectedItem={item.name} />;
       default:
         return null;
     }
@@ -90,10 +84,7 @@ const CustomDragLayer = () => {
   return (
     <LayoutDndProvider>
       <div style={layerStyles}>
-        <div
-          style={getItemStyles(initialOffset, currentOffset, mouseOffset)}
-          className="col-md-2"
-        >
+        <div style={getItemStyles(initialOffset, currentOffset, mouseOffset)} className="col-md-2">
           {renderItem()}
         </div>
       </div>

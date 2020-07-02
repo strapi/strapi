@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import IconRemove from '../../assets/images/icon_remove.svg';
@@ -11,6 +11,7 @@ import { Span } from './components';
 
 const Relation = ({ data, isDisabled, mainField, onRemove, to }) => {
   const cursor = isDisabled ? 'not-allowed' : 'pointer';
+  const { pathname } = useLocation();
 
   return (
     <>
@@ -20,7 +21,7 @@ const Relation = ({ data, isDisabled, mainField, onRemove, to }) => {
         </div>
         <FormattedMessage id={`${pluginId}.containers.Edit.clickToJump`}>
           {title => (
-            <Link to={to} title={title}>
+            <Link to={{ pathname: to, state: { from: pathname } }} title={title}>
               <Span>{data[mainField]}</Span>
             </Link>
           )}
