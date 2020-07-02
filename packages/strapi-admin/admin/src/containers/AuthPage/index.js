@@ -91,6 +91,11 @@ const AuthPage = ({ hasAdmin }) => {
   const handleSubmit = async e => {
     e.preventDefault();
 
+    dispatch({
+      type: 'SET_ERRORS',
+      errors: {},
+    });
+
     const errors = await checkFormValidity(modifiedData, schema);
 
     dispatch({
