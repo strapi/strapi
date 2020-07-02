@@ -19,7 +19,7 @@ const policyExistsIn = (container, policy) => !_.isUndefined(getPolicyIn(contain
 
 const stripPolicy = (policy, prefix) => policy.replace(prefix, '');
 
-const createPolicy = (policyName, args) => ({ policyName, args });
+const createPolicy = (policyName, ...args) => ({ policyName, args });
 
 const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
 
@@ -129,7 +129,7 @@ const get = (policy, plugin, apiName) => {
   const resolvedPolicy = resolvePolicy(policyName);
 
   if (resolvedPolicy !== undefined) {
-    return isPolicyFactory(policy) ? resolvedPolicy(args) : resolvedPolicy;
+    return isPolicyFactory(policy) ? resolvedPolicy(...args) : resolvedPolicy;
   }
 
   const localPolicy = searchLocalPolicy(policy, plugin, apiName);
@@ -144,20 +144,20 @@ const get = (policy, plugin, apiName) => {
 const createPolicyFactory = (factoryCallback, options) => {
   const { validator, name = 'unnamed' } = options;
 
-  const validate = args => {
+  const validate = (...args) => {
     try {
-      validator(args);
+      validator(...args);
     } catch (e) {
       throw new Error(`Invalid objects submitted to "${name}" policy.`);
     }
   };
 
-  return args => {
+  return (...args) => {
     if (validator) {
-      validate(args);
+      validate(...args);
     }
 
-    return factoryCallback(args);
+    return factoryCallback(...args);
   };
 };
 
