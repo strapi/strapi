@@ -99,7 +99,7 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      return (ctx.body = entity);
+      return (ctx.body = pm.sanitize(entity));
     }
 
     if (pm.ability.cannot(ACTIONS.read, model)) {
