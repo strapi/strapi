@@ -6,7 +6,7 @@ const _ = require('lodash');
  * A set of functions called "actions" for `ContentManager`
  */
 module.exports = {
-  fetchAll(model, query, params = {}) {
+  fetchAll(model, query) {
     const { query: request, populate, ...filters } = query;
 
     const queryFilter = !_.isEmpty(request)
@@ -18,7 +18,7 @@ module.exports = {
 
     return strapi.entityService.find(
       {
-        params: { ...queryFilter, ...params },
+        params: queryFilter,
         populate,
       },
       { model }
@@ -26,22 +26,19 @@ module.exports = {
   },
 
   fetch(model, id, config = {}) {
-    const { params = {}, populate } = config;
+    const { query = {}, populate } = config;
 
     return strapi.entityService.findOne(
       {
-        params: { ...params, id },
+        params: { ...query, id },
         populate,
       },
       { model }
     );
   },
 
-  count(params, query) {
-    const { model } = params;
-    const { ...filters } = query;
-
-    return strapi.entityService.count({ params: filters }, { model });
+  count(model, query) {
+    return strapi.entityService.count({ params: query }, { model });
   },
 
   create({ data, files }, { model } = {}) {
@@ -52,18 +49,22 @@ module.exports = {
     return strapi.entityService.update({ params, data, files }, { model });
   },
 
-  delete(model, id, params) {
-    return strapi.entityService.delete({ params: { _where: [{ id }, params] } }, { model });
+  delete(model, id, query) {
+    return strapi.entityService.delete(
+      { params: { ...query, _where: _.concat({ id }, query._where) } },
+      { model }
+    );
   },
 
-  deleteMany(model, query, params) {
+  deleteMany(model, ids, query) {
     const { primaryKey } = strapi.query(model);
 
     return strapi.entityService.delete(
       {
         params: {
           _limit: 100,
-          _where: [{ [`${primaryKey}_in`]: Object.values(query) }, params],
+          ...query,
+          _where: _.concat({ [`${primaryKey}_in`]: ids }, query._where),
         },
       },
       { model }
@@ -74,10 +75,7 @@ module.exports = {
     return strapi.entityService.search({ params: { ...query, ...params } }, { model });
   },
 
-  countSearch(params, query) {
-    const { model } = params;
-    const { _q } = query;
-
-    return strapi.entityService.countSearch({ params: { _q } }, { model });
+  countSearch(model, query) {
+    return strapi.entityService.countSearch({ params: query }, { model });
   },
 };

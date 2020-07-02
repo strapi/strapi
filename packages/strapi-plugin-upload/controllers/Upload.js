@@ -8,6 +8,8 @@
 const _ = require('lodash');
 const validateSettings = require('./validation/settings');
 const { yup, formatYupErrors } = require('strapi-utils');
+const apiUploadController = require('./api-upload');
+const apiAdminUploadController = require('./api-admin-upload');
 
 const fileInfoSchema = yup.object({
   name: yup.string().nullable(),
@@ -67,6 +69,21 @@ const setCreatorInfo = (ctx, files, { edition = false } = {}) => {
       }
     })
   );
+};
+
+const resolveControllerFor = method => ctx => {
+  const {
+    state: { isAuthenticatedAdmin },
+  } = ctx;
+
+  const controller = isAuthenticatedAdmin ? apiAdminUploadController : apiUploadController;
+  const callbackFn = controller[method];
+
+  if (!_.isFunction(callbackFn)) {
+    return ctx.notFound();
+  }
+
+  return callbackFn(ctx);
 };
 
 module.exports = {
@@ -131,49 +148,10 @@ module.exports = {
     ctx.body = { data };
   },
 
-  async find(ctx) {
-    if (ctx.query._q) {
-      ctx.body = await strapi.plugins['upload'].services.upload.search(ctx.query);
-    } else {
-      ctx.body = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
-    }
-  },
-
-  async findOne(ctx) {
-    const { id } = ctx.params;
-    const data = await strapi.plugins['upload'].services.upload.fetch({ id });
-
-    if (!data) {
-      return ctx.notFound('file.notFound');
-    }
-
-    ctx.body = data;
-  },
-
-  async count(ctx) {
-    let count;
-    if (ctx.query._q) {
-      count = await strapi.plugins['upload'].services.upload.countSearch(ctx.query);
-    } else {
-      count = await strapi.plugins['upload'].services.upload.count(ctx.query);
-    }
-
-    ctx.body = { count };
-  },
-
-  async destroy(ctx) {
-    const { id } = ctx.params;
-
-    const file = await strapi.plugins['upload'].services.upload.fetch({ id });
-
-    if (!file) {
-      return ctx.notFound('file.notFound');
-    }
-
-    await strapi.plugins['upload'].services.upload.remove(file);
-
-    ctx.body = file;
-  },
+  find: resolveControllerFor('find'),
+  findOne: resolveControllerFor('findOne'),
+  count: resolveControllerFor('count'),
+  destroy: resolveControllerFor('destroy'),
 
   async search(ctx) {
     const { id } = ctx.params;

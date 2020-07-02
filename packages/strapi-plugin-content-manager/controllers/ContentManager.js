@@ -81,21 +81,16 @@ module.exports = {
       model
     );
 
-    let entities = [];
+    const method = _.has(request.query, '_q') ? 'search' : 'fetchAll';
+    const query = pm.queryFrom(request.query);
 
-    if (_.has(ctx.request.query, '_q')) {
-      entities = await contentManagerService.search(model, request.query, pm.query);
-    } else {
-      entities = await contentManagerService.fetchAll(model, request.query, pm.query);
-    }
+    const results = await contentManagerService[method](model, query);
 
-    if (!entities) {
+    if (!results) {
       return ctx.notFound();
     }
 
-    ctx.body = _.isArray(entities)
-      ? entities.map(entity => pm.sanitize(entity))
-      : pm.sanitize(entities);
+    ctx.body = pm.sanitize(results);
   },
 
   /**
@@ -113,7 +108,7 @@ module.exports = {
       model
     );
 
-    const entry = await contentManagerService.fetch(model, id, { params: pm.query });
+    const entry = await contentManagerService.fetch(model, id, { query: pm.query });
 
     // Entry not found
     if (!entry) {
@@ -127,15 +122,22 @@ module.exports = {
    * Returns a count of entities of a content type matching query parameters
    */
   async count(ctx) {
-    const { model } = ctx.params;
+    const {
+      state: { userAbility },
+      params: { model },
+      request,
+    } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
-    let count;
-    if (_.has(ctx.request.query, '_q')) {
-      count = await contentManagerService.countSearch({ model }, ctx.request.query);
-    } else {
-      count = await contentManagerService.count({ model }, ctx.request.query);
-    }
+    const pm = strapi.admin.services.permission.createPermissionsManager(
+      userAbility,
+      ACTIONS.read,
+      model
+    );
+    const method = _.has(request.query, '_q') ? 'countSearch' : 'count';
+    const query = pm.queryFrom(request.query);
+
+    const count = await contentManagerService[method](model, query);
 
     ctx.body = {
       count: _.isNumber(count) ? count : _.toNumber(count),
@@ -256,6 +258,7 @@ module.exports = {
     const {
       state: { userAbility },
       params: { model },
+      request,
     } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
     const pm = strapi.admin.services.permission.createPermissionsManager(
@@ -264,7 +267,11 @@ module.exports = {
       model
     );
 
-    const results = await contentManagerService.deleteMany(model, ctx.request.query, pm.query);
+    const results = await contentManagerService.deleteMany(
+      model,
+      Object.values(request.query),
+      pm.query
+    );
 
     ctx.body = results.map(result => pm.sanitize(result, { action: ACTIONS.read }));
   },

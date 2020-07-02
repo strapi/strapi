@@ -20,12 +20,23 @@ module.exports = (ability, action, model) => ({
     return buildStrapiQuery(buildCaslQuery(ability, action, model));
   },
 
+  get isAllowed() {
+    return this.ability.can(action, model);
+  },
+
   toSubject(target, subjectType = model) {
     return asSubject(subjectType, target);
   },
 
   pickPermittedFieldsOf(data, options = {}) {
     return this.sanitize(data, { ...options, isOutput: false });
+  },
+
+  queryFrom(query) {
+    return {
+      ...query,
+      _where: _.concat(this.query, query._where),
+    };
   },
 
   sanitize(data, options = {}) {

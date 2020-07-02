@@ -28,7 +28,11 @@ module.exports = createPolicyFactory(
     );
 
     return (ctx, next) => {
-      const { userAbility: ability } = ctx.state;
+      const { userAbility: ability, isAuthenticatedAdmin } = ctx.state;
+
+      if (!isAuthenticatedAdmin || !ability) {
+        return next();
+      }
 
       const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));
 
