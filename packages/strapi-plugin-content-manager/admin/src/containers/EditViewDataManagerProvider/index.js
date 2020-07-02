@@ -78,7 +78,7 @@ const EditViewDataManagerProvider = ({
   }, [userPermissions, slug]);
 
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
-    if (isLoadingForPermissions) {
+    if (isLoadingForPermissions || isLoading) {
       return false;
     }
 
@@ -92,10 +92,10 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoadingForPermissions, isCreatingEntry, canCreate]);
+  }, [isLoadingForPermissions, isCreatingEntry, canCreate, isLoading]);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (isLoadingForPermissions) {
+    if (isLoadingForPermissions || isLoading) {
       return false;
     }
 
@@ -108,7 +108,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoadingForPermissions, isCreatingEntry, canRead, canUpdate]);
+  }, [isLoadingForPermissions, isLoading, isCreatingEntry, canRead, canUpdate]);
 
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
@@ -140,6 +140,18 @@ const EditViewDataManagerProvider = ({
   }, [shouldCheckErrors]);
 
   useEffect(() => {
+    if (shouldRedirectToHomepageWhenEditingEntry) {
+      strapi.notification.info(getTrad('permissions.not-allowed.update'));
+    }
+  }, [shouldRedirectToHomepageWhenEditingEntry]);
+
+  useEffect(() => {
+    if (shouldRedirectToHomepageWhenCreatingEntry) {
+      strapi.notification.info(getTrad('permissions.not-allowed.create'));
+    }
+  }, [shouldRedirectToHomepageWhenCreatingEntry]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await request(getRequestUrl(`${slug}/${id || ''}`), {
@@ -156,7 +168,10 @@ const EditViewDataManagerProvider = ({
           ),
         });
       } catch (err) {
-        if (id && err.response.status === 404) {
+        console.log(err);
+        const status = get(err, 'response.status', null);
+
+        if (id && status === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -168,8 +183,18 @@ const EditViewDataManagerProvider = ({
           strapi.notification.error(`${pluginId}.error.record.fetch`);
         }
 
-        if (!id && err.response.status === 404) {
+        // Create a single type
+        if (!id && status === 404) {
           setIsCreatingEntry(true);
+
+          return;
+        }
+
+        // Not allowed to update or read a ST
+        if (!id && status === 403) {
+          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+
+          push(from);
         }
       }
     };
@@ -595,15 +620,11 @@ const EditViewDataManagerProvider = ({
 
   // Redirect the user to the homepage if he is not allowed to create a document
   if (shouldRedirectToHomepageWhenCreatingEntry) {
-    strapi.notification.info(getTrad('permissions.not-allowed.create'));
-
     return <Redirect to="/" />;
   }
 
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
-    strapi.notification.info(getTrad('permissions.not-allowed.update'));
-
     return <Redirect to={from} />;
   }
 

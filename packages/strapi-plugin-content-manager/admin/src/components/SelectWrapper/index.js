@@ -135,12 +135,14 @@ function SelectWrapper({
       return () => clearTimeout(timer);
     }
 
-    ref.current();
+    if (isFieldAllowed) {
+      ref.current();
+    }
 
     return () => {
       abortController.abort();
     };
-  }, [state._contains]);
+  }, [state._contains, isFieldAllowed]);
 
   useEffect(() => {
     if (state._start !== 0) {
