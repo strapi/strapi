@@ -83,7 +83,7 @@ module.exports = {
     );
 
     if (kind === 'singleType') {
-      // fetchAll for a singleType only return on entity
+      // fetchAll for a singleType only return one entity
       const entity = await contentManagerService.fetchAll(model, query);
 
       // allow user with create permission to know a single type is not created
@@ -95,7 +95,7 @@ module.exports = {
         return ctx.notFound();
       }
 
-      if (entity && pm.ability.cannot(ACTIONS.read, pm.toSubject(entity))) {
+      if (pm.ability.cannot(ACTIONS.read, pm.toSubject(entity))) {
         return ctx.forbidden();
       }
 
