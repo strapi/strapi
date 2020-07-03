@@ -139,8 +139,10 @@ describe('Content-Type', () => {
       });
       expect(res).toEqual(expectedResult);
     });
+  });
 
-    const testsC = [
+  describe('getNestedFieldsWithIntermediate', () => {
+    const tests = [
       [1, ['firstname', 'restaurant', 'car']],
       [
         2,
@@ -205,8 +207,8 @@ describe('Content-Type', () => {
       ],
     ];
 
-    test.each(testsC)('%p level(s) - withIntermediate', async (nestingLevel, expectedResult) => {
-      const res = contentTypeService.getNestedFields(contentTypes.user, {
+    test.each(tests)('%p level(s) - withIntermediate', async (nestingLevel, expectedResult) => {
+      const res = contentTypeService.getNestedFieldsWithIntermediate(contentTypes.user, {
         nestingLevel,
         components: strapi.components,
         withIntermediate: true,
