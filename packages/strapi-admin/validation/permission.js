@@ -16,25 +16,21 @@ const BOUND_ACTIONS = [
 ];
 
 const checkPermissionsAreBound = function(permissions) {
-  const subjectMap = {};
   let areBond = true;
-  permissions
-    .filter(perm => BOUND_ACTIONS.includes(perm.action))
-    .forEach(perm => {
-      subjectMap[perm.subject] = subjectMap[perm.subject] || {};
-      perm.fields.forEach(field => {
-        subjectMap[perm.subject][field] = subjectMap[perm.subject][field] || new Set();
-        subjectMap[perm.subject][field].add(perm.action);
-      });
-    });
-
-  _.forIn(subjectMap, subject => {
-    _.forIn(subject, field => {
-      if (field.size !== BOUND_ACTIONS.length) {
-        areBond = false;
-        return false;
-      }
-    });
+  const permsBySubject = _.groupBy(
+    permissions.filter(perm => BOUND_ACTIONS.includes(perm.action)),
+    'subject'
+  );
+  _.forIn(permsBySubject, perms => {
+    const uniqPerms = _.uniqBy(perms, 'action');
+    areBond = uniqPerms.length === BOUND_ACTIONS.length;
+    if (!areBond) return false;
+    const permsByAction = _.groupBy(uniqPerms, 'action');
+    areBond =
+      BOUND_ACTIONS.slice(0, 3)
+        .map(action => permsByAction[action][0].fields || [])
+        .map(f => f.sort())
+        .filter((fields, i, arr) => _.isEqual(arr[0], fields)).length === 3;
     if (!areBond) return false;
   });
 
