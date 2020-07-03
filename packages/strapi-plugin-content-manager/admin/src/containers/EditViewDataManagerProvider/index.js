@@ -51,6 +51,16 @@ const EditViewDataManagerProvider = ({
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+  const allDynamicZoneFields = useMemo(() => {
+    const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
+
+    const dynamicZoneFields = Object.keys(attributes).filter(attrName => {
+      return get(attributes, [attrName, 'type'], '') === 'dynamiczone';
+    });
+
+    return dynamicZoneFields;
+  }, [currentContentTypeLayout]);
+
   const abortController = new AbortController();
   const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
@@ -636,6 +646,7 @@ const EditViewDataManagerProvider = ({
         addRelation,
         addRepeatableComponentToField,
         allLayoutData,
+        allDynamicZoneFields,
         checkFormErrors,
         clearData,
         createActionAllowedFields,
