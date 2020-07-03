@@ -15,6 +15,7 @@ const GraphQLLong = require('graphql-type-long');
 
 const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
+const { createDefaultSchema } = require('./utils');
 
 const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
 
@@ -195,6 +196,9 @@ module.exports = {
    */
 
   addPolymorphicUnionType(definition) {
+    if (definition.trim().length === 0) {
+      return createDefaultSchema();
+    }
     const types = graphql
       .parse(definition)
       .definitions.filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')

@@ -48,7 +48,7 @@ const generateSchema = () => {
     pluginCRUD.resolvers
   );
 
-  const extraResolvers = diffResolvers(_schema.resolver, builtResolvers);
+  const extraResolvers = diffResolvers(builtResolvers, _schema.resolver);
 
   const resolvers = _.merge({}, builtResolvers, buildResolvers(extraResolvers));
 

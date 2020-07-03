@@ -28,7 +28,7 @@ const createDefaultSchema = () => ({
   resolvers: {},
 });
 
-const diffResolvers = (object, base) => {
+const diffResolvers = (base, object = {}) => {
   let newObj = {};
 
   Object.keys(object).forEach(type => {
