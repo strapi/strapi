@@ -1,10 +1,15 @@
-import React, { memo, useReducer } from 'react';
+import React, { memo, useMemo, useReducer } from 'react';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { capitalize, get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { PluginHeader, getFilterType } from 'strapi-helper-plugin';
+import {
+  PluginHeader,
+  getFilterType,
+  useUser,
+  findMatchingPermissions,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
@@ -17,10 +22,26 @@ import reducer, { initialState } from './reducer';
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
 
 function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState }) {
-  const { schema, filters } = useListView();
+  const { schema, filters, slug } = useListView();
+  const userPermissions = useUser();
+  const readActionAllowedFields = useMemo(() => {
+    const matchingPermissions = findMatchingPermissions(userPermissions, [
+      {
+        action: 'plugins::content-manager.explorer.read',
+        subject: slug,
+      },
+    ]);
+
+    return get(matchingPermissions, ['0', 'fields'], []);
+  }, [userPermissions, slug]);
+
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {
       const current = get(schema, ['attributes', attr], {});
+
+      if (!readActionAllowedFields.includes(attr)) {
+        return false;
+      }
 
       return !NOT_ALLOWED_FILTERS.includes(current.type) && current.type !== undefined;
     })

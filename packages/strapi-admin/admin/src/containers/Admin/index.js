@@ -200,8 +200,6 @@ export class Admin extends React.Component {
       return <LoadingIndicatorPage />;
     }
 
-    console.log({ userPermissions });
-
     return (
       <GlobalContextProvider
         autoReload={autoReload}
