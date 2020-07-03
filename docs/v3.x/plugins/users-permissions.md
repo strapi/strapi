@@ -193,7 +193,7 @@ Then fill the information:
 
 - **Enable**: `ON`
 - **Client ID**: 53de5258f8472c140917
-- **Client ID**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
+- **Client Secret**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/github`
 
 :::
@@ -234,7 +234,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 2408954435875229
-- **Client ID**: 4fe04b740b69f31ea410b9391ff3b5b0
+- **Client Secret**: 4fe04b740b69f31ea410b9391ff3b5b0
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/facebook`
 
 :::
@@ -318,7 +318,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: yfN4ycGGmKXiS1njtIYxuN5IH
-- **Client ID**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
+- **Client Secret**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/twitter`
 
 :::
@@ -347,7 +347,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 665118465148846081
-- **Client ID**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
+- **Client Secret**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/discord`
 
 :::
@@ -379,7 +379,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: amuy279g8wt68qlht3u4gek4oykh5j
-- **Client ID**: dapssh10uo97gg2l25qufr8wen3yr6
+- **Client Secret**: dapssh10uo97gg2l25qufr8wen3yr6
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitch`
 
 :::
@@ -422,7 +422,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 563883201184965
-- **Client ID**: f5ba10a7dd78c2410ab6b8a35ab28226
+- **Client Secret**: f5ba10a7dd78c2410ab6b8a35ab28226
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/instagram`
 
 :::
@@ -459,7 +459,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 7276416
-- **Client ID**: cFBUSghLXGuxqnCyw1N3
+- **Client Secret**: cFBUSghLXGuxqnCyw1N3
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/vk`
 
 :::
