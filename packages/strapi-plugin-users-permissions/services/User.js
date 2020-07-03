@@ -62,12 +62,8 @@ module.exports = {
    * Promise to fetch a/an user.
    * @return {Promise}
    */
-  fetch(params, populate) {
-    let defaultPopulate = ['role'];
-
-    if (populate) _.merge(defaultPopulate, populate);
-
-    return strapi.query('user', 'users-permissions').findOne(params, defaultPopulate);
+  fetch(params, populate = ['role']) {
+    return strapi.query('user', 'users-permissions').findOne(params, populate);
   },
 
   /**
