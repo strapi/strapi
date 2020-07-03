@@ -27,10 +27,11 @@ const checkPermissionsAreBound = function(permissions) {
     if (!areBond) return false;
     const permsByAction = _.groupBy(uniqPerms, 'action');
     areBond =
-      BOUND_ACTIONS.slice(0, 3)
+      BOUND_ACTIONS.filter(action => action !== 'plugins::content-manager.explorer.delete')
         .map(action => permsByAction[action][0].fields || [])
         .map(f => f.sort())
-        .filter((fields, i, arr) => _.isEqual(arr[0], fields)).length === 3;
+        .filter((fields, i, arr) => _.isEqual(arr[0], fields)).length ===
+      BOUND_ACTIONS.length - 1;
     if (!areBond) return false;
   });
 
