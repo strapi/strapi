@@ -4,15 +4,14 @@ const _ = require('lodash');
 const fp = require('lodash/fp');
 
 /**
- * Creates an array of permissions with the "fields" attribute filled
- * @param {string} contentTypeUid uid of a content-type or components
+ * Creates an array of paths to the fields and nested fields, without path nodes
+ * @param {string} model model used to get the nested fields
  * @param {Object} options
- * @param {string} options.fieldPath current path of the field
+ * @param {string} options.prefix prefix to add to the path
  * @param {number} options.nestingLevel level of nesting to achieve
  * @param {object} options.components components where components attributes can be found
  * @param {object} options.requiredOnly only returns required nestedFields
  * @param {object} options.existingFields fields that are already selected, meaning that some sub-fields may be required
- * @param {object} options.withIntermediate if true, the paths to the nodes will also be returned, if false, only the paths to the leaves will be returned
  * @returns {array<string>}
  */
 const getNestedFields = (
@@ -58,6 +57,16 @@ const getNestedFields = (
     []
   );
 };
+
+/**
+ * Creates an array of paths to the fields and nested fields, with path nodes
+ * @param {string} model model used to get the nested fields
+ * @param {Object} options
+ * @param {string} options.prefix prefix to add to the path
+ * @param {number} options.nestingLevel level of nesting to achieve
+ * @param {object} options.components components where components attributes can be found
+ * @returns {array<string>}
+ */
 
 const getNestedFieldsWithIntermediate = (
   model,
