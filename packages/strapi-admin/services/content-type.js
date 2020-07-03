@@ -17,17 +17,10 @@ const fp = require('lodash/fp');
  */
 const getNestedFields = (
   model,
-  {
-    prefix = '',
-    nestingLevel = 15,
-    components = {},
-    requiredOnly = false,
-    existingFields = [],
-    withIntermediate = false,
-  }
+  { prefix = '', nestingLevel = 15, components = {}, requiredOnly = false, existingFields = [] }
 ) => {
   if (nestingLevel === 0) {
-    return prefix && !withIntermediate ? [prefix] : [];
+    return prefix ? [prefix] : [];
   }
 
   return _.reduce(
@@ -38,9 +31,6 @@ const getNestedFields = (
       const insideExistingFields = existingFields && existingFields.some(fp.startsWith(fieldPath));
 
       if (attr.type === 'component') {
-        if (withIntermediate) {
-          fields.push(fieldPath);
-        }
         if (requiredOrNotNeeded || insideExistingFields) {
           const compoFields = getNestedFields(components[attr.component], {
             nestingLevel: nestingLevel - 1,
@@ -48,11 +38,10 @@ const getNestedFields = (
             components,
             requiredOnly,
             existingFields,
-            withIntermediate,
           });
 
           if (requiredOnly && compoFields.length === 0 && attr.required) {
-            return withIntermediate ? fields : fields.concat(fieldPath);
+            return fields.concat(fieldPath);
           }
 
           return fields.concat(compoFields);
@@ -62,6 +51,36 @@ const getNestedFields = (
 
       if (requiredOrNotNeeded) {
         return fields.concat(fieldPath);
+      }
+
+      return fields;
+    },
+    []
+  );
+};
+
+const getNestedFieldsWithIntermediate = (
+  model,
+  { prefix = '', nestingLevel = 15, components = {} }
+) => {
+  if (nestingLevel === 0) {
+    return [];
+  }
+
+  return _.reduce(
+    model.attributes,
+    (fields, attr, key) => {
+      const fieldPath = prefix ? `${prefix}.${key}` : key;
+      fields.push(fieldPath);
+
+      if (attr.type === 'component') {
+        const compoFields = getNestedFieldsWithIntermediate(components[attr.component], {
+          nestingLevel: nestingLevel - 1,
+          prefix: fieldPath,
+          components,
+        });
+
+        fields.push(...compoFields);
       }
 
       return fields;
@@ -111,10 +130,9 @@ const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }
     if (fieldsNullFor.includes(perm.actionId)) {
       newFields = null;
     } else if (perm.subject && strapi.contentTypes[perm.subject]) {
-      const possiblefields = getNestedFields(strapi.contentTypes[perm.subject], {
+      const possiblefields = getNestedFieldsWithIntermediate(strapi.contentTypes[perm.subject], {
         components: strapi.components,
         nestingLevel,
-        withIntermediate: true,
       });
 
       const requiredFields = getNestedFields(strapi.contentTypes[perm.subject], {
@@ -128,7 +146,7 @@ const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }
         ...requiredFields,
       ]);
       newFields = badNestedFields.filter(
-        f1 => !badNestedFields.some(f2 => f2.startsWith(`${f1}.`))
+        field => !badNestedFields.some(fp.startsWith(`${field}.`))
       );
     }
 
@@ -139,4 +157,5 @@ module.exports = {
   getNestedFields,
   getPermissionsWithNestedFields,
   cleanPermissionFields,
+  getNestedFieldsWithIntermediate,
 };
