@@ -53,7 +53,7 @@ module.exports = ({ dir, logger = noLog }) => {
 
     const licenseInfo = JSON.parse(content);
 
-    if (licenseInfo.expire_at < new Date().getTime()) {
+    if (licenseInfo.expireAt < new Date().getTime()) {
       return warnAndReturn('License expired');
     }
   } catch (err) {
