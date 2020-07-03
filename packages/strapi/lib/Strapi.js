@@ -57,12 +57,15 @@ class Strapi {
     this.config = loadConfiguration(this.dir, opts);
     this.isLoaded = false;
 
-    this.EE = ee({ dir: this.dir, logger });
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
+  }
+
+  get EE() {
+    return ee({ dir: this.dir, logger });
   }
 
   requireProjectBootstrap() {

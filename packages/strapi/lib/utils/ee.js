@@ -14,13 +14,19 @@ const noLog = {
   info: noop,
 };
 
+const internals = {};
+
 module.exports = ({ dir, logger = noLog }) => {
+  if (_.has(internals, 'isEE')) return internals.isEE;
+
   const warnAndReturn = (msg = 'Invalid license. Starting in CE.') => {
     logger.warn(msg);
+    internals.isEE = false;
     return false;
   };
 
   if (process.env.STRAPI_DISABLE_EE === 'true') {
+    internals.isEE = false;
     return false;
   }
 
@@ -34,6 +40,7 @@ module.exports = ({ dir, logger = noLog }) => {
   }
 
   if (_.isNil(license)) {
+    internals.isEE = false;
     return false;
   }
 
@@ -51,14 +58,41 @@ module.exports = ({ dir, logger = noLog }) => {
     const isValid = verifier.verify(publicKey, signature);
     if (!isValid) return warnAndReturn();
 
-    const licenseInfo = JSON.parse(content);
+    internals.licenseInfo = JSON.parse(content);
 
-    if (licenseInfo.expireAt < new Date().getTime()) {
+    if (internals.licenseInfo.expireAt < new Date().getTime()) {
       return warnAndReturn('License expired');
     }
   } catch (err) {
     return warnAndReturn();
   }
 
+  internals.isEE = true;
   return true;
+};
+
+Object.defineProperty(module.exports, 'licenseInfo', {
+  get: () => {
+    mustHaveKey('licenseInfo');
+    return internals.licenseInfo;
+  },
+  configurable: false,
+  enumerable: false,
+});
+
+Object.defineProperty(module.exports, 'isEE', {
+  get: () => {
+    mustHaveKey('isEE');
+    return internals.isEE;
+  },
+  configurable: false,
+  enumerable: false,
+});
+
+const mustHaveKey = key => {
+  if (!_.has(internals, key)) {
+    const err = new Error('Tampering with license');
+    err.stack = null;
+    throw err;
+  }
 };

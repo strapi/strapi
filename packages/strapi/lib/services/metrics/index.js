@@ -10,6 +10,7 @@ const wrapWithRateLimit = require('./rate-limiter');
 const createSender = require('./sender');
 const createMiddleware = require('./middleware');
 const isTruthy = require('./is-truthy');
+const ee = require('../../utils/ee');
 
 const LIMITED_EVENTS = [
   'didSaveMediaWithAlternativeText',
@@ -28,6 +29,26 @@ const createTelemetryInstance = strapi => {
   if (!isDisabled) {
     scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
     strapi.app.use(createMiddleware({ sendEvent }));
+  }
+
+  if (strapi.EE === true && ee.isEE === true) {
+    const pingDisabled =
+      isTruthy(process.env.STRAPI_LICENSE_PING_DISABLED) && ee.licenseInfo.type === 'enterprise';
+
+    const sendLicenseCheck = () => {
+      return sendEvent(
+        'didCheckLicense',
+        { licenseInfo: ee.licenseInfo },
+        {
+          headers: { 'x-strapi-project': 'enterprise' },
+        }
+      );
+    };
+
+    if (!pingDisabled) {
+      scheduleJob('0 0 0 * * 7', () => sendLicenseCheck());
+      sendLicenseCheck();
+    }
   }
 
   return {

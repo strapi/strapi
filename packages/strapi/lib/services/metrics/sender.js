@@ -1,11 +1,18 @@
 'use strict';
 
 const os = require('os');
-
+const _ = require('lodash');
 const isDocker = require('is-docker');
 const { machineIdSync } = require('node-machine-id');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
+
+const defaultQueryOpts = {
+  timeout: 1000,
+  headers: { 'Content-Type': 'application/json' },
+};
+
+const ANALYTICS_URI = 'http://localhost:1338'; // https://analytics.strapi.io
 
 /**
  * Create a send function for event with all the necessary metadatas
@@ -28,23 +35,23 @@ module.exports = strapi => {
     strapiVersion: strapi.config.info.strapi,
   };
 
-  return async (event, payload = {}) => {
-    try {
-      const res = await fetch('https://analytics.strapi.io/track', {
-        method: 'POST',
-        body: JSON.stringify({
-          event,
-          uuid,
-          deviceId,
-          properties: {
-            ...payload,
-            ...anonymous_metadata,
-          },
-        }),
-        timeout: 1000,
-        headers: { 'Content-Type': 'application/json' },
-      });
+  return async (event, payload = {}, opts = {}) => {
+    const reqParams = {
+      method: 'POST',
+      body: JSON.stringify({
+        event,
+        uuid,
+        deviceId,
+        properties: {
+          ...payload,
+          ...anonymous_metadata,
+        },
+      }),
+      ..._.merge({}, defaultQueryOpts, opts),
+    };
 
+    try {
+      const res = await fetch(`${ANALYTICS_URI}/track`, reqParams);
       return res.ok;
     } catch (err) {
       return false;
