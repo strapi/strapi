@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
-import { get } from 'lodash';
+import { get, take } from 'lodash';
 import useDataManager from '../../../hooks/useDataManager';
+import { getFieldName } from '../../../utils';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {
+    allDynamicZoneFields,
     createActionAllowedFields,
     isCreatingEntry,
     modifiedData,
@@ -17,23 +19,41 @@ function useSelect({ isFromDynamicZone, name }) {
   }, [isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
 
   const componentValue = get(modifiedData, name, null);
+  const compoName = useMemo(() => {
+    return getFieldName(name);
+  }, [name]);
 
   const hasChildrenAllowedFields = useMemo(() => {
     if (isFromDynamicZone) {
       return true;
     }
 
+    if (allDynamicZoneFields.includes(compoName[0])) {
+      return true;
+    }
+
     const relatedChildrenAllowedFields = allowedFields
       .map(fieldName => {
-        return fieldName.split('.')[0];
+        return fieldName.split('.');
       })
-      .filter(fieldName => fieldName === name.split('.')[0]);
+      .filter(fieldName => {
+        if (fieldName.length < compoName.length) {
+          return false;
+        }
+
+        const joined = take(fieldName, compoName.length).join('.');
+
+        return joined === compoName.join('.');
+      });
 
     return relatedChildrenAllowedFields.length > 0;
-  }, [allowedFields, isFromDynamicZone, name]);
+  }, [isFromDynamicZone, allDynamicZoneFields, compoName, allowedFields]);
 
   const hasChildrenReadableFields = useMemo(() => {
     if (isFromDynamicZone) {
+      return true;
+    }
+    if (allDynamicZoneFields.includes(compoName[0])) {
       return true;
     }
 
@@ -41,12 +61,26 @@ function useSelect({ isFromDynamicZone, name }) {
 
     const relatedChildrenAllowedFields = allowedFields
       .map(fieldName => {
-        return fieldName.split('.')[0];
+        return fieldName.split('.');
       })
-      .filter(fieldName => fieldName === name.split('.')[0]);
+      .filter(fieldName => {
+        if (fieldName.length < compoName.length) {
+          return false;
+        }
+
+        const joined = take(fieldName, compoName.length).join('.');
+
+        return joined === compoName.join('.');
+      });
 
     return relatedChildrenAllowedFields.length > 0;
-  }, [readActionAllowedFields, isFromDynamicZone, name, isCreatingEntry]);
+  }, [
+    isFromDynamicZone,
+    allDynamicZoneFields,
+    compoName,
+    isCreatingEntry,
+    readActionAllowedFields,
+  ]);
 
   const isReadOnly = useMemo(() => {
     if (isCreatingEntry) {

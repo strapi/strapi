@@ -145,7 +145,6 @@ function Inputs({
     }
 
     if (isChildOfDynamicZone) {
-      // TODO we can simply return true here if we block the dynamic zone
       return allowedFields.includes(fieldName[0]);
     }
 
