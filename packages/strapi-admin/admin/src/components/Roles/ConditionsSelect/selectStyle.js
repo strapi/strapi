@@ -52,6 +52,7 @@ const selectStyle = {
     } = state;
 
     let border;
+    let borderBottom;
 
     if (state.isFocused) {
       border = '1px solid #78caff !important';
@@ -59,6 +60,10 @@ const selectStyle = {
       border = '1px solid #f64d0a !important';
     } else {
       border = '1px solid #e3e9f3 !important';
+    }
+
+    if (state.menuIsOpen === true) {
+      borderBottom = '1px solid #e3e9f3 !important';
     }
 
     return {
@@ -70,6 +75,7 @@ const selectStyle = {
       boxShadow: 0,
       borderRadius: '2px !important',
       ...borderRadiusStyle,
+      borderBottom,
     };
   },
   valueContainer: base => ({

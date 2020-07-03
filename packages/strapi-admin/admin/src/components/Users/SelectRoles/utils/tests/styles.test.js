@@ -204,6 +204,7 @@ describe('ADMIN | COMPONENTS | USER | SelectRoles | utils | styles', () => {
       const expected = {
         ok: true,
         maxHeight: '112px',
+        paddingTop: 2,
       };
 
       expect(styles.menuList(base)).toEqual(expected);
