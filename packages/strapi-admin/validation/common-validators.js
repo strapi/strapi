@@ -45,39 +45,72 @@ const arrayOfConditionNames = yup
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
-const updatePermissions = yup
-  .object()
-  .shape({
+const checkCTPermsDeleteHaveFieldsToNull = permissions =>
+  permissions.every(
+    perm => perm.action !== 'plugins::content-manager.explorer.delete' || _.isNil(perm.fields)
+  );
+
+const permissionsAreEquals = (a, b) =>
+  a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
+
+const checkNoDuplicatedPermissions = permissions =>
+  permissions.every((permA, i) =>
+    permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
+  );
+
+const updatePermissionsValidators = [
+  yup
+    .object()
+    .shape({
+      permissions: yup
+        .array()
+        .requiredAllowEmpty()
+        .of(
+          yup
+            .object()
+            .shape({
+              action: yup.string().required(),
+              subject: yup.string().nullable(),
+              fields: yup
+                .array()
+                .of(yup.string())
+                .nullable()
+                .test(
+                  'field-nested',
+                  'Fields format are incorrect (bad nesting).',
+                  checkFieldsAreCorrectlyNested
+                )
+                .test(
+                  'field-nested',
+                  'Fields format are incorrect (duplicates).',
+                  checkFieldsDontHaveDuplicates
+                ),
+              conditions: arrayOfConditionNames,
+            })
+            .noUnknown()
+        ),
+    })
+    .required()
+    .noUnknown(),
+  yup.object().shape({
     permissions: yup
       .array()
-      .requiredAllowEmpty()
-      .of(
-        yup
-          .object()
-          .shape({
-            action: yup.string().required(),
-            subject: yup.string().nullable(),
-            fields: yup
-              .array()
-              .of(yup.string())
-              .nullable()
-              .test(
-                'field-nested',
-                'Fields format are incorrect (bad nesting).',
-                checkFieldsAreCorrectlyNested
-              )
-              .test(
-                'field-nested',
-                'Fields format are incorrect (duplicates).',
-                checkFieldsDontHaveDuplicates
-              ),
-            conditions: arrayOfConditionNames,
-          })
-          .noUnknown()
+      .test(
+        'delete-fields-are-null',
+        'Some permissions are duplicated (same action and subject)',
+        checkNoDuplicatedPermissions
       ),
-  })
-  .required()
-  .noUnknown();
+  }),
+  yup.object().shape({
+    permissions: yup
+      .array()
+      .test(
+        'delete-fields-are-null',
+        'The action "plugins::content-manager.explorer.delete" must have fields set to null or undefined',
+        checkCTPermsDeleteHaveFieldsToNull
+      ),
+  }),
+];
 
 module.exports = {
   email,
@@ -88,5 +121,5 @@ module.exports = {
   roles,
   isAPluginName,
   arrayOfConditionNames,
-  updatePermissions,
+  updatePermissionsValidators,
 };
