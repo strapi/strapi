@@ -23,9 +23,13 @@ const { buildQuery, buildMutation } = require('./resolvers-builder');
 
 const generateSchema = () => {
   const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
+  const enablePlugins = strapi.plugins.graphql.config.enablePlugins !== false;
 
   // Generate type definition and query/mutation for models.
   const shadowCRUD = shadowCRUDEnabled ? buildModelsShadowCRUD() : createDefaultSchema();
+
+  // Generate type definition and query/mutation for models inside plugins.
+  const pluginCRUD = enablePlugins ? buildPluginModelsShadowCRUD() : createDefaultSchema();
 
   const _schema = strapi.plugins.graphql.config._schema.graphql;
 
@@ -33,23 +37,38 @@ const generateSchema = () => {
   const { definition, query, mutation, resolver = {} } = _schema;
 
   // Polymorphic.
-  const polymorphicSchema = Types.addPolymorphicUnionType(definition + shadowCRUD.definition);
+  const polymorphicSchema = Types.addPolymorphicUnionType(
+    definition + shadowCRUD.definition + pluginCRUD.definition
+  );
 
-  const builtResolvers = _.merge({}, shadowCRUD.resolvers, polymorphicSchema.resolvers);
+  const builtResolvers = _.merge(
+    {},
+    shadowCRUD.resolvers,
+    polymorphicSchema.resolvers,
+    pluginCRUD.resolvers
+  );
 
   const extraResolvers = diffResolvers(_schema.resolver, builtResolvers);
 
   const resolvers = _.merge({}, builtResolvers, buildResolvers(extraResolvers));
 
   // Return empty schema when there is no model.
-  if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
+  if (
+    _.isEmpty(shadowCRUD.definition) &&
+    _.isEmpty(pluginCRUD.definition) &&
+    _.isEmpty(definition)
+  ) {
     return {};
   }
 
   const queryFields = shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
+  const queryPluginFields =
+    pluginCRUD.query && toSDL(pluginCRUD.query, resolver.Query, null, 'query');
 
   const mutationFields =
     shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
+  const mutationPluginFields =
+    pluginCRUD.mutation && toSDL(pluginCRUD.mutation, resolver.Mutation, null, 'mutation');
 
   const scalars = Types.getScalars();
 
@@ -62,24 +81,19 @@ const generateSchema = () => {
   let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
+      ${pluginCRUD.definition}
       ${polymorphicSchema.definition}
 
       ${Types.addInput()}
 
-      type Query {
-        ${queryFields}
-        ${query}
-      }
+      ${combineQueriesOrMutations('Query', queryFields, queryPluginFields, query)}
+      ${combineQueriesOrMutations('Mutation', mutationFields, mutationPluginFields, mutation)}
 
-      type Mutation {
-        ${mutationFields}
-        ${mutation}
-      }
 
       ${scalarDef}
     `;
 
-  // // Build schema.
+  // Build schema.
   if (strapi.config.environment !== 'production') {
     // Write schema.
     const schema = makeExecutableSchema({
@@ -112,16 +126,17 @@ const writeGenerateSchema = schema => {
 const buildModelsShadowCRUD = () => {
   const models = Object.values(strapi.models).filter(model => model.internal !== true);
 
+  const components = Object.values(strapi.components);
+
+  return mergeSchemas(createDefaultSchema(), ...buildModels([...models, ...components]));
+};
+
+const buildPluginModelsShadowCRUD = () => {
   const pluginModels = Object.values(strapi.plugins)
     .map(plugin => Object.values(plugin.models) || [])
     .reduce((acc, arr) => acc.concat(arr), []);
 
-  const components = Object.values(strapi.components);
-
-  return mergeSchemas(
-    createDefaultSchema(),
-    ...buildModels([...models, ...pluginModels, ...components])
-  );
+  return mergeSchemas(createDefaultSchema(), ...buildModels([...pluginModels]));
 };
 
 const buildResolvers = resolvers => {
@@ -156,6 +171,16 @@ const buildResolvers = resolvers => {
       return acc;
     }, acc);
   }, {});
+};
+
+const combineQueriesOrMutations = (type, ...methods) => {
+  methods = methods.join('\n').trim();
+  if (!methods.length) {
+    return '';
+  }
+  return `type ${type} {
+    ${methods}
+  }`;
 };
 
 module.exports = {

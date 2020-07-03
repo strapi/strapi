@@ -67,7 +67,10 @@ module.exports = strapi => {
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const baseSchema = mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas]);
+      const enablePlugins = strapi.plugins.graphql.config.enablePlugins !== false;
+      const baseSchema = enablePlugins
+        ? mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas])
+        : mergeSchemas(apisSchemas);
 
       // save the final schema in the plugin's config
       _.set(strapi, ['plugins', 'graphql', 'config', '_schema', 'graphql'], baseSchema);
