@@ -42,6 +42,7 @@ const generateThumbnail = async file => {
       const { width, height, size } = await getMetadatas(newBuff);
 
       return {
+        name: `thumbnail_${file.name}`,
         hash: `thumbnail_${file.hash}`,
         ext: file.ext,
         mime: file.mime,
@@ -122,6 +123,7 @@ const generateBreakpoint = async (key, { file, breakpoint }) => {
     return {
       key,
       file: {
+        name: `${key}_${file.name}`,
         hash: `${key}_${file.hash}`,
         ext: file.ext,
         mime: file.mime,
