@@ -8,54 +8,40 @@ const pluginPermissions = {
     {
       action: 'plugins::upload.assets.create',
       subject: null,
-      fields: null,
-      conditions: null,
     },
     {
       action: 'plugins::upload.assets.update',
       subject: null,
-      fields: null,
-      conditions: null,
     },
   ],
   copyLink: [
     {
       action: 'plugins::upload.assets.copy-link',
       subject: null,
-      fields: null,
-      conditions: null,
     },
   ],
   create: [
     {
       action: 'plugins::upload.assets.create',
       subject: null,
-      fields: null,
-      conditions: null,
     },
   ],
   download: [
     {
       action: 'plugins::upload.assets.download',
       subject: null,
-      fields: null,
-      conditions: null,
     },
   ],
   read: [
     { action: 'plugins::upload.read', subject: null },
 
-    {
-      action: 'plugins::upload.assets.update',
-      subject: null,
-      fields: null,
-      conditions: null,
-    },
+    // {
+    //   action: 'plugins::upload.assets.update',
+    //   subject: null,
+    // },
   ],
   settings: [{ action: 'plugins::upload.settings.read', subject: null }],
-  update: [
-    { action: 'plugins::upload.assets.update', subject: null, fields: null, conditions: null },
-  ],
+  update: [{ action: 'plugins::upload.assets.update', subject: null, fields: null }],
 };
 
 export default pluginPermissions;
