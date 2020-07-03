@@ -32,14 +32,7 @@ const pluginPermissions = {
       subject: null,
     },
   ],
-  read: [
-    { action: 'plugins::upload.read', subject: null },
-
-    // {
-    //   action: 'plugins::upload.assets.update',
-    //   subject: null,
-    // },
-  ],
+  read: [{ action: 'plugins::upload.read', subject: null }],
   settings: [{ action: 'plugins::upload.settings.read', subject: null }],
   update: [{ action: 'plugins::upload.assets.update', subject: null, fields: null }],
 };
