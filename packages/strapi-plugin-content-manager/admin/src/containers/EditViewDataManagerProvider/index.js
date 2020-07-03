@@ -38,7 +38,8 @@ const EditViewDataManagerProvider = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
   const { push } = useHistory();
-
+  // Here in case of a 403 response when fetching data we will either redirect to the previous page
+  // Or to the homepage if there's no state in the history stack
   const from = get(state, 'from', '/');
   const {
     formErrors,
@@ -51,6 +52,7 @@ const EditViewDataManagerProvider = ({
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+  // This is used for the readonly mode when updating an entry
   const allDynamicZoneFields = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
 
@@ -96,7 +98,6 @@ const EditViewDataManagerProvider = ({
       return false;
     }
 
-    // if (isCreatingEntry && canCreate === false) {
     if (canCreate === false) {
       return true;
     }

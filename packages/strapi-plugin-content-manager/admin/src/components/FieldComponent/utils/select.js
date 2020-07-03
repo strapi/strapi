@@ -24,11 +24,13 @@ function useSelect({ isFromDynamicZone, name }) {
   }, [name]);
 
   const hasChildrenAllowedFields = useMemo(() => {
-    if (isFromDynamicZone) {
+    if (isFromDynamicZone && isCreatingEntry) {
       return true;
     }
 
-    if (allDynamicZoneFields.includes(compoName[0])) {
+    const includedDynamicZoneFields = allowedFields.filter(name => name === compoName[0]);
+
+    if (includedDynamicZoneFields.length > 0) {
       return true;
     }
 
@@ -47,8 +49,9 @@ function useSelect({ isFromDynamicZone, name }) {
       });
 
     return relatedChildrenAllowedFields.length > 0;
-  }, [isFromDynamicZone, allDynamicZoneFields, compoName, allowedFields]);
+  }, [isFromDynamicZone, isCreatingEntry, allowedFields, compoName]);
 
+  // This is used only when updating an entry
   const hasChildrenReadableFields = useMemo(() => {
     if (isFromDynamicZone) {
       return true;
