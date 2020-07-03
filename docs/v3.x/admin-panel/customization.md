@@ -8,43 +8,21 @@ To apply your changes you need to [rebuild](#build) your admin panel
 
 ## Change access URL
 
-By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path.
+By default, the administration panel is exposed on [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path.
 
 **Path —** `./config/server.js`.
 
 ```js
-module.exports = {
-  host: 'localhost',
-  port: 1337,
-  cron: {
-    enabled: false,
-  },
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
   admin: {
     url: '/dashboard',
   },
 };
 ```
 
-The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
-
-## Change the host
-
-By default, the administration panel client host name is `localhost`. However, you can change this setting by updating the `admin` configuration:
-
-**Path —** `./config/server.js`.
-
-```js
-module.exports = {
-  host: 'localhost',
-  port: 1337,
-  cron: {
-    enabled: false,
-  },
-  admin: {
-    host: 'my-host',
-  },
-};
-```
+The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configuration above.
 
 ## Development mode
 
@@ -72,7 +50,7 @@ touch admin/src/i18n.js
 touch admin/src/translations/index.js
 ```
 
-**Path --** `my-app/admin/src/translations/index.js`
+**Path -** `my-app/admin/src/translations/index.js`
 
 ```js
 import en from './en.json';
@@ -92,7 +70,7 @@ With this modification only English and French will be available in your admin
 
 ### Customize a plugin
 
-Similarly to the back-end override system any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
+Similarly to the back-end override system, any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
 
 **Example: Changing the current WYSIWYG**
 
@@ -108,7 +86,7 @@ cd admin/src && mkdir -p components/WysiwygWithErrors
 touch components/WysiwygWithErrors/index.js
 ```
 
-**Path --** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
+**Path -** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
 
 ```js
 import React from 'react';
@@ -154,21 +132,19 @@ export const SHOW_TUTORIALS = false;
 export const SETTINGS_BASE_URL = '/settings';
 ```
 
-### Changing the port
+### Changing the host and port
 
-By default, the front-development server runs on the `8000` port. However, you can change this setting by updating the following configuration:
+By default, the front-development server runs on `localhost:8000`. However, you can change this setting by updating the following configuration:
 
 **Path —** `./config/server.js`.
 
 ```js
-module.exports = {
-  host: 'localhost',
-  port: 1337,
-  cron: {
-    enabled: false,
-  },
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
   admin: {
-    port: 3000,
+    host: 'my-host', // only used along with `strapi develop --watch-admin` command
+    port: 3000, // only used along with `strapi develop --watch-admin` command
   },
 };
 ```

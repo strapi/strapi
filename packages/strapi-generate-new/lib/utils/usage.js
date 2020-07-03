@@ -93,7 +93,7 @@ function trackUsage({ event, scope, error }) {
         node_version: process.version,
         version: scope.strapiVersion,
         docker: scope.docker,
-        useYarn: scope.useYarn,
+        useYarn: scope.useYarn.toString(),
       },
     });
   } catch (err) {
