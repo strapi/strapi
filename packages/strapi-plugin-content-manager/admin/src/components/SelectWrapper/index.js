@@ -34,6 +34,8 @@ function SelectWrapper({
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
   const { isDraggingComponent } = useEditView();
+
+  // This is needed for making requests when used in a component
   const fieldName = useMemo(() => {
     const fieldNameArray = getFieldName(name);
 
@@ -82,8 +84,6 @@ function SelectWrapper({
 
     if (!isDraggingComponent) {
       try {
-        // const requestUrl = `/${pluginId}/explorer/${targetModel}`;
-
         const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
 
         const containsKey = `${mainField}_contains`;
