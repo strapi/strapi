@@ -5,7 +5,10 @@
       "path": "/plugins",
       "handler": "Admin.plugins",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::marketplace.read"]]
+        ]
       }
     },
     {
@@ -17,17 +20,19 @@
       "method": "POST",
       "path": "/plugins/install",
       "handler": "Admin.installPlugin",
-      "config": {
-        "policies": []
-      }
+      "policies": [
+        "admin::isAuthenticatedAdmin",
+        ["admin::hasPermissions", ["admin::marketplace.plugins.install"]]
+      ]
     },
     {
       "method": "DELETE",
       "path": "/plugins/uninstall/:plugin",
       "handler": "Admin.uninstallPlugin",
-      "config": {
-        "policies": []
-      }
+      "policies": [
+        "admin::isAuthenticatedAdmin",
+        ["admin::hasPermissions", ["admin::marketplace.plugins.uninstall"]]
+      ]
     },
     {
       "method": "POST",
@@ -69,7 +74,10 @@
       "path": "/webhooks",
       "handler": "Webhooks.listWebhooks",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::webhooks.read"]]
+        ]
       }
     },
     {
@@ -77,7 +85,10 @@
       "path": "/webhooks",
       "handler": "Webhooks.createWebhook",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::webhooks.create"]]
+        ]
       }
     },
     {
@@ -85,7 +96,10 @@
       "path": "/webhooks/:id",
       "handler": "Webhooks.getWebhook",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::webhooks.read"]]
+        ]
       }
     },
     {
@@ -93,7 +107,10 @@
       "path": "/webhooks/:id",
       "handler": "Webhooks.updateWebhook",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::webhooks.update"]]
+        ]
       }
     },
     {
@@ -101,7 +118,10 @@
       "path": "/webhooks/:id",
       "handler": "Webhooks.deleteWebhook",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::webhooks.delete"]]
+        ]
       }
     },
     {
@@ -109,7 +129,10 @@
       "path": "/webhooks/batch-delete",
       "handler": "Webhooks.deleteWebhooks",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::webhooks.delete"]]
+        ]
       }
     },
     {
@@ -147,34 +170,66 @@
     {
       "method": "POST",
       "path": "/users",
-      "handler": "user.create"
+      "handler": "user.create",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::users.create"]]
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/users",
-      "handler": "user.find"
+      "handler": "user.find",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::users.read"]]
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/users/:id",
-      "handler": "user.findOne"
+      "handler": "user.findOne",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::users.read"]]
+        ]
+      }
     },
     {
       "method": "PUT",
       "path": "/users/:id",
-      "handler": "user.update"
+      "handler": "user.update",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::users.update"]]
+        ]
+      }
     },
     {
       "method": "DELETE",
       "path": "/users/:id",
-      "handler": "user.delete"
+      "handler": "user.delete",
+      "config": {
+        "policies": [
+          ["admin::hasPermissions", ["admin::users.delete"]]
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/roles/:id/permissions",
       "handler": "role.getPermissions",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::roles.read"]]
+        ]
       }
     },
     {
@@ -182,7 +237,10 @@
       "path": "/roles/:id/permissions",
       "handler": "role.updatePermissions",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::roles.update"]]
+        ]
       }
     },
     {
@@ -190,7 +248,10 @@
       "path": "/roles/:id",
       "handler": "role.findOne",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::roles.read"]]
+        ]
       }
     },
     {
@@ -198,7 +259,10 @@
       "path": "/roles",
       "handler": "role.findAll",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::roles.read"]]
+        ]
       }
     },
     {
@@ -206,7 +270,10 @@
       "path": "/roles/:id",
       "handler": "role.update",
       "config": {
-        "policies": []
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::roles.update"]]
+        ]
       }
     },
     {
@@ -214,7 +281,7 @@
       "path": "/permissions",
       "handler": "permission.getAll",
       "config": {
-        "policies": []
+        "policies": ["admin::isAuthenticatedAdmin"]
       }
     },
     {
