@@ -2,8 +2,8 @@ import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
 
 const schema = {
-  firstname: yup.string().required(translatedErrors.required),
-  lastname: yup.string().required(translatedErrors.required),
+  firstname: yup.mixed().required(translatedErrors.required),
+  lastname: yup.mixed().required(translatedErrors.required),
   email: yup
     .string()
     .email(translatedErrors.email)
