@@ -16,7 +16,7 @@ const allowedOperations = [
   '$gt',
   '$gte',
   '$exists',
-  '$elemMatch,',
+  '$elemMatch',
 ];
 const operations = _.pick(sift, allowedOperations);
 
