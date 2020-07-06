@@ -12,7 +12,7 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'http://localhost:1338'; // https://analytics.strapi.io
+const ANALYTICS_URI = 'https://analytics.strapi.io';
 
 /**
  * Create a send function for event with all the necessary metadatas
