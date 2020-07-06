@@ -9,8 +9,11 @@ const PermissionCheckbox = styled(Checkbox)`
   position: relative;
   input[type='checkbox'] {
     z-index: 10;
+    &:after {
+      color: ${({ theme }) => theme.main.colors.mediumBlue};
+    }
   }
-  ${({ hasConditions, theme }) =>
+  ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
     `
     &:before {
@@ -18,14 +21,16 @@ const PermissionCheckbox = styled(Checkbox)`
       position: absolute;
       top: -9px;
       left: -8px;
-      color: ${theme.main.colors.mediumBlue};
+      color: ${disabled ? theme.main.colors.grey : theme.main.colors.mediumBlue};
     }
   `}
   ${({ disabled, theme }) =>
+    disabled &&
     `
     input[type='checkbox'] {
         &:after {
-          color: ${!disabled ? theme.main.colors.mediumBlue : theme.main.colors.grey};
+          cursor: default;
+          color: ${theme.main.colors.grey};
         }
       }
     `}

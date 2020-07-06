@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import styled from 'styled-components';
 
@@ -60,6 +61,19 @@ const Ul = styled.ul`
       }
     }
   }
+  ${({ disabled, theme }) =>
+    disabled &&
+    `
+    label {
+      cursor: default !important;
+    }
+    input[type='checkbox'] {
+      &:after {
+        cursor: default;
+        color: ${theme.main.colors.grey};
+      }
+    }
+  `}
 `;
 
 export default Ul;
