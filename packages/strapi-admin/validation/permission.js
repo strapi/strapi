@@ -54,7 +54,7 @@ const checkPermissionsAreBound = function(permissions) {
 };
 
 const updatePermissionsSchemas = [
-  ...validators.updatePermissionsValidators,
+  validators.updatePermissions,
   yup.object().shape({
     permissions: yup
       .array()
