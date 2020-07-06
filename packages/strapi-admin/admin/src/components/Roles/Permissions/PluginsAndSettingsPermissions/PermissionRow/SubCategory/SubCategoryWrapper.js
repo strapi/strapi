@@ -3,10 +3,6 @@ import styled from 'styled-components';
 
 const SubCategoryWrapper = styled.div`
   padding-bottom: 0.8rem;
-  label {
-    cursor: default !important;
-    color: ${({ theme }) => theme.main.colors.mediumBlue};
-  }
   input[type='checkbox'] {
     &:after {
       color: ${({ theme }) => theme.main.colors.mediumBlue};
