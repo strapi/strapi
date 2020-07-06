@@ -145,7 +145,7 @@ const SubCategory = ({ subCategory }) => {
         <Padded top size="xs">
           <Flex flexWrap="wrap">
             {subCategory.actions.map(sc => (
-              <CheckboxWrapper hasConditions={checkCategory(sc.action)} key={sc.action}>
+              <CheckboxWrapper disabled hasConditions={checkCategory(sc.action)} key={sc.action}>
                 <Checkbox
                   value={checkPermission(sc.action)}
                   name={sc.action}
@@ -156,7 +156,7 @@ const SubCategory = ({ subCategory }) => {
               </CheckboxWrapper>
             ))}
           </Flex>
-          <ConditionsButtonWrapper hasConditions={hasCategoryConditions}>
+          <ConditionsButtonWrapper disabled hasConditions={hasCategoryConditions}>
             <ConditionsButton hasConditions={hasCategoryConditions} onClick={handleModalOpen} />
           </ConditionsButtonWrapper>
         </Padded>

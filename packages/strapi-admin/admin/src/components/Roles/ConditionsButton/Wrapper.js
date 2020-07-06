@@ -11,7 +11,7 @@ const Wrapper = styled.div`
     position: absolute;
     right: 5rem;
   `}
-  ${({ hasConditions, theme }) =>
+  ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
     `
     &:before {
@@ -20,7 +20,7 @@ const Wrapper = styled.div`
       top: -4px;
       left: -15px;
       font-size: 18px;
-      color: ${theme.main.colors.mediumBlue};
+      color: ${disabled ? theme.main.colors.grey : theme.main.colors.mediumBlue};
     }
   `}
 `;

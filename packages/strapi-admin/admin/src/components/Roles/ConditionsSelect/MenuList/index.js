@@ -52,7 +52,7 @@ const MenuList = ({ selectProps, ...rest }) => {
 
   return (
     <Component {...rest}>
-      <Ul>
+      <Ul disabled>
         {Object.entries(optionsGroupByCategory).map((category, index) => {
           return (
             <li key={category[0]}>

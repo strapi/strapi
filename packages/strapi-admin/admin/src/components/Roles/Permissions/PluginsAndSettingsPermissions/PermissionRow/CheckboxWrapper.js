@@ -6,7 +6,7 @@ const CheckboxWrapper = styled.div`
   padding: 0.9rem;
   height: 3.6rem;
   position: relative;
-  ${({ hasConditions, theme }) =>
+  ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
     `
     &:before {
@@ -14,7 +14,7 @@ const CheckboxWrapper = styled.div`
       position: absolute;
       top: 2px;
       left: 0px;
-      color: ${theme.main.colors.mediumBlue};
+      color: ${disabled ? theme.main.colors.grey : theme.main.colors.mediumBlue};
     }
   `}
 `;
