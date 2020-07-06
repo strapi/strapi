@@ -32,17 +32,6 @@ module.exports = {
     }
   },
 
-  async deleteProvider(ctx) {
-    const { provider } = ctx.params;
-
-    if (!provider) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
-    }
-
-    // TODO handle dynamic
-    ctx.send({ ok: true });
-  },
-
   async deleteRole(ctx) {
     // Fetch public role.
     const publicRole = await strapi.query('role', 'users-permissions').findOne({ type: 'public' });
