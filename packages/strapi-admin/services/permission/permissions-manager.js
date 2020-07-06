@@ -6,7 +6,7 @@ const { permittedFieldsOf, rulesToQuery } = require('@casl/ability/extra');
 const { VALID_REST_OPERATORS, sanitizeEntity } = require('strapi-utils');
 
 const ops = {
-  common: VALID_REST_OPERATORS,
+  common: VALID_REST_OPERATORS.map(op => `$${op}`),
   boolean: ['$or'],
   cleanable: ['$elemMatch'],
 };
@@ -102,14 +102,23 @@ const flattenDeep = condition => {
 };
 
 const cleanupUnwantedProperties = condition => {
+  if (!_.isObject(condition)) {
+    return condition;
+  }
+
   const shouldClean = e => ops.cleanable.find(o => e.includes(`.${o}`));
 
   return _.reduce(
     condition,
-    (acc, value, key) => ({
-      ...acc,
-      [shouldClean(key) ? key.split(`.${shouldClean(key)}`).join('') : key]: value,
-    }),
+    (acc, value, key) => {
+      const keyToClean = shouldClean(key);
+      const newKey = keyToClean ? key.split(`.${keyToClean}`).join('') : key;
+
+      return {
+        ...acc,
+        [newKey]: _.isArray(value) ? value.map(cleanupUnwantedProperties) : value,
+      };
+    },
     {}
   );
 };
