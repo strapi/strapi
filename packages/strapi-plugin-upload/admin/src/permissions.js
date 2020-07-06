@@ -7,11 +7,11 @@ const pluginPermissions = {
     { action: 'plugins::upload.read', subject: null },
     {
       action: 'plugins::upload.assets.create',
-      subject: null,
+      subject: 'plugins::upload.file',
     },
     {
       action: 'plugins::upload.assets.update',
-      subject: null,
+      subject: 'plugins::upload.file',
     },
   ],
   copyLink: [
@@ -23,7 +23,7 @@ const pluginPermissions = {
   create: [
     {
       action: 'plugins::upload.assets.create',
-      subject: null,
+      subject: 'plugins::upload.file',
     },
   ],
   download: [
@@ -34,7 +34,9 @@ const pluginPermissions = {
   ],
   read: [{ action: 'plugins::upload.read', subject: null }],
   settings: [{ action: 'plugins::upload.settings.read', subject: null }],
-  update: [{ action: 'plugins::upload.assets.update', subject: null, fields: null }],
+  update: [
+    { action: 'plugins::upload.assets.update', subject: 'plugins::upload.file', fields: null },
+  ],
 };
 
 export default pluginPermissions;
