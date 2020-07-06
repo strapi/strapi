@@ -5,6 +5,7 @@ import { get, isEmpty } from 'lodash';
 import { useGlobalContext, auth } from 'strapi-helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
+import PropTypes from 'prop-types';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -15,7 +16,7 @@ import { useUsersForm } from '../../../hooks';
 import { editValidation } from '../../../validations/users';
 import form from './utils/form';
 
-const EditPage = () => {
+const EditPage = ({ canUpdate }) => {
   const { settingsBaseURL } = useGlobalContext();
   const { formatMessage } = useIntl();
   const {
@@ -92,6 +93,7 @@ const EditPage = () => {
                 <SizedInput
                   {...form[key]}
                   key={key}
+                  disabled={!canUpdate}
                   error={formErrors[key]}
                   name={key}
                   onChange={handleChange}
@@ -110,6 +112,7 @@ const EditPage = () => {
                   <Padded top size="sm">
                     <SelectRoles
                       name="roles"
+                      isDisabled={!canUpdate}
                       onChange={handleChange}
                       error={formErrors.roles}
                       value={get(modifiedData, 'roles', [])}
@@ -125,6 +128,10 @@ const EditPage = () => {
       </form>
     </>
   );
+};
+
+EditPage.propTypes = {
+  canUpdate: PropTypes.bool.isRequired,
 };
 
 export default EditPage;

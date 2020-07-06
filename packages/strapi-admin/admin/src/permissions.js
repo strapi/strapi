@@ -40,8 +40,9 @@ const permissions = {
       delete: [{ action: 'admin::users.delete', subject: null }],
       read: [
         { action: 'admin::users.read', subject: null },
-        { action: 'admin::users.update', subject: null },
-        { action: 'admin::users.delete', subject: null },
+        // NOTE: leaving this commented on purpose
+        // { action: 'admin::users.update', subject: null },
+        // { action: 'admin::users.delete', subject: null },
       ],
       update: [{ action: 'admin::users.update', subject: null }],
     },

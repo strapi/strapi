@@ -101,6 +101,9 @@ const List = forwardRef(
           className="table-wrapper"
           isLoading={isLoading}
           headers={headers}
+          onClickRow={(e, data) => {
+            handleClick(data.id);
+          }}
           onSelect={handleChange}
           onSelectAll={handleChangeAll}
           rows={rows}
