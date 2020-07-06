@@ -13,6 +13,7 @@ const fp = require('lodash/fp');
  * @param {object} options.requiredOnly only returns required nestedFields
  * @param {object} options.existingFields fields that are already selected, meaning that some sub-fields may be required
  * @returns {array<string>}
+ * @param model
  */
 const getNestedFields = (
   model,
@@ -104,24 +105,30 @@ const getNestedFieldsWithIntermediate = (
  * @param {object} options
  * @param {number} options.nestingLevel level of nesting
  * @param {array} options.fieldsNullFor actionIds where the fields should be null
+ * @param {array} options.restrictedSubjects subjectsId to ignore
  * @returns {array<permissions>}
  */
-const getPermissionsWithNestedFields = (actions, { nestingLevel, fieldsNullFor = [] } = {}) =>
+const getPermissionsWithNestedFields = (
+  actions,
+  { nestingLevel, fieldsNullFor = [], restrictedSubjects = [] } = {}
+) =>
   actions.reduce((perms, action) => {
-    action.subjects.forEach(contentTypeUid => {
-      const fields = fieldsNullFor.includes(action.actionId)
-        ? null
-        : getNestedFields(strapi.contentTypes[contentTypeUid], {
-            components: strapi.components,
-            nestingLevel,
-          });
-      perms.push({
-        action: action.actionId,
-        subject: contentTypeUid,
-        fields,
-        conditions: [],
+    action.subjects
+      .filter(subject => !restrictedSubjects.includes(subject))
+      .forEach(contentTypeUid => {
+        const fields = fieldsNullFor.includes(action.actionId)
+          ? null
+          : getNestedFields(strapi.contentTypes[contentTypeUid], {
+              components: strapi.components,
+              nestingLevel,
+            });
+        perms.push({
+          action: action.actionId,
+          subject: contentTypeUid,
+          fields,
+          conditions: [],
+        });
       });
-    });
     return perms;
   }, []);
 

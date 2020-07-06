@@ -36,6 +36,7 @@ const create = async attributes => {
 /**
  * Find a role in database
  * @param params query params to find the role
+ * @param populate
  * @returns {Promise<role>}
  */
 const findOne = (params = {}, populate = []) => {
@@ -45,14 +46,14 @@ const findOne = (params = {}, populate = []) => {
 /**
  * Find a role in database with usersCounts
  * @param params query params to find the role
+ * @param populate
  * @returns {Promise<role>}
  */
 const findOneWithUsersCount = async (params = {}, populate = []) => {
   const role = await strapi.query('role', 'admin').findOne(params, populate);
 
   if (role) {
-    const usersCounts = await getUsersCount(role.id);
-    role.usersCount = usersCounts;
+    role.usersCount = await getUsersCount(role.id);
   }
 
   return role;
@@ -61,6 +62,7 @@ const findOneWithUsersCount = async (params = {}, populate = []) => {
 /**
  * Find roles in database
  * @param params query params to find the roles
+ * @param populate
  * @returns {Promise<array>}
  */
 const find = (params = {}, populate = []) => {
@@ -74,8 +76,7 @@ const find = (params = {}, populate = []) => {
 const findAllWithUsersCount = async (populate = []) => {
   const roles = await strapi.query('role', 'admin').find({ _limit: -1 }, populate);
   for (let role of roles) {
-    const usersCount = await getUsersCount(role.id);
-    role.usersCount = usersCount;
+    role.usersCount = await getUsersCount(role.id);
   }
 
   return roles;
@@ -152,8 +153,8 @@ const deleteByIds = async (ids = []) => {
 };
 
 /** Count the number of users for some roles
- * @param rolesIds
  * @returns {Promise<integer>}
+ * @param roleId
  */
 const getUsersCount = async roleId => {
   return strapi.query('user', 'admin').count({ roles: [roleId] });
@@ -207,6 +208,7 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
     contentTypesActions,
     {
       fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+      restrictedSubjects: ['plugins::users-permissions.user'],
     }
   );
 
