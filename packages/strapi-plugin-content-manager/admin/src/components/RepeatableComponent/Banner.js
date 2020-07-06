@@ -37,6 +37,7 @@ const Banner = forwardRef(
         hasErrors={hasErrors}
         isFirst={isFirst}
         isOpen={isOpen}
+        isReadOnly={isReadOnly}
         onClick={onClickToggle}
         ref={refs ? refs.dropRef : null}
         style={style}

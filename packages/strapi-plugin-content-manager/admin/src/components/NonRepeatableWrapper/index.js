@@ -1,5 +1,21 @@
 import styled from 'styled-components';
 
+const hoverStyle = `
+  border: 1px solid #aed4fb;
+  background-color: #e6f0fb;
+  > button {
+    :before,
+    :after {
+      background-color: #007eff;
+    }
+    background-color: #aed4fb;
+  }
+
+  > p {
+    color: #007eff;
+  }
+`;
+
 /* eslint-disable indent */
 const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
@@ -30,19 +46,7 @@ const NonRepeatableWrapper = styled.div`
       border: 1px solid transparent;
 
       &:hover {
-        border: 1px solid #aed4fb;
-        background-color: #e6f0fb;
-        > button {
-          :before,
-          :after {
-            background-color: #007eff;
-          }
-          background-color: #aed4fb;
-        }
-
-        > p {
-          color: #007eff;
-        }
+        ${isReadOnly ? '' : hoverStyle};
       }
     `;
     }

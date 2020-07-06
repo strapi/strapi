@@ -180,7 +180,7 @@ const DraggedItem = ({
         onExited={() => setShowForm(false)}
       >
         {!isDragging && (
-          <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
+          <FormWrapper hasErrors={hasErrors} isOpen={isOpen} isReadOnly={isReadOnly}>
             {showForm &&
               fields.map((fieldRow, key) => {
                 return (
