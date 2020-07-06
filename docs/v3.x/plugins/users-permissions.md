@@ -778,3 +778,27 @@ module.exports = {
 ::: tip
 You can learn more on configuration in the documentation [here](../concepts/configurations.md)
 :::
+
+## Custom providers subdomain configuration
+
+Some external Identity providers like AWS Cognito will require you to provide the link to the IDP host url (e.g. your_idp_name.auth.eu-central-1.amazoncognito.com) so that you can access the IDP login page using `htts://your_strapi_url/connect/your_custom_provider_name`. In order to do that you will have to add the following property `customProviderHost` in your config > server.js file:
+
+```js
+module.exports = ({
+  env
+}) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
+  customProviderHost: 'your_idp_name.auth.eu-central-1.amazoncognito.com', // add this property to configure the subdomain property for your custom provider
+  admin: {
+    autoOpen: false,
+    url: '/adminpanel'
+  },
+  proxy: {
+    enabled: false
+  },
+  cron: {
+    enabled: false
+  }
+})
+```
