@@ -21,7 +21,7 @@
       "path": "/content-types/:uid",
       "handler": "ContentTypes.updateContentType",
       "config": {
-        "policies": []
+        "policies": ["admin::isAuthenticatedAdmin"]
       }
     },
     {
