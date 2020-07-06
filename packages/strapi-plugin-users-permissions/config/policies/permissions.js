@@ -16,7 +16,7 @@ module.exports = async (ctx, next) => {
       if (isAdmin) {
         ctx.state.admin = await strapi.query('administrator', 'admin').findOne({ id }, []);
       } else {
-        ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ id }, ['role']);
+        ctx.state.user = await strapi.plugins['users-permissions'].services.user.fetch({ id });
       }
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
