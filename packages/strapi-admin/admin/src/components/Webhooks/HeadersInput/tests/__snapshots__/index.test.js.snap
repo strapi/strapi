@@ -26,6 +26,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
 
 .c2:disabled {
   background-color: #FAFAFB;
+  cursor: not-allowed;
 }
 
 .c1 {
