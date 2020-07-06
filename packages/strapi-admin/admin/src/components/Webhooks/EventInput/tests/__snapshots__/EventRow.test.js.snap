@@ -157,12 +157,14 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   <td>
     <div
       className="c0"
+      disabled={false}
     >
       <input
         autoComplete="off"
         autoFocus={false}
         checked={false}
         className="c1"
+        disabled={false}
         id="events"
         name="events"
         onChange={[Function]}
@@ -181,6 +183,7 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   <td>
     <div
       className="c0"
+      disabled={false}
     >
       <input
         autoComplete="off"
@@ -204,6 +207,7 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   <td>
     <div
       className="c0"
+      disabled={false}
     >
       <input
         autoComplete="off"
@@ -227,6 +231,7 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   <td>
     <div
       className="c0"
+      disabled={false}
     >
       <input
         autoComplete="off"

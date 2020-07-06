@@ -262,12 +262,14 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
               autoFocus={false}
               checked={false}
               className="c2"
+              disabled={false}
               id="entry"
               name="entry"
               onChange={[Function]}
@@ -286,6 +288,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
@@ -309,6 +312,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
@@ -332,6 +336,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
@@ -357,12 +362,14 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
               autoFocus={false}
               checked={false}
               className="c4"
+              disabled={false}
               id="media"
               name="media"
               onChange={[Function]}
@@ -381,6 +388,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
@@ -404,6 +412,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"
@@ -427,6 +436,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
         <td>
           <div
             className="c1"
+            disabled={false}
           >
             <input
               autoComplete="off"

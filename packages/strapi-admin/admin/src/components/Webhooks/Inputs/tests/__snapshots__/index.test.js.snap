@@ -296,12 +296,14 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
                 className="c4"
+                disabled={false}
                 id="entry"
                 name="entry"
                 onChange={[Function]}
@@ -320,6 +322,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
@@ -343,6 +346,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
@@ -366,6 +370,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
@@ -391,12 +396,14 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
                 className="c5"
+                disabled={false}
                 id="media"
                 name="media"
                 onChange={[Function]}
@@ -415,6 +422,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
@@ -438,6 +446,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
@@ -461,6 +470,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           <td>
             <div
               className="c3"
+              disabled={false}
             >
               <input
                 autoComplete="off"
@@ -520,6 +530,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 
 .c4:disabled {
   background-color: #FAFAFB;
+  cursor: not-allowed;
 }
 
 .c3 {
