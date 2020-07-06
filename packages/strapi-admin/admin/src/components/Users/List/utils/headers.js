@@ -4,8 +4,7 @@ import ActiveStatus from '../ActiveStatus';
 const headers = [
   {
     cellFormatter: (cellData, rowData) => {
-      // eslint-disable-next-line no-extra-boolean-cast
-      if (!!cellData) {
+      if (!cellData) {
         return '-';
       }
 

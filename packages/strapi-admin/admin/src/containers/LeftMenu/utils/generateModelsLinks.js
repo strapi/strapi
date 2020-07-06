@@ -1,4 +1,4 @@
-import { chain } from 'lodash';
+import { chain, get } from 'lodash';
 
 const generateLinks = links => {
   return links
@@ -26,8 +26,8 @@ const generateModelsLinks = models => {
     .value();
 
   return {
-    collectionTypesSectionLinks: generateLinks(collectionTypes.links),
-    singleTypesSectionLinks: generateLinks(singleTypes.links),
+    collectionTypesSectionLinks: generateLinks(get(collectionTypes, 'links', [])),
+    singleTypesSectionLinks: generateLinks(get(singleTypes, 'links', [])),
   };
 };
 

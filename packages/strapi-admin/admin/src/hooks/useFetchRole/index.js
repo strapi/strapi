@@ -35,6 +35,8 @@ const useFetchRole = id => {
         permissions: formatPermissionsFromApi(permissions),
       });
     } catch (err) {
+      console.error(err);
+
       dispatch({
         type: 'GET_DATA_ERROR',
       });

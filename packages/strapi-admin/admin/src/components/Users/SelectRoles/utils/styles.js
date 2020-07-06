@@ -16,6 +16,7 @@ const styles = {
 
     let border;
     let borderBottom;
+    let backgroundColor;
 
     if (state.isFocused) {
       border = '1px solid #78caff !important';
@@ -29,6 +30,10 @@ const styles = {
       borderBottom = '1px solid #e3e9f3 !important';
     }
 
+    if (state.isDisabled) {
+      backgroundColor = '#fafafb !important';
+    }
+
     return {
       ...base,
       fontSize: 13,
@@ -39,6 +44,7 @@ const styles = {
       borderRadius: '2px !important',
       ...borderRadiusStyle,
       borderBottom,
+      backgroundColor,
     };
   },
   menu: base => {

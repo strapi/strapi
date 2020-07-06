@@ -30,10 +30,13 @@ const useRolesList = (shouldFetchData = true) => {
     } catch (err) {
       const message = get(err, ['response', 'payload', 'message'], 'An error occured');
 
-      strapi.notification.error(message);
       dispatch({
         type: 'GET_DATA_ERROR',
       });
+
+      if (message !== 'Forbidden') {
+        strapi.notification.error(message);
+      }
     }
   };
 
