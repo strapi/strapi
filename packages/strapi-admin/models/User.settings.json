@@ -60,6 +60,11 @@
       "dominant": true,
       "plugin": "admin",
       "configurable": false
+    },
+    "blocked": {
+      "type": "boolean",
+      "default": false,
+      "configurable": false
     }
   }
 }
