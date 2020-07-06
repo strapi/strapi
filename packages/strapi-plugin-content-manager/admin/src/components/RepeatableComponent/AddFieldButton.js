@@ -35,7 +35,7 @@ const Button = styled.button`
     return '';
   }}
 
-  color: #007eff;
+  color: ${({ disabled }) => (disabled ? '#9EA7B8' : ' #007eff')};
   font-size: 12px;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
@@ -56,5 +56,9 @@ const Button = styled.button`
     margin-top: -18px;
   }
 `;
+
+Button.defaultProps = {
+  disabled: false,
+};
 
 export default Button;
