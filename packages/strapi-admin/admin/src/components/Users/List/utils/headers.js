@@ -4,6 +4,10 @@ import ActiveStatus from '../ActiveStatus';
 const headers = [
   {
     cellFormatter: (cellData, rowData) => {
+      if (cellData === null) {
+        return '-';
+      }
+
       return `${cellData} ${rowData.lastname}`;
     },
     name: 'name',

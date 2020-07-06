@@ -50,9 +50,7 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
               e.preventDefault();
               e.stopPropagation();
 
-              if (canUpdate) {
-                handleGoTo(row.id);
-              }
+              handleGoTo(row.id);
             }}
           >
             <Row
