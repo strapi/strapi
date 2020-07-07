@@ -149,7 +149,7 @@ const getPermissionsWithNestedFields = (
 const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }) =>
   permissions.map(perm => {
     let newFields = perm.fields;
-    if (fieldsNullFor.includes(perm.actionId)) {
+    if (fieldsNullFor.includes(perm.action)) {
       newFields = null;
     } else if (perm.subject && strapi.contentTypes[perm.subject]) {
       const possiblefields = getNestedFieldsWithIntermediate(strapi.contentTypes[perm.subject], {
