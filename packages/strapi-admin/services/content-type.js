@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const fp = require('lodash/fp');
 
+const EXCLUDE_FIELDS = ['created_by', 'updated_by'];
+
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
  * @param {string} model model used to get the nested fields
@@ -26,6 +28,8 @@ const getNestedFields = (
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
+      if (EXCLUDE_FIELDS.includes(key)) return fields;
+
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       const requiredOrNotNeeded = !requiredOnly || attr.required === true;
       const insideExistingFields = existingFields && existingFields.some(fp.startsWith(fieldPath));
@@ -80,6 +84,8 @@ const getNestedFieldsWithIntermediate = (
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
+      if (EXCLUDE_FIELDS.includes(key)) return fields;
+
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       fields.push(fieldPath);
 
