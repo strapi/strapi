@@ -74,7 +74,7 @@ const EditorWrapper = styled.div`
     font-size: 13px;
     background-color: #fff;
     line-height: 18px !important;
-    cursor: text;
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'text')};
     overflow: auto;
 
     h1,
