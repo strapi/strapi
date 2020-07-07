@@ -67,7 +67,7 @@ Object {
       },
       Object {
         "action": "plugins::documentation.read",
-        "displayName": "Can access to the Documentation",
+        "displayName": "Access the Documentation",
         "plugin": "plugin::documentation",
         "subCategory": "general",
       },
@@ -109,7 +109,7 @@ Object {
       },
       Object {
         "action": "plugins::upload.read",
-        "displayName": "Can access to the Media Library",
+        "displayName": "Access the Media Library",
         "plugin": "plugin::upload",
         "subCategory": "general",
       },
@@ -190,7 +190,7 @@ Object {
       Object {
         "action": "admin::marketplace.read",
         "category": "plugins and marketplace",
-        "displayName": "Can access to the marketplace",
+        "displayName": "Access the marketplace",
         "subCategory": "marketplace",
       },
       Object {
@@ -268,7 +268,7 @@ Object {
       Object {
         "action": "plugins::upload.settings.read",
         "category": "media library",
-        "displayName": "Can access the Media Library settings page",
+        "displayName": "Access the Media Library settings page",
         "subCategory": "general",
       },
     ],

@@ -140,7 +140,7 @@ export const permissionsLayout = {
         plugin: 'plugin::content-type-builder',
       },
       {
-        displayName: 'Can access to the Documentation',
+        displayName: 'Access the Documentation',
         action: 'plugins::documentation.read',
         subCategory: 'general',
         plugin: 'plugin::documentation',
@@ -158,7 +158,7 @@ export const permissionsLayout = {
         plugin: 'plugin::documentation',
       },
       {
-        displayName: 'Can access to the Media Library',
+        displayName: 'Access the Media Library',
         action: 'plugins::upload.read',
         subCategory: 'general',
         plugin: 'plugin::upload',
@@ -172,13 +172,13 @@ export const permissionsLayout = {
     ],
     settings: [
       {
-        displayName: 'Can access the Media Library settings page',
+        displayName: 'Access the Media Library settings page',
         action: 'plugins::upload.settings.read',
         category: 'media library',
         subCategory: 'general',
       },
       {
-        displayName: 'Can access to the marketplace',
+        displayName: 'Access the marketplace',
         action: 'admin::marketplace.read',
         category: 'plugins and marketplace',
         subCategory: 'marketplace',

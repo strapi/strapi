@@ -27,7 +27,7 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | formatPermissionsLayout', () => {
             subCategory: 'general',
             actions: [
               {
-                displayName: 'Can access to the Documentation',
+                displayName: 'Access the Documentation',
                 action: 'plugins::documentation.read',
                 subCategory: 'general',
                 plugin: 'plugin::documentation',
@@ -60,7 +60,7 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | formatPermissionsLayout', () => {
             subCategory: 'general',
             actions: [
               {
-                displayName: 'Can access to the Media Library',
+                displayName: 'Access the Media Library',
                 action: 'plugins::upload.read',
                 subCategory: 'general',
                 plugin: 'plugin::upload',
@@ -94,7 +94,7 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | formatPermissionsLayout', () => {
             subCategory: 'general',
             actions: [
               {
-                displayName: 'Can access the Media Library settings page',
+                displayName: 'Access the Media Library settings page',
                 action: 'plugins::upload.settings.read',
                 category: 'media library',
                 subCategory: 'general',
@@ -110,7 +110,7 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | formatPermissionsLayout', () => {
             subCategory: 'marketplace',
             actions: [
               {
-                displayName: 'Can access to the marketplace',
+                displayName: 'Access the marketplace',
                 action: 'admin::marketplace.read',
                 category: 'plugins and marketplace',
                 subCategory: 'marketplace',
