@@ -155,7 +155,12 @@ const Header = () => {
       setDidDeleteEntry(true);
     } catch (err) {
       emitEvent('didNotDeleteEntry', { error: err });
-      strapi.notification.error(`${pluginId}.error.record.delete`);
+      const errorMessage = get(
+        err,
+        'response.payload.message',
+        formatMessage({ id: `${pluginId}.error.record.delete` })
+      );
+      strapi.notification.error(errorMessage);
     } finally {
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
