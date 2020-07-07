@@ -796,7 +796,7 @@ xhr.send(
 
 ## Dynamic Zone
 
-Dynamic Zone fields let you create flexible space, to compose content based on a component list inside of.
+Dynamic Zone fields let you create flexible space, to compose content based on a component list, inside.
 
 #### Example
 
