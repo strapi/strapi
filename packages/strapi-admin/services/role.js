@@ -219,12 +219,8 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
 
   // add plugin permissions for each role
   const defaultPluginPermissions = [
-    { action: 'plugins::upload.assets.create', subject: 'plugins::upload.file' },
-    {
-      action: 'plugins::upload.assets.update',
-      subject: 'plugins::upload.file',
-      conditions: ['admin::is-creator'],
-    },
+    { action: 'plugins::upload.assets.create' },
+    { action: 'plugins::upload.assets.update', conditions: ['admin::is-creator'] },
     { action: 'plugins::upload.assets.download' },
     { action: 'plugins::upload.assets.copy-link' },
   ].map(createPermission);

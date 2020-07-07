@@ -96,7 +96,7 @@ module.exports = conditionProvider => ({
     // Transform each result into registerFn options
     const transformToRegisterOptions = map(result => ({
       action,
-      subject,
+      subject: subject || 'all',
       fields,
       condition: result,
     }));
