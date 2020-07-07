@@ -4,7 +4,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import {
-  CheckPermissions,
   PopUpWarning,
   LoadingIndicator,
   useGlobalContext,
@@ -14,7 +13,6 @@ import {
   useQuery,
 } from 'strapi-helper-plugin';
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
-import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
 import Padded from '../../components/Padded';
@@ -310,11 +308,13 @@ const HomePage = () => {
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),
         type: 'button',
-        Component: buttonProps => (
-          <CheckPermissions permissions={pluginPermissions.update}>
-            <Button {...buttonProps} />
-          </CheckPermissions>
-        ),
+        Component: buttonProps => {
+          if (!allowedActions.canUpdate) {
+            return null;
+          }
+
+          return <Button {...buttonProps} />;
+        },
       },
       {
         disabled: false,
@@ -322,11 +322,13 @@ const HomePage = () => {
         label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
         onClick: () => handleClickToggleModal(),
         type: 'button',
-        Component: buttonProps => (
-          <CheckPermissions permissions={pluginPermissions.create}>
-            <Button {...buttonProps} />
-          </CheckPermissions>
-        ),
+        Component: buttonProps => {
+          if (!allowedActions.canCreate) {
+            return null;
+          }
+
+          return <Button {...buttonProps} />;
+        },
       },
     ],
   };
