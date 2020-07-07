@@ -3,6 +3,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_BULK,
   ON_CHANGE_BULK_SELECT_ALL,
+  ON_DELETE_DATA_ERROR,
   ON_DELETE_DATA_SUCCEEDED,
   ON_DELETE_SEVERAL_DATA_SUCCEEDED,
   RESET_PROPS,
@@ -35,6 +36,12 @@ export function onChangeBulk({ target: { name } }) {
 export function onChangeBulkSelectall() {
   return {
     type: ON_CHANGE_BULK_SELECT_ALL,
+  };
+}
+
+export function onDeleteDataError() {
+  return {
+    type: ON_DELETE_DATA_ERROR,
   };
 }
 

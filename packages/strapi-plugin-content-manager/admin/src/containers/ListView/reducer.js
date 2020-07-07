@@ -10,6 +10,7 @@ import {
   RESET_PROPS,
   ON_CHANGE_BULK,
   ON_CHANGE_BULK_SELECT_ALL,
+  ON_DELETE_DATA_ERROR,
   ON_DELETE_DATA_SUCCEEDED,
   ON_DELETE_SEVERAL_DATA_SUCCEEDED,
   TOGGLE_MODAL_DELETE,
@@ -67,6 +68,11 @@ const listViewReducer = (state = initialState, action) =>
 
       case ON_DELETE_DATA_SUCCEEDED: {
         drafState.didDeleteData = true;
+        drafState.showWarningDelete = false;
+        break;
+      }
+      case ON_DELETE_DATA_ERROR: {
+        drafState.didDeleteData = false;
         drafState.showWarningDelete = false;
         break;
       }
