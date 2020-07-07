@@ -217,15 +217,8 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
     conditions: ['admin::is-creator'],
   }));
 
-  // add plugin permissions for each role
-  const defaultPluginPermissions = [
-    { action: 'plugins::upload.assets.create' },
-    { action: 'plugins::upload.assets.update', conditions: ['admin::is-creator'] },
-    { action: 'plugins::upload.assets.download' },
-    { action: 'plugins::upload.assets.copy-link' },
-  ].map(createPermission);
-  editorPermissions.push(...defaultPluginPermissions);
-  authorPermissions.push(...defaultPluginPermissions);
+  editorPermissions.push(...getDefaultPluginPermissions());
+  authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));
 
   // assign permissions to roles
   await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);
@@ -234,6 +227,19 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   if (createPermissionsForAdmin) {
     await strapi.admin.services.permission.resetSuperAdminPermissions();
   }
+};
+
+const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
+  const conditions = isAuthor ? ['admin::is-creator'] : null;
+
+  // add plugin permissions for each role
+  return [
+    { action: 'plugins::upload.read', conditions },
+    { action: 'plugins::upload.assets.create' },
+    { action: 'plugins::upload.assets.update', conditions },
+    { action: 'plugins::upload.assets.download' },
+    { action: 'plugins::upload.assets.copy-link' },
+  ].map(createPermission);
 };
 
 /** Display a warning if the role superAdmin doesn't exist
