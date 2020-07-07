@@ -199,7 +199,20 @@ const InputModalStepper = ({
         handleFileSelection({ target: { name: id } });
         goToList();
       } catch (err) {
-        console.log(err);
+        console.error(err);
+
+        const status = get(err, 'response.status', get(err, 'status', null));
+        const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
+        const errorMessage = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
+          get(err, ['response', 'payload', 'message'], statusText)
+        );
+        strapi.notification.error(errorMessage);
+
+        if (status) {
+          handleSetFileToEditError(errorMessage);
+        }
       }
     }
   };

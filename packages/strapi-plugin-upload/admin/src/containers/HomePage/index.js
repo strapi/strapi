@@ -1,5 +1,5 @@
 import React, { useReducer, useRef, useState, useEffect } from 'react';
-import { includes, toString, isEqual, intersectionWith } from 'lodash';
+import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
@@ -62,10 +62,12 @@ const HomePage = () => {
       await request(requestURL, {
         method: 'DELETE',
       });
+
+      return Promise.resolve();
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+
+      return Promise.reject(errorMessage);
     }
   };
 
@@ -211,6 +213,7 @@ const HomePage = () => {
     push({ search: newSearch });
   };
 
+  // FIXME: the delete logic should be redone
   const handleDeleteMediaFromModal = async id => {
     handleClickToggleModal();
 
@@ -226,12 +229,13 @@ const HomePage = () => {
         mediaId: id,
       });
     } catch (err) {
-      // Silent
+      strapi.notification.error(err);
     } finally {
       strapi.unlockApp();
     }
   };
 
+  // FIXME: the delete logic should be redone
   const handleDeleteMedias = async () => {
     setIsPopupOpen(false);
 
@@ -243,11 +247,14 @@ const HomePage = () => {
       dispatch({
         type: 'CLEAR_DATA_TO_DELETE',
       });
+    } catch (err) {
+      strapi.notification.error(err);
 
-      fetchListData();
-    } catch (error) {
-      // Silent
+      dispatch({
+        type: 'ON_DELETE_MEDIA_ERROR',
+      });
     } finally {
+      fetchListData();
       strapi.unlockApp();
     }
   };
