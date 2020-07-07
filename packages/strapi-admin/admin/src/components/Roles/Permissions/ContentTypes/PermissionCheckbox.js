@@ -18,9 +18,10 @@ const PermissionCheckbox = styled(Checkbox)`
     `
     &:before {
       content: '•';
+      font-size: 11px;
       position: absolute;
-      top: -9px;
-      left: -8px;
+      top: -6px;
+      left: -7px;
       color: ${disabled ? theme.main.colors.grey : theme.main.colors.mediumBlue};
     }
   `}

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
+import moment from 'moment';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
@@ -96,11 +97,15 @@ const CreatePage = () => {
     </ButtonWithNumber>,
   ];
 
+  const defaultDescription = `${formatMessage({
+    id: 'Settings.roles.form.created',
+  })} ${moment().format('LL')}`;
+
   return (
     <>
       <PageTitle name="Roles" />
       <Formik
-        initialValues={{ name: '', description: '' }}
+        initialValues={{ name: '', description: defaultDescription }}
         onSubmit={handleCreateRoleSubmit}
         validationSchema={schema}
         validateOnChange={false}
