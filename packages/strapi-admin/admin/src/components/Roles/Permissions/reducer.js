@@ -117,6 +117,7 @@ const reducer = (state, action) =>
         const permissionsLayout = get(state.permissionsLayout, ['sections', 'contentTypes'], []);
 
         draftState.contentTypesPermissions[subject] = {
+          ...get(state.contentTypesPermissions, [subject], {}),
           attributes: subjectPermissions,
           contentTypeActions: generateContentTypeActions(
             subjectPermissions,

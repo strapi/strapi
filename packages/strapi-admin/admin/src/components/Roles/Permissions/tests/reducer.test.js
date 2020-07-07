@@ -546,6 +546,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.read': true,
@@ -563,6 +566,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.read': true,
@@ -590,6 +596,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             attributes: {
               picture: {
                 actions: [],
@@ -602,6 +611,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.read': true,
@@ -629,6 +641,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
               'plugins::content-manager.explorer.create': true,
@@ -651,6 +666,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
@@ -685,6 +703,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
@@ -709,6 +730,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         collapsePath: [],
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
             },
@@ -1242,6 +1266,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const initialState = {
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             attributes: {
               address: {
                 actions: ['read'],
@@ -1269,6 +1296,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const expected = {
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.read': true,
@@ -1330,6 +1360,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         },
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             attributes: {
               address: {
                 actions: ['read'],
@@ -1367,6 +1400,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         },
         contentTypesPermissions: {
           place: {
+            conditions: {
+              read: ['admin::is-creator'],
+            },
             contentTypeActions: {
               'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
