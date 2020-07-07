@@ -62,7 +62,8 @@
       "via": "users",
       "dominant": true,
       "plugin": "admin",
-      "configurable": false
+      "configurable": false,
+      "private": true
     },
     "blocked": {
       "type": "boolean",
