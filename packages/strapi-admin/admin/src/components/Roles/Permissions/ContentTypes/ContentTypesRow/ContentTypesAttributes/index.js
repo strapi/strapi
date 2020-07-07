@@ -22,11 +22,11 @@ const AttributesTitleWrapper = styled.div`
   padding-left: 3.5rem;
 `;
 
-const ContentTypesAttributes = ({ attributes, contentType }) => {
+const ContentTypesAttributes = ({ attributes, contentType, withPadding }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Wrapper>
+    <Wrapper withPadding={withPadding}>
       <Flex>
         <AttributesTitleWrapper>
           <Text fontWeight="bold">
@@ -60,9 +60,13 @@ const ContentTypesAttributes = ({ attributes, contentType }) => {
   );
 };
 
+ContentTypesAttributes.defaultProps = {
+  withPadding: false,
+};
 ContentTypesAttributes.propTypes = {
   attributes: PropTypes.array.isRequired,
   contentType: PropTypes.object.isRequired,
+  withPadding: PropTypes.bool,
 };
 
 export default ContentTypesAttributes;

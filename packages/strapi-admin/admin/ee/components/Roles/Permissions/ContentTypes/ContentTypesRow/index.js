@@ -21,7 +21,7 @@ import ContentTypesAttributes from '../../../../../../src/components/Roles/Permi
 import PermissionWrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
 import CollapseLabel from '../../../../../../src/components/Roles/Permissions/ContentTypes/CollapseLabel';
 import ConditionsButton from '../../../../../../src/components/Roles/ConditionsButton';
-
+import RowWrapper from '../../../../../../src/components/Roles/Permissions/ContentTypes/ContentTypesRow/RowWrapper';
 import ConditionsModal from '../../../../../../src/components/Roles/ConditionsModal';
 
 const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
@@ -178,7 +178,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   };
 
   return (
-    <>
+    <RowWrapper withMargin={index % 2 !== 0}>
       <StyledRow disabled={isSuperAdmin} isActive={isActive} isGrey={index % 2 === 0}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
@@ -245,7 +245,11 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
         </Flex>
       </StyledRow>
       {isActive && (
-        <ContentTypesAttributes contentType={contentType} attributes={attributesToDisplay} />
+        <ContentTypesAttributes
+          withPadding={index % 2 !== 0}
+          contentType={contentType}
+          attributes={attributesToDisplay}
+        />
       )}
       {modal.isMounted && (
         <ConditionsModal
@@ -257,7 +261,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onClosed={handleClosed}
         />
       )}
-    </>
+    </RowWrapper>
   );
 };
 

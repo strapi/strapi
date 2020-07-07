@@ -20,6 +20,7 @@ import PermissionName from './PermissionName';
 import StyledRow from './StyledRow';
 import ContentTypesAttributes from './ContentTypesAttributes';
 import PermissionWrapper from './PermissionWrapper';
+import RowWrapper from './RowWrapper';
 import CollapseLabel from '../CollapseLabel';
 
 const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
@@ -163,7 +164,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   };
 
   return (
-    <>
+    <RowWrapper withMargin={index % 2 !== 0}>
       <StyledRow disabled={isSuperAdmin} isActive={isActive} isGrey={index % 2 === 0}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
@@ -228,7 +229,11 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
         </Flex>
       </StyledRow>
       {isActive && (
-        <ContentTypesAttributes contentType={contentType} attributes={attributesToDisplay} />
+        <ContentTypesAttributes
+          withPadding={index % 2 !== 0}
+          contentType={contentType}
+          attributes={attributesToDisplay}
+        />
       )}
       {modal.isMounted && (
         <ConditionsModal
@@ -240,7 +245,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onClosed={handleClosed}
         />
       )}
-    </>
+    </RowWrapper>
   );
 };
 
