@@ -34,12 +34,13 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
 
     return get(matchingPermissions, ['0', 'fields'], []);
   }, [userPermissions, slug]);
+  const timestamps = get(schema, ['options', 'timestamps']);
 
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {
       const current = get(schema, ['attributes', attr], {});
 
-      if (!readActionAllowedFields.includes(attr)) {
+      if (!readActionAllowedFields.includes(attr) && attr !== 'id' && !timestamps.includes(attr)) {
         return false;
       }
 
@@ -53,8 +54,9 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
     });
 
   const [state, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, allowedAttributes[0])
+    init(initialState, allowedAttributes[0] || {})
   );
+
   const modifiedData = state.get('modifiedData').toJS();
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
