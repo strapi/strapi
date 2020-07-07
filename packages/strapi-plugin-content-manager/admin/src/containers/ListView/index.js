@@ -34,6 +34,7 @@ import {
   getDataSucceeded,
   onChangeBulk,
   onChangeBulkSelectall,
+  onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
   resetProps,
@@ -61,6 +62,7 @@ function ListView({
   onChangeBulk,
   onChangeBulkSelectall,
   onChangeListLabels,
+  onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
   resetListLabels,
@@ -281,9 +283,18 @@ function ListView({
       onDeleteDataSucceeded();
       emitEvent('didDeleteEntry');
     } catch (err) {
-      strapi.notification.error(`${pluginId}.error.record.delete`);
+      const errorMessage = get(
+        err,
+        'response.payload.message',
+        formatMessage({ id: `${pluginId}.error.record.delete` })
+      );
+
+      strapi.notification.error(errorMessage);
+      // Close the modal
+      onDeleteDataError();
     }
-  }, [emitEvent, idToDelete, onDeleteDataSucceeded, slug, setModalLoadingState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setModalLoadingState, slug, idToDelete, onDeleteDataSucceeded]);
 
   const handleConfirmDeleteAllData = useCallback(async () => {
     const params = Object.assign(entriesToDelete);
@@ -630,6 +641,7 @@ ListView.propTypes = {
   onChangeBulk: PropTypes.func.isRequired,
   onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListLabels: PropTypes.func.isRequired,
+  onDeleteDataError: PropTypes.func.isRequired,
   onDeleteDataSucceeded: PropTypes.func.isRequired,
   onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   resetListLabels: PropTypes.func.isRequired,
@@ -653,6 +665,7 @@ export function mapDispatchToProps(dispatch) {
       onChangeBulk,
       onChangeBulkSelectall,
       onChangeListLabels,
+      onDeleteDataError,
       onDeleteDataSucceeded,
       onDeleteSeveralDataSucceeded,
       resetListLabels,
