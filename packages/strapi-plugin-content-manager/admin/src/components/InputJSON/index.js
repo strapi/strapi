@@ -54,11 +54,7 @@ class InputJSON extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      isEmpty(prevProps.value) &&
-      !isEmpty(this.props.value) &&
-      !this.state.hasInitValue
-    ) {
+    if (isEmpty(prevProps.value) && !isEmpty(this.props.value) && !this.state.hasInitValue) {
       this.setInitValue();
     }
   }
@@ -150,10 +146,7 @@ class InputJSON extends React.Component {
     }
 
     clearTimeout(this.timer);
-    this.timer = setTimeout(
-      () => this.testJSON(this.codeMirror.getValue()),
-      WAIT
-    );
+    this.timer = setTimeout(() => this.testJSON(this.codeMirror.getValue()), WAIT);
   };
 
   testJSON = value => {
@@ -170,13 +163,8 @@ class InputJSON extends React.Component {
     }
 
     return (
-      <Wrapper>
-        <textarea
-          ref={this.editor}
-          autoComplete="off"
-          id={this.props.name}
-          defaultValue=""
-        />
+      <Wrapper disabled={this.props.disabled}>
+        <textarea ref={this.editor} autoComplete="off" id={this.props.name} defaultValue="" />
       </Wrapper>
     );
   }
