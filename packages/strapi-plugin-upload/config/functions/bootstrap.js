@@ -85,7 +85,7 @@ const registerPermissionActions = () => {
   const actions = [
     {
       section: 'plugins',
-      displayName: 'Can access to the Media Library',
+      displayName: 'Access the Media Library',
       uid: 'read',
       pluginName: 'upload',
     },
@@ -119,7 +119,7 @@ const registerPermissionActions = () => {
     },
     {
       section: 'settings',
-      displayName: 'Can access the Media Library settings page',
+      displayName: 'Access the Media Library settings page',
       uid: 'settings.read',
       category: 'media library',
       pluginName: 'upload',

@@ -4,7 +4,7 @@ module.exports = {
   actions: [
     {
       uid: 'marketplace.read',
-      displayName: 'Can access to the marketplace',
+      displayName: 'Access the marketplace',
       pluginName: 'admin',
       section: 'settings',
       category: 'plugins and marketplace',

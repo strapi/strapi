@@ -74,7 +74,7 @@ describe('Action Provider Service', () => {
     test('Cannot register a settings action with a non standard name', async () => {
       const action = {
         uid: 'Marketplace Read',
-        displayName: 'Can access to the marketplace',
+        displayName: 'Access the marketplace',
         pluginName: 'aPlugin',
         section: 'settings',
         category: 'plugins and marketplace',
@@ -111,7 +111,7 @@ describe('Action Provider Service', () => {
     test("Cannot register a settings action with a pluginName that doesn't exist", async () => {
       const action = {
         uid: 'marketplace.read',
-        displayName: 'Can access to the marketplace',
+        displayName: 'Access the marketplace',
         pluginName: 'plugin-name-that-doesnt-exist',
         section: 'settings',
         category: 'plugins and marketplace',
@@ -125,7 +125,7 @@ describe('Action Provider Service', () => {
     test('Cannot register a settings action without category', async () => {
       const action = {
         uid: 'marketplace.read',
-        displayName: 'Can access to the marketplace',
+        displayName: 'Access the marketplace',
         pluginName: 'admin',
         section: 'settings',
       };

@@ -112,7 +112,7 @@ module.exports = async () => {
   const actions = [
     {
       section: 'plugins',
-      displayName: 'Can access to the Documentation',
+      displayName: 'Access the Documentation',
       uid: 'read',
       pluginName: 'documentation',
     },
