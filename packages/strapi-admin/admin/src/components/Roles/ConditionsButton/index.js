@@ -22,8 +22,8 @@ const ConditionsButton = ({ onClick, className, hasConditions, isRight }) => {
           <Text color="mediumBlue">
             {formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' })}
           </Text>
-          <Padded style={{ height: '18px' }} left size="xs">
-            <FontAwesomeIcon icon="cog" />
+          <Padded style={{ height: '18px', lineHeight: 'normal' }} left size="xs">
+            <FontAwesomeIcon style={{ fontSize: '11px' }} icon="cog" />
           </Padded>
         </Flex>
       </Padded>

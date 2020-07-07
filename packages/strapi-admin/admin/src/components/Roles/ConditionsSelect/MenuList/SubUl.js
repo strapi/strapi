@@ -11,7 +11,6 @@ const ToggleUl = styled(Collapse)`
   background-color: #fff;
   > li {
     padding-top: 5px;
-    padding-bottom: 12px;
     label {
       cursor: pointer;
     }
@@ -22,6 +21,9 @@ const ToggleUl = styled(Collapse)`
         z-index: 1;
       }
     }
+  }
+  > li:not(:last-child) {
+    padding-bottom: 12px;
   }
 `;
 

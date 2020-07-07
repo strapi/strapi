@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Padded } from '@buffetjs/core';
 import ComponentAttributeRow from 'ee_else_ce/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/ComponentAttributeRow';
+
+import Wrapper from './Wrapper';
 
 // Custom timeline header style used only in this file.
 const TopTimeline = styled.div`
@@ -14,7 +15,7 @@ const TopTimeline = styled.div`
 `;
 
 const ComponentsAttributes = ({ attributes, recursiveLevel }) => (
-  <Padded left size="smd">
+  <Wrapper>
     <TopTimeline />
     {attributes &&
       attributes.map((attribute, index) => (
@@ -26,7 +27,7 @@ const ComponentsAttributes = ({ attributes, recursiveLevel }) => (
           recursiveLevel={recursiveLevel}
         />
       ))}
-  </Padded>
+  </Wrapper>
 );
 
 ComponentsAttributes.defaultProps = {

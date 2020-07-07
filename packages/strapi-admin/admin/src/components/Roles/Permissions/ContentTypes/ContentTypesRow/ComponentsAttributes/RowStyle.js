@@ -16,8 +16,8 @@ const activeStyle = theme => `
 `;
 
 const RowStyle = styled.div`
-  padding-left: ${({ theme }) => theme.main.sizes.paddings.sm};
-  width: ${({ level }) => 123 - level * 23}px;
+  padding-left: ${({ theme }) => theme.main.sizes.paddings.xs};
+  width: ${({ level }) => 128 - level * 18}px;
   ${Chevron} {
     width: 13px;
   }

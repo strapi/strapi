@@ -3,10 +3,11 @@ import { Text } from '@buffetjs/core';
 import Chevron from './Chevron';
 import ConditionsButton from '../../../ConditionsButton';
 
-const activeRowStyle = theme => `
+const activeRowStyle = (theme, isActive) => `
   border: 1px solid ${theme.main.colors.darkBlue};
   background-color: ${theme.main.colors.lightBlue};
   color: ${theme.main.colors.mediumBlue};
+  border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
   ${Text} {
     color: ${theme.main.colors.mediumBlue};
   }
@@ -28,9 +29,9 @@ const StyledRow = styled.div`
   ${ConditionsButton} {
     display: none;
   }
-  ${({ isActive, theme }) => isActive && activeRowStyle(theme)}
+  ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive)}
   &:hover {
-    ${({ theme }) => activeRowStyle(theme)}
+    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
   }
 `;
 

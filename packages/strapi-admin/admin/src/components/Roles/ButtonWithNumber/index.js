@@ -1,27 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { Button, Flex, Text, Padded } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import NumberCard from './NumberCard';
 
-const ButtonWithNumber = ({ number, onClick }) => (
-  <Button color="primary" onClick={onClick}>
-    <Flex justifyContent="space-between" alignItems="center">
-      <FontAwesomeIcon icon="users" />
-      <Padded left size="xs" />
-      <Text color="white" fontWeight="semiBold">
-        Users with this role
-      </Text>
-      <Padded left size="xs" />
-      <NumberCard>
-        <Text fontSize="xs" fontWeight="bold" color="mediumBlue">
-          {number}
+const ButtonWithNumber = ({ number, onClick }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Button disabled color="primary" onClick={onClick}>
+      <Flex style={{ minWidth: '17rem' }} justifyContent="space-between" alignItems="center">
+        <FontAwesomeIcon icon="users" />
+        <Padded left size="sm" />
+        <Text color="grey" fontWeight="semiBold">
+          {formatMessage({
+            id: 'Settings.roles.form.button.users-with-role',
+            defaultMessage: 'Users with this role',
+          })}
         </Text>
-      </NumberCard>
-    </Flex>
-  </Button>
-);
+        <Padded left size="sm" />
+        <NumberCard>
+          <Text fontSize="xs" fontWeight="bold" color="grey">
+            {number}
+          </Text>
+        </NumberCard>
+      </Flex>
+    </Button>
+  );
+};
 
 ButtonWithNumber.defaultProps = {
   number: 0,

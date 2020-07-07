@@ -69,7 +69,8 @@ const selectStyle = {
     return {
       ...base,
       fontSize: 13,
-      minHeight: 36,
+      minHeight: 34,
+      top: '1px',
       border,
       outline: 0,
       boxShadow: 0,
