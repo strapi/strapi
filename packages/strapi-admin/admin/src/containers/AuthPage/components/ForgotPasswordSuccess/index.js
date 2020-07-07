@@ -23,36 +23,39 @@ const ForgotPasswordSuccess = () => {
         <Logo />
       </Section>
       <Section withBackground textAlign="center">
-        {/* FIXME IN BUFFET.JS */}
-        <BaselineAlignment top size="20px">
+        <Padded top size="smd">
           <Padded top size="xs">
             <Box withoutError>
               <BaselineAlignment top size="3px">
                 <Envelope />
               </BaselineAlignment>
-              {/* FIXME IN BUFFET.JS */}
-              <BaselineAlignment top size="20px">
+
+              <Padded top size="smd">
                 <Text fontWeight="bold" lineHeight="24px" fontSize="xl">
                   {formatMessage({ id: 'app.containers.AuthPage.ForgotPasswordSuccess.title' })}
                 </Text>
-              </BaselineAlignment>
-              {/* FIXME IN BUFFET.JS */}
-              <BaselineAlignment top size="20px">
-                <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
-                  {formatMessage({
-                    id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
-                  })}
-                </Text>
-                <Padded top>
-                  <BaselineAlignment top size="7px">
-                    <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
-                      {formatMessage({
-                        id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin',
-                      })}
-                    </Text>
-                  </BaselineAlignment>
+              </Padded>
+
+              <Padded right left size="lg">
+                <Padded top size="smd">
+                  <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
+                    {formatMessage({
+                      id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
+                    })}
+                  </Text>
+
+                  <Padded top>
+                    <BaselineAlignment top size="7px">
+                      <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
+                        {formatMessage({
+                          id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin',
+                        })}
+                      </Text>
+                    </BaselineAlignment>
+                  </Padded>
                 </Padded>
-              </BaselineAlignment>
+              </Padded>
+
               <Padded top size="md">
                 <Button
                   type="button"
@@ -65,7 +68,7 @@ const ForgotPasswordSuccess = () => {
               </Padded>
             </Box>
           </Padded>
-        </BaselineAlignment>
+        </Padded>
       </Section>
     </>
   );

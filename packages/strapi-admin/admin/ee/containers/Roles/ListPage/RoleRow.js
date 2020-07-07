@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
@@ -26,13 +26,21 @@ const RoleRow = ({
     onRoleToggle(role.id);
   };
 
-  const handleClickDelete = () => {
+  const handleClickDelete = e => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (role.usersCount) {
       strapi.notification.info('Roles.ListPage.notification.delete-not-allowed');
     } else {
       onRoleRemove(role.id);
     }
   };
+
+  const handleGoTo = useCallback(() => {
+    push(`${settingsBaseURL}/roles/${role.id}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role.id, settingsBaseURL]);
 
   const prefix = canDelete ? (
     <Checkbox
@@ -44,17 +52,22 @@ const RoleRow = ({
 
   return (
     <RoleRowBase
+      onClick={handleGoTo}
       selectedRoles={selectedRoles}
       prefix={prefix}
       role={role}
       links={[
         {
           icon: canCreate ? <Duplicate fill="#0e1622" /> : null,
-          onClick: () => onRoleDuplicate(role.id),
+          onClick: e => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRoleDuplicate(role.id);
+          },
         },
         {
           icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-          onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
+          onClick: handleGoTo,
         },
         {
           icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,

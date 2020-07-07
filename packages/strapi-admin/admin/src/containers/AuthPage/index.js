@@ -3,6 +3,7 @@ import axios from 'axios';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from 'strapi-helper-plugin';
+import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -283,21 +284,23 @@ const AuthPage = ({ hasAdmin }) => {
 
   return (
     <>
-      <PageTitle title={upperFirst(authType)} />
-      <NavTopRightWrapper>
-        <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
-      </NavTopRightWrapper>
-      <BaselineAlignment top size="78px">
-        <Component
-          fieldsToDisable={fieldsToDisable}
-          formErrors={formErrors}
-          inputsPrefix={inputsPrefix}
-          modifiedData={modifiedData}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          requestError={requestError}
-        />
-      </BaselineAlignment>
+      <Padded bottom size="md">
+        <PageTitle title={upperFirst(authType)} />
+        <NavTopRightWrapper>
+          <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
+        </NavTopRightWrapper>
+        <BaselineAlignment top size="78px">
+          <Component
+            fieldsToDisable={fieldsToDisable}
+            formErrors={formErrors}
+            inputsPrefix={inputsPrefix}
+            modifiedData={modifiedData}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            requestError={requestError}
+          />
+        </BaselineAlignment>
+      </Padded>
     </>
   );
 };
