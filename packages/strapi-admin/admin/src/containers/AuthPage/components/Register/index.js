@@ -99,7 +99,7 @@ const Register = ({
               />
               <Input
                 error={formErrors[`${inputsPrefix}confirmPassword`]}
-                label="Auth.form.password.label"
+                label="Auth.form.confirmPassword.label"
                 name={`${inputsPrefix}confirmPassword`}
                 onChange={onChange}
                 type="password"
@@ -112,8 +112,19 @@ const Register = ({
                   onChange={onChange}
                   value={get(modifiedData, `${inputsPrefix}news`, false)}
                 />
-                <Padded left size="xs" />
-                <CustomLabel id="Auth.form.register.news.label" values={{ terms, policy }} />
+                <Padded left size="sm" />
+                <CustomLabel
+                  id="Auth.form.register.news.label"
+                  values={{ terms, policy }}
+                  onClick={() => {
+                    onChange({
+                      target: {
+                        name: `${inputsPrefix}news`,
+                        value: !get(modifiedData, `${inputsPrefix}news`, false),
+                      },
+                    });
+                  }}
+                />
               </Flex>
               <Padded top size="md">
                 <Button type="submit" color="primary" textTransform="uppercase">

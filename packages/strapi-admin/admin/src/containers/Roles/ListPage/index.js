@@ -37,7 +37,19 @@ const RoleListPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleToggle = useCallback(() => setIsOpen(prev => !prev), []);
+  const handleGoTo = useCallback(
+    id => {
+      push(`${settingsBaseURL}/roles/${id}`);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settingsBaseURL]
+  );
+
+  const handleToggle = useCallback(e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(prev => !prev);
+  }, []);
 
   const headerActions = [
     {
@@ -86,6 +98,7 @@ const RoleListPage = () => {
           isLoading={isLoading}
           customRowComponent={role => (
             <RoleRow
+              onClick={() => handleGoTo(role.id)}
               canUpdate={canUpdate}
               links={[
                 {
@@ -94,7 +107,9 @@ const RoleListPage = () => {
                 },
                 {
                   icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-                  onClick: () => push(`${settingsBaseURL}/roles/${role.id}`),
+                  onClick: () => {
+                    handleGoTo(role.id);
+                  },
                 },
                 {
                   icon: <FontAwesomeIcon icon="trash-alt" />,

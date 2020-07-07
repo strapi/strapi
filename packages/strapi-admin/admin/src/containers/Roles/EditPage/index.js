@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
@@ -81,8 +81,10 @@ const EditPage = () => {
       strapi.notification.success('notification.success.saved');
       goBack();
     } catch (err) {
-      console.error(err);
-      strapi.notification.error('notification.error');
+      console.error(err.response);
+      const message = get(err, 'response.payload.message', 'An error occured');
+
+      strapi.notification.error(message);
     } finally {
       setIsSubmiting(false);
       strapi.unlockApp();
