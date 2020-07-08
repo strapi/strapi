@@ -84,18 +84,20 @@ const sanitizeEntity = (dataSource, options) => {
 
 const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
+const CREATOR_FIELDS = ['created_by', 'updated_by'];
+const COMPONENT_FIELDS = ['__component'];
+const STATIC_FIELDS = ['id', '__v'];
+
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
   const { options, primaryKey } = model;
 
   const timestamps = options.timestamps || [];
-  const creatorFields = ['created_by', 'updated_by'];
-  const componentFields = ['__component'];
 
   return _.concat(
     includeFields || [],
     ...(isOutput
-      ? [primaryKey, componentFields, timestamps, creatorFields]
-      : [primaryKey, componentFields])
+      ? [primaryKey, timestamps, STATIC_FIELDS, COMPONENT_FIELDS, CREATOR_FIELDS]
+      : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
   );
 };
 

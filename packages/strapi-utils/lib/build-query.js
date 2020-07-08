@@ -90,14 +90,14 @@ const normalizeFieldName = ({ model, field }) => {
 
 const BOOLEAN_OPERATORS = ['or'];
 
-const hasDeepFilters = (whereClauses = []) => {
+const hasDeepFilters = (whereClauses = [], { minDepth = 1 } = {}) => {
   return (
     whereClauses.filter(({ field, operator, value }) => {
       if (BOOLEAN_OPERATORS.includes(operator)) {
         return value.filter(hasDeepFilters).length > 0;
       }
 
-      return field.split('.').length > 2;
+      return field.split('.').length > minDepth;
     }).length > 0
   );
 };
@@ -142,7 +142,7 @@ const normalizeClauses = (whereClauses, { model }) => {
 const buildQuery = ({ model, filters = {}, ...rest }) => {
   // Validate query clauses
   if (filters.where && Array.isArray(filters.where)) {
-    if (hasDeepFilters(filters.where)) {
+    if (hasDeepFilters(filters.where, { minDepth: 2 })) {
       strapi.log.warn(
         'Deep filtering queries should be used carefully (e.g Can cause performance issues).\nWhen possible build custom routes which will in most case be more optimised.'
       );
