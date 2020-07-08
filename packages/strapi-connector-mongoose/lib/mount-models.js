@@ -29,13 +29,11 @@ module.exports = ({ models, target }, ctx) => {
 
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
       definition.attributes['created_by'] = {
-        autoPopulate: false,
         model: 'user',
         plugin: 'admin',
       };
 
       definition.attributes['updated_by'] = {
-        autoPopulate: false,
         model: 'user',
         plugin: 'admin',
       };

@@ -428,6 +428,7 @@ const buildQueryMatches = (model, filters, search = []) => {
     });
 
     const criterias = combineSearchAndWhere(search, wheres);
+
     return [{ $match: criterias }];
   }
 
