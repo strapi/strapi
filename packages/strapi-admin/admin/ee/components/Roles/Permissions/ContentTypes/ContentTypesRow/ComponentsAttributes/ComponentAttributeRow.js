@@ -128,11 +128,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const checkPermission = useCallback(
     action => {
-      return (
-        attributeActions.findIndex(
-          permAction => permAction === `${contentManagerPermissionPrefix}.${action}`
-        ) !== -1
-      );
+      return attributeActions.findIndex(permAction => permAction === action) !== -1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [contentTypesPermissions, attribute]

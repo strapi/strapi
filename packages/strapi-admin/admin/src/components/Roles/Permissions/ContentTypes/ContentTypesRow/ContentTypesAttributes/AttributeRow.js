@@ -47,16 +47,17 @@ const AttributeRow = ({ attribute, contentType }) => {
     );
   }, [contentType, contentTypesPermissions, attribute]);
 
-  const getRecursiveAttributes = useCallback(() => {
+  const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
 
-    return [...getAttributesByModel(component, components, attribute.attributeName), attribute];
-  }, [attribute, components]);
+    return isCollapsable
+      ? getAttributesByModel(component, components, attribute.attributeName)
+      : [attribute];
+  }, [isCollapsable, attribute, components]);
 
   const hasAllActions = useMemo(() => {
     return (
-      recursivePermissions ===
-      ATTRIBUTES_PERMISSIONS_ACTIONS.length * getRecursiveAttributes().length
+      recursivePermissions === ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentTypesPermissions]);
@@ -64,20 +65,21 @@ const AttributeRow = ({ attribute, contentType }) => {
   const hasSomeActions = useMemo(() => {
     return (
       recursivePermissions > 0 &&
-      recursivePermissions < ATTRIBUTES_PERMISSIONS_ACTIONS.length * getRecursiveAttributes().length
+      recursivePermissions < ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentTypesPermissions]);
 
   const handleCheckAllAction = () => {
     if (isCollapsable) {
-      const attributesToAdd = getRecursiveAttributes();
-      const allActionsSize = attributesToAdd.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const attributes = recursiveAttributes;
+      const allActionsSize = attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const shouldEnable = recursivePermissions >= 0 && recursivePermissions < allActionsSize;
 
       onAllContentTypeActions({
         subject: contentType.uid,
-        attributes: attributesToAdd,
-        shouldEnable: recursivePermissions >= 0 && recursivePermissions < allActionsSize,
+        attributes,
+        shouldEnable,
         shouldSetAllContentTypes: false,
       });
     } else {
@@ -91,7 +93,7 @@ const AttributeRow = ({ attribute, contentType }) => {
   const getRecursiveAttributesPermissions = useCallback(
     action => {
       return getNumberOfRecursivePermissionsByAction(
-        collapsePath[0],
+        contentType.uid,
         action,
         isCollapsable
           ? `${attribute.attributeName}.`
@@ -126,13 +128,13 @@ const AttributeRow = ({ attribute, contentType }) => {
     return (
       isCollapsable &&
       getRecursiveAttributesPermissions(action) > 0 &&
-      getRecursiveAttributesPermissions(action) < getRecursiveAttributes().length
+      getRecursiveAttributesPermissions(action) < recursiveAttributes.length
     );
   };
 
   const allRecursiveChecked = action => {
     return (
-      isCollapsable && getRecursiveAttributesPermissions(action) === getRecursiveAttributes().length
+      isCollapsable && getRecursiveAttributesPermissions(action) === recursiveAttributes.length
     );
   };
 

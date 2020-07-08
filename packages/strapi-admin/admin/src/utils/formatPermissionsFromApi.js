@@ -3,18 +3,24 @@ import { contentManagerPermissionPrefix } from '../components/Roles/Permissions/
 
 const formatPermissionsFromApi = data => {
   const getFieldsPermissions = (permissionsAcc, permission) => {
-    return get(permission, ['fields'], []).reduce((acc, field) => {
-      return {
-        ...acc,
-        [field]: {
-          ...get(permissionsAcc, [permission.subject, 'attributes', field], {}),
-          actions: [
-            ...get(permissionsAcc, [permission.subject, 'attributes', field, 'actions'], []),
-            permission.action,
-          ],
-        },
-      };
-    }, {});
+    const fields = get(permission, ['fields'], []);
+
+    if (fields) {
+      return fields.reduce((acc, field) => {
+        return {
+          ...acc,
+          [field]: {
+            ...get(permissionsAcc, [permission.subject, 'attributes', field], {}),
+            actions: [
+              ...get(permissionsAcc, [permission.subject, 'attributes', field, 'actions'], []),
+              permission.action,
+            ],
+          },
+        };
+      }, {});
+    }
+
+    return {};
   };
 
   const formattedPermissions = data.reduce((acc, current) => {

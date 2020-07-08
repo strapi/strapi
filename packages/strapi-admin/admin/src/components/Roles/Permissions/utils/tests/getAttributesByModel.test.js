@@ -7,15 +7,9 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | getAttributesByModel', () => {
     const expected = [
       { type: 'string', required: false, attributeName: 'city' },
       { type: 'media', multiple: false, required: false, attributeName: 'cover' },
-      {
-        component: 'default.closingperiod',
-        type: 'component',
-        attributeName: 'closing_period',
-      },
       { type: 'string', attributeName: 'label' },
 
       { attributeName: 'closing_period.start_date', type: 'date', required: true },
-      { attributeName: 'closing_period.dish', component: 'default.dish', type: 'component' },
       { attributeName: 'closing_period.media', type: 'media', multiple: false, required: false },
 
       { attributeName: 'closing_period.dish.description', type: 'text' },
