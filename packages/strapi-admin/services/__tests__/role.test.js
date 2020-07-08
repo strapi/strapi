@@ -303,7 +303,14 @@ describe('Role', () => {
           conditions: [],
         },
       ];
+
       const defaultPermissions = [
+        {
+          action: 'plugins::upload.read',
+          conditions: ['admin::is-creator'],
+          fields: null,
+          subject: null,
+        },
         {
           action: 'plugins::upload.assets.create',
           conditions: [],
@@ -369,9 +376,17 @@ describe('Role', () => {
       });
       expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
         fieldsNullFor: ['plugins::content-manager.explorer.delete'],
+        restrictedSubjects: ['plugins::users-permissions.user'],
       });
       expect(assign).toHaveBeenCalledTimes(2);
-      expect(assign).toHaveBeenNthCalledWith(1, 2, [...permissions, ...defaultPermissions]);
+      expect(assign).toHaveBeenNthCalledWith(1, 2, [
+        ...permissions,
+        ...defaultPermissions.map(d => ({
+          ...d,
+          conditions: [],
+        })),
+      ]);
+
       expect(assign).toHaveBeenNthCalledWith(2, 3, [
         { ...permissions[0], conditions: ['admin::is-creator'] },
         ...defaultPermissions,
