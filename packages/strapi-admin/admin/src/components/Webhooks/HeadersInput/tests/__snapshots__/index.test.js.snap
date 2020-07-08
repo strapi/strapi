@@ -27,11 +27,13 @@ exports[`Admin | components | HeadersInput should render properly should match t
 .c2:disabled {
   background-color: #FAFAFB;
   cursor: not-allowed;
+  color: #9ea7b8;
 }
 
 .c1 {
   position: relative;
   background-color: #ffffff;
+  border-radius: 2px;
 }
 
 .c1 button[type='button'] {

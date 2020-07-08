@@ -59,6 +59,10 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   cursor: initial;
 }
 
+.c1:disabled:after {
+  color: #9ea7b8;
+}
+
 .c1 + label {
   display: inline-block;
   font-weight: 500;
@@ -114,6 +118,10 @@ exports[`<EventRow /> should match the snapshot 1`] = `
 .c3:disabled {
   background-color: #FAFAFB;
   cursor: initial;
+}
+
+.c3:disabled:after {
+  color: #9ea7b8;
 }
 
 .c3 + label {
