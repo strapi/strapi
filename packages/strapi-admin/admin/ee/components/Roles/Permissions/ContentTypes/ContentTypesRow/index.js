@@ -91,11 +91,23 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     [contentTypesPermissions, contentType]
   );
 
+  const getAttributesPermissions = useCallback(
+    action => {
+      return getAttributePermissionsSizeByContentTypeAction(
+        contentTypesPermissions,
+        contentType.uid,
+        action
+      );
+    },
+    [contentType, contentTypesPermissions]
+  );
+
   const hasAllAttributeByAction = useCallback(
-    action =>
-      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) > 0 &&
-      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) ===
-        attributes.length,
+    action => {
+      const attributesPermissionsCount = getAttributesPermissions(action);
+
+      return attributesPermissionsCount > 0 && attributesPermissionsCount === attributes.length;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [contentTypesPermissions, contentType, attributes]
   );
@@ -103,13 +115,17 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   // Check if an attribute have the passed action
   // Used to set the someChecked props of an action checkbox
   const hasSomeAttributeByAction = useCallback(
-    action =>
-      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) > 0 &&
-      getAttributePermissionsSizeByContentTypeAction(contentTypesPermissions, contentType.uid, action) <
-        attributes.length &&
-      hasContentTypeAction(action),
+    action => {
+      const attributesPermissionsCount = getAttributesPermissions(action);
+
+      return (
+        attributesPermissionsCount > 0 &&
+        attributesPermissionsCount < attributes.length &&
+        hasContentTypeAction(action)
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [contentTypesPermissions, contentType, attributes]
+    [attributes, hasContentTypeAction]
   );
 
   const checkConditions = useCallback(
