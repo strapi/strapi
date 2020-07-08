@@ -5,37 +5,12 @@ import { useIntl } from 'react-intl';
 
 import { usePermissionsContext } from '../../../../../hooks';
 import PermissionCheckbox from '../PermissionCheckbox';
-import { getContentTypesActionsSize, isAttributeAction } from '../../utils';
+import { getContentTypesActionsSize } from '../../utils';
 import Wrapper from './Wrapper';
 
-const PermissionsHeader = ({ allAttributes, contentTypes }) => {
+const PermissionsHeader = ({ contentTypes }) => {
   const { formatMessage } = useIntl();
-  const {
-    onSetAttributesPermissions,
-    onGlobalPermissionsActionSelect,
-    permissionsLayout,
-    contentTypesPermissions,
-  } = usePermissionsContext();
-
-  const handleCheck = action => {
-    // If the action is present in the actions of the attributes
-    // Then we set all the attributes permissions otherwise,
-    // we only set the global content type actions
-    if (isAttributeAction(action)) {
-      onSetAttributesPermissions({
-        attributes: allAttributes,
-        action,
-        shouldEnable: !hasAllActions(action),
-        hasContentTypeAction: true,
-      });
-    } else {
-      onGlobalPermissionsActionSelect({
-        action,
-        contentTypes,
-        shouldEnable: !hasAllActions(action),
-      });
-    }
-  };
+  const { permissionsLayout, contentTypesPermissions } = usePermissionsContext();
 
   // Get the count of content type contentTypesPermissions by action.
   const countContentTypesActionPermissions = useCallback(
@@ -51,24 +26,25 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
       countContentTypesActionPermissions(action) < contentTypes.length
     );
   };
+
   const hasAllActions = action => {
     return countContentTypesActionPermissions(action) === contentTypes.length;
   };
 
   return (
-    <Wrapper>
+    <Wrapper disabled>
       <Flex>
         {permissionsLayout.sections.contentTypes.map(permissionLayout => (
           <PermissionCheckbox
             key={permissionLayout.action}
             name={permissionLayout.action}
+            disabled
             value={hasAllActions(permissionLayout.action)}
             someChecked={hasSomeActions(permissionLayout.action)}
             message={formatMessage({
               id: `Settings.roles.form.permissions.${permissionLayout.displayName.toLowerCase()}`,
               defaultMessage: permissionLayout.displayName,
             })}
-            onChange={() => handleCheck(permissionLayout.action)}
           />
         ))}
       </Flex>
@@ -78,7 +54,6 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
 
 PermissionsHeader.propTypes = {
   contentTypes: PropTypes.array.isRequired,
-  allAttributes: PropTypes.array.isRequired,
 };
 
 export default PermissionsHeader;

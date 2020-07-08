@@ -22,15 +22,7 @@ const getAttributesByModel = (contentType, components, attributeNamePrefix) => {
           attributeName.push(currentAttribute.attributeName);
         }
 
-        const componentAttributes = [
-          ...recursiveAttribute(component, true),
-          ...attributeAcc,
-          {
-            ...currentAttribute,
-            attributeName: attributeName.join('.'),
-            contentTypeUid: contentType.uid,
-          },
-        ];
+        const componentAttributes = [...recursiveAttribute(component, true), ...attributeAcc];
 
         attributeName = attributeName.slice(0, attributeName.length - 1);
 

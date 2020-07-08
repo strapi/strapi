@@ -11,10 +11,10 @@ import reducer, { initialState } from './reducer';
 import init from './init';
 import { getAllAttributes, formatPermissionsLayout } from './utils';
 
-const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => {
+const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, ref) => {
   const { singleTypes, collectionTypes, components } = useModels();
   const [state, dispatch] = useReducer(reducer, initialState, state =>
-    init(state, permissionsLayout, rolePermissions)
+    init(state, permissionsLayout, rolePermissions, role)
   );
 
   useImperativeHandle(ref, () => ({
@@ -199,8 +199,13 @@ const Permissions = forwardRef(({ permissionsLayout, rolePermissions }, ref) => 
   );
 });
 
+Permissions.defaultProps = {
+  role: null,
+  rolePermissions: {},
+};
 Permissions.propTypes = {
   permissionsLayout: PropTypes.object.isRequired,
-  rolePermissions: PropTypes.object.isRequired,
+  rolePermissions: PropTypes.object,
+  role: PropTypes.object,
 };
 export default Permissions;
