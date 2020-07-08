@@ -1,8 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { stringIncludes, stringEquals } = require('strapi-utils');
-const { createUser } = require('../domain/user');
+const { stringIncludes } = require('strapi-utils');
+const { createUser, hasSuperAdminRole } = require('../domain/user');
 const { SUPER_ADMIN_CODE } = require('./constants');
 
 const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
@@ -51,20 +51,26 @@ const create = async attributes => {
 const updateById = async (id, attributes) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
+    const lastAdminUser = await isLastSuperAdminUser(id);
     const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
-    const nbOfSuperAdminUsers = _.get(superAdminRole, 'usersCount');
-    const mayRemoveSuperAdmins = !stringIncludes(attributes.roles, superAdminRole.id);
+    const willRemoveSuperAdminRole = !stringIncludes(attributes.roles, superAdminRole.id);
 
-    if (nbOfSuperAdminUsers === 1 && mayRemoveSuperAdmins) {
-      const userWithAdminRole = await strapi
-        .query('user', 'admin')
-        .findOne({ roles: [superAdminRole.id] });
-      if (stringEquals(userWithAdminRole.id, id)) {
-        throw strapi.errors.badRequest(
-          'ValidationError',
-          'You must have at least one user with super admin role.'
-        );
-      }
+    if (lastAdminUser && willRemoveSuperAdminRole) {
+      throw strapi.errors.badRequest(
+        'ValidationError',
+        'You must have at least one user with super admin role.'
+      );
+    }
+  }
+
+  // cannot disable last super admin
+  if (attributes.isActive === false) {
+    const lastAdminUser = await isLastSuperAdminUser(id);
+    if (lastAdminUser) {
+      throw strapi.errors.badRequest(
+        'ValidationError',
+        'You must have at least one active user with super admin role.'
+      );
     }
   }
 
@@ -82,6 +88,17 @@ const updateById = async (id, attributes) => {
   }
 
   return strapi.query('user', 'admin').update({ id }, attributes);
+};
+
+/**
+ * Check if a user is the last super admin
+ * @param {int|string} userId user's id to look for
+ */
+const isLastSuperAdminUser = async userId => {
+  const user = await findOne({ id: userId }, ['roles']);
+  const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
+
+  return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
 };
 
 /**
@@ -133,8 +150,8 @@ const register = async ({ registrationToken, userInfo }) => {
 /**
  * Find one user
  */
-const findOne = async params => {
-  return strapi.query('user', 'admin').findOne(params);
+const findOne = async (params, populate) => {
+  return strapi.query('user', 'admin').findOne(params, populate);
 };
 
 /** Find many users (paginated)
