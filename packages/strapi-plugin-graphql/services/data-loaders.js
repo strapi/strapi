@@ -153,10 +153,7 @@ module.exports = {
       .value();
 
     // Run query and remove duplicated ID.
-    return strapi.plugins['content-manager'].services['contentmanager'].fetchAll(
-      { model: modelUID },
-      params
-    );
+    return strapi.plugins['content-manager'].services['contentmanager'].fetchAll(modelUID, params);
   },
 
   extractQueries: function(modelUID, keys) {

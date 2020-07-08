@@ -49,11 +49,8 @@ module.exports = {
     return strapi.entityService.update({ params, data, files }, { model });
   },
 
-  delete(model, id, query) {
-    return strapi.entityService.delete(
-      { params: { ...query, _where: _.concat({ id }, query._where || {}) } },
-      { model }
-    );
+  delete(model, query) {
+    return strapi.entityService.delete({ params: query }, { model });
   },
 
   deleteMany(model, ids, query) {

@@ -5,8 +5,13 @@ Object {
   "conditions": Array [
     Object {
       "category": "default",
-      "displayName": "Is Creator",
+      "displayName": "Is creator",
       "id": "admin::is-creator",
+    },
+    Object {
+      "category": "default",
+      "displayName": "Has same role as creator",
+      "id": "admin::has-same-role-as-creator",
     },
   ],
   "sections": Object {

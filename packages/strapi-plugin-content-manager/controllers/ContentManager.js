@@ -270,7 +270,7 @@ module.exports = {
 
     const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.delete, model, id);
 
-    const result = await contentManagerService.delete(model, id, pm.query);
+    const result = await contentManagerService.delete(model, { id });
 
     ctx.body = pm.sanitize(result, { action: ACTIONS.read });
   },
