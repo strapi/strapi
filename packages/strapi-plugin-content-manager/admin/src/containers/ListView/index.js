@@ -463,7 +463,7 @@ function ListView({
       ];
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [label, pathname, search, canCreate]
+    [label, pathname, search, canCreate, formatMessage]
   );
 
   const headerProps = useMemo(() => {
@@ -487,7 +487,7 @@ function ListView({
     };
     /* eslint-enable indent */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, headerAction, label, canRead]);
+  }, [count, headerAction, label, canRead, formatMessage]);
 
   return (
     <>

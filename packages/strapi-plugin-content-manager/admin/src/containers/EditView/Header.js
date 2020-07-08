@@ -69,7 +69,7 @@ const Header = () => {
             toggleWarningCancel();
           },
           color: 'cancel',
-          label: formatMessageRef.current({
+          label: formatMessage({
             id: `${pluginId}.containers.Edit.reset`,
           }),
           type: 'button',
@@ -82,7 +82,7 @@ const Header = () => {
         {
           disabled: !didChangeData,
           color: 'success',
-          label: formatMessageRef.current({
+          label: formatMessage({
             id: `${pluginId}.containers.Edit.submit`,
           }),
           isLoading: isSubmitting,
@@ -97,7 +97,7 @@ const Header = () => {
 
     if (!isCreatingEntry && canDelete) {
       headerActions.unshift({
-        label: formatMessageRef.current({
+        label: formatMessage({
           id: 'app.utils.delete',
         }),
         color: 'delete',
@@ -114,7 +114,15 @@ const Header = () => {
     }
 
     return headerActions;
-  }, [canCreate, canDelete, canUpdate, didChangeData, isCreatingEntry, isSubmitting]);
+  }, [
+    canCreate,
+    canDelete,
+    canUpdate,
+    didChangeData,
+    isCreatingEntry,
+    isSubmitting,
+    formatMessage,
+  ]);
 
   const headerProps = useMemo(() => {
     return {
