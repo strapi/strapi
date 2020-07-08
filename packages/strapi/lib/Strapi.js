@@ -87,12 +87,15 @@ class Strapi {
       chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
     });
 
+    const isEE = strapi.EE === true && ee.isEE === true;
+
     infoTable.push(
       [chalk.blue('Time'), `${new Date()}`],
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
+      [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
     );
 
     console.log(infoTable.toString());
