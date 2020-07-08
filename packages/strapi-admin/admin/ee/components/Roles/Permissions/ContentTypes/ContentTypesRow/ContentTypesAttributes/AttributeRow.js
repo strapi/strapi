@@ -53,8 +53,10 @@ const AttributeRow = ({ attribute, contentType }) => {
   const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
 
-    return [...getAttributesByModel(component, components, attribute.attributeName), attribute];
-  }, [attribute, components]);
+    return isCollapsable
+      ? getAttributesByModel(component, components, attribute.attributeName)
+      : [attribute];
+  }, [isCollapsable, attribute, components]);
 
   const hasAllActions = useMemo(() => {
     return (

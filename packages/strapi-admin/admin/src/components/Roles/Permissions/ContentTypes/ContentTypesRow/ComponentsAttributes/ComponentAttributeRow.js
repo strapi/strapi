@@ -51,7 +51,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     []
   );
 
-  const getRecursiveAttributes = useCallback(() => {
+  const recursiveAttributes = useMemo(() => {
     const component = components.find(component => component.uid === attribute.component);
 
     return isCollapsable
@@ -75,11 +75,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const checkPermission = useCallback(
     action => {
-      return (
-        attributeActions.findIndex(
-          permAction => permAction === `${contentManagerPermissionPrefix}.${action}`
-        ) !== -1
-      );
+      return attributeActions.findIndex(permAction => permAction === action) !== -1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [contentTypesPermissions, attribute]
@@ -100,16 +96,14 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return (
-      isCollapsable &&
-      recursivePermissions > 0 &&
-      recursivePermissions < getRecursiveAttributes().length
+      isCollapsable && recursivePermissions > 0 && recursivePermissions < recursiveAttributes.length
     );
   };
 
   const allRecursiveChecked = action => {
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
-    return isCollapsable && recursivePermissions === getRecursiveAttributes().length;
+    return isCollapsable && recursivePermissions === recursiveAttributes.length;
   };
 
   return (
@@ -148,9 +142,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
               <PermissionCheckbox
                 disabled
                 key={`${attribute.attributeName}-${action}`}
-                // onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
-                value={allRecursiveChecked(action) || checkPermission(action)}
+                value={
+                  allRecursiveChecked(`${contentManagerPermissionPrefix}.${action}`) ||
+                  checkPermission(`${contentManagerPermissionPrefix}.${action}`)
+                }
                 name={`${attribute.attributeName}-${action}`}
               />
             ))}
