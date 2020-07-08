@@ -132,12 +132,13 @@ describe('User', () => {
       const id = 1;
       const input = { email: 'test@strapi.io', password: '123' };
 
+      const findOne = jest.fn((_, user) => Promise.resolve(user));
       const update = jest.fn((_, user) => Promise.resolve(user));
       const hashPassword = jest.fn(() => Promise.resolve(hash));
 
       global.strapi = {
         query() {
-          return { update };
+          return { update, findOne };
         },
         admin: {
           services: {
@@ -160,11 +161,13 @@ describe('User', () => {
       const user = {
         email: 'test@strapi.io',
       };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
       const update = jest.fn(() => Promise.resolve(user));
 
       global.strapi = {
         query() {
-          return { update };
+          return { update, findOne };
         },
       };
       const id = 1;
