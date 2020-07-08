@@ -6,7 +6,7 @@ const ActiveStatus = styled.div`
     display: inline-block;
     width: 6px;
     height: 6px;
-    margin-top: 3px;
+    margin-bottom: 2px;
     margin-right: 10px;
     border-radius: 50%;
     background-color: ${({ isActive }) => (isActive ? '#38cd29' : '#f64d0a')};
