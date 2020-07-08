@@ -20,7 +20,7 @@ const findMatchingPermissions = (userPermissions, permissions) => {
 const formatPermissionsForRequest = permissions =>
   permissions.map(permission =>
     pickBy(permission, (value, key) => {
-      return ['action', 'subject', 'fields'].includes(key) && !isEmpty(value);
+      return ['action', 'subject'].includes(key) && !isEmpty(value);
     })
   );
 
