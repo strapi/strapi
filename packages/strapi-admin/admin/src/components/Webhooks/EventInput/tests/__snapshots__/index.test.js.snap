@@ -52,6 +52,10 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   cursor: initial;
 }
 
+.c2:disabled:after {
+  color: #9ea7b8;
+}
+
 .c2 + label {
   display: inline-block;
   font-weight: 500;
@@ -114,6 +118,10 @@ exports[`<EventInput /> should match the snapshot 1`] = `
 .c4:disabled {
   background-color: #FAFAFB;
   cursor: initial;
+}
+
+.c4:disabled:after {
+  color: #9ea7b8;
 }
 
 .c4 + label {

@@ -52,6 +52,10 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   cursor: initial;
 }
 
+.c4:disabled:after {
+  color: #9ea7b8;
+}
+
 .c4 + label {
   display: inline-block;
   font-weight: 500;
@@ -114,6 +118,10 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 .c5:disabled {
   background-color: #FAFAFB;
   cursor: initial;
+}
+
+.c5:disabled:after {
+  color: #9ea7b8;
 }
 
 .c5 + label {
@@ -531,11 +539,13 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 .c4:disabled {
   background-color: #FAFAFB;
   cursor: not-allowed;
+  color: #9ea7b8;
 }
 
 .c3 {
   position: relative;
   background-color: #ffffff;
+  border-radius: 2px;
 }
 
 .c3 button[type='button'] {
