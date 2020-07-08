@@ -98,7 +98,7 @@ module.exports = {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.canot(ACTIONS.read, fileModel)) {
+    if (userAbility.cannot(ACTIONS.read, fileModel)) {
       return ctx.forbidden();
     }
 

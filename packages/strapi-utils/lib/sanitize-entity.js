@@ -32,7 +32,11 @@ const sanitizeEntity = (dataSource, options) => {
 
     // Relations
     const relation = attribute && (attribute.model || attribute.collection || attribute.component);
-    if (relation && value !== null) {
+    if (relation) {
+      if (_.isNil(value)) {
+        return { ...acc, [key]: value };
+      }
+
       const [nextFields, isAllowed] = includeFields
         ? getNextFields(allowedFields, key, { allowedFieldsHasKey })
         : [null, true];
@@ -66,7 +70,6 @@ const sanitizeEntity = (dataSource, options) => {
       );
       return { ...acc, [key]: nextVal };
     }
-
     // Other fields
     const isAllowedField = !includeFields || allowedFieldsHasKey;
     if (isAllowedField) {

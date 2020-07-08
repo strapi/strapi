@@ -110,6 +110,7 @@ const createCollectionTypeController = ({ model, service }) => {
       } else {
         entity = await service.create(ctx.request.body);
       }
+
       return sanitizeEntity(entity, { model });
     },
 
