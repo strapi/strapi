@@ -61,7 +61,7 @@ module.exports = ({ dir, logger = noLog }) => {
     internals.licenseInfo = JSON.parse(content);
 
     if (internals.licenseInfo.expireAt < new Date().getTime()) {
-      return warnAndReturn('License expired');
+      return warnAndReturn('License expired. Starting in CE');
     }
   } catch (err) {
     return warnAndReturn();
