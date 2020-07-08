@@ -36,7 +36,7 @@ module.exports = ({ dir, logger = noLog }) => {
   if (_.has(process.env, 'STRAPI_LICENSE')) {
     license = process.env.STRAPI_LICENSE;
   } else if (fs.existsSync(licensePath)) {
-    license = fs.readFileSync(licensePath);
+    license = fs.readFileSync(licensePath).toString();
   }
 
   if (_.isNil(license)) {
