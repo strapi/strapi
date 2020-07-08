@@ -23,7 +23,6 @@ import {
   CheckPagePermissions,
   request,
 } from 'strapi-helper-plugin';
-import TestEE from 'ee_else_ce/containers/TestEE';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
 
 import adminPermissions from '../../permissions';
@@ -229,8 +228,6 @@ export class Admin extends React.Component {
                 <Switch>
                   <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
                   <Route path="/me" component={ProfilePage} />
-                  {/* TODO remove this Route it is just made for the test */}
-                  <Route path="/test" component={TestEE} />
                   <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
                   <Route path="/list-plugins" exact>
                     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
