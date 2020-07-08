@@ -188,15 +188,15 @@ module.exports = ({
       }),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
         // We might need to improve this if we want to make it work with components
-        const containerPathName = resource.context.split('/containers/');
-        const componentPathName = resource.context.split('/components/');
+        const containerPathName = resource.context.split(`${path.sep}containers${path.sep}`);
+        const componentPathName = resource.context.split(`${path.sep}components${path.sep}`);
         const wantedPath =
           containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
 
         if (useEE) {
           resource.request = resource.request.replace(
             /ee_else_ce/,
-            path.join(wantedPath, '..', 'ee')
+            path.join(wantedPath, '../..', 'ee/admin')
           );
         } else {
           resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
