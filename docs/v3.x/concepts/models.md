@@ -168,6 +168,8 @@ The options key on the model-json states.
 
 - `populateCreatorFields`: Configure whether the API response should include `created_by` and `updated_by` fields or not. Accepts a `boolean`. The default value is `false`.
 
+- `isDisplayed`: This tells the Content Manager if Content Type should be displayed &amp; accessible in the top left menu & manageable by any role. Accepts `boolean`. Default value when set to `true`.
+
 **Path —** `User.settings.json`.
 
 ```json
@@ -175,7 +177,8 @@ The options key on the model-json states.
   "options": {
     "timestamps": true,
     "privateAttributes": ["id", "created_at"],
-    "populateCreatorFields": true
+    "populateCreatorFields": true,
+    "isDisplayed": true
   }
 }
 ```

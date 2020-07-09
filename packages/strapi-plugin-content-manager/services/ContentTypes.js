@@ -54,13 +54,19 @@ const deleteConfiguration = uid => {
   return storeUtils.deleteKey(storeKey);
 };
 
+const isContentTypeDisplayed = contentType => {
+  const isHiddenByCore = HIDDEN_CONTENT_TYPES.includes(contentType.uid);
+  const isDisplayed = _.get(contentType, 'options.isDisplayed', true);
+  return !isHiddenByCore && isDisplayed;
+};
+
 const formatContentType = contentType => {
   return {
     uid: contentType.uid,
     name: _.get(contentType, ['info', 'name']),
     apiID: contentType.modelName,
     label: formatContentTypeLabel(contentType),
-    isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
+    isDisplayed: isContentTypeDisplayed(contentType),
     schema: {
       ...formatContentTypeSchema(contentType),
       kind: contentType.kind || 'collectionType',
