@@ -104,6 +104,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     attributes,
     shouldEnable,
     shouldSetAllContentTypes,
+    shouldAddDeleteAction,
   }) => {
     dispatch({
       type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
@@ -111,6 +112,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
       attributes,
       shouldEnable,
       shouldSetAllContentTypes,
+      shouldAddDeleteAction,
     });
   };
 
