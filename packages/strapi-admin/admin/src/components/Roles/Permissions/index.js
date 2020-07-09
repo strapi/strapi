@@ -104,6 +104,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     attributes,
     shouldEnable,
     shouldSetAllContentTypes,
+    shouldAddDeleteAction,
   }) => {
     dispatch({
       type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
@@ -111,6 +112,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
       attributes,
       shouldEnable,
       shouldSetAllContentTypes,
+      shouldAddDeleteAction,
     });
   };
 
@@ -123,11 +125,12 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     });
   };
 
-  const handleAllAttributeActionsSelect = ({ subject, attribute }) => {
+  const handleAllAttributeActionsSelect = ({ subject, attribute, shouldAddDeleteAction }) => {
     dispatch({
       type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
       subject,
       attribute,
+      shouldAddDeleteAction,
     });
   };
 

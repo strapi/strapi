@@ -81,11 +81,13 @@ const AttributeRow = ({ attribute, contentType }) => {
         attributes,
         shouldEnable,
         shouldSetAllContentTypes: false,
+        shouldAddDeleteAction: true,
       });
     } else {
       onAllAttributeActionsSelect({
         subject: contentType.uid,
         attribute: attribute.attributeName,
+        shouldAddDeleteAction: true,
       });
     }
   };

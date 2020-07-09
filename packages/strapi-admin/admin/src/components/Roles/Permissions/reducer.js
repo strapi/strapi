@@ -91,7 +91,8 @@ const reducer = (state, action) =>
       }
       // This reducer action is used to enable/disable a single attribute action
       case 'ALL_ATTRIBUTE_ACTIONS_SELECT': {
-        const { subject, attribute } = action;
+        const { subject, attribute, shouldAddDeleteAction } = action;
+
         const isAll =
           get(state.contentTypesPermissions, [subject, 'attributes', attribute, 'actions'], [])
             .length === staticAttributeActions.length;
@@ -114,7 +115,6 @@ const reducer = (state, action) =>
           [subject, 'contentTypeActions'],
           {}
         );
-        const permissionsLayout = get(state.permissionsLayout, ['sections', 'contentTypes'], []);
 
         draftState.contentTypesPermissions[subject] = {
           ...get(state.contentTypesPermissions, [subject], {}),
@@ -122,7 +122,7 @@ const reducer = (state, action) =>
           contentTypeActions: generateContentTypeActions(
             subjectPermissions,
             existingContentTypeActions,
-            permissionsLayout
+            shouldAddDeleteAction
           ),
         };
 
@@ -305,7 +305,13 @@ const reducer = (state, action) =>
       // This reducer action is used to enable/disable all
       // content type attributes actions recursively
       case 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT': {
-        const { subject, attributes, shouldEnable, shouldSetAllContentTypes } = action;
+        const {
+          subject,
+          attributes,
+          shouldEnable,
+          shouldSetAllContentTypes,
+          shouldAddDeleteAction,
+        } = action;
         const staticActionsName = get(
           state.permissionsLayout,
           ['sections', 'contentTypes'],
@@ -338,14 +344,13 @@ const reducer = (state, action) =>
           [subject, 'contentTypeActions'],
           {}
         );
-        const permissionsLayout = get(state.permissionsLayout, ['sections', 'contentTypes'], []);
 
         const contentTypeActions = shouldSetAllContentTypes
           ? contentTypeLayoutAction
           : generateContentTypeActions(
               attributesActions,
               existingContentTypeActions,
-              permissionsLayout
+              shouldAddDeleteAction
             );
 
         draftState.contentTypesPermissions[subject] = {
