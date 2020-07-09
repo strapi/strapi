@@ -341,7 +341,7 @@ DATABASE_URI=mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.m
 ::: warning NOTE
 The above configuration will create a database called `strapi`, the _default database_ Strapi sets for any **MongoDB** database. If you would like to name your database something else, add the following **key:value pair** into your **settings:** located in your `database.js` file.
 
-`database: "my-database-name"`
+`database: 'my-database-name'`
 
 :::
 
