@@ -122,7 +122,7 @@ const reducer = (state, action) =>
           contentTypeActions: generateContentTypeActions(
             subjectPermissions,
             existingContentTypeActions,
-            shouldAddDeleteAction || false
+            shouldAddDeleteAction
           ),
         };
 
@@ -305,7 +305,13 @@ const reducer = (state, action) =>
       // This reducer action is used to enable/disable all
       // content type attributes actions recursively
       case 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT': {
-        const { subject, attributes, shouldEnable, shouldSetAllContentTypes } = action;
+        const {
+          subject,
+          attributes,
+          shouldEnable,
+          shouldSetAllContentTypes,
+          shouldAddDeleteAction,
+        } = action;
         const staticActionsName = get(
           state.permissionsLayout,
           ['sections', 'contentTypes'],
@@ -341,7 +347,11 @@ const reducer = (state, action) =>
 
         const contentTypeActions = shouldSetAllContentTypes
           ? contentTypeLayoutAction
-          : generateContentTypeActions(attributesActions, existingContentTypeActions);
+          : generateContentTypeActions(
+              attributesActions,
+              existingContentTypeActions,
+              shouldAddDeleteAction
+            );
 
         draftState.contentTypesPermissions[subject] = {
           ...get(state.contentTypesPermissions, [subject], {}),

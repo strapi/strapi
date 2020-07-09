@@ -33,6 +33,7 @@ const generateContentTypeActions = (
     return {
       ...generatedContentTypeActions,
       ...additionalActions,
+      // TODO : Add all permissionLayout actions
       'plugins::content-manager.explorer.delete': true,
     };
   }

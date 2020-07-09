@@ -81,6 +81,7 @@ const AttributeRow = ({ attribute, contentType }) => {
         attributes,
         shouldEnable,
         shouldSetAllContentTypes: false,
+        shouldAddDeleteAction: true,
       });
     } else {
       onAllAttributeActionsSelect({
