@@ -86,6 +86,7 @@ const AttributeRow = ({ attribute, contentType }) => {
       onAllAttributeActionsSelect({
         subject: contentType.uid,
         attribute: attribute.attributeName,
+        shouldAddDeleteAction: true,
       });
     }
   };
