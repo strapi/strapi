@@ -11,7 +11,7 @@ const userCreationSchema = yup
     email: validators.email.required(),
     firstname: validators.firstname.required(),
     lastname: validators.lastname.required(),
-    roles: validators.roles, // FIXME: set min to 1 once the create  role API is created,
+    roles: validators.roles.min(1),
   })
   .noUnknown();
 
