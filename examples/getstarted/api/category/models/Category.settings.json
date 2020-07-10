@@ -15,8 +15,8 @@
       "type": "string"
     },
     "addresses": {
-      "collection": "address",
-      "via": "categories"
+      "via": "categories",
+      "collection": "address"
     }
   }
 }
