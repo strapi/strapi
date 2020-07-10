@@ -35,7 +35,7 @@ module.exports = (ability, action, model) => ({
   queryFrom(query) {
     return {
       ...query,
-      _where: _.concat(this.query, query._where || {}),
+      _where: query._where ? _.concat(this.query, query._where) : [this.query],
     };
   },
 
@@ -52,10 +52,14 @@ module.exports = (ability, action, model) => ({
     }
 
     const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
+    const hasAtLeastOneRegisteredField = _.some(
+      _.flatMap(ability.rulesFor(actionOverride, subject).map(_.property('fields')))
+    );
+    const shouldIncludeAllFields = _.isEmpty(permittedFields) && !hasAtLeastOneRegisteredField;
 
     return sanitizeEntity(data, {
       model: strapi.getModel(model),
-      includeFields: _.isEmpty(permittedFields) ? null : permittedFields,
+      includeFields: shouldIncludeAllFields ? null : permittedFields,
       withPrivate,
       isOutput,
     });
