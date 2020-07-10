@@ -65,7 +65,8 @@ module.exports = conditionProvider => ({
    * @returns {Promise<void>}
    */
   async evaluatePermission({ permission, user, options, registerFn }) {
-    const { action, subject, fields, conditions } = permission;
+    const { action, fields, conditions } = permission;
+    const subject = permission.subject || 'all';
 
     // Permissions with empty fields array should be removed
     if (Array.isArray(fields) && fields.length === 0) {
@@ -96,7 +97,7 @@ module.exports = conditionProvider => ({
     // Transform each result into registerFn options
     const transformToRegisterOptions = map(result => ({
       action,
-      subject: subject || 'all',
+      subject,
       fields,
       condition: result,
     }));
