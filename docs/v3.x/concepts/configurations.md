@@ -176,6 +176,8 @@ module.exports = ({ env }) => ({
 | `cron` | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule)) | Object | |
 | `cron.enabled` | Enable or disable CRON tasks to schedule jobs at specific dates. | boolean | `false` |
 | `admin` | Admin panel configuration | Object | |
+| `admin.auth` | Authentication configuration | Object | |
+| `admin.auth.secret`| Secret used to encode JWT tokens | string| `undefined` |
 | `admin.url` | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`. | string | `/admin` |
 | `admin.autoOpen` | Enable or disabled administration opening on start. | boolean | `true` |
 | `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). | Array(string) | `[]` |
