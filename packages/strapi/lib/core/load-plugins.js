@@ -2,13 +2,14 @@
 
 const { join } = require('path');
 const { existsSync } = require('fs-extra');
+const { readdirSync } = require('fs');
 const _ = require('lodash');
 const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
 const loadConfig = require('../load/load-config-files');
 
 module.exports = async ({ dir, config }) => {
-  const localPlugins = await loadLocalPlugins({ dir });
+  const localPlugins = await loadLocalPlugins({ dir, config });
   const plugins = await loadPlugins({
     installedPlugins: config.installedPlugins,
     config,
@@ -28,17 +29,28 @@ module.exports = async ({ dir, config }) => {
   return _.merge(plugins, localPlugins);
 };
 
-const loadLocalPlugins = async ({ dir }) => {
+const loadLocalPlugins = async ({ dir, config }) => {
   const pluginsDir = join(dir, 'plugins');
 
   if (!existsSync(pluginsDir)) return {};
 
-  const [files, configs] = await Promise.all([
-    loadFiles(pluginsDir, '{*/!(config)/*.*(js|json),*/package.json}'),
-    loadConfig(pluginsDir, '*/config/**/*.+(js|json)'),
-  ]);
+  const plugins = {};
 
-  return _.merge(files, configs);
+  for (const plugin of readdirSync(pluginsDir)) {
+    if (typeof config.plugins[plugin] !== 'undefined' && config.plugins[plugin].enabled === false)
+      continue;
+
+    const pluginDir = join(pluginsDir, plugin);
+
+    const [files, configs] = await Promise.all([
+      loadFiles(pluginDir, '{!(config)/*.*(js|json),package.json}'),
+      loadConfig(pluginDir, 'config/**/*.+(js|json)'),
+    ]);
+
+    plugins[plugin] = _.merge(files, configs);
+  }
+
+  return plugins;
 };
 
 const loadPlugins = async ({ installedPlugins, config }) => {
