@@ -45,6 +45,9 @@ const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
 
   for (let plugin of installedPlugins) {
+    if (typeof config.plugins[plugin] !== 'undefined' && config.plugins[plugin].enabled === false)
+      continue;
+
     const pluginPath = findPackagePath(`strapi-plugin-${plugin}`);
 
     const files = await loadFiles(
