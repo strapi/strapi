@@ -1,6 +1,6 @@
 # Strapi plugin
 
-After you need to set the provider values in the admin panel, you can override the srapi provided value using the following method.
+After you need to set the provider values in the admin panel, you can override the strapi provided value using the following method.
 
 Create a file `provider.js` on the `./config` folder
 
