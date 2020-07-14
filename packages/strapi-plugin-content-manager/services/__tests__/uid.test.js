@@ -132,6 +132,43 @@ describe('Test uid service', () => {
       expect(uidWithEmptyTarget).toBe('my-test-model');
     });
 
+    test('Uses options for generation', async () => {
+      global.strapi = {
+        contentTypes: {
+          'my-model': {
+            modelName: 'myTestModel',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              slug: {
+                type: 'uid',
+                targetField: 'title',
+                options: { lowercase: false },
+              },
+            },
+          },
+        },
+        db: {
+          query() {
+            return {
+              find: async () => [],
+            };
+          },
+        },
+      };
+
+      const uid = await uidService.generateUIDField({
+        contentTypeUID: 'my-model',
+        field: 'slug',
+        data: {
+          title: 'Test title',
+        },
+      });
+
+      expect(uid).toBe('Test-title');
+    });
+
     test('Ignores minLength attribute (should be handle by the user)', async () => {
       global.strapi = {
         contentTypes: {

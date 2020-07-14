@@ -30,13 +30,13 @@ const buildMutation = (mutationName, config) => {
 
   // custom resolvers
   if (_.isFunction(resolver)) {
-    return async (root, options = {}, graphqlContext) => {
+    return async (root, options = {}, graphqlContext, info) => {
       const ctx = buildMutationContext({ options, graphqlContext });
 
       await policiesMiddleware(ctx);
       graphqlContext.context = ctx;
 
-      return resolver(root, options, graphqlContext);
+      return resolver(root, options, graphqlContext, info);
     };
   }
 
@@ -91,13 +91,13 @@ const buildQuery = (queryName, config) => {
 
   // custom resolvers
   if (_.isFunction(resolver)) {
-    return async (root, options = {}, graphqlContext) => {
+    return async (root, options = {}, graphqlContext, info) => {
       const { ctx, opts } = buildQueryContext({ options, graphqlContext });
 
       await policiesMiddleware(ctx);
       graphqlContext.context = ctx;
 
-      return resolver(root, opts, graphqlContext);
+      return resolver(root, opts, graphqlContext, info);
     };
   }
 

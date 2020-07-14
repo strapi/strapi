@@ -3,8 +3,7 @@
  * Controller
  *
  */
-
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { get, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -14,27 +13,19 @@ import InputCheckbox from '../InputCheckboxPlugin';
 
 import { Header, Label, Separator, Wrapper } from './Components';
 
-function Controller({ actions, inputNamePath, isOpen, name }) {
+function Controller({ actions, inputNamePath, isOpen, name, inputSelected, setInputSelected }) {
   const { selectAllActions } = useEditPageContext();
-  const [inputSelected, setInputSelected] = useState('');
 
   const areAllActionsSelected = () => {
-    return Object.keys(actions).every(
-      action => actions[action].enabled === true
-    );
+    return Object.keys(actions).every(action => actions[action].enabled === true);
   };
 
   const handleChange = () => {
-    selectAllActions(
-      `${inputNamePath}.controllers.${name}`,
-      !areAllActionsSelected()
-    );
+    selectAllActions(`${inputNamePath}.controllers.${name}`, !areAllActionsSelected());
   };
 
   const hasSomeActionsSelected = () => {
-    return Object.keys(actions).some(
-      action => actions[action].enabled === true
-    );
+    return Object.keys(actions).some(action => actions[action].enabled === true);
   };
 
   const setNewInputSelected = name => {
