@@ -8,11 +8,6 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-// Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
-const isNumeric = value => {
-  return !_.isObject(value) && !isNaN(parseFloat(value)) && isFinite(value);
-};
-
 /*
  * Set of utils for models
  */
@@ -435,108 +430,5 @@ module.exports = {
       strapi.log.error(e);
       strapi.stop();
     }
-  },
-
-  convertParams: (entity, params) => {
-    if (!entity) {
-      throw new Error(
-        "You can't call the convert params method without passing the model's name as a first argument."
-      );
-    }
-
-    // Remove the source params (that can be sent from the ctm plugin) since it is not a filter
-    if (params.source) {
-      delete params.source;
-    }
-
-    const model = entity.toLowerCase();
-
-    const models = _.assign(
-      _.clone(strapi.models),
-      _.clone(strapi.admin.models),
-      Object.keys(strapi.plugins).reduce((acc, current) => {
-        _.assign(acc, _.get(strapi.plugins[current], ['models'], {}));
-        return acc;
-      }, {})
-    );
-
-    if (!_.has(models, model)) {
-      return this.log.error(`The model ${model} can't be found.`);
-    }
-
-    const client = models[model].client;
-    const connector = models[model].orm;
-
-    if (!connector) {
-      throw new Error(`Impossible to determine the ORM used for the model ${model}.`);
-    }
-
-    const convertor = strapi.db.connectors.get(connector).getQueryParams;
-    const convertParams = {
-      where: {},
-      sort: '',
-      start: 0,
-      limit: 100,
-    };
-
-    _.forEach(params, (value, key) => {
-      let result;
-      let formattedValue;
-      let modelAttributes = models[model]['attributes'];
-      let fieldType;
-      // Get the field type to later check if it's a string before number conversion
-      if (modelAttributes[key]) {
-        fieldType = modelAttributes[key]['type'];
-      } else {
-        // Remove the filter keyword at the end
-        let splitKey = key.split('_').slice(0, -1);
-        splitKey = splitKey.join('_');
-        if (modelAttributes[splitKey]) {
-          fieldType = modelAttributes[splitKey]['type'];
-        }
-      }
-      // Check if the value is a valid candidate to be converted to a number value
-      if (fieldType !== 'string') {
-        formattedValue = isNumeric(value) ? _.toNumber(value) : value;
-      } else {
-        formattedValue = value;
-      }
-
-      if (_.includes(['_start', '_limit', '_populate'], key)) {
-        result = convertor(formattedValue, key);
-      } else if (key === '_sort') {
-        const [attr, order = 'ASC'] = formattedValue.split(':');
-        result = convertor(order, key, attr);
-      } else {
-        const suffix = key.split('_');
-        // Mysql stores boolean as 1 or 0
-        if (
-          client === 'mysql' &&
-          _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean'
-        ) {
-          formattedValue = value.toString() === 'true' ? '1' : '0';
-        }
-
-        let type;
-
-        if (
-          _.includes(
-            ['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in', 'nin'],
-            _.last(suffix)
-          )
-        ) {
-          type = `_${_.last(suffix)}`;
-          key = _.dropRight(suffix).join('_');
-        } else {
-          type = '=';
-        }
-
-        result = convertor(formattedValue, type, key);
-      }
-
-      _.set(convertParams, result.key, result.value);
-    });
-
-    return convertParams;
   },
 };
