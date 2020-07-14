@@ -37,8 +37,7 @@ const loadLocalPlugins = async ({ dir, config }) => {
   const plugins = {};
 
   for (const plugin of readdirSync(pluginsDir)) {
-    if (typeof config.plugins[plugin] !== 'undefined' && config.plugins[plugin].enabled === false)
-      continue;
+    if (_.isUndefined(config.plugins[plugin]) && config.plugins[plugin].enabled === false) continue;
 
     const pluginDir = join(pluginsDir, plugin);
 
@@ -57,8 +56,7 @@ const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
 
   for (let plugin of installedPlugins) {
-    if (typeof config.plugins[plugin] !== 'undefined' && config.plugins[plugin].enabled === false)
-      continue;
+    if (_.isUndefined(config.plugins[plugin]) && config.plugins[plugin].enabled === false) continue;
 
     const pluginPath = findPackagePath(`strapi-plugin-${plugin}`);
 
