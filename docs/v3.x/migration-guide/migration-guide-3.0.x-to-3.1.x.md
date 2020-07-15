@@ -6,15 +6,17 @@
 
 1. [Upgrading your dependencies](#_1-upgrading-your-dependencies)
 2. [Define the admin JWT Token](#_2-define-the-admin-jwt-token)
-3. [Migrate you custom admin panel plugins](#_3-migrate-your-custom-admin-panel-plugins)
+3. [Migrate your custom admin panel plugins](#_3-migrate-your-custom-admin-panel-plugins)
 4. [Rebuild the admin panel](#_4-rebuild-the-admin-panel)
 
 ## 1. Upgrading your dependencies
 
 First, run the following command to get the last version of `3.1.x`:
+
 ```bash
 npm info strapi@3.1.x version
 ```
+
 Then, update your `package.json` with the highest version given by the previous command.
 
 **Example —** `package.json`
@@ -68,19 +70,19 @@ module.exports = ({ env }) => ({
 ```
 
 ::: warning
-For security concerns, you must change `example-secret` by your own sophisticated secret.
+For security concerns, you must change `example-secret` by your own sophisticated secret and secure secret.
+You can generate one with `openssl rand 64 | base64` (unix users) or `node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"` (all users).
 :::
 
 :::tip NOTE
-All the administrator will be disconnected from the app and will need to log in again.
+All currently logged in administrators will be disconnected from the app and will need to log in again.
 :::
-
 
 ## 3. Migrate your custom admin panel plugins
 
 If you don't have custom plugins, you can jump to the next section.
 
-In  order to display your custom plugin link into the mail `LeftMenu` you need to update the plugin registration by adding `icon`, `name` and `menu` in the following file.
+In order to display your custom plugin link into the mail `LeftMenu` you need to update the plugin registration by adding `icon`, `name` and `menu` in the following file.
 
 **Path —** `plugins/${pluginName}/admin/src/index.js`
 
@@ -120,7 +122,5 @@ yarn build --clean
 # or
 npm run build -- --clean
 ```
-
-
 
 🎉 Congrats, your application has been migrated!
