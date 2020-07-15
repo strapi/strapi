@@ -167,8 +167,6 @@ function Inputs({
     }
 
     if (isChildOfDynamicZone) {
-      // TODO we can simply return true here if we block the dynamic zone
-
       return readableFields.includes(fieldName[0]);
     }
 

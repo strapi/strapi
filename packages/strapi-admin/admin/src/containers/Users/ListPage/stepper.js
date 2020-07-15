@@ -13,13 +13,6 @@ const stepper = {
     isDisabled: true,
     next: null,
   },
-  // TODO: I am not sure this step is needed we might need to delete it
-  summary: {
-    buttonSubmitLabel: 'form.button.done',
-    Component: () => 'COMING SOON',
-    isDisabled: false,
-    next: null,
-  },
 };
 
 export default stepper;

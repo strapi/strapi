@@ -6,7 +6,6 @@ import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
-// import useDataManager from '../../hooks/useDataManager';
 import ItemTypes from '../../utils/ItemTypes';
 import connect from './utils/connect';
 import select from './utils/select';

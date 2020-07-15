@@ -75,7 +75,6 @@ const AuthPage = ({ hasAdmin }) => {
         }
       };
 
-      // TODO API call
       getData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

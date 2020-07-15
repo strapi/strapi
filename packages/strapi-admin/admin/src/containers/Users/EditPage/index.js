@@ -23,8 +23,6 @@ const EditPage = ({ canUpdate }) => {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/users/:id`);
 
-  // @HichamELBSI leaving this empty right now as we might need to handle the submit success in case the user is editing its profile
-  // in order to update the localStorage.
   const cbSuccess = data => {
     const userInfos = auth.getUserInfo();
 
