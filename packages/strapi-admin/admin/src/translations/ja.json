@@ -188,7 +188,6 @@
   "Auth.form.error.password.matching": "パスワードが一致していません。",
   "Auth.form.error.password.provide": "パスワードを入力してください。",
   "Auth.form.error.ratelimit": "試行回数が多すぎる場合は、もう一度試してください。",
-  "Auth.form.error.user.not-exist": "このメールは存在しません。",
   "Auth.form.error.username.taken": "ユーザー名は既に使われています。",
   "Auth.form.forgot-password.email.label": "メールアドレスを入力",
   "Auth.form.forgot-password.email.label.success": "Eメールが正常に送信されました",

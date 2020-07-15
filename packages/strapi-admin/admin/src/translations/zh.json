@@ -166,7 +166,6 @@
   "Auth.form.error.password.matching": "密碼不符",
   "Auth.form.error.password.provide": "請輸入您的密碼",
   "Auth.form.error.ratelimit": "過多請求，請稍後再試。",
-  "Auth.form.error.user.not-exist": "這個電子郵件地址不存在",
   "Auth.form.error.username.taken": "使用者名稱已被使用",
   "Auth.form.forgot-password.email.label": "輸入您的電子郵件地址",
   "Auth.form.forgot-password.email.label.success": "郵件成功寄出",

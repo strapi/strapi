@@ -199,7 +199,6 @@
   "Auth.form.error.password.matching": "Heslá sa nezhodujú.",
   "Auth.form.error.password.provide": "Prosím zadajte vaše heslo.",
   "Auth.form.error.ratelimit": "Príliš veľa pokusov, voľbu opakujte neskôr.",
-  "Auth.form.error.user.not-exist": "E-mailová adresa neexistuje.",
   "Auth.form.error.username.taken": "Používateľské meno je už registrované",
   "Auth.form.forgot-password.email.label": "Zadajte e-mailovú adresu",
   "Auth.form.forgot-password.email.label.success": "Email bol odoslaný na adresu",

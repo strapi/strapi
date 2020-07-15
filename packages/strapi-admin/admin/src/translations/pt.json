@@ -209,7 +209,6 @@
   "Auth.form.error.password.matching": "As palavra-passes não coincidem.",
   "Auth.form.error.password.provide": "Por favor digita a tua palavra-passe.",
   "Auth.form.error.ratelimit": "Demasiadas tentativas, por favor tenta novamente daqui a um minuto.",
-  "Auth.form.error.user.not-exist": "Este email não existe.",
   "Auth.form.error.username.taken": "Este nome de utilizador já está a ser utilizado.",
   "Auth.form.forgot-password.email.label": "Introduz o teu email",
   "Auth.form.forgot-password.email.label.success": "Email enviado com sucesso",

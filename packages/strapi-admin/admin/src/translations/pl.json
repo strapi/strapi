@@ -201,7 +201,6 @@
   "Auth.form.error.password.matching": "Hasła się nie zgadzają.",
   "Auth.form.error.password.provide": "Podaj hasło.",
   "Auth.form.error.ratelimit": "Zbyt wiele prób, spróbuj ponownie później.",
-  "Auth.form.error.user.not-exist": "Ten email nie istnieje.",
   "Auth.form.error.username.taken": "Nazwa użytkownika jest już zajęta",
   "Auth.form.forgot-password.email.label": "Email",
   "Auth.form.forgot-password.email.label.success": "E-mail wysłany z powodzeniem do",

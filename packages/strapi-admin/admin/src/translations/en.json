@@ -213,7 +213,6 @@
   "Auth.form.error.password.matching": "Passwords do not match.",
   "Auth.form.error.password.provide": "Please provide your password.",
   "Auth.form.error.ratelimit": "Too many attempts, please try again in a minute.",
-  "Auth.form.error.user.not-exist": "This email does not exist.",
   "Auth.form.error.username.taken": "Username is already taken.",
   "Auth.form.forgot-password.email.label": "Enter your email",
   "Auth.form.forgot-password.email.label.success": "Email successfully sent to",

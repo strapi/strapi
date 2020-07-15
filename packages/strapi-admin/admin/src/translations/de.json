@@ -192,7 +192,6 @@
   "Auth.form.error.password.matching": "Passwörter sind nicht gleich.",
   "Auth.form.error.password.provide": "Bitte gib dein Passwort ein.",
   "Auth.form.error.ratelimit": "Zu viele Versuche, bitte versuchen Sie es in einer Minute erneut.",
-  "Auth.form.error.user.not-exist": "Diese E-Mail-Adresse ist nicht registriert.",
   "Auth.form.error.username.taken": "Der Benutzername ist bereits vergeben",
   "Auth.form.forgot-password.email.label": "Gib deine E-Mail ein",
   "Auth.form.forgot-password.email.label.success": "Eine E-Mail wurde erfolgreich verschickt an",

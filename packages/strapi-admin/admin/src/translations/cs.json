@@ -198,7 +198,6 @@
   "Auth.form.error.password.matching": "Hesla se neshodují.",
   "Auth.form.error.password.provide": "Zadejte své heslo.",
   "Auth.form.error.ratelimit": "Příliš mnoho pokusů, prosím, zkuste to znovu za chvíli.",
-  "Auth.form.error.user.not-exist": "Tento e-mail neexistuje.",
   "Auth.form.error.username.taken": "Uživatelské jméno je již obsazeno.",
   "Auth.form.forgot-password.email.label": "Zadejte svůj e-mail",
   "Auth.form.forgot-password.email.label.success": "E-mail úspěšně odeslán na",

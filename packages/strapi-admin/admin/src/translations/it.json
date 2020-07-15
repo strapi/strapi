@@ -209,7 +209,6 @@
   "Auth.form.error.password.matching": "La password non corrisponde.",
   "Auth.form.error.password.provide": "Per favore fornisci la tua password",
   "Auth.form.error.ratelimit": "Troppi tentativi, riprova tra un minuto.",
-  "Auth.form.error.user.not-exist": "Questa email non esiste.",
   "Auth.form.error.username.taken": "Nome utente già utilizzato.",
   "Auth.form.forgot-password.email.label": "Inserisci la tua email",
   "Auth.form.forgot-password.email.label.success": "Email inviata correttamente",

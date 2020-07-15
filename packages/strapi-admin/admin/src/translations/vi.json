@@ -194,7 +194,6 @@
   "Auth.form.error.password.matching": "Những mật khẩu không khớp.",
   "Auth.form.error.password.provide": "Vui lòng cung cấp mật khẩu của bạn.",
   "Auth.form.error.ratelimit": "Thử quá nhiều lần, vui lòng thử lại trong một phút",
-  "Auth.form.error.user.not-exist": "Email này chưa tồn tại.",
   "Auth.form.error.username.taken": "Tên đăng nhập đã bị lấy.",
   "Auth.form.forgot-password.email.label": "Nhập email của bạn",
   "Auth.form.forgot-password.email.label.success": "Email đã gửi thành công đến",

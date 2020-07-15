@@ -210,7 +210,6 @@
   "Auth.form.error.password.matching": "Паролі не співпадають.",
   "Auth.form.error.password.provide": "Вкажіть свій пароль, будь ласка.",
   "Auth.form.error.ratelimit": "Забагато спроб, будь ласка, спробуйте знову через хвилинку.",
-  "Auth.form.error.user.not-exist": "Цього email не існує.",
   "Auth.form.error.username.taken": "Це ім'я користувача вже використовується.",
   "Auth.form.forgot-password.email.label": "Вкажіть свій email",
   "Auth.form.forgot-password.email.label.success": "Ми надіслали вам листа до",

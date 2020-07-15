@@ -206,7 +206,6 @@
   "Auth.form.error.password.matching": "Kata laluan tidak sepadan.",
   "Auth.form.error.password.provide": "Sila isikan kata laluan anda.",
   "Auth.form.error.ratelimit": "Terlalu banyak percubaan, sila cuba sebentar lagi.",
-  "Auth.form.error.user.not-exist": "E-mel ini tidak wujud.",
   "Auth.form.error.username.taken": "Nama pengguna sudah diambil.",
   "Auth.form.forgot-password.email.label": "Masukkan emel anda",
   "Auth.form.forgot-password.email.label.success": "E-mel berjaya dihantar ke",

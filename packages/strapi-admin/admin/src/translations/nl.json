@@ -21,7 +21,6 @@
   "Auth.form.error.password.matching": "Wachtwoorden komen niet overeen.",
   "Auth.form.error.password.provide": "Voer a.u.b je wachtwoord in.",
   "Auth.form.error.ratelimit": "Teveel pogingen, gelieve opnieuw te proberen binnen een minuut.",
-  "Auth.form.error.user.not-exist": "Dit e-mailadres bestaat niet.",
   "Auth.form.error.username.taken": "Gebruikersnaam is al in gebruik",
   "Auth.form.forgot-password.email.label": "Voer je e-mail in",
   "Auth.form.forgot-password.email.label.success": "E-mail succesvol verstuurt naar",

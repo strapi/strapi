@@ -207,7 +207,6 @@
   "Auth.form.error.password.matching": "Пароль не соответствует.",
   "Auth.form.error.password.provide": "Укажите свой пароль.",
   "Auth.form.error.ratelimit": "Слишком много попыток, повторите через минуту",
-  "Auth.form.error.user.not-exist": "Этот e-mail не существует.",
   "Auth.form.error.username.taken": "Имя пользователя уже используется",
   "Auth.form.forgot-password.email.label": "Введите ваш e-mail",
   "Auth.form.forgot-password.email.label.success": "Письмо успешно отправлено e-mail",

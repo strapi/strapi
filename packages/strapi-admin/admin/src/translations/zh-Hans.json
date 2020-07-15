@@ -205,7 +205,6 @@
   "Auth.form.error.password.matching": "密码不匹配。",
   "Auth.form.error.password.provide": "请提供您的密码。",
   "Auth.form.error.ratelimit": "您尝试的次数过多，请稍后再试。",
-  "Auth.form.error.user.not-exist": "此电子邮件不存在。",
   "Auth.form.error.username.taken": "用户名已被使用",
   "Auth.form.forgot-password.email.label": "输入你的电子邮件",
   "Auth.form.forgot-password.email.label.success": "电子邮件已成功发送到",

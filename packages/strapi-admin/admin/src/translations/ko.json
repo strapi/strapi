@@ -194,7 +194,6 @@
   "Auth.form.error.password.matching": "패스워드가 일치하지 않습니다.",
   "Auth.form.error.password.provide": "패스워드를 입력해 주세요.",
   "Auth.form.error.ratelimit": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
-  "Auth.form.error.user.not-exist": "이메일이 없습니다.",
   "Auth.form.error.username.taken": "이미 사용 중인 아이디입니다.",
   "Auth.form.forgot-password.email.label": "메일 주소를 입력하세요.",
   "Auth.form.forgot-password.email.label.success": "메일을 보냈습니다.",

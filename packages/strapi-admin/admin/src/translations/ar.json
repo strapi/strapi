@@ -164,7 +164,6 @@
   "Auth.form.error.password.local": "لم يقم هذا المستخدم بتعيين كلمة مرور محلية مطلقًا ، الرجاء تسجيل الدخول عبر الموفر المستخدم أثناء إنشاء الحساب.",
   "Auth.form.error.password.matching": "كلمة المرور غير مطابقة.",
   "Auth.form.error.password.provide": "يرجى تقديم كلمة المرور الخاصة بك.",
-  "Auth.form.error.user.not-exist": "هذا الإميل غير موجود.",
   "Auth.form.error.username.taken": "اسم المستخدم مسجل بالفعل",
   "Auth.form.forgot-password.email.label": "ادخل ايميلك",
   "Auth.form.forgot-password.email.label.success": "تم إرسال الرسالة بنجاح الى",
