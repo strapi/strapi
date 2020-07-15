@@ -1,7 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const { validateUserCreationInput, validateUserUpdateInput } = require('../validation/user');
+const {
+  validateUserCreationInput,
+  validateUserUpdateInput,
+  validateUsersDeleteInput,
+} = require('../validation/user');
 
 module.exports = {
   async create(ctx) {
@@ -90,7 +94,7 @@ module.exports = {
     };
   },
 
-  async delete(ctx) {
+  async deleteOne(ctx) {
     const { id } = ctx.params;
 
     const deletedUser = await strapi.admin.services.user.deleteById(id);
@@ -101,6 +105,26 @@ module.exports = {
 
     return ctx.deleted({
       data: strapi.admin.services.user.sanitizeUser(deletedUser),
+    });
+  },
+
+  /**
+   * Delete several users
+   * @param {KoaContext} ctx - koa context
+   */
+  async deleteMany(ctx) {
+    const { body } = ctx.request;
+    try {
+      await validateUsersDeleteInput(body);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const users = await strapi.admin.services.user.deleteByIds(body.ids);
+    const sanitizedUsers = users.map(strapi.admin.services.user.sanitizeUser);
+
+    return ctx.deleted({
+      data: sanitizedUsers,
     });
   },
 };

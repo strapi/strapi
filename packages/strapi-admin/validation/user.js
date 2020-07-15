@@ -53,8 +53,24 @@ const validateUserUpdateInput = data => {
   return userUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
+const usersDeleteSchema = yup
+  .object()
+  .shape({
+    ids: yup
+      .array()
+      .of(yup.strapiID())
+      .min(1)
+      .required(),
+  })
+  .noUnknown();
+
+const validateUsersDeleteInput = async data => {
+  return usersDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+};
+
 module.exports = {
   validateUserCreationInput,
   validateProfileUpdateInput,
   validateUserUpdateInput,
+  validateUsersDeleteInput,
 };

@@ -214,7 +214,17 @@
     {
       "method": "DELETE",
       "path": "/users/:id",
-      "handler": "user.delete",
+      "handler": "user.deleteOne",
+      "config": {
+        "policies": [
+          ["admin::hasPermissions", ["admin::users.delete"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/users/batch-delete",
+      "handler": "user.deleteMany",
       "config": {
         "policies": [
           ["admin::hasPermissions", ["admin::users.delete"]]
