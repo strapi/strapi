@@ -53,28 +53,30 @@ let rq;
  *
  * N°   Description
  * -------------------------------------------
- * 1.   Create a user (fail/body)
- * 2.   Create a user (success)
- * 3.   Update a user (success)
- * 4.   Create a user with superAdmin role (success)
- * 5.   Update a user (fail/body)
- * 6.   Get a user (success)
- * 7.   Get a list of users (success/full)
- * 8.   Delete a user (success)
- * 9.   Delete a user (fail/notFound)
- * 10.  Deletes a super admin user (successfully)
- * 11.  Deletes last super admin user (bad request)
- * 12.  Update a user (fail/notFound)
- * 13.  Get a user (fail/notFound)
- * 14.  Get a list of users (success/empty)
+ * 1.  Creates a user (wrong body)
+ * 2.  Creates a user (successfully)
+ * 3.  Creates users with superAdmin role (success)
+ * 4.  Updates a user (wrong body)
+ * 5.  Updates a user (successfully)
+ * 6.  Finds a user (successfully)
+ * 7.  Finds a list of users (contains user)
+ * 8.  Deletes a user (successfully)
+ * 9.  Deletes a user (not found)
+ * 10. Deletes 2 super admin users (successfully)
+ * 11. Deletes a super admin user (successfully)
+ * 12. Deletes last super admin user (bad request)
+ * 13. Deletes last super admin user in batch (bad request)
+ * 14. Updates a user (not found)
+ * 15. Finds a user (not found)
+ * 16. Finds a list of users (missing user)
  */
 
 describe('Admin User CRUD (e2e)', () => {
   // Local test data used across the test suite
   let testData = {
     firstSuperAdminUser: undefined,
+    otherSuperAdminUsers: [],
     user: undefined,
-    secondSuperAdminUser: undefined,
     role: undefined,
     superAdminRole: undefined,
   };
@@ -138,25 +140,28 @@ describe('Admin User CRUD (e2e)', () => {
     testData.user = res.body.data;
   });
 
-  test('3. Creates a user with superAdmin role (success)', async () => {
-    const body = {
-      email: 'user-tests2@strapi-e2e.com',
-      firstname: 'user_tests-firstname',
-      lastname: 'user_tests-lastname',
-      roles: [testData.superAdminRole.id],
+  test('3. Creates users with superAdmin role (success)', async () => {
+    const getBody = index => {
+      return {
+        email: `user-tests${index}@strapi-e2e.com`,
+        firstname: 'user_tests-firstname',
+        lastname: 'user_tests-lastname',
+        roles: [testData.superAdminRole.id],
+      };
     };
 
-    const res = await rq({
-      url: '/admin/users',
-      method: 'POST',
-      body,
-    });
+    for (let i = 0; i < 3; i++) {
+      const res = await rq({
+        url: '/admin/users',
+        method: 'POST',
+        body: getBody(i),
+      });
 
-    expect(res.statusCode).toBe(201);
-    expect(res.body.data).not.toBeNull();
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data).not.toBeNull();
 
-    // Using the created user as an example for the rest of the tests
-    testData.secondSuperAdminUser = res.body.data;
+      testData.otherSuperAdminUsers.push(res.body.data);
+    }
   });
 
   test('4. Updates a user (wrong body)', async () => {
@@ -268,17 +273,32 @@ describe('Admin User CRUD (e2e)', () => {
     expect(res.statusCode).toBe(404);
   });
 
-  test('10. Deletes a super admin user (successfully)', async () => {
+  test('10. Deletes 2 super admin users (successfully)', async () => {
+    const users = testData.otherSuperAdminUsers.splice(0, 2);
     const res = await rq({
-      url: `/admin/users/${testData.secondSuperAdminUser.id}`,
+      url: `/admin/users/batch-delete`,
+      method: 'POST',
+      body: {
+        ids: users.map(u => u.id),
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject(users);
+  });
+
+  test('11. Deletes a super admin user (successfully)', async () => {
+    const user = testData.otherSuperAdminUsers.pop();
+    const res = await rq({
+      url: `/admin/users/${user.id}`,
       method: 'DELETE',
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject(testData.secondSuperAdminUser);
+    expect(res.body.data).toMatchObject(user);
   });
 
-  test('11. Deletes last super admin user (bad request)', async () => {
+  test('12. Deletes last super admin user (bad request)', async () => {
     const res = await rq({
       url: `/admin/users/${testData.firstSuperAdminUser.id}`,
       method: 'DELETE',
@@ -293,7 +313,25 @@ describe('Admin User CRUD (e2e)', () => {
     });
   });
 
-  test('12. Updates a user (not found)', async () => {
+  test('13. Deletes last super admin user in batch (bad request)', async () => {
+    const res = await rq({
+      url: `/admin/users/batch-delete`,
+      method: 'POST',
+      body: {
+        ids: [testData.firstSuperAdminUser.id],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'ValidationError',
+      data: 'You must have at least one user with super admin role.',
+    });
+  });
+
+  test('14. Updates a user (not found)', async () => {
     const body = {
       lastname: 'doe',
     };
@@ -312,7 +350,7 @@ describe('Admin User CRUD (e2e)', () => {
     });
   });
 
-  test('13. Finds a user (not found)', async () => {
+  test('15. Finds a user (not found)', async () => {
     const res = await rq({
       url: `/admin/users/${testData.user.id}`,
       method: 'GET',
@@ -326,7 +364,7 @@ describe('Admin User CRUD (e2e)', () => {
     });
   });
 
-  test('14. Finds a list of users (missing user)', async () => {
+  test('16. Finds a list of users (missing user)', async () => {
     const res = await rq({
       url: `/admin/users?email=${testData.user.email}`,
       method: 'GET',
