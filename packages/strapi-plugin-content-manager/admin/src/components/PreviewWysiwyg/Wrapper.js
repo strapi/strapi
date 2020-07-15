@@ -1,9 +1,9 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 /* eslint-disable */
 
 const Wrapper = styled.div`
-  max-height: calc(100% - 70px);
+  max-height: 555px;
   min-height: 294px;
   overflow: auto;
   padding: 20px 20px 0 20px;
@@ -84,33 +84,26 @@ const Wrapper = styled.div`
     }
   }
 
+  pre,
   code {
-    background-color: rgba(0, 0, 0, 0.05);
+    font-size: 13px;
+    font-family: 'Lato';
     border-radius: 3px;
-    color: #212529;
   }
 
-  pre {
-    padding: 16px;
-    margin-top: 26px;
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 3px;
-
-    code {
-      background-color: transparent;
-    }
-
-    span {
-      font-family: Consolas, monospace !important;
-      font-size: 12px;
-      line-height: 16px;
-      white-space: pre;
+  /* Inline code */
+  p,
+  td {
+    > code {
+      /* We need to add the same color as the theme */
+      background-color: #f8f8f8;
+      color: #333;
     }
   }
 
   ${({ isFullscreen }) => {
     if (isFullscreen) {
-      return css`
+      return `
         max-height: calc(100% - 70px) !important;
         margin-bottom: 0;
         margin-top: 9px;
