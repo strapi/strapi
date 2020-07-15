@@ -2,8 +2,6 @@ import React from 'react';
 import { Inputs } from '@buffetjs/custom';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-// TODO errors trads
-// import { translatedErrors } from 'strapi-helper-plugin';
 
 const Input = ({ error, label, placeholder, ...rest }) => {
   const { formatMessage } = useIntl();

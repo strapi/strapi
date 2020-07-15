@@ -11,8 +11,6 @@ import { initialState, reducer } from './reducer';
 import init from './init';
 import Wrapper from './Wrapper';
 
-// TODO this component should handle the users that are already selected
-// we need to add this logic
 const List = forwardRef(
   (
     { canDelete, canUpdate, data, filters, isLoading, onChange, onClickDelete, searchParam },
@@ -23,7 +21,6 @@ const List = forwardRef(
 
     const { formatMessage } = useGlobalContext();
 
-    // TODO: test the effects we might need to add the isLoading prop in the dependencies array
     useEffect(() => {
       dispatch({
         type: 'SET_DATA',

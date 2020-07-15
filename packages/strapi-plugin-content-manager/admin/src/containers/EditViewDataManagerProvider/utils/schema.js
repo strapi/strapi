@@ -154,10 +154,6 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
           });
 
           if (min) {
-            // TODO remove code
-            // dynamicZoneSchema = dynamicZoneSchema
-            //   .min(min, errorsTrads.min)
-            //   .required(errorsTrads.required);
             dynamicZoneSchema = dynamicZoneSchema
               .test('min', errorsTrads.min, value => {
                 if (isCreatingEntry) {

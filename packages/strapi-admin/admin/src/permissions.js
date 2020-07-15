@@ -22,12 +22,7 @@ const permissions = {
       ],
       create: [{ action: 'admin::roles.create', subject: null }],
       delete: [{ action: 'admin::roles.delete', subject: null }],
-      read: [
-        { action: 'admin::roles.read', subject: null },
-        // NOTE: leaving this commented on purpose
-        // { action: 'admin::roles.delete', subject: null },
-        // { action: 'admin::roles.update', subject: null },
-      ],
+      read: [{ action: 'admin::roles.read', subject: null }],
       update: [{ action: 'admin::roles.update', subject: null }],
     },
     users: {
@@ -39,12 +34,7 @@ const permissions = {
       ],
       create: [{ action: 'admin::users.create', subject: null }],
       delete: [{ action: 'admin::users.delete', subject: null }],
-      read: [
-        { action: 'admin::users.read', subject: null },
-        // NOTE: leaving this commented on purpose
-        // { action: 'admin::users.update', subject: null },
-        // { action: 'admin::users.delete', subject: null },
-      ],
+      read: [{ action: 'admin::users.read', subject: null }],
       update: [{ action: 'admin::users.update', subject: null }],
     },
     webhooks: {
@@ -58,6 +48,7 @@ const permissions = {
       delete: [{ action: 'admin::webhooks.delete', subject: null }],
       read: [
         { action: 'admin::webhooks.read', subject: null },
+        // NOTE: We need to check with the API
         { action: 'admin::webhooks.update', subject: null },
         { action: 'admin::webhooks.delete', subject: null },
       ],

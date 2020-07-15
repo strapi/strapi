@@ -76,7 +76,6 @@ const ModalCreateBody = forwardRef(
 
     return (
       <form onSubmit={handleSubmit}>
-        {/* TODO magic link with token when api ready */}
         {showMagicLink && (
           <>
             <BaselineAlignment top size="18px" />

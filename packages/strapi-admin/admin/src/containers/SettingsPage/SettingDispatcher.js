@@ -7,7 +7,6 @@ import PageTitle from '../../components/SettingsPageTitle';
 const SettingDispatcher = () => {
   const { plugins } = useGlobalContext();
   const { pluginId } = useParams();
-  console.log({ pluginId });
 
   const pluginToRender = get(plugins, [pluginId, 'settings', 'mainComponent'], null);
 

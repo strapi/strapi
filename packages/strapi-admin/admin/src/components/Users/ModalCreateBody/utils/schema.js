@@ -1,6 +1,5 @@
 import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
-// TODO update schema with utils
 
 const schema = yup.object().shape({
   firstname: yup.string().required(translatedErrors.required),

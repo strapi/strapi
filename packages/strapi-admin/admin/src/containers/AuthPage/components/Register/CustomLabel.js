@@ -1,4 +1,3 @@
-// TODO DELETE THIS FILE WHEN AUTH FINISHED
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Text } from '@buffetjs/core';

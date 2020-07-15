@@ -4,18 +4,18 @@ import PropTypes from 'prop-types';
 import ListItem from './ListItem';
 import ListWrapper from './ListWrapper';
 
-const SortList = ({ onClick, selectedItem }) => {
-  const sortOptions = {
-    email_asc: 'email:ASC',
-    email_desc: 'email:DESC',
-    firstname_asc: 'firstname:ASC',
-    firstname_desc: 'firstname:DESC',
-    lastname_asc: 'lastname:ASC',
-    lastname_desc: 'lastname:DESC',
-    username_asc: 'username:ASC',
-    username_desc: 'username:DESC',
-  };
+const sortOptions = {
+  email_asc: 'email:ASC',
+  email_desc: 'email:DESC',
+  firstname_asc: 'firstname:ASC',
+  firstname_desc: 'firstname:DESC',
+  lastname_asc: 'lastname:ASC',
+  lastname_desc: 'lastname:DESC',
+  username_asc: 'username:ASC',
+  username_desc: 'username:DESC',
+};
 
+const SortList = ({ onClick, selectedItem }) => {
   return (
     <ListWrapper>
       {Object.keys(sortOptions).map(item => {

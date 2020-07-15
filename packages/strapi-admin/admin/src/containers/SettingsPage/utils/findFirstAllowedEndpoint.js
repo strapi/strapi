@@ -1,7 +1,7 @@
-const generateArrayOfLinks = object => object.map(({ links }) => links).flat();
+const generateArrayOfLinks = array => array.map(({ links }) => links).flat();
 
-const findFirstAllowedEndpoint = menuObject => {
-  const arrayOfLinks = generateArrayOfLinks(menuObject);
+const findFirstAllowedEndpoint = menuArray => {
+  const arrayOfLinks = generateArrayOfLinks(menuArray);
 
   const link = arrayOfLinks.find(link => link.isDisplayed === true);
 

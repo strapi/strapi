@@ -20,8 +20,6 @@ import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom
 import { useIntl } from 'react-intl';
 import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
 import ProtectedRolesListPage from 'ee_else_ce/containers/Roles/ProtectedListPage';
-// TODO remove this line when feature finished
-// import ProtectedRolesListPage from '../Roles/ProtectedListPage';
 import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
 import { useSettingsMenu } from '../../hooks';
