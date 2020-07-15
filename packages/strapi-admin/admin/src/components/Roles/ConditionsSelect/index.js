@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { intersectionWith, differenceWith } from 'lodash';
 import MenuList from 'ee_else_ce/components/Roles/ConditionsSelect/MenuList';
 import ClearIndicator from './ClearIndicator';
-import DropdownIndicator from './DropdownIndicator';
+import DropdownIndicator from './CustomDropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 
 import { usePermissionsContext } from '../../../hooks';
