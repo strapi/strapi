@@ -300,16 +300,7 @@ module.exports = {
 
     // admin not found.
     if (!admin) {
-      return ctx.badRequest(
-        null,
-        // FIXME it's not a good security practice to let user know if the email address is registered
-        // it'd better to say something like "Email was sent to xyz@xyz.com"
-        // this way potential hacker doesn't know if email is registered or not
-        formatError({
-          id: 'Auth.form.error.user.not-exist',
-          message: 'This email does not exit',
-        })
-      );
+      ctx.send({ ok: true });
     }
 
     // Generate random token.
@@ -317,13 +308,12 @@ module.exports = {
 
     const settings = {
       object: 'Reset password',
-      message: `<p>We heard that you lost your password. Sorry about that!</p>
-
-<p>But don’t worry! You can use the following link to reset your password:</p>
-
-<p>${url}?code=${resetPasswordToken}</p>
-
-<p>Thanks.</p>`,
+      message: `
+        <p>We heard that you lost your password. Sorry about that!</p>
+        <p>But don’t worry! You can use the following link to reset your password:</p>
+        <p>${url}?code=${resetPasswordToken}</p>
+        <p>Thanks.</p>
+      `,
     };
 
     try {

@@ -290,13 +290,7 @@ module.exports = {
 
     // User not found.
     if (!user) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.user.not-exist',
-          message: 'This email does not exist.',
-        })
-      );
+      ctx.send({ ok: true });
     }
 
     // Generate random token.
