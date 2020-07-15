@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "{label} registros encontrados",
   "containers.List.pluginHeaderDescription.singular": "{label} registro encontrado",
   "containers.ListPage.displayedFields": "Campos exibidos",
-  "containers.SettingPage.addField": "Adicionar campo",
-  "containers.SettingPage.addRelationalField": "Adicionar novo campo relacional",
   "containers.SettingPage.attributes": "Atributos",
   "containers.SettingPage.attributes.description": "Define a ordem dos atributos",
   "containers.SettingPage.editSettings.description": "Arraste e solte os campos para construir o layout",

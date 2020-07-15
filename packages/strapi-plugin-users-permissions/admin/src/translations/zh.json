@@ -72,8 +72,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "請確認這個 %APP_NAME% 地址正不正確",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>請點擊這個連結以認證您的電子郵件地址</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "請確認這個 %APP_NAME% 地址正不正確",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>請點擊這個連結以認證您的電子郵件地址</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "請確認這個 %APP_NAME% 地址正不正確",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "在 Discord 的設定中填入的重新導向網址",
   "PopUpForm.Providers.enabled.description": "如果停用，使用者將無法使用這個驗證方式",
@@ -96,7 +94,6 @@
   "PopUpForm.header.edit.email-templates": "編輯郵件範本",
   "PopUpForm.header.edit.providers": "編輯 驗證方式",
   "PopUpForm.inputSelect.providers.label": "選擇驗證方式",
-
   "components.Input.error.password.length": "密碼長度過短",
   "notification.error.delete": "刪除項目時發生錯誤",
   "notification.error.fetch": "讀取資料時發生錯誤",
