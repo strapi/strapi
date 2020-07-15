@@ -1,0 +1,16 @@
+{
+  "kind": "collectionType",
+  "collectionName": "previews",
+  "info": {
+    "name": "preview"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "text": {
+      "type": "richtext"
+    }
+  }
+}
