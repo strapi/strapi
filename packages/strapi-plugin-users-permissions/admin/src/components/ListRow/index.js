@@ -120,7 +120,7 @@ class ListRow extends React.Component {
                 </div>
                 <div>
                   {this.props.item.display && en[this.props.item.display] ? (
-                    <FormattedMessage id={`users-permissions.${this.props.item.display}`} />
+                    <FormattedMessage id={getTrad(this.props.item.display)} />
                   ) : (
                     this.props.item.name
                   )}

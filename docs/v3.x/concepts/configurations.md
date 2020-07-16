@@ -111,7 +111,7 @@ env.date('VAR', new Date());
 
 ## Environments
 
-What if you need to specific static configurations for specific environments and using environment variables becomes tedious?
+What if you need specific static configurations for specific environments and using environment variables becomes tedious?
 
 Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base configurations defined in the `./config` folder.
 The environment is based on the `NODE_ENV` environment variable (defaults to `development`).
@@ -180,6 +180,9 @@ module.exports = ({ env }) => ({
 | `admin.url`              | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`.                                                                              | string        | `/admin`    |
 | `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                                                              | boolean       | `true`      |
 | `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`).                                      | Array(string) | `[]`        |
+| `admin.host`             | Use a different host for the admin panel. Only used along with `strapi develop --watch-admin`                                                                                                    | string        | `localhost` |
+| `admin.port`             | Use a different port for the admin panel. Only used along with `strapi develop --watch-admin`                                                                                                    | string        | `8000`      |
+| `admin.serveAdminPanel`  | If false, the admin panel won't be served. Note: the `index.html` will still be served, see [defaultIndex option](./middlewares#global-middlewares)                                              | boolean       | `true`      |
 
 ## Functions
 

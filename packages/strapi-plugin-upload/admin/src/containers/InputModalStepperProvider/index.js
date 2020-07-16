@@ -419,7 +419,7 @@ const InputModalStepperProvider = ({
               return true;
             }
 
-            return allowedTypes.includes(fileType);
+            return allowedTypes.length === 0 || allowedTypes.includes(fileType);
           });
 
           dispatch({
