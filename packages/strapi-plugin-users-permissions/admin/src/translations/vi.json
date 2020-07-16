@@ -75,8 +75,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Vui lòng xác nhận địa chỉ email cho %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>Vui lòng nhấn liên kết này để xác nhận tài khoản của bạn</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "Vui lòng xác nhận địa chỉ email cho %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Vui lòng nhấn liên kết này để xác nhận tài khoản của bạn</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Vui lòng xác nhận địa chỉ email cho %APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "VĂN BẢN",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "URL chuyển tiếp để thêm vào các cấu hình ứng dụng Discord",
   "PopUpForm.Providers.enabled.description": "Nếu không kích hoạt, người dùng sẽ không thể dùng nhà cung cấp này.",
@@ -99,7 +97,6 @@
   "PopUpForm.header.edit.email-templates": "Sửa Các Mẫu Email",
   "PopUpForm.header.edit.providers": "Sửa Nhà Cung Cấp",
   "PopUpForm.inputSelect.providers.label": "Chọn Nhà Cung Cấp",
-
   "components.Input.error.password.length": "Mật khẩu quá ngắn",
   "notification.error.delete": "Một lỗi đã xảy ra trong khi cố gắng xoá một bản ghi",
   "notification.error.fetch": "Một lỗi đã xảy ra trong khi cố gắng lấy về dữ liệu",

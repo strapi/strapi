@@ -1,4 +1,6 @@
-const generateArrayOfLinks = array => array.map(({ links }) => links).flat();
+import { flatMap } from 'lodash';
+
+const generateArrayOfLinks = array => flatMap(array, 'links');
 
 const findFirstAllowedEndpoint = menuArray => {
   const arrayOfLinks = generateArrayOfLinks(menuArray);
