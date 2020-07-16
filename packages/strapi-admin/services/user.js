@@ -200,17 +200,17 @@ const deleteById = async id => {
  */
 const deleteByIds = async ids => {
   // Check at least one super admin remains
-  const usersToDelete = await strapi.query('user', 'admin').find({ id_in: ids }, ['roles']);
-  const superAdminUsers = usersToDelete.filter(hasSuperAdminRole);
-  if (superAdminUsers.length > 0) {
-    const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
-    if (superAdminRole.usersCount === superAdminUsers.length) {
-      throw strapi.errors.badRequest(
-        'ValidationError',
-        'You must have at least one user with super admin role.'
-      );
-    }
+  const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
+  const nbOfSuperAdminToDelete = await strapi
+    .query('user', 'admin')
+    .count({ id_in: ids, roles: [superAdminRole.id] });
+  if (superAdminRole.usersCount === nbOfSuperAdminToDelete) {
+    throw strapi.errors.badRequest(
+      'ValidationError',
+      'You must have at least one user with super admin role.'
+    );
   }
+
   return strapi.query('user', 'admin').delete({ id_in: ids });
 };
 

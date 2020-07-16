@@ -220,16 +220,11 @@ describe('User', () => {
 
   describe('deleteByIds', () => {
     test('Cannot delete last super admin', async () => {
-      const find = jest.fn(() =>
-        Promise.resolve([
-          { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] },
-          { id: 3, roles: [{ code: SUPER_ADMIN_CODE }] },
-        ])
-      );
+      const count = jest.fn(() => Promise.resolve(2));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
       const badRequest = jest.fn();
       global.strapi = {
-        query: () => ({ find }),
+        query: () => ({ count }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
         errors: { badRequest },
       };
@@ -251,11 +246,11 @@ describe('User', () => {
         { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] },
         { id: 3, roles: [{ code: SUPER_ADMIN_CODE }] },
       ];
-      const find = jest.fn(() => Promise.resolve(users));
+      const count = jest.fn(() => Promise.resolve(users.length));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 3 }));
       const deleteFn = jest.fn(() => users);
       global.strapi = {
-        query: () => ({ find, delete: deleteFn }),
+        query: () => ({ count, delete: deleteFn }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       };
 
