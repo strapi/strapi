@@ -170,8 +170,8 @@ const searchPage = async query => {
   return strapi.query('user', 'admin').searchPage(query);
 };
 
-/** Delete users
- * @param query
+/** Delete a user
+ * @param id id of the user to delete
  * @returns {Promise<user>}
  */
 const deleteById = async id => {
@@ -192,6 +192,26 @@ const deleteById = async id => {
   }
 
   return strapi.query('user', 'admin').delete({ id });
+};
+
+/** Delete a user
+ * @param ids ids of the users to delete
+ * @returns {Promise<user>}
+ */
+const deleteByIds = async ids => {
+  // Check at least one super admin remains
+  const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
+  const nbOfSuperAdminToDelete = await strapi
+    .query('user', 'admin')
+    .count({ id_in: ids, roles: [superAdminRole.id] });
+  if (superAdminRole.usersCount === nbOfSuperAdminToDelete) {
+    throw strapi.errors.badRequest(
+      'ValidationError',
+      'You must have at least one user with super admin role.'
+    );
+  }
+
+  return strapi.query('user', 'admin').delete({ id_in: ids });
 };
 
 /** Count the users that don't have any associated roles
@@ -286,6 +306,7 @@ module.exports = {
   findPage,
   searchPage,
   deleteById,
+  deleteByIds,
   countUsersWithoutRole,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,

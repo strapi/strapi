@@ -70,9 +70,9 @@ module.exports = {
 
     const sanitizedRole = roles.map(strapi.admin.services.role.sanitizeRole)[0] || null;
 
-    ctx.body = {
+    return ctx.deleted({
       data: sanitizedRole,
-    };
+    });
   },
 
   /**
@@ -90,9 +90,9 @@ module.exports = {
     const roles = await strapi.admin.services.role.deleteByIds(body.ids);
     const sanitizedRoles = roles.map(strapi.admin.services.role.sanitizeRole);
 
-    ctx.body = {
+    return ctx.deleted({
       data: sanitizedRoles,
-    };
+    });
   },
 
   /**

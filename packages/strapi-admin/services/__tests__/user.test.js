@@ -203,7 +203,7 @@ describe('User', () => {
       );
     });
     test('Can delete a super admin if he/she is not the last one', async () => {
-      const user = { id: 11, roles: [{ code: SUPER_ADMIN_CODE }] };
+      const user = { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] };
       const findOne = jest.fn(() => Promise.resolve(user));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
       const deleteFn = jest.fn(() => user);
@@ -215,6 +215,48 @@ describe('User', () => {
       const res = await userService.deleteById(user.id);
       expect(deleteFn).toHaveBeenCalledWith({ id: user.id });
       expect(res).toEqual(user);
+    });
+  });
+
+  describe('deleteByIds', () => {
+    test('Cannot delete last super admin', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
+      const badRequest = jest.fn();
+      global.strapi = {
+        query: () => ({ count }),
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        errors: { badRequest },
+      };
+
+      try {
+        await userService.deleteByIds([2, 3]);
+      } catch (e) {
+        // nothing
+      }
+
+      expect(badRequest).toHaveBeenCalledWith(
+        'ValidationError',
+        'You must have at least one user with super admin role.'
+      );
+    });
+
+    test('Can delete a super admin if he/she is not the last one', async () => {
+      const users = [
+        { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] },
+        { id: 3, roles: [{ code: SUPER_ADMIN_CODE }] },
+      ];
+      const count = jest.fn(() => Promise.resolve(users.length));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 3 }));
+      const deleteFn = jest.fn(() => users);
+      global.strapi = {
+        query: () => ({ count, delete: deleteFn }),
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      };
+
+      const res = await userService.deleteByIds([2, 3]);
+      expect(deleteFn).toHaveBeenCalledWith({ id_in: [2, 3] });
+      expect(res).toEqual(users);
     });
   });
 
