@@ -3,7 +3,7 @@
  * Controller
  *
  */
-
+import React from 'react';
 import PropTypes from 'prop-types';
 import { get, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -17,22 +17,15 @@ function Controller({ actions, inputNamePath, isOpen, name, inputSelected, setIn
   const { selectAllActions } = useEditPageContext();
 
   const areAllActionsSelected = () => {
-    return Object.keys(actions).every(
-      action => actions[action].enabled === true
-    );
+    return Object.keys(actions).every(action => actions[action].enabled === true);
   };
 
   const handleChange = () => {
-    selectAllActions(
-      `${inputNamePath}.controllers.${name}`,
-      !areAllActionsSelected()
-    );
+    selectAllActions(`${inputNamePath}.controllers.${name}`, !areAllActionsSelected());
   };
 
   const hasSomeActionsSelected = () => {
-    return Object.keys(actions).some(
-      action => actions[action].enabled === true
-    );
+    return Object.keys(actions).some(action => actions[action].enabled === true);
   };
 
   const setNewInputSelected = name => {

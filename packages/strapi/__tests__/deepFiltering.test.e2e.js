@@ -28,6 +28,9 @@ const collector = {
     name: {
       type: 'string',
     },
+    age: {
+      type: 'integer',
+    },
     panini_cards: {
       nature: 'manyWay',
       target: 'application::panini-card.panini-card',
@@ -48,6 +51,9 @@ const paniniCardFixtures = [
   {
     name: 'Samuel UMTITI',
   },
+  {
+    name: 'Samuel UMTITI',
+  },
 ];
 
 async function createFixtures() {
@@ -61,26 +67,32 @@ async function createFixtures() {
     data.paniniCards.push(res.body);
   }
 
-  const collector1Res = await rq({
-    method: 'POST',
-    url: '/collectors',
-    body: {
-      name: 'Bernard',
-      panini_cards: [data.paniniCards[0].id, data.paniniCards[1].id],
-    },
-  });
-  data.collectors.push(collector1Res.body);
+  const createCollector = async collector => {
+    const res = await rq({
+      method: 'POST',
+      url: '/collectors',
+      body: collector,
+    });
+    data.collectors.push(res.body);
+  };
 
-  const collector2Res = await rq({
-    method: 'POST',
-    url: '/collectors',
-    body: {
-      name: 'Isabelle',
-      panini_cards: [data.paniniCards[0].id],
-      collector_friends: [data.collectors[0].id],
-    },
+  await createCollector({
+    name: 'Bernard',
+    age: '25',
+    panini_cards: [data.paniniCards[0].id, data.paniniCards[1].id],
   });
-  data.collectors.push(collector2Res.body);
+  await createCollector({
+    name: 'Isabelle',
+    age: '55',
+    panini_cards: [data.paniniCards[0].id],
+    collector_friends: [data.collectors[0].id],
+  });
+  await createCollector({
+    name: 'Kenza',
+    age: '25',
+    panini_cards: [],
+    collector_friends: [data.collectors[0].id],
+  });
 }
 
 async function deleteFixtures() {
@@ -113,50 +125,116 @@ describe('Deep Filtering API', () => {
     await modelsUtils.deleteContentTypes(['collector', 'panini-card']);
   }, 60000);
 
-  describe('Filter on a manyWay relation', () => {
-    test('Should return 2 results', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/collectors',
-        qs: {
-          'panini_cards.name': data.paniniCards[0].name,
-        },
+  describe('Without search', () => {
+    describe('Filter on a manyWay relation', () => {
+      test('Should return 2 results', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            'panini_cards.name': data.paniniCards[0].name,
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(2);
+        expect(res.body[0]).toMatchObject(data.collectors[0]);
+        expect(res.body[1]).toMatchObject(data.collectors[1]);
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body[0]).toMatchObject(data.collectors[0]);
-      expect(res.body[1]).toMatchObject(data.collectors[1]);
+      test('Should return 1 result', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            'panini_cards.name': data.paniniCards[1].name,
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(1);
+        expect(res.body[0]).toMatchObject(data.collectors[0]);
+      });
     });
 
-    test('Should return 1 result', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/collectors',
-        qs: {
-          'panini_cards.name': data.paniniCards[1].name,
-        },
-      });
+    describe('Filter on a self manyWay relation', () => {
+      test('Should return 2 results', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            'collector_friends.name': data.collectors[0].name,
+          },
+        });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.collectors[0]);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(2);
+        expect(res.body).toMatchObject(data.collectors.slice(1, 3));
+      });
     });
   });
+  describe('With search', () => {
+    describe('Filter on a manyWay relation', () => {
+      test('panini_cards.name + empty search', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/explorer/application::collector.collector',
+          qs: {
+            'panini_cards.name': data.paniniCards[0].name,
+            _q: '',
+          },
+        });
 
-  describe('Filter on a self manyWay relation', () => {
-    test('Should return 1 result', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/collectors',
-        qs: {
-          'collector_friends.name': data.collectors[0].name,
-        },
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(2);
+        expect(res.body).toMatchObject(data.collectors.slice(0, 2));
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.collectors[1]);
+      test('panini_cards.name + _q=25', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/explorer/application::collector.collector',
+          qs: {
+            'panini_cards.name': data.paniniCards[0].name,
+            _q: 25,
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(1);
+        expect(res.body).toMatchObject([data.collectors[0]]);
+      });
+    });
+
+    describe('Filter on a self manyWay relation', () => {
+      test('collector_friends.name + empty search', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/explorer/application::collector.collector',
+          qs: {
+            'collector_friends.name': data.collectors[0].name,
+            _q: '',
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(2);
+        expect(res.body).toMatchObject(data.collectors.slice(1, 3));
+      });
+      test('collector_friends.name + search isa', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/explorer/application::collector.collector',
+          qs: {
+            'collector_friends.name': data.collectors[0].name,
+            _q: 'isa',
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(1);
+        expect(res.body).toMatchObject([data.collectors[1]]);
+      });
     });
   });
 });

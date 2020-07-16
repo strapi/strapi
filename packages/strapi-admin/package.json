@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.3",
+  "version": "3.0.6",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -67,7 +67,7 @@
     "react-dnd-html5-backend": "^10.0.2",
     "react-dom": "^16.9.0",
     "react-helmet": "^6.0.0",
-    "react-intl": "^4.5.0",
+    "react-intl": "4.5.0",
     "react-is": "^16.12.0",
     "react-loadable": "^5.5.0",
     "react-redux": "7.2.0",
@@ -84,8 +84,8 @@
     "reselect": "^4.0.0",
     "sanitize.css": "^4.1.0",
     "shelljs": "^0.7.8",
-    "strapi-helper-plugin": "3.0.3",
-    "strapi-utils": "3.0.3",
+    "strapi-helper-plugin": "3.0.6",
+    "strapi-utils": "3.0.6",
     "style-loader": "^0.23.1",
     "styled-components": "^5.0.0",
     "terser-webpack-plugin": "^1.2.3",

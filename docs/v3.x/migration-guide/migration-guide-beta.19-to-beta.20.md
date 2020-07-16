@@ -187,6 +187,15 @@ while (fileCursor.hasNext()) {
       );
     }
   });
+
+  if (el.name) {
+    var splitName = el.name.split('.');
+    var name = splitName[0];
+    var ext = splitName[1];
+    if (ext) {
+      db.getCollection('upload_file').updateOne({ _id: el._id }, { $set: { name: name } });
+    }
+  }
 }
 ```
 
@@ -207,6 +216,9 @@ var models = {
 ```
 
 Finally you can load this script in your mongo shell and run it.
+
+Note that after migration the `name` field of the files you uploaded will be replaced with a name without an extension.
+If you were displaying the file name including the extension on the front end, you might have to show the extension separately through the `ext` field.
 
 Once your migration is done you can delete the `export.js` and `models.json` files from your project. You are all set !
 

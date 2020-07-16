@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.3",
+  "version": "3.0.6",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -21,7 +21,7 @@
     "react": "^16.9.0",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.9.0",
-    "react-intl": "^4.5.0",
+    "react-intl": "4.5.0",
     "react-redux": "^7.0.3",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
@@ -29,7 +29,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.0.3",
+    "strapi-helper-plugin": "3.0.6",
     "swagger-ui-dist": "3.24.3"
   },
   "author": {
