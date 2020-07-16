@@ -649,7 +649,7 @@ case 'discord': {
 
 This code creates a `Purest` object that gives us a generic way to interact with the provider's REST API.
 
-For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest/tree/2.x)
+For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest)
 
 You may also want to take a look onto the numerous already made configurations [here](https://github.com/simov/purest-providers/blob/master/config/providers.json).
 
