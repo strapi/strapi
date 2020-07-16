@@ -37,6 +37,7 @@ const EditViewDataManagerProvider = ({
   const { id } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
+
   const { push } = useHistory();
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
