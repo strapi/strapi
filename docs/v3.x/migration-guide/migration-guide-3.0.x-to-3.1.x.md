@@ -4,10 +4,7 @@
 
 ## Summary
 
-1. [Upgrading your dependencies](#_1-upgrading-your-dependencies)
-2. [Define the admin JWT Token](#_2-define-the-admin-jwt-token)
-3. [Migrate your custom admin panel plugins](#_3-migrate-your-custom-admin-panel-plugins)
-4. [Rebuild the admin panel](#_4-rebuild-the-admin-panel)
+[[toc]]
 
 ## 1. Upgrading your dependencies
 
@@ -56,23 +53,40 @@ npm install
 This version comes with a new feature: Role & Permissions for the administrators. In the process, the authentication system for administrators has been updated and the `secret` used to encode the jwt token is not automatically generated anymore.
 In order to make the login work again you need to define the `secret` you want to use in `server.js`.
 
-**Example —** `config/server.js`
+**Example**
+
+1. Generate a secure token.
+
+```bash
+openssl rand 64 | base64 # (linux/macOS users)
+# or
+node -e "console.log(require('crypto').randomBytes(64).toString('base64'))" # (all users)
+```
+
+2. Add it to you env variables (for example in `.env`).
+
+`.env`
+
+```bash
+ADMIN_JWT_SECRET=token_generated_above
+```
+
+3. Add it to your config file.
+
+`config/server.js`
 
 ```js
 module.exports = ({ env }) => ({
   // ...
   admin: {
     auth: {
-      secret: env('ADMIN_JWT_SECRET', 'example-secret'),
+      secret: env('ADMIN_JWT_SECRET'),
     },
   },
 });
 ```
 
-::: warning
-For security concerns, you must change `example-secret` by your own sophisticated secret and secure secret.
-You can generate one with `openssl rand 64 | base64` (unix users) or `node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"` (all users).
-:::
+You're done!
 
 :::tip NOTE
 All currently logged in administrators will be disconnected from the app and will need to log in again.
