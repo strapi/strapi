@@ -143,15 +143,7 @@ beta_settings:
   cloud_sql_instances: '<instance_identifier>'
 ```
 
-#### Install the `pg` node module
-
-Unless you originally installed Strapi with PostgreSQL, you need to install the [pg](https://www.npmjs.com/package/pg) node module.
-
-`Path: ./my-project/`
-
-```bash
-npm install pg --save
-```
+:::
 
 ::::
 
