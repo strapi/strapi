@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
-  auth,
   useQuery,
   request,
   useUserPermissions,
@@ -17,7 +16,7 @@ import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../compone
 import adminPermissions from '../../../permissions';
 import Header from './Header';
 import ModalForm from './ModalForm';
-import { getFilters, retrieveAdminUsers, retrieveNonAdminUsers, sortIds } from './utils';
+import getFilters from './utils/getFilters';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -172,42 +171,18 @@ const ListPage = () => {
 
     let shouldDispatchSucceededAction = false;
 
-    // Retrieve the users that have the admin role
-    const adminUsersIdsToDelete = retrieveAdminUsers(dataToDelete, data);
+    try {
+      await request('/admin/users/batch-delete', {
+        method: 'POST',
+        body: {
+          ids: dataToDelete,
+        },
+      });
+      shouldDispatchSucceededAction = true;
+    } catch (err) {
+      const errorMessage = get(err, 'response.payload.data', 'An error occured');
 
-    const currentUserId = get(auth.getUserInfo(), 'id', null);
-    // Sort the ids by adding the current user one to the last index
-    const sortedAdminUsersIdsToDelete = sortIds(adminUsersIdsToDelete, currentUserId);
-
-    // Retrieve the users that don't have the admin role
-    const nonAdminUsersIdsToDelete = retrieveNonAdminUsers(dataToDelete, adminUsersIdsToDelete);
-
-    // Delete all users that are not admin at the same time
-    const requests = nonAdminUsersIdsToDelete.map(async dataId => {
-      try {
-        await request(`/admin/users/${dataId}`, { method: 'DELETE' });
-
-        shouldDispatchSucceededAction = true;
-      } catch (err) {
-        const errorMessage = get(err, 'response.payload.data', 'An error occured');
-
-        strapi.notification.error(errorMessage);
-      }
-    });
-
-    await Promise.all(requests);
-
-    for (let i = 0; i < sortedAdminUsersIdsToDelete.length; i++) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await request(`/admin/users/${sortedAdminUsersIdsToDelete[i]}`, { method: 'DELETE' });
-
-        shouldDispatchSucceededAction = true;
-      } catch (err) {
-        const errorMessage = get(err, 'response.payload.data', 'An error occured');
-
-        strapi.notification.error(errorMessage);
-      }
+      strapi.notification.error(errorMessage);
     }
 
     // Only dispatch the action once
@@ -218,7 +193,7 @@ const ListPage = () => {
     }
 
     handleToggleModal();
-  }, [dataToDelete, data]);
+  }, [dataToDelete]);
 
   const handleToggle = () => setIsModalOpened(prev => !prev);
 
