@@ -22,7 +22,7 @@ const DEFAULT_PERMISSIONS = [
     type: 'users-permissions',
     roleType: 'public',
   },
-  { action: 'resetPassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'resetpassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   { action: 'init', controller: 'userspermissions', type: null, roleType: null },
   { action: 'me', controller: 'user', type: 'users-permissions', roleType: null },
   { action: 'autoreload', controller: null, type: null, roleType: null },
