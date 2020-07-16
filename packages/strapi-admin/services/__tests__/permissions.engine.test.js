@@ -26,6 +26,11 @@ describe('Permissions Engine', () => {
         title: 'admin',
         roles: [{ id: 3 }],
       },
+      foo: {
+        firstname: 'Foo',
+        title: 'Bar',
+        roles: [{ id: 4 }],
+      },
     },
     roles: {
       1: {
@@ -61,6 +66,15 @@ describe('Permissions Engine', () => {
             subject: 'user',
             fields: ['title'],
             conditions: ['plugins::test.isContainedIn'],
+          },
+        ],
+      },
+      4: {
+        permissions: [
+          {
+            action: 'read',
+            subject: 'user',
+            fields: [],
           },
         ],
       },
@@ -195,6 +209,16 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'user', 'firstname')).toBeFalsy();
       expect(ability.can('read', 'user', 'title')).toBeTruthy();
       expect(ability.can('read', 'user', 'title.nested')).toBeFalsy();
+    });
+
+    test('Ignore permission on empty fields array', async () => {
+      const user = getUser('foo');
+
+      const ability = await engine.generateUserAbility(user);
+
+      expect(engine.generateAbilityCreatorFor).toHaveBeenCalledWith(user);
+      expect(ability.rules).toHaveLength(0);
+      expect(ability.can('read', 'user')).toBeFalsy();
     });
 
     describe('Use objects as subject', () => {

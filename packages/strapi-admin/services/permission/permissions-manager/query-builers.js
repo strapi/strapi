@@ -1,70 +1,14 @@
 'use strict';
 
 const _ = require('lodash');
-const { subject: asSubject } = require('@casl/ability');
-const { permittedFieldsOf, rulesToQuery } = require('@casl/ability/extra');
-const { VALID_REST_OPERATORS, sanitizeEntity } = require('strapi-utils');
+const { rulesToQuery } = require('@casl/ability/extra');
+const { VALID_REST_OPERATORS } = require('strapi-utils');
 
 const ops = {
   common: VALID_REST_OPERATORS.map(op => `$${op}`),
   boolean: ['$or'],
   cleanable: ['$elemMatch'],
 };
-
-module.exports = (ability, action, model) => ({
-  ability,
-  action,
-  model,
-
-  get query() {
-    return buildStrapiQuery(buildCaslQuery(ability, action, model));
-  },
-
-  get isAllowed() {
-    return this.ability.can(action, model);
-  },
-
-  toSubject(target, subjectType = model) {
-    return asSubject(subjectType, target);
-  },
-
-  pickPermittedFieldsOf(data, options = {}) {
-    return this.sanitize(data, { ...options, isOutput: false });
-  },
-
-  queryFrom(query) {
-    return {
-      ...query,
-      _where: query._where ? _.concat(this.query, query._where) : [this.query],
-    };
-  },
-
-  sanitize(data, options = {}) {
-    const {
-      subject = this.toSubject(data),
-      action: actionOverride = action,
-      withPrivate = true,
-      isOutput = true,
-    } = options;
-
-    if (_.isArray(data)) {
-      return data.map(this.sanitize.bind(this));
-    }
-
-    const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
-    const hasAtLeastOneRegisteredField = _.some(
-      _.flatMap(ability.rulesFor(actionOverride, subject).map(_.property('fields')))
-    );
-    const shouldIncludeAllFields = _.isEmpty(permittedFields) && !hasAtLeastOneRegisteredField;
-
-    return sanitizeEntity(data, {
-      model: strapi.getModel(model),
-      includeFields: shouldIncludeAllFields ? null : permittedFields,
-      withPrivate,
-      isOutput,
-    });
-  },
-});
 
 const buildCaslQuery = (ability, action, model) => {
   const query = rulesToQuery(ability, action, model, o => o.conditions);
@@ -79,6 +23,10 @@ const buildStrapiQuery = caslQuery => {
 const flattenDeep = condition => {
   if (_.isArray(condition)) {
     return _.map(condition, flattenDeep);
+  }
+
+  if (!_.isObject(condition)) {
+    return condition;
   }
 
   const shouldIgnore = e => !!ops.common.includes(e);
@@ -98,7 +46,7 @@ const flattenDeep = condition => {
         set(...getTransformParams(key, v, k));
       });
     } else {
-      set(key, value);
+      set(key, flattenDeep(value));
     }
   });
 
@@ -110,7 +58,12 @@ const cleanupUnwantedProperties = condition => {
     return condition;
   }
 
-  const shouldClean = e => ops.cleanable.find(o => e.includes(`.${o}`));
+  if (_.isArray(condition)) {
+    return condition.map(cleanupUnwantedProperties);
+  }
+
+  const shouldClean = e =>
+    typeof e === 'string' ? ops.cleanable.find(o => e.includes(`.${o}`)) : undefined;
 
   return _.reduce(
     condition,
@@ -125,4 +78,9 @@ const cleanupUnwantedProperties = condition => {
     },
     {}
   );
+};
+
+module.exports = {
+  buildCaslQuery,
+  buildStrapiQuery,
 };
