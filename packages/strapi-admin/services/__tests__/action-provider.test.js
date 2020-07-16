@@ -12,21 +12,29 @@ describe('Action Provider Service', () => {
   });
 
   describe('settings', () => {
-    test('Can register a settings action', async () => {
-      const action = {
-        uid: 'marketplace.read',
-        displayName: 'Can read',
-        pluginName: 'admin',
-        section: 'settings',
-        category: 'plugins and marketplace',
-        subCategory: 'marketplace',
-      };
+    const readAction = {
+      uid: 'marketplace.read',
+      displayName: 'Can read',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'plugins and marketplace',
+      subCategory: 'marketplace',
+    };
 
-      await actionProviderService.register([action]);
-      const createdAction = actionProviderService.get(action.uid, action.pluginName);
+    const createAction = {
+      uid: 'marketplace.create',
+      displayName: 'Can create',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'plugins and marketplace',
+    };
+
+    test('Can register a settings action', async () => {
+      await actionProviderService.register([readAction]);
+      const createdAction = actionProviderService.get(readAction.uid, readAction.pluginName);
 
       expect(createdAction).toMatchObject({
-        ..._.omit(action, ['uid']),
+        ..._.omit(readAction, ['uid']),
         actionId: 'admin::marketplace.read',
       });
 
@@ -34,23 +42,23 @@ describe('Action Provider Service', () => {
     });
 
     test('Can register a settings action without subCategory', async () => {
-      const action = {
-        uid: 'marketplace.create',
-        displayName: 'Can create',
-        pluginName: 'admin',
-        section: 'settings',
-        category: 'plugins and marketplace',
-      };
-
-      await actionProviderService.register([action]);
-      const createdAction = actionProviderService.get(action.uid, action.pluginName);
+      await actionProviderService.register([createAction]);
+      const createdAction = actionProviderService.get(createAction.uid, createAction.pluginName);
 
       expect(createdAction).toMatchObject({
-        ..._.omit(action, ['uid']),
+        ..._.omit(createAction, ['uid']),
         actionId: 'admin::marketplace.create',
         subCategory: 'general',
       });
       createdActions.push(createdAction);
+    });
+
+    test('Can get all registered entries (array)', () => {
+      expect(actionProviderService.getAll()).toHaveLength(2);
+    });
+
+    test('Can get all registered entries (map)', () => {
+      expect(actionProviderService.getAllByMap().size).toBe(2);
     });
 
     test('Can register a settings action with a pluginName other than "admin"', async () => {
@@ -132,6 +140,16 @@ describe('Action Provider Service', () => {
 
       expect(() => actionProviderService.register([action])).toThrow(
         '[0].category is a required field'
+      );
+    });
+
+    test('Cannot register an action outside of the bootstrap function', async () => {
+      global.strapi = {
+        isLoaded: true,
+      };
+
+      expect(() => actionProviderService.register([])).toThrow(
+        `You can't register new actions outside of the bootstrap function.`
       );
     });
   });
