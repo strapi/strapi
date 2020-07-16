@@ -13,7 +13,6 @@ import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
-// import 'codemirror/theme/3024-night.css';
 import 'codemirror/theme/solarized.css';
 
 import { isEmpty, trimStart } from 'lodash';
