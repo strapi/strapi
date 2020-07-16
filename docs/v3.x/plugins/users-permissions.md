@@ -748,7 +748,6 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 - `USER` (object)
   - `username`
   - `email`
-  - ...and any other field that you added manually in the model.
 - `TOKEN` corresponds to the token generated to be able to reset the password.
 - `URL` is the link where the user will be redirected after clicking on it in the email.
 
@@ -757,7 +756,6 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 - `USER` (object)
   - `username`
   - `email`
-  - ...and any other field that you added manually in the model.
 - `CODE` corresponds to the CODE generated to be able confirm the user email.
 - `URL` is the Strapi backend URL that confirms the code (by default `/auth/email-confirmation`).
 
