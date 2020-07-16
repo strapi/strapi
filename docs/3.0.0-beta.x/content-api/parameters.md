@@ -59,7 +59,7 @@ If you use the same operator (except for in and nin) the values will be used to 
 
 If you want to use `AND` for your query you will have to create a custom query by using the [Query](../concepts/queries.md) documentation.
 
-Strapi doesn't support the `AND` opperator for now.
+Strapi doesn't support the `AND` operator for now.
 
 :::
 

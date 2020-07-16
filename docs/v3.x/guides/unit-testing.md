@@ -96,7 +96,7 @@ The whole file will look like this:
 ### Strapi instance
 
 In order to test anything we need to have a strapi instance that runs in the testing eviroment,
-bascially we want to get instance of strapi app as object, similar like creating an instance for [process manager](process-manager).
+basically we want to get instance of strapi app as object, similar like creating an instance for [process manager](process-manager.md).
 
 These tasks require adding some files - let's create a folder `tests` where all the tests will be put and inside it, next to folder `helpers` where main Strapi helper will be in file strapi.js.
 
@@ -135,13 +135,13 @@ const fs = require('fs');
 const { setupStrapi } = require('./helpers/strapi');
 
 /** this code is called once before any test is called */
-beforeAll(async (done) => {
+beforeAll(async done => {
   await setupStrapi(); // singleton so it can be called many times
   done();
 });
 
 /** this code is called once before all the tested are finished */
-afterAll(async (done) => {
+afterAll(async done => {
   const dbSettings = strapi.config.get('database.connections.default.settings');
 
   //delete test database after all tests
@@ -154,7 +154,7 @@ afterAll(async (done) => {
   done();
 });
 
-it('strapi is defined', async (done) => {
+it('strapi is defined', async done => {
   expect(strapi).toBeDefined();
   done();
 });
@@ -193,11 +193,11 @@ Let's create a separate test file were `supertest` will be used to check if endp
 ```js
 const request = require('supertest');
 
-it('should return hello world', async (done) => {
+it('should return hello world', async done => {
   await request(strapi.server) // app server is an instance of Class: http.Server
     .get('/hello')
     .expect(200) // Expect response http code 200
-    .then((data) => {
+    .then(data => {
       expect(data.text).toBe('Hello World!'); // expect the response text
     });
   done();
@@ -251,7 +251,7 @@ const mockUserData = {
   blocked: null,
 };
 
-it('should login user and return jwt token', async (done) => {
+it('should login user and return jwt token', async done => {
   /** Creates a new user and save it to the database */
   await strapi.plugins['users-permissions'].services.user.add({
     ...mockUserData,
@@ -267,14 +267,14 @@ it('should login user and return jwt token', async (done) => {
     })
     .expect('Content-Type', /json/)
     .expect(200)
-    .then((data) => {
+    .then(data => {
       expect(data.body.jwt).toBeDefined();
     });
 
   done();
 });
 
-it('should return users data for authenticated user', async (done) => {
+it('should return users data for authenticated user', async done => {
   /** Gets the default user role */
   const defaultRole = await strapi.query('role', 'users-permissions').findOne({}, []);
 
@@ -299,7 +299,7 @@ it('should return users data for authenticated user', async (done) => {
     .set('Authorization', 'Bearer ' + jwt)
     .expect('Content-Type', /json/)
     .expect(200)
-    .then((data) => {
+    .then(data => {
       expect(data.body).toBeDefined();
       expect(data.body.id).toBe(user.id);
       expect(data.body.username).toBe(user.username);

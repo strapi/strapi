@@ -310,6 +310,16 @@ or
 $ yarn add strapi-provider-upload-aws-s3
 ```
 
+### Using scoped packages as providers
+
+If your package name is [scoped](https://docs.npmjs.com/about-scopes) (for example `@username/strapi-provider-upload-aws2`) you need to take an extra step by aliasing it in `package.json`. Go to the `dependencies` section and change the provider line to look like this:
+
+`"strapi-provider-upload-aws2": "npm:@username/strapi-provider-upload-aws2@0.1.9"`
+
+The string after the last `@` represents your desired [semver](https://docs.npmjs.com/about-semantic-versioning) version range.
+
+### Enabling the provider
+
 To enable the provider, create or edit the file at `./config/plugins.js`
 
 ```js
@@ -324,7 +334,7 @@ module.exports = ({ env }) => ({
         Bucket: 'my-bucket',
       },
     },
-  }
+  },
 });
 ```
 
