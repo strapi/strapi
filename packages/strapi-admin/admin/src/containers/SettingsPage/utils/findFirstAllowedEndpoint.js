@@ -1,6 +1,6 @@
-import { flatten } from 'lodash';
+import { flatMap } from 'lodash';
 
-const generateArrayOfLinks = array => flatten(array.map(({ links }) => links));
+const generateArrayOfLinks = array => flatMap(array, 'links');
 
 const findFirstAllowedEndpoint = menuArray => {
   const arrayOfLinks = generateArrayOfLinks(menuArray);
