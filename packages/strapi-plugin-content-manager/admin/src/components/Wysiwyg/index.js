@@ -18,12 +18,12 @@ import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
 import WysiwygProvider from '../../containers/WysiwygProvider';
 import Controls from '../WysiwygInlineControls';
+import PreviewWysiwyg from '../PreviewWysiwyg';
 import WysiwygBottomControls from '../WysiwygBottomControls';
 import WysiwygEditor from '../WysiwygEditor';
 import MediaLib from './MediaLib';
 import CustomSelect from './customSelect';
 import PreviewControl from './previewControl';
-import PreviewWysiwyg from './previewWysiwyg';
 import ToggleMode from './toggleMode';
 import { CONTROLS } from './constants';
 import {

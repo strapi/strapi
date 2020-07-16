@@ -1,6 +1,10 @@
 import styled from 'styled-components';
 
 const ActiveStatus = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   &:before {
     content: '';
     display: inline-block;
