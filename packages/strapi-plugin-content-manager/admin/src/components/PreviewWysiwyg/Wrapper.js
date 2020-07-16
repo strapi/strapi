@@ -96,8 +96,8 @@ const Wrapper = styled.div`
   td {
     > code {
       /* We need to add the same color as the theme */
-      background-color: #f8f8f8;
-      color: #333;
+      background-color: #002b36;
+      color: #839496;
     }
   }
 

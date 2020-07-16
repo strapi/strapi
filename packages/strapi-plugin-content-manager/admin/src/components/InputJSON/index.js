@@ -13,7 +13,8 @@ import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/3024-night.css';
+// import 'codemirror/theme/3024-night.css';
+import 'codemirror/theme/solarized.css';
 
 import { isEmpty, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
@@ -21,7 +22,7 @@ import Wrapper from './components';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const DEFAULT_THEME = '3024-night';
+const DEFAULT_THEME = 'solarized dark';
 
 class InputJSON extends React.Component {
   timer = null;

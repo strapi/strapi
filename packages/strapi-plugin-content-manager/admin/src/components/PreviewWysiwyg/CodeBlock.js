@@ -1,9 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import hljs from 'highlight.js';
-// Dark theme
-// import 'highlight.js/styles/night-owl.css';
-import 'highlight.js/styles/github.css';
+import 'highlight.js/styles/solarized-dark.css';
 
 const CodeBlock = ({ language, value }) => {
   const ref = useRef();
