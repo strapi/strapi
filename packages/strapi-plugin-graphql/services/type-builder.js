@@ -95,7 +95,7 @@ module.exports = {
       }
 
       if (repeatable === true) {
-        return `[${typeName}]!`;
+        return `[${typeName}]`;
       }
       return `${typeName}`;
     }
@@ -130,7 +130,7 @@ module.exports = {
           return '[ID]';
         }
 
-        return `[${globalId}]`;
+        return `[${globalId}]!`;
       }
 
       if (rootType === 'mutation') {
