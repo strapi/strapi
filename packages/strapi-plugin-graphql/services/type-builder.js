@@ -95,7 +95,7 @@ module.exports = {
       }
 
       if (repeatable === true) {
-        return `[${typeName}]`;
+        return `[${typeName}]!`;
       }
       return `${typeName}`;
     }
