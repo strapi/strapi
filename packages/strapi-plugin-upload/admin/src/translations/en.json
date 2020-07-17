@@ -65,6 +65,7 @@
   "settings.form.responsiveDimensions.description": "It automatically generates multiple formats (large, medium, small) of the uploaded asset",
   "settings.form.sizeOptimization.label": "Enable size optimization (without quality loss)",
   "settings.form.autoOrientation.label": "Enable auto orientation",
+  "settings.form.autoOrientation.description": "Automatically rotate image according to EXIF orientation tag",
   "settings.form.videoPreview.label": "Preview",
   "settings.form.videoPreview.description": "It will generate a six-second preview of the video (GIF)",
   "settings.section.video.label": "VIDEO",

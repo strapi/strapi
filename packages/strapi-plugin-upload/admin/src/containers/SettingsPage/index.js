@@ -150,6 +150,9 @@ const SettingsPage = () => {
                 label={formatMessage({
                   id: getTrad('settings.form.autoOrientation.label'),
                 })}
+                description={formatMessage({
+                  id: getTrad('settings.form.autoOrientation.description'),
+                })}
                 name="autoOrientation"
                 onChange={handleChange}
                 type="bool"
