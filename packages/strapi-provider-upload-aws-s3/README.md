@@ -21,7 +21,9 @@ module.exports = ({ env }) => ({
       region: env('AWS_REGION'),
       params: {
         Bucket: env('AWS_BUCKET')
-      }
+      },
+      // if CLOUDFRONT_ENDPOINT is set then assets will be saved with cloudfront distro CNAME
+      cloudfrontEndpoint: env('CLOUDFRONT_ENDPOINT') //optional https://d111111abcdef8.cloudfront.net/
     }
   },
   // ...

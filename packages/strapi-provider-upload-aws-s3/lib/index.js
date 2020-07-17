@@ -35,7 +35,7 @@ module.exports = {
               }
 
               // set the bucket file url
-              file.url = data.Location;
+              file.url =  (config.cloudfrontEndpoint) ? `${config.cloudfrontEndpoint}${path}${file.hash}${file.ext}` : data.Location;
 
               resolve();
             }
