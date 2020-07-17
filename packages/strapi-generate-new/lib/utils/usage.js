@@ -94,6 +94,7 @@ function trackUsage({ event, scope, error }) {
         version: scope.strapiVersion,
         docker: scope.docker,
         useYarn: scope.useYarn.toString(),
+        noRun: (scope.runQuickstartApp !== true).toString(),
       },
     });
   } catch (err) {
