@@ -102,7 +102,12 @@ const Wrapper = styled.div`
   }
 
   .warning {
-    background-color: #ff8;
+    background-color: #faa684;
+    padding: 30px;
+    border-radius: 3px;
+  }
+  .tip {
+    background-color: ${props => props.theme.main.colors.darkBlue};
     padding: 30px;
     border-radius: 3px;
   }

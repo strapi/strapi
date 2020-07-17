@@ -48,6 +48,7 @@ const md = new Markdown({
 })
   .use(abbr)
   .use(container, 'warning')
+  .use(container, 'tip')
   .use(deflist)
   .use(emoji)
   .use(footnote)
