@@ -73,7 +73,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
   const linkProps = hasAlreadyCreatedContentTypes
     ? {
         id: 'app.components.HomePage.button.blog',
-        href: 'https://blog.strapi.io/',
+        href: 'https://strapi.io/blog/',
         onClick: () => {},
         type: 'blog',
         target: '_blank',

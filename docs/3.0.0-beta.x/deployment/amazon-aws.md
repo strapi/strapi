@@ -366,7 +366,7 @@ Next, you need to install **PM2 Runtime** and configure the `ecosystem.config.js
 
 #### 6. Install **PM2 Runtime**
 
-[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime.
+[PM2 Runtime](https://pm2.keymetrics.io) allows you to keep your Strapi project alive and to reload it without downtime.
 
 Ensure you are logged in as a **non-root** user. You will install **PM2** globally:
 
@@ -374,7 +374,7 @@ Ensure you are logged in as a **non-root** user. You will install **PM2** global
 npm install pm2@latest -g
 ```
 
-Now, you will need to configure an `ecosystem.config.js` file. This file will set `env` variables that connect Strapi to your database. It will also be used to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrived from Github). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+Now, you will need to configure an `ecosystem.config.js` file. This file will set `env` variables that connect Strapi to your database. It will also be used to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrived from Github). You can read more about this file [here](https://pm2.keymetrics.io/docs/usage/application-declaration/).
 
 - You will need to open your `nano` editor and then `copy/paste` the following:
 
@@ -425,7 +425,7 @@ Earlier, `Port 1337` was allowed access for **testing and setup** purposes. Afte
 Follow the steps below to have your app launch on system startup.
 
 ::: tip
-These steps are based on the [PM2 Runtime Startup Hook Guide](https://pm2.io/doc/en/runtime/guide/startup-hook/).
+These steps are based on the [PM2 Runtime Startup Guide](https://pm2.keymetrics.io/docs/usage/startup/#startup-script-generator).
 :::
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:

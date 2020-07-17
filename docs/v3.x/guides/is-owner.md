@@ -127,5 +127,5 @@ module.exports = {
 And tada!
 
 ::: tip
-For the delete action, it will be the exact same check than the update action.
+For the delete action, it will be the exact same check as the update action.
 :::
