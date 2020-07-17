@@ -212,7 +212,7 @@ module.exports = ({ models, target }, ctx) => {
           }
 
           if (type === 'dynamiczone') {
-            if(returned[name]){
+            if (returned[name]) {
               const components = returned[name].map(el => {
                 return {
                   __component: findComponentByGlobalId(el.kind).uid,

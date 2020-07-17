@@ -111,7 +111,7 @@ env.date('VAR', new Date());
 
 ## Environments
 
-What if you need to specific static configurations for specific environments and using environment variables becomes tedious?
+What if you need specific static configurations for specific environments and using environment variables becomes tedious?
 
 Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base configurations defined in the `./config` folder.
 The environment is based on the `NODE_ENV` environment variable (defaults to `development`).
