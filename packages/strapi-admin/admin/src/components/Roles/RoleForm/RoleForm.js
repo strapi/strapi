@@ -1,15 +1,14 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import getNameInputValue from 'ee_else_ce/components/Roles/RoleForm/utils/getNameInputValue';
-import NameInput from 'ee_else_ce/components/Roles/RoleForm/NameInput';
+
+import NameInput from './NameInput';
 
 import FormCard from '../../FormBloc';
 import SizedInput from '../../SizedInput';
 import ButtonWithNumber from '../ButtonWithNumber';
 
 const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
-  const nameValue = getNameInputValue(values, role);
   const { formatMessage } = useIntl();
 
   const actions = [
@@ -55,7 +54,7 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
         type="text"
         error={errors.name ? { id: errors.name } : null}
         onBlur={onBlur}
-        value={nameValue}
+        value={values.name}
         onChange={onChange}
       />
 

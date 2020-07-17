@@ -5,8 +5,10 @@
   "description": "A Strapi application.",
   "scripts": {
     "develop": "strapi develop",
+    "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
     "build": "strapi build",
+    "build:ce": "STRAPI_DISABLE_EE=true strapi build",
     "strapi": "strapi"
   },
   "dependencies": {
