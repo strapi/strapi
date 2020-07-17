@@ -62,6 +62,7 @@
   "settings.form.responsiveDimensions.label": "Enable responsive friendly upload",
   "settings.form.sizeOptimization.label": "Enable size optimization (without quality loss)",
   "settings.form.autoOrientation.label": "Enable auto orientation",
+  "settings.form.autoOrientation.description": "Automatically rotate image according to EXIF orientation tag",
   "settings.form.videoPreview.label": "Preview",
   "settings.form.videoPreview.description": "It will generate a six-second preview of the video (GIF)",
   "settings.form.videoPreview.label": "Preview",
