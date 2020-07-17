@@ -7,6 +7,8 @@ If you're already familiar with Docker, you are probably looking for our officia
 ## Step 1: Create a `docker-compose.yaml` file
 
 Create this `docker-compose.yaml` file in an empty folder. <br>
+Create a `app` folder (or name it the the way you want).
+
 A fresh new Strapi application will be created where the `docker-compose.yaml` file is located.
 
 This docker-compose defines our database and Strapi service and links them.
@@ -21,7 +23,7 @@ services:
   strapi:
     image: strapi/strapi
     volumes:
-      - ./:/srv/app
+      - ./app:/srv/app
     ports:
       - '1337:1337'
 ```
