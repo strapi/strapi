@@ -484,13 +484,32 @@ Response payload:
 }
 ```
 
-### Forgotten password
+### Forgotten & reset password
 
-This action sends an email to a user with the link to your reset password page. This link contains a URL param `code` which is required to reset user password.
+**Can only be used for users registered using the email provider.**
 
-#### Usage
+The flow was thought this way:
 
-- `email` is your user email.
+1. The user goes to your **forgotten password page**
+2. The user enters his/her email address
+3. Your forgotten password page sends a request to the backend to send an email with the reset password link to the user
+4. The user receives the email, and clicks on the special link
+5. The link redirects the user to your **reset password page**
+6. The user enters his/her new password
+7. The **reset password page** sends a request to the backend with the new password
+8. If the request contains the code contained in the link at step 3., the password is updated
+9. The user can log in with the new password
+
+In the following section we will detail steps 3. and 7..
+
+#### Forgotten password: ask for the reset password link
+
+This action sends an email to a user with the link to your own reset password page.
+The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
+
+First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+
+Then, your **forgotten password page** has to make the following request to your backend.
 
 ```js
 import axios from 'axios';
@@ -498,31 +517,22 @@ import axios from 'axios';
 // Request API.
 axios
   .post('http://localhost:1337/auth/forgot-password', {
-    email: 'user@strapi.io',
+    email: 'user@strapi.io', // user's email
   })
   .then(response => {
-    // Handle success.
     console.log('Your user received an email');
   })
   .catch(error => {
-    // Handle error.
     console.log('An error occurred:', error.response);
   });
 ```
 
-This action will send the user an email that contains a URL with the needed code for the [reset password](#reset-password).
-The URL must link to your reset password form in your frontend application.
+#### Reset Password: send the new password
 
-To configure it you will have to go in the Roles & Permissions settings and navigate to the Advanced Settings tab.
+This action will update the user password.
+Also works with the [GraphQL Plugin](./graphql.md), with the `resetPassword` mutation.
 
-### Reset Password
-
-This action will reset the user password.
-Also works with the [GraphQL Plugin](./graphql.md), exposes `resetPassword` mutation.
-
-#### Usage
-
-- `code` is the url params received from the email link (see forgot password)
+Your **reset password page** has to make the following request to your backend.
 
 ```js
 import axios from 'axios';
@@ -530,27 +540,31 @@ import axios from 'axios';
 // Request API.
 axios
   .post('http://localhost:1337/auth/reset-password', {
-    code: 'privateCode',
-    password: 'myNewPassword',
-    passwordConfirmation: 'myNewPassword',
+    code: 'privateCode', // code contained in the reset link of step 3.
+    password: 'userNewPassword',
+    passwordConfirmation: 'userNewPassword',
   })
   .then(response => {
-    // Handle success.
     console.log("Your user's password has been reset.");
   })
   .catch(error => {
-    // Handle error.
     console.log('An error occurred:', error.response);
   });
 ```
 
+Congrats, you're done!
+
 ### Email validation
 
-This action sends an email to the user with the link to confirm the user.
+:::tip NOTE
+In production, make sure the `url` config property is set. Otherwise the validation link will redirect to `localhost`. More info on the config [here](../concepts/configurations.html#server).
+:::
 
-#### Usage
+After having registered, if you have set **Enable email confirmation** to **ON**, the user will receive a confirmation link by email. The user has to click on it to validate his/her registration.
 
-- email is the user email.
+_Example of the confirmation link:_ `https://yourwebsite.fr/auth/email-confirmation?confirmation=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk0OTgxMTE3LCJleHAiOjE1OTc1NzMxMTd9.0WeB-mvuguMyr4eY8CypTZDkunR--vZYzZH6h6sChFg`
+
+If needed, you can re-send the confirmation email by making the following request.
 
 ```js
 import axios from 'axios';
@@ -558,14 +572,12 @@ import axios from 'axios';
 // Request API.
 axios
   .post(`http://localhost:1337/auth/send-email-confirmation`, {
-    email: 'user@strapi.io',
+    email: 'user@strapi.io', // user's email
   })
   .then(response => {
-    // Handle success.
     console.log('Your user received an email');
   })
   .catch(error => {
-    // Handle error.
     console.error('An error occurred:', error.response);
   });
 ```
