@@ -48,7 +48,7 @@ module.exports = (ability, action, model) => ({
 
     const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
     const hasAtLeastOneRegisteredField = _.some(
-      _.flatMap(ability.rulesFor(actionOverride, subject).map(_.property('fields')))
+      _.flatMap(ability.rulesFor(actionOverride, subject), 'fields')
     );
     const shouldIncludeAllFields = _.isEmpty(permittedFields) && !hasAtLeastOneRegisteredField;
 
