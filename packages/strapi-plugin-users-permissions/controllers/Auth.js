@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
 const { sanitizeEntity } = require('strapi-utils');
+const { getAbsoluteServerUrl } = require('strapi-utils');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const formatError = error => [
@@ -494,7 +495,7 @@ module.exports = {
         settings.message = await strapi.plugins[
           'users-permissions'
         ].services.userspermissions.template(settings.message, {
-          URL: `${strapi.config.server.url}/auth/email-confirmation`,
+          URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`,
           USER: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
             'resetPasswordToken',
@@ -643,7 +644,7 @@ module.exports = {
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
-        URL: `${strapi.config.server.url}/auth/email-confirmation`,
+        URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`, // ICICI
         USER: userInfo,
         CODE: jwt,
       }
