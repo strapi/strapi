@@ -132,7 +132,7 @@ module.exports = {
       },
       {
         text: 'Blog',
-        link: 'https://blog.strapi.io',
+        link: 'https://strapi.io/blog',
       },
       {
         text: 'Tutorials',

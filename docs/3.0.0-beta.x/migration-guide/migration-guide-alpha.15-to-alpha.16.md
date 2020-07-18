@@ -55,7 +55,7 @@ Then, delete your old `plugins` folder and replace it with the new one.
 
 ## ⚠️ Bookshelf (Postgres and MySQL)
 
-Reverse of migration [alpha.14.5 to alpha.15](migration-guide-alpha.14.5-to-alpha.15) Bookshelf section.
+Reverse of migration [alpha.14.5 to alpha.15](migration-guide-alpha.14.5-to-alpha.15.md) Bookshelf section.
 
 Go in [diff files](https://github.com/strapi/strapi/compare/v3.0.0-alpha.15...v3.0.0-alpha.16) and search for following files:
 
@@ -68,7 +68,7 @@ You will have to update all your service by applying the diff.
 
 ## ⚠️ Mongoose (Mongo)
 
-Reverse of migration [alpha.14.5 to alpha.15](migration-guide-alpha.14.5-to-alpha.15) Mongoose section.
+Reverse of migration [alpha.14.5 to alpha.15](migration-guide-alpha.14.5-to-alpha.15.md) Mongoose section.
 
 Go in [diff files](https://github.com/strapi/strapi/compare/v3.0.0-alpha.15...v3.0.0-alpha.16) and search for following files:
 

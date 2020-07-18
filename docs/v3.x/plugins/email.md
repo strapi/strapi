@@ -88,9 +88,17 @@ npm install strapi-provider-email-sendgrid --save
 
 ::::
 
+#### Using scoped packages as providers
+
+If your package name is [scoped](https://docs.npmjs.com/about-scopes) (for example `@username/strapi-provider-email-gmail-oauth2`) you need to take an extra step by aliasing it in `package.json`. Go to the `dependencies` section and change the provider line to look like this:
+
+`"strapi-provider-email-gmail-oauth2": "npm:@username/strapi-provider-email-gmail-oauth2@0.1.9"`
+
+The string after the last `@` represents your desired [semver](https://docs.npmjs.com/about-semantic-versioning) version range.
+
 ### Configure your provider
 
-After installing your provider you will need to add some settings in `config/plugins.js`. Check the README of each provider to know what configuration settings the provider needs.
+After installing your provider you will need to add some settings in `config/plugins.js`. If this file doesn't exists, you'll need to create it. Check the README of each provider to know what configuration settings the provider needs.
 
 Here is an example of a configuration made for the provider [strapi-provider-email-sendgrid](https://www.npmjs.com/package/strapi-provider-email-sendgrid).
 
@@ -114,7 +122,7 @@ module.exports = ({ env }) => ({
 ```
 
 ::: tip
-If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations#environments)
+If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations.md#environments)
 :::
 
 ## Create new provider
