@@ -61,6 +61,15 @@ Start a Strapi application with autoReload disabled.
 This commands is there to run a Strapi application without restarts and file writes (aimed at production usage).
 Certain features are disabled in the `strapi start` mode because they require application restarts.
 
+Allowed environment variables:
+| Property | Description | Type | Default |
+| --------- | ----------- | ----- | ------- |
+| STRAPI_HIDE_STARTUP_MESSAGE | If `true` then Strapi will not show startup message on boot. Values can be `true` or `false` | string | `false` |
+| STRAPI_LOG_LEVEL | Values can be 'fatal', 'error', 'warn', 'info', 'debug', 'trace' | string | `debug` |
+| STRAPI_LOG_TIMESTAMP | Enables or disables the inclusion of a timestamp in the log message. Values can be `true` or `false` | string | `false`|
+| STRAPI_LOG_FORCE_COLOR | Values can be `true` or `false` | string | `true` |
+| STRAPI_LOG_PRETTY_PRINT | If pino-pretty module will be used to format logs. Values can be `true` or `false` | string | `true` |
+
 ## strapi build
 
 Builds your admin panel.

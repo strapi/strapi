@@ -71,8 +71,10 @@ module.exports = {
           break;
       }
 
-      if (attribute.required && action !== 'update') {
-        type += '!';
+      if (attribute.required) {
+        if (rootType !== 'mutation' || (action !== 'update' && attribute.default === undefined)) {
+          type += '!';
+        }
       }
 
       return type;
