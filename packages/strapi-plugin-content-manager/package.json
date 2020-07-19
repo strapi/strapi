@@ -14,7 +14,7 @@
     "codemirror": "^5.46.0",
     "draft-js": "^0.11.5",
     "immutable": "^3.8.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "pluralize": "^7.0.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
