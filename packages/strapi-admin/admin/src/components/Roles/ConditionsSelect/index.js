@@ -16,10 +16,11 @@ import selectStyle from './selectStyle';
 const Wrapper = styled.div`
   padding-left: 30px;
   width: 60%;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'default')};
 `;
 
 const ConditionsSelect = ({ onChange, value }) => {
-  const { permissionsLayout } = usePermissionsContext();
+  const { isSuperAdmin, permissionsLayout } = usePermissionsContext();
   const { formatMessage } = useIntl();
 
   const handleChange = action => {
@@ -51,7 +52,7 @@ const ConditionsSelect = ({ onChange, value }) => {
   };
 
   return (
-    <Wrapper>
+    <Wrapper disabled={isSuperAdmin}>
       <Select
         components={{
           ClearIndicator,
@@ -60,6 +61,7 @@ const ConditionsSelect = ({ onChange, value }) => {
           SingleValue,
           MenuList,
         }}
+        isDisabled={isSuperAdmin}
         onChange={handleChange}
         isClearable={false}
         isLoading={false}
