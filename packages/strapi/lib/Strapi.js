@@ -1,9 +1,7 @@
 'use strict';
 
-// Dependencies.
-const dotenv = require('dotenv');
-
-dotenv.config({ path: process.env.ENV_PATH });
+// required first because it loads env files.
+const loadConfiguration = require('./core/app-configuration');
 
 const http = require('http');
 const path = require('path');
@@ -18,7 +16,6 @@ const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
-const loadConfiguration = require('./core/app-configuration');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -37,7 +34,6 @@ const ee = require('./utils/ee');
  *
  * @constructor
  */
-
 class Strapi {
   constructor(opts = {}) {
     this.reload = this.reload();

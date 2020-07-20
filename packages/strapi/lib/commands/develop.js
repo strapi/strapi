@@ -1,5 +1,8 @@
 'use strict';
 
+// required first because it loads env files.
+const loadConfiguration = require('../core/app-configuration');
+
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
@@ -7,7 +10,6 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
-const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 
 /**
