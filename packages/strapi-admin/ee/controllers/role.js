@@ -3,9 +3,8 @@
 const { yup, formatYupErrors } = require('strapi-utils');
 const {
   validateRoleCreateInput,
-  validateRoleUpdateInput,
-  validateRolesDeleteInput,
   validateRoleDeleteInput,
+  validateRolesDeleteInput,
 } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 const { SUPER_ADMIN_CODE } = require('../../services/constants');
@@ -26,31 +25,6 @@ module.exports = {
 
     const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
     ctx.created({ data: sanitizedRole });
-  },
-
-  /**
-   * Update a role
-   * @param {KoaContext} ctx - koa context
-   */
-  async update(ctx) {
-    const { id } = ctx.params;
-
-    try {
-      await validateRoleUpdateInput(ctx.request.body, id);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
-
-    let role = await strapi.admin.services.role.update({ id }, ctx.request.body);
-    if (!role) {
-      return ctx.notFound('Role not found');
-    }
-
-    const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
-
-    ctx.body = {
-      data: sanitizedRole,
-    };
   },
 
   /**

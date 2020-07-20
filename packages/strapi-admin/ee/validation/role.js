@@ -15,14 +15,6 @@ const roleCreateSchema = yup
   })
   .noUnknown();
 
-const roleUpdateSchema = yup
-  .object()
-  .shape({
-    name: yup.string().min(1),
-    description: yup.string().nullable(),
-  })
-  .noUnknown();
-
 const rolesDeleteSchema = yup
   .object()
   .shape({
@@ -52,10 +44,6 @@ const validateRoleCreateInput = async data => {
   return roleCreateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
-const validateRoleUpdateInput = async data => {
-  return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
-};
-
 const validateRolesDeleteInput = async data => {
   return rolesDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
@@ -66,7 +54,6 @@ const validateRoleDeleteInput = async data => {
 
 module.exports = {
   validateRoleCreateInput,
-  validateRoleUpdateInput,
   validateRolesDeleteInput,
   validateRoleDeleteInput,
 };

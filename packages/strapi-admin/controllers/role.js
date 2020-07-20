@@ -48,13 +48,18 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const role = await strapi.admin.services.role.update({ id }, ctx.request.body);
-
+    const role = await strapi.admin.services.role.findOne({ id });
     if (!role) {
       return ctx.notFound('role.notFound');
     }
 
-    const sanitizedRole = strapi.admin.services.role.sanitizeRole(role);
+    if (role.code === SUPER_ADMIN_CODE) {
+      return ctx.badRequest("Super admin can't be edited.");
+    }
+
+    const updatedRole = await strapi.admin.services.role.update({ id }, ctx.request.body);
+
+    const sanitizedRole = strapi.admin.services.role.sanitizeRole(updatedRole);
 
     ctx.body = {
       data: sanitizedRole,

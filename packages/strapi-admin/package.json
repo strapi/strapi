@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"no tests yet\"",
-    "develop": "webpack-dev-server --config webpack.config.dev.js"
+    "develop": "webpack-dev-server --config webpack.config.dev.js",
+    "develop:ce": "STRAPI_DISABLE_EE=true webpack-dev-server --config webpack.config.dev.js"
   },
   "main": "index.js",
   "dependencies": {

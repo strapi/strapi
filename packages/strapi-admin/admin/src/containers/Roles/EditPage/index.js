@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { get, isEmpty } from 'lodash';
 import { useGlobalContext, request } from 'strapi-helper-plugin';
@@ -6,14 +6,13 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import getInitialValues from 'ee_else_ce/containers/Roles/EditPage/utils/getInitialValues';
-import schema from 'ee_else_ce/containers/Roles/EditPage/utils/schema';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 import { formatPermissionsToApi } from '../../../utils';
+import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -27,9 +26,7 @@ const EditPage = () => {
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
-  const initialValues = useMemo(() => {
-    return getInitialValues(role);
-  }, [role]);
+
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
     isLayoutLoading && isRoleLoading
@@ -40,6 +37,7 @@ const EditPage = () => {
               id: 'app.components.Button.reset',
               defaultMessage: 'Reset',
             }),
+            disabled: role.code === 'strapi-super-admin',
             onClick: handleReset,
             color: 'cancel',
             type: 'button',
@@ -49,6 +47,7 @@ const EditPage = () => {
               id: 'app.components.Button.save',
               defaultMessage: 'Save',
             }),
+            disabled: role.code === 'strapi-super-admin',
             onClick: handleSubmit,
             color: 'success',
             type: 'submit',
@@ -96,7 +95,10 @@ const EditPage = () => {
       <PageTitle name="Roles" />
       <Formik
         enableReinitialize
-        initialValues={initialValues}
+        initialValues={{
+          name: role.name,
+          description: role.description,
+        }}
         onSubmit={handleEditRoleSubmit}
         validationSchema={schema}
         validateOnChange={false}
@@ -121,6 +123,7 @@ const EditPage = () => {
               <BaselineAlignement top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
+                disabled={role.code === 'strapi-super-admin'}
                 errors={errors}
                 values={values}
                 onChange={handleChange}

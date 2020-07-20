@@ -1,15 +1,14 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import getNameInputValue from 'ee_else_ce/components/Roles/RoleForm/utils/getNameInputValue';
-import NameInput from 'ee_else_ce/components/Roles/RoleForm/NameInput';
+
+import NameInput from './NameInput';
 
 import FormCard from '../../FormBloc';
 import SizedInput from '../../SizedInput';
 import ButtonWithNumber from '../ButtonWithNumber';
 
-const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
-  const nameValue = getNameInputValue(values, role);
+const RoleForm = ({ disabled, role, values, errors, onChange, onBlur, isLoading }) => {
   const { formatMessage } = useIntl();
 
   const actions = [
@@ -49,17 +48,19 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
       /* eslint-enable indent */
     >
       <NameInput
+        disabled={disabled}
         label="Settings.roles.form.input.name"
         defaultMessage="Name"
         name="name"
         type="text"
         error={errors.name ? { id: errors.name } : null}
         onBlur={onBlur}
-        value={nameValue}
+        value={values.name}
         onChange={onChange}
       />
 
       <SizedInput
+        disabled={disabled}
         label="Settings.roles.form.input.description"
         defaultMessage="Description"
         name="description"
@@ -75,11 +76,13 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
 };
 
 RoleForm.defaultProps = {
+  disabled: false,
   isLoading: false,
   role: null,
   values: { name: '', description: '' },
 };
 RoleForm.propTypes = {
+  disabled: PropTypes.bool,
   errors: PropTypes.object.isRequired,
   isLoading: PropTypes.bool,
   onBlur: PropTypes.func.isRequired,
