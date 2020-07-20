@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
 import { CheckPermissions } from 'strapi-helper-plugin';
 import useModalContext from '../../hooks/useModalContext';
@@ -12,7 +11,7 @@ import SelectedAssets from '../SelectedAssets';
 import IntlText from '../IntlText';
 import BaselineAlignmentWrapper from './BaselineAlignmentWrapper';
 
-const ListModal = ({ noNavigation }) => {
+const ListModal = () => {
   const { currentTab, goTo, handleModalTabChange, selectedFiles } = useModalContext();
 
   const handleClick = to => {
@@ -48,10 +47,12 @@ const ListModal = ({ noNavigation }) => {
     },
   ];
 
-  const renderRightContent = noNavigation ? null : renderUploadModalButton;
-
   return (
-    <ModalNavWrapper initialTab={currentTab} links={links} renderRightContent={renderRightContent}>
+    <ModalNavWrapper
+      initialTab={currentTab}
+      links={links}
+      renderRightContent={renderUploadModalButton}
+    >
       {to => (
         <ModalSection>
           {to === 'browse' && <BrowseAssets />}
@@ -60,14 +61,6 @@ const ListModal = ({ noNavigation }) => {
       )}
     </ModalNavWrapper>
   );
-};
-
-ListModal.defaultProps = {
-  noNavigation: false,
-};
-
-ListModal.propTypes = {
-  noNavigation: PropTypes.bool,
 };
 
 export default ListModal;
