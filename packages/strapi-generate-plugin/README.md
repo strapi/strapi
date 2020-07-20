@@ -16,7 +16,7 @@ $ strapi generate:plugin pluginName
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 
