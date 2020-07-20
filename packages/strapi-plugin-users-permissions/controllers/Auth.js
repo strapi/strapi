@@ -644,7 +644,7 @@ module.exports = {
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
-        URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`, // ICICI
+        URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`,
         USER: userInfo,
         CODE: jwt,
       }
