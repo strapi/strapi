@@ -212,14 +212,16 @@ module.exports = ({ models, target }, ctx) => {
           }
 
           if (type === 'dynamiczone') {
-            const components = returned[name].map(el => {
-              return {
-                __component: findComponentByGlobalId(el.kind).uid,
-                ...el.ref,
-              };
-            });
+            if (returned[name]) {
+              const components = returned[name].map(el => {
+                return {
+                  __component: findComponentByGlobalId(el.kind).uid,
+                  ...el.ref,
+                };
+              });
 
-            returned[name] = components;
+              returned[name] = components;
+            }
           }
         });
       },

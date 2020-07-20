@@ -38,13 +38,13 @@ To allow customizations, the server will now serve the files in your `./public` 
 
 From now on, if you don't have any `index.html` file in your `./public` folder, the server will render the default Strapi homepage.
 
-You can now also disable this behavior with the `public.defaultIndex` option. Read the documentation [here](../concepts/configurations.md#application).
+You can now also disable this behavior with the `public.defaultIndex` option. Read the documentation [here](../../3.0.0-beta.x/concepts/configurations.md#application).
 
 ## Upload plugin settings
 
 A lot of our users have been requesting that we move some back-end specific configurations to files. While implementing the media library feature, we decided to move the upload plugin settings to files.
 
-This means that you now have to configure your provider directly in the files. You can read the documentation [here](../plugins/upload.md#using-a-provider) to update.
+This means that you now have to configure your provider directly in the files. You can read the documentation [here](../../3.0.0-beta.x/plugins/upload.md#using-a-provider) to update.
 
 ## MongoDB Media relation changes
 
@@ -187,6 +187,15 @@ while (fileCursor.hasNext()) {
       );
     }
   });
+
+  if (el.name) {
+    var splitName = el.name.split('.');
+    var name = splitName[0];
+    var ext = splitName[1];
+    if (ext) {
+      db.getCollection('upload_file').updateOne({ _id: el._id }, { $set: { name: name } });
+    }
+  }
 }
 ```
 
@@ -207,6 +216,9 @@ var models = {
 ```
 
 Finally you can load this script in your mongo shell and run it.
+
+Note that after migration the `name` field of the files you uploaded will be replaced with a name without an extension.
+If you were displaying the file name including the extension on the front end, you might have to show the extension separately through the `ext` field.
 
 Once your migration is done you can delete the `export.js` and `models.json` files from your project. You are all set !
 

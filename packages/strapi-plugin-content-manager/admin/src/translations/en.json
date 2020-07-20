@@ -121,7 +121,7 @@
   "error.validation.min": "The value is too low.",
   "error.validation.minLength": "The value is too short.",
   "error.validation.minSupMax": "Can't be superior",
-  "error.validation.regex": "The value not match the regex.",
+  "error.validation.regex": "The value does not match the regex.",
   "error.validation.required": "This value input is required.",
 
   "form.Input.bulkActions": "Enable bulk actions",
@@ -159,5 +159,5 @@
   "success.record.delete": "Deleted",
   "success.record.save": "Saved",
   "notification.info.minimumFields": "You need to have at least one field displayed",
-  "notification.upload.error": "An error has occured while uploading your files"
+  "notification.upload.error": "An error has occurred while uploading your files"
 }
