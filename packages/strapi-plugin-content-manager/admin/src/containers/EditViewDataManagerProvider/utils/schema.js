@@ -140,12 +140,43 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
         const { max, min } = attribute;
 
         if (attribute.required) {
-          dynamicZoneSchema = dynamicZoneSchema.required();
+          // dynamicZoneSchema = dynamicZoneSchema.required();
+          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
+            if (isCreatingEntry) {
+              return value !== null || value !== undefined;
+            }
+
+            if (value === undefined) {
+              return true;
+            }
+
+            return value !== null;
+          });
 
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema
-              .min(min, errorsTrads.min)
-              .required(errorsTrads.required);
+              .test('min', errorsTrads.min, value => {
+                if (isCreatingEntry) {
+                  return value && value.length > 0;
+                }
+
+                if (value === undefined) {
+                  return true;
+                }
+
+                return value !== null && value.length > 0;
+              })
+              .test('required', errorsTrads.required, value => {
+                if (isCreatingEntry) {
+                  return value !== null || value !== undefined;
+                }
+
+                if (value === undefined) {
+                  return true;
+                }
+
+                return value !== null;
+              });
           }
         } else {
           // eslint-disable-next-line no-lonely-if
@@ -237,7 +268,22 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
           }
 
           if (type !== 'password') {
-            schema = schema.required(errorsTrads.required);
+            if (isCreatingEntry) {
+              schema = schema.required(errorsTrads.required);
+            } else {
+              schema = schema.test('required', errorsTrads.required, value => {
+                // Field is not touched and the user is editing the entry
+                if (value === undefined) {
+                  return true;
+                }
+
+                if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                  return !!value;
+                }
+
+                return !isEmpty(value);
+              });
+            }
           }
 
           break;

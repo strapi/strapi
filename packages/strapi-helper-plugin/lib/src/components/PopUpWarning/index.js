@@ -36,21 +36,32 @@ const icons = {
 function PopUpWarning({
   content,
   isOpen,
+  isConfirmButtonLoading,
   onConfirm,
   onlyConfirmButton,
   popUpWarningType,
   toggleModal,
   ...rest
 }) {
+  const handleToggle = e => {
+    // Prevent user interactions while requests are being submitted
+    if (isConfirmButtonLoading) {
+      return;
+    }
+
+    toggleModal(e);
+  };
+
   const buttons = [
     {
       color: 'cancel',
-      onClick: toggleModal,
+      onClick: handleToggle,
       message: content.cancel || 'components.popUpWarning.button.cancel',
     },
     {
       color: 'delete',
       onClick: onConfirm,
+      isLoading: isConfirmButtonLoading,
       message: content.confirm || 'components.popUpWarning.button.confirm',
     },
   ];
@@ -67,11 +78,11 @@ function PopUpWarning({
 
   return (
     <Wrapper>
-      <StyledModal isOpen={isOpen} toggle={toggleModal} {...rest}>
-        <CloseButton onClick={toggleModal}>
+      <StyledModal isOpen={isOpen} toggle={handleToggle} {...rest}>
+        <CloseButton onClick={handleToggle}>
           <Close fill="#c3c5c8" />
         </CloseButton>
-        <StyledHeader toggle={toggleModal}>
+        <StyledHeader toggle={handleToggle}>
           <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
         </StyledHeader>
         <StyledBody>
@@ -104,6 +115,7 @@ PopUpWarning.propTypes = {
     message: PropTypes.string,
     title: PropTypes.string,
   }),
+  isConfirmButtonLoading: PropTypes.bool,
   isOpen: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onlyConfirmButton: PropTypes.bool,
@@ -118,6 +130,7 @@ PopUpWarning.defaultProps = {
     message: 'components.popUpWarning.message',
     title: 'components.popUpWarning.title',
   },
+  isConfirmButtonLoading: false,
   onlyConfirmButton: false,
   popUpWarningType: 'danger',
 };

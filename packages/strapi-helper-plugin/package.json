@@ -23,7 +23,7 @@
       "url": "http://strapi.io"
     }
   ],
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "rimraf dist",
@@ -50,6 +50,11 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
+    "@buffetjs/core": "3.2.1",
+    "@buffetjs/hooks": "3.2.1",
+    "@buffetjs/icons": "3.2.1",
+    "@buffetjs/styles": "3.2.1",
+    "@buffetjs/utils": "3.2.1",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",

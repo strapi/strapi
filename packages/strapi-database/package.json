@@ -26,9 +26,10 @@
     "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "lodash": "^4.17.11",
+    "p-map": "4.0.0",
     "verror": "^1.10.0"
   }
 }

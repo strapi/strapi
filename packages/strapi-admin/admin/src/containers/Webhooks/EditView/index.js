@@ -5,18 +5,15 @@
  */
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { get, isEmpty, isEqual, omit } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import { request, useGlobalContext, getYupInnerErrors, BackHeader } from 'strapi-helper-plugin';
-
-import Inputs from '../../../components/Inputs';
-import TriggerContainer from '../../../components/TriggerContainer';
-
+import PageTitle from '../../../components/SettingsPageTitle';
+import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 import reducer, { initialState } from './reducer';
 import { cleanData, form, schema } from './utils';
-
 import Wrapper from './Wrapper';
 
 function EditView() {
@@ -25,7 +22,10 @@ function EditView() {
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { push } = useHistory();
-  const { id } = useParams();
+  const {
+    params: { id },
+  } = useRouteMatch('/settings/webhooks/:id');
+
   const abortController = new AbortController();
   const { signal } = abortController;
   const isCreating = id === 'create';
@@ -347,6 +347,7 @@ function EditView() {
 
   return (
     <Wrapper>
+      <PageTitle name="Webhooks" />
       <BackHeader onClick={goBack} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />

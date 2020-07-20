@@ -9,7 +9,8 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/Main';
-import Initializer from './containers/Initializer';
+
+import ConfigureViewButton from './InjectedComponents/ContentTypeBuilder/ConfigureViewButton';
 import lifecycles from './lifecycles';
 import reducers from './reducers';
 import trads from './translations';
@@ -22,21 +23,24 @@ export default strapi => {
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: Initializer,
-    injectedComponents: [],
-    isReady: false,
+    initializer: null,
+    injectedComponents: [
+      {
+        plugin: 'content-type-builder.listView',
+        area: 'list.link',
+        component: ConfigureViewButton,
+        key: 'content-manager.link',
+      },
+    ],
+    isReady: true,
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles,
-    leftMenuLinks: [],
-    leftMenuSections: [],
     mainComponent: App,
     name: pluginPkg.strapi.name,
     pluginLogo,
     preventComponentRendering: false,
     reducers,
-    suffixUrl: () => '/ctm-configurations/models',
-    suffixUrlToReplaceForLeftMenuHighlight: '/models',
     trads,
   };
 

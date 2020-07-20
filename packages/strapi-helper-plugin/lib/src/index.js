@@ -64,24 +64,33 @@ export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPa
 
 export { default as Modal } from './components/Modal';
 export { default as ModalBody } from './components/BodyModal';
+export { default as ModalHeader } from './components/ModalHeader';
 export { default as ModalFooter } from './components/FooterModal';
 export { default as ModalForm } from './components/FormModal';
+export { default as ModalSection } from './components/ModalSection';
 export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
 export { default as PopUpWarning } from './components/PopUpWarning';
+export { default as Row } from './components/Row';
 export { default as SearchInfo } from './components/SearchInfo';
 export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
+export { default as UserProvider } from './components/UserProvider';
 export { default as ViewContainer } from './components/ViewContainer';
+export { default as CheckPagePermissions } from './components/CheckPagePermissions';
+export { default as CheckPermissions } from './components/CheckPermissions';
 
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
+export { default as UserContext } from './contexts/UserContext';
 
 // Hooks
 export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
+export { default as useUser } from './hooks/useUser';
+export { default as useUserPermissions } from './hooks/useUserPermissions';
 
 // Providers
 export { default as StrapiProvider } from './providers/StrapiProvider';
@@ -92,6 +101,8 @@ export { default as cleanData } from './utils/cleanData';
 export { default as difference } from './utils/difference';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
+export { default as hasPermissions } from './utils/hasPermissions';
+export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
 export { default as getFileExtension } from './utils/getFileExtension';

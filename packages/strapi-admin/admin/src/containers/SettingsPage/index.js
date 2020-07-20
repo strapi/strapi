@@ -9,76 +9,143 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-settings-api.md
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
-import React, { memo } from 'react';
-import { useGlobalContext, LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
-import { Switch, Redirect, Route, useParams } from 'react-router-dom';
-import EditView from '../Webhooks/EditView';
-import ListView from '../Webhooks/ListView';
+import React, { memo, useMemo, useState } from 'react';
+import {
+  BackHeader,
+  useGlobalContext,
+  LeftMenuList,
+  LoadingIndicatorPage,
+} from 'strapi-helper-plugin';
+import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
+import ProtectedRolesListPage from 'ee_else_ce/containers/Roles/ProtectedListPage';
+import HeaderSearch from '../../components/HeaderSearch';
+import PageTitle from '../../components/PageTitle';
+import { useSettingsMenu } from '../../hooks';
+import { retrieveGlobalLinks } from '../../utils';
+import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
+import UsersEditPage from '../Users/ProtectedEditPage';
+import UsersListPage from '../Users/ProtectedListPage';
+import RolesEditPage from '../Roles/ProtectedEditPage';
+import {
+  createRoute,
+  findFirstAllowedEndpoint,
+  createPluginsLinksRoutes,
+  makeUniqueRoutes,
+  getSectionsToDisplay,
+} from './utils';
+import WebhooksCreateView from '../Webhooks/ProtectedCreateView';
+import WebhooksEditView from '../Webhooks/ProtectedEditView';
+import WebhooksListView from '../Webhooks/ProtectedListView';
 import SettingDispatcher from './SettingDispatcher';
+import LeftMenu from './StyledLeftMenu';
 import Wrapper from './Wrapper';
-import retrieveGlobalLinks from './utils/retrieveGlobalLinks';
-import retrievePluginsMenu from './utils/retrievePluginsMenu';
 
 function SettingsPage() {
   const { settingId } = useParams();
-  const { formatMessage, plugins, settingsBaseURL } = useGlobalContext();
-  // Retrieve the links that will be injected into the global section
-  const globalLinks = retrieveGlobalLinks(plugins);
-  // Create the plugins settings section
-  // Note it is currently not possible to add a link into a plugin section
-  const pluginsMenu = retrievePluginsMenu(plugins);
+  const { goBack } = useHistory();
+  const { settingsBaseURL, plugins } = useGlobalContext();
+  const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
+  const { isLoading, menu } = useSettingsMenu();
+  const { formatMessage } = useIntl();
+  const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
+  const firstAvailableEndpoint = useMemo(() => {
+    // Don't need to compute while permissions are being checked
+    if (isLoading) {
+      return '';
+    }
 
-  const createdRoutes = globalLinks
-    .map(({ to, Component, exact }) => (
-      <Route path={to} key={to} component={Component} exact={exact || false} />
-    ))
-    .filter((route, index, refArray) => {
-      return refArray.findIndex(obj => obj.key === route.key) === index;
+    return findFirstAllowedEndpoint(menu);
+  }, [menu, isLoading]);
+
+  // Create all the <Route /> that needs to be created by the plugins
+  // For instance the upload plugin needs to create a <Route />
+  const globalSectionCreatedRoutes = useMemo(() => {
+    const routesToCreate = pluginsGlobalLinks.map(({ to, Component, exact }) =>
+      createRoute(Component, to, exact)
+    );
+
+    return makeUniqueRoutes(routesToCreate);
+  }, [pluginsGlobalLinks]);
+
+  // Same here for the plugins sections
+  const pluginsLinksRoutes = useMemo(() => {
+    return createPluginsLinksRoutes(menu);
+  }, [menu]);
+
+  // Only display accessible sections
+  const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
+
+  const toggleHeaderSearch = label =>
+    setShowHeaderSearchState(prev => {
+      if (prev.show) {
+        return {
+          show: false,
+          label: '',
+        };
+      }
+
+      return { label, show: true };
     });
 
-  const menuItems = [
-    {
-      id: 'global',
-      title: { id: 'Settings.global' },
-      links: [
-        {
-          title: formatMessage({ id: 'Settings.webhooks.title' }),
-          to: `${settingsBaseURL}/webhooks`,
-          name: 'webhooks',
-        },
-        ...globalLinks,
-      ],
-    },
-    ...pluginsMenu,
-  ];
-
-  // Redirect to the first static link of the menu
-  // This is needed in order to keep the menu highlight
-  // The link points to /settings instead of /settings/webhooks
-  if (!settingId) {
-    return <Redirect to={`${settingsBaseURL}/webhooks`} />;
+  // Since the useSettingsMenu hook can make API calls in order to check the links permissions
+  // We need to add a loading state to prevent redirecting the user while permissions are being checked
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
   }
 
+  if (!settingId && firstAvailableEndpoint) {
+    return <Redirect to={firstAvailableEndpoint} />;
+  }
+
+  const settingTitle = formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' });
+
   return (
-    <Wrapper>
-      <div className="row">
-        <div className="col-md-3">
-          <LeftMenu>
-            {menuItems.map(item => {
-              return <LeftMenuList {...item} key={item.id} />;
-            })}
-          </LeftMenu>
+    <SettingsSearchHeaderProvider value={{ toggleHeaderSearch }}>
+      <PageTitle title={settingTitle} />
+      <Wrapper>
+        <BackHeader onClick={goBack} />
+
+        <div className="row">
+          <div className="col-md-3">
+            <LeftMenu>
+              {filteredMenu.map(item => {
+                return <LeftMenuList {...item} key={item.id} />;
+              })}
+            </LeftMenu>
+          </div>
+          <div className="col-md-9">
+            <Switch>
+              <Route exact path={`${settingsBaseURL}/roles`} component={ProtectedRolesListPage} />
+              <Route
+                exact
+                path={`${settingsBaseURL}/roles/duplicate/:id`}
+                component={RolesCreatePage}
+              />
+              <Route exact path={`${settingsBaseURL}/roles/new`} component={RolesCreatePage} />
+              <Route exact path={`${settingsBaseURL}/roles/:id`} component={RolesEditPage} />
+              <Route exact path={`${settingsBaseURL}/users`} component={UsersListPage} />
+              <Route exact path={`${settingsBaseURL}/users/:id`} component={UsersEditPage} />
+
+              <Route
+                exact
+                path={`${settingsBaseURL}/webhooks/create`}
+                component={WebhooksCreateView}
+              />
+
+              <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={WebhooksEditView} />
+
+              <Route exact path={`${settingsBaseURL}/webhooks`} component={WebhooksListView} />
+              {globalSectionCreatedRoutes}
+              {pluginsLinksRoutes}
+              <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />
+            </Switch>
+          </div>
         </div>
-        <div className="col-md-9">
-          <Switch>
-            <Route exact path={`${settingsBaseURL}/webhooks`} component={ListView} />
-            <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={EditView} />
-            {createdRoutes}
-            <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />
-          </Switch>
-        </div>
-      </div>
-    </Wrapper>
+        {headerSearchState.show && <HeaderSearch label={headerSearchState.label} />}
+      </Wrapper>
+    </SettingsSearchHeaderProvider>
   );
 }
 
