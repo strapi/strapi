@@ -39,14 +39,15 @@ describe('Permission Service', () => {
     });
 
     test('Create new permissions', async () => {
+      const permissions = Array(5)
+        .fill(0)
+        .map((v, i) => ({ action: `action-${i}` }));
+
       const deleteFn = jest.fn(() => Promise.resolve([]));
       const createMany = jest.fn(() => Promise.resolve([]));
       const find = jest.fn(() => Promise.resolve([]));
-      const getAll = jest.fn(() =>
-        Array(5)
-          .fill(0)
-          .map((v, i) => ({ actionId: `action-${i}` }))
-      );
+      const getAll = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
+      const removeUnkownConditionIds = jest.fn(conds => _.intersection(conds, ['cond']));
 
       global.strapi = {
         admin: {
@@ -57,6 +58,9 @@ describe('Permission Service', () => {
                 getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
             },
+            condition: {
+              removeUnkownConditionIds,
+            },
           },
         },
         query() {
@@ -64,11 +68,13 @@ describe('Permission Service', () => {
         },
       };
 
-      const permissions = Array(5)
-        .fill(0)
-        .map((v, i) => ({ action: `action-${i}` }));
+      const permissionsToAssign = [...permissions];
+      permissionsToAssign[4] = {
+        ...permissions[4],
+        conditions: ['cond', 'unknown-cond'],
+      };
 
-      await permissionService.assign(1, permissions);
+      await permissionService.assign(1, permissionsToAssign);
 
       expect(createMany).toHaveBeenCalledTimes(1);
       expect(createMany).toHaveBeenCalledWith([
@@ -76,7 +82,7 @@ describe('Permission Service', () => {
         { action: 'action-1', conditions: [], fields: null, role: 1, subject: null },
         { action: 'action-2', conditions: [], fields: null, role: 1, subject: null },
         { action: 'action-3', conditions: [], fields: null, role: 1, subject: null },
-        { action: 'action-4', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-4', conditions: ['cond'], fields: null, role: 1, subject: null },
       ]);
     });
   });
@@ -110,18 +116,25 @@ describe('Permission Service', () => {
 
   describe('Sanitize Permission', () => {
     test('Removes unwanted properties', () => {
+      const removeUnkownConditionIds = jest.fn(() => ['cond']);
+      global.strapi = {
+        admin: { services: { condition: { removeUnkownConditionIds } } },
+      };
       const permission = {
         action: 'read',
         subject: 'article',
         fields: ['*'],
-        conditions: ['cond'],
+        conditions: ['cond', 'unknown-cond'],
         foo: 'bar',
       };
 
       const sanitizedPermission = permissionService.sanitizePermission(permission);
 
       expect(sanitizedPermission.foo).toBeUndefined();
-      expect(sanitizedPermission).toMatchObject(_.omit(permission, 'foo'));
+      expect(sanitizedPermission).toMatchObject({
+        ..._.omit(permission, 'foo'),
+        conditions: ['cond'],
+      });
     });
   });
 
@@ -242,6 +255,7 @@ describe('Permission Service', () => {
       const getPermissionsWithNestedFields = jest.fn(() => [...permissions]); // cloned, otherwise it is modified inside resetSuperAdminPermissions()
       const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 1 }));
       const createMany = jest.fn(() => Promise.resolve([{ ...permissions[0], role: { id: 1 } }]));
+      const removeUnkownConditionIds = jest.fn(conds => conds);
 
       global.strapi = {
         query: () => ({ createMany, find, delete: deleteFn }),
@@ -251,6 +265,7 @@ describe('Permission Service', () => {
               actionProvider: { getAll },
               conditionProvider: { getAll: getAllConditions },
             },
+            condition: { removeUnkownConditionIds },
             'content-type': { getPermissionsWithNestedFields },
             role: { getSuperAdmin },
           },

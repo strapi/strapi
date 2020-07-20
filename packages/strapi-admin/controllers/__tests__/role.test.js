@@ -47,6 +47,7 @@ describe('Role controller', () => {
 
       const findOneRole = jest.fn(() => Promise.resolve({ id: 1 }));
       const findPermissions = jest.fn(() => Promise.resolve(permissions));
+      const sanitizePermission = jest.fn(perms => perms);
 
       const ctx = createContext({
         params: { id: 1 },
@@ -60,6 +61,7 @@ describe('Role controller', () => {
             },
             permission: {
               find: findPermissions,
+              sanitizePermission,
             },
           },
         },
