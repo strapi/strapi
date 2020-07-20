@@ -73,5 +73,13 @@ module.exports = () => {
     getAll() {
       return Array.from(registry.values());
     },
+
+    /**
+     * Returns all the registered conditions ids.
+     * @returns {any[]}
+     */
+    getAllIds() {
+      return Array.from(registry.keys());
+    },
   };
 };

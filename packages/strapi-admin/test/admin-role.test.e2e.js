@@ -633,6 +633,39 @@ describe('Role CRUD End to End', () => {
         });
       });
 
+      test('assign permissions on role with an unknown condition', async () => {
+        const permissions = [
+          {
+            action: 'plugins::users-permissions.roles.update',
+          },
+          {
+            action: 'plugins::content-manager.explorer.create',
+            subject: 'plugins::users-permissions.user',
+            fields: ['username'],
+            conditions: ['admin::is-creator'],
+          },
+        ];
+        const res = await rq({
+          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
+          method: 'PUT',
+          body: {
+            permissions: [
+              permissions[0],
+              {
+                ...permissions[1],
+                conditions: [...permissions[1].conditions, 'unknown-condition'],
+              },
+            ],
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length > 0).toBe(true);
+        expect(res.body.data).toMatchObject(
+          permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+        );
+      });
+
       test("can't assign non-existing permissions on role", async () => {
         const res = await rq({
           url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
