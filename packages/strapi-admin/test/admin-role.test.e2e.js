@@ -398,7 +398,22 @@ describe('Role CRUD End to End', () => {
           ],
         });
       });
+
+      test('Cannot super admin role', async () => {
+        const updates = {
+          name: 'new name - Cannot update the name of a role',
+          description: 'new description - Can update a role successfully',
+        };
+        const res = await rq({
+          url: `/admin/roles/${data.superAdminRole.id}`,
+          method: 'PUT',
+          body: updates,
+        });
+
+        expect(res.statusCode).toBe(400);
+      });
     });
+
     describe('Delete roles', () => {
       describe('batch-delete', () => {
         test("Don't delete the roles if some still have assigned users", async () => {
@@ -543,7 +558,7 @@ describe('Role CRUD End to End', () => {
         expect(res.body).toMatchObject({
           statusCode: 404,
           error: 'Not Found',
-          message: 'entry.notFound',
+          message: 'role.notFound',
         });
       });
 
