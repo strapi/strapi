@@ -121,6 +121,7 @@ const EditPage = () => {
               <BaselineAlignement top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
+                disabled={role.code === 'strapi-super-admin'}
                 errors={errors}
                 values={values}
                 onChange={handleChange}

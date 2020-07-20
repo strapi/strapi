@@ -8,7 +8,7 @@ import FormCard from '../../FormBloc';
 import SizedInput from '../../SizedInput';
 import ButtonWithNumber from '../ButtonWithNumber';
 
-const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
+const RoleForm = ({ disabled, role, values, errors, onChange, onBlur, isLoading }) => {
   const { formatMessage } = useIntl();
 
   const actions = [
@@ -48,6 +48,7 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
       /* eslint-enable indent */
     >
       <NameInput
+        disabled={disabled}
         label="Settings.roles.form.input.name"
         defaultMessage="Name"
         name="name"
@@ -59,6 +60,7 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
       />
 
       <SizedInput
+        disabled={disabled}
         label="Settings.roles.form.input.description"
         defaultMessage="Description"
         name="description"
@@ -74,11 +76,13 @@ const RoleForm = ({ role, values, errors, onChange, onBlur, isLoading }) => {
 };
 
 RoleForm.defaultProps = {
+  disabled: false,
   isLoading: false,
   role: null,
   values: { name: '', description: '' },
 };
 RoleForm.propTypes = {
+  disabled: PropTypes.bool,
   errors: PropTypes.object.isRequired,
   isLoading: PropTypes.bool,
   onBlur: PropTypes.func.isRequired,
