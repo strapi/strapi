@@ -5,7 +5,7 @@
   "main": "./lib",
   "keywords": [],
   "author": "Pongstr Ordillo <https://github.com/pongstr>",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },
