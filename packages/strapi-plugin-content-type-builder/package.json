@@ -8,7 +8,7 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@sindresorhus/slugify": "0.9.1",
+    "@sindresorhus/slugify": "1.1.0",
     "fs-extra": "^7.0.0",
     "immutable": "^3.8.2",
     "lodash": "^4.17.11",
