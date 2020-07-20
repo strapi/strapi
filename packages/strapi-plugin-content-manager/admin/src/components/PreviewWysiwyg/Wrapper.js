@@ -58,7 +58,7 @@ const Wrapper = styled.div`
     max-width: 100%;
   }
 
-  > table {
+  table {
     font-size: 13px;
     thead {
       background: rgb(243, 243, 243);
@@ -89,16 +89,32 @@ const Wrapper = styled.div`
     font-size: 13px;
     font-family: 'Lato';
     border-radius: 3px;
+    background-color: #002b36;
   }
 
   /* Inline code */
   p,
+  pre,
   td {
     > code {
-      /* We need to add the same color as the theme */
-      background-color: #002b36;
       color: #839496;
     }
+  }
+
+  .warning {
+    background-color: #faa684;
+    padding: 30px;
+    border-radius: 3px;
+  }
+  .tip {
+    background-color: ${props => props.theme.main.colors.darkBlue};
+    padding: 30px;
+    border-radius: 3px;
+  }
+
+  .footnote-ref,
+  .footnote-backref {
+    color: #007bff;
   }
 
   ${({ isFullscreen }) => {
