@@ -53,7 +53,7 @@ const UpgradePlanModal = ({ isOpen, onToggle }) => {
       </Wrapper>
 
       <a
-        href="https://strapi.io/enterprise#contact"
+        href="https://strapi.io/pricing"
         target="_blank"
         rel="noopener noreferrer"
         style={{ display: 'none' }}
