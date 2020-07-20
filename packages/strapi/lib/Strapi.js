@@ -144,7 +144,7 @@ class Strapi {
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.listen(cb);
+      await this.listen(cb);
     } catch (err) {
       this.stopWithError(err);
     }
