@@ -9,7 +9,7 @@
     "required": true
   },
   "dependencies": {
-    "@sindresorhus/slugify": "^1.1.0",
+    "@sindresorhus/slugify": "1.1.0",
     "classnames": "^2.2.6",
     "codemirror": "^5.46.0",
     "draft-js": "^0.11.5",
