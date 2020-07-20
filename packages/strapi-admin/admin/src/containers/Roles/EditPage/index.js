@@ -37,6 +37,7 @@ const EditPage = () => {
               id: 'app.components.Button.reset',
               defaultMessage: 'Reset',
             }),
+            disabled: role.code === 'strapi-super-admin',
             onClick: handleReset,
             color: 'cancel',
             type: 'button',
@@ -46,6 +47,7 @@ const EditPage = () => {
               id: 'app.components.Button.save',
               defaultMessage: 'Save',
             }),
+            disabled: role.code === 'strapi-super-admin',
             onClick: handleSubmit,
             color: 'success',
             type: 'submit',
@@ -121,6 +123,7 @@ const EditPage = () => {
               <BaselineAlignement top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
+                disabled={role.code === 'strapi-super-admin'}
                 errors={errors}
                 values={values}
                 onChange={handleChange}
