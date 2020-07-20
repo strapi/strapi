@@ -16,7 +16,7 @@ $ strapi new <myAppName>
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

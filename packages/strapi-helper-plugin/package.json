@@ -23,7 +23,7 @@
       "url": "http://strapi.io"
     }
   ],
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "rimraf dist",

@@ -43,7 +43,7 @@ Don't be bogged down by tech you don't need!
 
 ### Source Code
 
-Strapi is an open-source project, all of Strapi's source code is under the MIT license. The core project can be found at the [strapi/strapi](https://github.com/strapi/strapi) GitHub repository and you will find all other tools in the [Strapi](https://github.com/strapi) GitHub organization.
+Strapi is an open-source project. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) file for licensing information. The core project can be found at the [strapi/strapi](https://github.com/strapi/strapi) GitHub repository and you will find all other tools in the [Strapi](https://github.com/strapi) GitHub organization.
 
 ### Marketplace
 
