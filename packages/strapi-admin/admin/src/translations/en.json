@@ -115,6 +115,8 @@
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
 
   "app.links.configure-view": "Configure the view",
+  "app.static.links.cheatsheet": "CheatSheet",
+
 
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
