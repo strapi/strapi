@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-service",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "Generate a service for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.11",
-    "strapi-utils": "3.0.6"
+    "strapi-utils": "3.1.0"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
