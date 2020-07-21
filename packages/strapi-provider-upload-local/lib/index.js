@@ -23,7 +23,7 @@ module.exports = {
         });
       }
     };
-    const getStaticPath = () => path.join(
+    const uploadDir = path.join(
       strapi.dir,
       strapi.config.middleware.settings.public.path || strapi.config.paths.static
     );
@@ -35,7 +35,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
           fs.writeFile(
-            path.join(getStaticPath(), `/uploads/${file.hash}${file.ext}`),
+            path.join(uploadDir, `/uploads/${file.hash}${file.ext}`),
             file.buffer,
             err => {
               if (err) {
@@ -51,10 +51,7 @@ module.exports = {
       },
       delete(file) {
         return new Promise((resolve, reject) => {
-          const filePath = path.join(
-            getStaticPath(),
-            `/uploads/${file.hash}${file.ext}`
-          );
+          const filePath = path.join(uploadDir, `/uploads/${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
             return resolve("File doesn't exist");
