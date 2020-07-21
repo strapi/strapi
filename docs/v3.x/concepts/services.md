@@ -143,7 +143,7 @@ module.exports = {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
         model: 'restaurant',
-        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+        // if you are using a plugin's model you will have to add the `source` key (source: 'users-permissions')
       });
       return this.findOne({ id: entry.id });
     }
@@ -174,7 +174,7 @@ module.exports = {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
         model: 'restaurant',
-        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+        // if you are using a plugin's model you will have to add the `source` key (source: 'users-permissions')
       });
       return this.findOne({ id: entry.id });
     }
