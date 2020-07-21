@@ -557,7 +557,7 @@ Congrats, you're done!
 ### Email validation
 
 :::tip NOTE
-In production, make sure the `url` config property is set. Otherwise the validation link will redirect to `localhost`. More info on the config [here](../concepts/configurations.html#server).
+In production, make sure the `url` config property is set. Otherwise the validation link will redirect to `localhost`. More info on the config [here](../concepts/configurations.md#server).
 :::
 
 After having registered, if you have set **Enable email confirmation** to **ON**, the user will receive a confirmation link by email. The user has to click on it to validate his/her registration.

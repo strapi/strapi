@@ -53,7 +53,7 @@ After saving the new function, let's restart the `POST /comment` request. We wil
 
 We now know the function we have to update. Let's get back to the original function.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the create logic.
+In the [controller documentation](../concepts/controllers.md#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the create logic.
 
 **Path —** `./api/comment/controller/Comment.js`
 
