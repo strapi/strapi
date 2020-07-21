@@ -20,37 +20,6 @@ export class LocaleToggle extends React.Component {
   // eslint-disable-line
   state = { isOpen: false };
 
-  getFlagUrl = locale => {
-    switch (locale) {
-      case 'en':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/us.svg';
-      case 'pt-BR':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/br.svg';
-      case 'zh':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/tw.svg';
-      case 'zh-Hans':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg';
-      case 'ar':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/sa.svg';
-      case 'ko':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/kr.svg';
-      case 'ja':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/jp.svg';
-      case 'vi':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/vn.svg';
-      case 'sk':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/sk.svg';
-      case 'cs':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cz.svg';
-      case 'ms':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/my.svg';
-      case 'sv':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/se.svg';
-      default:
-        return `https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/${locale}.svg`;
-    }
-  };
-
   toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
 
   render() {
@@ -65,7 +34,6 @@ export class LocaleToggle extends React.Component {
         <ButtonDropdown isOpen={this.state.isOpen} toggle={this.toggle}>
           <DropdownToggle className="localeDropdownContent">
             <span>{locale}</span>
-            <img src={this.getFlagUrl(locale)} alt={locale} />
           </DropdownToggle>
 
           <DropdownMenu className={style}>
