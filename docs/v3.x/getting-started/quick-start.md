@@ -8,7 +8,7 @@ Get ready to get Strapi up and running in **less than 3 minutes** 🚀.
 
 _For a step-by-step guide, please take a look at the following steps. This quickstart is really close to the [FoodAdvisor](https://github.com/strapi/foodadvisor) application._
 
-(Before continuing, please make sure [Node.js and npm are properly installed](../installation/cli.html#step-1-make-sure-requirements-are-met) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
+(Before continuing, please make sure [Node.js and npm are properly installed](../installation/cli.md#step-1-make-sure-requirements-are-met) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
 ## 1. Install Strapi and Create a new project
 
