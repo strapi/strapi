@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-sendgrid",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "Sendgrid provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -14,7 +14,7 @@
   "main": "./lib",
   "dependencies": {
     "@sendgrid/mail": "6.4.0",
-    "strapi-utils": "3.0.6"
+    "strapi-utils": "3.1.0"
   },
   "strapi": {
     "isProvider": true
@@ -42,7 +42,7 @@
     "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },

@@ -8,7 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map, omitBy, size } from 'lodash';
-import { Button, LoadingBar, LoadingIndicator } from 'strapi-helper-plugin';
+import { Button, LoadingBar, LoadingIndicator, CheckPermissions } from 'strapi-helper-plugin';
+import pluginPermissions from '../../permissions';
 import ListRow from '../ListRow';
 import { Flex, ListWrapper, Title, Wrapper } from './Components';
 
@@ -86,6 +87,7 @@ const generateListTitle = (data, settingType) => {
 };
 
 function List({
+  allowedActions,
   data,
   deleteData,
   noButton,
@@ -95,6 +97,14 @@ function List({
   values,
 }) {
   const object = omitBy(data, v => v.name === 'server'); // Remove the server key when displaying providers
+  const button = allowedActions.canCreateRole ? (
+    <Button onClick={onButtonClick} secondaryHotlineAdd>
+      <FormattedMessage id={`users-permissions.List.button.${settingType}`} />
+    </Button>
+  ) : (
+    // Align the list
+    <div style={{ height: 26 }} />
+  );
 
   return (
     <Wrapper>
@@ -106,17 +116,7 @@ function List({
             generateListTitle(data, settingType)
           )}
         </Title>
-        <div>
-          {noButton ? (
-            ''
-          ) : (
-            <Button onClick={onButtonClick} secondaryHotlineAdd>
-              <FormattedMessage
-                id={`users-permissions.List.button.${settingType}`}
-              />
-            </Button>
-          )}
-        </div>
+        <div>{noButton ? '' : button}</div>
       </Flex>
 
       <ListWrapper
@@ -130,6 +130,7 @@ function List({
           <ul className={noButton ? 'padded-list' : ''}>
             {map(object, item => (
               <ListRow
+                allowedActions={allowedActions}
                 deleteData={deleteData}
                 item={item}
                 key={item.name}

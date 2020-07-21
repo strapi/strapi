@@ -22,7 +22,7 @@ $ strapi generate:policy isAuthenticated user
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

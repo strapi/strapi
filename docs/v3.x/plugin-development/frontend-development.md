@@ -69,14 +69,72 @@ Here are its properties:
 | initializer               | node    | Refer to the [Initializer documentation](#initializer)                                                                                                                                                                  |
 | injectedComponents        | array   | Refer to the [Injected Component documentation](#injected-components)                                                                                                                                                   |
 | isReady                   | boolean | The app will load until this proprety is true                                                                                                                                                                           |
-| leftMenuLinks             | array   | Array of links to inject in the menu                                                                                                                                                                                    |
-| mainComponent             | node    | The plugin's App container, setting it to null will prevent the plugin from being displayed in the menu                                                                                                                 |
+| mainComponent             | node    | The plugin's App container,                                                                                                                                                                                             |
+| menu                      | object  | Define where the link of your plugin will be set. Without this your plugin will not display a link in the left menu                                                                                                     |
 | name                      | string  | The plugin's name retrieved from the package.json                                                                                                                                                                       |
 | pluginLogo                | file    | The plugin's logo                                                                                                                                                                                                       |
 | preventComponentRendering | boolean | Whether or not display the plugin's blockerComponent instead of the main component                                                                                                                                      |
 | settings                  | object  | Refer to the [Plugins settings API](./frontend-settings-api.md)                                                                                                                                                         |
 | reducers                  | object  | The plugin's redux reducers                                                                                                                                                                                             |
 | trads                     | object  | The plugin's translation files                                                                                                                                                                                          |
+
+### Displaying the plugin's link in the main menu
+
+To display a plugin link into the main menu the plugin needs to export a menu object.
+
+**Path —** `plugins/my-plugin/admin/src/index.js`.
+
+```js
+import pluginPkg from '../../package.json';
+import pluginLogo from './assets/images/logo.svg';
+import App from './containers/App';
+import lifecycles from './lifecycles';
+import trads from './translations';
+import pluginId from './pluginId';
+
+export default strapi => {
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+  const icon = pluginPkg.strapi.icon;
+  const name = pluginPkg.strapi.name;
+  const plugin = {
+    blockerComponent: null,
+    blockerComponentProps: {},
+    description: pluginDescription,
+    icon,
+    id: pluginId,
+    initializer: null,
+    isRequired: pluginPkg.strapi.required || false,
+    layout: null,
+    lifecycles,
+    mainComponent: App,
+    name,
+    pluginLogo,
+    preventComponentRendering: false,
+    trads,
+    menu: {
+      // Set a link into the PLUGINS section
+      pluginsSectionLinks: [
+        {
+          destination: `/plugins/${pluginId}`, // Endpoint of the link
+          icon,
+          label: {
+            id: `${pluginId}.plugin.name`, // Refers to a i18n
+            defaultMessage: 'My PLUGIN',
+          },
+          name,
+          // If the plugin has some permissions on whether or not it should be accessible
+          // depending on the logged in user's role you can set them here.
+          // Each permission object performs an OR comparison so if one matches the user's ones
+          // the link will be displayed
+          permissions: [{ action: 'plugins::content-type-builder.read', subject: null }],
+        },
+      ],
+    },
+  };
+
+  return strapi.registerPlugin(plugin);
+};
+```
 
 ### Initializer
 

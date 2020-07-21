@@ -1,3 +1,5 @@
+const path = require('path');
+
 const alias = [
   'object-assign',
   'whatwg-fetch',
@@ -12,6 +14,7 @@ const alias = [
   'classnames',
   'history',
   'hoist-non-react-statics',
+  'immer',
   'immutable',
   'invariant',
   'moment',
@@ -20,6 +23,7 @@ const alias = [
   'react-dnd',
   'react-dnd-html5-backend',
   'react-dom',
+  'react-fast-compare',
   'react-helmet',
   'react-is',
   'react-intl',
@@ -51,5 +55,6 @@ module.exports = alias.reduce(
     'react-select/async-creatable': require.resolve('react-select/async-creatable'),
     'react-select/base': require.resolve('react-select/base'),
     'react-select/creatable': require.resolve('react-select/creatable'),
+    ee_else_ce: path.resolve(__dirname),
   }
 );

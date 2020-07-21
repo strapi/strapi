@@ -14,7 +14,7 @@ We developed this hook to use Redis as cache database for our Strapi apps.
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

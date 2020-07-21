@@ -1,6 +1,6 @@
 {
   "name": "strapi-connector-mongoose",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -21,7 +21,7 @@
     "mongoose-long": "^0.2.1",
     "pluralize": "^7.0.0",
     "semver": "^7.3.2",
-    "strapi-utils": "3.0.6"
+    "strapi-utils": "3.1.0"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -46,7 +46,7 @@
     "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },

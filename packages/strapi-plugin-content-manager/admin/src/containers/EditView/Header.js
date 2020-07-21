@@ -1,38 +1,48 @@
-import React, { useState } from 'react';
-import { useParams, useRouteMatch } from 'react-router-dom';
+import React, { useMemo, useRef, useState } from 'react';
+import { useIntl } from 'react-intl';
 import { Header as PluginHeader } from '@buffetjs/custom';
+import { get, isEqual, isEmpty, toString } from 'lodash';
 
 import { PopUpWarning, request, templateObject, useGlobalContext } from 'strapi-helper-plugin';
-import { get } from 'lodash';
+
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
 const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
-
-  const { formatMessage, emitEvent } = useGlobalContext();
-  const { id } = useParams();
+  const [didDeleteEntry, setDidDeleteEntry] = useState(false);
+  const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
+  const { formatMessage } = useIntl();
+  const formatMessageRef = useRef(formatMessage);
+  const { emitEvent } = useGlobalContext();
   const {
-    deleteSuccess,
     initialData,
+    isCreatingEntry,
+    isSingleType,
+    isSubmitting,
     layout,
+    modifiedData,
     redirectToPreviousPage,
     resetData,
-    setIsSubmitting,
     slug,
     clearData,
   } = useDataManager();
   const {
-    params: { contentType },
-  } = useRouteMatch('/plugins/content-manager/:contentType');
-  const isSingleType = contentType === 'singleType';
+    allowedActions: { canDelete, canUpdate, canCreate },
+  } = useEditView();
 
-  const currentContentTypeMainField = get(layout, ['settings', 'mainField'], 'id');
-  const currentContentTypeName = get(layout, ['schema', 'info', 'name']);
-  const isCreatingEntry = id === 'create' || (isSingleType && !initialData.created_at);
+  const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
+    layout,
+  ]);
+  const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
+  const didChangeData = useMemo(() => {
+    return !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));
+  }, [initialData, isCreatingEntry, modifiedData]);
+  const apiID = useMemo(() => layout.apiID, [layout.apiID]);
 
   /* eslint-disable indent */
   const entryHeaderTitle = isCreatingEntry
@@ -41,39 +51,51 @@ const Header = () => {
       })
     : templateObject({ mainField: currentContentTypeMainField }, initialData).mainField;
   /* eslint-enable indent */
-  const headerTitle = isSingleType ? currentContentTypeName : entryHeaderTitle;
 
-  const getHeaderActions = () => {
-    const headerActions = [
-      {
-        onClick: () => {
-          toggleWarningCancel();
-        },
-        color: 'cancel',
-        label: formatMessage({
-          id: `${pluginId}.containers.Edit.reset`,
-        }),
-        type: 'button',
-        style: {
-          paddingLeft: 15,
-          paddingRight: 15,
-          fontWeight: 600,
-        },
-      },
-      {
-        color: 'success',
-        label: formatMessage({
-          id: `${pluginId}.containers.Edit.submit`,
-        }),
-        type: 'submit',
-        style: {
-          minWidth: 150,
-          fontWeight: 600,
-        },
-      },
-    ];
+  const headerTitle = useMemo(() => {
+    const title = isSingleType ? currentContentTypeName : entryHeaderTitle;
 
-    if (!isCreatingEntry) {
+    return title || currentContentTypeName;
+  }, [currentContentTypeName, entryHeaderTitle, isSingleType]);
+
+  const headerActions = useMemo(() => {
+    let headerActions = [];
+
+    if ((isCreatingEntry && canCreate) || (!isCreatingEntry && canUpdate)) {
+      headerActions = [
+        {
+          disabled: !didChangeData,
+          onClick: () => {
+            toggleWarningCancel();
+          },
+          color: 'cancel',
+          label: formatMessage({
+            id: `${pluginId}.containers.Edit.reset`,
+          }),
+          type: 'button',
+          style: {
+            paddingLeft: 15,
+            paddingRight: 15,
+            fontWeight: 600,
+          },
+        },
+        {
+          disabled: !didChangeData,
+          color: 'success',
+          label: formatMessage({
+            id: `${pluginId}.containers.Edit.submit`,
+          }),
+          isLoading: isSubmitting,
+          type: 'submit',
+          style: {
+            minWidth: 150,
+            fontWeight: 600,
+          },
+        },
+      ];
+    }
+
+    if (!isCreatingEntry && canDelete) {
       headerActions.unshift({
         label: formatMessage({
           id: 'app.utils.delete',
@@ -92,15 +114,25 @@ const Header = () => {
     }
 
     return headerActions;
-  };
+  }, [
+    canCreate,
+    canDelete,
+    canUpdate,
+    didChangeData,
+    isCreatingEntry,
+    isSubmitting,
+    formatMessage,
+  ]);
 
-  const headerProps = {
-    title: {
-      label: headerTitle && headerTitle.toString(),
-    },
-    content: `${formatMessage({ id: `${pluginId}.api.id` })} : ${layout.apiID}`,
-    actions: getHeaderActions(),
-  };
+  const headerProps = useMemo(() => {
+    return {
+      title: {
+        label: toString(headerTitle),
+      },
+      content: `${formatMessageRef.current({ id: `${pluginId}.api.id` })} : ${apiID}`,
+      actions: headerActions,
+    };
+  }, [headerActions, headerTitle, apiID]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
@@ -109,29 +141,50 @@ const Header = () => {
     toggleWarningCancel();
     resetData();
   };
+
   const handleConfirmDelete = async () => {
-    toggleWarningDelete();
-    setIsSubmitting();
     try {
+      // Show the loading state
+      setIsModalConfirmButtonLoading(true);
+
       emitEvent('willDeleteEntry');
+
       await request(getRequestUrl(`${slug}/${initialData.id}`), {
         method: 'DELETE',
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
-      deleteSuccess();
+
       emitEvent('didDeleteEntry');
 
+      // This is used to perform action after the modal is closed
+      // so the transitions are smoother
+      // Actions will be performed in the handleClosed function
+      setDidDeleteEntry(true);
+    } catch (err) {
+      emitEvent('didNotDeleteEntry', { error: err });
+      const errorMessage = get(
+        err,
+        'response.payload.message',
+        formatMessage({ id: `${pluginId}.error.record.delete` })
+      );
+      strapi.notification.error(errorMessage);
+    } finally {
+      setIsModalConfirmButtonLoading(false);
+      toggleWarningDelete();
+    }
+  };
+
+  const handleClosed = () => {
+    if (didDeleteEntry) {
       if (!isSingleType) {
         redirectToPreviousPage();
       } else {
         clearData();
       }
-    } catch (err) {
-      setIsSubmitting(false);
-      emitEvent('didNotDeleteEntry', { error: err });
-      strapi.notification.error(`${pluginId}.error.record.delete`);
     }
+
+    setDidDeleteEntry(false);
   };
 
   return (
@@ -160,6 +213,8 @@ const Header = () => {
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmDelete}
+        onClosed={handleClosed}
+        isConfirmButtonLoading={isModalConfirmButtonLoading}
       />
     </>
   );

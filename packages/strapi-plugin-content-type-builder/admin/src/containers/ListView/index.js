@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useGlobalContext, LayoutIcon } from 'strapi-helper-plugin';
+import { BackHeader, ListWrapper, useGlobalContext } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
+import pluginId from '../../pluginId';
+import getComponents from '../../utils/getComponents';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import ListRow from '../../components/ListRow';
 import List from '../../components/List';
-
+import ListButton from '../../components/ListButton';
 import useDataManager from '../../hooks/useDataManager';
-import pluginId from '../../pluginId';
-
 import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
 import Wrapper from './Wrapper';
@@ -31,7 +31,7 @@ const ListView = () => {
     toggleModalCancel,
   } = useDataManager();
 
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage, plugins } = useGlobalContext();
   const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
@@ -265,18 +265,19 @@ const ListView = () => {
     }
   };
 
-  const configureButtonProps = {
-    icon: <LayoutIcon className="colored" fill={isTemporary ? '#B4B6BA' : '#007eff'} />,
-    color: 'secondary',
-    label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
-    onClick: goToCMSettingsPage,
-    style: { marginTop: '2px' },
-    disabled: isTemporary,
-  };
+  const listInjectedComponents = useMemo(() => {
+    return getComponents('listView', 'list.link', plugins, {
+      onClick: goToCMSettingsPage,
+      isTemporary,
+      isInContentTypeView,
+      contentTypeKind,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTemporary, isInContentTypeView, contentTypeKind]);
 
   const listActions = isInDevelopmentMode
-    ? [{ ...configureButtonProps }, { ...addButtonProps }]
-    : [configureButtonProps];
+    ? [...listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]
+    : listInjectedComponents;
 
   const CustomRow = props => {
     const { name } = props;
