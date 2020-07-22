@@ -8,7 +8,7 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 
 import formatVideoArray from './utils/formatAndStoreVideoArray';
 
-import StaticLinks from '../../components/StaticLinks';
+import StaticLinks from './StaticLinks';
 import Video from './Video';
 import Wrapper from './Wrapper';
 import init from './init';

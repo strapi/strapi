@@ -18,12 +18,12 @@ import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
 import WysiwygProvider from '../../containers/WysiwygProvider';
 import Controls from '../WysiwygInlineControls';
+import PreviewWysiwyg from '../PreviewWysiwyg';
 import WysiwygBottomControls from '../WysiwygBottomControls';
 import WysiwygEditor from '../WysiwygEditor';
 import MediaLib from './MediaLib';
 import CustomSelect from './customSelect';
 import PreviewControl from './previewControl';
-import PreviewWysiwyg from './previewWysiwyg';
 import ToggleMode from './toggleMode';
 import { CONTROLS } from './constants';
 import {
@@ -582,8 +582,12 @@ class Wysiwyg extends React.Component {
     Modifier.replaceText(contentState, this.getSelection(), text);
 
   onChange = editorState => {
-    this.sendData(editorState);
-    this.setState({ editorState });
+    const { disabled } = this.props;
+
+    if (!disabled) {
+      this.sendData(editorState);
+      this.setState({ editorState });
+    }
   };
 
   handleTab = e => {
@@ -634,6 +638,7 @@ class Wysiwyg extends React.Component {
   render() {
     const { editorState, isMediaLibraryOpened, isPreviewMode, isFullscreen } = this.state;
     const editorStyle = isFullscreen ? { marginTop: '0' } : this.props.style;
+    const { disabled } = this.props;
 
     return (
       <WysiwygProvider
@@ -644,7 +649,7 @@ class Wysiwyg extends React.Component {
         isFullscreen={this.state.isFullscreen}
         placeholder={this.props.placeholder}
       >
-        <EditorWrapper isFullscreen={isFullscreen}>
+        <EditorWrapper isFullscreen={isFullscreen} disabled={disabled}>
           {/* FIRST EDITOR WITH CONTROLS} */}
           <div
             className={cn(
@@ -661,12 +666,12 @@ class Wysiwyg extends React.Component {
             style={editorStyle}
           >
             <div className="controlsContainer">
-              <CustomSelect />
+              <CustomSelect disabled={isPreviewMode || disabled} />
               {CONTROLS.map((value, key) => (
                 <Controls
                   key={key}
                   buttons={value}
-                  disabled={isPreviewMode}
+                  disabled={isPreviewMode || disabled}
                   editorState={editorState}
                   handlers={{
                     addContent: this.addContent,
@@ -750,6 +755,7 @@ Wysiwyg.defaultProps = {
   autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
+  disabled: false,
   error: false,
   onBlur: () => {},
   onChange: () => {},
@@ -764,6 +770,7 @@ Wysiwyg.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
+  disabled: PropTypes.bool,
   error: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,

@@ -4,12 +4,30 @@
  *
  */
 
-import { GET_PLUGINS_FROM_MARKETPLACE_SUCCEEDED, SET_APP_ERROR } from './constants';
+import {
+  GET_USER_PERMISSIONS,
+  GET_USER_PERMISSIONS_ERROR,
+  GET_USER_PERMISSIONS_SUCCEEDED,
+  SET_APP_ERROR,
+} from './constants';
 
-export function getPluginsFromMarketPlaceSucceeded(plugins) {
+export function getUserPermissions() {
   return {
-    type: GET_PLUGINS_FROM_MARKETPLACE_SUCCEEDED,
-    plugins,
+    type: GET_USER_PERMISSIONS,
+  };
+}
+
+export function getUserPermissionsError(error) {
+  return {
+    type: GET_USER_PERMISSIONS_ERROR,
+    error,
+  };
+}
+
+export function getUserPermissionsSucceeded(data) {
+  return {
+    type: GET_USER_PERMISSIONS_SUCCEEDED,
+    data,
   };
 }
 

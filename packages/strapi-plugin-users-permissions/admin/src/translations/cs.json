@@ -75,8 +75,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Prosím potvrďte e-mailovou adresu pro %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>Prosím klikněte na tento odkaz pro ověření vašeho účtu</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "Prosím potvrďte e-mailovou adresu pr %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Prosím klikněte na tento odkaz pro ověření vašeho účtu</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Prosím potvrďte e-mailovou adresu pr %APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Discord",
   "PopUpForm.Providers.enabled.description": "If disabled, users won't be able to use this provider.",
@@ -85,7 +83,6 @@
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Google",
   "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Instagram",
-  "PopUpForm.Providers.vk.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace VK",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Linkedin",
@@ -94,13 +91,13 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Twitter",
+  "PopUpForm.Providers.vk.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace VK",
   "PopUpForm.button.cancel": "Zrušit",
   "PopUpForm.button.save": "Uložit",
   "PopUpForm.header.add.providers": "Přidat nového poskytovatele",
   "PopUpForm.header.edit.email-templates": "Upravit e-mailové šablony",
   "PopUpForm.header.edit.providers": "Upravit Poskytovatele",
   "PopUpForm.inputSelect.providers.label": "Zvolit poskytovatele",
-
   "components.Input.error.password.length": "Heslo je příliš krátké",
   "notification.error.delete": "Při pokusu o odstranění položky došlo k chybě",
   "notification.error.fetch": "Při pokusu o načtení dat došlo k chybě",
@@ -109,5 +106,6 @@
   "notification.success.delete": "E-mail byl odstraněn",
   "notification.success.submit": "Nastavení bylo aktualizování",
   "plugin.description.long": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT. Tento zásuvný modul obsahuje ACL strategii, která vám umožní spravovat oprávnění mezi skupinami uživatelů.",
-  "plugin.description.short": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT"
+  "plugin.description.short": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT",
+  "plugin.name": "Role a oprávnění"
 }

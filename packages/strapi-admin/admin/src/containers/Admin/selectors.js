@@ -1,9 +1,12 @@
 import { createSelector } from 'reselect';
+import { initialState } from './reducer';
 
 /**
  * Direct selector to the admin state domain
  */
-const selectAdminDomain = () => state => state.get('admin');
+const selectAdminDomain = () => state => {
+  return state.get('admin') || initialState;
+};
 
 /**
  * Other specific selectors
@@ -13,12 +16,7 @@ const selectAdminDomain = () => state => state.get('admin');
  * Default selector used by Admin
  */
 
-const makeSelectAdmin = () => createSelector(selectAdminDomain(), substate => substate.toJS());
-
-const makeSelectPluginsFromMarketplace = () =>
-  createSelector(selectAdminDomain(), substate => substate.get('pluginsFromMarketplace').toJS());
-
-const makeSelectUuid = () => createSelector(selectAdminDomain(), substate => substate.get('uuid'));
+const makeSelectAdmin = () => createSelector(selectAdminDomain(), substate => substate);
 
 export default makeSelectAdmin;
-export { makeSelectUuid, selectAdminDomain, makeSelectPluginsFromMarketplace };
+export { selectAdminDomain };

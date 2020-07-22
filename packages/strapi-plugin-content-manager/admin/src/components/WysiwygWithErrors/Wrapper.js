@@ -23,6 +23,16 @@ const Wrapper = styled.div`
     text-overflow: ellipsis;
     margin-bottom: -9px;
   }
+
+  div,
+  pre,
+  code {
+    ::-webkit-scrollbar {
+      height: 5px;
+      width: 5px;
+      cursor: default;
+    }
+  }
 `;
 
 export default Wrapper;

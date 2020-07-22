@@ -15,12 +15,14 @@ import {
   formatFilters,
 } from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 /* eslint-disable indent */
 
 const InputModalStepperProvider = ({
+  allowedActions,
   allowedTypes,
   children,
   initialFilesToUpload,
@@ -34,6 +36,7 @@ const InputModalStepperProvider = ({
   step,
 }) => {
   const [formErrors, setFormErrors] = useState(null);
+
   const { emitEvent, plugins } = useGlobalContext();
   const [, updated_at] = getFileModelTimestamps(plugins);
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
@@ -335,12 +338,14 @@ const InputModalStepperProvider = ({
   };
 
   const fetchMediaLib = async () => {
-    const [files, count] = await Promise.all([fetchMediaLibFiles(), fetchMediaLibFilesCount()]);
-    dispatch({
-      type: 'GET_DATA_SUCCEEDED',
-      files,
-      countData: count,
-    });
+    if (allowedActions.canRead) {
+      const [files, count] = await Promise.all([fetchMediaLibFiles(), fetchMediaLibFilesCount()]);
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        files,
+        countData: count,
+      });
+    }
   };
 
   const fetchMediaLibFiles = async () => {
@@ -455,6 +460,7 @@ const InputModalStepperProvider = ({
     <InputModalStepperContext.Provider
       value={{
         ...reducerState,
+        allowedActions,
         addFilesToUpload,
         downloadFiles,
         fetchMediaLib,
@@ -495,6 +501,15 @@ const InputModalStepperProvider = ({
 };
 
 InputModalStepperProvider.propTypes = {
+  allowedActions: PropTypes.shape({
+    canCopyLink: PropTypes.bool,
+    canCreate: PropTypes.bool,
+    canDownload: PropTypes.bool,
+    canMain: PropTypes.bool,
+    canRead: PropTypes.bool,
+    canSettings: PropTypes.bool,
+    canUpdate: PropTypes.bool,
+  }),
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   children: PropTypes.node.isRequired,
   initialFilesToUpload: PropTypes.object,
@@ -509,6 +524,15 @@ InputModalStepperProvider.propTypes = {
 };
 
 InputModalStepperProvider.defaultProps = {
+  allowedActions: {
+    canCopyLink: true,
+    canCreate: true,
+    canDownload: true,
+    canMain: true,
+    canRead: true,
+    canSettings: true,
+    canUpdate: true,
+  },
   initialFileToEdit: null,
   initialFilesToUpload: null,
   isOpen: false,

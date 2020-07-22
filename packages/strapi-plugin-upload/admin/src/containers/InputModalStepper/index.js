@@ -1,8 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useUserPermissions } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import { omit } from 'lodash';
 import DragLayer from '../../components/DragLayer';
+
+import pluginPermissions from '../../permissions';
 import InputModalStepper from './InputModalStepper';
 import InputModalStepperProvider from '../InputModalStepperProvider';
 
@@ -20,11 +24,18 @@ const InputModal = ({
   step,
 }) => {
   const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
+  const permissions = React.useMemo(() => omit(pluginPermissions, 'main'), []);
+  const { allowedActions, isLoading } = useUserPermissions(permissions);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
       <InputModalStepperProvider
+        allowedActions={allowedActions}
         onClosed={onClosed}
         initialFilesToUpload={filesToUpload}
         initialFileToEdit={fileToEdit}
@@ -36,6 +47,7 @@ const InputModal = ({
         allowedTypes={singularTypes}
       >
         <InputModalStepper
+          allowedActions={allowedActions}
           isOpen={isOpen}
           noNavigation={noNavigation}
           onToggle={onToggle}

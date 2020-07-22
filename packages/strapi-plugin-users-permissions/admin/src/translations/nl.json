@@ -33,7 +33,6 @@
   "Email.template.email_confirmation": "E-mailadres bevestiging",
   "Email.template.reset_password": "Wachtwoord herstellen",
   "Email.template.success_register": "Registratie gelukt",
-  "Email.template.validation_email": "E-mailadres validatie",
   "HeaderNav.link.advancedSettings": "Geavanceerde instellingen",
   "HeaderNav.link.emailTemplates": "E-mail sjabloon",
   "HeaderNav.link.providers": "Leveranciers",
@@ -73,10 +72,8 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Bevestig a.u.b. het e-mailadres voor %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>Klik op deze link om je account te valideren</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "Bevestig a.u.b. het e-mailadres voor %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Klik op deze link om je account te valideren</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Bevestig a.u.b. het e-mailadres voor %APP_NAME%",
-  "PopUpForm.Providers.discord.providerConfig.redirectURL": "De doorstuur URL om in je Discord applicatie configuratie te zetten",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
+  "PopUpForm.Providers.discord.providerConfig.redirectURL": "De doorstuur URL om in je Discord applicatie configuratie te zetten",
   "PopUpForm.Providers.enabled.description": "Als deze uitgeschakeld is kunnen gebruikers geen gebruik maken van deze leverancier.",
   "PopUpForm.Providers.enabled.label": "Inschakelen",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "De doorstuur URL om in je Facebook applicatie configuratie te zetten",
@@ -85,8 +82,8 @@
   "PopUpForm.Providers.instagram.providerConfig.redirectURL": "De doorstuur URL om in je Instagram applicatie configuratie te zetten",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
-  "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "De doorstuur URL om in je Microsoft applicatie configuratie te zetten",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "De doorstuur URL om in je LinkedIn applicatie configuratie te zetten",
+  "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "De doorstuur URL om in je Microsoft applicatie configuratie te zetten",
   "PopUpForm.Providers.redirectURL.front-end.label": "De doorstuur URL voor jouw front-end app",
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
@@ -98,7 +95,6 @@
   "PopUpForm.header.edit.providers": "Leverancier aanpassen",
   "PopUpForm.inputSelect.providers.label": "Kies een leverancier",
   "components.Input.error.password.length": "Wachtwoord is te kort",
-
   "notification.error.delete": "Er is een fout opgetreden tijdens het verwijderen van dit item",
   "notification.error.fetch": "Er is een fout opgetreden tijdens het ophalen van de data",
   "notification.error.fetchUser": "Er is een fout opgetreden tijdens het ophalen van de gebruikers",
@@ -106,5 +102,6 @@
   "notification.success.delete": "Het item is verwijderd",
   "notification.success.submit": "Instellingen zijn geüpdatet",
   "plugin.description.long": "Beveilig je API met een volledig authenticatie proces op JWT. Deze extensie komt ook met een ACL strategie welke ervoor zorgt dat je de permissies tussen groepen van gebruikers kan beheren.",
-  "plugin.description.short": "Beveilig je API met een volledig authenticatie proces op JWT"
+  "plugin.description.short": "Beveilig je API met een volledig authenticatie proces op JWT",
+  "plugin.name": "Rollen & Permissies"
 }
