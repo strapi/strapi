@@ -1,0 +1,13 @@
+{
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/search",
+      "handler": "Search.search",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}
+
