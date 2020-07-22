@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import {
   capitalize,
   get,
+  has,
   findIndex,
   isArray,
   isEmpty,
@@ -40,7 +41,7 @@ import en from '../../translations/en.json';
 /* eslint-disable no-shadow */
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { enabled: false, isEditing: false };
+  state = { enabled: false };
 
   static contextType = HomePageContext;
 
@@ -53,7 +54,12 @@ class PopUpForm extends React.Component {
   }
 
   getRedirectURIProviderConf = () => {
-    // NOTE: Still testings providers so the switch statement is likely to change
+    let redirectUri;
+
+    if (has(this.props.values, 'redirectUri')) {
+      return get(this.props.values, 'redirectUri', '');
+    }
+
     switch (this.props.dataToEdit) {
       case 'discord':
         return `${strapi.backendURL}/connect/discord/callback`;
@@ -73,39 +79,15 @@ class PopUpForm extends React.Component {
         return `${strapi.backendURL}/connect/vk/callback`;
       case 'twitch':
         return `${strapi.backendURL}/connect/twitch/callback`;
-      default: {
-        const value = get(this.props.values, 'callback', '');
-
-        return startsWith(value, 'http') ? value : `${strapi.backendURL}${value}`;
-      }
+      default:
+        return `${strapi.backendURL}/connect/\${provider}/callback`;
     }
-  };
-
-  generateRedirectURL = url => {
-    return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing
-      ? url
-      : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
   };
 
   handleChange = e => {
     this.setState({ enabled: e.target.value });
     this.props.onChange(e);
   };
-
-  handleBlur = e => {
-    this.setState({ isEditing: false });
-
-    if (isEmpty(e.target.value)) {
-      const { name, type } = e.target;
-      const target = Object.assign(
-        { name, type },
-        { value: `/auth/${this.props.dataToEdit}/callback` }
-      );
-      this.props.onChange({ target });
-    }
-  };
-
-  handleFocus = () => this.setState({ isEditing: true });
 
   renderForm = () => {
     const { dataToEdit, didCheckErrors, formErrors, settingType, values } = this.props;
@@ -154,47 +136,19 @@ class PopUpForm extends React.Component {
               errors={get(formErrors, [findIndex(formErrors, ['name', value]), 'errors'], [])}
               key={value}
               label={{
-                id: `users-permissions.PopUpForm.Providers.${
-                  includes(value, 'callback') || includes(value, 'redirect_uri')
-                    ? 'redirectURL.front-end'
-                    : value
-                }.label`,
+                id:
+                  value === 'redirectUri'
+                    ? `users-permissions.PopUpForm.Providers.${dataToEdit}.${value}.label`
+                    : `users-permissions.PopUpForm.Providers.${value}.label`,
               }}
               name={`${settingType}.${dataToEdit}.${value}`}
-              onFocus={
-                includes(value, 'callback') || includes(value, 'redirect_uri')
-                  ? this.handleFocus
-                  : () => {}
-              }
-              onBlur={
-                includes(value, 'callback') || includes(value, 'redirect_uri')
-                  ? this.handleBlur
-                  : false
-              }
               onChange={this.props.onChange}
               type="text"
-              value={
-                includes(value, 'callback') || includes(value, 'redirect_uri')
-                  ? this.generateRedirectURL(get(values, value))
-                  : get(values, value)
-              }
+              disabled={value === 'redirectUri'}
+              value={get(values, value)}
               validations={{ required: true }}
             />
           ))}
-          {dataToEdit !== 'email' && (
-            <Input
-              customBootstrapClass="col-md-12"
-              disabled
-              label={{
-                id: `users-permissions.PopUpForm.Providers.${dataToEdit}.providerConfig.redirectURL`,
-              }}
-              name="noName"
-              type="text"
-              onChange={() => {}}
-              value={this.getRedirectURIProviderConf()}
-              validations={{}}
-            />
-          )}
         </>
       );
     }
