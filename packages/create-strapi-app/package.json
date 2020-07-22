@@ -1,8 +1,8 @@
 {
   "name": "create-strapi-app",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "Generate a new Strapi application.",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "homepage": "http://strapi.io",
   "keywords": [
     "create-strapi-app",
@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "commander": "^2.20.0",
-    "strapi-generate-new": "3.0.6"
+    "strapi-generate-new": "3.1.0"
   },
   "scripts": {
     "test": "echo \"no tests yet\""

@@ -120,7 +120,7 @@ const actionsExistSchema = yup
   .array()
   .of(
     yup.object().shape({
-      conditions: validators.arrayOfConditionNames,
+      conditions: yup.array().of(yup.string()),
     })
   )
   .test('actions-exist', '', checkPermissionsExist);

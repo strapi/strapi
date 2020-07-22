@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -29,7 +29,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.0.6",
+    "strapi-helper-plugin": "3.1.0",
     "swagger-ui-dist": "3.24.3"
   },
   "author": {
@@ -69,6 +69,6 @@
     "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

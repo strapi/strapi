@@ -1,11 +1,11 @@
 {
   "name": "strapi-provider-upload-rackspace",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "Rackspace provider for strapi upload",
   "main": "./lib",
   "keywords": [],
   "author": "Pongstr Ordillo <https://github.com/pongstr>",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },

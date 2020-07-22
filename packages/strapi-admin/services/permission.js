@@ -27,6 +27,16 @@ const arePermissionsEqual = (perm1, perm2) =>
   );
 
 /**
+ * Removes unwanted fields from a permission
+ * @param permission
+ * @returns {*}
+ */
+const sanitizePermission = perm => ({
+  ..._.pick(perm, ['id', 'action', 'subject', 'fields']),
+  conditions: strapi.admin.services.condition.removeUnkownConditionIds(perm.conditions),
+});
+
+/**
  * Delete permissions of roles in database
  * @param rolesIds ids of roles
  * @returns {Promise<array>}
@@ -66,7 +76,11 @@ const assign = async (roleId, permissions = []) => {
   }
 
   const permissionsWithRole = permissions.map(permission =>
-    createPermission({ ...permission, role: roleId })
+    createPermission({
+      ...permission,
+      conditions: strapi.admin.services.condition.removeUnkownConditionIds(permission.conditions),
+      role: roleId,
+    })
   );
 
   const existingPermissions = await find({ role: roleId, _limit: -1 });
@@ -109,14 +123,6 @@ const findUserPermissions = async ({ roles }) => {
     .query('permission', 'admin')
     .find({ role_in: roles.map(_.property('id')), _limit: -1 });
 };
-
-/**
- * Removes unwanted fields from a permission
- * @param permission
- * @returns {*}
- */
-const sanitizePermission = permission =>
-  _.pick(permission, ['action', 'subject', 'fields', 'conditions']);
 
 /**
  * Removes permissions in database that don't exist anymore

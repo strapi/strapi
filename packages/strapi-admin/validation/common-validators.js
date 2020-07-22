@@ -86,7 +86,7 @@ const updatePermissions = yup
                 'Fields format are incorrect (duplicates).',
                 checkFieldsDontHaveDuplicates
               ),
-            conditions: arrayOfConditionNames,
+            conditions: yup.array().of(yup.string()),
           })
           .test(
             'delete-fields-are-null',

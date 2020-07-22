@@ -10,7 +10,7 @@ The Strapi HTTP layer sits on top of [Koa](http://koajs.com/). Its ensemble of s
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

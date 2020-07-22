@@ -80,9 +80,12 @@ module.exports = {
     }
 
     const permissions = await strapi.admin.services.permission.find({ role: role.id, _limit: -1 });
+    const sanitizedPermissions = permissions.map(
+      strapi.admin.services.permission.sanitizePermission
+    );
 
     ctx.body = {
-      data: permissions,
+      data: sanitizedPermissions,
     };
   },
 

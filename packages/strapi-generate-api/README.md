@@ -16,7 +16,7 @@ $ strapi generate:api apiName
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 
