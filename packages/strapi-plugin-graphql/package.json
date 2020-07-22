@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@apollo/federation": "^0.15.0",
-    "apollo-server-koa": "2.9.12",
+    "apollo-server-koa": "2.16.0",
     "dataloader": "^1.4.0",
     "glob": "^7.1.4",
     "graphql": "^14.3.0",
