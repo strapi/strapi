@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -14,24 +12,24 @@ function generateSingleTypeRoutes({ route, name }) {
   return [
     {
       method: 'GET',
-      path: '/' + route,
-      handler: name + '.find',
+      path: `/${route}`,
+      handler: `${name}.find`,
       config: {
         policies: [],
       },
     },
     {
       method: 'PUT',
-      path: '/' + route,
-      handler: name + '.update',
+      path: `/${route}`,
+      handler: `${name}.update`,
       config: {
         policies: [],
       },
     },
     {
       method: 'DELETE',
-      path: '/' + route,
-      handler: name + '.delete',
+      path: `/${route}`,
+      handler: `${name}.delete`,
       config: {
         policies: [],
       },
@@ -43,48 +41,48 @@ function generateCollectionTypeRoutes({ route, name }) {
   return [
     {
       method: 'GET',
-      path: '/' + route,
-      handler: name + '.find',
+      path: `/${route}`,
+      handler: `${name}.find`,
       config: {
         policies: [],
       },
     },
     {
       method: 'GET',
-      path: '/' + route + '/count',
-      handler: name + '.count',
+      path: `/${route}/count`,
+      handler: `${name}.count`,
       config: {
         policies: [],
       },
     },
     {
       method: 'GET',
-      path: '/' + route + '/:id',
-      handler: name + '.findOne',
+      path: `/${route}/:id`,
+      handler: `${name}.findOne`,
       config: {
         policies: [],
       },
     },
     {
       method: 'POST',
-      path: '/' + route,
-      handler: name + '.create',
+      path: `/${route}`,
+      handler: `${name}.create`,
       config: {
         policies: [],
       },
     },
     {
       method: 'PUT',
-      path: '/' + route + '/:id',
-      handler: name + '.update',
+      path: `/${route}/:id`,
+      handler: `${name}.update`,
       config: {
         policies: [],
       },
     },
     {
       method: 'DELETE',
-      path: '/' + route + '/:id',
-      handler: name + '.delete',
+      path: `/${route}/:id`,
+      handler: `${name}.delete`,
       config: {
         policies: [],
       },
@@ -96,8 +94,9 @@ function generateCollectionTypeRoutes({ route, name }) {
  * Expose main routes of the generated API
  */
 
-module.exports = scope => {
+module.exports = (scope) => {
   let routes = [];
+
   if (!scope.args.plugin) {
     routes =
       scope.contentTypeKind === 'singleType'

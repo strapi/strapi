@@ -2,7 +2,12 @@ import React, { memo, useCallback, useMemo, useEffect, useReducer, useRef } from
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-import { BackHeader, LiLink, CheckPermissions, useUserPermissions } from 'strapi-helper-plugin';
+import {
+  BackHeader,
+  LiLink,
+  CheckPermissions,
+  useUserPermissions,
+} from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { generatePermissionsObject } from '../../utils';
@@ -59,25 +64,25 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
   );
 
   const getFieldMetas = useCallback(
-    fieldName => {
+    (fieldName) => {
       return get(currentContentTypeLayoutData, ['metadatas', fieldName, 'edit'], {});
     },
     [currentContentTypeLayoutData]
   );
   const getField = useCallback(
-    fieldName => {
+    (fieldName) => {
       return get(currentContentTypeSchema, ['attributes', fieldName], {});
     },
     [currentContentTypeSchema]
   );
   const getFieldType = useCallback(
-    fieldName => {
+    (fieldName) => {
       return get(getField(fieldName), ['type'], '');
     },
     [getField]
   );
   const getFieldComponentUid = useCallback(
-    fieldName => {
+    (fieldName) => {
       return get(getField(fieldName), ['component'], '');
     },
     [getField]
@@ -85,9 +90,9 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
 
   // Check if a block is a dynamic zone
   const isDynamicZone = useCallback(
-    block => {
-      return block.every(subBlock => {
-        return subBlock.every(obj => getFieldType(obj.name) === 'dynamiczone');
+    (block) => {
+      return block.every((subBlock) => {
+        return subBlock.every((obj) => getFieldType(obj.name) === 'dynamiczone');
       });
     },
     [getFieldType]
@@ -203,7 +208,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
               {currentContentTypeLayoutRelations.length > 0 && (
                 <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                   <div style={{ paddingTop: '22px' }}>
-                    {currentContentTypeLayoutRelations.map(relationName => {
+                    {currentContentTypeLayoutRelations.map((relationName) => {
                       const relation = get(
                         currentContentTypeLayoutData,
                         ['schema', 'attributes', relationName],

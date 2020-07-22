@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -35,6 +33,7 @@ module.exports = (scope, cb) => {
 
   // Determine the destination path.
   let filePath;
+
   if (scope.args.api) {
     filePath = `./api/${scope.args.api}/services`;
   } else if (scope.args.plugin) {

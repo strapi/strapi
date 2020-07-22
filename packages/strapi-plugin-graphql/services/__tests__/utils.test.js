@@ -1,5 +1,3 @@
-'use strict';
-
 const { mergeSchemas } = require('../utils');
 
 const createRootSchema = () => ({

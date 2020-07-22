@@ -24,8 +24,10 @@ function ListRow({ children, items, onClick, ...rest }) {
   return (
     <Li {...rest}>
       <div
+        tabIndex={0}
         className={cn('subContainer', 'row')}
         onClick={onClick}
+        onKeyDown={onClick}
         role="button"
       >
         {data}

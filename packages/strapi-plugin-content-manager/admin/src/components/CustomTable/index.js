@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
-import { LoadingIndicator } from 'strapi-helper-plugin';
+import { LoadingIndicator } from 'strapi-helper-plugin/lib/src';
 import useListView from '../../hooks/useListView';
 import TableHeader from './TableHeader';
 import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from './styledComponents';
@@ -17,7 +17,7 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
 
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
-  const handleGoTo = id => {
+  const handleGoTo = (id) => {
     emitEvent('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
@@ -42,11 +42,11 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
         </td>
       </TableEmpty>
     ) : (
-      data.map(row => {
+      data.map((row) => {
         return (
           <TableRow
             key={row.id}
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
 

@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const yup = require('yup');
 const { formatYupErrors } = require('strapi-utils');
@@ -16,16 +14,8 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
 })
   .shape({
-    icon: yup
-      .string()
-      .nullable()
-      .test(isValidIcon)
-      .required('icon.required'),
-    category: yup
-      .string()
-      .nullable()
-      .test(isValidCategoryName)
-      .required('category.required'),
+    icon: yup.string().nullable().test(isValidIcon).required('icon.required'),
+    category: yup.string().nullable().test(isValidCategoryName).required('category.required'),
   })
   .required()
   .noUnknown();
@@ -39,9 +29,11 @@ const nestedComponentSchema = yup.array().of(
     .test({
       name: 'mustHaveUIDOrTmpUID',
       message: 'Component must have a uid or a tmpUID',
-      test: attr => {
+      test: (attr) => {
         if (_.has(attr, 'uid') && _.has(attr, 'tmpUID')) return false;
+
         if (!_.has(attr, 'uid') && !_.has(attr, 'tmpUID')) return false;
+
         return true;
       },
     })
@@ -49,7 +41,7 @@ const nestedComponentSchema = yup.array().of(
     .noUnknown()
 );
 
-const validateComponentInput = data => {
+const validateComponentInput = (data) => {
   return yup
     .object({
       component: componentSchema,
@@ -60,16 +52,16 @@ const validateComponentInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch((error) => Promise.reject(formatYupErrors(error)));
 };
 
-const validateUpdateComponentInput = data => {
+const validateUpdateComponentInput = (data) => {
   if (_.has(data, 'component')) {
     removeEmptyDefaults(data.component);
   }
 
   if (_.has(data, 'components') && Array.isArray(data.components)) {
-    data.components.forEach(data => {
+    data.components.forEach((data) => {
       if (_.has(data, 'uid')) {
         removeEmptyDefaults(data);
       }
@@ -86,7 +78,7 @@ const validateUpdateComponentInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch((error) => Promise.reject(formatYupErrors(error)));
 };
 
 module.exports = {

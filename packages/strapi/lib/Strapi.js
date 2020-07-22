@@ -1,7 +1,4 @@
-'use strict';
-
 // required first because it loads env files.
-const loadConfiguration = require('./core/app-configuration');
 
 const http = require('http');
 const path = require('path');
@@ -13,6 +10,7 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
+const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
@@ -91,7 +89,7 @@ class Strapi {
 
     infoTable.push(
       [chalk.blue('Time'), `${new Date()}`],
-      [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
+      [chalk.blue('Launched in'), `${Date.now() - this.config.launchedAt} ms`],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
       [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
@@ -163,7 +161,7 @@ class Strapi {
     this.server = http.createServer(this.app.callback());
 
     // handle port in use cleanly
-    this.server.on('error', err => {
+    this.server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
         return this.stopWithError(`The port ${err.port} is already used by another application.`);
       }
@@ -174,16 +172,16 @@ class Strapi {
     // Close current connections to fully destroy the server
     const connections = {};
 
-    this.server.on('connection', conn => {
-      const key = conn.remoteAddress + ':' + conn.remotePort;
+    this.server.on('connection', (conn) => {
+      const key = `${conn.remoteAddress}:${conn.remotePort}`;
       connections[key] = conn;
 
-      conn.on('close', function() {
+      conn.on('close', function () {
         delete connections[key];
       });
     });
 
-    this.server.destroy = cb => {
+    this.server.destroy = (cb) => {
       this.server.close(cb);
 
       for (let key in connections) {
@@ -191,7 +189,7 @@ class Strapi {
       }
     };
 
-    const onListen = async err => {
+    const onListen = async (err) => {
       if (err) return this.stopWithError(err);
 
       // Is the project initialised?
@@ -226,17 +224,19 @@ class Strapi {
       }
     };
 
-    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), err =>
-      onListen(err).catch(err => this.stopWithError(err))
+    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), (err) =>
+      onListen(err).catch((err) => this.stopWithError(err))
     );
   }
 
   stopWithError(err, customMessage) {
-    this.log.debug(`⛔️ Server wasn't able to start properly.`);
+    this.log.debug("⛔️ Server wasn't able to start properly.");
+
     if (customMessage) {
       this.log.error(customMessage);
     }
     this.log.error(err);
+
     return this.stop();
   }
 
@@ -283,8 +283,8 @@ class Strapi {
     });
 
     // Init core store
-    this.models['core_store'] = coreStoreModel(this.config);
-    this.models['strapi_webhooks'] = webhookModel(this.config);
+    this.models.core_store = coreStoreModel(this.config);
+    this.models.strapi_webhooks = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();
@@ -324,7 +324,7 @@ class Strapi {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -332,11 +332,12 @@ class Strapi {
       shouldReload: 0,
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
         reload.isReloading = false;
+
         return;
       }
 
@@ -349,7 +350,7 @@ class Strapi {
     Object.defineProperty(reload, 'isWatching', {
       configurable: true,
       enumerable: true,
-      set: value => {
+      set: (value) => {
         // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
         if (state.isWatching === false && value === true) {
           state.shouldReload += 1;
@@ -368,19 +369,21 @@ class Strapi {
   }
 
   async runBootstrapFunctions() {
-    const execBootstrap = async fn => {
+    const execBootstrap = async (fn) => {
       if (!fn) return;
 
       return fn();
     };
 
     // plugins bootstrap
-    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
-        strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
-        strapi.log.error(err);
-        strapi.stop();
-      });
+    const pluginBoostraps = Object.keys(this.plugins).map((plugin) => {
+      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(
+        (err) => {
+          strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
+          strapi.log.error(err);
+          strapi.stop();
+        }
+      );
     });
     await Promise.all(pluginBoostraps);
 
@@ -389,8 +392,9 @@ class Strapi {
 
     // admin bootstrap : should always run after the others
     const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
-    return execBootstrap(adminBootstrap).catch(err => {
-      strapi.log.error(`Bootstrap function in admin failed`);
+
+    return execBootstrap(adminBootstrap).catch((err) => {
+      strapi.log.error('Bootstrap function in admin failed');
       strapi.log.error(err);
       strapi.stop();
     });
@@ -418,8 +422,9 @@ class Strapi {
   }
 }
 
-module.exports = options => {
+module.exports = (options) => {
   const strapi = new Strapi(options);
   global.strapi = strapi;
+
   return strapi;
 };

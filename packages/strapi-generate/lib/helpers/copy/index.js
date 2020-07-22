@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -22,7 +20,7 @@ const fileHelper = require('../file');
 module.exports = function (options, cb) {
   cb = reportback.extend(cb, {
     alreadyExists: 'error',
-    invalid: 'error'
+    invalid: 'error',
   });
 
   // Compute the canonical path to copy from
@@ -35,8 +33,11 @@ module.exports = function (options, cb) {
       return cb.error(err);
     }
 
-    return fileHelper(_.merge(options, {
-      contents
-    }), cb);
+    return fileHelper(
+      _.merge(options, {
+        contents,
+      }),
+      cb
+    );
   });
 };

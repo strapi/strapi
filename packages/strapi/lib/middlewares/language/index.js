@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -12,7 +10,7 @@ const i18n = require('koa-i18n');
  * Language hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook

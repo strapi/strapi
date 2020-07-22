@@ -1,6 +1,6 @@
 import React, { forwardRef, useReducer, useImperativeHandle, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { ModalSection, request } from 'strapi-helper-plugin';
+import { ModalSection, request } from 'strapi-helper-plugin/lib/src';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { Padded, Text } from '@buffetjs/core';
@@ -37,7 +37,7 @@ const ModalCreateBody = forwardRef(
       });
     };
 
-    const handleSubmit = async e => {
+    const handleSubmit = async (e) => {
       e.persist();
       e.preventDefault();
       const errors = await checkFormValidity(modifiedData, schema);
@@ -50,7 +50,7 @@ const ModalCreateBody = forwardRef(
           setIsSubmiting(true);
 
           const requestURL = '/admin/users';
-          const cleanedRoles = modifiedData.roles.map(role => role.id);
+          const cleanedRoles = modifiedData.roles.map((role) => role.id);
 
           const { data } = await request(requestURL, {
             method: 'POST',
@@ -88,7 +88,7 @@ const ModalCreateBody = forwardRef(
           <Padded top size="18px">
             <Text fontSize="xs" color="grey" fontWeight="bold" textTransform="uppercase">
               <FormattedMessage id="app.components.Users.ModalCreateBody.block-title.details">
-                {txt => txt}
+                {(txt) => txt}
               </FormattedMessage>
             </Text>
           </Padded>
@@ -117,7 +117,7 @@ const ModalCreateBody = forwardRef(
           <Padded top size="3px">
             <Text fontSize="xs" color="grey" fontWeight="bold" textTransform="uppercase">
               <FormattedMessage id="app.components.Users.ModalCreateBody.block-title.roles">
-                {txt => txt}
+                {(txt) => txt}
               </FormattedMessage>
             </Text>
           </Padded>
@@ -149,7 +149,7 @@ const ModalCreateBody = forwardRef(
 
 ModalCreateBody.defaultProps = {
   isDisabled: false,
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
   registrationToken: '',
   setIsSubmiting: () => {},
   showMagicLink: false,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, Padded, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'strapi-helper-plugin';
+import { useQuery } from 'strapi-helper-plugin/lib/src';
 import BaselineAlignement from '../../BaselineAlignement';
 
 const EmptyRole = () => {

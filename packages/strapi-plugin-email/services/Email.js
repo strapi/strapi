@@ -1,12 +1,10 @@
-'use strict';
-
 const _ = require('lodash');
 
 const getProviderConfig = () => {
   return strapi.plugins.email.config;
 };
 
-const send = async options => {
+const send = async (options) => {
   return strapi.plugins.email.provider.send(options);
 };
 
@@ -20,6 +18,7 @@ const send = async options => {
 const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) => {
   const attributes = ['subject', 'text', 'html'];
   const missingAttributes = _.difference(attributes, Object.keys(emailTemplate));
+
   if (missingAttributes.length > 0) {
     throw new Error(
       `Following attributes are missing from your email template : ${missingAttributes.join(', ')}`

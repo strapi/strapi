@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { Switch, Redirect, Route, useRouteMatch } from 'react-router-dom';
-import { CheckPagePermissions, NotFound } from 'strapi-helper-plugin';
+import { CheckPagePermissions, NotFound } from 'strapi-helper-plugin/lib/src';
 import { get, upperFirst, camelCase } from 'lodash';
+import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import getTrad from '../../utils/getTrad';
@@ -19,7 +20,7 @@ const Main = ({ allowedActions }) => {
   const settingType = useRouteMatch(`/plugins/${pluginId}/:settingType`);
 
   const tabs = ['roles', 'providers', 'email-templates', 'advanced-settings']
-    .map(tabName => {
+    .map((tabName) => {
       const name = tabName === 'advanced-settings' ? 'advanced' : tabName;
       const camelCaseName = camelCase(tabName);
 
@@ -30,7 +31,7 @@ const Main = ({ allowedActions }) => {
         canAccess: allowedActions[`canRead${upperFirst(camelCaseName)}`],
       };
     })
-    .filter(tab => tab.canAccess);
+    .filter((tab) => tab.canAccess);
 
   const firstAllowedSettingEndPoint = get(tabs, '0.to', '');
 
@@ -44,7 +45,7 @@ const Main = ({ allowedActions }) => {
       <Switch>
         <Route
           path={`/plugins/${pluginId}/:settingType/:actionType/:id?`}
-          render={props => (
+          render={(props) => (
             <CheckPagePermissions permissions={pluginPermissions.updateRole}>
               <EditPage {...props} />
             </CheckPagePermissions>
@@ -53,7 +54,7 @@ const Main = ({ allowedActions }) => {
         />
         <Route
           path={`/plugins/${pluginId}/:settingType`}
-          render={props => <HomePage {...props} tabs={tabs} allowedActions={allowedActions} />}
+          render={(props) => <HomePage {...props} tabs={tabs} allowedActions={allowedActions} />}
           exact
         />
         <Route component={NotFound} />
@@ -70,6 +71,16 @@ Main.defaultProps = {
     canReadProviders: false,
     canReadRoles: false,
   },
+};
+
+Main.propTypes = {
+  allowedActions: PropTypes.shape({
+    canMain: PropTypes.bool,
+    canReadAdvancedSettings: PropTypes.bool,
+    canReadEmails: PropTypes.bool,
+    canReadProviders: PropTypes.bool,
+    canReadRoles: PropTypes.bool,
+  }),
 };
 
 export default Main;

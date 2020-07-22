@@ -1,34 +1,33 @@
-'use strict';
-
 const _ = require('lodash');
 
 const toUID = (name, plugin) => {
-  const modelUID = Object.keys(strapi.contentTypes).find(key => {
+  const modelUID = Object.keys(strapi.contentTypes).find((key) => {
     const ct = strapi.contentTypes[key];
+
     if (ct.modelName === name && ct.plugin === plugin) return true;
   });
 
   return modelUID;
 };
 
-const fromUID = uid => {
+const fromUID = (uid) => {
   const contentType = strapi.contentTypes[uid];
   const { modelName, plugin } = contentType;
 
   return { modelName, plugin };
 };
 
-const hasComponent = model => {
-  const compoKeys = Object.keys(model.attributes || {}).filter(key => {
+const hasComponent = (model) => {
+  const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
     return model.attributes[key].type === 'component';
   });
 
   return compoKeys.length > 0;
 };
 
-const isConfigurable = attribute => _.get(attribute, 'configurable', true);
+const isConfigurable = (attribute) => _.get(attribute, 'configurable', true);
 
-const isRelation = attribute =>
+const isRelation = (attribute) =>
   _.has(attribute, 'target') || _.has(attribute, 'model') || _.has(attribute, 'collection');
 
 /**
@@ -37,13 +36,14 @@ const isRelation = attribute =>
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-const formatAttributes = model => {
+const formatAttributes = (model) => {
   return Object.keys(model.attributes).reduce((acc, key) => {
     if (key === 'created_by' || key === 'updated_by') {
       return acc;
     }
 
     acc[key] = formatAttribute(key, model.attributes[key], { model });
+
     return acc;
   }, {});
 };
@@ -59,44 +59,45 @@ const formatAttribute = (key, attribute, { model }) => {
   if (_.has(attribute, 'type')) return attribute;
 
   // format relations
-  const relation = (model.associations || []).find(assoc => assoc.alias === key);
+  const relation = (model.associations || []).find((assoc) => assoc.alias === key);
   const { plugin, configurable } = attribute;
   let targetEntity = attribute.model || attribute.collection;
 
   if (plugin === 'upload' && targetEntity === 'file') {
     return {
       type: 'media',
-      multiple: attribute.collection ? true : false,
-      required: attribute.required ? true : false,
+      multiple: !!attribute.collection,
+      required: !!attribute.required,
       configurable: configurable === false ? false : undefined,
       allowedTypes: attribute.allowedTypes,
     };
-  } else {
-    return {
-      nature: relation.nature,
-      target: targetEntity === '*' ? targetEntity : toUID(targetEntity, plugin),
-      plugin: plugin || undefined,
-      dominant: attribute.dominant ? true : false,
-      targetAttribute: attribute.via || undefined,
-      columnName: attribute.columnName || undefined,
-      configurable: configurable === false ? false : undefined,
-      targetColumnName: _.get(
-        strapi.getModel(targetEntity, plugin),
-        ['attributes', attribute.via, 'columnName'],
-        undefined
-      ),
-      unique: attribute.unique ? true : false,
-      autoPopulate: attribute.autoPopulate,
-    };
   }
+
+  return {
+    nature: relation.nature,
+    target: targetEntity === '*' ? targetEntity : toUID(targetEntity, plugin),
+    plugin: plugin || undefined,
+    dominant: !!attribute.dominant,
+    targetAttribute: attribute.via || undefined,
+    columnName: attribute.columnName || undefined,
+    configurable: configurable === false ? false : undefined,
+    targetColumnName: _.get(
+      strapi.getModel(targetEntity, plugin),
+      ['attributes', attribute.via, 'columnName'],
+      undefined
+    ),
+    unique: !!attribute.unique,
+    autoPopulate: attribute.autoPopulate,
+  };
 };
 
 // TODO: move to schema builder
-const replaceTemporaryUIDs = uidMap => schema => {
+const replaceTemporaryUIDs = (uidMap) => (schema) => {
   return {
     ...schema,
     attributes: Object.keys(schema.attributes).reduce((acc, key) => {
       const attr = schema.attributes[key];
+
       if (attr.type === 'component') {
         if (_.has(uidMap, attr.component)) {
           acc[key] = {
@@ -118,7 +119,7 @@ const replaceTemporaryUIDs = uidMap => schema => {
       ) {
         acc[key] = {
           ...attr,
-          components: attr.components.map(value => {
+          components: attr.components.map((value) => {
             if (_.has(uidMap, value)) return uidMap[value];
 
             if (!_.has(strapi.components, value)) {
@@ -133,6 +134,7 @@ const replaceTemporaryUIDs = uidMap => schema => {
       }
 
       acc[key] = attr;
+
       return acc;
     }, {}),
   };

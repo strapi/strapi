@@ -2,7 +2,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { Carret } from '@buffetjs/icons';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from 'strapi-helper-plugin/lib/src';
 
 const Table = styled.table`
   border-radius: 3px;
@@ -183,8 +183,8 @@ const LoadingWrapper = styled.div`
   width: 100%;
   height: 108px;
   display: flex;
-  background: ${props => props.theme.main.colors.white};
-  box-shadow: 0 2px 4px ${props => props.theme.main.colors.darkGrey};
+  background: ${(props) => props.theme.main.colors.white};
+  box-shadow: 0 2px 4px ${(props) => props.theme.main.colors.darkGrey};
   clip-path: inset(0px -5px -5px -5px);
 `;
 

@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const mongoose = require('mongoose');
 
@@ -8,7 +6,7 @@ const utils = require('./utils');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
 
-const isPolymorphicAssoc = assoc => {
+const isPolymorphicAssoc = (assoc) => {
   return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
@@ -28,35 +26,37 @@ module.exports = ({ models, target }, ctx) => {
     });
 
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      definition.attributes['created_by'] = {
+      definition.attributes.created_by = {
         model: 'user',
         plugin: 'admin',
       };
 
-      definition.attributes['updated_by'] = {
+      definition.attributes.updated_by = {
         model: 'user',
         plugin: 'admin',
       };
     }
 
-    const componentAttributes = Object.keys(definition.attributes).filter(key =>
+    const componentAttributes = Object.keys(definition.attributes).filter((key) =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
-    const scalarAttributes = Object.keys(definition.attributes).filter(key => {
+    const scalarAttributes = Object.keys(definition.attributes).filter((key) => {
       const { type } = definition.attributes[key];
+
       return type !== undefined && type !== null && type !== 'component' && type !== 'dynamiczone';
     });
 
-    const relationalAttributes = Object.keys(definition.attributes).filter(key => {
+    const relationalAttributes = Object.keys(definition.attributes).filter((key) => {
       const { type } = definition.attributes[key];
+
       return type === undefined;
     });
 
     // handle component and dynamic zone attrs
     if (componentAttributes.length > 0) {
       // create join morph collection thingy
-      componentAttributes.forEach(name => {
+      componentAttributes.forEach((name) => {
         definition.loadedModel[name] = [
           {
             kind: String,
@@ -70,7 +70,7 @@ module.exports = ({ models, target }, ctx) => {
     }
 
     // handle scalar attrs
-    scalarAttributes.forEach(name => {
+    scalarAttributes.forEach((name) => {
       const attr = definition.attributes[name];
 
       definition.loadedModel[name] = {
@@ -80,7 +80,7 @@ module.exports = ({ models, target }, ctx) => {
     });
 
     // handle relational attrs
-    relationalAttributes.forEach(name => {
+    relationalAttributes.forEach((name) => {
       buildRelation({
         definition,
         model,
@@ -109,13 +109,13 @@ module.exports = ({ models, target }, ctx) => {
       definition,
     });
 
-    findLifecycles.forEach(key => {
+    findLifecycles.forEach((key) => {
       schema.pre(key, populateFn);
     });
 
     // Add virtual key to provide populate and reverse populate
     _.forEach(
-      _.pickBy(definition.loadedModel, model => {
+      _.pickBy(definition.loadedModel, (model) => {
         return model.type === 'virtual';
       }),
       (value, key) => {
@@ -132,6 +132,7 @@ module.exports = ({ models, target }, ctx) => {
 
     // Use provided timestamps if the elemnets in the array are string else use default.
     const timestampsOption = _.get(definition, 'options.timestamps', true);
+
     if (_.isArray(timestampsOption)) {
       const [createAtCol = 'createdAt', updatedAtCol = 'updatedAt'] = timestampsOption;
 
@@ -160,7 +161,7 @@ module.exports = ({ models, target }, ctx) => {
     }
     schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
-    const refToStrapiRef = obj => {
+    const refToStrapiRef = (obj) => {
       const ref = obj.ref;
 
       let plainData = ref && typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
@@ -175,17 +176,17 @@ module.exports = ({ models, target }, ctx) => {
 
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
-      transform: function(doc, returned) {
+      transform(doc, returned) {
         // Remover $numberDecimal nested property.
 
         Object.keys(returned)
-          .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
-          .forEach(key => {
+          .filter((key) => returned[key] instanceof mongoose.Types.Decimal128)
+          .forEach((key) => {
             // Parse to float number.
             returned[key] = parseFloat(returned[key].toString());
           });
 
-        morphAssociations.forEach(association => {
+        morphAssociations.forEach((association) => {
           if (
             Array.isArray(returned[association.alias]) &&
             returned[association.alias].length > 0
@@ -199,7 +200,7 @@ module.exports = ({ models, target }, ctx) => {
 
               case 'manyMorphToMany':
               case 'manyMorphToOne': {
-                returned[association.alias] = returned[association.alias].map(obj =>
+                returned[association.alias] = returned[association.alias].map((obj) =>
                   refToStrapiRef(obj)
                 );
 
@@ -210,13 +211,13 @@ module.exports = ({ models, target }, ctx) => {
           }
         });
 
-        componentAttributes.forEach(name => {
+        componentAttributes.forEach((name) => {
           const attribute = definition.attributes[name];
           const { type } = attribute;
 
           if (type === 'component') {
             if (Array.isArray(returned[name])) {
-              const components = returned[name].map(el => el.ref);
+              const components = returned[name].map((el) => el.ref);
               // Reformat data by bypassing the many-to-many relationship.
               returned[name] =
                 attribute.repeatable === true ? components : _.first(components) || null;
@@ -225,7 +226,7 @@ module.exports = ({ models, target }, ctx) => {
 
           if (type === 'dynamiczone') {
             if (returned[name]) {
-              returned[name] = returned[name].map(el => {
+              returned[name] = returned[name].map((el) => {
                 return {
                   __component: findComponentByGlobalId(el.kind).uid,
                   ...el.ref,
@@ -241,7 +242,7 @@ module.exports = ({ models, target }, ctx) => {
     const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
     const handleIndexesErrors = () => {
-      Model.on('index', error => {
+      Model.on('index', (error) => {
         if (error) {
           if (error.code === 11000) {
             strapi.log.error(
@@ -278,10 +279,10 @@ module.exports = ({ models, target }, ctx) => {
 };
 
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
-  return function() {
+  return function () {
     const populatedPaths = this.getPopulatedPaths();
 
-    morphAssociations.forEach(association => {
+    morphAssociations.forEach((association) => {
       const { alias, nature } = association;
 
       if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
@@ -293,14 +294,14 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
 
     if (definition.modelType === 'component') {
       definition.associations
-        .filter(assoc => !isPolymorphicAssoc(assoc))
-        .filter(ast => ast.autoPopulate !== false)
-        .forEach(ast => {
+        .filter((assoc) => !isPolymorphicAssoc(assoc))
+        .filter((ast) => ast.autoPopulate !== false)
+        .forEach((ast) => {
           this.populate({ path: ast.alias });
         });
     }
 
-    componentAttributes.forEach(key => {
+    componentAttributes.forEach((key) => {
       this.populate({ path: `${key}.ref` });
     });
   };

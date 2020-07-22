@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Auth.js controller
  *
@@ -13,7 +11,7 @@ const grant = require('grant-koa');
 const { sanitizeEntity } = require('strapi-utils');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const formatError = error => [
+const formatError = (error) => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
@@ -128,16 +126,15 @@ module.exports = {
             message: 'Identifier or password invalid.',
           })
         );
-      } else {
-        ctx.send({
-          jwt: strapi.plugins['users-permissions'].services.jwt.issue({
-            id: user.id,
-          }),
-          user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-            model: strapi.query('user', 'users-permissions').model,
-          }),
-        });
       }
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue({
+          id: user.id,
+        }),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
+      });
     } else {
       if (!_.get(await store.get({ key: 'grant' }), [provider, 'enabled'])) {
         return ctx.badRequest(
@@ -150,7 +147,8 @@ module.exports = {
       }
 
       // Connect the user with the third-party provider.
-      let user, error;
+      let user;
+      let error;
       try {
         [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(
           provider,
@@ -302,9 +300,9 @@ module.exports = {
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+    const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
       try {
-        return storeEmail['reset_password'].options;
+        return storeEmail.reset_password.options;
       } catch (error) {
         return {};
       }
@@ -334,7 +332,7 @@ module.exports = {
 
     try {
       // Send an email to the user.
-      await strapi.plugins['email'].services.email.send({
+      await strapi.plugins.email.services.email.send({
         to: user.email,
         from:
           settings.from.email || settings.from.name
@@ -483,9 +481,9 @@ module.exports = {
       );
 
       if (settings.email_confirmation) {
-        const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+        const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
           try {
-            return storeEmail['email_confirmation'].options;
+            return storeEmail.email_confirmation.options;
           } catch (error) {
             return {};
           }
@@ -517,7 +515,7 @@ module.exports = {
 
         try {
           // Send an email to the user.
-          await strapi.plugins['email'].services.email.send({
+          await strapi.plugins.email.services.email.send({
             to: (user.toJSON ? user.toJSON() : user).email,
             from:
               settings.from.email && settings.from.name
@@ -536,6 +534,7 @@ module.exports = {
       const sanitizedUser = sanitizeEntity(user.toJSON ? user.toJSON() : user, {
         model: strapi.query('user', 'users-permissions').model,
       });
+
       if (settings.email_confirmation) {
         ctx.send({
           user: sanitizedUser,
@@ -630,9 +629,9 @@ module.exports = {
       _.pick(user.toJSON ? user.toJSON() : user, ['id'])
     );
 
-    const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+    const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
       try {
-        return storeEmail['email_confirmation'].options;
+        return storeEmail.email_confirmation.options;
       } catch (err) {
         return {};
       }
@@ -657,7 +656,7 @@ module.exports = {
     );
 
     try {
-      await strapi.plugins['email'].services.email.send({
+      await strapi.plugins.email.services.email.send({
         to: (user.toJSON ? user.toJSON() : user).email,
         from:
           settings.from.email && settings.from.name

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 
 import Wrapper from './Wrapper';
 

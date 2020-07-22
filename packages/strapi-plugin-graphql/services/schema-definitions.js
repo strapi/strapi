@@ -2,8 +2,6 @@
  * Schema definition language tools
  */
 
-'use strict';
-
 const _ = require('lodash');
 
 /**
@@ -90,6 +88,7 @@ const applyMetadatas = (definition, metadatas = {}) => {
   const { description, deprecated } = metadatas;
 
   let tmpDef = definition;
+
   if (description) {
     tmpDef = `"""\n${description}\n"""\n${tmpDef}`;
   }

@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, formatYupErrors } = require('strapi-utils');
 
 const fileInfoSchema = yup.object({
@@ -19,7 +17,7 @@ const multiUploadSchema = yup.object({
 const validateUploadBody = (data = {}, isMulti = false) => {
   const schema = isMulti ? multiUploadSchema : uploadSchema;
 
-  return schema.validate(data, { abortEarly: false }).catch(err => {
+  return schema.validate(data, { abortEarly: false }).catch((err) => {
     throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(err) });
   });
 };

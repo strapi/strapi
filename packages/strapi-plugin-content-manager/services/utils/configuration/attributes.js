@@ -1,24 +1,8 @@
-'use strict';
-
 const _ = require('lodash');
 
-const NON_SORTABLES = [
-  'component',
-  'json',
-  'relation',
-  'media',
-  'richtext',
-  'dynamiczone',
-];
+const NON_SORTABLES = ['component', 'json', 'relation', 'media', 'richtext', 'dynamiczone'];
 
-const NON_LISTABLES = [
-  'component',
-  'json',
-  'relation',
-  'password',
-  'richtext',
-  'dynamiczone',
-];
+const NON_LISTABLES = ['component', 'json', 'relation', 'password', 'richtext', 'dynamiczone'];
 
 // hidden fields are fields that are configured to be hidden from list, and edit views
 const isHidden = (schema, name) => {
@@ -26,11 +10,8 @@ const isHidden = (schema, name) => {
     return false;
   }
 
-  const isHidden = _.get(
-    schema,
-    ['config', 'attributes', name, 'hidden'],
-    false
-  );
+  const isHidden = _.get(schema, ['config', 'attributes', name, 'hidden'], false);
+
   if (isHidden === true) {
     return true;
   }
@@ -48,6 +29,7 @@ const isListable = (schema, name) => {
   }
 
   const attribute = schema.attributes[name];
+
   if (NON_LISTABLES.includes(attribute.type)) {
     return false;
   }
@@ -63,6 +45,7 @@ const isSortable = (schema, name) => {
   if (schema.modelType === 'component' && name === 'id') return false;
 
   const attribute = schema.attributes[name];
+
   if (NON_SORTABLES.includes(attribute.type)) {
     return false;
   }
@@ -96,6 +79,7 @@ const isTimestamp = (schema, name) => {
   }
 
   const timestampsOpt = _.get(schema, ['options', 'timestamps']);
+
   if (!timestampsOpt || !Array.isArray(timestampsOpt)) {
     return false;
   }
@@ -105,7 +89,7 @@ const isTimestamp = (schema, name) => {
   }
 };
 
-const isRelation = attribute => attribute.type === 'relation';
+const isRelation = (attribute) => attribute.type === 'relation';
 
 const hasRelationAttribute = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
@@ -138,6 +122,7 @@ const hasEditableAttribute = (schema, name) => {
 
   if (isRelation(schema.attributes[name])) {
     if (schema.modelType === 'component') return true;
+
     return false;
   }
 

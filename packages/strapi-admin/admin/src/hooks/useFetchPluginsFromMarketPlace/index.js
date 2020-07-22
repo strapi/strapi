@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 
 const useFetchPluginsFromMarketPlace = () => {
   const { currentLocale } = useGlobalContext();
@@ -31,7 +31,7 @@ const useFetchPluginsFromMarketPlace = () => {
           // Silent
         } else {
           // handle error
-          setState(prev => ({ ...prev, isLoading: false, error: true }));
+          setState((prev) => ({ ...prev, isLoading: false, error: true }));
         }
       }
     };

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -11,6 +9,7 @@ const url = require('url');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 require('mongoose-long')(mongoose);
+
 const Mongoose = mongoose.Mongoose;
 
 const relations = require('./relations');
@@ -35,13 +34,13 @@ const defaults = {
 
 const isMongooseConnection = ({ connector }) => connector === 'mongoose';
 
-module.exports = function(strapi) {
+module.exports = function (strapi) {
   function initialize() {
     const { connections } = strapi.config;
 
     const connectionsPromises = Object.keys(connections)
-      .filter(key => isMongooseConnection(connections[key]))
-      .map(async connectionName => {
+      .filter((key) => isMongooseConnection(connections[key]))
+      .map(async (connectionName) => {
         const connection = connections[connectionName];
         const instance = new Mongoose();
 
@@ -94,7 +93,7 @@ module.exports = function(strapi) {
           await instance.connect(
             uri ||
               `mongodb${isSrv ? '+srv' : ''}://${username}:${encodeURIComponent(password)}@${host}${
-                !isSrv ? ':' + port : ''
+                !isSrv ? `:${port}` : ''
               }/`,
             connectOptions
           );
@@ -172,8 +171,9 @@ module.exports = function(strapi) {
 
   function mountPlugins(connectionName, ctx) {
     return Promise.all(
-      Object.keys(strapi.plugins).map(name => {
+      Object.keys(strapi.plugins).map((name) => {
         const plugin = strapi.plugins[name];
+
         return mountModels(
           {
             models: _.pickBy(plugin.models, ({ connection }) => connection === connectionName),

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { useHistory } from 'react-router-dom';
 import { Pencil, Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -20,13 +20,13 @@ const RoleRow = ({
   const { push } = useHistory();
   const { settingsBaseURL } = useGlobalContext();
 
-  const handleRoleSelection = e => {
+  const handleRoleSelection = (e) => {
     e.stopPropagation();
 
     onRoleToggle(role.id);
   };
 
-  const handleClickDelete = e => {
+  const handleClickDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -44,7 +44,7 @@ const RoleRow = ({
 
   const prefix = canDelete ? (
     <Checkbox
-      value={selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1}
+      value={selectedRoles.findIndex((selectedRoleId) => selectedRoleId === role.id) !== -1}
       onClick={handleRoleSelection}
       name="role-checkbox"
     />
@@ -59,7 +59,7 @@ const RoleRow = ({
       links={[
         {
           icon: canCreate ? <Duplicate fill="#0e1622" /> : null,
-          onClick: e => {
+          onClick: (e) => {
             e.preventDefault();
             e.stopPropagation();
             onRoleDuplicate(role.id);

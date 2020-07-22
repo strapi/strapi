@@ -1,5 +1,3 @@
-'use strict';
-
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
@@ -10,7 +8,7 @@ let graphqlQuery;
 let modelsUtils;
 const data = {};
 
-const updateContent = data => {
+const updateContent = (data) => {
   return graphqlQuery({
     query: /* GraphQL */ `
       mutation updateHomePage($input: updateHomePageInput) {
@@ -34,7 +32,7 @@ describe('Single type Graphql support', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',

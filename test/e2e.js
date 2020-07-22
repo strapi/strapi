@@ -1,8 +1,8 @@
 const path = require('path');
-const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
 const execa = require('execa');
 const waitOn = require('wait-on');
 const yargs = require('yargs');
+const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
 
 const appName = 'testApp';
 
@@ -37,7 +37,7 @@ const databases = {
   },
 };
 
-const test = async args => {
+const test = async (args) => {
   return execa('yarn', ['-s', 'test:e2e', ...args.split(' ')], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
@@ -76,7 +76,7 @@ yargs
   .command(
     '$0',
     'run end to end tests',
-    yargs => {
+    (yargs) => {
       yargs.option('database', {
         alias: 'db',
         describe: 'choose a database',
@@ -84,7 +84,7 @@ yargs
         default: 'sqlite',
       });
     },
-    argv => {
+    (argv) => {
       const { database, _: args } = argv;
 
       main(databases[database], args.join(' '));

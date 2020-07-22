@@ -1,5 +1,3 @@
-'use strict';
-
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('strapi-utils');
@@ -9,7 +7,7 @@ const { getAbsoluteAdminUrl } = require('strapi-utils');
  * @param {string} password - password to hash
  * @returns {string} hashed password
  */
-const hashPassword = password => bcrypt.hash(password, 10);
+const hashPassword = (password) => bcrypt.hash(password, 10);
 
 /**
  * Validate a password
@@ -64,6 +62,7 @@ const forgotPassword = async ({ email } = {}) => {
   const url = `${getAbsoluteAdminUrl(
     strapi.config
   )}/auth/reset-password?code=${resetPasswordToken}`;
+
   return strapi.plugins.email.services.email
     .sendTemplatedEmail(
       {
@@ -77,7 +76,7 @@ const forgotPassword = async ({ email } = {}) => {
         user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
       }
     )
-    .catch(err => {
+    .catch((err) => {
       // log error server side but do not disclose it to the user to avoid leaking informations
       strapi.log.error(err);
     });

@@ -56,7 +56,7 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
         )}
       </h3>
       {searchable && (
-        <button onClick={toggleSearch}>
+        <button type="button" onClick={toggleSearch}>
           <FontAwesomeIcon icon="search" />
         </button>
       )}
@@ -64,9 +64,11 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
   ) : (
     <div className="search-wrapper">
       <FontAwesomeIcon icon="search" />
-      <button onClick={toggleSearch} />
+      <button type="button" onClick={toggleSearch}>
+        search
+      </button>
       <Search ref={ref} onChange={handleChange} value={search} placeholder="search…" />
-      <button onClick={handleClose}>
+      <button type="button" onClick={handleClose}>
         <FontAwesomeIcon icon="times" />
       </button>
     </div>

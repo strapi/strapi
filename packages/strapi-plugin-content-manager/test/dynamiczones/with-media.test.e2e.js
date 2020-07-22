@@ -10,7 +10,7 @@ let authRq;
 const uploadImg = () => {
   return authRq.post('/upload', {
     formData: {
-      files: fs.createReadStream(__dirname + '/rec.jpg'),
+      files: fs.createReadStream(`${__dirname}/rec.jpg`),
     },
   });
 };

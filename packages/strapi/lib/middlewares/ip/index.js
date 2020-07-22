@@ -1,11 +1,9 @@
-'use strict';
-
 const ip = require('koa-ip');
 /**
  * IP filter hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook

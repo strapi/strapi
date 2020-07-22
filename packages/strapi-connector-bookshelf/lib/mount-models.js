@@ -1,4 +1,3 @@
-'use strict';
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
@@ -16,7 +15,7 @@ const populateFetch = require('./populate');
 
 const PIVOT_PREFIX = '_pivot_';
 
-const getDatabaseName = connection => {
+const getDatabaseName = (connection) => {
   const dbName = _.get(connection.settings, 'database');
   const dbSchema = _.get(connection.settings, 'schema', 'public');
   switch (_.get(connection.settings, 'client')) {
@@ -35,7 +34,7 @@ module.exports = ({ models, target }, ctx) => {
   const { GLOBALS, connection, ORM } = ctx;
 
   // Parse every authenticated model.
-  const updates = Object.keys(models).map(async model => {
+  const updates = Object.keys(models).map(async (model) => {
     const definition = models[model];
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.associations = [];
@@ -80,12 +79,12 @@ module.exports = ({ models, target }, ctx) => {
       definition.options
     );
 
-    const componentAttributes = Object.keys(definition.attributes).filter(key =>
+    const componentAttributes = Object.keys(definition.attributes).filter((key) =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
     if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
-      loadedModel.toJSON = function(options = {}) {
+      loadedModel.toJSON = function (options = {}) {
         const { shallow = false, omitPivot = false } = options;
         const attributes = this.serialize(options);
 
@@ -93,7 +92,7 @@ module.exports = ({ models, target }, ctx) => {
           const pivot = this.pivot && !omitPivot && this.pivot.attributes;
 
           // Remove pivot attributes with prefix.
-          _.keys(pivot).forEach(key => delete attributes[`${PIVOT_PREFIX}${key}`]);
+          _.keys(pivot).forEach((key) => delete attributes[`${PIVOT_PREFIX}${key}`]);
 
           // Add pivot attributes without prefix.
           const pivotAttributes = _.mapKeys(
@@ -116,12 +115,12 @@ module.exports = ({ models, target }, ctx) => {
     });
 
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      definition.attributes['created_by'] = {
+      definition.attributes.created_by = {
         model: 'user',
         plugin: 'admin',
       };
 
-      definition.attributes['updated_by'] = {
+      definition.attributes.updated_by = {
         model: 'user',
         plugin: 'admin',
       };
@@ -129,8 +128,9 @@ module.exports = ({ models, target }, ctx) => {
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
-    Object.keys(definition.attributes).forEach(name => {
+    Object.keys(definition.attributes).forEach((name) => {
       const details = definition.attributes[name];
+
       if (details.type !== undefined) {
         return;
       }
@@ -159,7 +159,7 @@ module.exports = ({ models, target }, ctx) => {
             ? strapi.plugins[details.plugin].models[details.model]
             : strapi.models[details.model];
 
-          const FK = _.findKey(target.attributes, details => {
+          const FK = _.findKey(target.attributes, (details) => {
             if (
               _.has(details, 'model') &&
               details.model === model &&
@@ -172,7 +172,7 @@ module.exports = ({ models, target }, ctx) => {
 
           const columnName = _.get(target.attributes, [FK, 'columnName'], FK);
 
-          loadedModel[name] = function() {
+          loadedModel[name] = function () {
             return this.hasOne(GLOBALS[globalId], columnName);
           };
           break;
@@ -200,13 +200,13 @@ module.exports = ({ models, target }, ctx) => {
           // Set this info to be able to see if this field is a real database's field.
           details.isVirtual = true;
 
-          loadedModel[name] = function() {
+          loadedModel[name] = function () {
             return this.hasMany(GLOBALS[globalId], columnName);
           };
           break;
         }
         case 'belongsTo': {
-          loadedModel[name] = function() {
+          loadedModel[name] = function () {
             return this.belongsTo(GLOBALS[globalId], _.get(details, 'columnName', name));
           };
           break;
@@ -234,7 +234,7 @@ module.exports = ({ models, target }, ctx) => {
               details.attribute = `related_${details.attribute}`;
             }
 
-            loadedModel[name] = function() {
+            loadedModel[name] = function () {
               const targetBookshelfModel = GLOBALS[globalId];
               let collection = this.belongsToMany(
                 targetBookshelfModel,
@@ -270,7 +270,7 @@ module.exports = ({ models, target }, ctx) => {
               relationship.attribute = singular(details.via);
             }
 
-            loadedModel[name] = function() {
+            loadedModel[name] = function () {
               const targetBookshelfModel = GLOBALS[globalId];
 
               const foreignKey = `${relationship.attribute}_${relationship.column}`;
@@ -301,12 +301,12 @@ module.exports = ({ models, target }, ctx) => {
           const globalId = `${model.collectionName}_morph`;
           const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
-          loadedModel[name] = function() {
+          loadedModel[name] = function () {
             return this.morphOne(
               GLOBALS[globalId],
               details.via,
               `${definition.collectionName}`
-            ).query(qb => {
+            ).query((qb) => {
               qb.where(filter, name);
             });
           };
@@ -320,12 +320,12 @@ module.exports = ({ models, target }, ctx) => {
           const globalId = `${collection.collectionName}_morph`;
           const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
-          loadedModel[name] = function() {
+          loadedModel[name] = function () {
             return this.morphMany(
               GLOBALS[globalId],
               details.via,
               `${definition.collectionName}`
-            ).query(qb => {
+            ).query((qb) => {
               qb.where(filter, name).orderBy('order');
             });
           };
@@ -334,20 +334,20 @@ module.exports = ({ models, target }, ctx) => {
         case 'belongsToMorph':
         case 'belongsToManyMorph': {
           const association = definition.associations.find(
-            association => association.alias === name
+            (association) => association.alias === name
           );
 
-          const morphValues = association.related.map(id => {
-            let models = Object.values(strapi.models).filter(model => model.globalId === id);
+          const morphValues = association.related.map((id) => {
+            let models = Object.values(strapi.models).filter((model) => model.globalId === id);
 
             if (models.length === 0) {
-              models = Object.values(strapi.components).filter(model => model.globalId === id);
+              models = Object.values(strapi.components).filter((model) => model.globalId === id);
             }
 
             if (models.length === 0) {
               models = Object.keys(strapi.plugins).reduce((acc, current) => {
                 const models = Object.values(strapi.plugins[current].models).filter(
-                  model => model.globalId === id
+                  (model) => model.globalId === id
                 );
 
                 if (acc.length === 0 && models.length > 0) {
@@ -371,13 +371,13 @@ module.exports = ({ models, target }, ctx) => {
           const options = {
             requireFetch: false,
             tableName: `${definition.collectionName}_morph`,
-            [definition.collectionName]: function() {
+            [definition.collectionName]() {
               return this.belongsTo(
                 GLOBALS[definition.globalId],
                 `${definition.collectionName}_id`
               );
             },
-            related: function() {
+            related() {
               return this.morphTo(
                 name,
                 ...association.related.map((id, index) => [GLOBALS[id], morphValues[index]])
@@ -392,7 +392,7 @@ module.exports = ({ models, target }, ctx) => {
 
           // Hack Bookshelf to create a many-to-many polymorphic association.
           // Upload has many Upload_morph that morph to different model.
-          loadedModel[name] = function() {
+          loadedModel[name] = function () {
             if (verbose === 'belongsToMorph') {
               return this.hasOne(GLOBALS[options.tableName], `${definition.collectionName}_id`);
             }
@@ -414,7 +414,7 @@ module.exports = ({ models, target }, ctx) => {
     try {
       // External function to map key that has been updated with `columnName`
       const mapper = (params = {}) => {
-        Object.keys(params).map(key => {
+        Object.keys(params).map((key) => {
           const attr = definition.attributes[key] || {};
 
           params[key] = parseValue(attr.type, params[key]);
@@ -423,21 +423,21 @@ module.exports = ({ models, target }, ctx) => {
         return _.mapKeys(params, (value, key) => {
           const attr = definition.attributes[key] || {};
 
-          return _.isPlainObject(attr) && _.isString(attr['columnName']) ? attr['columnName'] : key;
+          return _.isPlainObject(attr) && _.isString(attr.columnName) ? attr.columnName : key;
         });
       };
 
       // Extract association except polymorphic.
       const associations = definition.associations.filter(
-        association => association.nature.toLowerCase().indexOf('morph') === -1
+        (association) => association.nature.toLowerCase().indexOf('morph') === -1
       );
       // Extract polymorphic association.
       const polymorphicAssociations = definition.associations.filter(
-        association => association.nature.toLowerCase().indexOf('morph') !== -1
+        (association) => association.nature.toLowerCase().indexOf('morph') !== -1
       );
 
       // Update serialize to reformat data for polymorphic associations.
-      loadedModel.serialize = function(options) {
+      loadedModel.serialize = function (options) {
         const attrs = _.clone(this.attributes);
 
         if (options && options.shallow) {
@@ -446,7 +446,7 @@ module.exports = ({ models, target }, ctx) => {
 
         const relations = this.relations;
 
-        componentAttributes.forEach(key => {
+        componentAttributes.forEach((key) => {
           if (!_.has(relations, key)) return;
 
           const attr = definition.attributes[key];
@@ -456,16 +456,16 @@ module.exports = ({ models, target }, ctx) => {
             case 'component': {
               const { repeatable } = attr;
 
-              const components = relations[key].toJSON().map(el => el.component);
+              const components = relations[key].toJSON().map((el) => el.component);
 
               attrs[key] = repeatable === true ? components : _.first(components) || null;
 
               break;
             }
             case 'dynamiczone': {
-              attrs[key] = relations[key].toJSON().map(el => {
+              attrs[key] = relations[key].toJSON().map((el) => {
                 const componentKey = Object.keys(strapi.components).find(
-                  key => strapi.components[key].collectionName === el.component_type
+                  (key) => strapi.components[key].collectionName === el.component_type
                 );
 
                 return {
@@ -482,7 +482,7 @@ module.exports = ({ models, target }, ctx) => {
           }
         });
 
-        polymorphicAssociations.map(association => {
+        polymorphicAssociations.map((association) => {
           // Retrieve relation Bookshelf object.
           const relation = relations[association.alias];
 
@@ -503,7 +503,7 @@ module.exports = ({ models, target }, ctx) => {
                 break;
               case 'manyToManyMorph':
                 attrs[association.alias] = attrs[association.alias].map(
-                  rel => rel[model.collectionName]
+                  (rel) => rel[model.collectionName]
                 );
                 break;
               case 'oneMorphToOne': {
@@ -526,7 +526,7 @@ module.exports = ({ models, target }, ctx) => {
               }
               case 'manyMorphToOne':
               case 'manyMorphToMany':
-                attrs[association.alias] = attrs[association.alias].map(obj => {
+                attrs[association.alias] = attrs[association.alias].map((obj) => {
                   const contentType = strapi.db.getModelByCollectionName(
                     obj[`${association.alias}_type`]
                   );
@@ -542,7 +542,7 @@ module.exports = ({ models, target }, ctx) => {
           }
         });
 
-        associations.map(association => {
+        associations.map((association) => {
           const relation = relations[association.alias];
 
           if (relation) {
@@ -555,7 +555,7 @@ module.exports = ({ models, target }, ctx) => {
       };
 
       // Initialize lifecycle callbacks.
-      loadedModel.initialize = function() {
+      loadedModel.initialize = function () {
         // Load bookshelf plugin arguments from model options
         this.constructor.__super__.initialize.apply(this, arguments);
 
@@ -569,15 +569,15 @@ module.exports = ({ models, target }, ctx) => {
 
         const formatValue = createFormatter(definition.client);
         function formatEntry(entry) {
-          Object.keys(entry.attributes).forEach(key => {
+          Object.keys(entry.attributes).forEach((key) => {
             const attr = definition.attributes[key] || {};
             entry.attributes[key] = formatValue(attr, entry.attributes[key]);
           });
         }
 
-        this.on('saved fetched fetched:collection', instance => {
+        this.on('saved fetched fetched:collection', (instance) => {
           if (Array.isArray(instance.models)) {
-            instance.models.forEach(entry => formatEntry(entry));
+            instance.models.forEach((entry) => formatEntry(entry));
           } else {
             formatEntry(instance);
           }

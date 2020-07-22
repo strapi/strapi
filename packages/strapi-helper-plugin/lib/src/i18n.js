@@ -20,7 +20,7 @@ const pluginId = pluginPkg.name.replace(/^strapi-plugin-/i, '');
  *
  * @param messages
  */
-const formatMessages = messages =>
+const formatMessages = (messages) =>
   reduce(
     messages,
     (result, value, key) => {
@@ -36,14 +36,17 @@ const formatMessages = messages =>
  *
  * @param language {String}
  */
-const requireTranslations = language => {
+const requireTranslations = (language) => {
   try {
-    return require(`translations/${language}.json`); // eslint-disable-line global-require
+    // eslint-disable-next-line global-require,import/no-dynamic-require
+    return require(`translations/${language}.json`);
   } catch (error) {
     console.error(
       `Unable to load "${language}" translation for the plugin ${pluginId}. Please make sure "${language}.json" file exists in "pluginPath/admin/src/translations" folder.`
     );
   }
+
+  return null;
 };
 
 /**
@@ -60,4 +63,4 @@ const translationMessages = reduce(
   {}
 );
 
-export { translationMessages };
+export default translationMessages;

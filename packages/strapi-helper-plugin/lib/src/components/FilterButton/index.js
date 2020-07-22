@@ -10,6 +10,7 @@ import Close from '../../svgs/Close';
 
 function Filter({ label, onClick }) {
   const { name, filter, value } = label;
+
   return (
     <Wrapper>
       <span>{upperFirst(name)}&nbsp;</span>
@@ -23,17 +24,15 @@ function Filter({ label, onClick }) {
 }
 
 Filter.defaultProps = {
-  children: null,
   onClick: () => {},
 };
 
 Filter.propTypes = {
-  children: PropTypes.node,
   label: PropTypes.shape({
     name: PropTypes.string,
     filter: PropTypes.string,
     value: PropTypes.string,
-  }),
+  }).isRequired,
   onClick: PropTypes.func,
 };
 

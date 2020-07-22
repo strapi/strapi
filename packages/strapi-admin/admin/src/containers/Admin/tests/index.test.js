@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // FIXME
-// import { OverlayBlocker } from 'strapi-helper-plugin';
+// import { OverlayBlocker } from 'strapi-helper-plugin/lib/src';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,

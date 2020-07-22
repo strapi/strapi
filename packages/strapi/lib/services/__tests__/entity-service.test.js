@@ -1,8 +1,6 @@
-'use strict';
-
+const { EventEmitter } = require('events');
 const createEntityService = require('../entity-service');
 const createEntityValidator = require('../entity-validator');
-const { EventEmitter } = require('events');
 
 describe('Entity service', () => {
   describe('Find', () => {
@@ -82,7 +80,7 @@ describe('Entity service', () => {
 
         const fakeQuery = {
           count: jest.fn(() => 0),
-          create: jest.fn(data => data),
+          create: jest.fn((data) => data),
         };
 
         const fakeModel = {

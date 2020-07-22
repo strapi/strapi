@@ -30,7 +30,7 @@ import {
   ModalFooter,
   ModalForm,
   InputsIndex as Input,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { HomePageContext } from '../../contexts/HomePage';
 
 // Translations
@@ -81,18 +81,18 @@ class PopUpForm extends React.Component {
     }
   };
 
-  generateRedirectURL = url => {
+  generateRedirectURL = (url) => {
     return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing
       ? url
       : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
   };
 
-  handleChange = e => {
+  handleChange = (e) => {
     this.setState({ enabled: e.target.value });
     this.props.onChange(e);
   };
 
-  handleBlur = e => {
+  handleBlur = (e) => {
     this.setState({ isEditing: false });
 
     if (isEmpty(e.target.value)) {
@@ -233,7 +233,7 @@ class PopUpForm extends React.Component {
           />
         ))}
         <div className="col-md-6" />
-        {map(takeRight(form, 2), value => (
+        {map(takeRight(form, 2), (value) => (
           <Input
             key={value}
             customBootstrapClass="col-md-12"

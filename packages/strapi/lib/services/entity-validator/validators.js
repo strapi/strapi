@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const { yup } = require('strapi-utils');
@@ -7,7 +5,7 @@ const { yup } = require('strapi-utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => attr => {
+const composeValidators = (...fns) => (attr) => {
   return fns.reduce((validator, fn) => {
     return fn(attr, validator);
   }, yup.mixed());
@@ -86,7 +84,7 @@ const uidValidator = composeValidators(stringValidator, (attr, validator) =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
-const enumerationValidator = attr => {
+const enumerationValidator = (attr) => {
   return yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
 };
 

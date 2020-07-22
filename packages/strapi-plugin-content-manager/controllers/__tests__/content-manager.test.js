@@ -1,5 +1,3 @@
-'use strict';
-
 const createContext = require('../../../../test/helpers/create-context');
 const ContentManager = require('../ContentManager');
 

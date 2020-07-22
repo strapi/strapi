@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -32,7 +30,7 @@ const defaultConfig = {
  * Knex hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   // For each connection in the config register a new Knex connection.
   _.forEach(
     _.pickBy(strapi.config.connections, {
@@ -117,14 +115,17 @@ module.exports = strapi => {
           options.connection.bigNumberStrings = true;
           options.connection.typeCast = (field, next) => {
             if (field.type == 'DECIMAL' || field.type === 'NEWDECIMAL') {
-              var value = field.string();
+              let value = field.string();
+
               return value === null ? null : Number(value);
             }
 
             if (field.type == 'TINY' && field.length == 1) {
               let value = field.string();
+
               return value ? value == '1' : null;
             }
+
             return next();
           };
           break;
@@ -135,7 +136,7 @@ module.exports = strapi => {
             options.pool = {
               ...options.pool,
               afterCreate: (conn, cb) => {
-                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, err => {
+                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
                   cb(err, conn);
                 });
               },

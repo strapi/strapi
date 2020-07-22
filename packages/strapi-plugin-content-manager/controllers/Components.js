@@ -1,5 +1,3 @@
-'use strict';
-
 const { createModelConfigurationSchema } = require('./validation');
 
 module.exports = {
@@ -7,10 +5,9 @@ module.exports = {
    * Returns the list of available components
    */
   async listComponents(ctx) {
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const contentTypeService = strapi.plugins['content-manager'].services.contenttypes;
 
-    const data = Object.keys(strapi.components).map(uid => {
+    const data = Object.keys(strapi.components).map((uid) => {
       return {
         category: strapi.components[uid].category,
         ...contentTypeService.formatContentType(strapi.components[uid]),
@@ -36,8 +33,7 @@ module.exports = {
       return ctx.notFound('component.notFound');
     }
 
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
+    const componentService = strapi.plugins['content-manager'].services.components;
 
     const data = await componentService.getComponentInformations(uid);
 
@@ -60,22 +56,17 @@ module.exports = {
       return ctx.notFound('component.notFound');
     }
 
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const componentService = strapi.plugins['content-manager'].services.components;
+    const contentTypeService = strapi.plugins['content-manager'].services.contenttypes;
 
     const schema = contentTypeService.formatContentTypeSchema(component);
     let input;
     try {
-      input = await createModelConfigurationSchema(component, schema).validate(
-        body,
-        {
-          abortEarly: false,
-          stripUnknown: true,
-          strict: true,
-        }
-      );
+      input = await createModelConfigurationSchema(component, schema).validate(body, {
+        abortEarly: false,
+        stripUnknown: true,
+        strict: true,
+      });
     } catch (error) {
       return ctx.badRequest(null, {
         name: 'validationError',

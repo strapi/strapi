@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<EventInput /> should match the snapshot 1`] = `
+exports['<EventInput /> should match the snapshot 1'] = `
 .c2 {
   cursor: pointer;
   margin: 0;

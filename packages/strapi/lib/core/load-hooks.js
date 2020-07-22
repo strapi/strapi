@@ -1,5 +1,3 @@
-'use strict';
-
 // Dependencies.
 const fs = require('fs-extra');
 const path = require('path');
@@ -10,7 +8,7 @@ const findPackagePath = require('../load/package-path');
 /**
  * Load hooks
  */
-module.exports = async function({ installedHooks, installedPlugins, appPath }) {
+module.exports = async function ({ installedHooks, installedPlugins, appPath }) {
   let hooks = {};
 
   await Promise.all([
@@ -31,27 +29,24 @@ const loadHooksInDir = async (dir, hooks) => {
     cwd: dir,
   });
 
-  files.forEach(f => {
+  files.forEach((f) => {
     const name = f.split('/')[0];
     mountHooks(name, [path.resolve(dir, f)], hooks);
   });
 };
 
-const loadLocalHooks = (appPath, hooks) =>
-  loadHooksInDir(path.resolve(appPath, 'hooks'), hooks);
+const loadLocalHooks = (appPath, hooks) => loadHooksInDir(path.resolve(appPath, 'hooks'), hooks);
 
 const loadPluginsHooks = async (plugins, hooks) => {
   for (let pluginName of plugins) {
-    const dir = path.resolve(
-      findPackagePath(`strapi-plugin-${pluginName}`),
-      'hooks'
-    );
+    const dir = path.resolve(findPackagePath(`strapi-plugin-${pluginName}`), 'hooks');
     await loadHooksInDir(dir, hooks);
   }
 };
 
 const loadLocalPluginsHooks = async (appPath, hooks) => {
   const pluginsDir = path.resolve(appPath, 'plugins');
+
   if (!fs.existsSync(pluginsDir)) return;
 
   const pluginsNames = await fs.readdir(pluginsDir);
@@ -59,6 +54,7 @@ const loadLocalPluginsHooks = async (appPath, hooks) => {
   for (let pluginName of pluginsNames) {
     // ignore files
     const stat = await fs.stat(path.resolve(pluginsDir, pluginName));
+
     if (!stat.isDirectory()) continue;
 
     const dir = path.resolve(pluginsDir, pluginName, 'hooks');
@@ -80,16 +76,12 @@ const loadHookDependencies = async (installedHooks, hooks) => {
 };
 
 const mountHooks = (name, files, hooks) => {
-  files.forEach(file => {
+  files.forEach((file) => {
     hooks[name] = hooks[name] || { loaded: false };
 
     let dependencies = [];
     try {
-      dependencies = _.get(
-        require(`strapi-hook-${name}/package.json`),
-        'strapi.dependencies',
-        []
-      );
+      dependencies = _.get(require(`strapi-hook-${name}/package.json`), 'strapi.dependencies', []);
     } catch (err) {
       // Silent
     }
@@ -101,12 +93,12 @@ const mountHooks = (name, files, hooks) => {
         get: () => require(file)(strapi),
       });
       hooks[name].dependencies = dependencies;
+
       return;
     }
 
     if (_.endsWith(file, 'defaults.json')) {
       hooks[name].defaults = require(file);
-      return;
     }
   });
 };

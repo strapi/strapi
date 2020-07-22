@@ -1,5 +1,3 @@
-'use strict';
-
 const loadFiles = require('./load-files');
 const requireFileAndParse = require('./require-file-parse');
 const checkReservedFilename = require('./check-reserved-filename');

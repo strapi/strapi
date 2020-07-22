@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { Carret } from '@buffetjs/icons';
 import { getTrad, getFileModelTimestamps } from '../../utils';
 
@@ -22,17 +22,17 @@ const SortPicker = ({ onChange, value }) => {
 
   return (
     <Picker
-      renderButtonContent={isOpen => (
+      renderButtonContent={(isOpen) => (
         <>
           <FormattedMessage id={getTrad('sort.label')} />
           <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
         </>
       )}
-      renderSectionContent={onToggle => (
+      renderSectionContent={(onToggle) => (
         <SortList
           list={orders}
           selectedItem={value}
-          onClick={e => {
+          onClick={(e) => {
             onChange(e);
             onToggle();
           }}

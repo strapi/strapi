@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const _ = require('lodash');
 
@@ -18,6 +16,7 @@ module.exports = (initialConfig = {}) => {
 
     set(path, val) {
       _.set(_config, path, val);
+
       return this;
     },
 

@@ -1,17 +1,15 @@
-'use strict';
-
 const path = require('path');
 const fs = require('fs');
 const { templateConfiguration } = require('strapi-utils');
 
 const env = require('./env-helper');
 
-module.exports = dir => {
+module.exports = (dir) => {
   if (!fs.existsSync(dir)) return {};
 
   return fs
     .readdirSync(dir, { withFileTypes: true })
-    .filter(file => file.isFile())
+    .filter((file) => file.isFile())
     .reduce((acc, file) => {
       const key = path.basename(file.name, path.extname(file.name));
 
@@ -21,7 +19,7 @@ module.exports = dir => {
     }, {});
 };
 
-const loadFile = file => {
+const loadFile = (file) => {
   const ext = path.extname(file);
 
   switch (ext) {
@@ -34,7 +32,7 @@ const loadFile = file => {
   }
 };
 
-const loadJsFile = file => {
+const loadJsFile = (file) => {
   try {
     const jsModule = require(file);
 
@@ -49,7 +47,7 @@ const loadJsFile = file => {
   }
 };
 
-const loadJSONFile = file => {
+const loadJSONFile = (file) => {
   try {
     return templateConfiguration(JSON.parse(fs.readFileSync(file)));
   } catch (error) {

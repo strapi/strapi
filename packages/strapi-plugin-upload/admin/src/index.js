@@ -5,7 +5,7 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import React from 'react';
-import { CheckPagePermissions } from 'strapi-helper-plugin';
+import { CheckPagePermissions } from 'strapi-helper-plugin/lib/src';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
@@ -19,7 +19,7 @@ import trads from './translations';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const icon = pluginPkg.strapi.icon;
   const name = pluginPkg.strapi.name;

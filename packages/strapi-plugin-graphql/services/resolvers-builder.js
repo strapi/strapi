@@ -2,8 +2,6 @@
  * Build queries and mutation resolvers
  */
 
-'use strict';
-
 const _ = require('lodash');
 const compose = require('koa-compose');
 
@@ -120,11 +118,11 @@ const buildQuery = (queryName, config) => {
   };
 };
 
-const validateResolverOption = config => {
+const validateResolverOption = (config) => {
   const { resolver, resolverOf, policies } = config;
 
   if (_.isFunction(resolver) && !isResolvablePath(resolverOf)) {
-    throw new Error(`Missing "resolverOf" option with custom resolver.`);
+    throw new Error('Missing "resolverOf" option with custom resolver.');
   }
 
   if (!_.isUndefined(policies) && (!Array.isArray(policies) || !_.every(policies, _.isString))) {
@@ -134,7 +132,7 @@ const validateResolverOption = config => {
   return true;
 };
 
-const cloneKoaContext = ctx => {
+const cloneKoaContext = (ctx) => {
   return Object.assign(ctx.app.createContext(_.clone(ctx.req), _.clone(ctx.res)), {
     state: {
       ...ctx.state,
@@ -166,10 +164,10 @@ const buildQueryContext = ({ options, graphqlContext }) => {
  * Checks if a resolverPath (resolver or resovlerOf) might be resolved
  */
 
-const getPolicies = config => {
+const getPolicies = (config) => {
   const { resolver, policies = [], resolverOf } = config;
 
-  const { api, plugin } = config['_metadatas'] || {};
+  const { api, plugin } = config._metadatas || {};
 
   const policyFns = [];
 
@@ -189,7 +187,7 @@ const getPolicies = config => {
     policies.unshift('plugins::users-permissions.permissions');
   }
 
-  policies.forEach(policy => {
+  policies.forEach((policy) => {
     const policyFn = policyUtils.get(policy, plugin, api);
     policyFns.push(policyFn);
   });

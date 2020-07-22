@@ -1,5 +1,5 @@
-const { cleanTestApp, generateTestApp } = require('./helpers/testAppGenerator');
 const yargs = require('yargs');
+const { cleanTestApp, generateTestApp } = require('./helpers/testAppGenerator');
 
 const appName = 'testApp';
 
@@ -34,7 +34,7 @@ const databases = {
   },
 };
 
-const main = async database => {
+const main = async (database) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
@@ -48,13 +48,14 @@ yargs
   .command(
     '$0 [databaseName]',
     'Create test app',
-    yargs => {
+    (yargs) => {
       yargs.positional('databaseName', {
         choices: Object.keys(databases),
       });
     },
-    argv => {
+    (argv) => {
       const { databaseName } = argv;
+
       if (databaseName) {
         return main(databases[databaseName]);
       }

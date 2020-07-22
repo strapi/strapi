@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -16,7 +14,7 @@ const stackTrace = require('stack-trace');
  * Redis hook
  */
 
-module.exports = function(strapi) {
+module.exports = function (strapi) {
   const hook = {
     /**
      * Default options
@@ -53,9 +51,7 @@ module.exports = function(strapi) {
         return;
       }
 
-      const done = _.after(_.size(connections), () => {
-        return;
-      });
+      const done = _.after(_.size(connections), () => {});
 
       // For each connection in the config register a new Knex connection.
       _.forEach(connections, (connection, name) => {
@@ -75,7 +71,7 @@ module.exports = function(strapi) {
           )
         );
 
-        redis.on('error', err => {
+        redis.on('error', (err) => {
           strapi.log.error(err);
           process.exit(0);
         });
@@ -86,7 +82,7 @@ module.exports = function(strapi) {
         redis.cache = async ({ expired = 60 * 60, serial }, cb, type) => {
           if (_.isEmpty(serial)) {
             strapi.log.warn(
-              `Be careful, you're using cache() function of strapi-redis without serial`
+              "Be careful, you're using cache() function of strapi-redis without serial"
             );
 
             const traces = stackTrace.get();
@@ -105,10 +101,7 @@ module.exports = function(strapi) {
           if (!cache) {
             cache = await cb();
 
-            if (
-              cache &&
-              _.get(connection, 'options.disabledCaching') !== true
-            ) {
+            if (cache && _.get(connection, 'options.disabledCaching') !== true) {
               switch (type) {
                 case 'json':
                   redis.set(serial, JSON.stringify(cache), 'ex', expired);

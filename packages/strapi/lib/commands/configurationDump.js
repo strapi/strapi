@@ -1,5 +1,3 @@
-'use strict';
-
 const fs = require('fs');
 const strapi = require('../index');
 
@@ -9,7 +7,7 @@ const CHUNK_SIZE = 100;
  * Will dump configurations to a file or stdout
  * @param {string} file filepath to use as output
  */
-module.exports = async function({ file: filePath }) {
+module.exports = async function ({ file: filePath }) {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
   const app = await strapi().load();
@@ -26,8 +24,8 @@ module.exports = async function({ file: filePath }) {
       .find({ _limit: CHUNK_SIZE, _start: page * CHUNK_SIZE, _sort: 'key' });
 
     results
-      .filter(result => result.key.startsWith('plugin_'))
-      .forEach(result => {
+      .filter((result) => result.key.startsWith('plugin_'))
+      .forEach((result) => {
         exportData.push({
           key: result.key,
           value: result.value,

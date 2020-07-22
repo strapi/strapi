@@ -1,9 +1,7 @@
-'use strict';
-
 const convert = require('koa-convert');
 const { xssProtection } = require('koa-lusca');
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     initialize() {
       const defaults = require('./defaults.json');
@@ -19,6 +17,7 @@ module.exports = strapi => {
         }
 
         const xssConfig = strapi.config.get('middleware.settings.xss');
+
         if (xssConfig.enabled) {
           return await convert(xssProtection(xssConfig))(ctx, next);
         }

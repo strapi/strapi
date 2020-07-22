@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { hasPermissions, useUser } from 'strapi-helper-plugin';
+import { hasPermissions, useUser } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import DynamicComponentCard from '../DynamicComponentCard';
@@ -32,8 +32,8 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
   }, []);
 
   const handleMouseEvent = () => {
-    setIsOverDynamicZone(v => !v);
-    setIsOver(v => !v);
+    setIsOverDynamicZone((v) => !v);
+    setIsOver((v) => !v);
   };
 
   return (

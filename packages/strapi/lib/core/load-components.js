@@ -1,11 +1,9 @@
-'use strict';
-
 const _ = require('lodash');
 const { join } = require('path');
 const { exists } = require('fs-extra');
 const loadFiles = require('../load/load-files');
 
-module.exports = async strapi => {
+module.exports = async (strapi) => {
   const componentsDir = join(strapi.dir, 'components');
 
   if (!(await exists(componentsDir))) {
@@ -15,7 +13,7 @@ module.exports = async strapi => {
   const map = await loadFiles(componentsDir, '*/*.*(js|json)');
 
   return Object.keys(map).reduce((acc, category) => {
-    Object.keys(map[category]).forEach(key => {
+    Object.keys(map[category]).forEach((key) => {
       const schema = map[category][key];
 
       const filePath = join(componentsDir, category, schema.__filename__);

@@ -11,7 +11,7 @@ import {
   generateSearchFromFilters,
   request,
   useQuery,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
@@ -53,7 +53,7 @@ const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const deleteMedia = async id => {
+  const deleteMedia = async (id) => {
     const requestURL = getRequestUrl(`files/${id}`);
 
     try {
@@ -180,9 +180,9 @@ const HomePage = () => {
     push({ search: newSearch });
   };
 
-  const handleClickEditFile = id => {
+  const handleClickEditFile = (id) => {
     if (allowedActions.canUpdate) {
-      const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+      const file = formatFileForEditing(data.find((file) => toString(file.id) === toString(id)));
 
       setFileToEdit(file);
       setModalInitialStep('edit');
@@ -191,15 +191,15 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setIsModalOpen(prev => !prev);
+    setIsModalOpen((prev) => !prev);
     setShouldRefetch(refetch);
   };
 
   const handleClickTogglePopup = () => {
-    setIsPopupOpen(prev => !prev);
+    setIsPopupOpen((prev) => !prev);
   };
 
-  const handleDeleteFilter = index => {
+  const handleDeleteFilter = (index) => {
     const filters = generateFiltersFromSearch(search).filter(
       (filter, filterIndex) => filterIndex !== index
     );
@@ -212,7 +212,7 @@ const HomePage = () => {
   };
 
   // FIXME: the delete logic should be redone
-  const handleDeleteMediaFromModal = async id => {
+  const handleDeleteMediaFromModal = async (id) => {
     handleClickToggleModal();
 
     lockAppWithOverlay();
@@ -240,7 +240,7 @@ const HomePage = () => {
     lockAppWithOverlay();
 
     try {
-      await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
+      await Promise.all(dataToDelete.map((item) => deleteMedia(item.id)));
 
       dispatch({
         type: 'CLEAR_DATA_TO_DELETE',
@@ -308,7 +308,7 @@ const HomePage = () => {
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),
         type: 'button',
-        Component: buttonProps => {
+        Component: (buttonProps) => {
           if (!allowedActions.canUpdate) {
             return null;
           }
@@ -322,7 +322,7 @@ const HomePage = () => {
         label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
         onClick: () => handleClickToggleModal(),
         type: 'button',
-        Component: buttonProps => {
+        Component: (buttonProps) => {
           if (!allowedActions.canCreate) {
             return null;
           }

@@ -8,6 +8,7 @@ const UserProvider = ({ children, value }) => {
 
 UserProvider.propTypes = {
   children: PropTypes.node.isRequired,
+  value: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
 };
 
 export default UserProvider;

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Upload.js controller
  *
@@ -9,7 +7,7 @@ const _ = require('lodash');
 const apiUploadController = require('./upload/api');
 const adminUploadController = require('./upload/admin');
 
-const resolveController = ctx => {
+const resolveController = (ctx) => {
   const {
     state: { isAuthenticatedAdmin },
   } = ctx;
@@ -17,7 +15,7 @@ const resolveController = ctx => {
   return isAuthenticatedAdmin ? adminUploadController : apiUploadController;
 };
 
-const resolveControllerMethod = method => ctx => {
+const resolveControllerMethod = (method) => (ctx) => {
   const controller = resolveController(ctx);
   const callbackFn = controller[method];
 
@@ -77,13 +75,13 @@ const searchQueries = {
   bookshelf({ model }) {
     return ({ id }) => {
       return model
-        .query(qb => {
+        .query((qb) => {
           qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw('LOWER(name) LIKE ?', [
             `%${id}%`,
           ]);
         })
         .fetchAll()
-        .then(results => results.toJSON());
+        .then((results) => results.toJSON());
     };
   },
   mongoose({ model }) {

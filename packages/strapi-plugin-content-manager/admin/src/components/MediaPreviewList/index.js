@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, isArray, includes, isEmpty } from 'lodash';
-import { getFileExtension, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { getFileExtension, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 import DefaultIcon from '../../icons/Na';
 import {
   StyledMediaPreviewList,
@@ -14,7 +14,7 @@ import {
 const IMAGE_PREVIEW_COUNT = 3;
 
 function MediaPreviewList({ hoverable, files }) {
-  const renderImage = image => {
+  const renderImage = (image) => {
     const { name, size, url } = image;
     const thumbnail = get(image, ['formats', 'thumbnail', 'url'], null);
     const fileUrl = thumbnail || url;
@@ -33,7 +33,7 @@ function MediaPreviewList({ hoverable, files }) {
     );
   };
 
-  const renderFile = file => {
+  const renderFile = (file) => {
     const { ext, name } = file;
     const fileExtension = getFileExtension(ext);
 
@@ -54,7 +54,7 @@ function MediaPreviewList({ hoverable, files }) {
     );
   };
 
-  const renderItem = file => {
+  const renderItem = (file) => {
     const { mime } = file;
 
     return (
@@ -64,7 +64,7 @@ function MediaPreviewList({ hoverable, files }) {
     );
   };
 
-  const renderText = count => {
+  const renderText = (count) => {
     return (
       <MediaPreviewText>
         <div>
@@ -74,7 +74,7 @@ function MediaPreviewList({ hoverable, files }) {
     );
   };
 
-  const renderMultipleItems = files => {
+  const renderMultipleItems = (files) => {
     return files.map((file, index) => {
       return (
         <React.Fragment key={JSON.stringify(file)}>

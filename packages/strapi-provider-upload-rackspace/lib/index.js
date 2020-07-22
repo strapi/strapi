@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -20,6 +18,7 @@ module.exports = {
       new Promise((resolve, reject) => {
         return client.getContainer(config.container, (err, res) => {
           if (err && !res) return reject(err);
+
           return resolve(res);
         });
       });
@@ -35,10 +34,10 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
           readStream.pipe(writeStream);
-          writeStream.on('error', error => error && reject(error));
-          writeStream.on('success', result => {
+          writeStream.on('error', (error) => error && reject(error));
+          writeStream.on('success', (result) => {
             remoteURL()
-              .then(data => {
+              .then((data) => {
                 resolve(
                   Object.assign(file, {
                     mime: result.contentType,
@@ -46,14 +45,15 @@ module.exports = {
                   })
                 );
               })
-              .catch(err => console.error(err) && reject(err));
+              .catch((err) => console.error(err) && reject(err));
           });
         });
       },
       delete(file) {
         return new Promise((resolve, reject) => {
-          client.removeFile(config.container, file.hash, error => {
+          client.removeFile(config.container, file.hash, (error) => {
             if (error) return reject(error);
+
             return resolve();
           });
         });

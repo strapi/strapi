@@ -1,10 +1,8 @@
-'use strict';
-
 const slugify = require('@sindresorhus/slugify');
 
 const nameToSlug = (name, options = { separator: '-' }) => slugify(name, options);
 
-const nameToCollectionName = name => slugify(name, { separator: '_' });
+const nameToCollectionName = (name) => slugify(name, { separator: '_' });
 
 const getCommonBeginning = (str1 = '', str2 = '') => {
   let common = '';
@@ -17,6 +15,7 @@ const getCommonBeginning = (str1 = '', str2 = '') => {
       break;
     }
   }
+
   return common;
 };
 

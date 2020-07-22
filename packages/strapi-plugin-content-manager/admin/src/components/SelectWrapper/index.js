@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -58,11 +58,11 @@ function SelectWrapper({
   const startRef = useRef();
 
   const filteredOptions = useMemo(() => {
-    return options.filter(option => {
+    return options.filter((option) => {
       if (!isEmpty(value)) {
         // SelectMany
         if (Array.isArray(value)) {
-          return findIndex(value, o => o.id === option.value.id) === -1;
+          return findIndex(value, (o) => o.id === option.value.id) === -1;
         }
 
         // SelectOne
@@ -102,19 +102,19 @@ function SelectWrapper({
           signal,
         });
 
-        const formattedData = data.map(obj => {
+        const formattedData = data.map((obj) => {
           return { value: obj, label: obj[mainField] };
         });
 
-        setOptions(prevState =>
+        setOptions((prevState) =>
           prevState.concat(formattedData).filter((obj, index) => {
-            const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
+            const objIndex = prevState.findIndex((el) => el.value.id === obj.value.id);
 
             if (objIndex === -1) {
               return true;
             }
 
-            return prevState.findIndex(el => el.value.id === obj.value.id) === index;
+            return prevState.findIndex((el) => el.value.id === obj.value.id) === index;
           })
         );
         setIsLoading(false);
@@ -156,7 +156,7 @@ function SelectWrapper({
 
   const onInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
-      setState(prevState => {
+      setState((prevState) => {
         if (prevState._contains === inputValue) {
           return prevState;
         }
@@ -169,7 +169,7 @@ function SelectWrapper({
   };
 
   const onMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _start: prevState._start + 20 }));
+    setState((prevState) => ({ ...prevState, _start: prevState._start + 20 }));
   };
 
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
@@ -191,7 +191,7 @@ function SelectWrapper({
   const associationsLength = isArray(value) ? value.length : 0;
 
   const customStyles = {
-    option: provided => {
+    option: (provided) => {
       return {
         ...provided,
         maxWidth: '100% !important',
@@ -237,7 +237,7 @@ function SelectWrapper({
         {!isEmpty(description) && <p className="description">{description}</p>}
       </Nav>
       <Component
-        addRelation={value => {
+        addRelation={(value) => {
           addRelation({ target: { name, value } });
         }}
         id={name}
@@ -248,12 +248,12 @@ function SelectWrapper({
         move={moveRelation}
         name={name}
         options={filteredOptions}
-        onChange={value => {
+        onChange={(value) => {
           onChange({ target: { name, value: value ? value.value : value } });
         }}
         onInputChange={onInputChange}
         onMenuClose={() => {
-          setState(prevState => ({ ...prevState, _contains: '' }));
+          setState((prevState) => ({ ...prevState, _contains: '' }));
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
         onRemove={onRemoveRelation}

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { useLocation } from 'react-router-dom';
-import { generateFiltersFromSearch, useQuery } from 'strapi-helper-plugin';
+import { generateFiltersFromSearch, useQuery } from 'strapi-helper-plugin/lib/src';
 
 import HomePageSettings from './HomePageSettings';
 import HomePageList from './HomePageList';
@@ -22,13 +22,13 @@ const HomePageContent = ({
   const { search } = useLocation();
   const filters = generateFiltersFromSearch(search);
 
-  const hasSomeCheckboxSelected = data.some(item =>
-    dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
+  const hasSomeCheckboxSelected = data.some((item) =>
+    dataToDelete.find((itemToDelete) => item.id.toString() === itemToDelete.id.toString())
   );
 
   const areAllCheckboxesSelected =
-    data.every(item =>
-      dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
+    data.every((item) =>
+      dataToDelete.find((itemToDelete) => item.id.toString() === itemToDelete.id.toString())
     ) && hasSomeCheckboxSelected;
 
   const hasFilters = !isEmpty(filters);

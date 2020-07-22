@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from 'strapi-helper-plugin/lib/src';
 
 import Text from '../Text';
 import formatDuration from './utils/formatDuration';

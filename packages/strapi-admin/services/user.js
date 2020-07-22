@@ -1,17 +1,15 @@
-'use strict';
-
 const _ = require('lodash');
 const { stringIncludes } = require('strapi-utils');
 const { createUser, hasSuperAdminRole } = require('../domain/user');
 const { SUPER_ADMIN_CODE } = require('./constants');
 
-const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
+const sanitizeUserRoles = (role) => _.pick(role, ['id', 'name', 'description', 'code']);
 
 /**
  * Remove private user fields
  * @param {Object} user - user to sanitize
  */
-const sanitizeUser = user => {
+const sanitizeUser = (user) => {
   return {
     ..._.omit(user, ['password', 'resetPasswordToken', 'roles']),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
@@ -23,7 +21,7 @@ const sanitizeUser = user => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const user = createUser({
     registrationToken: strapi.admin.services.token.createToken(),
     ...attributes,
@@ -66,6 +64,7 @@ const updateById = async (id, attributes) => {
   // cannot disable last super admin
   if (attributes.isActive === false) {
     const lastAdminUser = await isLastSuperAdminUser(id);
+
     if (lastAdminUser) {
       throw strapi.errors.badRequest(
         'ValidationError',
@@ -94,7 +93,7 @@ const updateById = async (id, attributes) => {
  * Check if a user is the last super admin
  * @param {int|string} userId user's id to look for
  */
-const isLastSuperAdminUser = async userId => {
+const isLastSuperAdminUser = async (userId) => {
   const user = await findOne({ id: userId }, ['roles']);
   const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
 
@@ -115,7 +114,7 @@ const exists = async (attributes = {}) => {
  * @param {string} registrationToken - a user registration token
  * @returns {Promise<registrationInfo>} - Returns user email, firstname and lastname
  */
-const findRegistrationInfo = async registrationToken => {
+const findRegistrationInfo = async (registrationToken) => {
   const user = await strapi.query('user', 'admin').findOne({ registrationToken });
 
   if (!user) {
@@ -158,7 +157,7 @@ const findOne = async (params, populate) => {
  * @param query
  * @returns {Promise<user>}
  */
-const findPage = async query => {
+const findPage = async (query) => {
   return strapi.query('user', 'admin').findPage(query);
 };
 
@@ -166,7 +165,7 @@ const findPage = async query => {
  * @param query
  * @returns {Promise<user>}
  */
-const searchPage = async query => {
+const searchPage = async (query) => {
   return strapi.query('user', 'admin').searchPage(query);
 };
 
@@ -174,12 +173,14 @@ const searchPage = async query => {
  * @param id id of the user to delete
  * @returns {Promise<user>}
  */
-const deleteById = async id => {
+const deleteById = async (id) => {
   // Check at least one super admin remains
   const userToDelete = await strapi.query('user', 'admin').findOne({ id }, ['roles']);
+
   if (userToDelete) {
-    if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
+    if (userToDelete.roles.some((r) => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
+
       if (superAdminRole.usersCount === 1) {
         throw strapi.errors.badRequest(
           'ValidationError',
@@ -198,12 +199,13 @@ const deleteById = async id => {
  * @param ids ids of the users to delete
  * @returns {Promise<user>}
  */
-const deleteByIds = async ids => {
+const deleteByIds = async (ids) => {
   // Check at least one super admin remains
   const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
   const nbOfSuperAdminToDelete = await strapi
     .query('user', 'admin')
     .count({ id_in: ids, roles: [superAdminRole.id] });
+
   if (superAdminRole.usersCount === nbOfSuperAdminToDelete) {
     throw strapi.errors.badRequest(
       'ValidationError',
@@ -230,7 +232,7 @@ const countUsersWithoutRole = async () => {
   } else {
     const allRoles = await strapi.query('role', 'admin').find({ _limit: -1 });
     count = await strapi.query('user', 'admin').count({
-      roles_nin: allRoles.map(r => r.id),
+      roles_nin: allRoles.map((r) => r.id),
     });
   }
 
@@ -240,11 +242,11 @@ const countUsersWithoutRole = async () => {
 /** Assign some roles to several users
  * @returns {undefined}
  */
-const assignARoleToAll = async roleId => {
+const assignARoleToAll = async (roleId) => {
   const userModel = strapi.query('user', 'admin').model;
 
   if (userModel.orm === 'bookshelf') {
-    const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
+    const assocTable = userModel.associations.find((a) => a.alias === 'roles').tableCollectionName;
     const userTable = userModel.collectionName;
     const knex = strapi.connections[userModel.connection];
     const usersIds = await knex
@@ -255,7 +257,7 @@ const assignARoleToAll = async roleId => {
       .pluck(`${userTable}.id`);
 
     if (usersIds.length > 0) {
-      const newRelations = usersIds.map(userId => ({ user_id: userId, role_id: roleId }));
+      const newRelations = usersIds.map((userId) => ({ user_id: userId, role_id: roleId }));
       await knex.insert(newRelations).into(assocTable);
     }
   } else if (userModel.orm === 'mongoose') {
@@ -276,6 +278,7 @@ const displayWarningIfUsersDontHaveRole = async () => {
 
 const migrateUsers = async () => {
   const someRolesExist = await strapi.admin.services.role.exists();
+
   if (someRolesExist) {
     return;
   }
@@ -284,10 +287,10 @@ const migrateUsers = async () => {
 
   if (userModel.orm === 'bookshelf') {
     await userModel
-      .query(qb => qb.where('blocked', false).orWhere('blocked', null))
+      .query((qb) => qb.where('blocked', false).orWhere('blocked', null))
       .save({ isActive: true }, { method: 'update', patch: true, require: false });
     await userModel
-      .query(qb => qb.where('blocked', true))
+      .query((qb) => qb.where('blocked', true))
       .save({ isActive: false }, { method: 'update', patch: true, require: false });
   } else if (userModel.orm === 'mongoose') {
     await userModel.updateMany({ blocked: { $in: [false, null] } }, { isActive: true });

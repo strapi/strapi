@@ -56,7 +56,6 @@ export function getPermissionsSucceeded(data) {
   };
 }
 
-
 export function getPolicies() {
   return {
     type: GET_POLICIES,
@@ -68,11 +67,13 @@ export function getPoliciesSucceeded(policies) {
     acc.push({ value: current });
 
     return acc;
-  },[]);
+  }, []);
 
   return {
     type: GET_POLICIES_SUCCEEDED,
-    policies: [{ name: 'users-permissions.Policies.InputSelect.empty', value: '' }].concat(formattedPolicies),
+    policies: [{ name: 'users-permissions.Policies.InputSelect.empty', value: '' }].concat(
+      formattedPolicies
+    ),
   };
 }
 
@@ -114,7 +115,7 @@ export function getUser(user) {
 export function getUserSucceeded(users) {
   return {
     type: GET_USER_SUCCEEDED,
-    users: users.filter(o => toString(o.role) !== '0'),
+    users: users.filter((o) => toString(o.role) !== '0'),
   };
 }
 

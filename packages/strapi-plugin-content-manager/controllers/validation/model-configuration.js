@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup } = require('strapi-utils');
 const {
   isListable,
@@ -13,47 +11,27 @@ module.exports = (model, schema, opts = {}) =>
   yup
     .object()
     .shape({
-      settings: createSettingsSchema(model, schema)
-        .default(null)
-        .nullable(),
-      metadatas: createMetadasSchema(model, schema)
-        .default(null)
-        .nullable(),
-      layouts: createLayoutsSchema(model, schema, opts)
-        .default(null)
-        .nullable(),
+      settings: createSettingsSchema(model, schema).default(null).nullable(),
+      metadatas: createMetadasSchema(model, schema).default(null).nullable(),
+      layouts: createLayoutsSchema(model, schema, opts).default(null).nullable(),
     })
     .noUnknown();
 
 const createSettingsSchema = (model, schema) => {
-  const validAttributes = Object.keys(schema.attributes).filter(key => isListable(schema, key));
+  const validAttributes = Object.keys(schema.attributes).filter((key) => isListable(schema, key));
 
   return yup
     .object()
     .shape({
       bulkable: yup.boolean().required(),
       filterable: yup.boolean().required(),
-      pageSize: yup
-        .number()
-        .integer()
-        .min(10)
-        .max(100)
-        .required(),
+      pageSize: yup.number().integer().min(10).max(100).required(),
       searchable: yup.boolean().required(),
       // should be reset when the type changes
-      mainField: yup
-        .string()
-        .oneOf(validAttributes.concat('id'))
-        .default('id'),
+      mainField: yup.string().oneOf(validAttributes.concat('id')).default('id'),
       // should be reset when the type changes
-      defaultSortBy: yup
-        .string()
-        .oneOf(validAttributes.concat('id'))
-        .default('id'),
-      defaultSortOrder: yup
-        .string()
-        .oneOf(['ASC', 'DESC'])
-        .default('ASC'),
+      defaultSortBy: yup.string().oneOf(validAttributes.concat('id')).default('id'),
+      defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
     .noUnknown();
 };
@@ -96,17 +74,17 @@ const createMetadasSchema = (model, schema) => {
 const createArrayTest = ({ allowUndefined = false } = {}) => ({
   name: 'isArray',
   message: '${path} is required and must be an array',
-  test: val => (allowUndefined === true && val === undefined ? true : Array.isArray(val)),
+  test: (val) => (allowUndefined === true && val === undefined ? true : Array.isArray(val)),
 });
 
 const createLayoutsSchema = (model, schema, opts = {}) => {
-  const validAttributes = Object.keys(schema.attributes).filter(key => isListable(schema, key));
+  const validAttributes = Object.keys(schema.attributes).filter((key) => isListable(schema, key));
 
-  const editAttributes = Object.keys(schema.attributes).filter(key =>
+  const editAttributes = Object.keys(schema.attributes).filter((key) =>
     hasEditableAttribute(schema, key)
   );
 
-  const relationAttributes = Object.keys(schema.attributes).filter(key =>
+  const relationAttributes = Object.keys(schema.attributes).filter((key) =>
     hasRelationAttribute(schema, key)
   );
 
@@ -118,24 +96,14 @@ const createLayoutsSchema = (model, schema, opts = {}) => {
           yup
             .object()
             .shape({
-              name: yup
-                .string()
-                .oneOf(editAttributes)
-                .required(),
-              size: yup
-                .number()
-                .integer()
-                .positive()
-                .required(),
+              name: yup.string().oneOf(editAttributes).required(),
+              size: yup.number().integer().positive().required(),
             })
             .noUnknown()
         )
       )
       .test(createArrayTest(opts)),
-    list: yup
-      .array()
-      .of(yup.string().oneOf(validAttributes))
-      .test(createArrayTest(opts)),
+    list: yup.array().of(yup.string().oneOf(validAttributes)).test(createArrayTest(opts)),
     editRelations: yup
       .array()
       .of(yup.string().oneOf(relationAttributes))

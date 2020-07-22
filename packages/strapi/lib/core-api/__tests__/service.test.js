@@ -1,4 +1,3 @@
-'use strict';
 const createService = require('../service');
 
 describe('Default Service', () => {

@@ -1,16 +1,14 @@
-'use strict';
-
 const _ = require('lodash');
 
 /**
  * Merges
  */
 const mergeSchemas = (root, ...subs) => {
-  subs.forEach(sub => {
+  subs.forEach((sub) => {
     if (_.isEmpty(sub)) return;
     const { definition = '', query = {}, mutation = {}, resolvers = {} } = sub;
 
-    root.definition += '\n' + definition;
+    root.definition += `\n${definition}`;
     _.merge(root, {
       query,
       mutation,
@@ -31,8 +29,8 @@ const createDefaultSchema = () => ({
 const diffResolvers = (object, base) => {
   let newObj = {};
 
-  Object.keys(object).forEach(type => {
-    Object.keys(object[type]).forEach(resolver => {
+  Object.keys(object).forEach((type) => {
+    Object.keys(object[type]).forEach((resolver) => {
       if (type === 'Query' || type === 'Mutation') {
         if (!_.has(base, [type, resolver])) {
           _.set(newObj, [type, resolver], _.get(object, [type, resolver]));
@@ -46,15 +44,16 @@ const diffResolvers = (object, base) => {
   return newObj;
 };
 
-const convertToParams = params => {
+const convertToParams = (params) => {
   return Object.keys(params).reduce((acc, current) => {
     const key = current === 'id' ? 'id' : `_${current}`;
     acc[key] = params[current];
+
     return acc;
   }, {});
 };
 
-const convertToQuery = params => {
+const convertToQuery = (params) => {
   const result = {};
 
   _.forEach(params, (value, key) => {
@@ -85,26 +84,27 @@ const amountLimiting = (params = {}) => {
   return params;
 };
 
-const nonRequired = type => type.replace('!', '');
+const nonRequired = (type) => type.replace('!', '');
 
 const actionExists = ({ resolver, resolverOf }) => {
   if (isResolvablePath(resolverOf)) {
     return true;
-  } else if (_.isFunction(resolver)) {
-    return true;
-  } else if (_.isString(resolver)) {
-    return _.isFunction(getActionFn(getActionDetails(resolver)));
-  } else {
-    throw new Error(
-      `Error building query. Expected \`resolver\` as string or a function, or \`resolverOf\` as a string. got ${{
-        resolver,
-        resolverOf,
-      }}`
-    );
   }
+  if (_.isFunction(resolver)) {
+    return true;
+  }
+  if (_.isString(resolver)) {
+    return _.isFunction(getActionFn(getActionDetails(resolver)));
+  }
+  throw new Error(
+    `Error building query. Expected \`resolver\` as string or a function, or \`resolverOf\` as a string. got ${{
+      resolver,
+      resolverOf,
+    }}`
+  );
 };
 
-const getAction = resolver => {
+const getAction = (resolver) => {
   if (!_.isString(resolver)) {
     throw new Error(`Error building query. Expected a string, got ${resolver}`);
   }
@@ -121,7 +121,7 @@ const getAction = resolver => {
   return actionFn;
 };
 
-const getActionFn = details => {
+const getActionFn = (details) => {
   const { controller, action, plugin, api } = details;
 
   if (plugin) {
@@ -131,7 +131,7 @@ const getActionFn = details => {
   return _.get(strapi.api, [_.toLower(api), 'controllers', _.toLower(controller), action]);
 };
 
-const getActionDetails = resolver => {
+const getActionDetails = (resolver) => {
   if (resolver.startsWith('plugins::')) {
     const [, path] = resolver.split('::');
     const [plugin, controller, action] = path.split('.');
@@ -150,12 +150,14 @@ const getActionDetails = resolver => {
 
   if (args.length === 3) {
     const [api, controller, action] = args;
+
     return { api, controller, action };
   }
 
   // if direct api access
   if (args.length === 2) {
     const [controller, action] = args;
+
     return { api: controller, controller, action };
   }
 
@@ -164,7 +166,7 @@ const getActionDetails = resolver => {
   );
 };
 
-const isResolvablePath = path => _.isString(path) && !_.isEmpty(path);
+const isResolvablePath = (path) => _.isString(path) && !_.isEmpty(path);
 
 module.exports = {
   diffResolvers,

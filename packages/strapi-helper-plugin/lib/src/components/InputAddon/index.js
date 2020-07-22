@@ -13,23 +13,26 @@ import Wrapper from './Wrapper';
 class InputAddon extends React.Component {
   state = { isFocused: false };
 
-  handleBlur = e => {
-    this.setState({ isFocused: !this.state.isFocused });
+  changeFocused = () => {
+    this.setState((prevState) => ({ isFocused: !prevState.isFocused }));
+  };
+
+  handleBlur = (e) => {
+    this.changeFocused();
 
     if (isFunction(this.props.onBlur)) {
       this.props.onBlur(e);
     }
   };
 
-  handleFocus = e => {
-    this.setState({ isFocused: !this.state.isFocused });
+  handleFocus = (e) => {
+    this.changeFocused();
     this.props.onFocus(e);
   };
 
   render() {
     const {
       addon,
-      autoFocus,
       className,
       deactivateErrorHighlight,
       disabled,
@@ -45,12 +48,9 @@ class InputAddon extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <Wrapper
-        className={cn('input-group', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Wrapper className={cn('input-group', !isEmpty(className) && className)} style={style}>
         <FormattedMessage id={addon} defaultMessage={upperFirst(addon)}>
-          {message => (
+          {(message) => (
             <span
               className={cn(
                 'input-group-addon',
@@ -63,20 +63,13 @@ class InputAddon extends React.Component {
             </span>
           )}
         </FormattedMessage>
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
-          {message => (
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
+          {(message) => (
             <input
-              autoFocus={autoFocus}
               className={cn(
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !deactivateErrorHighlight &&
-                  error &&
-                  this.state.isFocused &&
-                  'invalidAddon'
+                !deactivateErrorHighlight && error && this.state.isFocused && 'invalidAddon'
               )}
               disabled={disabled}
               id={name}
@@ -98,7 +91,6 @@ class InputAddon extends React.Component {
 
 InputAddon.defaultProps = {
   addon: 'app.utils.placeholder.defaultMessage', // Prevent error from FormattedMessage
-  autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
@@ -112,7 +104,6 @@ InputAddon.defaultProps = {
 
 InputAddon.propTypes = {
   addon: PropTypes.string,
-  autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,

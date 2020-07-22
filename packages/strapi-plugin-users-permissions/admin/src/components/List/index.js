@@ -8,8 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map, omitBy, size } from 'lodash';
-import { Button, LoadingBar, LoadingIndicator, CheckPermissions } from 'strapi-helper-plugin';
-import pluginPermissions from '../../permissions';
+import { Button, LoadingBar, LoadingIndicator } from 'strapi-helper-plugin/lib/src';
 import ListRow from '../ListRow';
 import { Flex, ListWrapper, Title, Wrapper } from './Components';
 
@@ -32,7 +31,7 @@ const generateListTitle = (data, settingType) => {
       return title;
     }
     case 'providers': {
-      const enabledProvidersSize = data.filter(o => o.enabled).length;
+      const enabledProvidersSize = data.filter((o) => o.enabled).length;
 
       const enabledProviders =
         enabledProvidersSize > 1 ? (
@@ -96,7 +95,7 @@ function List({
   showLoaders,
   values,
 }) {
-  const object = omitBy(data, v => v.name === 'server'); // Remove the server key when displaying providers
+  const object = omitBy(data, (v) => v.name === 'server'); // Remove the server key when displaying providers
   const button = allowedActions.canCreateRole ? (
     <Button onClick={onButtonClick} secondaryHotlineAdd>
       <FormattedMessage id={`users-permissions.List.button.${settingType}`} />
@@ -128,7 +127,7 @@ function List({
           <LoadingIndicator />
         ) : (
           <ul className={noButton ? 'padded-list' : ''}>
-            {map(object, item => (
+            {map(object, (item) => (
               <ListRow
                 allowedActions={allowedActions}
                 deleteData={deleteData}
@@ -149,6 +148,9 @@ List.defaultProps = {
   noButton: false,
   onButtonClick: () => {},
   showLoaders: true,
+  allowedActions: {
+    canCreateRole: false,
+  },
 };
 
 List.propTypes = {
@@ -159,6 +161,9 @@ List.propTypes = {
   settingType: PropTypes.string.isRequired,
   showLoaders: PropTypes.bool,
   values: PropTypes.object.isRequired,
+  allowedActions: PropTypes.shape({
+    canCreateRole: PropTypes.bool,
+  }),
 };
 
 export default List;

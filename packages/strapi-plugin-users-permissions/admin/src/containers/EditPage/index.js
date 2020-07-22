@@ -18,7 +18,7 @@ import {
   InputsIndex as Input,
   LoadingIndicator,
   LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { Header } from '@buffetjs/custom';
 import { EditPageContextProvider } from '../../contexts/EditPage';
 import InputSearch from '../../components/InputSearchContainer';
@@ -179,7 +179,7 @@ export class EditPage extends React.Component {
             number: size(get(this.props.editPage, ['modifiedData', 'users'])),
           },
         }}
-        onClickAdd={itemToAdd => {
+        onClickAdd={(itemToAdd) => {
           this.context.emitEvent('didAssociateUserToRole');
           this.props.onClickAdd(itemToAdd);
         }}
@@ -244,7 +244,7 @@ export class EditPage extends React.Component {
               id={pluginHeaderTitle}
               values={{ name: get(this.props.editPage.initialData, 'name') }}
             >
-              {title => {
+              {(title) => {
                 return (
                   <FormattedMessage
                     id={pluginHeaderDescription}
@@ -252,7 +252,7 @@ export class EditPage extends React.Component {
                       description: get(this.props.editPage.initialData, 'description', ''),
                     }}
                   >
-                    {description => {
+                    {(description) => {
                       return (
                         <Header
                           title={{

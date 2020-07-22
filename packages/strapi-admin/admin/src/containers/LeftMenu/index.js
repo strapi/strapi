@@ -16,7 +16,7 @@ import React, {
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 
-import { UserContext, hasPermissions, request } from 'strapi-helper-plugin';
+import { UserContext, hasPermissions, request } from 'strapi-helper-plugin/lib/src';
 import {
   LeftMenuLinksSection,
   LeftMenuFooter,
@@ -69,7 +69,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
     return { index, hasPermission };
   };
 
-  const generateArrayOfPromises = array =>
+  const generateArrayOfPromises = (array) =>
     array.map((_, index) => checkPermissions(index, array[index].permissions));
 
   const getModels = async () => {

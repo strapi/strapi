@@ -1,7 +1,6 @@
 /**
  * Core API
  */
-'use strict';
 
 const _ = require('lodash');
 

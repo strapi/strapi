@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
@@ -36,13 +34,13 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await strapi.plugins['upload'].services.upload.fetch({ id });
+    const file = await strapi.plugins.upload.services.upload.fetch({ id });
 
     if (!file) {
       return ctx.notFound('file.notFound');
     }
 
-    await strapi.plugins['upload'].services.upload.remove(file);
+    await strapi.plugins.upload.services.upload.remove(file);
 
     ctx.body = file;
   },

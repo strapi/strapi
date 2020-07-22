@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { InputsIndex as Input } from 'strapi-helper-plugin/lib/src';
 import BoundRoute from '../BoundRoute';
 import { useEditPageContext } from '../../contexts/EditPage';
 import { Header, Wrapper } from './Components';
@@ -24,26 +24,14 @@ const Policies = ({
   const baseTitle = 'users-permissions.Policies.header';
   const title = shouldDisplayPoliciesHint ? 'hint' : 'title';
   const value = get(values, inputSelectName);
-  const path = without(
-    inputSelectName.split('.'),
-    'permissions',
-    'controllers',
-    'policy'
-  );
+  const path = without(inputSelectName.split('.'), 'permissions', 'controllers', 'policy');
   const controllerRoutes = get(
     routes,
-    without(
-      inputSelectName.split('.'),
-      'permissions',
-      'controllers',
-      'policy'
-    )[0]
+    without(inputSelectName.split('.'), 'permissions', 'controllers', 'policy')[0]
   );
   const displayedRoutes = isEmpty(controllerRoutes)
     ? []
-    : controllerRoutes.filter(
-        o => toLower(o.handler) === toLower(takeRight(path, 2).join('.'))
-      );
+    : controllerRoutes.filter((o) => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
 
   return (
     <Wrapper className="col-md-5">
@@ -69,9 +57,7 @@ const Policies = ({
         </div>
         <div className="row">
           {!shouldDisplayPoliciesHint
-            ? map(displayedRoutes, (route, key) => (
-                <BoundRoute key={key} route={route} />
-              ))
+            ? map(displayedRoutes, (route, key) => <BoundRoute key={key} route={route} />)
             : ''}
         </div>
       </div>

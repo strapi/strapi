@@ -1,5 +1,3 @@
-'use strict';
-
 const { parseType } = require('strapi-utils');
 
 const { Kind, GraphQLScalarType } = require('graphql');
@@ -15,10 +13,11 @@ const Time = new GraphQLScalarType({
   },
   parseLiteral(ast) {
     if (ast.kind !== Kind.STRING) {
-      throw new TypeError(`Time cannot represent non string type`);
+      throw new TypeError('Time cannot represent non string type');
     }
 
     const value = ast.value;
+
     return parseType({ type: 'time', value });
   },
 });

@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 import { get, has, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
@@ -48,7 +48,7 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = await checkFormValidity(modifiedData, schema);
 
@@ -68,7 +68,7 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
 
         if (cleanedData.roles) {
-          cleanedData.roles = cleanedData.roles.map(role => role.id);
+          cleanedData.roles = cleanedData.roles.map((role) => role.id);
         }
 
         const { data } = await request(endPoint, {

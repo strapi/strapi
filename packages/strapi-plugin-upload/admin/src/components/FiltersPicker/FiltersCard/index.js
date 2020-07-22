@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Select } from '@buffetjs/core';
-import { getFilterType, useGlobalContext } from 'strapi-helper-plugin';
+import { getFilterType, useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { getTrad, getFileModelTimestamps } from '../../../utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -42,13 +42,13 @@ const FiltersCard = ({ onChange }) => {
   const renderFiltersOptions = () => {
     return filtersOptions.map(({ id, value }) => (
       <FormattedMessage id={id} key={id}>
-        {msg => <option value={value}>{msg}</option>}
+        {(msg) => <option value={value}>{msg}</option>}
       </FormattedMessage>
     ));
   };
 
   const renderNamesOptions = () => {
-    return Object.keys(filtersForm).map(key => {
+    return Object.keys(filtersForm).map((key) => {
       return (
         <option key={key} value={key}>
           {key === 'mime' ? 'type' : key}

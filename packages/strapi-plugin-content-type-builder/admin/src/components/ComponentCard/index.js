@@ -13,22 +13,18 @@ import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 import Close from './Close';
 
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-
-function ComponentCard({
-  component,
-  dzName,
-  index,
-  isActive,
-  isInDevelopmentMode,
-  onClick,
-}) {
+function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
     schema: { icon, name },
   } = get(modifiedData, ['components', component], {
     schema: { icon: null },
   });
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    removeComponentFromDynamicZone(dzName, index);
+  };
 
   return (
     <Wrapper onClick={onClick} className={isActive ? 'active' : ''}>
@@ -38,10 +34,10 @@ function ComponentCard({
       <p>{name}</p>
       <div
         className="close-btn"
-        onClick={e => {
-          e.stopPropagation();
-          removeComponentFromDynamicZone(dzName, index);
-        }}
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={handleClick}
       >
         {isInDevelopmentMode && <Close width="7px" height="7px" />}
       </div>

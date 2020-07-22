@@ -1,5 +1,3 @@
-'use strict';
-
 const createEntityValidator = require('../entity-validator');
 
 describe('Entity validator', () => {

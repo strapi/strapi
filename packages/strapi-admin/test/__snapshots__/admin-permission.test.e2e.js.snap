@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Role CRUD End to End Can get the existing permissions 1`] = `
+exports['Role CRUD End to End Can get the existing permissions 1'] = `
 Object {
   "conditions": Array [
     Object {

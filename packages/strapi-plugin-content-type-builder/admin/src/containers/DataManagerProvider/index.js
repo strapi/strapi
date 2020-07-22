@@ -6,7 +6,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import getTrad from '../../utils/getTrad';
@@ -78,7 +78,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         { data: contentTypesArray },
         reservedNames,
       ] = await Promise.all(
-        ['components', 'content-types', 'reserved-names'].map(endPoint => {
+        ['components', 'content-types', 'reserved-names'].map((endPoint) => {
           return request(`/${pluginId}/${endPoint}`, {
             method: 'GET',
             signal,
@@ -209,9 +209,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
-  const deleteCategory = async categoryUid => {
+  const deleteCategory = async (categoryUid) => {
     try {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
+      // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
           id: getTrad('popUpWarning.bodyMessage.category.delete'),
@@ -244,6 +245,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     try {
       const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
       const isTemporary = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
+      // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
           id: getTrad(
@@ -392,7 +394,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  const submitData = async additionalContentTypeData => {
+  const submitData = async (additionalContentTypeData) => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
       const body = {
@@ -464,7 +466,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   // Open the modal warning cancel changes
   const toggleModalCancel = () => {
-    toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
+    toggleInfoModal((prev) => ({ ...prev, cancel: !prev.cancel }));
   };
 
   // Update the menu using the internal API

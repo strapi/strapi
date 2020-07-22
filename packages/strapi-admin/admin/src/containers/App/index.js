@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin/lib/src';
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
@@ -98,7 +98,7 @@ function App(props) {
           <Switch>
             <Route
               path="/auth/:authType"
-              render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
+              render={(routerProps) => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
               exact
             />
             <PrivateRoute path="/" component={Admin} />

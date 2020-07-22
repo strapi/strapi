@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
-import { useQuery } from 'strapi-helper-plugin';
+import { useQuery } from 'strapi-helper-plugin/lib/src';
 import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
@@ -15,8 +15,6 @@ import UpperFirst from '../UpperFirst';
 
 import hasSubArray from './utils/hasSubArray';
 import hasSomeSubArray from './utils/HasSomeSubArray';
-
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 
 const MultipleMenuList = ({
   selectProps: { name, addComponentsToDynamicZone, inputValue, value },
@@ -82,25 +80,25 @@ const MultipleMenuList = ({
     if (inputValue !== '') {
       // Close collapses
       Object.keys(filteredComponentsGroupedByCategory)
-        .filter(cat => categoriesToOpen.indexOf(cat) === -1)
-        .forEach(catName => {
-          setCollapses(prevState => ({ ...prevState, [catName]: false }));
+        .filter((cat) => categoriesToOpen.indexOf(cat) === -1)
+        .forEach((catName) => {
+          setCollapses((prevState) => ({ ...prevState, [catName]: false }));
         });
 
-      categoriesToOpen.forEach(catName => {
-        setCollapses(prevState => ({ ...prevState, [catName]: true }));
+      categoriesToOpen.forEach((catName) => {
+        setCollapses((prevState) => ({ ...prevState, [catName]: true }));
       });
     } else {
       // Close all collapses
-      categoriesToOpen.forEach(catName => {
-        setCollapses(prevState => ({ ...prevState, [catName]: false }));
+      categoriesToOpen.forEach((catName) => {
+        setCollapses((prevState) => ({ ...prevState, [catName]: false }));
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputValue]);
 
-  const toggleCollapse = catName => {
-    setCollapses(prevState => ({
+  const toggleCollapse = (catName) => {
+    setCollapses((prevState) => ({
       ...prevState,
       [catName]: !prevState[catName],
     }));
@@ -109,7 +107,7 @@ const MultipleMenuList = ({
   const Component = components.MenuList;
 
   const allComponentsCategory = Object.keys(options).reduce((acc, current) => {
-    const categoryCompos = options[current].map(compo => {
+    const categoryCompos = options[current].map((compo) => {
       return compo.uid;
     });
 
@@ -118,13 +116,13 @@ const MultipleMenuList = ({
     return acc;
   }, {});
 
-  const getCategoryValue = categoryName => {
+  const getCategoryValue = (categoryName) => {
     const componentsCategory = allComponentsCategory[categoryName];
 
     return hasSubArray(value.value, componentsCategory);
   };
 
-  const doesCategoryHasSomeElements = categoryName => {
+  const doesCategoryHasSomeElements = (categoryName) => {
     const componentsCategory = allComponentsCategory[categoryName];
 
     return hasSomeSubArray(value.value, componentsCategory);
@@ -161,10 +159,10 @@ const MultipleMenuList = ({
               }`
             )}
           >
-            {msg => <li style={{ paddingTop: 11 }}>{msg}</li>}
+            {(msg) => <li style={{ paddingTop: 11 }}>{msg}</li>}
           </FormattedMessage>
         )}
-        {Object.keys(options).map(categoryName => {
+        {Object.keys(options).map((categoryName) => {
           const isChecked = getCategoryValue(categoryName);
           const someChecked = !isChecked && doesCategoryHasSomeElements(categoryName);
           const target = { name: categoryName, value: !isChecked };
@@ -189,12 +187,18 @@ const MultipleMenuList = ({
                     <UpperFirst content={categoryName} />
                   </Label>
                   <div
+                    role="button"
+                    tabIndex={0}
                     style={{
                       width: '150px',
                       textAlign: 'right',
                       flexGrow: 2,
                     }}
-                    onClick={e => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCollapse(categoryName);
+                    }}
+                    onKeyDown={(e) => {
                       e.stopPropagation();
                       toggleCollapse(categoryName);
                     }}
@@ -207,7 +211,7 @@ const MultipleMenuList = ({
                 </CheckboxWrapper>
               </div>
               <SubUl tag="ul" isOpen={collapses[categoryName]}>
-                {options[categoryName].map(component => {
+                {options[categoryName].map((component) => {
                   const isChecked = get(value, 'value', []).includes(component.uid);
                   const target = { name: component.uid, value: !isChecked };
 

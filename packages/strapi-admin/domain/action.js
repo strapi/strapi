@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const actionFields = [
@@ -20,6 +18,7 @@ const actionFields = [
  */
 const getActionId = ({ pluginName, uid }) => {
   let id = '';
+
   if (pluginName === 'admin') {
     id = `admin::${uid}`;
   } else if (pluginName) {
@@ -27,6 +26,7 @@ const getActionId = ({ pluginName, uid }) => {
   } else {
     id = `application::${uid}`;
   }
+
   return id;
 };
 

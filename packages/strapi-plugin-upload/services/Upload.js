@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Upload.js service
  *
@@ -16,13 +14,13 @@ const { nameToSlug } = require('strapi-utils');
 const { bytesToKbytes } = require('../utils/file');
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
-const generateFileName = name => {
+const generateFileName = (name) => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = data => {
+const sendMediaMetrics = (data) => {
   if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
     strapi.telemetry.send('didSaveMediaWithCaption');
   }
@@ -32,10 +30,10 @@ const sendMediaMetrics = data => {
   }
 };
 
-const combineFilters = params => {
+const combineFilters = (params) => {
   // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
   if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-    params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
+    params._where = params.mime_ncontains.map((val) => ({ mime_ncontains: val }));
     delete params.mime_ncontains;
   }
 };
@@ -128,6 +126,7 @@ module.exports = {
     await strapi.plugins.upload.provider.upload(fileData);
 
     const thumbnailFile = await generateThumbnail(fileData);
+
     if (thumbnailFile) {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
@@ -135,6 +134,7 @@ module.exports = {
     }
 
     const formats = await generateResponsiveFormats(fileData);
+
     if (Array.isArray(formats) && formats.length > 0) {
       for (const format of formats) {
         if (!format) continue;
@@ -207,7 +207,7 @@ module.exports = {
 
       if (dbFile.formats) {
         await Promise.all(
-          Object.keys(dbFile.formats).map(key => {
+          Object.keys(dbFile.formats).map((key) => {
             return strapi.plugins.upload.provider.delete(dbFile.formats[key]);
           })
         );
@@ -220,6 +220,7 @@ module.exports = {
     _.set(fileData, 'formats', {});
 
     const thumbnailFile = await generateThumbnail(fileData);
+
     if (thumbnailFile) {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
@@ -227,6 +228,7 @@ module.exports = {
     }
 
     const formats = await generateResponsiveFormats(fileData);
+
     if (Array.isArray(formats) && formats.length > 0) {
       for (const format of formats) {
         if (!format) continue;
@@ -257,6 +259,7 @@ module.exports = {
 
     const res = await strapi.query('file', 'upload').update(params, values);
     strapi.eventHub.emit('media.update', { media: res });
+
     return res;
   },
 
@@ -265,6 +268,7 @@ module.exports = {
 
     const res = await strapi.query('file', 'upload').create(values);
     strapi.eventHub.emit('media.create', { media: res });
+
     return res;
   },
 
@@ -274,6 +278,7 @@ module.exports = {
 
   fetchAll(params) {
     combineFilters(params);
+
     return strapi.query('file', 'upload').find(params);
   },
 
@@ -287,6 +292,7 @@ module.exports = {
 
   count(params) {
     combineFilters(params);
+
     return strapi.query('file', 'upload').count(params);
   },
 
@@ -299,7 +305,7 @@ module.exports = {
 
       if (file.formats) {
         await Promise.all(
-          Object.keys(file.formats).map(key => {
+          Object.keys(file.formats).map((key) => {
             return strapi.plugins.upload.provider.delete(file.formats[key]);
           })
         );
@@ -320,7 +326,7 @@ module.exports = {
 
     const arr = Array.isArray(files) ? files : [files];
     const enhancedFiles = await Promise.all(
-      arr.map(file => {
+      arr.map((file) => {
         return this.enhanceFile(
           file,
           {},
@@ -334,7 +340,7 @@ module.exports = {
       })
     );
 
-    await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
+    await Promise.all(enhancedFiles.map((file) => this.uploadFileAndPersist(file)));
   },
 
   getSettings() {
@@ -372,7 +378,7 @@ module.exports = {
     const editionFields = ['updated_by'];
 
     return Promise.all(
-      files.map(file => {
+      files.map((file) => {
         const params = _.pick(fields, edition ? editionFields : creationFields);
 
         return strapi.query('file', 'upload').update({ id: file.id }, params);

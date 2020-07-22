@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const { registerAndLogin } = require('../../../test/helpers/auth');
@@ -19,7 +17,7 @@ const data = {
   aditorRole: undefined,
 };
 
-const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
+const omitTimestamps = (obj) => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
 
 describe('Role CRUD End to End', () => {
   beforeAll(async () => {
@@ -64,9 +62,9 @@ describe('Role CRUD End to End', () => {
           expect.objectContaining(defaultsRoles[2]),
         ])
       );
-      data.superAdminRole = res.body.data.find(r => r.code === 'strapi-super-admin');
-      data.authorRole = res.body.data.find(r => r.code === 'strapi-author');
-      data.editorRole = res.body.data.find(r => r.code === 'strapi-editor');
+      data.superAdminRole = res.body.data.find((r) => r.code === 'strapi-super-admin');
+      data.authorRole = res.body.data.find((r) => r.code === 'strapi-author');
+      data.editorRole = res.body.data.find((r) => r.code === 'strapi-editor');
     });
 
     test('Author have admin::is-creator condition for every permission', async () => {
@@ -79,8 +77,8 @@ describe('Role CRUD End to End', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data).toHaveLength(5);
       res.body.data
-        .filter(p => !p.action.includes('plugins::upload'))
-        .forEach(permission => {
+        .filter((p) => !p.action.includes('plugins::upload'))
+        .forEach((permission) => {
           expect(permission.conditions).toEqual(['admin::is-creator']);
         });
     });
@@ -95,8 +93,8 @@ describe('Role CRUD End to End', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data).toHaveLength(5);
       res.body.data
-        .filter(p => !p.action.includes('plugins::upload'))
-        .forEach(permission => {
+        .filter((p) => !p.action.includes('plugins::upload'))
+        .forEach((permission) => {
           expect(permission.conditions).toEqual([]);
         });
     });
@@ -209,7 +207,7 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining(
             newPermissions
               .slice(3, 6)
-              .map(p => ({ ...p, conditions: [] }))
+              .map((p) => ({ ...p, conditions: [] }))
               .map(expect.objectContaining)
           ),
         });
@@ -226,7 +224,7 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining(
             newPermissions
               .slice(3, 6)
-              .map(p => ({ ...p, conditions: ['admin::is-creator'] }))
+              .map((p) => ({ ...p, conditions: ['admin::is-creator'] }))
               .map(expect.objectContaining)
           ),
         });
@@ -244,7 +242,7 @@ describe('Role CRUD End to End', () => {
         [{ name: 'new role 4', description: 'description' }],
         [{ name: 'new role 5', description: 'description' }],
       ];
-      test.each(rolesToCreate)('can create %p', async role => {
+      test.each(rolesToCreate)('can create %p', async (role) => {
         let res = await rq({
           url: '/admin/roles',
           method: 'POST',
@@ -315,8 +313,11 @@ describe('Role CRUD End to End', () => {
 
     describe('Find all roles', () => {
       test('Can find all roles successfully', async () => {
-        const expectedRolesWithoutUser = data.rolesWithoutUsers.map(r => ({ ...r, usersCount: 0 }));
-        const expectedRolesWithUser = data.rolesWithUsers.map(r => ({ ...r, usersCount: 1 }));
+        const expectedRolesWithoutUser = data.rolesWithoutUsers.map((r) => ({
+          ...r,
+          usersCount: 0,
+        }));
+        const expectedRolesWithUser = data.rolesWithUsers.map((r) => ({ ...r, usersCount: 1 }));
         const expectedRoles = expectedRolesWithoutUser.concat(expectedRolesWithUser);
 
         const res = await rq({
@@ -325,7 +326,7 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expectedRoles.forEach(role => {
+        expectedRoles.forEach((role) => {
           expect(res.body.data).toEqual(
             expect.arrayContaining([
               expect.objectContaining({
@@ -418,7 +419,7 @@ describe('Role CRUD End to End', () => {
       describe('batch-delete', () => {
         test("Don't delete the roles if some still have assigned users", async () => {
           const roles = [data.rolesWithUsers[0], data.rolesWithUsers[0]];
-          const rolesIds = roles.map(r => r.id);
+          const rolesIds = roles.map((r) => r.id);
           let res = await rq({
             url: '/admin/roles/batch-delete',
             method: 'POST',
@@ -461,7 +462,7 @@ describe('Role CRUD End to End', () => {
 
         test('Can delete two roles', async () => {
           const roles = data.rolesWithoutUsers.slice(0, 2);
-          const rolesIds = roles.map(r => r.id);
+          const rolesIds = roles.map((r) => r.id);
 
           let res = await rq({
             url: '/admin/roles/batch-delete',
@@ -617,7 +618,7 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data.length > 0).toBe(true);
-        res.body.data.forEach(permission => {
+        res.body.data.forEach((permission) => {
           expect(permission).toMatchObject({
             id: expect.anything(),
             action: expect.any(String),
@@ -662,7 +663,7 @@ describe('Role CRUD End to End', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.data.length > 0).toBe(true);
         expect(res.body.data).toMatchObject(
-          permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+          permissions.map((perm) => ({ subject: null, fields: null, conditions: [], ...perm }))
         );
       });
 
@@ -696,7 +697,7 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data.length > 0).toBe(true);
-        res.body.data.forEach(permission => {
+        res.body.data.forEach((permission) => {
           expect(permission).toMatchObject({
             id: expect.anything(),
             action: expect.any(String),

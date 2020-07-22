@@ -101,7 +101,7 @@ The administration panel will be available at http://localhost:4000/admin
 #### 5. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
-- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn build` builds the `strapi-helper-plugin/lib/src` (use this command when you develop in the administration panel).
 - `yarn setup` installs the dependencies.
 - `yarn lint` lints the codebase.
 - `yarn test:clean` removes the coverage.

@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import invariant from 'invariant';
 
-export default ({ key, pluginId }) => WrappedComponent => {
+export default ({ key, pluginId }) => (WrappedComponent) => {
   class WithHooks extends React.Component {
     static WrappedComponent = WrappedComponent;
 
-    static displayName = `withHooks(${WrappedComponent.displayName ||
-      WrappedComponent.name ||
-      'Component'})`;
+    static displayName = `withHooks(${
+      WrappedComponent.displayName || WrappedComponent.name || 'Component'
+    })`;
 
     static contextTypes = {
       plugins: PropTypes.object,
@@ -25,24 +25,26 @@ export default ({ key, pluginId }) => WrappedComponent => {
 
     state = { hooks: {}, otherComponents: [] };
 
+    compo = React.createRef();
+
     componentDidMount() {
       this.prepareHooks();
     }
 
-    getHook = hookName => {
+    getHook = (hookName) => {
       const self = this.compo.current;
       const { hooks } = this.state;
 
       if (hooks[hookName]) {
-        hooks[hookName].forEach(hook => {
+        hooks[hookName].forEach((hook) => {
           hook.bind(self)();
         });
       }
     };
 
     setHooks = (...args) => {
-      const updateState = hooks => {
-        return this.setState(prevState => {
+      const updateState = (hooks) => {
+        return this.setState((prevState) => {
           const newHooks = Object.keys(hooks).reduce(
             (acc, current) => {
               if (acc[current]) {
@@ -53,7 +55,7 @@ export default ({ key, pluginId }) => WrappedComponent => {
 
               return acc;
             },
-            { ...prevState.hooks },
+            { ...prevState.hooks }
           );
 
           return { hooks: newHooks };
@@ -83,11 +85,9 @@ export default ({ key, pluginId }) => WrappedComponent => {
       invariant(plugins, errMsg);
 
       Object.keys(plugins)
-        .filter(plugin => !!plugins[plugin].lifecycles)
-        .forEach(plugin => plugins[plugin].lifecycles.bind(this)());
+        .filter((plugin) => !!plugins[plugin].lifecycles)
+        .forEach((plugin) => plugins[plugin].lifecycles.bind(this)());
     };
-
-    compo = React.createRef();
 
     render() {
       const props = { ...this.props, ...this.state, getHook: this.getHook };

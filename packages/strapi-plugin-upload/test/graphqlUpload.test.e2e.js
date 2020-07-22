@@ -1,5 +1,3 @@
-'use strict';
-
 const fs = require('fs');
 
 const { registerAndLogin } = require('../../../test/helpers/auth');
@@ -18,7 +16,7 @@ const resetProviderConfigToDefault = () => {
   return setConfigOptions(defaultProviderConfig);
 };
 
-const setConfigOptions = assign => {
+const setConfigOptions = (assign) => {
   return rq.put('/upload/settings/development', {
     body: {
       ...defaultProviderConfig,
@@ -66,7 +64,7 @@ describe('Upload plugin end to end tests', () => {
       })
     );
 
-    form.append('0', fs.createReadStream(__dirname + '/rec.jpg'));
+    form.append('0', fs.createReadStream(`${__dirname}/rec.jpg`));
 
     const res = await req;
 
@@ -111,8 +109,8 @@ describe('Upload plugin end to end tests', () => {
       })
     );
 
-    form.append('0', fs.createReadStream(__dirname + '/rec.jpg'));
-    form.append('1', fs.createReadStream(__dirname + '/rec.jpg'));
+    form.append('0', fs.createReadStream(`${__dirname}/rec.jpg`));
+    form.append('1', fs.createReadStream(`${__dirname}/rec.jpg`));
 
     const res = await req;
 

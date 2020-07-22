@@ -1,5 +1,3 @@
-'use strict';
-
 const sqlClientModule = {
   sqlite: 'sqlite3',
   postgres: 'pg',

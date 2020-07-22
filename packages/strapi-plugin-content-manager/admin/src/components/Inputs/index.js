@@ -4,7 +4,7 @@ import { get, isEmpty, omit, toLower, take } from 'lodash';
 import isEqual from 'react-fast-compare';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
-import { useStrapi } from 'strapi-helper-plugin';
+import { useStrapi } from 'strapi-helper-plugin/lib/src';
 import useEditView from '../../hooks/useEditView';
 import { getFieldName } from '../../utils';
 import InputJSONWithErrors from '../InputJSONWithErrors';
@@ -200,7 +200,7 @@ function Inputs({
   }, [disabled, isCreatingEntry, isUserAllowedToEditField, isUserAllowedToReadField]);
 
   const options = useMemo(() => {
-    return get(attribute, 'enum', []).map(v => {
+    return get(attribute, 'enum', []).map((v) => {
       return (
         <option key={v} value={v}>
           {v}
@@ -251,7 +251,7 @@ function Inputs({
 
   const enumOptions = [
     <FormattedMessage id="components.InputSelect.option.placeholder" key="__enum_option_null">
-      {msg => (
+      {(msg) => (
         <option disabled={isRequired} hidden={isRequired} value="">
           {msg}
         </option>
@@ -262,7 +262,7 @@ function Inputs({
 
   return (
     <FormattedMessage id={errorId} defaultMessage={errorId}>
-      {error => {
+      {(error) => {
         return (
           <InputsIndex
             {...metadatas}

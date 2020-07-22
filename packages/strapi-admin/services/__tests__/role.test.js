@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const roleService = require('../role');
 const { SUPER_ADMIN_CODE } = require('../constants');
@@ -7,7 +5,7 @@ const { SUPER_ADMIN_CODE } = require('../constants');
 describe('Role', () => {
   describe('create', () => {
     test('Creates a role', async () => {
-      const dbCreate = jest.fn(role => Promise.resolve(role));
+      const dbCreate = jest.fn((role) => Promise.resolve(role));
       const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
@@ -98,7 +96,7 @@ describe('Role', () => {
         },
       ];
       const dbFind = jest.fn(() =>
-        Promise.resolve(roles.map(role => _.omit(role, ['usersCount'])))
+        Promise.resolve(roles.map((role) => _.omit(role, ['usersCount'])))
       );
       const dbCount = jest.fn(() => Promise.resolve(0));
 
@@ -229,7 +227,7 @@ describe('Role', () => {
       ];
       const dbCount = jest.fn(() => Promise.resolve(0));
       const dbFindOne = jest.fn(() => ({ id: 3, code: SUPER_ADMIN_CODE }));
-      const rolesIds = roles.map(r => r.id);
+      const rolesIds = roles.map((r) => r.id);
       const dbDelete = jest.fn(() => Promise.resolve(roles));
       const dbGetUsersCount = jest.fn(() => Promise.resolve(0));
       const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
@@ -339,7 +337,7 @@ describe('Role', () => {
 
       const count = jest.fn(() => Promise.resolve(0));
       let id = 1;
-      const create = jest.fn(role => ({ ...role, id: id++ }));
+      const create = jest.fn((role) => ({ ...role, id: id++ }));
       const getAll = jest.fn(() => actions);
       const assign = jest.fn();
       const assignARoleToAll = jest.fn();
@@ -381,7 +379,7 @@ describe('Role', () => {
       expect(assign).toHaveBeenCalledTimes(2);
       expect(assign).toHaveBeenNthCalledWith(1, 2, [
         ...permissions,
-        ...defaultPermissions.map(d => ({
+        ...defaultPermissions.map((d) => ({
           ...d,
           conditions: [],
         })),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { useGlobalContext, request } from 'strapi-helper-plugin/lib/src';
 import { Header, List } from '@buffetjs/custom';
 import PageTitle from '../../components/PageTitle';
 import ContainerFluid from '../../components/ContainerFluid';
@@ -9,7 +9,7 @@ import generateRows from './utils/generateRows';
 
 const InstalledPluginsPage = () => {
   const { formatMessage, plugins } = useGlobalContext();
-  const onConfirm = async id => {
+  const onConfirm = async (id) => {
     try {
       const requestUrl = `/admin/plugins/uninstall/${id}`;
       // Force the Overlayblocker to be displayed

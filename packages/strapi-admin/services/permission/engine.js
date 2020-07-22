@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { map, filter, each } = require('lodash/fp');
 const { AbilityBuilder, Ability } = require('@casl/ability');
@@ -20,11 +18,11 @@ const allowedOperations = [
 ];
 const operations = _.pick(sift, allowedOperations);
 
-const conditionsMatcher = conditions => {
+const conditionsMatcher = (conditions) => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-module.exports = conditionProvider => ({
+module.exports = (conditionProvider) => ({
   /**
    * Generate an ability based on the given user (using associated roles & permissions)
    * @param user
@@ -88,14 +86,14 @@ module.exports = conditionProvider => ({
     const filterValidConditions = filter(_.isObject);
 
     // Evaluate the conditions if they're a function, returns the object otherwise
-    const evaluateConditions = conditions =>
-      Promise.all(conditions.map(cond => (_.isFunction(cond) ? cond(user, options) : cond)));
+    const evaluateConditions = (conditions) =>
+      Promise.all(conditions.map((cond) => (_.isFunction(cond) ? cond(user, options) : cond)));
 
     // Only keeps 'true' booleans or objects as condition's result
-    const filterValidResults = filter(result => result === true || _.isObject(result));
+    const filterValidResults = filter((result) => result === true || _.isObject(result));
 
     // Transform each result into registerFn options
-    const transformToRegisterOptions = map(result => ({
+    const transformToRegisterOptions = map((result) => ({
       action,
       subject,
       fields,

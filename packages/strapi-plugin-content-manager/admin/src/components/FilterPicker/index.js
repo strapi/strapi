@@ -9,7 +9,7 @@ import {
   getFilterType,
   useUser,
   findMatchingPermissions,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
@@ -37,7 +37,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
   const timestamps = get(schema, ['options', 'timestamps']);
 
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
-    .filter(attr => {
+    .filter((attr) => {
       const current = get(schema, ['attributes', attr], {});
 
       if (!readActionAllowedFields.includes(attr) && attr !== 'id' && !timestamps.includes(attr)) {
@@ -47,7 +47,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
       return !NOT_ALLOWED_FILTERS.includes(current.type) && current.type !== undefined;
     })
     .sort()
-    .map(attr => {
+    .map((attr) => {
       const current = get(schema, ['attributes', attr], {});
 
       return { name: attr, type: current.type, options: current.enum || null };
@@ -68,7 +68,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
 
   const renderTitle = () => (
     <FormattedMessage id={`${pluginId}.components.FiltersPickWrapper.PluginHeader.title.filter`}>
-      {message => (
+      {(message) => (
         <span>
           {capitalize(name)}&nbsp;-&nbsp;
           <span>{message}</span>
@@ -123,7 +123,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
     <Collapse isOpen={isOpen} onEntering={handleEntering}>
       <Container style={{ backgroundColor: 'white', paddingBottom: 0 }}>
         <form
-          onSubmit={e => {
+          onSubmit={(e) => {
             e.preventDefault();
 
             onSubmit(modifiedData);
@@ -145,7 +145,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
                 modifiedData={modifiedData}
                 onChange={handleChange}
                 onClickAddFilter={addFilter}
-                onRemoveFilter={index => {
+                onRemoveFilter={(index) => {
                   if (index === 0 && modifiedData.length === 1) {
                     toggleFilterPickerState();
 

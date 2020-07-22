@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage } from 'strapi-helper-plugin/lib/src';
 
 const ListView = lazy(() => import('../ListView'));
 

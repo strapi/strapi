@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const { createQuery } = require('./queries');
@@ -41,18 +39,18 @@ class DatabaseManager {
   }
 
   initializeModelsMap() {
-    Object.keys(this.strapi.models).forEach(modelKey => {
+    Object.keys(this.strapi.models).forEach((modelKey) => {
       const model = this.strapi.models[modelKey];
       this.models.set(model.uid, model);
     });
 
-    Object.keys(this.strapi.admin.models).forEach(modelKey => {
+    Object.keys(this.strapi.admin.models).forEach((modelKey) => {
       const model = this.strapi.admin.models[modelKey];
       this.models.set(model.uid, model);
     });
 
-    Object.keys(this.strapi.plugins).forEach(pluginKey => {
-      Object.keys(this.strapi.plugins[pluginKey].models).forEach(modelKey => {
+    Object.keys(this.strapi.plugins).forEach((pluginKey) => {
+      Object.keys(this.strapi.plugins[pluginKey].models).forEach((modelKey) => {
         const model = this.strapi.plugins[pluginKey].models[modelKey];
         this.models.set(model.uid, model);
       });
@@ -61,7 +59,7 @@ class DatabaseManager {
 
   query(entity, plugin) {
     if (!entity) {
-      throw new Error(`argument entity is required`);
+      throw new Error('argument entity is required');
     }
 
     const normalizedName = entity.toLowerCase();
@@ -89,6 +87,7 @@ class DatabaseManager {
     });
 
     this.queries.set(model.uid, query);
+
     return query;
   }
 
@@ -113,13 +112,13 @@ class DatabaseManager {
   }
 
   getModelByCollectionName(collectionName) {
-    return Array.from(this.models.values()).find(model => {
+    return Array.from(this.models.values()).find((model) => {
       return model.collectionName === collectionName;
     });
   }
 
   getModelByGlobalId(globalId) {
-    return Array.from(this.models.values()).find(model => {
+    return Array.from(this.models.values()).find((model) => {
       return model.globalId === globalId;
     });
   }

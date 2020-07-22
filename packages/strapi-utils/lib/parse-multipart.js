@@ -1,13 +1,11 @@
-'use strict';
-
 const _ = require('lodash');
 
-module.exports = ctx => {
+module.exports = (ctx) => {
   const { body = {}, files = {} } = ctx.request;
 
   if (!body.data) {
     throw strapi.errors.badRequest(
-      `When using multipart/form-data you need to provide your data in a JSON 'data' field.`
+      "When using multipart/form-data you need to provide your data in a JSON 'data' field."
     );
   }
 
@@ -15,9 +13,7 @@ module.exports = ctx => {
   try {
     data = JSON.parse(body.data);
   } catch (error) {
-    throw strapi.errors.badRequest(
-      `Invalid 'data' field. 'data' should be a valid JSON.`
-    );
+    throw strapi.errors.badRequest("Invalid 'data' field. 'data' should be a valid JSON.");
   }
 
   const filesToUpload = Object.keys(files).reduce((acc, key) => {
@@ -25,12 +21,13 @@ module.exports = ctx => {
 
     if (fullPath.length <= 1 || fullPath[0] !== 'files') {
       throw strapi.errors.badRequest(
-        `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.`
+        "When using multipart/form-data you need to provide your files by prefixing them with the 'files'."
       );
     }
 
     const path = _.tail(fullPath);
     acc[path.join('.')] = files[key];
+
     return acc;
   }, {});
 

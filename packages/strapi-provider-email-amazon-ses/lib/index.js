@@ -1,14 +1,12 @@
-'use strict';
-
 const nodeSES = require('node-ses');
 const { removeUndefined } = require('strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
-    var client = nodeSES.createClient({ ...providerOptions });
+    let client = nodeSES.createClient({ ...providerOptions });
 
     return {
-      send: options => {
+      send: (options) => {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
@@ -24,7 +22,7 @@ module.exports = {
             ...rest,
           };
 
-          client.sendEmail(removeUndefined(msg), function(err) {
+          client.sendEmail(removeUndefined(msg), function (err) {
             if (err) {
               reject(err);
             } else {

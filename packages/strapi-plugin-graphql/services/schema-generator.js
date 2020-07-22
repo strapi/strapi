@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * GraphQL.js service
  *
@@ -55,7 +53,7 @@ const generateSchema = () => {
 
   Object.assign(resolvers, scalars);
   const scalarDef = Object.keys(scalars)
-    .map(key => `scalar ${key}`)
+    .map((key) => `scalar ${key}`)
     .join('\n');
 
   // Concatenate.
@@ -100,6 +98,7 @@ const generateSchema = () => {
   // buildFederatedSchema()
   // (https://www.apollographql.com/docs/apollo-server/federation/implementing-services/)
   const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
+
   if (!isFederated) {
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
   }
@@ -116,15 +115,15 @@ const generateSchema = () => {
  * @return void
  */
 
-const writeGenerateSchema = schema => {
+const writeGenerateSchema = (schema) => {
   return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
 };
 
 const buildModelsShadowCRUD = () => {
-  const models = Object.values(strapi.models).filter(model => model.internal !== true);
+  const models = Object.values(strapi.models).filter((model) => model.internal !== true);
 
   const pluginModels = Object.values(strapi.plugins)
-    .map(plugin => Object.values(plugin.models) || [])
+    .map((plugin) => Object.values(plugin.models) || [])
     .reduce((acc, arr) => acc.concat(arr), []);
 
   const components = Object.values(strapi.components);
@@ -135,7 +134,7 @@ const buildModelsShadowCRUD = () => {
   );
 };
 
-const buildResolvers = resolvers => {
+const buildResolvers = (resolvers) => {
   // Transform object to only contain function.
   return Object.keys(resolvers).reduce((acc, type) => {
     if (graphql.isScalarType(resolvers[type])) {

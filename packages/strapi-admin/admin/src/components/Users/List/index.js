@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import { Table } from '@buffetjs/core';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { useHistory } from 'react-router-dom';
 import { SETTINGS_BASE_URL } from '../../../config';
 import { checkIfAllEntriesAreSelected, getSelectedIds, headers } from './utils';
@@ -58,8 +58,8 @@ const List = forwardRef(
     };
 
     const handleClickDelete = useCallback(
-      id => {
-        const rowIndex = rows.findIndex(obj => obj.id === id);
+      (id) => {
+        const rowIndex = rows.findIndex((obj) => obj.id === id);
 
         dispatch({
           type: 'ON_CLICK_DELETE',
@@ -88,7 +88,7 @@ const List = forwardRef(
       onChange(selectedIds);
     };
 
-    const handleClick = id => {
+    const handleClick = (id) => {
       push(`${SETTINGS_BASE_URL}/users/${id}`);
     };
 
@@ -107,13 +107,13 @@ const List = forwardRef(
           rowLinks={[
             {
               icon: canUpdate ? <FontAwesomeIcon icon={faPencilAlt} /> : null,
-              onClick: data => {
+              onClick: (data) => {
                 handleClick(data.id);
               },
             },
             {
               icon: canDelete ? <FontAwesomeIcon icon={faTrashAlt} /> : null,
-              onClick: data => {
+              onClick: (data) => {
                 handleClickDelete(data.id);
               },
             },

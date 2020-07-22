@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
 import { camelCase, get, omit, upperFirst, pick } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery } from 'strapi-helper-plugin';
+import { auth, useQuery } from 'strapi-helper-plugin/lib/src';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import BaselineAlignment from '../../components/BaselineAlignement';
@@ -88,7 +88,7 @@ const AuthPage = ({ hasAdmin }) => {
     });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     dispatch({

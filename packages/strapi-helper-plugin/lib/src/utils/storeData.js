@@ -19,6 +19,8 @@ const storeData = {
     if (localStorage) {
       return localStorage.setItem(key, JSON.stringify(value, null, 2));
     }
+
+    return null;
   },
 };
 

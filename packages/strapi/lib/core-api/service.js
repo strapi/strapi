@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * default service
  *
@@ -39,18 +37,18 @@ const createSingleTypeService = ({ model, strapi }) => {
 
       if (!entity) {
         return strapi.entityService.create({ data, files }, { model: modelName });
-      } else {
-        return strapi.entityService.update(
-          {
-            params: {
-              id: entity.id,
-            },
-            data,
-            files,
-          },
-          { model: modelName }
-        );
       }
+
+      return strapi.entityService.update(
+        {
+          params: {
+            id: entity.id,
+          },
+          data,
+          files,
+        },
+        { model: modelName }
+      );
     },
 
     /**

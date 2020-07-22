@@ -28,7 +28,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 // Strapi provider with the internal APIs
-import { StrapiProvider } from 'strapi-helper-plugin';
+import { StrapiProvider } from 'strapi-helper-plugin/lib/src';
 import { merge } from 'lodash';
 import { Fonts } from '@buffetjs/styles';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
@@ -63,8 +63,8 @@ const store = configureStore(initialState, history);
 const { dispatch } = store;
 const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
 
-Object.keys(plugins).forEach(current => {
-  const registerPlugin = plugin => {
+Object.keys(plugins).forEach((current) => {
+  const registerPlugin = (plugin) => {
     return plugin;
   };
   const currentPluginFn = plugins[current];
@@ -98,7 +98,7 @@ Object.keys(plugins).forEach(current => {
   // Inject plugins reducers
   const pluginReducers = plugin.reducers || {};
 
-  Object.keys(pluginReducers).forEach(reducerName => {
+  Object.keys(pluginReducers).forEach((reducerName) => {
     getInjectors(store).injectReducer(reducerName, pluginReducers[reducerName]);
   });
 
@@ -123,7 +123,7 @@ const remoteURL = (() => {
 const displayNotification = (message, status) => {
   dispatch(showNotification(message, status));
 };
-const lockApp = data => {
+const lockApp = (data) => {
   dispatch(freezeApp(data));
 };
 const unlockApp = () => {
@@ -145,24 +145,24 @@ window.strapi = Object.assign(window.strapi || {}, {
   remoteURL,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
-    success: message => {
+    success: (message) => {
       displayNotification(message, 'success');
     },
-    warning: message => {
+    warning: (message) => {
       displayNotification(message, 'warning');
     },
-    error: message => {
+    error: (message) => {
       displayNotification(message, 'error');
     },
-    info: message => {
+    info: (message) => {
       displayNotification(message, 'info');
     },
   },
-  refresh: pluginId => ({
-    translationMessages: translationMessagesUpdated => {
+  refresh: (pluginId) => ({
+    translationMessages: (translationMessagesUpdated) => {
       render(merge({}, translationMessages, translationMessagesUpdated));
     },
-    leftMenuSections: leftMenuSectionsUpdated => {
+    leftMenuSections: (leftMenuSectionsUpdated) => {
       store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
@@ -181,7 +181,7 @@ window.strapi = Object.assign(window.strapi || {}, {
   store,
 });
 
-const render = messages => {
+const render = (messages) => {
   ReactDOM.render(
     <Provider store={store}>
       <StrapiProvider strapi={strapi}>

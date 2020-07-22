@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * From Express core: (MIT License)
  *
@@ -31,15 +29,30 @@ exports.pathRegexp = (path, keys, sensitive, strict) => {
   path = path
     .concat(strict ? '' : '/?')
     .replace(/\/\(/g, '(?:/')
-    .replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, (_, slash, format, key, capture, optional, star) => {
-      keys.push({
-        name: key,
-        optional: !!optional
-      });
-      slash = slash || '';
-      return '' + (optional ? '' : slash) + '(?:' + (optional ? slash : '') + (format || '') + (capture || (format && '([^/.]+?)' || '([^/]+?)')) + ')' + (optional || '') + (star ? '(/*)?' : '');
-    })
+    .replace(
+      /(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g,
+      (_, slash, format, key, capture, optional, star) => {
+        keys.push({
+          name: key,
+          optional: !!optional,
+        });
+        slash = slash || '';
+
+        return (
+          '' +
+          (optional ? '' : slash) +
+          '(?:' +
+          (optional ? slash : '') +
+          (format || '') +
+          (capture || (format && '([^/.]+?)') || '([^/]+?)') +
+          ')' +
+          (optional || '') +
+          (star ? '(/*)?' : '')
+        );
+      }
+    )
     .replace(/([\/.])/g, '\\$1')
     .replace(/\*/g, '(.*)');
+
   return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 };

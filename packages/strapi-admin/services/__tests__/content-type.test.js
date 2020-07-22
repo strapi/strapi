@@ -1,5 +1,3 @@
-'use strict';
-
 const contentTypeService = require('../content-type');
 
 describe('Content-Type', () => {

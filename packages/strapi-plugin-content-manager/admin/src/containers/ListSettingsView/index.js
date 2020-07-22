@@ -6,7 +6,7 @@ import {
   request,
   // contexts
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { FormattedMessage } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
@@ -34,7 +34,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const { emitEvent } = useGlobalContext();
 
-  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
+  const toggleModalForm = () => setIsModalFormOpen((prevState) => !prevState);
 
   const { labelForm, labelToEdit, initialData, modifiedData, isLoading } = reducerState.toJS();
 
@@ -83,17 +83,17 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
     const attributes = getAttributes;
 
     return Object.keys(metadatas)
-      .filter(key => {
+      .filter((key) => {
         const type = get(attributes, [key, 'type'], '');
 
         return !['json', 'component', 'richtext', 'relation'].includes(type) && !!type;
       })
-      .filter(field => {
+      .filter((field) => {
         return !getListDisplayedFields().includes(field);
       });
   };
 
-  const handleClickEditLabel = labelToEdit => {
+  const handleClickEditLabel = (labelToEdit) => {
     dispatch({
       type: 'SET_LABEL_TO_EDIT',
       labelToEdit,
@@ -161,9 +161,9 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
     <>
       <div className="col-6" style={{ marginBottom: 4 }}>
         <FormattedMessage id={`${pluginId}.form.Input.label`}>
-          {label => (
+          {(label) => (
             <FormattedMessage id={`${pluginId}.form.Input.label.inputDescription`}>
-              {description => (
+              {(description) => (
                 <Input
                   description={description}
                   label={label}
@@ -181,7 +181,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
       {get(getAttributes, [labelToEdit, 'type'], 'text') !== 'media' && (
         <div className="col-6" style={{ marginBottom: 4 }}>
           <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
-            {label => (
+            {(label) => (
               <Input
                 label={label}
                 type="bool"
@@ -239,7 +239,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
                       move={move}
                       name={item}
                       onClick={handleClickEditLabel}
-                      onRemove={e => {
+                      onRemove={(e) => {
                         e.stopPropagation();
 
                         if (getListDisplayedFields().length === 1) {
@@ -263,7 +263,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
             isOpen={isOpen}
             toggle={() => {
               if (getListRemainingFields().length > 0) {
-                setIsOpen(prevState => !prevState);
+                setIsOpen((prevState) => !prevState);
               }
             }}
             direction="down"
@@ -275,7 +275,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
           >
             <Toggle disabled={getListRemainingFields().length === 0} />
             <MenuDropdown>
-              {getListRemainingFields().map(item => (
+              {getListRemainingFields().map((item) => (
                 <DropdownItem
                   key={item}
                   onClick={() => {
@@ -296,7 +296,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
         headerId={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
         isOpen={isModalFormOpen}
         onClosed={handleClosed}
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault();
           toggleModalForm();
           dispatch({

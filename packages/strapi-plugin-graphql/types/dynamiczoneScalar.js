@@ -1,28 +1,16 @@
-'use strict';
-
 const _ = require('lodash');
-const {
-  Kind,
-  GraphQLScalarType,
-  valueFromASTUntyped,
-  GraphQLError,
-} = require('graphql');
+const { Kind, GraphQLScalarType, valueFromASTUntyped, GraphQLError } = require('graphql');
 
-module.exports = function DynamicZoneScalar({
-  name,
-  attribute,
-  globalId,
-  components,
-}) {
-  const parseData = value => {
+module.exports = function DynamicZoneScalar({ name, attribute, globalId, components }) {
+  const parseData = (value) => {
     const compo = Object.values(strapi.components).find(
-      compo => compo.globalId === value.__typename
+      (compo) => compo.globalId === value.__typename
     );
 
     if (!compo) {
       throw new GraphQLError(
         `Component not found. expected one of: ${components
-          .map(uid => strapi.components[uid].globalId)
+          .map((uid) => strapi.components[uid].globalId)
           .join(', ')}`
       );
     }
@@ -36,14 +24,15 @@ module.exports = function DynamicZoneScalar({
   };
 
   return new GraphQLScalarType({
-    name: name,
+    name,
     description: `Input type for dynamic zone ${attribute} of ${globalId}`,
-    serialize: value => value,
-    parseValue: value => parseData(value),
+    serialize: (value) => value,
+    parseValue: (value) => parseData(value),
     parseLiteral: (ast, variables) => {
       if (ast.kind !== Kind.OBJECT) return undefined;
 
       const value = valueFromASTUntyped(ast, variables);
+
       return parseData(value);
     },
   });

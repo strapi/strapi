@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<Inputs /> should match the snapshot if type is events 1`] = `
+exports['<Inputs /> should match the snapshot if type is events 1'] = `
 .c4 {
   cursor: pointer;
   margin: 0;
@@ -513,7 +513,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 </div>
 `;
 
-exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
+exports['<Inputs /> should match the snapshot if type is headers 1'] = `
 .c4 {
   width: 100%;
   height: 3.4rem;

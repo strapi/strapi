@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const sanitizeEntity = (dataSource, options) => {
@@ -32,6 +30,7 @@ const sanitizeEntity = (dataSource, options) => {
 
     // Relations
     const relation = attribute && (attribute.model || attribute.collection || attribute.component);
+
     if (relation) {
       if (_.isNil(value)) {
         return { ...acc, [key]: value };
@@ -53,7 +52,7 @@ const sanitizeEntity = (dataSource, options) => {
       };
 
       const nextVal = Array.isArray(value)
-        ? value.map(elem => sanitizeEntity(elem, nextOptions))
+        ? value.map((elem) => sanitizeEntity(elem, nextOptions))
         : sanitizeEntity(value, nextOptions);
 
       return { ...acc, [key]: nextVal };
@@ -61,17 +60,19 @@ const sanitizeEntity = (dataSource, options) => {
 
     // Dynamic zones
     if (attribute && attribute.type === 'dynamiczone' && value !== null && allowedFieldsHasKey) {
-      const nextVal = value.map(elem =>
+      const nextVal = value.map((elem) =>
         sanitizeEntity(elem, {
           model: strapi.getModel(elem.__component),
           withPrivate,
           isOutput,
         })
       );
+
       return { ...acc, [key]: nextVal };
     }
     // Other fields
     const isAllowedField = !includeFields || allowedFieldsHasKey;
+
     if (isAllowedField) {
       return { ...acc, [key]: value };
     }
@@ -82,7 +83,7 @@ const sanitizeEntity = (dataSource, options) => {
   return _.reduce(data, reducerFn, {});
 };
 
-const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
+const parseOriginalData = (data) => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
 const CREATOR_FIELDS = ['created_by', 'updated_by'];
 const COMPONENT_FIELDS = ['__component'];
@@ -105,8 +106,8 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   const searchStr = `${key}.`;
 
   const transformedFields = (fields || [])
-    .filter(field => field.startsWith(searchStr))
-    .map(field => field.replace(searchStr, ''));
+    .filter((field) => field.startsWith(searchStr))
+    .map((field) => field.replace(searchStr, ''));
 
   const isAllowed = allowedFieldsHasKey || transformedFields.length > 0;
   const nextFields = allowedFieldsHasKey ? null : transformedFields;

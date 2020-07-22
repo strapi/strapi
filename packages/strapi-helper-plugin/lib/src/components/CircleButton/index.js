@@ -13,8 +13,8 @@ const CircleButton = styled.button`
     outline: 0;
   }
   ${({ isRemoveButton }) => {
-    if (isRemoveButton) {
-      return css`
+  if (isRemoveButton) {
+    return css`
         &:after {
           content: '\f068';
           font-family: FontAwesome;
@@ -23,9 +23,9 @@ const CircleButton = styled.button`
           color: #007eff;
         }
       `;
-    }
+  }
 
-    return css`
+  return css`
       &:after {
         content: '\f067';
         font-family: FontAwesome;
@@ -34,7 +34,7 @@ const CircleButton = styled.button`
         color: #007eff;
       }
     `;
-  }}
+}}
 `;
 
 export default CircleButton;

@@ -1,25 +1,23 @@
-'use strict';
-
 const passport = require('koa-passport');
 const { Strategy: LocalStrategy } = require('passport-local');
 
-const createLocalStrategy = strapi => {
+const createLocalStrategy = (strapi) => {
   return new LocalStrategy(
     {
       usernameField: 'email',
       passwordField: 'password',
       session: false,
     },
-    function(email, password, done) {
+    function (email, password, done) {
       return strapi.admin.services.auth
         .checkCredentials({ email, password })
         .then(([error, user, message]) => done(error, user, message))
-        .catch(error => done(error));
+        .catch((error) => done(error));
     }
   );
 };
 
-module.exports = strapi => ({
+module.exports = (strapi) => ({
   initialize() {
     passport.use(createLocalStrategy(strapi));
 
@@ -48,6 +46,7 @@ module.exports = strapi => ({
             admin
           );
           ctx.state.isAuthenticatedAdmin = true;
+
           return next();
         }
       }

@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Image manipulation functions
  */
@@ -6,12 +5,12 @@ const sharp = require('sharp');
 
 const { bytesToKbytes } = require('../utils/file');
 
-const getMetadatas = buffer =>
+const getMetadatas = (buffer) =>
   sharp(buffer)
     .metadata()
     .catch(() => ({})); // ignore errors
 
-const getDimensions = buffer =>
+const getDimensions = (buffer) =>
   getMetadatas(buffer)
     .then(({ width = null, height = null }) => ({ width, height }))
     .catch(() => ({})); // ignore errors
@@ -28,7 +27,7 @@ const resizeTo = (buffer, options) =>
     .toBuffer()
     .catch(() => null);
 
-const generateThumbnail = async file => {
+const generateThumbnail = async (file) => {
   if (!(await canBeProccessed(file.buffer))) {
     return null;
   }
@@ -58,7 +57,7 @@ const generateThumbnail = async file => {
   return null;
 };
 
-const optimize = async buffer => {
+const optimize = async (buffer) => {
   const {
     sizeOptimization = false,
     autoOrientation = false,
@@ -69,6 +68,7 @@ const optimize = async buffer => {
   }
 
   const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
+
   return sharpInstance
     .toBuffer({ resolveWithObject: true })
     .then(({ data, info }) => ({
@@ -88,7 +88,7 @@ const BREAKPOINTS = {
   small: 500,
 };
 
-const generateResponsiveFormats = async file => {
+const generateResponsiveFormats = async (file) => {
   const {
     responsiveDimensions = false,
   } = await strapi.plugins.upload.services.upload.getSettings();
@@ -102,7 +102,7 @@ const generateResponsiveFormats = async file => {
   const originalDimensions = await getDimensions(file.buffer);
 
   return Promise.all(
-    Object.keys(BREAKPOINTS).map(key => {
+    Object.keys(BREAKPOINTS).map((key) => {
       const breakpoint = BREAKPOINTS[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
@@ -144,8 +144,9 @@ const breakpointSmallerThan = (breakpoint, { width, height }) => {
 };
 
 const formatsToProccess = ['jpeg', 'png', 'webp', 'tiff'];
-const canBeProccessed = async buffer => {
+const canBeProccessed = async (buffer) => {
   const { format } = await getMetadatas(buffer);
+
   return format && formatsToProccess.includes(format);
 };
 

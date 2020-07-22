@@ -29,7 +29,7 @@ describe('<PopUpWarning />', () => {
   };
 
   beforeAll(() => {
-    ReactDOM.createPortal = jest.fn(element => {
+    ReactDOM.createPortal = jest.fn((element) => {
       return element;
     });
   });
@@ -51,7 +51,7 @@ describe('<PopUpWarning />', () => {
 
     it('should match snapshot if onlyConfirmButton is true', () => {
       const { asFragment } = renderWithIntl(
-        <PopUpWarning {...props} onlyConfirmButton={true} />,
+        <PopUpWarning {...props} onlyConfirmButton />,
         translationMessages
       );
 

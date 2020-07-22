@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 /**
@@ -14,7 +12,7 @@ module.exports = (filePath, useFileNameAsKey = true) => {
     .replace(/(\.settings|\.json|\.js)/g, '')
     .toLowerCase()
     .split('/')
-    .map(p => _.trimStart(p, '.'))
+    .map((p) => _.trimStart(p, '.'))
     .join('.')
     .split('.');
 

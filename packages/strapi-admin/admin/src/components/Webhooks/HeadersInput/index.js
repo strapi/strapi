@@ -3,9 +3,9 @@ import { FormattedMessage } from 'react-intl';
 import CreatableSelect from 'react-select/creatable';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { CircleButton } from 'strapi-helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
+import { CircleButton } from 'strapi-helper-plugin/lib/src';
 
 import getBorderColor from './utils/getBorderColor';
 import keys from './keys';
@@ -14,8 +14,8 @@ import Wrapper from './Wrapper';
 /* eslint-disable react/no-array-index-key */
 
 const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
-  const formatOption = value => ({ value, label: value });
-  const options = keys.map(key => formatOption(key));
+  const formatOption = (value) => ({ value, label: value });
+  const options = keys.map((key) => formatOption(key));
 
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
@@ -26,7 +26,7 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
     }
   };
 
-  const customStyles = hasError => {
+  const customStyles = (hasError) => {
     return {
       control: (base, state) => ({
         ...base,
@@ -36,7 +36,7 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
         })} !important`,
         borderRadius: '2px !important',
       }),
-      menu: base => {
+      menu: (base) => {
         return {
           ...base,
           padding: '0',
@@ -50,7 +50,7 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
           marginTop: '-1px;',
         };
       },
-      menuList: base => ({
+      menuList: (base) => ({
         ...base,
         maxHeight: '224px',
         paddingTop: '0',
@@ -93,7 +93,7 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
               <section>
                 <CreatableSelect
                   isClearable
-                  onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
+                  onChange={(e) => handleChangeKey(e, `${name}.${index}.key`)}
                   name={`${name}.${index}.key`}
                   options={options}
                   styles={customStyles(get(errors, `headers.${index}.key`, null))}

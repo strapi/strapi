@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is false 1`] = `
+exports['<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is false 1'] = `
 <DocumentFragment>
   .c6 {
   height: 30px;
@@ -274,7 +274,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 </DocumentFragment>
 `;
 
-exports[`<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is true 1`] = `
+exports['<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is true 1'] = `
 <DocumentFragment>
   .c6 {
   height: 30px;

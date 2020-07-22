@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 import { IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CheckPermissions, PopUpWarning } from 'strapi-helper-plugin';
+import { CheckPermissions, PopUpWarning } from 'strapi-helper-plugin/lib/src';
 
 import getTrad from '../../utils/getTrad';
 import pluginPermissions from '../../permissions';
@@ -19,10 +19,9 @@ import { HomePageContext } from '../../contexts/HomePage';
 import { Container, Flex, Row, Wrapper } from './Components';
 
 class ListRow extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  state = { showModalDelete: false };
-
   static contextType = HomePageContext;
+
+  state = { showModalDelete: false };
 
   // Roles that can't be deleted && modified
   // Don't delete this line
@@ -32,9 +31,11 @@ class ListRow extends React.Component {
   undeletableIDs = ['public', 'authenticated'];
 
   generateContent = () => {
+    let links = [];
+
     switch (this.props.settingType) {
       case 'roles':
-        let links = [
+        links = [
           {
             icon: (
               <CheckPermissions permissions={pluginPermissions.updateRole}>
@@ -49,7 +50,7 @@ class ListRow extends React.Component {
                 <FontAwesomeIcon icon="trash-alt" />
               </CheckPermissions>
             ),
-            onClick: e => {
+            onClick: (e) => {
               e.stopPropagation();
               this.setState({ showModalDelete: true });
             },
@@ -168,14 +169,13 @@ class ListRow extends React.Component {
 
   handleClick = () => {
     const { pathname, push } = this.context;
-    const { allowedActions } = this.props;
 
     switch (this.props.settingType) {
       case 'roles': {
         if (!includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
           return push(`${pathname}/edit/${this.props.item.id}`);
         }
-        return;
+        break;
       }
       case 'providers':
         this.context.emitEvent('willEditAuthenticationProvider');
@@ -186,8 +186,10 @@ class ListRow extends React.Component {
 
         return this.context.setDataToEdit(this.props.item.name);
       default:
-        return;
+        return null;
     }
+
+    return null;
   };
 
   handleDelete = () => {

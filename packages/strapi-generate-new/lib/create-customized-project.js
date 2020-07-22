@@ -1,5 +1,3 @@
-'use strict';
-
 const { join } = require('path');
 const fse = require('fs-extra');
 const inquirer = require('inquirer');
@@ -13,20 +11,19 @@ const clientDependencies = require('./utils/db-client-dependencies');
 const dbQuestions = require('./utils/db-questions');
 const createProject = require('./create-project');
 
-module.exports = async scope => {
+module.exports = async (scope) => {
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
 
-  const configuration = await askDbInfosAndTest(scope).catch(error => {
-    return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(
-      () => {
-        throw error;
-      }
-    );
+  const configuration = await askDbInfosAndTest(scope).catch((error) => {
+    return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(() => {
+      throw error;
+    });
   });
 
   console.log();
   console.log('Creating a project with custom database options.');
   await trackUsage({ event: 'didConnectDatabase', scope });
+
   return createProject(scope, configuration);
 };
 
@@ -48,27 +45,24 @@ async function askDbInfosAndTest(scope) {
       scope,
       configuration,
     })
-      .then(result => {
-        if (
-          result &&
-          result.shouldRetry === true &&
-          retries < MAX_RETRIES - 1
-        ) {
+      .then((result) => {
+        if (result && result.shouldRetry === true && retries < MAX_RETRIES - 1) {
           console.log('Retrying...');
           retries++;
+
           return loop();
         }
       })
       .then(
         () => fse.remove(scope.tmpPath),
-        err => {
+        (err) => {
           return fse.remove(scope.tmpPath).then(() => {
             throw err;
           });
         }
       )
       .then(() => configuration)
-      .catch(err => {
+      .catch((err) => {
         if (retries < MAX_RETRIES - 1) {
           console.log();
           console.log(`⛔️ Connection test failed: ${err.message}`);
@@ -81,6 +75,7 @@ async function askDbInfosAndTest(scope) {
 
           console.log('Retrying...');
           retries++;
+
           return loop();
         }
 
@@ -114,18 +109,11 @@ async function testDatabaseConnection({ scope, configuration }) {
   );
 
   const tester = require(connectivityFile);
+
   return tester({ scope, connection: configuration.connection });
 }
 
-const SETTINGS_FIELDS = [
-  'database',
-  'host',
-  'srv',
-  'port',
-  'username',
-  'password',
-  'filename',
-];
+const SETTINGS_FIELDS = ['database', 'host', 'srv', 'port', 'username', 'password', 'filename'];
 
 const OPTIONS_FIELDS = ['authenticationDatabase'];
 
@@ -140,9 +128,7 @@ async function askDatabaseInfos(scope) {
     },
   ]);
 
-  const responses = await inquirer.prompt(
-    dbQuestions[client].map(q => q({ scope, client }))
-  );
+  const responses = await inquirer.prompt(dbQuestions[client].map((q) => q({ scope, client })));
 
   const connection = merge({}, defaultConfigs[client] || {}, {
     settings: pick(responses, SETTINGS_FIELDS),
@@ -174,7 +160,7 @@ async function installDatabaseTestingDep({ scope, configuration }) {
     await fse.ensureDir(scope.tmpPath);
   }
 
-  const deps = Object.keys(configuration.dependencies).map(dep => {
+  const deps = Object.keys(configuration.dependencies).map((dep) => {
     return `${dep}@${configuration.dependencies[dep]}`;
   });
 

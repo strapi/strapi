@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const {
@@ -52,7 +50,7 @@ describe('Auth', () => {
       expect(res).toEqual([null, false, { message: 'Invalid credentials' }]);
     });
 
-    test.each([false, null, 1, 0])('Fails when user is not active (%s)', async isActive => {
+    test.each([false, null, 1, 0])('Fails when user is not active (%s)', async (isActive) => {
       const user = {
         id: 1,
         firstname: '',
@@ -256,6 +254,7 @@ describe('Auth', () => {
       };
 
       expect.assertions(2);
+
       return resetPassword({ resetPasswordToken, password: 'Test1234' }).catch(() => {
         expect(findOne).toHaveBeenCalledWith({ resetPasswordToken, isActive: true });
         expect(badRequest).toHaveBeenCalled();
@@ -275,6 +274,7 @@ describe('Auth', () => {
       };
 
       expect.assertions(1);
+
       return resetPassword({ resetPasswordToken, password: 'Test1234' }).catch(() => {
         expect(badRequest).toHaveBeenCalled();
       });

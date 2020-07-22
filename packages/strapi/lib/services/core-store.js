@@ -1,6 +1,4 @@
-'use strict';
-
-const coreStoreModel = config => ({
+const coreStoreModel = (config) => ({
   connection: config.get('database.defaultConnection'),
   uid: 'strapi::core-store',
   internal: true,

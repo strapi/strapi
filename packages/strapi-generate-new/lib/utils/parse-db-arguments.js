@@ -1,37 +1,26 @@
-'use strict';
-
 const chalk = require('chalk');
 const stopProcess = require('./stop-process');
 
-const DB_ARGS = [
-  'dbclient',
-  'dbhost',
-  'dbport',
-  'dbname',
-  'dbusername',
-  'dbpassword',
-];
+const DB_ARGS = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 
 const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres', 'mongo'];
 
 module.exports = function parseDatabaseArguments({ scope, args }) {
   const argKeys = Object.keys(args);
-  const matchingArgs = DB_ARGS.filter(key => argKeys.includes(key));
-  const missingArgs = DB_ARGS.filter(key => !argKeys.includes(key));
+  const matchingArgs = DB_ARGS.filter((key) => argKeys.includes(key));
+  const missingArgs = DB_ARGS.filter((key) => !argKeys.includes(key));
 
   if (matchingArgs.length === 0) return;
 
   if (matchingArgs.length !== DB_ARGS.length && args.dbclient !== 'sqlite') {
-    return stopProcess(
-      `Required database arguments are missing: ${missingArgs.join(', ')}.`
-    );
+    return stopProcess(`Required database arguments are missing: ${missingArgs.join(', ')}.`);
   }
 
   if (!VALID_CLIENTS.includes(args.dbclient)) {
     return stopProcess(
-      `Invalid client ${chalk.yellow(
-        args.dbclient
-      )}. Possible choices: ${VALID_CLIENTS.join(', ')}.`
+      `Invalid client ${chalk.yellow(args.dbclient)}. Possible choices: ${VALID_CLIENTS.join(
+        ', '
+      )}.`
     );
   }
 

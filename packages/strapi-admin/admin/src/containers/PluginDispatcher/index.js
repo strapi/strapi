@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { get } from 'lodash';
 
-import { BlockerComponent } from 'strapi-helper-plugin';
+import { BlockerComponent } from 'strapi-helper-plugin/lib/src';
 import PageTitle from '../../components/PageTitle';
 
 import { LOGIN_LOGO } from '../../config';

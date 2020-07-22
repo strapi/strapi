@@ -12,7 +12,7 @@ import {
   request,
   useUserPermissions,
   LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { useIntl } from 'react-intl';
 import adminPermissions from '../../../../../admin/src/permissions';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
@@ -79,8 +79,8 @@ const RoleListPage = () => {
       dispath({
         type: 'ON_REMOVE_ROLES',
       });
-      const filteredRoles = selectedRoles.filter(currentId => {
-        const currentRole = roles.find(role => role.id === currentId);
+      const filteredRoles = selectedRoles.filter((currentId) => {
+        const currentRole = roles.find((role) => role.id === currentId);
 
         return currentRole.usersCount === 0;
       });
@@ -112,13 +112,13 @@ const RoleListPage = () => {
     }
   };
 
-  const handleDuplicateRole = id => {
+  const handleDuplicateRole = (id) => {
     push(`${settingsBaseURL}/roles/duplicate/${id}`);
   };
 
   const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
 
-  const handleRemoveRole = roleId => {
+  const handleRemoveRole = (roleId) => {
     dispath({
       type: 'SET_ROLE_TO_DELETE',
       id: roleId,
@@ -127,14 +127,14 @@ const RoleListPage = () => {
     handleToggleModal();
   };
 
-  const handleRoleToggle = roleId => {
+  const handleRoleToggle = (roleId) => {
     dispath({
       type: 'ON_SELECTION',
       id: roleId,
     });
   };
 
-  const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
+  const handleToggleModal = () => setIsWarningDeleteAllOpenend((prev) => !prev);
 
   /* eslint-disable indent */
   const headerActions = canCreate
@@ -202,7 +202,7 @@ const RoleListPage = () => {
             }
             /* eslint-enable indent */
             items={results}
-            customRowComponent={role => (
+            customRowComponent={(role) => (
               <RoleRow
                 canCreate={canCreate}
                 canDelete={canDelete}

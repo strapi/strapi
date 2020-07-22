@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Content types service format ContentType Returns consistent schemas 1`] = `
+exports['Content types service format ContentType Returns consistent schemas 1'] = `
 Object {
   "apiID": "my-name",
   "plugin": "some-plugin",

@@ -1,7 +1,6 @@
 /**
  * Integration test for the content-type-buidler content types managment apis
  */
-'use strict';
 
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
@@ -126,7 +125,7 @@ describe('Content Type Builder - Content types', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         error: {
-          ['contentType.attributes.relation.nature']: expect.arrayContaining([
+          'contentType.attributes.relation.nature': expect.arrayContaining([
             expect.stringMatching('must be one of the following values: oneWay, manyWay'),
           ]),
         },
@@ -160,7 +159,7 @@ describe('Content Type Builder - Content types', () => {
       for (let i = 0; i < 2; i++) {
         const res = await rq({
           method: 'POST',
-          url: `/test-collections`,
+          url: '/test-collections',
           body: {
             title: 'Test',
           },

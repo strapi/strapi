@@ -87,9 +87,9 @@ BlockerComponent.defaultProps = {
 
 BlockerComponent.propTypes = {
   blockerComponentContent: PropTypes.string,
-  blockerComponentDescription: PropTypes.string.isRequired,
+  blockerComponentDescription: PropTypes.string,
   blockerComponentIcon: PropTypes.string,
-  blockerComponentTitle: PropTypes.string.isRequired,
+  blockerComponentTitle: PropTypes.string,
 };
 
 export default BlockerComponent;

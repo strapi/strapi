@@ -1,5 +1,3 @@
-'use strict';
-
 const { validateProfileUpdateInput } = require('../validation/user');
 
 module.exports = {

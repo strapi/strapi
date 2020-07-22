@@ -1,12 +1,8 @@
-const { isValidName } = require('../common');
 const yup = require('yup');
+const { isValidName } = require('../common');
 
 function runTest(test, value) {
-  return () =>
-    yup
-      .string()
-      .test(test)
-      .validateSync(value);
+  return () => yup.string().test(test).validateSync(value);
 }
 
 describe('isValidName', () => {

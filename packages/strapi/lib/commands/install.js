@@ -4,18 +4,19 @@ const ora = require('ora');
 const execa = require('execa');
 const findPackagePath = require('../load/package-path');
 
-module.exports = async plugins => {
+module.exports = async (plugins) => {
   const loader = ora();
   const dir = process.cwd();
 
   const version = require(join(dir, 'package.json')).dependencies.strapi;
 
-  const pluginArgs = plugins.map(name => `strapi-plugin-${name}@${version}`);
+  const pluginArgs = plugins.map((name) => `strapi-plugin-${name}@${version}`);
 
   try {
-    loader.start(`Installing dependencies`);
+    loader.start('Installing dependencies');
 
     const useYarn = existsSync(join(dir, 'yarn.lock'));
+
     if (useYarn) {
       await execa('yarn', ['add', ...pluginArgs]);
     } else {
@@ -28,13 +29,14 @@ module.exports = async plugins => {
     let shouldRebuild = false;
     for (let name of plugins) {
       let pkgPath = findPackagePath(`strapi-plugin-${name}`);
+
       if (existsSync(join(pkgPath, 'admin', 'src', 'index.js'))) {
         shouldRebuild = true;
       }
     }
 
     if (shouldRebuild) {
-      loader.start(`Rebuilding admin UI`);
+      loader.start('Rebuilding admin UI');
       await execa('npm', ['run', 'build']);
       loader.succeed();
     }

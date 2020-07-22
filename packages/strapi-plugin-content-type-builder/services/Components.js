@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
@@ -11,7 +9,7 @@ const createBuilder = require('./schema-builder');
  * @param {string} uid - string
  * @param {Object} component - strapi component model
  */
-const formatComponent = component => {
+const formatComponent = (component) => {
   const { uid, modelName, connection, collectionName, info, category } = component;
 
   return {
@@ -43,7 +41,7 @@ const createComponent = async ({ component, components = [] }) => {
 
   const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
-  components.forEach(component => {
+  components.forEach((component) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -52,6 +50,7 @@ const createComponent = async ({ component, components = [] }) => {
   });
 
   await builder.writeFiles();
+
   return newComponent;
 };
 
@@ -72,7 +71,7 @@ const editComponent = async (uid, { component, components = [] }) => {
     ...replaceTmpUIDs(component),
   });
 
-  components.forEach(component => {
+  components.forEach((component) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -81,15 +80,17 @@ const editComponent = async (uid, { component, components = [] }) => {
   });
 
   await builder.writeFiles();
+
   return updatedComponent;
 };
 
-const deleteComponent = async uid => {
+const deleteComponent = async (uid) => {
   const builder = createBuilder();
 
   const deletedComponent = builder.deleteComponent(uid);
 
   await builder.writeFiles();
+
   return deletedComponent;
 };
 

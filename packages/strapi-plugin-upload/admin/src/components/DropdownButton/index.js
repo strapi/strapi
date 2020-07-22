@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from 'strapi-helper-plugin/lib/src';
 
 import Text from '../Text';
 
-const DropdownButton = styled(props => (
+const DropdownButton = styled((props) => (
   <Text
     as="button"
     fontWeight="semiBold"

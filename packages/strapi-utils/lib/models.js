@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -16,7 +14,7 @@ module.exports = {
    * Initialize to prevent some mistakes
    */
 
-  initialize: cb => {
+  initialize: (cb) => {
     cb();
   },
 
@@ -57,8 +55,8 @@ module.exports = {
       }
 
       // We have to find if they are a model linked to this key
-      _.forEach(allModels, model => {
-        _.forIn(model.attributes, attribute => {
+      _.forEach(allModels, (model) => {
+        _.forIn(model.attributes, (attribute) => {
           if (_.has(attribute, 'via') && attribute.via === attributeName) {
             if (_.has(attribute, 'collection') && attribute.collection === modelName) {
               types.other = 'collection';
@@ -128,8 +126,8 @@ module.exports = {
       types.current = 'model';
 
       // We have to find if they are a model linked to this attributeName
-      _.forIn(models, model => {
-        _.forIn(model.attributes, attribute => {
+      _.forIn(models, (model) => {
+        _.forIn(model.attributes, (attribute) => {
           if (_.has(attribute, 'via') && attribute.via === attributeName) {
             if (_.has(attribute, 'collection') && attribute.collection === modelName) {
               types.other = 'collection';
@@ -149,8 +147,8 @@ module.exports = {
       types.current = 'collectionD';
 
       // We have to find if they are a model linked to this attributeName
-      _.forIn(models, model => {
-        _.forIn(model.attributes, attribute => {
+      _.forIn(models, (model) => {
+        _.forIn(model.attributes, (attribute) => {
           if (_.has(attribute, 'via') && attribute.via === attributeName) {
             if (_.has(attribute, 'collection') && attribute.collection === modelName) {
               types.other = 'collection';
@@ -173,40 +171,44 @@ module.exports = {
         nature: 'manyToManyMorph',
         verbose: 'morphMany',
       };
-    } else if (types.current === 'collection' && types.other === 'morphToD') {
+    }
+    if (types.current === 'collection' && types.other === 'morphToD') {
       return {
         nature: 'manyToOneMorph',
         verbose: 'morphMany',
       };
-    } else if (types.current === 'modelD' && types.other === 'morphTo') {
+    }
+    if (types.current === 'modelD' && types.other === 'morphTo') {
       return {
         nature: 'oneToManyMorph',
         verbose: 'morphOne',
       };
-    } else if (types.current === 'modelD' && types.other === 'morphToD') {
+    }
+    if (types.current === 'modelD' && types.other === 'morphToD') {
       return {
         nature: 'oneToOneMorph',
         verbose: 'morphOne',
       };
-    } else if (types.current === 'morphToD' && types.other === 'collection') {
+    }
+    if (types.current === 'morphToD' && types.other === 'collection') {
       return {
         nature: 'oneMorphToMany',
         verbose: 'belongsToMorph',
       };
-    } else if (types.current === 'morphToD' && types.other === 'model') {
+    }
+    if (types.current === 'morphToD' && types.other === 'model') {
       return {
         nature: 'oneMorphToOne',
         verbose: 'belongsToMorph',
       };
-    } else if (
-      types.current === 'morphTo' &&
-      (types.other === 'model' || _.has(attribute, 'model'))
-    ) {
+    }
+    if (types.current === 'morphTo' && (types.other === 'model' || _.has(attribute, 'model'))) {
       return {
         nature: 'manyMorphToOne',
         verbose: 'belongsToManyMorph',
       };
-    } else if (
+    }
+    if (
       types.current === 'morphTo' &&
       (types.other === 'collection' || _.has(attribute, 'collection'))
     ) {
@@ -214,20 +216,20 @@ module.exports = {
         nature: 'manyMorphToMany',
         verbose: 'belongsToManyMorph',
       };
-    } else if (types.current === 'modelD' && types.other === 'model') {
+    }
+    if (types.current === 'modelD' && types.other === 'model') {
       return {
         nature: 'oneToOne',
         verbose: 'belongsTo',
       };
-    } else if (types.current === 'model' && types.other === 'modelD') {
+    }
+    if (types.current === 'model' && types.other === 'modelD') {
       return {
         nature: 'oneToOne',
         verbose: 'hasOne',
       };
-    } else if (
-      (types.current === 'model' || types.current === 'modelD') &&
-      types.other === 'collection'
-    ) {
+    }
+    if ((types.current === 'model' || types.current === 'modelD') && types.other === 'collection') {
       return {
         nature: 'manyToOne',
         verbose: 'belongsTo',
@@ -286,11 +288,13 @@ module.exports = {
       .sort((a, b) => {
         if (a.collection === b.collection) {
           if (a.dominant) return 1;
-          else return -1;
+
+          return -1;
         }
+
         return a.collection < b.collection ? -1 : 1;
       })
-      .map(table =>
+      .map((table) =>
         _.snakeCase(`${pluralize.plural(table.collection)} ${pluralize.plural(table.via)}`)
       )
       .join('__');
@@ -300,7 +304,7 @@ module.exports = {
    * Define associations key to models
    */
 
-  defineAssociations: function(model, definition, association, key) {
+  defineAssociations(model, definition, association, key) {
     try {
       // Initialize associations object
       if (definition.associations === undefined) {
@@ -350,6 +354,7 @@ module.exports = {
             `${definition.collectionName}__${_.snakeCase(key)}`;
         }
         definition.associations.push(ast);
+
         return;
       }
 
@@ -365,12 +370,13 @@ module.exports = {
           plugin: association.plugin || undefined,
           filter: details.filter,
         });
+
         return;
       }
 
       const pluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
-        Object.keys(strapi.plugins[current].models).forEach(entity => {
-          Object.keys(strapi.plugins[current].models[entity].attributes).forEach(attribute => {
+        Object.keys(strapi.plugins[current].models).forEach((entity) => {
+          Object.keys(strapi.plugins[current].models[entity].attributes).forEach((attribute) => {
             const attr = strapi.plugins[current].models[entity].attributes[attribute];
 
             if ((attr.collection || attr.model || '').toLowerCase() === model.toLowerCase()) {
@@ -383,7 +389,7 @@ module.exports = {
       }, []);
 
       const appModels = Object.keys(strapi.models).reduce((acc, entity) => {
-        Object.keys(strapi.models[entity].attributes).forEach(attribute => {
+        Object.keys(strapi.models[entity].attributes).forEach((attribute) => {
           const attr = strapi.models[entity].attributes[attribute];
 
           if ((attr.collection || attr.model || '').toLowerCase() === model.toLowerCase()) {
@@ -395,7 +401,7 @@ module.exports = {
       }, []);
 
       const componentModels = Object.keys(strapi.components).reduce((acc, entity) => {
-        Object.keys(strapi.components[entity].attributes).forEach(attribute => {
+        Object.keys(strapi.components[entity].attributes).forEach((attribute) => {
           const attr = strapi.components[entity].attributes[attribute];
 
           if ((attr.collection || attr.model || '').toLowerCase() === model.toLowerCase()) {

@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const fs = require('fs');
 const strapi = require('../index');
@@ -9,7 +7,7 @@ const strapi = require('../index');
  * @param {string} file filepath to use as input
  * @param {string} strategy import strategy. one of (replace, merge, keep, default: replace)
  */
-module.exports = async function({ file: filePath, strategy = 'replace' }) {
+module.exports = async function ({ file: filePath, strategy = 'replace' }) {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
 
   const app = await strapi().load();
@@ -22,7 +20,7 @@ module.exports = async function({ file: filePath, strategy = 'replace' }) {
   }
 
   if (!Array.isArray(dataToImport)) {
-    throw new Error(`Invalid input data. Expected a valid JSON array.`);
+    throw new Error('Invalid input data. Expected a valid JSON array.');
   }
 
   const importer = createImporter(app.db, strategy);
@@ -78,7 +76,7 @@ const createImporter = (db, strategy) => {
  * Replace importer. Will replace the keys that already exist and create the new ones
  * @param {Object} db - DatabaseManager instance
  */
-const createReplaceImporter = db => {
+const createReplaceImporter = (db) => {
   const stats = {
     created: 0,
     replaced: 0,
@@ -91,6 +89,7 @@ const createReplaceImporter = db => {
 
     async import(conf) {
       const matching = await db.query('core_store').count({ key: conf.key });
+
       if (matching > 0) {
         stats.replaced += 1;
         await db.query('core_store').update({ key: conf.key }, conf);
@@ -106,7 +105,7 @@ const createReplaceImporter = db => {
  * Merge importer. Will merge the keys that already exist with their new value and create the new ones
  * @param {Object} db - DatabaseManager instance
  */
-const createMergeImporter = db => {
+const createMergeImporter = (db) => {
   const stats = {
     created: 0,
     merged: 0,
@@ -119,6 +118,7 @@ const createMergeImporter = db => {
 
     async import(conf) {
       const existingConf = await db.query('core_store').find({ key: conf.key });
+
       if (existingConf) {
         stats.merged += 1;
         await db.query('core_store').update({ key: conf.key }, _.merge(existingConf, conf));
@@ -134,7 +134,7 @@ const createMergeImporter = db => {
  * Merge importer. Will keep the keys that already exist without changing them and create the new ones
  * @param {Object} db - DatabaseManager instance
  */
-const createKeepImporter = db => {
+const createKeepImporter = (db) => {
   const stats = {
     created: 0,
     untouched: 0,
@@ -147,6 +147,7 @@ const createKeepImporter = db => {
 
     async import(conf) {
       const matching = await db.query('core_store').count({ key: conf.key });
+
       if (matching > 0) {
         stats.untouched += 1;
         // if configuration already exists do not overwrite it

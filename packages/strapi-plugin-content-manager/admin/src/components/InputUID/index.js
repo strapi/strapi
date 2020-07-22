@@ -5,7 +5,7 @@ import { ErrorMessage, Description } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
 import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
-import { request, LoadingIndicator } from 'strapi-helper-plugin';
+import { request, LoadingIndicator } from 'strapi-helper-plugin/lib/src';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 
@@ -215,7 +215,7 @@ const InputUID = ({
                 error={hasError}
                 onFocus={handleFocus}
                 name={name}
-                onChange={e => handleChange(e, canCheck, dispatch)}
+                onChange={(e) => handleChange(e, canCheck, dispatch)}
                 type="text"
                 onBlur={onBlur}
                 // eslint-disable-next-line no-irregular-whitespace
@@ -239,7 +239,7 @@ const InputUID = ({
               </RightContent>
               {availability && availability.suggestion && isSuggestionOpen && (
                 <FormattedMessage id={`${pluginId}.components.uid.suggested`}>
-                  {msg => (
+                  {(msg) => (
                     <Options
                       title={msg}
                       options={[

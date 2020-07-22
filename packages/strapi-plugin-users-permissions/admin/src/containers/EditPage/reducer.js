@@ -51,8 +51,7 @@ const initialState = fromJS({
 function editPageReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_USER:
-      return state
-        .updateIn(['modifiedData', 'users'], list => list.push(action.newUser));
+      return state.updateIn(['modifiedData', 'users'], (list) => list.push(action.newUser));
     case GET_PERMISSIONS_SUCCEEDED:
       return state
         .updateIn(['initialData', 'permissions'], () => action.permissions)
@@ -77,15 +76,15 @@ function editPageReducer(state = initialState, action) {
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .set('modifiedData', state.get('initialData'));
     case ON_CHANGE_INPUT:
-      return state
-        .updateIn(action.keys, () => action.value);
+      return state.updateIn(action.keys, () => action.value);
     case ON_CLICK_ADD:
-      return state
-        .updateIn(['modifiedData', 'users'], list => list.push(action.itemToAdd));
+      return state.updateIn(['modifiedData', 'users'], (list) => list.push(action.itemToAdd));
     case ON_CLICK_DELETE:
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
-        .updateIn(['modifiedData', 'users'], list => list.filter(o => o[o.id ? 'id' : '_id'] !== action.itemToDelete[o.id ? 'id' : '_id']));
+        .updateIn(['modifiedData', 'users'], (list) =>
+          list.filter((o) => o[o.id ? 'id' : '_id'] !== action.itemToDelete[o.id ? 'id' : '_id'])
+        );
     case RESET_PROPS:
       return state
         .updateIn(['modifiedData'], () => Map({}))
@@ -98,13 +97,11 @@ function editPageReducer(state = initialState, action) {
       map(controllerActions, (value, key) => {
         controllerActions[key].enabled = action.shouldEnable;
       });
-      return state
-        .updateIn(action.keys, () => Map(fromJS(controllerActions)));
+
+      return state.updateIn(action.keys, () => Map(fromJS(controllerActions)));
     }
     case SET_ACTION_TYPE:
-      return state
-        .set('formErrors', List([]))
-        .set('actionType', action.actionType);
+      return state.set('formErrors', List([])).set('actionType', action.actionType);
     case SET_ERRORS:
       return state
         .set('formErrors', List(action.formErrors))
@@ -121,11 +118,9 @@ function editPageReducer(state = initialState, action) {
     case SET_SHOULD_DISPLAY_POLICIES_HINT:
       return state.set('shouldDisplayPoliciesHint', false);
     case SUBMIT_ERROR:
-      return state
-        .set('formErrors', List(action.errors));
+      return state.set('formErrors', List(action.errors));
     case SUBMIT_SUCCEEDED:
-      return state
-        .set('didSubmit', !state.get('didSubmit'));
+      return state.set('didSubmit', !state.get('didSubmit'));
     default:
       return state;
   }

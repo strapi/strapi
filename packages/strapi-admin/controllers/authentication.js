@@ -1,5 +1,3 @@
-'use strict';
-
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 
@@ -24,10 +22,11 @@ module.exports = {
         }
 
         ctx.state.user = user;
+
         return next();
       })(ctx, next);
     },
-    ctx => {
+    (ctx) => {
       const { user } = ctx.state;
 
       ctx.body = {

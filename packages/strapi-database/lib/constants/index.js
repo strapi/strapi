@@ -1,5 +1,3 @@
-'use strict';
-
 // contentTypes and components reserved names
 const RESERVED_MODEL_NAMES = ['admin', 'boolean', 'date', 'date-time', 'time', 'upload'];
 // attribute reserved names

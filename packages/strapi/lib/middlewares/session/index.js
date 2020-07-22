@@ -1,5 +1,3 @@
-'use strict';
-
 const path = require('path');
 const _ = require('lodash');
 const session = require('koa-session');
@@ -7,21 +5,23 @@ const session = require('koa-session');
 /**
  * Session middleware
  */
-module.exports = strapi => {
-  const requireStore = store => {
-    return require(path.resolve(strapi.config.appPath, 'node_modules', 'koa-' + store));
+module.exports = (strapi) => {
+  const requireStore = (store) => {
+    return require(path.resolve(strapi.config.appPath, 'node_modules', `koa-${store}`));
   };
 
-  const defineStore = session => {
+  const defineStore = (session) => {
     if (_.isEmpty(_.get(session, 'client'))) {
       return strapi.log.error(
         '(middleware:session) please provide a valid client to store session'
       );
-    } else if (_.isEmpty(_.get(session, 'connection'))) {
+    }
+    if (_.isEmpty(_.get(session, 'connection'))) {
       return strapi.log.error(
         '(middleware:session) please provide connection for the session store'
       );
-    } else if (strapi.config.get(`database.connections.${session.connection}`)) {
+    }
+    if (strapi.config.get(`database.connections.${session.connection}`)) {
       return strapi.log.error(
         '(middleware:session) please provide a valid connection for the session store'
       );

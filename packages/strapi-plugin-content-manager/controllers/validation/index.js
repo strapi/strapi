@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 
@@ -10,16 +8,16 @@ const TYPES = ['singleType', 'collectionType'];
 /**
  * Validates type kind
  */
-const validateKind = kind => {
+const validateKind = (kind) => {
   return yup
     .string()
     .oneOf(TYPES)
     .nullable()
     .validate(kind)
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch((error) => Promise.reject(formatYupErrors(error)));
 };
 
-const validateGenerateUIDInput = data => {
+const validateGenerateUIDInput = (data) => {
   return yup
     .object({
       contentTypeUID: yup.string().required(),
@@ -30,26 +28,23 @@ const validateGenerateUIDInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => {
+    .catch((error) => {
       throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
     });
 };
 
-const validateCheckUIDAvailabilityInput = data => {
+const validateCheckUIDAvailabilityInput = (data) => {
   return yup
     .object({
       contentTypeUID: yup.string().required(),
       field: yup.string().required(),
-      value: yup
-        .string()
-        .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
-        .required(),
+      value: yup.string().matches(new RegExp('^[A-Za-z0-9-_.~]*$')).required(),
     })
     .validate(data, {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => {
+    .catch((error) => {
       throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
     });
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { LoadingIndicatorPage, useUserPermissions } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useUserPermissions } from 'strapi-helper-plugin/lib/src';
 import pluginPermissions from '../../permissions';
 import Main from '../Main';
 

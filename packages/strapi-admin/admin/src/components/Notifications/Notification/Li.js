@@ -1,5 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from 'strapi-helper-plugin/lib/src';
 
 const GlobalNotification = createGlobalStyle`
   .notificationIcon {
@@ -14,11 +14,11 @@ const GlobalNotification = createGlobalStyle`
       top: 10px;
       left: 5px;
       border-radius: 10px;
-      border: 1px solid ${props => props.theme.main.colors.green};
+      border: 1px solid ${(props) => props.theme.main.colors.green};
       display: flex;
       svg {
         margin: auto;
-        color: ${props => props.theme.main.colors.green};
+        color: ${(props) => props.theme.main.colors.green};
         width: 10px;
         height: 10px;
       }
@@ -67,10 +67,10 @@ const GlobalNotification = createGlobalStyle`
   .notificationSuccess{
     .notificationIcon {
       div {
-        border-color: ${props => props.theme.main.colors.green};
+        border-color: ${(props) => props.theme.main.colors.green};
       } 
       svg {
-        color: ${props => props.theme.main.colors.green};
+        color: ${(props) => props.theme.main.colors.green};
       }
     } 
   }
@@ -78,10 +78,10 @@ const GlobalNotification = createGlobalStyle`
   .notificationWarning {
     .notificationIcon {
       div {
-        border-color: ${props => props.theme.main.colors.orange};
+        border-color: ${(props) => props.theme.main.colors.orange};
       } 
       svg {
-        color: ${props => props.theme.main.colors.orange};
+        color: ${(props) => props.theme.main.colors.orange};
       }
     } 
   }
@@ -89,10 +89,10 @@ const GlobalNotification = createGlobalStyle`
   .notificationError {
     .notificationIcon {
       div {
-        border-color: ${props => props.theme.main.colors.red};
+        border-color: ${(props) => props.theme.main.colors.red};
       } 
       svg {
-        color: ${props => props.theme.main.colors.red};
+        color: ${(props) => props.theme.main.colors.red};
       }
     } 
   }
@@ -100,10 +100,10 @@ const GlobalNotification = createGlobalStyle`
   .notificationInfo {
     .notificationIcon {
       div {
-        border-color: ${props => props.theme.main.colors.blue};
+        border-color: ${(props) => props.theme.main.colors.blue};
       } 
       svg {
-        color: ${props => props.theme.main.colors.blue};
+        color: ${(props) => props.theme.main.colors.blue};
       }
     } 
   }
@@ -116,7 +116,7 @@ const Li = styled.li`
   width: 300px;
   min-height: 60px;
   margin-bottom: 14px;
-  background: ${props => props.theme.main.colors.white};
+  background: ${(props) => props.theme.main.colors.white};
   border-radius: 2px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
   color: #333740;
@@ -124,15 +124,15 @@ const Li = styled.li`
   overflow: hidden;
   z-index: 10;
   padding: 1rem;
-  border-left: 2px solid ${props => props.theme.main.colors.green};
+  border-left: 2px solid ${(props) => props.theme.main.colors.green};
   &.notificationError {
-    border-color: ${props => props.theme.main.colors.red};
+    border-color: ${(props) => props.theme.main.colors.red};
   }
   &.notificationWarning {
-    border-color: ${props => props.theme.main.colors.orange};
+    border-color: ${(props) => props.theme.main.colors.orange};
   }
   &.notificationInfo {
-    border-color: ${props => props.theme.main.colors.blue};
+    border-color: ${(props) => props.theme.main.colors.blue};
   }
 
   &:last-child {

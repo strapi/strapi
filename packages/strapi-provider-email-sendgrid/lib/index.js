@@ -1,5 +1,3 @@
-'use strict';
-
 const sendgrid = require('@sendgrid/mail');
 const { removeUndefined } = require('strapi-utils');
 
@@ -8,7 +6,7 @@ module.exports = {
     sendgrid.setApiKey(providerOptions.apiKey);
 
     return {
-      send: options => {
+      send: (options) => {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
@@ -24,7 +22,7 @@ module.exports = {
             ...rest,
           };
 
-          sendgrid.send(removeUndefined(msg), function(err) {
+          sendgrid.send(removeUndefined(msg), function (err) {
             if (err) {
               reject(err);
             } else {

@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { useGlobalContext, ListButton } from 'strapi-helper-plugin/lib/src';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
@@ -18,8 +18,6 @@ import useDataManager from '../../hooks/useDataManager';
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import Wrapper from './List';
-
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 
 function List({
   className,
@@ -184,7 +182,7 @@ function List({
       <Wrapper className={className} isFromDynamicZone={isFromDynamicZone}>
         <table>
           <tbody>
-            {items.map(item => {
+            {items.map((item) => {
               const { type } = item;
               const CustomRow = customRowComponent;
 
@@ -244,7 +242,13 @@ function List({
         )}
       </Wrapper>
       {isSub && (
-        <div className="plus-icon" onClick={onClickAddField}>
+        <div
+          role="button"
+          tabIndex={0}
+          className="plus-icon"
+          onClick={onClickAddField}
+          onKeyDown={onClickAddField}
+        >
           {isInDevelopmentMode && <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />}
         </div>
       )}

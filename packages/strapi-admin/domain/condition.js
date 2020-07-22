@@ -1,18 +1,17 @@
-'use strict';
-
 const DEFAULT_CATEGORY = 'default';
 
 const getConditionId = ({ name, plugin }) => {
   if (plugin === 'admin') {
     return `admin::${name}`;
-  } else if (plugin) {
+  }
+  if (plugin) {
     return `plugins::${plugin}.${name}`;
   }
 
   return `application::${name}`;
 };
 
-const createCondition = condition => ({
+const createCondition = (condition) => ({
   category: DEFAULT_CATEGORY,
   ...condition,
   id: getConditionId(condition),

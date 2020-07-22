@@ -1,5 +1,3 @@
-'use strict';
-
 const convert = require('koa-convert');
 const { xframe } = require('koa-lusca');
 
@@ -7,7 +5,7 @@ const { xframe } = require('koa-lusca');
  * CRON hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -22,6 +20,7 @@ module.exports = strapi => {
         }
 
         const { enabled, value } = strapi.config.get('middleware.settings.xframe', {});
+
         if (enabled) {
           return await convert(xframe(value))(ctx, next);
         }

@@ -1,17 +1,15 @@
-'use strict';
-
 /**
  * Expose main routes of the generated plugin
  */
 
-module.exports = scope => {
+module.exports = (scope) => {
   function generateRoutes() {
     return {
       routes: [
         {
           method: 'GET',
           path: '/',
-          handler: scope.name + '.index',
+          handler: `${scope.name}.index`,
           config: {
             policies: [],
           },

@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
-import { CheckPermissions } from 'strapi-helper-plugin';
+import { CheckPermissions } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
@@ -84,7 +84,7 @@ const DraggedField = forwardRef(
               isOverEditBlock={showEditBlockOverState}
               isOverRemove={isOverRemove}
               ref={ref}
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
               }}
@@ -134,9 +134,9 @@ const DraggedField = forwardRef(
         {type === 'component' && (
           <CheckPermissions permissions={pluginPermissions.componentsConfigurations}>
             <FormattedMessage id={`${pluginId}.components.FieldItem.linkToComponentLayout`}>
-              {msg => (
+              {(msg) => (
                 <Link
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
 
                     goTo(

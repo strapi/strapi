@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -61,6 +59,7 @@ function generate(generator, scope, cb) {
             // Then generate the target, passing along a reference to
             // the base `generate` method to allow for recursive generators.
             const target = generator.targets[keyPath];
+
             if (!target) {
               return asyncEachSb(
                 new Error(
@@ -89,6 +88,7 @@ function generate(generator, scope, cb) {
                 try {
                   const paramMatchExpr = ':' + param.name;
                   let actualParamValue = scope[param.name];
+
                   if (!actualParamValue) {
                     err = new Error(
                       'generator error:\n' +
@@ -101,6 +101,7 @@ function generate(generator, scope, cb) {
                         param.name +
                         "` does not exist in the generator's scope."
                     );
+
                     return false;
                   }
                   actualParamValue = String(actualParamValue);
@@ -109,11 +110,13 @@ function generate(generator, scope, cb) {
                 } catch (e) {
                   err = new Error('Error: Could not parse target key ' + memoKeyPath);
                   err.message = e;
+
                   return false;
                 }
               },
               keyPath
             );
+
             if (!parsedKeyPath) {
               return asyncEachSb(err);
             }
@@ -145,6 +148,7 @@ function generate(generator, scope, cb) {
                 },
                 asyncEachSb
               );
+
               return;
             }
 
@@ -160,7 +164,7 @@ function generate(generator, scope, cb) {
             );
           },
 
-          err => {
+          (err) => {
             // Expose a `error` handler in generators.
             if (err) {
               const errorFn =
@@ -168,6 +172,7 @@ function generate(generator, scope, cb) {
                 function defaultError(err, scope, _cb) {
                   return _cb(err);
                 };
+
               return errorFn(err, scope, sb);
             }
 
@@ -177,6 +182,7 @@ function generate(generator, scope, cb) {
               function defaultAfter(scope, _cb) {
                 return _cb();
               };
+
             return afterFn(scope, sb);
           }
         );

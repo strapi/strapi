@@ -16,16 +16,15 @@ import Controller from '../Controller';
 import { Banner, Chevron, ControllerWrapper, Description, Icon, Name, Wrapper } from './Components';
 
 class Plugin extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  state = { collapse: false, inputSelected: '' };
-
   static contextType = EditPageContext;
+
+  state = { collapse: false, inputSelected: '' };
 
   componentDidMount() {
     // Open the application's permissions section if there are APIs
     if (this.props.name === 'application' && !isEmpty(get(this.props.plugin, 'controllers'))) {
       this.props.changePluginSelected('application');
-      this.setState({ collapse: !this.state.collapse });
+      this.setState((prevState) => ({ collapse: !prevState.collapse }));
     }
   }
 
@@ -43,7 +42,7 @@ class Plugin extends React.Component {
     this.props.changePluginSelected(this.props.name);
 
     if (!isEmpty(get(this.props.plugin, 'controllers'))) {
-      this.setState({ collapse: !this.state.collapse });
+      this.setState((prevState) => ({ collapse: !prevState.collapse }));
     }
 
     if (this.state.collapse) {
@@ -51,7 +50,7 @@ class Plugin extends React.Component {
     }
   };
 
-  setInputSelectedState = name => {
+  setInputSelectedState = (name) => {
     this.setState({ inputSelected: name });
   };
 

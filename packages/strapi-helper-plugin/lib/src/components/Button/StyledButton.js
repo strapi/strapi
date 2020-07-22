@@ -123,8 +123,8 @@ const blink = keyframes`
 
 const StyledButton = styled.button`
   ${({ loader }) => {
-    if (loader) {
-      return css`
+  if (loader) {
+    return css`
         height: 3rem;
         padding: 0;
         border-radius: 0.3rem;
@@ -136,9 +136,9 @@ const StyledButton = styled.button`
           outline: 0;
         }
       `;
-    }
+  }
 
-    return css`
+  return css`
       height: 3rem;
       position: relative;
       border-radius: 0.3rem;
@@ -175,57 +175,59 @@ const StyledButton = styled.button`
         cursor: not-allowed;
       }
     `;
-  }}
+}}
 
-  ${props => {
-    if (props.primary) {
-      return primary;
-    }
+  ${(props) => {
+  if (props.primary) {
+    return primary;
+  }
 
-    if (props.primaryAddShape) {
-      return primaryAddShape;
-    }
+  if (props.primaryAddShape) {
+    return primaryAddShape;
+  }
 
-    if (props.secondary) {
-      return secondary;
-    }
-    if (props.secondaryHotlineAdd) {
-      return secondaryHotlineAdd;
-    }
+  if (props.secondary) {
+    return secondary;
+  }
+  if (props.secondaryHotlineAdd) {
+    return secondaryHotlineAdd;
+  }
 
-    if (props.secondaryHotline) {
-      return secondaryHotline;
-    }
+  if (props.secondaryHotline) {
+    return secondaryHotline;
+  }
 
-    if (props.delete) {
-      return deleteStyle;
-    }
+  if (props.delete) {
+    return deleteStyle;
+  }
 
-    if (props.back) {
-      return back;
-    }
-  }}
+  if (props.back) {
+    return back;
+  }
+
+  return '';
+}}
 
   ${({ kind }) => {
-    switch (kind) {
-      case 'primary':
-        return primary;
-      case 'primaryAddShape':
-        return primaryAddShape;
-      case 'secondary':
-        return secondary;
-      case 'secondaryHotlineAdd':
-        return secondaryHotlineAdd;
-      case 'secondaryHotline':
-        return secondaryHotline;
-      case 'delete':
-        return deleteStyle;
-      case 'back':
-        return back;
-      default:
-        return '';
-    }
-  }}
+  switch (kind) {
+    case 'primary':
+      return primary;
+    case 'primaryAddShape':
+      return primaryAddShape;
+    case 'secondary':
+      return secondary;
+    case 'secondaryHotlineAdd':
+      return secondaryHotlineAdd;
+    case 'secondaryHotline':
+      return secondaryHotline;
+    case 'delete':
+      return deleteStyle;
+    case 'back':
+      return back;
+    default:
+      return '';
+  }
+}}
 
   .saving {
     margin-top: -2.35rem;

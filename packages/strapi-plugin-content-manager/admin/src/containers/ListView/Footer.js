@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { GlobalPagination, InputSelect, useGlobalContext } from 'strapi-helper-plugin';
+import { GlobalPagination, InputSelect, useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import useListView from '../../hooks/useListView';
 import { FooterWrapper, SelectWrapper, Label } from './components';
 

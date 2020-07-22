@@ -1,8 +1,6 @@
-'use strict';
-
 const _ = require('lodash');
 
-const formatError = error => [
+const formatError = (error) => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
@@ -69,7 +67,9 @@ module.exports = {
       .get();
 
     if (!email) return ctx.badRequest('missing.email');
+
     if (!username) return ctx.badRequest('missing.username');
+
     if (!password) return ctx.badRequest('missing.password');
 
     const userWithSameUsername = await strapi

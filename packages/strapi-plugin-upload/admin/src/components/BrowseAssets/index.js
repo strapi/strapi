@@ -1,6 +1,6 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
-import { PageFooter } from 'strapi-helper-plugin';
+import { PageFooter } from 'strapi-helper-plugin/lib/src';
 import { generatePageFromStart, generateStartFromPage } from '../../utils';
 import Filters from '../Filters';
 import Flex from '../Flex';
@@ -45,7 +45,7 @@ const BrowseAssets = () => {
     }
   };
 
-  const handleDeleteFilter = index => {
+  const handleDeleteFilter = (index) => {
     removeFilter(index);
   };
 
@@ -61,7 +61,7 @@ const BrowseAssets = () => {
     handleListCardClick(name);
   };
 
-  const handleListCardClick = id => {
+  const handleListCardClick = (id) => {
     if (!canSelectFile && id !== selectedFiles[0].id) {
       handleFileSelection({
         target: {
@@ -81,7 +81,7 @@ const BrowseAssets = () => {
   /* eslint-disable react/jsx-indent */
   const renderCardControl = noNavigation
     ? null
-    : id => {
+    : (id) => {
         if (!allowedActions.canUpdate) {
           return null;
         }
@@ -92,7 +92,7 @@ const BrowseAssets = () => {
             title="edit"
             color="#9EA7B8"
             type="pencil"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               handleGoToEditFile(id);
             }}
@@ -108,14 +108,14 @@ const BrowseAssets = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const hasSomeCheckboxSelected = files.some(file =>
-    selectedFiles.find(selectedFile => file.id === selectedFile.id)
+  const hasSomeCheckboxSelected = files.some((file) =>
+    selectedFiles.find((selectedFile) => file.id === selectedFile.id)
   );
   const areAllCheckboxesSelected =
-    files.every(file => selectedFiles.find(selectedFile => file.id === selectedFile.id)) &&
+    files.every((file) => selectedFiles.find((selectedFile) => file.id === selectedFile.id)) &&
     hasSomeCheckboxSelected;
 
-  const hasFilters = !isEmpty(params.filters.filter(filter => !filter.isDisabled));
+  const hasFilters = !isEmpty(params.filters.filter((filter) => !filter.isDisabled));
   const hasSearch = !isEmpty(params._q);
   const areResultsEmptyWithSearchOrFilters = isEmpty(files) && (hasSearch || hasFilters);
 

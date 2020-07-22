@@ -1,11 +1,9 @@
-'use strict';
-
 const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('strapi-utils');
+const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -23,6 +21,7 @@ module.exports = function createComponentBuilder() {
     createNewComponentUIDMap(components) {
       return components.reduce((uidMap, component) => {
         uidMap[component.tmpUID] = this.createComponentUID(component);
+
         return uidMap;
       }, {});
     },
@@ -104,11 +103,11 @@ module.exports = function createComponentBuilder() {
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
-        this.components.forEach(compo => {
+        this.components.forEach((compo) => {
           compo.updateComponent(uid, newUID);
         });
 
-        this.contentTypes.forEach(ct => {
+        this.contentTypes.forEach((ct) => {
           ct.updateComponent(uid, newUID);
         });
       }
@@ -121,11 +120,11 @@ module.exports = function createComponentBuilder() {
         throw new Error('component.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeComponent(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeComponent(uid);
       });
 

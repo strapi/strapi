@@ -1,14 +1,9 @@
 import { findIndex, get } from 'lodash';
 import { takeLatest, put, fork, select, call } from 'redux-saga/effects';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
-import {
-  deleteDataSucceeded,
-  fetchDataSucceeded,
-  setForm,
-  submitSucceeded,
-} from './actions';
+import { deleteDataSucceeded, fetchDataSucceeded, setForm, submitSucceeded } from './actions';
 import { DELETE_DATA, FETCH_DATA, SUBMIT } from './constants';
 import {
   makeSelectAllData,
@@ -22,10 +17,7 @@ export function* dataDelete() {
     const allData = yield select(makeSelectAllData());
     const dataToDelete = yield select(makeSelectDataToDelete());
     const endPointAPI = yield select(makeSelectDeleteEndPoint());
-    const indexDataToDelete = findIndex(allData[endPointAPI], [
-      'name',
-      dataToDelete.name,
-    ]);
+    const indexDataToDelete = findIndex(allData[endPointAPI], ['name', dataToDelete.name]);
 
     if (indexDataToDelete !== -1) {
       const id = dataToDelete.id;
@@ -64,10 +56,7 @@ export function* submitData(action) {
     const body = yield select(makeSelectModifiedData());
     const opts = {
       method: 'PUT',
-      body:
-        action.endPoint === 'advanced'
-          ? get(body, ['advanced', 'settings'], {})
-          : body,
+      body: action.endPoint === 'advanced' ? get(body, ['advanced', 'settings'], {}) : body,
     };
 
     yield call(request, `/${pluginId}/${action.endPoint}`, opts);

@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const createConditionProvider = require('../permission/condition-provider');
 const { createCondition, getConditionId } = require('../../domain/condition');
@@ -114,12 +112,7 @@ describe('Condition Provider', () => {
 
       provider.registerMany(conditions);
 
-      expect(
-        provider
-          .getAll()
-          .map(_.property('id'))
-          .sort()
-      ).toMatchObject(expected);
+      expect(provider.getAll().map(_.property('id')).sort()).toMatchObject(expected);
     });
   });
 
@@ -132,7 +125,7 @@ describe('Condition Provider', () => {
       expect(provider.has(condition.name, condition.plugin)).toBeTruthy();
     });
 
-    test(`The key doesn't exists`, () => {
+    test("The key doesn't exists", () => {
       const { name, plugin } = localTestData.conditions[1];
 
       expect(provider.has(name, plugin)).toBeFalsy();

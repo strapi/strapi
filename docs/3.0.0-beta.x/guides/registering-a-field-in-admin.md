@@ -52,7 +52,7 @@ In this part we will create three components:
 
 ```js
 import React, { useEffect, useState } from 'react';
-import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 import PropTypes from 'prop-types';
 
 const MediaLib = ({ isOpen, onChange, onToggle }) => {
@@ -72,7 +72,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
 
   const Component = getComponent('media-library').Component;
 
-  const handleInputChange = data => {
+  const handleInputChange = (data) => {
     if (data) {
       const { url } = data;
 
@@ -130,7 +130,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { Button } from '@buffetjs/core';
-import { Label, InputDescription, InputErrors } from 'strapi-helper-plugin';
+import { Label, InputDescription, InputErrors } from 'strapi-helper-plugin/lib/src';
 import Editor from '../CKEditor';
 import MediaLib from '../MediaLib';
 
@@ -150,7 +150,7 @@ const Wysiwyg = ({
     spacer = <div />;
   }
 
-  const handleChange = data => {
+  const handleChange = (data) => {
     if (data.mime.includes('image')) {
       const imgTag = `<p><img src="${data.url}" caption="${data.caption}" alt="${data.alternativeText}"></img></p>`;
       const newValue = value ? `${value}${imgTag}` : imgTag;
@@ -161,7 +161,7 @@ const Wysiwyg = ({
     // Handle videos and other type of files by adding some code
   };
 
-  const handleToggle = () => setIsOpen(prev => !prev);
+  const handleToggle = () => setIsOpen((prev) => !prev);
 
   return (
     <div
@@ -303,7 +303,7 @@ import pluginPkg from '../../package.json';
 import Wysiwyg from './components/Wysiwyg';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {

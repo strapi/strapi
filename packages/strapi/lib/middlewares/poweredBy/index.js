@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     initialize() {
       strapi.app.use(async (ctx, next) => {

@@ -1,5 +1,3 @@
-'use strict';
-
 const { join, resolve, basename } = require('path');
 const os = require('os');
 const crypto = require('crypto');
@@ -31,7 +29,7 @@ module.exports = (projectDirectory, cliArguments) => {
     rootPath,
     name: basename(rootPath),
     // disable quickstart run app after creation
-    runQuickstartApp: cliArguments.run === false ? false : true,
+    runQuickstartApp: cliArguments.run !== false,
     // use pacakge version as strapiVersion (all packages have the same version);
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
@@ -56,7 +54,7 @@ module.exports = (projectDirectory, cliArguments) => {
     additionalsDependencies: {},
   };
 
-  sentry.configureScope(function(sentryScope) {
+  sentry.configureScope(function (sentryScope) {
     const tags = {
       os_type: os.type(),
       os_platform: os.platform(),
@@ -66,7 +64,7 @@ module.exports = (projectDirectory, cliArguments) => {
       docker: scope.docker,
     };
 
-    Object.keys(tags).forEach(tag => {
+    Object.keys(tags).forEach((tag) => {
       sentryScope.setTag(tag, tags[tag]);
     });
   });
@@ -77,8 +75,9 @@ module.exports = (projectDirectory, cliArguments) => {
   console.log(`Creating a new Strapi application at ${chalk.green(rootPath)}.`);
   console.log();
 
-  return generateNew(scope).catch(error => {
+  return generateNew(scope).catch((error) => {
     console.error(error);
+
     return captureException(error).then(() => {
       return trackError({ scope, error }).then(() => {
         process.exit(1);
@@ -95,7 +94,7 @@ function initCancelCatcher() {
       output: process.stdout,
     });
 
-    rl.on('SIGINT', function() {
+    rl.on('SIGINT', function () {
       process.emit('SIGINT');
     });
   }

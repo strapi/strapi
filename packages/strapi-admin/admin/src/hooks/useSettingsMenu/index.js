@@ -1,5 +1,5 @@
 import { useContext, useEffect, useReducer } from 'react';
-import { useGlobalContext, hasPermissions, UserContext } from 'strapi-helper-plugin';
+import { useGlobalContext, hasPermissions, UserContext } from 'strapi-helper-plugin/lib/src';
 
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -20,9 +20,9 @@ const useSettingsMenu = (noCheck = false) => {
         return { hasPermission, path };
       };
 
-      const generateArrayOfPromises = array => {
+      const generateArrayOfPromises = (array) => {
         return array.reduce((acc, current, sectionIndex) => {
-          const generateArrayOfPromises = array =>
+          const generateArrayOfPromises = (array) =>
             array.map((link, index) =>
               checkPermissions(array[index].permissions, `${sectionIndex}.links.${index}`)
             );

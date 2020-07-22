@@ -52,7 +52,7 @@ module.exports = ({
 
   return {
     mode: isProduction ? 'production' : 'development',
-    bail: isProduction ? true : false,
+    bail: !!isProduction,
     devtool: isProduction ? false : 'cheap-module-source-map',
     entry,
     output: {
@@ -186,7 +186,7 @@ module.exports = ({
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
         PUBLIC_PATH: JSON.stringify(options.publicPath),
       }),
-      new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
+      new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function (resource) {
         // We might need to improve this if we want to make it work with components
         const containerPathName = resource.context.split(`${path.sep}containers${path.sep}`);
         const componentPathName = resource.context.split(`${path.sep}components${path.sep}`);

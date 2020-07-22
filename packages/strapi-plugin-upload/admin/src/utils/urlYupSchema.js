@@ -1,6 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
 import * as yup from 'yup';
-import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
+import * as errorsTrads from 'strapi-helper-plugin/lib/src';
 import getTrad from './getTrad';
 
 const urlSchema = yup.object().shape({
@@ -12,7 +12,7 @@ const urlSchema = yup.object().shape({
       name: 'isUrlValid',
       message: '${path}',
       test(values) {
-        const filtered = values.filter(val => {
+        const filtered = values.filter((val) => {
           try {
             // eslint-disable-next-line no-new
             new URL(val);

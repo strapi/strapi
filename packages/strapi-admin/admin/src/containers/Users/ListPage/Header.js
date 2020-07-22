@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { Button } from '@buffetjs/core';
 import { Header as HeaderCompo } from '@buffetjs/custom';
 import { Envelope } from '@buffetjs/icons';
@@ -31,7 +31,7 @@ const Header = ({
             label: formatMessage({ id: 'app.utils.delete' }),
             onClick: onClickDelete,
             type: 'button',
-            Component: props => (canDelete ? <Button {...props} /> : null),
+            Component: (props) => (canDelete ? <Button {...props} /> : null),
           },
 
           {
@@ -40,7 +40,7 @@ const Header = ({
             label: formatMessage({ id: 'Settings.permissions.users.create' }),
             onClick: onClickAddUser,
             type: 'button',
-            Component: props => (canCreate ? <Button {...props} /> : null),
+            Component: (props) => (canCreate ? <Button {...props} /> : null),
           },
         ],
     content: canRead

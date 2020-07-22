@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Loaders.js service
  *
@@ -12,59 +10,61 @@ const DataLoader = require('dataloader');
 module.exports = {
   loaders: {},
 
-  initializeLoader: function() {
+  initializeLoader() {
     this.resetLoaders();
 
     // Create loaders for each relational field (exclude core models).
     Object.keys(strapi.models)
-      .filter(model => model.internal !== true)
-      .forEach(modelKey => {
+      .filter((model) => model.internal !== true)
+      .forEach((modelKey) => {
         const model = strapi.models[modelKey];
         this.createLoader(model.uid);
       });
 
     // Reproduce the same pattern for each plugin.
-    Object.keys(strapi.plugins).forEach(plugin => {
-      Object.keys(strapi.plugins[plugin].models).forEach(modelKey => {
+    Object.keys(strapi.plugins).forEach((plugin) => {
+      Object.keys(strapi.plugins[plugin].models).forEach((modelKey) => {
         const model = strapi.plugins[plugin].models[modelKey];
         this.createLoader(model.uid);
       });
     });
   },
 
-  resetLoaders: function() {
+  resetLoaders() {
     this.loaders = {};
   },
 
-  createLoader: function(modelUID) {
+  createLoader(modelUID) {
     if (this.loaders[modelUID]) {
       return this.loaders[modelUID];
     }
 
     this.loaders[modelUID] = new DataLoader(
-      keys => {
+      (keys) => {
         // Extract queries from keys and merge similar queries.
         const { queries, map } = this.extractQueries(modelUID, _.cloneDeep(keys));
 
         // Run queries in parallel.
-        return Promise.all(queries.map(query => this.makeQuery(modelUID, query))).then(results => {
-          // Use to match initial queries order.
-          return this.mapData(modelUID, keys, map, results);
-        });
+        return Promise.all(queries.map((query) => this.makeQuery(modelUID, query))).then(
+          (results) => {
+            // Use to match initial queries order.
+            return this.mapData(modelUID, keys, map, results);
+          }
+        );
       },
       {
-        cacheKeyFn: key => {
+        cacheKeyFn: (key) => {
           return _.isObjectLike(key) ? JSON.stringify(_.cloneDeep(key)) : key;
         },
       }
     );
   },
 
-  mapData: function(modelUID, originalMap, map, results) {
+  mapData(modelUID, originalMap, map, results) {
     // Use map to re-dispatch data correctly based on initial keys.
     return originalMap.map((query, index) => {
       // Find the index of where we should extract the results.
-      const indexResults = map.findIndex(queryMap => queryMap.indexOf(index) !== -1);
+      const indexResults = map.findIndex((queryMap) => queryMap.indexOf(index) !== -1);
       const data = results[indexResults];
 
       // Retrieving referring model.
@@ -73,7 +73,7 @@ module.exports = {
       if (query.single) {
         // Return object instead of array for one-to-many relationship.
         return data.find(
-          entry =>
+          (entry) =>
             entry[ref.primaryKey].toString() === (query.params[ref.primaryKey] || '').toString()
         );
       }
@@ -86,33 +86,36 @@ module.exports = {
       // Extracting ids from original request to map with query results.
       const ids = this.extractIds(query, ref);
 
-      const ast = ref.associations.find(ast => ast.alias === ids.alias);
+      const ast = ref.associations.find((ast) => ast.alias === ids.alias);
       const astModel = ast
         ? strapi.getModel(ast.model || ast.collection, ast.plugin)
         : strapi.getModel(modelUID);
 
       if (!_.isArray(ids)) {
         return data
-          .filter(entry => entry !== undefined)
-          .filter(entry => {
+          .filter((entry) => entry !== undefined)
+          .filter((entry) => {
             const aliasEntry = entry[ids.alias];
 
             if (_.isArray(aliasEntry)) {
               return _.find(
                 aliasEntry,
-                value => value[astModel.primaryKey].toString() === ids.value
+                (value) => value[astModel.primaryKey].toString() === ids.value
               );
             }
 
             const entryValue = aliasEntry[astModel.primaryKey].toString();
+
             return entryValue === ids.value;
           })
           .slice(skip, skip + limit);
       }
 
       return data
-        .filter(entry => entry !== undefined)
-        .filter(entry => ids.map(id => id.toString()).includes(entry[ref.primaryKey].toString()))
+        .filter((entry) => entry !== undefined)
+        .filter((entry) =>
+          ids.map((id) => id.toString()).includes(entry[ref.primaryKey].toString())
+        )
         .slice(skip, skip + limit);
     });
   },
@@ -124,19 +127,20 @@ module.exports = {
 
     const alias = _.first(Object.keys(query.options.query));
     const value = query.options.query[alias].toString();
+
     return {
       alias,
       value,
     };
   },
 
-  makeQuery: async function(modelUID, query = {}) {
+  async makeQuery(modelUID, query = {}) {
     if (_.isEmpty(query.ids)) {
       return [];
     }
 
     const ref = strapi.getModel(modelUID);
-    const ast = ref.associations.find(ast => ast.alias === query.alias);
+    const ast = ref.associations.find((ast) => ast.alias === query.alias);
 
     const params = {
       ...query.options,
@@ -147,16 +151,16 @@ module.exports = {
     };
 
     params.query[`${query.alias}_in`] = _.chain(query.ids)
-      .filter(id => !_.isEmpty(id) || _.isInteger(id)) // Only keep valid ids
-      .map(id => id.toString()) // convert ids to string
+      .filter((id) => !_.isEmpty(id) || _.isInteger(id)) // Only keep valid ids
+      .map((id) => id.toString()) // convert ids to string
       .uniq() // Remove redundant ids
       .value();
 
     // Run query and remove duplicated ID.
-    return strapi.plugins['content-manager'].services['contentmanager'].fetchAll(modelUID, params);
+    return strapi.plugins['content-manager'].services.contentmanager.fetchAll(modelUID, params);
   },
 
-  extractQueries: function(modelUID, keys) {
+  extractQueries(modelUID, keys) {
     const queries = [];
     const map = [];
 

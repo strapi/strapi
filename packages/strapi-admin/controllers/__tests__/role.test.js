@@ -1,5 +1,3 @@
-'use strict';
-
 const createContext = require('../../../../test/helpers/create-context');
 const roleController = require('../role');
 
@@ -47,7 +45,7 @@ describe('Role controller', () => {
 
       const findOneRole = jest.fn(() => Promise.resolve({ id: 1 }));
       const findPermissions = jest.fn(() => Promise.resolve(permissions));
-      const sanitizePermission = jest.fn(perms => perms);
+      const sanitizePermission = jest.fn((perms) => perms);
 
       const ctx = createContext({
         params: { id: 1 },

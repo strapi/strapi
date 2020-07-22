@@ -22,10 +22,10 @@ module.exports = async () => {
   }
 
   let shouldUpdateFullDoc = false;
-  const services = strapi.plugins['documentation'].services.documentation;
+  const services = strapi.plugins.documentation.services.documentation;
   // Generate plugins' documentation
   const pluginsWithDocumentationNeeded = services.getPluginsWithDocumentationNeeded();
-  pluginsWithDocumentationNeeded.forEach(plugin => {
+  pluginsWithDocumentationNeeded.forEach((plugin) => {
     const isDocExisting = services.checkIfPluginDocumentationFolderExists(plugin);
 
     if (!isDocExisting) {
@@ -47,7 +47,7 @@ module.exports = async () => {
   // Retrieve all the apis from the apis directory
   const apis = services.getApis();
   // Generate APIS' documentation
-  apis.forEach(api => {
+  apis.forEach((api) => {
     const isDocExisting = services.checkIfDocumentationFolderExists(api);
 
     if (!isDocExisting) {
@@ -79,9 +79,9 @@ module.exports = async () => {
      * @param {Object} documentation
      * @returns {String}
      */
-    const getDocTagsToString = documentation => {
+    const getDocTagsToString = (documentation) => {
       return _.get(documentation, 'tags', [])
-        .map(tag => {
+        .map((tag) => {
           return tag.name.toLowerCase();
         })
         .sort((a, b) => a - b)

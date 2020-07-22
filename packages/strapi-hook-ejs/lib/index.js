@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -15,7 +13,7 @@ const render = require('koa-ejs');
  * EJS hook
  */
 
-module.exports = function(strapi) {
+module.exports = function (strapi) {
   const hook = {
     /**
      * Default options
@@ -39,10 +37,7 @@ module.exports = function(strapi) {
         strapi.config.hook.settings.ejs.cache = true;
       }
 
-      render(
-        strapi.app,
-        Object.assign(this.defaults, strapi.config.hook.settings.ejs)
-      );
+      render(strapi.app, Object.assign(this.defaults, strapi.config.hook.settings.ejs));
 
       strapi.app.context.render = co.wrap(strapi.app.context.render);
     },

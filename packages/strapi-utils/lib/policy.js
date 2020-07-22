@@ -1,7 +1,6 @@
 /**
  * Policies util
  */
-'use strict';
 
 const _ = require('lodash');
 
@@ -21,13 +20,13 @@ const stripPolicy = (policy, prefix) => policy.replace(prefix, '');
 
 const createPolicy = (policyName, ...args) => ({ policyName, args });
 
-const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
+const resolveHandler = (policy) => (_.isFunction(policy) ? policy : policy.handler);
 
-const parsePolicy = policy =>
+const parsePolicy = (policy) =>
   isPolicyFactory(policy) ? createPolicy(...policy) : createPolicy(policy);
 
-const resolvePolicy = policyName => {
-  const resolver = policyResolvers.find(resolver => resolver.exists(policyName));
+const resolvePolicy = (policyName) => {
+  const resolver = policyResolvers.find((resolver) => resolver.exists(policyName));
 
   return resolver ? resolveHandler(resolver.get)(policyName) : undefined;
 };
@@ -48,6 +47,7 @@ const searchLocalPolicy = (policy, plugin, apiName) => {
   }
 
   const api = _.get(strapi.api, apiName);
+
   if (api && policyExistsIn(api, policy)) {
     return resolveHandler(getPolicyIn(api, policy));
   }
@@ -78,9 +78,10 @@ const policyResolvers = [
     exists(policy) {
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
-    get: policy => {
+    get: (policy) => {
       const [, policyWithoutPrefix] = policy.split('::');
       const [api = '', policyName = ''] = policyWithoutPrefix.split('.');
+
       return getPolicyIn(_.get(strapi, ['api', api]), policyName);
     },
   },
@@ -92,7 +93,7 @@ const policyResolvers = [
     exists(policy) {
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
-    get: policy => {
+    get: (policy) => {
       return getPolicyIn(_.get(strapi, 'admin'), stripPolicy(policy, ADMIN_PREFIX));
     },
   },
@@ -106,6 +107,7 @@ const policyResolvers = [
     },
     get(policy) {
       const [plugin = '', policyName = ''] = stripPolicy(policy, PLUGIN_PREFIX).split('.');
+
       return getPolicyIn(_.get(strapi, ['plugins', plugin]), policyName);
     },
   },

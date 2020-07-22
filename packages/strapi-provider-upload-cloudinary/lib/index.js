@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -20,6 +18,7 @@ module.exports = {
             (err, image) => {
               if (err) {
                 strapi.log.error(`Error uploading to cloudinary: ${err.message}`);
+
                 return reject(new Error('Upload to cloudinary failed'));
               }
 

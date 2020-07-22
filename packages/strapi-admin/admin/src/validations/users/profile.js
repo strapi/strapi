@@ -1,13 +1,10 @@
 import * as yup from 'yup';
-import { translatedErrors } from 'strapi-helper-plugin';
+import { translatedErrors } from 'strapi-helper-plugin/lib/src';
 
 const schema = {
   firstname: yup.mixed().required(translatedErrors.required),
   lastname: yup.mixed().required(translatedErrors.required),
-  email: yup
-    .string()
-    .email(translatedErrors.email)
-    .required(translatedErrors.required),
+  email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
   username: yup.string().nullable(),
   password: yup
     .string()

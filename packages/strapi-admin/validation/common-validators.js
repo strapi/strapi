@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
 const {
@@ -7,10 +5,7 @@ const {
   checkFieldsDontHaveDuplicates,
 } = require('./common-functions');
 
-const email = yup
-  .string()
-  .email()
-  .min(1);
+const email = yup.string().email().min(1);
 
 const firstname = yup.string().min(1);
 
@@ -29,7 +24,7 @@ const roles = yup.array(yup.strapiID()).min(1);
 
 const isAPluginName = yup
   .string()
-  .test('is-a-plugin-name', 'is not a plugin name', function(value) {
+  .test('is-a-plugin-name', 'is not a plugin name', function (value) {
     return [undefined, 'admin', ...Object.keys(strapi.plugins)].includes(value)
       ? true
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
@@ -38,26 +33,27 @@ const isAPluginName = yup
 const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
-  .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
-    const ids = strapi.admin.services.permission.conditionProvider.getAll().map(c => c.id);
+  .test('is-an-array-of-conditions', 'is not a plugin name', function (value) {
+    const ids = strapi.admin.services.permission.conditionProvider.getAll().map((c) => c.id);
+
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
-      : this.createError({ path: this.path, message: `contains conditions that don't exist` });
+      : this.createError({ path: this.path, message: "contains conditions that don't exist" });
   });
 
-const checkCTPermsDeleteHaveFieldsToNull = permissions =>
+const checkCTPermsDeleteHaveFieldsToNull = (permissions) =>
   !Array.isArray(permissions) ||
   permissions.every(
-    perm => perm.action !== 'plugins::content-manager.explorer.delete' || _.isNil(perm.fields)
+    (perm) => perm.action !== 'plugins::content-manager.explorer.delete' || _.isNil(perm.fields)
   );
 
 const permissionsAreEquals = (a, b) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
 
-const checkNoDuplicatedPermissions = permissions =>
+const checkNoDuplicatedPermissions = (permissions) =>
   !Array.isArray(permissions) ||
   permissions.every((permA, i) =>
-    permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
+    permissions.slice(i + 1).every((permB) => !permissionsAreEquals(permA, permB))
   );
 
 const updatePermissions = yup

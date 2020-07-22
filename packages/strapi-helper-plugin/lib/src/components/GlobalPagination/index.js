@@ -13,9 +13,9 @@ import Wrapper from './Wrapper';
 class GlobalPagination extends React.Component {
   getLastPageNumber = () => Math.ceil(this.props.count / this.props.params._limit) || 1;
 
-  handleDotsClick = e => e.preventDefault();
+  handleDotsClick = (e) => e.preventDefault();
 
-  handlePreviousPageClick = e => {
+  handlePreviousPageClick = (e) => {
     e.preventDefault();
 
     if (!this.isFirstPage()) {
@@ -27,7 +27,7 @@ class GlobalPagination extends React.Component {
     }
   };
 
-  handleNextPageClick = e => {
+  handleNextPageClick = (e) => {
     e.preventDefault();
 
     if (!this.isLastPage()) {
@@ -39,7 +39,7 @@ class GlobalPagination extends React.Component {
     }
   };
 
-  handleFirstPageClick = e => {
+  handleFirstPageClick = (e) => {
     e.preventDefault();
     const target = {
       name: 'params._page',
@@ -48,7 +48,7 @@ class GlobalPagination extends React.Component {
     this.props.onChangeParams({ target });
   };
 
-  handleLastPageClick = e => {
+  handleLastPageClick = (e) => {
     e.preventDefault();
     const target = {
       name: 'params._page',
@@ -73,7 +73,7 @@ class GlobalPagination extends React.Component {
     linksOptions.push({
       value: this.props.params._page,
       isActive: true,
-      handleClick: e => e.preventDefault(),
+      handleClick: (e) => e.preventDefault(),
     });
 
     // Add previous page link
@@ -113,9 +113,9 @@ class GlobalPagination extends React.Component {
     // Generate links
     return map(linksOptions, (linksOption, key) => (
       <li className={cn(linksOption.isActive && 'navLiActive')} key={key}>
-        <a href="" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
+        <button type="button" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
           {linksOption.value}
-        </a>
+        </button>
       </li>
     ));
   };
@@ -124,25 +124,25 @@ class GlobalPagination extends React.Component {
     return (
       <Wrapper>
         <div>
-          <a
-            href=""
+          <button
+            type="button"
             className="paginationNavigator"
             onClick={this.handlePreviousPageClick}
             disabled={this.isFirstPage()}
           >
             <i className="fa fa-chevron-left" aria-hidden="true" />
-          </a>
+          </button>
           <nav className="navWrapper">
             <ul className="navUl">{this.renderLinks()}</ul>
           </nav>
-          <a
-            href=""
+          <button
+            type="button"
             className="paginationNavigator"
             onClick={this.handleNextPageClick}
             disabled={this.isLastPage()}
           >
             <i className="fa fa-chevron-right" aria-hidden="true" />
-          </a>
+          </button>
         </div>
       </Wrapper>
     );

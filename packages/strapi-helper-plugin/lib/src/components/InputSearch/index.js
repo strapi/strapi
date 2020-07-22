@@ -14,19 +14,18 @@ import Wrapper from './Wrapper';
 class InputSearch extends React.Component {
   state = { isFocused: false };
 
-  handleBlur = e => {
-    this.setState({ isFocused: !this.state.isFocused });
+  handleBlur = (e) => {
+    this.handleFocus(e);
     this.props.onBlur(e);
   };
 
-  handleFocus = e => {
-    this.setState({ isFocused: !this.state.isFocused });
+  handleFocus = (e) => {
+    this.setState((prevState) => ({ isFocused: !prevState.isFocused }));
     this.props.onFocus(e);
   };
 
   render() {
     const {
-      autoFocus,
       className,
       deactivateErrorHighlight,
       disabled,
@@ -42,10 +41,7 @@ class InputSearch extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <Wrapper
-        className={cn('input-group', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Wrapper className={cn('input-group', !isEmpty(className) && className)} style={style}>
         <span
           className={cn(
             'input-group-addon',
@@ -54,20 +50,13 @@ class InputSearch extends React.Component {
             !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
-          {message => (
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
+          {(message) => (
             <input
-              autoFocus={autoFocus}
               className={cn(
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !deactivateErrorHighlight &&
-                  error &&
-                  this.state.isFocused &&
-                  'invalidSearch'
+                !deactivateErrorHighlight && error && this.state.isFocused && 'invalidSearch'
               )}
               disabled={disabled}
               id={name}
@@ -88,7 +77,6 @@ class InputSearch extends React.Component {
 }
 
 InputSearch.defaultProps = {
-  autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
@@ -101,7 +89,6 @@ InputSearch.defaultProps = {
 };
 
 InputSearch.propTypes = {
-  autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,

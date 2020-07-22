@@ -1,10 +1,10 @@
 import { useReducer, useEffect } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 
 import reducer, { initialState } from './reducer';
 import { formatPermissionsFromApi } from '../../utils';
 
-const useFetchRole = id => {
+const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -21,10 +21,10 @@ const useFetchRole = id => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const fetchRole = async roleId => {
+  const fetchRole = async (roleId) => {
     try {
       const [{ data: role }, { data: permissions }] = await Promise.all(
-        [`roles/${roleId}`, `roles/${roleId}/permissions`].map(endPoint =>
+        [`roles/${roleId}`, `roles/${roleId}/permissions`].map((endPoint) =>
           request(`/admin/${endPoint}`, { method: 'GET' })
         )
       );

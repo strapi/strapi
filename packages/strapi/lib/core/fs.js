@@ -1,12 +1,10 @@
-'use strict';
-
 const path = require('path');
 const fse = require('fs-extra');
 
 /**
  * create strapi fs layer
  */
-module.exports = strapi => {
+module.exports = (strapi) => {
   function normalizePath(optPath) {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 
@@ -23,9 +21,8 @@ module.exports = strapi => {
      */
     writeAppFile(optPath, data) {
       const writePath = normalizePath(optPath);
-      return fse
-        .ensureFile(writePath)
-        .then(() => fse.writeFile(writePath, data));
+
+      return fse.ensureFile(writePath).then(() => fse.writeFile(writePath, data));
     },
 
     /**
@@ -36,6 +33,7 @@ module.exports = strapi => {
      */
     writePluginFile(plugin, optPath, data) {
       const newPath = ['extensions', plugin].concat(optPath).join('/');
+
       return strapiFS.writeAppFile(newPath, data);
     },
 
@@ -44,6 +42,7 @@ module.exports = strapi => {
      */
     removeAppFile(optPath) {
       const removePath = normalizePath(optPath);
+
       return fse.remove(removePath);
     },
   };

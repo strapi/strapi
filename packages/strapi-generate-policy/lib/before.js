@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -28,6 +26,7 @@ module.exports = (scope, cb) => {
   const name = scope.name || nameToSlug(scope.id);
 
   let filePath;
+
   if (scope.args.api) {
     filePath = `./api/${scope.args.api}/config/policies`;
   } else if (scope.args.plugin) {

@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from 'strapi-helper-plugin/lib/src';
 
 import Text from '../Text';
 
-const Wrapper = styled(props => <Text as="ul" fontSize="md" {...props} />)`
+const Wrapper = styled((props) => <Text as="ul" fontSize="md" {...props} />)`
   margin-bottom: 0;
   padding: 0;
   min-width: 230px;

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * User.js service
  *
@@ -74,7 +72,7 @@ module.exports = {
   },
 
   hashPassword(user = {}) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!user.password || this.isHashed(user.password)) {
         resolve(null);
       } else {

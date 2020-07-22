@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -13,15 +11,16 @@ const loadConfigs = require('./load-config');
 
 const attachMetadataToResolvers = (schema, { api, plugin }) => {
   const { resolver = {} } = schema;
+
   if (_.isEmpty(resolver)) return schema;
 
-  Object.keys(resolver).forEach(type => {
+  Object.keys(resolver).forEach((type) => {
     if (!_.isPlainObject(resolver[type])) return;
 
-    Object.keys(resolver[type]).forEach(resolverName => {
+    Object.keys(resolver[type]).forEach((resolverName) => {
       if (!_.isPlainObject(resolver[type][resolverName])) return;
 
-      resolver[type][resolverName]['_metadatas'] = {
+      resolver[type][resolverName]._metadatas = {
         api,
         plugin,
       };
@@ -31,7 +30,7 @@ const attachMetadataToResolvers = (schema, { api, plugin }) => {
   return schema;
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   const { appPath, installedPlugins } = strapi.config;
 
   return {
@@ -53,18 +52,21 @@ module.exports = strapi => {
       /*
        * Create a merge of all the GraphQL configuration.
        */
-      const apisSchemas = Object.keys(strapi.api || {}).map(key => {
+      const apisSchemas = Object.keys(strapi.api || {}).map((key) => {
         const schema = _.get(strapi.api[key], 'config.schema.graphql', {});
+
         return attachMetadataToResolvers(schema, { api: key });
       });
 
-      const pluginsSchemas = Object.keys(strapi.plugins || {}).map(key => {
+      const pluginsSchemas = Object.keys(strapi.plugins || {}).map((key) => {
         const schema = _.get(strapi.plugins[key], 'config.schema.graphql', {});
+
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const extensionsSchemas = Object.keys(extensions || {}).map(key => {
+      const extensionsSchemas = Object.keys(extensions || {}).map((key) => {
         const schema = _.get(extensions[key], 'config.schema.graphql', {});
+
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
@@ -88,6 +90,7 @@ module.exports = strapi => {
       // Get federation config
       const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
       const schemaDef = {};
+
       if (isFederated) {
         schemaDef.schema = buildFederatedSchema([{ typeDefs, resolvers }]);
       } else {
@@ -107,7 +110,7 @@ module.exports = strapi => {
             context: ctx,
           };
         },
-        formatError: err => {
+        formatError: (err) => {
           const formatError = _.get(strapi.plugins.graphql, 'config.formatError', null);
 
           return typeof formatError === 'function' ? formatError(err) : err;
@@ -145,7 +148,7 @@ module.exports = strapi => {
  * Merges a  list of schemas
  * @param {Array<Object>} schemas - The list of schemas to merge
  */
-const mergeSchemas = schemas => {
+const mergeSchemas = (schemas) => {
   return schemas.reduce((acc, el) => {
     const { definition, query, mutation, type, resolver } = el;
 

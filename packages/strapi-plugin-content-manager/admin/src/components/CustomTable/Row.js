@@ -2,7 +2,7 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -11,8 +11,6 @@ import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
-
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
@@ -71,7 +69,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
   const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
-    name => {
+    (name) => {
       const type = get(schema, ['attributes', name, 'type'], 'string');
 
       return getDisplayedValue(type, row[name], name);
@@ -87,7 +85,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
     },
     {
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
-      onClick: e => {
+      onClick: (e) => {
         e.stopPropagation();
         emitEvent('willDeleteEntryFromList');
         onClickDelete(row.id);
@@ -98,15 +96,16 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
   return (
     <>
       {isBulkable && (
-        <td key="i" onClick={e => e.stopPropagation()}>
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+        <td key="i" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
           <CustomInputCheckbox
             name={row.id}
             onChange={onChangeBulk}
-            value={entriesToDelete.filter(id => toString(id) === toString(row.id)).length > 0}
+            value={entriesToDelete.filter((id) => toString(id) === toString(row.id)).length > 0}
           />
         </td>
       )}
-      {headers.map(header => {
+      {headers.map((header) => {
         return (
           <td key={header.name}>
             {get(schema, ['attributes', header.name, 'type']) !== 'media' ? (

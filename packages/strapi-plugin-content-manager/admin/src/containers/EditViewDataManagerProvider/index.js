@@ -10,7 +10,7 @@ import {
   useUser,
   useUserPermissions,
   OverlayBlocker,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import { generatePermissionsObject, getTrad } from '../../utils';
 import pluginId from '../../pluginId';
@@ -25,7 +25,7 @@ import {
   removePasswordFieldsFromData,
 } from './utils';
 
-const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
+const getRequestUrl = (path) => `/${pluginId}/explorer/${path}`;
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -57,7 +57,7 @@ const EditViewDataManagerProvider = ({
   const allDynamicZoneFields = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
 
-    const dynamicZoneFields = Object.keys(attributes).filter(attrName => {
+    const dynamicZoneFields = Object.keys(attributes).filter((attrName) => {
       return get(attributes, [attrName, 'type'], '') === 'dynamiczone';
     });
 
@@ -369,7 +369,7 @@ const EditViewDataManagerProvider = ({
     []
   );
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Create yup schema
@@ -402,10 +402,10 @@ const EditViewDataManagerProvider = ({
 
       formData.append('data', JSON.stringify(cleanedData));
 
-      Object.keys(filesToUpload).forEach(key => {
+      Object.keys(filesToUpload).forEach((key) => {
         const files = filesToUpload[key];
 
-        files.forEach(file => {
+        files.forEach((file) => {
           formData.append(`files.${key}`, file);
         });
       });
@@ -499,8 +499,8 @@ const EditViewDataManagerProvider = ({
   };
 
   const shouldCheckDZErrors = useCallback(
-    dzName => {
-      const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
+    (dzName) => {
+      const doesDZHaveError = Object.keys(formErrors).some((key) => key.split('.')[0] === dzName);
       const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
 
       return shouldCheckErrors;
@@ -555,7 +555,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const onRemoveRelation = useCallback(keys => {
+  const onRemoveRelation = useCallback((keys) => {
     dispatch({
       type: 'REMOVE_RELATION',
       keys,

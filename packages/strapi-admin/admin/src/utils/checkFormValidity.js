@@ -1,4 +1,4 @@
-import { getYupInnerErrors } from 'strapi-helper-plugin';
+import { getYupInnerErrors } from 'strapi-helper-plugin/lib/src';
 
 const checkFormValidity = async (data, schema) => {
   let errors = null;

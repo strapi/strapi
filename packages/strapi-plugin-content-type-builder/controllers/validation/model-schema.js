@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const yup = require('yup');
 
@@ -10,31 +8,22 @@ const getRelationValidator = require('./relations');
 
 const createSchema = (types, relations, { modelType } = {}) => {
   const shape = {
-    name: yup
-      .string()
-      .min(1)
-      .required('name.required'),
+    name: yup.string().min(1).required('name.required'),
     description: yup.string(),
     connection: yup.string(),
-    collectionName: yup
-      .string()
-      .nullable()
-      .test(isValidCollectionName),
+    collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
   };
 
   if (modelType === modelTypes.CONTENT_TYPE) {
-    shape.kind = yup
-      .string()
-      .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
-      .nullable();
+    shape.kind = yup.string().oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]).nullable();
   }
 
   return yup.object(shape).noUnknown();
 };
 
 const createAttributesValidator = ({ types, modelType, relations }) => {
-  return yup.lazy(attributes => {
+  return yup.lazy((attributes) => {
     return yup
       .object()
       .shape(
@@ -63,7 +52,7 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
   });
 };
 
-const isForbiddenKey = key => {
+const isForbiddenKey = (key) => {
   return [
     ...FORBIDDEN_ATTRIBUTE_NAMES,
     ...strapi.plugins['content-type-builder'].services.builder.getReservedNames().attributes,

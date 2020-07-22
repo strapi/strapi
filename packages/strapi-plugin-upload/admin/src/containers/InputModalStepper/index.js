@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useUserPermissions } from 'strapi-helper-plugin';
+import { useUserPermissions } from 'strapi-helper-plugin/lib/src';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { omit } from 'lodash';
@@ -23,7 +23,7 @@ const InputModal = ({
   selectedFiles,
   step,
 }) => {
-  const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
+  const singularTypes = allowedTypes.map((type) => type.substring(0, type.length - 1));
   const permissions = React.useMemo(() => omit(pluginPermissions, 'main'), []);
   const { allowedActions, isLoading } = useUserPermissions(permissions);
 

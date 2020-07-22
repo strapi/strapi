@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -37,6 +35,7 @@ module.exports = (scope, cb) => {
 
   // Determine the destination path.
   let filePath;
+
   if (scope.args.api) {
     filePath = `./api/${scope.args.api}/models`;
   } else if (scope.args.plugin) {
@@ -60,7 +59,7 @@ module.exports = (scope, cb) => {
     scope.attributes = scope.args.attributes;
   } else {
     // Map attributes and split them for CLI.
-    scope.attributes = scope.args.attributes.map(attribute => {
+    scope.attributes = scope.args.attributes.map((attribute) => {
       if (_.isString(attribute)) {
         const parts = attribute.split(':');
 
@@ -69,6 +68,7 @@ module.exports = (scope, cb) => {
         // Handle invalid attributes.
         if (!parts[1] || !parts[0]) {
           invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+
           return;
         }
 
@@ -78,9 +78,9 @@ module.exports = (scope, cb) => {
             type: _.trim(_.deburr(parts[1].toLowerCase())),
           },
         };
-      } else {
-        return _.has(attribute, 'params.type') ? attribute : undefined;
       }
+
+      return _.has(attribute, 'params.type') ? attribute : undefined;
     });
 
     scope.attributes = _.compact(scope.attributes);
@@ -93,7 +93,7 @@ module.exports = (scope, cb) => {
 
     // Make sure there aren't duplicates.
     if (
-      _(scope.attributes.map(attribute => attribute.name))
+      _(scope.attributes.map((attribute) => attribute.name))
         .uniq()
         .valueOf().length !== scope.attributes.length
     ) {
@@ -104,6 +104,7 @@ module.exports = (scope, cb) => {
     // and make it available in our scope for use later on.
     scope.attributes = scope.attributes.reduce((acc, attribute) => {
       acc[attribute.name] = attribute.params;
+
       return acc;
     }, {});
   }

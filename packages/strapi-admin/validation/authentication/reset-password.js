@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, formatYupErrors } = require('strapi-utils');
 const validators = require('../common-validators');
 
@@ -12,10 +10,10 @@ const resetPasswordSchema = yup
   .required()
   .noUnknown();
 
-const validateResetPasswordInput = data => {
+const validateResetPasswordInput = (data) => {
   return resetPasswordSchema
     .validate(data, { strict: true, abortEarly: false })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch((error) => Promise.reject(formatYupErrors(error)));
 };
 
 module.exports = validateResetPasswordInput;

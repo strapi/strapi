@@ -12,12 +12,11 @@ import { bindActionCreators, compose } from 'redux';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
-import { GlobalContext, HeaderNav, CheckPermissions } from 'strapi-helper-plugin';
+import { HeaderNav, CheckPermissions } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import { HomePageContextProvider } from '../../contexts/HomePage';
 import EditForm from '../../components/EditForm';
-import List from '../../components/List';
 import PopUpForm from '../../components/PopUpForm';
 import selectHomePage from './selectors';
 import Wrapper from './Wrapper';
@@ -35,10 +34,8 @@ import {
 import saga from './saga';
 import checkFormValidity from './checkFormValidity';
 import pluginPermissions from '../../permissions';
-
-/* eslint-disable consistent-return */
-/* eslint-disable react/sort-comp */
-/* eslint-disable react/no-access-state-in-setstate */
+// eslint-disable-next-line import/no-cycle
+import List from '../../components/List';
 
 const keyBoardShortCuts = [18, 78];
 
@@ -54,7 +51,7 @@ export class HomePage extends React.Component {
       onClick: () => this.props.cancelChanges(),
       type: 'button',
       key: 'button-cancel',
-      Component: props => (
+      Component: (props) => (
         <CheckPermissions permissions={pluginPermissions.updateAdvancedSettings}>
           <Button {...props} />
         </CheckPermissions>
@@ -68,7 +65,7 @@ export class HomePage extends React.Component {
       onClick: () => this.props.submit(this.props.match.params.settingType),
       type: 'submit',
       key: 'button-submit',
-      Component: props => (
+      Component: (props) => (
         <CheckPermissions permissions={pluginPermissions.updateAdvancedSettings}>
           <Button {...props} />
         </CheckPermissions>
@@ -91,7 +88,7 @@ export class HomePage extends React.Component {
   UNSAFE_componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect =
-      allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
+      allowedPaths.filter((el) => el === nextProps.match.params.settingType).length === 0;
 
     if (shouldRedirect) {
       this.props.history.push('/404');
@@ -116,9 +113,11 @@ export class HomePage extends React.Component {
 
   getEndPoint = () => this.props.match.params.settingType;
 
-  handleKeyBoardShortCut = e => {
+  handleKeyBoardShortCut = (e) => {
     if (includes(keyBoardShortCuts, e.keyCode)) {
-      const mapKey = clone(this.state.mapKey);
+      let { mapKey } = this.state;
+
+      mapKey = clone(mapKey);
       mapKey[e.keyCode] = e.type === 'keydown';
       this.setState({ mapKey });
 
@@ -142,7 +141,7 @@ export class HomePage extends React.Component {
     }
   };
 
-  handleSubmit = e => {
+  handleSubmit = (e) => {
     e.preventDefault();
     const modifiedObject = get(this.props.modifiedData, [
       this.getEndPoint(),
@@ -165,6 +164,8 @@ export class HomePage extends React.Component {
     } else {
       this.props.setFormErrors(formErrors);
     }
+
+    return null;
   };
 
   isAdvanded = () => {
@@ -179,8 +180,6 @@ export class HomePage extends React.Component {
       (isLoading && this.isAdvanded() && get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
-
-  static contextType = GlobalContext;
 
   render() {
     const {
@@ -212,7 +211,7 @@ export class HomePage extends React.Component {
         setDataToEdit={this.props.setDataToEdit}
         unsetDataToEdit={this.props.unsetDataToEdit}
       >
-        <form onSubmit={e => e.preventDefault()}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <Wrapper className="container-fluid">
             <Header
               title={{
@@ -264,6 +263,12 @@ export class HomePage extends React.Component {
   }
 }
 
+HomePage.defaultProps = {
+  allowedActions: {
+    canUpdateAdvancedSettings: false,
+  },
+};
+
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
   data: PropTypes.object.isRequired,
@@ -285,6 +290,13 @@ HomePage.propTypes = {
   setFormErrors: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
   unsetDataToEdit: PropTypes.func.isRequired,
+  allowedActions: PropTypes.shape({
+    canUpdateAdvancedSettings: PropTypes.bool,
+  }),
+  tabs: PropTypes.shape({
+    links: PropTypes.arrayOf(PropTypes.string).isRequired,
+    style: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 function mapDispatchToProps(dispatch) {

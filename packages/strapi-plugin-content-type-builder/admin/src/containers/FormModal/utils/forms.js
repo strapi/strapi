@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import * as yup from 'yup';
 import { get, isEmpty, toLower, trim, toNumber } from 'lodash';
-import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
+import { translatedErrors as errorsTrads } from 'strapi-helper-plugin/lib/src';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
 import getTrad from '../../../utils/getTrad';
@@ -14,7 +14,7 @@ import { NAME_REGEX, ENUM_REGEX, CATEGORY_NAME_REGEX } from './attributesRegexes
 /* eslint-disable prefer-arrow-callback */
 
 yup.addMethod(yup.mixed, 'defined', function() {
-  return this.test('defined', errorsTrads.required, value => value !== undefined);
+  return this.test('defined', errorsTrads.required, (value) => value !== undefined);
 });
 
 yup.addMethod(yup.string, 'unique', function(
@@ -36,7 +36,7 @@ yup.addMethod(yup.string, 'unique', function(
 
 yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   return this.test('hasNotEmptyValues', message, function(array) {
-    return !array.some(value => {
+    return !array.some((value) => {
       return isEmpty(value);
     });
   });
@@ -68,7 +68,7 @@ yup.addMethod(yup.string, 'isInferior', function(message, max) {
 
 yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
   return this.test('matchesEnumRegex', message, function(array) {
-    return array.every(value => {
+    return array.every((value) => {
       return ENUM_REGEX.test(value);
     });
   });
@@ -96,7 +96,7 @@ const forms = {
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
-      ).filter(attribute => {
+      ).filter((attribute) => {
         if (isEditing) {
           return attribute !== attributeToEditName;
         }
@@ -115,7 +115,7 @@ const forms = {
         dataToValidate.target === currentSchema.uid
       ) {
         targetAttributeAlreadyTakenValue = targetAttributeAlreadyTakenValue.filter(
-          attribute => attribute !== initialData.targetAttribute
+          (attribute) => attribute !== initialData.targetAttribute
         );
       }
 
@@ -178,10 +178,7 @@ const forms = {
         }),
       };
       const fieldsThatSupportMaxAndMinLengthShape = {
-        maxLength: yup
-          .number()
-          .integer()
-          .nullable(),
+        maxLength: yup.number().integer().nullable(),
         minLength: yup
           .number()
           .integer()
@@ -226,7 +223,7 @@ const forms = {
               .test({
                 name: 'areEnumValuesUnique',
                 message: getTrad('error.validation.enum-duplicate'),
-                test: values => {
+                test: (values) => {
                   const filtered = [...new Set(values)];
 
                   return filtered.length === values.length;
@@ -240,10 +237,7 @@ const forms = {
           return yup.object().shape({
             ...commonShape,
             ...fieldsThatSupportMaxAndMinLengthShape,
-            regex: yup
-              .string()
-              .isValidRegExpPattern(getTrad('error.validation.regex'))
-              .nullable(),
+            regex: yup.string().isValidRegExpPattern(getTrad('error.validation.regex')).nullable(),
           });
         case 'number':
         case 'integer':
@@ -253,10 +247,7 @@ const forms = {
           if (dataToValidate.type === 'biginteger') {
             return yup.object().shape({
               ...commonShape,
-              default: yup
-                .string()
-                .nullable()
-                .matches(/^\d*$/),
+              default: yup.string().nullable().matches(/^\d*$/),
               min: yup
                 .string()
                 .nullable()
@@ -269,10 +260,7 @@ const forms = {
                   return schema;
                 }),
 
-              max: yup
-                .string()
-                .nullable()
-                .matches(/^\d*$/),
+              max: yup.string().nullable().matches(/^\d*$/),
             });
           }
 
@@ -460,13 +448,13 @@ const forms = {
                   key="hidden___value__placeholder"
                   id="components.InputSelect.option.placeholder"
                 >
-                  {msg => <option value="">{msg}</option>}
+                  {(msg) => <option value="">{msg}</option>}
                 </FormattedMessage>,
               ].concat(
                 data.enum
                   ? data.enum
                       .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
-                      .map(val => (
+                      .map((val) => (
                         <option key={val} value={val}>
                           {val}
                         </option>
@@ -686,7 +674,7 @@ const forms = {
 
               return (
                 <FormattedMessage id={tradId} key={id}>
-                  {msg => (
+                  {(msg) => (
                     <option disabled={disabled} hidden={disabled} value={value}>
                       {msg}
                     </option>
@@ -729,7 +717,7 @@ const forms = {
 
               return (
                 <FormattedMessage id={tradId} key={id}>
-                  {msg => (
+                  {(msg) => (
                     <option disabled={disabled} hidden={disabled} value={value}>
                       {msg}
                     </option>
@@ -765,8 +753,8 @@ const forms = {
 
         if (type === 'uid') {
           const options = Object.keys(attributes)
-            .filter(key => ['string', 'text'].includes(attributes[key].type))
-            .map(key => ({ id: key, value: key }));
+            .filter((key) => ['string', 'text'].includes(attributes[key].type))
+            .map((key) => ({ id: key, value: key }));
 
           return {
             items: [
@@ -788,7 +776,7 @@ const forms = {
                     <Fragment key={index}>
                       {index === 0 ? (
                         <FormattedMessage id={option.id}>
-                          {msg => <option value={option.value}>{msg}</option>}
+                          {(msg) => <option value={option.value}>{msg}</option>}
                         </FormattedMessage>
                       ) : (
                         <option value={option.value}>{option.value}</option>
@@ -813,7 +801,7 @@ const forms = {
   contentType: {
     schema(alreadyTakenNames, isEditing, ctUid, reservedNames) {
       const takenNames = isEditing
-        ? alreadyTakenNames.filter(uid => uid !== ctUid)
+        ? alreadyTakenNames.filter((uid) => uid !== ctUid)
         : alreadyTakenNames;
 
       return yup.object().shape({
@@ -917,7 +905,7 @@ const forms = {
       compoUid = null
     ) {
       const takenNames = isEditing
-        ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
+        ? alreadyTakenAttributes.filter((uid) => uid !== compoUid)
         : alreadyTakenAttributes;
 
       return yup.object().shape({
@@ -983,8 +971,8 @@ const forms = {
   editCategory: {
     schema(allCategories, initialData) {
       const allowedCategories = allCategories
-        .filter(cat => cat !== initialData.name)
-        .map(cat => toLower(cat));
+        .filter((cat) => cat !== initialData.name)
+        .map((cat) => toLower(cat));
 
       return yup.object().shape({
         name: yup

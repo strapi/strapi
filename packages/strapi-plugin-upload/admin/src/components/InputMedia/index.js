@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get, isEmpty } from 'lodash';
-import { CheckPermissions, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { CheckPermissions, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';
@@ -41,7 +41,7 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
 
   const handleClickToggleModal = () => {
     if (!disabled) {
-      setModal(prev => ({
+      setModal((prev) => ({
         isDisplayed: true,
         step: 'list',
         isOpen: !prev.isOpen,
@@ -50,13 +50,13 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
     }
   };
 
-  const handleClosed = () => setModal(prev => ({ ...prev, isDisplayed: false }));
+  const handleClosed = () => setModal((prev) => ({ ...prev, isDisplayed: false }));
 
-  const handleChange = v => {
+  const handleChange = (v) => {
     onChange({ target: { name, type, value: v } });
   };
 
-  const handleFilesNavigation = displayNext => {
+  const handleFilesNavigation = (displayNext) => {
     if (attribute.multiple) {
       if (displayNext && fileToDisplay === value.length - 1) {
         setFileToDisplay(0);
@@ -67,7 +67,7 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
       if (!displayNext && fileToDisplay === 0) {
         setFileToDisplay(value.length - 1);
       } else {
-        setFileToDisplay(prev => (displayNext ? prev + 1 : prev - 1));
+        setFileToDisplay((prev) => (displayNext ? prev + 1 : prev - 1));
       }
     }
   };
@@ -97,9 +97,9 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
     strapi.notification.info(getTrad('notification.link-copied'));
   };
 
-  const handleAllowDrop = e => e.preventDefault();
+  const handleAllowDrop = (e) => e.preventDefault();
 
-  const handleDrop = e => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.persist();
 

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -16,7 +14,7 @@ module.exports = {
   before: require('./before'),
   targets: {
     ':filePath/:filename': {
-      template: 'policy.template'
-    }
-  }
+      template: 'policy.template',
+    },
+  },
 };

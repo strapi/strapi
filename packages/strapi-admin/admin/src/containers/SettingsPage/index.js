@@ -15,7 +15,7 @@ import {
   useGlobalContext,
   LeftMenuList,
   LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
@@ -77,8 +77,8 @@ function SettingsPage() {
   // Only display accessible sections
   const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
 
-  const toggleHeaderSearch = label =>
-    setShowHeaderSearchState(prev => {
+  const toggleHeaderSearch = (label) =>
+    setShowHeaderSearchState((prev) => {
       if (prev.show) {
         return {
           show: false,
@@ -110,7 +110,7 @@ function SettingsPage() {
         <div className="row">
           <div className="col-md-3">
             <LeftMenu>
-              {filteredMenu.map(item => {
+              {filteredMenu.map((item) => {
                 return <LeftMenuList {...item} key={item.id} />;
               })}
             </LeftMenu>

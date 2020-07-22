@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @param events a list of events that need to be limited
  */
@@ -22,6 +20,7 @@ module.exports = (sender, { limitedEvents = [] } = {}) => {
     }
 
     eventCache.set(event, true);
+
     return sender(event, ...args);
   };
 };

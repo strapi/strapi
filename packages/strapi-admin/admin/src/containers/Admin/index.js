@@ -13,7 +13,7 @@ import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
-// Components from strapi-helper-plugin
+// Components from strapi-helper-plugin/lib/src
 import {
   difference,
   GlobalContextProvider,
@@ -22,7 +22,7 @@ import {
   UserProvider,
   CheckPagePermissions,
   request,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
 
 import adminPermissions from '../../permissions';
@@ -44,7 +44,7 @@ import {
   enableGlobalOverlayBlocker,
   updatePlugin,
 } from '../App/actions';
-import makeSelecApp from '../App/selectors';
+import makeSelectApp from '../App/selectors';
 import {
   getUserPermissions,
   getUserPermissionsError,
@@ -124,12 +124,12 @@ export class Admin extends React.Component {
     }
   };
 
-  hasApluginNotReady = props => {
+  hasApluginNotReady = (props) => {
     const {
       global: { plugins },
     } = props;
 
-    return !Object.keys(plugins).every(plugin => plugins[plugin].isReady === true);
+    return !Object.keys(plugins).every((plugin) => plugins[plugin].isReady === true);
   };
 
   /**
@@ -158,7 +158,7 @@ export class Admin extends React.Component {
     }, []);
   };
 
-  renderPluginDispatcher = props => {
+  renderPluginDispatcher = (props) => {
     // NOTE: Send the needed props instead of everything...
 
     return <PluginDispatcher {...this.props} {...props} {...this.helpers} />;
@@ -226,7 +226,7 @@ export class Admin extends React.Component {
               <Header />
               <Content>
                 <Switch>
-                  <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                  <Route path="/" render={(props) => this.renderRoute(props, HomePage)} exact />
                   <Route path="/me" component={ProfilePage} />
                   <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
                   <Route path="/list-plugins" exact>
@@ -301,7 +301,7 @@ Admin.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   admin: makeSelectAdmin(),
-  global: makeSelecApp(),
+  global: makeSelectApp(),
 });
 
 export function mapDispatchToProps(dispatch) {

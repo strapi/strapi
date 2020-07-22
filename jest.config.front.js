@@ -56,7 +56,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/examples/getstarted/',
-    '<rootDir>/packages/strapi-helper-plugin/dist/',
+    '<rootDir>/packages/strapi-helper-plugin/lib/src/dist/',
     '/OLD/',
   ],
   setupFilesAfterEnv: [

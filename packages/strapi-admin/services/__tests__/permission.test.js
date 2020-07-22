@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const permissionService = require('../permission');
 
@@ -46,8 +44,8 @@ describe('Permission Service', () => {
       const deleteFn = jest.fn(() => Promise.resolve([]));
       const createMany = jest.fn(() => Promise.resolve([]));
       const find = jest.fn(() => Promise.resolve([]));
-      const getAll = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
-      const removeUnkownConditionIds = jest.fn(conds => _.intersection(conds, ['cond']));
+      const getAll = jest.fn(() => permissions.map((perm) => ({ actionId: perm.action })));
+      const removeUnkownConditionIds = jest.fn((conds) => _.intersection(conds, ['cond']));
 
       global.strapi = {
         admin: {
@@ -100,7 +98,7 @@ describe('Permission Service', () => {
       const rolesId = [1, 2];
 
       const res = await permissionService.findUserPermissions({
-        roles: rolesId.map(id => ({ id })),
+        roles: rolesId.map((id) => ({ id })),
       });
 
       expect(find).toHaveBeenCalledWith({ role_in: rolesId, _limit: -1 });
@@ -255,7 +253,7 @@ describe('Permission Service', () => {
       const getPermissionsWithNestedFields = jest.fn(() => [...permissions]); // cloned, otherwise it is modified inside resetSuperAdminPermissions()
       const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 1 }));
       const createMany = jest.fn(() => Promise.resolve([{ ...permissions[0], role: { id: 1 } }]));
-      const removeUnkownConditionIds = jest.fn(conds => conds);
+      const removeUnkownConditionIds = jest.fn((conds) => conds);
 
       global.strapi = {
         query: () => ({ createMany, find, delete: deleteFn }),

@@ -8,7 +8,7 @@ import {
   // contexts
   // TODO add emit event
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -69,7 +69,7 @@ const EditSettingsView = ({
 
   const getForm = () =>
     Object.keys(get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})).filter(
-      meta => meta !== 'visible'
+      (meta) => meta !== 'visible'
     );
 
   const getRelationsLayout = useCallback(() => {
@@ -81,8 +81,8 @@ const EditSettingsView = ({
     const displayedFields = getRelationsLayout();
 
     return Object.keys(attributes)
-      .filter(attr => get(attributes, [attr, 'type'], '') === 'relation')
-      .filter(attr => displayedFields.indexOf(attr) === -1);
+      .filter((attr) => get(attributes, [attr, 'type'], '') === 'relation')
+      .filter((attr) => displayedFields.indexOf(attr) === -1);
   };
 
   const getEditRemainingFields = () => {
@@ -91,15 +91,15 @@ const EditSettingsView = ({
     const displayedFields = getEditLayout().reduce((acc, curr) => [...acc, ...curr.rowContent], []);
 
     return Object.keys(attributes)
-      .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
-      .filter(attr => get(metadatas, [attr, 'edit', 'visible'], false) === true)
-      .filter(attr => {
-        return displayedFields.findIndex(el => el.name === attr) === -1;
+      .filter((attr) => get(attributes, [attr, 'type'], '') !== 'relation')
+      .filter((attr) => get(metadatas, [attr, 'edit', 'visible'], false) === true)
+      .filter((attr) => {
+        return displayedFields.findIndex((el) => el.name === attr) === -1;
       });
   };
 
   const getSelectedItemSelectOptions = useCallback(
-    formType => {
+    (formType) => {
       if (formType !== 'relation' && formType !== 'component') {
         return [];
       }
@@ -194,7 +194,7 @@ const EditSettingsView = ({
     }
   };
 
-  const handleSubmitMetaForm = e => {
+  const handleSubmitMetaForm = (e) => {
     e.preventDefault();
     dispatch({
       type: 'SUBMIT_META_FORM',
@@ -231,7 +231,7 @@ const EditSettingsView = ({
   };
 
   const toggleModalForm = () => {
-    setIsModalFormOpen(prevState => !prevState);
+    setIsModalFormOpen((prevState) => !prevState);
   };
 
   const renderForm = () =>
@@ -259,11 +259,11 @@ const EditSettingsView = ({
           <FormattedMessage
             id={`${pluginId}.containers.SettingPage.editSettings.entry.title.description`}
           >
-            {description => (
+            {(description) => (
               <FormattedMessage
                 id={get(getInputProps(meta), 'label.id', 'app.utils.defaultMessage')}
               >
-                {label => (
+                {(label) => (
                   <Input
                     autoFocus={index === 0}
                     description={meta === 'mainField' ? description : ''}
@@ -294,7 +294,7 @@ const EditSettingsView = ({
       metadatas={get(modifiedData, ['metadatas'], {})}
       moveItem={moveItem}
       moveRow={moveRow}
-      onAddData={name => {
+      onAddData={(name) => {
         dispatch({
           type: 'ON_ADD_DATA',
           name,
@@ -308,7 +308,7 @@ const EditSettingsView = ({
           fieldIndex,
         });
       }}
-      setEditFieldToSelect={name => {
+      setEditFieldToSelect={(name) => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',
           name,
@@ -392,7 +392,7 @@ const EditSettingsView = ({
           <FieldsReorder className={fieldsReorderClassName} />
           {type !== 'components' && (
             <SortableList
-              addItem={name => {
+              addItem={(name) => {
                 dispatch({
                   type: 'ADD_RELATION',
                   name,
@@ -406,7 +406,7 @@ const EditSettingsView = ({
                   hoverIndex,
                 });
               }}
-              removeItem={index => {
+              removeItem={(index) => {
                 dispatch({
                   type: 'REMOVE_RELATION',
                   index,

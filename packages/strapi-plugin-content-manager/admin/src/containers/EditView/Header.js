@@ -3,13 +3,18 @@ import { useIntl } from 'react-intl';
 import { Header as PluginHeader } from '@buffetjs/custom';
 import { get, isEqual, isEmpty, toString } from 'lodash';
 
-import { PopUpWarning, request, templateObject, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  PopUpWarning,
+  request,
+  templateObject,
+  useGlobalContext,
+} from 'strapi-helper-plugin/lib/src';
 
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
 
-const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
+const getRequestUrl = (path) => `/${pluginId}/explorer/${path}`;
 
 const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
@@ -134,8 +139,8 @@ const Header = () => {
     };
   }, [headerActions, headerTitle, apiID]);
 
-  const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
-  const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
+  const toggleWarningCancel = () => setWarningCancel((prevState) => !prevState);
+  const toggleWarningDelete = () => setWarningDelete((prevState) => !prevState);
 
   const handleConfirmReset = () => {
     toggleWarningCancel();

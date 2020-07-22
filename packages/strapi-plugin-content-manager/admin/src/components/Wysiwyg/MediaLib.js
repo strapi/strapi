@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 import PropTypes from 'prop-types';
 
 const MediaLib = ({ isOpen, onChange, onToggle }) => {
@@ -19,7 +19,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
 
   const Component = getComponent('media-library').Component;
 
-  const handleInputChange = data => {
+  const handleInputChange = (data) => {
     if (data) {
       const { name, alternativeText, url } = data;
       const alt = alternativeText || name;

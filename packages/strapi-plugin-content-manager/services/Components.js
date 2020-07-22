@@ -1,10 +1,8 @@
-'use strict';
-
 const _ = require('lodash');
 
 const storeUtils = require('./utils/store');
 
-const uidToStoreKey = uid => `components::${uid}`;
+const uidToStoreKey = (uid) => `components::${uid}`;
 
 module.exports = {
   async getComponentInformations(uid) {
@@ -38,9 +36,7 @@ module.exports = {
 
         if (_.has(componentsMap, compo.uid)) continue;
 
-        const { component, components } = await this.getComponentInformations(
-          compo.uid
-        );
+        const { component, components } = await this.getComponentInformations(compo.uid);
 
         Object.assign(componentsMap, {
           [compo.uid]: component,
@@ -56,9 +52,7 @@ module.exports = {
 
           if (_.has(componentsMap, compo.uid)) continue;
 
-          const { component, components } = await this.getComponentInformations(
-            compo.uid
-          );
+          const { component, components } = await this.getComponentInformations(compo.uid);
 
           Object.assign(componentsMap, {
             [compo.uid]: component,
@@ -73,6 +67,7 @@ module.exports = {
 
   getConfiguration(uid) {
     const storeKey = uidToStoreKey(uid);
+
     return storeUtils.getModelConfiguration(storeKey);
   },
 
@@ -80,6 +75,7 @@ module.exports = {
     const { settings, metadatas, layouts } = input;
 
     const storeKey = uidToStoreKey(uid);
+
     return storeUtils.setModelConfiguration(storeKey, {
       uid,
       isComponent: true,
@@ -91,6 +87,7 @@ module.exports = {
 
   deleteConfiguration(uid) {
     const storeKey = uidToStoreKey(uid);
+
     return storeUtils.deleteKey(storeKey);
   },
 };

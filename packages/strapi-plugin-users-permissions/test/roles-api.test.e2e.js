@@ -33,9 +33,9 @@ const deleteTestUser = () =>
     url: `/users/${data.user.id}`,
   });
 
-/*****************************
+/** ***************************
  * TESTS
- *****************************/
+ **************************** */
 describe('Roles API', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -73,7 +73,7 @@ describe('Roles API', () => {
       expect.arrayContaining([expect.objectContaining(internals.role)])
     );
 
-    data.role = res.body.roles.find(r => r.name === internals.role.name);
+    data.role = res.body.roles.find((r) => r.name === internals.role.name);
   });
 
   test('Delete Role', async () => {

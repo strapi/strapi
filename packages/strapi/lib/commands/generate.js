@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -22,12 +20,12 @@ const packageJSON = require('../../package.json');
  * Scaffolding for the application in our working directory.
  */
 
-module.exports = function(id, cliArguments) {
+module.exports = function (id, cliArguments) {
   // Build initial scope.
   const scope = {
     rootPath: process.cwd(),
     strapiRoot: path.resolve(__dirname, '..'),
-    id: id,
+    id,
     args: cliArguments,
     strapiPackageJSON: packageJSON,
   };

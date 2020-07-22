@@ -1,5 +1,3 @@
-'use strict';
-
 const { SUPER_ADMIN_CODE } = require('../services/constants');
 
 /**
@@ -15,8 +13,8 @@ function createUser(attributes) {
   };
 }
 
-const hasSuperAdminRole = user => {
-  return user.roles.filter(role => role.code === SUPER_ADMIN_CODE).length > 0;
+const hasSuperAdminRole = (user) => {
+  return user.roles.filter((role) => role.code === SUPER_ADMIN_CODE).length > 0;
 };
 
 module.exports = {

@@ -5,7 +5,7 @@ const form = require('../../../test/helpers/generators');
 
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-const cleanDate = entry => {
+const cleanDate = (entry) => {
   delete entry.updatedAt;
   delete entry.createdAt;
   delete entry.created_at;
@@ -33,13 +33,7 @@ describe('Create Strapi API End to End', () => {
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteContentTypes([
-      'article',
-      'tag',
-      'category',
-      'reference',
-      'product',
-    ]);
+    await modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'product']);
   }, 60000);
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
@@ -616,8 +610,7 @@ describe('Create Strapi API End to End', () => {
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
-        return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

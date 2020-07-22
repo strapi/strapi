@@ -1,12 +1,10 @@
-'use strict';
-
 const body = require('koa-body');
 const qs = require('qs');
 
 /**
  * Body parser hook
  */
-const addQsParser = app => {
+const addQsParser = (app) => {
   Object.defineProperty(app.request, 'query', {
     configurable: false,
     enumerable: true,
@@ -16,6 +14,7 @@ const addQsParser = app => {
     get() {
       const qstr = this.querystring;
       const cache = (this._querycache = this._querycache || {});
+
       return cache[qstr] || (cache[qstr] = qs.parse(qstr, { depth: 20 }));
     },
 
@@ -30,7 +29,7 @@ const addQsParser = app => {
   return app;
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook

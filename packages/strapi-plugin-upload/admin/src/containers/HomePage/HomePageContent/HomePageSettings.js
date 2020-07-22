@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDebounce } from '@buffetjs/hooks';
-import { HeaderSearch, useGlobalContext, useQuery } from 'strapi-helper-plugin';
+import { HeaderSearch, useGlobalContext, useQuery } from 'strapi-helper-plugin/lib/src';
 import { useAppContext } from '../../../hooks';
 import { getTrad, getFileModelTimestamps } from '../../../utils';
 

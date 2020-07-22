@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const slugify = require('@sindresorhus/slugify');
 
@@ -34,7 +32,7 @@ module.exports = {
         [`${field}_contains`]: value,
         _limit: -1,
       })
-      .then(results => results.map(result => result[field]));
+      .then((results) => results.map((result) => result[field]));
 
     if (possibleColisions.length === 0) {
       return value;
@@ -58,6 +56,7 @@ module.exports = {
     });
 
     if (count > 0) return false;
+
     return true;
   },
 };

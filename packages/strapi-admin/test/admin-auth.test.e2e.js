@@ -1,5 +1,3 @@
-'use strict';
-
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
@@ -24,7 +22,7 @@ describe('Admin Auth End to End', () => {
     role: null,
   };
 
-  const createUser = data => {
+  const createUser = (data) => {
     return rq({
       url: '/admin/users',
       method: 'POST',

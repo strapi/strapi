@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { LayoutIcon, CheckPermissions } from 'strapi-helper-plugin';
+import { LayoutIcon, CheckPermissions } from 'strapi-helper-plugin/lib/src';
 import { Button as Base } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import pluginPermissions from '../../../permissions';

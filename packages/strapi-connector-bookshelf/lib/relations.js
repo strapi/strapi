@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -12,21 +10,21 @@ const {
   models: { getValuePrimaryKey },
 } = require('strapi-utils');
 
-const transformToArrayID = array => {
+const transformToArrayID = (array) => {
   if (_.isArray(array)) {
     return array
-      .map(value => _.get(value, 'id') || value)
-      .filter(n => n)
-      .map(val => _.toString(val));
+      .map((value) => _.get(value, 'id') || value)
+      .filter((n) => n)
+      .map((val) => _.toString(val));
   }
 
   return transformToArrayID([array]);
 };
 
-const removeUndefinedKeys = obj => _.pickBy(obj, _.negate(_.isUndefined));
+const removeUndefinedKeys = (obj) => _.pickBy(obj, _.negate(_.isUndefined));
 
 const addRelationMorph = async (model, { params, transacting } = {}) => {
-  return await model.morph.forge().save(
+  return model.morph.forge().save(
     {
       [`${model.collectionName}_id`]: params.id,
       [`${params.alias}_id`]: params.refId,
@@ -72,7 +70,7 @@ module.exports = {
     // Retrieve data manually.
     if (_.isEmpty(populate)) {
       const arrayOfPromises = this.associations
-        .filter(association => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
+        .filter((association) => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
         .map(() => {
           return this.morph
             .forge()
@@ -104,7 +102,7 @@ module.exports = {
     // Only update fields which are on this document.
     const values = Object.keys(removeUndefinedKeys(params.values)).reduce((acc, current) => {
       const property = params.values[current];
-      const association = this.associations.filter(x => x.alias === current)[0];
+      const association = this.associations.filter((x) => x.alias === current)[0];
       const details = this._attributes[current];
 
       if (!association && _.get(details, 'isVirtual') !== true) {
@@ -139,6 +137,7 @@ module.exports = {
               );
 
             relationUpdates.push(updatePromise);
+
             return _.set(acc, current, null);
           }
 
@@ -167,6 +166,7 @@ module.exports = {
 
           // set new relation
           relationUpdates.push(updateLink);
+
           return _.set(acc, current, property);
         }
         case 'oneToMany': {
@@ -182,7 +182,7 @@ module.exports = {
             .where(
               assocModel.primaryKey,
               'in',
-              toRemove.map(val => val[assocModel.primaryKey] || val)
+              toRemove.map((val) => val[assocModel.primaryKey] || val)
             )
             .save(
               { [details.via]: null },
@@ -198,7 +198,7 @@ module.exports = {
                 .where(
                   assocModel.primaryKey,
                   'in',
-                  property.map(val => val[assocModel.primaryKey] || val)
+                  property.map((val) => val[assocModel.primaryKey] || val)
                 )
                 .save(
                   { [details.via]: primaryKeyValue },
@@ -212,6 +212,7 @@ module.exports = {
             });
 
           relationUpdates.push(updatePromise);
+
           return acc;
         }
         case 'manyToOne': {
@@ -234,6 +235,7 @@ module.exports = {
             .then(() => collection.attach(toAdd, { transacting }));
 
           relationUpdates.push(updatePromise);
+
           return acc;
         }
         // media -> model
@@ -250,13 +252,15 @@ module.exports = {
             break;
           }
 
-          refs.forEach(obj => {
+          refs.forEach((obj) => {
             const targetModel = strapi.db.getModel(
               obj.ref,
               obj.source !== 'content-manager' ? obj.source : null
             );
 
-            const reverseAssoc = targetModel.associations.find(assoc => assoc.alias === obj.field);
+            const reverseAssoc = targetModel.associations.find(
+              (assoc) => assoc.alias === obj.field
+            );
 
             // Remove existing relationship because only one file
             // can be related to this field.
@@ -290,7 +294,7 @@ module.exports = {
 
             const addRelation = async () => {
               const maxOrder = await this.morph
-                .query(qb => {
+                .query((qb) => {
                   qb.max('order as order').where({
                     [`${association.alias}_id`]: obj.refId,
                     [`${association.alias}_type`]: targetModel.collectionName,
@@ -368,6 +372,7 @@ module.exports = {
     await Promise.all(relationUpdates);
 
     delete values[this.primaryKey];
+
     if (!_.isEmpty(values)) {
       await this.forge({
         [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
@@ -389,7 +394,7 @@ module.exports = {
   deleteRelations(id, { transacting }) {
     const values = {};
 
-    this.associations.map(association => {
+    this.associations.map((association) => {
       switch (association.nature) {
         case 'oneWay':
         case 'oneToOne':

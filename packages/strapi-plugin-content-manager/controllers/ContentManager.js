@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const parseMultipartBody = require('../utils/parse-multipart');
@@ -189,7 +187,7 @@ module.exports = {
       throw strapi.errors.forbidden();
     }
 
-    const sanitize = e => pm.pickPermittedFieldsOf(e, { subject: model });
+    const sanitize = (e) => pm.pickPermittedFieldsOf(e, { subject: model });
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
@@ -235,7 +233,7 @@ module.exports = {
       id
     );
 
-    const sanitize = e => pm.pickPermittedFieldsOf(e, { subject: pm.toSubject(entity) });
+    const sanitize = (e) => pm.pickPermittedFieldsOf(e, { subject: pm.toSubject(entity) });
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
@@ -297,7 +295,7 @@ module.exports = {
       pm.query
     );
 
-    ctx.body = results.map(result => pm.sanitize(result, { action: ACTIONS.read }));
+    ctx.body = results.map((result) => pm.sanitize(result, { action: ACTIONS.read }));
   },
 
   async findRelationList(ctx) {
@@ -317,6 +315,7 @@ module.exports = {
     }
 
     const attr = modelDef.attributes[targetField];
+
     if (!attr) {
       return ctx.badRequest('targetField.invalid');
     }
@@ -347,7 +346,7 @@ module.exports = {
 
     const field = _.get(modelConfig, `metadatas.${targetField}.edit.mainField`, 'id');
     const pickFields = [field, 'id', target.primaryKey];
-    const sanitize = d => _.pick(d, pickFields);
+    const sanitize = (d) => _.pick(d, pickFields);
 
     ctx.body = _.isArray(entities) ? entities.map(sanitize) : sanitize(entities);
   },

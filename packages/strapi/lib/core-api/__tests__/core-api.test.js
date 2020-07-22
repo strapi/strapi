@@ -1,4 +1,3 @@
-'use strict';
 const { createCoreApi } = require('../index');
 
 describe('Core Api', () => {

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
@@ -70,7 +68,7 @@ exports.connect = (provider, query) => {
         }
 
         if (
-          !_.isEmpty(_.find(users, user => user.provider !== provider)) &&
+          !_.isEmpty(_.find(users, (user) => user.provider !== provider)) &&
           advanced.unique_email
         ) {
           return resolve([
@@ -87,7 +85,7 @@ exports.connect = (provider, query) => {
 
         // Create the new user.
         const params = _.assign(profile, {
-          provider: provider,
+          provider,
           role: defaultRole.id,
           confirmed: true,
         });
@@ -151,9 +149,9 @@ const getProfile = async (provider, query, callback) => {
             callback(err);
           } else {
             // Combine username and discriminator because discord username is not unique
-            var username = `${body.username}#${body.discriminator}`;
+            let username = `${body.username}#${body.discriminator}`;
             callback(null, {
-              username: username,
+              username,
               email: body.email,
             });
           }
@@ -242,7 +240,7 @@ const getProfile = async (provider, query, callback) => {
               return callback(null, {
                 username: userbody.login,
                 email: Array.isArray(emailsbody)
-                  ? emailsbody.find(email => email.primary === true).email
+                  ? emailsbody.find((email) => email.primary === true).email
                   : null,
               });
             });

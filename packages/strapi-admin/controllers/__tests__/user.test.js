@@ -1,5 +1,3 @@
-'use strict';
-
 const createContext = require('../../../../test/helpers/create-context');
 const userController = require('../user');
 
@@ -36,7 +34,7 @@ describe('User Controller', () => {
     test('Create User Successfully', async () => {
       const create = jest.fn(() => Promise.resolve(body));
       const exists = jest.fn(() => Promise.resolve(false));
-      const sanitizeUser = jest.fn(user => Promise.resolve(user));
+      const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const badRequest = jest.fn();
       const created = jest.fn();
       const ctx = createContext({ body }, { badRequest, created });
@@ -74,7 +72,7 @@ describe('User Controller', () => {
 
     test('Find a user correctly', async () => {
       const findOne = jest.fn(() => user);
-      const sanitizeUser = jest.fn(user => user);
+      const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({ params: { id: user.id } });
 
       global.strapi = {
@@ -138,7 +136,7 @@ describe('User Controller', () => {
         pagination,
       }));
 
-      const sanitizeUser = jest.fn(user => user);
+      const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({});
 
       global.strapi = {
@@ -163,7 +161,7 @@ describe('User Controller', () => {
         pagination,
       }));
 
-      const sanitizeUser = jest.fn(user => user);
+      const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({ query: { _q: 'foo' } });
 
       global.strapi = {
@@ -228,7 +226,7 @@ describe('User Controller', () => {
 
     test('Update a user correctly', async () => {
       const updateById = jest.fn((_, input) => ({ ...user, ...input }));
-      const sanitizeUser = jest.fn(user => user);
+      const sanitizeUser = jest.fn((user) => user);
       const body = { firstname: 'Foo' };
 
       const ctx = createContext({ params: { id: user.id }, body });

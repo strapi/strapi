@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Export shared utilities
  */

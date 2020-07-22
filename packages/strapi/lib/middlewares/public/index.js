@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -18,7 +16,7 @@ const utils = require('../../utils');
  * Public assets hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -34,6 +32,7 @@ module.exports = strapi => {
         const serveIndexPage = async (ctx, next) => {
           // defer rendering of strapi index page
           await next();
+
           if (ctx.body != null || ctx.status !== 404) return;
 
           ctx.url = 'index.html';
@@ -88,9 +87,9 @@ module.exports = strapi => {
         serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' })
       );
 
-      strapi.router.get(`${strapi.config.admin.path}*`, ctx => {
+      strapi.router.get(`${strapi.config.admin.path}*`, (ctx) => {
         ctx.type = 'html';
-        ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
+        ctx.body = fs.createReadStream(path.join(`${buildDir}/index.html`));
       });
     },
   };

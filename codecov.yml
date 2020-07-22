@@ -1,4 +1,2 @@
-comment:
-  branches:
-    - master
-    - develop
+-master
+- develop;

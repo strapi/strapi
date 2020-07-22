@@ -8,7 +8,6 @@
  * - Components
  * - ContentTypes
  */
-'use strict';
 
 const _ = require('lodash');
 
@@ -20,7 +19,7 @@ const loadExtensions = require('./load-extensions');
 const loadHooks = require('./load-hooks');
 const loadComponents = require('./load-components');
 
-module.exports = async strapi => {
+module.exports = async (strapi) => {
   const [api, admin, plugins, middlewares, hook, extensions, components] = await Promise.all([
     loadApis(strapi),
     loadAdmin(strapi),

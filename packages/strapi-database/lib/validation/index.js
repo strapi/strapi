@@ -1,5 +1,3 @@
-'use strict';
-
 const checkDuplicatedTableNames = require('./check-duplicated-table-names');
 const checkReservedNames = require('./check-reserved-names');
 

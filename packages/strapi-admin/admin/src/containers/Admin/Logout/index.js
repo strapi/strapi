@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
-import { auth } from 'strapi-helper-plugin';
+import { auth } from 'strapi-helper-plugin/lib/src';
 import Wrapper from './components';
 
 const Logout = ({ history: { push } }) => {
@@ -27,7 +27,7 @@ const Logout = ({ history: { push } }) => {
     push('/auth/login');
   };
 
-  const toggle = () => setIsOpen(prev => !prev);
+  const toggle = () => setIsOpen((prev) => !prev);
 
   const userInfo = auth.getUserInfo();
   const displayName = userInfo.username || `${userInfo.firstname} ${userInfo.lastname}`;

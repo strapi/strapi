@@ -7,17 +7,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import {
-  difference,
-  findIndex,
-  has,
-  includes,
-  isEmpty,
-  map,
-  toLower,
-} from 'lodash';
+import { difference, findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 
-import { Label } from 'strapi-helper-plugin';
+import { Label } from 'strapi-helper-plugin/lib/src';
 import InputSearchLi from '../InputSearchLi';
 
 import { Addon, List, Wrapper } from './Components';
@@ -56,12 +48,12 @@ function InputSearchContainer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didFetchUsers]);
 
-  const handleBlur = () => setIsFocused(prev => !prev);
+  const handleBlur = () => setIsFocused((prev) => !prev);
 
   const handleChange = ({ target: { value } }) => {
     const filteredUsers = isEmpty(value)
       ? currUsers
-      : currUsers.filter(user => includes(toLower(user.name), toLower(value)));
+      : currUsers.filter((user) => includes(toLower(user.name), toLower(value)));
 
     if (!isEmpty(value)) {
       if (isEmpty(filteredUsers)) {
@@ -78,10 +70,11 @@ function InputSearchContainer({
     }
   };
 
-  const handleClick = item => {
+  const handleClick = (item) => {
     if (isAdding) {
       const id = has(item, '_id') ? '_id' : 'id';
       const users = values;
+
       // Check if user is already associated with this role
       if (findIndex(users, [id, item[id]]) === -1) {
         onClickAdd(item);
@@ -98,19 +91,19 @@ function InputSearchContainer({
     }
   };
 
-  const handleFocus = () => setIsFocused(prev => !prev);
+  const handleFocus = () => setIsFocused((prev) => !prev);
 
   return (
     <Wrapper className="col-md-6">
       <Label htmlFor={name} message={label} />
       <div className="input-group">
         <Addon className={`input-group-addon ${isFocused && 'focus'}`}>
-          <i className="fas fa-search"></i>
+          <i className="fas fa-search" />
         </Addon>
         <FormattedMessage id="users-permissions.InputSearch.placeholder">
-          {message => (
+          {(message) => (
             <input
-              className={`form-control`}
+              className="form-control"
               id={name}
               name={name}
               onBlur={handleBlur}
@@ -126,7 +119,7 @@ function InputSearchContainer({
       </div>
       <List className={isFocused && 'focused'}>
         <ul>
-          {map(filteredUsers, user => (
+          {map(filteredUsers, (user) => (
             <InputSearchLi
               key={user.id || user._id}
               item={user}

@@ -1,5 +1,3 @@
-'use strict';
-
 const { isValidEmailTemplate } = require('../email-template');
 
 describe('isValidEmailTemplate', () => {

@@ -1,5 +1,3 @@
-'use strict';
-
 const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 
 /**
@@ -26,6 +24,7 @@ const createSingleTypeController = ({ model, service }) => {
      */
     async find() {
       const entity = await service.find();
+
       return sanitizeEntity(entity, { model });
     },
 
@@ -36,6 +35,7 @@ const createSingleTypeController = ({ model, service }) => {
      */
     async update(ctx) {
       let entity;
+
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartData(ctx);
         entity = await service.createOrUpdate(data, { files });
@@ -48,6 +48,7 @@ const createSingleTypeController = ({ model, service }) => {
 
     async delete() {
       const entity = await service.delete();
+
       return sanitizeEntity(entity, { model });
     },
   };
@@ -66,13 +67,14 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async find(ctx) {
       let entities;
+
       if (ctx.query._q) {
         entities = await service.search(ctx.query);
       } else {
         entities = await service.find(ctx.query);
       }
 
-      return entities.map(entity => sanitizeEntity(entity, { model }));
+      return entities.map((entity) => sanitizeEntity(entity, { model }));
     },
 
     /**
@@ -82,6 +84,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async findOne(ctx) {
       const entity = await service.findOne({ id: ctx.params.id });
+
       return sanitizeEntity(entity, { model });
     },
 
@@ -94,6 +97,7 @@ const createCollectionTypeController = ({ model, service }) => {
       if (ctx.query._q) {
         return service.countSearch(ctx.query);
       }
+
       return service.count(ctx.query);
     },
 
@@ -104,6 +108,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async create(ctx) {
       let entity;
+
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartData(ctx);
         entity = await service.create(data, { files });
@@ -121,6 +126,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async update(ctx) {
       let entity;
+
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartData(ctx);
         entity = await service.update({ id: ctx.params.id }, data, { files });
@@ -138,6 +144,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async delete(ctx) {
       const entity = await service.delete({ id: ctx.params.id });
+
       return sanitizeEntity(entity, { model });
     },
   };

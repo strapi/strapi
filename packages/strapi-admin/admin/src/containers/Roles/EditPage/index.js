@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { get, isEmpty } from 'lodash';
-import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { useGlobalContext, request } from 'strapi-helper-plugin/lib/src';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -56,7 +56,7 @@ const EditPage = () => {
         ];
   /* eslint-enable indent */
 
-  const handleEditRoleSubmit = async data => {
+  const handleEditRoleSubmit = async (data) => {
     try {
       strapi.lockAppWithOverlay();
       setIsSubmiting(true);

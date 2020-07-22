@@ -2,7 +2,6 @@
  * Entity validator
  * Module that will validate input data for entity creation or edition
  */
-'use strict';
 
 const _ = require('lodash');
 
@@ -22,7 +21,7 @@ module.exports = ({ strapi }) => ({
       .validate(data, {
         abortEarly: false,
       })
-      .catch(error => {
+      .catch((error) => {
         throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(error) });
       });
   },
@@ -39,20 +38,20 @@ module.exports = ({ strapi }) => ({
       .validate(data, {
         abortEarly: false,
       })
-      .catch(error => {
+      .catch((error) => {
         throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(error) });
       });
   },
 });
 
-const isMedia = attr => {
+const isMedia = (attr) => {
   return (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
 };
 
-const createValidator = model => {
+const createValidator = (model) => {
   return yup
     .object(
-      _.mapValues(model.attributes, attr => {
+      _.mapValues(model.attributes, (attr) => {
         if (isMedia(attr)) {
           return yup.mixed().nullable();
         }
@@ -75,10 +74,10 @@ const createValidator = model => {
     .required();
 };
 
-const createUpdateValidator = model => {
+const createUpdateValidator = (model) => {
   return yup
     .object(
-      _.mapValues(model.attributes, attr => {
+      _.mapValues(model.attributes, (attr) => {
         if (isMedia(attr)) {
           return yup.mixed().nullable();
         }
@@ -101,7 +100,7 @@ const createUpdateValidator = model => {
 /**
  * Validator for existing types
  */
-const createAttributeValidator = attr => {
+const createAttributeValidator = (attr) => {
   if (_.has(validators, attr.type)) {
     return validators[attr.type](attr);
   }

@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, formatYupErrors } = require('strapi-utils');
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
@@ -49,6 +47,7 @@ module.exports = {
     }
 
     const role = await strapi.admin.services.role.findOne({ id });
+
     if (!role) {
       return ctx.notFound('role.notFound');
     }
@@ -98,6 +97,7 @@ module.exports = {
     const input = ctx.request.body;
 
     const role = await strapi.admin.services.role.findOne({ id });
+
     if (!role) {
       return ctx.notFound('role.notFound');
     }
@@ -114,13 +114,14 @@ module.exports = {
 
     let existingPermissions = strapi.admin.services.permission.actionProvider.getAllByMap();
     let permissionsToAssign;
+
     if ([EDITOR_CODE, AUTHOR_CODE].includes(role.code)) {
       permissionsToAssign = input.permissions.filter(
-        p => existingPermissions.get(p.action).section !== 'contentTypes'
+        (p) => existingPermissions.get(p.action).section !== 'contentTypes'
       );
       const modifiedPermissions = input.permissions
-        .filter(p => existingPermissions.get(p.action).section === 'contentTypes')
-        .map(p => ({
+        .filter((p) => existingPermissions.get(p.action).section === 'contentTypes')
+        .map((p) => ({
           ...p,
           conditions: role.code === AUTHOR_CODE ? ['admin::is-creator'] : [],
         }));

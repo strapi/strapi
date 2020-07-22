@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin/lib/src';
 import { Header } from '@buffetjs/custom';
 import { useHistory } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ const MarketPlacePage = () => {
     return <LoadingIndicatorPage />;
   }
 
-  const handleDownloadPlugin = async pluginId => {
+  const handleDownloadPlugin = async (pluginId) => {
     // Force the Overlayblocker to be displayed
     const overlayblockerParams = {
       enabled: true,
@@ -66,7 +66,7 @@ const MarketPlacePage = () => {
           })}
         />
         <div className="row" style={{ paddingTop: '4.1rem' }}>
-          {data.map(plugin => {
+          {data.map((plugin) => {
             return (
               <PluginCard
                 autoReload={autoReload}

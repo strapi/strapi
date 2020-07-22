@@ -1,5 +1,3 @@
-'use strict';
-
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest, createRequest } = require('../../../test/helpers/request');

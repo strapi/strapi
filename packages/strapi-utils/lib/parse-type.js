@@ -1,13 +1,9 @@
-'use strict';
-
 const _ = require('lodash');
 const dates = require('date-fns');
 
-const timeRegex = new RegExp(
-  '^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$'
-);
+const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
 
-const parseTime = value => {
+const parseTime = (value) => {
   if (dates.isDate(value)) return dates.format(value, 'HH:mm:ss.SSS');
 
   if (typeof value !== 'string') {
@@ -25,31 +21,33 @@ const parseTime = value => {
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
 
-const parseDate = value => {
+const parseDate = (value) => {
   if (dates.isDate(value)) return dates.format(value, 'yyyy-MM-dd');
   try {
     let date = dates.parseISO(value);
 
     if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
 
-    throw new Error(`Invalid format, expected an ISO compatible date`);
+    throw new Error('Invalid format, expected an ISO compatible date');
   } catch (error) {
-    throw new Error(`Invalid format, expected an ISO compatible date`);
+    throw new Error('Invalid format, expected an ISO compatible date');
   }
 };
 
-const parseDateTimeOrTimestamp = value => {
+const parseDateTimeOrTimestamp = (value) => {
   if (dates.isDate(value)) return value;
   try {
     const date = dates.parseISO(value);
+
     if (dates.isValid(date)) return date;
 
     const milliUnixDate = dates.parse(value, 'T', new Date());
+
     if (dates.isValid(milliUnixDate)) return milliUnixDate;
 
-    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+    throw new Error('Invalid format, expected a timestamp or an ISO date');
   } catch (error) {
-    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+    throw new Error('Invalid format, expected a timestamp or an ISO date');
   }
 };
 
@@ -72,9 +70,7 @@ const parseType = ({ type, value }) => {
         return false;
       }
 
-      throw new Error(
-        'Invalid boolean input. Expected "t","1","true","false","0","f"'
-      );
+      throw new Error('Invalid boolean input. Expected "t","1","true","false","0","f"');
     }
     case 'integer':
     case 'biginteger':

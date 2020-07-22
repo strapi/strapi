@@ -1,26 +1,26 @@
-'use strict';
-
 const _ = require('lodash');
 const { rulesToQuery } = require('@casl/ability/extra');
 const { VALID_REST_OPERATORS } = require('strapi-utils');
 
 const ops = {
-  common: VALID_REST_OPERATORS.map(op => `$${op}`),
+  common: VALID_REST_OPERATORS.map((op) => `$${op}`),
   boolean: ['$or'],
   cleanable: ['$elemMatch'],
 };
 
 const buildCaslQuery = (ability, action, model) => {
-  const query = rulesToQuery(ability, action, model, o => o.conditions);
+  const query = rulesToQuery(ability, action, model, (o) => o.conditions);
+
   return query && _.has(query, '$or') ? _.pick(query, '$or') : {};
 };
 
-const buildStrapiQuery = caslQuery => {
+const buildStrapiQuery = (caslQuery) => {
   const transform = _.flow([flattenDeep, cleanupUnwantedProperties]);
+
   return transform(caslQuery);
 };
 
-const flattenDeep = condition => {
+const flattenDeep = (condition) => {
   if (_.isArray(condition)) {
     return _.map(condition, flattenDeep);
   }
@@ -29,7 +29,7 @@ const flattenDeep = condition => {
     return condition;
   }
 
-  const shouldIgnore = e => !!ops.common.includes(e);
+  const shouldIgnore = (e) => !!ops.common.includes(e);
   const shouldPerformTransformation = (v, k) => _.isObject(v) && !_.isArray(v) && !shouldIgnore(k);
 
   const result = {};
@@ -53,7 +53,7 @@ const flattenDeep = condition => {
   return result;
 };
 
-const cleanupUnwantedProperties = condition => {
+const cleanupUnwantedProperties = (condition) => {
   if (!_.isObject(condition)) {
     return condition;
   }
@@ -62,8 +62,8 @@ const cleanupUnwantedProperties = condition => {
     return condition.map(cleanupUnwantedProperties);
   }
 
-  const shouldClean = e =>
-    typeof e === 'string' ? ops.cleanable.find(o => e.includes(`.${o}`)) : undefined;
+  const shouldClean = (e) =>
+    typeof e === 'string' ? ops.cleanable.find((o) => e.includes(`.${o}`)) : undefined;
 
   return _.reduce(
     condition,

@@ -18,8 +18,8 @@ const Wrapper = styled.div`
       cursor: pointer;
     }
     ${({ value }) => {
-      if (value) {
-        return css`
+  if (value) {
+    return css`
           &:hover {
             > i,
             > svg {
@@ -27,8 +27,10 @@ const Wrapper = styled.div`
             }
           }
         `;
-      }
-    }}
+  }
+
+  return css``;
+}}
 
     &:hover {
       background-color: #e9eaeb;

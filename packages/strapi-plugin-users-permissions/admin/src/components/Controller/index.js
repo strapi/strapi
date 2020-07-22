@@ -17,7 +17,7 @@ function Controller({ actions, inputNamePath, isOpen, name, inputSelected, setIn
   const { selectAllActions } = useEditPageContext();
 
   const areAllActionsSelected = () => {
-    return Object.keys(actions).every(action => actions[action].enabled === true);
+    return Object.keys(actions).every((action) => actions[action].enabled === true);
   };
 
   const handleChange = () => {
@@ -25,10 +25,10 @@ function Controller({ actions, inputNamePath, isOpen, name, inputSelected, setIn
   };
 
   const hasSomeActionsSelected = () => {
-    return Object.keys(actions).some(action => actions[action].enabled === true);
+    return Object.keys(actions).some((action) => actions[action].enabled === true);
   };
 
-  const setNewInputSelected = name => {
+  const setNewInputSelected = (name) => {
     setInputSelected(name);
   };
 
@@ -42,10 +42,9 @@ function Controller({ actions, inputNamePath, isOpen, name, inputSelected, setIn
         <div className="checkbox-wrapper">
           <div className="form-check">
             <Label
-              className={`form-check-label ${areAllActionsSelected() &&
-                'checked'} ${!areAllActionsSelected() &&
-                hasSomeActionsSelected() &&
-                'some-checked'}`}
+              className={`form-check-label ${areAllActionsSelected() && 'checked'} ${
+                !areAllActionsSelected() && hasSomeActionsSelected() && 'some-checked'
+              }`}
               htmlFor={name}
             >
               <input
@@ -62,7 +61,7 @@ function Controller({ actions, inputNamePath, isOpen, name, inputSelected, setIn
         </div>
       </Header>
       <div className="row">
-        {map(Object.keys(actions).sort(), actionKey => (
+        {map(Object.keys(actions).sort(), (actionKey) => (
           <InputCheckbox
             inputSelected={inputSelected}
             isOpen={isOpen}
@@ -89,6 +88,8 @@ Controller.propTypes = {
   inputNamePath: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
   name: PropTypes.string,
+  inputSelected: PropTypes.func.isRequired,
+  setInputSelected: PropTypes.func.isRequired,
 };
 
 export default Controller;

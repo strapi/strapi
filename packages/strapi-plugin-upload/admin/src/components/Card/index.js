@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin';
+import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { formatBytes, getType, getTrad } from '../../utils';
 
 import Flex from '../Flex';

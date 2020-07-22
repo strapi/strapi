@@ -1,4 +1,4 @@
-//TODO: move to dbal
+// TODO: move to dbal
 
 const _ = require('lodash');
 const parseType = require('./parse-type');
@@ -23,7 +23,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
     const part = fieldParts[i];
     attribute = part;
 
-    const assoc = tmpModel.associations.find(ast => ast.alias === part);
+    const assoc = tmpModel.associations.find((ast) => ast.alias === part);
 
     if (assoc) {
       association = assoc;
@@ -57,8 +57,8 @@ const getAssociationFromFieldKey = ({ model, field }) => {
  */
 const castInput = ({ type, value, operator }) => {
   return Array.isArray(value)
-    ? value.map(val => castValue({ type, operator, value: val }))
-    : castValue({ type, operator, value: value });
+    ? value.map((val) => castValue({ type, operator, value: val }))
+    : castValue({ type, operator, value });
 };
 
 /**
@@ -70,6 +70,7 @@ const castInput = ({ type, value, operator }) => {
  */
 const castValue = ({ type, value, operator }) => {
   if (operator === 'null') return parseType({ type: 'boolean', value });
+
   return parseType({ type, value });
 };
 
@@ -81,10 +82,9 @@ const castValue = ({ type, value, operator }) => {
  */
 const normalizeFieldName = ({ model, field }) => {
   const fieldPath = field.split('.');
+
   return _.last(fieldPath) === 'id'
-    ? _.initial(fieldPath)
-        .concat(model.primaryKey)
-        .join('.')
+    ? _.initial(fieldPath).concat(model.primaryKey).join('.')
     : fieldPath.join('.');
 };
 
@@ -110,7 +110,7 @@ const normalizeClauses = (whereClauses, { model }) => {
         return {
           field,
           operator,
-          value: value.map(clauses => normalizeClauses(clauses, { model })),
+          value: value.map((clauses) => normalizeClauses(clauses, { model })),
         };
       }
 

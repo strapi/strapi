@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const pmap = require('p-map');
 const { createPermission } = require('../domain/permission');
@@ -13,11 +11,13 @@ const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
 
 const fieldsToCompare = ['action', 'subject', 'fields', 'conditions'];
-const getPermissionWithSortedFields = perm => {
+const getPermissionWithSortedFields = (perm) => {
   const sortedPerm = _.cloneDeep(perm);
+
   if (Array.isArray(sortedPerm.fields)) {
     sortedPerm.fields.sort();
   }
+
   return sortedPerm;
 };
 const arePermissionsEqual = (perm1, perm2) =>
@@ -31,7 +31,7 @@ const arePermissionsEqual = (perm1, perm2) =>
  * @param permission
  * @returns {*}
  */
-const sanitizePermission = perm => ({
+const sanitizePermission = (perm) => ({
   ..._.pick(perm, ['id', 'action', 'subject', 'fields']),
   conditions: strapi.admin.services.condition.removeUnkownConditionIds(perm.conditions),
 });
@@ -41,7 +41,7 @@ const sanitizePermission = perm => ({
  * @param rolesIds ids of roles
  * @returns {Promise<array>}
  */
-const deleteByRolesIds = rolesIds => {
+const deleteByRolesIds = (rolesIds) => {
   return strapi.query('permission', 'admin').delete({ role_in: rolesIds });
 };
 
@@ -50,7 +50,7 @@ const deleteByRolesIds = rolesIds => {
  * @param ids ids of permissions
  * @returns {Promise<array>}
  */
-const deleteByIds = ids => {
+const deleteByIds = (ids) => {
   return strapi.query('permission', 'admin').delete({ id_in: ids });
 };
 
@@ -75,7 +75,7 @@ const assign = async (roleId, permissions = []) => {
     throw strapi.errors.badRequest('ValidationError', err);
   }
 
-  const permissionsWithRole = permissions.map(permission =>
+  const permissionsWithRole = permissions.map((permission) =>
     createPermission({
       ...permission,
       conditions: strapi.admin.services.condition.removeUnkownConditionIds(permission.conditions),
@@ -97,13 +97,13 @@ const assign = async (roleId, permissions = []) => {
   const permissionsToReturn = _.differenceBy(existingPermissions, permissionsToDelete, 'id');
 
   if (permissionsToDelete.length > 0) {
-    await deleteByIds(permissionsToDelete.map(p => p.id));
+    await deleteByIds(permissionsToDelete.map((p) => p.id));
   }
   if (permissionsToAdd.length > 0) {
     const createdPermissions = await strapi
       .query('permission', 'admin')
       .createMany(permissionsToAdd);
-    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
+    permissionsToReturn.push(...createdPermissions.map((p) => ({ ...p, role: p.role.id })));
   }
 
   return permissionsToReturn;
@@ -149,13 +149,16 @@ const cleanPermissionInDatabase = async () => {
       ) {
         idsToDelete.push(perm.id);
       }
+
       return idsToDelete;
     }, []);
 
     const deletePromise = deleteByIds(permissionsToRemoveIds);
 
     // Second, clean fields of permissions (add required ones, remove the non-existing anymore ones)
-    const permissionsInDb = dbPermissions.filter(perm => !permissionsToRemoveIds.includes(perm.id));
+    const permissionsInDb = dbPermissions.filter(
+      (perm) => !permissionsToRemoveIds.includes(perm.id)
+    );
     const permissionsWithCleanFields = strapi.admin.services['content-type'].cleanPermissionFields(
       permissionsInDb,
       {
@@ -169,10 +172,10 @@ const cleanPermissionInDatabase = async () => {
       permissionsInDb,
       (a, b) => a.id === b.id && _.xor(a.fields, b.fields).length === 0
     );
-    const promiseProvider = perm =>
+    const promiseProvider = (perm) =>
       strapi.query('permission', 'admin').update({ id: perm.id }, perm);
 
-    //Update the database
+    // Update the database
     await Promise.all([
       deletePromise,
       pmap(permissionsNeedingToBeUpdated, promiseProvider, {
@@ -189,12 +192,13 @@ const cleanPermissionInDatabase = async () => {
  */
 const resetSuperAdminPermissions = async () => {
   const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
+
   if (!superAdminRole) {
     return;
   }
 
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
-  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+  const contentTypesActions = allActions.filter((a) => a.section === 'contentTypes');
 
   const permissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
     contentTypesActions,
@@ -203,10 +207,10 @@ const resetSuperAdminPermissions = async () => {
     }
   );
 
-  const otherActions = allActions.filter(a => a.section !== 'contentTypes');
-  otherActions.forEach(action => {
+  const otherActions = allActions.filter((a) => a.section !== 'contentTypes');
+  otherActions.forEach((action) => {
     if (action.subjects) {
-      const newPerms = action.subjects.map(subject =>
+      const newPerms = action.subjects.map((subject) =>
         createPermission({ action: action.actionId, subject })
       );
       permissions.push(...newPerms);

@@ -1,5 +1,5 @@
 import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import {
@@ -10,18 +10,8 @@ import {
   getUserSucceeded,
   submitSucceeded,
 } from './actions';
-import {
-  GET_PERMISSIONS,
-  GET_POLICIES,
-  GET_ROLE,
-  GET_USER,
-  SUBMIT,
-} from './constants';
-import {
-  makeSelectActionType,
-  makeSelectModifiedData,
-  makeSelectRoleId,
-} from './selectors';
+import { GET_PERMISSIONS, GET_POLICIES, GET_ROLE, GET_USER, SUBMIT } from './constants';
+import { makeSelectActionType, makeSelectModifiedData, makeSelectRoleId } from './selectors';
 
 export function* fetchUser(action) {
   try {
@@ -46,9 +36,7 @@ export function* permissionsGet() {
 
     yield put(getPermissionsSucceeded(response));
   } catch (err) {
-    strapi.notification.error(
-      getTrad('EditPage.notification.permissions.error')
-    );
+    strapi.notification.error(getTrad('EditPage.notification.permissions.error'));
   }
 }
 
@@ -92,9 +80,7 @@ export function* submit(action) {
     };
 
     const requestURL =
-      actionType === 'POST'
-        ? `/${pluginId}/roles`
-        : `/${pluginId}/roles/${roleId}`;
+      actionType === 'POST' ? `/${pluginId}/roles` : `/${pluginId}/roles/${roleId}`;
     const response = yield call(request, requestURL, opts);
 
     if (actionType === 'POST') {

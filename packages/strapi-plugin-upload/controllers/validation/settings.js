@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, formatYupErrors } = require('strapi-utils');
 
 const settingsSchema = yup.object({
@@ -7,12 +5,12 @@ const settingsSchema = yup.object({
   responsiveDimensions: yup.boolean().required(),
 });
 
-const validateSettings = data => {
+const validateSettings = (data) => {
   return settingsSchema
     .validate(data, {
       abortEarly: false,
     })
-    .catch(error => {
+    .catch((error) => {
       throw strapi.errors.badRequest('ValidationError', {
         errors: formatYupErrors(error),
       });

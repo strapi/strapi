@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalHeader, ModalFooter } from 'strapi-helper-plugin';
+import { Modal, ModalHeader, ModalFooter } from 'strapi-helper-plugin/lib/src';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 
@@ -12,7 +12,7 @@ const ConditionsModal = ({ isOpen, onToggle, actions, onClosed, initialCondition
   const [conditions, setConditions] = useState(initialConditions);
 
   const handleSelectChange = (action, conditions) => {
-    setConditions(prev => ({
+    setConditions((prev) => ({
       ...prev,
       [action]: conditions,
     }));
@@ -49,7 +49,7 @@ const ConditionsModal = ({ isOpen, onToggle, actions, onClosed, initialCondition
             action={action}
             isGrey={index % 2 === 0}
             value={conditions[action.id]}
-            onChange={val => handleSelectChange(action.id, val)}
+            onChange={(val) => handleSelectChange(action.id, val)}
           />
         ))}
       </Padded>

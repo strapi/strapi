@@ -1,5 +1,3 @@
-'use strict';
-
 const createMiddleware = ({ sendEvent }) => {
   const _state = {
     currentDay: null,

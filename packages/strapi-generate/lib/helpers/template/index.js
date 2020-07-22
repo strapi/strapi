@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -23,7 +21,7 @@ const fileHelper = require('../file');
 module.exports = function (options, cb) {
   cb = reportback.extend(cb, {
     noTemplate: 'error',
-    alreadyExists: 'error'
+    alreadyExists: 'error',
   });
 
   // Compute the canonical path to a template
@@ -40,16 +38,17 @@ module.exports = function (options, cb) {
       err = err instanceof Error ? err : new Error(err);
       err.message = `Template error: ${err.message}`;
       err.path = absTemplatePath;
+
       if (err.code === 'ENOENT') {
         return cb.noTemplate(err);
-      } else {
-        return cb(err);
       }
+
+      return cb(err);
     }
 
     try {
       const compiled = _.template(contents, {
-        interpolate: /<%=([\s\S]+?)%>/g
+        interpolate: /<%=([\s\S]+?)%>/g,
       });
       contents = compiled(options);
 
@@ -62,8 +61,11 @@ module.exports = function (options, cb) {
       return cb(e);
     }
 
-    return fileHelper(_.merge(options, {
-      contents
-    }), cb);
+    return fileHelper(
+      _.merge(options, {
+        contents,
+      }),
+      cb
+    );
   });
 };

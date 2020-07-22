@@ -1,19 +1,17 @@
-'use strict';
-
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const generator = require('strapi-generate');
 
+const { nameToSlug } = require('strapi-utils');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const { nameToSlug } = require('strapi-utils');
 
 /**
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
  */
-const formatContentType = contentType => {
+const formatContentType = (contentType) => {
   const { uid, kind, modelName, plugin, connection, collectionName, info } = contentType;
 
   return {
@@ -47,9 +45,10 @@ const createContentType = async ({ contentType, components = [] }) => {
   const newContentType = builder.createContentType(replaceTmpUIDs(contentType));
 
   // allow components to target the new contentType
-  const targetContentType = infos => {
-    Object.keys(infos.attributes).forEach(key => {
+  const targetContentType = (infos) => {
+    Object.keys(infos.attributes).forEach((key) => {
       const { target } = infos.attributes[key];
+
       if (target === '__contentType__') {
         infos.attributes[key].target = newContentType.uid;
       }
@@ -58,7 +57,7 @@ const createContentType = async ({ contentType, components = [] }) => {
     return infos;
   };
 
-  components.forEach(component => {
+  components.forEach((component) => {
     const options = replaceTmpUIDs(targetContentType(component));
 
     if (!_.has(component, 'uid')) {
@@ -75,6 +74,7 @@ const createContentType = async ({ contentType, components = [] }) => {
   });
 
   await builder.writeFiles();
+
   return newContentType;
 };
 
@@ -97,7 +97,7 @@ const generateAPI = ({ name, kind = 'collectionType' }) => {
 
     generator(scope, {
       success: () => resolve(),
-      error: err => reject(err),
+      error: (err) => reject(err),
     });
   });
 };
@@ -116,6 +116,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
   if (newKind !== previousKind && newKind === 'singleType') {
     const entryCount = await strapi.query(uid).count();
+
     if (entryCount > 1) {
       throw strapi.errors.badRequest(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
@@ -131,7 +132,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
     ...replaceTmpUIDs(contentType),
   });
 
-  components.forEach(component => {
+  components.forEach((component) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -161,6 +162,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   }
 
   await builder.writeFiles();
+
   return updatedContentType;
 };
 
@@ -168,7 +170,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
  * Deletes a content type and the api files related to it
  * @param {string} uid content type uid
  */
-const deleteContentType = async uid => {
+const deleteContentType = async (uid) => {
   const builder = createBuilder();
 
   // make a backup

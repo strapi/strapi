@@ -1,11 +1,9 @@
-'use strict';
-
 /**
  * Gzip hook
  */
 const compress = require('koa-compress');
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook

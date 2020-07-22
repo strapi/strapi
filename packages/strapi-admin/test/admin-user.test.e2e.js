@@ -1,11 +1,9 @@
-'use strict';
-
 const _ = require('lodash');
 const { login, registerAndLogin, getUser } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const { SUPER_ADMIN_CODE } = require('../services/constants');
 
-const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
+const omitTimestamps = (obj) => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
 
 const getAuthToken = async () => {
   let token = await login();
@@ -30,7 +28,7 @@ const createUserRole = async () => {
   return res && res.body && res.body.data;
 };
 
-const deleteUserRole = async id => {
+const deleteUserRole = async (id) => {
   await rq({
     url: `/admin/roles/${id}`,
     method: 'DELETE',
@@ -43,7 +41,7 @@ const getSuperAdminRole = async () => {
     method: 'GET',
   });
 
-  return res.body.data.find(r => r.code === SUPER_ADMIN_CODE);
+  return res.body.data.find((r) => r.code === SUPER_ADMIN_CODE);
 };
 
 let rq;
@@ -141,7 +139,7 @@ describe('Admin User CRUD (e2e)', () => {
   });
 
   test('3. Creates users with superAdmin role (success)', async () => {
-    const getBody = index => {
+    const getBody = (index) => {
       return {
         email: `user-tests${index}@strapi-e2e.com`,
         firstname: 'user_tests-firstname',
@@ -276,10 +274,10 @@ describe('Admin User CRUD (e2e)', () => {
   test('10. Deletes 2 super admin users (successfully)', async () => {
     const users = testData.otherSuperAdminUsers.splice(0, 2);
     const res = await rq({
-      url: `/admin/users/batch-delete`,
+      url: '/admin/users/batch-delete',
       method: 'POST',
       body: {
-        ids: users.map(u => u.id),
+        ids: users.map((u) => u.id),
       },
     });
 
@@ -315,7 +313,7 @@ describe('Admin User CRUD (e2e)', () => {
 
   test('13. Deletes last super admin user in batch (bad request)', async () => {
     const res = await rq({
-      url: `/admin/users/batch-delete`,
+      url: '/admin/users/batch-delete',
       method: 'POST',
       body: {
         ids: [testData.firstSuperAdminUser.id],

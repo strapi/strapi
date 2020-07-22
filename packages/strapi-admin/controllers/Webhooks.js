@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 
@@ -17,11 +15,8 @@ const urlRegex = /^(?:([a-z0-9+.-]+):\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d
 const webhookValidator = yup
   .object({
     name: yup.string().required(),
-    url: yup
-      .string()
-      .matches(urlRegex, 'url must be a valid URL')
-      .required(),
-    headers: yup.lazy(data => {
+    url: yup.string().matches(urlRegex, 'url must be a valid URL').required(),
+    headers: yup.lazy((data) => {
       if (typeof data !== 'object') {
         return yup.object().required();
       }
@@ -29,24 +24,12 @@ const webhookValidator = yup
       return yup
         .object(
           _.mapValues(data, () => {
-            yup
-              .string()
-              .min(1)
-              .required();
+            yup.string().min(1).required();
           })
         )
         .required();
     }),
-    events: yup
-      .array()
-      .of(
-        yup
-          .string()
-          .oneOf(ALLOWED_EVENTS)
-          .required()
-      )
-      .min(1)
-      .required(),
+    events: yup.array().of(yup.string().oneOf(ALLOWED_EVENTS).required()).min(1).required(),
   })
   .noUnknown();
 

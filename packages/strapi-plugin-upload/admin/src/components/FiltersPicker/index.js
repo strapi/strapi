@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { FilterIcon } from 'strapi-helper-plugin';
+import { FilterIcon } from 'strapi-helper-plugin/lib/src';
 
 import FiltersCard from './FiltersCard';
 import Wrapper from './Wrapper';
@@ -23,9 +23,9 @@ const FiltersPicker = ({ onChange }) => {
             <FormattedMessage id="app.utils.filters" />
           </>
         )}
-        renderSectionContent={onToggle => (
+        renderSectionContent={(onToggle) => (
           <FiltersCard
-            onChange={e => {
+            onChange={(e) => {
               handleChange(e);
               onToggle();
             }}

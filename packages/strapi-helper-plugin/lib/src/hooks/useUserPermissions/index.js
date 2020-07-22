@@ -6,7 +6,7 @@ import generateResultsObject from './utils/generateResultsObject';
 import reducer from './reducer';
 import init from './init';
 
-const useUserPermissions = pluginPermissions => {
+const useUserPermissions = (pluginPermissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
 
@@ -19,7 +19,7 @@ const useUserPermissions = pluginPermissions => {
   const checkPermissionsRef = useRef();
   const generateArrayOfPromisesRef = useRef();
 
-  checkPermissionsRef.current = async permissionName => {
+  checkPermissionsRef.current = async (permissionName) => {
     const hasPermission = await hasPermissions(
       currentUserPermissions,
       pluginPermissions[permissionName],
@@ -29,8 +29,8 @@ const useUserPermissions = pluginPermissions => {
     return { permissionName, hasPermission };
   };
 
-  generateArrayOfPromisesRef.current = array =>
-    array.map(permissionName => checkPermissionsRef.current(permissionName));
+  generateArrayOfPromisesRef.current = (array) =>
+    array.map((permissionName) => checkPermissionsRef.current(permissionName));
 
   useEffect(() => {
     isMounted.current = true;
@@ -62,12 +62,12 @@ const useUserPermissions = pluginPermissions => {
       }
     };
 
-    getData();
+    getData().then((r) => console.log(r));
 
     return () => {
       abortController.abort();
     };
-  }, [permissionNames]);
+  }, [permissionNames, abortController]);
 
   // This function is used to synchronise the hook when used in dynamic components
   const setIsLoading = () => {

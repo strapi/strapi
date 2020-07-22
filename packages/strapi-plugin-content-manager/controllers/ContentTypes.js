@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const { createModelConfigurationSchema, validateKind } = require('./validation');
@@ -20,12 +18,12 @@ module.exports = {
     const service = strapi.plugins['content-manager'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => {
+      .filter((uid) => {
         if (uid.startsWith('strapi::')) return false;
 
         return !(kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind);
       })
-      .map(uid => {
+      .map((uid) => {
         return service.formatContentType(strapi.contentTypes[uid]);
       });
 

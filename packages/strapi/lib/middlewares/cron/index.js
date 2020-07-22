@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -12,7 +10,7 @@ const cron = require('node-schedule');
  * CRON hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -20,7 +18,7 @@ module.exports = strapi => {
 
     initialize() {
       if (strapi.config.get('server.cron.enabled', false) === true) {
-        _.forEach(_.keys(strapi.config.get('functions.cron', {})), task => {
+        _.forEach(_.keys(strapi.config.get('functions.cron', {})), (task) => {
           cron.scheduleJob(task, strapi.config.functions.cron[task]);
         });
       }

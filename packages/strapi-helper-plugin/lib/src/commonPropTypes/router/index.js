@@ -27,5 +27,4 @@ const propTypes = (params = {}) => ({
   }).isRequired,
 });
 
-
 export default propTypes;

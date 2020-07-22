@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const createPaginatedQuery = ({ fetch, count }) => async (queryParams, ...args) => {
@@ -31,7 +29,7 @@ const getPaginationInfos = async (queryParams, count) => {
   };
 };
 
-const withDefaultPagination = params => {
+const withDefaultPagination = (params) => {
   const { page = 1, pageSize = 100, ...rest } = params;
 
   return {

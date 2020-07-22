@@ -1,5 +1,3 @@
-'use strict';
-
 const pmap = require('p-map');
 
 const { createQueryWithLifecycles, withLifecycles } = require('./helpers');
@@ -57,7 +55,7 @@ module.exports = function createQuery(opts) {
 
     create: createFn,
     createMany: (entities, { concurrency = 100 } = {}, ...rest) => {
-      return pmap(entities, entity => createFn(entity, ...rest), {
+      return pmap(entities, (entity) => createFn(entity, ...rest), {
         concurrency,
         stopOnError: true,
       });

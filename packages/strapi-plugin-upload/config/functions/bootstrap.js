@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Upload plugin bootstrap.
  *
@@ -73,7 +72,7 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
   }
 
   const models = Array.from(strapi.db.models.values());
-  const modelsId = models.map(model => model.globalId);
+  const modelsId = models.map((model) => model.globalId);
 
   return model.updateMany(
     { related: { $elemMatch: { kind: { $nin: modelsId } } } },

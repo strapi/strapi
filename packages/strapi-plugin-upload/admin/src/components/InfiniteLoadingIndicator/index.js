@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ClearIcon } from 'strapi-helper-plugin';
+import { ClearIcon } from 'strapi-helper-plugin/lib/src';
 
 import LoadingIndicator from '../LoadingIndicator';
 import IntlText from '../IntlText';

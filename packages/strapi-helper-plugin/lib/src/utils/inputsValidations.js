@@ -12,6 +12,7 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
   let errors = [];
 
   const emailRegex = new RegExp(
+    // eslint-disable-next-line max-len
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   );
   // handle i18n
@@ -68,7 +69,7 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
   }
 
   if (includes(errors, requiredError)) {
-    errors = reject(errors, error => error !== requiredError);
+    errors = reject(errors, (error) => error !== requiredError);
   }
 
   return errors;

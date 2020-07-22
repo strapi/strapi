@@ -4,8 +4,6 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-'use strict';
-
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
@@ -19,8 +17,9 @@ const { toSDL } = require('./schema-definitions');
  *
  * @returns {Boolean}
  */
-const isPrimitiveType = type => {
+const isPrimitiveType = (type) => {
   const nonRequiredType = nonRequired(type);
+
   return (
     nonRequiredType === 'Int' ||
     nonRequiredType === 'Float' ||
@@ -36,7 +35,7 @@ const isPrimitiveType = type => {
  *
  * @returns {Boolean}
  */
-const isEnumType = type => {
+const isEnumType = (type) => {
   return type === 'enumeration';
 };
 
@@ -52,15 +51,16 @@ const isEnumType = type => {
  * isNotOfTypeArray(String!)
  * // => true
  */
-const isNotOfTypeArray = type => {
+const isNotOfTypeArray = (type) => {
   return !/(\[\w+!?\])/.test(type);
 };
 
 /**
  * Returns all fields of type Integer or float
  */
-const isNumberType = type => {
+const isNumberType = (type) => {
   const nonRequiredType = nonRequired(type);
+
   return nonRequiredType === 'Int' || nonRequiredType === 'Float';
 };
 
@@ -74,6 +74,7 @@ const getFieldsByTypes = (fields, typeCheck, returnType) => {
       if (typeCheck(fieldType)) {
         acc[fieldName] = returnType(fieldType, fieldName);
       }
+
       return acc;
     },
     {}
@@ -86,13 +87,14 @@ const getFieldsByTypes = (fields, typeCheck, returnType) => {
  * @returns {function}
  */
 const fieldResolver = (field, key) => {
-  return object => {
+  return (object) => {
     const resolver =
       field.resolve ||
       function resolver(obj) {
         // eslint-disable-line no-unused-vars
         return obj[key];
       };
+
     return resolver(object);
   };
 };
@@ -102,9 +104,10 @@ const fieldResolver = (field, key) => {
  *
  * @return {Object}
  */
-const createFieldsResolver = function(fields, resolverFn, typeCheck) {
+const createFieldsResolver = function (fields, resolverFn, typeCheck) {
   const resolver = Object.keys(fields).reduce((acc, fieldKey) => {
     const field = fields[fieldKey];
+
     // Check if the field is of the correct type
     if (typeCheck(field)) {
       return _.set(acc, fieldKey, (obj, options, context) => {
@@ -119,6 +122,7 @@ const createFieldsResolver = function(fields, resolverFn, typeCheck) {
         );
       });
     }
+
     return acc;
   }, {});
 
@@ -142,7 +146,7 @@ const createFieldsResolver = function(fields, resolverFn, typeCheck) {
  * // => String
  *
  */
-const extractType = function(_type, attributeType) {
+const extractType = function (_type, attributeType) {
   return isPrimitiveType(_type)
     ? _type.replace('!', '')
     : isEnumType(attributeType)
@@ -172,7 +176,7 @@ const extractType = function(_type, attributeType) {
  *   age: function ageResolver() { .... }
  * }
  */
-const createAggregationFieldsResolver = function(model, fields, operation, typeCheck) {
+const createAggregationFieldsResolver = function (model, fields, operation, typeCheck) {
   return createFieldsResolver(
     fields,
     async (obj, options, context, fieldResolver, fieldKey) => {
@@ -188,12 +192,12 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
             [fieldKey]: { [`$${operation}`]: `$${fieldKey}` },
           })
           .exec()
-          .then(result => _.get(result, [0, fieldKey]));
+          .then((result) => _.get(result, [0, fieldKey]));
       }
 
       if (model.orm === 'bookshelf') {
         return model
-          .query(qb => {
+          .query((qb) => {
             // apply filters
             buildQuery({ model, filters })(qb);
 
@@ -201,7 +205,7 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
             qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
           })
           .fetch()
-          .then(result => result.get(`${operation}_${fieldKey}`));
+          .then((result) => result.get(`${operation}_${fieldKey}`));
       }
     },
     typeCheck
@@ -211,9 +215,10 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
 /**
  * Correctly format the data returned by the group by
  */
-const preProcessGroupByData = function({ result, fieldKey, filters }) {
+const preProcessGroupByData = function ({ result, fieldKey, filters }) {
   const _result = _.toArray(result);
-  return _.map(_result, value => {
+
+  return _.map(_result, (value) => {
     return {
       key: value._id.toString(),
       connection: () => {
@@ -250,7 +255,7 @@ const preProcessGroupByData = function({ result, fieldKey, filters }) {
  *   email: function emailResolver() { .... }
  * }
  */
-const createGroupByFieldsResolver = function(model, fields) {
+const createGroupByFieldsResolver = function (model, fields) {
   const resolver = async (filters, options, context, fieldResolver, fieldKey) => {
     const params = convertRestQueryParams({
       ...convertToParams(_.omit(filters, 'where')),
@@ -275,18 +280,19 @@ const createGroupByFieldsResolver = function(model, fields) {
 
     if (model.orm === 'bookshelf') {
       return model
-        .query(qb => {
+        .query((qb) => {
           buildQuery({ model, filters: params })(qb);
           qb.groupBy(fieldKey);
           qb.select(fieldKey);
         })
         .fetchAll()
-        .then(result => {
+        .then((result) => {
           let values = result.models
-            .map(m => m.get(fieldKey)) // extract aggregate field
-            .filter(v => !!v) // remove null
-            .map(v => '' + v); // convert to string
-          return values.map(v => ({
+            .map((m) => m.get(fieldKey)) // extract aggregate field
+            .filter((v) => !!v) // remove null
+            .map((v) => `${v}`); // convert to string
+
+          return values.map((v) => ({
             key: v,
             connection: () => {
               return {
@@ -309,26 +315,26 @@ const createGroupByFieldsResolver = function(model, fields) {
  *
  * @return {String}
  */
-const generateConnectionFieldsTypes = function(fields, model) {
+const generateConnectionFieldsTypes = function (fields, model) {
   const { globalId, attributes } = model;
   const primitiveFields = getFieldsByTypes(fields, isNotOfTypeArray, (type, name) =>
     extractType(type, (attributes[name] || {}).type)
   );
 
-  const connectionFields = _.mapValues(primitiveFields, fieldType => ({
+  const connectionFields = _.mapValues(primitiveFields, (fieldType) => ({
     key: fieldType,
     connection: `${globalId}Connection`,
   }));
 
   return Object.keys(primitiveFields)
     .map(
-      fieldKey =>
+      (fieldKey) =>
         `type ${globalId}Connection${_.upperFirst(fieldKey)} {${toSDL(connectionFields[fieldKey])}}`
     )
     .join('\n\n');
 };
 
-const formatConnectionGroupBy = function(fields, model) {
+const formatConnectionGroupBy = function (fields, model) {
   const { globalId } = model;
   const groupByGlobalId = `${globalId}GroupBy`;
 
@@ -352,7 +358,7 @@ const formatConnectionGroupBy = function(fields, model) {
   };
 };
 
-const formatConnectionAggregator = function(fields, model, modelName) {
+const formatConnectionAggregator = function (fields, model, modelName) {
   const { globalId } = model;
 
   // Extract all fields of type Integer and Float and change their type to Float
@@ -367,7 +373,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
 
   // Only add the aggregator's operations if there are some numeric fields
   if (!_.isEmpty(numericFields)) {
-    ['sum', 'avg', 'min', 'max'].forEach(agg => {
+    ['sum', 'avg', 'min', 'max'].forEach((agg) => {
       initialFields[agg] = `${aggregatorGlobalId}${_.startCase(agg)}`;
     });
   }
@@ -384,6 +390,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
           // allow search param
           return strapi.query(modelName, model.plugin).countSearch(opts);
         }
+
         return strapi.query(modelName, model.plugin).count(opts);
       },
       totalCount() {
@@ -395,7 +402,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
   // Only add the aggregator's operations types and resolver if there are some numeric fields
   if (!_.isEmpty(numericFields)) {
     // Returns the actual object and handle aggregation in the query resolvers
-    const defaultAggregatorFunc = obj => {
+    const defaultAggregatorFunc = (obj) => {
       // eslint-disable-line no-unused-vars
       return obj;
     };
@@ -494,7 +501,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
  *  }
  *
  */
-const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
+const formatModelConnectionsGQL = function ({ fields, model, name, resolver }) {
   const { globalId } = model;
 
   const connectionGlobalId = `${globalId}Connection`;
@@ -509,6 +516,7 @@ const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
   const pluralName = pluralize.plural(_.camelCase(name));
 
   let modelConnectionTypes = `type ${connectionGlobalId} {${toSDL(connectionFields)}}\n\n`;
+
   if (aggregatorFormat) {
     modelConnectionTypes += aggregatorFormat.type;
   }

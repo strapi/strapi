@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Database connector registry
  */
@@ -16,6 +15,7 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
     load() {
       for (const connection of Object.values(connections)) {
         const { connector } = connection;
+
         if (!_connectors.has(connector)) {
           _connectors.set(connector, requireConnector(connector)(strapi));
         }
@@ -37,11 +37,13 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
 
     set(key, val) {
       _connectors.set(key, val);
+
       return this;
     },
 
     get default() {
       const defaultConnector = connections[defaultConnection].connector;
+
       return _connectors.get(defaultConnector);
     },
 
@@ -51,6 +53,7 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
       }
 
       const connectorKey = connections[connection].connector;
+
       return _connectors.get(connectorKey);
     },
   };

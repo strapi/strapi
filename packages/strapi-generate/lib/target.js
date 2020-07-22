@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -42,42 +40,61 @@ function generateTarget(options, cb) {
     () => {
       return isValidTarget(target) || ++_resolves > maxResolves;
     },
-    asyncCb => {
+    (asyncCb) => {
       parseTarget(target, scope, (err, resolvedTarget) => {
         if (err) {
           return asyncCb(err);
         }
         target = resolvedTarget;
+
         return asyncCb();
       });
     },
-    err => {
+    (err) => {
       if (err) {
         return sb(err);
       }
       if (!isValidTarget(target)) {
-        return sb(new Error('Generator Error :: Could not resolve target `' + scope.rootPath + '` (probably a recursive loop)'));
+        return sb(
+          new Error(
+            'Generator Error :: Could not resolve target `' +
+              scope.rootPath +
+              '` (probably a recursive loop)'
+          )
+        );
       }
 
       // Pass down parent Generator's template directory abs path.
       scope.templatesDirectory = parentGenerator.templatesDirectory;
 
       if (target.copy) {
-        scope = mergeSubtargetScope(scope, typeof target.copy === 'string' ? {
-          templatePath: target.copy
-        } : target.copy);
+        scope = mergeSubtargetScope(
+          scope,
+          typeof target.copy === 'string'
+            ? {
+                templatePath: target.copy,
+              }
+            : target.copy
+        );
+
         return copyHelper(scope, sb);
       }
 
       if (target.folder) {
         scope = mergeSubtargetScope(scope, target.folder);
+
         return folderHelper(scope, sb);
       }
 
       if (target.template) {
-        scope = mergeSubtargetScope(scope, typeof target.template === 'string' ? {
-          templatePath: target.template
-        } : target.template);
+        scope = mergeSubtargetScope(
+          scope,
+          typeof target.template === 'string'
+            ? {
+                templatePath: target.template,
+              }
+            : target.template
+        );
 
         return templateHelper(scope, sb);
       }
@@ -87,9 +104,10 @@ function generateTarget(options, cb) {
           scope = mergeSubtargetScope(scope, target.jsonfile);
         } else if (typeof target.jsonfile === 'function') {
           scope = _.merge(scope, {
-            data: target.jsonfile(scope)
+            data: target.jsonfile(scope),
           });
         }
+
         return jsonFileHelper(scope, sb);
       }
 
@@ -98,8 +116,15 @@ function generateTarget(options, cb) {
       // call this method recursively on it, passing along our
       // callback.
       if (++scope._depth > scope.maxHops) {
-        return sb(new Error('`maxHops` (' + scope.maxHops + ') exceeded! There is probably a recursive loop in one of your generators.'));
+        return sb(
+          new Error(
+            '`maxHops` (' +
+              scope.maxHops +
+              ') exceeded! There is probably a recursive loop in one of your generators.'
+          )
+        );
       }
+
       return recursiveGenerate(target, scope, sb);
     }
   );
@@ -141,7 +166,7 @@ function targetIsHelper(target) {
 function parseTarget(target, scope, cb) {
   if (typeof target === 'string') {
     target = {
-      generator: target
+      generator: target,
     };
   }
 
@@ -151,19 +176,23 @@ function parseTarget(target, scope, cb) {
   }
 
   if (target.generator) {
-
     // Normalize the subgenerator reference.
     let subGeneratorRef;
+
     if (typeof target.generator === 'string') {
       subGeneratorRef = {
-        module: target.generator
+        module: target.generator,
       };
     } else if (typeof target.generator === 'object') {
       subGeneratorRef = target.generator;
     }
 
     if (!subGeneratorRef) {
-      return cb(new Error('Generator Error :: Invalid subgenerator referenced for target `' + scope.rootPath + '`'));
+      return cb(
+        new Error(
+          'Generator Error :: Invalid subgenerator referenced for target `' + scope.rootPath + '`'
+        )
+      );
     }
 
     // Now normalize the sub-generator.
@@ -172,6 +201,7 @@ function parseTarget(target, scope, cb) {
     // No `module` means we'll treat this subgenerator as an inline generator definition.
     if (!subGeneratorRef.module) {
       subGenerator = subGeneratorRef;
+
       if (subGenerator) {
         return cb(null, subGenerator);
       }
@@ -179,7 +209,6 @@ function parseTarget(target, scope, cb) {
 
     // Otherwise, we'll attempt to load this subgenerator.
     if (typeof subGeneratorRef.module === 'string') {
-
       // Lookup the generator by name if a `module` was specified
       // This allows the module for a given generator to be
       // overridden.
@@ -190,7 +219,8 @@ function parseTarget(target, scope, cb) {
       // disable the generator.
       if (configuredReference) {
         return cb(null, configuredReference);
-      } else if (configuredReference === false) {
+      }
+      if (configuredReference === false) {
         return cb(null);
       }
 
@@ -235,9 +265,15 @@ function parseTarget(target, scope, cb) {
     if (!subGenerator && !module.match(/^strapi-generate-/)) {
       try {
         if (process.mainModule.filename.indexOf('yarn') !== -1) {
-          subGenerator = require(path.resolve(process.mainModule.paths[2], 'strapi-generate-' + module));
+          subGenerator = require(path.resolve(
+            process.mainModule.paths[2],
+            'strapi-generate-' + module
+          ));
         } else {
-          subGenerator = require(path.resolve(process.mainModule.paths[1], 'strapi-generate-' + module));
+          subGenerator = require(path.resolve(
+            process.mainModule.paths[1],
+            'strapi-generate-' + module
+          ));
         }
       } catch (e1) {
         requireError = e1;
@@ -250,10 +286,25 @@ function parseTarget(target, scope, cb) {
     }
 
     // But if we still can't find it, give up.
-    return cb(new Error('Error: Failed to load `' + subGeneratorRef.module + '`...' + (requireError ? ' (' + requireError + ')' : '') +''));
+    return cb(
+      new Error(
+        'Error: Failed to load `' +
+          subGeneratorRef.module +
+          '`...' +
+          (requireError ? ' (' + requireError + ')' : '') +
+          ''
+      )
+    );
   }
 
-  return cb(new Error('Unrecognized generator syntax in `targets["' + scope.keyPath + '"]` ::\n' + util.inspect(target)));
+  return cb(
+    new Error(
+      'Unrecognized generator syntax in `targets["' +
+        scope.keyPath +
+        '"]` ::\n' +
+        util.inspect(target)
+    )
+  );
 }
 
 /**

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -12,7 +10,7 @@ const createEndpointComposer = require('./utils/composeEndpoint');
  * Router hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   const composeEndpoint = createEndpointComposer(strapi);
 
   return {
@@ -21,7 +19,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      _.forEach(strapi.config.routes, value => {
+      _.forEach(strapi.config.routes, (value) => {
         composeEndpoint(value, { router: strapi.router });
       });
 
@@ -32,7 +30,7 @@ module.exports = strapi => {
           prefix: '/admin',
         });
 
-        _.get(strapi.admin, 'config.routes', []).forEach(route => {
+        _.get(strapi.admin, 'config.routes', []).forEach((route) => {
           composeEndpoint(route, { router });
         });
 
@@ -47,7 +45,7 @@ module.exports = strapi => {
             prefix: `/${pluginName}`,
           });
 
-          (plugin.config.routes || []).forEach(route => {
+          (plugin.config.routes || []).forEach((route) => {
             const hasPrefix = _.has(route.config, 'prefix');
             composeEndpoint(route, {
               plugin: pluginName,

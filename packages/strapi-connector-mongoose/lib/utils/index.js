@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const Mongoose = require('mongoose');
 const { parseType } = require('strapi-utils');
@@ -17,7 +15,7 @@ module.exports = (mongoose = Mongoose) => {
    *
    * Refer to: https://github.com/graphql/graphql-js/commit/3521e1429eec7eabeee4da65c93306b51308727b#diff-87c5e74dd1f7d923143e0eee611f598eR183
    */
-  mongoose.Types.ObjectId.prototype.valueOf = function() {
+  mongoose.Types.ObjectId.prototype.valueOf = function () {
     return this.toString();
   };
 
@@ -32,14 +30,14 @@ module.exports = (mongoose = Mongoose) => {
       case 'time':
         return {
           type: String,
-          validate: value => parseType({ type: 'time', value }),
-          set: value => parseType({ type: 'time', value }),
+          validate: (value) => parseType({ type: 'time', value }),
+          set: (value) => parseType({ type: 'time', value }),
         };
       case 'date':
         return {
           type: String,
-          validate: value => parseType({ type: 'date', value }),
-          set: value => parseType({ type: 'date', value }),
+          validate: (value) => parseType({ type: 'date', value }),
+          set: (value) => parseType({ type: 'date', value }),
         };
       case 'datetime':
         return {
@@ -87,7 +85,7 @@ module.exports = (mongoose = Mongoose) => {
     }
   };
 
-  const isMongoId = value => {
+  const isMongoId = (value) => {
     if (value instanceof mongoose.Types.ObjectId) {
       return true;
     }
@@ -99,10 +97,11 @@ module.exports = (mongoose = Mongoose) => {
     // Here we don't use mongoose.Types.ObjectId.isValid method because it's a weird check,
     // it returns for instance true for any integer value
     const hexadecimal = /^[0-9A-F]+$/i;
+
     return hexadecimal.test(value) && value.length === 24;
   };
 
-  const valueToId = value => {
+  const valueToId = (value) => {
     if (Array.isArray(value)) return value.map(valueToId);
 
     if (isMongoId(value)) {

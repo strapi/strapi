@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const storeUtils = require('../../services/utils/store');
 const {
@@ -10,9 +8,9 @@ const {
 const contentTypeService = require('../../services/ContentTypes');
 const componentService = require('../../services/Components');
 
-const updateContentTypes = async configurations => {
-  const updateConfiguration = async uid => {
-    const conf = configurations.find(conf => conf.uid === uid);
+const updateContentTypes = async (configurations) => {
+  const updateConfiguration = async (uid) => {
+    const conf = configurations.find((conf) => conf.uid === uid);
 
     return contentTypeService.setConfiguration(
       uid,
@@ -20,7 +18,7 @@ const updateContentTypes = async configurations => {
     );
   };
 
-  const generateNewConfiguration = async uid => {
+  const generateNewConfiguration = async (uid) => {
     return contentTypeService.setConfiguration(
       uid,
       await createDefaultConfiguration(strapi.contentTypes[uid])
@@ -35,13 +33,13 @@ const updateContentTypes = async configurations => {
   const contentTypesToDelete = _.difference(DBUIDs, currentUIDS);
 
   // delette old schemas
-  await Promise.all(contentTypesToDelete.map(uid => contentTypeService.deleteConfiguration(uid)));
+  await Promise.all(contentTypesToDelete.map((uid) => contentTypeService.deleteConfiguration(uid)));
 
   // create new schemas
-  await Promise.all(contentTypesToAdd.map(uid => generateNewConfiguration(uid)));
+  await Promise.all(contentTypesToAdd.map((uid) => generateNewConfiguration(uid)));
 
   // update current schemas
-  await Promise.all(contentTypesToUpdate.map(uid => updateConfiguration(uid)));
+  await Promise.all(contentTypesToUpdate.map((uid) => updateConfiguration(uid)));
 };
 
 const syncContentTypesSchemas = async () => {
@@ -53,8 +51,8 @@ const syncContentTypesSchemas = async () => {
 };
 
 const syncComponentsSchemas = async () => {
-  const updateConfiguration = async uid => {
-    const conf = configurations.find(conf => conf.uid === uid);
+  const updateConfiguration = async (uid) => {
+    const conf = configurations.find((conf) => conf.uid === uid);
 
     return componentService.setConfiguration(
       uid,
@@ -62,7 +60,7 @@ const syncComponentsSchemas = async () => {
     );
   };
 
-  const generateNewConfiguration = async uid => {
+  const generateNewConfiguration = async (uid) => {
     return componentService.setConfiguration(
       uid,
       await createDefaultConfiguration(strapi.components[uid])
@@ -80,13 +78,13 @@ const syncComponentsSchemas = async () => {
   const componentsToDelete = _.difference(DBUIDs, realUIDs);
 
   // delette old schemas
-  await Promise.all(componentsToDelete.map(uid => componentService.deleteConfiguration(uid)));
+  await Promise.all(componentsToDelete.map((uid) => componentService.deleteConfiguration(uid)));
 
   // create new schemas
-  await Promise.all(componentsToAdd.map(uid => generateNewConfiguration(uid)));
+  await Promise.all(componentsToAdd.map((uid) => generateNewConfiguration(uid)));
 
   // update current schemas
-  await Promise.all(componentsToUpdate.map(uid => updateConfiguration(uid)));
+  await Promise.all(componentsToUpdate.map((uid) => updateConfiguration(uid)));
 };
 
 const registerPermissions = () => {

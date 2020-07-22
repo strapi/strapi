@@ -1,7 +1,6 @@
 /**
  * Simple worker queue in memory
  */
-'use strict';
 
 const debug = require('debug')('strapi');
 
@@ -24,6 +23,7 @@ module.exports = class WorkerQueue {
 
   enqueue(payload) {
     debug('Enqueue event in worker queue');
+
     if (this.running < this.concurrency) {
       this.running++;
       this.execute(payload);

@@ -2,13 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { upperFirst } from 'lodash';
-import { useQuery } from 'strapi-helper-plugin';
+import { useQuery } from 'strapi-helper-plugin/lib/src';
 import useDataManager from '../../hooks/useDataManager';
 import Ul from '../SelectMenuUl';
 import Category from './Category';
-
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 const MenuList = ({
   selectProps: { isAddingAComponentToAnotherComponent, name, onClickOption, refState, value },
@@ -30,12 +27,12 @@ const MenuList = ({
       <Ul>
         {Object.keys(componentsGroupedByCategory)
           .sort()
-          .map(categoryName => {
+          .map((categoryName) => {
             return (
               <li key={categoryName}>
                 <Category categoryName={categoryName} />
-                <Ul style={{ marginTop: '-4px' }}>
-                  {componentsGroupedByCategory[categoryName].map(component => {
+                <ul style={{ marginTop: '-4px' }}>
+                  {componentsGroupedByCategory[categoryName].map((component) => {
                     if (
                       (isAddingAComponentToAnotherComponent &&
                         componentsThatHaveOtherComponentInTheirAttributes.includes(
@@ -49,10 +46,17 @@ const MenuList = ({
                     const isSelected = value.value === component.uid;
 
                     return (
+                      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
                       <li
                         key={component.uid}
                         className="li"
                         onClick={() => {
+                          refState.current.select.blur();
+                          onClickOption({
+                            target: { name, value: component.uid },
+                          });
+                        }}
+                        onKeyDown={() => {
                           refState.current.select.blur();
                           onClickOption({
                             target: { name, value: component.uid },
@@ -71,7 +75,7 @@ const MenuList = ({
                       </li>
                     );
                   })}
-                </Ul>
+                </ul>
               </li>
             );
           })}

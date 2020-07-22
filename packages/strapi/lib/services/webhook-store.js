@@ -1,9 +1,8 @@
 /**
  * Webhook store is the implementation of webhook storage over the core_store
  */
-'use strict';
 
-const webhookModel = config => ({
+const webhookModel = (config) => ({
   connection: config.get('database.defaultConnection'),
   uid: 'strapi::webhooks',
   internal: true,
@@ -32,7 +31,7 @@ const webhookModel = config => ({
   },
 });
 
-const toDBObject = data => {
+const toDBObject = (data) => {
   return {
     name: data.name,
     url: data.url,
@@ -42,7 +41,7 @@ const toDBObject = data => {
   };
 };
 
-const fromDBObject = row => {
+const fromDBObject = (row) => {
   return {
     id: row.id,
     name: row.name,
@@ -65,6 +64,7 @@ const createWebhookStore = ({ db }) => {
 
     async findWebhook(id) {
       const result = await webhookQueries.findOne({ id });
+
       return result ? fromDBObject(result) : null;
     },
 
@@ -74,11 +74,13 @@ const createWebhookStore = ({ db }) => {
 
     async updateWebhook(id, data) {
       const webhook = await webhookQueries.update({ id }, toDBObject(data));
+
       return webhook ? fromDBObject(webhook) : null;
     },
 
     async deleteWebhook(id) {
       const webhook = await webhookQueries.delete({ id });
+
       return webhook ? fromDBObject(webhook) : null;
     },
   };

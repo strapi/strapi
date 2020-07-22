@@ -60,23 +60,23 @@ Each plugin exports all its configurations in an object. This object is located 
 
 Here are its properties:
 
-| key                       | type    | Description                                                                                                                                                                                                             |
-| ------------------------- | ------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| blockerComponent          | node    | Props can be either `null` or React node (e.g. `() => <div />`)                                                                                                                                                         |
-| blockerComponentProps     | object  | Props to provide to customise the [blockerComponent](https://github.com/strapi/strapi/blob/58588e10e5d15921b0966e20ce1bc6cde70df5cc/packages/strapi-helper-plugin/lib/src/components/BlockerComponent/index.js#L81-L86) |
-| description               | string  | Plugin's description retrieved from the package.json                                                                                                                                                                    |
-| id                        | string  | Id of the plugin from the `package.json`                                                                                                                                                                                |
-| initializer               | node    | Refer to the [Initializer documentation](#initializer)                                                                                                                                                                  |
-| injectedComponents        | array   | Refer to the [Injected Component documentation](#injected-components)                                                                                                                                                   |
-| isReady                   | boolean | The app will load until this proprety is true                                                                                                                                                                           |
-| mainComponent             | node    | The plugin's App container,                                                                                                                                                                                             |
-| menu                      | object  | Define where the link of your plugin will be set. Without this your plugin will not display a link in the left menu                                                                                                     |
-| name                      | string  | The plugin's name retrieved from the package.json                                                                                                                                                                       |
-| pluginLogo                | file    | The plugin's logo                                                                                                                                                                                                       |
-| preventComponentRendering | boolean | Whether or not display the plugin's blockerComponent instead of the main component                                                                                                                                      |
-| settings                  | object  | Refer to the [Plugins settings API](./frontend-settings-api.md)                                                                                                                                                         |
-| reducers                  | object  | The plugin's redux reducers                                                                                                                                                                                             |
-| trads                     | object  | The plugin's translation files                                                                                                                                                                                          |
+| key                       | type    | Description                                                                                                                                                                |
+| ------------------------- | ------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| blockerComponent          | node    | Props can be either `null` or React node (e.g. `() => <div />`)                                                                                                            |
+| blockerComponentProps     | object  | Props to provide to customise the [blockerComponent](https://github.com/strapi/strapi/blob/58588e10e5d15921b0966e20ce1bc6cde70df5cc/packages/strapi-helper-plugin/lib/src' |
+| description               | string  | Plugin's description retrieved from the package.json                                                                                                                       |
+| id                        | string  | Id of the plugin from the `package.json`                                                                                                                                   |
+| initializer               | node    | Refer to the [Initializer documentation](#initializer)                                                                                                                     |
+| injectedComponents        | array   | Refer to the [Injected Component documentation](#injected-components)                                                                                                      |
+| isReady                   | boolean | The app will load until this proprety is true                                                                                                                              |
+| mainComponent             | node    | The plugin's App container,                                                                                                                                                |
+| menu                      | object  | Define where the link of your plugin will be set. Without this your plugin will not display a link in the left menu                                                        |
+| name                      | string  | The plugin's name retrieved from the package.json                                                                                                                          |
+| pluginLogo                | file    | The plugin's logo                                                                                                                                                          |
+| preventComponentRendering | boolean | Whether or not display the plugin's blockerComponent instead of the main component                                                                                         |
+| settings                  | object  | Refer to the [Plugins settings API](./frontend-settings-api.md)                                                                                                            |
+| reducers                  | object  | The plugin's redux reducers                                                                                                                                                |
+| trads                     | object  | The plugin's translation files                                                                                                                                             |
 
 ### Displaying the plugin's link in the main menu
 
@@ -92,7 +92,7 @@ import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const icon = pluginPkg.strapi.icon;
   const name = pluginPkg.strapi.name;
@@ -292,7 +292,7 @@ The example below shows how to use i18n inside your plugin.
 import { FormattedMessage } from 'react-intl';
 import SomeOtherComponent from 'components/SomeOtherComponent';
 
-const Foo = props => (
+const Foo = (props) => (
   <div className={styles.foo}>
     <FormattedMessage id="my-plugin.notification.error.message" />
     <SomeOtherComponent {...props} />
@@ -314,7 +314,7 @@ Usage:
 
 ```js
 import React from 'react';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 
 const Foo = () => {
   const globalContext = useGlobalContext();
@@ -329,7 +329,7 @@ const Foo = () => {
 
 ```js
 import React from 'react';
-import { GlobalContext } from 'strapi-helper-plugin';
+import { GlobalContext } from 'strapi-helper-plugin/lib/src';
 
 class Foo extends React.Component {
   static contextType = GlobalContext;

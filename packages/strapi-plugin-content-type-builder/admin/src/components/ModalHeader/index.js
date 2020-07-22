@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { HeaderModalTitle } from 'strapi-helper-plugin';
+import { HeaderModalTitle } from 'strapi-helper-plugin/lib/src';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,10 +22,7 @@ const ModalHeader = ({ headerId, headers }) => {
         {headerId && (
           <>
             <Icon type={get(headers, [0, 'icon', 'name'], '')} />
-            <FormattedMessage
-              id={headerId}
-              values={{ name: get(headers, [0, 'label'], '') }}
-            />
+            <FormattedMessage id={headerId} values={{ name: get(headers, [0, 'label'], '') }} />
           </>
         )}
         {!headerId &&
@@ -79,10 +76,7 @@ const ModalHeader = ({ headerId, headers }) => {
                   <UpperFirst content={get(header, ['label'], '')} />
                 </span>
                 {header.info.category && (
-                  <ComponentInfos
-                    category={header.info.category}
-                    name={header.info.name}
-                  />
+                  <ComponentInfos category={header.info.category} name={header.info.name} />
                 )}
               </Fragment>
             );

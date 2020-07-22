@@ -4,7 +4,7 @@ const createModelsUtils = require('../../../test/helpers/models');
 const form = require('../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-const cleanDate = entry => {
+const cleanDate = (entry) => {
   delete entry.updatedAt;
   delete entry.createdAt;
   delete entry.created_at;
@@ -48,7 +48,7 @@ describe('Content Manager End to End', () => {
   describe('Conent Types api', () => {
     test('Label is pluralized', async () => {
       const res = await rq({
-        url: `/content-manager/content-types`,
+        url: '/content-manager/content-types',
         method: 'GET',
       });
 

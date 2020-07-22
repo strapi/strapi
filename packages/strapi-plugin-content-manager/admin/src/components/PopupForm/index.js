@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalForm,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import { AttributeIcon, Button } from '@buffetjs/core';
@@ -39,10 +39,7 @@ const PopupForm = ({
       <HeaderModal>
         <section>
           <HeaderModalTitle style={{ textTransform: 'none' }}>
-            <AttributeIcon
-              type={getAttrType()}
-              style={{ margin: 'auto 20px auto 0' }}
-            />
+            <AttributeIcon type={getAttrType()} style={{ margin: 'auto 20px auto 0' }} />
             <FormattedMessage id={headerId} />
           </HeaderModalTitle>
         </section>

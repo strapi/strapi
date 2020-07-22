@@ -1,5 +1,3 @@
-'use strict';
-
 const execa = require('execa');
 
 const { trackUsage, captureStderr } = require('./utils/usage');
@@ -46,7 +44,7 @@ module.exports = async function createQuickStartProject(scope) {
     process.exit(1);
   }
 
-  console.log(`Running your Strapi application.`);
+  console.log('Running your Strapi application.');
 
   try {
     await trackUsage({ event: 'willStartServer', scope });

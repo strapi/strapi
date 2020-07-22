@@ -39,6 +39,7 @@ HeaderSearch.defaultProps = {
   onClear: () => {},
   placeholder: 'Search for an entry',
   value: '',
+  className: '',
 };
 
 HeaderSearch.propTypes = {
@@ -48,6 +49,7 @@ HeaderSearch.propTypes = {
   onClear: PropTypes.func,
   placeholder: PropTypes.string,
   value: PropTypes.string,
+  className: PropTypes.string,
 };
 
 export default HeaderSearch;

@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
 
@@ -19,6 +17,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     // return first element and ignore filters
     if (kind === 'singleType') {
       const results = await db.query(model).find({ _limit: 1 }, populate);
+
       return _.first(results) || null;
     }
 
@@ -57,6 +56,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     if (kind === 'singleType') {
       // check if there is already one entry and throw
       const count = await db.query(model).count();
+
       if (count >= 1) {
         throw new Error('Single type entry can only be created once');
       }

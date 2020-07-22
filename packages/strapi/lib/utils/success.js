@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -27,5 +25,5 @@ try {
     }).catch(() => {});
   }
 } catch (e) {
-  //...
+  // ...
 }

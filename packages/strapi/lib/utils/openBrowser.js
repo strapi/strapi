@@ -5,17 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-'use strict';
-
-var execSync = require('child_process').execSync;
-var chalk = require('chalk');
-var spawn = require('cross-spawn');
-var opn = require('opn');
+let execSync = require('child_process').execSync;
+let chalk = require('chalk');
+let spawn = require('cross-spawn');
+let opn = require('opn');
 const fetch = require('node-fetch');
 const { getAbsoluteAdminUrl } = require('strapi-utils');
 
 // https://github.com/sindresorhus/opn#app
-var OSX_CHROME = 'google chrome';
+let OSX_CHROME = 'google chrome';
 
 const Actions = Object.freeze({
   NONE: 0,
@@ -29,6 +27,7 @@ function getBrowserEnv() {
   // See https://github.com/sindresorhus/opn#app for documentation.
   const value = process.env.BROWSER;
   let action;
+
   if (!value) {
     // Default.
     action = Actions.BROWSER;
@@ -39,6 +38,7 @@ function getBrowserEnv() {
   } else {
     action = Actions.BROWSER;
   }
+
   return { action, value };
 }
 
@@ -47,15 +47,15 @@ function executeNodeScript(scriptPath, url) {
   const child = spawn('node', [scriptPath, ...extraArgs, url], {
     stdio: 'inherit',
   });
-  child.on('close', code => {
+  child.on('close', (code) => {
     if (code !== 0) {
       console.log();
       console.log(chalk.red('The script specified as BROWSER environment variable failed.'));
       console.log(`${chalk.cyan(scriptPath)} exited with code ${code}.`);
       console.log();
-      return;
     }
   });
+
   return true;
 }
 
@@ -76,6 +76,7 @@ function startBrowserProcess(browser, url) {
         cwd: __dirname,
         stdio: 'ignore',
       });
+
       return true;
     } catch (err) {
       strapi.log.error('Failed to open Google Chrome with AppleScript');
@@ -93,8 +94,9 @@ function startBrowserProcess(browser, url) {
   // Fallback to opn
   // (It will always open new tab)
   try {
-    var options = { app: browser };
+    let options = { app: browser };
     opn(url, options).catch(() => {}); // Prevent `unhandledRejection` error.
+
     return true;
   } catch (err) {
     return false;
@@ -113,7 +115,7 @@ async function pingDashboard(url, multipleTime = false) {
 
     // Only display once.
     if (!multipleTime) {
-      this.log.warn(`⚠️  The admin panel is unavailable... Impossible to open it in the browser.`);
+      this.log.warn('⚠️  The admin panel is unavailable... Impossible to open it in the browser.');
     }
   }
 }

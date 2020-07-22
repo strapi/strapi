@@ -1,5 +1,3 @@
-'use strict';
-
 const {
   policy: { createPolicyFactory },
 } = require('strapi-utils');
@@ -17,8 +15,8 @@ module.exports = createPolicyFactory(
     }
 
     const isAuthorized = hasAtLeastOne
-      ? actions.some(action => userAbility.can(action, model))
-      : actions.every(action => userAbility.can(action, model));
+      ? actions.some((action) => userAbility.can(action, model))
+      : actions.every((action) => userAbility.can(action, model));
 
     if (!isAuthorized) {
       throw strapi.errors.forbidden();

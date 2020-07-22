@@ -1,36 +1,31 @@
-'use strict';
 /**
  * Implementation of model queries for bookshelf
  */
 
 const _ = require('lodash');
 const pmap = require('p-map');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  escapeQuery,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
   // association key
-  const assocKeys = model.associations.map(ast => ast.alias);
+  const assocKeys = model.associations.map((ast) => ast.alias);
   // component keys
-  const componentKeys = Object.keys(model.attributes).filter(key => {
+  const componentKeys = Object.keys(model.attributes).filter((key) => {
     return ['dynamiczone', 'component'].includes(model.attributes[key].type);
   });
 
   const timestamps = _.get(model, ['options', 'timestamps'], []);
 
   // Returns an object with relation keys only to create relations in DB
-  const pickRelations = attributes => {
+  const pickRelations = (attributes) => {
     return _.pick(attributes, assocKeys);
   };
 
   // keys to exclude to get attribute keys
   const excludedKeys = assocKeys.concat(componentKeys);
   // Returns an object without relational keys to persist in DB
-  const selectAttributes = attributes => {
+  const selectAttributes = (attributes) => {
     return _.pickBy(attributes, (value, key) => {
       if (Array.isArray(timestamps) && timestamps.includes(key)) {
         return false;
@@ -44,7 +39,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const db = strapi.connections[model.connection];
 
     if (transacting) return fn(transacting);
-    return db.transaction(trx => fn(trx));
+
+    return db.transaction((trx) => fn(trx));
   };
 
   /**
@@ -52,6 +48,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    */
   async function findOne(params, populate, { transacting } = {}) {
     const entries = await find({ ...params, _limit: 1 }, populate, { transacting });
+
     return entries[0] || null;
   }
 
@@ -67,7 +64,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         withRelated: populate,
         transacting,
       })
-      .then(results => results.toJSON());
+      .then((results) => results.toJSON());
   }
 
   /**
@@ -86,7 +83,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const relations = pickRelations(attributes);
     const data = selectAttributes(attributes);
 
-    const runCreate = async trx => {
+    const runCreate = async (trx) => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
       await createComponents(entry, attributes, { transacting: trx });
@@ -110,7 +107,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const relations = pickRelations(attributes);
     const data = selectAttributes(attributes);
 
-    const runUpdate = async trx => {
+    const runUpdate = async (trx) => {
       const updatedEntry =
         Object.keys(data).length > 0
           ? await entry.save(data, {
@@ -142,9 +139,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
     await model.deleteRelations(id, { transacting });
 
-    const runDelete = async trx => {
+    const runDelete = async (trx) => {
       await deleteComponents(entry, { transacting: trx });
       await model.where({ id: entry.id }).destroy({ transacting: trx, require: false });
+
       return entry.toJSON();
     };
 
@@ -154,15 +152,18 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   async function deleteMany(params, { transacting } = {}) {
     if (params[model.primaryKey]) {
       const entries = await find({ ...params, _limit: 1 }, null, { transacting });
+
       if (entries.length > 0) {
         return deleteOne(entries[0][model.primaryKey], { transacting });
       }
+
       return null;
     }
 
     const paramsWithDefaults = _.defaults(params, { _limit: -1 });
     const entries = await find(paramsWithDefaults, null, { transacting });
-    return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
+
+    return pmap(entries, (entry) => deleteOne(entry.id, { transacting }), {
       concurrency: 100,
       stopOnError: true,
     });
@@ -172,17 +173,17 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query((qb) => qb.where(buildSearchQuery({ model, params })))
       .query(buildQuery({ model, filters }))
       .fetchAll({ withRelated: populate })
-      .then(results => results.toJSON());
+      .then((results) => results.toJSON());
   }
 
   function countSearch(params) {
     const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query((qb) => qb.where(buildSearchQuery({ model, params })))
       .query(buildQuery({ model, filters }))
       .count()
       .then(Number);
@@ -198,7 +199,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return strapi
         .query(componentModel.uid)
         .create(value, { transacting })
-        .then(component => {
+        .then((component) => {
           return joinModel.forge().save(
             {
               [foreignKey]: entry.id,
@@ -275,6 +276,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             dynamiczoneValues.map((value, idx) => {
               const component = value.__component;
               const componentModel = strapi.components[component];
+
               return createComponentAndLink({
                 componentModel,
                 value: _.omit(value, ['__component']),
@@ -307,7 +309,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             value,
             { transacting }
           )
-          .then(component => {
+          .then((component) => {
             return joinModel
               .where({
                 [foreignKey]: entry.id,
@@ -327,7 +329,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return strapi
         .query(componentModel.uid)
         .create(value, { transacting })
-        .then(component => {
+        .then((component) => {
           return joinModel.forge().save(
             {
               [foreignKey]: entry.id,
@@ -413,6 +415,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             dynamiczoneValues.map((value, idx) => {
               const component = value.__component;
               const componentModel = strapi.components[component];
+
               return updateOrCreateComponentAndLink({
                 componentModel,
                 value: _.omit(value, ['__component']),
@@ -425,13 +428,13 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         }
       }
     }
-    return;
   }
 
   async function deleteDynamicZoneOldComponents(entry, values, { key, joinModel, transacting }) {
     const idsToKeep = values.reduce((acc, value) => {
       const component = value.__component;
       const componentModel = strapi.components[component];
+
       if (_.has(value, componentModel.primaryKey)) {
         acc.push({
           id: value[componentModel.primaryKey].toString(),
@@ -443,13 +446,13 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }, []);
 
     const allIds = await joinModel
-      .query(qb => {
+      .query((qb) => {
         qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
       })
       .fetchAll({ transacting })
-      .map(el => {
+      .map((el) => {
         const componentKey = Object.keys(strapi.components).find(
-          key => strapi.components[key].collectionName === el.get('component_type')
+          (key) => strapi.components[key].collectionName === el.get('component_type')
         );
 
         return {
@@ -460,7 +463,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(({ id, component }) => {
-      if (!allIds.find(el => el.id === id && el.component.uid === component.uid)) {
+      if (!allIds.find((el) => el.id === id && el.component.uid === component.uid)) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
         );
@@ -470,22 +473,23 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     });
 
     const idsToDelete = allIds.reduce((acc, { id, component }) => {
-      if (!idsToKeep.find(el => el.id === id && el.component.uid === component.uid)) {
+      if (!idsToKeep.find((el) => el.id === id && el.component.uid === component.uid)) {
         acc.push({
           id,
           component,
         });
       }
+
       return acc;
     }, []);
 
     if (idsToDelete.length > 0) {
       await joinModel
-        .query(qb => {
+        .query((qb) => {
           qb.where('field', key);
-          qb.where(qb => {
+          qb.where((qb) => {
             idsToDelete.forEach(({ id, component }) => {
-              qb.orWhere(qb => {
+              qb.orWhere((qb) => {
                 qb.where('component_id', id).andWhere('component_type', component.collectionName);
               });
             });
@@ -509,8 +513,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const componentArr = Array.isArray(componentValue) ? componentValue : [componentValue];
 
     const idsToKeep = componentArr
-      .filter(el => _.has(el, componentModel.primaryKey))
-      .map(el => el[componentModel.primaryKey].toString());
+      .filter((el) => _.has(el, componentModel.primaryKey))
+      .map((el) => el[componentModel.primaryKey].toString());
 
     const allIds = await joinModel
       .where({
@@ -518,10 +522,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         field: key,
       })
       .fetchAll({ transacting })
-      .map(el => el.get('component_id').toString());
+      .map((el) => el.get('component_id').toString());
 
     // verify the provided ids are realted to this entity.
-    idsToKeep.forEach(id => {
+    idsToKeep.forEach((id) => {
       if (!allIds.includes(id)) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
@@ -532,9 +536,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     });
 
     const idsToDelete = _.difference(allIds, idsToKeep);
+
     if (idsToDelete.length > 0) {
       await joinModel
-        .query(qb => qb.whereIn('component_id', idsToDelete).andWhere('field', key))
+        .query((qb) => qb.whereIn('component_id', idsToDelete).andWhere('field', key))
         .destroy({ transacting, require: false });
 
       await strapi
@@ -565,7 +570,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
               field: key,
             })
             .fetchAll({ transacting })
-            .map(el => el.get('component_id'));
+            .map((el) => el.get('component_id'));
 
           await strapi
             .query(componentModel.uid)
@@ -588,7 +593,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
               field: key,
             })
             .fetchAll({ transacting })
-            .map(el => ({
+            .map((el) => ({
               id: el.get('component_id'),
               componentType: el.get('component_type'),
             }));
@@ -597,12 +602,12 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             const { uid, collectionName } = strapi.components[compo];
             const model = strapi.query(uid);
 
-            const toDelete = componentJoins.filter(el => el.componentType === collectionName);
+            const toDelete = componentJoins.filter((el) => el.componentType === collectionName);
 
             if (toDelete.length > 0) {
               await model.delete(
                 {
-                  [`${model.primaryKey}_in`]: toDelete.map(el => el.id),
+                  [`${model.primaryKey}_in`]: toDelete.map((el) => el.id),
                 },
                 { transacting }
               );
@@ -639,21 +644,21 @@ module.exports = function createQueryBuilder({ model, strapi }) {
  * @param {*} model
  * @param {*} params
  */
-const buildSearchQuery = ({ model, params }) => qb => {
+const buildSearchQuery = ({ model, params }) => (qb) => {
   const query = params._q;
 
-  const associations = model.associations.map(x => x.alias);
+  const associations = model.associations.map((x) => x.alias);
   const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
   const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
 
   const searchColumns = Object.keys(model._attributes)
-    .filter(attribute => !associations.includes(attribute))
-    .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
+    .filter((attribute) => !associations.includes(attribute))
+    .filter((attribute) => stringTypes.includes(model._attributes[attribute].type));
 
   if (!_.isNaN(_.toNumber(query))) {
     const numberColumns = Object.keys(model._attributes)
-      .filter(attribute => !associations.includes(attribute))
-      .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
+      .filter((attribute) => !associations.includes(attribute))
+      .filter((attribute) => numberTypes.includes(model._attributes[attribute].type));
     searchColumns.push(...numberColumns);
   }
 
@@ -664,7 +669,7 @@ const buildSearchQuery = ({ model, params }) => qb => {
   // Search in columns with text using index.
   switch (model.client) {
     case 'pg':
-      searchColumns.forEach(attr =>
+      searchColumns.forEach((attr) =>
         qb.orWhereRaw(
           `"${model.collectionName}"."${attr}"::text ILIKE ?`,
           `%${escapeQuery(query, '*%\\')}%`
@@ -672,7 +677,7 @@ const buildSearchQuery = ({ model, params }) => qb => {
       );
       break;
     case 'sqlite3':
-      searchColumns.forEach(attr =>
+      searchColumns.forEach((attr) =>
         qb.orWhereRaw(
           `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
           `%${escapeQuery(query, '*%\\')}%`
@@ -680,7 +685,7 @@ const buildSearchQuery = ({ model, params }) => qb => {
       );
       break;
     case 'mysql':
-      searchColumns.forEach(attr =>
+      searchColumns.forEach((attr) =>
         qb.orWhereRaw(
           `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
           `%${escapeQuery(query, '*%\\')}%`
@@ -697,7 +702,7 @@ function validateRepeatableInput(value, { key, min, max, required }) {
     throw err;
   }
 
-  value.forEach(val => {
+  value.forEach((val) => {
     if (typeof val !== 'object' || Array.isArray(val) || val === null) {
       const err = new Error(
         `Component ${key} has invalid items. Expected each items to be objects`
@@ -741,7 +746,7 @@ function validateDynamiczoneInput(value, { key, min, max, components, required }
     throw err;
   }
 
-  value.forEach(val => {
+  value.forEach((val) => {
     if (typeof val !== 'object' || Array.isArray(val) || val === null) {
       const err = new Error(
         `Dynamiczone ${key} has invalid items. Expected each items to be objects`

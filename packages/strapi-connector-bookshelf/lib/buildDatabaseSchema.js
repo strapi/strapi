@@ -4,10 +4,7 @@ const { singular } = require('pluralize');
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const createIdType = (table, definition) => {
     if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
-      return table
-        .specificType('id', 'uuid DEFAULT uuid_generate_v4()')
-        .notNullable()
-        .primary();
+      return table.specificType('id', 'uuid DEFAULT uuid_generate_v4()').notNullable().primary();
     }
 
     if (definition.primaryKeyType !== 'integer') {
@@ -30,7 +27,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
   const buildColType = ({ name, attribute, table, tableExists = false }) => {
     if (!attribute.type) {
-      const relation = definition.associations.find(association => {
+      const relation = definition.associations.find((association) => {
         return association.alias === name;
       });
 
@@ -56,6 +53,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
         return table.uuid(name);
       case 'uid': {
         table.unique(name);
+
         return table.string(name);
       }
       case 'richtext':
@@ -103,6 +101,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   const { hasTimestamps } = loadedModel;
 
   let [createAtCol, updatedAtCol] = ['created_at', 'updated_at'];
+
   if (Array.isArray(hasTimestamps)) {
     [createAtCol, updatedAtCol] = hasTimestamps;
   }
@@ -114,7 +113,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     const buildColumns = (tbl, columns, opts = {}) => {
       const { tableExists, alter = false } = opts;
 
-      Object.keys(columns).forEach(key => {
+      Object.keys(columns).forEach((key) => {
         const attribute = columns[key];
 
         const col = buildColType({
@@ -123,6 +122,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
           table: tbl,
           tableExists,
         });
+
         if (!col) return;
 
         if (attribute.required === true) {
@@ -154,7 +154,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     };
 
     const createTable = (table, { trx = ORM.knex, ...opts } = {}) => {
-      return trx.schema.createTable(table, tbl => {
+      return trx.schema.createTable(table, (tbl) => {
         createIdType(tbl, definition);
         createColumns(tbl, attributes, { ...opts, tableExists: false });
       });
@@ -163,6 +163,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     if (!tableExists) {
       await createTable(table);
       await storeTable(table, attributes);
+
       return;
     }
 
@@ -170,7 +171,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
     // Fetch existing column
     const columnsExist = await Promise.all(
-      columns.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
+      columns.map((attribute) => ORM.knex.schema.hasColumn(table, attribute))
     );
 
     const columnsToAdd = {};
@@ -186,7 +187,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
     // Generate and execute query to add missing column
     if (Object.keys(columnsToAdd).length > 0) {
-      await ORM.knex.schema.table(table, tbl => {
+      await ORM.knex.schema.table(table, (tbl) => {
         createColumns(tbl, columnsToAdd, { tableExists });
       });
     }
@@ -195,7 +196,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     try {
       previousAttributes = JSON.parse(
         (
-          await strapi.models['core_store']
+          await strapi.models.core_store
             .forge({
               key: `db_model_${table}`,
             })
@@ -206,7 +207,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       await storeTable(table, attributes);
       previousAttributes = JSON.parse(
         (
-          await strapi.models['core_store']
+          await strapi.models.core_store
             .forge({
               key: `db_model_${table}`,
             })
@@ -222,18 +223,18 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     if (definition.client === 'sqlite3') {
       const tmpTable = `tmp_${table}`;
 
-      const rebuildTable = async trx => {
+      const rebuildTable = async (trx) => {
         await trx.schema.renameTable(table, tmpTable);
 
         // drop possible conflicting indexes
         await Promise.all(
-          columns.map(key => trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key)))
+          columns.map((key) => trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key)))
         );
 
         // create the table
         await createTable(table, { trx });
 
-        const attrs = Object.keys(attributes).filter(attribute =>
+        const attrs = Object.keys(attributes).filter((attribute) =>
           isColumn({
             definition,
             attribute: attributes[attribute],
@@ -243,19 +244,19 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
         const allAttrs = ['id', ...attrs];
 
-        await trx.insert(qb => qb.select(allAttrs).from(tmpTable)).into(table);
+        await trx.insert((qb) => qb.select(allAttrs).from(tmpTable)).into(table);
         await trx.schema.dropTableIfExists(tmpTable);
       };
 
       try {
-        await ORM.knex.transaction(trx => rebuildTable(trx));
+        await ORM.knex.transaction((trx) => rebuildTable(trx));
       } catch (err) {
         if (err.message.includes('UNIQUE constraint failed')) {
           strapi.log.error(
             `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.stack}`
           );
         } else {
-          strapi.log.error(`Migration failed`);
+          strapi.log.error('Migration failed');
           strapi.log.error(err);
         }
 
@@ -263,20 +264,20 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       }
     } else {
       const columnsToAlter = columns.filter(
-        key => JSON.stringify(previousAttributes[key]) !== JSON.stringify(attributes[key])
+        (key) => JSON.stringify(previousAttributes[key]) !== JSON.stringify(attributes[key])
       );
 
-      const alterTable = async trx => {
+      const alterTable = async (trx) => {
         await Promise.all(
-          columnsToAlter.map(col => {
+          columnsToAlter.map((col) => {
             return ORM.knex.schema
-              .alterTable(table, tbl => {
+              .alterTable(table, (tbl) => {
                 tbl.dropUnique(col, uniqueColName(table, col));
               })
               .catch(() => {});
           })
         );
-        await trx.schema.alterTable(table, tbl => {
+        await trx.schema.alterTable(table, (tbl) => {
           alterColumns(tbl, _.pick(attributes, columnsToAlter), {
             tableExists,
           });
@@ -284,7 +285,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       };
 
       try {
-        await ORM.knex.transaction(trx => alterTable(trx));
+        await ORM.knex.transaction((trx) => alterTable(trx));
       } catch (err) {
         if (err.code === '23505' && definition.client === 'pg') {
           strapi.log.error(
@@ -295,7 +296,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
             `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
           );
         } else {
-          strapi.log.error(`Migration failed`);
+          strapi.log.error('Migration failed');
           strapi.log.error(err);
         }
 
@@ -332,7 +333,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   }
 
   // Equilize polymorphic releations
-  const morphRelations = definition.associations.filter(association => {
+  const morphRelations = definition.associations.filter((association) => {
     return association.nature.toLowerCase().includes('morphto');
   });
 
@@ -398,6 +399,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       };
 
       const table = manyRelation.tableCollectionName;
+
       if (connection.options && connection.options.autoMigration !== false) {
         await createOrUpdateTable(table, attributes);
       }
@@ -413,7 +415,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
 const isColumn = ({ definition, attribute, name }) => {
   if (!_.has(attribute, 'type')) {
-    const relation = definition.associations.find(association => {
+    const relation = definition.associations.find((association) => {
       return association.alias === name;
     });
 
@@ -434,14 +436,14 @@ const isColumn = ({ definition, attribute, name }) => {
 };
 
 const storeTable = async (table, attributes) => {
-  const existTable = await strapi.models['core_store']
+  const existTable = await strapi.models.core_store
     .forge({
       key: `db_model_${table}`,
     })
     .fetch();
 
   if (existTable) {
-    return await strapi.models['core_store']
+    return await strapi.models.core_store
       .forge({
         id: existTable.id,
       })
@@ -450,7 +452,7 @@ const storeTable = async (table, attributes) => {
       });
   }
 
-  await strapi.models['core_store']
+  await strapi.models.core_store
     .forge({
       key: `db_model_${table}`,
       type: 'object',

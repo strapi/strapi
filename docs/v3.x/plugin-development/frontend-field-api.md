@@ -25,7 +25,7 @@ Registering a field during the load phase of a plugin can be done as follows:
 
 ```js
 import React from 'react';
-const InputMedia = props => {
+const InputMedia = (props) => {
   // Check out the provided props
   console.log(props);
 
@@ -44,7 +44,7 @@ import pluginPkg from '../../package.json';
 import InputMedia from './components/InputMedia';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {
@@ -87,7 +87,7 @@ The other way to register a **Field** is to use the provided `react-hook`: **`us
 
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useStrapi } from 'strapi-helper-plugin';
+import { useStrapi } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import InputMedia from './components/InputMedia';
 
@@ -126,7 +126,7 @@ import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const plugin = {
     blockerComponent: null,
@@ -164,7 +164,7 @@ import React, { memo, useMemo } from 'react';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 
 // Import the Hook with which you can access the Field API
-import { useStrapi } from 'strapi-helper-plugin';
+import { useStrapi } from 'strapi-helper-plugin/lib/src';
 
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   // This is where you will access the field API
@@ -177,7 +177,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
   return (
     <FormattedMessage id={errorId}>
-      {error => {
+      {(error) => {
         return (
           <InputsIndex
             {...metadatas}

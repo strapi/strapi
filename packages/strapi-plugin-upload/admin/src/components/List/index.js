@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
-import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 import { getTrad, getType } from '../../utils';
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
@@ -24,7 +24,7 @@ const List = ({
 }) => {
   const selectedAssets = selectedItems.length;
 
-  const handleCheckboxClick = e => {
+  const handleCheckboxClick = (e) => {
     e.stopPropagation();
   };
 
@@ -38,12 +38,12 @@ const List = ({
         />
       )}
       <ListRow>
-        {data.map(item => {
+        {data.map((item) => {
           const { id } = item;
           const url = get(item, ['formats', 'small', 'url'], item.url);
           const isAllowed =
             allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
-          const checked = selectedItems.findIndex(file => file.id === id) !== -1;
+          const checked = selectedItems.findIndex((file) => file.id === id) !== -1;
           const fileUrl = prefixFileUrlWithBackendUrl(url);
 
           return (

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Default db infos
  */

@@ -1,5 +1,3 @@
-'use strict';
-
 const mailgunFactory = require('mailgun-js');
 const { removeUndefined } = require('strapi-utils');
 
@@ -11,7 +9,7 @@ module.exports = {
     });
 
     return {
-      send: options => {
+      send: (options) => {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
@@ -27,7 +25,7 @@ module.exports = {
             ...rest,
           };
 
-          mailgun.messages().send(removeUndefined(msg), function(err) {
+          mailgun.messages().send(removeUndefined(msg), function (err) {
             if (err) {
               reject(err);
             } else {

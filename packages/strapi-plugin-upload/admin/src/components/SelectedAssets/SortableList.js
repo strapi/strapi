@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
-import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 import DraggableCard from './DraggableCard';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
@@ -18,7 +18,7 @@ const SortableList = ({
   onClickEditFile,
   selectedItems,
 }) => {
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.stopPropagation();
   };
 
@@ -28,9 +28,9 @@ const SortableList = ({
         {data.map((item, index) => {
           const { id } = item;
           const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
-          const checked = selectedItems.findIndex(file => file.id === id) !== -1;
+          const checked = selectedItems.findIndex((file) => file.id === id) !== -1;
           const fileUrl = prefixFileUrlWithBackendUrl(url);
-          const handleEditClick = e => {
+          const handleEditClick = (e) => {
             e.stopPropagation();
             onClickEditFile(id);
           };
@@ -62,7 +62,7 @@ const SortableList = ({
                       title="edit"
                       color="#9EA7B8"
                       type="pencil"
-                      onClick={e => handleEditClick(e)}
+                      onClick={(e) => handleEditClick(e)}
                     />
                   </CardControlsWrapper>
                 )}

@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import { InputsIndex as Input, LoadingIndicator } from 'strapi-helper-plugin';
+import { InputsIndex as Input, LoadingIndicator } from 'strapi-helper-plugin/lib/src';
 
 import { Wrapper } from './Components';
 
@@ -22,6 +22,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
         value: get(roles, [current, 'type']),
       };
       acc.push(option);
+
       return acc;
     }, []);
 
@@ -46,7 +47,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               value={get(settings, 'default_role')}
               disabled={disabled}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.email',
@@ -60,7 +61,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               disabled={disabled}
               value={get(settings, 'unique_email')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               disabled={disabled}
               label={{
@@ -74,7 +75,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'allow_register')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               disabled={disabled}
               label={{
@@ -88,7 +89,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               type="text"
               value={get(settings, 'email_reset_password')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               disabled={disabled}
               label={{
@@ -102,7 +103,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'email_confirmation')}
             />
-            <div className="col-6"></div>
+            <div className="col-6" />
             <Input
               disabled={disabled}
               label={{

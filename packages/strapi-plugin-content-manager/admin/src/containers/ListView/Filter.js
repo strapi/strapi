@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, toString } from 'lodash';
 import moment from 'moment';
-import { FilterButton } from 'strapi-helper-plugin';
+import { FilterButton } from 'strapi-helper-plugin/lib/src';
 import dateFormats from '../../utils/dateFormats';
 
 function Filter({
@@ -30,10 +30,7 @@ function Filter({
       format = dateFormats.datetime;
     }
 
-    displayedValue = moment
-      .parseZone(date)
-      .utc()
-      .format(format);
+    displayedValue = moment.parseZone(date).utc().format(format);
   }
 
   const label = {

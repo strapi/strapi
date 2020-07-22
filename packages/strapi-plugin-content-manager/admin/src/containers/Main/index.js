@@ -8,7 +8,7 @@ import {
   useGlobalContext,
   request,
   CheckPagePermissions,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
@@ -54,7 +54,7 @@ function Main({
   getDataRef.current = async () => {
     try {
       const [{ data: components }, { data: models }] = await Promise.all(
-        ['components', 'content-types'].map(endPoint =>
+        ['components', 'content-types'].map((endPoint) =>
           request(getRequestUrl(endPoint), { method: 'GET' })
         )
       );
@@ -68,7 +68,7 @@ function Main({
     }
   };
 
-  getLayoutRef.current = async uid => {
+  getLayoutRef.current = async (uid) => {
     try {
       const { data: layout } = await request(getRequestUrl(`content-types/${uid}`), {
         method: 'GET',
@@ -122,7 +122,7 @@ function Main({
     <Route
       key={path}
       path={`/plugins/${pluginId}/${path}`}
-      render={props => renderRoute(props, comp)}
+      render={(props) => renderRoute(props, comp)}
     />
   ));
 
@@ -133,7 +133,7 @@ function Main({
         <Switch>
           <Route
             path={`/plugins/${pluginId}/ctm-configurations/edit-settings/:type/:componentSlug`}
-            render={routeProps => (
+            render={(routeProps) => (
               <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
                 <EditSettingsView
                   currentEnvironment={currentEnvironment}

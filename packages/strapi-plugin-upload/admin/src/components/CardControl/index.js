@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Pencil, Plus } from '@buffetjs/icons';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { getTrad } from '../../utils';

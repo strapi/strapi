@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Create a permission
  * @param {Object} attributes - permission attributes

@@ -1,12 +1,8 @@
-'use strict';
-
 const { createDefaultSettings, syncSettings } = require('./settings');
 const { createDefaultMetadatas, syncMetadatas } = require('./metadatas');
 const { createDefaultLayouts, syncLayouts } = require('./layouts');
 const { formatContentTypeSchema } = require('../../ContentTypes');
-const {
-  createModelConfigurationSchema,
-} = require('../../../controllers/validation');
+const { createModelConfigurationSchema } = require('../../../controllers/validation');
 
 async function validateCustomConfig(model, schema) {
   try {

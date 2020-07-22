@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackHeader, auth } from 'strapi-helper-plugin';
+import { BackHeader, auth } from 'strapi-helper-plugin/lib/src';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 
@@ -13,7 +13,7 @@ import { form, schema } from './utils';
 
 const ProfilePage = () => {
   const { goBack } = useHistory();
-  const onSubmitSuccessCb = data => auth.setUserInfo(data);
+  const onSubmitSuccessCb = (data) => auth.setUserInfo(data);
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader, showHeaderButtonLoader },
@@ -44,7 +44,7 @@ const ProfilePage = () => {
           />
           <BaselineAlignement top size="3px" />
           <FormBloc isLoading={isLoading}>
-            {Object.keys(form).map(key => {
+            {Object.keys(form).map((key) => {
               return (
                 <SizedInput
                   {...form[key]}

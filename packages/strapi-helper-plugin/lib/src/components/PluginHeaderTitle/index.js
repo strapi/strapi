@@ -31,11 +31,15 @@ function PluginHeaderTitle({
           {contentTitle}
           {icon && (
             <i
+              tabIndex={0}
               className={`${icon}`}
               id="editCTName"
               onClick={onClickIcon}
+              onKeyDown={onClickIcon}
               role="button"
-            />
+            >
+              Edit title
+            </i>
           )}
         </h1>
       </div>
@@ -48,15 +52,9 @@ function PluginHeaderTitle({
   );
 }
 
-const formatData = data => {
+const formatData = (data) => {
   if (isObject(data) && !isEmpty(data.id)) {
-    return (
-      <FormattedMessage
-        id={data.id}
-        defaultMessage={data.id}
-        values={data.values}
-      />
-    );
+    return <FormattedMessage id={data.id} defaultMessage={data.id} values={data.values} />;
   }
 
   if (isFunction(data)) {

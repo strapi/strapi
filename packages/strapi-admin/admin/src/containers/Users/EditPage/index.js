@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import { useGlobalContext, auth } from 'strapi-helper-plugin';
+import { useGlobalContext, auth } from 'strapi-helper-plugin/lib/src';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
@@ -23,7 +23,7 @@ const EditPage = ({ canUpdate }) => {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/users/:id`);
 
-  const cbSuccess = data => {
+  const cbSuccess = (data) => {
     const userInfos = auth.getUserInfo();
 
     // The user is updating himself
@@ -86,7 +86,7 @@ const EditPage = ({ canUpdate }) => {
               id: 'app.components.Users.ModalCreateBody.block-title.details',
             })}
           >
-            {Object.keys(form).map(key => {
+            {Object.keys(form).map((key) => {
               return (
                 <SizedInput
                   {...form[key]}

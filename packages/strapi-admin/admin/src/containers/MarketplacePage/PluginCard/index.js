@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Button, PopUpWarning, CheckPermissions } from 'strapi-helper-plugin';
+import { Button, PopUpWarning, CheckPermissions } from 'strapi-helper-plugin/lib/src';
 import adminPermissions from '../../../permissions';
 import Wrapper from './Wrapper';
 
@@ -43,7 +43,7 @@ class PluginCard extends React.Component {
     this.setState({ boostrapCol });
   };
 
-  handleDownloadPlugin = e => {
+  handleDownloadPlugin = (e) => {
     const {
       autoReload,
       currentEnvironment,
@@ -98,7 +98,7 @@ class PluginCard extends React.Component {
               <img src={this.props.plugin.logo} alt="icon" />
             </div>
             <div
-              onClick={e => {
+              onClick={(e) => {
                 window.open(
                   `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
                   '_blank'
@@ -109,7 +109,7 @@ class PluginCard extends React.Component {
             </div>
           </div>
           <div className="cardDescription">{descriptions.long}</div>
-          <div className="cardFooter" onClick={e => e.stopPropagation()}>
+          <div className="cardFooter" onClick={(e) => e.stopPropagation()}>
             <div className="cardFooterButton">
               <CheckPermissions permissions={adminPermissions.marketplace.install}>
                 <Button

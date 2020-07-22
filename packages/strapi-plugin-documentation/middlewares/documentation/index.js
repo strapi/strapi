@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -13,7 +11,7 @@ const koaStatic = require('koa-static');
 // Variables.
 const initialRoutes = [];
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     beforeInitialize() {
       strapi.config.middleware.load.before.push('documentation');

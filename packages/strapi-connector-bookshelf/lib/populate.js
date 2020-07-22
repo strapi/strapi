@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { getComponentAttributes, isComponent } = require('./utils/attributes');
 const { isPolymorphic } = require('./utils/associations');
@@ -11,6 +9,7 @@ const { isPolymorphic } = require('./utils/associations');
 const populateFetch = (definition, options) => {
   // do not populate anything
   if (options.withRelated === false) return;
+
   if (options.isEager === true) return;
 
   if (_.isNil(options.withRelated)) {
@@ -28,8 +27,8 @@ const populateFetch = (definition, options) => {
 
 const populateAssociations = (definition, { prefix = '' } = {}) => {
   return definition.associations
-    .filter(ast => ast.autoPopulate !== false)
-    .map(assoc => {
+    .filter((ast) => ast.autoPopulate !== false)
+    .map((assoc) => {
       if (isPolymorphic({ assoc })) {
         return formatPolymorphicPopulate({
           assoc,
@@ -44,8 +43,8 @@ const populateAssociations = (definition, { prefix = '' } = {}) => {
 
 const populateBareAssociations = (definition, { prefix = '' } = {}) => {
   return (definition.associations || [])
-    .filter(ast => ast.autoPopulate !== false)
-    .map(assoc => {
+    .filter((ast) => ast.autoPopulate !== false)
+    .map((assoc) => {
       if (isPolymorphic({ assoc })) {
         return formatPolymorphicPopulate({
           assoc,
@@ -57,8 +56,8 @@ const populateBareAssociations = (definition, { prefix = '' } = {}) => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
 
       const polyAssocs = assocModel.associations
-        .filter(assoc => isPolymorphic({ assoc }))
-        .map(assoc =>
+        .filter((assoc) => isPolymorphic({ assoc }))
+        .map((assoc) =>
           formatPolymorphicPopulate({
             assoc,
             prefix: `${path}.`,
@@ -75,8 +74,8 @@ const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
   const assocModel = strapi.db.getModelByAssoc(assoc);
 
   const polyAssocs = assocModel.associations
-    .filter(assoc => isPolymorphic({ assoc }))
-    .map(assoc =>
+    .filter((assoc) => isPolymorphic({ assoc }))
+    .map((assoc) =>
       formatPolymorphicPopulate({
         assoc,
         prefix: `${path}.`,
@@ -90,7 +89,7 @@ const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
 
 const populateComponents = (definition, { prefix = '' } = {}) => {
   return getComponentAttributes(definition)
-    .map(key => {
+    .map((key) => {
       const attribute = definition.attributes[key];
       const autoPopulate = _.get(attribute, ['autoPopulate'], true);
 
@@ -140,6 +139,7 @@ const formatPopulateOptions = (definition, withRelated) => {
   const obj = withRelated.reduce((acc, key) => {
     if (_.isString(key)) {
       acc[key] = () => {};
+
       return acc;
     }
 
@@ -172,7 +172,7 @@ const formatPopulateOptions = (definition, withRelated) => {
         continue;
       }
 
-      const assoc = tmpModel.associations.find(association => association.alias === part);
+      const assoc = tmpModel.associations.find((association) => association.alias === part);
 
       if (!assoc) return acc;
 
@@ -192,6 +192,7 @@ const formatPopulateOptions = (definition, withRelated) => {
     }
 
     acc[newKey] = obj[key];
+
     return acc;
   }, {});
 
@@ -209,7 +210,7 @@ const formatPolymorphicPopulate = ({ assoc, prefix = '' }) => {
   const model = strapi.db.getModelByAssoc(assoc);
 
   return {
-    [`${prefix}${assoc.alias}.${model.collectionName}`]: function(query) {
+    [`${prefix}${assoc.alias}.${model.collectionName}`](query) {
       query.orderBy('created_at', 'desc');
     },
   };

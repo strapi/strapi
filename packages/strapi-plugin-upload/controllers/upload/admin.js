@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
@@ -87,7 +85,7 @@ module.exports = {
       id
     );
 
-    await strapi.plugins['upload'].services.upload.remove(file);
+    await strapi.plugins.upload.services.upload.remove(file);
 
     ctx.body = pm.sanitize(file, { action: ACTIONS.read });
   },

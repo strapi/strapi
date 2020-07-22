@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import Wrapper from './Wrapper';
 
 class InputToggle extends React.Component {
-  handleClick = e => {
+  handleClick = (e) => {
     const target = {
       name: this.props.name,
       type: 'toggle',
@@ -21,7 +21,6 @@ class InputToggle extends React.Component {
 
   render() {
     const {
-      autoFocus,
       className,
       disabled,
       deactivateErrorHighlight,
@@ -42,7 +41,6 @@ class InputToggle extends React.Component {
         style={style}
       >
         <button
-          autoFocus={autoFocus}
           disabled={disabled}
           className={cn('btn', !value && 'gradientOff')}
           id={`__OFF__${name}`}
@@ -67,7 +65,6 @@ class InputToggle extends React.Component {
 }
 
 InputToggle.defaultProps = {
-  autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
@@ -78,7 +75,6 @@ InputToggle.defaultProps = {
 };
 
 InputToggle.propTypes = {
-  autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,

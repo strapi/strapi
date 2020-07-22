@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin/lib/src';
 
 import CardPreview from '../CardPreview';
 import Flex from '../Flex';

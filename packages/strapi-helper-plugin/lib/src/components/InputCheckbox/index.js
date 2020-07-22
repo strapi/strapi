@@ -24,7 +24,6 @@ class InputCheckbox extends React.Component {
 
   render() {
     const {
-      autoFocus,
       className,
       disabled,
       label,
@@ -37,7 +36,6 @@ class InputCheckbox extends React.Component {
     } = this.props;
     const checkbox = (
       <input
-        autoFocus={autoFocus}
         className="form-check-input"
         checked={value}
         disabled={disabled}
@@ -54,10 +52,7 @@ class InputCheckbox extends React.Component {
 
     if (typeof label === 'string') {
       content = (
-        <label
-          className={cn('form-check-label', disabled && 'disabled')}
-          htmlFor={name}
-        >
+        <label className={cn('form-check-label', disabled && 'disabled')} htmlFor={name}>
           {checkbox}
           <p>{label}</p>
         </label>
@@ -66,10 +61,7 @@ class InputCheckbox extends React.Component {
 
     if (isFunction(label)) {
       content = (
-        <label
-          className={cn('form-check-label', disabled && 'disabled')}
-          htmlFor={name}
-        >
+        <label className={cn('form-check-label', disabled && 'disabled')} htmlFor={name}>
           {checkbox}
           <p>{label()}</p>
         </label>
@@ -78,16 +70,9 @@ class InputCheckbox extends React.Component {
 
     if (isObject(label) && label.id) {
       content = (
-        <FormattedMessage
-          id={label.id}
-          defaultMessage={label.id}
-          values={label.params}
-        >
-          {message => (
-            <label
-              className={cn('form-check-label', disabled && 'disabled')}
-              htmlFor={name}
-            >
+        <FormattedMessage id={label.id} defaultMessage={label.id} values={label.params}>
+          {(message) => (
+            <label className={cn('form-check-label', disabled && 'disabled')} htmlFor={name}>
               {checkbox}
               <p>{message}</p>
             </label>
@@ -97,10 +82,7 @@ class InputCheckbox extends React.Component {
     }
 
     return (
-      <Wrapper
-        className={cn('form-check', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Wrapper className={cn('form-check', !isEmpty(className) && className)} style={style}>
         {content}
       </Wrapper>
     );
@@ -108,7 +90,6 @@ class InputCheckbox extends React.Component {
 }
 
 InputCheckbox.defaultProps = {
-  autoFocus: false,
   className: '',
   disabled: false,
   label: '',
@@ -120,7 +101,6 @@ InputCheckbox.defaultProps = {
 };
 
 InputCheckbox.propTypes = {
-  autoFocus: PropTypes.bool,
   className: PropTypes.string,
   disabled: PropTypes.bool,
   label: PropTypes.oneOfType([

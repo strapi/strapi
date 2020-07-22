@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { getConditionId, createCondition } = require('../../domain/condition');
 
@@ -16,7 +14,7 @@ module.exports = () => {
       const conditionId = getConditionId(condition);
 
       if (strapi.isLoaded) {
-        throw new Error(`You can't register new conditions outside of the bootstrap function.`);
+        throw new Error("You can't register new conditions outside of the bootstrap function.");
       }
 
       if (this.has(condition.name, condition.plugin)) {
@@ -24,6 +22,7 @@ module.exports = () => {
       }
 
       registry.set(conditionId, createCondition(condition));
+
       return this;
     },
 
@@ -33,7 +32,8 @@ module.exports = () => {
      * @param conditions
      */
     registerMany(conditions) {
-      _.each(conditions, condition => this.register(condition));
+      _.each(conditions, (condition) => this.register(condition));
+
       return this;
     },
 

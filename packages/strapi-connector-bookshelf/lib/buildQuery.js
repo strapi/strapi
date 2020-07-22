@@ -9,7 +9,7 @@ const BOOLEAN_OPERATORS = ['or'];
  * @param {Object} options.model - Bookshelf model
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
-const buildQuery = ({ model, filters }) => qb => {
+const buildQuery = ({ model, filters }) => (qb) => {
   if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
     buildJoinsAndFilter(qb, model, filters.where);
@@ -45,13 +45,14 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {string} name - name to alias
    */
   const aliasMap = {};
-  const generateAlias = name => {
+  const generateAlias = (name) => {
     if (!aliasMap[name]) {
       aliasMap[name] = 1;
     }
 
     const alias = `${name}_${aliasMap[name]}`;
     aliasMap[name] += 1;
+
     return alias;
   };
 
@@ -62,7 +63,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    */
   const buildJoinsFromTree = (qb, queryTree) => {
     // build joins
-    Object.keys(queryTree.joins).forEach(key => {
+    Object.keys(queryTree.joins).forEach((key) => {
       const subQueryTree = queryTree.joins[key];
       buildJoin(qb, subQueryTree.assoc, queryTree, subQueryTree);
 
@@ -82,6 +83,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
 
       let originColumnNameInJoinTable;
+
       if (assoc.nature === 'manyToMany') {
         originColumnNameInJoinTable = `${joinTableAlias}.${singular(
           destinationInfo.model.attributes[assoc.via].attribute
@@ -156,6 +158,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     let [key, ...parts] = field.split('.');
 
     const assoc = findAssoc(tree.model, key);
+
     // if the key is an attribute add as where clause
     if (!assoc) {
       return `${tree.alias}.${key}`;
@@ -185,11 +188,11 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {Object} context.model model on which the query is run
    */
   const buildWhereClauses = (whereClauses, { model }) => {
-    return whereClauses.map(whereClause => {
+    return whereClauses.map((whereClause) => {
       const { field, operator, value } = whereClause;
 
       if (BOOLEAN_OPERATORS.includes(operator)) {
-        return { field, operator, value: value.map(v => buildWhereClauses(v, { model })) };
+        return { field, operator, value: value.map((v) => buildWhereClauses(v, { model })) };
       }
 
       const path = generateNestedJoins(field, tree);
@@ -205,9 +208,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
   const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
 
   buildJoinsFromTree(qb, tree);
-  aliasedWhereClauses.forEach(w => buildWhereClause({ qb, ...w }));
-
-  return;
+  aliasedWhereClauses.forEach((w) => buildWhereClause({ qb, ...w }));
 };
 
 /**
@@ -221,21 +222,21 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
  */
 const buildWhereClause = ({ qb, field, operator, value }) => {
   if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
-    return qb.where(subQb => {
+    return qb.where((subQb) => {
       for (let val of value) {
-        subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
+        subQb.orWhere((q) => buildWhereClause({ qb: q, field, operator, value: val }));
       }
     });
   }
 
   switch (operator) {
     case 'or':
-      return qb.where(orQb => {
-        value.forEach(orClause => {
-          orQb.orWhere(subQb => {
+      return qb.where((orQb) => {
+        value.forEach((orClause) => {
+          orQb.orWhere((subQb) => {
             if (Array.isArray(orClause)) {
-              orClause.forEach(orClause =>
-                subQb.where(andQb => buildWhereClause({ qb: andQb, ...orClause }))
+              orClause.forEach((orClause) =>
+                subQb.where((andQb) => buildWhereClause({ qb: andQb, ...orClause }))
               );
             } else {
               buildWhereClause({ qb: subQb, ...orClause });
@@ -276,6 +277,6 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
   }
 };
 
-const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);
+const findAssoc = (model, key) => model.associations.find((assoc) => assoc.alias === key);
 
 module.exports = buildQuery;

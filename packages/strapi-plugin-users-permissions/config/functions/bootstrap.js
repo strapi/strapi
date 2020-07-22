@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * An asynchronous bootstrap function that runs before
  * your application gets started.
@@ -96,12 +94,13 @@ module.exports = async () => {
     },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
+
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
   if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
     // merge with the previous provider config.
-    _.keys(grantConfig).forEach(key => {
+    _.keys(grantConfig).forEach((key) => {
       if (key in prevGrantConfig) {
         grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }

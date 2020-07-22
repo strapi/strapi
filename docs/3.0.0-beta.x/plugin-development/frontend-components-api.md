@@ -36,7 +36,7 @@ import pluginPkg from '../../package.json';
 import MyComponent from './components/MyComponent';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {
@@ -81,7 +81,7 @@ The other way to register a **Component** is to use the provided `react-hook`: *
 
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useStrapi } from 'strapi-helper-plugin';
+import { useStrapi } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import MyComponent from './components/MyComponent';
 
@@ -120,7 +120,7 @@ import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const plugin = {
     blockerComponent: null,

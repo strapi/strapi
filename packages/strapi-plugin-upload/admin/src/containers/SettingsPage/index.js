@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
 import { isEqual } from 'lodash';
-import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin/lib/src';
 
 import { getRequestUrl, getTrad } from '../../utils';
 import Text from '../../components/Text';

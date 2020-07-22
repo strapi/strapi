@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useDebounce } from '@buffetjs/hooks';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 
 import getTrad from '../../utils/getTrad';
 import useModalContext from '../../hooks/useModalContext';
@@ -22,7 +22,7 @@ const Search = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, canRead]);
 
-  const handleSearchChange = e => {
+  const handleSearchChange = (e) => {
     setValue(e.target.value);
   };
 

@@ -1,6 +1,12 @@
 import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
+import {
+  Modal,
+  ModalFooter,
+  PopUpWarning,
+  useGlobalContext,
+  request,
+} from 'strapi-helper-plugin/lib/src';
 import { Button } from '@buffetjs/core';
 import { get, isEmpty, isEqual } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
@@ -147,7 +153,7 @@ const InputModalStepper = ({
     toggleModalWarning();
   };
 
-  const handleClickDeleteFileToUpload = fileIndex => {
+  const handleClickDeleteFileToUpload = (fileIndex) => {
     handleRemoveFileToUpload(fileIndex);
 
     if (currentStep === 'edit-new') {
@@ -173,12 +179,12 @@ const InputModalStepper = ({
     goBack();
   };
 
-  const handleSubmitEditNewFile = e => {
+  const handleSubmitEditNewFile = (e) => {
     e.preventDefault();
     goNext();
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onInputMediaChange(multiple ? selectedFiles : selectedFiles[0]);
     goNext();
@@ -310,7 +316,9 @@ const InputModalStepper = ({
   };
 
   const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
-  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading || file.isUploading);
+  const isFinishButtonDisabled = filesToUpload.some(
+    (file) => file.isDownloading || file.isUploading
+  );
   const areButtonsDisabledOnEditExistingFile =
     currentStep === 'edit' && fileToEdit.isUploading === true;
 

@@ -1,14 +1,14 @@
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import svg from 'rollup-plugin-svg';
-import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
-import replace from 'rollup-plugin-replace';
-import filesize from 'rollup-plugin-filesize';
-import pkg from './package.json';
+const babel = require('rollup-plugin-babel');
+const resolve = require('rollup-plugin-node-resolve');
+const commonjs = require('rollup-plugin-commonjs');
+const svg = require('rollup-plugin-svg');
+const postcss = require('rollup-plugin-postcss');
+const { terser } = require('rollup-plugin-terser');
+const replace = require('rollup-plugin-replace');
+const filesize = require('rollup-plugin-filesize');
+const pkg = require('./package.json');
 
-export default {
+module.exports = {
   input: './lib/src/index.js',
   output: [
     {
@@ -16,7 +16,7 @@ export default {
       file: pkg.main,
       format: 'cjs',
       sourceMap: false,
-      name: 'strapi-helper-plugin',
+      name: 'strapi-helper-plugin/lib/src',
       compact: true,
       globals: {
         react: 'React',
@@ -28,7 +28,7 @@ export default {
       sourceMap: false,
       file: pkg.module,
       format: 'es',
-      name: 'strapi-helper-plugin',
+      name: 'strapi-helper-plugin/lib/src',
       compact: true,
       globals: {
         react: 'React',
@@ -54,8 +54,5 @@ export default {
     }),
   ],
 
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
+  external: [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})],
 };

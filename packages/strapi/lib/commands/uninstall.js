@@ -1,5 +1,3 @@
-'use strict';
-
 const { join } = require('path');
 const { existsSync, removeSync } = require('fs-extra');
 const ora = require('ora');
@@ -12,7 +10,7 @@ module.exports = async (plugins, { deleteFiles }) => {
     {
       type: 'confirm',
       name: 'deleteFiles',
-      message: `Do you want to delete the plugin generated files in the extensions folder ?`,
+      message: 'Do you want to delete the plugin generated files in the extensions folder ?',
       default: true,
       when: !deleteFiles,
     },
@@ -21,21 +19,23 @@ module.exports = async (plugins, { deleteFiles }) => {
   const loader = ora();
   const dir = process.cwd();
 
-  const pluginArgs = plugins.map(name => `strapi-plugin-${name}`);
+  const pluginArgs = plugins.map((name) => `strapi-plugin-${name}`);
 
   try {
     // verify should rebuild before removing the pacakge
     let shouldRebuild = false;
     for (let name of plugins) {
       let pkgPath = findPackagePath(`strapi-plugin-${name}`);
+
       if (existsSync(join(pkgPath, 'admin', 'src', 'index.js'))) {
         shouldRebuild = true;
       }
     }
 
-    loader.start(`Uninstalling dependencies`);
+    loader.start('Uninstalling dependencies');
 
     const useYarn = existsSync(join(dir, 'yarn.lock'));
+
     if (useYarn) {
       await execa('yarn', ['remove', ...pluginArgs]);
     } else {
@@ -48,6 +48,7 @@ module.exports = async (plugins, { deleteFiles }) => {
       loader.start('Deleting old files');
       for (let name of plugins) {
         const pluginDir = join(dir, 'extensions', name);
+
         if (existsSync(pluginDir)) {
           removeSync(pluginDir);
         }
@@ -56,7 +57,7 @@ module.exports = async (plugins, { deleteFiles }) => {
     }
 
     if (shouldRebuild) {
-      loader.start(`Rebuilding admin UI`);
+      loader.start('Rebuilding admin UI');
       await execa('npm', ['run', 'build']);
       loader.succeed();
     }

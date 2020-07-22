@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Documentation.js service
  *
@@ -23,7 +21,7 @@ module.exports = {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
   },
 
-  checkIfAPIDocNeedsUpdate: function(apiName) {
+  checkIfAPIDocNeedsUpdate(apiName) {
     const prevDocumentation = this.createDocObject(this.retrieveDocumentation(apiName));
     const currentDocumentation = this.createDocObject(this.createDocumentationFile(apiName, false));
 
@@ -34,25 +32,27 @@ module.exports = {
    * Check if the documentation folder with its related version of an API exists
    * @param {String} apiName
    */
-  checkIfDocumentationFolderExists: function(apiName) {
+  checkIfDocumentationFolderExists(apiName) {
     try {
       fs.accessSync(this.getDocumentationPath(apiName));
+
       return true;
     } catch (err) {
       return false;
     }
   },
 
-  checkIfPluginDocumentationFolderExists: function(pluginName) {
+  checkIfPluginDocumentationFolderExists(pluginName) {
     try {
       fs.accessSync(this.getPluginDocumentationPath(pluginName));
+
       return true;
     } catch (err) {
       return false;
     }
   },
 
-  checkIfPluginDocNeedsUpdate: function(pluginName) {
+  checkIfPluginDocNeedsUpdate(pluginName) {
     const prevDocumentation = this.createDocObject(this.retrieveDocumentation(pluginName, true));
     const currentDocumentation = this.createDocObject(
       this.createPluginDocumentationFile(pluginName, false)
@@ -61,18 +61,20 @@ module.exports = {
     return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
   },
 
-  checkIfApiDefaultDocumentationFileExist: function(apiName, docName) {
+  checkIfApiDefaultDocumentationFileExist(apiName, docName) {
     try {
       fs.accessSync(this.getAPIOverrideDocumentationPath(apiName, docName));
+
       return true;
     } catch (err) {
       return false;
     }
   },
 
-  checkIfPluginDefaultDocumentFileExists: function(pluginName, docName) {
+  checkIfPluginDefaultDocumentFileExists(pluginName, docName) {
     try {
       fs.accessSync(this.getPluginOverrideDocumentationPath(pluginName, docName));
+
       return true;
     } catch (err) {
       return false;
@@ -83,9 +85,10 @@ module.exports = {
    * Check if the documentation folder exists in the documentation plugin
    * @returns {Boolean}
    */
-  checkIfMergedDocumentationFolderExists: function() {
+  checkIfMergedDocumentationFolderExists() {
     try {
       fs.accessSync(this.getMergedDocumentationPath());
+
       return true;
     } catch (err) {
       return false;
@@ -97,7 +100,7 @@ module.exports = {
    * @param {String} targetDir
    *
    */
-  createDocumentationDirectory: function(targetDir) {
+  createDocumentationDirectory(targetDir) {
     const sep = path.sep;
     const initDir = path.isAbsolute(targetDir) ? sep : '';
     const baseDir = '.';
@@ -136,7 +139,7 @@ module.exports = {
    * Create the apiName.json and unclassified.json files inside an api's documentation/version folder
    * @param {String} apiName
    */
-  createDocumentationFile: function(apiName, writeFile = true) {
+  createDocumentationFile(apiName, writeFile = true) {
     // Retrieve all the routes from an API
     const apiRoutes = this.getApiRoutes(apiName);
     const apiDocumentation = this.generateApiDocumentation(apiName, apiRoutes);
@@ -152,16 +155,16 @@ module.exports = {
       try {
         if (writeFile) {
           return fs.writeFileSync(targetFile, JSON.stringify(documentation, null, 2), 'utf8');
-        } else {
-          return acc.concat(documentation);
         }
+
+        return acc.concat(documentation);
       } catch (err) {
         return acc;
       }
     }, []);
   },
 
-  createPluginDocumentationFile: function(pluginName, writeFile = true) {
+  createPluginDocumentationFile(pluginName, writeFile = true) {
     const pluginRoutes = this.getPluginRoutesWithDescription(pluginName);
     const pluginDocumentation = this.generatePluginDocumentation(pluginName, pluginRoutes);
 
@@ -185,35 +188,36 @@ module.exports = {
       try {
         if (writeFile) {
           return fs.writeFileSync(targetFile, JSON.stringify(documentation, null, 2), 'utf8');
-        } else {
-          return acc.concat(documentation);
         }
+
+        return acc.concat(documentation);
       } catch (err) {
         // Silent
       }
     }, []);
   },
 
-  createDocObject: array => {
+  createDocObject: (array) => {
     return array.reduce((acc, curr) => _.merge(acc, curr), {});
   },
 
-  deleteDocumentation: async function(version = this.getDocumentationVersion()) {
+  async deleteDocumentation(version = this.getDocumentationVersion()) {
     const recursiveDeleteFiles = async (folderPath, removeCompleteFolder = true) => {
       // Check if folderExist
       try {
         const arrayOfPromises = [];
         fs.accessSync(folderPath);
-        const items = fs.readdirSync(folderPath).filter(x => x[0] !== '.');
+        const items = fs.readdirSync(folderPath).filter((x) => x[0] !== '.');
 
-        items.forEach(item => {
+        items.forEach((item) => {
           const itemPath = path.join(folderPath, item);
 
           // Check if directory
           if (fs.lstatSync(itemPath).isDirectory()) {
             if (removeCompleteFolder) {
               return arrayOfPromises.push(recursiveDeleteFiles(itemPath), removeCompleteFolder);
-            } else if (!itemPath.includes('overrides')) {
+            }
+            if (!itemPath.includes('overrides')) {
               return arrayOfPromises.push(recursiveDeleteFiles(itemPath), removeCompleteFolder);
             }
           } else {
@@ -246,12 +250,12 @@ module.exports = {
     const apis = this.getApis();
     const plugins = this.getPluginsWithDocumentationNeeded();
 
-    apis.forEach(api => {
+    apis.forEach((api) => {
       const apiPath = path.join(strapi.config.appPath, 'api', api, 'documentation', version);
       arrayOfPromises.push(recursiveDeleteFiles(apiPath));
     });
 
-    plugins.forEach(plugin => {
+    plugins.forEach((plugin) => {
       const pluginPath = path.join(
         strapi.config.appPath,
         'extensions',
@@ -285,10 +289,10 @@ module.exports = {
    * @param {String} endPoint
    * @returns {String} (/products/{id})
    */
-  formatApiEndPoint: endPoint => {
+  formatApiEndPoint: (endPoint) => {
     return pathToRegexp
       .parse(endPoint)
-      .map(token => {
+      .map((token) => {
         if (_.isObject(token)) {
           return token.prefix + '{' + token.name + '}'; // eslint-disable-line prefer-template
         }
@@ -308,7 +312,7 @@ module.exports = {
   formatTag: (plugin, name, withoutSpace = false) => {
     const formattedPluginName = plugin
       .split('-')
-      .map(i => _.upperFirst(i))
+      .map((i) => _.upperFirst(i))
       .join('');
     const formattedName = _.upperFirst(name);
 
@@ -319,7 +323,7 @@ module.exports = {
     return `${formattedPluginName} - ${formattedName}`;
   },
 
-  generateAssociationSchema: function(attributes, getter) {
+  generateAssociationSchema(attributes, getter) {
     return Object.keys(attributes).reduce(
       (acc, curr) => {
         const attribute = attributes[curr];
@@ -335,7 +339,7 @@ module.exports = {
           const newGetter = getter.slice();
           newGetter.splice(newGetter.length - 1, 1, 'associations');
           const relationNature = _.get(strapi, newGetter).filter(
-            association => association.alias === curr
+            (association) => association.alias === curr
           )[0].nature;
 
           switch (relationNature) {
@@ -367,7 +371,7 @@ module.exports = {
    * @param {Array} routes
    * @returns {Object}
    */
-  generateApiDocumentation: function(apiName, routes) {
+  generateApiDocumentation(apiName, routes) {
     return routes.reduce((acc, current) => {
       const [controllerName, controllerMethod] = current.handler.split('.');
       // Retrieve the tag key in the config object
@@ -377,7 +381,7 @@ module.exports = {
       let verb;
 
       if (Array.isArray(current.method)) {
-        verb = current.method.map(method => method.toLowerCase());
+        verb = current.method.map((method) => method.toLowerCase());
       } else {
         verb = current.method.toLowerCase();
       }
@@ -417,7 +421,7 @@ module.exports = {
 
       // Swagger is not support key with ',' symbol, for array of methods need generate documentation for each method
       if (Array.isArray(verb)) {
-        verb.forEach(method => {
+        verb.forEach((method) => {
           _.set(acc, [key, 'paths', endPoint, method], verbObject);
         });
       } else {
@@ -458,7 +462,7 @@ module.exports = {
         }
 
         if (Array.isArray(verb)) {
-          verb.forEach(method => {
+          verb.forEach((method) => {
             _.set(acc, [key, 'paths', endPoint, method, 'requestBody'], requestBody);
           });
         } else {
@@ -471,7 +475,7 @@ module.exports = {
 
       if (!verb.includes('post')) {
         if (Array.isArray(verb)) {
-          verb.forEach(method => {
+          verb.forEach((method) => {
             _.set(acc, [key, 'paths', endPoint, method, 'parameters'], parameters);
           });
         } else {
@@ -483,7 +487,7 @@ module.exports = {
     }, {});
   },
 
-  generateFullDoc: function(version = this.getDocumentationVersion()) {
+  generateFullDoc(version = this.getDocumentationVersion()) {
     const apisDoc = this.retrieveDocumentationFiles(false, version);
     const pluginsDoc = this.retrieveDocumentationFiles(true, version);
     const appDoc = [...apisDoc, ...pluginsDoc];
@@ -493,7 +497,7 @@ module.exports = {
     _.set(defaultSettings, ['info', 'x-generation-date'], moment().format('L LTS'));
     _.set(defaultSettings, ['info', 'version'], version);
     const tags = appDoc.reduce((acc, current) => {
-      const tags = current.tags.filter(el => {
+      const tags = current.tags.filter((el) => {
         return _.findIndex(acc, ['name', el.name || '']) === -1;
       });
 
@@ -517,7 +521,7 @@ module.exports = {
    * @param {Array} associations
    * @returns {Object}
    */
-  generateMainComponent: function(attributes, associations) {
+  generateMainComponent(attributes, associations) {
     return Object.keys(attributes).reduce(
       (acc, current) => {
         const attribute = attributes[current];
@@ -539,7 +543,7 @@ module.exports = {
 
         if (attribute.model || attribute.collection) {
           const currentAssociation = associations.filter(
-            association => association.alias === current
+            (association) => association.alias === current
           )[0];
           const relationNature = currentAssociation.nature;
           const name = currentAssociation.model || currentAssociation.collection;
@@ -592,7 +596,7 @@ module.exports = {
         } else if (type === 'dynamiczone') {
           const { components, min, max } = attribute;
 
-          const cmps = components.map(component => {
+          const cmps = components.map((component) => {
             const schema = this.generateMainComponent(
               strapi.components[component].attributes,
               strapi.components[component].associations
@@ -638,7 +642,7 @@ module.exports = {
     );
   },
 
-  generatePluginDocumentation: function(pluginName, routes) {
+  generatePluginDocumentation(pluginName, routes) {
     return routes.reduce((acc, current) => {
       const {
         config: { description, prefix },
@@ -650,7 +654,7 @@ module.exports = {
       let verb;
 
       if (Array.isArray(current.method)) {
-        verb = current.method.map(method => method.toLowerCase());
+        verb = current.method.map((method) => method.toLowerCase());
       } else {
         verb = current.method.toLowerCase();
       }
@@ -692,7 +696,7 @@ module.exports = {
       if (_.isEmpty(defaultDocumentation)) {
         if (!verb.includes('post')) {
           if (Array.isArray(verb)) {
-            verb.forEach(method => {
+            verb.forEach((method) => {
               _.set(acc, [key, 'paths', endPoint, method, 'parameters'], parameters);
             });
           } else {
@@ -740,7 +744,7 @@ module.exports = {
           }
 
           if (Array.isArray(verb)) {
-            verb.forEach(method => {
+            verb.forEach((method) => {
               _.set(acc, [key, 'paths', endPoint, method, 'requestBody'], requestBody);
             });
           } else {
@@ -753,7 +757,7 @@ module.exports = {
     }, {});
   },
 
-  generatePluginResponseSchema: function(tag) {
+  generatePluginResponseSchema(tag) {
     const { actionType, name, plugin } = _.isObject(tag) ? tag : { tag };
     const getter = plugin ? ['plugins', plugin, 'models', name.toLowerCase()] : ['models', name];
     const isModelRelated =
@@ -806,7 +810,7 @@ module.exports = {
     };
   },
 
-  generatePluginVerbResponses: function(routeObject) {
+  generatePluginVerbResponses(routeObject) {
     const {
       config: { tag },
     } = routeObject;
@@ -881,7 +885,7 @@ module.exports = {
    * @param {String} tag
    * @returns {Object}
    */
-  generateResponses: function(verb, routeObject, tag) {
+  generateResponses(verb, routeObject, tag) {
     const endPoint = routeObject.path.split('/')[1];
     const description = this.generateResponseDescription(verb, tag, endPoint);
     const schema = this.generateResponseSchema(verb, routeObject, tag, endPoint);
@@ -939,11 +943,12 @@ module.exports = {
    * Retrieve all privates attributes from a model
    * @param {Object} attributes
    */
-  getPrivateAttributes: function(attributes) {
+  getPrivateAttributes(attributes) {
     const privateAttributes = Object.keys(attributes).reduce((acc, current) => {
       if (attributes[current].private === true) {
         acc.push(current);
       }
+
       return acc;
     }, []);
 
@@ -956,7 +961,7 @@ module.exports = {
    * @param {String} tag
    * @returns {Object}
    */
-  generateResponseComponent: function(tag, pluginName = '', isPlugin = false) {
+  generateResponseComponent(tag, pluginName = '', isPlugin = false) {
     // The component's name have to be capitalised
     const [plugin, name] = isPlugin ? this.getModelAndNameForPlugin(tag, pluginName) : [null, null];
     const upperFirstTag = isPlugin ? this.formatTag(plugin, name, true) : _.upperFirst(tag);
@@ -971,10 +976,10 @@ module.exports = {
     const modelAssociations = _.get(strapi, associationGetter);
     const { attributes } = this.getModelAttributes(attributesObject);
     const associationsWithUpload = modelAssociations
-      .filter(association => {
+      .filter((association) => {
         return association.plugin === 'upload';
       })
-      .map(obj => obj.alias);
+      .map((obj) => obj.alias);
 
     // We always create two nested components from the main one
     const mainComponent = this.generateMainComponent(attributes, modelAssociations, upperFirstTag);
@@ -986,6 +991,7 @@ module.exports = {
         if (privateAttributes.indexOf(current) === -1) {
           acc.properties[current] = mainComponent.properties[current];
         }
+
         return acc;
       },
       { required: mainComponent.required, properties: {} }
@@ -994,7 +1000,7 @@ module.exports = {
     // Special component only for POST || PUT verbs since the upload is made with a different route
     const postComponent = Object.keys(mainComponent).reduce((acc, current) => {
       if (current === 'required') {
-        const required = mainComponent.required.slice().filter(attr => {
+        const required = mainComponent.required.slice().filter((attr) => {
           return associationsWithUpload.indexOf(attr) === -1 && attr !== 'id' && attr !== '_id';
         });
 
@@ -1056,22 +1062,23 @@ module.exports = {
    * @param {String} endPoint
    * @returns {String}
    */
-  generateResponseDescription: function(verb, tag, endPoint) {
+  generateResponseDescription(verb, tag, endPoint) {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
 
     if (Array.isArray(verb)) {
-      verb = verb.map(method => method.toLocaleLowerCase());
+      verb = verb.map((method) => method.toLocaleLowerCase());
     }
 
     if (verb.includes('get') || verb.includes('put') || verb.includes('post')) {
       return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
-    } else if (verb.includes('delete')) {
+    }
+    if (verb.includes('delete')) {
       return isModelRelated
         ? `deletes a single ${tag} based on the ID supplied`
         : 'deletes a single record based on the ID supplied';
-    } else {
-      return 'response';
     }
+
+    return 'response';
   },
 
   /**
@@ -1084,7 +1091,7 @@ module.exports = {
    * @param {String} endPoint
    * @returns {Object}
    */
-  generateResponseSchema: function(verb, routeObject, tag) {
+  generateResponseSchema(verb, routeObject, tag) {
     const { handler } = routeObject;
     let [controller, handlerMethod] = handler.split('.');
     let upperFirstTag = _.upperFirst(tag);
@@ -1184,7 +1191,7 @@ module.exports = {
     };
   },
 
-  generateTags: function(name, docName, tag = '', isPlugin = false) {
+  generateTags(name, docName, tag = '', isPlugin = false) {
     return [
       {
         name: isPlugin ? tag : _.upperFirst(docName),
@@ -1266,10 +1273,10 @@ module.exports = {
    * @param {String} controllerMethod
    * @param {String} endPoint
    */
-  generateVerbParameters: function(verb, controllerMethod, endPoint) {
+  generateVerbParameters(verb, controllerMethod, endPoint) {
     const params = pathToRegexp
       .parse(endPoint)
-      .filter(token => _.isObject(token))
+      .filter((token) => _.isObject(token))
       .reduce((acc, current) => {
         const param = {
           name: current.name,
@@ -1300,7 +1307,7 @@ module.exports = {
     return Object.keys(strapi.api || {});
   },
 
-  getAPIOverrideComponentsDocumentation: function(apiName, docName) {
+  getAPIOverrideComponentsDocumentation(apiName, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getAPIOverrideDocumentationPath(apiName, docName), 'utf8')
@@ -1312,7 +1319,7 @@ module.exports = {
     }
   },
 
-  getAPIDefaultTagsDocumentation: function(name, docName) {
+  getAPIDefaultTagsDocumentation(name, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getAPIOverrideDocumentationPath(name, docName), 'utf8')
@@ -1324,7 +1331,7 @@ module.exports = {
     }
   },
 
-  getAPIDefaultVerbDocumentation: function(apiName, docName, routePath, verb) {
+  getAPIDefaultVerbDocumentation(apiName, docName, routePath, verb) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getAPIOverrideDocumentationPath(apiName, docName), 'utf8')
@@ -1336,7 +1343,7 @@ module.exports = {
     }
   },
 
-  getAPIOverrideDocumentationPath: function(apiName, docName) {
+  getAPIOverrideDocumentationPath(apiName, docName) {
     return path.join(
       strapi.config.appPath,
       'api',
@@ -1353,11 +1360,11 @@ module.exports = {
    * @param {String}
    * @returns {Array}
    */
-  getApiRoutes: apiName => {
+  getApiRoutes: (apiName) => {
     return _.get(strapi, ['api', apiName, 'config', 'routes'], []);
   },
 
-  getDocumentationOverridesPath: function(apiName) {
+  getDocumentationOverridesPath(apiName) {
     return path.join(
       strapi.config.appPath,
       'api',
@@ -1373,7 +1380,7 @@ module.exports = {
    * @param {String} apiName
    * @returns {Path}
    */
-  getDocumentationPath: function(apiName) {
+  getDocumentationPath(apiName) {
     return path.join(
       strapi.config.appPath,
       'api',
@@ -1391,7 +1398,7 @@ module.exports = {
    * Retrieve the plugin's configuration version
    */
   getDocumentationVersion: () => {
-    const version = strapi.plugins['documentation'].config.info.version;
+    const version = strapi.plugins.documentation.config.info.version;
 
     return version;
   },
@@ -1399,7 +1406,7 @@ module.exports = {
   /**
    * Retrieve the documentation plugin documentation directory
    */
-  getMergedDocumentationPath: function(version = this.getDocumentationVersion()) {
+  getMergedDocumentationPath(version = this.getDocumentationVersion()) {
     return path.join(
       strapi.config.appPath,
       'extensions',
@@ -1414,10 +1421,10 @@ module.exports = {
    * @param {Objet} modelAttributes
    * @returns {Object} { associations: [{ name: 'foo', getter: [], tag: 'foos' }], attributes }
    */
-  getModelAttributes: function(modelAttributes) {
+  getModelAttributes(modelAttributes) {
     const associations = [];
     const attributes = Object.keys(modelAttributes)
-      .map(attr => {
+      .map((attr) => {
         const attribute = modelAttributes[attr];
         const isField = !_.has(attribute, 'model') && !_.has(attribute, 'collection');
 
@@ -1446,7 +1453,7 @@ module.exports = {
    * @param {String} type
    * @returns {String}
    */
-  getType: type => {
+  getType: (type) => {
     switch (type) {
       case 'string':
       case 'byte':
@@ -1473,7 +1480,7 @@ module.exports = {
     }
   },
 
-  getPluginDefaultVerbDocumentation: function(pluginName, docName, routePath, verb) {
+  getPluginDefaultVerbDocumentation(pluginName, docName, routePath, verb) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8')
@@ -1485,7 +1492,7 @@ module.exports = {
     }
   },
 
-  getPluginDefaultTagsDocumentation: function(pluginName, docName) {
+  getPluginDefaultTagsDocumentation(pluginName, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8')
@@ -1497,7 +1504,7 @@ module.exports = {
     }
   },
 
-  getPluginOverrideComponents: function(pluginName, docName) {
+  getPluginOverrideComponents(pluginName, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8')
@@ -1509,7 +1516,7 @@ module.exports = {
     }
   },
 
-  getPluginOverrideDocumentationPath: function(pluginName, docName) {
+  getPluginOverrideDocumentationPath(pluginName, docName) {
     const defaultPath = path.join(
       strapi.config.appPath,
       'extensions',
@@ -1521,15 +1528,15 @@ module.exports = {
 
     if (docName) {
       return path.resolve(defaultPath, `${docName.json}`);
-    } else {
-      return defaultPath;
     }
+
+    return defaultPath;
   },
 
   /**
    * Given a plugin retrieve its documentation version
    */
-  getPluginDocumentationPath: function(pluginName) {
+  getPluginDocumentationPath(pluginName) {
     return path.join(
       strapi.config.appPath,
       'extensions',
@@ -1543,7 +1550,7 @@ module.exports = {
    * Retrieve all plugins that have a description inside one of its route
    * @return {Arrray}
    */
-  getPluginsWithDocumentationNeeded: function() {
+  getPluginsWithDocumentationNeeded() {
     return Object.keys(strapi.plugins).reduce((acc, current) => {
       const isDocumentationNeeded = this.isPluginDocumentationNeeded(current);
 
@@ -1560,9 +1567,9 @@ module.exports = {
    * @param {String} pluginName
    * @returns {Array}
    */
-  getPluginRoutesWithDescription: function(pluginName) {
+  getPluginRoutesWithDescription(pluginName) {
     return _.get(strapi, ['plugins', pluginName, 'config', 'routes'], []).filter(
-      route => _.get(route, ['config', 'description']) !== undefined
+      (route) => _.get(route, ['config', 'description']) !== undefined
     );
   },
 
@@ -1582,7 +1589,7 @@ module.exports = {
    * @param {String} plugin
    * @returns {Array}
    */
-  getModelForPlugin: function(string, pluginName) {
+  getModelForPlugin(string, pluginName) {
     const [plugin, model] = this.getModelAndNameForPlugin(string, pluginName);
 
     return ['plugins', plugin, 'models', _.lowerCase(model)];
@@ -1593,16 +1600,17 @@ module.exports = {
    * @param {String} pluginName
    * @returns {Boolean}
    */
-  isPluginDocumentationNeeded: function(pluginName) {
+  isPluginDocumentationNeeded(pluginName) {
     const { pluginsForWhichToGenerateDoc } = strapi.plugins.documentation.config['x-strapi-config'];
+
     if (
       Array.isArray(pluginsForWhichToGenerateDoc) &&
       !pluginsForWhichToGenerateDoc.includes(pluginName)
     ) {
       return false;
-    } else {
-      return this.getPluginRoutesWithDescription(pluginName).length > 0;
     }
+
+    return this.getPluginRoutesWithDescription(pluginName).length > 0;
   },
 
   /**
@@ -1623,7 +1631,7 @@ module.exports = {
     return _.merge(cleanedObj, srcObj);
   },
 
-  mergePaths: function(initObj, srcObj) {
+  mergePaths(initObj, srcObj) {
     return Object.keys(initObj.paths).reduce((acc, current) => {
       if (_.has(_.get(srcObj, ['paths'], {}), current)) {
         const verbs = Object.keys(initObj.paths[current]).reduce((acc1, curr) => {
@@ -1654,7 +1662,7 @@ module.exports = {
    * @param {Object} srcObj
    * @returns {Object}
    */
-  mergeVerbObject: function(initObj, srcObj) {
+  mergeVerbObject(initObj, srcObj) {
     return _.mergeWith(initObj, srcObj, (objValue, srcValue) => {
       if (_.isPlainObject(objValue)) {
         return Object.assign(objValue, srcValue);
@@ -1664,7 +1672,7 @@ module.exports = {
     });
   },
 
-  retrieveDocumentation: function(name, isPlugin = false) {
+  retrieveDocumentation(name, isPlugin = false) {
     const documentationPath = isPlugin
       ? [strapi.config.appPath, 'extensions', name, 'documentation', this.getDocumentationVersion()]
       : [strapi.config.appPath, 'api', name, 'documentation', this.getDocumentationVersion()];
@@ -1672,7 +1680,7 @@ module.exports = {
     try {
       const documentationFiles = fs
         .readdirSync(path.resolve(documentationPath.join('/')))
-        .filter(el => el.includes('.json'));
+        .filter((el) => el.includes('.json'));
 
       return documentationFiles.reduce((acc, current) => {
         try {
@@ -1696,7 +1704,7 @@ module.exports = {
    * @param {Boolean} isPlugin
    * @returns {Array}
    */
-  retrieveDocumentationFiles: function(isPlugin = false, version = this.getDocumentationVersion()) {
+  retrieveDocumentationFiles(isPlugin = false, version = this.getDocumentationVersion()) {
     const array = isPlugin ? this.getPluginsWithDocumentationNeeded() : this.getApis();
 
     return array.reduce((acc, current) => {
@@ -1707,9 +1715,9 @@ module.exports = {
       try {
         const documentationFiles = fs
           .readdirSync(path.resolve(documentationPath.join('/')))
-          .filter(el => el.includes('.json'));
+          .filter((el) => el.includes('.json'));
 
-        documentationFiles.forEach(el => {
+        documentationFiles.forEach((el) => {
           try {
             let documentation = JSON.parse(
               fs.readFileSync(path.resolve([...documentationPath, el].join('/')), 'utf8')
@@ -1781,10 +1789,10 @@ module.exports = {
     }, []);
   },
 
-  retrieveDocumentationVersions: function() {
+  retrieveDocumentationVersions() {
     return fs
       .readdirSync(this.getFullDocumentationPath())
-      .map(version => {
+      .map((version) => {
         try {
           const doc = JSON.parse(
             fs.readFileSync(
@@ -1798,10 +1806,10 @@ module.exports = {
           return null;
         }
       })
-      .filter(x => x);
+      .filter((x) => x);
   },
 
-  retrieveFrontForm: async function() {
+  async retrieveFrontForm() {
     const config = await strapi
       .store({
         environment: '',

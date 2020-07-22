@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * UsersPermissions.js controller
  *
@@ -99,7 +97,7 @@ module.exports = {
     );
 
     if (_.isEmpty(role)) {
-      return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: "Role don't exist" }] }]);
     }
 
     ctx.send({ role });
@@ -268,11 +266,11 @@ const searchQueries = {
   bookshelf({ model }) {
     return ({ id }) => {
       return model
-        .query(function(qb) {
+        .query(function (qb) {
           qb.where('username', 'LIKE', `%${id}%`).orWhere('email', 'LIKE', `%${id}%`);
         })
         .fetchAll()
-        .then(results => results.toJSON());
+        .then((results) => results.toJSON());
     };
   },
   mongoose({ model }) {

@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
-import { CheckPagePermissions, request, useGlobalContext } from 'strapi-helper-plugin';
+import { CheckPagePermissions, request, useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
@@ -52,7 +52,7 @@ const CreatePage = () => {
     },
   ];
 
-  const handleCreateRoleSubmit = data => {
+  const handleCreateRoleSubmit = (data) => {
     strapi.lockAppWithOverlay();
     setIsSubmiting(true);
 
@@ -62,7 +62,7 @@ const CreatePage = () => {
         body: data,
       })
     )
-      .then(res => {
+      .then((res) => {
         const permissionsToSend = permissionsRef.current.getPermissions();
 
         if (res.data.id && !isEmpty(permissionsToSend)) {
@@ -78,7 +78,7 @@ const CreatePage = () => {
         strapi.notification.success('Settings.roles.created');
         goBack();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         strapi.notification.error('notification.error');
       })

@@ -1,5 +1,3 @@
-'use strict';
-
 const { join } = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
@@ -26,7 +24,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     // copy dot files
     const dotFiles = await fse.readdir(join(resources, 'dot-files'));
     await Promise.all(
-      dotFiles.map(name => {
+      dotFiles.map((name) => {
         return fse.copy(join(resources, 'dot-files', name), join(rootPath, `.${name}`));
       })
     );
@@ -55,7 +53,7 @@ module.exports = async function createProject(scope, { client, connection, depen
 
     // create config/database.js
     await fse.writeFile(
-      join(rootPath, `config/database.js`),
+      join(rootPath, 'config/database.js'),
       createDatabaseConfig({
         client,
         connection,
@@ -63,7 +61,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     );
 
     // create config/server.js
-    await fse.writeFile(join(rootPath, `config/server.js`), createServerConfig());
+    await fse.writeFile(join(rootPath, 'config/server.js'), createServerConfig());
 
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
   } catch (err) {
@@ -77,10 +75,7 @@ module.exports = async function createProject(scope, { client, connection, depen
   const loader = ora(installPrefix).start();
 
   const logInstall = (chunk = '') => {
-    loader.text = `${installPrefix} ${chunk
-      .toString()
-      .split('\n')
-      .join(' ')}`;
+    loader.text = `${installPrefix} ${chunk.toString().split('\n').join(' ')}`;
   };
 
   try {
@@ -117,9 +112,9 @@ module.exports = async function createProject(scope, { client, connection, depen
         'Oh, it seems that you encountered errors while installing dependencies in your project.'
       )
     );
-    console.log(`Don't give up, your project was created correctly.`);
+    console.log("Don't give up, your project was created correctly.");
     console.log(
-      `Fix the issues mentionned in the installation errors and try to run the following command:`
+      'Fix the issues mentionned in the installation errors and try to run the following command:'
     );
     console.log();
     console.log(
@@ -149,7 +144,7 @@ module.exports = async function createProject(scope, { client, connection, depen
   console.log('  Build Strapi admin panel.');
   console.log();
   console.log(`  ${cmd} strapi`);
-  console.log(`  Display all available commands.`);
+  console.log('  Display all available commands.');
   console.log();
   console.log('You can start by doing:');
   console.log();

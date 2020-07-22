@@ -1,5 +1,3 @@
-'use strict';
-
 const policyUtils = require('../policy');
 
 describe('Policy util', () => {

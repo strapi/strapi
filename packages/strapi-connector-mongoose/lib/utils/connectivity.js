@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = async ({ connection }) => {
   const Mongoose = require('mongoose');
 
@@ -20,7 +18,7 @@ module.exports = async ({ connection }) => {
     connectOptions.authSource = authenticationDatabase;
   }
 
-  connectOptions.ssl = ssl ? true : false;
+  connectOptions.ssl = !!ssl;
   connectOptions.useNewUrlParser = true;
   connectOptions.dbName = connection.settings.database;
 
@@ -33,7 +31,7 @@ module.exports = async ({ connection }) => {
     () => {
       Mongoose.connection.close();
     },
-    error => {
+    (error) => {
       Mongoose.connection.close();
       throw error;
     }

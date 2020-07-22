@@ -14,7 +14,7 @@ import {
   CheckPermissions,
   useUserPermissions,
   useQuery,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { generatePermissionsObject, getRequestUrl } from '../../utils';
@@ -93,7 +93,7 @@ function ListView({
   }, [slug]);
 
   const getLayoutSetting = useCallback(
-    settingName => {
+    (settingName) => {
       return get(layouts, [...contentTypePath, 'settings', settingName], '');
     },
     [contentTypePath, layouts]
@@ -201,7 +201,7 @@ function ListView({
   }, [listSchema]);
 
   const tableHeaders = useMemo(() => {
-    return listLayout.map(label => {
+    return listLayout.map((label) => {
       return { ...getMetaDatas([label, 'list']), name: label };
     });
   }, [getMetaDatas, listLayout]);
@@ -209,7 +209,7 @@ function ListView({
   const getFirstSortableElement = useCallback(
     (name = '') => {
       return get(
-        listLayout.filter(h => {
+        listLayout.filter((h) => {
           return h !== name && getMetaDatas([h, 'list', 'sortable']) === true;
         }),
         ['0'],
@@ -223,12 +223,12 @@ function ListView({
     return sortBy(
       Object.keys(getMetaDatas())
         .filter(
-          key =>
+          (key) =>
             !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
               get(listSchema, ['attributes', key, 'type'], '')
             )
         )
-        .map(label => ({
+        .map((label) => ({
           name: label,
           value: listLayout.includes(label),
         })),
@@ -379,7 +379,7 @@ function ListView({
     push({ search: searchToString });
   };
 
-  const handleClickDelete = id => {
+  const handleClickDelete = (id) => {
     setIdToDelete(id);
     toggleModalDelete();
   };
@@ -401,7 +401,7 @@ function ListView({
       emitEvent('willFilterEntries');
     }
 
-    setFilterPickerState(prevState => !prevState);
+    setFilterPickerState((prevState) => !prevState);
   };
 
   const toggleLabelPickerState = () => {
@@ -409,7 +409,7 @@ function ListView({
       emitEvent('willChangeListFieldsSettings');
     }
 
-    setLabelPickerState(prevState => !prevState);
+    setLabelPickerState((prevState) => !prevState);
   };
 
   const filterPickerActions = [

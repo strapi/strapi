@@ -1,10 +1,8 @@
-'use strict';
-
 /**
  * X-Response-Time hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * User.js controller
  *
@@ -7,16 +5,16 @@
  */
 
 const _ = require('lodash');
+const { sanitizeEntity } = require('strapi-utils');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
-const { sanitizeEntity } = require('strapi-utils');
 
-const sanitizeUser = user =>
+const sanitizeUser = (user) =>
   sanitizeEntity(user, {
     model: strapi.query('user', 'users-permissions').model,
   });
 
-const resolveController = ctx => {
+const resolveController = (ctx) => {
   const {
     state: { isAuthenticatedAdmin },
   } = ctx;
@@ -24,7 +22,7 @@ const resolveController = ctx => {
   return isAuthenticatedAdmin ? adminUserController : apiUserController;
 };
 
-const resolveControllerMethod = method => ctx => {
+const resolveControllerMethod = (method) => (ctx) => {
   const controller = resolveController(ctx);
   const callbackFn = controller[method];
 

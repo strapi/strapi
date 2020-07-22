@@ -1,11 +1,9 @@
-'use strict';
-
 const _ = require('lodash');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
 const { createPermission } = require('../domain/permission');
 
-const sanitizeRole = role => {
+const sanitizeRole = (role) => {
   return _.omit(role, ['users', 'permissions']);
 };
 
@@ -14,7 +12,7 @@ const sanitizeRole = role => {
  * @param attributes A partial role object
  * @returns {Promise<role>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const alreadyExists = await exists({ name: attributes.name });
 
   if (alreadyExists) {
@@ -96,6 +94,7 @@ const update = async (params, attributes) => {
       name: sanitizedAttributes.name,
       id_ne: params.id,
     });
+
     if (alreadyExists) {
       throw strapi.errors.badRequest('ValidationError', {
         name: [
@@ -113,7 +112,7 @@ const update = async (params, attributes) => {
  * @param params query params to find the role
  * @returns {Promise<boolean>}
  */
-const exists = async params => {
+const exists = async (params) => {
   const foundCount = await strapi.query('role', 'admin').count(params);
 
   return foundCount > 0;
@@ -126,6 +125,7 @@ const exists = async params => {
  */
 const deleteByIds = async (ids = []) => {
   const superAdminRole = await getSuperAdmin();
+
   if (superAdminRole && stringIncludes(ids, superAdminRole.id)) {
     throw strapi.errors.badRequest('ValidationError', {
       ids: ['You cannot delete the super admin role'],
@@ -134,6 +134,7 @@ const deleteByIds = async (ids = []) => {
 
   for (let roleId of ids) {
     const usersCount = await getUsersCount(roleId);
+
     if (usersCount !== 0) {
       throw strapi.errors.badRequest('ValidationError', {
         ids: ['Some roles are still assigned to some users.'],
@@ -156,7 +157,7 @@ const deleteByIds = async (ids = []) => {
  * @returns {Promise<integer>}
  * @param roleId
  */
-const getUsersCount = async roleId => {
+const getUsersCount = async (roleId) => {
   return strapi.query('user', 'admin').count({ roles: [roleId] });
 };
 
@@ -175,12 +176,13 @@ const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_AD
  */
 const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}) => {
   const someRolesExist = await exists();
+
   if (someRolesExist) {
     return;
   }
 
   const allActions = strapi.admin.services.permission.actionProvider.getAll();
-  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+  const contentTypesActions = allActions.filter((a) => a.section === 'contentTypes');
 
   // create 3 roles
   const superAdminRole = await create({
@@ -212,7 +214,7 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
     }
   );
 
-  const authorPermissions = editorPermissions.map(p => ({
+  const authorPermissions = editorPermissions.map((p) => ({
     ...p,
     conditions: ['admin::is-creator'],
   }));
@@ -249,6 +251,7 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
 const displayWarningIfNoSuperAdmin = async () => {
   const superAdminRole = await getSuperAdminWithUsersCount();
   const someUsersExists = await strapi.admin.services.user.exists();
+
   if (!superAdminRole) {
     strapi.log.warn("Your application doesn't have a super admin role.");
   } else if (someUsersExists && superAdminRole.usersCount === 0) {

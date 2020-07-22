@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -10,7 +8,7 @@ const path = require('path');
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {
-    const verifySize = file => {
+    const verifySize = (file) => {
       if (file.size > sizeLimit) {
         throw strapi.errors.badRequest('FileToBig', {
           errors: [
@@ -33,7 +31,7 @@ module.exports = {
           fs.writeFile(
             path.join(strapi.config.paths.static, `/uploads/${file.hash}${file.ext}`),
             file.buffer,
-            err => {
+            (err) => {
               if (err) {
                 return reject(err);
               }
@@ -57,7 +55,7 @@ module.exports = {
           }
 
           // remove file from public/assets folder
-          fs.unlink(filePath, err => {
+          fs.unlink(filePath, (err) => {
             if (err) {
               return reject(err);
             }

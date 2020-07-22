@@ -10,7 +10,7 @@ import {
   PopUpWarning,
   // contexts
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 import Block from '../Block';
 import Container from '../Container';
@@ -39,8 +39,8 @@ const SettingsViewWrapper = ({
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
 
-  const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
-  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+  const toggleWarningCancel = () => setWarningCancel((prevState) => !prevState);
+  const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
   const getPluginHeaderActions = () => {
     return [
@@ -90,12 +90,12 @@ const SettingsViewWrapper = ({
     }),
   };
 
-  const getSelectOptions = input => {
+  const getSelectOptions = (input) => {
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
         ...getListDisplayedFields().filter(
-          name =>
+          (name) =>
             get(getAttributes, [name, 'type'], '') !== 'media' &&
             name !== 'id' &&
             get(getAttributes, [name, 'type'], '') !== 'richtext'
@@ -105,7 +105,7 @@ const SettingsViewWrapper = ({
 
     if (input.name === 'settings.mainField') {
       const attributes = getAttributes;
-      const options = Object.keys(attributes).filter(attr => {
+      const options = Object.keys(attributes).filter((attr) => {
         const type = get(attributes, [attr, 'type'], '');
 
         return (
@@ -128,7 +128,7 @@ const SettingsViewWrapper = ({
     return input.options;
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     toggleWarningSubmit();
     emitEvent('willSaveContentTypeLayout');
@@ -159,15 +159,15 @@ const SettingsViewWrapper = ({
             >
               <SectionTitle isSettings />
               <div className="row">
-                {inputs.map(input => {
+                {inputs.map((input) => {
                   return (
                     <FormattedMessage key={input.name} id={input.label.id}>
-                      {label => (
+                      {(label) => (
                         <div className={input.customBootstrapClass}>
                           <FormattedMessage
                             id={get(input, 'description.id', 'app.utils.defaultMessage')}
                           >
-                            {description => (
+                            {(description) => (
                               <Input
                                 {...input}
                                 description={description}

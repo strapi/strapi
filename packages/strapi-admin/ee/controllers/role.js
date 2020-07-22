@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, formatYupErrors } = require('strapi-utils');
 const {
   validateRoleCreateInput,
@@ -78,6 +76,7 @@ module.exports = {
     const input = ctx.request.body;
 
     const role = await strapi.admin.services.role.findOne({ id });
+
     if (!role) {
       return ctx.notFound('role.notFound');
     }

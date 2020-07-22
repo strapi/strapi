@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
-import { dateToUtcTime } from 'strapi-helper-plugin';
 import moment from 'moment';
+import { dateToUtcTime } from 'strapi-helper-plugin/lib/src';
 
 import filtersForm from './utils/filtersForm';
 
@@ -30,13 +30,7 @@ function reducer(state, action) {
     }
     case 'RESET_FORM':
       return initialState
-        .set(
-          'name',
-          state
-            .get('filtersForm')
-            .keySeq()
-            .first()
-        )
+        .set('name', state.get('filtersForm').keySeq().first())
         .update('filtersForm', () => state.get('filtersForm'));
     default:
       return state;

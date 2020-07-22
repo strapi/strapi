@@ -10,7 +10,7 @@ import {
   useGlobalContext,
   useQuery,
   InputsIndex,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { Button, Label } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -389,7 +389,7 @@ const FormModal = () => {
         // in order to prevent the user from creating a relation with a targetAttribute
         // that may exist in the other content type
         alreadyTakenTargetContentTypeAttributes = Object.keys(targetContentTypeAttributes).filter(
-          attrName => {
+          (attrName) => {
             // Keep all the target content type attributes when creating a relation
             if (state.actionType !== 'edit') {
               return true;
@@ -971,7 +971,7 @@ const FormModal = () => {
     }
   };
 
-  const sendAdvancedTabEvent = tab => {
+  const sendAdvancedTabEvent = (tab) => {
     if (tab !== 'advanced') {
       return;
     }
@@ -987,7 +987,7 @@ const FormModal = () => {
     }
   };
 
-  const sendButtonAddMoreFieldEvent = shouldContinue => {
+  const sendButtonAddMoreFieldEvent = (shouldContinue) => {
     if (
       state.modalType === 'attribute' &&
       state.forTarget === 'contentType' &&
@@ -1044,7 +1044,7 @@ const FormModal = () => {
                 step: state.step,
               }}
             >
-              {msg => <span>{upperFirst(msg)}</span>}
+              {(msg) => <span>{upperFirst(msg)}</span>}
             </FormattedMessage>
 
             {!isPickingAttribute && (
@@ -1061,7 +1061,7 @@ const FormModal = () => {
                           key={link.id}
                           {...link}
                           onClick={() => {
-                            setState(prev => ({
+                            setState((prev) => ({
                               ...prev,
                               settingType: link.id,
                             }));
@@ -1191,7 +1191,7 @@ const FormModal = () => {
                                 // Since the component info is stored in the
                                 // componentToCreate object we can access the error
                                 // By removing the key
-                                .filter(key => key !== 'componentToCreate'),
+                                .filter((key) => key !== 'componentToCreate'),
                               'id',
                             ],
                             null
@@ -1314,7 +1314,7 @@ const FormModal = () => {
                   <Button
                     type={isCreating ? 'button' : 'submit'}
                     color="success"
-                    onClick={e => {
+                    onClick={(e) => {
                       handleSubmit(e, false);
                     }}
                     style={{ marginRight: '10px' }}
@@ -1326,7 +1326,7 @@ const FormModal = () => {
                   <Button
                     type="button"
                     color="delete"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.preventDefault();
                       deleteData();
                     }}
@@ -1339,7 +1339,7 @@ const FormModal = () => {
                   <Button
                     type="button"
                     color="delete"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.preventDefault();
 
                       deleteCategory(initialData.name);
@@ -1363,7 +1363,7 @@ const FormModal = () => {
                         ? 'success'
                         : 'primary'
                     }
-                    onClick={e => handleSubmit(e, true)}
+                    onClick={(e) => handleSubmit(e, true)}
                     icon={
                       (isCreatingAttribute &&
                         !isCreatingComponentFromAView &&
@@ -1390,7 +1390,7 @@ const FormModal = () => {
                         ? 'success'
                         : 'primary'
                     }
-                    onClick={e => handleSubmit(e, true)}
+                    onClick={(e) => handleSubmit(e, true)}
                     icon={
                       (isCreatingAttribute &&
                         !isCreatingComponentFromAView &&

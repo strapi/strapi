@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin';
+import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin/lib/src';
 import { get } from 'lodash';
 
 import { formatBytes } from '../../utils';
@@ -52,7 +52,7 @@ const FileDetailsBox = ({ file }) => {
 
         return (
           <Flex justifyContent="space-between" key={key}>
-            {rows.map(rowItem => {
+            {rows.map((rowItem) => {
               return (
                 <Text as="div" key={rowItem.label} style={{ width: '50%' }}>
                   <Text color="grey" fontWeight="bold" textTransform="capitalize" lineHeight="18px">

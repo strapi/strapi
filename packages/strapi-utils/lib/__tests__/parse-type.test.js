@@ -1,5 +1,5 @@
-const parseType = require('../parse-type');
 const format = require('date-fns/format');
+const parseType = require('../parse-type');
 
 describe('parseType', () => {
   describe('boolean', () => {
@@ -68,7 +68,7 @@ describe('parseType', () => {
   describe('Datetime', () => {
     it.each(['2019-01-01', '2019-01-01 10:11:12', '1234567890111', '2019-01-01T10:11:12.123Z'])(
       'Supports ISO formats and always returns a date %s',
-      value => {
+      (value) => {
         const r = parseType({ type: 'datetime', value });
         expect(r instanceof Date).toBe(true);
       }

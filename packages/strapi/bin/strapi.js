@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-'use strict';
 
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
@@ -16,7 +15,7 @@ program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = () =
   program.help();
 };
 
-const checkCwdIsStrapiApp = name => {
+const checkCwdIsStrapiApp = (name) => {
   let logErrorAndExit = () => {
     console.log(
       `You need to run ${yellow(
@@ -27,7 +26,8 @@ const checkCwdIsStrapiApp = name => {
   };
 
   try {
-    const pkgJSON = require(process.cwd() + '/package.json');
+    const pkgJSON = require(`${process.cwd()}/package.json`);
+
     if (!_.has(pkgJSON, 'dependencies.strapi')) {
       logErrorAndExit(name);
     }
@@ -36,10 +36,11 @@ const checkCwdIsStrapiApp = name => {
   }
 };
 
-const getLocalScript = name => (...args) => {
+const getLocalScript = (name) => (...args) => {
   checkCwdIsStrapiApp(name);
 
   const cmdPath = resolveCwd.silent(`strapi/lib/commands/${name}`);
+
   if (!cmdPath) {
     console.log(
       `Error loading the local ${yellow(
@@ -55,7 +56,7 @@ const getLocalScript = name => (...args) => {
     .then(() => {
       return script(...args);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(`Error while running command ${name}: ${error.message}`);
       process.exit(1);
     });
@@ -76,7 +77,7 @@ program.allowUnknownOption(true);
 program.version(packageJSON.version, '-v, --version');
 
 // Make `-v` option case-insensitive.
-process.argv = _.map(process.argv, arg => {
+process.argv = _.map(process.argv, (arg) => {
   return arg === '-V' ? '-v' : arg;
 });
 
@@ -232,10 +233,7 @@ program
  */
 
 // `$ strapi help` (--help synonym)
-program
-  .command('help')
-  .description('output the help')
-  .action(program.usageMinusWildcard);
+program.command('help').description('output the help').action(program.usageMinusWildcard);
 
 // `$ strapi <unrecognized_cmd>`
 // Mask the '*' in `help`.
@@ -249,6 +247,7 @@ program.command('*').action(program.usageMinusWildcard);
 
 program.parse(process.argv);
 const NO_COMMAND_SPECIFIED = program.args.length === 0;
+
 if (NO_COMMAND_SPECIFIED) {
   program.usageMinusWildcard();
 }

@@ -11,7 +11,7 @@ describe('Primary Key', () => {
         const result = replaceIdByPrimaryKey({ id: '123', color: 'red' }, defaultPostgresModel);
         expect(result).toEqual({ id: '123', color: 'red' });
       });
-      test(`Params doesn't have "id"`, () => {
+      test('Params doesn\'t have "id"', () => {
         const result = replaceIdByPrimaryKey({ color: 'red' }, defaultPostgresModel);
         expect(result).toEqual({ color: 'red' });
       });
@@ -26,7 +26,7 @@ describe('Primary Key', () => {
         const result = replaceIdByPrimaryKey({ id: '123', color: 'red' }, defaultMongooseModel);
         expect(result).toEqual({ _id: '123', color: 'red' });
       });
-      test(`Params doesn't have "id" nor "_id"`, () => {
+      test('Params doesn\'t have "id" nor "_id"', () => {
         const result = replaceIdByPrimaryKey({ color: 'red' }, defaultMongooseModel);
         expect(result).toEqual({ color: 'red' });
       });
@@ -44,7 +44,7 @@ describe('Primary Key', () => {
         );
         expect(result).toEqual({ aRandomPrimaryKey: '123', color: 'red' });
       });
-      test(`Params doesn't have "id" nor "aRandomPrimaryKey"`, () => {
+      test('Params doesn\'t have "id" nor "aRandomPrimaryKey"', () => {
         const result = replaceIdByPrimaryKey({ color: 'red' }, customModel);
         expect(result).toEqual({ color: 'red' });
       });

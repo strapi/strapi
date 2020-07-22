@@ -1,19 +1,33 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isObject } from 'lodash';
-import { useGlobalContext } from '../../contexts/GlobalContext';
 import matchSorter from 'match-sorter';
+import { useGlobalContext } from '../../contexts/GlobalContext';
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
 import LeftMenuHeader from '../LeftMenuHeader';
 import List from './List';
 import Wrapper from './Wrapper';
 
+const formatTitleWithIntl = (title) => {
+  if (isObject(title) && title.id) {
+    return { ...title, defaultMessage: title.defaultMessage || title.id };
+  }
+
+  return { id: title, defaultMessage: title };
+};
+
+formatTitleWithIntl.propTypes = {
+  title: PropTypes.shape({
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
 function LeftMenuList({ customLink, links, title, searchable }) {
   const [search, setSearch] = useState('');
   const { formatMessage } = useGlobalContext();
 
-  const getLabel = message => {
+  const getLabel = (message) => {
     if (isObject(message) && message.id) {
       return formatMessage({
         ...message,
@@ -24,20 +38,12 @@ function LeftMenuList({ customLink, links, title, searchable }) {
     return message;
   };
 
-  const formatTitleWithIntl = title => {
-    if (isObject(title) && title.id) {
-      return { ...title, defaultMessage: title.defaultMessage || title.id };
-    }
-
-    return { id: title, defaultMessage: title };
-  };
-
   const { Component, componentProps } = customLink || {
     Component: null,
     componentProps: {},
   };
 
-  const hasChildObject = () => links.some(link => !isEmpty(link.links));
+  const hasChildObject = () => links.some((link) => !isEmpty(link.links));
 
   const getCount = () => {
     if (hasChildObject()) {
@@ -51,7 +57,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
 
   const getList = () => {
     if (hasChildObject()) {
-      return links.map(link => {
+      return links.map((link) => {
         return {
           ...link,
           links: matchSorter(link.links, search, { keys: ['title'] }),

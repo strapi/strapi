@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const createQuery = require('../create-query');
 
@@ -7,7 +5,7 @@ describe('Database queries', () => {
   describe('Substitute id with primaryKey in parameters', () => {
     test.each(['create', 'update', 'delete', 'find', 'findOne', 'search', 'count', 'countSearch'])(
       'Calling "%s" replaces id by the primaryKey in the params of the model before calling the underlying connector',
-      async method => {
+      async (method) => {
         const model = {
           primaryKey: 'testId',
         };
@@ -33,7 +31,7 @@ describe('Database queries', () => {
   describe('Lifecycles', () => {
     test.each(['create', 'update', 'delete', 'find', 'findOne', 'search', 'count', 'countSearch'])(
       'Calling "%s" calls the before adn after lifecycle hooks with the correct arguments',
-      async method => {
+      async (method) => {
         const arg1 = {};
         const arg2 = {};
         const output = {};

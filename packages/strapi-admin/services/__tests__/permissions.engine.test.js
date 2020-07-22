@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { subject } = require('@casl/ability');
 const createConditionProvider = require('../permission/condition-provider');
@@ -84,19 +82,19 @@ describe('Permissions Engine', () => {
         plugin: 'test',
         name: 'isBob',
         category: 'default',
-        handler: async user => new Promise(resolve => resolve(user.firstname === 'Bob')),
+        handler: async (user) => new Promise((resolve) => resolve(user.firstname === 'Bob')),
       },
       {
         plugin: 'test',
         name: 'isAdmin',
         category: 'default',
-        handler: user => user.title === 'admin',
+        handler: (user) => user.title === 'admin',
       },
       {
         plugin: 'test',
         name: 'isCreatedBy',
         category: 'default',
-        handler: user => ({ created_by: user.firstname }),
+        handler: (user) => ({ created_by: user.firstname }),
       },
       {
         plugin: 'test',
@@ -107,7 +105,7 @@ describe('Permissions Engine', () => {
     ],
   };
 
-  const getUser = name => localTestData.users[name];
+  const getUser = (name) => localTestData.users[name];
 
   beforeEach(() => {
     global.strapi = {

@@ -4,7 +4,7 @@
  *
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
@@ -15,7 +15,7 @@ import EyeWrapper from './EyeWrapper';
 class InputPassword extends React.Component {
   state = { showPassword: false };
 
-  handleClick = () => this.setState({ showPassword: !this.state.showPassword });
+  handleClick = () => this.setState((prevState) => ({ showPassword: !prevState.showPassword }));
 
   render() {
     const {
@@ -35,17 +35,12 @@ class InputPassword extends React.Component {
     } = this.props;
     const formattedPlaceholder =
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
-    const eyeColor = this.state.showPassword
-      ? { color: 'black' }
-      : { color: '#9EA7B8' };
+    const eyeColor = this.state.showPassword ? { color: 'black' } : { color: '#9EA7B8' };
 
     return (
       <>
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
-          {message => (
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
+          {(message) => (
             <Input
               autoComplete="new-password"
               autoFocus={autoFocus}
@@ -70,8 +65,11 @@ class InputPassword extends React.Component {
         </FormattedMessage>
         <EyeWrapper>
           <div
+            role="button"
+            tabIndex={0}
             className="iconEyeSubWrapper"
             onClick={this.handleClick}
+            onKeyDown={this.handleClick}
             style={eyeColor}
           >
             <i className="fa fa-eye" />

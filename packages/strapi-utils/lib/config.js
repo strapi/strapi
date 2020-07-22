@@ -5,6 +5,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   // Defines serverUrl value
   let serverUrl = _.get(serverConfig, 'url', '');
   serverUrl = _.trim(serverUrl, '/ ');
+
   if (typeof serverUrl !== 'string') {
     throw new Error('Invalid server url config. Make sure the url is a string.');
   }
@@ -23,6 +24,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   // Defines adminUrl value
   let adminUrl = _.get(serverConfig, 'admin.url', '/admin');
   adminUrl = _.trim(adminUrl, '/ ');
+
   if (typeof adminUrl !== 'string') {
     throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
   }
@@ -38,6 +40,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
 
   // Defines adminPath value
   let adminPath = adminUrl;
+
   if (
     serverUrl.startsWith('http') &&
     adminUrl.startsWith('http') &&
@@ -57,7 +60,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   };
 };
 
-const getAbsoluteUrl = adminOrServer => (config, forAdminBuild = false) => {
+const getAbsoluteUrl = (adminOrServer) => (config, forAdminBuild = false) => {
   const { serverUrl, adminUrl } = getConfigUrls(config.server, forAdminBuild);
   let url = adminOrServer === 'server' ? serverUrl : adminUrl;
 

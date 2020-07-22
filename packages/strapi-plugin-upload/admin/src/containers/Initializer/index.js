@@ -6,7 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 import pluginId from '../../pluginId';
 
 const Initializer = ({ updatePlugin }) => {
@@ -19,7 +19,7 @@ const Initializer = ({ updatePlugin }) => {
 
       try {
         const { data } = await request(requestURL, { method: 'GET' });
-        const fileModel = data.find(model => model.uid === 'plugins::upload.file');
+        const fileModel = data.find((model) => model.uid === 'plugins::upload.file');
 
         ref.current(pluginId, 'fileModel', fileModel);
         ref.current(pluginId, 'isReady', true);

@@ -1,5 +1,3 @@
-'use strict';
-
 const os = require('os');
 const _ = require('lodash');
 const isDocker = require('is-docker');
@@ -19,7 +17,7 @@ const ANALYTICS_URI = 'https://analytics.strapi.io';
  * @param {Object} strapi strapi app
  * @returns {Function} (event, payload) -> Promise{boolean}
  */
-module.exports = strapi => {
+module.exports = (strapi) => {
   const uuid = strapi.config.uuid;
   const deviceId = machineIdSync();
 
@@ -52,6 +50,7 @@ module.exports = strapi => {
 
     try {
       const res = await fetch(`${ANALYTICS_URI}/track`, reqParams);
+
       return res.ok;
     } catch (err) {
       return false;

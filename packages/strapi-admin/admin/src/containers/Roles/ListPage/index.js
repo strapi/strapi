@@ -6,7 +6,12 @@ import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ListButton, useGlobalContext, useQuery, useUserPermissions } from 'strapi-helper-plugin';
+import {
+  ListButton,
+  useGlobalContext,
+  useQuery,
+  useUserPermissions,
+} from 'strapi-helper-plugin/lib/src';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
@@ -38,17 +43,17 @@ const RoleListPage = () => {
   }, []);
 
   const handleGoTo = useCallback(
-    id => {
+    (id) => {
       push(`${settingsBaseURL}/roles/${id}`);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [settingsBaseURL]
   );
 
-  const handleToggle = useCallback(e => {
+  const handleToggle = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   }, []);
 
   const headerActions = [
@@ -96,7 +101,7 @@ const RoleListPage = () => {
           )}
           items={results}
           isLoading={isLoading}
-          customRowComponent={role => (
+          customRowComponent={(role) => (
             <RoleRow
               onClick={() => handleGoTo(role.id)}
               canUpdate={canUpdate}

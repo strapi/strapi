@@ -1,9 +1,7 @@
-'use strict';
-
 module.exports = function checkBeforeInstall() {
-  var currentNodeVersion = process.versions.node;
-  var semver = currentNodeVersion.split('.');
-  var major = semver[0];
+  let currentNodeVersion = process.versions.node;
+  let semver = currentNodeVersion.split('.');
+  let major = semver[0];
 
   if (major < 10) {
     console.error(`You are running Node ${currentNodeVersion}`);

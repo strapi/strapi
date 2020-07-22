@@ -1,5 +1,5 @@
 import { useReducer, useEffect } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 
 import reducer, { initialState } from './reducer';
 
@@ -17,7 +17,7 @@ const useModels = () => {
 
     try {
       const [{ data: components }, { data: contentTypes }] = await Promise.all(
-        ['components', 'content-types'].map(endPoint =>
+        ['components', 'content-types'].map((endPoint) =>
           request(`/content-manager/${endPoint}`, { method: 'GET' })
         )
       );

@@ -1,5 +1,3 @@
-'use strict';
-
 const { pick, map } = require('lodash/fp');
 
 // visible fields for the API

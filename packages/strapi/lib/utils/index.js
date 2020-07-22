@@ -1,5 +1,3 @@
-'use strict';
-
 // Dependencies.
 const { isEmpty } = require('lodash');
 const openBrowser = require('./openBrowser');

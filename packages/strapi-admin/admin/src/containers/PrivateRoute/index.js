@@ -10,14 +10,14 @@
 import React, { memo } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { auth } from 'strapi-helper-plugin';
+import { auth } from 'strapi-helper-plugin/lib/src';
 
 /* eslint-disable react/jsx-curly-newline */
 
 const PrivateRoute = ({ component: Component, path, ...rest }) => (
   <Route
     path={path}
-    render={props =>
+    render={(props) =>
       auth.getToken() !== null ? (
         <Component {...rest} {...props} />
       ) : (

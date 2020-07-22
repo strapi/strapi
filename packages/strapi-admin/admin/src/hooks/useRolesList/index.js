@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin/lib/src';
 import { get } from 'lodash';
 import init from './init';
 import reducer, { initialState } from './reducer';

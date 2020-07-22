@@ -14,12 +14,11 @@ import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import {
   auth,
-  PopUpWarning,
-  LoadingIndicatorPage,
-  InputsIndex as Input,
-  GlobalContext,
   CheckPermissions,
-} from 'strapi-helper-plugin';
+  InputsIndex as Input,
+  LoadingIndicatorPage,
+  PopUpWarning,
+} from 'strapi-helper-plugin/lib/src';
 
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
@@ -55,7 +54,7 @@ export class HomePage extends React.Component {
   };
 
   getPluginHeaderActions = () => {
-    const actions = [
+    return [
       {
         color: 'none',
         label: this.context.formatMessage({
@@ -65,7 +64,7 @@ export class HomePage extends React.Component {
         onClick: this.openCurrentDocumentation,
         type: 'button',
         key: 'button-open',
-        Component: props => (
+        Component: (props) => (
           <CheckPermissions permissions={pluginPermissions.open}>
             <Button {...props} />
           </CheckPermissions>
@@ -79,15 +78,13 @@ export class HomePage extends React.Component {
         onClick: () => {},
         type: 'submit',
         key: 'button-submit',
-        Component: props => (
+        Component: (props) => (
           <CheckPermissions permissions={pluginPermissions.update}>
             <Button {...props} />
           </CheckPermissions>
         ),
       },
     ];
-
-    return actions;
   };
 
   handleCopy = () => {
@@ -101,7 +98,7 @@ export class HomePage extends React.Component {
     return openWithNewTab(`${slash}${prefix}/v${currentDocVersion}`);
   };
 
-  shouldHideInput = inputName => {
+  shouldHideInput = (inputName) => {
     return !this.getRestrictedAccessValue() && inputName === 'password';
   };
 
@@ -132,7 +129,7 @@ export class HomePage extends React.Component {
     );
   };
 
-  renderRow = data => {
+  renderRow = (data) => {
     const { currentDocVersion, onClickDeleteDoc, onUpdateDoc } = this.props;
 
     return (
@@ -145,8 +142,6 @@ export class HomePage extends React.Component {
       />
     );
   };
-
-  static contextType = GlobalContext;
 
   render() {
     const {

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useClickAwayListener } from '@buffetjs/hooks';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin/lib/src';
 import DoubleFile from '../../icons/DoubleFile';
 import File from '../../icons/File';
 import Padded from '../Padded';
@@ -18,20 +18,20 @@ const CheckControl = ({ title, onSubmitEdit }) => {
 
   useClickAwayListener(dropdownRef, () => setIsOpen(false));
 
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.persist();
     setIsOpen(false);
     onSubmitEdit(e);
   };
 
-  const handleClickDuplicate = e => {
+  const handleClickDuplicate = (e) => {
     e.persist();
     setIsOpen(false);
     onSubmitEdit(e, true);
   };
 
   const handleToggle = () => {
-    setIsOpen(v => !v);
+    setIsOpen((v) => !v);
   };
 
   return (

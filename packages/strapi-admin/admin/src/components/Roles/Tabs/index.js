@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import { LoadingIndicator } from 'strapi-helper-plugin';
+import { LoadingIndicator } from 'strapi-helper-plugin/lib/src';
 import { useIntl } from 'react-intl';
 
 import TabsWrapper from './TabsWrapper';
@@ -11,7 +11,7 @@ const Tabs = ({ children, isLoading, tabsLabel }) => {
   const { formatMessage } = useIntl();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
-  const handleSelectedTab = index => {
+  const handleSelectedTab = (index) => {
     if (index !== selectedTabIndex) {
       setSelectedTabIndex(index);
     }

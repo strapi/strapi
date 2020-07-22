@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -34,7 +32,7 @@ const defaults = {
 
 const isBookshelfConnection = ({ connector }) => connector === 'bookshelf';
 
-module.exports = function(strapi) {
+module.exports = function (strapi) {
   function initialize() {
     initKnex(strapi);
 
@@ -42,8 +40,8 @@ module.exports = function(strapi) {
     const GLOBALS = {};
 
     const connectionsPromises = Object.keys(connections)
-      .filter(key => isBookshelfConnection(connections[key]))
-      .map(connectionName => {
+      .filter((key) => isBookshelfConnection(connections[key]))
+      .map((connectionName) => {
         const connection = connections[connectionName];
 
         _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
@@ -108,8 +106,9 @@ module.exports = function(strapi) {
 
   function mountPlugins(connectionName, ctx) {
     return Promise.all(
-      Object.keys(strapi.plugins).map(name => {
+      Object.keys(strapi.plugins).map((name) => {
         const plugin = strapi.plugins[name];
+
         return mountModels(
           {
             models: _.pickBy(plugin.models, ({ connection }) => connection === connectionName),

@@ -1,17 +1,15 @@
-'use strict';
-
 const { join } = require('path');
 const range = require('koa-range');
 const koaStatic = require('koa-static');
 
-module.exports = strapi => ({
+module.exports = (strapi) => ({
   initialize() {
     const staticDir = join(
       strapi.dir,
       strapi.config.middleware.settings.public.path || strapi.config.paths.static
     );
 
-    strapi.app.on('error', err => {
+    strapi.app.on('error', (err) => {
       if (err.code === 'EPIPE') {
         // when serving audio or video the browsers sometimes close the connection to go to range requests instead.
         // This causes koa to emit a write EPIPE error. We can ignore it.

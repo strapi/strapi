@@ -11,7 +11,7 @@ import { map } from 'lodash';
 import PropTypes from 'prop-types';
 
 // Utils
-import { darken } from '../../utils/colors';
+import darken from '../../utils/colors';
 import Wrapper from './Wrapper';
 
 function HeaderNav({ links, style }) {
@@ -19,7 +19,7 @@ function HeaderNav({ links, style }) {
 
   return (
     <Wrapper style={style}>
-      {map(links, link => {
+      {map(links, (link) => {
         linkColor = darken(linkColor, 1.5);
 
         return (
@@ -35,18 +35,14 @@ function HeaderNav({ links, style }) {
             isActive={(match, location) => {
               return location.pathname === link.to.split('?')[0];
             }}
-            onClick={e => {
+            onClick={(e) => {
               if (link.disabled) {
                 e.preventDefault();
               }
             }}
           >
             <div className="linkText text-center">
-              <FormattedMessage
-                id={link.name}
-                defaultMessage={link.name}
-                values={link.values}
-              />
+              <FormattedMessage id={link.name} defaultMessage={link.name} values={link.values} />
               {link.active && <div className="notifPoint" />}
             </div>
           </NavLink>

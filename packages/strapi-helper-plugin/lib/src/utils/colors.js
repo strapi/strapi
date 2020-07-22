@@ -6,9 +6,8 @@ const subtractLight = (color, amount) => {
   return c;
 };
 
-export const darken = (colour, amount) => {
-  let color =
-    colour.indexOf('#') >= 0 ? colour.substring(1, colour.length) : colour;
+const darken = (colour, amount) => {
+  let color = colour.indexOf('#') >= 0 ? colour.substring(1, colour.length) : colour;
   const percentage = parseInt((255 * amount) / 100, 10);
   color = `#${subtractLight(color.substring(0, 2), percentage)}${subtractLight(
     color.substring(2, 4),
@@ -17,3 +16,5 @@ export const darken = (colour, amount) => {
 
   return color;
 };
+
+export default darken;

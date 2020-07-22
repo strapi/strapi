@@ -83,7 +83,7 @@ module.exports = {
         },
       },
       roles: {
-        description: `Retrieve all the existing roles. You can't apply filters on this query.`,
+        description: "Retrieve all the existing roles. You can't apply filters on this query.",
         resolverOf: 'plugins::users-permissions.userspermissions.getRoles', // Apply the `getRoles` permissions on the resolver.
         resolver: async (obj, options, { context }) => {
           context.params = { ...context.params, ...options.input };
@@ -194,6 +194,7 @@ module.exports = {
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);
+
           return {
             user: output.user || output,
             jwt: output.jwt,
@@ -213,6 +214,7 @@ module.exports = {
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);
+
           return {
             user: output.user || output,
             jwt: output.jwt,

@@ -9,7 +9,12 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { get, isEmpty, isEqual, omit } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
-import { request, useGlobalContext, getYupInnerErrors, BackHeader } from 'strapi-helper-plugin';
+import {
+  request,
+  useGlobalContext,
+  BackHeader,
+  getYupInnerErrors,
+} from 'strapi-helper-plugin/lib/src';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 import reducer, { initialState } from './reducer';
@@ -80,7 +85,7 @@ function EditView() {
   const isTriggerActionDisabled = isCreating || (!isCreating && !areActionDisabled) || isTriggering;
 
   const formattedErrors = Object.keys(formErrors)
-    .filter(key => key.includes('headers'))
+    .filter((key) => key.includes('headers'))
     .reduce((obj, key) => {
       obj[key] = formErrors[key];
 
@@ -189,7 +194,7 @@ function EditView() {
     }
   };
 
-  const getErrorMessage = error => {
+  const getErrorMessage = (error) => {
     if (!error) {
       return null;
     }
@@ -254,7 +259,7 @@ function EditView() {
     }
   };
 
-  const handleRemove = index => {
+  const handleRemove = (index) => {
     dispatch({
       type: 'ON_HEADER_REMOVE',
       index,
@@ -268,7 +273,7 @@ function EditView() {
       type: 'RESET_FORM',
     });
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
     checkFormErrors(true);
@@ -288,7 +293,7 @@ function EditView() {
     setErrors(errors);
   };
 
-  const resetHeadersError = keys => {
+  const resetHeadersError = (keys) => {
     const errors = formErrors;
 
     setErrors(omit(errors, [keys]));
@@ -297,7 +302,7 @@ function EditView() {
   const resetHeadersErrors = () => {
     const errors = formErrors;
     const newErrors = Object.keys(errors)
-      .filter(key => !key.includes('headers'))
+      .filter((key) => !key.includes('headers'))
       .reduce((obj, key) => {
         obj[key] = formErrors[key];
 
@@ -307,7 +312,7 @@ function EditView() {
     setErrors(newErrors);
   };
 
-  const setErrors = errors => {
+  const setErrors = (errors) => {
     dispatch({
       type: 'SET_ERRORS',
       errors,
@@ -363,7 +368,7 @@ function EditView() {
         <div className="form-wrapper">
           <div className="form-card">
             <div className="row">
-              {Object.keys(form).map(key => {
+              {Object.keys(form).map((key) => {
                 return (
                   <div key={key} className={form[key].styleName}>
                     <InputsIndex

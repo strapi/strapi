@@ -1,20 +1,18 @@
-'use strict';
-
-const { buildStrapiQuery } = require('../permission/permissions-manager/query-builers');
 const { defineAbility } = require('@casl/ability');
+const { buildStrapiQuery } = require('../permission/permissions-manager/query-builers');
 const createPermissionsManager = require('../permission/permissions-manager');
 
 describe('Permissions Manager', () => {
   describe('get Query', () => {
     test('It should returns an empty query when no conditions are defined', async () => {
-      const ability = defineAbility(can => can('read', 'foo'));
+      const ability = defineAbility((can) => can('read', 'foo'));
       const pm = createPermissionsManager(ability, 'read', 'foo');
 
       expect(pm.query).toStrictEqual({});
     });
 
     test('It should returns a valid query from the ability', () => {
-      const ability = defineAbility(can => can('read', 'foo', ['bar'], { john: 'doe' }));
+      const ability = defineAbility((can) => can('read', 'foo', ['bar'], { john: 'doe' }));
       const pm = createPermissionsManager(ability, 'read', 'foo');
 
       const expected = { _or: [{ john: 'doe' }] };
@@ -24,7 +22,7 @@ describe('Permissions Manager', () => {
   });
 
   describe('get isAllowed', () => {
-    const ability = defineAbility(can => can('read', 'foo'));
+    const ability = defineAbility((can) => can('read', 'foo'));
 
     test('It should grants access', () => {
       const pm = createPermissionsManager(ability, 'read', 'foo');
@@ -41,7 +39,7 @@ describe('Permissions Manager', () => {
 
   describe('toSubject', () => {
     const attr = '__caslSubjectType__';
-    const ability = defineAbility(can => can('read', 'foo'));
+    const ability = defineAbility((can) => can('read', 'foo'));
     const pm = createPermissionsManager(ability, 'read', 'foo');
 
     test('It should transform an object to a subject using default model', () => {
@@ -65,7 +63,7 @@ describe('Permissions Manager', () => {
   });
 
   describe('pickPermittedFieldsOf', () => {
-    const ability = defineAbility(can => {
+    const ability = defineAbility((can) => {
       can('read', 'article', ['title'], { title: 'foo' });
       can('edit', 'article', ['title'], { title: { $in: ['john', 'doe'] } });
     });
@@ -93,7 +91,7 @@ describe('Permissions Manager', () => {
       expect(res).toStrictEqual(input);
     });
 
-    test(`Pick 0 fields (output) using custom model`, () => {
+    test('Pick 0 fields (output) using custom model', () => {
       const input = { title: 'foo' };
       const res = pm.pickPermittedFieldsOf(input, { action: 'edit' });
 
@@ -111,7 +109,7 @@ describe('Permissions Manager', () => {
   });
 
   describe('queryFrom', () => {
-    const ability = defineAbility(can => can('read', 'article', ['title'], { title: 'foo' }));
+    const ability = defineAbility((can) => can('read', 'article', ['title'], { title: 'foo' }));
     const pm = createPermissionsManager(ability, 'read', 'article');
     const pmQuery = { _or: [{ title: 'foo' }] };
 
@@ -201,7 +199,7 @@ describe('Permissions Manager', () => {
       ],
     ];
 
-    test.each(tests)(`Test n°%#: %s`, (name, input, expected) => {
+    test.each(tests)('Test n°%#: %s', (name, input, expected) => {
       expect(buildStrapiQuery(input)).toStrictEqual(expected);
     });
   });

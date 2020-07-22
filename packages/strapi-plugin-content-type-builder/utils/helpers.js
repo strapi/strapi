@@ -1,10 +1,8 @@
-'use strict';
-
 const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
 };
 
-const deepTrimObject = attribute => {
+const deepTrimObject = (attribute) => {
   if (Array.isArray(attribute)) {
     return attribute.map(deepTrimObject);
   }

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -14,7 +12,7 @@ const defaults = {
   keepHeadersOnError: false,
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -32,10 +30,11 @@ module.exports = strapi => {
 
       strapi.app.use(
         cors({
-          origin: function(ctx) {
+          origin(ctx) {
             const whitelist = Array.isArray(origin) ? origin : origin.split(/\s*,\s*/);
 
             const requestOrigin = ctx.accept.headers.origin;
+
             if (whitelist.includes('*')) {
               return '*';
             }
@@ -43,6 +42,7 @@ module.exports = strapi => {
             if (!whitelist.includes(requestOrigin)) {
               return ctx.throw(`${requestOrigin} is not a valid origin`);
             }
+
             return requestOrigin;
           },
           exposeHeaders: expose,

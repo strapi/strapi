@@ -1,5 +1,3 @@
-'use strict';
-
 const { replaceIdByPrimaryKey } = require('../utils/primary-key');
 const { executeBeforeLifecycle, executeAfterLifecycle } = require('../utils/lifecycles');
 

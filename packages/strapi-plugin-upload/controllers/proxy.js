@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const fetch = require('node-fetch');
 const isValidDomain = require('is-valid-domain');
@@ -19,6 +17,7 @@ module.exports = {
     } catch (err) {
       ctx.status = 400;
       ctx.body = 'Invalid URL';
+
       return;
     }
 

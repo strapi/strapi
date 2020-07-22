@@ -5,7 +5,7 @@ import {
   useUserPermissions,
   LoadingIndicatorPage,
   PopUpWarning,
-} from 'strapi-helper-plugin';
+} from 'strapi-helper-plugin/lib/src';
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
@@ -101,7 +101,7 @@ const ListPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
-  const handleChangeDataToDelete = ids => {
+  const handleChangeDataToDelete = (ids) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
       dataToDelete: ids,
@@ -136,7 +136,7 @@ const ListPage = () => {
     push({ search: currentSearch.toString() });
   };
 
-  const handleClickDelete = useCallback(id => {
+  const handleClickDelete = useCallback((id) => {
     handleToggleModal();
 
     dispatch({
@@ -195,9 +195,9 @@ const ListPage = () => {
     handleToggleModal();
   }, [dataToDelete]);
 
-  const handleToggle = () => setIsModalOpened(prev => !prev);
+  const handleToggle = () => setIsModalOpened((prev) => !prev);
 
-  const handleToggleModal = () => setIsWarningDeleteAllOpened(prev => !prev);
+  const handleToggleModal = () => setIsWarningDeleteAllOpened((prev) => !prev);
 
   const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
     const currentSearch = new URLSearchParams(search);

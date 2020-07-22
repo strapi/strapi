@@ -1,4 +1,3 @@
-'use strict';
 const _ = require('lodash');
 const actionProviderService = require('../permission/action-provider');
 
@@ -149,7 +148,7 @@ describe('Action Provider Service', () => {
       };
 
       expect(() => actionProviderService.register([])).toThrow(
-        `You can't register new actions outside of the bootstrap function.`
+        "You can't register new actions outside of the bootstrap function."
       );
     });
   });

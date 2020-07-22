@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -18,21 +16,17 @@ const reportback = require('reportback')();
 
 /* eslint-disable prefer-template */
 module.exports = function (options, handlers) {
-
   // Provide default values for handlers.
   handlers = reportback.extend(handlers, {
-    alreadyExists: 'error'
+    alreadyExists: 'error',
   });
 
   // Provide defaults and validate required options.
   _.defaults(options, {
-    force: false
+    force: false,
   });
 
-  const missingOpts = _.difference([
-    'rootPath',
-    'data'
-  ], Object.keys(options));
+  const missingOpts = _.difference(['rootPath', 'data'], Object.keys(options));
 
   if (missingOpts.length) {
     return handlers.invalid(missingOpts);
@@ -41,13 +35,13 @@ module.exports = function (options, handlers) {
   const rootPath = path.resolve(process.cwd(), options.rootPath);
 
   // Only override an existing file if `options.force` is true.
-  fs.exists(rootPath, exists => {
+  fs.exists(rootPath, (exists) => {
     if (exists && !options.force) {
       return handlers.alreadyExists('Something else already exists at `' + rootPath + '`.');
     }
 
     if (exists) {
-      fs.remove(rootPath, err => {
+      fs.remove(rootPath, (err) => {
         if (err) {
           return handlers.error(err);
         }
@@ -58,12 +52,11 @@ module.exports = function (options, handlers) {
     }
 
     function _afterwards_() {
-      fs.outputJSON(rootPath, options.data, {spaces: 2}, err => {
+      fs.outputJSON(rootPath, options.data, { spaces: 2 }, (err) => {
         if (err) {
           return handlers.error(err);
-        } else {
-          handlers.success();
         }
+        handlers.success();
       });
     }
   });

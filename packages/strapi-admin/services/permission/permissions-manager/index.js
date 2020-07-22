@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Jwt.js service
  *
@@ -21,6 +19,7 @@ module.exports = {
       if (parts.length === 2) {
         const scheme = parts[0];
         const credentials = parts[1];
+
         if (/^Bearer$/i.test(scheme)) {
           token = credentials;
         }
@@ -40,6 +39,7 @@ module.exports = {
 
   issue(payload, jwtOptions = {}) {
     _.defaults(jwtOptions, strapi.plugins['users-permissions'].config.jwt);
+
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
       _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
@@ -48,12 +48,12 @@ module.exports = {
   },
 
   verify(token) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       jwt.verify(
         token,
         _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
         {},
-        function(err, tokenPayload = {}) {
+        function (err, tokenPayload = {}) {
           if (err) {
             return reject(new Error('Invalid token.'));
           }

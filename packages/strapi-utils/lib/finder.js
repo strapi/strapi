@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -23,7 +21,7 @@ module.exports = (api, controller) => {
     throw new Error('Should be an object or a string');
   }
 
-  const where = _.findKey(api, o => {
+  const where = _.findKey(api, (o) => {
     return _.get(o, `controllers.${controller}`);
   });
 

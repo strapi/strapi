@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
@@ -22,17 +20,20 @@ module.exports = ({ dir, logger = noLog }) => {
   const warnAndReturn = (msg = 'Invalid license. Starting in CE.') => {
     logger.warn(msg);
     internals.isEE = false;
+
     return false;
   };
 
   if (process.env.STRAPI_DISABLE_EE === 'true') {
     internals.isEE = false;
+
     return false;
   }
 
   const licensePath = path.join(dir, 'license.txt');
 
   let license;
+
   if (_.has(process.env, 'STRAPI_LICENSE')) {
     license = process.env.STRAPI_LICENSE;
   } else if (fs.existsSync(licensePath)) {
@@ -41,6 +42,7 @@ module.exports = ({ dir, logger = noLog }) => {
 
   if (_.isNil(license)) {
     internals.isEE = false;
+
     return false;
   }
 
@@ -56,6 +58,7 @@ module.exports = ({ dir, logger = noLog }) => {
     verifier.end();
 
     const isValid = verifier.verify(publicKey, signature);
+
     if (!isValid) return warnAndReturn();
 
     internals.licenseInfo = JSON.parse(content);
@@ -68,12 +71,14 @@ module.exports = ({ dir, logger = noLog }) => {
   }
 
   internals.isEE = true;
+
   return true;
 };
 
 Object.defineProperty(module.exports, 'licenseInfo', {
   get: () => {
     mustHaveKey('licenseInfo');
+
     return internals.licenseInfo;
   },
   configurable: false,
@@ -83,13 +88,14 @@ Object.defineProperty(module.exports, 'licenseInfo', {
 Object.defineProperty(module.exports, 'isEE', {
   get: () => {
     mustHaveKey('isEE');
+
     return internals.isEE;
   },
   configurable: false,
   enumerable: false,
 });
 
-const mustHaveKey = key => {
+const mustHaveKey = (key) => {
   if (!_.has(internals, key)) {
     const err = new Error('Tampering with license');
     err.stack = null;

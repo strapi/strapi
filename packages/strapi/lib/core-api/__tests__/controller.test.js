@@ -1,4 +1,3 @@
-'use strict';
 const createController = require('../controller');
 
 describe('Default Controller', () => {

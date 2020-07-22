@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -41,9 +39,8 @@ module.exports = (scope, cb) => {
 
   function throwIfModuleNotFoundError(error, module) {
     const isModuleNotFoundError =
-      error &&
-      error.code === 'MODULE_NOT_FOUND' &&
-      error.message.match(new RegExp(module));
+      error && error.code === 'MODULE_NOT_FOUND' && error.message.match(new RegExp(module));
+
     if (!isModuleNotFoundError) {
       logger.error('Invalid `' + scope.generatorType + '` generator.');
       throw error;
@@ -60,9 +57,7 @@ module.exports = (scope, cb) => {
   }
 
   if (!generator) {
-    return logger.error(
-      'No generator called `' + scope.generatorType + '` found.'
-    );
+    return logger.error('No generator called `' + scope.generatorType + '` found.');
   }
 
   generate(generator, scope, cb);

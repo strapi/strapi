@@ -104,7 +104,7 @@ export { default as dateToUtcTime } from './utils/dateToUtcTime';
 export { default as hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
-export { darken } from './utils/colors';
+export darken from './utils/colors';
 export { default as getFileExtension } from './utils/getFileExtension';
 export { default as getFilterType } from './utils/getFilterType';
 export { default as getQueryParameters } from './utils/getQueryParameters';

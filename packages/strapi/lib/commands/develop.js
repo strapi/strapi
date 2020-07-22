@@ -1,7 +1,4 @@
-'use strict';
-
 // required first because it loads env files.
-const loadConfiguration = require('../core/app-configuration');
 
 const path = require('path');
 const cluster = require('cluster');
@@ -10,13 +7,14 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
+const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin }) {
+module.exports = async function ({ build, watchAdmin }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 
@@ -24,6 +22,7 @@ module.exports = async function({ build, watchAdmin }) {
   const serveAdminPanel = config.get('server.admin.serveAdminPanel', true);
 
   const buildExists = fs.existsSync(path.join(dir, 'build'));
+
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
@@ -61,7 +60,6 @@ module.exports = async function({ build, watchAdmin }) {
             worker.kill();
             process.exit(1);
           default:
-            return;
         }
       });
 
@@ -72,7 +70,7 @@ module.exports = async function({ build, watchAdmin }) {
       const strapiInstance = strapi({
         dir,
         autoReload: true,
-        serveAdminPanel: watchAdmin ? false : true,
+        serveAdminPanel: !watchAdmin,
       });
 
       watchFileChanges({
@@ -81,7 +79,7 @@ module.exports = async function({ build, watchAdmin }) {
         watchIgnoreFiles: adminWatchIgnoreFiles,
       });
 
-      process.on('message', message => {
+      process.on('message', (message) => {
         switch (message) {
           case 'isKilled':
             strapiInstance.server.destroy(() => {
@@ -140,15 +138,15 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
   });
 
   watcher
-    .on('add', path => {
+    .on('add', (path) => {
       strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
-    .on('change', path => {
+    .on('change', (path) => {
       strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
-    .on('unlink', path => {
+    .on('unlink', (path) => {
       strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });

@@ -1,21 +1,20 @@
-'use strict';
-
 const _ = require('lodash');
 
 const pluralize = require('pluralize');
 const storeUtils = require('./utils/store');
 const { pickSchemaFields } = require('./utils/schema');
 
-const uidToStoreKey = uid => {
+const uidToStoreKey = (uid) => {
   return `content_types::${uid}`;
 };
 
 const toUID = (name, plugin) => {
   const model = strapi.getModel(name, plugin);
+
   return model.uid;
 };
 
-const formatContentTypeLabel = contentType => {
+const formatContentTypeLabel = (contentType) => {
   const { kind } = contentType;
   const name = _.get(contentType, ['info', 'name'], contentType.modelName);
 
@@ -32,8 +31,9 @@ const HIDDEN_CONTENT_TYPES = [
   'strapi::user',
 ];
 
-const getConfiguration = uid => {
+const getConfiguration = (uid) => {
   const storeKey = uidToStoreKey(uid);
+
   return storeUtils.getModelConfiguration(storeKey);
 };
 
@@ -41,6 +41,7 @@ const setConfiguration = (uid, input) => {
   const { settings, metadatas, layouts } = input;
 
   const storeKey = uidToStoreKey(uid);
+
   return storeUtils.setModelConfiguration(storeKey, {
     uid,
     settings,
@@ -49,18 +50,19 @@ const setConfiguration = (uid, input) => {
   });
 };
 
-const deleteConfiguration = uid => {
+const deleteConfiguration = (uid) => {
   const storeKey = uidToStoreKey(uid);
+
   return storeUtils.deleteKey(storeKey);
 };
 
-const formatContentType = contentType => {
+const formatContentType = (contentType) => {
   return {
     uid: contentType.uid,
     name: _.get(contentType, ['info', 'name']),
     apiID: contentType.modelName,
     label: formatContentTypeLabel(contentType),
-    isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
+    isDisplayed: !HIDDEN_CONTENT_TYPES.includes(contentType.uid),
     schema: {
       ...formatContentTypeSchema(contentType),
       kind: contentType.kind || 'collectionType',
@@ -68,13 +70,14 @@ const formatContentType = contentType => {
   };
 };
 
-const formatAttributes = model => {
+const formatAttributes = (model) => {
   return Object.keys(model.attributes).reduce((acc, key) => {
     if (key === 'created_by' || key === 'updated_by') {
       return acc;
     }
 
     acc[key] = formatAttribute(key, model.attributes[key], { model });
+
     return acc;
   }, {});
 };
@@ -83,7 +86,7 @@ const formatAttribute = (key, attribute, { model }) => {
   if (_.has(attribute, 'type')) return attribute;
 
   // format relations
-  const relation = (model.associations || []).find(assoc => assoc.alias === key);
+  const relation = (model.associations || []).find((assoc) => assoc.alias === key);
 
   const { plugin } = attribute;
   let targetEntity = attribute.model || attribute.collection;
@@ -91,21 +94,21 @@ const formatAttribute = (key, attribute, { model }) => {
   if (plugin === 'upload' && targetEntity === 'file') {
     return {
       type: 'media',
-      multiple: attribute.collection ? true : false,
-      required: attribute.required ? true : false,
+      multiple: !!attribute.collection,
+      required: !!attribute.required,
       allowedTypes: attribute.allowedTypes,
     };
-  } else {
-    return {
-      ...attribute,
-      type: 'relation',
-      targetModel: targetEntity === '*' ? '*' : toUID(targetEntity, plugin),
-      relationType: relation.nature,
-    };
   }
+
+  return {
+    ...attribute,
+    type: 'relation',
+    targetModel: targetEntity === '*' ? '*' : toUID(targetEntity, plugin),
+    relationType: relation.nature,
+  };
 };
 
-const formatContentTypeSchema = contentType => {
+const formatContentTypeSchema = (contentType) => {
   return {
     ...pickSchemaFields(contentType),
     attributes: {
@@ -118,7 +121,7 @@ const formatContentTypeSchema = contentType => {
   };
 };
 
-const createTimestampsSchema = contentType => {
+const createTimestampsSchema = (contentType) => {
   if (_.get(contentType, 'options.timestamps', false) === false) {
     return {};
   }
@@ -136,7 +139,7 @@ const createTimestampsSchema = contentType => {
 };
 
 const getDisplayedContentTypesUids = () =>
-  Object.keys(strapi.contentTypes).filter(ct => !HIDDEN_CONTENT_TYPES.includes(ct));
+  Object.keys(strapi.contentTypes).filter((ct) => !HIDDEN_CONTENT_TYPES.includes(ct));
 
 module.exports = {
   getConfiguration,

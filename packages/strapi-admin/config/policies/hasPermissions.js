@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const {
   policy: { createPolicyFactory },
@@ -9,23 +7,23 @@ const { validateHasPermissionsInput } = require('../../validation/policies/hasPe
 const inputModifiers = [
   {
     check: _.isString,
-    transform: action => ({ action }),
+    transform: (action) => ({ action }),
   },
   {
     check: _.isArray,
-    transform: arr => ({ action: arr[0], subject: arr[1] }),
+    transform: (arr) => ({ action: arr[0], subject: arr[1] }),
   },
   {
     // Has to be after the isArray check since _.isObject also matches arrays
     check: _.isObject,
-    transform: perm => perm,
+    transform: (perm) => perm,
   },
 ];
 
 module.exports = createPolicyFactory(
-  input => {
-    const permissions = input.map(val =>
-      inputModifiers.find(modifier => modifier.check(val)).transform(val)
+  (input) => {
+    const permissions = input.map((val) =>
+      inputModifiers.find((modifier) => modifier.check(val)).transform(val)
     );
 
     return (ctx, next) => {

@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const {
@@ -21,8 +19,9 @@ module.exports = {
     const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => {
+      .filter((uid) => {
         if (uid.startsWith('strapi::')) return false;
+
         if (uid === 'plugins::upload.file') return false; // TODO: add a flag in the content type instead
 
         if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
@@ -31,7 +30,7 @@ module.exports = {
 
         return true;
       })
-      .map(uid => contentTypeService.formatContentType(strapi.contentTypes[uid]));
+      .map((uid) => contentTypeService.formatContentType(strapi.contentTypes[uid]));
 
     ctx.send({
       data: contentTypes,

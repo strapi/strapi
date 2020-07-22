@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 const invalidPatternsRegexes = [/<%[^=]([^<>%]*)%>/m, /\${([^{}]*)}/m];
@@ -15,10 +13,11 @@ const matchAll = (pattern, src) => {
 
     matches.push(_.trim(group));
   }
+
   return matches;
 };
 
-const isValidEmailTemplate = template => {
+const isValidEmailTemplate = (template) => {
   for (let reg of invalidPatternsRegexes) {
     if (reg.test(template)) {
       return false;

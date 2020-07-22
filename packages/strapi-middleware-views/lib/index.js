@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -16,7 +14,7 @@ const koaViews = require('koa-views');
  * Public assets hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -24,6 +22,7 @@ module.exports = strapi => {
 
     initialize() {
       const { views } = strapi.config.middleware.settings;
+
       if (_.isPlainObject(views) && !_.isEmpty(views)) {
         const opts = _.clone(views);
 
@@ -33,7 +32,7 @@ module.exports = strapi => {
         }
 
         // Map every template engine in config.
-        _.forEach(opts.map, engine => {
+        _.forEach(opts.map, (engine) => {
           if (!consolidate.requires[engine]) {
             // Try to require them using `consolidate` or throw an error.
             try {
@@ -43,12 +42,8 @@ module.exports = strapi => {
                 engine
               ));
             } catch (err) {
-              strapi.log.error(
-                '`' + engine + '` template engine not installed.'
-              );
-              strapi.log.error(
-                'Execute `$ npm install ' + engine + ' --save` to install it.'
-              );
+              strapi.log.error(`\`${engine}\` template engine not installed.`);
+              strapi.log.error(`Execute \`$ npm install ${engine} --save\` to install it.`);
               process.exit(1);
             }
           }
@@ -58,10 +53,7 @@ module.exports = strapi => {
         });
 
         strapi.app.use(
-          koaViews(
-            path.resolve(strapi.config.appPath, strapi.config.paths.views),
-            opts
-          )
+          koaViews(path.resolve(strapi.config.appPath, strapi.config.paths.views), opts)
         );
       }
     },

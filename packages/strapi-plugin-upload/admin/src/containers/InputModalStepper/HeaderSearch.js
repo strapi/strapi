@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { HeaderSearch as BaseHeaderSearch } from 'strapi-helper-plugin';
+import { HeaderSearch as BaseHeaderSearch } from 'strapi-helper-plugin/lib/src';
 
 const HeaderSearch = styled(BaseHeaderSearch)`
   position: relative;

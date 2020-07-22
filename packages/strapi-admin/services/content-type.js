@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const fp = require('lodash/fp');
 
@@ -50,6 +48,7 @@ const getNestedFields = (
 
           return fields.concat(compoFields);
         }
+
         return fields;
       }
 
@@ -120,8 +119,8 @@ const getPermissionsWithNestedFields = (
 ) =>
   actions.reduce((perms, action) => {
     action.subjects
-      .filter(subject => !restrictedSubjects.includes(subject))
-      .forEach(contentTypeUid => {
+      .filter((subject) => !restrictedSubjects.includes(subject))
+      .forEach((contentTypeUid) => {
         const fields = fieldsNullFor.includes(action.actionId)
           ? null
           : getNestedFields(strapi.contentTypes[contentTypeUid], {
@@ -135,6 +134,7 @@ const getPermissionsWithNestedFields = (
           conditions: [],
         });
       });
+
     return perms;
   }, []);
 
@@ -147,8 +147,9 @@ const getPermissionsWithNestedFields = (
  * @returns {array<permissions>}
  */
 const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }) =>
-  permissions.map(perm => {
+  permissions.map((perm) => {
     let newFields = perm.fields;
+
     if (fieldsNullFor.includes(perm.action)) {
       newFields = null;
     } else if (perm.subject && strapi.contentTypes[perm.subject]) {
@@ -168,7 +169,7 @@ const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }
         ...requiredFields,
       ]);
       newFields = badNestedFields.filter(
-        field => !badNestedFields.some(fp.startsWith(`${field}.`))
+        (field) => !badNestedFields.some(fp.startsWith(`${field}.`))
       );
     }
 

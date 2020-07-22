@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * GraphQL.js service
  *
@@ -26,7 +24,7 @@ const isMutationEnabled = (schema, name) => {
   return _.get(schema, `resolver.Mutation.${name}`) !== false;
 };
 
-const buildTypeDefObj = model => {
+const buildTypeDefObj = (model) => {
   const { associations = [], attributes, primaryKey, globalId } = model;
 
   const typeDef = {
@@ -42,8 +40,8 @@ const buildTypeDefObj = model => {
   }
 
   Object.keys(attributes)
-    .filter(attributeName => attributes[attributeName].private !== true)
-    .forEach(attributeName => {
+    .filter((attributeName) => attributes[attributeName].private !== true)
+    .forEach((attributeName) => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
       typeDef[attributeName] = types.convertType({
@@ -55,9 +53,9 @@ const buildTypeDefObj = model => {
 
   // Change field definition for collection relations
   associations
-    .filter(association => association.type === 'collection')
-    .filter(association => attributes[association.alias].private !== true)
-    .forEach(association => {
+    .filter((association) => association.type === 'collection')
+    .filter((association) => attributes[association.alias].private !== true)
+    .forEach((association) => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
 
@@ -69,12 +67,13 @@ const buildTypeDefObj = model => {
 
 const generateEnumDefinitions = (attributes, globalId) => {
   return Object.keys(attributes)
-    .filter(attribute => attributes[attribute].type === 'enumeration')
-    .map(attribute => {
+    .filter((attribute) => attributes[attribute].type === 'enumeration')
+    .map((attribute) => {
       const definition = attributes[attribute];
 
       const name = types.convertEnumType(definition, globalId, attribute);
-      const values = definition.enum.map(v => `\t${v}`).join('\n');
+      const values = definition.enum.map((v) => `\t${v}`).join('\n');
+
       return `enum ${name} {\n${values}\n}\n`;
     })
     .join('');
@@ -82,8 +81,8 @@ const generateEnumDefinitions = (attributes, globalId) => {
 
 const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
   Object.keys(attributes)
-    .filter(attribute => attributes[attribute].type === 'dynamiczone')
-    .forEach(attribute => {
+    .filter((attribute) => attributes[attribute].type === 'dynamiczone')
+    .forEach((attribute) => {
       const { components } = attributes[attribute];
 
       const typeName = `${globalId}${_.upperFirst(_.camelCase(attribute))}DynamicZone`;
@@ -92,10 +91,11 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
         // Create dummy type because graphql doesn't support empty ones
 
         schema.definition += `type ${typeName} { _:Boolean}`;
-        schema.definition += `\nscalar EmptyQuery\n`;
+        schema.definition += '\nscalar EmptyQuery\n';
       } else {
-        const componentsTypeNames = components.map(componentUID => {
+        const componentsTypeNames = components.map((componentUID) => {
           const compo = strapi.components[componentUID];
+
           if (!compo) {
             throw new Error(
               `Trying to creating dynamiczone type with unkown component ${componentUID}`
@@ -128,13 +128,13 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
     });
 };
 
-const buildAssocResolvers = model => {
-  const contentManager = strapi.plugins['content-manager'].services['contentmanager'];
+const buildAssocResolvers = (model) => {
+  const contentManager = strapi.plugins['content-manager'].services.contentmanager;
 
   const { primaryKey, associations = [] } = model;
 
   return associations
-    .filter(association => model.attributes[association.alias].private !== true)
+    .filter((association) => model.attributes[association.alias].private !== true)
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
@@ -144,7 +144,7 @@ const buildAssocResolvers = model => {
         case 'manyMorphToOne':
         case 'manyMorphToMany':
         case 'manyToManyMorph': {
-          resolver[association.alias] = async obj => {
+          resolver[association.alias] = async (obj) => {
             if (obj[association.alias]) {
               return obj[association.alias];
             }
@@ -189,7 +189,7 @@ const buildAssocResolvers = model => {
                   queryOpts,
                   ['query', targetModel.primaryKey],
                   obj[association.alias]
-                    ? obj[association.alias].map(val => val[targetModel.primaryKey] || val).sort()
+                    ? obj[association.alias].map((val) => val[targetModel.primaryKey] || val).sort()
                     : []
                 );
               } else {
@@ -221,8 +221,8 @@ const buildAssocResolvers = model => {
  *
  * @return Object
  */
-const buildModels = models => {
-  return models.map(model => {
+const buildModels = (models) => {
+  return models.map((model) => {
     const { kind, modelType } = model;
 
     if (modelType === 'component') {
@@ -249,7 +249,7 @@ const buildModelDefinition = (model, globalType = {}) => {
       Query: {},
       Mutation: {},
       [globalId]: {
-        id: parent => parent[primaryKey] || parent.id,
+        id: (parent) => parent[primaryKey] || parent.id,
         ...buildAssocResolvers(model),
       },
     },
@@ -265,10 +265,11 @@ const buildModelDefinition = (model, globalType = {}) => {
   const typeDef = `${description}type ${globalId} {${fields}}\n`;
 
   schema.definition += typeDef;
+
   return schema;
 };
 
-const buildComponent = component => {
+const buildComponent = (component) => {
   const { globalId } = component;
   const schema = buildModelDefinition(component);
 
@@ -279,7 +280,7 @@ const buildComponent = component => {
   return schema;
 };
 
-const buildSingleType = model => {
+const buildSingleType = (model) => {
   const { uid, modelName } = model;
 
   const singularName = toSingular(modelName);
@@ -316,7 +317,7 @@ const buildSingleType = model => {
   localSchema.definition += types.generateInputModel(model, modelName);
 
   // build every mutation
-  ['update', 'delete'].forEach(action => {
+  ['update', 'delete'].forEach((action) => {
     const mutationSchema = buildMutationTypeDef({ model, action }, { _schema });
 
     mergeSchemas(localSchema, mutationSchema);
@@ -325,7 +326,7 @@ const buildSingleType = model => {
   return localSchema;
 };
 
-const buildCollectionType = model => {
+const buildCollectionType = (model) => {
   const { globalId, plugin, modelName, uid } = model;
 
   const singularName = toSingular(modelName);
@@ -344,7 +345,7 @@ const buildCollectionType = model => {
       Mutation: {},
       // define default resolver for this model
       [globalId]: {
-        id: parent => parent[model.primaryKey] || parent.id,
+        id: (parent) => parent[model.primaryKey] || parent.id,
         ...buildAssocResolvers(model),
       },
     },
@@ -371,6 +372,7 @@ const buildCollectionType = model => {
       resolver: `${uid}.findOne`,
       ..._.get(_schema, `resolver.Query.${singularName}`, {}),
     };
+
     if (actionExists(resolverOpts)) {
       _.merge(localSchema, {
         query: {
@@ -390,6 +392,7 @@ const buildCollectionType = model => {
       resolver: `${uid}.find`,
       ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
     };
+
     if (actionExists(resolverOpts)) {
       _.merge(localSchema, {
         query: {
@@ -419,7 +422,7 @@ const buildCollectionType = model => {
   localSchema.definition += types.generateInputModel(model, modelName);
 
   // build every mutation
-  ['create', 'update', 'delete'].forEach(action => {
+  ['create', 'update', 'delete'].forEach((action) => {
     const mutationSchema = buildMutationTypeDef({ model, action }, { _schema });
     mergeSchemas(localSchema, mutationSchema);
   });
@@ -436,7 +439,7 @@ const buildMutationTypeDef = ({ model, action }, { _schema }) => {
 
   const resolverOpts = {
     resolver: `${model.uid}.${action}`,
-    transformOutput: result => ({ [toSingular(model.modelName)]: result }),
+    transformOutput: (result) => ({ [toSingular(model.modelName)]: result }),
     ..._.get(_schema, `resolver.Mutation.${mutationName}`, {}),
   };
 
@@ -461,6 +464,7 @@ const buildMutationTypeDef = ({ model, action }, { _schema }) => {
   const { kind } = model;
 
   let mutationDef = `${mutationName}(input: ${mutationName}Input)`;
+
   if (kind === 'singleType' && action === 'delete') {
     mutationDef = mutationName;
   }

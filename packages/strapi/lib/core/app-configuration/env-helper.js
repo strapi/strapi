@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 function env(key, defaultValue) {
@@ -13,6 +11,7 @@ const utils = {
     }
 
     const value = process.env[key];
+
     return parseInt(value, 10);
   },
 
@@ -22,6 +21,7 @@ const utils = {
     }
 
     const value = process.env[key];
+
     return parseFloat(value);
   },
 
@@ -31,6 +31,7 @@ const utils = {
     }
 
     const value = process.env[key];
+
     return value === 'true';
   },
 
@@ -58,7 +59,7 @@ const utils = {
       value = value.substring(1, value.length - 1);
     }
 
-    return value.split(',').map(v => {
+    return value.split(',').map((v) => {
       return _.trim(_.trim(v, ' '), '"');
     });
   },
@@ -69,6 +70,7 @@ const utils = {
     }
 
     const value = process.env[key];
+
     return new Date(value);
   },
 };

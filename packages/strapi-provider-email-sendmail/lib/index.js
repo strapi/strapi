@@ -1,5 +1,3 @@
-'use strict';
-
 const sendmailFactory = require('sendmail');
 const { removeUndefined } = require('strapi-utils');
 
@@ -9,8 +7,9 @@ module.exports = {
       silent: true,
       ...providerOptions,
     });
+
     return {
-      send: options => {
+      send: (options) => {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
@@ -26,7 +25,7 @@ module.exports = {
             ...rest,
           };
 
-          sendmail(removeUndefined(msg), err => {
+          sendmail(removeUndefined(msg), (err) => {
             if (err) {
               reject(err);
             } else {

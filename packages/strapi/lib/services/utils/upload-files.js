@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 
 module.exports = async (entry, files, { model, source }) => {
@@ -9,7 +7,7 @@ module.exports = async (entry, files, { model, source }) => {
 
   const uploadService = strapi.plugins.upload.services.upload;
 
-  const findModelFromUploadPath = path => {
+  const findModelFromUploadPath = (path) => {
     if (path.length === 0) return { model, source };
 
     let currentPath = [];
@@ -62,9 +60,10 @@ module.exports = async (entry, files, { model, source }) => {
 
     if (model) {
       const id = _.get(entry, path.concat('id'));
+
       return uploadService.uploadToEntity({ id, model, field }, files, source);
     }
   };
 
-  await Promise.all(Object.keys(files).map(key => doUpload(key, files[key])));
+  await Promise.all(Object.keys(files).map((key) => doUpload(key, files[key])));
 };

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Module dependencies
  */
@@ -12,7 +10,7 @@ const favicon = require('koa-favicon');
  * Favicon hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -20,10 +18,7 @@ module.exports = strapi => {
 
     initialize() {
       const { dir } = strapi;
-      const {
-        maxAge,
-        path: faviconPath,
-      } = strapi.config.middleware.settings.favicon;
+      const { maxAge, path: faviconPath } = strapi.config.middleware.settings.favicon;
 
       strapi.app.use(
         favicon(resolve(dir, faviconPath), {

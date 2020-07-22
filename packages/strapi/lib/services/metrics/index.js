@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Strapi telemetry package.
  * You can learn more at https://strapi.io/documentation/v3.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
@@ -22,7 +21,7 @@ const LIMITED_EVENTS = [
   'didEnableResponsiveDimensions',
 ];
 
-const createTelemetryInstance = strapi => {
+const createTelemetryInstance = (strapi) => {
   const uuid = strapi.config.uuid;
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
@@ -63,20 +62,17 @@ const createTelemetryInstance = strapi => {
   return {
     async send(event, payload) {
       if (isDisabled) return true;
+
       return sendEvent(event, payload);
     },
   };
 };
 
-const hash = str =>
-  crypto
-    .createHash('sha256')
-    .update(str)
-    .digest('hex');
+const hash = (str) => crypto.createHash('sha256').update(str).digest('hex');
 
-const hashProject = strapi => hash(`${strapi.config.info.name}${strapi.config.info.description}`);
+const hashProject = (strapi) => hash(`${strapi.config.info.name}${strapi.config.info.description}`);
 
-const hashDep = strapi => {
+const hashDep = (strapi) => {
   const depStr = JSON.stringify(strapi.config.info.dependencies);
   const readmePath = path.join(strapi.dir, 'README.md');
 

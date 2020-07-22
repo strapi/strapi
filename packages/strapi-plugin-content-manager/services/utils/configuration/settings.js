@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const { isSortable } = require('./attributes');
 
@@ -11,10 +9,8 @@ const DEFAULT_SETTINGS = {
   pageSize: 10,
 };
 
-const getDefaultMainField = schema =>
-  Object.keys(schema.attributes).find(
-    key => schema.attributes[key].type === 'string'
-  ) || 'id';
+const getDefaultMainField = (schema) =>
+  Object.keys(schema.attributes).find((key) => schema.attributes[key].type === 'string') || 'id';
 
 /**
  * Retunrs a configuration default settings
@@ -46,15 +42,12 @@ async function syncSettings(configuration, schema) {
 
   let defaultField = getDefaultMainField(schema);
 
-  const { mainField = defaultField, defaultSortBy = defaultField } =
-    configuration.settings || {};
+  const { mainField = defaultField, defaultSortBy = defaultField } = configuration.settings || {};
 
   return {
     ...configuration.settings,
     mainField: isSortable(schema, mainField) ? mainField : defaultField,
-    defaultSortBy: isSortable(schema, defaultSortBy)
-      ? defaultSortBy
-      : defaultField,
+    defaultSortBy: isSortable(schema, defaultSortBy) ? defaultSortBy : defaultField,
   };
 }
 

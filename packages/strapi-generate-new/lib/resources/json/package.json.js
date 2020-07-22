@@ -1,18 +1,10 @@
-'use strict';
-
 /**
  * Expose main package JSON of the application
  * with basic info, dependencies, etc.
  */
 
-module.exports = opts => {
-  const {
-    strapiDependencies,
-    additionalsDependencies,
-    strapiVersion,
-    projectName,
-    uuid,
-  } = opts;
+module.exports = (opts) => {
+  const { strapiDependencies, additionalsDependencies, strapiVersion, projectName, uuid } = opts;
 
   // Finally, return the JSON.
   return {
@@ -31,6 +23,7 @@ module.exports = opts => {
       {},
       strapiDependencies.reduce((acc, key) => {
         acc[key] = strapiVersion;
+
         return acc;
       }, {}),
       additionalsDependencies
@@ -39,7 +32,7 @@ module.exports = opts => {
       name: 'A Strapi developer',
     },
     strapi: {
-      uuid: uuid,
+      uuid,
     },
     engines: {
       node: '>=10.0.0',

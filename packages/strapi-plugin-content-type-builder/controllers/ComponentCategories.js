@@ -1,5 +1,3 @@
-'use strict';
-
 const validateComponentCategory = require('./validation/component-category');
 
 module.exports = {

@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup } = require('strapi-utils');
 const { validateRegisterProviderAction } = require('../../validation/action-provider');
 const { getActionId, createAction } = require('../../domain/action');
@@ -17,6 +15,7 @@ const createActionProvider = () => {
     get(uid, pluginName) {
       const actionId = getActionId({ pluginName, uid });
       const action = actions.get(actionId);
+
       return action;
     },
 
@@ -42,11 +41,12 @@ const createActionProvider = () => {
      */
     register(newActions) {
       if (strapi.isLoaded) {
-        throw new Error(`You can't register new actions outside of the bootstrap function.`);
+        throw new Error("You can't register new actions outside of the bootstrap function.");
       }
       validateRegisterProviderAction(newActions);
-      newActions.forEach(newAction => {
+      newActions.forEach((newAction) => {
         const actionId = getActionId(newAction);
+
         if (actions.has(actionId)) {
           throw new yup.ValidationError(
             `Duplicated action id: ${actionId}. You may want to change the actions name.`

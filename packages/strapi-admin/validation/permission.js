@@ -1,10 +1,8 @@
-'use strict';
-
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
 const validators = require('./common-validators');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleReject = (error) => Promise.reject(formatYupErrors(error));
 
 // validatedUpdatePermissionsInput
 
@@ -29,24 +27,26 @@ const actionFieldsAreEqual = (a, b) => {
 };
 
 const haveSameFieldsAsOtherActions = (a, i, allActions) =>
-  allActions.slice(i + 1).every(b => actionFieldsAreEqual(a, b));
+  allActions.slice(i + 1).every((b) => actionFieldsAreEqual(a, b));
 
-const checkPermissionsAreBound = function(permissions) {
+const checkPermissionsAreBound = function (permissions) {
   const permsBySubject = _.groupBy(
-    permissions.filter(perm => BOUND_ACTIONS.includes(perm.action)),
+    permissions.filter((perm) => BOUND_ACTIONS.includes(perm.action)),
     'subject'
   );
 
   for (const perms of Object.values(permsBySubject)) {
     const missingActions =
       _.xor(
-        perms.map(p => p.action),
+        perms.map((p) => p.action),
         BOUND_ACTIONS
       ).length !== 0;
+
     if (missingActions) return false;
 
-    const permsBoundByFields = perms.filter(p => BOUND_ACTIONS_FOR_FIELDS.includes(p.action));
+    const permsBoundByFields = perms.filter((p) => BOUND_ACTIONS_FOR_FIELDS.includes(p.action));
     const everyActionsHaveSameFields = _.every(permsBoundByFields, haveSameFieldsAsOtherActions);
+
     if (!everyActionsHaveSameFields) return false;
   }
 
@@ -79,13 +79,13 @@ const checkPermissionsSchema = yup.object().shape({
   ),
 });
 
-const validateCheckPermissionsInput = data => {
+const validateCheckPermissionsInput = (data) => {
   return checkPermissionsSchema
     .validate(data, { strict: true, abortEarly: false })
     .catch(handleReject);
 };
 
-const validatedUpdatePermissionsInput = async data => {
+const validatedUpdatePermissionsInput = async (data) => {
   try {
     for (const schema of updatePermissionsSchemas) {
       await schema.validate(data, { strict: true, abortEarly: false });
@@ -97,12 +97,12 @@ const validatedUpdatePermissionsInput = async data => {
 
 // validatePermissionsExist
 
-const checkPermissionsExist = function(permissions) {
+const checkPermissionsExist = function (permissions) {
   const existingActions = strapi.admin.services.permission.actionProvider.getAll();
   const failIndex = permissions.findIndex(
-    permission =>
+    (permission) =>
       !existingActions.some(
-        ea =>
+        (ea) =>
           ea.actionId === permission.action &&
           (ea.section !== 'contentTypes' || ea.subjects.includes(permission.subject))
       )
@@ -125,7 +125,7 @@ const actionsExistSchema = yup
   )
   .test('actions-exist', '', checkPermissionsExist);
 
-const validatePermissionsExist = data => {
+const validatePermissionsExist = (data) => {
   return actionsExistSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 

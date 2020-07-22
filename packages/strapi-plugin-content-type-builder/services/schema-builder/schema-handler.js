@@ -1,5 +1,3 @@
-'use strict';
-
 const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash');
@@ -55,6 +53,7 @@ module.exports = function createSchemaHandler(infos) {
       modified = true;
 
       state.uid = val;
+
       return this;
     },
 
@@ -62,6 +61,7 @@ module.exports = function createSchemaHandler(infos) {
       modified = true;
 
       state.dir = val;
+
       return this;
     },
 
@@ -73,6 +73,7 @@ module.exports = function createSchemaHandler(infos) {
       modified = true;
 
       state.schema = _.cloneDeep(val);
+
       return this;
     },
 
@@ -101,6 +102,7 @@ module.exports = function createSchemaHandler(infos) {
 
     delete() {
       deleted = true;
+
       return this;
     },
 
@@ -135,7 +137,7 @@ module.exports = function createSchemaHandler(infos) {
     removeContentType(uid) {
       const { attributes } = state.schema;
 
-      Object.keys(attributes).forEach(key => {
+      Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
         const target = attr.model || attr.collection;
         const plugin = attr.plugin;
@@ -154,7 +156,7 @@ module.exports = function createSchemaHandler(infos) {
     removeComponent(uid) {
       const { attributes } = state.schema;
 
-      Object.keys(attributes).forEach(key => {
+      Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
 
         if (attr.type === 'component' && attr.component === uid) {
@@ -166,7 +168,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attributes[key].components.filter(val => val !== uid);
+          const updatedComponentList = attributes[key].components.filter((val) => val !== uid);
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
       });
@@ -177,7 +179,7 @@ module.exports = function createSchemaHandler(infos) {
     updateComponent(uid, newUID) {
       const { attributes } = state.schema;
 
-      Object.keys(attributes).forEach(key => {
+      Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
 
         if (attr.type === 'component' && attr.component === uid) {
@@ -189,7 +191,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attr.components.map(val => (val === uid ? newUID : val));
+          const updatedComponentList = attr.components.map((val) => (val === uid ? newUID : val));
 
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
@@ -207,6 +209,7 @@ module.exports = function createSchemaHandler(infos) {
         await fse.remove(initialPath);
 
         const list = await fse.readdir(initialState.dir);
+
         if (list.length === 0) {
           await fse.remove(initialState.dir);
         }
@@ -232,6 +235,7 @@ module.exports = function createSchemaHandler(infos) {
           await fse.remove(initialPath);
 
           const list = await fse.readdir(initialState.dir);
+
           if (list.length === 0) {
             await fse.remove(initialState.dir);
           }
@@ -251,9 +255,11 @@ module.exports = function createSchemaHandler(infos) {
         await fse.remove(filePath);
 
         const list = await fse.readdir(state.dir);
+
         if (list.length === 0) {
           await fse.remove(state.dir);
         }
+
         return;
       }
 
@@ -266,6 +272,7 @@ module.exports = function createSchemaHandler(infos) {
           await fse.remove(filePath);
 
           const list = await fse.readdir(state.dir);
+
           if (list.length === 0) {
             await fse.remove(state.dir);
           }

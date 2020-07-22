@@ -13,19 +13,22 @@ import Div from './Div';
 class InputEmail extends React.Component {
   state = { isFocused: false };
 
-  handleBlur = e => {
-    this.setState({ isFocused: !this.state.isFocused });
+  changeFocus = () => {
+    this.setState((prevState) => ({ isFocused: !prevState.isFocused }));
+  };
+
+  handleBlur = (e) => {
+    this.changeFocus();
     this.props.onBlur(e);
   };
 
-  handleFocus = e => {
-    this.setState({ isFocused: !this.state.isFocused });
+  handleFocus = (e) => {
+    this.changeFocus();
     this.props.onFocus(e);
   };
 
   render() {
     const {
-      autoFocus,
       className,
       deactivateErrorHighlight,
       disabled,
@@ -41,10 +44,7 @@ class InputEmail extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <Div
-        className={cn('input-group', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Div className={cn('input-group', !isEmpty(className) && className)} style={style}>
         <span
           className={cn(
             'input-group-addon',
@@ -53,20 +53,13 @@ class InputEmail extends React.Component {
             !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
-          {message => (
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
+          {(message) => (
             <input
-              autoFocus={autoFocus}
               className={cn(
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !deactivateErrorHighlight &&
-                  error &&
-                  this.state.isFocused &&
-                  'invalidEmail'
+                !deactivateErrorHighlight && error && this.state.isFocused && 'invalidEmail'
               )}
               disabled={disabled}
               id={name}
@@ -87,7 +80,6 @@ class InputEmail extends React.Component {
 }
 
 InputEmail.defaultProps = {
-  autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
@@ -100,7 +92,6 @@ InputEmail.defaultProps = {
 };
 
 InputEmail.propTypes = {
-  autoFocus: PropTypes.bool,
   className: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
