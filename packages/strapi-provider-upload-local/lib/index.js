@@ -25,7 +25,7 @@ module.exports = {
     };
     const uploadDir = path.join(
       strapi.dir,
-      strapi.config.middleware.settings.public.path || strapi.config.paths.static
+      strapi.config.get('middleware.settings.public.path', strapi.config.paths.static)
     );
 
     return {
