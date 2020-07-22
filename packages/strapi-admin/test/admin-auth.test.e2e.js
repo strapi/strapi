@@ -19,31 +19,44 @@ const createAuthRole = async () => {
   return res && res.body && res.body.data;
 };
 
-describe('Admin Auth End to End', () => {
-  const testData = {
-    role: null,
-  };
+let internals = {
+  users: [],
+  role: null,
+};
 
-  const createUser = data => {
-    return rq({
+describe('Admin Auth End to End', () => {
+  const createUser = async data => {
+    const res = await rq({
       url: '/admin/users',
       method: 'POST',
       body: {
-        roles: [testData.role.id],
+        roles: [internals.role.id],
         ...data,
       },
     });
+
+    internals.users.push(res.body.data);
+    return res;
   };
 
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
-    testData.role = await createAuthRole();
+    internals.role = await createAuthRole();
   }, 60000);
 
   afterAll(async () => {
+    await Promise.all(
+      internals.users.map(u =>
+        rq({
+          url: `/admin/users/${u.id}`,
+          method: 'DELETE',
+        })
+      )
+    );
+
     await rq({
-      url: `/admin/roles/${testData.role.id}`,
+      url: `/admin/roles/${internals.role.id}`,
       method: 'DELETE',
     });
   }, 60000);
