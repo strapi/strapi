@@ -5,7 +5,6 @@ import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import {
   PopUpWarning,
-  LoadingIndicator,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
@@ -326,6 +325,7 @@ const HomePage = () => {
       data={data}
       dataCount={dataCount}
       dataToDelete={dataToDelete}
+      isLoading={isLoading}
       onCardCheck={handleChangeCheck}
       onCardClick={handleClickEditFile}
       onClick={handleClickToggleModal}
@@ -338,14 +338,7 @@ const HomePage = () => {
   return (
     <Container>
       <Header {...headerProps} isLoading={isLoading} />
-      {isLoading ? (
-        <>
-          <Padded top bottom size="lg" />
-          <LoadingIndicator />
-        </>
-      ) : (
-        content
-      )}
+      {content}
       <ModalStepper
         initialFileToEdit={fileToEdit}
         initialStep={modalInitialStep}
