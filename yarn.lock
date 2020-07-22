@@ -4051,7 +4051,7 @@ apollo-server-errors@^2.4.2:
   resolved "https://registry.yarnpkg.com/apollo-server-errors/-/apollo-server-errors-2.4.2.tgz#1128738a1d14da989f58420896d70524784eabe5"
   integrity sha512-FeGxW3Batn6sUtX3OVVUm7o56EgjxDlmgpTLNyWcLb0j6P8mw9oLNyAm3B+deHA4KNdNHO5BmHS2g1SJYjqPCQ==
 
-apollo-server-koa@^2.14.2:
+apollo-server-koa@2.16.0:
   version "2.16.0"
   resolved "https://registry.yarnpkg.com/apollo-server-koa/-/apollo-server-koa-2.16.0.tgz#922a597d406791190239358ba65f93f518a476dd"
   integrity sha512-LeULpJ/SZNqpvMakcrNs9YHBTqrgfXg+aDPjavj+m8vTK7CyMmg2MTXYEwpDp0oI5o3+HbpqZPRI7uEC5771Xg==
