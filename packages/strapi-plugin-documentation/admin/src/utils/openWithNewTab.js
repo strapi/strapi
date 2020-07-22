@@ -1,6 +1,6 @@
 import { startsWith } from 'lodash';
 
-const openWithNewTab = path => {
+const openWithNewTab = (path) => {
   const url = (() => {
     if (startsWith(path, '/')) {
       return `${strapi.backendURL}${path}`;

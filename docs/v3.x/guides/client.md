@@ -33,7 +33,7 @@ Lets create our GitHub hook.
 **Path —** `./hooks/github/index.js`
 
 ```js
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     async initialize() {
       console.log('my hook is loaded');
@@ -89,7 +89,7 @@ Now we have to load the GitHub client.
 ```js
 const GitHubAPI = require('@octokit/rest');
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     async initialize() {
       const { token } = strapi.config.get('hook.settings.github');

@@ -8,7 +8,7 @@ import PermissionRow from './PermissionRow';
 const PluginsAndSettingsPermissions = ({ pluginsPermissionsLayout, permissionType }) => {
   const [openedCategory, setOpenedCategory] = useState();
 
-  const handleOpenCategory = categoryName => {
+  const handleOpenCategory = (categoryName) => {
     setOpenedCategory(categoryName === openedCategory ? null : categoryName);
   };
 

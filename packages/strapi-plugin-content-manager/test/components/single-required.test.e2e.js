@@ -6,10 +6,7 @@ let modelsUtils;
 let rq;
 
 describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/explorer/application::withcomponent.withcomponent',
-  ],
+  ['CONTENT MANAGER', '/content-manager/explorer/application::withcomponent.withcomponent'],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and required component', (_, path) => {
   beforeAll(async () => {
@@ -84,7 +81,7 @@ describe.each([
 
     test.each([[], 'someString', 128219, false])(
       'Throws if the field is not an object %p',
-      async value => {
+      async (value) => {
         const res = await rq.post('/', {
           body: {
             field: value,
@@ -120,7 +117,7 @@ describe.each([
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
-      res.body.forEach(entry => {
+      res.body.forEach((entry) => {
         if (entry.field === null) return;
 
         expect(entry.field).toMatchObject({
@@ -133,7 +130,7 @@ describe.each([
   describe('PUT entry', () => {
     test.each([[], 'someString', 128219, false])(
       'Throws when sending invalid updated field %p',
-      async value => {
+      async (value) => {
         const res = await rq.post('/', {
           body: {
             field: {

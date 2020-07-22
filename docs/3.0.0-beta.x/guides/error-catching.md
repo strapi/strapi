@@ -15,7 +15,7 @@ A [middleware](../concepts/middlewares.md) will be used in order to catch the er
 **Path —** `./middlewares/sentry/index.js`
 
 ```js
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     initialize() {
       strapi.app.use(async (ctx, next) => {
@@ -43,7 +43,7 @@ Sentry.init({
   environment: strapi.config.environment,
 });
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     initialize() {
       strapi.app.use(async (ctx, next) => {

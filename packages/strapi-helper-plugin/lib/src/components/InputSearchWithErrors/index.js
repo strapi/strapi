@@ -105,12 +105,7 @@ class InputSearchWithErrors extends React.Component {
         )}
         style={style}
       >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={label}
-          style={labelStyle}
-        />
+        <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
         <InputSearch
           autoFocus={autoFocus}
           className={inputClassName}

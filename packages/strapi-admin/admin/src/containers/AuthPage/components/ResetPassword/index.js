@@ -58,7 +58,7 @@ const ResetPassword = ({ formErrors, modifiedData, onChange, onSubmit, requestEr
 };
 
 ResetPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 

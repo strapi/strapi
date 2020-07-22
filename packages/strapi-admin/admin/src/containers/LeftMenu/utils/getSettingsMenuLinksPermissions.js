@@ -1,6 +1,6 @@
 import { get, isEmpty } from 'lodash';
 
-const getSettingsMenuLinksPermissions = menu =>
+const getSettingsMenuLinksPermissions = (menu) =>
   menu.reduce((acc, current) => {
     const links = get(current, 'links', []);
 

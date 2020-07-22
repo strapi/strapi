@@ -9,7 +9,7 @@ import { InputText, Select } from '@buffetjs/core';
 import { DateTime } from '@buffetjs/custom';
 import SizeInput from './SizeInput';
 
-const getInputType = type => {
+const getInputType = (type) => {
   switch (type) {
     case 'datetime':
       return DateTime;

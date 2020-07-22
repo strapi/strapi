@@ -27,7 +27,7 @@ const WysiwygInlineControls = ({
 
   return (
     <Wrapper>
-      {buttons.map(type => (
+      {buttons.map((type) => (
         <Button
           key={type.label}
           active={type.style === blockType || currentStyle.has(type.style)}

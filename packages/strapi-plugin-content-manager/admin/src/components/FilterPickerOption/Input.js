@@ -10,7 +10,7 @@ import { DateTime } from '@buffetjs/custom';
 import { DatePicker, InputText, InputNumber, Select, TimePicker } from '@buffetjs/core';
 import { InputWrapperDate } from './components';
 
-const getInputType = attrType => {
+const getInputType = (attrType) => {
   switch (attrType) {
     case 'boolean':
       return Select;

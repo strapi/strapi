@@ -21,7 +21,7 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
     isSuperAdmin,
   } = usePermissionsContext();
 
-  const handleCheck = action => {
+  const handleCheck = (action) => {
     // If the action is present in the actions of the attributes
     // Then we set all the attributes contentTypesPermissions otherwise,
     // we only set the global content type actions
@@ -43,27 +43,27 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
 
   // Get the count of content type contentTypesPermissions by action.
   const countContentTypesActionPermissions = useCallback(
-    action => {
+    (action) => {
       return getContentTypesActionsSize(contentTypes, contentTypesPermissions, action);
     },
     [contentTypes, contentTypesPermissions]
   );
 
-  const hasSomeActions = action => {
+  const hasSomeActions = (action) => {
     return (
       countContentTypesActionPermissions(action) > 0 &&
       countContentTypesActionPermissions(action) < contentTypes.length
     );
   };
 
-  const hasAllActions = action => {
+  const hasAllActions = (action) => {
     return countContentTypesActionPermissions(action) === contentTypes.length;
   };
 
   return (
     <Wrapper disabled={isSuperAdmin}>
       <Flex>
-        {permissionsLayout.sections.contentTypes.map(permissionLayout => (
+        {permissionsLayout.sections.contentTypes.map((permissionLayout) => (
           <PermissionCheckbox
             key={permissionLayout.action}
             name={permissionLayout.action}

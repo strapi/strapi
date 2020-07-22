@@ -45,8 +45,8 @@ const DynamicZone = ({
   const { components } = useEditView();
 
   const getDynamicComponentSchemaData = useCallback(
-    componentUid => {
-      const component = components.find(compo => compo.uid === componentUid);
+    (componentUid) => {
+      const component = components.find((compo) => compo.uid === componentUid);
       const { schema } = component;
 
       return schema;
@@ -55,7 +55,7 @@ const DynamicZone = ({
   );
 
   const getDynamicComponentInfos = useCallback(
-    componentUid => {
+    (componentUid) => {
       const {
         info: { icon, name },
       } = getDynamicComponentSchemaData(componentUid);
@@ -67,10 +67,10 @@ const DynamicZone = ({
 
   const dynamicZoneErrors = useMemo(() => {
     return Object.keys(formErrors)
-      .filter(key => {
+      .filter((key) => {
         return key === name;
       })
-      .map(key => formErrors[key]);
+      .map((key) => formErrors[key]);
   }, [formErrors, name]);
 
   const dynamicZoneAvailableComponents = useMemo(
@@ -167,7 +167,7 @@ const DynamicZone = ({
             className={isOpen && 'isOpen'}
             onClick={() => {
               if (dynamicDisplayedComponentsLength < max) {
-                setIsOpen(prev => !prev);
+                setIsOpen((prev) => !prev);
               } else {
                 strapi.notification.info(
                   `${pluginId}.components.notification.info.maximum-requirement`
@@ -207,7 +207,7 @@ const DynamicZone = ({
                 <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
               </p>
               <div className="componentsList">
-                {dynamicZoneAvailableComponents.map(componentUid => {
+                {dynamicZoneAvailableComponents.map((componentUid) => {
                   const { icon, name: friendlyName } = getDynamicComponentInfos(componentUid);
 
                   return (

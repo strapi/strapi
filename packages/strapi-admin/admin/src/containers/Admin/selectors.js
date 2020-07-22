@@ -4,7 +4,7 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the admin state domain
  */
-const selectAdminDomain = () => state => {
+const selectAdminDomain = () => (state) => {
   return state.get('admin') || initialState;
 };
 
@@ -16,7 +16,7 @@ const selectAdminDomain = () => state => {
  * Default selector used by Admin
  */
 
-const makeSelectAdmin = () => createSelector(selectAdminDomain(), substate => substate);
+const makeSelectAdmin = () => createSelector(selectAdminDomain(), (substate) => substate);
 
 export default makeSelectAdmin;
 export { selectAdminDomain };

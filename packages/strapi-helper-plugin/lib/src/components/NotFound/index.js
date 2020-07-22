@@ -14,7 +14,7 @@ function NotFound({ history }) {
       <Button
         label="app.components.NotFoundPage.back"
         kind="back"
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
 
           history.push('/');

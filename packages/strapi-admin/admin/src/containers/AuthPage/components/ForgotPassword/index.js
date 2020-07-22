@@ -52,7 +52,7 @@ const ForgotPassword = ({ formErrors, modifiedData, onChange, onSubmit }) => {
 };
 
 ForgotPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
 };
 
 ForgotPassword.propTypes = {

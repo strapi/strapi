@@ -76,11 +76,7 @@ class InputCheckboxWithErrors extends React.Component {
     if (isObject(title) && title.id) {
       inputTitle = (
         <div className="inputTitle">
-          <FormattedMessage
-            id={title.id}
-            defaultMessage={title.id}
-            values={title.params}
-          />
+          <FormattedMessage id={title.id} defaultMessage={title.id} values={title.params} />
         </div>
       );
     }
@@ -110,10 +106,7 @@ class InputCheckboxWithErrors extends React.Component {
           value={value}
         />
         <InputDescription
-          className={cn(
-            'inputCheckboxDescriptionContainer',
-            inputDescriptionClassName
-          )}
+          className={cn('inputCheckboxDescriptionContainer', inputDescriptionClassName)}
           message={this.props.inputDescription}
           style={inputDescriptionStyle}
         />

@@ -49,7 +49,7 @@ describe('Test type password', () => {
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
 
-    res.body.forEach(element => {
+    res.body.forEach((element) => {
       expect(element.field).toBeUndefined();
     });
   });

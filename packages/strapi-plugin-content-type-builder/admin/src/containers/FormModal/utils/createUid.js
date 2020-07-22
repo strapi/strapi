@@ -1,8 +1,8 @@
 import slugify from '@sindresorhus/slugify';
 
-const nameToSlug = name => slugify(name, { separator: '-' });
+const nameToSlug = (name) => slugify(name, { separator: '-' });
 
-const createUid = name => {
+const createUid = (name) => {
   const modelName = nameToSlug(name);
   const uid = `application::${modelName}.${modelName}`;
 

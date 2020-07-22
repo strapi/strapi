@@ -1,11 +1,5 @@
-import {
-  resetLocaleDefaultClassName,
-  setLocaleCustomClassName,
-} from '../actions';
-import {
-  RESET_DEFAULT_CLASSNAME,
-  SET_CUSTOM_CLASSNAME,
-} from '../constants';
+import { resetLocaleDefaultClassName, setLocaleCustomClassName } from '../actions';
+import { RESET_DEFAULT_CLASSNAME, SET_CUSTOM_CLASSNAME } from '../constants';
 
 describe('<LocaleToggle /> actions', () => {
   describe('ResetLocaleDefaultClassName Action', () => {

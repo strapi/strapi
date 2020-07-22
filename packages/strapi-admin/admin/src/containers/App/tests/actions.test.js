@@ -104,9 +104,7 @@ describe('<App /> actions', () => {
         updatedValue,
       };
 
-      expect(updatePlugin(pluginId, updatedKey, updatedValue)).toEqual(
-        expected
-      );
+      expect(updatePlugin(pluginId, updatedKey, updatedValue)).toEqual(expected);
     });
   });
 });

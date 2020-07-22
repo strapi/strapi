@@ -9,7 +9,7 @@ const Wrapper = styled.div`
   }
 
   .adminPageRightWrapper {
-    width: ${props => `calc(100% - ${props.theme.main.sizes.leftMenu.width})`};
+    width: ${(props) => `calc(100% - ${props.theme.main.sizes.leftMenu.width})`};
   }
 `;
 

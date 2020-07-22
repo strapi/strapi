@@ -1,8 +1,5 @@
 import { fromJS } from 'immutable';
-import {
-  resetLocaleDefaultClassName,
-  setLocaleCustomClassName,
-} from '../actions';
+import { resetLocaleDefaultClassName, setLocaleCustomClassName } from '../actions';
 import localeToggleReducer from '../reducer';
 
 describe('<LocaleToggle />, reducer', () => {

@@ -78,7 +78,7 @@ To upload files into your application.
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', e => {
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();
@@ -139,7 +139,7 @@ Code
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', e => {
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();
@@ -189,7 +189,7 @@ Code
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', e => {
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();

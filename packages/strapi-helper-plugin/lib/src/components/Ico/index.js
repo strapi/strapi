@@ -5,10 +5,10 @@ import Div from './Div';
 function Ico(props) {
   const iProps = Object.assign({}, props);
   const propsToDelete = ['onClick', 'icoType'];
-  propsToDelete.map(value => delete iProps[value]);
+  propsToDelete.map((value) => delete iProps[value]);
 
   return (
-    <Div onClick={e => handleClick(e, props.onClick)} id={props.id}>
+    <Div onClick={(e) => handleClick(e, props.onClick)} id={props.id}>
       <i
         className={`fa fa-${props.icoType}`}
         id={props.id}

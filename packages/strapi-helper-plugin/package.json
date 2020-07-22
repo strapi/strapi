@@ -1,5 +1,5 @@
 {
-  "name": "strapi-helper-plugin/lib/src",
+  "name": "strapi-helper-plugin",
   "version": "3.1.0",
   "description": "Helper for Strapi plugins development",
   "files": [
@@ -14,8 +14,8 @@
     "name": "Strapi team",
     "url": "http://strapi.io"
   },
-  "main": "dist/strapi-helper-plugin/lib/src.cjs.min.js",
-  "module": "dist/strapi-helper-plugin/lib/src.esm.min.js",
+  "main": "dist/strapi-helper-plugin.cjs.min.js",
+  "module": "dist/strapi-helper-plugin.esm.min.js",
   "maintainers": [
     {
       "name": "Strapi team",

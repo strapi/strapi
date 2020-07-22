@@ -7,7 +7,7 @@ The hooks are modules that add functionality to the core. They are loaded during
 ### File structure
 
 ```js
-module.exports = strapi => {
+module.exports = (strapi) => {
   const hook = {
     /**
      * Default options

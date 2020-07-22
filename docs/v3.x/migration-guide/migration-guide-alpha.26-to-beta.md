@@ -200,7 +200,7 @@ The function exported in `config/functions/bootstrap.js` previously received a c
 **Before**
 
 ```js
-module.exports = cb => {
+module.exports = (cb) => {
   cb();
 };
 ```
@@ -361,13 +361,13 @@ For example, if you have a `customIndex` action in the `User` controller you onl
 
 ```javascript
 module.exports = {
-  customIndex: async ctx => {},
+  customIndex: async (ctx) => {},
 
   find: async (ctx, next, { populate } = {}) => {
     //...
   },
 
-  me: async ctx => {
+  me: async (ctx) => {
     //...
   },
 
@@ -381,7 +381,7 @@ module.exports = {
 
 ```js
 module.exports = {
-  customIndex: async ctx => {},
+  customIndex: async (ctx) => {},
 };
 ```
 
@@ -588,12 +588,12 @@ module.exports = {
 ```js
 module.exports = {
   // this function overrides the default one
-  find: async ctx => {
+  find: async (ctx) => {
     myCustomImplementation(ctx);
   },
 
   // this one is added to the default controller
-  customAction: async ctx => {
+  customAction: async (ctx) => {
     ctx.send({ ok: true });
   },
 };
@@ -633,27 +633,27 @@ If you haven't customized the `destroy` action, then remove it from your control
 
 ```js
 module.exports = {
-  find: async ctx => {
+  find: async (ctx) => {
     return strapi.services.product.fetchAll(ctx.query);
   },
 
-  findOne: async ctx => {
+  findOne: async (ctx) => {
     return strapi.services.product.fetch(ctx.params);
   },
 
-  count: async ctx => {
+  count: async (ctx) => {
     return strapi.services.product.count(ctx.query);
   },
 
-  create: async ctx => {
+  create: async (ctx) => {
     return strapi.services.product.add(ctx.request.body);
   },
 
-  update: async ctx => {
+  update: async (ctx) => {
     return strapi.services.product.edit(ctx.params, ctx.request.body);
   },
 
-  destroy: async ctx => {
+  destroy: async (ctx) => {
     customImplementation(ctx);
   },
 };
@@ -683,7 +683,7 @@ module.exports = {
 
 ```js
 module.exports = {
-  delete: async ctx => {
+  delete: async (ctx) => {
     customImplementation(ctx);
   },
 };

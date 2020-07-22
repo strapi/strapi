@@ -7,7 +7,7 @@ The middlewares are functions which are composed and executed in a stack-like ma
 ### File structure
 
 ```js
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     // can also be async
     initialize() {
@@ -141,7 +141,7 @@ Create your custom middleware.
 **Path —** `./middlewares/timer/index.js`
 
 ```js
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     initialize() {
       strapi.app.use(async (ctx, next) => {

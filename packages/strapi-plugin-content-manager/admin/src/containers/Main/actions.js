@@ -25,7 +25,7 @@ export function getDataSucceeded(components, models, mainFields) {
   return {
     type: GET_DATA_SUCCEEDED,
     components,
-    models: models.filter(model => model.isDisplayed === true),
+    models: models.filter((model) => model.isDisplayed === true),
     mainFields,
   };
 }

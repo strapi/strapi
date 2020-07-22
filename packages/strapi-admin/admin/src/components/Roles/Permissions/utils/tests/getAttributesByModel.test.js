@@ -23,7 +23,7 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | getAttributesByModel', () => {
 
     expect(actual.length).toEqual(expected.length);
     expect(
-      actual.find(attribute => attribute.attributeName === 'closing_period.dish.name')
+      actual.find((attribute) => attribute.attributeName === 'closing_period.dish.name')
     ).toBeTruthy();
   });
 });

@@ -4,7 +4,7 @@ import pluginId from '../../../pluginId';
 import makeUnique from '../../../utils/makeUnique';
 
 const getCreatedAndModifiedComponents = (allComponents, initialComponents) => {
-  const componentUIDsToReturn = Object.keys(allComponents).filter(compoUid => {
+  const componentUIDsToReturn = Object.keys(allComponents).filter((compoUid) => {
     const currentCompo = get(allComponents, compoUid, {});
     const initialCompo = get(initialComponents, compoUid, {});
     const hasComponentBeenCreated = get(currentCompo, ['isTemporary'], false);
@@ -110,10 +110,10 @@ const formatAttributes = (attributes, mainDataUID, isCreatingMainData, isCompone
   }, {});
 };
 
-const formatRelationTargetAttribute = targetAttribute =>
+const formatRelationTargetAttribute = (targetAttribute) =>
   targetAttribute === '-' ? null : targetAttribute;
 
-const removeNullKeys = obj =>
+const removeNullKeys = (obj) =>
   Object.keys(obj).reduce((acc, current) => {
     if (obj[current] !== null && current !== 'plugin') {
       acc[current] = obj[current];
@@ -129,7 +129,7 @@ const getComponentsToPost = (
   isCreatingData = false
 ) => {
   const componentsToFormat = getCreatedAndModifiedComponents(allComponents, initialComponents);
-  const formattedComponents = componentsToFormat.map(compoUID => {
+  const formattedComponents = componentsToFormat.map((compoUID) => {
     const currentCompo = get(allComponents, compoUID, {});
     const formattedComponent = formatComponent(currentCompo, mainDataUID, isCreatingData);
 
@@ -139,18 +139,18 @@ const getComponentsToPost = (
   return formattedComponents;
 };
 
-const sortContentType = types =>
+const sortContentType = (types) =>
   sortBy(
     Object.keys(types)
-      .map(uid => ({
+      .map((uid) => ({
         name: uid,
         title: types[uid].schema.name,
         uid,
         to: `/plugins/${pluginId}/content-types/${uid}`,
         kind: types[uid].schema.kind,
       }))
-      .filter(obj => obj !== null),
-    obj => camelCase(obj.title)
+      .filter((obj) => obj !== null),
+    (obj) => camelCase(obj.title)
   );
 
 export {

@@ -7,7 +7,7 @@ const MultiValueContainer = ({ data, selectProps }) => {
   const Component = components.MultiValueContainer;
 
   const handleClick = () => {
-    const newValue = selectProps.value.filter(option => option.id !== data.id);
+    const newValue = selectProps.value.filter((option) => option.id !== data.id);
 
     selectProps.onChange(newValue);
   };

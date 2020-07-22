@@ -10,7 +10,7 @@ function ListHeader({ actions, title }) {
     <Wrapper>
       <div className="list-header-actions">{actions}</div>
       <div className="list-header-title">
-        {title.map(item => {
+        {title.map((item) => {
           return <Title key={item}>{item}&nbsp;</Title>;
         })}
       </div>

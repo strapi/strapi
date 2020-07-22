@@ -64,7 +64,7 @@ describe('Test type integer', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    res.body.forEach((entry) => {
       expect(Number.isInteger(entry.field)).toBe(true);
     });
   });

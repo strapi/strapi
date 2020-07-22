@@ -1,4 +1,4 @@
-const getType = mime => {
+const getType = (mime) => {
   if (!mime) {
     return 'file';
   }

@@ -11,7 +11,7 @@ const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother,
   const [isOpen, setIsOpen] = useState(false);
   const { contentTypes, sortedContentTypesList } = useDataManager();
   const allowedContentTypesForRelation = sortedContentTypesList.filter(
-    obj => obj.kind === 'collectionType'
+    (obj) => obj.kind === 'collectionType'
   );
 
   const targetFriendlyName = get(contentTypes, [target, 'schema', 'name'], 'error');

@@ -1,6 +1,6 @@
 import { isObject } from 'lodash';
 
-const createHeadersObjectFromArray = array => {
+const createHeadersObjectFromArray = (array) => {
   return array.reduce((acc, current, index) => {
     const createHeaderObject = (obj, i, middle = '') =>
       Object.keys(obj).reduce((acc1, current1) => {

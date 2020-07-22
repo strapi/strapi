@@ -23,7 +23,7 @@ The menu section can be declared as follows:
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   // Declare the links that will be injected into the settings menu
@@ -132,7 +132,7 @@ import pluginPkg from '../../package.json';
 import Settings from './containers/Settings';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   // Declare the links that will be injected into the settings menu
@@ -197,7 +197,7 @@ import Settings from './containers/Settings';
 import SettingLink from './components/SettingLink';
 import pluginId from './pluginId';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   // Declare the links that will be injected into the settings menu

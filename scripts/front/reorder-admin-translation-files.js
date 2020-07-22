@@ -16,7 +16,7 @@ async function orderTrads({ mainTranslationFile, translationFiles }) {
 
   await fs.writeJSON(mainTranslationFile, orderedData, { spaces: 2 });
 
-  const cleanFile = async trad => {
+  const cleanFile = async (trad) => {
     const cleanedFile = {};
     const orderedDataKeys = Object.keys(orderedData);
 
@@ -40,7 +40,7 @@ async function orderTrads({ mainTranslationFile, translationFiles }) {
     }
   };
 
-  await Promise.all(translationFiles.map(trad => cleanFile(trad)));
+  await Promise.all(translationFiles.map((trad) => cleanFile(trad)));
 }
 
 async function run() {
@@ -49,15 +49,15 @@ async function run() {
 
   const pluginsWithTranslationFiles = packageDirs
     .filter(
-      dir =>
+      (dir) =>
         (dir.startsWith('packages/strapi-plugin') || dir.startsWith('packages/strapi-admin')) &&
         fs.existsSync(join(dir, ...pathToTranslationsFolder, 'index.js'))
     )
-    .map(dir => {
+    .map((dir) => {
       const translationFiles = fs
         .readdirSync(join(dir, ...pathToTranslationsFolder))
-        .filter(file => !file.includes('index.js') && !file.includes('en.json'))
-        .map(file => join(dir, ...pathToTranslationsFolder, file));
+        .filter((file) => !file.includes('index.js') && !file.includes('en.json'))
+        .map((file) => join(dir, ...pathToTranslationsFolder, file));
 
       return {
         translationFiles,
@@ -65,7 +65,7 @@ async function run() {
       };
     });
 
-  await Promise.all(pluginsWithTranslationFiles.map(t => orderTrads(t)));
+  await Promise.all(pluginsWithTranslationFiles.map((t) => orderTrads(t)));
 }
 
-run().catch(err => console.error(err));
+run().catch((err) => console.error(err));

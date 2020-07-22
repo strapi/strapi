@@ -30,7 +30,7 @@ describe('Test Graphql API End to End', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',
@@ -54,7 +54,7 @@ describe('Test Graphql API End to End', () => {
       posts: [],
     };
 
-    test.each(postsPayload)('Create Post %o', async post => {
+    test.each(postsPayload)('Create Post %o', async (post) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation createPost($input: createPostInput) {
@@ -271,15 +271,13 @@ describe('Test Graphql API End to End', () => {
       expect(res.body.data.posts.length).toBe(expected.length);
 
       // all the posts returned are in the expected array
-      res.body.data.posts.forEach(post => {
+      res.body.data.posts.forEach((post) => {
         expect(expected).toEqual(expect.arrayContaining([post]));
       });
 
       // all expected values are in the result
-      expected.forEach(expectedPost => {
-        expect(res.body.data.posts).toEqual(
-          expect.arrayContaining([expectedPost])
-        );
+      expected.forEach((expectedPost) => {
+        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
       });
     });
 

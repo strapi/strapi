@@ -53,17 +53,9 @@ export function onTab(editorState) {
   let newContentState;
 
   if (selection.isCollapsed()) {
-    newContentState = Modifier.insertText(
-      contentState,
-      selection,
-      DEFAULT_INDENTATION
-    );
+    newContentState = Modifier.insertText(contentState, selection, DEFAULT_INDENTATION);
   } else {
-    newContentState = Modifier.replaceText(
-      contentState,
-      selection,
-      DEFAULT_INDENTATION
-    );
+    newContentState = Modifier.replaceText(contentState, selection, DEFAULT_INDENTATION);
   }
 
   return EditorState.push(editorState, newContentState, 'insert-characters');

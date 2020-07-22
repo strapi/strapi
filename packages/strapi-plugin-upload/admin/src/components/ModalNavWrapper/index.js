@@ -11,7 +11,7 @@ import Wrapper from './Wrapper';
 const ModalNavWrapper = ({ children, links, renderRightContent, initialTab }) => {
   const [to, setTo] = useState(initialTab || links[0].to);
 
-  const handleGoTo = link => {
+  const handleGoTo = (link) => {
     setTo(link.to);
 
     if (link.onClick) {
@@ -25,7 +25,7 @@ const ModalNavWrapper = ({ children, links, renderRightContent, initialTab }) =>
         <BaselineAlignment />
         <Flex justifyContent="space-between">
           <Flex>
-            {links.map(link => {
+            {links.map((link) => {
               const isActive = link.to === to;
 
               return (

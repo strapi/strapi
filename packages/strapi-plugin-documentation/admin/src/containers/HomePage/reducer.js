@@ -39,7 +39,7 @@ function homePageReducer(state = initialState, action) {
       return state.update('versionToDelete', () => action.version);
     case SET_FORM_ERRORS:
       return state
-        .update('didCheckErrors', v => !v)
+        .update('didCheckErrors', (v) => !v)
         .update('formErrors', () => fromJS(action.errors));
     default:
       return state;

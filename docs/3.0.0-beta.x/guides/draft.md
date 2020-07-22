@@ -72,7 +72,7 @@ module.exports = {
       entities = await strapi.services.article.find(ctx.query);
     }
 
-    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.article }));
+    return entities.map((entity) => sanitizeEntity(entity, { model: strapi.models.article }));
   },
 };
 ```
@@ -106,7 +106,7 @@ module.exports = {
       entities = await strapi.services.article.find(ctx.query);
     }
 
-    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.article }));
+    return entities.map((entity) => sanitizeEntity(entity, { model: strapi.models.article }));
   },
 };
 ```

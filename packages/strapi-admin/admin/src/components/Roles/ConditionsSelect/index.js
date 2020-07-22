@@ -23,17 +23,17 @@ const ConditionsSelect = ({ onChange, value }) => {
   const { isSuperAdmin, permissionsLayout } = usePermissionsContext();
   const { formatMessage } = useIntl();
 
-  const handleChange = action => {
-    const hasValue = value.findIndex(option => option === action) !== -1;
+  const handleChange = (action) => {
+    const hasValue = value.findIndex((option) => option === action) !== -1;
 
     if (hasValue) {
-      onChange(value.filter(val => val !== action));
+      onChange(value.filter((val) => val !== action));
     } else {
       onChange([...value, action]);
     }
   };
 
-  const handleCategoryChange = categoryActions => {
+  const handleCategoryChange = (categoryActions) => {
     const missingActions = intersectionWith(
       value,
       categoryActions,

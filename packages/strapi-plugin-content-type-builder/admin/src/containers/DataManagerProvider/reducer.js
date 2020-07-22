@@ -17,7 +17,7 @@ const initialState = fromJS({
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeNature = originalNature => {
+const getOppositeNature = (originalNature) => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
   }
@@ -51,7 +51,7 @@ const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
   );
 
   // We need to add the nested components to the modifiedData.components as well
-  nestedComponents.forEach(componentUid => {
+  nestedComponents.forEach((componentUid) => {
     const isTemporary = state.getIn(['components', componentUid, 'isTemporary']) || false;
     const hasNestedComponentAlreadyBeenAdded =
       state.getIn(['modifiedData', 'components', componentUid]) !== undefined;
@@ -83,7 +83,7 @@ const reducer = (state, action) => {
         .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', name], () => {
           return fromJS(rest);
         })
-        .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], obj => {
+        .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], (obj) => {
           const type = get(rest, 'type', 'relation');
           const target = get(rest, 'target', null);
           const nature = get(rest, 'nature', null);
@@ -116,7 +116,7 @@ const reducer = (state, action) => {
 
           return obj;
         })
-        .updateIn(['modifiedData', 'components'], existingCompos => {
+        .updateIn(['modifiedData', 'components'], (existingCompos) => {
           if (action.shouldAddComponentToData) {
             return addComponentsToState(state, rest.component, existingCompos);
           }
@@ -129,7 +129,7 @@ const reducer = (state, action) => {
 
       return state.updateIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', dynamicZoneTarget, 'components'],
-        list => {
+        (list) => {
           return list.concat(componentsToAdd);
         }
       );
@@ -145,11 +145,11 @@ const reducer = (state, action) => {
       return state
         .updateIn(
           ['modifiedData', 'contentType', 'schema', 'attributes', dynamicZoneTarget, 'components'],
-          list => {
+          (list) => {
             return fromJS(makeUnique([...list.toJS(), ...newComponents]));
           }
         )
-        .updateIn(['modifiedData', 'components'], old => {
+        .updateIn(['modifiedData', 'components'], (old) => {
           const componentsSchema = newComponents.reduce((acc, current) => {
             return addComponentsToState(state, current, acc);
           }, old);
@@ -209,7 +209,7 @@ const reducer = (state, action) => {
         ? [forTarget]
         : [forTarget, targetUid];
 
-      return newState.updateIn(['modifiedData', ...pathToDataToEdit, 'schema'], obj => {
+      return newState.updateIn(['modifiedData', ...pathToDataToEdit, 'schema'], (obj) => {
         let oppositeAttributeNameToRemove = null;
         let oppositeAttributeNameToUpdate = null;
         let oppositeAttributeNameToCreateBecauseOfNatureChange = null;
@@ -393,15 +393,17 @@ const reducer = (state, action) => {
         }
       }
 
-      return state.removeIn(pathToAttributeToRemove).updateIn([...pathToAttributes], attributes => {
-        return attributes.keySeq().reduce((acc, current) => {
-          if (acc.getIn([current, 'targetField']) === attributeToRemoveName) {
-            return acc.removeIn([current, 'targetField']);
-          }
+      return state
+        .removeIn(pathToAttributeToRemove)
+        .updateIn([...pathToAttributes], (attributes) => {
+          return attributes.keySeq().reduce((acc, current) => {
+            if (acc.getIn([current, 'targetField']) === attributeToRemoveName) {
+              return acc.removeIn([current, 'targetField']);
+            }
 
-          return acc;
-        }, attributes);
-      });
+            return acc;
+          }, attributes);
+        });
     }
     case 'SET_MODIFIED_DATA': {
       let newState = state
@@ -426,7 +428,7 @@ const reducer = (state, action) => {
         uid,
       } = action;
 
-      let newState = state.updateIn(['modifiedData', schemaType], obj => {
+      let newState = state.updateIn(['modifiedData', schemaType], (obj) => {
         let updatedObj = obj
           .updateIn(['schema', 'name'], () => name)
           .updateIn(['schema', 'collectionName'], () => collectionName);
@@ -444,7 +446,7 @@ const reducer = (state, action) => {
       });
 
       if (schemaType === 'component') {
-        newState = newState.updateIn(['components'], obj => {
+        newState = newState.updateIn(['components'], (obj) => {
           return obj.update(uid, () => newState.getIn(['modifiedData', 'component']));
         });
       }

@@ -13,8 +13,8 @@ const Wrapper = styled.div`
   top: 0;
   left: 0;
   height: 100vh;
-  width: ${props => props.theme.main.sizes.leftMenu.width};
-  background: ${props => props.theme.main.colors.strapi['blue-darker']};
+  width: ${(props) => props.theme.main.sizes.leftMenu.width};
+  background: ${(props) => props.theme.main.colors.strapi['blue-darker']};
 
   /* scrollbar overrides */
   * {
@@ -28,15 +28,15 @@ const Wrapper = styled.div`
     }
 
     ::-webkit-scrollbar-thumb {
-      background-color: ${props => props.theme.main.colors.leftMenu['title-color']};
+      background-color: ${(props) => props.theme.main.colors.leftMenu['title-color']};
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background-color: ${props => props.theme.main.colors.leftMenu['link-color']};
+      background-color: ${(props) => props.theme.main.colors.leftMenu['link-color']};
     }
 
     /* firefox */
-    scrollbar-color: ${props => props.theme.main.colors.leftMenu['title-color']} transparent;
+    scrollbar-color: ${(props) => props.theme.main.colors.leftMenu['title-color']} transparent;
   }
 `;
 

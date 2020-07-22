@@ -17,20 +17,20 @@ const MenuList = ({ selectProps, ...rest }) => {
   const Component = components.MenuList;
   const [collapses, setCollapses] = useState({});
   const optionsGroupByCategory = groupBy(selectProps.options, 'category');
-  const toggleCollapse = collapseName => {
-    setCollapses(prevState => ({ ...prevState, [collapseName]: !collapses[collapseName] }));
+  const toggleCollapse = (collapseName) => {
+    setCollapses((prevState) => ({ ...prevState, [collapseName]: !collapses[collapseName] }));
   };
 
   const hasAction = useCallback(
-    condition => {
+    (condition) => {
       return selectProps.value.includes(condition.id);
     },
     [selectProps.value]
   );
 
   const hasSomeCategoryAction = useCallback(
-    category => {
-      const formattedCategories = category[1].map(condition => condition.id);
+    (category) => {
+      const formattedCategories = category[1].map((condition) => condition.id);
 
       const categoryActions = intersectionWith(formattedCategories, selectProps.value).length;
 
@@ -40,8 +40,8 @@ const MenuList = ({ selectProps, ...rest }) => {
   );
 
   const hasAllCategoryAction = useCallback(
-    category => {
-      const formattedCategories = category[1].map(condition => condition.id);
+    (category) => {
+      const formattedCategories = category[1].map((condition) => condition.id);
 
       const categoryActions = intersectionWith(formattedCategories, selectProps.value).length;
 
@@ -86,7 +86,7 @@ const MenuList = ({ selectProps, ...rest }) => {
                 </Flex>
               </div>
               <SubUl tag="ul" isOpen={collapses[category[0]]}>
-                {category[1].map(action => {
+                {category[1].map((action) => {
                   return (
                     <li key={action.id}>
                       <Flex>

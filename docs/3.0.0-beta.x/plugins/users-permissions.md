@@ -64,11 +64,11 @@ axios
       Authorization: `Bearer ${token}`,
     },
   })
-  .then(response => {
+  .then((response) => {
     // Handle success.
     console.log('Data: ', response.data);
   })
-  .catch(error => {
+  .catch((error) => {
     // Handle error.
     console.log('An error occurred:', error.response);
   });
@@ -91,13 +91,13 @@ axios
     email: 'user@strapi.io',
     password: 'strapiPassword',
   })
-  .then(response => {
+  .then((response) => {
     // Handle success.
     console.log('Well done!');
     console.log('User profile', response.data.user);
     console.log('User token', response.data.jwt);
   })
-  .catch(error => {
+  .catch((error) => {
     // Handle error.
     console.log('An error occurred:', error.response);
   });
@@ -120,13 +120,13 @@ axios
     identifier: 'user@strapi.io',
     password: 'strapiPassword',
   })
-  .then(response => {
+  .then((response) => {
     // Handle success.
     console.log('Well done!');
     console.log('User profile', response.data.user);
     console.log('User token', response.data.jwt);
   })
-  .catch(error => {
+  .catch((error) => {
     // Handle error.
     console.log('An error occurred:', error.response);
   });
@@ -480,11 +480,11 @@ axios
   .post('http://localhost:1337/auth/forgot-password', {
     email: 'user@strapi.io',
   })
-  .then(response => {
+  .then((response) => {
     // Handle success.
     console.log('Your user received an email');
   })
-  .catch(error => {
+  .catch((error) => {
     // Handle error.
     console.log('An error occurred:', error.response);
   });
@@ -513,11 +513,11 @@ axios
     password: 'myNewPassword',
     passwordConfirmation: 'myNewPassword',
   })
-  .then(response => {
+  .then((response) => {
     // Handle success.
     console.log("Your user's password has been changed.");
   })
-  .catch(error => {
+  .catch((error) => {
     // Handle error.
     console.log('An error occurred:', error.response);
   });
@@ -539,11 +539,11 @@ axios
   .post(`http://localhost:1337/auth/send-email-confirmation`, {
     email: 'user@strapi.io',
   })
-  .then(response => {
+  .then((response) => {
     // Handle success.
     console.log('Your user received an email');
   })
-  .catch(error => {
+  .catch((error) => {
     // Handle error.
     console.error('An error occured:', error.response);
   });
@@ -558,7 +558,7 @@ The `user` object is available to successfully authenticated requests.
 - The authenticated `user` object is a property of `ctx.state`.
 
 ```js
-create: async ctx => {
+create: async (ctx) => {
   const { id } = ctx.state.user;
 
   const depositObj = {

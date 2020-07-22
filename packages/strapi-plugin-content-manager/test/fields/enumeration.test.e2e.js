@@ -60,7 +60,7 @@ describe('Test type enumeration', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    res.body.forEach((entry) => {
       expect(['one', 'two'].includes(entry.field)).toBe(true);
     });
   });

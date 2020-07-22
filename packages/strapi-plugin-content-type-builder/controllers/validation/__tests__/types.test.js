@@ -111,7 +111,7 @@ describe('Type validators', () => {
       'datetime',
       'timestamp',
       'boolean',
-    ])('Target field cannot be %s', type => {
+    ])('Target field cannot be %s', (type) => {
       const attributes = {
         title: {
           type,
@@ -291,7 +291,7 @@ describe('Type validators', () => {
       expect(validator.isValidSync(attributes.img)).toBe(true);
     });
 
-    test.each(['images', 'files', 'videos'])('%s is an allowed types', type => {
+    test.each(['images', 'files', 'videos'])('%s is an allowed types', (type) => {
       const attributes = {
         img: {
           type: 'media',

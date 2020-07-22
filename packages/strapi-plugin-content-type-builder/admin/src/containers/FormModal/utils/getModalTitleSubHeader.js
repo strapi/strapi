@@ -1,6 +1,6 @@
 import getTrad from '../../../utils/getTrad';
 
-const getModalTitleSubHeader = state => {
+const getModalTitleSubHeader = (state) => {
   switch (state.modalType) {
     case 'chooseAttribute':
       return getTrad(

@@ -1,7 +1,7 @@
 import { get, pick } from 'lodash';
 import { contentManagerPermissionPrefix } from '../components/Roles/Permissions/utils/permissonsConstantsActions';
 
-const formatPermissionsFromApi = data => {
+const formatPermissionsFromApi = (data) => {
   const getFieldsPermissions = (permissionsAcc, permission) => {
     const fields = get(permission, ['fields'], []);
 

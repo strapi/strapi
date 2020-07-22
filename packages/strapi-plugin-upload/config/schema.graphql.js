@@ -35,11 +35,11 @@ module.exports = {
         description: 'Upload one file',
         resolverOf: 'plugins::upload.upload.upload',
         resolver: async (obj, { files: uploads, ...fields }) => {
-          const files = await Promise.all(uploads.map(upload => formatFile(upload, fields)));
+          const files = await Promise.all(uploads.map((upload) => formatFile(upload, fields)));
 
           const uploadService = strapi.plugins.upload.services.upload;
 
-          return Promise.all(files.map(file => uploadService.uploadFileAndPersist(file)));
+          return Promise.all(files.map((file) => uploadService.uploadFileAndPersist(file)));
         },
       },
     },

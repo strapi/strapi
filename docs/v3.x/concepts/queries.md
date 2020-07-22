@@ -345,7 +345,7 @@ Documentation: [https://bookshelfjs.org/](https://bookshelfjs.org/)
 ```js
 const result = await strapi
   .query('restaurant')
-  .model.query(qb => {
+  .model.query((qb) => {
     qb.where('id', 1);
   })
   .fetch();

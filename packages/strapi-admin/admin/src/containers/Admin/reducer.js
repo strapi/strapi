@@ -21,7 +21,7 @@ const initialState = {
 
 const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case GET_USER_PERMISSIONS: {
         draftState.isLoading = true;

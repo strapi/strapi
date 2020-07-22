@@ -116,7 +116,7 @@ Koa@1.x.x was based on generators whereas Koa@2.x.x is based on async functions.
 
 ```js
 module.exports = {
-  find: function*() {
+  find: function* () {
     try {
       this.body = yield Post.find(this.params);
     } catch (error) {
@@ -130,7 +130,7 @@ module.exports = {
 
 ```js
 module.exports = {
-  find: async ctx => {
+  find: async (ctx) => {
     ctx.body = await Post.find(this.params);
   },
 };
@@ -229,7 +229,7 @@ We were based on the popular Waterline ORM. As we said in our blog posts, Waterl
 
 ```js
 module.exports = {
-  find: function*() {
+  find: function* () {
     try {
       this.body = yield Post.find(this.params);
     } catch (error) {
@@ -237,7 +237,7 @@ module.exports = {
     }
   },
 
-  findOne: function*() {
+  findOne: function* () {
     try {
       this.body = yield Post.findOne(this.params);
     } catch (error) {
@@ -246,7 +246,7 @@ module.exports = {
   },
 
   // POST request
-  create: function*() {
+  create: function* () {
     try {
       this.body = yield Post.create(this.request.body);
     } catch (error) {
@@ -255,7 +255,7 @@ module.exports = {
   },
 
   // PUT request
-  update: function*() {
+  update: function* () {
     try {
       this.body = yield Post.update(this.params.id, this.request.body);
     } catch (error) {
@@ -264,7 +264,7 @@ module.exports = {
   },
 
   // DELETE request
-  delete: function*() {
+  delete: function* () {
     try {
       this.body = yield Post.destroy(this.params);
     } catch (error) {
@@ -278,28 +278,28 @@ module.exports = {
 
 ```js
 module.exports = {
-  find: async ctx => {
+  find: async (ctx) => {
     // Bookshelf
     ctx.body = await Post.forge(this.params).fetchAll();
     // Mongoose
     ctx.body = await Post.find(this.params);
   },
 
-  findOne: async ctx => {
+  findOne: async (ctx) => {
     // Bookshelf
     ctx.body = await Post.forge(this.params).fetch();
     // Mongoose
     ctx.body = await Post.findOne(this.params);
   },
 
-  create: async ctx => {
+  create: async (ctx) => {
     // Bookshelf
     ctx.body = await Post.forge(this.request.body).save();
     // Mongoose
     ctx.body = await Post.create(this.request.body);
   },
 
-  update: async ctx => {
+  update: async (ctx) => {
     // Bookshelf
     ctx.body = await Post.forge({ id: 1234 }).save(this.request.body, {
       patch: true,
@@ -308,7 +308,7 @@ module.exports = {
     ctx.body = await Post.update({ id: 1234 }, this.request.body);
   },
 
-  delete: async ctx => {
+  delete: async (ctx) => {
     // Bookshelf
     ctx.body = await Post.forge({ id: 1234 }).destroy();
     // Mongoose
@@ -374,7 +374,7 @@ Boom is deeply integrated into the core which allows you to enjoy the entire [Bo
 ```js
 module.exports = {
   // GET request
-  find: function*() {
+  find: function* () {
     try {
       const posts = yield Post.find(this.params);
 
@@ -396,7 +396,7 @@ module.exports = {
 ```js
 module.exports = {
   // GET request
-  find: async ctx => {
+  find: async (ctx) => {
     const posts = await Post.find(this.params);
 
     if (post.length === 0) {

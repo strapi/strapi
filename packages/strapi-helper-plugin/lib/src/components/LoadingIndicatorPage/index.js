@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Loader from './Loader';
 
-const LoadingIndicatorPage = props => {
+const LoadingIndicatorPage = (props) => {
   if (props.error) {
     return (
       <div style={{ padding: 40 }}>
@@ -18,9 +18,7 @@ const LoadingIndicatorPage = props => {
         </h2>
         <p>{props.error && props.error.toString()}</p>
         <br />
-        <details style={{ whiteSpace: 'pre-wrap' }}>
-          {props.error.stack}
-        </details>
+        <details style={{ whiteSpace: 'pre-wrap' }}>{props.error.stack}</details>
       </div>
     );
   }

@@ -32,10 +32,10 @@ const RepeatableComponent = ({
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
 
   const componentErrorKeys = Object.keys(formErrors)
-    .filter(errorKey => {
+    .filter((errorKey) => {
       return take(errorKey.split('.'), isNested ? 3 : 1).join('.') === name;
     })
-    .map(errorKey => {
+    .map((errorKey) => {
       return errorKey
         .split('.')
         .slice(0, name.split('.').length + 1)
@@ -49,24 +49,24 @@ const RepeatableComponent = ({
     init(initialState, componentValue)
   );
   const { collapses } = state.toJS();
-  const toggleCollapses = index => {
+  const toggleCollapses = (index) => {
     dispatch({
       type: 'TOGGLE_COLLAPSE',
       index,
     });
   };
   const missingComponentsValue = min - componentValueLength;
-  const errorsArray = componentErrorKeys.map(key => get(formErrors, [key, 'id'], ''));
+  const errorsArray = componentErrorKeys.map((key) => get(formErrors, [key, 'id'], ''));
 
   const hasMinError =
-    get(errorsArray, [0], '').includes('min') && !collapses.some(obj => obj.isOpen === true);
+    get(errorsArray, [0], '').includes('min') && !collapses.some((obj) => obj.isOpen === true);
 
   return (
     <div>
       {componentValueLength === 0 && (
         <EmptyComponent hasMinError={hasMinError}>
           <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
-            {msg => <p>{msg}</p>}
+            {(msg) => <p>{msg}</p>}
           </FormattedMessage>
         </EmptyComponent>
       )}

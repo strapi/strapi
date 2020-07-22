@@ -33,7 +33,7 @@ function ListRow({
     },
     {
       icon: canDelete ? <FontAwesomeIcon icon={faTrashAlt} /> : null,
-      onClick: e => {
+      onClick: (e) => {
         e.stopPropagation();
         onDeleteCLick(id);
       },
@@ -55,7 +55,7 @@ function ListRow({
           <Checkbox
             name={name}
             value={isChecked}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             onChange={({ target: { value } }) => onCheckChange(value, id)}
           />
         </td>
@@ -67,7 +67,7 @@ function ListRow({
         <p title={url}>{url}</p>
       </td>
       <td className="switchWrapper">
-        <div onClick={e => e.stopPropagation()} role="button" aria-hidden="true">
+        <div onClick={(e) => e.stopPropagation()} role="button" aria-hidden="true">
           <Switch
             disabled={!canUpdate}
             name={name}

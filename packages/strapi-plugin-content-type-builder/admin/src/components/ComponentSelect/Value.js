@@ -20,12 +20,7 @@ const Value = ({ children, ...props }) => {
     schema: { name },
   } = selectedComponent;
   const {
-    selectProps: {
-      componentCategory,
-      componentName,
-      isCreatingComponent,
-      isMultiple,
-    },
+    selectProps: { componentCategory, componentName, isCreatingComponent, isMultiple },
   } = props;
 
   const displayedCategory = isCreatingComponent ? componentCategory : category;
@@ -50,7 +45,7 @@ const Value = ({ children, ...props }) => {
       )}
       {isMultiple && (
         <FormattedMessage id={message} values={{ number: valueLength }}>
-          {msg => <span style={style}>{msg}</span>}
+          {(msg) => <span style={style}>{msg}</span>}
         </FormattedMessage>
       )}
     </SingleValue>
@@ -68,10 +63,7 @@ Value.defaultProps = {
 };
 
 Value.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string),
-  ]),
+  children: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   selectProps: PropTypes.shape({
     componentCategory: PropTypes.string,
     componentName: PropTypes.string,

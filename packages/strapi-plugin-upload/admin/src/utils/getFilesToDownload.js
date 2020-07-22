@@ -1,5 +1,5 @@
-const getFilesToDownload = files => {
-  return files.filter(file => file.isDownloading === true);
+const getFilesToDownload = (files) => {
+  return files.filter((file) => file.isDownloading === true);
 };
 
 export default getFilesToDownload;

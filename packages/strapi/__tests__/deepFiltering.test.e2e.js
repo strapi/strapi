@@ -67,7 +67,7 @@ async function createFixtures() {
     data.paniniCards.push(res.body);
   }
 
-  const createCollector = async collector => {
+  const createCollector = async (collector) => {
     const res = await rq({
       method: 'POST',
       url: '/collectors',

@@ -30,7 +30,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'ADD_FILES_TO_UPLOAD': {
         draftState.filesToUpload = [
@@ -74,7 +74,7 @@ const reducer = (state, action) =>
       }
       case 'EDIT_EXISTING_FILE': {
         const index = draftState.selectedFiles.findIndex(
-          selectedFile => selectedFile.id === action.file.id
+          (selectedFile) => selectedFile.id === action.file.id
         );
 
         if (index !== -1) {
@@ -83,7 +83,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'FILE_DOWNLOADED': {
-        const index = state.filesToUpload.findIndex(file => file.tempId === action.fileTempId);
+        const index = state.filesToUpload.findIndex((file) => file.tempId === action.fileTempId);
 
         draftState.filesToUpload[index] = {
           ...draftState.filesToUpload[index],
@@ -130,19 +130,19 @@ const reducer = (state, action) =>
       case 'ON_FILE_SELECTION': {
         const { id } = action;
         const stringId = toString(id);
-        const fileIndex = state.selectedFiles.findIndex(file => toString(file.id) === stringId);
+        const fileIndex = state.selectedFiles.findIndex((file) => toString(file.id) === stringId);
 
         if (fileIndex !== -1) {
           draftState.selectedFiles.splice(fileIndex, 1);
           break;
         }
-        const fileToStore = state.files.find(file => file.id.toString() === stringId);
+        const fileToStore = state.files.find((file) => file.id.toString() === stringId);
 
         if (fileToStore) {
           draftState.selectedFiles.push(fileToStore);
         }
         // Clean
-        draftState.selectedFiles = draftState.selectedFiles.filter(file => file && file.id);
+        draftState.selectedFiles = draftState.selectedFiles.filter((file) => file && file.id);
         break;
       }
       case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
@@ -161,7 +161,7 @@ const reducer = (state, action) =>
         }
 
         const index = draftState.filesToUpload.findIndex(
-          fileToUpload => fileToUpload.originalIndex === action.fileIndex
+          (fileToUpload) => fileToUpload.originalIndex === action.fileIndex
         );
         draftState.filesToUpload.splice(index, 1);
         break;
@@ -198,7 +198,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'SET_FILE_TO_DOWNLOAD_ERROR': {
-        const index = state.filesToUpload.findIndex(file => file.tempId === action.fileTempId);
+        const index = state.filesToUpload.findIndex((file) => file.tempId === action.fileTempId);
 
         draftState.filesToUpload[index] = {
           ...draftState.filesToUpload[index],
@@ -211,7 +211,7 @@ const reducer = (state, action) =>
       }
       case 'SET_FILE_TO_EDIT': {
         draftState.fileToEdit = formatFileForEditing(
-          state.files.find(file => file.id.toString() === action.fileId.toString())
+          state.files.find((file) => file.id.toString() === action.fileId.toString())
         );
         break;
       }
@@ -268,7 +268,7 @@ const reducer = (state, action) =>
       case 'TOGGLE_SELECT_ALL': {
         const allowedFiles =
           state.allowedTypes.length > 0
-            ? state.files.filter(file => state.allowedTypes.includes(getType(file.mime)))
+            ? state.files.filter((file) => state.allowedTypes.includes(getType(file.mime)))
             : state.files;
         const comparator = (first, second) => first.id === second.id;
         const isSelected =

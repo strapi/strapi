@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import pluginId from '../pluginId';
 
-const getFileModelTimestamps = plugins => {
+const getFileModelTimestamps = (plugins) => {
   const timestamps = get(
     plugins,
     [pluginId, 'fileModel', 'schema', 'options', 'timestamps'],

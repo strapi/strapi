@@ -72,7 +72,7 @@ export const getDefaultSelectionOffsets = (
   content,
   startReplacer,
   endReplacer,
-  initPosition = 0,
+  initPosition = 0
 ) => ({
   anchorOffset: initPosition + content.length - trimStart(content, startReplacer).length,
   focusOffset: initPosition + trimEnd(content, endReplacer).length,

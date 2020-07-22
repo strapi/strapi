@@ -36,7 +36,7 @@ const Button = ({
   style,
   text,
 }) => {
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.preventDefault();
 
     handlers[handler](text, style);

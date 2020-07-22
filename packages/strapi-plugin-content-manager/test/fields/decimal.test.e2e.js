@@ -66,7 +66,7 @@ describe('Test type decimal', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    res.body.forEach((entry) => {
       expect(entry.field).toEqual(expect.any(Number));
     });
   });

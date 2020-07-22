@@ -7,9 +7,9 @@ const generateNew = require('../../packages/strapi-generate-new/lib/generate-new
  * Delete the testApp folder
  * @param {string} appName - name of the app / folder where the app is located
  */
-const cleanTestApp = appName => {
+const cleanTestApp = (appName) => {
   return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appName), err => {
+    rimraf(path.resolve(appName), (err) => {
       if (err) reject(err);
       resolve();
     });
@@ -65,7 +65,7 @@ const generateTestApp = async ({ appName, database }) => {
  * @param {string} options.appName - Name of the app / folder in which run the start script
  */
 const startTestApp = ({ appName }) => {
-  return execa.shell('BROWSER=none strapi develop --no-build', {
+  return execa.command('BROWSER=none strapi develop --no-build', {
     stdio: 'inherit',
     cwd: path.resolve(appName),
   });

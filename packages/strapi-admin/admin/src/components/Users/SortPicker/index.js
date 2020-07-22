@@ -8,10 +8,10 @@ const SortPicker = ({ onChange, value }) => {
   return (
     <Picker
       renderButtonContent={Button}
-      renderSectionContent={onToggle => (
+      renderSectionContent={(onToggle) => (
         <List
           selectedItem={value}
-          onClick={e => {
+          onClick={(e) => {
             onChange(e);
             onToggle();
           }}

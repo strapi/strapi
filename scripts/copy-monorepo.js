@@ -8,25 +8,16 @@ const watch = (source, dest, { runOnce, quiet }) => {
 
   chokidar
     .watch(source, {
-      ignored: [
-        filePath => ignored.filter(reg => reg.test(filePath)).length > 0,
-      ],
+      ignored: [(filePath) => ignored.filter((reg) => reg.test(filePath)).length > 0],
     })
     .on('all', (event, filePath) => {
       if (['change', 'add'].includes(event)) {
-        const newPath = path.join(
-          dest,
-          'node_modules',
-          path.relative(source, filePath)
-        );
+        const newPath = path.join(dest, 'node_modules', path.relative(source, filePath));
         fs.copy(filePath, newPath);
 
         if (!quiet) {
           console.log(
-            `Copied ${filePath} to ${path.join(
-              'node_modules',
-              path.relative(source, filePath)
-            )}`
+            `Copied ${filePath} to ${path.join('node_modules', path.relative(source, filePath))}`
           );
         }
       }
@@ -42,10 +33,10 @@ yargs
   .command(
     '$0 <dest>',
     'default command',
-    yargs => {
+    (yargs) => {
       yargs.boolean('run-once').boolean('quiet');
     },
-    argv => {
+    (argv) => {
       const source = path.resolve(__dirname, '..', 'packages');
       const dest = path.resolve(process.cwd(), argv.dest);
       watch(source, dest, argv);

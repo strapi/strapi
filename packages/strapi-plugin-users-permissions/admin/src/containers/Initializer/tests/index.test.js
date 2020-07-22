@@ -12,10 +12,6 @@ describe('<Initializer />', () => {
     const props = { updatePlugin: jest.fn() };
     mount(<Initializer {...props} />);
 
-    expect(props.updatePlugin).toHaveBeenCalledWith(
-      'users-permissions',
-      'isReady',
-      true
-    );
+    expect(props.updatePlugin).toHaveBeenCalledWith('users-permissions', 'isReady', true);
   });
 });

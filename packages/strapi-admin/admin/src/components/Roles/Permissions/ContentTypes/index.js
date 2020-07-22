@@ -13,7 +13,9 @@ const ContentTypesPermissions = ({ contentTypes, allContentTypesAttributes }) =>
 
   useEffect(() => {
     if (allContentTypesAttributes.length > 0) {
-      const requiredAttributes = allContentTypesAttributes.filter(attribute => attribute.required);
+      const requiredAttributes = allContentTypesAttributes.filter(
+        (attribute) => attribute.required
+      );
 
       onSetAttributesPermissionsRef.current({
         attributes: requiredAttributes,

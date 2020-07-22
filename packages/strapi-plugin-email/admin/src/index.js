@@ -10,7 +10,7 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {

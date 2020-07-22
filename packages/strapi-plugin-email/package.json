@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "rimraf": "3.0.0",
-    "strapi-helper-plugin/lib/src": "3.1.0"
+    "strapi-helper-plugin": "3.1.0"
   },
   "author": {
     "name": "Strapi team",

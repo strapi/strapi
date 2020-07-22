@@ -16,7 +16,7 @@ import InputJSON from '../InputJSON';
 import Wrapper from './Wrapper';
 
 class InputJSONWithErrors extends React.Component {
-  handleChange = e => {
+  handleChange = (e) => {
     this.props.onChange(e);
   };
 
@@ -44,20 +44,13 @@ class InputJSONWithErrors extends React.Component {
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
     return (
-      <Error
-        inputError={inputError}
-        name={name}
-        type="text"
-        validations={validations}
-      >
+      <Error inputError={inputError} name={name} type="text" validations={validations}>
         {({ canCheck, onBlur, error, dispatch }) => {
           const hasError = error && error !== null;
 
           return (
             <Wrapper
-              className={`${cn(!isEmpty(className) && className)} ${
-                hasError ? 'bordered' : ''
-              }`}
+              className={`${cn(!isEmpty(className) && className)} ${hasError ? 'bordered' : ''}`}
             >
               <Label htmlFor={name}>{label}</Label>
               <InputJSON
@@ -68,7 +61,7 @@ class InputJSONWithErrors extends React.Component {
                 deactivateErrorHighlight={deactivateErrorHighlight}
                 name={name}
                 onBlur={isFunction(handleBlur) ? handleBlur : onBlur}
-                onChange={e => {
+                onChange={(e) => {
                   if (!canCheck) {
                     dispatch({
                       type: 'SET_CHECK',
@@ -87,9 +80,7 @@ class InputJSONWithErrors extends React.Component {
                 tabIndex={tabIndex}
                 value={value}
               />
-              {!hasError && inputDescription && (
-                <Description>{inputDescription}</Description>
-              )}
+              {!hasError && inputDescription && <Description>{inputDescription}</Description>}
               {hasError && <ErrorMessage>{error}</ErrorMessage>}
             </Wrapper>
           );

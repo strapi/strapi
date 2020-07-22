@@ -11,7 +11,7 @@ function InputCheckbox({ name, onChange, value }) {
   return (
     <Div
       className="col-12"
-      onClick={e => {
+      onClick={(e) => {
         e.stopPropagation();
       }}
     >

@@ -1,6 +1,6 @@
 import pluginId from '../../../pluginId';
 
-const getInputProps = fieldName => {
+const getInputProps = (fieldName) => {
   let type;
 
   switch (fieldName) {

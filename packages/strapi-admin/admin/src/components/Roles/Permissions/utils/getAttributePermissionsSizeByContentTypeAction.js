@@ -7,8 +7,8 @@ const getAttributePermissionsSizeByContentTypeAction = (
 ) => {
   const permissionsOccurencesByAction = Object.values(
     get(contentTypesPermissions, [subject, 'attributes'], {})
-  ).filter(attribute => {
-    return get(attribute, 'actions', []).findIndex(permAction => permAction === action) !== -1;
+  ).filter((attribute) => {
+    return get(attribute, 'actions', []).findIndex((permAction) => permAction === action) !== -1;
   });
 
   return permissionsOccurencesByAction.length;

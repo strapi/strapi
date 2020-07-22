@@ -1,10 +1,6 @@
 import { get, isEmpty, isObject } from 'lodash';
 
-export default function checkFormValidity(
-  settingType,
-  data,
-  providerToEdit = ''
-) {
+export default function checkFormValidity(settingType, data, providerToEdit = '') {
   const formErrors = [];
 
   switch (settingType) {
@@ -12,7 +8,7 @@ export default function checkFormValidity(
       const isProviderEnabled = get(data, 'enabled');
       const keys = providerToEdit === 'email' ? [] : ['key', 'secret'];
 
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (isProviderEnabled && isEmpty(get(data, key))) {
           formErrors.push({
             name: key,
@@ -23,9 +19,9 @@ export default function checkFormValidity(
       break;
     }
     case 'email-templates': {
-      Object.keys(data.options).forEach(value => {
+      Object.keys(data.options).forEach((value) => {
         if (isObject(data.options[value])) {
-          Object.keys(data.options[value]).forEach(subValue => {
+          Object.keys(data.options[value]).forEach((subValue) => {
             if (isEmpty(get(data, ['options', value, subValue]))) {
               formErrors.push({
                 name: `options.${value}.${subValue}`,
@@ -35,10 +31,7 @@ export default function checkFormValidity(
           });
         }
 
-        if (
-          value !== 'response_email' &&
-          isEmpty(get(data, ['options', value]))
-        ) {
+        if (value !== 'response_email' && isEmpty(get(data, ['options', value]))) {
           formErrors.push({
             name: `options.${value}`,
             errors: [{ id: 'components.Input.error.validation.required' }],

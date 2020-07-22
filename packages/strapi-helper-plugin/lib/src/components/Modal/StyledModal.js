@@ -14,8 +14,7 @@ const StyledModal = styled(Modal)`
     border: none;
     border-radius: 2px;
     background-color: white;
-    overflow: ${({ withoverflow }) =>
-      withoverflow === 'true' ? 'visible' : 'hidden'};
+    overflow: ${({ withoverflow }) => (withoverflow === 'true' ? 'visible' : 'hidden')};
   }
 `;
 

@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { unformatBytes } from '../../../utils';
 
-const formatFilter = filter => {
+const formatFilter = (filter) => {
   const { name, value } = filter;
 
   if (value._isAMomentObject === true) {

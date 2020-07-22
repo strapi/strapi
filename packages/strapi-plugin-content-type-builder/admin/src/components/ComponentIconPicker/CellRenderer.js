@@ -10,12 +10,7 @@ const CellRenderer = ({ icon, name, onChange, style, value }) => {
   };
 
   return (
-    <Cell
-      className="cell"
-      style={style}
-      isSelected={isSelected}
-      onClick={handleClick}
-    >
+    <Cell className="cell" style={style} isSelected={isSelected} onClick={handleClick}>
       <FontAwesomeIcon icon={icon} />
     </Cell>
   );

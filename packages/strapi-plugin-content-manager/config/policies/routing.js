@@ -12,16 +12,9 @@ module.exports = async (ctx, next) => {
     return ctx.send({ error: 'contentType.notFound' }, 404);
   }
 
-  const target =
-    ct.plugin === 'admin' ? strapi.admin : strapi.plugins[ct.plugin];
+  const target = ct.plugin === 'admin' ? strapi.admin : strapi.plugins[ct.plugin];
 
-  const actionPath = [
-    'config',
-    'layout',
-    ct.modelName,
-    'actions',
-    ctx.request.route.action,
-  ];
+  const actionPath = ['config', 'layout', ct.modelName, 'actions', ctx.request.route.action];
 
   if (_.has(target, actionPath)) {
     const [controller, action] = _.get(target, actionPath, []).split('.');

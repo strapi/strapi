@@ -36,7 +36,7 @@ const ContentTypesAttributes = ({ attributes, contentType, withPadding }) => {
             })}
           </Text>
         </AttributesTitleWrapper>
-        {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
+        {ATTRIBUTES_PERMISSIONS_ACTIONS.map((action) => (
           <ActionTitle key={action}>
             <Text textTransform="capitalize" fontWeight="bold">
               {formatMessage({
@@ -48,7 +48,7 @@ const ContentTypesAttributes = ({ attributes, contentType, withPadding }) => {
         ))}
       </Flex>
       <Padded left size="md">
-        {attributes.map(attribute => (
+        {attributes.map((attribute) => (
           <AttributeRow
             contentType={contentType}
             attribute={attribute}

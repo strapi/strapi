@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { InputText, Select, Toggle } from '@buffetjs/core';
 import { formatInputValue } from './utils';
 
-const getInputType = type => {
+const getInputType = (type) => {
   switch (type) {
     case 'toggle':
       return Toggle;

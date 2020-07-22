@@ -1,4 +1,4 @@
-const getHeaderLabel = count => {
+const getHeaderLabel = (count) => {
   let headerLabel = 'header.content.assets-single';
 
   if (count === 0) {

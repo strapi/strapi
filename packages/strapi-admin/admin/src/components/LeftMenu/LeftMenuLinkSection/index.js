@@ -51,7 +51,7 @@ const LeftMenuLinksSection = ({
         ) : (
           <EmptyLinksListWrapper>
             <FormattedMessage id={emptyLinksListMessage} defaultMessage="No plugins installed yet">
-              {msg => <EmptyLinksList>{msg}</EmptyLinksList>}
+              {(msg) => <EmptyLinksList>{msg}</EmptyLinksList>}
             </FormattedMessage>
           </EmptyLinksListWrapper>
         )}

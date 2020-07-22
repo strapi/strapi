@@ -13,7 +13,7 @@ import { getAllAttributes, formatPermissionsLayout } from './utils';
 
 const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, ref) => {
   const { singleTypes, collectionTypes, components } = useModels();
-  const [state, dispatch] = useReducer(reducer, initialState, state =>
+  const [state, dispatch] = useReducer(reducer, initialState, (state) =>
     init(state, permissionsLayout, rolePermissions, role)
   );
 
@@ -134,7 +134,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     });
   };
 
-  const handlePluginSettingPermission = action => {
+  const handlePluginSettingPermission = (action) => {
     dispatch({
       type: 'ON_PLUGIN_SETTING_ACTION',
       action,
@@ -157,7 +157,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     });
   };
 
-  const handlePluginSettingConditionsSelect = conditions => {
+  const handlePluginSettingConditionsSelect = (conditions) => {
     dispatch({
       type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
       conditions,

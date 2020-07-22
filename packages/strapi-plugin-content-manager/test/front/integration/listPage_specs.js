@@ -6,12 +6,12 @@ const backendUrl = Cypress.config('backendUrl');
 describe('Testing Content Manager ListPages', function() {
   before(() => {
     cy.login()
-      .then(data => {
+      .then((data) => {
         jwt = data.jwt;
 
         return cy.createCTMApis(data.jwt).then(() => jwt);
       })
-      .then(jwt => {
+      .then((jwt) => {
         cy.seedData('product', jwt);
       })
       .wait(1000);
@@ -19,15 +19,13 @@ describe('Testing Content Manager ListPages', function() {
 
   after(() => {
     cy.deleteAllModelData('product', jwt);
-    cy.deleteApi('tag', jwt)
-      .deleteApi('category', jwt)
-      .deleteApi('product', jwt);
+    cy.deleteApi('tag', jwt).deleteApi('category', jwt).deleteApi('product', jwt);
   });
 
   context('Testing sorting options', () => {
     beforeEach(() => {
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
         })
         .visit('/admin')
@@ -35,9 +33,7 @@ describe('Testing Content Manager ListPages', function() {
     });
 
     it('Should have the Id default sort', () => {
-      cy.get(
-        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-      )
+      cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"]')
         .click()
         .wait(frontLoadingDelay);
 
@@ -60,9 +56,7 @@ describe('Testing Content Manager ListPages', function() {
         `${backendUrl}/content-manager/explorer/product?_limit=10&_start=0&_sort=name:DESC&source=content-manager`
       ).as('getSortByNameDESC');
 
-      cy.get(
-        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-      )
+      cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"]')
         .click()
         .wait('@getProduct')
         .get('tr > th:nth-child(3) > span')
@@ -108,9 +102,7 @@ describe('Testing Content Manager ListPages', function() {
         .get('#ctaConfirm')
         .click()
         .wait(frontLoadingDelay)
-        .get(
-          'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-        )
+        .get('a[href="/admin/plugins/content-manager/product?source=content-manager"]')
         .click()
         .wait(frontLoadingDelay)
         .get('tr > th:nth-child(3) > span')
@@ -136,9 +128,7 @@ describe('Testing Content Manager ListPages', function() {
         .get('#ctaConfirm')
         .click()
         .wait(frontLoadingDelay)
-        .get(
-          'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-        )
+        .get('a[href="/admin/plugins/content-manager/product?source=content-manager"]')
         .click()
         .wait(frontLoadingDelay)
         .get('tr > th:nth-child(2) > span')
@@ -151,7 +141,7 @@ describe('Testing Content Manager ListPages', function() {
   context('Testing filters', () => {
     beforeEach(() => {
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
         })
         .visit('/admin')
@@ -159,9 +149,7 @@ describe('Testing Content Manager ListPages', function() {
     });
 
     it('Should apply filters for product data', () => {
-      cy.get(
-        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-      )
+      cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"]')
         .click()
         .wait(frontLoadingDelay);
       cy.get('button#addFilterCTA')

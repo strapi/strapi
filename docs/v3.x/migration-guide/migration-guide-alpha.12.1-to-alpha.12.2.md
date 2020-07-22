@@ -97,11 +97,11 @@ edit: async (params, values) => {
 For `remove` function:
 
 ```js
-remove: async params => {
+remove: async (params) => {
   // Select field to populate.
   const populate = Article.associations
-    .filter(ast => ast.autoPopulate !== false)
-    .map(ast => ast.alias)
+    .filter((ast) => ast.autoPopulate !== false)
+    .map((ast) => ast.alias)
     .join(' ');
 
   // Note: To get the full response of Mongo, use the `remove()` method
@@ -113,7 +113,7 @@ remove: async params => {
   }
 
   await Promise.all(
-    Article.associations.map(async association => {
+    Article.associations.map(async (association) => {
       const search =
         _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
           ? { [association.via]: data._id }

@@ -23,7 +23,7 @@ const LeftMenuLinkHeader = ({ section, searchable, setSearch, search }) => {
   }, [ref, showSearch]);
 
   const toggleSearch = () => {
-    setShowSearch(prev => !prev);
+    setShowSearch((prev) => !prev);
   };
 
   const handleChange = ({ target: { value } }) => {
@@ -52,7 +52,7 @@ const LeftMenuLinkHeader = ({ section, searchable, setSearch, search }) => {
             <FontAwesomeIcon style={{ fontSize: 12 }} icon="search" />
           </div>
           <FormattedMessage id="components.Search.placeholder">
-            {message => (
+            {(message) => (
               <Search ref={ref} onChange={handleChange} value={search} placeholder={message} />
             )}
           </FormattedMessage>

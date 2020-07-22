@@ -16,7 +16,7 @@ class ExtendComponent extends React.Component {
         const injectedComponents = plugin
           .toJS()
           .injectedComponents.filter(
-            compo =>
+            (compo) =>
               compo.plugin === this.props.plugin &&
               compo.container === this.props.container &&
               compo.area === this.props.area

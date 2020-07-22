@@ -8,16 +8,16 @@ export const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_SELECTION': {
         const { id } = action;
-        const roleIndex = state.selectedRoles.findIndex(roleId => roleId === id);
+        const roleIndex = state.selectedRoles.findIndex((roleId) => roleId === id);
 
         if (roleIndex === -1) {
           draftState.selectedRoles.push(id);
         } else {
-          draftState.selectedRoles = state.selectedRoles.filter(roleId => roleId !== id);
+          draftState.selectedRoles = state.selectedRoles.filter((roleId) => roleId !== id);
         }
         break;
       }

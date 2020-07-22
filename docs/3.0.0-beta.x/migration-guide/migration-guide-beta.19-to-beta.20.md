@@ -75,19 +75,19 @@ require('strapi')()
   .then(() => {
     const models = {};
 
-    Object.keys(strapi.api).forEach(apiName => {
-      Object.values(strapi.api[apiName].models || {}).forEach(model => {
+    Object.keys(strapi.api).forEach((apiName) => {
+      Object.values(strapi.api[apiName].models || {}).forEach((model) => {
         models[model.globalId] = formatModel(model);
       });
     });
 
-    Object.keys(strapi.plugins).forEach(pluginName => {
-      Object.values(strapi.plugins[pluginName].models || {}).forEach(model => {
+    Object.keys(strapi.plugins).forEach((pluginName) => {
+      Object.values(strapi.plugins[pluginName].models || {}).forEach((model) => {
         models[model.globalId] = formatModel(model);
       });
     });
 
-    Object.values(strapi.components).forEach(model => {
+    Object.values(strapi.components).forEach((model) => {
       models[model.globalId] = formatModel(model);
     });
 
@@ -161,7 +161,7 @@ var fileCursor = db.getCollection('upload_file').find({});
 
 while (fileCursor.hasNext()) {
   var el = fileCursor.next();
-  el.related.forEach(function(fileRef) {
+  el.related.forEach(function (fileRef) {
     var model = models[fileRef.kind];
 
     if (!model) {

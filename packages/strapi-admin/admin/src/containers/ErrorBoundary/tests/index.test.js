@@ -14,7 +14,7 @@ describe('<ErrorBoundary />', () => {
     const wrapper = shallow(
       <ErrorBoundary>
         <Child />
-      </ErrorBoundary>,
+      </ErrorBoundary>
     );
 
     expect(wrapper.find(Child)).toHaveLength(1);

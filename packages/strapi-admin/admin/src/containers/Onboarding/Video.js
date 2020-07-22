@@ -45,7 +45,7 @@ class OnboardingVideo extends React.Component {
     }
   };
 
-  handleCurrentTimeChange = curr => {
+  handleCurrentTimeChange = (curr) => {
     this.props.getVideoCurrentTime(this.props.id, curr, this.props.video.duration);
   };
 

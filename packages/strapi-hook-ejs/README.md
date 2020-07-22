@@ -34,7 +34,7 @@ Insert code in your controller to render a view.
 
 ```javascript
 module.exports = {
-  home: async ctx => {
+  home: async (ctx) => {
     return ctx.render('home', {
       title: 'My app title',
     });

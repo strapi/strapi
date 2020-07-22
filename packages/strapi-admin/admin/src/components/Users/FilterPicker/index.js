@@ -9,7 +9,7 @@ const FilterPicker = ({ onChange }) => {
   return (
     <Picker
       renderButtonContent={Button}
-      renderSectionContent={onToggle => (
+      renderSectionContent={(onToggle) => (
         <Card
           onChange={({ value, ...rest }) => {
             if (value !== '') {

@@ -49,7 +49,7 @@ const Banner = forwardRef(
           </div>
 
           <FormattedMessage id={`${pluginId}.containers.Edit.pluginHeader.title.new`}>
-            {msg => {
+            {(msg) => {
               return <div style={{ display }}>{displayedValue || msg}</div>;
             }}
           </FormattedMessage>
@@ -59,7 +59,7 @@ const Banner = forwardRef(
                 <div
                   className="trash-icon"
                   style={{ marginRight: 10, padding: '0 5px' }}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     onClickRemove();

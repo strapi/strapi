@@ -1,4 +1,4 @@
-const generateRows = numberOfRows => {
+const generateRows = (numberOfRows) => {
   const rows = Array.from({ length: numberOfRows }, (_, i) => {
     return {
       key: i,

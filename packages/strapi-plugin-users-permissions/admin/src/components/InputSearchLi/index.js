@@ -29,7 +29,7 @@ function InputSearchLi({ onClick, isAdding, item }) {
           </a>
         </div>
         <div
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
             onClick(item);

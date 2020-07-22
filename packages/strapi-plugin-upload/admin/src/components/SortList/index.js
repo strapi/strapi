@@ -7,7 +7,7 @@ import SortListItem from '../SortListItem';
 const SortList = ({ list, onClick, selectedItem }) => {
   return (
     <Wrapper>
-      {Object.keys(list).map(item => {
+      {Object.keys(list).map((item) => {
         return (
           <SortListItem
             key={item}

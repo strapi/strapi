@@ -1,4 +1,4 @@
-const getFilterType = type => {
+const getFilterType = (type) => {
   switch (type) {
     case 'string':
     case 'text':

@@ -7,7 +7,7 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 
 // ...
 
-const Foo = props => {
+const Foo = (props) => {
   const sections = [
     {
       name: 'section 1',
@@ -52,7 +52,7 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 
 // ...
 
-const addCustomSection = sectionStyles => (
+const addCustomSection = (sectionStyles) => (
   // You have access to the section styles
   <div className={sectionStyles.pluginLeftMenuSection}>
     <p>DOCUMENTATION</p>
@@ -99,7 +99,7 @@ const renderCustomLink = (props, linkStyles) => {
   );
 };
 
-const Foo = props => {
+const Foo = (props) => {
   const sections = [
     {
       name: 'section 1',

@@ -2,10 +2,10 @@
 const loadUtils = require('strapi/lib/load');
 const _ = require('lodash');
 
-const loadApisGraphqlConfig = appPath =>
+const loadApisGraphqlConfig = (appPath) =>
   loadUtils.loadFiles(appPath, 'api/**/config/*.graphql?(.js)');
 
-const loadPluginsGraphqlConfig = async installedPlugins => {
+const loadPluginsGraphqlConfig = async (installedPlugins) => {
   const root = {};
 
   for (let pluginName of installedPlugins) {
@@ -19,10 +19,10 @@ const loadPluginsGraphqlConfig = async installedPlugins => {
   return root;
 };
 
-const loadLocalPluginsGraphqlConfig = async appPath =>
+const loadLocalPluginsGraphqlConfig = async (appPath) =>
   loadUtils.loadFiles(appPath, 'plugins/**/config/*.graphql?(.js)');
 
-const loadExtensions = async appPath =>
+const loadExtensions = async (appPath) =>
   loadUtils.loadFiles(appPath, 'extensions/**/config/*.graphql?(.js)');
 
 /**

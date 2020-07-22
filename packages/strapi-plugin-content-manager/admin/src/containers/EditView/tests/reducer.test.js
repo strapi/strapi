@@ -25,7 +25,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | reducer', () => {
         type: 'SET_IS_DRAGGING_COMPONENT',
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.isDraggingComponent = true;
       });
 
@@ -40,7 +40,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | reducer', () => {
         formattedContentTypeLayout: ['test', 'test1'],
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.formattedContentTypeLayout = ['test', 'test1'];
       });
 
@@ -57,7 +57,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | reducer', () => {
       state.isDraggingComponent = true;
       state.formattedContentTypeLayout = ['test', 'test1'];
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.isDraggingComponent = false;
         draft.formattedContentTypeLayout = [];
       });
@@ -74,7 +74,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | reducer', () => {
         type: 'UNSET_IS_DRAGGING_COMPONENT',
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.isDraggingComponent = false;
       });
 

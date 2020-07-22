@@ -59,8 +59,7 @@ const Item = ({
       const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
       // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
 
@@ -136,7 +135,7 @@ const Item = ({
       item.itemIndex = hoverIndex;
       item.rowIndex = targetRow;
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       canDrop: monitor.canDrop(),
       clientOffset: monitor.getClientOffset(),
       isOver: monitor.isOver(),
@@ -156,7 +155,7 @@ const Item = ({
       // We will need to add a 12 size _TEMP_ div to offer a drop target between each existing row.
       return name !== '_TEMP_';
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
       getItem: monitor.getItem(),
     }),
@@ -189,13 +188,11 @@ const Item = ({
     showLeftCarret =
       isOver &&
       getItem.size !== 12 &&
-      Math.abs(clientOffset.x - hoverBoundingRect.left) <
-        hoverBoundingRect.width / 2;
+      Math.abs(clientOffset.x - hoverBoundingRect.left) < hoverBoundingRect.width / 2;
     showRightCarret =
       isOver &&
       getItem.size !== 12 &&
-      Math.abs(clientOffset.x - hoverBoundingRect.left) >
-        hoverBoundingRect.width / 2;
+      Math.abs(clientOffset.x - hoverBoundingRect.left) > hoverBoundingRect.width / 2;
 
     if (name === '_TEMP_') {
       showLeftCarret = isOver && getItem.size !== 12;
@@ -213,7 +210,7 @@ const Item = ({
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={setEditFieldToSelect}
-      onClickRemove={e => {
+      onClickRemove={(e) => {
         e.stopPropagation();
         removeField(rowIndex, itemIndex);
       }}

@@ -21,7 +21,7 @@ function StaticLinks() {
 
   return (
     <ul className="list">
-      {staticLinks.map(link => {
+      {staticLinks.map((link) => {
         const { icon, label, destination } = link;
 
         return (

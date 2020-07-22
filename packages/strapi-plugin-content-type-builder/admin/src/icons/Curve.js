@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Curve = props => (
+const Curve = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.08 21" {...props}>
     <g>
       <path

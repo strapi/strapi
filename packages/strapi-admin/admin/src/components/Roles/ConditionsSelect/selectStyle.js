@@ -2,13 +2,13 @@
 /* eslint-disable no-nested-ternary */
 
 const selectStyle = {
-  container: base => ({
+  container: (base) => ({
     ...base,
     width: '70%',
     alignItems: 'center',
     height: '36px',
   }),
-  menu: base => ({
+  menu: (base) => ({
     ...base,
     margin: '0',
     paddingTop: 0,
@@ -20,21 +20,21 @@ const selectStyle = {
     borderTop: '0 !important',
     fontSize: '13px',
   }),
-  menuList: base => ({
+  menuList: (base) => ({
     ...base,
     paddingBottom: 9,
     paddingTop: 10,
   }),
-  multiValue: base => ({
+  multiValue: (base) => ({
     ...base,
     backgroundColor: 'none',
     color: '#333740',
   }),
-  multiValueLabel: base => ({
+  multiValueLabel: (base) => ({
     ...base,
     fontSize: '13px',
   }),
-  multiValueRemove: base => ({
+  multiValueRemove: (base) => ({
     ...base,
     display: 'none',
   }),
@@ -79,13 +79,13 @@ const selectStyle = {
       borderBottom,
     };
   },
-  valueContainer: base => ({
+  valueContainer: (base) => ({
     ...base,
     padding: '2px 4px 4px 10px',
     lineHeight: '18px',
     minWidth: 200,
   }),
-  placeholder: base => ({
+  placeholder: (base) => ({
     ...base,
     paddingTop: 1,
     color: 'black',

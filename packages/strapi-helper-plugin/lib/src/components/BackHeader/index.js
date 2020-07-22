@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { useGlobalContext } from '../../contexts/GlobalContext';
 import StyledBackHeader from './StyledBackHeader';
 
-const BackHeader = props => {
+const BackHeader = (props) => {
   const { emitEvent } = useGlobalContext();
   const pluginsParams = useRouteMatch('/plugins/:pluginId');
   const settingsParams = useRouteMatch('/settings/:settingType');
@@ -20,7 +20,7 @@ const BackHeader = props => {
   const settingType = get(settingsParams, ['params', 'settingType'], null);
   const location = pluginId || settingType;
 
-  const handleClick = e => {
+  const handleClick = (e) => {
     if (location) {
       emitEvent('didGoBack', { location });
     }

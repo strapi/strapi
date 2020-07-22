@@ -1,4 +1,4 @@
-const formatFilters = params => {
+const formatFilters = (params) => {
   const indexOfFileFilterContains = params.indexOf('mime_contains=file');
   const indexOfFileFilterNContains = params.indexOf('mime_ncontains=file');
   let paramsToReturn = params;

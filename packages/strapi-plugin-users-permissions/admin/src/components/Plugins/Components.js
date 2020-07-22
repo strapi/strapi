@@ -36,11 +36,7 @@ const PluginsContainer = styled.div`
     }
   }
   > div:not(:first-child) {
-    background: linear-gradient(
-      315deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(227, 233, 243, 0.54) 100%
-    );
+    background: linear-gradient(315deg, rgba(255, 255, 255, 0) 0%, rgba(227, 233, 243, 0.54) 100%);
     > div {
       line-height: 5.2rem;
     }

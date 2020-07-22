@@ -35,7 +35,7 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
-    onHideNotification: id => {
+    onHideNotification: (id) => {
       dispatch(hideNotification(id));
     },
     dispatch,

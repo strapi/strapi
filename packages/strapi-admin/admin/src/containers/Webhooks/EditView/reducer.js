@@ -21,34 +21,25 @@ const initialState = fromJS({
 const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NEW_HEADER':
-      return state.updateIn(['modifiedData', ...action.keys], arr =>
-        arr.push(fromJS(header))
-      );
+      return state.updateIn(['modifiedData', ...action.keys], (arr) => arr.push(fromJS(header)));
     case 'GET_DATA_SUCCEEDED': {
       const headers = get(action, ['data', 'headers'], {});
       let formattedHeaders = [header];
 
       if (Object.keys(headers).length > 0) {
-        formattedHeaders = Object.keys(headers).map(key => {
+        formattedHeaders = Object.keys(headers).map((key) => {
           return { key, value: headers[key] };
         });
       }
 
-      const data = fromJS(action.data).update('headers', () =>
-        fromJS(formattedHeaders)
-      );
+      const data = fromJS(action.data).update('headers', () => fromJS(formattedHeaders));
 
-      return state
-        .update('initialData', () => data)
-        .update('modifiedData', () => data);
+      return state.update('initialData', () => data).update('modifiedData', () => data);
     }
     case 'ON_CHANGE':
-      return state.updateIn(
-        ['modifiedData', ...action.keys],
-        () => action.value
-      );
+      return state.updateIn(['modifiedData', ...action.keys], () => action.value);
     case 'ON_HEADER_REMOVE': {
-      return state.updateIn(['modifiedData', 'headers'], headers => {
+      return state.updateIn(['modifiedData', 'headers'], (headers) => {
         if (headers.size === 1) {
           return fromJS([header]);
         }
@@ -57,15 +48,13 @@ const reducer = (state, action) => {
       });
     }
     case 'ON_TRIGGER_CANCELED':
-      return state
-        .update('isTriggering', () => false)
-        .set('triggerResponse', fromJS({}));
+      return state.update('isTriggering', () => false).set('triggerResponse', fromJS({}));
     case 'RESET_FORM':
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_ERRORS':
       return state.update('formErrors', () => fromJS(action.errors));
     case 'SET_IS_TRIGGERING':
-      return state.update('isTriggering', isTriggering => !isTriggering);
+      return state.update('isTriggering', (isTriggering) => !isTriggering);
     case 'SUBMIT_SUCCEEDED':
       return state.update('initialData', () => state.get('modifiedData'));
     case 'TRIGGER_SUCCEEDED':

@@ -55,14 +55,14 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
  * Sort query parser
  * @param {string} sortQuery - ex: id:asc,price:desc
  */
-const convertSortQueryParams = sortQuery => {
+const convertSortQueryParams = (sortQuery) => {
   if (typeof sortQuery !== 'string') {
     throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
   }
 
   const sortKeys = [];
 
-  sortQuery.split(',').forEach(part => {
+  sortQuery.split(',').forEach((part) => {
     // split field and order param with default order to ascending
     const [field, order = 'asc'] = part.split(':');
 
@@ -86,7 +86,7 @@ const convertSortQueryParams = sortQuery => {
  * Start query parser
  * @param {string} startQuery - ex: id:asc,price:desc
  */
-const convertStartQueryParams = startQuery => {
+const convertStartQueryParams = (startQuery) => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
@@ -102,7 +102,7 @@ const convertStartQueryParams = startQuery => {
  * Limit query parser
  * @param {string} limitQuery - ex: id:asc,price:desc
  */
-const convertLimitQueryParams = limitQuery => {
+const convertLimitQueryParams = (limitQuery) => {
   const limitAsANumber = _.toNumber(limitQuery);
 
   if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
@@ -136,7 +136,7 @@ const BOOLEAN_OPERATORS = ['or'];
 /**
  * Parse where params
  */
-const convertWhereParams = whereParams => {
+const convertWhereParams = (whereParams) => {
   let finalWhere = [];
 
   if (Array.isArray(whereParams)) {
@@ -145,7 +145,7 @@ const convertWhereParams = whereParams => {
     }, []);
   }
 
-  Object.keys(whereParams).forEach(whereClause => {
+  Object.keys(whereParams).forEach((whereClause) => {
     const { field, operator = 'eq', value } = convertWhereClause(
       whereClause,
       whereParams[whereClause]

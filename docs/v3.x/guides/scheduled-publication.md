@@ -62,7 +62,7 @@ module.exports = {
     });
 
     // update status of articles
-    draftArticleToPublish.forEach(async article => {
+    draftArticleToPublish.forEach(async (article) => {
       await strapi.api.article.services.article.update({ id: article.id }, { status: 'published' });
     });
   },

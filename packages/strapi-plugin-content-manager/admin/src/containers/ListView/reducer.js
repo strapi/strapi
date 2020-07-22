@@ -31,7 +31,7 @@ export const initialState = {
 
 const listViewReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, drafState => {
+  produce(state, (drafState) => {
     switch (action.type) {
       case GET_DATA:
         return initialState;
@@ -42,10 +42,10 @@ const listViewReducer = (state = initialState, action) =>
         break;
       }
       case ON_CHANGE_BULK: {
-        const hasElement = state.entriesToDelete.some(el => el === action.name);
+        const hasElement = state.entriesToDelete.some((el) => el === action.name);
 
         if (hasElement) {
-          drafState.entriesToDelete = drafState.entriesToDelete.filter(el => el !== action.name);
+          drafState.entriesToDelete = drafState.entriesToDelete.filter((el) => el !== action.name);
           break;
         }
 
@@ -59,7 +59,7 @@ const listViewReducer = (state = initialState, action) =>
           break;
         }
 
-        drafState.data.forEach(value => {
+        drafState.data.forEach((value) => {
           drafState.entriesToDelete.push(value.id.toString());
         });
 

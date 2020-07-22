@@ -16,7 +16,7 @@ function PluginHeaderActions({ actions, overrideRendering }) {
   let content = '';
 
   if (isArray(actions)) {
-    content = actions.map(action => <Button {...action} key={action.label} />);
+    content = actions.map((action) => <Button {...action} key={action.label} />);
   }
 
   if (isFunction(overrideRendering)) {

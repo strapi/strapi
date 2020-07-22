@@ -11,15 +11,15 @@ const init = (initialState, plugins = {}, settingsMenu = []) => {
 
     return [...acc, ...pluginsSectionLinks];
   }, []);
-  const sortedLinks = sortLinks(pluginsLinks).map(link => {
+  const sortedLinks = sortLinks(pluginsLinks).map((link) => {
     return { ...omit(link, 'name'), isDisplayed: false };
   });
 
   const settingsLinkIndex = initialState.generalSectionLinks.findIndex(
-    obj => obj.destination === SETTINGS_BASE_URL
+    (obj) => obj.destination === SETTINGS_BASE_URL
   );
 
-  if (!settingsLinkPermissions.filter(perm => perm === null).length && settingsLinkIndex !== -1) {
+  if (!settingsLinkPermissions.filter((perm) => perm === null).length && settingsLinkIndex !== -1) {
     const permissionsPath = ['generalSectionLinks', settingsLinkIndex, 'permissions'];
 
     set(initialState, permissionsPath, settingsLinkPermissions);

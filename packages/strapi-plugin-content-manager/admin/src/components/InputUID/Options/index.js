@@ -11,11 +11,11 @@ import RightOptionLabel from './RightOptionLabel';
 const Options = ({ options, title }) => (
   <OptionsWrapper>
     {title && <OptionsTitle>{title}</OptionsTitle>}
-    {options.map(option => (
+    {options.map((option) => (
       <Option key={option.id} onClick={option.onClick}>
         <div>{option.label}</div>
         <FormattedMessage id={getTrad('components.uid.apply')}>
-          {msg => <RightOptionLabel className="right-label">{msg}</RightOptionLabel>}
+          {(msg) => <RightOptionLabel className="right-label">{msg}</RightOptionLabel>}
         </FormattedMessage>
       </Option>
     ))}

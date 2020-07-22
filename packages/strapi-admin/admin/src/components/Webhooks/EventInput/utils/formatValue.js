@@ -1,4 +1,4 @@
-const formatValue = value =>
+const formatValue = (value) =>
   value.reduce((acc, curr) => {
     const key = curr.split('.')[0];
 

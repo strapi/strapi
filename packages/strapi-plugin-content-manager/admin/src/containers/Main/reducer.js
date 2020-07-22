@@ -33,9 +33,7 @@ function mainReducer(state = initialState, action) {
       return state
         .update('components', () => fromJS(action.components))
         .update('models', () => fromJS(action.models))
-        .update('componentsAndModelsMainPossibleMainFields', () =>
-          fromJS(action.mainFields)
-        )
+        .update('componentsAndModelsMainPossibleMainFields', () => fromJS(action.mainFields))
         .update('isLoading', () => false);
     case GET_LAYOUT_SUCCEEDED:
       return state
@@ -44,16 +42,13 @@ function mainReducer(state = initialState, action) {
     case ON_CHANGE_LIST_LABELS: {
       const { name, slug, value } = action;
 
-      return state.updateIn(
-        ['layouts', slug, 'contentType', 'layouts', 'list'],
-        list => {
-          if (value) {
-            return list.push(name);
-          }
-
-          return list.filter(l => l !== name);
+      return state.updateIn(['layouts', slug, 'contentType', 'layouts', 'list'], (list) => {
+        if (value) {
+          return list.push(name);
         }
-      );
+
+        return list.filter((l) => l !== name);
+      });
     }
     case RESET_LIST_LABELS:
       return state.updateIn(['layouts', action.slug], () =>

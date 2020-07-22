@@ -99,7 +99,7 @@ Get the URL param in the controller
 
 ```js
 module.exports = {
-  findOne: async ctx => {
+  findOne: async (ctx) => {
     // const id = ctx.params.id;
     const { id } = ctx.params;
     return id;

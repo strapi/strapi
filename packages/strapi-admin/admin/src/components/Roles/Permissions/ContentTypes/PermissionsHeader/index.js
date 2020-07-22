@@ -14,27 +14,27 @@ const PermissionsHeader = ({ contentTypes }) => {
 
   // Get the count of content type contentTypesPermissions by action.
   const countContentTypesActionPermissions = useCallback(
-    action => {
+    (action) => {
       return getContentTypesActionsSize(contentTypes, contentTypesPermissions, action);
     },
     [contentTypes, contentTypesPermissions]
   );
 
-  const hasSomeActions = action => {
+  const hasSomeActions = (action) => {
     return (
       countContentTypesActionPermissions(action) > 0 &&
       countContentTypesActionPermissions(action) < contentTypes.length
     );
   };
 
-  const hasAllActions = action => {
+  const hasAllActions = (action) => {
     return countContentTypesActionPermissions(action) === contentTypes.length;
   };
 
   return (
     <Wrapper disabled>
       <Flex>
-        {permissionsLayout.sections.contentTypes.map(permissionLayout => (
+        {permissionsLayout.sections.contentTypes.map((permissionLayout) => (
           <PermissionCheckbox
             key={permissionLayout.action}
             name={permissionLayout.action}

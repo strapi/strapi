@@ -48,7 +48,7 @@ function Inputs({
           {({ canCheck, error, dispatch }) => {
             const hasError = error && error !== null;
 
-            const handleChange = e => {
+            const handleChange = (e) => {
               if (!canCheck) {
                 dispatch({
                   type: 'SET_CHECK',
@@ -66,7 +66,7 @@ function Inputs({
               <>
                 <EventInput
                   name={name}
-                  onChange={e => {
+                  onChange={(e) => {
                     handleChange(e);
                   }}
                   value={value}

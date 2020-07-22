@@ -1,5 +1,5 @@
 const updateRows = (array, shouldSelect) =>
-  array.map(row => {
+  array.map((row) => {
     return { ...row, _isChecked: shouldSelect };
   });
 

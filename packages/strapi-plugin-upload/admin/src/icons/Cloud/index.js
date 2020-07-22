@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Cloud = props => {
+const Cloud = (props) => {
   return (
     <svg width="53" height="42" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>

@@ -4,9 +4,7 @@ import PropTypes from 'prop-types';
 
 const Option = ({ id, value }) => {
   return (
-    <FormattedMessage id={id}>
-      {msg => <option value={value}>{msg}</option>}
-    </FormattedMessage>
+    <FormattedMessage id={id}>{(msg) => <option value={value}>{msg}</option>}</FormattedMessage>
   );
 };
 

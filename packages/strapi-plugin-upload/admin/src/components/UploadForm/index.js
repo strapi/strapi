@@ -19,7 +19,7 @@ const UploadForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleClick = to => {
+  const handleClick = (to) => {
     setShouldDisplayNextButton(to === 'url');
   };
 
@@ -30,7 +30,7 @@ const UploadForm = ({
 
   return (
     <ModalNavWrapper links={links}>
-      {to => (
+      {(to) => (
         <ModalSection>
           {to === 'computer' && <InputFileModal onChange={addFilesToUpload} />}
           {to === 'url' && (

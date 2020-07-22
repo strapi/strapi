@@ -77,7 +77,7 @@ describe('Test type json', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    res.body.forEach((entry) => {
       expect(entry.field).toBeDefined();
       expect(entry.field).not.toBeNull();
       expect(typeof entry.field).toBe('object');

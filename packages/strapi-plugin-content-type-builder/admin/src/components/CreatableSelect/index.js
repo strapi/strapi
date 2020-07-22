@@ -19,11 +19,11 @@ const CreatableSelect = ({ onChange, name, styles, value }) => {
   };
 
   const formatOptions = () => {
-    return allComponentsCategories.map(cat => ({ value: cat, label: cat }));
+    return allComponentsCategories.map((cat) => ({ value: cat, label: cat }));
   };
 
   const getValue = () => {
-    return formatOptions().find(el => el.value === value);
+    return formatOptions().find((el) => el.value === value);
   };
 
   return (

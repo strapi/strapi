@@ -101,7 +101,7 @@ Then update your controller's file and add the count action.
  * @return {Number}
  */
 
-count: async ctx => {
+count: async (ctx) => {
   return strapi.services.article.count(ctx.query);
 };
 ```
@@ -115,7 +115,7 @@ For Mongo applications update the service of your API with the following code:
  * @return {Promise}
  */
 
-count: params => {
+count: (params) => {
   // Convert `params` object to filters compatible with Mongo.
   const filters = strapi.utils.models.convertParams('article', params);
 
@@ -132,11 +132,11 @@ And for Postgres and MySQL applications with this one:
  * @return {Promise}
  */
 
-count: params => {
+count: (params) => {
   // Convert `params` object to filters compatible with Bookshelf.
   const filters = strapi.utils.models.convertParams('article', params);
 
-  return Article.query(function(qb) {
+  return Article.query(function (qb) {
     _.forEach(filters.where, (where, key) => {
       if (_.isArray(where.value)) {
         for (const value in where.value) {

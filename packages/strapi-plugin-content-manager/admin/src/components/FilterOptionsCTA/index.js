@@ -7,7 +7,7 @@ const FilterOptionsCTA = styled.button`
   width: 20px;
   margin: 8px 5px 0px 0px;
   border-radius: 50%;
-  border: 1px solid #E3E9F3;
+  border: 1px solid #e3e9f3;
   cursor: pointer;
 `;
 

@@ -4,7 +4,7 @@ import invariant from 'invariant';
 class ComponentApi {
   components = {};
 
-  getComponent = name => {
+  getComponent = (name) => {
     invariant(name, 'A name must be provided');
 
     return cloneDeep(this.components[name]) || null;
@@ -20,7 +20,7 @@ class ComponentApi {
     }, {});
   };
 
-  registerComponent = component => {
+  registerComponent = (component) => {
     const { name, Component } = component;
 
     invariant(Component, 'A Component must be provided');
@@ -30,7 +30,7 @@ class ComponentApi {
     this.components[name] = { Component };
   };
 
-  removeComponent = name => {
+  removeComponent = (name) => {
     invariant(name, 'A name must be provided in order to remove a field');
 
     delete this.components[name];

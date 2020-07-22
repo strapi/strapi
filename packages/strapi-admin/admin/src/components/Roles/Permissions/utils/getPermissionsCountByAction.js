@@ -7,7 +7,7 @@ const getPermissionsCountByAction = (contentTypes, contentTypesPermissions, acti
     ).reduce((attributeAcc, currentAttribute) => {
       return (
         attributeAcc +
-        get(currentAttribute, 'actions', []).filter(permAction => permAction === action).length
+        get(currentAttribute, 'actions', []).filter((permAction) => permAction === action).length
       );
     }, 0);
 

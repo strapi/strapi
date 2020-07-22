@@ -21,12 +21,10 @@ const getInjectedComponents = (
     const injectedComponents = get(currentPlugin, 'injectedComponents', []);
 
     const compos = injectedComponents
-      .filter(compo => {
-        return (
-          compo.plugin === `${pluginId}.${container}` && compo.area === area
-        );
+      .filter((compo) => {
+        return compo.plugin === `${pluginId}.${container}` && compo.area === area;
       })
-      .map(compo => {
+      .map((compo) => {
         const Component = compo.component;
 
         return (

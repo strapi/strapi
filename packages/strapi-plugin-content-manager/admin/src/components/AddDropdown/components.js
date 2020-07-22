@@ -71,7 +71,6 @@ const Wrapper = styled.div`
         font-size: 13px !important;
         &:focus,
         &:active,
-        &:hover,
         &:hover {
           background-color: #fafafb !important;
           color: #333740;

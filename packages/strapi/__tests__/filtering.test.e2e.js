@@ -171,7 +171,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body).toEqual(
-          expect.arrayContaining(data.products.map(o => expect.objectContaining(o)))
+          expect.arrayContaining(data.products.map((o) => expect.objectContaining(o)))
         );
       });
 
@@ -198,7 +198,7 @@ describe('Filtering API', () => {
           },
         });
 
-        const matching = data.products.filter(x => x.price === null);
+        const matching = data.products.filter((x) => x.price === null);
         res.body.sort((a, b) => (a.id > b.id ? 1 : -1));
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(matching.length);
@@ -231,7 +231,7 @@ describe('Filtering API', () => {
         });
 
         expect(res1.body).toEqual(
-          expect.arrayContaining(data.products.map(o => expect.objectContaining(o)))
+          expect.arrayContaining(data.products.map((o) => expect.objectContaining(o)))
         );
 
         const res2 = await rq({
@@ -279,7 +279,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body).toEqual(
-          expect.arrayContaining(data.products.map(o => expect.objectContaining(o)))
+          expect.arrayContaining(data.products.map((o) => expect.objectContaining(o)))
         );
 
         const res2 = await rq({
@@ -1096,7 +1096,7 @@ describe('Filtering API', () => {
       });
 
       [data.products[3], data.products[0], data.products[2], data.products[1]].forEach(
-        expectedPost => {
+        (expectedPost) => {
           expect(res.body).toEqual(expect.arrayContaining([expectedPost]));
         }
       );

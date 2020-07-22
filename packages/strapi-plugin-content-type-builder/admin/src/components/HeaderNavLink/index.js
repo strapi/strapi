@@ -16,7 +16,7 @@ function HeaderNavLink({ custom, isDisabled, id, isActive, onClick }) {
     <Wrapper
       isActive={isActive}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
-      onClick={e => {
+      onClick={(e) => {
         if (isDisabled) {
           e.preventDefault();
 
@@ -25,9 +25,7 @@ function HeaderNavLink({ custom, isDisabled, id, isActive, onClick }) {
         onClick(id);
       }}
     >
-      <FormattedMessage
-        id={`${pluginId}.popUpForm.navContainer.${custom || id}`}
-      />
+      <FormattedMessage id={`${pluginId}.popUpForm.navContainer.${custom || id}`} />
     </Wrapper>
   );
 }

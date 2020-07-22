@@ -3,24 +3,19 @@ import { get, isEmpty } from 'lodash';
 /* eslint-disable no-restricted-syntax */
 
 const createAttributesLayout = (currentLayout, attributes) => {
-  const getType = name => get(attributes, [name, 'type'], '');
+  const getType = (name) => get(attributes, [name, 'type'], '');
   let currentRowIndex = 0;
   const newLayout = [];
 
   for (let row of currentLayout) {
-    const hasDynamicZone = row.some(
-      ({ name }) => getType(name) === 'dynamiczone'
-    );
+    const hasDynamicZone = row.some(({ name }) => getType(name) === 'dynamiczone');
 
     if (!newLayout[currentRowIndex]) {
       newLayout[currentRowIndex] = [];
     }
 
     if (hasDynamicZone) {
-      currentRowIndex =
-        currentRowIndex === 0 && isEmpty(newLayout[0])
-          ? 0
-          : currentRowIndex + 1;
+      currentRowIndex = currentRowIndex === 0 && isEmpty(newLayout[0]) ? 0 : currentRowIndex + 1;
 
       if (!newLayout[currentRowIndex]) {
         newLayout[currentRowIndex] = [];
@@ -33,7 +28,7 @@ const createAttributesLayout = (currentLayout, attributes) => {
     }
   }
 
-  return newLayout.filter(arr => arr.length > 0);
+  return newLayout.filter((arr) => arr.length > 0);
 };
 
 export default createAttributesLayout;

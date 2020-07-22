@@ -107,7 +107,7 @@ const Wrapper = styled.div`
     border-radius: 3px;
   }
   .tip {
-    background-color: ${props => props.theme.main.colors.darkBlue};
+    background-color: ${(props) => props.theme.main.colors.darkBlue};
     padding: 30px;
     border-radius: 3px;
   }

@@ -167,7 +167,7 @@ describe('Search query', () => {
       expect(res.body[0]).toMatchObject(data.beds[2]);
     });
 
-    test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
+    test.each(Object.keys(bedFixtures[0]))('search that target column %p', async (columnName) => {
       const res = await rq({
         method: 'GET',
         url: '/content-manager/explorer/application::bed.bed',

@@ -24,7 +24,7 @@ function getItemStyles(initialOffset, currentOffset, mouseOffset) {
 
 const DragLayer = () => {
   const { itemType, isDragging, item, initialOffset, currentOffset, mouseOffset } = useDragLayer(
-    monitor => ({
+    (monitor) => ({
       item: monitor.getItem(),
       itemType: monitor.getItemType(),
       initialOffset: monitor.getInitialSourceClientOffset(),

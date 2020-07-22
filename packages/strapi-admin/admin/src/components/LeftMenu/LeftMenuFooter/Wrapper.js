@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   position: absolute;
   width: 100%;
-  background: ${props => props.theme.main.colors.strapi['blue-darker']};
+  background: ${(props) => props.theme.main.colors.strapi['blue-darker']};
   bottom: 0;
   .poweredBy {
     width: 100%;

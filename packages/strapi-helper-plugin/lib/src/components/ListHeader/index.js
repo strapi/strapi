@@ -7,25 +7,17 @@ import Title from '../ListTitle';
 import SubTitle from './SubTitle';
 import Wrapper from './Wrapper';
 
-function ListHeader({
-  button,
-  children,
-  subtitle,
-  subtitleValues,
-  style,
-  title,
-  titleValues,
-}) {
+function ListHeader({ button, children, subtitle, subtitleValues, style, title, titleValues }) {
   return (
     <Wrapper style={style}>
       {button && <Button {...button} />}
       {children || (
         <FormattedMessage id={title} values={titleValues}>
-          {msg => <Title>{msg}</Title>}
+          {(msg) => <Title>{msg}</Title>}
         </FormattedMessage>
       )}
       <FormattedMessage id={subtitle} values={subtitleValues}>
-        {msg => <SubTitle>{msg}</SubTitle>}
+        {(msg) => <SubTitle>{msg}</SubTitle>}
       </FormattedMessage>
     </Wrapper>
   );

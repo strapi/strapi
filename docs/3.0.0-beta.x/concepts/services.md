@@ -333,7 +333,7 @@ The service is now available through the `strapi.services` global variable. We c
 ```js
 module.exports = {
   // GET /hello
-  signup: async ctx => {
+  signup: async (ctx) => {
     // Store the new user in database.
     const user = await User.create(ctx.query);
 

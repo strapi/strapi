@@ -44,9 +44,7 @@ function ComponentList({
           isFromDynamicZone={isFromDynamicZone}
           isNestedInDZComponent={isNestedInDZComponent}
           isSub
-          secondLoopComponentName={
-            firstLoopComponentName ? componentName : null
-          }
+          secondLoopComponentName={firstLoopComponentName ? componentName : null}
           secondLoopComponentUid={firstLoopComponentUid ? component : null}
         />
       </Td>

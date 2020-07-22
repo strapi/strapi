@@ -1,6 +1,6 @@
 import { clone, set, unset } from 'lodash';
 
-const generateSearchFromObject = params => {
+const generateSearchFromObject = (params) => {
   const clonedParams = clone(params);
   const _start = (clonedParams._page - 1) * parseInt(clonedParams._limit, 10);
 

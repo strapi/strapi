@@ -10,7 +10,7 @@
 const React = require('react');
 const hoistNonReactStatics = require('hoist-non-react-statics');
 
-const hoc = () => WrappedComponent => {
+const hoc = () => (WrappedComponent) => {
   class HocInjector extends React.Component {
     static WrappedComponent = WrappedComponent;
 

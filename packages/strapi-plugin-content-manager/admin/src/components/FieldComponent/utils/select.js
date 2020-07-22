@@ -28,17 +28,17 @@ function useSelect({ isFromDynamicZone, name }) {
       return true;
     }
 
-    const includedDynamicZoneFields = allowedFields.filter(name => name === compoName[0]);
+    const includedDynamicZoneFields = allowedFields.filter((name) => name === compoName[0]);
 
     if (includedDynamicZoneFields.length > 0) {
       return true;
     }
 
     const relatedChildrenAllowedFields = allowedFields
-      .map(fieldName => {
+      .map((fieldName) => {
         return fieldName.split('.');
       })
-      .filter(fieldName => {
+      .filter((fieldName) => {
         if (fieldName.length < compoName.length) {
           return false;
         }
@@ -63,10 +63,10 @@ function useSelect({ isFromDynamicZone, name }) {
     const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
 
     const relatedChildrenAllowedFields = allowedFields
-      .map(fieldName => {
+      .map((fieldName) => {
         return fieldName.split('.');
       })
-      .filter(fieldName => {
+      .filter((fieldName) => {
         if (fieldName.length < compoName.length) {
           return false;
         }

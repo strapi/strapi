@@ -63,12 +63,12 @@ When it's done, you have to update the life cycle of the **Article** Content Typ
 const slugify = require('slugify');
 
 module.exports = {
-  beforeSave: async model => {
+  beforeSave: async (model) => {
     if (model.title) {
       model.slug = slugify(model.title);
     }
   },
-  beforeUpdate: async model => {
+  beforeUpdate: async (model) => {
     if (model.getUpdate() && model.getUpdate().title) {
       model.update({
         slug: slugify(model.getUpdate().title),

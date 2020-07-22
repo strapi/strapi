@@ -12,7 +12,7 @@ describe('Test Graphql Users API End to End', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',

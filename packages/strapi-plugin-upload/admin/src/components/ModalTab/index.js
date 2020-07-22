@@ -15,7 +15,7 @@ import Flex from '../Flex';
 import Count from './Count';
 
 const ModalTab = ({ isDisabled, label, to, isActive, onClick, count }) => {
-  const handleClick = e => {
+  const handleClick = (e) => {
     if (isDisabled) {
       e.preventDefault();
 

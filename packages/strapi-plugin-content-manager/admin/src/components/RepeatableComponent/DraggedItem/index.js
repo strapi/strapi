@@ -66,14 +66,8 @@ const DraggedItem = ({
       const dragPath = item.originalPath;
       const hoverPath = componentFieldName;
       const fullPathToComponentArray = dragPath.split('.');
-      const dragIndexString = fullPathToComponentArray
-        .slice()
-        .splice(-1)
-        .join('');
-      const hoverIndexString = hoverPath
-        .split('.')
-        .splice(-1)
-        .join('');
+      const dragIndexString = fullPathToComponentArray.slice().splice(-1).join('');
+      const hoverIndexString = hoverPath.split('.').splice(-1).join('');
       const pathToComponentArray = fullPathToComponentArray.slice(
         0,
         fullPathToComponentArray.length - 1
@@ -135,7 +129,7 @@ const DraggedItem = ({
       // Update the errors
       triggerFormValidation();
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
@@ -144,8 +138,8 @@ const DraggedItem = ({
     preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
-  const getField = fieldName => get(schema, ['schema', 'attributes', fieldName], {});
-  const getMeta = fieldName => get(schema, ['metadatas', fieldName, 'edit'], {});
+  const getField = (fieldName) => get(schema, ['schema', 'attributes', fieldName], {});
+  const getMeta = (fieldName) => get(schema, ['metadatas', fieldName, 'edit'], {});
 
   // Create the refs
   // We need 1 for the drop target
@@ -185,7 +179,7 @@ const DraggedItem = ({
               fields.map((fieldRow, key) => {
                 return (
                   <div className="row" key={key}>
-                    {fieldRow.map(field => {
+                    {fieldRow.map((field) => {
                       const currentField = getField(field.name);
                       const isComponent = get(currentField, 'type', '') === 'component';
                       const keys = `${componentFieldName}.${field.name}`;

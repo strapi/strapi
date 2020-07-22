@@ -33,8 +33,7 @@ class InputSelectWithErrors extends React.Component {
         type: 'select',
         name: this.props.name,
         value:
-          get(this.props.selectOptions, ['0', 'value']) ||
-          get(this.props.selectOptions, ['0']),
+          get(this.props.selectOptions, ['0', 'value']) || get(this.props.selectOptions, ['0']),
       };
       this.props.onChange({ target });
     }
@@ -95,12 +94,7 @@ class InputSelectWithErrors extends React.Component {
         className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={label}
-          style={labelStyle}
-        />
+        <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
         <InputSelect
           autoFocus={autoFocus}
           className={inputClassName}

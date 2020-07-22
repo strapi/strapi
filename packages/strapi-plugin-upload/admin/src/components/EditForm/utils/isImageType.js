@@ -1,3 +1,3 @@
-const isImageType = mimeType => mimeType.includes('image');
+const isImageType = (mimeType) => mimeType.includes('image');
 
 export default isImageType;

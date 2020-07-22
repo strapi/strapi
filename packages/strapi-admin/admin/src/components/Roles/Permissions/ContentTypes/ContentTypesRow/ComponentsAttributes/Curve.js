@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Curve = props => (
+const Curve = (props) => (
   <svg
     style={{
       height: '14px',

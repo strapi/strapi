@@ -36,7 +36,7 @@ function InputSelect(props) {
     >
       {props.withOptionPlaceholder && (
         <FormattedMessage id="components.InputSelect.option.placeholder">
-          {msg => (
+          {(msg) => (
             <option disabled hidden value="">
               {msg}
             </option>

@@ -1,4 +1,4 @@
-const createMatrix = refArray => {
+const createMatrix = (refArray) => {
   const maxNumberOfColumns = 4;
   const matrix = [];
 

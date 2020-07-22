@@ -26,10 +26,7 @@ describe('<EventRow />', () => {
       target: { name: 'events', value: true },
     };
 
-    const selectAllCheckbox = renderedComponent
-      .find('td')
-      .at(0)
-      .find(Checkbox);
+    const selectAllCheckbox = renderedComponent.find('td').at(0).find(Checkbox);
     selectAllCheckbox.simulate('change', event);
 
     expect(props.handleChangeAll).toHaveBeenCalledWith(event);
@@ -41,10 +38,7 @@ describe('<EventRow />', () => {
       target: { name: 'events', value: true },
     };
 
-    const checkbox = renderedComponent
-      .find('td')
-      .at(1)
-      .find(Checkbox);
+    const checkbox = renderedComponent.find('td').at(1).find(Checkbox);
     checkbox.simulate('change', event);
 
     expect(props.handleChange).toHaveBeenCalledWith(event);

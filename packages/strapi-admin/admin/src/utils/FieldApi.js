@@ -10,7 +10,7 @@ import invariant from 'invariant';
 class FieldApi {
   fields = {};
 
-  getField = type => {
+  getField = (type) => {
     invariant(type, 'A type must be provided');
 
     return cloneDeep(this.fields[type]) || null;
@@ -26,7 +26,7 @@ class FieldApi {
     }, {});
   };
 
-  registerField = field => {
+  registerField = (field) => {
     const { type, Component } = field;
 
     invariant(Component, 'A Component must be provided');
@@ -36,7 +36,7 @@ class FieldApi {
     this.fields[type] = { Component };
   };
 
-  removeField = type => {
+  removeField = (type) => {
     invariant(type, 'A type must be provided in order to remove a field');
 
     delete this.fields[type];

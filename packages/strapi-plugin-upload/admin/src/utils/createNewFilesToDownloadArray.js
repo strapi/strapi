@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { isEmpty } from 'lodash';
 
-const getTempsIds = alreadyUploadedFiles => {
-  return [...new Set([0, ...alreadyUploadedFiles.map(file => file.tempId).filter(id => !!id)])];
+const getTempsIds = (alreadyUploadedFiles) => {
+  return [...new Set([0, ...alreadyUploadedFiles.map((file) => file.tempId).filter((id) => !!id)])];
 };
 
-const getMax = arr => {
+const getMax = (arr) => {
   return Math.max.apply(Math, arr) + 1;
 };
 

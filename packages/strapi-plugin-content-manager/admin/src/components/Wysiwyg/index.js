@@ -134,7 +134,7 @@ class Wysiwyg extends React.Component {
    * Init the editor with data from
    * @param {[type]} props [description]
    */
-  setInitialValue = props => {
+  setInitialValue = (props) => {
     if (isEmpty(props.value)) {
       return this.setState({ editorState: EditorState.createEmpty() });
     }
@@ -222,9 +222,7 @@ class Wysiwyg extends React.Component {
       nextBlocks.map((block, index) => {
         const previousContent =
           index === 0
-            ? this.getEditorState()
-                .getCurrentContent()
-                .getBlockForKey(this.getCurrentAnchorKey())
+            ? this.getEditorState().getCurrentContent().getBlockForKey(this.getCurrentAnchorKey())
             : newEditorState.getCurrentContent().getBlockBefore(block.getKey());
         // Check if there was an li before the position so we update the entire list bullets
         const number = previousContent ? parseInt(previousContent.getText().split('.')[0], 10) : 0;
@@ -301,7 +299,7 @@ class Wysiwyg extends React.Component {
       });
     }
 
-    selectedBlocksList.map(block => {
+    selectedBlocksList.map((block) => {
       const selectedText = block.getText();
       const li = selectedText === '' ? '- ' : `- ${selectedText}`;
       const newBlock = createNewBlock(li, 'block-list', block.getKey());
@@ -321,7 +319,7 @@ class Wysiwyg extends React.Component {
    * Handler to create header
    * @param {String} text header content
    */
-  addBlock = text => {
+  addBlock = (text) => {
     const nextBlockKey = this.getNextBlockKey(this.getCurrentAnchorKey()) || genKey();
     const newBlock = createNewBlock(text, 'header', nextBlockKey);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
@@ -468,9 +466,7 @@ class Wysiwyg extends React.Component {
    * @return {Map} ContentBlock
    */
   getCurrentContentBlock = () =>
-    this.getEditorState()
-      .getCurrentContent()
-      .getBlockForKey(this.getSelection().getAnchorKey());
+    this.getEditorState().getCurrentContent().getBlockForKey(this.getSelection().getAnchorKey());
 
   /**
    * Retrieve the block key after a specific one
@@ -482,17 +478,13 @@ class Wysiwyg extends React.Component {
     editorState.getCurrentContent().getKeyAfter(currentBlockKey);
 
   getSelectedText = ({ start, end } = getOffSets(this.getSelection())) =>
-    this.getCurrentContentBlock()
-      .getText()
-      .slice(start, end);
+    this.getCurrentContentBlock().getText().slice(start, end);
 
   handleBlur = () => {
     const target = {
       name: this.props.name,
       type: 'textarea',
-      value: this.getEditorState()
-        .getCurrentContent()
-        .getPlainText(),
+      value: this.getEditorState().getCurrentContent().getPlainText(),
     };
     this.props.onBlur({ target });
     this.blur();
@@ -560,7 +552,7 @@ class Wysiwyg extends React.Component {
     return false;
   };
 
-  mapKeyToEditorCommand = e => {
+  mapKeyToEditorCommand = (e) => {
     if (e.keyCode === 9 /* TAB */) {
       const newEditorState = RichUtils.onTab(e, this.state.editorState, 4 /* maxDepth */);
       if (newEditorState !== this.state.editorState) {
@@ -581,7 +573,7 @@ class Wysiwyg extends React.Component {
   modifyBlockContent = (text, contentState = this.getEditorState().getCurrentContent()) =>
     Modifier.replaceText(contentState, this.getSelection(), text);
 
-  onChange = editorState => {
+  onChange = (editorState) => {
     const { disabled } = this.props;
 
     if (!disabled) {
@@ -590,7 +582,7 @@ class Wysiwyg extends React.Component {
     }
   };
 
-  handleTab = e => {
+  handleTab = (e) => {
     e.preventDefault();
     const newEditorState = onTab(this.getEditorState());
 
@@ -602,7 +594,7 @@ class Wysiwyg extends React.Component {
    */
 
   handleToggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       isMediaLibraryOpened: !prevState.isMediaLibraryOpened,
     }));
@@ -612,7 +604,7 @@ class Wysiwyg extends React.Component {
    * Update the parent reducer
    * @param  {Map} editorState [description]
    */
-  sendData = editorState => {
+  sendData = (editorState) => {
     if (
       this.getEditorState().getCurrentContent() !== editorState.getCurrentContent() ||
       editorState.getLastChangeType() === 'remove-range'
@@ -627,7 +619,7 @@ class Wysiwyg extends React.Component {
     } else return;
   };
 
-  toggleFullScreen = e => {
+  toggleFullScreen = (e) => {
     e.preventDefault();
     this.setState({
       isFullscreen: !this.state.isFullscreen,
@@ -657,7 +649,7 @@ class Wysiwyg extends React.Component {
               !this.props.deactivateErrorHighlight && this.props.error && 'editorError',
               !isEmpty(this.props.className) && this.props.className
             )}
-            onClick={e => {
+            onClick={(e) => {
               if (isFullscreen) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -708,7 +700,7 @@ class Wysiwyg extends React.Component {
                   onChange={this.onChange}
                   onTab={this.handleTab}
                   placeholder={this.props.placeholder}
-                  setRef={editor => (this.domEditor = editor)}
+                  setRef={(editor) => (this.domEditor = editor)}
                   stripPastedStyles
                   tabIndex={this.props.tabIndex}
                 />
@@ -727,7 +719,7 @@ class Wysiwyg extends React.Component {
           {isFullscreen && (
             <div
               className={cn('editorWrapper')}
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}

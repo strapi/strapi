@@ -14,7 +14,7 @@ const Picker = ({ renderButtonContent, renderSectionContent }) => {
   useClickAwayListener(dropdownRef, () => setIsOpen(false));
 
   const handleToggle = () => {
-    setIsOpen(v => !v);
+    setIsOpen((v) => !v);
   };
 
   return (

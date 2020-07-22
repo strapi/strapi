@@ -8,13 +8,7 @@ import PropTypes from 'prop-types';
 import ButtonContainer from './ButtonContainer';
 import { Wrapper } from './components';
 
-function Row({
-  currentDocVersion,
-  data,
-  isHeader,
-  onClickDelete,
-  onUpdateDoc,
-}) {
+function Row({ currentDocVersion, data, isHeader, onClickDelete, onUpdateDoc }) {
   const { version, generatedDate } = data;
 
   return (

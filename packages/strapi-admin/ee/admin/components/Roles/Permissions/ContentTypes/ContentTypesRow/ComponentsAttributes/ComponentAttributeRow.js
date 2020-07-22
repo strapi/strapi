@@ -62,7 +62,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   }, [attributePermissionName, contentTypeUid, contentTypesPermissions]);
 
   const recursiveAttributes = useMemo(() => {
-    const component = components.find(component => component.uid === attribute.component);
+    const component = components.find((component) => component.uid === attribute.component);
 
     return isCollapsable
       ? getAttributesByModel(component, components, attributePermissionName)
@@ -70,7 +70,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   }, [components, attribute, attributePermissionName, isCollapsable]);
 
   const getContentTypePermissions = useCallback(
-    action => {
+    (action) => {
       return getAttributePermissionsSizeByContentTypeAction(
         contentTypesPermissions,
         contentTypeUid,
@@ -81,7 +81,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   );
 
   const getRecursiveAttributesPermissions = useCallback(
-    action => {
+    (action) => {
       const number = getNumberOfRecursivePermissionsByAction(
         contentTypeUid,
         action,
@@ -95,7 +95,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   );
 
   const handleCheck = useCallback(
-    action => {
+    (action) => {
       // If the current attribute is a component,
       // we need select all the component attributes.
       // Otherwhise, we just need to select the current attribute
@@ -127,15 +127,15 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   );
 
   const checkPermission = useCallback(
-    action => {
-      return attributeActions.findIndex(permAction => permAction === action) !== -1;
+    (action) => {
+      return attributeActions.findIndex((permAction) => permAction === action) !== -1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [contentTypesPermissions, attribute]
   );
 
   const attributesToDisplay = useMemo(() => {
-    return getAttributesToDisplay(components.find(comp => comp.uid === attribute.component));
+    return getAttributesToDisplay(components.find((comp) => comp.uid === attribute.component));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attribute]);
 
@@ -145,7 +145,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     }
   };
 
-  const someChecked = action => {
+  const someChecked = (action) => {
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return (
@@ -153,13 +153,13 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
     );
   };
 
-  const allRecursiveChecked = action => {
+  const allRecursiveChecked = (action) => {
     const recursivePermissions = getRecursiveAttributesPermissions(action);
 
     return isCollapsable && recursivePermissions === recursiveAttributes.length;
   };
 
-  const isChecked = action => {
+  const isChecked = (action) => {
     return allRecursiveChecked(action) || checkPermission(action);
   };
 
@@ -195,7 +195,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
             </CollapseLabel>
           </RowStyle>
           <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
-            {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
+            {ATTRIBUTES_PERMISSIONS_ACTIONS.map((action) => (
               <PermissionCheckbox
                 disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
                 key={`${attribute.attributeName}-${action}`}

@@ -10,7 +10,7 @@ const createRequest = (defaults = {}) => {
   });
 };
 
-const createAuthRequest = token => {
+const createAuthRequest = (token) => {
   return createRequest({
     headers: {
       Authorization: `Bearer ${token}`,

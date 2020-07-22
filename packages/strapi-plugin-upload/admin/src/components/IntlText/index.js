@@ -6,7 +6,7 @@ import Text from '../Text';
 
 const IntlText = ({ id, defaultMessage, values, ...textProps }) => (
   <FormattedMessage id={id} defaultMessage={defaultMessage} values={values}>
-    {msg => <Text {...textProps}>{msg}</Text>}
+    {(msg) => <Text {...textProps}>{msg}</Text>}
   </FormattedMessage>
 );
 

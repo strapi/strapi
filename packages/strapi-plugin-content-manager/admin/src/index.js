@@ -15,7 +15,7 @@ import lifecycles from './lifecycles';
 import reducers from './reducers';
 import trads from './translations';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const plugin = {
     blockerComponent: null,

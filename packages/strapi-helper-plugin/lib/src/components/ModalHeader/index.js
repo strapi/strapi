@@ -11,7 +11,7 @@ import Wrapper from './Wrapper';
 const ModalHeader = ({ headerBreadcrumbs, onClickGoBack, withBackButton, HeaderComponent }) => {
   /* eslint-disable indent */
   const translatedHeaders = headerBreadcrumbs
-    ? headerBreadcrumbs.map(headerTrad => ({
+    ? headerBreadcrumbs.map((headerTrad) => ({
         key: headerTrad,
         element: <FormattedMessage id={headerTrad} defaultMessage={headerTrad} />,
       }))

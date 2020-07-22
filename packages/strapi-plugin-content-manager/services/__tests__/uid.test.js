@@ -34,7 +34,7 @@ describe('Test uid service', () => {
 
     test('Calls findUniqueUID', async () => {
       const tmpFn = uidService.findUniqueUID;
-      uidService.findUniqueUID = jest.fn(v => v);
+      uidService.findUniqueUID = jest.fn((v) => v);
 
       global.strapi = {
         contentTypes: {

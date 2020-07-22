@@ -3,11 +3,11 @@
  * @param  {String} search
  * @return {Object}
  */
-const generateFiltersFromSearch = search => {
+const generateFiltersFromSearch = (search) => {
   return search
     .split('&')
     .filter(
-      x =>
+      (x) =>
         !x.includes('_limit') &&
         !x.includes('_page') &&
         !x.includes('_sort') &&

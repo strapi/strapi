@@ -15,7 +15,7 @@ const getAttributesByModel = (contentType, components, attributeNamePrefix) => {
 
       if (currentAttribute.type === 'component') {
         const component = components.find(
-          component => component.uid === currentAttribute.component
+          (component) => component.uid === currentAttribute.component
         );
 
         if (!attributeName[0]) {

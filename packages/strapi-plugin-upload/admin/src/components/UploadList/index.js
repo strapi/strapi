@@ -51,7 +51,7 @@ const UploadList = ({
           {matrix.map(({ key, rowContent }) => {
             return (
               <div className="row" key={key}>
-                {rowContent.map(data => {
+                {rowContent.map((data) => {
                   return (
                     <RowItem
                       {...data}

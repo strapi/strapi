@@ -7,7 +7,7 @@ Controllers are JavaScript files which contain a set of methods called **actions
 ```js
 module.exports = {
   // GET /hello
-  index: async ctx => {
+  index: async (ctx) => {
     return 'Hello World!';
   },
 };
@@ -67,7 +67,7 @@ module.exports = {
       entities = await strapi.services.restaurant.find(ctx.query);
     }
 
-    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.restaurant }));
+    return entities.map((entity) => sanitizeEntity(entity, { model: strapi.models.restaurant }));
   },
 };
 ```
@@ -254,7 +254,7 @@ Our `index` action will return `Hello World!`. You can also return a JSON object
 ```js
 module.exports = {
   // GET /hello
-  index: async ctx => {
+  index: async (ctx) => {
     ctx.send('Hello World!');
   },
 };

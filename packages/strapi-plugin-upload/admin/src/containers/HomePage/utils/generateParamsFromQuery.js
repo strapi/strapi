@@ -1,4 +1,4 @@
-const generateParamsFromQuery = query => {
+const generateParamsFromQuery = (query) => {
   const params = {
     _limit: 10,
     _start: 0,

@@ -48,7 +48,7 @@ const PermissionRow = ({
       </RowStyle>
       {openedCategory === permissions.category && (
         <PermissionsWrapper>
-          {permissions.subCategories.map(subCategory => (
+          {permissions.subCategories.map((subCategory) => (
             <SubCategory key={subCategory.subCategory} subCategory={subCategory} />
           ))}
         </PermissionsWrapper>

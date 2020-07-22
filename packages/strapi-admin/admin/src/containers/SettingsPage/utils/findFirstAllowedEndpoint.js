@@ -1,11 +1,11 @@
 import { flatMap } from 'lodash';
 
-const generateArrayOfLinks = array => flatMap(array, 'links');
+const generateArrayOfLinks = (array) => flatMap(array, 'links');
 
-const findFirstAllowedEndpoint = menuArray => {
+const findFirstAllowedEndpoint = (menuArray) => {
   const arrayOfLinks = generateArrayOfLinks(menuArray);
 
-  const link = arrayOfLinks.find(link => link.isDisplayed === true);
+  const link = arrayOfLinks.find((link) => link.isDisplayed === true);
 
   return link ? link.to : null;
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { Remove } from '@buffetjs/icons';
 import { components } from 'react-select';
 
-const ClearIndicator = props => {
+const ClearIndicator = (props) => {
   const Component = components.ClearIndicator;
 
   return (

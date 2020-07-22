@@ -21,10 +21,10 @@ const ListEmpty = ({ canCreate, hasSearchApplied, onClick, numberOfRows }) => {
 
   return (
     <Wrapper className="container-fluid">
-      {rows.map(row => {
+      {rows.map((row) => {
         return (
           <div className="row" key={row.key}>
-            {row.rows.map(key => {
+            {row.rows.map((key) => {
               return (
                 <div className="col-xs-12 col-md-6 col-xl-3" key={key}>
                   <CardEmpty />

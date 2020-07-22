@@ -15,7 +15,7 @@ export const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'COLLAPSE_PATH': {
         const { index, value } = action;
@@ -48,7 +48,7 @@ const reducer = (state, action) =>
 
           // Don't remove an action of a required field
           return !attribute.required
-            ? attributeActions.filter(action => action !== permissionAction)
+            ? attributeActions.filter((action) => action !== permissionAction)
             : attributeActions;
         };
 
@@ -171,7 +171,7 @@ const reducer = (state, action) =>
             state.contentTypesPermissions,
             [subject, 'attributes', attribute, 'actions'],
             []
-          ).filter(action => action !== permissionAction);
+          ).filter((action) => action !== permissionAction);
         }
 
         const willRemoveLastAction = subjectActions === 1 && isExist;
@@ -232,7 +232,7 @@ const reducer = (state, action) =>
 
         if (!shouldEnable) {
           attributesPermissions = attributes
-            .filter(attribute => !attribute.required)
+            .filter((attribute) => !attribute.required)
             .reduce((acc, attribute) => {
               return {
                 ...acc,
@@ -247,7 +247,7 @@ const reducer = (state, action) =>
                       state.contentTypesPermissions,
                       [subject, 'attributes', attribute.attributeName, 'actions'],
                       []
-                    ).filter(action => action !== permissionAction),
+                    ).filter((action) => action !== permissionAction),
                   ],
                 },
               };
@@ -316,7 +316,7 @@ const reducer = (state, action) =>
           state.permissionsLayout,
           ['sections', 'contentTypes'],
           []
-        ).map(contentTypeAction => contentTypeAction.action);
+        ).map((contentTypeAction) => contentTypeAction.action);
 
         let attributesActions = attributes.reduce((acc, attribute) => {
           return {
@@ -387,7 +387,7 @@ const reducer = (state, action) =>
       case 'ON_PLUGIN_SETTING_ACTION': {
         const { action: permissionAction } = action;
         const permissionIndex = state.pluginsAndSettingsPermissions.findIndex(
-          permission => permission.action === permissionAction
+          (permission) => permission.action === permissionAction
         );
 
         if (permissionIndex === -1) {
@@ -410,7 +410,7 @@ const reducer = (state, action) =>
       case 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS': {
         const { actions, shouldEnable } = action;
 
-        const actionsToAdd = actions.map(permission => ({
+        const actionsToAdd = actions.map((permission) => ({
           action: permission.action,
           // For the moment, this will reset the conditions object
           // but it will be changed after the conditions US

@@ -13,7 +13,7 @@ const generateRows = (obj, onConfirm) => {
     };
   });
 
-  return sortBy(rows, [obj => obj.name.toLowerCase()]);
+  return sortBy(rows, [(obj) => obj.name.toLowerCase()]);
 };
 
 export default generateRows;

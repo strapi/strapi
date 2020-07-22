@@ -27,8 +27,8 @@ function SelectMany({
   value,
 }) {
   const [, drop] = useDrop({ accept: ItemTypes.RELATION });
-  const findRelation = id => {
-    const relation = value.filter(c => {
+  const findRelation = (id) => {
+    const relation = value.filter((c) => {
       return `${c.id}` === `${id}`;
     })[0];
 
@@ -62,7 +62,7 @@ function SelectMany({
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected = value.findIndex((item) => item.id === candidate.value.id) !== -1;
 
             if (isSelected) {
               return false;

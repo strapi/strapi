@@ -50,7 +50,7 @@ class OverlayBlocker extends React.Component {
       return;
     }
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       elapsed: Math.round(Date.now() - prevState.start) / 1000,
     }));
   };

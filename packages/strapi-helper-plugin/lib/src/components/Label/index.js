@@ -26,11 +26,7 @@ function Label(props) {
   }
 
   return (
-    <StyledLabel
-      className={props.className}
-      htmlFor={props.htmlFor}
-      style={props.style}
-    >
+    <StyledLabel className={props.className} htmlFor={props.htmlFor} style={props.style}>
       {content}
     </StyledLabel>
   );

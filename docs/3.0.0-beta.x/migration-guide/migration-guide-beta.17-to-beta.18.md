@@ -548,7 +548,7 @@ strapi console
 ```
 
 ```js
-Object.keys(strapi.components).map(key => strapi.components[key].globalId);
+Object.keys(strapi.components).map((key) => strapi.components[key].globalId);
 //[
 // 'ComponentCategoryMyComponent',
 // 'ComponentCategoryMyOtherComponent',
@@ -589,7 +589,7 @@ db.collection.renameCollection('groups_my_group', 'components_my_component');
 To know the old `kind` name of a group here is the function that creates it:
 
 ```js
-toGlobalId = name => upperFirst(camelCase(`group_${name}`));
+toGlobalId = (name) => upperFirst(camelCase(`group_${name}`));
 // my-group => GroupMyGroup
 ```
 

@@ -18,7 +18,7 @@ const sortOptions = {
 const SortList = ({ onClick, selectedItem }) => {
   return (
     <ListWrapper>
-      {Object.keys(sortOptions).map(item => {
+      {Object.keys(sortOptions).map((item) => {
         return (
           <ListItem
             key={item}

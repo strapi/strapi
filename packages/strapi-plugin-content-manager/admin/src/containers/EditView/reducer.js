@@ -7,7 +7,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, drafState => {
+  produce(state, (drafState) => {
     switch (action.type) {
       case 'SET_IS_DRAGGING_COMPONENT': {
         drafState.isDraggingComponent = true;

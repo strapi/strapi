@@ -14,13 +14,13 @@ import Wrapper from './Wrapper';
 
 const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }) => {
   const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
-  const initialIcons = allIcons.filter(ico => {
+  const initialIcons = allIcons.filter((ico) => {
     if (isCreating) {
       return !allComponentsIconAlreadyTaken.includes(ico);
     }
 
     // Edition
-    return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
+    return !allComponentsIconAlreadyTaken.filter((icon) => icon !== originalIcon).includes(ico);
   });
   const ref = useRef();
   const searchWrapperRef = useRef();
@@ -28,7 +28,7 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
   const [icons, setIcons] = useState(initialIcons);
-  const toggleSearch = () => setShowSearch(prev => !prev);
+  const toggleSearch = () => setShowSearch((prev) => !prev);
 
   useClickAwayListener(searchWrapperRef, () => {
     setShowSearch(false);
@@ -66,7 +66,7 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
 
   const handleChangeSearch = ({ target: { value } }) => {
     setSearch(value);
-    setIcons(() => initialIcons.filter(icon => icon.includes(value)));
+    setIcons(() => initialIcons.filter((icon) => icon.includes(value)));
   };
 
   return (

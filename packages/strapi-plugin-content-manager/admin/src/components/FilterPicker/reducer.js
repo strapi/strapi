@@ -10,7 +10,7 @@ const initialState = fromJS({
 function reducer(state, action) {
   switch (action.type) {
     case 'ADD_FILTER':
-      return state.update('modifiedData', list => list.push(fromJS(action.filter)));
+      return state.update('modifiedData', (list) => list.push(fromJS(action.filter)));
     case 'ON_CHANGE': {
       const [index, key] = action.keys;
 
@@ -22,7 +22,7 @@ function reducer(state, action) {
 
           return action.value;
         })
-        .updateIn(['modifiedData', index, 'value'], value => {
+        .updateIn(['modifiedData', index, 'value'], (value) => {
           if (key === 'name') {
             const attribute = state.getIn(['attributes', action.value]);
             const attributeType = attribute.get('type');

@@ -7,7 +7,7 @@ const Title = styled.div`
   padding-right: 1.6rem;
   padding-top: 1rem;
   margin-bottom: 0.9rem;
-  color: ${props => props.theme.main.colors.leftMenu['title-color']};
+  color: ${(props) => props.theme.main.colors.leftMenu['title-color']};
   text-transform: uppercase;
   font-size: 1.1rem;
   letter-spacing: 0.1rem;

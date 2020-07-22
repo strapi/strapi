@@ -1,4 +1,4 @@
-const createNewFilesToUploadArray = filesObject => {
+const createNewFilesToUploadArray = (filesObject) => {
   return Object.keys(filesObject).reduce((acc, current) => {
     const currentFile = filesObject[current];
     const abortController = new AbortController();

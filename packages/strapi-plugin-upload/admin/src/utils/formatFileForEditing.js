@@ -1,6 +1,6 @@
 import { pick } from 'lodash';
 
-const formatFileForEditing = file => {
+const formatFileForEditing = (file) => {
   const abortController = new AbortController();
 
   return {

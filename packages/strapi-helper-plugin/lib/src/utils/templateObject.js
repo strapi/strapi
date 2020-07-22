@@ -4,7 +4,7 @@ const templateObject = function(obj, variables) {
   // Allow values which looks like such as
   // an ES6 literal string without parenthesis inside (aka function call).
   const regex = /\$\{[\S]*\}/g;
-  const replacer = match => {
+  const replacer = (match) => {
     const key = match.substring(0, match.length - 1).replace('${', '');
 
     return variables[key];

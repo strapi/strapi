@@ -15,7 +15,7 @@ export function showNotification(message, status) {
   nextNotificationId++; // eslint-disable-line no-plusplus
 
   // Start timeout to hide the notification
-  (id => {
+  ((id) => {
     setTimeout(() => {
       dispatch(hideNotification(id));
     }, 2500);

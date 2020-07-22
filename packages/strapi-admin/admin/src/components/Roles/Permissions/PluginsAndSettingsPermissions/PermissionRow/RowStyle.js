@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Text } from '@buffetjs/core';
 
-const activeStyle = theme => `
+const activeStyle = (theme) => `
     background-color: #e4f0fc;
     border: 1px solid ${theme.main.colors.darkBlue};
     ${Text} {

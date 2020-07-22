@@ -9,15 +9,15 @@ import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
 
 const NonRepeatableComponent = ({ componentUid, fields, isFromDynamicZone, name, schema }) => {
-  const getField = fieldName => get(schema, ['schema', 'attributes', fieldName], {});
-  const getMeta = fieldName => get(schema, ['metadatas', fieldName, 'edit'], {});
+  const getField = (fieldName) => get(schema, ['schema', 'attributes', fieldName], {});
+  const getMeta = (fieldName) => get(schema, ['metadatas', fieldName, 'edit'], {});
 
   return (
     <NonRepeatableWrapper isFromDynamicZone={isFromDynamicZone}>
       {fields.map((fieldRow, key) => {
         return (
           <div className="row" key={key}>
-            {fieldRow.map(field => {
+            {fieldRow.map((field) => {
               const currentField = getField(field.name);
               const isComponent = get(currentField, 'type', '') === 'component';
               const keys = `${name}.${field.name}`;

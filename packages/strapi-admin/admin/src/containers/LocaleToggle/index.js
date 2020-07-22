@@ -20,7 +20,7 @@ export class LocaleToggle extends React.Component {
   // eslint-disable-line
   state = { isOpen: false };
 
-  getFlagUrl = locale => {
+  getFlagUrl = (locale) => {
     switch (locale) {
       case 'en':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/us.svg';
@@ -51,7 +51,7 @@ export class LocaleToggle extends React.Component {
     }
   };
 
-  toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  toggle = () => this.setState((prevState) => ({ isOpen: !prevState.isOpen }));
 
   render() {
     const {
@@ -69,7 +69,7 @@ export class LocaleToggle extends React.Component {
           </DropdownToggle>
 
           <DropdownMenu className={style}>
-            {languages.map(language => (
+            {languages.map((language) => (
               <DropdownItem
                 key={language}
                 onClick={() => this.props.changeLocale(language)}

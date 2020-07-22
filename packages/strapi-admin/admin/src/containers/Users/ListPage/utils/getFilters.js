@@ -1,4 +1,4 @@
-const getFilters = search => {
+const getFilters = (search) => {
   const query = new URLSearchParams(search);
   const filters = [];
 

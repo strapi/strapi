@@ -13,7 +13,7 @@ const Wrapper = styled.div`
     `};
   min-height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
   padding: 0 10px 0 0;
-  flex-basis: calc(100% / ${props => props.count});
+  flex-basis: calc(100% / ${(props) => props.count});
   flex-shrink: 1;
   min-width: 130px;
   position: relative;
@@ -21,12 +21,7 @@ const Wrapper = styled.div`
   .sub_wrapper {
     position: relative;
     cursor: pointer;
-    background-color: ${({
-      isOverEditBlock,
-      isOverRemove,
-      isSelected,
-      isSub,
-    }) => {
+    background-color: ${({ isOverEditBlock, isOverRemove, isSelected, isSub }) => {
       if (isOverRemove) {
         return '#ffe9e0';
       } else if (isSelected || isOverEditBlock) {

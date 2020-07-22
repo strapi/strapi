@@ -28,7 +28,7 @@ function DynamicZoneList({
   const { isInDevelopmentMode } = useDataManager();
   const [activeTab, setActiveTab] = useState('0');
 
-  const toggle = tab => {
+  const toggle = (tab) => {
     if (activeTab !== tab) {
       setActiveTab(tab);
     }

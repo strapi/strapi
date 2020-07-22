@@ -33,9 +33,9 @@ const Card = ({ onChange }) => {
   };
 
   const renderFiltersOptions = () => {
-    return form[name].allowedFilters.map(filter => (
+    return form[name].allowedFilters.map((filter) => (
       <FormattedMessage id={filter.id} key={filter.id}>
-        {msg => <option value={filter.value}>{msg}</option>}
+        {(msg) => <option value={filter.value}>{msg}</option>}
       </FormattedMessage>
     ));
   };

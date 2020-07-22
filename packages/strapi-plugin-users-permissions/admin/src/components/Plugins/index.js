@@ -16,7 +16,7 @@ import { Header, PluginsContainer, Wrapper } from './Components';
 class Plugins extends React.Component {
   state = { pluginSelected: '' };
 
-  changePluginSelected = name => this.setState({ pluginSelected: name });
+  changePluginSelected = (name) => this.setState({ pluginSelected: name });
 
   render() {
     return (
@@ -31,11 +31,9 @@ class Plugins extends React.Component {
             </div>
           </Header>
           <PluginsContainer
-            className={
-              !has(this.props.plugins, 'application') && 'pluginsGradient'
-            }
+            className={!has(this.props.plugins, 'application') && 'pluginsGradient'}
           >
-            {map(Object.keys(this.props.plugins).sort(), plugin => (
+            {map(Object.keys(this.props.plugins).sort(), (plugin) => (
               <Plugin
                 changePluginSelected={this.changePluginSelected}
                 key={plugin}

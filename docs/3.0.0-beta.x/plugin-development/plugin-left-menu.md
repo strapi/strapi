@@ -7,7 +7,7 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 
 // ...
 
-const Foo = props => {
+const Foo = (props) => {
   const sections = [
     {
       name: 'section 1',
@@ -52,7 +52,7 @@ import PluginLeftMenu from 'components/PluginLeftMenu';
 
 // ...
 
-const addCustomSection = sectionStyles => (
+const addCustomSection = (sectionStyles) => (
   // You have access to the section styles
   <div className={sectionStyles.pluginLeftMenuSection}>
     <p>DOCUMENTATION</p>
@@ -69,10 +69,7 @@ const addCustomSection = sectionStyles => (
 
 const renderAddLink = (props, customLinkStyles) => (
   <li className={customLinkStyles.pluginLeftMenuLink}>
-    <div
-      className={`${customLinkStyles.liInnerContainer}`}
-      onClick={this.handleAddLinkClick}
-    >
+    <div className={`${customLinkStyles.liInnerContainer}`} onClick={this.handleAddLinkClick}>
       <div>
         <i className={`fa ${props.link.icon}`} />
       </div>
@@ -102,7 +99,7 @@ const renderCustomLink = (props, linkStyles) => {
   );
 };
 
-const Foo = props => {
+const Foo = (props) => {
   const sections = [
     {
       name: 'section 1',

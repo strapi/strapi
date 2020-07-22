@@ -4,7 +4,7 @@ const _ = require('lodash');
  * remove condition ids that don't exist
  * @returns {[string]}
  */
-const removeUnkownConditionIds = conditionsIds => {
+const removeUnkownConditionIds = (conditionsIds) => {
   if (!Array.isArray(conditionsIds)) {
     return conditionsIds;
   }

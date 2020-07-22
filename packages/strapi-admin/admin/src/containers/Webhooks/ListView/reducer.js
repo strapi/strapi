@@ -15,24 +15,24 @@ const reducer = (state, action) => {
     case 'SET_WEBHOOK_TO_DELETE':
       return state.update('webhookToDelete', () => action.id);
     case 'SET_WEBHOOKS_TO_DELETE':
-      return state.update('webhooksToDelete', list => {
+      return state.update('webhooksToDelete', (list) => {
         if (action.value) {
           return list.push(action.id);
         }
 
-        return list.filter(data => data !== action.id);
+        return list.filter((data) => data !== action.id);
       });
     case 'WEBHOOKS_DELETED':
       return state
-        .update('webhooks', webhooks =>
-          webhooks.filter(webhook => {
+        .update('webhooks', (webhooks) =>
+          webhooks.filter((webhook) => {
             return !state.get('webhooksToDelete').includes(webhook.get('id'));
           })
         )
         .update('webhooksToDelete', () => []);
     case 'WEBHOOK_DELETED':
       return state
-        .update('webhooks', webhooks => webhooks.remove(action.index))
+        .update('webhooks', (webhooks) => webhooks.remove(action.index))
         .update('webhookToDelete', () => null);
     default:
       return state;

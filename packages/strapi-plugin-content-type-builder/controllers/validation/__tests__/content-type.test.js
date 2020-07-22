@@ -52,7 +52,7 @@ describe('Content type validator', () => {
         },
       };
 
-      await validateUpdateContentTypeInput(data).catch(err => {
+      await validateUpdateContentTypeInput(data).catch((err) => {
         expect(err).toMatchObject({
           'contentType.attributes.thisIsReserved': [
             expect.stringMatching('Attribute keys cannot be one of'),
@@ -75,7 +75,7 @@ describe('Content type validator', () => {
         },
       };
 
-      await validateContentTypeInput(data).catch(err => {
+      await validateContentTypeInput(data).catch((err) => {
         expect(err).toMatchObject({
           'contentType.name': [expect.stringMatching('cannot be pluralized')],
         });

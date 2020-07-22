@@ -13,10 +13,7 @@ function InputErrors(props) {
       {map(props.errors, (error, key) => {
         const displayError =
           isObject(error) && error.id ? (
-            <FormattedMessage
-              {...error}
-              values={{ errorMessage: error.errorMessage }}
-            />
+            <FormattedMessage {...error} values={{ errorMessage: error.errorMessage }} />
           ) : (
             error
           );

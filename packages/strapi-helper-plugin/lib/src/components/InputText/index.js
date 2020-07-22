@@ -12,7 +12,7 @@ function InputText(props) {
 
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-      {message => (
+      {(message) => (
         <Input
           autoFocus={props.autoFocus}
           className={cn(

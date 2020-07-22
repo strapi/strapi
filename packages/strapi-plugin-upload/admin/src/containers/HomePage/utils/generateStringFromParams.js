@@ -6,10 +6,10 @@ const generateStringFromParams = (query, paramsToFilter = []) => {
   const paramsObject = generateParamsFromQuery(query);
 
   Object.keys(paramsObject)
-    .filter(key => {
+    .filter((key) => {
       return !paramsToFilter.includes(key) && !isEmpty(toString(paramsObject[key]));
     })
-    .forEach(key => {
+    .forEach((key) => {
       const value = paramsObject[key];
 
       if (key.includes('mime') && value === 'file') {

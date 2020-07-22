@@ -57,7 +57,7 @@ const RelationFormNaturePicker = ({
     <Wrapper>
       <div className="nature-container">
         <div className="nature-buttons">
-          {relationsType.map(relationNature => {
+          {relationsType.map((relationNature) => {
             const Asset = relations[relationNature];
 
             return (

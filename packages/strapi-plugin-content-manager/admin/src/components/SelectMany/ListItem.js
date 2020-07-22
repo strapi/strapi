@@ -29,7 +29,7 @@ function ListItem({
       data,
       mainField,
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
@@ -52,7 +52,7 @@ function ListItem({
 
   return (
     <Li
-      ref={node => {
+      ref={(node) => {
         if (!isDisabled) {
           drag(drop(node));
         }

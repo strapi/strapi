@@ -3,16 +3,10 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
-const DynamicComponentCard = ({
-  children,
-  componentUid,
-  friendlyName,
-  icon,
-  onClick,
-}) => {
+const DynamicComponentCard = ({ children, componentUid, friendlyName, icon, onClick }) => {
   return (
     <Wrapper
-      onClick={e => {
+      onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
 

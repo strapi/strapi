@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-const retrieveGlobalLinks = pluginsObj => {
+const retrieveGlobalLinks = (pluginsObj) => {
   return Object.values(pluginsObj).reduce((acc, current) => {
     const links = get(current, ['settings', 'global', 'links'], null);
 

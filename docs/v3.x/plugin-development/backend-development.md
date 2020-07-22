@@ -52,7 +52,7 @@ You already have `User` model defining in your `./api/user/models/User.settings.
 
 ```js
 module.exports = {
-  findUser: async function(params) {
+  findUser: async function (params) {
     // This `User` global variable will always make a reference the User model defining in your `./api/xxx/models/User.settings.json`.
     return await User.find();
   },

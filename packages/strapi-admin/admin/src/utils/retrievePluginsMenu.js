@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-const retrievePluginsMenu = pluginsObj => {
+const retrievePluginsMenu = (pluginsObj) => {
   return Object.values(pluginsObj).reduce((acc, current) => {
     const pluginMenu = get(current, ['settings', 'menuSection'], null);
 

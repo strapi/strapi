@@ -14,7 +14,7 @@ const getRequest = (model, sort = '_id') => {
 describe('Testing Content Manager createPages', function() {
   before(() => {
     cy.login()
-      .then(data => {
+      .then((data) => {
         jwt = data.jwt;
 
         return cy.createCTMApis(data.jwt).then(() => jwt);
@@ -22,35 +22,25 @@ describe('Testing Content Manager createPages', function() {
       .wait(1000);
 
     Cypress.Commands.add('ctmTagLink', () => {
-      return cy.get(
-        'a[href="/admin/plugins/content-manager/tag?source=content-manager"]'
-      );
+      return cy.get('a[href="/admin/plugins/content-manager/tag?source=content-manager"]');
     });
     Cypress.Commands.add('ctmProductLink', () => {
-      return cy.get(
-        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-      );
+      return cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"]');
     });
     Cypress.Commands.add('ctmCategoryLink', () => {
-      return cy.get(
-        'a[href="/admin/plugins/content-manager/category?source=content-manager"]'
-      );
+      return cy.get('a[href="/admin/plugins/content-manager/category?source=content-manager"]');
     });
     Cypress.Commands.add('ctmAddButton', () => {
       return cy.get('button#addEntry');
     });
-    Cypress.Commands.add('inputError', name => {
+    Cypress.Commands.add('inputError', (name) => {
       return cy.get(`#errorOf${name} > span`);
     });
     Cypress.Commands.add('getListTagsOrderedByName', () => {
-      return cy
-        .ctmTagLink()
-        .click()
-        .get('tr > th:nth-child(3) > span')
-        .click();
+      return cy.ctmTagLink().click().get('tr > th:nth-child(3) > span').click();
     });
-    Cypress.Commands.add('fillProductForm', product => {
-      Object.keys(product).forEach(key => {
+    Cypress.Commands.add('fillProductForm', (product) => {
+      Object.keys(product).forEach((key) => {
         if (key === 'description') {
           cy.get(`textarea[name="${key}"]`).type(product[key]);
         } else {
@@ -58,7 +48,7 @@ describe('Testing Content Manager createPages', function() {
         }
       });
     });
-    Cypress.Commands.add('getProduct', index => {
+    Cypress.Commands.add('getProduct', (index) => {
       return cy
         .ctmProductLink()
         .click()
@@ -73,9 +63,7 @@ describe('Testing Content Manager createPages', function() {
   });
 
   after(() => {
-    cy.deleteApi('tag', jwt)
-      .deleteApi('category', jwt)
-      .deleteApi('product', jwt);
+    cy.deleteApi('tag', jwt).deleteApi('category', jwt).deleteApi('product', jwt);
   });
 
   context('Creating data with no relation', () => {
@@ -83,7 +71,7 @@ describe('Testing Content Manager createPages', function() {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initContentManager');
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
         })
         .visit('/admin')
@@ -100,10 +88,7 @@ describe('Testing Content Manager createPages', function() {
     it('Should create a tag with no relation', () => {
       cy.server();
       cy.route(getRequest('tag')).as('getTags');
-      cy.ctmTagLink()
-        .click()
-        .ctmAddButton()
-        .click();
+      cy.ctmTagLink().click().ctmAddButton().click();
       const tagsToCreate = [
         'tag1',
         'tag2',
@@ -207,7 +192,7 @@ describe('Testing Content Manager createPages', function() {
         .window()
         .its('__store__')
         .its('store')
-        .then(pluginStore => {
+        .then((pluginStore) => {
           const records = pluginStore
             .getState()
             .getIn(['content-manager_listPage', 'records', 'tag'])
@@ -223,15 +208,15 @@ describe('Testing Content Manager createPages', function() {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initContentManager');
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
 
           return data.jwt;
         })
-        .then(jwt => {
+        .then((jwt) => {
           return cy.seedData('tag', jwt).then(() => jwt);
         })
-        .then(jwt => {
+        .then((jwt) => {
           return cy.seedData('category', jwt);
         });
     });
@@ -240,7 +225,7 @@ describe('Testing Content Manager createPages', function() {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initContentManager');
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
 
           return data.jwt;
@@ -255,10 +240,7 @@ describe('Testing Content Manager createPages', function() {
       cy.route(
         `${backendUrl}/content-manager/explorer/tag?_limit=10&_start=0&_sort=name:ASC&source=content-manager`
       ).as('getTags');
-      cy.ctmProductLink()
-        .click()
-        .ctmAddButton()
-        .click();
+      cy.ctmProductLink().click().ctmAddButton().click();
 
       // Test default value
       cy.get('button#__OFF__bool')
@@ -276,7 +258,7 @@ describe('Testing Content Manager createPages', function() {
         email: 'hi@strapi.io',
       };
 
-      Object.keys(product).forEach(key => {
+      Object.keys(product).forEach((key) => {
         if (key === 'description') {
           cy.get(`textarea[name="${key}"]`).type(product[key]);
         } else {
@@ -284,10 +266,7 @@ describe('Testing Content Manager createPages', function() {
         }
       });
 
-      cy.get('button#__ON__bool')
-        .click()
-        .get('button#__OFF__bool1')
-        .click();
+      cy.get('button#__ON__bool').click().get('button#__OFF__bool1').click();
 
       cy.get('input#tags')
         .type('special t', { force: true })
@@ -296,7 +275,7 @@ describe('Testing Content Manager createPages', function() {
         .type('{enter}', { force: true })
         .get('ul#sortableListOftags')
         .children('li')
-        .should(children => {
+        .should((children) => {
           expect(children[0].innerText.trim()).to.equal('special tag');
           expect(children[1].innerText.trim()).to.equal('tag1');
         })
@@ -314,7 +293,7 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .get('ul#sortableListOfproducts')
         .children()
-        .should(children => {
+        .should((children) => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         });
@@ -326,7 +305,7 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .get('ul#sortableListOfproducts')
         .children()
-        .should(children => {
+        .should((children) => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         });
@@ -338,9 +317,7 @@ describe('Testing Content Manager createPages', function() {
         .get('tbody > tr:nth-child(2)')
         .click()
         .wait(1000)
-        .get(
-          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img'
-        )
+        .get('ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img')
         .click()
         .submitForm()
         .ctmProductLink()
@@ -351,7 +328,7 @@ describe('Testing Content Manager createPages', function() {
         .wait(frontLoadingDelay)
         .get('ul#sortableListOftags')
         .children()
-        .should(children => {
+        .should((children) => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('special tag');
         });
@@ -378,10 +355,7 @@ describe('Testing Content Manager createPages', function() {
         email: 'bob@strapi.io',
       };
 
-      cy.ctmProductLink()
-        .click()
-        .ctmAddButton()
-        .click();
+      cy.ctmProductLink().click().ctmAddButton().click();
 
       cy.fillProductForm(product)
         .submitForm()
@@ -399,13 +373,11 @@ describe('Testing Content Manager createPages', function() {
         .get('ul#sortableListOfproducts')
         .as('relations')
         .children()
-        .should(children => {
+        .should((children) => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         })
-        .get(
-          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img'
-        )
+        .get('ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img')
         .click()
         .get('input#products')
         .type('mac', { force: true })
@@ -414,14 +386,14 @@ describe('Testing Content Manager createPages', function() {
         .type('{enter}', { force: true })
         .get('@relations')
         .children()
-        .should(children => {
+        .should((children) => {
           expect(children).to.have.length(2);
           expect(children[0].innerText.trim()).to.equal('MacBook');
           expect(children[1].innerText.trim()).to.equal('Dell');
         })
         .submitForm();
 
-      cy.getProduct(1).then(pluginStore => {
+      cy.getProduct(1).then((pluginStore) => {
         const category = pluginStore
           .getState()
           .getIn(['content-manager_editPage', 'record', 'category']);
@@ -430,7 +402,7 @@ describe('Testing Content Manager createPages', function() {
       });
 
       cy.getProduct(2)
-        .then(pluginStore => {
+        .then((pluginStore) => {
           const category = pluginStore
             .getState()
             .getIn(['content-manager_editPage', 'record', 'category', 'name']);
@@ -438,7 +410,7 @@ describe('Testing Content Manager createPages', function() {
           expect(category).to.equal('french food');
         })
         .getProduct(3)
-        .then(pluginStore => {
+        .then((pluginStore) => {
           const category = pluginStore
             .getState()
             .getIn(['content-manager_editPage', 'record', 'category', 'name']);

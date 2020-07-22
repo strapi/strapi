@@ -7,16 +7,11 @@ import Input from './Input';
 
 function InputNumber(props) {
   const formattedPlaceholder =
-    props.placeholder === ''
-      ? 'app.utils.placeholder.defaultMessage'
-      : props.placeholder;
+    props.placeholder === '' ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
 
   return (
-    <FormattedMessage
-      id={formattedPlaceholder}
-      defaultMessage={formattedPlaceholder}
-    >
-      {message => (
+    <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
+      {(message) => (
         <Input
           autoFocus={props.autoFocus}
           className={cn(

@@ -2,7 +2,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Carret } from '@buffetjs/icons';
 
-const Button = isOpen => {
+const Button = (isOpen) => {
   return (
     <>
       <FormattedMessage id="app.components.Users.SortPicker.button-label" />

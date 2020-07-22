@@ -29,15 +29,15 @@ const SubCategory = ({ subCategory }) => {
   } = usePermissionsContext();
 
   const checkPermission = useCallback(
-    action => {
+    (action) => {
       return (
-        pluginsAndSettingsPermissions.findIndex(permission => permission.action === action) !== -1
+        pluginsAndSettingsPermissions.findIndex((permission) => permission.action === action) !== -1
       );
     },
     [pluginsAndSettingsPermissions]
   );
 
-  const handlePermission = action => {
+  const handlePermission = (action) => {
     onPluginSettingPermission(action);
   };
 
@@ -85,31 +85,32 @@ const SubCategory = ({ subCategory }) => {
   };
 
   const handleToggleModal = () => {
-    setModal(prev => ({
+    setModal((prev) => ({
       ...prev,
       isOpen: !prev.isOpen,
     }));
   };
 
   const handleClosed = () => {
-    setModal(prev => ({ ...prev, isMounted: false }));
+    setModal((prev) => ({ ...prev, isMounted: false }));
   };
 
   const actionsForConditions = useMemo(() => {
-    return currentPermissions.map(permission => ({
+    return currentPermissions.map((permission) => ({
       id: permission.action,
-      displayName: subCategory.actions.find(perm => perm.action === permission.action).displayName,
+      displayName: subCategory.actions.find((perm) => perm.action === permission.action)
+        .displayName,
     }));
   }, [currentPermissions, subCategory.actions]);
 
   const checkCategory = useCallback(
-    action => {
+    (action) => {
       return categoryConditions[action] ? categoryConditions[action].length > 0 : false;
     },
     [categoryConditions]
   );
 
-  const handleConditionsSubmit = conditions => {
+  const handleConditionsSubmit = (conditions) => {
     onPluginSettingConditionsSelect(conditions);
   };
 
@@ -144,7 +145,7 @@ const SubCategory = ({ subCategory }) => {
         <BaselineAlignment />
         <Padded top size="xs">
           <Flex flexWrap="wrap">
-            {subCategory.actions.map(sc => (
+            {subCategory.actions.map((sc) => (
               <CheckboxWrapper disabled hasConditions={checkCategory(sc.action)} key={sc.action}>
                 <Checkbox
                   value={checkPermission(sc.action)}

@@ -1,9 +1,9 @@
 import { chain, get } from 'lodash';
 
-const generateLinks = links => {
+const generateLinks = (links) => {
   return links
-    .filter(link => link.isDisplayed)
-    .map(link => {
+    .filter((link) => link.isDisplayed)
+    .map((link) => {
       return {
         icon: 'circle',
         destination: `/plugins/content-manager/${link.schema.kind}/${link.uid}`,
@@ -18,7 +18,7 @@ const generateLinks = links => {
     });
 };
 
-const generateModelsLinks = models => {
+const generateModelsLinks = (models) => {
   const [collectionTypes, singleTypes] = chain(models)
     .groupBy('schema.kind')
     .map((value, key) => ({ name: key, links: value }))

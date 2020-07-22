@@ -25,7 +25,7 @@ describe('adminReducer', () => {
   });
 
   it('should handle the setAppError action correctly', () => {
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.appError = true;
     });
 
@@ -33,7 +33,7 @@ describe('adminReducer', () => {
   });
 
   it('should handle the getUserPermissions action correctly', () => {
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = true;
     });
 
@@ -42,7 +42,7 @@ describe('adminReducer', () => {
 
   it('should handle the getUserPermissionsError action correctly', () => {
     const error = 'Error';
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = false;
       draft.error = error;
     });
@@ -52,7 +52,7 @@ describe('adminReducer', () => {
 
   it('should handle the getUserPermissionsSucceeded action correctly', () => {
     const data = ['permission 1', 'permission 2'];
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = false;
       draft.userPermissions = data;
     });

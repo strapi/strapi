@@ -76,9 +76,9 @@ module.exports = {
       type: 'text',
     },
   },
-  init: config => {
+  init: (config) => {
     return {
-      send: async options => {},
+      send: async (options) => {},
     };
   },
 };

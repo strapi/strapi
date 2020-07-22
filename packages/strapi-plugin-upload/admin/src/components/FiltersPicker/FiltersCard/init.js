@@ -3,7 +3,7 @@ const init = (initialState, timestamps) => {
 
   return initialState
     .update('name', () => created_at)
-    .updateIn(['filtersForm'], object => {
+    .updateIn(['filtersForm'], (object) => {
       return object.keySeq().reduce((acc, current) => {
         if (current === 'created_at' && created_at !== 'created_at') {
           return acc.set(created_at, object.get('created_at')).remove('created_at');
