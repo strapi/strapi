@@ -1,9 +1,7 @@
 'use strict';
 
-// Dependencies.
-const dotenv = require('dotenv');
-
-dotenv.config({ path: process.env.ENV_PATH });
+// required first because it loads env files.
+const loadConfiguration = require('./core/app-configuration');
 
 const http = require('http');
 const path = require('path');
@@ -18,7 +16,6 @@ const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
-const loadConfiguration = require('./core/app-configuration');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -30,13 +27,13 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const ee = require('./utils/ee');
 
 /**
  * Construct an Strapi instance.
  *
  * @constructor
  */
-
 class Strapi {
   constructor(opts = {}) {
     this.reload = this.reload();
@@ -54,6 +51,7 @@ class Strapi {
     };
 
     this.dir = opts.dir || process.cwd();
+
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
@@ -64,6 +62,10 @@ class Strapi {
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
+  }
+
+  get EE() {
+    return ee({ dir: this.dir, logger });
   }
 
   requireProjectBootstrap() {
@@ -85,12 +87,15 @@ class Strapi {
       chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
     });
 
+    const isEE = strapi.EE === true && ee.isEE === true;
+
     infoTable.push(
       [chalk.blue('Time'), `${new Date()}`],
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
+      [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
     );
 
     console.log(infoTable.toString());
@@ -363,26 +368,13 @@ class Strapi {
   }
 
   async runBootstrapFunctions() {
-    const timeoutMs = this.config.bootstrapTimeout || 3500;
-    const warnOnTimeout = () =>
-      setTimeout(() => {
-        this.log.warn(
-          `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
-        );
-        this.log.warn('Make sure you call it?');
-      }, timeoutMs);
-
     const execBootstrap = async fn => {
       if (!fn) return;
 
-      const timer = warnOnTimeout();
-      try {
-        await fn();
-      } finally {
-        clearTimeout(timer);
-      }
+      return fn();
     };
 
+    // plugins bootstrap
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
@@ -390,10 +382,18 @@ class Strapi {
         strapi.stop();
       });
     });
-
     await Promise.all(pluginBoostraps);
 
-    return execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // user bootstrap
+    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+
+    // admin bootstrap : should always run after the others
+    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
+    return execBootstrap(adminBootstrap).catch(err => {
+      strapi.log.error(`Bootstrap function in admin failed`);
+      strapi.log.error(err);
+      strapi.stop();
+    });
   }
 
   async freeze() {

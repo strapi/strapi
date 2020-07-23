@@ -39,6 +39,10 @@ const isRelation = attribute =>
  */
 const formatAttributes = model => {
   return Object.keys(model.attributes).reduce((acc, key) => {
+    if (key === 'created_by' || key === 'updated_by') {
+      return acc;
+    }
+
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});

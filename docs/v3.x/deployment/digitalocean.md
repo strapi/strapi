@@ -8,7 +8,7 @@ Strapi does have a [One-Click](../installation/digitalocean-one-click.md) deploy
 
 ### DigitalOcean Install Requirements
 
-- You must have a [DigitalOcean account](https://m.do.co/c/30986c1ff595) before doing these steps.
+- If you don't have a DigitalOcean account you will need to create one, you can use [this referral link](https://try.digitalocean.com/strapi/) to get \$100 of free credits!
 
 ### Create a "Droplet"
 

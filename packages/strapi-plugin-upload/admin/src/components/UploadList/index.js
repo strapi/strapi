@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-
 import { createMatrix, getTrad } from '../../utils';
-
 import ModalSection from '../ModalSection';
 import IntlText from '../IntlText';
 import Container from './Container';

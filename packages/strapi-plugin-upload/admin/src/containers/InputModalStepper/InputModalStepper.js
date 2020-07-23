@@ -9,7 +9,13 @@ import pluginId from '../../pluginId';
 import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';
 
-const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange }) => {
+const InputModalStepper = ({
+  allowedActions,
+  isOpen,
+  onToggle,
+  noNavigation,
+  onInputMediaChange,
+}) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
@@ -193,7 +199,20 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
         handleFileSelection({ target: { name: id } });
         goToList();
       } catch (err) {
-        console.log(err);
+        console.error(err);
+
+        const status = get(err, 'response.status', get(err, 'status', null));
+        const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
+        const errorMessage = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
+          get(err, ['response', 'payload', 'message'], statusText)
+        );
+        strapi.notification.error(errorMessage);
+
+        if (status) {
+          handleSetFileToEditError(errorMessage);
+        }
       }
     }
   };
@@ -308,6 +327,7 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
         {/* body of the modal */}
         {Component && (
           <Component
+            {...allowedActions}
             addFilesToUpload={addFilesToUploadList}
             components={components}
             filesToDownload={filesToDownload}
@@ -418,11 +438,29 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
 };
 
 InputModalStepper.defaultProps = {
+  allowedActions: {
+    canCopyLink: true,
+    canCreate: true,
+    canDownload: true,
+    canMain: true,
+    canRead: true,
+    canSettings: true,
+    canUpdate: true,
+  },
   noNavigation: false,
   onToggle: () => {},
 };
 
 InputModalStepper.propTypes = {
+  allowedActions: PropTypes.shape({
+    canCopyLink: PropTypes.bool,
+    canCreate: PropTypes.bool,
+    canDownload: PropTypes.bool,
+    canMain: PropTypes.bool,
+    canRead: PropTypes.bool,
+    canSettings: PropTypes.bool,
+    canUpdate: PropTypes.bool,
+  }),
   isOpen: PropTypes.bool.isRequired,
   noNavigation: PropTypes.bool,
   onInputMediaChange: PropTypes.func.isRequired,

@@ -18,6 +18,7 @@ const Banner = forwardRef(
       hasErrors,
       hasMinError,
       isFirst,
+      isReadOnly,
       isDragging,
       isOpen,
       onClickToggle,
@@ -36,6 +37,7 @@ const Banner = forwardRef(
         hasErrors={hasErrors}
         isFirst={isFirst}
         isOpen={isOpen}
+        isReadOnly={isReadOnly}
         onClick={onClickToggle}
         ref={refs ? refs.dropRef : null}
         style={style}
@@ -52,20 +54,24 @@ const Banner = forwardRef(
             }}
           </FormattedMessage>
           <div className="cta-wrapper" style={{ display }}>
-            <div
-              className="trash-icon"
-              style={{ marginRight: 10, padding: '0 5px' }}
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                onClickRemove();
-              }}
-            >
-              <FontAwesomeIcon icon="trash-alt" />
-            </div>
-            <div className="grab" ref={refs ? refs.dragRef : null}>
-              <Grab />
-            </div>
+            {!isReadOnly && (
+              <>
+                <div
+                  className="trash-icon"
+                  style={{ marginRight: 10, padding: '0 5px' }}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClickRemove();
+                  }}
+                >
+                  <FontAwesomeIcon icon="trash-alt" />
+                </div>
+                <div className="grab" ref={refs ? refs.dragRef : null}>
+                  <Grab />
+                </div>
+              </>
+            )}
           </div>
         </>
       </BannerWrapper>
@@ -94,6 +100,7 @@ Banner.propTypes = {
   isDragging: PropTypes.bool,
   isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
+  isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func,
   onClickRemove: PropTypes.func,
   style: PropTypes.object,

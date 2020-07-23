@@ -1,5 +1,8 @@
 'use strict';
 
+const dotenv = require('dotenv');
+dotenv.config({ path: process.env.ENV_PATH });
+
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 const os = require('os');

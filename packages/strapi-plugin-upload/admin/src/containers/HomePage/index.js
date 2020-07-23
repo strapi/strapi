@@ -1,7 +1,8 @@
 import React, { useReducer, useRef, useState, useEffect } from 'react';
-import { includes, toString, isEqual, intersectionWith } from 'lodash';
+import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
+import { Button } from '@buffetjs/core';
 import {
   PopUpWarning,
   LoadingIndicator,
@@ -15,15 +16,20 @@ import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } 
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
 import Padded from '../../components/Padded';
+import { useAppContext } from '../../hooks';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const HomePage = () => {
+  const { allowedActions } = useAppContext();
+  const { canRead } = allowedActions;
   const { formatMessage, plugins } = useGlobalContext();
   const [, updated_at] = getFileModelTimestamps(plugins);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, allowedActions)
+  );
   const query = useQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -54,10 +60,12 @@ const HomePage = () => {
       await request(requestURL, {
         method: 'DELETE',
       });
+
+      return Promise.resolve();
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+
+      return Promise.reject(errorMessage);
     }
   };
 
@@ -106,16 +114,18 @@ const HomePage = () => {
   };
 
   const fetchListData = async () => {
-    dispatch({ type: 'GET_DATA' });
+    if (canRead) {
+      dispatch({ type: 'GET_DATA' });
 
-    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+      const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
 
-    if (isMounted.current) {
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-        count,
-      });
+      if (isMounted.current) {
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data,
+          count,
+        });
+      }
     }
   };
 
@@ -171,11 +181,13 @@ const HomePage = () => {
   };
 
   const handleClickEditFile = id => {
-    const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+    if (allowedActions.canUpdate) {
+      const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
 
-    setFileToEdit(file);
-    setModalInitialStep('edit');
-    handleClickToggleModal();
+      setFileToEdit(file);
+      setModalInitialStep('edit');
+      handleClickToggleModal();
+    }
   };
 
   const handleClickToggleModal = (refetch = false) => {
@@ -199,6 +211,7 @@ const HomePage = () => {
     push({ search: newSearch });
   };
 
+  // FIXME: the delete logic should be redone
   const handleDeleteMediaFromModal = async id => {
     handleClickToggleModal();
 
@@ -214,12 +227,13 @@ const HomePage = () => {
         mediaId: id,
       });
     } catch (err) {
-      // Silent
+      strapi.notification.error(err);
     } finally {
       strapi.unlockApp();
     }
   };
 
+  // FIXME: the delete logic should be redone
   const handleDeleteMedias = async () => {
     setIsPopupOpen(false);
 
@@ -231,11 +245,14 @@ const HomePage = () => {
       dispatch({
         type: 'CLEAR_DATA_TO_DELETE',
       });
+    } catch (err) {
+      strapi.notification.error(err);
 
-      fetchListData();
-    } catch (error) {
-      // Silent
+      dispatch({
+        type: 'ON_DELETE_MEDIA_ERROR',
+      });
     } finally {
+      fetchListData();
       strapi.unlockApp();
     }
   };
@@ -273,12 +290,16 @@ const HomePage = () => {
     title: {
       label: pluginName,
     },
-    content: formatMessage(
-      {
-        id: getTrad(getHeaderLabel(dataCount)),
-      },
-      { number: dataCount }
-    ),
+    /* eslint-disable indent */
+    content: canRead
+      ? formatMessage(
+          {
+            id: getTrad(getHeaderLabel(dataCount)),
+          },
+          { number: dataCount }
+        )
+      : null,
+    /* eslint-enable indent */
     actions: [
       {
         disabled: dataToDelete.length === 0,
@@ -287,6 +308,13 @@ const HomePage = () => {
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),
         type: 'button',
+        Component: buttonProps => {
+          if (!allowedActions.canUpdate) {
+            return null;
+          }
+
+          return <Button {...buttonProps} />;
+        },
       },
       {
         disabled: false,
@@ -294,9 +322,30 @@ const HomePage = () => {
         label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
         onClick: () => handleClickToggleModal(),
         type: 'button',
+        Component: buttonProps => {
+          if (!allowedActions.canCreate) {
+            return null;
+          }
+
+          return <Button {...buttonProps} />;
+        },
       },
     ],
   };
+
+  const content = canRead ? (
+    <HomePageContent
+      data={data}
+      dataCount={dataCount}
+      dataToDelete={dataToDelete}
+      onCardCheck={handleChangeCheck}
+      onCardClick={handleClickEditFile}
+      onClick={handleClickToggleModal}
+      onFilterDelete={handleDeleteFilter}
+      onParamsChange={handleChangeParams}
+      onSelectAll={handleSelectAll}
+    />
+  ) : null;
 
   return (
     <Container>
@@ -307,17 +356,7 @@ const HomePage = () => {
           <LoadingIndicator />
         </>
       ) : (
-        <HomePageContent
-          data={data}
-          dataCount={dataCount}
-          dataToDelete={dataToDelete}
-          onCardCheck={handleChangeCheck}
-          onCardClick={handleClickEditFile}
-          onClick={handleClickToggleModal}
-          onFilterDelete={handleDeleteFilter}
-          onParamsChange={handleChangeParams}
-          onSelectAll={handleSelectAll}
-        />
+        content
       )}
       <ModalStepper
         initialFileToEdit={fileToEdit}

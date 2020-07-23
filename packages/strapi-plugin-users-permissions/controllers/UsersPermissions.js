@@ -32,17 +32,6 @@ module.exports = {
     }
   },
 
-  async deleteProvider(ctx) {
-    const { provider } = ctx.params;
-
-    if (!provider) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
-    }
-
-    // TODO handle dynamic
-    ctx.send({ ok: true });
-  },
-
   async deleteRole(ctx) {
     // Fetch public role.
     const publicRole = await strapi.query('role', 'users-permissions').findOne({ type: 'public' });
@@ -141,12 +130,6 @@ module.exports = {
   async index(ctx) {
     // Send 200 `ok`
     ctx.send({ message: 'ok' });
-  },
-
-  async init(ctx) {
-    const admins = await strapi.query('administrator', 'admin').find({ _limit: 1 });
-
-    ctx.send({ hasAdmin: admins.length > 0 });
   },
 
   async searchUsers(ctx) {

@@ -1,0 +1,373 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Admin | components | HeadersInput should render properly should match the snapshot 1`] = `
+<DocumentFragment>
+  .c2 {
+  width: 100%;
+  height: 3.4rem;
+  padding: 0 1rem;
+  font-weight: 400;
+  font-size: 1.3rem;
+  cursor: text;
+  outline: 0;
+  border: 1px solid #E3E9F3;
+  border-radius: 2px;
+  color: #333740;
+  background-color: transparent;
+}
+
+.c2::-webkit-input-placeholder {
+  color: #919BAE;
+}
+
+.c2:focus {
+  border-color: #78caff;
+}
+
+.c2:disabled {
+  background-color: #FAFAFB;
+  cursor: not-allowed;
+  color: #9ea7b8;
+}
+
+.c1 {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 2px;
+}
+
+.c1 button[type='button'] {
+  width: 3.4rem;
+  height: 3.4rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  background: transparent;
+}
+
+.c1 button[type='button']:hover span::before {
+  color: #000000;
+}
+
+.c1 button[type='button'].shown span::before {
+  color: #000000;
+}
+
+.c1 button[type='button'].shown + input[type='text'] {
+  padding-right: calc(3.4rem + 1rem);
+}
+
+.c1 span {
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.c1 input {
+  position: relative;
+  z-index: 1;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  margin: 8px 5px 0px 0px;
+  border-radius: 50%;
+  border: 1px solid #e3e9f3;
+  cursor: pointer;
+}
+
+.c3:focus {
+  outline: 0;
+}
+
+.c3:after {
+  content: '\\f068';
+  font-family: FontAwesome;
+  font-size: 9px;
+  line-height: 18px;
+  color: #007eff;
+}
+
+.c0 {
+  margin-top: 12px;
+  padding: 23px 24px 26px 24px;
+  background-color: #fafafb;
+  border-radius: 2px;
+}
+
+.c0 > ul {
+  margin-bottom: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.c0 > ul + button {
+  padding: 0;
+  color: #007eff;
+  font-size: 13px;
+  font-weight: 500;
+  outline: 0;
+}
+
+.c0 > ul + button svg,
+.c0 > ul + button span {
+  vertical-align: middle;
+}
+
+.c0 > ul + button svg {
+  margin-right: 10px;
+}
+
+.c0 > ul li {
+  position: relative;
+  padding-right: 30px;
+}
+
+.c0 > ul li:not(:first-of-type) {
+  margin-bottom: 20px;
+}
+
+.c0 > ul li:last-of-type {
+  margin-bottom: 6px;
+}
+
+.c0 > ul li > section {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
+.c0 > ul li > section:nth-child(odd) {
+  padding-right: 15px;
+}
+
+.c0 > ul li > section:nth-child(even) {
+  padding-left: 15px;
+}
+
+.c0 > ul li > section > p {
+  font-size: 13px;
+  color: #333740;
+  font-weight: 500;
+}
+
+.c0 > ul li > section > div:first-of-type {
+  height: 34px;
+}
+
+.c0 > ul li > section > div:first-of-type > div:first-of-type {
+  height: 34px;
+  min-height: 34px;
+  border: 1px solid #e3e9f3;
+  border-radius: 2px;
+  font-size: 13px;
+  color: #333740;
+  -webkit-align-items: normal;
+  -webkit-box-align: normal;
+  -ms-flex-align: normal;
+  align-items: normal;
+}
+
+.c0 > ul li > section > div:first-of-type > div:first-of-type > div:first-of-type {
+  height: 32px;
+  padding: 0 1rem;
+}
+
+.c0 > ul li > section > div:first-of-type > div:first-of-type > div:last-of-type {
+  display: none;
+}
+
+.c0 > ul li > section > div:first-of-type > div:first-of-type:hover {
+  cursor: text;
+}
+
+.c0 > ul li > section > div:first-of-type > span + div:first-of-type {
+  border-color: #78caff;
+  box-shadow: none;
+}
+
+.c0 > ul li > section + div {
+  position: absolute;
+  top: 7px;
+  right: 0;
+}
+
+.c0 > ul li > section + div button {
+  margin: 0;
+}
+
+.c0 .bordered input {
+  border: 1px solid #f64d0a;
+}
+
+<div
+    class="c0"
+  >
+    <ul>
+      <li>
+        <section>
+          <p>
+            <span>
+              Key
+            </span>
+          </p>
+        </section>
+        <section>
+          <p>
+            <span>
+              Value
+            </span>
+          </p>
+        </section>
+      </li>
+      <li>
+        <section>
+          <div
+            class=" css-2b097c-container"
+          >
+            <div
+              class=" css-1w9ejix-control"
+            >
+              <div
+                class=" css-g1d714-ValueContainer"
+              >
+                <div
+                  class=" css-1uccc91-singleValue"
+                />
+                <div
+                  class="css-b8ldur-Input"
+                >
+                  <div
+                    class=""
+                    style="display: inline-block;"
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      autocapitalize="none"
+                      autocomplete="off"
+                      autocorrect="off"
+                      id="react-select-2-input"
+                      spellcheck="false"
+                      style="box-sizing: content-box; width: 2px; border: 0px; opacity: 1; outline: 0; padding: 0px;"
+                      tabindex="0"
+                      type="text"
+                      value=""
+                    />
+                    <div
+                      style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div
+                class=" css-1hb7zxy-IndicatorsContainer"
+              >
+                <div
+                  aria-hidden="true"
+                  class=" css-tlfecz-indicatorContainer"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="css-6q0nyr-Svg"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    width="20"
+                  >
+                    <path
+                      d="M14.348 14.849c-0.469 0.469-1.229 0.469-1.697 0l-2.651-3.030-2.651 3.029c-0.469 0.469-1.229 0.469-1.697 0-0.469-0.469-0.469-1.229 0-1.697l2.758-3.15-2.759-3.152c-0.469-0.469-0.469-1.228 0-1.697s1.228-0.469 1.697 0l2.652 3.031 2.651-3.031c0.469-0.469 1.228-0.469 1.697 0s0.469 1.229 0 1.697l-2.758 3.152 2.758 3.15c0.469 0.469 0.469 1.229 0 1.698z"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class=" css-1okebmr-indicatorSeparator"
+                />
+                <div
+                  aria-hidden="true"
+                  class=" css-tlfecz-indicatorContainer"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="css-6q0nyr-Svg"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    width="20"
+                  >
+                    <path
+                      d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <input
+              name="headers.0.key"
+              type="hidden"
+              value=""
+            />
+          </div>
+        </section>
+        <section>
+          <div
+            class="c1"
+          >
+            <input
+              autocomplete="off"
+              class="c2"
+              id="headers.0.value"
+              name="headers.0.value"
+              tabindex="0"
+              type="text"
+              value=""
+            />
+          </div>
+        </section>
+        <div>
+          <button
+            class="c3"
+            type="button"
+          />
+        </div>
+      </li>
+    </ul>
+    <button
+      type="button"
+    >
+      <svg
+        fill="#007eff"
+        height="13px"
+        viewBox="0 0 13 13"
+        width="10px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g
+          data-name="Layer 2"
+        >
+          <path
+            d="M6.5.5v12m6-6H.5"
+            fill="none"
+            stroke="#007eff"
+            stroke-linecap="round"
+          />
+        </g>
+      </svg>
+      <span>
+        Create a new header
+      </span>
+    </button>
+  </div>
+</DocumentFragment>
+`;

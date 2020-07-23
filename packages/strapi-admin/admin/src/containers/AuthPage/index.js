@@ -1,132 +1,274 @@
-import React, { memo, useEffect, useReducer, useRef } from 'react';
+import React, { useEffect, useReducer } from 'react';
+import axios from 'axios';
+import { camelCase, get, omit, upperFirst, pick } from 'lodash';
+import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
+import { auth, useQuery } from 'strapi-helper-plugin';
+import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import { get, isEmpty, omit, set, upperFirst, pick } from 'lodash';
-import { FormattedMessage } from 'react-intl';
-import { Link, Redirect } from 'react-router-dom';
-import { Button } from '@buffetjs/core';
-import { auth, getQueryParameters, getYupInnerErrors, request } from 'strapi-helper-plugin';
+import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import LogoStrapi from '../../assets/images/logo_strapi.png';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
-import Wrapper from './Wrapper';
-import Input from './Input';
-import forms from './forms';
-import reducer, { initialState } from './reducer';
-import formatErrorFromRequest from './utils/formatErrorFromRequest';
+import checkFormValidity from '../../utils/checkFormValidity';
+import formatAPIErrors from '../../utils/formatAPIErrors';
+import { forms } from './utils';
+import init from './init';
+import { initialState, reducer } from './reducer';
 
-const AuthPage = ({
-  hasAdminUser,
-  location: { search },
-  match: {
+const AuthPage = ({ hasAdmin }) => {
+  const { push } = useHistory();
+  const {
     params: { authType },
-  },
-}) => {
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const codeRef = useRef();
-  const abortController = new AbortController();
+  } = useRouteMatch('/auth/:authType');
+  const query = useQuery();
+  const registrationToken = query.get('registrationToken');
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema } = get(
+    forms,
+    authType,
+    {}
+  );
+  const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    init
+  );
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
-  const { signal } = abortController;
-  codeRef.current = getQueryParameters(search, 'code');
   useEffect(() => {
-    // Set the reset code provided by the url
-    if (authType === 'reset-password') {
-      dispatch({
-        type: 'ON_CHANGE',
-        keys: ['code'],
-        value: codeRef.current,
-      });
-    } else {
-      // Clean reducer upon navigation
-      dispatch({
-        type: 'RESET_PROPS',
-      });
-    }
-
+    // Cancel request on unmount
     return () => {
-      abortController.abort();
+      source.cancel('Component unmounted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authType, codeRef]);
-  const { didCheckErrors, errors, modifiedData, submitSuccess, userEmail } = reducerState.toJS();
+  }, []);
+
+  // Reset the state on navigation change
+  useEffect(() => {
+    dispatch({
+      type: 'RESET_PROPS',
+    });
+  }, [authType]);
+
+  useEffect(() => {
+    if (authType === 'register') {
+      const getData = async () => {
+        try {
+          const {
+            data: { data },
+          } = await axios.get(
+            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
+          );
+
+          dispatch({
+            type: 'SET_DATA',
+            data: { registrationToken, userInfo: data },
+          });
+        } catch (err) {
+          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
+
+          strapi.notification.error(errorMessage);
+
+          // Redirect to the oops page in case of an invalid token
+          // @alexandrebodin @JAB I am not sure it is the wanted behavior
+          push(`/auth/oops?info=${encodeURIComponent(errorMessage)}`);
+        }
+      };
+
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authType]);
+
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
-      keys: name.split('.'),
+      keys: name,
       value,
     });
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const schema = forms[authType].schema;
-    let formErrors = {};
-
-    try {
-      await schema.validate(modifiedData, { abortEarly: false });
-
-      if (modifiedData.news === true) {
-        request('https://analytics.strapi.io/register', {
-          method: 'POST',
-          body: pick(modifiedData, ['email', 'username']),
-          signal,
-        }).catch(() => {
-          // ignore error
-        });
-      }
-
-      try {
-        const requestEndPoint = forms[authType].endPoint;
-        const requestURL = `/admin/auth/${requestEndPoint}`;
-        const body = omit(modifiedData, 'news');
-
-        if (authType === 'forgot-password') {
-          set(body, 'url', `${strapi.remoteURL}/auth/reset-password`);
-        }
-
-        const { jwt, user, ok } = await request(requestURL, {
-          method: 'POST',
-          body,
-          signal,
-        });
-
-        if (authType === 'forgot-password' && ok === true) {
-          dispatch({
-            type: 'SUBMIT_SUCCESS',
-            email: modifiedData.email,
-          });
-        } else {
-          auth.setToken(jwt, modifiedData.rememberMe);
-          auth.setUserInfo(user, modifiedData.rememberMe);
-        }
-      } catch (err) {
-        const formattedError = formatErrorFromRequest(err);
-
-        if (authType === 'login') {
-          formErrors = {
-            global: formattedError,
-            identifier: formattedError,
-            password: formattedError,
-          };
-        } else if (authType === 'forgot-password') {
-          formErrors = { email: formattedError[0] };
-        } else {
-          strapi.notification.error(get(formattedError, '0.id', 'notification.error'));
-        }
-      }
-    } catch (err) {
-      formErrors = getYupInnerErrors(err);
-    }
 
     dispatch({
       type: 'SET_ERRORS',
-      formErrors,
+      errors: {},
     });
+
+    const errors = await checkFormValidity(modifiedData, schema);
+
+    dispatch({
+      type: 'SET_ERRORS',
+      errors: errors || {},
+    });
+
+    if (!errors) {
+      const body = omit(modifiedData, fieldsToOmit);
+      const requestURL = `/admin/${endPoint}`;
+
+      if (authType === 'login') {
+        await loginRequest(body, requestURL);
+      }
+
+      if (authType === 'register' || authType === 'register-admin') {
+        await registerRequest(body, requestURL);
+      }
+
+      if (authType === 'forgot-password') {
+        await forgotPasswordRequest(body, requestURL);
+      }
+
+      if (authType === 'reset-password') {
+        await resetPasswordRequest(body, requestURL);
+      }
+    }
+  };
+
+  const forgotPasswordRequest = async (body, requestURL) => {
+    try {
+      await axios({
+        method: 'POST',
+        url: `${strapi.backendURL}${requestURL}`,
+        data: body,
+        cancelToken: source.token,
+      });
+
+      push('/auth/forgot-password-success');
+    } catch (err) {
+      console.error(err);
+
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  const loginRequest = async (body, requestURL) => {
+    try {
+      const {
+        data: {
+          data: { token, user },
+        },
+      } = await axios({
+        method: 'POST',
+        url: `${strapi.backendURL}${requestURL}`,
+        data: body,
+        cancelToken: source.token,
+      });
+
+      auth.setToken(token, modifiedData.rememberMe);
+      auth.setUserInfo(user, modifiedData.rememberMe);
+
+      push('/');
+    } catch (err) {
+      if (err.response) {
+        const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
+        const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
+
+        if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
+          push('/auth/oops');
+
+          dispatch({
+            type: 'RESET_PROPS',
+          });
+
+          return;
+        }
+
+        dispatch({
+          type: 'SET_REQUEST_ERROR',
+          errorMessage,
+          errorStatus,
+        });
+      }
+    }
+  };
+
+  const registerRequest = async (body, requestURL) => {
+    try {
+      const {
+        data: {
+          data: { token, user },
+        },
+      } = await axios({
+        method: 'POST',
+        url: `${strapi.backendURL}${requestURL}`,
+        data: body,
+        cancelToken: source.token,
+      });
+
+      auth.setToken(token, false);
+      auth.setUserInfo(user, false);
+
+      if (
+        (authType === 'register' && modifiedData.userInfo.news === true) ||
+        (authType === 'register-admin' && modifiedData.news === true)
+      ) {
+        axios({
+          method: 'POST',
+          url: 'https://analytics.strapi.io/register',
+          data: pick(modifiedData, ['userInfo.email', 'userInfo.firstname']),
+        });
+      }
+      // Redirect to the homePage
+      push('/');
+    } catch (err) {
+      if (err.response) {
+        const { data } = err.response;
+        const apiErrors = formatAPIErrors(data);
+
+        dispatch({
+          type: 'SET_ERRORS',
+          errors: apiErrors,
+        });
+      }
+    }
+  };
+
+  const resetPasswordRequest = async (body, requestURL) => {
+    try {
+      const {
+        data: {
+          data: { token, user },
+        },
+      } = await axios({
+        method: 'POST',
+        url: `${strapi.backendURL}${requestURL}`,
+        data: { ...body, resetPasswordToken: query.get('code') },
+        cancelToken: source.token,
+      });
+
+      auth.setToken(token, false);
+      auth.setUserInfo(user, false);
+
+      // Redirect to the homePage
+      push('/');
+    } catch (err) {
+      if (err.response) {
+        const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
+        const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
+
+        dispatch({
+          type: 'SET_REQUEST_ERROR',
+          errorMessage,
+          errorStatus,
+        });
+      }
+    }
   };
 
   // Redirect the user to the login page if the endpoint does not exist
-  if (!Object.keys(forms).includes(authType)) {
+  if (!forms[authType]) {
     return <Redirect to="/" />;
+  }
+
+  // Redirect the user to the login page if there is already an admin user
+  if (hasAdmin && authType === 'register-admin') {
+    return <Redirect to="/" />;
+  }
+
+  // Redirect the user to the register-admin if it is the first user
+  if (!hasAdmin && authType !== 'register-admin') {
+    return <Redirect to="/auth/register-admin" />;
   }
 
   // Redirect the user to the homepage if he is logged in
@@ -134,122 +276,35 @@ const AuthPage = ({
     return <Redirect to="/" />;
   }
 
-  if (!hasAdminUser && authType !== 'register') {
-    return <Redirect to="/auth/register" />;
-  }
-
-  // Prevent the user from registering to the admin
-  if (hasAdminUser && authType === 'register') {
-    return <Redirect to="/auth/login" />;
-  }
-
-  const globalError = get(errors, 'global.0.id', '');
-  const shouldShowFormErrors = !isEmpty(globalError);
-
   return (
     <>
-      <PageTitle title={upperFirst(authType)} />
-      <Wrapper authType={authType} withSuccessBorder={submitSuccess}>
+      <Padded bottom size="md">
+        <PageTitle title={upperFirst(authType)} />
         <NavTopRightWrapper>
           <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
         </NavTopRightWrapper>
-        <div className="wrapper">
-          <div className="headerContainer">
-            {authType === 'register' ? (
-              <FormattedMessage id="Auth.form.header.register" />
-            ) : (
-              <img src={LogoStrapi} alt="strapi-logo" />
-            )}
-          </div>
-          <div className="headerDescription">
-            {authType === 'register' && <FormattedMessage id="Auth.header.register.description" />}
-          </div>
-          {/* TODO Forgot success style */}
-          <div className="formContainer bordered">
-            <form onSubmit={handleSubmit}>
-              <div className="container-fluid">
-                {shouldShowFormErrors && (
-                  <div className="errorsContainer">
-                    <FormattedMessage id={globalError} />
-                  </div>
-                )}
-                <div className="row" style={{ textAlign: 'start' }}>
-                  {submitSuccess && (
-                    <div className="forgotSuccess">
-                      <FormattedMessage id="Auth.form.forgot-password.email.label.success" />
-                      <br />
-                      <p>{userEmail}</p>
-                    </div>
-                  )}
-                  {!submitSuccess &&
-                    forms[authType].inputs.map((row, index) => {
-                      return row.map(input => {
-                        return (
-                          <Input
-                            {...input}
-                            autoFocus={index === 0}
-                            didCheckErrors={didCheckErrors}
-                            errors={errors}
-                            key={input.name}
-                            noErrorsDescription={shouldShowFormErrors}
-                            onChange={handleChange}
-                            value={modifiedData[input.name]}
-                          />
-                        );
-                      });
-                    })}
-                  <div
-                    className={`${
-                      authType === 'login' ? 'col-6 loginButton' : 'col-12 buttonContainer'
-                    }`}
-                  >
-                    <Button
-                      color="primary"
-                      className={submitSuccess ? 'buttonForgotSuccess' : ''}
-                      type="submit"
-                      style={authType === 'login' ? {} : { width: '100%' }}
-                    >
-                      <FormattedMessage
-                        id={`Auth.form.button.${
-                          submitSuccess ? 'forgot-password.success' : authType
-                        }`}
-                      />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-          <div className="linkContainer">
-            {authType !== 'register' && authType !== 'reset-password' && (
-              <Link to={`/auth/${authType === 'login' ? 'forgot-password' : 'login'}`}>
-                <FormattedMessage
-                  id={`Auth.link.${authType === 'login' ? 'forgot-password' : 'ready'}`}
-                />
-              </Link>
-            )}
-          </div>
-          {authType === 'register' && (
-            <div className="logoContainer">
-              <img src={LogoStrapi} alt="strapi-logo" />
-            </div>
-          )}
-        </div>
-      </Wrapper>
+        <BaselineAlignment top size="78px">
+          <Component
+            fieldsToDisable={fieldsToDisable}
+            formErrors={formErrors}
+            inputsPrefix={inputsPrefix}
+            modifiedData={modifiedData}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            requestError={requestError}
+          />
+        </BaselineAlignment>
+      </Padded>
     </>
   );
 };
 
-AuthPage.propTypes = {
-  hasAdminUser: PropTypes.bool.isRequired,
-  location: PropTypes.shape({
-    search: PropTypes.string.isRequired,
-  }).isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      authType: PropTypes.string,
-    }).isRequired,
-  }).isRequired,
+AuthPage.defaultProps = {
+  hasAdmin: false,
 };
 
-export default memo(AuthPage);
+AuthPage.propTypes = {
+  hasAdmin: PropTypes.bool,
+};
+
+export default AuthPage;

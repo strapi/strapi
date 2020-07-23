@@ -5,8 +5,7 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the listView state domain
  */
-const listViewDomain = () => state =>
-  state.get(`${pluginId}_listView`) || initialState;
+const listViewDomain = () => state => state.get(`${pluginId}_listView`) || initialState;
 
 /**
  * Other specific selectors
@@ -17,12 +16,9 @@ const listViewDomain = () => state =>
  */
 
 const makeSelectListView = () =>
-  createSelector(
-    listViewDomain(),
-    substate => {
-      return substate.toJS();
-    }
-  );
+  createSelector(listViewDomain(), substate => {
+    return substate;
+  });
 
 export default makeSelectListView;
 export { listViewDomain };

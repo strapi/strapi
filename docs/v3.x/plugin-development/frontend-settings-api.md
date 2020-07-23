@@ -42,6 +42,7 @@ export default strapi => {
         title: 'Setting page 1',
         to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
         name: 'setting1',
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }], // This key is not mandatory it can be null, undefined or an empty array
       },
       {
         // Using i18n with a corresponding translation key
@@ -51,6 +52,8 @@ export default strapi => {
         },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
+        // Define a specific component if needed:
+        Component: () => <div />,
       },
     ],
   };
@@ -64,8 +67,6 @@ export default strapi => {
     initializer: () => null,
     injectedComponents: [],
     isReady: true,
-    leftMenuLinks: [],
-    leftMenuSections: [],
     mainComponent: null,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
@@ -147,6 +148,7 @@ export default strapi => {
         title: 'Setting page 1',
         to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
         name: 'setting1',
+        permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }],
       },
       {
         title: {
@@ -168,8 +170,6 @@ export default strapi => {
     initializer: () => null,
     injectedComponents: [],
     isReady: true,
-    leftMenuLinks: [],
-    leftMenuSections: [],
     mainComponent: null,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
@@ -233,23 +233,24 @@ export default strapi => {
     initializer: () => null,
     injectedComponents: [],
     isReady: true,
-    leftMenuLinks: [],
-    leftMenuSections: [],
     mainComponent: null,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
     settings: {
       // Add a link into the global section of the settings view
-      global: [
-        {
-          title: 'Setting link 1',
-          to: `${strapi.settingsBaseURL}/setting-link-1`,
-          name: 'settingLink1',
-          Component: SettingLink,
-          // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
-          exact: false,
-        },
-      ],
+      global: {
+        links: [
+          {
+            title: 'Setting link 1',
+            to: `${strapi.settingsBaseURL}/setting-link-1`,
+            name: 'settingLink1',
+            Component: SettingLink,
+            // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
+            exact: false,
+            permissions: [{ action: 'plugins::my-plugin.action-name', subject: null }],
+          },
+        ],
+      },
       mainComponent: Settings,
       menuSection,
     },
