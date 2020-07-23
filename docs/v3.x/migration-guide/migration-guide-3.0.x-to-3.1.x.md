@@ -2,6 +2,12 @@
 
 **Make sure your server is not running until the end of the migration**
 
+:::warning
+If you are using **extensions** to create custom code or modifying existing code, you will need to update your code and compare your version to the new changes on the repository.
+<br>
+Not updating your **extensions** can break your app in unexpected ways that we cannot predict.
+:::
+
 ## Summary
 
 [[toc]]
