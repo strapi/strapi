@@ -11,7 +11,11 @@ const EmptyInputMedia = styled.div`
   align-items: center;
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   background-color: ${({ theme }) => theme.main.colors.black};
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
+
+EmptyInputMedia.defaultProps = {
+  disabled: false,
+};
 
 export default EmptyInputMedia;

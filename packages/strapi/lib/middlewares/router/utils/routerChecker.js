@@ -30,6 +30,12 @@ module.exports = strapi =>
       controller = strapi.controllers[controllerKey] || strapi.admin.controllers[controllerKey];
     }
 
+    if (!_.isFunction(controller[actionName])) {
+      strapi.stopWithError(
+        `Error creating endpoint ${method} ${endpoint}: handler not found "${controllerKey}.${actionName}"`
+      );
+    }
+
     const action = controller[actionName].bind(controller);
 
     // Retrieve the API's name where the controller is located
@@ -69,7 +75,7 @@ module.exports = strapi =>
       // Set body.
       const values = await next();
 
-      if (!ctx.body) {
+      if (_.isNil(ctx.body) && !_.isNil(values)) {
         ctx.body = values;
       }
     });

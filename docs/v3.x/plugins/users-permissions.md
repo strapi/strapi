@@ -649,7 +649,7 @@ case 'discord': {
 
 This code creates a `Purest` object that gives us a generic way to interact with the provider's REST API.
 
-For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest/tree/2.x)
+For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest)
 
 You may also want to take a look onto the numerous already made configurations [here](https://github.com/simov/purest-providers/blob/master/config/providers.json).
 
@@ -748,7 +748,6 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 - `USER` (object)
   - `username`
   - `email`
-  - ...and any other field that you added manually in the model.
 - `TOKEN` corresponds to the token generated to be able to reset the password.
 - `URL` is the link where the user will be redirected after clicking on it in the email.
 
@@ -757,7 +756,6 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 - `USER` (object)
   - `username`
   - `email`
-  - ...and any other field that you added manually in the model.
 - `CODE` corresponds to the CODE generated to be able confirm the user email.
 - `URL` is the Strapi backend URL that confirms the code (by default `/auth/email-confirmation`).
 

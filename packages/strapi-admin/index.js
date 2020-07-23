@@ -7,12 +7,15 @@ const getWebpackConfig = require('./webpack.config.js');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
+// eslint-disable-next-line node/no-extraneous-require
+const hasEE = require('strapi/lib/utils/ee');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
-  let webpackConfig = getWebpackConfig(config);
+
+  let webpackConfig = getWebpackConfig({ useEE: hasEE({ dir }), ...config });
 
   if (fs.existsSync(adminConfigPath)) {
     const adminConfig = require(path.resolve(adminConfigPath));
@@ -151,6 +154,9 @@ async function copyPlugin(name, dest) {
 
 async function copyAdmin(dest) {
   const adminPath = getPkgPath('strapi-admin');
+
+  // TODO copy ee folders for plugins
+  await fs.copy(path.resolve(adminPath, 'ee', 'admin'), path.resolve(dest, 'ee', 'admin'));
 
   await fs.ensureDir(path.resolve(dest, 'config'));
   await fs.copy(path.resolve(adminPath, 'admin'), path.resolve(dest, 'admin'));

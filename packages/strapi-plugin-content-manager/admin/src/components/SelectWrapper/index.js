@@ -3,31 +3,46 @@ import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { cloneDeep, findIndex, get, isArray, isEmpty } from 'lodash';
+import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
-
+import { getFieldName } from '../../utils';
+import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import { Nav, Wrapper } from './components';
+import { connect, select } from './utils';
 
 function SelectWrapper({
+  componentUid,
   description,
   editable,
   label,
+  isCreatingEntry,
+  isFieldAllowed,
+  isFieldReadable,
   mainField,
   name,
   relationType,
+  slug,
   targetModel,
   placeholder,
 }) {
-  const { pathname, search } = useLocation();
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
   const { isDraggingComponent } = useEditView();
+
+  // This is needed for making requests when used in a component
+  const fieldName = useMemo(() => {
+    const fieldNameArray = getFieldName(name);
+
+    return fieldNameArray[fieldNameArray.length - 1];
+  }, [name]);
+
+  const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
   const [state, setState] = useState({
@@ -69,13 +84,17 @@ function SelectWrapper({
 
     if (!isDraggingComponent) {
       try {
-        const requestUrl = `/${pluginId}/explorer/${targetModel}`;
+        const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
 
         const containsKey = `${mainField}_contains`;
         const { _contains, ...restState } = cloneDeep(state);
         const params = isEmpty(state._contains)
           ? restState
           : { [containsKey]: _contains, ...restState };
+
+        if (componentUid) {
+          set(params, '_component', componentUid);
+        }
 
         const data = await request(requestUrl, {
           method: 'GET',
@@ -116,12 +135,14 @@ function SelectWrapper({
       return () => clearTimeout(timer);
     }
 
-    ref.current();
+    if (isFieldAllowed) {
+      ref.current();
+    }
 
     return () => {
       abortController.abort();
     };
-  }, [state._contains]);
+  }, [state._contains, isFieldAllowed]);
 
   useEffect(() => {
     if (state._start !== 0) {
@@ -154,17 +175,15 @@ function SelectWrapper({
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
     relationType
   );
-  const nextSearch = `${pathname}${search}`;
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${
-    value ? value.id : null
-  }?redirectUrl=${nextSearch}`;
+
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
   const link =
     value === null ||
     value === undefined ||
     ['plugins::users-permissions.role', 'plugins::users-permissions.permission'].includes(
       targetModel
     ) ? null : (
-      <Link to={to}>
+      <Link to={{ pathname: to, state: { from: pathname } }}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
       </Link>
     );
@@ -182,6 +201,26 @@ function SelectWrapper({
       };
     },
   };
+
+  const isDisabled = useMemo(() => {
+    if (isMorph) {
+      return true;
+    }
+
+    if (!isCreatingEntry) {
+      return !isFieldAllowed && isFieldReadable;
+    }
+
+    return !editable;
+  });
+
+  if (!isFieldAllowed && isCreatingEntry) {
+    return <NotAllowedInput label={label} />;
+  }
+
+  if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
+    return <NotAllowedInput label={label} />;
+  }
 
   return (
     <Wrapper className="form-group">
@@ -202,13 +241,12 @@ function SelectWrapper({
           addRelation({ target: { name, value } });
         }}
         id={name}
-        isDisabled={!editable || isMorph}
+        isDisabled={isDisabled}
         isLoading={isLoading}
         isClearable
         mainField={mainField}
         move={moveRelation}
         name={name}
-        nextSearch={nextSearch}
         options={filteredOptions}
         onChange={value => {
           onChange({ target: { name, value: value ? value.value : value } });
@@ -236,21 +274,30 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
+  componentUid: null,
   editable: true,
   description: '',
   label: '',
+  isFieldAllowed: true,
   placeholder: '',
 };
 
 SelectWrapper.propTypes = {
+  componentUid: PropTypes.string,
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
+  isCreatingEntry: PropTypes.bool.isRequired,
+  isFieldAllowed: PropTypes.bool,
+  isFieldReadable: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
+  slug: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
 };
 
-export default memo(SelectWrapper);
+const Memoized = memo(SelectWrapper);
+
+export default connect(Memoized, select);

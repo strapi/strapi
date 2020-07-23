@@ -44,6 +44,8 @@ const reducer = (state, action) => {
       return state
         .update('data', list => list.filter(item => item.get('id') !== action.mediaId))
         .update('dataCount', count => count - 1);
+    case 'ON_DELETE_MEDIA_ERROR':
+      return state.update('dataToDelete', () => fromJS([]));
     case 'TOGGLE_SELECT_ALL': {
       const isSelected = state.get('data').every(item => state.get('dataToDelete').includes(item));
 

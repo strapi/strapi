@@ -45,10 +45,6 @@
       ],
       "plugin": "upload",
       "required": false
-    },
-    "full_name": {
-      "type": "string",
-      "required": true
     }
   }
 }

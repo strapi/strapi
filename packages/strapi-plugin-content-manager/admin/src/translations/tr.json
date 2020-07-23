@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "{label} kayıt bulundu",
   "containers.List.pluginHeaderDescription.singular": "{label} kayıt bulundu",
   "containers.ListPage.displayedFields": "Görüntülenen Alanlar",
-  "containers.SettingPage.addField": "Yeni alan ekle",
-  "containers.SettingPage.addRelationalField": "Add new relational field",
   "containers.SettingPage.attributes": "Nitelik alanları",
   "containers.SettingPage.attributes.description": "Niteliklerin sırasını tanımlayın",
   "containers.SettingPage.editSettings.description": "Yerleşimi oluşturmak için alanları sürükleyip bırakın",

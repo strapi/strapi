@@ -3,6 +3,7 @@
 const _ = require('lodash');
 var semver = require('semver');
 const utils = require('./utils')();
+const { hasDeepFilters } = require('strapi-utils');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -62,6 +63,8 @@ const buildSearchOr = (model, query) => {
   return searchOr;
 };
 
+const BOOLEAN_OPERATORS = ['or'];
+
 /**
  * Build a mongo query
  * @param {Object} options - Query options
@@ -78,10 +81,9 @@ const buildQuery = ({
   aggregate = false,
   session = null,
 } = {}) => {
-  const deepFilters = (filters.where || []).filter(({ field }) => field.split('.').length > 1);
   const search = buildSearchOr(model, searchParam);
 
-  if (deepFilters.length === 0 && aggregate === false) {
+  if (!hasDeepFilters(filters.where) && aggregate === false) {
     return buildSimpleQuery({ model, filters, search, populate, session });
   }
 
@@ -252,14 +254,24 @@ const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
     })
     .reduce((acc, paths) => acc.concat(paths), []);
 
-  const castedWherePaths = where
-    .map(({ field }) => findModelPath({ rootModel: model, path: field }))
-    .filter(path => !!path);
+  const castedWherePaths = recursiveCastedWherePaths(where, { model });
 
   return {
     populatePaths: pathsToTree(castedPopulatePaths),
     wherePaths: pathsToTree(castedWherePaths),
   };
+};
+
+const recursiveCastedWherePaths = (whereClauses, { model }) => {
+  const paths = whereClauses.map(({ field, operator, value }) => {
+    if (BOOLEAN_OPERATORS.includes(operator)) {
+      return value.map(where => recursiveCastedWherePaths(where, { model }));
+    }
+
+    return findModelPath({ rootModel: model, path: field });
+  });
+
+  return _.flattenDeep(paths).filter(path => !!path);
 };
 
 /**
@@ -301,7 +313,7 @@ const buildQueryAggregate = (model, { paths } = {}) => {
  */
 const buildLookup = ({ model, key, paths }) => {
   const assoc = model.associations.find(a => a.alias === key);
-  const assocModel = findModelByAssoc({ assoc });
+  const assocModel = strapi.db.getModelByAssoc(assoc);
 
   if (!assocModel) return [];
 
@@ -422,6 +434,7 @@ const buildQueryMatches = (model, filters, search = []) => {
     });
 
     const criterias = combineSearchAndWhere(search, wheres);
+
     return [{ $match: criterias }];
   }
 
@@ -442,7 +455,7 @@ const formatValue = value => utils.valueToId(value);
  * @param {*} options.value - Where clause alue
  */
 const buildWhereClause = ({ field, operator, value }) => {
-  if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
     return {
       $or: value.map(val => buildWhereClause({ field, operator, value: val })),
     };
@@ -451,6 +464,19 @@ const buildWhereClause = ({ field, operator, value }) => {
   const val = formatValue(value);
 
   switch (operator) {
+    case 'or': {
+      return {
+        $or: value.map(orClause => {
+          if (Array.isArray(orClause)) {
+            return {
+              $and: orClause.map(buildWhereClause),
+            };
+          } else {
+            return buildWhereClause(orClause);
+          }
+        }),
+      };
+    }
     case 'eq':
       return { [field]: val };
     case 'ne':
@@ -519,6 +545,14 @@ const buildWhereClause = ({ field, operator, value }) => {
  * @param {*} whereClause.value - Where clause alue
  */
 const formatWhereClause = (model, { field, operator, value }) => {
+  if (BOOLEAN_OPERATORS.includes(operator)) {
+    return {
+      field,
+      operator,
+      value: value.map(v => v.map(whereClause => formatWhereClause(model, whereClause))),
+    };
+  }
+
   const { assoc, model: assocModel } = getAssociationFromFieldKey(model, field);
 
   const shouldFieldBeSuffixed =
@@ -548,7 +582,7 @@ const getAssociationFromFieldKey = (model, fieldKey) => {
   for (let key of parts) {
     assoc = tmpModel.associations.find(ast => ast.alias === key);
     if (assoc) {
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
     }
   }
 
@@ -571,7 +605,7 @@ const findModelByPath = ({ rootModel, path }) => {
   for (let part of parts) {
     const assoc = tmpModel.associations.find(ast => ast.alias === part);
     if (assoc) {
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
     }
   }
 
@@ -593,17 +627,12 @@ const findModelPath = ({ rootModel, path }) => {
     const assoc = tmpModel.associations.find(ast => ast.alias === part);
 
     if (assoc) {
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
       tmpPath.push(part);
     }
   }
 
   return tmpPath.length > 0 ? tmpPath.join('.') : null;
-};
-
-const findModelByAssoc = ({ assoc }) => {
-  const { models } = strapi.plugins[assoc.plugin] || strapi;
-  return models[assoc.model || assoc.collection];
 };
 
 module.exports = buildQuery;

@@ -20,13 +20,11 @@ const BlogPost = ({ error, isFirst, isLoading, title, content, link }) => {
     <a
       rel="noopener noreferrer"
       target="_blank"
-      href={`https://blog.strapi.io/${link}`}
+      href={`https://strapi.io/blog/${link}`}
       style={{ color: '#333740' }}
     >
       <h2>{title}</h2>
-      <p style={{ marginTop: 17, marginBottom: isFirst ? 32 : 10 }}>
-        {content}
-      </p>
+      <p style={{ marginTop: 17, marginBottom: isFirst ? 32 : 10 }}>{content}</p>
     </a>
   );
 };
