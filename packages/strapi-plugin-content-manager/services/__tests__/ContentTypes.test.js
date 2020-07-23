@@ -1,23 +1,23 @@
 const contentTypesService = require('../ContentTypes');
 
 describe('Test ContentTypes service', () => {
-  describe('formatContentType:isDisplayed', () => {
+  describe('formatContentType:isManaged', () => {
     global.strapi = {
       contentTypes: {
-        'visible-model': {
-          uid: 'visibleModel',
-          modelName: 'visibleModel',
+        'managed-model': {
+          uid: 'managedModel',
+          modelName: 'managedModel',
           attributes: {
             sample: {
               type: 'string',
             },
           },
         },
-        'hidden-model': {
-          uid: 'hiddenModel',
-          modelName: 'hiddenModel',
+        'non-managed-model': {
+          uid: 'nonManagedModel',
+          modelName: 'nonManagedModel',
           options: {
-            isDisplayed: false,
+            isManaged: false,
           },
           attributes: {
             sample: {
@@ -25,9 +25,9 @@ describe('Test ContentTypes service', () => {
             },
           },
         },
-        'restricted-hidden-model': {
+        'restricted-model': {
           uid: 'plugins::users-permissions.role',
-          modelName: 'restrictedHiddenModel',
+          modelName: 'restrictedModel',
           attributes: {
             sample: {
               type: 'string',
@@ -36,28 +36,31 @@ describe('Test ContentTypes service', () => {
         },
       },
     };
-    test('Model shouldn be displayed by default', () => {
+    test('Model should be managed by default', () => {
       const contentType = contentTypesService.formatContentType(
-        global.strapi.contentTypes['visible-model']
+        global.strapi.contentTypes['managed-model']
       );
 
       expect(contentType.isDisplayed).toBe(true);
+      expect(contentType.isManaged).toBe(true);
     });
 
-    test("Model shouldn't be displayed by definition", () => {
+    test("Model shouldn't be managed by definition", () => {
       const contentType = contentTypesService.formatContentType(
-        global.strapi.contentTypes['hidden-model']
+        global.strapi.contentTypes['non-managed-model']
+      );
+
+      expect(contentType.isDisplayed).toBe(true);
+      expect(contentType.isManaged).toBe(false);
+    });
+
+    test("Model shouldn't be displayed because of being one of internal HIDDEN_CONTENT_TYPES", () => {
+      const contentType = contentTypesService.formatContentType(
+        global.strapi.contentTypes['restricted-model']
       );
 
       expect(contentType.isDisplayed).toBe(false);
-    });
-
-    test("Model shouldn't be displayed because of being one of HIDDEN_CONTENT_TYPES", () => {
-      const contentType = contentTypesService.formatContentType(
-        global.strapi.contentTypes['restricted-hidden-model']
-      );
-
-      expect(contentType.isDisplayed).toBe(false);
+      expect(contentType.isManaged).toBe(true);
     });
   });
 });

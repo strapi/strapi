@@ -14,4 +14,18 @@ describe('ADMIN | CONTAINERS | LeftMenu | utils | filterLinks', () => {
 
     expect(filterLinks(data)).toHaveLength(2);
   });
+
+  it('should return the displayable & manageable links', () => {
+    const data = [
+      {
+        isDisplayed: false,
+      },
+      {
+        isDisplayed: true,
+      },
+      { isDisplayed: true, isManaged: false },
+    ];
+
+    expect(filterLinks(data)).toHaveLength(1);
+  });
 });

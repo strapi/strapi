@@ -10,6 +10,7 @@ describe('ADMIN | LeftMenu | utils', () => {
       const data = [
         {
           isDisplayed: true,
+          isManaged: true,
           label: 'Addresses',
           schema: { modelType: 'contentType', kind: 'collectionType' },
           uid: 'application::address.address',
@@ -33,6 +34,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           icon: 'circle',
           destination: '/plugins/content-manager/collectionType/application::address.address',
           isDisplayed: false,
+          isManaged: true,
           label: 'Addresses',
           permissions: [
             {
@@ -80,9 +82,17 @@ describe('ADMIN | LeftMenu | utils', () => {
       const data = [
         {
           isDisplayed: true,
+          isManaged: true,
           label: 'Addresses',
           schema: { modelType: 'contentType', kind: 'collectionType' },
           uid: 'application::address.address',
+        },
+        {
+          isDisplayed: true,
+          isManaged: false,
+          label: 'Non manageable',
+          schema: { modelType: 'contentType', kind: 'collectionType' },
+          uid: 'application::restricted.restricted',
         },
         {
           isDisplayed: false,
@@ -104,6 +114,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             icon: 'circle',
             destination: '/plugins/content-manager/collectionType/application::address.address',
             isDisplayed: false,
+            isManaged: true,
             label: 'Addresses',
             permissions: [
               {
@@ -117,6 +128,28 @@ describe('ADMIN | LeftMenu | utils', () => {
               {
                 action: 'plugins::content-manager.explorer.update',
                 subject: 'application::address.address',
+              },
+            ],
+          },
+          {
+            icon: 'circle',
+            destination:
+              '/plugins/content-manager/collectionType/application::restricted.restricted',
+            isDisplayed: false,
+            isManaged: false,
+            label: 'Non manageable',
+            permissions: [
+              {
+                action: 'plugins::content-manager.explorer.create',
+                subject: 'application::restricted.restricted',
+              },
+              {
+                action: 'plugins::content-manager.explorer.read',
+                subject: 'application::restricted.restricted',
+              },
+              {
+                action: 'plugins::content-manager.explorer.update',
+                subject: 'application::restricted.restricted',
               },
             ],
           },
