@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "{label} 個のエントリーが見つかりました",
   "containers.List.pluginHeaderDescription.singular": "{label} 個のエントリーが見つかりました",
   "containers.ListPage.displayedFields": "フィールドが表示されました",
-  "containers.SettingPage.addField": "フィールドを追加",
-  "containers.SettingPage.addRelationalField": "新しいリレーショナルフィールドを追加する",
   "containers.SettingPage.attributes": "属性フィールド",
   "containers.SettingPage.attributes.description": "属性の順序を定義する",
   "containers.SettingPage.editSettings.description": "フィールドをドラッグアンドドロップしてレイアウトを作成する",

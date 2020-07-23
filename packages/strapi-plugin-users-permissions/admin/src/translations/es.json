@@ -72,8 +72,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Confirme su dirección de email para %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>Haga clic en este enlace para validar su cuenta</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "Confirme su dirección de email para %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Haga clic en este enlace para validar su cuenta</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Por favor, confirme su dirección de email para %APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "TEXTO",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "La URL de redirección para agregar a las configuraciones de su aplicación Discord",
   "PopUpForm.Providers.enabled.description": "Si está desactivado, los usuarios no podrán utilizar este proveedor.",
@@ -96,7 +94,6 @@
   "PopUpForm.header.edit.email-templates": "Editar Plantillas de Email",
   "PopUpForm.header.edit.providers": "Editar Proveedor",
   "PopUpForm.inputSelect.providers.label": "Elija el proveedor",
-
   "components.Input.error.password.length": "Contraseña muy corta",
   "notification.error.delete": "Se ha producido un error al intentar borrar el elemento",
   "notification.error.fetch": "Se ha producido un error al intentar recuperar los datos",
@@ -105,5 +102,6 @@
   "notification.success.delete": "El elemento ha sido borrado",
   "notification.success.submit": "Los ajustes se han actualizado",
   "plugin.description.long": "Proteja su API con un proceso de autenticación completo basado en JWT. Este plugin viene también con una estrategia ACL que le permite administrar los permisos entre los grupos de usuarios.",
-  "plugin.description.short": "Proteja su API con un proceso de autenticación completo basado en JWT"
+  "plugin.description.short": "Proteja su API con un proceso de autenticación completo basado en JWT",
+  "plugin.name": "Roles y Permisos"
 }

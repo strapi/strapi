@@ -12,13 +12,13 @@ import Relation from './Relation';
 function ListItem({
   data,
   findRelation,
+  isDisabled,
   mainField,
   moveRelation,
-  nextSearch,
   onRemove,
   targetModel,
 }) {
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}?redirectUrl=${nextSearch}`;
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({
@@ -51,8 +51,21 @@ function ListItem({
   const opacity = isDragging ? 0.2 : 1;
 
   return (
-    <Li ref={node => drag(drop(node))} style={{ opacity }}>
-      <Relation mainField={mainField} onRemove={onRemove} data={data} to={to} />
+    <Li
+      ref={node => {
+        if (!isDisabled) {
+          drag(drop(node));
+        }
+      }}
+      style={{ opacity }}
+    >
+      <Relation
+        mainField={mainField}
+        onRemove={onRemove}
+        data={data}
+        to={to}
+        isDisabled={isDisabled}
+      />
     </Li>
   );
 }
@@ -60,7 +73,6 @@ function ListItem({
 ListItem.defaultProps = {
   findRelation: () => {},
   moveRelation: () => {},
-  nextSearch: '',
   onRemove: () => {},
   targetModel: '',
 };
@@ -68,9 +80,9 @@ ListItem.defaultProps = {
 ListItem.propTypes = {
   data: PropTypes.object.isRequired,
   findRelation: PropTypes.func,
+  isDisabled: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   moveRelation: PropTypes.func,
-  nextSearch: PropTypes.string,
   onRemove: PropTypes.func,
   targetModel: PropTypes.string,
 };

@@ -144,6 +144,22 @@ const SettingsPage = () => {
               />
             </div>
           </div>
+          <div className="row">
+            <div className="col-6">
+              <Inputs
+                label={formatMessage({
+                  id: getTrad('settings.form.autoOrientation.label'),
+                })}
+                description={formatMessage({
+                  id: getTrad('settings.form.autoOrientation.description'),
+                })}
+                name="autoOrientation"
+                onChange={handleChange}
+                type="bool"
+                value={modifiedData.autoOrientation}
+              />
+            </div>
+          </div>
 
           {/*
           <Divider />

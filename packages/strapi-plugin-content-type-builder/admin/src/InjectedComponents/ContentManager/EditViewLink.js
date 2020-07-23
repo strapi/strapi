@@ -6,7 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LiLink, useGlobalContext } from 'strapi-helper-plugin';
+import { LiLink, useGlobalContext, CheckPermissions } from 'strapi-helper-plugin';
+import pluginPermissions from '../../permissions';
 
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
@@ -23,13 +24,15 @@ function EditViewLink(props) {
   }
 
   return (
-    <LiLink
-      {...props}
-      url={url}
-      onClick={() => {
-        emitEvent('willEditEditLayout');
-      }}
-    />
+    <CheckPermissions permissions={pluginPermissions.main}>
+      <LiLink
+        {...props}
+        url={url}
+        onClick={() => {
+          emitEvent('willEditEditLayout');
+        }}
+      />
+    </CheckPermissions>
   );
 }
 

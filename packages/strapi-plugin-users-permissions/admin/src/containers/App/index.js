@@ -6,31 +6,23 @@
  */
 
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { NotFound } from 'strapi-helper-plugin';
-import pluginId from '../../pluginId';
-
-import EditPage from '../EditPage';
-import HomePage from '../HomePage';
+import { Redirect } from 'react-router-dom';
+import { LoadingIndicatorPage, useUserPermissions } from 'strapi-helper-plugin';
+import pluginPermissions from '../../permissions';
+import Main from '../Main';
 
 const App = () => {
-  return (
-    <div className={pluginId}>
-      <Switch>
-        <Route
-          path={`/plugins/${pluginId}/:settingType/:actionType/:id?`}
-          component={EditPage}
-          exact
-        />
-        <Route
-          path={`/plugins/${pluginId}/:settingType`}
-          component={HomePage}
-          exact
-        />
-        <Route component={NotFound} />
-      </Switch>
-    </div>
-  );
+  const { isLoading, allowedActions } = useUserPermissions(pluginPermissions);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  if (allowedActions.canMain) {
+    return <Main allowedActions={allowedActions} />;
+  }
+
+  return <Redirect to="/" />;
 };
 
 export default App;

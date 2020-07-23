@@ -4,7 +4,9 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
+import { CheckPermissions } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
+import pluginPermissions from '../../permissions';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
 import GrabWrapper from './GrabWrapper';
 import Link from './Link';
@@ -122,9 +124,7 @@ const DraggedField = forwardRef(
               onMouseLeave={() => setIsOverRemove(false)}
             >
               {isOverRemove && !isSelected && <Close />}
-              {((showEditBlockOverState && !isOverRemove) || isSelected) && (
-                <Pencil />
-              )}
+              {((showEditBlockOverState && !isOverRemove) || isSelected) && <Pencil />}
               {!showEditBlockOverState && !isOverRemove && !isSelected && (
                 <Close width="10px" height="10px" />
               )}
@@ -132,24 +132,24 @@ const DraggedField = forwardRef(
           </SubWrapper>
         )}
         {type === 'component' && (
-          <FormattedMessage
-            id={`${pluginId}.components.FieldItem.linkToComponentLayout`}
-          >
-            {msg => (
-              <Link
-                onClick={e => {
-                  e.stopPropagation();
+          <CheckPermissions permissions={pluginPermissions.componentsConfigurations}>
+            <FormattedMessage id={`${pluginId}.components.FieldItem.linkToComponentLayout`}>
+              {msg => (
+                <Link
+                  onClick={e => {
+                    e.stopPropagation();
 
-                  goTo(
-                    `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`
-                  );
-                }}
-              >
-                <FontAwesomeIcon icon="cog" />
-                {msg}
-              </Link>
-            )}
-          </FormattedMessage>
+                    goTo(
+                      `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`
+                    );
+                  }}
+                >
+                  <FontAwesomeIcon icon="cog" />
+                  {msg}
+                </Link>
+              )}
+            </FormattedMessage>
+          </CheckPermissions>
         )}
       </Wrapper>
     );

@@ -72,8 +72,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Por favor confirme o seu endereço de email para %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>Por favor clique neste link para validar a sua conta</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "Por favor confirme o seu endereço de email para %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>Por favor clique neste link para validar a sua conta</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Por favor confirme o seu endereço de email para %APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "TEXTO",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de Discord",
   "PopUpForm.Providers.enabled.description": "Se desativado, os utilizadores não conseguirão utilizar este serviço de autenticação.",
@@ -96,7 +94,6 @@
   "PopUpForm.header.edit.email-templates": "Editar Modelos de Email",
   "PopUpForm.header.edit.providers": "Editar o serviço de autenticação",
   "PopUpForm.inputSelect.providers.label": "Selecionar o serviço de autenticação",
-
   "components.Input.error.password.length": "A password é demasiado curta",
   "notification.error.delete": "Ocorreu um erro a tentar eliminar o item",
   "notification.error.fetch": "Ocorreu um erro a tentar obter os dados",
@@ -105,5 +102,6 @@
   "notification.success.delete": "O item foi eliminado",
   "notification.success.submit": "As configurações foram atualizadas",
   "plugin.description.long": "Proteja a sua API com um processo completo de autenticação baseado em JWT. Este plugin também vem com estratégia de ACL que permite gerir permissões entre grupos de utilizadores.",
-  "plugin.description.short": "Proteja a sua API com um processo completo de autenticação baseado em JWT"
+  "plugin.description.short": "Proteja a sua API com um processo completo de autenticação baseado em JWT",
+  "plugin.name": "Grupos & Permissões"
 }
