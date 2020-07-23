@@ -128,6 +128,8 @@ module.exports = {
       roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
+    await strapi.telemetry.send('didCreateFirstAdmin');
+
     ctx.body = {
       data: {
         token: strapi.admin.services.token.createJwtToken(user),
