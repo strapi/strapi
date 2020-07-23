@@ -12,7 +12,7 @@
     "fs-extra": "^7.0.0",
     "immutable": "^3.8.2",
     "lodash": "^4.17.11",
-    "pluralize": "^7.0.0",
+    "pluralize": "^8.0.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",

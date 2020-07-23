@@ -18,7 +18,7 @@
     "date-fns": "^2.8.1",
     "lodash": "4.17.12",
     "pino": "^4.7.1",
-    "pluralize": "^7.0.0",
+    "pluralize": "^8.0.0",
     "shelljs": "^0.8.3",
     "yup": "0.28.1"
   },
