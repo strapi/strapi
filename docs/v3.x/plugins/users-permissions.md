@@ -160,16 +160,16 @@ For better understanding, you may find as follows the description of the login f
 
 #### Understanding the login flow
 
-Let's say that strapi's backend is located at: strapi.website.fr.
-Let's say that your app frontend is located at: website.fr.
+Let's say that strapi's backend is located at: strapi.website.com.
+Let's say that your app frontend is located at: website.com.
 
-1. The user goes on your frontend app (`https://website.fr`) and click on your button `connect with Github`.
-2. The frontend redirect the tab to `https://strapi.website.fr/connect/github` that calls the backend.
+1. The user goes on your frontend app (`https://website.com`) and click on your button `connect with Github`.
+2. The frontend redirect the tab to `https://strapi.website.com/connect/github` that calls the backend.
 3. The backend redirects the tab to the github login page where the user logs in.
-4. Once done, Github redirects the tab to `https://strapi.website.fr/connect/github/callback?code=abcdef` that calls the backend
+4. Once done, Github redirects the tab to `https://strapi.website.com/connect/github/callback?code=abcdef` that calls the backend
 5. The backend uses the given `code` to get from Github an `access_token` that can be used for a period of time to make authorized requests to Github to get the user info (the email of the user of example).
-6. Then, the backend redirects the tab to the url of your choice with the param `access_token` (example: `http://website.fr/connect/github/redirect?access_token=eyfvg`)
-7. The frontend (`http://website.fr/connect/github/redirect`) calls the backend with `https://strapi.website.fr/auth/github/callback?access_token=eyfvg` that returns the strapi user profile with its `jwt`. <br> (Under the hood, the backend asks Github for the user's profile and a match is done on Github user's email address and Strapi user's email address)
+6. Then, the backend redirects the tab to the url of your choice with the param `access_token` (example: `http://website.com/connect/github/redirect?access_token=eyfvg`)
+7. The frontend (`http://website.com/connect/github/redirect`) calls the backend with `https://strapi.website.com/auth/github/callback?access_token=eyfvg` that returns the strapi user profile with its `jwt`. <br> (Under the hood, the backend asks Github for the user's profile and a match is done on Github user's email address and Strapi user's email address)
 8. The frontend now possesses the user's `jwt`, with means the user is connected and the frontend can make authenticated requests to the backend!
 
 An example of a frontend app that handles this flow can be found here: [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react).
@@ -592,7 +592,7 @@ In production, make sure the `url` config property is set. Otherwise the validat
 
 After having registered, if you have set **Enable email confirmation** to **ON**, the user will receive a confirmation link by email. The user has to click on it to validate his/her registration.
 
-_Example of the confirmation link:_ `https://yourwebsite.fr/auth/email-confirmation?confirmation=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk0OTgxMTE3LCJleHAiOjE1OTc1NzMxMTd9.0WeB-mvuguMyr4eY8CypTZDkunR--vZYzZH6h6sChFg`
+_Example of the confirmation link:_ `https://yourwebsite.com/auth/email-confirmation?confirmation=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk0OTgxMTE3LCJleHAiOjE1OTc1NzMxMTd9.0WeB-mvuguMyr4eY8CypTZDkunR--vZYzZH6h6sChFg`
 
 If needed, you can re-send the confirmation email by making the following request.
 
