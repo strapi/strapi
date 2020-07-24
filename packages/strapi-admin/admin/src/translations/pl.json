@@ -83,6 +83,7 @@
   "Settings.permissions.conditions.when": "Kiedy",
   "Settings.permissions.menu.link.roles.label": "Role",
   "Settings.permissions.menu.link.users.label": "Użytkownicy",
+  "Settings.permissions.restricted": "zablokowane",
   "Settings.permissions.users.add-new": "Dodaj nowego użytkownika",
   "Settings.permissions.users.create": "Stwórz nowego użytkownika",
   "Settings.permissions.users.form.email": "E-mail",
