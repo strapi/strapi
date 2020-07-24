@@ -46,7 +46,7 @@ function Inputs({
       ) : (
         <Error inputError={inputError} name={name} type="text" validations={validations}>
           {({ canCheck, error, dispatch }) => {
-            const hasError = error && error !== null;
+            const hasError = Boolean(error);
 
             const handleChange = e => {
               if (!canCheck) {
