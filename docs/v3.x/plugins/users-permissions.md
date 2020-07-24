@@ -338,10 +338,12 @@ ngrok http 1337
   - **Tell us how this app will be used**: - here write a message enough long -
 - At the end of the process you should see your Application ID and secret, save them for later
 - Go to you app setting and click on edit **Authentication settings**
-- Enable 3rd party authentication
+- Enable **3rd party authentication** AND **Request email address from users**
 - Fill the information (replace with your own ngrok url):
   - **Callback URLs**: `https://65e60559.ngrok.io/connect/twitter/callback`
   - **Website URL**: `https://65e60559.ngrok.io`
+  - **Privacy policy**: `https://d73e70e88872.ngrok.io`
+  - **Terms of service**: `https://d73e70e88872.ngrok.io`
 
 #### Strapi configuration
 
