@@ -80,7 +80,9 @@ class PopUpForm extends React.Component {
       case 'twitch':
         return `${strapi.backendURL}/connect/twitch/callback`;
       default:
-        return `${strapi.backendURL}/connect/\${provider}/callback`;
+        return this.props.dataToEdit
+          ? `${strapi.backendURL}/connect/${this.props.dataToEdit}/callback`
+          : '';
     }
   };
 
