@@ -90,6 +90,7 @@
   "Settings.permissions.conditions.when": "When",
   "Settings.permissions.menu.link.roles.label": "Roles",
   "Settings.permissions.menu.link.users.label": "Users",
+  "Settings.permissions.restricted": "restricted",
   "Settings.permissions.users.add-new": "Add new user",
   "Settings.permissions.users.create": "Create new User",
   "Settings.permissions.users.form.email": "Email",

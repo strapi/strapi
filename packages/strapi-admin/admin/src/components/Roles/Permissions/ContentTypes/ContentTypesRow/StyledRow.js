@@ -26,12 +26,13 @@ const StyledRow = styled.div`
   background-color: ${({ isGrey, theme }) =>
     isGrey ? theme.main.colors.content.background : theme.main.colors.white};
   border: 1px solid transparent;
-  ${ConditionsButton} {
+  color: ${({ isManaged, theme }) => (isManaged ? 'inherits' : theme.main.colors.greyDisabled)}
+    ${ConditionsButton} {
     display: none;
   }
   ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive)}
   &:hover {
-    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
+    ${({ theme, isActive, isManaged }) => (isManaged ? activeRowStyle(theme, isActive) : null)}
   }
 `;
 
