@@ -278,6 +278,10 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
                 }
 
                 if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                  if (value === 0) {
+                    return true;
+                  }
+
                   return !!value;
                 }
 
