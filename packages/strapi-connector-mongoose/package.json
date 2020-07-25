@@ -19,7 +19,7 @@
     "mongoose": "5.8.0",
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.2.1",
-    "pluralize": "^7.0.0",
+    "pluralize": "^8.0.0",
     "semver": "^7.3.2",
     "strapi-utils": "3.1.1"
   },
