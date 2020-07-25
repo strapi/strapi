@@ -19,7 +19,7 @@ module.exports = async function() {
   const port = config.get('server.admin.port', 8000);
   const host = config.get('server.admin.host', 'localhost');
 
-  const public = config.get('server.admin.public', host);
+  const adminPublic = config.get('server.admin.public', host);
   const allowedHosts = config.get('server.admin.allowedHosts', []);
   const watchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
 
@@ -28,11 +28,11 @@ module.exports = async function() {
     port,
     host,
     options: {
-      public,
       allowedHosts,
       watchIgnoreFiles,
-      backend: getAbsoluteServerUrl(config, true),
+      public: adminPublic,
       publicPath: addSlash(adminPath),
+      backend: getAbsoluteServerUrl(config, true),
     },
   });
 };
