@@ -16,18 +16,23 @@ module.exports = async function() {
 
   const { adminPath } = getConfigUrls(config.get('server'), true);
 
-  const adminPort = config.get('server.admin.port', 8000);
-  const adminHost = config.get('server.admin.host', 'localhost');
-  const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
+  const port = config.get('server.admin.port', 8000);
+  const host = config.get('server.admin.host', 'localhost');
+
+  const public = config.get('server.admin.public', host);
+  const allowedHosts = config.get('server.admin.allowedHosts', []);
+  const watchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
 
   strapiAdmin.watchAdmin({
     dir,
-    port: adminPort,
-    host: adminHost,
+    port,
+    host,
     options: {
+      public,
+      allowedHosts,
+      watchIgnoreFiles,
       backend: getAbsoluteServerUrl(config, true),
       publicPath: addSlash(adminPath),
-      watchIgnoreFiles: adminWatchIgnoreFiles,
     },
   });
 };

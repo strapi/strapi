@@ -255,6 +255,8 @@ async function watchAdmin({ dir, host, port, options }) {
     quiet: true,
     open: true,
     publicPath: options.publicPath,
+    public: options.public,
+    allowedHosts: options.allowedHosts,
     historyApiFallback: {
       index: options.publicPath,
     },
