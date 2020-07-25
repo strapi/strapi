@@ -85,6 +85,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               }}
               name="advanced.settings.email_reset_password"
               onChange={onChange}
+              placeholder="ex: https://yourfrontend.com/reset-password"
               type="text"
               value={get(settings, 'email_reset_password')}
             />
@@ -115,6 +116,7 @@ function EditForm({ disabled, onChange, showLoaders, values }) {
               name="advanced.settings.email_confirmation_redirection"
               onChange={onChange}
               type="text"
+              placeholder="ex: https://yourfrontend.com/confirmation/success"
               value={get(settings, 'email_confirmation_redirection')}
             />
           </div>
