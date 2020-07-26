@@ -27,8 +27,8 @@ When we are creating a new Article via `POST /articles` we will need to set the 
 To do so we will customize the `create` controller function of the Article API.
 
 **Concepts we will use:**
-Here is the code of [core controllers](../concepts/controllers.html#core-controllers).
-We will also use this [documentation](../plugins/users-permissions.html#user-object-in-strapi-context) to access the current authenticated user information.
+Here is the code of [core controllers](../concepts/controllers.md#core-controllers).
+We will also use this [documentation](../plugins/users-permissions.md#user-object-in-strapi-context) to access the current authenticated user information.
 
 **Path —** `./api/article/controllers/Article.js`
 

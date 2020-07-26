@@ -5,11 +5,7 @@
 
 const _ = require('lodash');
 const pmap = require('p-map');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  escapeQuery,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -179,11 +175,11 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   }
 
   function countSearch(params) {
-    const filters = convertRestQueryParams(_.omit(params, '_q'));
+    const { where } = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))
-      .query(buildQuery({ model, filters }))
+      .query(buildQuery({ model, filters: { where } }))
       .count()
       .then(Number);
   }
