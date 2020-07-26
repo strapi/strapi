@@ -9,6 +9,7 @@ import ListWrapper from '../ListWrapper';
 import CardControl from '../CardControl';
 
 const SortableList = ({
+  allowedActions,
   canSelect,
   data,
   moveAsset,
@@ -54,7 +55,7 @@ const SortableList = ({
                     />
                   </CardControlsWrapper>
                 )}
-                {!noNavigation && (
+                {!noNavigation && allowedActions.canUpdate && (
                   <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
                     <CardControl
                       small
@@ -75,6 +76,9 @@ const SortableList = ({
 };
 
 SortableList.defaultProps = {
+  allowedActions: {
+    canUpdate: false,
+  },
   canSelect: true,
   data: [],
   moveAsset: () => {},
@@ -85,6 +89,7 @@ SortableList.defaultProps = {
 };
 
 SortableList.propTypes = {
+  allowedActions: PropTypes.object,
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   moveAsset: PropTypes.func,

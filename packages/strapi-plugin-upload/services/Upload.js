@@ -362,4 +362,21 @@ module.exports = {
       })
       .set({ value });
   },
+
+  setCreatorInfo(userId, files, { edition = false } = {}) {
+    if (!Array.isArray(files)) files = [files];
+
+    const fields = { created_by: userId, updated_by: userId };
+
+    const creationFields = ['updated_by', 'created_by'];
+    const editionFields = ['updated_by'];
+
+    return Promise.all(
+      files.map(file => {
+        const params = _.pick(fields, edition ? editionFields : creationFields);
+
+        return strapi.query('file', 'upload').update({ id: file.id }, params);
+      })
+    );
+  },
 };

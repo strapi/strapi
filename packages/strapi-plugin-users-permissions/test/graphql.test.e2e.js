@@ -53,7 +53,9 @@ describe('Test Graphql user service', () => {
           query: /* GraphQL */ `
             mutation {
               createUser(
-                input: { data: { username: "test", email: "test@strapi.io", password: "test" } }
+                input: {
+                  data: { username: "test", email: "test-graphql@strapi.io", password: "test" }
+                }
               ) {
                 user {
                   id

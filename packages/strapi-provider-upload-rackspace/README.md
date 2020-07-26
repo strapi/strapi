@@ -14,12 +14,12 @@ See the [using a provider](https://strapi.io/documentation/v3.x/plugins/upload.h
 module.exports = ({ env }) => ({
   // ...
   upload: {
-    provider: "rackspace",
+    provider: 'rackspace',
     providerOptions: {
       username: env('RACKSPACE_USERNAME'),
       apiKey: env('RACKSPACE_KEY'),
-      region: env('RACKSPACE_REGION')
-    }
+      region: env('RACKSPACE_REGION'),
+    },
   },
   // ...
 });
@@ -27,7 +27,7 @@ module.exports = ({ env }) => ({
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

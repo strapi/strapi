@@ -10,12 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import {
-  ButtonDropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from 'reactstrap';
+import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 import makeSelectLocale from '../LanguageProvider/selectors';
 import { changeLocale } from '../LanguageProvider/actions';
 import { languages } from '../../i18n';
@@ -49,6 +44,8 @@ export class LocaleToggle extends React.Component {
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cz.svg';
       case 'ms':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/my.svg';
+      case 'sv':
+        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/se.svg';
       default:
         return `https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/${locale}.svg`;
     }
@@ -114,9 +111,6 @@ export function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 export default compose(withConnect)(LocaleToggle);

@@ -132,7 +132,7 @@ module.exports = {
       },
       {
         text: 'Blog',
-        link: 'https://blog.strapi.io',
+        link: 'https://strapi.io/blog',
       },
       {
         text: 'Tutorials',
@@ -223,6 +223,7 @@ module.exports = {
             '/v3.x/admin-panel/customization',
             '/v3.x/admin-panel/custom-webpack-config',
             '/v3.x/admin-panel/deploy',
+            '/v3.x/admin-panel/forgot-password',
           ],
         },
         {

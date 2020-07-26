@@ -14,7 +14,7 @@ It is designed to work well with SQLite3, PostgreSQL, MySQL, MariaDB, Microsoft 
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

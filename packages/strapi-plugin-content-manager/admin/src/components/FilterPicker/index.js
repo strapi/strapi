@@ -1,28 +1,48 @@
-import React, { memo, useReducer } from 'react';
+import React, { memo, useMemo, useReducer } from 'react';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { capitalize, get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { PluginHeader, getFilterType } from 'strapi-helper-plugin';
+import {
+  PluginHeader,
+  getFilterType,
+  useUser,
+  findMatchingPermissions,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import Container from '../Container';
-
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
-
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext'];
+const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
 
 function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState }) {
-  const { schema, searchParams } = useListView();
+  const { schema, filters, slug } = useListView();
+  const userPermissions = useUser();
+  const readActionAllowedFields = useMemo(() => {
+    const matchingPermissions = findMatchingPermissions(userPermissions, [
+      {
+        action: 'plugins::content-manager.explorer.read',
+        subject: slug,
+      },
+    ]);
+
+    return get(matchingPermissions, ['0', 'fields'], []);
+  }, [userPermissions, slug]);
+  const timestamps = get(schema, ['options', 'timestamps']);
+
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {
       const current = get(schema, ['attributes', attr], {});
+
+      if (!readActionAllowedFields.includes(attr) && attr !== 'id' && !timestamps.includes(attr)) {
+        return false;
+      }
 
       return !NOT_ALLOWED_FILTERS.includes(current.type) && current.type !== undefined;
     })
@@ -34,8 +54,9 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
     });
 
   const [state, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, allowedAttributes[0])
+    init(initialState, allowedAttributes[0] || {})
   );
+
   const modifiedData = state.get('modifiedData').toJS();
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -81,7 +102,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
   };
   // Set the filters when the collapse is opening
   const handleEntering = () => {
-    const currentFilters = searchParams.filters;
+    const currentFilters = filters;
     const initialFilters = currentFilters.length > 0 ? currentFilters : [getInitialFilter()];
 
     dispatch({
