@@ -19,6 +19,7 @@ const getInputType = (type = '') => {
     case 'boolean':
       return 'bool';
     case 'biginteger':
+      return 'text';
     case 'decimal':
     case 'float':
     case 'integer':
