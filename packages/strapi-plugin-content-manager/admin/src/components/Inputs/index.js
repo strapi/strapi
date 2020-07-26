@@ -19,7 +19,6 @@ const getInputType = (type = '') => {
     case 'boolean':
       return 'bool';
     case 'biginteger':
-      return 'text';
     case 'decimal':
     case 'float':
     case 'integer':
@@ -123,11 +122,11 @@ function Inputs({
     let step;
 
     if (type === 'float' || type === 'decimal') {
-      step = 'any';
+      step = 0.1;
     } else if (type === 'time' || type === 'datetime') {
       step = 30;
     } else {
-      step = '1';
+      step = 1;
     }
 
     return step;
