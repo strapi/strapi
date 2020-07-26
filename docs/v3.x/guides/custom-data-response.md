@@ -52,7 +52,7 @@ After saving the new function, let's restart the `GET /restaurants` request. We 
 
 We now know the function we have to update, but we just want to customize the returned restaurant values.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the fetch logic.
+In the [controller documentation](../concepts/controllers.md#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the fetch logic.
 
 **Path —** `./api/restaurant/controller/Restaurant.js`
 
