@@ -192,7 +192,7 @@ You can access the config of the current environment through `strapi.config.curr
 
 This file lets you define database connections that will be used to store your application content.
 
-You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
+You can find [supported database and versions](../installation/cli.md#databases) in the local installation process.
 
 **Path —** `./config/environments/**/database.json`.
 

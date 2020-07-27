@@ -84,7 +84,7 @@ Returns the Router (Joi router) instance.
 
 ## strapi.server
 
-Returns the [`http.Server`](https://nodejs.org/api/http.html#http_class_http_server) instance.
+Returns the [`http.Server`](https://nodejs.org/api/http.md#http_class_http_server) instance.
 
 ## strapi.services
 
