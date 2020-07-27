@@ -14,7 +14,7 @@ const { nameToSlug } = require('strapi-utils');
  * @param {Object} contentType
  */
 const formatContentType = contentType => {
-  const { uid, kind, modelName, plugin, connection, collectionName, info } = contentType;
+  const { uid, kind, modelName, plugin, connection, collectionName, info, options } = contentType;
 
   return {
     uid,
@@ -23,6 +23,7 @@ const formatContentType = contentType => {
     schema: {
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
+      draftAndPublish: _.get(options, 'draftAndPublish', false),
       connection,
       kind: kind || 'collectionType',
       collectionName,
