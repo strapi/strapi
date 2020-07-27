@@ -823,6 +823,7 @@ const forms = {
           .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
           .required(errorsTrads.required),
         collectionName: yup.string(),
+        draftAndPublish: yup.boolean(),
         kind: yup.string().oneOf(['singleType', 'collectionType']),
       });
     },

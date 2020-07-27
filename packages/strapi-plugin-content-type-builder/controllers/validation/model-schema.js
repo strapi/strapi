@@ -15,6 +15,7 @@ const createSchema = (types, relations, { modelType } = {}) => {
       .min(1)
       .required('name.required'),
     description: yup.string(),
+    draftAndPublish: yup.boolean(),
     connection: yup.string(),
     collectionName: yup
       .string()
