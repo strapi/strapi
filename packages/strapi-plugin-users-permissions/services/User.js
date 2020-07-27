@@ -69,8 +69,8 @@ module.exports = {
    * Promise to fetch state user in header.
    * @return {Promise}
    */
-  fetchState(params, populate = ['role']) {
-    return strapi.query('user', 'users-permissions').findOne(params, populate);
+  fetchAuthenticatedUser(id) {
+    return strapi.query('user', 'users-permissions').findOne({ id }, ['roles']);
   },
 
   /**
