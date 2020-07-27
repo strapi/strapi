@@ -11,8 +11,9 @@ import {
   useQuery,
   InputsIndex,
 } from 'strapi-helper-plugin';
-import { Button, Label } from '@buffetjs/core';
+import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
+
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
@@ -1129,20 +1130,22 @@ const FormModal = () => {
                           // It is the one responsible for displaying the settings label
                           if (input.type === 'divider') {
                             return (
-                              <div
-                                className="col-12"
-                                style={{
-                                  marginBottom: '1.4rem',
-                                  lineHeight: 'normal',
-                                  fontWeight: 500,
-                                }}
-                                key="divider"
-                              >
-                                <Label htmlFor="divider-no-for">
-                                  <FormattedMessage
-                                    id={getTrad('form.attribute.item.settings.name')}
-                                  />
-                                </Label>
+                              <div className="col-12" key="divider">
+                                <Padded bottom size="smd">
+                                  <div style={{ paddingTop: 3 }} />
+                                  <Text
+                                    fontSize="xs"
+                                    color="grey"
+                                    fontWeight="bold"
+                                    textTransform="uppercase"
+                                  >
+                                    <FormattedMessage
+                                      id={getTrad('form.attribute.item.settings.name')}
+                                    >
+                                      {txt => txt}
+                                    </FormattedMessage>
+                                  </Text>
+                                </Padded>
                               </div>
                             );
                           }

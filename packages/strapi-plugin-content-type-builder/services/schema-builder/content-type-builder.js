@@ -104,6 +104,8 @@ module.exports = function createComponentBuilder() {
     editContentType(infos) {
       const { uid } = infos;
 
+      console.log({ infos });
+
       if (!this.contentTypes.has(uid)) {
         throw new Error('contentType.notFound');
       }
@@ -184,6 +186,7 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
+        .set(['options', 'draftAndPublish'], infos.draftAndPublish)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
