@@ -290,6 +290,10 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
                   return moment(value)._isValid === true;
                 }
 
+                if (type === 'boolean') {
+                  return value !== undefined;
+                }
+
                 return !isEmpty(value);
               });
             }
