@@ -66,7 +66,7 @@ module.exports = {
   },
 
   /**
-   * Promise to fetch state user in header.
+   * Promise to fetch authenticated user.
    * @return {Promise}
    */
   fetchAuthenticatedUser(id) {
