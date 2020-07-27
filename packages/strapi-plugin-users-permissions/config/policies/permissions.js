@@ -16,6 +16,7 @@ module.exports = async (ctx, next) => {
         throw new Error('Invalid token: Token did not contain required fields');
       }
 
+      // fetch authenticated user
       ctx.state.user = await strapi.plugins[
         'users-permissions'
       ].services.user.fetchAuthenticatedUser(id);
