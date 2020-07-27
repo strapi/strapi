@@ -200,10 +200,6 @@ In the following examples, the frontend app will be the [react login example app
 It (the frontend app) will be running on `http://localhost:3000`. <br>
 Strapi (the backend) will be running on `http://localhost:1337`.
 
-:::tip
-If you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react), don't forget to specify the `BACKEND_URL` in `src/config.js`. If you use ngrok it is the ngrok url, otherwise it is `http://localhost:1337`.
-:::
-
 :::: tabs
 
 ::: tab GitHub
@@ -216,6 +212,10 @@ Use `ngrok` to serve the backend app.
 ```
 ngrok http 1337
 ```
+
+:::tip
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
+:::
 
 #### Github configuration
 
@@ -249,6 +249,10 @@ Use `ngrok` to serve the backend app.
 ```
 ngrok http 1337
 ```
+
+:::tip
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
+:::
 
 #### Facebook configuration
 
@@ -327,6 +331,10 @@ Use `ngrok` to serve the backend app.
 ```
 ngrok http 1337
 ```
+
+:::tip
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
+:::
 
 #### Twitter configuration
 
@@ -428,6 +436,10 @@ Use `ngrok` to serve the backend app.
 ```
 ngrok http 1337
 ```
+
+:::tip
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
+:::
 
 #### Instagram configuration
 
