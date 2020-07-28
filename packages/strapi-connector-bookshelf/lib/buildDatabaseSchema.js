@@ -108,7 +108,13 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   }
 
   // Equilize database tables
-  const createOrUpdateTable = async (table, attributes) => {
+  const createOrUpdateTable = async (table, rawAttributes) => {
+    const attributes = _.cloneDeep(rawAttributes);
+
+    for (const key in attributes) {
+      if (attributes[key].virtual) delete attributes[key];
+    }
+
     const tableExists = await ORM.knex.schema.hasTable(table);
 
     const buildColumns = (tbl, columns, opts = {}) => {

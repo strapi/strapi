@@ -34,6 +34,7 @@ const getTypeValidator = (attribute, { types, modelType, attributes }) => {
       .string()
       .oneOf(types)
       .required(),
+    virtual: yup.boolean(),
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),
     ...getTypeShape(attribute, { modelType, attributes }),
