@@ -1,26 +1,34 @@
-import { fromJS } from 'immutable';
+import produce from 'immer';
 
-const initialState = fromJS({
+const initialState = {
   formattedContentTypeLayout: [],
   isDraggingComponent: false,
-});
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'SET_IS_DRAGGING_COMPONENT':
-      return state.update('isDraggingComponent', () => true);
-    case 'SET_LAYOUT_DATA':
-      return state.update('formattedContentTypeLayout', () =>
-        fromJS(action.formattedContentTypeLayout)
-      );
-    case 'RESET_PROPS':
-      return initialState;
-    case 'UNSET_IS_DRAGGING_COMPONENT':
-      return state.update('isDraggingComponent', () => false);
-    default:
-      return state;
-  }
 };
+
+const reducer = (state, action) =>
+  // eslint-disable-next-line consistent-return
+  produce(state, drafState => {
+    switch (action.type) {
+      case 'SET_IS_DRAGGING_COMPONENT': {
+        drafState.isDraggingComponent = true;
+        break;
+      }
+
+      case 'SET_LAYOUT_DATA': {
+        drafState.formattedContentTypeLayout = action.formattedContentTypeLayout;
+        break;
+      }
+      case 'RESET_PROPS':
+        return initialState;
+      case 'UNSET_IS_DRAGGING_COMPONENT': {
+        drafState.isDraggingComponent = false;
+        break;
+      }
+      default: {
+        return drafState;
+      }
+    }
+  });
 
 export default reducer;
 export { initialState };

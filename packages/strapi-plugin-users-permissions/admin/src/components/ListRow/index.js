@@ -10,8 +10,10 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 import { IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { CheckPermissions, PopUpWarning } from 'strapi-helper-plugin';
 
-import { PopUpWarning } from 'strapi-helper-plugin';
+import getTrad from '../../utils/getTrad';
+import pluginPermissions from '../../permissions';
 import en from '../../translations/en.json';
 import { HomePageContext } from '../../contexts/HomePage';
 import { Container, Flex, Row, Wrapper } from './Components';
@@ -30,30 +32,38 @@ class ListRow extends React.Component {
   undeletableIDs = ['public', 'authenticated'];
 
   generateContent = () => {
-    let links = [
-      {
-        icon: <FontAwesomeIcon icon="pencil-alt" />,
-        onClick: this.handleClick,
-      },
-      {
-        icon: <FontAwesomeIcon icon="trash-alt" />,
-        onClick: e => {
-          e.stopPropagation();
-          this.setState({ showModalDelete: true });
-        },
-      },
-    ];
-
     switch (this.props.settingType) {
       case 'roles':
-        if (includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
-          links = [];
-        }
+        let links = [
+          {
+            icon: (
+              <CheckPermissions permissions={pluginPermissions.updateRole}>
+                <FontAwesomeIcon icon="pencil-alt" />
+              </CheckPermissions>
+            ),
+            onClick: this.handleClick,
+          },
+          {
+            icon: (
+              <CheckPermissions permissions={pluginPermissions.deleteRole}>
+                <FontAwesomeIcon icon="trash-alt" />
+              </CheckPermissions>
+            ),
+            onClick: e => {
+              e.stopPropagation();
+              this.setState({ showModalDelete: true });
+            },
+          },
+        ];
 
         if (includes(this.undeletableIDs, get(this.props.item, 'type', ''))) {
           links = [
             {
-              icon: <FontAwesomeIcon icon="pencil-alt" />,
+              icon: (
+                <CheckPermissions permissions={pluginPermissions.updateRole}>
+                  <FontAwesomeIcon icon="pencil-alt" />
+                </CheckPermissions>
+              ),
               onClick: this.handleClick,
             },
           ];
@@ -75,8 +85,6 @@ class ListRow extends React.Component {
           </Wrapper>
         );
       case 'providers':
-        links.pop(); // Remove the delete CTA
-
         return (
           <Wrapper className="row">
             <div className="col-md-4">
@@ -93,20 +101,33 @@ class ListRow extends React.Component {
             </div>
             <div className="col-md-6" style={{ fontWeight: '500' }}>
               {get(this.props.values, [get(this.props.item, 'name'), 'enabled']) ? (
-                <span style={{ color: '#5A9E06' }}>Enabled</span>
+                <span style={{ color: '#5A9E06' }}>
+                  <FormattedMessage id={getTrad('ListRow.enabled')} />
+                </span>
               ) : (
-                <span style={{ color: '#F64D0A' }}>Disabled</span>
+                <span style={{ color: '#F64D0A' }}>
+                  <FormattedMessage id={getTrad('ListRow.disabled')} />
+                </span>
               )}
             </div>
             <div className="col-md-2">
-              <IconLinks links={links} />
+              <IconLinks
+                links={[
+                  {
+                    icon: (
+                      <CheckPermissions permissions={pluginPermissions.updateProviders}>
+                        <FontAwesomeIcon icon="pencil-alt" />
+                      </CheckPermissions>
+                    ),
+                    onClick: this.handleClick,
+                  },
+                ]}
+              />
             </div>
           </Wrapper>
         );
 
       case 'email-templates':
-        links.pop(); // Remove the delete CTA
-
         return (
           <Wrapper className="row">
             <div className="col-md-4">
@@ -116,7 +137,7 @@ class ListRow extends React.Component {
                 </div>
                 <div>
                   {this.props.item.display && en[this.props.item.display] ? (
-                    <FormattedMessage id={`users-permissions.${this.props.item.display}`} />
+                    <FormattedMessage id={getTrad(this.props.item.display)} />
                   ) : (
                     this.props.item.name
                   )}
@@ -124,7 +145,18 @@ class ListRow extends React.Component {
               </Flex>
             </div>
             <div className="col-md-8">
-              <IconLinks links={links} />
+              <IconLinks
+                links={[
+                  {
+                    icon: (
+                      <CheckPermissions permissions={pluginPermissions.updateEmailTemplates}>
+                        <FontAwesomeIcon icon="pencil-alt" />
+                      </CheckPermissions>
+                    ),
+                    onClick: this.handleClick,
+                  },
+                ]}
+              />
             </div>
           </Wrapper>
         );
@@ -136,6 +168,7 @@ class ListRow extends React.Component {
 
   handleClick = () => {
     const { pathname, push } = this.context;
+    const { allowedActions } = this.props;
 
     switch (this.props.settingType) {
       case 'roles': {
@@ -164,7 +197,7 @@ class ListRow extends React.Component {
 
   render() {
     return (
-      <Row onClick={this.handleClick}>
+      <Row>
         <Container>{this.generateContent()}</Container>
         <PopUpWarning
           isOpen={this.state.showModalDelete}

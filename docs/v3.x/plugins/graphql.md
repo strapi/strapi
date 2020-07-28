@@ -1,6 +1,6 @@
 # GraphQL
 
-By default Strapi create [REST endpoints](../content-api/api-endpoints) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
+By default Strapi create [REST endpoints](../content-api/api-endpoints.md) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
 
 ## Usage
 
@@ -267,7 +267,7 @@ query {
 To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
 ::: tip NOTE
-If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.html#core-controllers).
+If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.md#core-controllers).
 :::
 
 ### Example
@@ -479,7 +479,7 @@ Result
 }
 ```
 
-## Customise the GraphQL schema
+## Customize the GraphQL schema
 
 If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql.js` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql.js` or plugin `./extensions/*/config/schema.graphql.js`.
 
@@ -567,7 +567,7 @@ module.exports = {
 Edit the `definition` attribute in one of the `schema.graphql.js` files of your project by using the GraphQL Type language string.
 
 ::: tip
-The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customise anything.
+The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customize anything.
 :::
 
 ```js
@@ -856,7 +856,7 @@ To do that, we need to use the `schema.graphql.js` like below:
 ```js
 module.exports = {
   type: {
-    Restaurant: false, // The Restaurant type won't be "queriable" or "mutable".
+    Restaurant: false, // The Restaurant type won't be "queryable" or "mutable".
   },
   resolver: {
     Query: {

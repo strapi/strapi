@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Pemissions** link in the left menu.
+To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
 
 ## Concept
 
@@ -189,11 +189,11 @@ Then fill the informations:
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **GitHub** provider
 
-Then fill the informations:
+Then fill the information:
 
 - **Enable**: `ON`
 - **Client ID**: 53de5258f8472c140917
-- **Client ID**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
+- **Client Secret**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/github`
 
 :::
@@ -234,7 +234,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 2408954435875229
-- **Client ID**: 4fe04b740b69f31ea410b9391ff3b5b0
+- **Client Secret**: 4fe04b740b69f31ea410b9391ff3b5b0
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/facebook`
 
 :::
@@ -318,7 +318,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: yfN4ycGGmKXiS1njtIYxuN5IH
-- **Client ID**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
+- **Client Secret**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
 - **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/twitter`
 
 :::
@@ -347,7 +347,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 665118465148846081
-- **Client ID**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
+- **Client Secret**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/discord`
 
 :::
@@ -379,7 +379,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: amuy279g8wt68qlht3u4gek4oykh5j
-- **Client ID**: dapssh10uo97gg2l25qufr8wen3yr6
+- **Client Secret**: dapssh10uo97gg2l25qufr8wen3yr6
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitch`
 
 :::
@@ -409,7 +409,7 @@ Then fill the informations:
 - **Deauthorize**: `https://c6a8cc7c.ngrok.io`
 - **Data Deletion Requests**: `https://c6a8cc7c.ngrok.io`
 
-On the **App Review for Instagram Basic Display** click on **Add to submition** for **instagram_graph_user_profile**.
+On the **App Review for Instagram Basic Display** click on **Add to submission** for **instagram_graph_user_profile**.
 
 Make sure your Application information are well completed.
 
@@ -422,7 +422,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 563883201184965
-- **Client ID**: f5ba10a7dd78c2410ab6b8a35ab28226
+- **Client Secret**: f5ba10a7dd78c2410ab6b8a35ab28226
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/instagram`
 
 :::
@@ -459,7 +459,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 7276416
-- **Client ID**: cFBUSghLXGuxqnCyw1N3
+- **Client Secret**: cFBUSghLXGuxqnCyw1N3
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/vk`
 
 :::
@@ -484,13 +484,32 @@ Response payload:
 }
 ```
 
-### Forgotten password
+### Forgotten & reset password
 
-This action sends an email to a user with the link to your reset password page. This link contains a URL param `code` which is required to reset user password.
+**Can only be used for users registered using the email provider.**
 
-#### Usage
+The flow was thought this way:
 
-- `email` is your user email.
+1. The user goes to your **forgotten password page**
+2. The user enters his/her email address
+3. Your forgotten password page sends a request to the backend to send an email with the reset password link to the user
+4. The user receives the email, and clicks on the special link
+5. The link redirects the user to your **reset password page**
+6. The user enters his/her new password
+7. The **reset password page** sends a request to the backend with the new password
+8. If the request contains the code contained in the link at step 3., the password is updated
+9. The user can log in with the new password
+
+In the following section we will detail steps 3. and 7..
+
+#### Forgotten password: ask for the reset password link
+
+This action sends an email to a user with the link to your own reset password page.
+The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
+
+First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+
+Then, your **forgotten password page** has to make the following request to your backend.
 
 ```js
 import axios from 'axios';
@@ -498,31 +517,22 @@ import axios from 'axios';
 // Request API.
 axios
   .post('http://localhost:1337/auth/forgot-password', {
-    email: 'user@strapi.io',
+    email: 'user@strapi.io', // user's email
   })
   .then(response => {
-    // Handle success.
     console.log('Your user received an email');
   })
   .catch(error => {
-    // Handle error.
     console.log('An error occurred:', error.response);
   });
 ```
 
-This action will send the user an email that contains a URL with the needed code for the [reset password](#reset-password).
-The URL must link to your reset password form in your frontend application.
+#### Reset Password: send the new password
 
-To configure it you will have to go in the Roles & Permissions settings and navigate to the Advanced Settings tab.
+This action will update the user password.
+Also works with the [GraphQL Plugin](./graphql.md), with the `resetPassword` mutation.
 
-### Reset Password
-
-This action will reset the user password.
-Also works with the [GraphQL Plugin](./graphql.md), exposes `resetPassword` mutation.
-
-#### Usage
-
-- `code` is the url params received from the email link (see forgot password)
+Your **reset password page** has to make the following request to your backend.
 
 ```js
 import axios from 'axios';
@@ -530,27 +540,31 @@ import axios from 'axios';
 // Request API.
 axios
   .post('http://localhost:1337/auth/reset-password', {
-    code: 'privateCode',
-    password: 'myNewPassword',
-    passwordConfirmation: 'myNewPassword',
+    code: 'privateCode', // code contained in the reset link of step 3.
+    password: 'userNewPassword',
+    passwordConfirmation: 'userNewPassword',
   })
   .then(response => {
-    // Handle success.
     console.log("Your user's password has been reset.");
   })
   .catch(error => {
-    // Handle error.
     console.log('An error occurred:', error.response);
   });
 ```
 
+Congrats, you're done!
+
 ### Email validation
 
-This action sends an email to the user with the link to confirm the user.
+:::tip NOTE
+In production, make sure the `url` config property is set. Otherwise the validation link will redirect to `localhost`. More info on the config [here](../concepts/configurations.md#server).
+:::
 
-#### Usage
+After having registered, if you have set **Enable email confirmation** to **ON**, the user will receive a confirmation link by email. The user has to click on it to validate his/her registration.
 
-- email is the user email.
+_Example of the confirmation link:_ `https://yourwebsite.fr/auth/email-confirmation?confirmation=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk0OTgxMTE3LCJleHAiOjE1OTc1NzMxMTd9.0WeB-mvuguMyr4eY8CypTZDkunR--vZYzZH6h6sChFg`
+
+If needed, you can re-send the confirmation email by making the following request.
 
 ```js
 import axios from 'axios';
@@ -558,15 +572,13 @@ import axios from 'axios';
 // Request API.
 axios
   .post(`http://localhost:1337/auth/send-email-confirmation`, {
-    email: 'user@strapi.io',
+    email: 'user@strapi.io', // user's email
   })
   .then(response => {
-    // Handle success.
     console.log('Your user received an email');
   })
   .catch(error => {
-    // Handle error.
-    console.error('An error occured:', error.response);
+    console.error('An error occurred:', error.response);
   });
 ```
 
@@ -649,7 +661,7 @@ case 'discord': {
 
 This code creates a `Purest` object that gives us a generic way to interact with the provider's REST API.
 
-For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest/tree/2.x)
+For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest)
 
 You may also want to take a look onto the numerous already made configurations [here](https://github.com/simov/purest-providers/blob/master/config/providers.json).
 
@@ -682,7 +694,7 @@ from the `query` parameter to authenticate.
 
 That way, you should be able to retrieve the user info you need.
 
-Now, you can simply call the `callback` function with the username and email of your user. That way, strapi will be able
+Now, you can simply call the `callback` function with the username and email of your user. That way, Strapi will be able
 to retrieve your user from the database and log you in.
 
 ### Configure the new provider model onto database
@@ -748,7 +760,6 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 - `USER` (object)
   - `username`
   - `email`
-  - ...and any other field that you added manually in the model.
 - `TOKEN` corresponds to the token generated to be able to reset the password.
 - `URL` is the link where the user will be redirected after clicking on it in the email.
 
@@ -757,7 +768,6 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 - `USER` (object)
   - `username`
   - `email`
-  - ...and any other field that you added manually in the model.
 - `CODE` corresponds to the CODE generated to be able confirm the user email.
 - `URL` is the Strapi backend URL that confirms the code (by default `/auth/email-confirmation`).
 

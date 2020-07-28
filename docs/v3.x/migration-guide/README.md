@@ -2,6 +2,10 @@
 
 Please also refer to the following [documentation](../guides/update-version.md) for a better understanding of how to update your project
 
+## Guides
+
+- [Migration guide from 3.0.x to 3.1.x](migration-guide-3.0.x-to-3.1.x.md)
+
 ## Migrating from Beta ?
 
 Read the [Migration guide from beta.20+ to stable](migration-guide-beta.20-to-3.0.0.md).

@@ -12,7 +12,7 @@ This built-in connector allows you to use the [Mongoose ORM](http://mongoosejs.c
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

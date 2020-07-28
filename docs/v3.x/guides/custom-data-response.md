@@ -19,9 +19,9 @@ And that is what we will do to manage our custom data response.
 In our example we will use a restaurant type with a chef. By default when you fetch restaurants, you will get all information for the chef.
 Let's consider you don't want to expose the chef's email for privacy reasons.
 
-To enforce this rule we will customize the action that fetchs all restaurants and remove the email from the returned data.
+To enforce this rule we will customize the action that fetches all restaurants and remove the email from the returned data.
 
-To follow the example your will have to create a content type `restaurant` and add the following field definition:
+To follow the example you will have to create a content type `restaurant` and add the following field definition:
 
 - `string` attribute named `name`
 - `text` attribute named `description`
@@ -52,7 +52,7 @@ After saving the new function, let's restart the `GET /restaurants` request. We 
 
 We now know the function we have to update, but we just want to customize the returned restaurant values.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the fetch logic.
+In the [controller documentation](../concepts/controllers.md#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the fetch logic.
 
 **Path —** `./api/restaurant/controller/Restaurant.js`
 

@@ -44,7 +44,7 @@ Should you decide to opt-out, you may do so by removing the `uuid` property in t
   "strapi": {
     "uuid": "7b581c0d-89b7-479e-b379-a76ab90b8754"
   },
-  "license": "MIT"
+  "license": "SEE LICENSE IN LICENSE"
 }
 ```
 

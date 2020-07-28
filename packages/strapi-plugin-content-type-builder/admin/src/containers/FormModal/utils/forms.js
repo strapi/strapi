@@ -211,6 +211,7 @@ const forms = {
           return yup.object().shape({
             name: yup
               .string()
+              .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes)
               .unique(errorsTrads.unique, alreadyTakenAttributes)
               .matches(ENUM_REGEX, errorsTrads.regex)
               .required(errorsTrads.required),
@@ -291,11 +292,14 @@ const forms = {
           return yup.object().shape({
             name: yup
               .string()
+              .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes)
               .matches(NAME_REGEX, errorsTrads.regex)
               .unique(errorsTrads.unique, alreadyTakenAttributes)
               .required(errorsTrads.required),
             targetAttribute: yup.lazy(() => {
-              let schema = yup.string();
+              let schema = yup
+                .string()
+                .isAllowed(getTrad('error.attributeName.reserved-name'), reservedNames.attributes);
 
               if (!['oneWay', 'manyWay'].includes(dataToValidate.nature)) {
                 schema = schema.matches(NAME_REGEX, errorsTrads.regex);

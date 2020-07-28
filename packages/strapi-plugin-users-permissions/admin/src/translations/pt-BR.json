@@ -19,7 +19,6 @@
   "EditPage.form.roles.label.users": "Usuários associados a este nível ({number})",
   "EditPage.form.roles.name.error": "Este valor é obrigatório.",
   "EditPage.header.description": "{description}",
-  "EditPage.header.description.create": "",
   "EditPage.header.title": "{name}",
   "EditPage.header.title.create": "Criar um novo nível",
   "EditPage.notification.permissions.error": "Ocorreu um erro ao buscar permissões",
@@ -28,7 +27,6 @@
   "EditPage.submit": "Salvar",
   "Email.template.reset_password": "Redefinir senha",
   "Email.template.success_register": "Registo bem sucedido",
-  "Email.template.validation_email": "Validação de endereço de email",
   "HeaderNav.link.advancedSettings": "Configurações avançadas",
   "HeaderNav.link.emailTemplates": "Modelos de email",
   "HeaderNav.link.providers": "Provedores",
@@ -68,8 +66,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Confirme seu endereço de e-mail para% APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p> Por favor, clique neste link para validar sua conta </ ​​p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "Confirme seu endereço de e-mail para% APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p> Por favor, clique neste link para validar sua conta </ ​​p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Confirme seu endereço de e-mail para% APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Se desativado, os usuários não poderão usar este provedor",
   "PopUpForm.Providers.enabled.label": "Ativar",
@@ -90,7 +86,6 @@
   "PopUpForm.header.edit.email-templates": "Editar modelos de email",
   "PopUpForm.header.edit.providers": "Editar provedor",
   "PopUpForm.inputSelect.providers.label": "Escolher o provedor",
-
   "notification.error.delete": "Ocorreu um erro ao tentar eliminar o registro",
   "notification.error.fetch": "Ocorreu um erro ao tentar buscar dados",
   "notification.error.fetchUser": "Ocorreu um erro ao tentar buscar usuários",
@@ -98,5 +93,6 @@
   "notification.success.delete": "O item foi excluído",
   "notification.success.submit": "As configurações foram atualizadas",
   "plugin.description.long": "Proteja sua API com um processo de autenticação completo baseado no JWT. Esse plugin também vem com uma estratégia de ACL que permite gerenciar as permissões entre os grupos de usuários.",
-  "plugin.description.short": "Proteja sua API com um processo de autenticação completo baseado no JWT"
+  "plugin.description.short": "Proteja sua API com um processo de autenticação completo baseado no JWT",
+  "plugin.name": "Papéis e permissões"
 }

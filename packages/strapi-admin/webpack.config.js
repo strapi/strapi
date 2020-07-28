@@ -17,6 +17,7 @@ const URLs = {
 };
 
 module.exports = ({
+  useEE,
   entry,
   dest,
   env,
@@ -60,9 +61,7 @@ module.exports = ({
       // Utilize long-term caching by adding content hashes (not compilation hashes)
       // to compiled assets for production
       filename: isProduction ? '[name].[contenthash:8].js' : 'bundle.js',
-      chunkFilename: isProduction
-        ? '[name].[contenthash:8].chunk.js'
-        : '[name].chunk.js',
+      chunkFilename: isProduction ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
     },
     optimization: {
       minimize: optimize,
@@ -115,9 +114,7 @@ module.exports = ({
                 require.resolve('@babel/plugin-proposal-class-properties'),
                 require.resolve('@babel/plugin-syntax-dynamic-import'),
                 require.resolve('@babel/plugin-transform-modules-commonjs'),
-                require.resolve(
-                  '@babel/plugin-proposal-async-generator-functions'
-                ),
+                require.resolve('@babel/plugin-proposal-async-generator-functions'),
                 [
                   require.resolve('@babel/plugin-transform-runtime'),
                   {
@@ -182,16 +179,29 @@ module.exports = ({
         // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(
-          isProduction ? 'production' : 'development'
-        ),
+        'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
         NODE_ENV: JSON.stringify(isProduction ? 'production' : 'development'),
         REMOTE_URL: JSON.stringify(options.publicPath),
         BACKEND_URL: JSON.stringify(options.backend),
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
         PUBLIC_PATH: JSON.stringify(options.publicPath),
       }),
+      new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
+        // We might need to improve this if we want to make it work with components
+        const containerPathName = resource.context.split(`${path.sep}containers${path.sep}`);
+        const componentPathName = resource.context.split(`${path.sep}components${path.sep}`);
+        const wantedPath =
+          containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
 
+        if (useEE) {
+          resource.request = resource.request.replace(
+            /ee_else_ce/,
+            path.join(wantedPath, '../..', 'ee/admin')
+          );
+        } else {
+          resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
+        }
+      }),
       ...webpackPlugins,
     ],
   };

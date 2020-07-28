@@ -25,9 +25,18 @@ module.exports = strapi =>
     let controller;
 
     if (plugin) {
-      controller = strapi.plugins[plugin].controllers[controllerKey];
+      controller =
+        plugin === 'admin'
+          ? strapi.admin.controllers[controllerKey]
+          : strapi.plugins[plugin].controllers[controllerKey];
     } else {
-      controller = strapi.controllers[controllerKey] || strapi.admin.controllers[controllerKey];
+      controller = strapi.controllers[controllerKey];
+    }
+
+    if (!_.isFunction(controller[actionName])) {
+      strapi.stopWithError(
+        `Error creating endpoint ${method} ${endpoint}: handler not found "${controllerKey}.${actionName}"`
+      );
     }
 
     const action = controller[actionName].bind(controller);
@@ -69,7 +78,7 @@ module.exports = strapi =>
       // Set body.
       const values = await next();
 
-      if (!ctx.body) {
+      if (_.isNil(ctx.body) && !_.isNil(values)) {
         ctx.body = values;
       }
     });

@@ -4,7 +4,7 @@ Thanks to the plugin `Upload`, you can upload any kind of file on your server or
 
 ## Configuration
 
-Currently the strapi middleware in charge of parsing request needs to be configured to support bigger file sizes if you need to upload file with a size greater than 200MB.
+Currently the Strapi middleware in charge of parsing request needs to be configured to support bigger file sizes if you need to upload file with a size greater than 200MB.
 
 The library we use is [`koa-body`](https://github.com/dlau/koa-body), and itself uses the [`node-formidable`](https://github.com/felixge/node-formidable) library to process files.
 
@@ -300,15 +300,35 @@ You can check all the available providers developed by the community on npmjs.or
 
 To install a new provider run:
 
-```
-$ npm install strapi-provider-upload-aws-s3 --save
-```
+:::: tabs
 
-or
+::: tab yarn
 
 ```
-$ yarn add strapi-provider-upload-aws-s3
+yarn add strapi-provider-upload-aws-s3
 ```
+
+:::
+
+::: tab npm
+
+```
+npm install strapi-provider-upload-aws-s3 --save
+```
+
+:::
+
+::::
+
+### Using scoped packages as providers
+
+If your package name is [scoped](https://docs.npmjs.com/about-scopes) (for example `@username/strapi-provider-upload-aws2`) you need to take an extra step by aliasing it in `package.json`. Go to the `dependencies` section and change the provider line to look like this:
+
+`"strapi-provider-upload-aws2": "npm:@username/strapi-provider-upload-aws2@0.1.9"`
+
+The string after the last `@` represents your desired [semver](https://docs.npmjs.com/about-semantic-versioning) version range.
+
+### Enabling the provider
 
 To enable the provider, create or edit the file at `./config/plugins.js`
 
@@ -324,7 +344,7 @@ module.exports = ({ env }) => ({
         Bucket: 'my-bucket',
       },
     },
-  }
+  },
 });
 ```
 

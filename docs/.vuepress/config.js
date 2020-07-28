@@ -132,7 +132,7 @@ module.exports = {
       },
       {
         text: 'Blog',
-        link: 'https://blog.strapi.io',
+        link: 'https://strapi.io/blog',
       },
       {
         text: 'Tutorials',
@@ -161,7 +161,6 @@ module.exports = {
             ['/v3.x/getting-started/contributing', 'Contributing'],
             ['/v3.x/getting-started/troubleshooting', 'Troubleshooting'],
             '/v3.x/getting-started/quick-start',
-            '/v3.x/getting-started/quick-start-tutorial',
           ],
         },
         {
@@ -213,6 +212,7 @@ module.exports = {
             '/v3.x/guides/registering-a-field-in-admin',
             '/v3.x/guides/client',
             '/v3.x/guides/update-version',
+            '/v3.x/guides/unit-testing',
           ],
         },
         {
@@ -222,6 +222,7 @@ module.exports = {
             '/v3.x/admin-panel/customization',
             '/v3.x/admin-panel/custom-webpack-config',
             '/v3.x/admin-panel/deploy',
+            '/v3.x/admin-panel/forgot-password',
           ],
         },
         {

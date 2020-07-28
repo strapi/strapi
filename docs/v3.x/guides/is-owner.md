@@ -27,8 +27,8 @@ When we are creating a new Article via `POST /articles` we will need to set the 
 To do so we will customize the `create` controller function of the Article API.
 
 **Concepts we will use:**
-Here is the code of [core controllers](../concepts/controllers.html#core-controllers).
-We will also use this [documentation](../plugins/users-permissions.html#user-object-in-strapi-context) to access the current authenticated user information.
+Here is the code of [core controllers](../concepts/controllers.md#core-controllers).
+We will also use this [documentation](../plugins/users-permissions.md#user-object-in-strapi-context) to access the current authenticated user information.
 
 **Path —** `./api/article/controllers/Article.js`
 
@@ -57,7 +57,7 @@ module.exports = {
 };
 ```
 
-Now, when an article is created, the authenticated user is automaticaly set as author of the article.
+Now, when an article is created, the authenticated user is automatically set as author of the article.
 
 ## Limit the update
 
@@ -127,5 +127,5 @@ module.exports = {
 And tada!
 
 ::: tip
-For the delete action, it will be the exact same check than the update action.
+For the delete action, it will be the exact same check as the update action.
 :::

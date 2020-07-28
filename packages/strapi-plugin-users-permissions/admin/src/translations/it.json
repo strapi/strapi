@@ -28,7 +28,6 @@
   "EditPage.submit": "Salva",
   "Email.template.reset_password": "Reset password",
   "Email.template.success_register": "Registrazione avvenuta",
-  "Email.template.validation_email": "Validazione dell'indirizzo Email",
   "HeaderNav.link.emailTemplates": "Template delle Email",
   "HeaderNav.link.providers": "Providers",
   "HeaderNav.link.roles": "Ruoli e permessi",
@@ -67,8 +66,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "Conferma gentilmente il tuo indirizzo email per %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "Clicca su questo link per validare il tuo account",
   "PopUpForm.Email.success_register.options.object.placeholder": "Conferma gentilmente il tuo indirizzo email per %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "Clicca su questo link per validare il tuo account",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "Conferma gentilmente il tuo indirizzo email per %APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Se disabilitato, gli utenti non potranno usare questo provider.",
   "PopUpForm.Providers.enabled.label": "Abilita",
@@ -88,15 +85,13 @@
   "PopUpForm.header.edit.email-templates": "Modifica il template delle Email",
   "PopUpForm.header.edit.providers": "Modifica Provider",
   "PopUpForm.inputSelect.providers.label": "Scegli il provider",
-
-  "eaderNav.link.advancedSettings": "Impostazioni avanzate",
   "notification.error.delete": "Si è verificato un errore mentre si stava cercando di eliminare l'elemento",
   "notification.error.fetch": "Si è verificato un errore mentre si stava cercando di recuperare i dati",
   "notification.error.fetchUser": "Si è verificato un errore mentre si stava cercando di recuperare gli utenti",
   "notification.info.emailSent": "Email inviata",
   "notification.success.delete": "L'elemento è stato eliminato",
   "notification.success.submit": "Impostazioni aggiornate",
-  "opUpForm.Providers.key.label": "Client ID",
   "plugin.description.long": "Proteggi le tue API con un processo completo di autenticazione basato su JWT. Questo plugin è implementato con una strategia ACL che ti consente di gestire i permessi tra i gruppi di utenti.",
-  "plugin.description.short": "Proteggi le tue API con un processo completo di autenticazione basato su JWT"
+  "plugin.description.short": "Proteggi le tue API con un processo completo di autenticazione basato su JWT",
+  "plugin.name": "Ruoli e Permessi"
 }

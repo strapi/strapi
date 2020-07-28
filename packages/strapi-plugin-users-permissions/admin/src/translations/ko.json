@@ -75,8 +75,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "%APP_NAME%의 이메일 주소를 확인하세요.",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>이 링크를 클릭하고 계정을 확인하세요.</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "%APP_NAME%의 이메일 주소를 확인하세요.",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>이 링크를 클릭하고 계정을 확인하세요.</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "%APP_NAME%의 이메일 주소를 확인하세요.",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Discord 애플리케이션 구성에 추가 할 리다이렉트 URL",
   "PopUpForm.Providers.enabled.description": "사용하지 않을 경우 이 프로바이더(provider) 기능을 이용할 수 없습니다.",
@@ -99,7 +97,6 @@
   "PopUpForm.header.edit.email-templates": "이메일 템플릿 수정",
   "PopUpForm.header.edit.providers": "프로바이더(Provider) 설정",
   "PopUpForm.inputSelect.providers.label": "프로바이더(provider) 선택",
-
   "components.Input.error.password.length": "패스워드가 너무 짧습니다.",
   "notification.error.delete": "항목을 삭제하는데 에러가 발생했습니다.",
   "notification.error.fetch": "데이터를 가져오는데 에러가 발생했습니다.",
@@ -108,5 +105,6 @@
   "notification.success.delete": "항목을 삭제했습니다.",
   "notification.success.submit": "설정을 업데이트했습니다.",
   "plugin.description.long": "JWT 기반의 인증 프로세스로 API를 보호하세요. 이 플러그인에서 사용자 그룹간 권한을 관리할 수 있는 ACL 전략도 설정할 수 있습니다.",
-  "plugin.description.short": "JWT 기반의 인증 프로세스로 API를 보호하세요."
+  "plugin.description.short": "JWT 기반의 인증 프로세스로 API를 보호하세요.",
+  "plugin.name": "역할(roles) & 권한(permissions)"
 }

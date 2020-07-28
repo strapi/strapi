@@ -10,9 +10,9 @@ But we don't want to use [parameters](../content-api/parameters.md) (eg. /articl
 
 To be able to do that, you have first to understand some concepts.
 
-When you create a content type, it generates an API with the following list of [endpoints](../content-api/endpoint.md).
+When you create a content type, it generates an API with the following list of [endpoints](../content-api/api-endpoints.md).
 
-Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
+Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controllers.md) that exist by default when a content type is created.
 
 If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It is because all the default logic is managed by Strapi. But you can override these actions with your own code.
 
@@ -56,7 +56,7 @@ After saving the new function, let's restart the `GET /articles` request. We wil
 
 We now know the function we have to update, but we just want to customize the returned article values.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the fetch logic.
+In the [controller documentation](../concepts/controllers.md#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the fetch logic.
 
 **Path —** `./api/article/controller/Article.js`
 
@@ -86,7 +86,7 @@ Here we want to force it to fetch articles that have status equal to `published`
 The way to do that is to set `ctx.query.status` to `published`.
 It will force the filter of the query.
 
-**Path —** `./api/restaurant/controller/Restaurant.js`
+**Path —** `./api/article/controller/Article.js`
 
 ```js
 const { sanitizeEntity } = require('strapi-utils');

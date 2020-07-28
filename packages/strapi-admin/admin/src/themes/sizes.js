@@ -15,6 +15,7 @@ const sizes = {
     // TODO
     xs: '5px',
     sm: '10px',
+    smd: '20px',
     md: '30px',
     lg: '40px',
   },
@@ -23,6 +24,7 @@ const sizes = {
     sm: '12px',
     md: '13px',
     lg: '18px',
+    xl: '24px',
   },
 };
 

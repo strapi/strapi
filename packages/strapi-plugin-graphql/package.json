@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.1",
+  "version": "3.1.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -11,7 +11,8 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "apollo-server-koa": "2.9.12",
+    "@apollo/federation": "^0.15.0",
+    "apollo-server-koa": "2.16.0",
     "dataloader": "^1.4.0",
     "glob": "^7.1.4",
     "graphql": "^14.3.0",
@@ -23,8 +24,8 @@
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.1.0",
     "lodash": "4.17.12",
-    "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.1"
+    "pluralize": "^8.0.0",
+    "strapi-utils": "3.1.1"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
@@ -44,9 +45,9 @@
     }
   ],
   "engines": {
-    "node": ">=10.0.0",
+    "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }
