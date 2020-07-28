@@ -212,7 +212,7 @@ To achieve this, there are three options:
   :::
 
 ::: warning
-This feature isn't available for the `upload` plugin.
+This feature isn't available for **polymorphic** relations. This relation type is used in `media`, `component` and `dynamic zone` fields.
 :::
 
 ## Sort

@@ -1,12 +1,12 @@
 # Quick Start Guide
 
-Get ready to get Strapi up and running in **less than 5 minutes** 🚀.
+Get ready to get Strapi up and running in **less than 3 minutes** 🚀.
 
 <div class="video-container">
-<iframe width="853" height="480" src="https://www.youtube.com/embed/4m1wKzzfs-M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <iframe width="853" height="480" src="https://www.youtube.com/embed/zd0_S_FPzKg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
-_For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.md)._
+_For a step-by-step guide, please take a look at the following steps. This quickstart is really close to the [FoodAdvisor](https://github.com/strapi/foodadvisor) application._
 
 (Before continuing, please make sure [Node.js and npm are properly installed](../installation/cli.html#step-1-make-sure-requirements-are-met) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
@@ -45,14 +45,14 @@ Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin
 
 - Click the **"+ Create new collection type"** link
 - Enter `restaurant`, and click `Continue`
-- A window opens with fields options:
-  - Click the **Text** field
-  - Type `name` in the **Name** field
-  - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
-  - Click the **"+ Add another Field"** button
-  - Click the **Rich Text** field
-  - Type `description` under the **BASE SETTINGS** tab, in the **Name** field
-  - Click `Finish`
+- Click the **"+ Add another Field"** button
+- Click the **Text** field
+- Type `name` in the **Name** field
+- Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
+- Click the **"+ Add another Field"** button
+- Click the **Rich Text** field
+- Type `description` under the **BASE SETTINGS** tab, in the **Name** field
+- Click `Finish`
 - Click the **Save** button and wait for Strapi to restart
 
 ## 4. Create a Category Content type
@@ -61,15 +61,15 @@ Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/
 
 - Click the **"+ Create new collection type"** link
 - Enter `category`, and click `Continue`
-- A window opens with fields options:
-  - Click the **Text** field
-  - Type `name` under the **BASE SETTINGS** tab, in the **Name** field
-  - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
-  - Click the **"+ Add another field"** button
-  - Click the **Relation** field
-  - On the right side, click the **Category** dropdown and select, `Restaurant`
-  - In the center, select the icon that represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`
-  - Click `Finish`
+- Click the **"+ Add another Field"** button
+- Click the **Text** field
+- Type `name` under the **BASE SETTINGS** tab, in the **Name** field
+- Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
+- Click the **"+ Add another field"** button
+- Click the **Relation** field
+- On the right side, click the **Category** dropdown and select, `Restaurant`
+- In the center, select the icon that represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`
+- Click `Finish`
 - Click the **Save** button and wait for Strapi to restart
 
 ## 5. Add content to "Restaurant" Content Type
