@@ -890,6 +890,21 @@ const forms = {
       advanced() {
         return {
           items: [
+            [fields.divider],
+            [
+              {
+                label: {
+                  id: `${pluginId}.contentType.draftAndPublish.label`,
+                },
+                description: {
+                  id: `${pluginId}.contentType.draftAndPublish.description`,
+                },
+                name: 'draftAndPublish',
+                type: 'bool',
+                validations: {},
+              },
+            ],
+            [fields.divider],
             [
               {
                 autoFocus: true,
