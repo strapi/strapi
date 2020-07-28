@@ -19,6 +19,8 @@ You can read about `strapi.query` calls [here](./queries.md).
 In the following example your controller, service and model are named `restaurant`.
 :::
 
+#### Collection Type
+
 :::: tabs
 
 ::: tab find
@@ -271,6 +273,102 @@ module.exports = {
 {
   "name_contains": "sushi"
 }
+```
+
+:::
+
+::::
+
+#### Single Type
+
+:::: tabs
+
+::: tab find
+
+#### `find`
+
+```js
+const _ = require('lodash');
+
+module.exports = {
+  /**
+   * Promise to fetch the record
+   *
+   * @return {Promise}
+   */
+  async find(populate) {
+    const results = await strapi.query('restaurant').find({ _limit: 1 }, populate);
+    return _.first(results) || null;
+  },
+};
+```
+
+- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
+
+:::
+
+::: tab createOrUpdate
+
+#### `createOrUpdate`
+
+```js
+const _ = require('lodash');
+
+module.exports = {
+  /**
+   * Promise to add/update the record
+   *
+   * @return {Promise}
+   */
+
+  async createOrUpdate(data, { files } = {}) {
+    const results = await strapi.query('restaurant').find({ _limit: 1 });
+    const entity = _.first(results) || null;
+
+    let entry;
+    if (!entity) {
+      entry = await strapi.query('restaurant').create(data);
+    } else {
+      entry = await strapi.query('restaurant').update({ id: entity.id }, data);
+    }
+
+    if (files) {
+      // automatically uploads the files based on the entry and the model
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: 'restaurant',
+        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+      });
+      return this.findOne({ id: entry.id });
+    }
+
+    return entry;
+  },
+};
+```
+
+:::
+
+::: tab delete
+
+#### `delete`
+
+```js
+module.exports = {
+  /**
+   * Promise to delete a record
+   *
+   * @return {Promise}
+   */
+
+  delete() {
+    const results = await strapi.query('restaurant').find({ _limit: 1 });
+    const entity = _.first(results) || null;
+
+    if (!entity) return;
+
+    return strapi.query('restaurant').delete({id: entity.id});
+  },
+};
 ```
 
 :::
