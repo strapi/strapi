@@ -25,8 +25,8 @@ cache:
 e2e_tests: &e2e_tests
   stage: 'End to End tests CE'
   script:
-    - yarn run -s test:generate-app -- $DB_STRING
-    - yarn run -s test:start-app & wait-on http://localhost:1337
+    - STRAPI_DISABLE_EE=true yarn run -s test:generate-app -- $DB_STRING
+    - STRAPI_DISABLE_EE=true yarn run -s test:start-app & wait-on http://localhost:1337
     - STRAPI_DISABLE_EE=true yarn run -s test:e2e
 
 # end to end testing template
