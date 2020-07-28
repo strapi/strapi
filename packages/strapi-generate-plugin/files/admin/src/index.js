@@ -27,7 +27,7 @@ export default strapi => {
     preventComponentRendering: false,
     trads,
     menu: {
-      pluginsSection: [
+      pluginsSectionLinks: [
         {
           destination: `/plugins/${pluginId}`,
           icon,
