@@ -77,13 +77,15 @@ module.exports = function createComponentBuilder() {
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
-        .set(['info', 'name'], infos.name)
-        .set(['info', 'description'], infos.description)
+        .set('info', {
+          name: infos.name,
+          description: infos.description,
+        })
         .set('options', {
           increments: true,
           timestamps: true,
+          draftAndPublish: infos.draftAndPublish || false,
         })
-        .setOption('draftAndPublish', infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
@@ -185,7 +187,7 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .setOption('draftAndPublish', infos.draftAndPublish || false)
+        .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
