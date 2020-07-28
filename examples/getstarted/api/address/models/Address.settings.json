@@ -21,6 +21,10 @@
     "postal_coder": {
       "type": "string"
     },
+    "title": {
+      "type": "string",
+      "virtual": true
+    },
     "categories": {
       "collection": "category",
       "via": "addresses",
