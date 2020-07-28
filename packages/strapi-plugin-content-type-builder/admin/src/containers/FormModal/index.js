@@ -206,22 +206,41 @@ const FormModal = () => {
         });
       }
 
+      // Create content type we need to add the default option draftAndPublish
+      if (
+        modalType === 'contentType' &&
+        state.modalType !== 'contentType' && // Prevent setting the data structure when navigating from one tab to another
+        actionType === 'create'
+      ) {
+        dispatch({
+          type: 'SET_DATA_TO_EDIT',
+          data: {
+            draftAndPublish: false,
+          },
+        });
+      }
+
       // Edit content type
       if (
         modalType === 'contentType' &&
         state.modalType !== 'contentType' &&
         actionType === 'edit'
       ) {
-        const { name, collectionName, kind } = get(allDataSchema, [...pathToSchema, 'schema'], {
-          name: null,
-          collectionName: null,
-        });
+        const { name, collectionName, draftAndPublish, kind } = get(
+          allDataSchema,
+          [...pathToSchema, 'schema'],
+          {
+            name: null,
+            collectionName: null,
+          }
+        );
 
         dispatch({
           type: 'SET_DATA_TO_EDIT',
           data: {
             name,
             collectionName,
+            draftAndPublish,
             kind,
           },
         });
