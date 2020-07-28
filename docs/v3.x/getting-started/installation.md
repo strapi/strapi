@@ -1,9 +1,9 @@
 # Installation
 
-Strapi gives you many possible installation options for your project or application. Strapi can be installed on your computer or services such as Digital Ocean or Platform.sh. The following documentation covers differents options to install strapi and getting sttarted.
+Strapi gives you many possible installation options for your project or application. Strapi can be installed on your computer or services such as DigitalOcean, Amazon AWS, or Platform.sh. The following documentation covers many different options to install Strapi and getting started on using it.
 
 ::: tip
-For a more detailed overview of deployment please see the [related documentation](./deployment).
+For a more detailed overview of deployment please see the [related documentation](./deployment.md).
 :::
 
 ## Installation guides

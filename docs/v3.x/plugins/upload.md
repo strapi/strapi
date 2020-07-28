@@ -357,7 +357,7 @@ When configuring your upload provider you might want to change the configuration
 
 You can set a specific configuration in the `./config/env/{env}/plugins.js` configuration file and it will be used to overwrite the one in the default configuration.
 
-## Create a providers
+## Create providers
 
 You can create a Node.js module to implement a custom provider. Read the official documentation [here](https://docs.npmjs.com/creating-node-js-modules).
 
