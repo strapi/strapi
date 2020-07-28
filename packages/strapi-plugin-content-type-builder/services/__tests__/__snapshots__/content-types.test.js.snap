@@ -13,6 +13,7 @@ Object {
     "collectionName": "tests",
     "connection": "default",
     "description": "My description",
+    "draftAndPublish": false,
     "kind": "singleType",
     "name": "My name",
   },

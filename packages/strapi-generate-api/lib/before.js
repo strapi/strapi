@@ -128,6 +128,7 @@ module.exports = (scope, cb) => {
         description: scope.description,
       },
       options: {
+        draftAndPublish: false,
         increments: true,
         timestamps: true,
         comment: '',
