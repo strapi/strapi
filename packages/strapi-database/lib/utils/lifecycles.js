@@ -3,8 +3,8 @@
 const _ = require('lodash');
 
 const executeLifecycle = async (lifecycle, model, ...args) => {
-  if (_.has(model, `lifecycles.${lifecycle}`)) {
-    await model.lifecycles[lifecycle](...args);
+  if (lifecycle in model) {
+    await model[lifecycle](...args);
   }
 };
 
