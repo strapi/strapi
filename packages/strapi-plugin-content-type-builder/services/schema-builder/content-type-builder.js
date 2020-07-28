@@ -83,7 +83,7 @@ module.exports = function createComponentBuilder() {
           increments: true,
           timestamps: true,
         })
-        .setSchemaOption(['draftAndPublish'], infos.draftAndPublish || false)
+        .setOption('draftAndPublish', infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
@@ -185,7 +185,7 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .setSchemaOption(['draftAndPublish'], infos.draftAndPublish || false)
+        .setOption('draftAndPublish', infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
