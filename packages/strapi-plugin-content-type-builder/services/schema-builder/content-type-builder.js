@@ -185,7 +185,7 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .setSchemaOption(['draftAndPublish'], infos.draftAndPublish)
+        .setSchemaOption(['draftAndPublish'], infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
