@@ -890,7 +890,11 @@ const forms = {
       advanced() {
         return {
           items: [
-            [fields.divider],
+            [
+              {
+                type: 'dividerDraftPublish',
+              },
+            ],
             [
               {
                 label: {
