@@ -76,6 +76,15 @@ module.exports = function createSchemaHandler(infos) {
       return this;
     },
 
+    // Set a particular option inside the schema
+    setSchemaOption(path, val) {
+      modified = true;
+
+      _.set(state.schema, ['options', ...path], val);
+
+      return this;
+    },
+
     // get a particuar path inside the schema
     get(path) {
       return _.get(state.schema, path);
