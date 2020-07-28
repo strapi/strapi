@@ -1147,7 +1147,12 @@ const FormModal = () => {
                         {row.map((input, i) => {
                           // The divider type is used mainly the advanced tab
                           // It is the one responsible for displaying the settings label
-                          if (input.type === 'divider') {
+                          if (input.type === 'divider' || input.type === 'dividerDraftPublish') {
+                            const tradId =
+                              input.type === 'divider'
+                                ? 'form.attribute.item.settings.name'
+                                : 'form.contentType.divider.draft-publish';
+
                             return (
                               <div className="col-12" key="divider">
                                 <Padded bottom size="smd">
@@ -1158,9 +1163,7 @@ const FormModal = () => {
                                     fontWeight="bold"
                                     textTransform="uppercase"
                                   >
-                                    <FormattedMessage
-                                      id={getTrad('form.attribute.item.settings.name')}
-                                    >
+                                    <FormattedMessage id={getTrad(tradId)}>
                                       {txt => txt}
                                     </FormattedMessage>
                                   </Text>
