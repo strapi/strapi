@@ -316,7 +316,6 @@ yarn add strapi-provider-upload-aws-s3
 npm install strapi-provider-upload-aws-s3 --save
 ```
 
-<<<<<<< HEAD
 :::
 
 ::::
