@@ -369,9 +369,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     const { plugin, collection, via, dominant, alias } = manyRelation;
 
     if (dominant) {
-      const targetCollection = plugin
-        ? strapi.plugins[plugin].models[collection]
-        : strapi.models[collection];
+      const targetCollection = strapi.db.getModel(collection, plugin);
 
       const targetAttr = via
         ? targetCollection.attributes[via]

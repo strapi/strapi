@@ -13,7 +13,7 @@ import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/3024-night.css';
+import 'codemirror/theme/solarized.css';
 
 import { isEmpty, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
@@ -21,7 +21,7 @@ import Wrapper from './components';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const DEFAULT_THEME = '3024-night';
+const DEFAULT_THEME = 'solarized dark';
 
 class InputJSON extends React.Component {
   timer = null;
@@ -54,11 +54,7 @@ class InputJSON extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      isEmpty(prevProps.value) &&
-      !isEmpty(this.props.value) &&
-      !this.state.hasInitValue
-    ) {
+    if (isEmpty(prevProps.value) && !isEmpty(this.props.value) && !this.state.hasInitValue) {
       this.setInitValue();
     }
   }
@@ -150,10 +146,7 @@ class InputJSON extends React.Component {
     }
 
     clearTimeout(this.timer);
-    this.timer = setTimeout(
-      () => this.testJSON(this.codeMirror.getValue()),
-      WAIT
-    );
+    this.timer = setTimeout(() => this.testJSON(this.codeMirror.getValue()), WAIT);
   };
 
   testJSON = value => {
@@ -170,13 +163,8 @@ class InputJSON extends React.Component {
     }
 
     return (
-      <Wrapper>
-        <textarea
-          ref={this.editor}
-          autoComplete="off"
-          id={this.props.name}
-          defaultValue=""
-        />
+      <Wrapper disabled={this.props.disabled}>
+        <textarea ref={this.editor} autoComplete="off" id={this.props.name} defaultValue="" />
       </Wrapper>
     );
   }

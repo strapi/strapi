@@ -31,7 +31,7 @@
                   },
                   "replyTo": {
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
                     "example": "user4@example.com"
                   },
                   "subject": {

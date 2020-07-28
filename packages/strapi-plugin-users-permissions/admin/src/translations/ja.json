@@ -72,8 +72,6 @@
   "PopUpForm.Email.reset_password.options.object.placeholder": "あなたのメールアドレスを確認してください %APP_NAME%",
   "PopUpForm.Email.success_register.options.message.placeholder": "<p>このリンクをクリックしてアカウントを確認してください</p>",
   "PopUpForm.Email.success_register.options.object.placeholder": "あなたのメールアドレスを確認してください %APP_NAME%",
-  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>このリンクをクリックしてアカウントを確認してください</p>",
-  "PopUpForm.Email.validation_email.options.object.placeholder": "あなたのメールアドレスを確認してください %APP_NAME%",
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Discordアプリケーションの設定で追加するリダイレクトURL",
   "PopUpForm.Providers.enabled.description": "無効にすると、ユーザーはこのプロバイダを使用できなくなります。",
@@ -96,7 +94,6 @@
   "PopUpForm.header.edit.email-templates": "メールテンプレートの編集",
   "PopUpForm.header.edit.providers": "プロバイダを編集",
   "PopUpForm.inputSelect.providers.label": "プロバイダの選択",
-
   "components.Input.error.password.length": "パスワードが一致しません",
   "notification.error.delete": "アイテムの削除中にエラーが発生しました",
   "notification.error.fetch": "データの取得中にエラーが発生しました",
@@ -105,5 +102,6 @@
   "notification.success.delete": "アイテムが削除されました",
   "notification.success.submit": "設定が更新されました",
   "plugin.description.long": "JWTに基づいた完全な認証プロセスでAPIを保護します。このプラグインには、ユーザーのグループ間で権限を管理できるACL戦略もあります。",
-  "plugin.description.short": "JWTに基づく完全な認証プロセスでAPIを保護する"
+  "plugin.description.short": "JWTに基づく完全な認証プロセスでAPIを保護する",
+  "plugin.name": "ロールと権限"
 }

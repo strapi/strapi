@@ -8,7 +8,7 @@ To apply your changes you need to [rebuild](#build) your admin panel
 
 ## Change access URL
 
-By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path. For more advanced settings please see the [server config](https://strapi.io/documentation/v3.x/concepts/configurations.html#server) documentation.
+By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path. For more advanced settings please see the [server config](../concepts/configurations.md#server) documentation.
 
 **Path —** `./config/server.js`.
 
@@ -22,7 +22,7 @@ module.exports = ({ env }) => ({
 });
 ```
 
-The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
+The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configuration above.
 
 ## Development mode
 
@@ -50,7 +50,7 @@ touch admin/src/i18n.js
 touch admin/src/translations/index.js
 ```
 
-**Path --** `my-app/admin/src/translations/index.js`
+**Path -** `my-app/admin/src/translations/index.js`
 
 ```js
 import en from './en.json';
@@ -70,7 +70,7 @@ With this modification only English and French will be available in your admin
 
 ### Customize a plugin
 
-Similarly to the back-end override system any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
+Similarly to the back-end override system, any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
 
 **Example: Changing the current WYSIWYG**
 
@@ -86,14 +86,14 @@ cd admin/src && mkdir -p components/WysiwygWithErrors
 touch components/WysiwygWithErrors/index.js
 ```
 
-**Path --** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
+**Path -** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
 
 ```js
 import React from 'react';
 import MyNewWYSIWYG from 'my-awesome-lib';
 
 // This is a dummy example
-const WysiwygWithErrors = (props) => <MyNewWYSIWYG {...props} />;
+const WysiwygWithErrors = props => <MyNewWYSIWYG {...props} />;
 
 export default WysiwygWithErrors;
 ```
@@ -130,6 +130,23 @@ Add the following configuration:
 export const LOGIN_LOGO = null;
 export const SHOW_TUTORIALS = false;
 export const SETTINGS_BASE_URL = '/settings';
+```
+
+### Changing the host and port
+
+By default, the front-development server runs on `localhost:8000`. However, you can change this setting by updating the following configuration:
+
+**Path —** `./config/server.js`.
+
+```js
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
+  admin: {
+    host: 'my-host', // only used along with `strapi develop --watch-admin` command
+    port: 3000, // only used along with `strapi develop --watch-admin` command
+  },
+});
 ```
 
 ## Build

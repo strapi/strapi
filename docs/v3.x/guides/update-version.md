@@ -6,52 +6,52 @@ How to upgrade your application to the latest version of Strapi.
 
 Start by upgrading all your Strapi package version.
 
-For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
+For example moving from `3.0.4` to `3.0.5`
 
 :::: tabs
 
-::: tab 3.0.0-beta.16
+::: tab 3.0.5
 
 ```json
 {
   //...
   "dependencies": {
-    "strapi": "3.0.0-beta.16",
-    "strapi-admin": "3.0.0-beta.16",
-    "strapi-hook-bookshelf": "3.0.0-beta.16",
-    "strapi-hook-knex": "3.0.0-beta.16",
-    "strapi-plugin-content-manager": "3.0.0-beta.16",
-    "strapi-plugin-content-type-builder": "3.0.0-beta.16",
-    "strapi-plugin-email": "3.0.0-beta.16",
-    "strapi-plugin-graphql": "3.0.0-beta.16",
-    "strapi-plugin-settings-manager": "3.0.0-beta.16",
-    "strapi-plugin-upload": "3.0.0-beta.16",
-    "strapi-plugin-users-permissions": "3.0.0-beta.16",
-    "strapi-utils": "3.0.0-beta.16"
+    "strapi": "3.0.5",
+    "strapi-admin": "3.0.5",
+    "strapi-hook-bookshelf": "3.0.5",
+    "strapi-hook-knex": "3.0.5",
+    "strapi-plugin-content-manager": "3.0.5",
+    "strapi-plugin-content-type-builder": "3.0.5",
+    "strapi-plugin-email": "3.0.5",
+    "strapi-plugin-graphql": "3.0.5",
+    "strapi-plugin-settings-manager": "3.0.5",
+    "strapi-plugin-upload": "3.0.5",
+    "strapi-plugin-users-permissions": "3.0.5",
+    "strapi-utils": "3.0.5"
   }
 }
 ```
 
 :::
 
-::: tab 3.0.0-beta.17
+::: tab 3.0.6
 
 ```json
 {
   //...
   "dependencies": {
-    "strapi": "3.0.0-beta.17",
-    "strapi-admin": "3.0.0-beta.17",
-    "strapi-hook-bookshelf": "3.0.0-beta.17",
-    "strapi-hook-knex": "3.0.0-beta.17",
-    "strapi-plugin-content-manager": "3.0.0-beta.17",
-    "strapi-plugin-content-type-builder": "3.0.0-beta.17",
-    "strapi-plugin-email": "3.0.0-beta.17",
-    "strapi-plugin-graphql": "3.0.0-beta.17",
-    "strapi-plugin-settings-manager": "3.0.0-beta.17",
-    "strapi-plugin-upload": "3.0.0-beta.17",
-    "strapi-plugin-users-permissions": "3.0.0-beta.17",
-    "strapi-utils": "3.0.0-beta.17"
+    "strapi": "3.0.6",
+    "strapi-admin": "3.0.6",
+    "strapi-hook-bookshelf": "3.0.6",
+    "strapi-hook-knex": "3.0.6",
+    "strapi-plugin-content-manager": "3.0.6",
+    "strapi-plugin-content-type-builder": "3.0.6",
+    "strapi-plugin-email": "3.0.6",
+    "strapi-plugin-graphql": "3.0.6",
+    "strapi-plugin-settings-manager": "3.0.6",
+    "strapi-plugin-upload": "3.0.6",
+    "strapi-plugin-users-permissions": "3.0.6",
+    "strapi-utils": "3.0.6"
   }
 }
 ```

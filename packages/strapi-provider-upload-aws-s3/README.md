@@ -30,7 +30,7 @@ module.exports = ({ env }) => ({
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 
