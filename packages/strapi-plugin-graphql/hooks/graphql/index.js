@@ -118,7 +118,6 @@ module.exports = strapi => {
         cors: false,
         bodyParserConfig: true,
         introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
-        engine: _.get(strapi.plugins.graphql, 'config.engine', false),
       };
 
       // Disable GraphQL Playground in production environment.
