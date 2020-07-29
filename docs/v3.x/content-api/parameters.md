@@ -60,20 +60,20 @@ or
 
 `GET /restaurants?_where[0][price_gte]=3&[0][price_lte]=7`
 
-## Complexe queries
+## Complex queries
 
 ::: tip NOTE
 `OR` and `AND` operations are availabled starting from v3.1.0
 :::
 
-When building more complexe queries you must use the `_where` query parameter in combination with the [`qs`](https://github.com/ljharb/qs) library.
+When building more complex queries you must use the `_where` query parameter in combination with the [`qs`](https://github.com/ljharb/qs) library.
 
-We are taking advantage of the capability of `qs` to parse nested objects to create more complexe queries.
+We are taking advantage of the capability of `qs` to parse nested objects to create more complex queries.
 
-This will give you full power to create complexe queries with logical `AND` and `OR` operations.
+This will give you full power to create complex queries with logical `AND` and `OR` operations.
 
 ::: tip NOTE
-We strongly recommend using `qs` directly to generate complexe queries instead of creating them manually.
+We strongly recommend using `qs` directly to generate complex queries instead of creating them manually.
 :::
 
 ### `AND` operator
