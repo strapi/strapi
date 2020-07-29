@@ -174,8 +174,8 @@ The following middlewares cannot be disabled: responses, router, logger and boom
 - `parser` (See [koa-body](https://github.com/dlau/koa-body#options) for more information)
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
-  - `jsonLimit` (string|Integer): The byte (if integer) limit of the JSON body. Default value: `1mb`.
-  - `formLimit` (string|Integer): The byte (if integer) limit of the form body. Default value: `56k`.
+  - `jsonLimit` (string|integer): The byte (if integer) limit of the JSON body. Default value: `1mb`.
+  - `formLimit` (string|integer): The byte (if integer) limit of the form body. Default value: `56k`.
 
 ::: tip
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
