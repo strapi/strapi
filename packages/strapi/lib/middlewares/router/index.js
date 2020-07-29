@@ -33,7 +33,7 @@ module.exports = strapi => {
         });
 
         _.get(strapi.admin, 'config.routes', []).forEach(route => {
-          composeEndpoint(route, { router });
+          composeEndpoint(route, { plugin: 'admin', router });
         });
 
         // Mount admin router on Strapi router
