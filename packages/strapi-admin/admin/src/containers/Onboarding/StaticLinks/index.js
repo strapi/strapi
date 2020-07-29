@@ -5,18 +5,23 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import StyledLink from './StyledLink';
 
 function StaticLinks() {
+  const { formatMessage } = useIntl();
   const staticLinks = [
     {
       icon: 'book',
-      label: 'documentation',
+      label: formatMessage({ id: 'app.components.LeftMenuFooter.documentation' }),
       destination: 'https://strapi.io/documentation',
     },
+    {
+      icon: 'file',
+      label: formatMessage({ id: 'app.static.links.cheatsheet' }),
+      destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
+    }
   ];
 
   return (
@@ -28,7 +33,7 @@ function StaticLinks() {
           <li key={label}>
             <StyledLink href={destination} target="_blank" rel="noopener noreferrer">
               <FontAwesomeIcon icon={icon} />
-              <FormattedMessage id={`app.components.LeftMenuFooter.${label}`} />
+              <span>{label}</span>
             </StyledLink>
           </li>
         );
