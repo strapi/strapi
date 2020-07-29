@@ -86,7 +86,7 @@ Here we want to force it to fetch articles that have status equal to `published`
 The way to do that is to set `ctx.query.status` to `published`.
 It will force the filter of the query.
 
-**Path —** `./api/restaurant/controller/Restaurant.js`
+**Path —** `./api/article/controller/Article.js`
 
 ```js
 const { sanitizeEntity } = require('strapi-utils');
