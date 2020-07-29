@@ -18,7 +18,6 @@ module.exports = {
    * @return {Object}
    */
   async create(ctx) {
-    console.log('hello');
     const advanced = await strapi
       .store({
         environment: '',

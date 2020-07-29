@@ -28,7 +28,7 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "p-map": "4.0.0",
     "verror": "^1.10.0"
   }
