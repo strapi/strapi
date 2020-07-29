@@ -15,7 +15,7 @@
     "fs-extra": "^8.1.0",
     "immutable": "^3.8.2",
     "koa-static": "^5.0.0",
-    "lodash": "^4.17.19",
+    "lodash": "4.17.19",
     "moment": "^2.24.0",
     "path-to-regexp": "^3.1.0",
     "react": "^16.9.0",

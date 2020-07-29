@@ -15,7 +15,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "^4.17.19",
+    "lodash": "4.17.19",
     "mongoose": "5.8.0",
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.2.1",

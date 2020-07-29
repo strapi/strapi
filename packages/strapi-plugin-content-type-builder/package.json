@@ -11,7 +11,7 @@
     "@sindresorhus/slugify": "1.1.0",
     "fs-extra": "^7.0.0",
     "immutable": "^3.8.2",
-    "lodash": "^4.17.19",
+    "lodash": "4.17.19",
     "pluralize": "^8.0.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
