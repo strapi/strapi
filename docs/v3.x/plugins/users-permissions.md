@@ -650,6 +650,10 @@ create: async ctx => {
 
 ## Adding a new provider (to your project)
 
+**Only providers handled by [grant](https://github.com/simov/grant) are supported**. <br> You can check the 180+ supported providers list there: [https://github.com/simov/grant#180-supported-providers--oauth-playground](https://github.com/simov/grant#180-supported-providers--oauth-playground).
+
+### Prepare your files
+
 To add a new provider on Strapi, you will need to perform changes onto the following files:
 
 ```
@@ -659,7 +663,7 @@ extensions/users-permissions/admin/src/components/PopUpForm/index.js
 extensions/users-permissions/admin/src/translations/en.json
 ```
 
-If these files don't exist you will need to copy from your `node_modules` or the Strapi mono-repo. You can see the [plugin extensions](../concepts/customization.md#plugin-extensions) for more information as to how this works
+If these files don't exist you will need to copy from your `node_modules` or the Strapi mono-repo. You can see [plugin extensions](../concepts/customization.md#plugin-extensions) for more information on how it works.
 
 We will go step by step.
 
