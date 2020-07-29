@@ -23,7 +23,7 @@
     "graphql-type-json": "0.3.1",
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.1.0",
-    "lodash": "4.17.12",
+    "lodash": "4.17.19",
     "pluralize": "^8.0.0",
     "strapi-utils": "3.1.1"
   },
