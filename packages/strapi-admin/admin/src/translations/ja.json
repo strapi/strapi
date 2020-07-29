@@ -38,6 +38,7 @@
   "HomePage.welcome.congrats": "おめでとうございます！",
   "HomePage.welcome.congrats.content": "初期管理者としてログインしました。Strapiが提供する強力な機能を探すために、",
   "HomePage.welcome.congrats.content.bold": "まずはコンテンツタイプを作ることをオススメします。",
+  "Media Library": "メディアライブラリ",
   "New entry": "新規投稿",
   "Password": "パスワード",
   "Provider": "プロバイダ",
@@ -203,6 +204,7 @@
   "notification.error.layout": "レイアウトを復旧できませんでした",
   "notification.form.error.fields": "フォームに同じエラーがあります",
   "notification.form.success.fields": "保存されました",
+  "notification.link-copied": "クリップボードにリンクをコピーしました",
   "notification.success.delete": "アイテムは削除されました",
   "request.error.model.unknown": "モデルが存在しません"
 }
