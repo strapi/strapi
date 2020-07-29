@@ -250,6 +250,7 @@
   "app.utils.defaultMessage": " ",
   "app.utils.delete": "Delete",
   "app.utils.filters": "Filters",
+  "app.static.links.cheatsheet": "CheatSheet",
   "app.utils.placeholder.defaultMessage": " ",
   "component.Input.error.validation.integer": "The value must be an integer",
   "components.AutoReloadBlocker.description": "Run Strapi with one of the following commands:",
