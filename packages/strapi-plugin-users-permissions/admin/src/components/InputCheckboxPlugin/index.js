@@ -9,13 +9,7 @@ import PropTypes from 'prop-types';
 import { useEditPageContext } from '../../contexts/EditPage';
 import { Label, Wrapper } from './Components';
 
-function InputCheckboxPlugin({
-  inputSelected,
-  label,
-  name,
-  setNewInputSelected,
-  value,
-}) {
+function InputCheckboxPlugin({ inputSelected, label, name, setNewInputSelected, value }) {
   const {
     onChange,
     resetShouldDisplayPoliciesHint,
@@ -61,14 +55,11 @@ function InputCheckboxPlugin({
   return (
     <Wrapper className="col-md-4" onClick={handleClick}>
       <div
-        className={`form-check ${
-          isSelected && policiesShown ? 'highlighted' : ''
-        }  ${value ? 'is-checked' : ''}`}
+        className={`form-check ${isSelected && policiesShown ? 'highlighted' : ''}  ${
+          value ? 'is-checked' : ''
+        }`}
       >
-        <Label
-          className={`form-check-label ${value ? 'checked' : ''}`}
-          htmlFor={name}
-        >
+        <Label className={`form-check-label ${value ? 'checked' : ''}`} htmlFor={name}>
           <input
             className="form-check-input"
             defaultChecked={value}
