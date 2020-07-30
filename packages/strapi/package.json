@@ -51,7 +51,6 @@
     "qs": "^6.9.3",
     "resolve-cwd": "^3.0.0",
     "rimraf": "^2.6.2",
-    "shelljs": "^0.8.3",
     "strapi-database": "3.1.2",
     "strapi-generate": "3.1.2",
     "strapi-generate-api": "3.1.2",
