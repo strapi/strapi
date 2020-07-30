@@ -171,9 +171,11 @@ The following middlewares cannot be disabled: responses, router, logger and boom
   - `level` (string): Default log level. Default value: `debug`.
   - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
   - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
-- `parser`
+- `parser` (See [koa-body](https://github.com/dlau/koa-body#options) for more information)
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
+  - `jsonLimit` (string|integer): The byte (if integer) limit of the JSON body. Default value: `1mb`.
+  - `formLimit` (string|integer): The byte (if integer) limit of the form body. Default value: `56k`.
 
 ::: tip
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
