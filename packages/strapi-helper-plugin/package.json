@@ -65,7 +65,7 @@
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
     "react-router": "^5.0.0",
-    "react-router-dom": "^5.0.0",
+    "react-router-dom": "^5.2.0",
     "reactstrap": "8.4.1",
     "styled-components": "^5.0.0",
     "whatwg-fetch": "^2.0.3"
