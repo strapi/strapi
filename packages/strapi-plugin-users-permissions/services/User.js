@@ -7,7 +7,6 @@
  */
 
 const bcrypt = require('bcryptjs');
-const _ = require('lodash');
 
 module.exports = {
   /**
@@ -62,8 +61,16 @@ module.exports = {
    * Promise to fetch a/an user.
    * @return {Promise}
    */
-  fetch(params, populate = ['role']) {
+  fetch(params, populate) {
     return strapi.query('user', 'users-permissions').findOne(params, populate);
+  },
+
+  /**
+   * Promise to fetch authenticated user.
+   * @return {Promise}
+   */
+  fetchAuthenticatedUser(id) {
+    return strapi.query('user', 'users-permissions').findOne({ id }, ['role']);
   },
 
   /**
@@ -102,12 +109,8 @@ module.exports = {
     return strapi.query('user', 'users-permissions').delete(params);
   },
 
-  async removeAll(params, query) {
-    const toRemove = Object.values(_.omit(query, 'source'));
-    const { primaryKey } = strapi.query('user', 'users-permissions');
-    const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
-
-    return strapi.query('user', 'users-permissions').delete(filter);
+  async removeAll(params) {
+    return strapi.query('user', 'users-permissions').delete(params);
   },
 
   validatePassword(password, hash) {

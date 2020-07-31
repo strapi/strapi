@@ -10,7 +10,8 @@ const _ = require('lodash');
 const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
 const packageJSON = require('./resources/json/package.json');
-const databaseJSON = require('./resources/json/database.json.js');
+const createDatabaseConfig = require('./resources/templates/database.js');
+const createServerConfig = require('./resources/templates/server.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log('Creating files.');
@@ -52,13 +53,17 @@ module.exports = async function createProject(scope, { client, connection, depen
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
+    // create config/database.js
     await fse.writeFile(
       join(rootPath, `config/database.js`),
-      databaseJSON({
+      createDatabaseConfig({
         client,
         connection,
       })
     );
+
+    // create config/server.js
+    await fse.writeFile(join(rootPath, `config/server.js`), createServerConfig());
 
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
   } catch (err) {

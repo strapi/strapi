@@ -4,8 +4,12 @@ Thanks to the plugin `Email`, you can send email from your server or externals p
 
 ## Programmatic usage
 
+### Send an email - `.send()`
+
 In your custom controllers or services you may want to send email.
 By using the following function, Strapi will use the configured provider to send an email.
+
+**Example**
 
 ```js
 await strapi.plugins['email'].services.email.send({
@@ -20,11 +24,43 @@ await strapi.plugins['email'].services.email.send({
 });
 ```
 
+### Send an email using a template - `.sendTemplatedEmail()`
+
+When you send an email, you will most likely want to build it from a template you wrote.
+The email plugin provides the service `sendTemplatedEmail` that compile the email and then sends it. The function have the following params:
+
+| param           | description                                                                                                              | type   | default |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ | ------ | ------- |
+| `emailOptions`  | Object that contains email options (`to`, `from`, `replyTo`, `cc`, `bcc`) except `subject`, `text` and `html`            | object | `{}`    |
+| `emailTemplate` | Object that contains `subject`, `text` and `html` as [lodash string templates](https://lodash.com/docs/4.17.15#template) | object | `{}`    |
+| `data`          | Object that contains the data used to compile the templates                                                              | object | `{}`    |
+
+**Example**
+
+```js
+const emailTemplate = {
+  subject: 'Welcome <%= user.firstname %>',
+  text: `Welcome on mywebsite.fr!
+    Your account is now linked with: <%= user.email %>.`,
+  html: `<h1>Welcome on mywebsite.fr!</h1>
+    <p>Your account is now linked with: <%= user.email %>.<p>`,
+},
+
+await strapi.plugins.email.services.email.sendTemplatedEmail(
+  {
+    to: user.email,
+    // from: is not specified, so it's the defaultFrom that will be used instead
+  },
+  emailTemplate,
+  {
+    user: _.pick(user, ['username', 'email', 'firstname', 'lastname']),
+  },
+);
+```
+
 ## Configure the plugin
 
-### Install the provider you want
-
-By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to [Configure your provider](#configure-your-provider).
+By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to configure your provider.
 
 You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
 
@@ -87,7 +123,7 @@ module.exports = ({ env }) => ({
 If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations.md#environments)
 :::
 
-## Create new provider
+## Create a provider
 
 If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier) and customize the `send` function.
 

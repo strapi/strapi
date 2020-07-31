@@ -16,6 +16,10 @@ Extensions folder structure:
     - `controllers`: You can extend the plugin's controllers by creating controllers with the same names and override certain methods.
     - `services`: You can extend the plugin's services by creating services with the same names and override certain methods.
 
+::: warning
+When using **extensions** you will need to update your code whenever you upgrade your strapi version. Not updating and comparing your **extensions** with the new changes on the repository, can break your app in unexpected ways that we cannot predict in the [migration guides](../migration-guide/README.md).
+:::
+
 ## Admin extension
 
 The admin panel is a `node_module` that is similar to a plugin, with the slight difference that it encapsulates all the installed plugins of your application.

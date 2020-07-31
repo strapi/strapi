@@ -149,13 +149,9 @@ const buildAssocResolvers = model => {
               return obj[association.alias];
             }
 
-            const entry = await contentManager.fetch(
-              {
-                id: obj[primaryKey],
-                model: model.uid,
-              },
-              [association.alias]
-            );
+            const entry = await contentManager.fetch(model.uid, obj[primaryKey], {
+              populate: [association.alias],
+            });
 
             return entry[association.alias];
           };

@@ -13,8 +13,8 @@ function TableHeader({ headers, isBulkable }) {
     entriesToDelete,
     firstSortableElement,
     onChangeBulkSelectall,
-    onChangeParams,
-    searchParams: { _sort },
+    onChangeSearch,
+    _sort,
   } = useListView();
   const [sortBy, sortOrder] = _sort.split(':');
 
@@ -46,7 +46,7 @@ function TableHeader({ headers, isBulkable }) {
                     value = `${firstSortableElement}:ASC`;
                   }
 
-                  onChangeParams({
+                  onChangeSearch({
                     target: {
                       name: '_sort',
                       value,

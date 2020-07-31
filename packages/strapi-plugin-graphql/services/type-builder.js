@@ -119,10 +119,7 @@ module.exports = {
     // Association
     if (ref && ref !== '*') {
       // Add bracket or not
-      const globalId = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[ref].globalId
-        : strapi.models[ref].globalId;
-
+      const globalId = strapi.db.getModel(ref, attribute.plugin).globalId;
       const plural = !_.isEmpty(attribute.collection);
 
       if (plural) {

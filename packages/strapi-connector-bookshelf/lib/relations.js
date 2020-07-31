@@ -23,14 +23,6 @@ const transformToArrayID = array => {
   return transformToArrayID([array]);
 };
 
-const getModel = (model, plugin) => {
-  return (
-    _.get(strapi.plugins, [plugin, 'models', model]) ||
-    _.get(strapi, ['models', model]) ||
-    undefined
-  );
-};
-
 const removeUndefinedKeys = obj => _.pickBy(obj, _.negate(_.isUndefined));
 
 const addRelationMorph = async (model, { params, transacting } = {}) => {
@@ -119,7 +111,7 @@ module.exports = {
         return _.set(acc, current, property);
       }
 
-      const assocModel = getModel(details.model || details.collection, details.plugin);
+      const assocModel = strapi.db.getModel(details.model || details.collection, details.plugin);
 
       switch (association.nature) {
         case 'oneWay': {
@@ -259,7 +251,7 @@ module.exports = {
           }
 
           refs.forEach(obj => {
-            const targetModel = strapi.getModel(
+            const targetModel = strapi.db.getModel(
               obj.ref,
               obj.source !== 'content-manager' ? obj.source : null
             );
@@ -331,7 +323,7 @@ module.exports = {
         case 'manyToManyMorph': {
           const currentValue = transformToArrayID(params.values[current]);
 
-          const model = getModel(details.collection || details.model, details.plugin);
+          const model = strapi.db.getModel(details.collection || details.model, details.plugin);
 
           const promise = removeRelationMorph(model, {
             params: {

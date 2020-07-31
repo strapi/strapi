@@ -4,7 +4,7 @@ const _ = require('lodash');
 const createQuery = require('../create-query');
 
 describe('Database queries', () => {
-  describe('Subsitute id with primaryKey in paramters', () => {
+  describe('Substitute id with primaryKey in parameters', () => {
     test.each(['create', 'update', 'delete', 'find', 'findOne', 'search', 'count', 'countSearch'])(
       'Calling "%s" replaces id by the primaryKey in the params of the model before calling the underlying connector',
       async method => {

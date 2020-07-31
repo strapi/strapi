@@ -6,149 +6,70 @@
  */
 
 const _ = require('lodash');
-const validateSettings = require('./validation/settings');
-const { yup, formatYupErrors } = require('strapi-utils');
+const apiUploadController = require('./upload/api');
+const adminUploadController = require('./upload/admin');
 
-const fileInfoSchema = yup.object({
-  name: yup.string().nullable(),
-  alternativeText: yup.string().nullable(),
-  caption: yup.string().nullable(),
-});
+const resolveController = ctx => {
+  const {
+    state: { isAuthenticatedAdmin },
+  } = ctx;
 
-const uploadSchema = yup.object({
-  fileInfo: fileInfoSchema,
-});
-
-const multiUploadSchema = yup.object({
-  fileInfo: yup.array().of(fileInfoSchema),
-});
-
-const validateUploadBody = (schema, data = {}) => {
-  return schema.validate(data, { abortEarly: false }).catch(err => {
-    throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(err) });
-  });
+  return isAuthenticatedAdmin ? adminUploadController : apiUploadController;
 };
 
-const isUploadDisabled = () => _.get(strapi.plugins, 'upload.config.enabled', true) === false;
+const resolveControllerMethod = method => ctx => {
+  const controller = resolveController(ctx);
+  const callbackFn = controller[method];
 
-const disabledPluginError = () =>
-  strapi.errors.badRequest(null, {
-    errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
-  });
+  if (!_.isFunction(callbackFn)) {
+    return ctx.notFound();
+  }
 
-const emptyFileError = () =>
-  strapi.errors.badRequest(null, {
-    errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
-  });
+  return callbackFn(ctx);
+};
 
 module.exports = {
+  find: resolveControllerMethod('find'),
+  findOne: resolveControllerMethod('findOne'),
+  count: resolveControllerMethod('count'),
+  destroy: resolveControllerMethod('destroy'),
+  updateSettings: resolveControllerMethod('updateSettings'),
+  getSettings: resolveControllerMethod('getSettings'),
+
   async upload(ctx) {
-    if (isUploadDisabled()) {
-      throw disabledPluginError();
+    const isUploadDisabled = _.get(strapi.plugins, 'upload.config.enabled', true) === false;
+
+    if (isUploadDisabled) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
+      });
     }
 
-    const { id } = ctx.query;
-    const files = _.get(ctx.request.files, 'files');
+    const {
+      query: { id },
+      request: { files: { files } = {} },
+    } = ctx;
+    const controller = resolveController(ctx);
 
-    // update only fileInfo if not file content sent
     if (id && (_.isEmpty(files) || files.size === 0)) {
-      const data = await validateUploadBody(uploadSchema, ctx.request.body);
-
-      ctx.body = await strapi.plugins.upload.services.upload.updateFileInfo(id, data.fileInfo);
-      return;
+      return controller.updateFileInfo(ctx);
     }
 
     if (_.isEmpty(files) || files.size === 0) {
-      throw emptyFileError();
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+      });
     }
 
-    const uploadService = strapi.plugins.upload.services.upload;
-
-    const validationSchema = Array.isArray(files) ? multiUploadSchema : uploadSchema;
-    const data = await validateUploadBody(validationSchema, ctx.request.body);
-
-    if (id) {
-      // cannot replace with more than one file
-      if (Array.isArray(files)) {
-        throw strapi.errors.badRequest(null, {
-          errors: [
-            { id: 'Upload.replace.single', message: 'Cannot replace a file with multiple ones' },
-          ],
-        });
-      }
-
-      ctx.body = await uploadService.replace(id, { data, file: files });
-    } else {
-      ctx.body = await uploadService.upload({ data, files });
-    }
-  },
-
-  async getSettings(ctx) {
-    const data = await strapi.plugins.upload.services.upload.getSettings();
-
-    ctx.body = { data };
-  },
-
-  async updateSettings(ctx) {
-    const data = await validateSettings(ctx.request.body);
-
-    await strapi.plugins.upload.services.upload.setSettings(data);
-
-    ctx.body = { data };
-  },
-
-  async find(ctx) {
-    if (ctx.query._q) {
-      ctx.body = await strapi.plugins['upload'].services.upload.search(ctx.query);
-    } else {
-      ctx.body = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
-    }
-  },
-
-  async findOne(ctx) {
-    const { id } = ctx.params;
-    const data = await strapi.plugins['upload'].services.upload.fetch({ id });
-
-    if (!data) {
-      return ctx.notFound('file.notFound');
-    }
-
-    ctx.body = data;
-  },
-
-  async count(ctx) {
-    let count;
-    if (ctx.query._q) {
-      count = await strapi.plugins['upload'].services.upload.countSearch(ctx.query);
-    } else {
-      count = await strapi.plugins['upload'].services.upload.count(ctx.query);
-    }
-
-    ctx.body = { count };
-  },
-
-  async destroy(ctx) {
-    const { id } = ctx.params;
-
-    const file = await strapi.plugins['upload'].services.upload.fetch({ id });
-
-    if (!file) {
-      return ctx.notFound('file.notFound');
-    }
-
-    await strapi.plugins['upload'].services.upload.remove(file);
-
-    ctx.body = file;
+    await (id ? controller.replaceFile : controller.uploadFiles)(ctx);
   },
 
   async search(ctx) {
     const { id } = ctx.params;
 
-    const data = await strapi.query('file', 'upload').custom(searchQueries)({
+    ctx.body = await strapi.query('file', 'upload').custom(searchQueries)({
       id,
     });
-
-    ctx.body = data;
   },
 };
 

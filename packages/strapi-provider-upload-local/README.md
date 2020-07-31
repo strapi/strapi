@@ -21,7 +21,7 @@ The `sizeLimit` parameter must be a number. Be aware that the unit is in KB. Whe
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 
