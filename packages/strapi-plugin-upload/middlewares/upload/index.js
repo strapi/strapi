@@ -1,15 +1,18 @@
 'use strict';
 
-const { join } = require('path');
+const { join, isAbsolute } = require('path');
 const range = require('koa-range');
 const koaStatic = require('koa-static');
 
 module.exports = strapi => ({
   initialize() {
-    const staticDir = join(
-      strapi.dir,
-      strapi.config.middleware.settings.public.path || strapi.config.paths.static
+    const configPublicPath = strapi.config.get(
+      'middleware.settings.public.path',
+      strapi.config.paths.static
     );
+    const staticDir = isAbsolute(configPublicPath)
+      ? configPublicPath
+      : join(strapi.dir, configPublicPath);
 
     strapi.app.on('error', err => {
       if (err.code === 'EPIPE') {
