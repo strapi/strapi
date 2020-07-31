@@ -118,7 +118,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 ::: tip CONGRATULATIONS
 👏 Congratulations, you have now completed the **Strapi Quick Start**. Where to go next?
 
-- Consume your API with your favorite frameworks, frontend or backend programming language just below!
+- Consume your API with your favorite frameworks, frontend or backend programming language just below.
 - Learn how to use Strapi with React ([Gatsby](https://strapi.io/blog/build-a-static-blog-with-gatsby-and-strapi) or [Next.js](https://strapi.io/blog/nextjs-react-hooks-strapi-food-app-1)) or Vue.js ([Nuxt.js](https://strapi.io/blog/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
 - Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
