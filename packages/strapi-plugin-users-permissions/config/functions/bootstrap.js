@@ -148,6 +148,23 @@ module.exports = async () => {
 <p>Thanks.</p>`,
         },
       },
+      account_using_external_provider: {
+        display: "Email.template.account_using_external_provider",
+        icon: "sync",
+        options: {
+          from: {
+            name: "Administration Panel",
+            email: "no-reply@slub.ro"
+          },
+          response_email: "",
+          object: "Reset password",
+          message: `<p>We heard that you lost your password. Sorry about that!</p>
+        
+<p>You register using <%= PROVIDER %>. Could you try to sign in again using  <%= PROVIDER %>
+
+<p>Thanks.</p>`
+        }
+      },
     };
 
     await pluginStore.set({ key: 'email', value });

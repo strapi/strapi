@@ -36,6 +36,7 @@
   "Email.template.email_confirmation": "Email address confirmation",
   "Email.template.reset_password": "Reset password",
   "Email.template.success_register": "Registration successful",
+  "Email.template.account_using_external_provider": "Account using external provider",
   "HeaderNav.link.advancedSettings": "Advanced settings",
   "HeaderNav.link.emailTemplates": "Email templates",
   "HeaderNav.link.providers": "Providers",

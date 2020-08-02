@@ -300,6 +300,45 @@ module.exports = {
       );
     }
 
+    // User register using external provider
+    if (user.provider !== 'local') {
+      const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+        try {
+          return storeEmail['account_using_external_provider'].options;
+        } catch (error) {
+          return {};
+        }
+      });
+
+      settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
+        settings.message,
+        {
+          PROVIDER: user.provider
+        }
+      );
+
+      try {
+        // Send an email to the user.
+        await strapi.plugins['email'].services.email.send({
+          to: user.email,
+          from:
+            settings.from.email || settings.from.name
+              ? `${settings.from.name} <${settings.from.email}>`
+              : undefined,
+          replyTo: settings.response_email,
+          subject: settings.object,
+          text: settings.message,
+          html: settings.message,
+        });
+      } catch (err) {
+        return ctx.badRequest(null, err);
+      }
+
+      return ctx.send({ ok: true });
+
+    }
+
+
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
@@ -550,9 +589,9 @@ module.exports = {
     } catch (err) {
       const adminError = _.includes(err.message, 'username')
         ? {
-            id: 'Auth.form.error.username.taken',
-            message: 'Username already taken',
-          }
+          id: 'Auth.form.error.username.taken',
+          message: 'Username already taken',
+        }
         : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
 
       ctx.badRequest(null, formatError(adminError));
