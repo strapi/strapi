@@ -120,6 +120,15 @@ const exists = async params => {
 };
 
 /**
+ * Count the number of users based on params
+ * @param params
+ * @returns {Promise<*>}
+ */
+const count = async (params = {}) => {
+  return strapi.query('role', 'admin').count(params);
+};
+
+/**
  * Delete roles in database if they have no user assigned
  * @param ids query params to find the roles
  * @returns {Promise<array>}
@@ -265,6 +274,7 @@ module.exports = {
   findAllWithUsersCount,
   update,
   exists,
+  count,
   deleteByIds,
   getUsersCount,
   getSuperAdmin,

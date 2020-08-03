@@ -29,17 +29,20 @@ const create = async attributes => {
     ...attributes,
   });
 
-  // hash password if a new one is sent
   if (_.has(user, 'password')) {
-    const hashedPassword = await strapi.admin.services.auth.hashPassword(user.password);
-
-    return strapi.query('user', 'admin').create({
-      ...user,
-      password: hashedPassword,
-    });
+    user.password = await strapi.admin.services.auth.hashPassword(user.password);
   }
 
-  return strapi.query('user', 'admin').create(user);
+  const createdUser = await strapi.query('user', 'admin').create(user);
+
+  if (createdUser) {
+    const numberOfUsers = await count();
+    const numberOfRoles = await strapi.admin.services.role.count();
+
+    await strapi.telemetry.send('didInviteUser', { numberOfRoles, numberOfUsers });
+  }
+
+  return createdUser;
 };
 
 /**
@@ -237,6 +240,15 @@ const countUsersWithoutRole = async () => {
   return count;
 };
 
+/**
+ * Count number of users based on attributes
+ * @param attributes the filters used to filter the search
+ * @returns {Promise<number>}
+ */
+const count = async (attributes = {}) => {
+  return strapi.query('user', 'admin').count(attributes);
+};
+
 /** Assign some roles to several users
  * @returns {undefined}
  */
@@ -308,6 +320,7 @@ module.exports = {
   deleteById,
   deleteByIds,
   countUsersWithoutRole,
+  count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
   migrateUsers,
