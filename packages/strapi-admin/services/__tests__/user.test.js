@@ -26,20 +26,25 @@ describe('User', () => {
   });
 
   describe('create', () => {
+    const count = jest.fn(() => Promise.resolve(1));
+    const send = jest.fn();
+
     test('Creates a user by merging given and default attributes', async () => {
       const create = jest.fn(user => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
+        telemetry: { send },
         admin: {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -59,14 +64,16 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
+        telemetry: { send },
         admin: {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -99,14 +106,16 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
+        telemetry: { send },
         admin: {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -122,6 +131,33 @@ describe('User', () => {
       const result = await userService.create(input);
 
       expect(result).toMatchObject(expected);
+    });
+  });
+
+  describe('Count users', () => {
+    test('Count users without params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const amount = await userService.count();
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith({});
+    });
+
+    test('Count users with params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const params = { foo: 'bar' };
+      const amount = await userService.count(params);
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith(params);
     });
   });
 
