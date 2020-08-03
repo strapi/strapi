@@ -34,7 +34,11 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
 
     return get(matchingPermissions, ['0', 'fields'], []);
   }, [userPermissions, slug]);
-  const timestamps = get(schema, ['options', 'timestamps']);
+  let timestamps = get(schema, ['options', 'timestamps']);
+
+  if (!Array.isArray(timestamps)) {
+    timestamps = [];
+  }
 
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {

@@ -60,9 +60,7 @@ await strapi.plugins.email.services.email.sendTemplatedEmail(
 
 ## Configure the plugin
 
-### Install the provider you want
-
-By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to [Configure your provider](#configure-your-provider).
+By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to configure your provider.
 
 You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
 
@@ -125,7 +123,7 @@ module.exports = ({ env }) => ({
 If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations.md#environments)
 :::
 
-## Create new provider
+## Create a provider
 
 If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier) and customize the `send` function.
 

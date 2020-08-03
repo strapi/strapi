@@ -79,6 +79,46 @@ By default this file doesn't exist, you will have to create it.
   - `{middlewareName}` (Object): Configuration of one middleware
     - `enabled` (boolean): Tells Strapi to run the middleware or not
 
+### Settings
+
+**Example**:
+
+**Path —** `./config/middleware.js`.
+
+```js
+module.exports = {
+  //...
+  settings: {
+    cors: {
+      origin: 'http://localhost',
+    },
+  },
+};
+```
+
+### Load order
+
+The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, create or edit the file `./config/middleware.js`.
+
+**Path —** `./config/middleware.js`.
+
+```js
+module.exports = {
+  load: {
+    before: ['responseTime', 'logger', 'cors', 'responses'],
+    order: [
+      "Define the middlewares' load order by putting their name in this array in the right order",
+    ],
+    after: ['parser', 'router'],
+  },
+};
+```
+
+- `load`:
+  - `before`: Array of middlewares that need to be loaded in the first place. The order of this array matters.
+  - `order`: Array of middlewares that need to be loaded in a specific order.
+  - `after`: Array of middlewares that need to be loaded at the end of the stack. The order of this array matters.
+
 ## Core middleware configurations
 
 The core of Strapi embraces a small list of middlewares for performances, security and great error handling.
@@ -139,7 +179,7 @@ The following middlewares cannot be disabled: responses, router, logger and boom
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 :::
 
-## Response middlewares
+### Response middlewares
 
 - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
   - `enabled` (boolean): Enable or not GZIP response compression.
@@ -178,45 +218,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
   - `blackList` (array): Blacklisted IPs. Default value: `[]`.
 
-**Example**:
-
-**Path —** `./config/middleware.js`.
-
-```js
-module.exports = {
-  //...
-  settings: {
-    cors: {
-      origin: 'http://localhost',
-    },
-  },
-};
-```
-
-### Load order
-
-The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, create or edit the file `./config/middleware.js`.
-
-**Path —** `./config/middleware.js`.
-
-```js
-module.exports = {
-  load: {
-    before: ['responseTime', 'logger', 'cors', 'responses'],
-    order: [
-      "Define the middlewares' load order by putting their name in this array in the right order",
-    ],
-    after: ['parser', 'router'],
-  },
-};
-```
-
-- `load`:
-  - `before`: Array of middlewares that need to be loaded in the first place. The order of this array matters.
-  - `order`: Array of middlewares that need to be loaded in a specific order.
-  - `after`: Array of middlewares that need to be loaded at the end of the stack. The order of this array matters.
-
-### Examples
+## Example
 
 Create your custom middleware.
 

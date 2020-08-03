@@ -4,7 +4,7 @@ const { singular } = require('pluralize');
 
 const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
-const buildDatabaseSchema = require('./buildDatabaseSchema');
+const buildDatabaseSchema = require('./build-database-schema');
 const {
   createComponentJoinTables,
   createComponentModels,
