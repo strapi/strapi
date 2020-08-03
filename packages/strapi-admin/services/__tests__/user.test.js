@@ -27,7 +27,7 @@ describe('User', () => {
 
   describe('create', () => {
     const count = jest.fn(() => Promise.resolve(1));
-    const send = jest.fn();
+    const sendDidInviteUser = jest.fn();
 
     test('Creates a user by merging given and default attributes', async () => {
       const create = jest.fn(user => Promise.resolve(user));
@@ -35,12 +35,12 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
-        telemetry: { send },
         admin: {
           services: {
             token: { createToken },
             auth: { hashPassword },
             role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
@@ -64,12 +64,12 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
-        telemetry: { send },
         admin: {
           services: {
             token: { createToken },
             auth: { hashPassword },
             role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
@@ -106,12 +106,12 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
-        telemetry: { send },
         admin: {
           services: {
             token: { createToken },
             auth: { hashPassword },
             role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
