@@ -20,5 +20,7 @@ describe('Metrics', () => {
     await metricsService.sendDidInviteUser();
 
     expect(send).toHaveBeenCalledWith('didInviteUser', { numberOfRoles: 3, numberOfUsers: 2 });
+    expect(countUsers).toHaveBeenCalledWith();
+    expect(countRoles).toHaveBeenCalledWith();
   });
 });
