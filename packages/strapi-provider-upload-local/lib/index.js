@@ -27,9 +27,8 @@ module.exports = {
       'middleware.settings.public.path',
       strapi.config.paths.static
     );
-    const uploadDir = path.isAbsolute(configPublicPath)
-      ? configPublicPath
-      : path.join(strapi.dir, configPublicPath);
+
+    const uploadDir = path.resolve(strapi.dir, configPublicPath);
 
     return {
       upload(file) {
