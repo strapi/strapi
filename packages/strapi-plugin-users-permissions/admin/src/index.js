@@ -5,16 +5,21 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
+import React from 'react';
+import { CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import layout from '../../config/layout';
 import pluginId from './pluginId';
-import App from './containers/App';
 import Initializer from './containers/Initializer';
+import RolesPage from './containers/Roles';
+import ProvidersPage from './containers/Providers';
+import EmailTemplatesPage from './containers/EmailTemplates';
+import AdvancedSettingsPage from './containers/AdvancedSettings';
 import lifecycles from './lifecycles';
-import reducers from './reducers';
 import trads from './translations';
+import getTrad from './utils/getTrad';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -32,27 +37,75 @@ export default strapi => {
     isRequired: pluginPkg.strapi.required || false,
     layout,
     lifecycles,
-    mainComponent: App,
     name,
     pluginLogo,
     preventComponentRendering: false,
-    reducers,
-    settings: {},
-    trads,
-    menu: {
-      pluginsSectionLinks: [
-        {
-          destination: `/plugins/${pluginId}`,
-          icon,
-          label: {
-            id: `${pluginId}.plugin.name`,
-            defaultMessage: 'Roles & Permissions',
+    reducers: null, // TODO : this is temp
+    settings: {
+      menuSection: {
+        id: pluginId,
+        title: getTrad('plugin.name'),
+        links: [
+          {
+            title: {
+              id: getTrad('HeaderNav.link.roles'),
+              defaultMessage: 'Roles',
+            },
+            name: 'roles',
+            to: `${strapi.settingsBaseURL}/${pluginId}/roles`,
+            Component: () => (
+              <CheckPagePermissions permissions={pluginPermissions.settings}>
+                <RolesPage />
+              </CheckPagePermissions>
+            ),
+            permissions: pluginPermissions.settings,
           },
-          name,
-          permissions: pluginPermissions.main,
-        },
-      ],
+          {
+            title: {
+              id: getTrad('HeaderNav.link.providers'),
+              defaultMessage: 'Providers',
+            },
+            name: 'providers',
+            to: `${strapi.settingsBaseURL}/${pluginId}/providers`,
+            Component: () => (
+              <CheckPagePermissions permissions={pluginPermissions.settings}>
+                <ProvidersPage />
+              </CheckPagePermissions>
+            ),
+            permissions: pluginPermissions.settings,
+          },
+          {
+            title: {
+              id: getTrad('HeaderNav.link.email-templates'),
+              defaultMessage: 'Email templates',
+            },
+            name: 'email-templates',
+            to: `${strapi.settingsBaseURL}/${pluginId}/email-templates`,
+            Component: () => (
+              <CheckPagePermissions permissions={pluginPermissions.settings}>
+                <EmailTemplatesPage />
+              </CheckPagePermissions>
+            ),
+            permissions: pluginPermissions.settings,
+          },
+          {
+            title: {
+              id: getTrad('HeaderNav.link.advanced-settings'),
+              defaultMessage: 'Advanced Settings',
+            },
+            name: 'advanced-settings',
+            to: `${strapi.settingsBaseURL}/${pluginId}/advanced-settings`,
+            Component: () => (
+              <CheckPagePermissions permissions={pluginPermissions.settings}>
+                <AdvancedSettingsPage />
+              </CheckPagePermissions>
+            ),
+            permissions: pluginPermissions.settings,
+          },
+        ],
+      },
     },
+    trads,
   };
 
   return strapi.registerPlugin(plugin);
