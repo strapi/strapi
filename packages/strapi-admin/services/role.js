@@ -120,9 +120,9 @@ const exists = async params => {
 };
 
 /**
- * Count the number of users based on params
- * @param params
- * @returns {Promise<*>}
+ * Count the number of roles based on search params
+ * @param params params used for the query
+ * @returns {Promise<number>}
  */
 const count = async (params = {}) => {
   return strapi.query('role', 'admin').count(params);

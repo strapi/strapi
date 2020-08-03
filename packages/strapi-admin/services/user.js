@@ -24,23 +24,19 @@ const sanitizeUser = user => {
  * @returns {Promise<user>}
  */
 const create = async attributes => {
-  const user = createUser({
+  const userInfo = {
     registrationToken: strapi.admin.services.token.createToken(),
     ...attributes,
-  });
+  };
 
-  if (_.has(user, 'password')) {
-    user.password = await strapi.admin.services.auth.hashPassword(user.password);
+  if (_.has(attributes, 'password')) {
+    userInfo.password = await strapi.admin.services.auth.hashPassword(attributes.password);
   }
 
+  const user = createUser(userInfo);
   const createdUser = await strapi.query('user', 'admin').create(user);
 
-  if (createdUser) {
-    const numberOfUsers = await count();
-    const numberOfRoles = await strapi.admin.services.role.count();
-
-    await strapi.telemetry.send('didInviteUser', { numberOfRoles, numberOfUsers });
-  }
+  await strapi.admin.services.metrics.sendDidInviteUser();
 
   return createdUser;
 };
@@ -241,12 +237,12 @@ const countUsersWithoutRole = async () => {
 };
 
 /**
- * Count number of users based on attributes
- * @param attributes the filters used to filter the search
+ * Count the number of users based on search params
+ * @param params params used for the query
  * @returns {Promise<number>}
  */
-const count = async (attributes = {}) => {
-  return strapi.query('user', 'admin').count(attributes);
+const count = async (params = {}) => {
+  return strapi.query('user', 'admin').count(params);
 };
 
 /** Assign some roles to several users
