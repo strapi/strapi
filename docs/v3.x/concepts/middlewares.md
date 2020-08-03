@@ -161,12 +161,6 @@ The following middlewares cannot be disabled: responses, router, logger and boom
 
 - `session`
   - `enabled` (boolean): Enable or disable sessions. Default value: `false`.
-  - `client` (string): Client used to persist sessions. Default value: `redis`.
-  - `settings`
-    - `host` (string): Client host name. Default value: `localhost`.
-    - `port` (integer): Client port. Default value: `6379`.
-    - `database`(integer)|String - Client database name. Default value: `10`.
-    - `password` (string): Client password. Default value: ``.
 - `logger`
   - `level` (string): Default log level. Default value: `debug`.
   - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
