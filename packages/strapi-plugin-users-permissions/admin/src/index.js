@@ -10,14 +10,11 @@ import { CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
-import layout from '../../config/layout';
 import pluginId from './pluginId';
-import Initializer from './containers/Initializer';
 import RolesPage from './containers/Roles';
 import ProvidersPage from './containers/Providers';
 import EmailTemplatesPage from './containers/EmailTemplates';
 import AdvancedSettingsPage from './containers/AdvancedSettings';
-import lifecycles from './lifecycles';
 import trads from './translations';
 import getTrad from './utils/getTrad';
 
@@ -32,11 +29,10 @@ export default strapi => {
     description: pluginDescription,
     icon,
     id: pluginId,
-    initializer: Initializer,
+    initializer: null,
     injectedComponents: [],
     isRequired: pluginPkg.strapi.required || false,
-    layout,
-    lifecycles,
+    isReady: true,
     name,
     pluginLogo,
     preventComponentRendering: false,
