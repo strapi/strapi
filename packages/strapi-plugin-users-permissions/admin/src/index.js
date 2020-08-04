@@ -53,12 +53,8 @@ export default strapi => {
             },
             name: 'roles',
             to: `${strapi.settingsBaseURL}/${pluginId}/roles`,
-            Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.settings}>
-                <RolesPage />
-              </CheckPagePermissions>
-            ),
-            permissions: pluginPermissions.settings,
+            Component: () => <RolesPage />,
+            permissions: pluginPermissions.accessRoles,
           },
           {
             title: {
@@ -68,11 +64,11 @@ export default strapi => {
             name: 'providers',
             to: `${strapi.settingsBaseURL}/${pluginId}/providers`,
             Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.settings}>
+              <CheckPagePermissions permissions={pluginPermissions.readProviders}>
                 <ProvidersPage />
               </CheckPagePermissions>
             ),
-            permissions: pluginPermissions.settings,
+            permissions: pluginPermissions.readProviders,
           },
           {
             title: {
@@ -82,11 +78,11 @@ export default strapi => {
             name: 'email-templates',
             to: `${strapi.settingsBaseURL}/${pluginId}/email-templates`,
             Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.settings}>
+              <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
                 <EmailTemplatesPage />
               </CheckPagePermissions>
             ),
-            permissions: pluginPermissions.settings,
+            permissions: pluginPermissions.readEmailTemplates,
           },
           {
             title: {
@@ -96,11 +92,11 @@ export default strapi => {
             name: 'advanced-settings',
             to: `${strapi.settingsBaseURL}/${pluginId}/advanced-settings`,
             Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.settings}>
+              <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
                 <AdvancedSettingsPage />
               </CheckPagePermissions>
             ),
-            permissions: pluginPermissions.settings,
+            permissions: pluginPermissions.readAdvancedSettings,
           },
         ],
       },
