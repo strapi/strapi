@@ -13,7 +13,6 @@ const pluginPermissions = {
   // AdvancedSettings
   readAdvancedSettings: [
     { action: 'plugins::users-permissions.advanced-settings.read', subject: null },
-    { action: 'plugins::users-permissions.advanced-settings.update', subject: null },
   ],
   updateAdvancedSettings: [
     { action: 'plugins::users-permissions.advanced-settings.update', subject: null },

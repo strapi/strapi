@@ -27,8 +27,9 @@ const form = [
     description: getTrad('EditForm.inputToggle.description.email-reset-password'),
     label: getTrad('EditForm.inputToggle.label.email-reset-password'),
     name: 'email_reset_password',
-    type: 'bool',
-    size: { xs: 12 },
+    type: 'text',
+    size: { xs: 6 },
+    placeholder: 'ex: https://yourfrontend.com/reset-password',
   },
   {
     description: getTrad('EditForm.inputToggle.description.email-confirmation'),
@@ -43,6 +44,7 @@ const form = [
     name: 'email_confirmation_redirection',
     type: 'text',
     size: { xs: 6 },
+    placeholder: 'ex: https://yourfrontend.com/reset-password',
   },
 ];
 

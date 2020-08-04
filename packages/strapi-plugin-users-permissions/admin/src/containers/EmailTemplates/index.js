@@ -13,7 +13,7 @@ const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.emailTemplates') });
   const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateProviders };
+    return { update: pluginPermissions.updateEmailTemplates };
   }, []);
   const [{ isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
   const emailTemplates = useMemo(() => {
