@@ -8,6 +8,7 @@ import pluginPermissions from '../../permissions';
 import { getRequestURL, getTrad } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import ListRow from '../../components/ListRow';
+import createProvidersArray from './utils/createProvidersArray';
 import reducer, { initialState } from './reducer';
 
 const ProvidersPage = () => {
@@ -20,7 +21,8 @@ const ProvidersPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useUserPermissions(updatePermissions);
-  const [{ isLoading, providers }, dispatch] = useReducer(reducer, initialState);
+  const [{ isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
+  const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
     () => providers.filter(provider => provider.enabled).length,
     [providers]
@@ -59,12 +61,12 @@ const ProvidersPage = () => {
 
         const data = await request(getRequestURL('providers'), { method: 'GET' });
 
-        console.log({ data });
-
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
         });
+
+        console.log({ data });
       } catch (err) {
         dispatch({
           type: 'GET_DATA_ERROR',

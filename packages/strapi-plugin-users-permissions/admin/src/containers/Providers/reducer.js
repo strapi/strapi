@@ -3,8 +3,8 @@ import { sortBy } from 'lodash';
 
 const initialState = {
   isLoading: true,
-  data: {},
-  providers: [],
+  initialData: {},
+  modifiedData: {},
 };
 
 const reducer = (state, action) =>
@@ -13,32 +13,23 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'GET_DATA': {
         draftState.isLoading = true;
+        draftState.initialData = {};
+        draftState.modifiedData = {};
+
         break;
       }
 
       case 'GET_DATA_SUCCEEDED': {
         draftState.isLoading = false;
-        draftState.data = action.data;
-        draftState.providers = sortBy(
-          Object.keys(action.data).reduce((acc, current) => {
-            const { icon: iconName, enabled } = action.data[current];
-            const icon = iconName === 'envelope' ? ['fas', 'envelope'] : ['fab', iconName];
-
-            acc.push({ name: current, icon, enabled });
-
-            return acc;
-          }, []),
-          'name'
-        );
+        draftState.initialData = action.data;
+        draftState.modifiedData = action.data;
 
         break;
       }
       case 'GET_DATA_ERROR': {
-        drafState.isLoading = true;
+        draftState.isLoading = true;
         break;
       }
-      case 'RESET_PROPS':
-        return initialState;
       default: {
         return draftState;
       }
