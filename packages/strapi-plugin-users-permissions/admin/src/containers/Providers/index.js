@@ -16,7 +16,7 @@ const ProvidersPage = () => {
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
-  }, [pluginPermissions]);
+  }, []);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
@@ -50,7 +50,7 @@ const ProvidersPage = () => {
     );
 
     return `${enabledMessage} ${disabledMessage}`;
-  }, [formatMessage, enabledProvidersCount]);
+  }, [formatMessage, enabledProvidersCount, disabledProvidersCount]);
 
   useEffect(() => {
     const getData = async () => {

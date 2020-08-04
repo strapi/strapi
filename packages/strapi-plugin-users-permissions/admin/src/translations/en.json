@@ -42,8 +42,6 @@
   "InputSearch.placeholder": "Search for a user",
   "List.button.providers": "Add New Provider",
   "List.button.roles": "Add New Role",
-  "List.title.emailTemplates.plural": "{number} email templates are available",
-  "List.title.emailTemplates.singular": "{number} email template is available",
 
   "List.title.roles.plural": "{number} roles are available",
   "List.title.roles.singular": "{number} role is available",
@@ -106,6 +104,8 @@
   "notification.success.submit": "Settings have been updated",
 
   "TRANSLATIONS-TO-KEEP": "TRANSLATIONS TO KEEP",
+  "List.title.emailTemplates.plural": "{number} email templates are available",
+  "List.title.emailTemplates.singular": "{number} email template is available",
   "HeaderNav.link.advancedSettings": "Advanced settings",
   "HeaderNav.link.emailTemplates": "Email templates",
   "HeaderNav.link.providers": "Providers",
