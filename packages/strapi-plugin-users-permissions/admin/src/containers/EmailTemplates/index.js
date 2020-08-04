@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useIntl } from 'react-intl';
+import { Header } from '@buffetjs/custom';
 import { SettingsPageTitle } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 
@@ -10,7 +11,9 @@ const EmailTemplatesPage = () => {
   return (
     <>
       <SettingsPageTitle name={pageTitle} />
-      <div>Email</div>
+      <div>
+        <Header title={{ label: pageTitle }} />
+      </div>
     </>
   );
 };
