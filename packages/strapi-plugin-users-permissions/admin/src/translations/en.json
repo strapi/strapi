@@ -36,10 +36,7 @@
   "Email.template.email_confirmation": "Email address confirmation",
   "Email.template.reset_password": "Reset password",
   "Email.template.success_register": "Registration successful",
-  "HeaderNav.link.advancedSettings": "Advanced settings",
-  "HeaderNav.link.emailTemplates": "Email templates",
-  "HeaderNav.link.providers": "Providers",
-  "HeaderNav.link.roles": "Roles",
+
   "HomePage.header.description": "Define the roles and permissions for your users.",
   "HomePage.header.title": "Roles & Permissions",
   "InputSearch.placeholder": "Search for a user",
@@ -110,6 +107,12 @@
   "notification.info.emailSent": "The email has been sent",
   "notification.success.delete": "The item has been deleted",
   "notification.success.submit": "Settings have been updated",
+
+  "TRANSLATIONS-TO-KEEP": "TRANSLATIONS TO KEEP",
+  "HeaderNav.link.advancedSettings": "Advanced settings",
+  "HeaderNav.link.emailTemplates": "Email templates",
+  "HeaderNav.link.providers": "Providers",
+  "HeaderNav.link.roles": "Roles",
   "plugin.description.long": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
   "plugin.description.short": "Protect your API with a full authentication process based on JWT",
   "plugin.name": "Users & Permissions Plugin"

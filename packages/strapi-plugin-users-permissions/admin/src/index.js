@@ -72,7 +72,7 @@ export default strapi => {
           },
           {
             title: {
-              id: getTrad('HeaderNav.link.email-templates'),
+              id: getTrad('HeaderNav.link.emailTemplates'),
               defaultMessage: 'Email templates',
             },
             name: 'email-templates',
@@ -86,7 +86,7 @@ export default strapi => {
           },
           {
             title: {
-              id: getTrad('HeaderNav.link.advanced-settings'),
+              id: getTrad('HeaderNav.link.advancedSettings'),
               defaultMessage: 'Advanced Settings',
             },
             name: 'advanced-settings',
