@@ -1,25 +1,11 @@
 import React from 'react';
-import { Switch, Route, Link } from 'react-router-dom';
-import { useGlobalContext, CheckPagePermissions, NotFound } from 'strapi-helper-plugin';
+import { Switch, Route } from 'react-router-dom';
+import { useGlobalContext, NotFound } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-import pluginPermissions from '../../permissions';
 
+import ProtectedRolesListPage from './ProtectedListPage';
 import ProtectedRolesEditPage from './ProtectedEditPage';
 import ProtectedRolesCreatePage from './ProtectedCreatePage';
-
-const RolesListPage = () => {
-  return (
-    <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
-      <div>Role list</div>
-      <div>
-        <Link to="/settings/users-permissions/roles/1">Edit Role</Link>
-      </div>
-      <div>
-        <Link to="/settings/users-permissions/roles/new">Create Role</Link>
-      </div>
-    </CheckPagePermissions>
-  );
-};
 
 const Roles = () => {
   const { settingsBaseURL } = useGlobalContext();
@@ -36,7 +22,11 @@ const Roles = () => {
         component={ProtectedRolesEditPage}
         exact
       />
-      <Route path={`${settingsBaseURL}/${pluginId}/roles`} component={RolesListPage} exact />
+      <Route
+        path={`${settingsBaseURL}/${pluginId}/roles`}
+        component={ProtectedRolesListPage}
+        exact
+      />
       <Route path="" component={NotFound} />
     </Switch>
   );

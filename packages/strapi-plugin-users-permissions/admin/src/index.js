@@ -40,7 +40,6 @@ export default strapi => {
     name,
     pluginLogo,
     preventComponentRendering: false,
-    reducers: null, // TODO : this is temp
     settings: {
       menuSection: {
         id: pluginId,
