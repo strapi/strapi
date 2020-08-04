@@ -90,7 +90,7 @@ const ProvidersPage = () => {
         <List
           title={listTitle}
           items={providers}
-          isLoading={isLoading}
+          isLoading={isLoadingForPermissions || isLoading}
           customRowComponent={provider => (
             <ListRow
               {...provider}

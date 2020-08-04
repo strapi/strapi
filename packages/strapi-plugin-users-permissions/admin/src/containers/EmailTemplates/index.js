@@ -72,12 +72,12 @@ const EmailTemplatesPage = () => {
     <>
       <SettingsPageTitle name={pageTitle} />
       <div>
-        <Header title={{ label: pageTitle }} />
+        <Header title={{ label: pageTitle }} isLoading={isLoadingForPermissions || isLoading} />
         <ListBaselineAlignment />
         <List
           title={listTitle}
           items={emailTemplates}
-          isLoading={isLoading}
+          isLoading={isLoadingForPermissions || isLoading}
           customRowComponent={provider => (
             <ListRow
               {...provider}
