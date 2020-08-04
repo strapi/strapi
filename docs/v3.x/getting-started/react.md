@@ -118,7 +118,7 @@ fetch("http://localhost:1337/restaurants", {
   },
 }).then(response => response.json())
   .then(data => console.log(data));
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
   });
 ```
@@ -233,7 +233,7 @@ class App extends React.Component {
         const restaurants = data;
         this.setState({ restaurants });
       })
-      .catch((error) => {
+      .catch(error => {
         this.setState({ error });
       });
   }
@@ -275,10 +275,10 @@ axios.post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious'
   })
-  .then(function (response) {
+  .then(response => {
     console.log(response);
   })
-  .catch(function (error) {
+  .catch(error => {
     console.log(error);
   });
 ```
@@ -315,11 +315,11 @@ fetch('http://localhost:1337/restaurants', {
      name: 'Dolemon Sushi',
      description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious'
    })
- }).then(function(response) {
+ }).then(response => {
    return response.json();
- }).then(function(data) {
+ }).then(data => {
    console.log(data);
- }).catch((error) => {
+ }).catch(error => {
    console.error(error);
  });
 ```
@@ -395,10 +395,10 @@ class App extends React.Component {
     e.preventDefault();
 
     axios.post('http://localhost:1337/restaurants', this.state)
-      .then(function (response) {
+      .then(response => {
         console.log(response);
       })
-      .catch(function (error) {
+      .catch(error => {
         this.setState({ error });
       });
   }
@@ -465,7 +465,7 @@ class App extends React.Component {
         const categories = data;
         this.setState({ allCategories: categories });
       })
-      .catch((error) => {
+      .catch(error => {
         this.setState({ error });
       });
   }
@@ -494,7 +494,7 @@ class App extends React.Component {
     .then(data => {
       console.log(data);
     })
-    .catch((error) => {
+    .catch(error => {
       this.setState({ error });
     });
   }
@@ -551,10 +551,10 @@ axios.put('http://localhost:1337/restaurants/2', {
     id: 3
   }]
 })
-.then(function (response) {
+.then(response => {
   console.log(response);
 })
-.catch(function (error) {
+.catch(error => {
   console.log(error);
 });
 ```
@@ -603,7 +603,7 @@ fetch('http://localhost:1337/restaurants/2', {
 .then(data => {
   console.log(data);
 })
-.catch((error) => {
+.catch(error => {
   console.error(error);
 });
 ```
@@ -638,4 +638,4 @@ Response
 
 Here is how to request your Collection Types in Strapi using React. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
 
-We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)
+We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)
