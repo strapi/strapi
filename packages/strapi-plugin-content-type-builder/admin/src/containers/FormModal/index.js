@@ -215,7 +215,7 @@ const FormModal = () => {
         dispatch({
           type: 'SET_DATA_TO_EDIT',
           data: {
-            draftAndPublish: false,
+            draftAndPublish: true,
           },
         });
       }
