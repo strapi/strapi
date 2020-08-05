@@ -5,3 +5,5 @@ updates:
     schedule:
       interval: 'daily'
     versioning-strategy: increase
+    reviewers:
+      - strapi/maintainers

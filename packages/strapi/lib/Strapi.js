@@ -57,6 +57,8 @@ class Strapi {
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
+    this.app.proxy = this.config.get('server.proxy');
+
     this.isLoaded = false;
 
     // internal services.

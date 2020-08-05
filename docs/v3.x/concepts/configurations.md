@@ -174,7 +174,8 @@ module.exports = ({ env }) => ({
 | `host` | Host name | string | `localhost` |
 | `port` | Port on which the server should be running. | integer | `1337` |
 | `emitErrors` | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services. | boolean | `false` |
-| `url` | Public url of the server. Required for many different features (ex: reset password, third login providers etc.). Also enables proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. An absolute url is however **recommended** | string | `''` |
+| `url` | Public url of the server. Required for many different features (ex: reset password, third login providers etc.). Also enables proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. An absolute url is however **recommended**.| string | `''` |
+|`proxy`| Set the koa variable `app.proxy`. When `true`, proxy header fields will be trusted. |boolean|`false`|
 | `cron` | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule)) | Object | |
 | `cron.enabled` | Enable or disable CRON tasks to schedule jobs at specific dates. | boolean | `false` |
 | `admin` | Admin panel configuration | Object | |

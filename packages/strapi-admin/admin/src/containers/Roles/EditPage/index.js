@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import { get, isEmpty } from 'lodash';
-import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { get, has, isEmpty } from 'lodash';
+import { useGlobalContext, request, difference } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -17,7 +17,7 @@ import schema from './utils/schema';
 const EditPage = () => {
   const { formatMessage } = useIntl();
   const { goBack } = useHistory();
-  const { settingsBaseURL } = useGlobalContext();
+  const { emitEvent, settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
@@ -63,6 +63,21 @@ const EditPage = () => {
 
       const permissionsToSend = permissionsRef.current.getPermissions();
 
+      const checkConditionsDiff = () => {
+        const diff = difference(
+          get(permissionsToSend, 'contentTypesPermissions', {}),
+          get(rolePermissions, 'contentTypesPermissions', {})
+        );
+
+        if (isEmpty(diff)) {
+          return false;
+        }
+
+        return Object.keys(diff).some(key => {
+          return has(diff, [key, 'conditions']);
+        });
+      };
+
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
         body: data,
@@ -75,6 +90,10 @@ const EditPage = () => {
             permissions: formatPermissionsToApi(permissionsToSend),
           },
         });
+
+        if (checkConditionsDiff()) {
+          emitEvent('didUpdateConditions');
+        }
       }
 
       strapi.notification.success('notification.success.saved');

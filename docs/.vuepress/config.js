@@ -160,6 +160,7 @@ module.exports = {
             ['/v3.x/getting-started/deployment', 'Deployment'],
             ['/v3.x/getting-started/contributing', 'Contributing'],
             ['/v3.x/getting-started/troubleshooting', 'Troubleshooting'],
+            ['/v3.x/getting-started/usage-information', 'Telemetry'],
             '/v3.x/getting-started/quick-start',
           ],
         },
@@ -256,7 +257,7 @@ module.exports = {
         {
           collapsable: true,
           title: '🏗 Global strapi',
-          children: ['/v3.x/global-strapi/api-reference', '/v3.x/global-strapi/usage-information'],
+          children: ['/v3.x/global-strapi/api-reference'],
         },
         {
           collapsable: false,

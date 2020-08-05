@@ -4,6 +4,8 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
 let rq;
 
 const createAuthRole = async () => {
@@ -42,7 +44,17 @@ describe('Admin Auth End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
-    internals.role = await createAuthRole();
+
+    if (edition === 'EE') {
+      internals.role = await createAuthRole();
+    } else {
+      internals.role = (
+        await rq({
+          url: '/admin/roles',
+          method: 'GET',
+        })
+      ).body.data[0];
+    }
   }, 60000);
 
   afterAll(async () => {

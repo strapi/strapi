@@ -5,6 +5,8 @@ const { login, registerAndLogin, getUser } = require('../../../test/helpers/auth
 const { createAuthRequest } = require('../../../test/helpers/request');
 const { SUPER_ADMIN_CODE } = require('../services/constants');
 
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
 
 const getAuthToken = async () => {
@@ -85,7 +87,18 @@ describe('Admin User CRUD (e2e)', () => {
   beforeAll(async () => {
     const token = await getAuthToken();
     rq = createAuthRequest(token);
-    testData.role = await createUserRole();
+
+    if (edition === 'EE') {
+      testData.role = await createUserRole();
+    } else {
+      testData.role = (
+        await rq({
+          url: '/admin/roles',
+          method: 'GET',
+        })
+      ).body.data[0];
+    }
+
     testData.firstSuperAdminUser = await getUser();
     testData.superAdminRole = await getSuperAdminRole();
   });

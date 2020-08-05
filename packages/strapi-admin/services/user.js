@@ -24,22 +24,21 @@ const sanitizeUser = user => {
  * @returns {Promise<user>}
  */
 const create = async attributes => {
-  const user = createUser({
+  const userInfo = {
     registrationToken: strapi.admin.services.token.createToken(),
     ...attributes,
-  });
+  };
 
-  // hash password if a new one is sent
-  if (_.has(user, 'password')) {
-    const hashedPassword = await strapi.admin.services.auth.hashPassword(user.password);
-
-    return strapi.query('user', 'admin').create({
-      ...user,
-      password: hashedPassword,
-    });
+  if (_.has(attributes, 'password')) {
+    userInfo.password = await strapi.admin.services.auth.hashPassword(attributes.password);
   }
 
-  return strapi.query('user', 'admin').create(user);
+  const user = createUser(userInfo);
+  const createdUser = await strapi.query('user', 'admin').create(user);
+
+  await strapi.admin.services.metrics.sendDidInviteUser();
+
+  return createdUser;
 };
 
 /**
@@ -237,6 +236,15 @@ const countUsersWithoutRole = async () => {
   return count;
 };
 
+/**
+ * Count the number of users based on search params
+ * @param params params used for the query
+ * @returns {Promise<number>}
+ */
+const count = async (params = {}) => {
+  return strapi.query('user', 'admin').count(params);
+};
+
 /** Assign some roles to several users
  * @returns {undefined}
  */
@@ -308,6 +316,7 @@ module.exports = {
   deleteById,
   deleteByIds,
   countUsersWithoutRole,
+  count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
   migrateUsers,
