@@ -164,12 +164,18 @@ The options key on the model-json states.
 
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
+- `privateAttributes`: This configuration allows to treat as private a set of attributes, even if they're not actually defined as attributes in the model. Accepts an `Array` of strings. It could be used to remove from API responses timestamps or `_v` when using MongoDB. The set of `privateAttributes` defined in the model are merged with the `privateAttributes` defined in the global Strapi configuration only when `ignoreGlobalPrivateAttributes` is set to `false`.
+
+- `ignoreGlobalPrivateAttributes`: This configuration allows to ignore the global `privateAttributes`. The set of `privateAttributes` defined in the model won't be merged with the `privateAttributes` defined in the global Strapi configuration.
+
 **Path —** `User.settings.json`.
 
 ```json
 {
   "options": {
-    "timestamps": true
+    "timestamps": true,
+    "privateAttributes": ["id", "_v", "created_at"],
+    "ignoreGlobalPrivateAttributes": true
   }
 }
 ```
