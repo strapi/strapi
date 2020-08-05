@@ -3,6 +3,7 @@ import { set } from 'lodash';
 
 const initialState = {
   isLoading: true,
+  isConfirmButtonLoading: false,
   initialData: {},
   modifiedData: {},
   roles: [],
@@ -34,6 +35,23 @@ const reducer = (state, action) =>
       }
       case 'ON_CHANGE': {
         set(draftState.modifiedData, action.keys.split('.'), action.value);
+        break;
+      }
+      case 'ON_RESET': {
+        draftState.modifiedData = state.initialData;
+        break;
+      }
+      case 'ON_SUBMIT': {
+        draftState.isConfirmButtonLoading = true;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.initialData = state.modifiedData;
+        draftState.isConfirmButtonLoading = false;
+        break;
+      }
+      case 'ON_SUBMIT_ERROR': {
+        draftState.isConfirmButtonLoading = false;
         break;
       }
       default: {

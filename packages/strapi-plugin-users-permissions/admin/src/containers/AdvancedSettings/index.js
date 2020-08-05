@@ -1,27 +1,24 @@
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header } from '@buffetjs/custom';
+import { isEqual } from 'lodash';
 import {
   FormBloc,
+  PopUpWarning,
   SettingsPageTitle,
   SizedInput,
   useUserPermissions,
   request,
 } from 'strapi-helper-plugin';
-import { Container } from 'reactstrap';
-import styled from 'styled-components';
 import pluginPermissions from '../../permissions';
 import { getTrad, getRequestURL } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import form from './utils/form';
 import reducer, { initialState } from './reducer';
 
-const ContainerFluid = styled(Container)`
-  padding: ${({ padding }) => padding};
-`;
-
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
+  const [showModalWarning, setShowModalWarning] = useState(false);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateAdvancedSettings };
@@ -30,7 +27,10 @@ const AdvancedSettingsPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useUserPermissions(updatePermissions);
-  const [{ isLoading, modifiedData, roles }, dispatch] = useReducer(reducer, initialState);
+  const [
+    { initialData, isConfirmButtonLoading, isLoading, modifiedData, roles },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const getData = async () => {
@@ -40,7 +40,6 @@ const AdvancedSettingsPage = () => {
         });
 
         const data = await request(getRequestURL('advanced'), { method: 'GET' });
-        console.log({ data });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
@@ -68,9 +67,81 @@ const AdvancedSettingsPage = () => {
     });
   }, []);
 
-  const handleSubmit = useCallback(e => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault();
+
+      try {
+        dispatch({
+          type: 'ON_SUBMIT',
+        });
+
+        await request(getRequestURL('advanced'), { method: 'PUT', body: modifiedData });
+
+        dispatch({
+          type: 'ON_SUBMIT_SUCCEEDED',
+        });
+
+        strapi.notification.success(getTrad('notification.success.submit'));
+      } catch (err) {
+        dispatch({
+          type: 'ON_SUBMIT_ERROR',
+        });
+        console.error(err);
+        strapi.notification.error('notification.error');
+      }
+    },
+    [modifiedData]
+  );
+
+  const handleConfirmReset = useCallback(() => {
+    dispatch({
+      type: 'ON_RESET',
+    });
+
+    setShowModalWarning(false);
   }, []);
+
+  const handleToggleModal = useCallback(() => {
+    setShowModalWarning(prev => !prev);
+  }, []);
+
+  const headerActions = useMemo(() => {
+    const isDisabled = isEqual(initialData, modifiedData);
+
+    return [
+      {
+        disabled: isDisabled,
+        onClick: () => {
+          handleToggleModal();
+        },
+        color: 'cancel',
+        label: formatMessage({
+          id: 'app.components.Button.reset',
+        }),
+
+        type: 'button',
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
+      },
+      {
+        disabled: isDisabled,
+        color: 'success',
+        label: formatMessage({
+          id: 'app.components.Button.save',
+        }),
+        isLoading: isConfirmButtonLoading,
+        type: 'submit',
+        style: {
+          minWidth: 150,
+          fontWeight: 600,
+        },
+      },
+    ];
+  }, [initialData, isConfirmButtonLoading, modifiedData, formatMessage, handleToggleModal]);
 
   const showLoader = isLoadingForPermissions || isLoading;
 
@@ -79,26 +150,36 @@ const AdvancedSettingsPage = () => {
       <SettingsPageTitle name={pageTitle} />
       <div>
         <form onSubmit={handleSubmit}>
-          <Header title={{ label: pageTitle }} isLoading={showLoader} />
-          <ContainerFluid padding="0">
-            <ListBaselineAlignment />
-            <FormBloc title="Settings" isLoading={showLoader}>
-              {form.map(input => {
-                return (
-                  <SizedInput
-                    key={input.name}
-                    {...input}
-                    disabled={!canUpdate}
-                    onChange={handleChange}
-                    options={roles}
-                    value={modifiedData[input.name]}
-                  />
-                );
-              })}
-            </FormBloc>
-          </ContainerFluid>
+          <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
+          <ListBaselineAlignment />
+          <FormBloc title="Settings" isLoading={showLoader}>
+            {form.map(input => {
+              return (
+                <SizedInput
+                  key={input.name}
+                  {...input}
+                  disabled={!canUpdate}
+                  onChange={handleChange}
+                  options={roles}
+                  value={modifiedData[input.name]}
+                />
+              );
+            })}
+          </FormBloc>
         </form>
       </div>
+      <PopUpWarning
+        isOpen={showModalWarning}
+        toggleModal={handleToggleModal}
+        // content={{
+        //   title: `${pluginId}.popUpWarning.title`,
+        //   message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+        //   cancel: `${pluginId}.popUpWarning.button.cancel`,
+        //   confirm: `${pluginId}.popUpWarning.button.confirm`,
+        // }}
+        popUpWarningType="danger"
+        onConfirm={handleConfirmReset}
+      />
     </>
   );
 };

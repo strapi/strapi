@@ -89,7 +89,6 @@
   "notification.error.fetchUser": "An error occurred while trying to fetch users",
   "notification.info.emailSent": "The email has been sent",
   "notification.success.delete": "The item has been deleted",
-  "notification.success.submit": "Settings have been updated",
 
   "TRANSLATIONS-TO-KEEP": "TRANSLATIONS TO KEEP",
   "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
@@ -115,6 +114,7 @@
   "List.title.providers.disabled.singular": "{number} is disabled",
   "List.title.providers.enabled.plural": "{number} providers are enabled and",
   "List.title.providers.enabled.singular": "{number} provider is enabled and",
+  "notification.success.submit": "Settings have been updated",
   "plugin.description.long": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
   "plugin.description.short": "Protect your API with a full authentication process based on JWT",
   "plugin.name": "Users & Permissions Plugin"

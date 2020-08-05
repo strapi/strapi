@@ -2,6 +2,7 @@ import { getTrad } from '../../../utils';
 
 const form = [
   {
+    autoFocus: true,
     description: getTrad('EditForm.inputSelect.description.role'),
     label: getTrad('EditForm.inputSelect.label.role'),
     name: 'default_role',
