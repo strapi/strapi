@@ -58,7 +58,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
 export default memo(HomePage);
 ```
 
-Now the admin panel home page should just contain the sentence `Hello Wold!`.
+Now the admin panel home page should just contain the sentence `Hello World!`.
 
 ## Update the Content Manager
 
