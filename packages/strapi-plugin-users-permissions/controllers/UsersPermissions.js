@@ -243,6 +243,14 @@ module.exports = {
       })
       .get();
 
+    for (const provider in providers) {
+      if (provider !== 'email') {
+        providers[provider].redirectUri = strapi.plugins[
+          'users-permissions'
+        ].services.providers.buildRedirectUri(provider);
+      }
+    }
+
     ctx.send(providers);
   },
 

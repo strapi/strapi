@@ -23,10 +23,12 @@ module.exports = {
         });
       }
     };
-    const uploadDir = path.join(
-      strapi.dir,
-      strapi.config.get('middleware.settings.public.path', strapi.config.paths.static)
+    const configPublicPath = strapi.config.get(
+      'middleware.settings.public.path',
+      strapi.config.paths.static
     );
+
+    const uploadDir = path.resolve(strapi.dir, configPublicPath);
 
     return {
       upload(file) {
