@@ -6,6 +6,7 @@ describe('Upload plugin bootstrap function', () => {
     const register = jest.fn(() => {});
 
     global.strapi = {
+      dir: process.cwd(),
       admin: {
         services: { permission: { actionProvider: { register } } },
       },
@@ -13,6 +14,10 @@ describe('Upload plugin bootstrap function', () => {
         error() {},
       },
       config: {
+        get() {
+          return 'public';
+        },
+        paths: {},
         info: {
           dependencies: {},
         },

@@ -300,15 +300,25 @@ You can check all the available providers developed by the community on npmjs.or
 
 To install a new provider run:
 
-```
-$ npm install strapi-provider-upload-aws-s3 --save
-```
+:::: tabs
 
-or
+::: tab yarn
 
 ```
-$ yarn add strapi-provider-upload-aws-s3
+yarn add strapi-provider-upload-aws-s3
 ```
+
+:::
+
+::: tab npm
+
+```
+npm install strapi-provider-upload-aws-s3 --save
+```
+
+:::
+
+::::
 
 ### Using scoped packages as providers
 

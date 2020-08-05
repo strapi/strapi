@@ -276,6 +276,33 @@ describe('Role', () => {
     });
   });
 
+  describe('Count roles', () => {
+    test('Count roles without params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const amount = await roleService.count();
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith({});
+    });
+
+    test('Count roles with params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const params = { foo: 'bar' };
+      const amount = await roleService.count(params);
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith(params);
+    });
+  });
+
   describe('createRolesIfNoneExist', () => {
     test("Don't create roles if one already exist", async () => {
       const count = jest.fn(() => Promise.resolve(1));

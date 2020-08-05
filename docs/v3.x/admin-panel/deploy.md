@@ -22,7 +22,7 @@ module.exports = ({ env }) => ({
   admin: {
     url: '/dashboard', // We change the path to access to the admin (highly recommended for security reasons).
   },
-};
+});
 ```
 
 **You have to rebuild the administration panel to make this work.** [Build instructions](./customization.md#build).
@@ -42,7 +42,7 @@ module.exports = ({ env }) => ({
     url: '/', // Note: The administration will be accessible from the root of the domain (ex: http://yourfrontend.com/)
     serveAdminPanel: false, // http://yourbackend.com will not serve any static admin files
   },
-};
+});
 ```
 
 After running `yarn build` with this configuration, the folder `build` will be created/overwritten. You can then use this folder to serve it from another server with the domain of your choice (ex: `http://youfrontend.com`).
