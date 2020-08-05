@@ -21,12 +21,21 @@ const sanitizeEntity = (dataSource, options) => {
 
   const { attributes } = model;
   const allowedFields = getAllowedFields({ includeFields, model, isOutput });
+  const privateAttributes = _.union(
+    _.get(model, 'options.privateAttributes', []),
+    _.get(model, 'options.ignoreGlobalPrivateAttributes', false)
+      ? []
+      : strapi.config.get('api.responses.privateAttributes', [])
+  );
 
   const reducerFn = (acc, value, key) => {
     const attribute = attributes[key];
     const allowedFieldsHasKey = allowedFields.includes(key);
 
-    if (shouldRemoveAttribute(attribute, { withPrivate, isOutput })) {
+    if (
+      shouldRemoveAttribute(attribute, { withPrivate, isOutput }) ||
+      (privateAttributes.includes(key) && isOutput && !withPrivate)
+    ) {
       return acc;
     }
 
