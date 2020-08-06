@@ -41,6 +41,7 @@ const reducer = (state, action) =>
       }
       case 'RESET_FORM': {
         draftState.modifiedData = state.initialData;
+        draftState.formErrors = {};
         break;
       }
       case 'SET_ERRORS': {

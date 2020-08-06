@@ -1,14 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { Button, Padded } from '@buffetjs/core';
 import { Header, List } from '@buffetjs/custom';
 import { Pencil } from '@buffetjs/icons';
 import { get } from 'lodash';
 import {
-  Modal,
-  ModalFooter,
-  ModalHeader,
-  ModalSection,
   SettingsPageTitle,
   SizedInput,
   useUserPermissions,
@@ -19,7 +14,7 @@ import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import ListRow from '../../components/ListRow';
-import ModalFormWrapper from '../../components/ModalFormWrapper';
+import ModalForm from '../../components/ModalForm';
 import { getRequestURL, getTrad } from '../../utils';
 import forms from './utils/forms';
 import schema from './utils/schema';
@@ -199,59 +194,43 @@ const EmailTemplatesPage = () => {
           )}
         />
       </div>
-      <Modal
+      <ModalForm
         isOpen={isOpen}
         onOpened={handleOpened}
         onToggle={handleToggle}
         onClosed={handleClosed}
+        headerBreadcrumbs={[
+          getTrad('PopUpForm.header.edit.email-templates'),
+          get(templateToEdit, 'name', ''),
+        ]}
+        onClick={handleClick}
+        onCancel={handleToggle}
+        isLoading={isSubmiting}
       >
-        <ModalHeader
-          headerBreadcrumbs={[
-            getTrad('PopUpForm.header.edit.email-templates'),
-            get(templateToEdit, 'name', ''),
-          ]}
-        />
-        <ModalSection>
-          <ModalFormWrapper>
-            <ListBaselineAlignment />
-            <Padded top size="md">
-              {showForm && (
-                <form onSubmit={handleSubmit}>
-                  <Row>
-                    {forms.map(input => {
-                      const id = get(templateToEdit, 'id');
+        {showForm && (
+          <form onSubmit={handleSubmit}>
+            <Row>
+              {forms.map(input => {
+                const id = get(templateToEdit, 'id');
 
-                      return (
-                        <SizedInput
-                          key={input.name}
-                          {...input}
-                          error={formErrors[input.name]}
-                          name={`${id}.${input.name}`}
-                          onChange={handleChange}
-                          value={get(modifiedData, [id, ...input.name.split('.')], '')}
-                        />
-                      );
-                    })}
-                  </Row>
-                  <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
-                    hidden button to use the native form event
-                  </button>
-                </form>
-              )}
-            </Padded>
-          </ModalFormWrapper>
-        </ModalSection>
-        <ModalFooter>
-          <section>
-            <Button type="button" color="cancel" onClick={handleToggle}>
-              {formatMessage({ id: 'app.components.Button.cancel' })}
-            </Button>
-            <Button color="success" type="button" onClick={handleClick} isLoading={isSubmiting}>
-              {formatMessage({ id: 'app.components.Button.save' })}
-            </Button>
-          </section>
-        </ModalFooter>
-      </Modal>
+                return (
+                  <SizedInput
+                    key={input.name}
+                    {...input}
+                    error={formErrors[input.name]}
+                    name={`${id}.${input.name}`}
+                    onChange={handleChange}
+                    value={get(modifiedData, [id, ...input.name.split('.')], '')}
+                  />
+                );
+              })}
+            </Row>
+            <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
+              hidden button to use the native form event
+            </button>
+          </form>
+        )}
+      </ModalForm>
     </>
   );
 };

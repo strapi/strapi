@@ -1,19 +1,28 @@
-import React, { useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header, List } from '@buffetjs/custom';
 import { Text } from '@buffetjs/core';
 import { Pencil } from '@buffetjs/icons';
-import { SettingsPageTitle, useUserPermissions, request } from 'strapi-helper-plugin';
+import { SettingsPageTitle, SizedInput, useUserPermissions, request } from 'strapi-helper-plugin';
+import { get, upperFirst } from 'lodash';
+import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { getRequestURL, getTrad } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import ListRow from '../../components/ListRow';
+import ModalForm from '../../components/ModalForm';
 import createProvidersArray from './utils/createProvidersArray';
+import forms from './utils/forms';
 import reducer, { initialState } from './reducer';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
-  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmiting, setIsSubmiting] = useState(false);
+  const buttonSubmitRef = useRef(null);
+  const [showForm, setShowForm] = useState(false);
+  const [providerToEditName, setProviderToEditName] = useState(null);
+
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
   }, []);
@@ -21,7 +30,7 @@ const ProvidersPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useUserPermissions(updatePermissions);
-  const [{ isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
+  const [{ formErrors, isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
     () => providers.filter(provider => provider.enabled).length,
@@ -52,6 +61,8 @@ const ProvidersPage = () => {
     return `${enabledMessage} ${disabledMessage}`;
   }, [formatMessage, enabledProvidersCount, disabledProvidersCount]);
 
+  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -81,6 +92,52 @@ const ProvidersPage = () => {
     }
   }, [isLoadingForPermissions]);
 
+  const handleClick = useCallback(() => {
+    buttonSubmitRef.current.click();
+  }, []);
+
+  const handleSubmit = useCallback(async e => {
+    e.preventDefault();
+
+    setIsSubmiting(true);
+  }, []);
+
+  const handleToggle = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
+
+  const handleClickEdit = useCallback(
+    provider => {
+      setProviderToEditName(provider.name);
+      handleToggle();
+    },
+    [handleToggle]
+  );
+
+  const handleChange = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name,
+      value,
+    });
+  }, []);
+
+  const handleClosed = useCallback(() => {
+    setProviderToEditName(null);
+    setShowForm(false);
+    dispatch({
+      type: 'RESET_FORM',
+    });
+  }, []);
+
+  const handleOpened = useCallback(() => {
+    setShowForm(true);
+  }, []);
+
+  const formToRender = useMemo(() => {
+    return providerToEditName === 'email' ? forms.email.form : forms.providers.form;
+  }, [providerToEditName]);
+
   return (
     <>
       <SettingsPageTitle name={pageTitle} />
@@ -95,13 +152,13 @@ const ProvidersPage = () => {
             <ListRow
               {...provider}
               onClick={() => {
-                console.log(`Will edit ${provider.name}`);
+                handleClickEdit(provider);
               }}
               links={[
                 {
                   icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
                   onClick: () => {
-                    console.log(`Will edit ${provider.name}`);
+                    handleClickEdit(provider);
                   },
                 },
               ]}
@@ -119,6 +176,51 @@ const ProvidersPage = () => {
           )}
         />
       </div>
+      <ModalForm
+        isOpen={isOpen}
+        onClick={handleClick}
+        onCancel={handleToggle}
+        isLoading={isSubmiting}
+        onOpened={handleOpened}
+        onClosed={handleClosed}
+        onToggle={handleToggle}
+        headerBreadcrumbs={[
+          getTrad('PopUpForm.header.edit.providers'),
+          upperFirst(providerToEditName),
+        ]}
+      >
+        {showForm && (
+          <form onSubmit={handleSubmit}>
+            <Row>
+              {formToRender.map(input => {
+                const label = input.label.params
+                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
+                  : input.label;
+
+                const value =
+                  input.name === 'noName'
+                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
+                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
+
+                return (
+                  <SizedInput
+                    key={input.name}
+                    {...input}
+                    label={label}
+                    error={formErrors[input.name]}
+                    name={`${providerToEditName}.${input.name}`}
+                    onChange={handleChange}
+                    value={value}
+                  />
+                );
+              })}
+            </Row>
+            <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
+              hidden button to use the native form event
+            </button>
+          </form>
+        )}
+      </ModalForm>
     </>
   );
 };

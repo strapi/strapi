@@ -1,6 +1,8 @@
 import produce from 'immer';
+import { set } from 'lodash';
 
 const initialState = {
+  formErrors: {},
   isLoading: true,
   initialData: {},
   modifiedData: {},
@@ -27,6 +29,19 @@ const reducer = (state, action) =>
       }
       case 'GET_DATA_ERROR': {
         draftState.isLoading = true;
+        break;
+      }
+      case 'ON_CHANGE': {
+        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        break;
+      }
+      case 'RESET_FORM': {
+        draftState.modifiedData = state.initialData;
+        draftState.formErrors = {};
+        break;
+      }
+      case 'SET_ERRORS': {
+        draftState.formErrors = action.errors;
         break;
       }
       default: {

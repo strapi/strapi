@@ -7,16 +7,24 @@ import translatedErrors from '../../utils/translatedErrors';
 
 const IntlInput = ({
   description,
-  label: labelId,
+  label,
   defaultMessage,
   error,
   placeholder: placeholderId,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
-  const label = formatMessage({ id: labelId, defaultMessage: defaultMessage || labelId });
 
   let formattedDescription = '';
+  let formattedLabel = '';
+
+  if (label) {
+    const params = label.params || {};
+
+    formattedLabel = isObject(label)
+      ? formatMessage({ id: label.id, defaultMessage: label.defaultMessage || label.id }, params)
+      : formatMessage({ id: label, defaultMessage: label });
+  }
 
   if (description) {
     const params = description.params || {};
@@ -44,7 +52,7 @@ const IntlInput = ({
   return (
     <Inputs
       {...rest}
-      label={label}
+      label={formattedLabel}
       description={formattedDescription}
       error={translatedError}
       translatedErrors={formattedErrors}
