@@ -15,9 +15,7 @@ const IntlInput = ({
 }) => {
   const { formatMessage } = useIntl();
   const label = formatMessage({ id: labelId, defaultMessage: defaultMessage || labelId });
-  // const description = descriptionId
-  //   ? formatMessage({ id: descriptionId, defaultMessage: descriptionId })
-  //   : '';
+
   let formattedDescription = '';
 
   if (description) {
@@ -42,8 +40,6 @@ const IntlInput = ({
     }, {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log({ description, formattedDescription });
 
   return (
     <Inputs

@@ -41,9 +41,9 @@ const forms = [
     autoFocus: false,
     label: getTrad('PopUpForm.Email.options.object.label'),
     name: 'options.object',
-    type: 'c',
+    type: 'customText',
     placeholder: getTrad('PopUpForm.Email.options.object.placeholder'),
-    customInputs: { c: CustomTextInput },
+    customInputs: { customText: CustomTextInput },
     descriptione: () => (
       <FormattedMessage
         id={getTrad('PopUpForm.Email.email_templates.inputDescription')}

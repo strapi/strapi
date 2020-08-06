@@ -13,6 +13,7 @@ import {
   SizedInput,
   useUserPermissions,
   request,
+  getYupInnerErrors,
 } from 'strapi-helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -21,6 +22,7 @@ import ListRow from '../../components/ListRow';
 import ModalFormWrapper from '../../components/ModalFormWrapper';
 import { getRequestURL, getTrad } from '../../utils';
 import forms from './utils/forms';
+import schema from './utils/schema';
 import reducer, { initialState } from './reducer';
 
 const EmailTemplatesPage = () => {
@@ -31,9 +33,10 @@ const EmailTemplatesPage = () => {
     return { update: pluginPermissions.updateEmailTemplates };
   }, []);
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmiting, setIsSubmiting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState(null);
-  const [{ isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
+  const [{ formErrors, isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
   const emailTemplates = useMemo(() => {
     return Object.keys(modifiedData).reduce((acc, current) => {
       const { display, icon } = modifiedData[current];
@@ -101,6 +104,9 @@ const EmailTemplatesPage = () => {
   const handleClosed = useCallback(() => {
     setTemplateToEdit(null);
     setShowForm(false);
+    dispatch({
+      type: 'RESET_FORM',
+    });
   }, []);
 
   const handleToggle = useCallback(() => {
@@ -115,15 +121,45 @@ const EmailTemplatesPage = () => {
     [handleToggle]
   );
 
-  const handleSubmit = useCallback(async e => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault();
 
-    try {
-      console.log('todo');
-    } catch (err) {
-      // TODO
-    }
-  }, []);
+      let errors = {};
+
+      try {
+        setIsSubmiting(true);
+        await schema.validate(modifiedData[templateToEdit.id], { abortEarly: false });
+
+        try {
+          await request(getRequestURL('email-templates'), {
+            method: 'PUT',
+            body: { 'email-templates': modifiedData },
+          });
+
+          strapi.notification.success(getTrad('notification.success.submit'));
+
+          dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
+
+          handleToggle();
+        } catch (err) {
+          console.error(err);
+
+          strapi.notification.error('notification.error');
+        }
+      } catch (err) {
+        errors = getYupInnerErrors(err);
+      } finally {
+        setIsSubmiting(false);
+      }
+
+      dispatch({
+        type: 'SET_ERRORS',
+        errors,
+      });
+    },
+    [modifiedData, templateToEdit, handleToggle]
+  );
 
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
@@ -189,6 +225,7 @@ const EmailTemplatesPage = () => {
                         <SizedInput
                           key={input.name}
                           {...input}
+                          error={formErrors[input.name]}
                           name={`${id}.${input.name}`}
                           onChange={handleChange}
                           value={get(modifiedData, [id, ...input.name.split('.')], '')}
@@ -209,7 +246,7 @@ const EmailTemplatesPage = () => {
             <Button type="button" color="cancel" onClick={handleToggle}>
               {formatMessage({ id: 'app.components.Button.cancel' })}
             </Button>
-            <Button color="success" type="button" onClick={handleClick}>
+            <Button color="success" type="button" onClick={handleClick} isLoading={isSubmiting}>
               {formatMessage({ id: 'app.components.Button.save' })}
             </Button>
           </section>
