@@ -1,6 +1,6 @@
 import React from 'react';
 import { CustomRow } from '@buffetjs/styles';
-import { IconLinks, Text } from '@buffetjs/core';
+import { IconLinks } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import PrefixedIcon from '../PrefixedIcon';
 

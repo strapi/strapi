@@ -34,13 +34,11 @@ const RoleRow = ({ role, onClick, links }) => {
 
 RoleRow.defaultProps = {
   onClick: null,
-  prefix: null,
 };
 
 RoleRow.propTypes = {
   links: PropTypes.array.isRequired,
   onClick: PropTypes.func,
-  prefix: PropTypes.node,
   role: PropTypes.object.isRequired,
 };
 

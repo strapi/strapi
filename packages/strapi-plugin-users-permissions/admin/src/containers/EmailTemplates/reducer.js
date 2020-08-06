@@ -1,4 +1,5 @@
 import produce from 'immer';
+import { set } from 'lodash';
 
 const initialState = {
   isLoading: true,
@@ -27,6 +28,11 @@ const reducer = (state, action) =>
       }
       case 'GET_DATA_ERROR': {
         draftState.isLoading = true;
+        break;
+      }
+      case 'ON_CHANGE': {
+        console.log(action.keys);
+        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
         break;
       }
       default: {
