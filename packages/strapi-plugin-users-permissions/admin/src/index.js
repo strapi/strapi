@@ -4,18 +4,20 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
-
 import React from 'react';
 import { CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
+import layout from '../../config/layout';
 import pluginId from './pluginId';
+import Initializer from './containers/Initializer';
+import lifecycles from './lifecycles';
+import trads from './translations';
 import RolesPage from './containers/Roles';
 import ProvidersPage from './containers/Providers';
 import EmailTemplatesPage from './containers/EmailTemplates';
 import AdvancedSettingsPage from './containers/AdvancedSettings';
-import trads from './translations';
 import getTrad from './utils/getTrad';
 
 export default strapi => {
@@ -29,13 +31,16 @@ export default strapi => {
     description: pluginDescription,
     icon,
     id: pluginId,
-    initializer: null,
+    initializer: Initializer,
     injectedComponents: [],
     isRequired: pluginPkg.strapi.required || false,
-    isReady: true,
+    layout,
+    lifecycles,
+    mainComponent: null,
     name,
     pluginLogo,
     preventComponentRendering: false,
+    trads,
     settings: {
       menuSection: {
         id: pluginId,
@@ -48,7 +53,11 @@ export default strapi => {
             },
             name: 'roles',
             to: `${strapi.settingsBaseURL}/${pluginId}/roles`,
-            Component: () => <RolesPage />,
+            Component: () => (
+              <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
+                <RolesPage />
+              </CheckPagePermissions>
+            ),
             permissions: pluginPermissions.accessRoles,
           },
           {
@@ -67,7 +76,7 @@ export default strapi => {
           },
           {
             title: {
-              id: getTrad('HeaderNav.link.emailTemplates'),
+              id: getTrad('HeaderNav.link.email-templates'),
               defaultMessage: 'Email templates',
             },
             name: 'email-templates',
@@ -81,7 +90,7 @@ export default strapi => {
           },
           {
             title: {
-              id: getTrad('HeaderNav.link.advancedSettings'),
+              id: getTrad('HeaderNav.link.advanced-settings'),
               defaultMessage: 'Advanced Settings',
             },
             name: 'advanced-settings',
@@ -96,7 +105,6 @@ export default strapi => {
         ],
       },
     },
-    trads,
   };
 
   return strapi.registerPlugin(plugin);

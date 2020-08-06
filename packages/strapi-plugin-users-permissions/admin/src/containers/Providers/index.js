@@ -174,13 +174,12 @@ const ProvidersPage = () => {
           customRowComponent={provider => (
             <ListRow
               {...provider}
-              onClick={() => {
-                handleClickEdit(provider);
-              }}
+              onClick={() => handleClickEdit(provider)}
               links={[
                 {
                   icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-                  onClick: () => {
+                  onClick: e => {
+                    e.stopPropagation();
                     handleClickEdit(provider);
                   },
                 },

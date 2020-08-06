@@ -162,7 +162,8 @@ const EmailTemplatesPage = () => {
               links={[
                 {
                   icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-                  onClick: () => {
+                  onClick: e => {
+                    e.stopPropagation();
                     handleClickEdit(template);
                   },
                 },
