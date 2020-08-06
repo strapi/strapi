@@ -1,34 +1,19 @@
-# Getting Started with React
+# Getting Started with Vue.js
 
 This integration guide is following the [Getting started guide](../getting-started/quick-start.html). We assume that you have completed [Step 8](../getting-started/quick-start.html#_8-consume-the-content-type-s-api) and therefore can consume the API by browsing this [url](http://localhost:1337/restaurants).
 
-If you haven't gone through the getting started guide, the way you request a Strapi API with [React](https://reactjs.org/) remains the same except that you will not fetch the same content.
+If you haven't gone through the getting started guide, the way you request a Strapi API with [Vue.js](https://vuejs.org/) remains the same except that you will not fetch the same content.
 
 
-### Create a React app
+### Create a Vue.js app
 
-Create a basic React application using [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html).
+Create a basic Vue.js application using [Vue CLI](https://cli.vuejs.org).
 
-
-:::: tabs
-
-::: tab yarn
 
 ```bash
-yarn create react-app react-app
+vue create vue-app
 ```
 
-:::
-
-::: tab npx
-
-```bash
-npx create-react-app react-app
-```
-
-:::
-
-::::
 
 ### Use an HTTP client
 
@@ -57,7 +42,8 @@ No installation needed
 
 Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
-Be sure that you activated the `find` permission for the `restaurant` Collection Type
+Be sure that you activated the `find` permission for the `restaurant` Collection Type.
+
 
 :::: tabs
 
@@ -135,95 +121,91 @@ fetch("http://localhost:1337/restaurants", {
 
 ::: tab axios
 
-`./src/App.js`
+`./src/App.vue`
 
 ```js
-import React from 'react';
-import axios from "axios"
+<template>
+  <div id="app">
+    <div v-if="error">
+      {{ error }}
+    </div>
+    <ul v-else>
+      <li v-for="restaurant in restaurants" :key="restaurant.id">
+        {{ restaurant.name }}
+      </li>
+    </ul>
+  </div>
+</template>
 
-class App extends React.Component {
+<script>
+import axios from 'axios'
 
-  state = {
-    restaurants: [],
-    error: null
-  }
-
-  componentDidMount() {
+export default {
+  name: 'App',
+  data () {
+    return {
+      restaurants: [],
+      error: null
+    }
+  },
+  mounted () {
     axios.get('http://localhost:1337/restaurants')
       .then(response => {
-        const restaurants = response.data;
-        this.setState({ restaurants });
+        this.restaurants = response.data;
       })
       .catch(error => {
-        this.setState({ error });
+        this.error = error;
       })
   }
-
-  render() {
-    const { error, restaurant } = this.state
-    if (error) {
-       return <div>An error occured: {error.message}</div>
-    }
-    return (
-      <div className="App">
-        <ul>
-          {this.state.restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>)}
-        </ul>
-      </div>
-    );
-  }
 }
-
-export default App;
+</script>
 ```
 
 :::
 
 ::: tab fetch
 
-`./src/App.js`
+`./src/App.vue`
 
 ```js
-import React from 'react';
+<template>
+  <div id="app">
+    <div v-if="error">
+      {{ error }}
+    </div>
+    <ul v-else>
+      <li v-for="restaurant in restaurants" :key="restaurant.id">
+        {{ restaurant.name }}
+      </li>
+    </ul>
+  </div>
+</template>
 
-class App extends React.Component {
+<script>
 
-  state = {
-    restaurants: [],
-    error: null
-  }
-
-  componentDidMount() {
+export default {
+  name: 'App',
+  data () {
+    return {
+      restaurants: [],
+      error: null
+    }
+  },
+  mounted () {
     fetch("http://localhost:1337/restaurants", {
       headers: {
          'Content-Type': 'application/json'
       },
     }).then(response => response.json())
       .then(data => {
-        const restaurants = data;
-        this.setState({ restaurants });
+        this.restaurants = data
       })
-      .catch(error => {
-        this.setState({ error });
+      .catch((error) => {
+        this.error = error
       });
   }
-
-  render() {
-    const { error, restaurant } = this.state
-    if (error) {
-       return <div>An error occured: {error.message}</div>
-    }
-    return (
-      <div className="App">
-        <ul>
-          { this.state.restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>)}
-        </ul>
-      </div>
-    );
-  }
 }
-
-export default App;
+</script>
 ```
 
 :::
@@ -234,7 +216,8 @@ export default App;
 
 Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
 
-Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission fot the `category` Collection type.
+Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
+
 
 :::: tabs
 
@@ -306,182 +289,161 @@ fetch('http://localhost:1337/restaurants', {
 
 ::: tab axios
 
-`./src/App.js`
+`./src/App.vue`
 
 ```js
-import React from 'react';
+<template>
+<div id="app">
+  <div v-if="error">
+    {{ error }}
+  </div>
+
+  <form id="form" v-on:submit="handleSubmit" v-else>
+    <label for="name">Name</label>
+    <input id="name" v-model="name" type="text" name="name">
+
+    <label for="description">Description</label>
+    <input id="description" v-model="description" type="text" name="description">
+
+    <select v-if="this.allCategories.length > 0" id="categories" v-model="categories" name="categories">
+      <option v-for="category in allCategories" :key="category.id" :value="category.id">
+        {{ category.name }}
+      </option>
+    </select>
+
+    <input type="submit" value="Submit">
+  </form>
+
+</div>
+</template>
+
+<script>
 import axios from 'axios'
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
+export default {
+  name: 'App',
+  data() {
+    return {
+      allCategories: [],
       name: '',
       description: '',
       categories: '',
-      allCategories: [],
       error: null
-    };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
-  }
-
-  componentDidMount() {
+    }
+  },
+  mounted() {
     axios.get('http://localhost:1337/categories')
-    .then(response => {
-      const categories = response.data;
-      this.setState({ allCategories: categories });
-    })
-    .catch(error => {
-      this.setState({ error });
-    })
-  }
-
-  handleInputChange(event) {
-     const target = event.target;
-     const value = target.value;
-     const name = target.name;
-
-     this.setState({
-       [name]: value
-     });
-   }
-
-  handleSubmit = (e) =>  {
-    e.preventDefault();
-
-    axios.post('http://localhost:1337/restaurants', this.state)
       .then(response => {
-        console.log(response);
+        this.allCategories = response.data;
       })
       .catch(error => {
-        this.setState({ error });
-      });
-  }
+        this.error = error;
+      })
+  },
+  methods: {
+    handleSubmit: function(e) {
+      axios.post('http://localhost:1337/restaurants', {
+          name: this.name,
+          description: this.description,
+          categories: this.categories
+        })
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          this.error = error;
+        });
+      e.preventDefault();
 
-  render() {
-    const { error, categories, allCategories } = this.state
-    if (error) {
-       return <div>An error occured: {error.message}</div>
     }
-    return (
-      <div className="App">
-        <form onSubmit={this.handleSubmit}>
-           <label>
-             Name:
-             <input type="text" name="name" onChange={this.handleInputChange} />
-           </label>
-           <label>
-             Description:
-             <input type="text" name="description" onChange={this.handleInputChange} />
-           </label>
-           <select name="categories" value={categories} onChange={this.handleInputChange}>
-             { allCategories.map(value => <option key={value.id} value={value.id}>{value.name}</option>) }
-            </select>
-           <button type="submit">Submit</button>
-        </form>
-      </div>
-    );
   }
 }
-
-export default App;
+</script>
 ```
 
 :::
 
 ::: tab fetch
 
-`./src/App.js`
+`./src/App.vue`
 
 ```js
-import React from 'react';
+<template>
+<div id="app">
+  <div v-if="error">
+    {{ error }}
+  </div>
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
+  <form id="form" v-on:submit="handleSubmit" v-else>
+    <label for="name">Name</label>
+    <input id="name" v-model="name" type="text" name="name">
+
+    <label for="description">Description</label>
+    <input id="description" v-model="description" type="text" name="description">
+
+    <select v-if="this.allCategories.length > 0" id="categories" v-model="categories" name="categories">
+      <option v-for="category in allCategories" :key="category.id" :value="category.id">
+        {{ category.name }}
+      </option>
+    </select>
+
+    <input type="submit" value="Submit">
+  </form>
+
+</div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  data() {
+    return {
+      allCategories: [],
       name: '',
       description: '',
       categories: '',
-      allCategories: [],
       error: null
-    };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
-  }
-
-  componentDidMount() {
+    }
+  },
+  mounted() {
     fetch("http://localhost:1337/categories", {
-      headers: {
-         'Content-Type': 'application/json'
-      },
-    }).then(response => response.json())
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then(response => response.json())
       .then(data => {
-        const categories = data;
-        this.setState({ allCategories: categories });
+        this.allCategories = data
       })
       .catch(error => {
-        this.setState({ error });
+        this.error = error;
       });
-  }
+  },
+  methods: {
+    handleSubmit: function(e) {
+      fetch('http://localhost:1337/restaurants', {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: this.name,
+            description: this.description,
+            categories: this.categories
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+        })
+        .catch(error => {
+          this.error = error;
+        });
 
-  handleInputChange(event) {
-     const target = event.target;
-     const value = target.value;
-     const name = target.name;
-
-     this.setState({
-       [name]: value
-     });
-   }
-
-  handleSubmit = (e) =>  {
-    e.preventDefault();
-
-    fetch('http://localhost:1337/restaurants', {
-      method: "POST",
-      headers: {
-         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(this.state)
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-    })
-    .catch(error => {
-      this.setState({ error });
-    });
-  }
-
-  render() {
-    const { error, categories, allCategories } = this.state
-    if (error) {
-       return <div>An error occured: {error.message}</div>
+      e.preventDefault();
     }
-    return (
-      <div className="App">
-        <form onSubmit={this.handleSubmit}>
-           <label>
-             Name:
-             <input type="text" name="name" onChange={this.handleInputChange} />
-           </label>
-           <label>
-             Description:
-             <input type="text" name="description" onChange={this.handleInputChange} />
-           </label>
-           <select name="categories" value={categories} onChange={this.handleInputChange}>
-             { allCategories.map(value => <option key={value.id} value={value.id}>{value.name}</option>) }
-            </select>
-           <button type="submit">Submit</button>
-        </form>
-      </div>
-    );
   }
 }
-
-export default App;
+</script>
 ```
 
 :::
@@ -539,7 +501,7 @@ fetch('http://localhost:1337/restaurants/2', {
 .then(data => {
   console.log(data);
 })
-.catch(error => {
+.catch((error) => {
   console.error(error);
 });
 ```
@@ -572,6 +534,6 @@ fetch('http://localhost:1337/restaurants/2', {
 
 ## Conclusion
 
-Here is how to request your Collection Types in Strapi using React. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
+Here is how to request your Collection Types in Strapi using Vue.js. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
 
 We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)

@@ -127,7 +127,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.
   :::
 
-Consume your API using one of these technologies:
+### Consume your API using one of these technologies:
 
   <IntegrationLinks>
   </IntegrationLinks>
