@@ -716,6 +716,7 @@ class Wysiwyg extends React.Component {
                   setRef={editor => (this.domEditor = editor)}
                   stripPastedStyles
                   tabIndex={this.props.tabIndex}
+                  spellCheck
                 />
                 <input className="editorInput" tabIndex="-1" />
               </div>
