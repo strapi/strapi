@@ -139,7 +139,7 @@ const Home = ({ restaurants, error }) => {
 
 Home.getInitialProps = async (ctx) => {
   try {
-    const res = await axios('http://localhost:1337/restaurants')
+    const res = await axios.get('http://localhost:1337/restaurants')
     const restaurants = await res
     return { restaurants: restaurants.data }
   } catch (error) {
