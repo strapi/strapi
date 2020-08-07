@@ -1,24 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header, List } from '@buffetjs/custom';
 import { Pencil } from '@buffetjs/icons';
 import { get } from 'lodash';
-import {
-  SettingsPageTitle,
-  SizedInput,
-  useUserPermissions,
-  request,
-  getYupInnerErrors,
-} from 'strapi-helper-plugin';
+import { SettingsPageTitle, SizedInput, request, getYupInnerErrors } from 'strapi-helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
+import { useForm } from '../../hooks';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import ListRow from '../../components/ListRow';
 import ModalForm from '../../components/ModalForm';
 import { getRequestURL, getTrad } from '../../utils';
 import forms from './utils/forms';
 import schema from './utils/schema';
-import reducer, { initialState } from './reducer';
 
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
@@ -31,7 +25,19 @@ const EmailTemplatesPage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState(null);
-  const [{ formErrors, isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
+
+  const {
+    allowedActions: { canUpdate },
+    dispatchResetForm,
+    dispatchSetFormErrors,
+    dispatchSubmitSucceeded,
+    formErrors,
+    handleChange,
+    isLoading,
+    isLoadingForPermissions,
+    modifiedData,
+  } = useForm('email-templates', updatePermissions);
+
   const emailTemplates = useMemo(() => {
     return Object.keys(modifiedData).reduce((acc, current) => {
       const { display, icon } = modifiedData[current];
@@ -46,10 +52,6 @@ const EmailTemplatesPage = () => {
     }, []);
   }, [modifiedData, formatMessage]);
 
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canUpdate },
-  } = useUserPermissions(updatePermissions);
   const listTitle = useMemo(() => {
     const count = emailTemplates.length;
 
@@ -61,48 +63,11 @@ const EmailTemplatesPage = () => {
     );
   }, [emailTemplates.length, formatMessage]);
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        dispatch({
-          type: 'GET_DATA',
-        });
-
-        const data = await request(getRequestURL('email-templates'), { method: 'GET' });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        dispatch({
-          type: 'GET_DATA_ERROR',
-        });
-        console.error(err);
-        strapi.notification.error('notification.error');
-      }
-    };
-
-    if (!isLoadingForPermissions) {
-      getData();
-    }
-  }, [isLoadingForPermissions]);
-
-  const handleChange = useCallback(({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value,
-    });
-  }, []);
-
   const handleClosed = useCallback(() => {
     setTemplateToEdit(null);
     setShowForm(false);
-    dispatch({
-      type: 'RESET_FORM',
-    });
-  }, []);
+    dispatchResetForm();
+  }, [dispatchResetForm]);
 
   const handleToggle = useCallback(() => {
     setIsOpen(prev => !prev);
@@ -126,6 +91,8 @@ const EmailTemplatesPage = () => {
         setIsSubmiting(true);
         await schema.validate(modifiedData[templateToEdit.id], { abortEarly: false });
 
+        strapi.lockAppWithOverlay();
+
         try {
           await request(getRequestURL('email-templates'), {
             method: 'PUT',
@@ -134,7 +101,7 @@ const EmailTemplatesPage = () => {
 
           strapi.notification.success(getTrad('notification.success.submit'));
 
-          dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
+          dispatchSubmitSucceeded();
 
           handleToggle();
         } catch (err) {
@@ -146,14 +113,12 @@ const EmailTemplatesPage = () => {
         errors = getYupInnerErrors(err);
       } finally {
         setIsSubmiting(false);
+        strapi.unlockApp();
       }
 
-      dispatch({
-        type: 'SET_ERRORS',
-        errors,
-      });
+      dispatchSetFormErrors(errors);
     },
-    [modifiedData, templateToEdit, handleToggle]
+    [dispatchSetFormErrors, dispatchSubmitSucceeded, modifiedData, templateToEdit, handleToggle]
   );
 
   const handleClick = useCallback(() => {

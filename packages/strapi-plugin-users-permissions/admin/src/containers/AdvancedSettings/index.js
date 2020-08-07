@@ -76,6 +76,7 @@ const AdvancedSettingsPage = () => {
           type: 'ON_SUBMIT',
         });
 
+        strapi.lockAppWithOverlay();
         await request(getRequestURL('advanced'), { method: 'PUT', body: modifiedData });
 
         dispatch({
@@ -90,6 +91,8 @@ const AdvancedSettingsPage = () => {
         console.error(err);
         strapi.notification.error('notification.error');
       }
+
+      strapi.unlockApp();
     },
     [modifiedData]
   );

@@ -59,9 +59,9 @@ export default strapi => {
             name: 'providers',
             to: `${strapi.settingsBaseURL}/${pluginId}/providers`,
             Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.readProviders}>
-                <ProvidersPage />
-              </CheckPagePermissions>
+              // <CheckPagePermissions permissions={pluginPermissions.readProviders}>
+              <ProvidersPage />
+              // {/* </CheckPagePermissions> */}
             ),
             permissions: pluginPermissions.readProviders,
           },
@@ -73,9 +73,9 @@ export default strapi => {
             name: 'email-templates',
             to: `${strapi.settingsBaseURL}/${pluginId}/email-templates`,
             Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
-                <EmailTemplatesPage />
-              </CheckPagePermissions>
+              // <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+              <EmailTemplatesPage />
+              // </CheckPagePermissions>
             ),
             permissions: pluginPermissions.readEmailTemplates,
           },

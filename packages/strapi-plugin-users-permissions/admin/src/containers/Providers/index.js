@@ -1,25 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header, List } from '@buffetjs/custom';
 import { Text } from '@buffetjs/core';
 import { Pencil } from '@buffetjs/icons';
-import {
-  SettingsPageTitle,
-  SizedInput,
-  useUserPermissions,
-  getYupInnerErrors,
-  request,
-} from 'strapi-helper-plugin';
+import { SettingsPageTitle, SizedInput, getYupInnerErrors, request } from 'strapi-helper-plugin';
 import { get, upperFirst } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
+import { useForm } from '../../hooks';
 import { getRequestURL, getTrad } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import ListRow from '../../components/ListRow';
 import ModalForm from '../../components/ModalForm';
 import createProvidersArray from './utils/createProvidersArray';
 import forms from './utils/forms';
-import reducer, { initialState } from './reducer';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -32,11 +26,19 @@ const ProvidersPage = () => {
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
   }, []);
+
   const {
-    isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useUserPermissions(updatePermissions);
-  const [{ formErrors, isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
+    dispatchResetForm,
+    dispatchSetFormErrors,
+    dispatchSubmitSucceeded,
+    formErrors,
+    handleChange,
+    isLoading,
+    isLoadingForPermissions,
+    modifiedData,
+  } = useForm('providers', updatePermissions);
+
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
     () => providers.filter(provider => provider.enabled).length,
@@ -69,35 +71,6 @@ const ProvidersPage = () => {
 
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        dispatch({
-          type: 'GET_DATA',
-        });
-
-        const data = await request(getRequestURL('providers'), { method: 'GET' });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-
-        console.log({ data });
-      } catch (err) {
-        dispatch({
-          type: 'GET_DATA_ERROR',
-        });
-        console.error(err);
-        strapi.notification.error('notification.error');
-      }
-    };
-
-    if (!isLoadingForPermissions) {
-      getData();
-    }
-  }, [isLoadingForPermissions]);
-
   const formToRender = useMemo(() => {
     return providerToEditName === 'email' ? forms.email : forms.providers;
   }, [providerToEditName]);
@@ -118,21 +91,11 @@ const ProvidersPage = () => {
     [handleToggle]
   );
 
-  const handleChange = useCallback(({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value,
-    });
-  }, []);
-
   const handleClosed = useCallback(() => {
     setProviderToEditName(null);
     setShowForm(false);
-    dispatch({
-      type: 'RESET_FORM',
-    });
-  }, []);
+    dispatchResetForm();
+  }, [dispatchResetForm]);
 
   const handleOpened = useCallback(() => {
     setShowForm(true);
@@ -148,6 +111,7 @@ const ProvidersPage = () => {
 
       try {
         await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
+        strapi.lockAppWithOverlay();
 
         try {
           await request(getRequestURL('providers'), {
@@ -157,7 +121,7 @@ const ProvidersPage = () => {
 
           strapi.notification.success(getTrad('notification.success.submit'));
 
-          dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
+          dispatchSubmitSucceeded();
 
           handleToggle();
         } catch (err) {
@@ -170,14 +134,19 @@ const ProvidersPage = () => {
         console.log(errors);
       }
 
-      dispatch({
-        type: 'SET_ERRORS',
-        errors,
-      });
+      dispatchSetFormErrors(errors);
 
       setIsSubmiting(false);
+      strapi.unlockApp();
     },
-    [formToRender, handleToggle, modifiedData, providerToEditName]
+    [
+      dispatchSetFormErrors,
+      dispatchSubmitSucceeded,
+      formToRender,
+      handleToggle,
+      modifiedData,
+      providerToEditName,
+    ]
   );
 
   return (
