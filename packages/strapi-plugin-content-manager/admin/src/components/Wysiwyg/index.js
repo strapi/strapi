@@ -327,6 +327,8 @@ class Wysiwyg extends React.Component {
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, text);
 
+    this.sendData(newEditorState);
+
     return this.setState(
       {
         editorState: newEditorState,
@@ -401,6 +403,9 @@ class Wysiwyg extends React.Component {
           });
 
     newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
+
+    // Update the parent reducer
+    this.sendData(newEditorState);
 
     return this.setState({
       editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
