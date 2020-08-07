@@ -1,7 +1,7 @@
 import React from 'react';
 import { Col } from 'reactstrap';
 import PropTypes from 'prop-types';
-import IntlInput from '../InTlInput';
+import IntlInput from '../IntlInput';
 
 const SizedInput = ({ size, ...rest }) => {
   return (
