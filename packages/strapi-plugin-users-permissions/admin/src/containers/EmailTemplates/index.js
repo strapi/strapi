@@ -3,7 +3,13 @@ import { useIntl } from 'react-intl';
 import { Header, List } from '@buffetjs/custom';
 import { Pencil } from '@buffetjs/icons';
 import { get } from 'lodash';
-import { SettingsPageTitle, SizedInput, request, getYupInnerErrors } from 'strapi-helper-plugin';
+import {
+  SettingsPageTitle,
+  SizedInput,
+  useGlobalContext,
+  request,
+  getYupInnerErrors,
+} from 'strapi-helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { useForm } from '../../hooks';
@@ -16,6 +22,8 @@ import schema from './utils/schema';
 
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
+  const { emitEvent } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
   const buttonSubmitRef = useRef(null);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.emailTemplates') });
   const updatePermissions = useMemo(() => {
@@ -94,10 +102,14 @@ const EmailTemplatesPage = () => {
         strapi.lockAppWithOverlay();
 
         try {
+          emitEventRef.current('willEditEmailTemplates');
+
           await request(getRequestURL('email-templates'), {
             method: 'PUT',
             body: { 'email-templates': modifiedData },
           });
+
+          emitEventRef.current('didEditEmailTemplates');
 
           strapi.notification.success(getTrad('notification.success.submit'));
 

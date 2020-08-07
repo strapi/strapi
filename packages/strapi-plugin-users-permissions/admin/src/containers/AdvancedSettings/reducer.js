@@ -15,6 +15,7 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'GET_DATA': {
         draftState.isLoading = true;
+        draftState.isConfirmButtonLoading = false;
         draftState.initialData = {};
         draftState.modifiedData = {};
 

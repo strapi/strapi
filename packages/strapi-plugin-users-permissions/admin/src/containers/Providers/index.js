@@ -3,7 +3,13 @@ import { useIntl } from 'react-intl';
 import { Header, List } from '@buffetjs/custom';
 import { Text } from '@buffetjs/core';
 import { Pencil } from '@buffetjs/icons';
-import { SettingsPageTitle, SizedInput, getYupInnerErrors, request } from 'strapi-helper-plugin';
+import {
+  SettingsPageTitle,
+  SizedInput,
+  useGlobalContext,
+  getYupInnerErrors,
+  request,
+} from 'strapi-helper-plugin';
 import { get, upperFirst } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -17,6 +23,8 @@ import forms from './utils/forms';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
+  const { emitEvent } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
   const buttonSubmitRef = useRef(null);
@@ -114,10 +122,14 @@ const ProvidersPage = () => {
         strapi.lockAppWithOverlay();
 
         try {
+          emitEventRef.current('willEditAuthenticationProvider');
+
           await request(getRequestURL('providers'), {
             method: 'PUT',
             body: { providers: modifiedData },
           });
+
+          emitEventRef.current('didEditAuthenticationProvider');
 
           strapi.notification.success(getTrad('notification.success.submit'));
 
