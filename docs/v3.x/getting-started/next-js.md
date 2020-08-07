@@ -290,11 +290,6 @@ const Home = ({ allCategories, error }) => {
     e.preventDefault();
   }
 
-  const handleInputChange = ({ target: { name, value } }) => {
-    setCategories(prev => ({
-      [name]: value
-    }));
-  };
 
   const renderCheckbox = category => {
     const isChecked = categories.includes(category.id);
@@ -397,12 +392,6 @@ const Home = ({ allCategories, error }) => {
       });
     e.preventDefault();
   }
-
-  const handleInputChange = ({ target: { name, value } }) => {
-    setCategories(prev => ({
-      [name]: value
-    }));
-  };
 
   const renderCheckbox = category => {
     const isChecked = categories.includes(category.id);
