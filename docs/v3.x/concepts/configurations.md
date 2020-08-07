@@ -280,6 +280,8 @@ module.exports = {
 
 When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
 
+You will need to install the plugin using the normal `npm install the-plugin-name` or any of the other supported package tools such as yarn then follow the below examples to load them.
+
 :::: tabs
 
 ::: tab Mongoose
@@ -310,7 +312,7 @@ Another example would be using the `bookshelf-uuid` plugin for MySQL, you can re
 'use strict';
 
 module.exports = (bookshelf, connection) => {
-  bookshelf.plugin(require('bookshelf-uuid'));
+  bookshelf.plugin('bookshelf-uuid');
 };
 ```
 
