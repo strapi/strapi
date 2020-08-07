@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header } from '@buffetjs/custom';
 import { isEqual } from 'lodash';
@@ -31,6 +31,9 @@ const AdvancedSettingsPage = () => {
     { initialData, isConfirmButtonLoading, isLoading, modifiedData, roles },
     dispatch,
   ] = useReducer(reducer, initialState);
+  const isMounted = useRef(true);
+  const abortController = new AbortController();
+  const { signal } = abortController;
 
   useEffect(() => {
     const getData = async () => {
@@ -39,24 +42,33 @@ const AdvancedSettingsPage = () => {
           type: 'GET_DATA',
         });
 
-        const data = await request(getRequestURL('advanced'), { method: 'GET' });
+        const data = await request(getRequestURL('advanced'), { method: 'GET', signal });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
         });
       } catch (err) {
-        dispatch({
-          type: 'GET_DATA_ERROR',
-        });
-        console.error(err);
-        strapi.notification.error('notification.error');
+        if (isMounted.current) {
+          dispatch({
+            type: 'GET_DATA_ERROR',
+          });
+          console.error(err);
+          strapi.notification.error('notification.error');
+        }
       }
     };
 
     if (!isLoadingForPermissions) {
       getData();
     }
+
+    return () => {
+      abortController.abort();
+      isMounted.current = false;
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingForPermissions]);
 
   const handleChange = useCallback(({ target }) => {
