@@ -147,7 +147,7 @@ Home.getInitialProps = async (ctx) => {
   }
 }
 
-export default Home
+export default Home;
 ```
 
 :::
@@ -157,30 +157,48 @@ export default Home
 `./pages/index.js`
 
 ```js
-import axios from 'axios'
-
 const Home = ({ restaurants, error }) => {
   if (error) {
-    return <div>An error occured: {error.message}</div>
+    return <div>An error occured: {error.message}</div>;
   }
   return (
     <ul>
-      {restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>)}
+      {restaurants.map((restaurant) => (
+        <li key={restaurant.id}>{restaurant.name}</li>
+      ))}
     </ul>
-  )
-}
-
+  );
+};
 Home.getInitialProps = async (ctx) => {
   try {
-    const res = await fetch('http://localhost:1337/restaurants')
-    const restaurants = await res.json()
-    return { restaurants: restaurants }
-  } catch (error) {
-    return { error: error }
-  }
-}
+    // Parses the JSON returned by a network request
+    const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+    // Checks if a network request came back fine, and throws an error if not
+    const checkStatus = (resp) => {
+      if (resp.status >= 200 && resp.status < 300) {
+        return resp;
+      }
+      return parseJSON(resp).then((resp) => {
+        throw resp;
+      });
+    };
 
-export default Home
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    const res = await fetch('http://localhost:1337/restaurants', {
+      method: 'GET',
+      headers,
+    })
+      .then(checkStatus)
+      .then(parseJSON);
+    return { restaurants: res };
+  } catch (error) {
+    return { error: error };
+  }
+};
+export default Home;
 ```
 
 :::
@@ -267,47 +285,53 @@ fetch('http://localhost:1337/restaurants', {
 `./pages/index.js`
 
 ```js
-import { useState } from 'react'
-import axios from 'axios'
+import { useState } from 'react';
+import axios from 'axios';
 
 const Home = ({ allCategories, error }) => {
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [categories, setCategories] = useState([])
+  const [modifiedData, setModifiedData] = useState({
+    name: '',
+    description: '',
+    categories: [],
+  });
 
-  const handleSubmit = (e) =>  {
-    axios.post('http://localhost:1337/restaurants', {
-      name: name,
-      description: description,
-      categories: categories
-    }).then(response => {
-        console.log(response);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  const handleChange = ({ target: { name, value } }) => {
+    setModifiedData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  }
+    try {
+      const response = await axios.post('http://localhost:1337/restaurants', modifiedData);
+      console.log(response);
+    } catch (err) {
+      console.log({ err });
+    }
+  };
 
-
-  const renderCheckbox = category => {
+  const renderCheckbox = (category) => {
+    const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
-    const handleChange = () => {
+    const handleCheckboxChange = () => {
       if (!categories.includes(category.id)) {
-        setCategories(categories.concat(category.id))
+        handleChange({ target: { name: 'categories', value: categories.concat(category.id) } });
       } else {
-        setCategories(categories.filter(v => v !== category.id))
+        handleChange({
+          target: { name: 'categories', value: categories.filter((v) => v !== category.id) },
+        });
       }
     };
-
     return (
       <div key={category.id}>
         <label htmlFor={category.id}>{category.name}</label>
         <input
           type="checkbox"
           checked={isChecked}
-          onChange={handleChange}
+          onChange={handleCheckboxChange}
           name="categories"
           id={category.id}
         />
@@ -316,45 +340,47 @@ const Home = ({ allCategories, error }) => {
   };
 
   if (error) {
-    return <div>An error occured: {error.message}</div>
+    return <div>An error occured: {error.message}</div>;
   }
   return (
     <div>
       <form onSubmit={handleSubmit}>
-      <h3>Restaurants</h3>
-      <br />
-         <label>
-           Name:
-           <input type="text" name="name" value={name} onChange={e => setName(e.target.value)} />
-         </label>
-         <label>
-           Description:
-           <input type="text" name="description" value={description} onChange={e => setDescription(e.target.value)} />
-         </label>
-         <div>
+        <h3>Restaurants</h3>
+        <br />
+        <label>
+          Name:
+          <input type="text" name="name" value={modifiedData.name} onChange={handleChange} />
+        </label>
+        <label>
+          Description:
+          <input
+            type="text"
+            name="description"
+            value={modifiedData.description}
+            onChange={handleChange}
+          />
+        </label>
+        <div>
           <br />
           <b>Select categories</b>
           <br />
-           {allCategories.map(renderCheckbox)}
-         </div>
-         <br />
-         <button type="submit">Submit</button>
-          </form>
+          {allCategories.map(renderCheckbox)}
+        </div>
+        <br />
+        <button type="submit">Submit</button>
+      </form>
     </div>
-  )
-}
-
+  );
+};
 Home.getInitialProps = async (ctx) => {
   try {
-    const res = await axios('http://localhost:1337/categories')
-    const categories = await res
-    return { allCategories: categories.data }
+    const res = await axios.get('http://localhost:1337/categories');
+    return { allCategories: res.data };
   } catch (error) {
-    return { error: error }
+    return { error: error };
   }
-}
-
-export default Home
+};
+export default Home;
 ```
 
 :::
@@ -364,105 +390,121 @@ export default Home
 `./pages/index.js`
 
 ```js
-import { useState } from 'react'
+import { useState } from 'react';
+
+// Parses the JSON returned by a network request
+const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+
+// Checks if a network request came back fine, and throws an error if not
+const checkStatus = (resp) => {
+  if (resp.status >= 200 && resp.status < 300) {
+    return resp;
+  }
+  return parseJSON(resp).then((resp) => {
+    throw resp;
+  });
+};
+
+const headers = {
+  'Content-Type': 'application/json',
+};
 
 const Home = ({ allCategories, error }) => {
-
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [categories, setCategories] = useState([])
-
-  const handleSubmit = (e) =>  {
-    fetch('http://localhost:1337/restaurants', {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: name,
-        description: description,
-        categories: categories
-      })
-    }).then(response => response.json())
-      .then(data => {
-        console.log(data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  const [modifiedData, setModifiedData] = useState({
+    name: '',
+    description: '',
+    categories: [],
+  });
+  const handleChange = ({ target: { name, value } }) => {
+    setModifiedData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  }
-
-  const renderCheckbox = category => {
+    try {
+      const response = await fetch('http://localhost:1337/restaurants', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(modifiedData),
+      })
+        .then(checkStatus)
+        .then(parseJSON);
+    } catch (err) {
+      console.log({ err });
+    }
+  };
+  const renderCheckbox = (category) => {
+    const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
-    const handleChange = () => {
+    const handleCheckboxChange = () => {
       if (!categories.includes(category.id)) {
-        setCategories(categories.concat(category.id))
+        handleChange({ target: { name: 'categories', value: categories.concat(category.id) } });
       } else {
-        setCategories(categories.filter(v => v !== category.id))
+        handleChange({
+          target: { name: 'categories', value: categories.filter((v) => v !== category.id) },
+        });
       }
     };
-
     return (
       <div key={category.id}>
         <label htmlFor={category.id}>{category.name}</label>
         <input
           type="checkbox"
           checked={isChecked}
-          onChange={handleChange}
+          onChange={handleCheckboxChange}
           name="categories"
           id={category.id}
         />
       </div>
     );
   };
-
   if (error) {
-    return <div>An error occured: {error.message}</div>
+    return <div>An error occured: {error.message}</div>;
   }
   return (
     <div>
       <form onSubmit={handleSubmit}>
-      <h3>Restaurants</h3>
-      <br />
-         <label>
-           Name:
-           <input type="text" name="name" value={name} onChange={e => setName(e.target.value)} />
-         </label>
-         <label>
-           Description:
-           <input type="text" name="description" value={description} onChange={e => setDescription(e.target.value)} />
-         </label>
-         <div>
+        <h3>Restaurants</h3>
+        <br />
+        <label>
+          Name:
+          <input type="text" name="name" value={modifiedData.name} onChange={handleChange} />
+        </label>
+        <label>
+          Description:
+          <input
+            type="text"
+            name="description"
+            value={modifiedData.description}
+            onChange={handleChange}
+          />
+        </label>
+        <div>
           <br />
           <b>Select categories</b>
           <br />
-           {allCategories.map(renderCheckbox)}
-         </div>
-         <br />
-         <button type="submit">Submit</button>
-          </form>
+          {allCategories.map(renderCheckbox)}
+        </div>
+        <br />
+        <button type="submit">Submit</button>
+      </form>
     </div>
-  )
-}
-
+  );
+};
 Home.getInitialProps = async (ctx) => {
   try {
-    const res = await fetch('http://localhost:1337/categories').then(response => response.json())
-      .then(data => {
-        return data
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    const categories = await res
-    return { allCategories: categories }
+    const res = await fetch('http://localhost:1337/categories', { method: 'GET', headers })
+      .then(checkStatus)
+      .then(parseJSON);
+    const categories = await res;
+    return { allCategories: categories };
   } catch (error) {
-    return { error: error }
+    return { error: error };
   }
-}
-
-export default Home
+};
+export default Home;
 ```
 
 :::
