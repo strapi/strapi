@@ -128,5 +128,9 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
-  "PopUpForm.Providers.redirectURL.label": "The redirect URL to add in your {provider} application configurations"
+  "PopUpForm.Providers.redirectURL.label": "The redirect URL to add in your {provider} application configurations",
+  "popUpWarning.button.cancel": "Cancel",
+  "popUpWarning.button.confirm": "Confirm",
+  "popUpWarning.title": "Please confirm",
+  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?"
 }

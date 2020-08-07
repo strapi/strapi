@@ -186,12 +186,12 @@ const AdvancedSettingsPage = () => {
       <PopUpWarning
         isOpen={showModalWarning}
         toggleModal={handleToggleModal}
-        // content={{
-        //   title: `${pluginId}.popUpWarning.title`,
-        //   message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
-        //   cancel: `${pluginId}.popUpWarning.button.cancel`,
-        //   confirm: `${pluginId}.popUpWarning.button.confirm`,
-        // }}
+        content={{
+          title: getTrad('popUpWarning.title'),
+          message: getTrad('popUpWarning.warning.cancel'),
+          cancel: getTrad('popUpWarning.button.cancel'),
+          confirm: getTrad('popUpWarning.button.confirm'),
+        }}
         popUpWarningType="danger"
         onConfirm={handleConfirmReset}
       />
