@@ -3,7 +3,13 @@ import { useIntl } from 'react-intl';
 import { Header, List } from '@buffetjs/custom';
 import { Text } from '@buffetjs/core';
 import { Pencil } from '@buffetjs/icons';
-import { SettingsPageTitle, SizedInput, useUserPermissions, request } from 'strapi-helper-plugin';
+import {
+  SettingsPageTitle,
+  SizedInput,
+  useUserPermissions,
+  getYupInnerErrors,
+  request,
+} from 'strapi-helper-plugin';
 import { get, upperFirst } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -92,14 +98,12 @@ const ProvidersPage = () => {
     }
   }, [isLoadingForPermissions]);
 
+  const formToRender = useMemo(() => {
+    return providerToEditName === 'email' ? forms.email : forms.providers;
+  }, [providerToEditName]);
+
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
-  }, []);
-
-  const handleSubmit = useCallback(async e => {
-    e.preventDefault();
-
-    setIsSubmiting(true);
   }, []);
 
   const handleToggle = useCallback(() => {
@@ -134,9 +138,47 @@ const ProvidersPage = () => {
     setShowForm(true);
   }, []);
 
-  const formToRender = useMemo(() => {
-    return providerToEditName === 'email' ? forms.email.form : forms.providers.form;
-  }, [providerToEditName]);
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault();
+      const { schema } = formToRender;
+      let errors = {};
+
+      setIsSubmiting(true);
+
+      try {
+        await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
+
+        try {
+          await request(getRequestURL('providers'), {
+            method: 'PUT',
+            body: { providers: modifiedData },
+          });
+
+          strapi.notification.success(getTrad('notification.success.submit'));
+
+          dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
+
+          handleToggle();
+        } catch (err) {
+          console.error(err);
+          strapi.notification.error('notification.error');
+        }
+      } catch (err) {
+        console.error(err);
+        errors = getYupInnerErrors(err);
+        console.log(errors);
+      }
+
+      dispatch({
+        type: 'SET_ERRORS',
+        errors,
+      });
+
+      setIsSubmiting(false);
+    },
+    [formToRender, handleToggle, modifiedData, providerToEditName]
+  );
 
   return (
     <>
@@ -192,7 +234,7 @@ const ProvidersPage = () => {
         {showForm && (
           <form onSubmit={handleSubmit}>
             <Row>
-              {formToRender.map(input => {
+              {formToRender.form.map(input => {
                 const label = input.label.params
                   ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
                   : input.label;

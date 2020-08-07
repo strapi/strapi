@@ -1,3 +1,6 @@
+import * as yup from 'yup';
+import { translatedErrors } from 'strapi-helper-plugin';
+
 import { getTrad } from '../../../utils';
 
 const forms = {
@@ -15,6 +18,9 @@ const forms = {
         },
       },
     ],
+    schema: yup.object().shape({
+      enabled: yup.bool().required(translatedErrors.required),
+    }),
   },
   providers: {
     form: [
@@ -78,6 +84,24 @@ const forms = {
         disabled: true,
       },
     ],
+    schema: yup.object().shape({
+      enabled: yup.bool().required(translatedErrors.required),
+      key: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+      secret: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+      callback: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+    }),
   },
 };
 
