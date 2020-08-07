@@ -402,17 +402,30 @@ fetch('http://localhost:1337/restaurants', {
   </div>
 
   <form id="form" v-on:submit="handleSubmit" v-else>
+    <h3>Restaurants</h3>
+    <br>
+
     <label for="name">Name</label>
     <input id="name" v-model="name" type="text" name="name">
 
     <label for="description">Description</label>
     <input id="description" v-model="description" type="text" name="description">
-
-    <select v-if="this.allCategories.length > 0" id="categories" v-model="categories" name="categories">
-      <option v-for="category in allCategories" :key="category.id" :value="category.id">
-        {{ category.name }}
-      </option>
-    </select>
+    <div>
+      <br />
+      <b>Select categories</b>
+      <br>
+      <div v-for="category in allCategories" :key="category.id">
+        <label>{{ category.name }}</label>
+        <input
+          type="checkbox"
+          :value="category.id"
+          v-model="categories"
+          name="categories"
+          :id="category.id"
+        />
+      </div>
+    </div>
+    <br>
 
     <input type="submit" value="Submit">
   </form>
@@ -428,7 +441,7 @@ export default {
       allCategories: [],
       name: '',
       description: '',
-      categories: '',
+      categories: [],
       error: null
     }
   },
@@ -472,17 +485,30 @@ export default {
   </div>
 
   <form id="form" v-on:submit="handleSubmit" v-else>
+    <h3>Restaurants</h3>
+    <br>
+
     <label for="name">Name</label>
     <input id="name" v-model="name" type="text" name="name">
 
     <label for="description">Description</label>
     <input id="description" v-model="description" type="text" name="description">
-
-    <select v-if="this.allCategories.length > 0" id="categories" v-model="categories" name="categories">
-      <option v-for="category in allCategories" :key="category.id" :value="category.id">
-        {{ category.name }}
-      </option>
-    </select>
+    <div>
+      <br />
+      <b>Select categories</b>
+      <br>
+      <div v-for="category in allCategories" :key="category.id">
+        <label>{{ category.name }}</label>
+        <input
+          type="checkbox"
+          :value="category.id"
+          v-model="categories"
+          name="categories"
+          :id="category.id"
+        />
+      </div>
+    </div>
+    <br>
 
     <input type="submit" value="Submit">
   </form>
@@ -500,7 +526,7 @@ export default {
       allCategories: [],
       name: '',
       description: '',
-      categories: '',
+      categories: [],
       error: null
     }
   },

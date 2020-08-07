@@ -274,7 +274,7 @@ const Home = ({ allCategories, error }) => {
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [categories, setCategories] = useState('')
+  const [categories, setCategories] = useState([])
 
   const handleSubmit = (e) =>  {
     axios.post('http://localhost:1337/restaurants', {
@@ -290,12 +290,44 @@ const Home = ({ allCategories, error }) => {
     e.preventDefault();
   }
 
+  const handleInputChange = ({ target: { name, value } }) => {
+    setCategories(prev => ({
+      [name]: value
+    }));
+  };
+
+  const renderCheckbox = category => {
+    const isChecked = categories.includes(category.id);
+    const handleChange = () => {
+      if (!categories.includes(category.id)) {
+        setCategories(categories.concat(category.id))
+      } else {
+        setCategories(categories.filter(v => v !== category.id))
+      }
+    };
+
+    return (
+      <div key={category.id}>
+        <label htmlFor={category.id}>{category.name}</label>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={handleChange}
+          name="categories"
+          id={category.id}
+        />
+      </div>
+    );
+  };
+
   if (error) {
     return <div>An error occured: {error.message}</div>
   }
   return (
     <div>
       <form onSubmit={handleSubmit}>
+      <h3>Restaurants</h3>
+      <br />
          <label>
            Name:
            <input type="text" name="name" value={name} onChange={e => setName(e.target.value)} />
@@ -304,9 +336,13 @@ const Home = ({ allCategories, error }) => {
            Description:
            <input type="text" name="description" value={description} onChange={e => setDescription(e.target.value)} />
          </label>
-         <select name="categories" value={categories} onChange={e => setCategories(e.target.value)}>
-          { allCategories.map(value => <option key={value.id} value={value.id}>{value.name}</option>) }
-         </select>
+         <div>
+          <br />
+          <b>Select categories</b>
+          <br />
+           {allCategories.map(renderCheckbox)}
+         </div>
+         <br />
          <button type="submit">Submit</button>
           </form>
     </div>
@@ -339,7 +375,7 @@ const Home = ({ allCategories, error }) => {
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [categories, setCategories] = useState('')
+  const [categories, setCategories] = useState([])
 
   const handleSubmit = (e) =>  {
     fetch('http://localhost:1337/restaurants', {
@@ -362,12 +398,44 @@ const Home = ({ allCategories, error }) => {
     e.preventDefault();
   }
 
+  const handleInputChange = ({ target: { name, value } }) => {
+    setCategories(prev => ({
+      [name]: value
+    }));
+  };
+
+  const renderCheckbox = category => {
+    const isChecked = categories.includes(category.id);
+    const handleChange = () => {
+      if (!categories.includes(category.id)) {
+        setCategories(categories.concat(category.id))
+      } else {
+        setCategories(categories.filter(v => v !== category.id))
+      }
+    };
+
+    return (
+      <div key={category.id}>
+        <label htmlFor={category.id}>{category.name}</label>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={handleChange}
+          name="categories"
+          id={category.id}
+        />
+      </div>
+    );
+  };
+
   if (error) {
     return <div>An error occured: {error.message}</div>
   }
   return (
     <div>
       <form onSubmit={handleSubmit}>
+      <h3>Restaurants</h3>
+      <br />
          <label>
            Name:
            <input type="text" name="name" value={name} onChange={e => setName(e.target.value)} />
@@ -376,9 +444,13 @@ const Home = ({ allCategories, error }) => {
            Description:
            <input type="text" name="description" value={description} onChange={e => setDescription(e.target.value)} />
          </label>
-         <select name="categories" value={categories} onChange={e => setCategories(e.target.value)}>
-          { allCategories.map(value => <option key={value.id} value={value.id}>{value.name}</option>) }
-         </select>
+         <div>
+          <br />
+          <b>Select categories</b>
+          <br />
+           {allCategories.map(renderCheckbox)}
+         </div>
+         <br />
          <button type="submit">Submit</button>
           </form>
     </div>
@@ -387,9 +459,15 @@ const Home = ({ allCategories, error }) => {
 
 Home.getInitialProps = async (ctx) => {
   try {
-    const res = await axios('http://localhost:1337/categories')
+    const res = await fetch('http://localhost:1337/categories').then(response => response.json())
+      .then(data => {
+        return data
+      })
+      .catch(error => {
+        console.log(error);
+      });
     const categories = await res
-    return { allCategories: categories.data }
+    return { allCategories: categories }
   } catch (error) {
     return { error: error }
   }

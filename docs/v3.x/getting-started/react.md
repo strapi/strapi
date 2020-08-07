@@ -309,21 +309,21 @@ fetch('http://localhost:1337/restaurants', {
 `./src/App.js`
 
 ```js
-import React from 'react';
-import axios from 'axios'
+import React from "react";
+import axios from "axios"
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      description: '',
-      categories: '',
+      modifiedData: {
+        name: "",
+        description: "",
+        categories: []
+      },
       allCategories: [],
       error: null
     };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   componentDidMount() {
@@ -337,48 +337,101 @@ class App extends React.Component {
     })
   }
 
-  handleInputChange(event) {
-     const target = event.target;
-     const value = target.value;
-     const name = target.name;
+  handleInputChange = ({ target: { name, value } }) => {
+    this.setState(prev => ({
+      ...prev,
+      modifiedData: {
+        ...prev.modifiedData,
+        [name]: value
+      }
+    }));
+  };
 
-     this.setState({
-       [name]: value
-     });
-   }
-
-  handleSubmit = (e) =>  {
+  handleSubmit = e => {
     e.preventDefault();
 
-    axios.post('http://localhost:1337/restaurants', this.state)
-      .then(response => {
-        console.log(response);
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
-  }
+    axios.post('http://localhost:1337/restaurants', {
+      name: this.state.modifiedData.name,
+      description: this.state.modifiedData.description,
+      categories: this.state.modifiedData.categories
+    })
+     .then(response => {
+       console.log(response);
+     })
+     .catch(error => {
+       this.setState({ error });
+     });
+  };
+
+  renderCheckbox = category => {
+    const {
+      modifiedData: { categories }
+    } = this.state;
+    const isChecked = categories.includes(category.id);
+    const handleChange = () => {
+      if (!categories.includes(category.id)) {
+        this.handleInputChange({
+          target: { name: "categories", value: categories.concat(category.id) }
+        });
+      } else {
+        this.handleInputChange({
+          target: {
+            name: "categories",
+            value: categories.filter(v => v !== category.id)
+          }
+        });
+      }
+    };
+
+    return (
+      <div key={category.id}>
+        <label htmlFor={category.id}>{category.name}</label>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={handleChange}
+          name="categories"
+          id={category.id}
+        />
+      </div>
+    );
+  };
 
   render() {
-    const { error, categories, allCategories } = this.state
+    const { error, allCategories, modifiedData } = this.state;
     if (error) {
-       return <div>An error occured: {error.message}</div>
+      return <div>An error occured: {error.message}</div>;
     }
     return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
-           <label>
-             Name:
-             <input type="text" name="name" onChange={this.handleInputChange} />
-           </label>
-           <label>
-             Description:
-             <input type="text" name="description" onChange={this.handleInputChange} />
-           </label>
-           <select name="categories" value={categories} onChange={this.handleInputChange}>
-             { allCategories.map(value => <option key={value.id} value={value.id}>{value.name}</option>) }
-            </select>
-           <button type="submit">Submit</button>
+          <h3>Restaurants</h3>
+          <br />
+          <label>
+            Name:
+            <input
+              type="text"
+              name="name"
+              onChange={this.handleInputChange}
+              value={modifiedData.name}
+            />
+          </label>
+          <label>
+            Description:
+            <input
+              type="text"
+              name="description"
+              onChange={this.handleInputChange}
+              value={modifiedData.description}
+            />
+          </label>
+          <div>
+            <br />
+            <b>Select categories</b>
+            {allCategories.map(this.renderCheckbox)}
+          </div>
+          <br />
+          <button type="submit">Submit</button>
         </form>
       </div>
     );
@@ -395,20 +448,20 @@ export default App;
 `./src/App.js`
 
 ```js
-import React from 'react';
+import React from "react";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      description: '',
-      categories: '',
+      modifiedData: {
+        name: "",
+        description: "",
+        categories: []
+      },
       allCategories: [],
       error: null
     };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   componentDidMount() {
@@ -426,17 +479,17 @@ class App extends React.Component {
       });
   }
 
-  handleInputChange(event) {
-     const target = event.target;
-     const value = target.value;
-     const name = target.name;
+  handleInputChange = ({ target: { name, value } }) => {
+    this.setState(prev => ({
+      ...prev,
+      modifiedData: {
+        ...prev.modifiedData,
+        [name]: value
+      }
+    }));
+  };
 
-     this.setState({
-       [name]: value
-     });
-   }
-
-  handleSubmit = (e) =>  {
+  handleSubmit = e => {
     e.preventDefault();
 
     fetch('http://localhost:1337/restaurants', {
@@ -444,7 +497,11 @@ class App extends React.Component {
       headers: {
          'Content-Type': 'application/json'
       },
-      body: JSON.stringify(this.state)
+      body: JSON.stringify({
+        name: this.state.modifiedData.name,
+        description: this.state.modifiedData.description,
+        categories: this.state.modifiedData.categories
+      })
     })
     .then(response => response.json())
     .then(data => {
@@ -453,28 +510,77 @@ class App extends React.Component {
     .catch(error => {
       this.setState({ error });
     });
-  }
+  };
+
+  renderCheckbox = category => {
+    const {
+      modifiedData: { categories }
+    } = this.state;
+    const isChecked = categories.includes(category.id);
+    const handleChange = () => {
+      if (!categories.includes(category.id)) {
+        this.handleInputChange({
+          target: { name: "categories", value: categories.concat(category.id) }
+        });
+      } else {
+        this.handleInputChange({
+          target: {
+            name: "categories",
+            value: categories.filter(v => v !== category.id)
+          }
+        });
+      }
+    };
+
+    return (
+      <div key={category.id}>
+        <label htmlFor={category.id}>{category.name}</label>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={handleChange}
+          name="categories"
+          id={category.id}
+        />
+      </div>
+    );
+  };
 
   render() {
-    const { error, categories, allCategories } = this.state
+    const { error, allCategories, modifiedData } = this.state;
     if (error) {
-       return <div>An error occured: {error.message}</div>
+      return <div>An error occured: {error.message}</div>;
     }
     return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
-           <label>
-             Name:
-             <input type="text" name="name" onChange={this.handleInputChange} />
-           </label>
-           <label>
-             Description:
-             <input type="text" name="description" onChange={this.handleInputChange} />
-           </label>
-           <select name="categories" value={categories} onChange={this.handleInputChange}>
-             { allCategories.map(value => <option key={value.id} value={value.id}>{value.name}</option>) }
-            </select>
-           <button type="submit">Submit</button>
+          <h3>Restaurants</h3>
+          <br />
+          <label>
+            Name:
+            <input
+              type="text"
+              name="name"
+              onChange={this.handleInputChange}
+              value={modifiedData.name}
+            />
+          </label>
+          <label>
+            Description:
+            <input
+              type="text"
+              name="description"
+              onChange={this.handleInputChange}
+              value={modifiedData.description}
+            />
+          </label>
+          <div>
+            <br />
+            <b>Select categories</b>
+            {allCategories.map(this.renderCheckbox)}
+          </div>
+          <br />
+          <button type="submit">Submit</button>
         </form>
       </div>
     );
