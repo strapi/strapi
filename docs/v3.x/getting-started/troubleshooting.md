@@ -105,3 +105,28 @@ Due to these two issues, it is recommended you use a proxy application such as N
 ### Is X feature available yet
 
 You can see the [ProductBoard roadmap](https://portal.productboard.com/strapi) to see which feature requests are currently being worked on and which have not been started yet.
+
+### How do I success on create-strapi-app if it shows `gyp: No Xcode or CLT version detected!`
+
+The issue can be consistant by two cases: you may not have installed the Xcode on your host, or the OS version of the host is macOS Catalina and above (macOS 10.15). Solution for each case is simple: install, or re-install the Xcode.
+
+1. **Check whether you have installed (optional)**
+
+    - Open up the terminal and type the following command: `xcode-select --print-path`
+
+    - If it prints an error as xcode-select is not found, then your host does not have an installation of Xcode. Otherwise, you may see the following directory printed out: `/Library/Developer/CommandLineTools`
+
+2. **Remove previous installation of Xcode**
+    > __Skip if you have did not found an Xcode installation from step 1.__
+
+    - Continue on terminal, type the following command: `sudo rm -r -f /Library/Developer/CommandLineTools`
+    
+    - This will ensure the previous installation to be deleted.
+
+3. **Install the Xcode**
+
+    - As a last step, install the Xcode with command: `xcode-select --install`
+    
+    - A popup will show up to install the Xcode. Proceed as we need that installation.
+
+If you followed along 3 steps above, your installation can now be successful. The source of issue for this trouble is that the 
