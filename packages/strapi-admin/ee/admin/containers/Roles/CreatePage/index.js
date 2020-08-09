@@ -24,7 +24,7 @@ const CreatePage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { goBack } = useHistory();
   const permissionsRef = useRef();
-  const { settingsBaseURL } = useGlobalContext();
+  const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
@@ -56,6 +56,12 @@ const CreatePage = () => {
     strapi.lockAppWithOverlay();
     setIsSubmiting(true);
 
+    if (id) {
+      emitEvent('willDuplicateRole');
+    } else {
+      emitEvent('willCreateNewRole');
+    }
+
     Promise.resolve(
       request('/admin/roles', {
         method: 'POST',
@@ -64,6 +70,12 @@ const CreatePage = () => {
     )
       .then(res => {
         const permissionsToSend = permissionsRef.current.getPermissions();
+
+        if (id) {
+          emitEvent('didDuplicateRole');
+        } else {
+          emitEvent('didCreateNewRole');
+        }
 
         if (res.data.id && !isEmpty(permissionsToSend)) {
           return request(`/admin/roles/${res.data.id}/permissions`, {

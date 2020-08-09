@@ -218,7 +218,7 @@
   "app.components.UpgradePlanModal.text-ee": "Entreprise Edition",
   "app.components.UpgradePlanModal.text-power": "Unlock the full power",
   "app.components.UpgradePlanModal.text-strapi": "of Strapi by upgrading your plan to the",
-  "app.components.Users.MagicLink.connect": "Send this link to the user for him to connect.",
+  "app.components.Users.MagicLink.connect": "Send this link to the user for them to connect.",
   "app.components.Users.ModalCreateBody.block-title.details": "Details",
   "app.components.Users.ModalCreateBody.block-title.roles": "User's roles",
   "app.components.Users.SortPicker.button-label": "Sort by",

@@ -18,7 +18,7 @@ const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const [isOpen, setIsOpen] = useState(false);
-  const { settingsBaseURL } = useGlobalContext();
+  const { emitEvent, settingsBaseURL } = useGlobalContext();
   const { roles, isLoading } = useRolesList();
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const {
@@ -51,13 +51,22 @@ const RoleListPage = () => {
     setIsOpen(prev => !prev);
   }, []);
 
+  const handleToggleModalForCreatingRole = useCallback(e => {
+    e.preventDefault();
+    e.stopPropagation();
+    emitEvent('didShowRBACUpgradeModal');
+
+    setIsOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const headerActions = [
     {
       label: formatMessage({
         id: 'Settings.roles.list.button.add',
         defaultMessage: 'Add new role',
       }),
-      onClick: handleToggle,
+      onClick: handleToggleModalForCreatingRole,
       color: 'primary',
       type: 'button',
       icon: true,
@@ -123,7 +132,7 @@ const RoleListPage = () => {
         {!resultsCount && !isLoading && <EmptyRole />}
         <ListButton>
           <Button
-            onClick={handleToggle}
+            onClick={handleToggleModalForCreatingRole}
             icon={<Plus fill="#007eff" width="11px" height="11px" />}
             label={formatMessage({
               id: 'Settings.roles.list.button.add',
