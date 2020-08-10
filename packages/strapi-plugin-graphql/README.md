@@ -1,6 +1,6 @@
 # Strapi GraphQL
 
 This plugin will add GraphQL functionality to your app.
-By default it will provide you with all the default CRUD methods.
+By default it will provide you with most CRUD methods exposed in Strapi REST API.
 
 To learn more about GraphQL in Strapi [visit documentation](https://strapi.io/documentation/v3.x/plugins/graphql.html)
