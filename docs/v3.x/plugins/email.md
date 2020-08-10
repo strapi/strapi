@@ -138,7 +138,7 @@ Default template
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
     return {
-      send: async (options) => {},
+      send: async options => {},
     };
   },
 };
