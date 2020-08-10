@@ -21,7 +21,7 @@ services:
   strapi:
     image: strapi/strapi
     volumes:
-      - ./:/srv/app
+      - ./app:/srv/app
     ports:
       - '1337:1337'
 ```
@@ -42,22 +42,21 @@ services:
       DATABASE_PORT: 5432
       DATABASE_USERNAME: strapi
       DATABASE_PASSWORD: strapi
-    links:
-      - postgres:postgres
     volumes:
       - ./app:/srv/app
     ports:
       - '1337:1337'
+    depends_on:
+      - postgres
 
   postgres:
     image: postgres
     environment:
+      POSTGRES_DB: strapi
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
     volumes:
       - ./data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
 ```
 
 :::
@@ -76,22 +75,21 @@ services:
       DATABASE_PORT: 27017
       DATABASE_USERNAME: strapi
       DATABASE_PASSWORD: strapi
-    links:
-      - mongo:mongo
     volumes:
       - ./app:/srv/app
     ports:
       - '1337:1337'
+    depends_on:
+      - mongo
 
   mongo:
     image: mongo
     environment:
+      MONGO_INITDB_DATABASE: strapi
       MONGO_INITDB_ROOT_USERNAME: strapi
       MONGO_INITDB_ROOT_PASSWORD: strapi
     volumes:
-      - ./data/db:/data/db
-    ports:
-      - '27017:27017'
+      - ./data:/data/db
 ```
 
 :::
