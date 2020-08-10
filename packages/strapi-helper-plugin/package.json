@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@buffetjs/core": "3.2.1",
+    "@buffetjs/custom": "3.2.1",
     "@buffetjs/hooks": "3.2.1",
     "@buffetjs/icons": "3.2.1",
     "@buffetjs/styles": "3.2.1",
@@ -63,6 +64,7 @@
     "moment": "^2.16.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-helmet": "^6.0.0",
     "react-intl": "4.5.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",

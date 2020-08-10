@@ -20,11 +20,14 @@ const RoleListPage = () => {
     allowedActions: { canUpdate, canDelete },
   } = useUserPermissions(permissions.accessRoles);
 
-  const handleGoTo = useCallback(id => {
-    if (canUpdate) {
-      push(`/settings/${pluginId}/roles/${id}`);
-    }
-  }, []);
+  const handleGoTo = useCallback(
+    id => {
+      if (canUpdate) {
+        push(`/settings/${pluginId}/roles/${id}`);
+      }
+    },
+    [canUpdate, push]
+  );
 
   const handleToggle = useCallback(e => {
     e.preventDefault();
