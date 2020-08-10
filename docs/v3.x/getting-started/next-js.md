@@ -182,11 +182,9 @@ Home.getInitialProps = async (ctx) => {
         throw resp;
       });
     };
-
     const headers = {
       'Content-Type': 'application/json',
     };
-
     const res = await fetch('http://localhost:1337/restaurants', {
       method: 'GET',
       headers,
@@ -289,30 +287,27 @@ import { useState } from 'react';
 import axios from 'axios';
 
 const Home = ({ allCategories, error }) => {
-
   const [modifiedData, setModifiedData] = useState({
     name: '',
     description: '',
     categories: [],
   });
-
   const handleChange = ({ target: { name, value } }) => {
     setModifiedData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:1337/restaurants', modifiedData);
       console.log(response);
     } catch (err) {
+      // TODO handle errors
       console.log({ err });
     }
   };
-
   const renderCheckbox = (category) => {
     const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
@@ -338,7 +333,6 @@ const Home = ({ allCategories, error }) => {
       </div>
     );
   };
-
   if (error) {
     return <div>An error occured: {error.message}</div>;
   }
@@ -391,10 +385,8 @@ export default Home;
 
 ```js
 import { useState } from 'react';
-
 // Parses the JSON returned by a network request
 const parseJSON = (resp) => (resp.json ? resp.json() : resp);
-
 // Checks if a network request came back fine, and throws an error if not
 const checkStatus = (resp) => {
   if (resp.status >= 200 && resp.status < 300) {
@@ -404,11 +396,9 @@ const checkStatus = (resp) => {
     throw resp;
   });
 };
-
 const headers = {
   'Content-Type': 'application/json',
 };
-
 const Home = ({ allCategories, error }) => {
   const [modifiedData, setModifiedData] = useState({
     name: '',
@@ -432,6 +422,7 @@ const Home = ({ allCategories, error }) => {
         .then(checkStatus)
         .then(parseJSON);
     } catch (err) {
+      // TODO handle errors
       console.log({ err });
     }
   };
@@ -495,10 +486,9 @@ const Home = ({ allCategories, error }) => {
 };
 Home.getInitialProps = async (ctx) => {
   try {
-    const res = await fetch('http://localhost:1337/categories', { method: 'GET', headers })
+    const categories = await fetch('http://localhost:1337/categories', { method: 'GET', headers })
       .then(checkStatus)
       .then(parseJSON);
-    const categories = await res;
     return { allCategories: categories };
   } catch (error) {
     return { error: error };
