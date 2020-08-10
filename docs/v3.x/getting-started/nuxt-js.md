@@ -406,10 +406,10 @@ fetch('http://localhost:1337/restaurants', {
     <br>
 
     <label for="name">Name</label>
-    <input id="name" v-model="name" type="text" name="name">
+    <input id="name" v-model="modifiedData.name" type="text" name="name">
 
     <label for="description">Description</label>
-    <input id="description" v-model="description" type="text" name="description">
+    <input id="description" v-model="modifiedData.description" type="text" name="description">
     <div>
       <br />
       <b>Select categories</b>
@@ -419,7 +419,7 @@ fetch('http://localhost:1337/restaurants', {
         <input
           type="checkbox"
           :value="category.id"
-          v-model="categories"
+          v-model="modifiedData.categories"
           name="categories"
           :id="category.id"
         />
@@ -439,9 +439,11 @@ export default {
   data() {
     return {
       allCategories: [],
-      name: '',
-      description: '',
-      categories: [],
+      modifiedData: {
+        name: '',
+        description: '',
+        categories: [],
+      },
       error: null
     }
   },
@@ -456,9 +458,9 @@ export default {
     handleSubmit: async function(e) {
       try {
         await this.$strapi.create('restaurants', {
-          name: this.name,
-          description: this.description,
-          categories: this.categories
+          name: this.modifiedData.name,
+          description: this.modifiedData.description,
+          categories: this.modifiedData.categories
         })
       } catch (error) {
         this.error = error
@@ -484,15 +486,16 @@ export default {
     {{ error }}
   </div>
 
+
   <form id="form" v-on:submit="handleSubmit" v-else>
     <h3>Restaurants</h3>
     <br>
 
     <label for="name">Name</label>
-    <input id="name" v-model="name" type="text" name="name">
+    <input id="name" v-model="modifiedData.name" type="text" name="name">
 
     <label for="description">Description</label>
-    <input id="description" v-model="description" type="text" name="description">
+    <input id="description" v-model="modifiedData.description" type="text" name="description">
     <div>
       <br />
       <b>Select categories</b>
@@ -502,7 +505,7 @@ export default {
         <input
           type="checkbox"
           :value="category.id"
-          v-model="categories"
+          v-model="modifiedData.categories"
           name="categories"
           :id="category.id"
         />
@@ -524,9 +527,11 @@ export default {
   data() {
     return {
       allCategories: [],
-      name: '',
-      description: '',
-      categories: [],
+      modifiedData: {
+        name: '',
+        description: '',
+        categories: [],
+      },
       error: null
     }
   },
@@ -542,9 +547,9 @@ export default {
   methods: {
     handleSubmit: function(e) {
       axios.post('http://localhost:1337/restaurants', {
-          name: this.name,
-          description: this.description,
-          categories: this.categories
+          name: this.modifiedData.name,
+          description: this.modifiedData.description,
+          categories: this.modifiedData.categories
         })
         .then(response => {
           console.log(response);
@@ -575,16 +580,26 @@ export default {
 
   <form id="form" v-on:submit="handleSubmit" v-else>
     <label for="name">Name</label>
-    <input id="name" v-model="name" type="text" name="name">
+    <input id="name" v-model="modifiedData.name" type="text" name="name">
 
     <label for="description">Description</label>
-    <input id="description" v-model="description" type="text" name="description">
+    <input id="description" v-model="modifiedData.description" type="text" name="description">
 
-    <select v-if="this.allCategories.length > 0" id="categories" v-model="categories" name="categories">
-      <option v-for="category in allCategories" :key="category.id" :value="category.id">
-        {{ category.name }}
-      </option>
-    </select>
+    <div>
+      <br />
+      <b>Select categories</b>
+      <br>
+      <div v-for="category in allCategories" :key="category.id">
+        <label>{{ category.name }}</label>
+        <input
+          type="checkbox"
+          :value="category.id"
+          v-model="modifiedData.categories"
+          name="categories"
+          :id="category.id"
+        />
+      </div>
+    </div>
 
     <input type="submit" value="Submit">
   </form>
@@ -598,9 +613,11 @@ export default {
   data() {
     return {
       allCategories: [],
-      name: '',
-      description: '',
-      categories: '',
+      modifiedData: {
+        name: '',
+        description: '',
+        categories: [],
+      },
       error: null
     }
   },
@@ -625,9 +642,9 @@ export default {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            name: this.name,
-            description: this.description,
-            categories: this.categories
+            name: this.modifiedData.name,
+            description: this.modifiedData.description,
+            categories: this.modifiedData.categories
           })
         })
         .then(response => response.json())
