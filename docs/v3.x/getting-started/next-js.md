@@ -219,7 +219,10 @@ Be sure that you activated the `create` permission for the `restaurant` Collecti
 ```js
 axios.post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
-    description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious'
+    description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
+    categories: [
+      id: 3
+    ]
   })
   .then(response => {
     console.log(response);
@@ -243,7 +246,10 @@ fetch('http://localhost:1337/restaurants', {
    },
    body: JSON.stringify({
      name: 'Dolemon Sushi',
-     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious'
+     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
+     categories: [
+       id: 3
+     ]
    })
  }).then(response => {
    return response.json();
@@ -267,8 +273,14 @@ fetch('http://localhost:1337/restaurants', {
     "updated_by": null,
     "created_at": "2020-08-04T09:57:11.669Z",
     "updated_at": "2020-08-04T09:57:11.669Z",
-    "categories": [
-    ]
+    "categories": [{
+      "id": 3,
+      "name": "Japanese",
+      "created_by": 1,
+      "updated_by": 1,
+      "created_at": "2020-07-31T11:36:23.164Z",
+      "updated_at": "2020-07-31T11:36:23.172Z"
+    }]
 }
 ```
 
