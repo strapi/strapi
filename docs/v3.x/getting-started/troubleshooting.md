@@ -43,14 +43,14 @@ Strapi does not currently provide any tools for migrating or deploying your data
 
 With the release of the Strapi beta version a fundamental change occurred in that the "end-users" (REST and GraphQL users) were split from the Administrators (admin panel users) in such a way that normal users can not be given access to the admin panel. If you would like to read more on why this change was done, you can read the Strapi [blog post](https://strapi.io/blog/why-we-split-the-management-of-the-admin-users-and-end-users) about it.
 
-In the future Strapi does plan to implement a solution where Administrators could use the REST and GraphQL routes like a standard 3rd party provider, but there is no intention of allowing for the reverse. Instead within Q1/Q2 2020 we plan to offer a plugin called [Administrators Roles & Permissions](https://portal.productboard.com/strapi/1-public-roadmap/c/8-administrators-roles-permissions) that will allow you to control access to Administrators within the admin panel. As of right now there is no work around to currently do this, anyone with access to the admin panel will have full access to all parts of it.
+Strapi has released the new Admin & Permissions (RBAC - Role based access control) that does allow for some degree of control over what users can access within the admin panel and includes some field level permissions. You can now also give roles specific permissions for things like content-types, single-types, plugins, and settings.
 
 When this new plugin release, there will be two versions:
 
 - Community Edition
 - Enterprise Edition
 
-By default, the Community Edition will include 3 administrators and 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited number of administrators and roles.
+By default, the Community Edition will include 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited number of roles. There will be certain other field level permission limitations based on the edition and we will be building a detailed guide as to what is included within the "Basic" vs "Advanced" RBAC features. To learn more about what is included as well as pricing please see our [pricing page](https://strapi.io/pricing).
 
 ### Relations aren't maintaining their sort order
 
