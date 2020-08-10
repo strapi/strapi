@@ -77,9 +77,9 @@ module.exports = {
 
   async replaceFile(ctx) {
     const {
-      id,
+      query: { id },
       request: { body, files: { files } = {} },
-    } = ctx.query;
+    } = ctx;
 
     // cannot replace with more than one file
     if (Array.isArray(files)) {
@@ -99,7 +99,7 @@ module.exports = {
   async uploadFiles(ctx) {
     const {
       request: { body, files: { files } = {} },
-    } = ctx.query;
+    } = ctx;
 
     ctx.body = await strapi.plugins.upload.services.upload.upload({
       data: await validateUploadBody(body),

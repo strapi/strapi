@@ -25,9 +25,12 @@ module.exports = strapi =>
     let controller;
 
     if (plugin) {
-      controller = strapi.plugins[plugin].controllers[controllerKey];
+      controller =
+        plugin === 'admin'
+          ? strapi.admin.controllers[controllerKey]
+          : strapi.plugins[plugin].controllers[controllerKey];
     } else {
-      controller = strapi.controllers[controllerKey] || strapi.admin.controllers[controllerKey];
+      controller = strapi.controllers[controllerKey];
     }
 
     if (!_.isFunction(controller[actionName])) {

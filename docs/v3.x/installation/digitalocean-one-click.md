@@ -10,7 +10,7 @@ You can find the image generation [source code](https://github.com/strapi/one-cl
 
 ### Step 1: Create a DigitalOcean account
 
-If you don't have a DigitalOcean account you will need to create one, you can use [this referral link](https://m.do.co/c/30986c1ff595) to get \$100 of free credits!
+If you don't have a DigitalOcean account you will need to create one, you can use [this referral link](https://try.digitalocean.com/strapi/) to get \$100 of free credits!
 
 ### Step 2: Create a project
 
@@ -151,7 +151,7 @@ pm2 stop strapi-development
 psql -c "ALTER USER strapi with password 'your-new-password';"
 ```
 
-- Update the `/srv/strapi/strapi/config/.env` file with the new password.
+- Update the `/srv/strapi/strapi-development/.env` file with the new password.
 
 ```
 DATABASE_PASSWORD=your-new-password
