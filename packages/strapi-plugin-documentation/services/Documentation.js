@@ -20,7 +20,12 @@ const defaultSettingsKeys = Object.keys(defaultSettings);
 
 module.exports = {
   areObjectsEquals: (obj1, obj2) => {
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
+    // stringify to remove nested empty objects
+    return _.isEqual(JSON.parse(JSON.stringify(obj1)), JSON.parse(JSON.stringify(obj2)))
+  },
+
+  arrayCustomizer: (objValue, srcValue) => {
+    if (_.isArray(objValue)) return objValue.concat(srcValue);
   },
 
   checkIfAPIDocNeedsUpdate: function(apiName) {
@@ -194,8 +199,9 @@ module.exports = {
     }, []);
   },
 
-  createDocObject: array => {
-    return array.reduce((acc, curr) => _.merge(acc, curr), {});
+  createDocObject: function(array) {
+    // use custom merge for arrays
+    return array.reduce((acc, curr) => _.mergeWith(acc, curr, this.arrayCustomizer), {});
   },
 
   deleteDocumentation: async function(version = this.getDocumentationVersion()) {
