@@ -108,7 +108,7 @@ module.exports = {
       // send an email by using the email plugin
       await strapi.plugins['email'].services.email.send({
         to: 'paulbocuse@strapi.io',
-        from: 'admin@strapi.io'
+        from: 'admin@strapi.io',
         subject: 'Comment posted that contains a bad words',
         text: `
           The comment #${entry.id} contain a bad words.
