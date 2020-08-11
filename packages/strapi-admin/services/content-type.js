@@ -110,24 +110,20 @@ const getNestedFieldsWithIntermediate = (
  * @param {array} actions array of actions
  * @param {object} options
  * @param {number} options.nestingLevel level of nesting
- * @param {array} options.fieldsNullFor actionIds where the fields should be null
  * @param {array} options.restrictedSubjects subjectsId to ignore
  * @returns {array<permissions>}
  */
-const getPermissionsWithNestedFields = (
-  actions,
-  { nestingLevel, fieldsNullFor = [], restrictedSubjects = [] } = {}
-) =>
+const getPermissionsWithNestedFields = (actions, { nestingLevel, restrictedSubjects = [] } = {}) =>
   actions.reduce((perms, action) => {
     action.subjects
       .filter(subject => !restrictedSubjects.includes(subject))
       .forEach(contentTypeUid => {
-        const fields = fieldsNullFor.includes(action.actionId)
-          ? null
-          : getNestedFields(strapi.contentTypes[contentTypeUid], {
+        const fields = action.options.fieldsGranularity
+          ? getNestedFields(strapi.contentTypes[contentTypeUid], {
               components: strapi.components,
               nestingLevel,
-            });
+            })
+          : null;
         perms.push({
           action: action.actionId,
           subject: contentTypeUid,
@@ -143,28 +139,30 @@ const getPermissionsWithNestedFields = (
  * @param {object} permissions array of existing permissions in db
  * @param {object} options
  * @param {number} options.nestingLevel level of nesting
- * @param {array} options.fieldsNullFor actionIds where the fields should be null
  * @returns {array<permissions>}
  */
-const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }) =>
+const cleanPermissionFields = (permissions, { nestingLevel }) =>
   permissions.map(perm => {
-    let newFields = perm.fields;
-    if (fieldsNullFor.includes(perm.action)) {
+    const { action: actionId, fields, subject } = perm;
+    const action = strapi.admin.services.permission.actionProvider.getByActionId(actionId);
+    let newFields = fields;
+
+    if (!action.options.fieldsGranularity) {
       newFields = null;
-    } else if (perm.subject && strapi.contentTypes[perm.subject]) {
-      const possiblefields = getNestedFieldsWithIntermediate(strapi.contentTypes[perm.subject], {
+    } else if (subject && strapi.contentTypes[subject]) {
+      const possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
         components: strapi.components,
         nestingLevel,
       });
 
-      const requiredFields = getNestedFields(strapi.contentTypes[perm.subject], {
+      const requiredFields = getNestedFields(strapi.contentTypes[subject], {
         components: strapi.components,
         requiredOnly: true,
         nestingLevel,
-        existingFields: perm.fields,
+        existingFields: fields,
       });
       const badNestedFields = _.uniq([
-        ..._.intersection(perm.fields, possiblefields),
+        ..._.intersection(fields, possibleFields),
         ...requiredFields,
       ]);
       newFields = badNestedFields.filter(
