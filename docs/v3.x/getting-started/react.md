@@ -148,14 +148,12 @@ class App extends React.Component {
 
   // Fetch your restaurants immediately after the component is mounted
   componentDidMount = async () => {
-    await axios.get('http://localhost:1337/restaurants')
-      .then(response => {
-        const restaurants = response.data;
-        this.setState({ restaurants });
-      })
-      .catch(error => {
-        this.setState({ error });
-      })
+    try {
+      const response = await axios.get('http://localhost:1337/restaurants');
+      this.setState({ restaurants: response.data })
+    } catch(error) {
+      this.setState({ error })
+    }
   }
 
   render() {
@@ -357,14 +355,12 @@ class App extends React.Component {
 
   // Fetch your categories immediately after the component is mounted
   componentDidMount = async () => {
-    await axios.get('http://localhost:1337/categories')
-    .then(response => {
-      const allCategories = response.data;
-      this.setState({ allCategories });
-    })
-    .catch(error => {
-      this.setState({ error });
-    })
+    try {
+      const response = await axios.get('http://localhost:1337/categories');
+      this.setState({ allCategories: response.data });
+    } catch(error) {
+      this.setState({ error })
+    }
   }
 
   handleInputChange = ({ target: { name, value } }) => {
@@ -377,17 +373,16 @@ class App extends React.Component {
     }));
   };
 
-  handleSubmit = async(e) => {
+  handleSubmit = async e => {
     e.preventDefault();
 
-    await axios.post('http://localhost:1337/restaurants', this.state.modifiedData)
-     .then(response => {
-       console.log(response);
-     })
-     .catch(error => {
-       this.setState({ error });
-     });
-  };
+    try {
+      const response = await axios.post('http://localhost:1337/restaurants', this.state.modifiedData);
+      console.log(response);
+    } catch(error) {
+      this.setState({ error });
+    }
+}
 
   renderCheckbox = category => {
     const {

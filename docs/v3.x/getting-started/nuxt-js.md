@@ -234,13 +234,12 @@ export default {
     }
   },
   async mounted () {
-    await axios.get('http://localhost:1337/restaurants')
-      .then(response => {
-        this.restaurants = response.data;
-      })
-      .catch(error => {
-        this.error = error;
-      })
+    try {
+      const response = await axios.get('http://localhost:1337/restaurants')
+      this.restaurants = response.data
+    } catch (error) {
+      this.error = error;
+    }
   }
 }
 </script>
@@ -292,12 +291,12 @@ export default {
   },
   async mounted () {
     try {
-      const restaurants = await fetch("http://localhost:1337/restaurants", {
+      const response = await fetch("http://localhost:1337/restaurants", {
         method: 'GET',
         headers: this.headers,
       }).then(this.checkStatus)
         .then(this.parseJSON);
-        this.restaurants = restaurants
+        this.restaurants = response
     } catch (error) {
       this.error = error
     }
@@ -543,25 +542,23 @@ export default {
     }
   },
   async mounted() {
-    await axios.get('http://localhost:1337/categories')
-      .then(response => {
-        this.allCategories = response.data;
-      })
-      .catch(error => {
-        this.error = error;
-      })
+    try {
+      const response = await axios.get('http://localhost:1337/categories')
+      this.allCategories = response.data;
+    } catch (error) {
+      this.error = error;
+    }
   },
   methods: {
     handleSubmit: async function(e) {
       e.preventDefault();
 
-      await axios.post('http://localhost:1337/restaurants', this.modifiedData)
-        .then(response => {
-          console.log(response);
-        })
-        .catch(error => {
-          this.error = error;
-        });
+      try {
+        const response = await axios.post('http://localhost:1337/restaurants', this.modifiedData)
+        console.log(response);
+      } catch(error) {
+        this.error = error;
+      }
     }
   }
 }
@@ -656,13 +653,13 @@ export default {
       e.preventDefault();
 
       try {
-        const restaurants = await fetch('http://localhost:1337/restaurants', {
+        const response = await fetch('http://localhost:1337/restaurants', {
             method: 'POST',
             headers: this.headers,
             body: JSON.stringify(this.modifiedData)
           }).then(this.checkStatus)
             .then(this.parseJSON);
-            console.log(restaurants);
+            console.log(response);
       } catch (error) {
         this.error = error
       }
