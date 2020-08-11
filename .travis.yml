@@ -23,11 +23,66 @@ cache:
 
 # end to end testing template
 e2e_tests: &e2e_tests
-  stage: 'End to End tests'
+  stage: 'End to End tests CE'
+  script:
+    - STRAPI_DISABLE_EE=true yarn run -s test:generate-app -- $DB_STRING
+    - STRAPI_DISABLE_EE=true yarn run -s test:start-app & wait-on http://localhost:1337
+    - STRAPI_DISABLE_EE=true yarn run -s test:e2e
+
+# end to end testing template
+e2e_tests_ee: &e2e_tests_ee
+  stage: 'End to End tests EE'
   script:
     - yarn run -s test:generate-app -- $DB_STRING
     - yarn run -s test:start-app & wait-on http://localhost:1337
     - yarn run -s test:e2e
+  if: fork = false
+
+pg_test: &pg_test
+  name: 'E2E Postgresql'
+  before_install:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$PATH"
+    - sudo apt-get update
+    - sudo apt-get --yes remove postgresql-*
+    - sudo apt-get install -y postgresql-11 postgresql-client-11
+    - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
+    - sudo service postgresql restart 11
+    - psql -c 'create database strapi_test;' -U postgres
+  env:
+    - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5433 --dbname=strapi_test --dbusername=postgres --dbpassword='
+
+mysql_test: &mysql_test
+  name: 'E2E Mysql'
+  before_install:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$PATH"
+    - sudo cp $TRAVIS_BUILD_DIR/_travis/mysql.cnf /etc/mysql/conf.d/
+    - sudo service mysql restart
+    - mysql -e 'CREATE DATABASE strapi_test;'
+  env:
+    - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
+
+sqlite_test: &sqlite_test
+  name: 'E2E Sqlite'
+  before_install:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$PATH"
+  env:
+    - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
+
+mongo_test: &mongo_test
+  name: 'E2E MongoDB'
+  before_install:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$PATH"
+    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
+    - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
+    - mkdir -p ./data/db/27017
+    - mkdir -p ./data/db/27000
+    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
+  env:
+    - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
 
 before_script:
   - yarn build
@@ -55,47 +110,25 @@ jobs:
         - yarn run -s test:front && codecov -C -F front
 
     - <<: *e2e_tests
-      name: 'E2E Postgresql'
-      before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$PATH"
-        - sudo apt-get update
-        - sudo apt-get --yes remove postgresql-*
-        - sudo apt-get install -y postgresql-11 postgresql-client-11
-        - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
-        - sudo service postgresql restart 11
-        - psql -c 'create database strapi_test;' -U postgres
-      env:
-        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5433 --dbname=strapi_test --dbusername=postgres --dbpassword='
+      <<: *pg_test
 
     - <<: *e2e_tests
-      name: 'E2E Mysql'
-      before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$PATH"
-        - sudo cp $TRAVIS_BUILD_DIR/_travis/mysql.cnf /etc/mysql/conf.d/
-        - sudo service mysql restart
-        - mysql -e 'CREATE DATABASE strapi_test;'
-      env:
-        - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
+      <<: *mysql_test
 
     - <<: *e2e_tests
-      name: 'E2E Sqlite'
-      before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$PATH"
-      env:
-        - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
+      <<: *sqlite_test
 
     - <<: *e2e_tests
-      name: 'E2E MongoDB'
-      before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$PATH"
-        - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
-        - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
-        - mkdir -p ./data/db/27017
-        - mkdir -p ./data/db/27000
-        - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
-      env:
-        - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
+      <<: *mongo_test
+
+    - <<: *e2e_tests_ee
+      <<: *pg_test
+
+    - <<: *e2e_tests_ee
+      <<: *mysql_test
+
+    - <<: *e2e_tests_ee
+      <<: *sqlite_test
+
+    - <<: *e2e_tests_ee
+      <<: *mongo_test

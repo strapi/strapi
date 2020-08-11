@@ -56,7 +56,7 @@ After saving the new function, let's restart the `GET /articles` request. We wil
 
 We now know the function we have to update, but we just want to customize the returned article values.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the fetch logic.
+In the [controller documentation](../concepts/controllers.md#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the fetch logic.
 
 **Path —** `./api/article/controller/Article.js`
 
@@ -86,7 +86,7 @@ Here we want to force it to fetch articles that have status equal to `published`
 The way to do that is to set `ctx.query.status` to `published`.
 It will force the filter of the query.
 
-**Path —** `./api/restaurant/controller/Restaurant.js`
+**Path —** `./api/article/controller/Article.js`
 
 ```js
 const { sanitizeEntity } = require('strapi-utils');

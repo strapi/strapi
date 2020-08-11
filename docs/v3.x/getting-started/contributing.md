@@ -1,4 +1,4 @@
-# 🦸 Contributing
+# Contributing
 
 Strapi is a community oriented project and we really appreciate every contribution made by the community: feature requests, bug reports, and especially pull requests! If you have any questions please reach out the [Core team](https://strapi.io/company) on [Slack](https://slack.strapi.io).
 

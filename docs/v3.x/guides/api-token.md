@@ -44,6 +44,11 @@ const _ = require('lodash');
 module.exports = async (ctx, next) => {
   let role;
 
+ if (ctx.state.user) {
+    // request is already authenticated in a different way
+    return next();
+  }
+
   // add the detection of `token` query parameter
   if (
     (ctx.request && ctx.request.header && ctx.request.header.authorization) ||

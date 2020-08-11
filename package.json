@@ -4,7 +4,7 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@testing-library/jest-dom": "^5.8.0",
-    "@testing-library/react": "^10.0.4",
+    "@testing-library/react": "^10.4.8",
     "@testing-library/react-hooks": "^3.2.1",
     "axios-mock-adapter": "^1.17.0",
     "babel-eslint": "^10.0.0",

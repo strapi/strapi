@@ -42,6 +42,8 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
 
+    this.server = http.createServer(this.handleRequest.bind(this));
+
     // Logger.
     this.log = logger;
 
@@ -55,6 +57,8 @@ class Strapi {
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
+    this.app.proxy = this.config.get('server.proxy');
+
     this.isLoaded = false;
 
     // internal services.
@@ -66,6 +70,14 @@ class Strapi {
 
   get EE() {
     return ee({ dir: this.dir, logger });
+  }
+
+  handleRequest(req, res) {
+    if (!this.requestHandler) {
+      this.requestHandler = this.app.callback();
+    }
+
+    return this.requestHandler(req, res);
   }
 
   requireProjectBootstrap() {
@@ -159,9 +171,6 @@ class Strapi {
    * Add behaviors to the server
    */
   async listen(cb) {
-    // Mount the HTTP server.
-    this.server = http.createServer(this.app.callback());
-
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {

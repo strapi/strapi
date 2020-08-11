@@ -11,6 +11,7 @@ const request = require('request');
 // Purest strategies.
 const purest = require('purest')({ request });
 const purestConfig = require('@purest/providers');
+const { getAbsoluteServerUrl } = require('strapi-utils');
 
 /**
  * Connect thanks to a third-party provider.
@@ -22,7 +23,7 @@ const purestConfig = require('@purest/providers');
  * @return  {*}
  */
 
-exports.connect = (provider, query) => {
+const connect = (provider, query) => {
   const access_token = query.access_token || query.code || query.oauth_token;
 
   return new Promise((resolve, reject) => {
@@ -55,15 +56,15 @@ exports.connect = (provider, query) => {
           })
           .get();
 
-        if (_.isEmpty(_.find(users, { provider })) && !advanced.allow_register) {
+        const user = _.find(users, { provider });
+
+        if (_.isEmpty(user) && !advanced.allow_register) {
           return resolve([
             null,
             [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
             'Register action is actualy not available.',
           ]);
         }
-
-        const user = _.find(users, { provider });
 
         if (!_.isEmpty(user)) {
           return resolve([user, null]);
@@ -328,7 +329,7 @@ const getProfile = async (provider, query, callback) => {
 
       vk.query()
         .get('users.get')
-        .qs({ access_token, id: query.raw.user_id, v: '5.013' })
+        .qs({ access_token, id: query.raw.user_id, v: '5.122' })
         .request((err, res, body) => {
           if (err) {
             callback(err);
@@ -391,4 +392,12 @@ const getProfile = async (provider, query, callback) => {
       });
       break;
   }
+};
+
+const buildRedirectUri = (provider = '') =>
+  `${getAbsoluteServerUrl(strapi.config)}/connect/${provider}/callback`;
+
+module.exports = {
+  connect,
+  buildRedirectUri,
 };
