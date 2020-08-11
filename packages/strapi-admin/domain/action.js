@@ -15,7 +15,7 @@ const actionFields = [
 
 const defaultAction = {
   options: {
-    fieldsGranularity: true,
+    fieldsRestriction: true,
   },
 };
 
@@ -39,7 +39,7 @@ const getActionId = ({ pluginName, uid }) => {
  * Create a permission action
  * @param {Object} attributes - action attributes
  */
-function createAction(attributes) {
+const createAction = attributes => {
   const action = _.cloneDeep(_.pick(attributes, actionFields));
   action.actionId = getActionId(attributes);
 
@@ -47,10 +47,13 @@ function createAction(attributes) {
     action.subCategory = attributes.subCategory || 'general';
   }
 
-  return _.merge(action, defaultAction);
-}
+  return _.merge({}, defaultAction, action);
+};
+
+const hasFieldsRestriction = _.matchesProperty('options.fieldsRestriction', true);
 
 module.exports = {
   getActionId,
   createAction,
+  hasFieldsRestriction,
 };

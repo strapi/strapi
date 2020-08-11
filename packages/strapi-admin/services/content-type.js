@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const fp = require('lodash/fp');
+const actionDomain = require('../domain/action');
 
 const EXCLUDE_FIELDS = ['created_by', 'updated_by'];
 
@@ -118,7 +119,7 @@ const getPermissionsWithNestedFields = (actions, { nestingLevel, restrictedSubje
     action.subjects
       .filter(subject => !restrictedSubjects.includes(subject))
       .forEach(contentTypeUid => {
-        const fields = action.options.fieldsGranularity
+        const fields = actionDomain.hasFieldsRestriction(action)
           ? getNestedFields(strapi.contentTypes[contentTypeUid], {
               components: strapi.components,
               nestingLevel,
@@ -141,13 +142,13 @@ const getPermissionsWithNestedFields = (actions, { nestingLevel, restrictedSubje
  * @param {number} options.nestingLevel level of nesting
  * @returns {array<permissions>}
  */
-const cleanPermissionFields = (permissions, { nestingLevel }) =>
+const cleanPermissionFields = (permissions, { nestingLevel } = {}) =>
   permissions.map(perm => {
     const { action: actionId, fields, subject } = perm;
     const action = strapi.admin.services.permission.actionProvider.getByActionId(actionId);
     let newFields = fields;
 
-    if (!action.options.fieldsGranularity) {
+    if (!actionDomain.hasFieldsRestriction(action)) {
       newFields = null;
     } else if (subject && strapi.contentTypes[subject]) {
       const possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
