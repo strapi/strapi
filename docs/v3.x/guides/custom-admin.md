@@ -4,7 +4,9 @@ In this guide we will see how you can customize the admin panel.
 
 ## Introduction
 
-For this example, we will see two things: 1) The customization of the admin panel itself, by updating the content of the `/admin/` home page; 2) We will see how to update the interface of a plugin, by replacing the `date` format in the content manager list view.
+For this example, we will see two things:
+1) The customization of the admin panel itself, by updating the content of the `/admin/` home page;
+2) How to update the interface of a plugin, by replacing the `date` format in the content manager list view.
 
 First, you will have to read the [customization concept](../concepts/customization.md), it will help you understand how to customize all of your application.
 
