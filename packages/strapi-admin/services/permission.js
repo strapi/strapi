@@ -28,7 +28,7 @@ const arePermissionsEqual = (perm1, perm2) =>
 
 /**
  * Removes unwanted fields from a permission
- * @param permission
+ * @param perm
  * @returns {*}
  */
 const sanitizePermission = perm => ({
@@ -157,10 +157,7 @@ const cleanPermissionInDatabase = async () => {
     // Second, clean fields of permissions (add required ones, remove the non-existing anymore ones)
     const permissionsInDb = dbPermissions.filter(perm => !permissionsToRemoveIds.includes(perm.id));
     const permissionsWithCleanFields = strapi.admin.services['content-type'].cleanPermissionFields(
-      permissionsInDb,
-      {
-        fieldsNullFor: ['plugins::content-manager.explorer.delete'],
-      }
+      permissionsInDb
     );
 
     // Update only the ones that need to be updated
@@ -197,10 +194,7 @@ const resetSuperAdminPermissions = async () => {
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
   const permissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
-    contentTypesActions,
-    {
-      fieldsNullFor: ['plugins::content-manager.explorer.delete'],
-    }
+    contentTypesActions
   );
 
   const otherActions = allActions.filter(a => a.section !== 'contentTypes');
