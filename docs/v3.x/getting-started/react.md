@@ -66,12 +66,11 @@ Be sure that you activated the `find` permission for the `restaurant` Collection
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.get('http://localhost:1337/restaurants')
   .then(response => {
     console.log(response);
-  })
-  .catch(error => {
-    console.log(error);
   })
 ```
 
@@ -83,14 +82,12 @@ axios.get('http://localhost:1337/restaurants')
 
 ```js
 fetch("http://localhost:1337/restaurants", {
+  method: "GET",
   headers: {
      'Content-Type': 'application/json'
   },
 }).then(response => response.json())
   .then(data => console.log(data));
-  .catch(error => {
-    console.error(error);
-  });
 ```
 
 :::
@@ -139,17 +136,19 @@ fetch("http://localhost:1337/restaurants", {
 
 ```js
 import React from 'react';
-import axios from "axios"
+import axios from 'axios'
 
 class App extends React.Component {
 
+  // State of your application
   state = {
     restaurants: [],
     error: null
   }
 
-  componentDidMount() {
-    axios.get('http://localhost:1337/restaurants')
+  // Fetch your restaurants immediately after the component is mounted
+  componentDidMount = async () => {
+    await axios.get('http://localhost:1337/restaurants')
       .then(response => {
         const restaurants = response.data;
         this.setState({ restaurants });
@@ -161,9 +160,12 @@ class App extends React.Component {
 
   render() {
     const { error, restaurant } = this.state
+
+    // Print errors if any
     if (error) {
        return <div>An error occured: {error.message}</div>
     }
+
     return (
       <div className="App">
         <ul>
@@ -188,31 +190,50 @@ import React from 'react';
 
 class App extends React.Component {
 
+  // State of your application
   state = {
     restaurants: [],
     error: null
   }
 
-  componentDidMount() {
-    fetch("http://localhost:1337/restaurants", {
-      headers: {
-         'Content-Type': 'application/json'
-      },
-    }).then(response => response.json())
-      .then(data => {
-        const restaurants = data;
-        this.setState({ restaurants });
-      })
-      .catch(error => {
-        this.setState({ error });
+  // Fetch your restaurants immediately after the component is mounted
+  componentDidMount = async () => {
+    // Parses the JSON returned by a network request
+    const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+
+    // Checks if a network request came back fine, and throws an error if not
+    const checkStatus = (resp) => {
+      if (resp.status >= 200 && resp.status < 300) {
+        return resp;
+      }
+      return parseJSON(resp).then((resp) => {
+        throw resp;
       });
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const restaurants = await fetch("http://localhost:1337/restaurants", {
+        method: "GET",
+        headers: headers,
+      }).then(checkStatus)
+        .then(parseJSON);
+        this.setState({ restaurants })
+    } catch (error) {
+      this.setState({ error })
+    }
   }
 
   render() {
     const { error, restaurant } = this.state
+
+    // Print errors if any
     if (error) {
        return <div>An error occured: {error.message}</div>
     }
+
     return (
       <div className="App">
         <ul>
@@ -243,19 +264,18 @@ Be sure that you activated the `create` permission for the `restaurant` Collecti
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
     categories: [
-      id: 3
+      3
     ]
   })
   .then(response => {
     console.log(response);
   })
-  .catch(error => {
-    console.log(error);
-  });
 ```
 
 :::
@@ -274,16 +294,11 @@ fetch('http://localhost:1337/restaurants', {
      name: 'Dolemon Sushi',
      description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
      categories: [
-       id: 3
+       3
      ]
    })
- }).then(response => {
-   return response.json();
- }).then(data => {
-   console.log(data);
- }).catch(error => {
-   console.error(error);
- });
+ }).then(response => response.json())
+   .then(data => console.log(data));
 ```
 
 :::
@@ -321,12 +336,14 @@ fetch('http://localhost:1337/restaurants', {
 `./src/App.js`
 
 ```js
-import React from "react";
-import axios from "axios"
+import React from 'react';
+import axios from 'axios'
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    // State of your application
     this.state = {
       modifiedData: {
         name: "",
@@ -338,11 +355,12 @@ class App extends React.Component {
     };
   }
 
-  componentDidMount() {
-    axios.get('http://localhost:1337/categories')
+  // Fetch your categories immediately after the component is mounted
+  componentDidMount = async () => {
+    await axios.get('http://localhost:1337/categories')
     .then(response => {
-      const categories = response.data;
-      this.setState({ allCategories: categories });
+      const allCategories = response.data;
+      this.setState({ allCategories });
     })
     .catch(error => {
       this.setState({ error });
@@ -359,14 +377,10 @@ class App extends React.Component {
     }));
   };
 
-  handleSubmit = e => {
+  handleSubmit = async(e) => {
     e.preventDefault();
 
-    axios.post('http://localhost:1337/restaurants', {
-      name: this.state.modifiedData.name,
-      description: this.state.modifiedData.description,
-      categories: this.state.modifiedData.categories
-    })
+    await axios.post('http://localhost:1337/restaurants', this.state.modifiedData)
      .then(response => {
        console.log(response);
      })
@@ -411,9 +425,12 @@ class App extends React.Component {
 
   render() {
     const { error, allCategories, modifiedData } = this.state;
+
+    // Print errors if any
     if (error) {
       return <div>An error occured: {error.message}</div>;
     }
+
     return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
@@ -462,6 +479,22 @@ export default App;
 ```js
 import React from "react";
 
+// Parses the JSON returned by a network request
+const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+
+// Checks if a network request came back fine, and throws an error if not
+const checkStatus = (resp) => {
+  if (resp.status >= 200 && resp.status < 300) {
+    return resp;
+  }
+  return parseJSON(resp).then((resp) => {
+    throw resp;
+  });
+};
+const headers = {
+  'Content-Type': 'application/json',
+};
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -476,19 +509,17 @@ class App extends React.Component {
     };
   }
 
-  componentDidMount() {
-    fetch("http://localhost:1337/categories", {
-      headers: {
-         'Content-Type': 'application/json'
-      },
-    }).then(response => response.json())
-      .then(data => {
-        const categories = data;
-        this.setState({ allCategories: categories });
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
+  componentDidMount = async () => {
+    try {
+      const allCategories = await fetch("http://localhost:1337/categories", {
+        method: "GET",
+        headers: headers,
+      }).then(checkStatus)
+        .then(parseJSON);
+        this.setState({ allCategories })
+    } catch (error) {
+      this.setState({ error });
+    }
   }
 
   handleInputChange = ({ target: { name, value } }) => {
@@ -501,27 +532,20 @@ class App extends React.Component {
     }));
   };
 
-  handleSubmit = e => {
+  handleSubmit = async(e) => {
     e.preventDefault();
 
-    fetch('http://localhost:1337/restaurants', {
-      method: "POST",
-      headers: {
-         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: this.state.modifiedData.name,
-        description: this.state.modifiedData.description,
-        categories: this.state.modifiedData.categories
+    try {
+      await fetch('http://localhost:1337/restaurants', {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(this.state.modifiedData)
       })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-    })
-    .catch(error => {
-      this.setState({ error });
-    });
+      .then(checkStatus)
+      .then(parseJSON);
+    } catch (error) {
+      this.setState({ error })
+    }
   };
 
   renderCheckbox = category => {
@@ -560,9 +584,12 @@ class App extends React.Component {
 
   render() {
     const { error, allCategories, modifiedData } = this.state;
+
+    // Print error if any
     if (error) {
       return <div>An error occured: {error.message}</div>;
     }
+
     return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
@@ -622,17 +649,16 @@ and the id of your category is `3`
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.put('http://localhost:1337/restaurants/2', {
-  categories: [{
-    id: 3
-  }]
+  categories: [
+    3
+  ]
 })
 .then(response => {
   console.log(response);
 })
-.catch(error => {
-  console.log(error);
-});
 ```
 
 :::
@@ -648,18 +674,15 @@ fetch('http://localhost:1337/restaurants/2', {
      'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    categories: [{
-      id: 3
-    }]
+    categories: [
+      3
+    ]
   })
 })
 .then(response => response.json())
 .then(data => {
   console.log(data);
 })
-.catch(error => {
-  console.error(error);
-});
 ```
 
 :::

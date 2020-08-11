@@ -52,12 +52,11 @@ Be sure that you activated the `find` permission for the `restaurant` Collection
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.get('http://localhost:1337/restaurants')
   .then(response => {
     console.log(response);
-  })
-  .catch(error => {
-    console.log(error);
   })
 ```
 
@@ -69,14 +68,12 @@ axios.get('http://localhost:1337/restaurants')
 
 ```js
 fetch("http://localhost:1337/restaurants", {
+  method: "GET",
   headers: {
      'Content-Type': 'application/json'
   },
 }).then(response => response.json())
   .then(data => console.log(data));
-  .catch(error => {
-    console.error(error);
-  });
 ```
 
 :::
@@ -148,8 +145,8 @@ export default {
       error: null
     }
   },
-  mounted () {
-    axios.get('http://localhost:1337/restaurants')
+  async mounted () {
+    await axios.get('http://localhost:1337/restaurants')
       .then(response => {
         this.restaurants = response.data;
       })
@@ -188,21 +185,34 @@ export default {
   data () {
     return {
       restaurants: [],
-      error: null
+      error: null,
+      headers: {'Content-Type': 'application/json'}
     }
   },
-  mounted () {
-    fetch("http://localhost:1337/restaurants", {
-      headers: {
-         'Content-Type': 'application/json'
-      },
-    }).then(response => response.json())
-      .then(data => {
-        this.restaurants = data
-      })
-      .catch((error) => {
-        this.error = error
+  methods: {
+    parseJSON: function (resp) {
+      return (resp.json ? resp.json() : resp);
+    },
+    checkStatus: function (resp) {
+      if (resp.status >= 200 && resp.status < 300) {
+        return resp;
+      }
+      return this.parseJSON(resp).then((resp) => {
+        throw resp;
       });
+    }
+  },
+  async mounted () {
+    try {
+      const restaurants = await fetch("http://localhost:1337/restaurants", {
+        method: 'GET',
+        headers: this.headers,
+      }).then(this.checkStatus)
+        .then(this.parseJSON);
+        this.restaurants = restaurants
+    } catch (error) {
+      this.error = error
+    }
   }
 }
 </script>
@@ -226,19 +236,18 @@ Be sure that you activated the `create` permission for the `restaurant` Collecti
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
     categories: [
-      id: 3
+      3
     ]
   })
   .then(response => {
     console.log(response);
   })
-  .catch(error => {
-    console.log(error);
-  });
 ```
 
 :::
@@ -257,16 +266,11 @@ fetch('http://localhost:1337/restaurants', {
      name: 'Dolemon Sushi',
      description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
      categories: [
-       id: 3
+       3
      ]
    })
- }).then(response => {
-   return response.json();
- }).then(data => {
-   console.log(data);
- }).catch(error => {
-   console.error(error);
- });
+ }).then(response => response.json())
+   .then(data => console.log(data));
 ```
 
 :::
@@ -354,8 +358,8 @@ export default {
       error: null
     }
   },
-  mounted() {
-    axios.get('http://localhost:1337/categories')
+  async mounted() {
+    await axios.get('http://localhost:1337/categories')
       .then(response => {
         this.allCategories = response.data;
       })
@@ -364,20 +368,16 @@ export default {
       })
   },
   methods: {
-    handleSubmit: function(e) {
-      axios.post('http://localhost:1337/restaurants', {
-          name: this.modifiedData.name,
-          description: this.modifiedData.description,
-          categories: this.modifiedData.categories
-        })
+    handleSubmit: async function(e) {
+      e.preventDefault();
+
+      await axios.post('http://localhost:1337/restaurants', this.modifiedData)
         .then(response => {
           console.log(response);
         })
         .catch(error => {
           this.error = error;
         });
-      e.preventDefault();
-
     }
   }
 }
@@ -440,44 +440,48 @@ export default {
         description: '',
         categories: [],
       },
-      error: null
+      error: null,
+      headers: {'Content-Type': 'application/json'}
     }
   },
-  mounted() {
-    fetch("http://localhost:1337/categories", {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      }).then(response => response.json())
-      .then(data => {
-        this.allCategories = data
-      })
-      .catch(error => {
-        this.error = error;
-      });
+  async mounted() {
+    try {
+      const allCategories = await fetch("http://localhost:1337/categories", {
+          method: 'GET',
+          headers: this.headers,
+        }).then(this.checkStatus)
+          .then(this.parseJSON);
+          this.allCategories = allCategories
+    } catch (error) {
+      this.error = error
+    }
   },
   methods: {
-    handleSubmit: function(e) {
-      fetch('http://localhost:1337/restaurants', {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: this.modifiedData.name,
-            description: this.modifiedData.description,
-            categories: this.modifiedData.categories
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-        })
-        .catch(error => {
-          this.error = error;
-        });
-
+    parseJSON: function (resp) {
+      return (resp.json ? resp.json() : resp);
+    },
+    checkStatus: function (resp) {
+      if (resp.status >= 200 && resp.status < 300) {
+        return resp;
+      }
+      return this.parseJSON(resp).then((resp) => {
+        throw resp;
+      });
+    },
+    handleSubmit: async function(e) {
       e.preventDefault();
+
+      try {
+        const restaurants = await fetch('http://localhost:1337/restaurants', {
+            method: 'POST',
+            headers: this.headers,
+            body: JSON.stringify(this.modifiedData)
+          }).then(this.checkStatus)
+            .then(this.parseJSON);
+            console.log(restaurants);
+      } catch (error) {
+        this.error = error
+      }
     }
   }
 }
@@ -504,17 +508,16 @@ and the id of your category is `3`
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.put('http://localhost:1337/restaurants/2', {
-  categories: [{
-    id: 3
-  }]
+  categories: [
+    3
+  ]
 })
 .then(response => {
   console.log(response);
 })
-.catch(error => {
-  console.log(error);
-});
 ```
 
 :::
@@ -530,18 +533,15 @@ fetch('http://localhost:1337/restaurants/2', {
      'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    categories: [{
-      id: 3
-    }]
+    categories: [
+      3
+    ]
   })
 })
 .then(response => response.json())
 .then(data => {
   console.log(data);
 })
-.catch((error) => {
-  console.error(error);
-});
 ```
 
 :::

@@ -66,7 +66,13 @@ Be sure that you activated the `find` permission for the `restaurant` Collection
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.get('http://localhost:1337/restaurants')
+  .then(response => {
+    console.log(response);
+  })
+
 ```
 
 :::
@@ -76,7 +82,13 @@ axios.get('http://localhost:1337/restaurants')
 *Request*
 
 ```js
-fetch("http://localhost:1337/restaurants")
+fetch("http://localhost:1337/restaurants", {
+  method: "GET",
+  headers: {
+     'Content-Type': 'application/json'
+  },
+}).then(response => response.json())
+  .then(data => console.log(data));
 ```
 
 :::
@@ -140,10 +152,10 @@ const Home = ({ restaurants, error }) => {
 Home.getInitialProps = async (ctx) => {
   try {
     const res = await axios.get('http://localhost:1337/restaurants')
-    const restaurants = await res
-    return { restaurants: restaurants.data }
+    const restaurants = res.data
+    return { restaurants }
   } catch (error) {
-    return { error: error }
+    return { error }
   }
 }
 
@@ -178,24 +190,29 @@ Home.getInitialProps = async (ctx) => {
       if (resp.status >= 200 && resp.status < 300) {
         return resp;
       }
+
       return parseJSON(resp).then((resp) => {
         throw resp;
       });
     };
+
     const headers = {
       'Content-Type': 'application/json',
     };
-    const res = await fetch('http://localhost:1337/restaurants', {
+
+    const restaurants = await fetch('http://localhost:1337/restaurants', {
       method: 'GET',
       headers,
     })
       .then(checkStatus)
       .then(parseJSON);
-    return { restaurants: res };
+
+    return { restaurants };
   } catch (error) {
-    return { error: error };
+    return { error };
   }
 };
+
 export default Home;
 ```
 
@@ -217,19 +234,18 @@ Be sure that you activated the `create` permission for the `restaurant` Collecti
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
     categories: [
-      id: 3
+      3
     ]
   })
   .then(response => {
     console.log(response);
   })
-  .catch(error => {
-    console.log(error);
-  });
 ```
 
 :::
@@ -248,16 +264,11 @@ fetch('http://localhost:1337/restaurants', {
      name: 'Dolemon Sushi',
      description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
      categories: [
-       id: 3
+       3
      ]
    })
- }).then(response => {
-   return response.json();
- }).then(data => {
-   console.log(data);
- }).catch(error => {
-   console.error(error);
- });
+ }).then(response => response.json())
+   .then(data => console.log(data));
 ```
 
 :::
@@ -298,28 +309,32 @@ fetch('http://localhost:1337/restaurants', {
 import { useState } from 'react';
 import axios from 'axios';
 
-const Home = ({ allCategories, error }) => {
+const Home = ({ allCategories, errorCategories }) => {
   const [modifiedData, setModifiedData] = useState({
     name: '',
     description: '',
     categories: [],
   });
+  const [errorRestaurants, setErrorRestaurants] = useState(null)
+
   const handleChange = ({ target: { name, value } }) => {
     setModifiedData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const response = await axios.post('http://localhost:1337/restaurants', modifiedData);
       console.log(response);
-    } catch (err) {
-      // TODO handle errors
-      console.log({ err });
+    } catch (error) {
+      setErrorRestaurants(error)
     }
   };
+
   const renderCheckbox = (category) => {
     const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
@@ -345,8 +360,11 @@ const Home = ({ allCategories, error }) => {
       </div>
     );
   };
-  if (error) {
-    return <div>An error occured: {error.message}</div>;
+  if (errorCategories) {
+    return <div>An error occured (categories): {errorCategories.message}</div>;
+  }
+  if (errorRestaurants) {
+    return <div>An error occured (restaurants): {errorRestaurants.message}</div>;
   }
   return (
     <div>
@@ -378,14 +396,17 @@ const Home = ({ allCategories, error }) => {
     </div>
   );
 };
+
 Home.getInitialProps = async (ctx) => {
   try {
     const res = await axios.get('http://localhost:1337/categories');
-    return { allCategories: res.data };
-  } catch (error) {
-    return { error: error };
+    const allCategories = res.data
+    return { allCategories };
+  } catch (errorCategories) {
+    return { errorCategories };
   }
 };
+
 export default Home;
 ```
 
@@ -397,6 +418,7 @@ export default Home;
 
 ```js
 import { useState } from 'react';
+
 // Parses the JSON returned by a network request
 const parseJSON = (resp) => (resp.json ? resp.json() : resp);
 // Checks if a network request came back fine, and throws an error if not
@@ -411,20 +433,25 @@ const checkStatus = (resp) => {
 const headers = {
   'Content-Type': 'application/json',
 };
-const Home = ({ allCategories, error }) => {
+
+const Home = ({ allCategories, errorCategories }) => {
   const [modifiedData, setModifiedData] = useState({
     name: '',
     description: '',
     categories: [],
   });
+  const [errorRestaurants, setErrorRestaurants] = useState(null)
+
   const handleChange = ({ target: { name, value } }) => {
     setModifiedData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const response = await fetch('http://localhost:1337/restaurants', {
         method: 'POST',
@@ -433,11 +460,11 @@ const Home = ({ allCategories, error }) => {
       })
         .then(checkStatus)
         .then(parseJSON);
-    } catch (err) {
-      // TODO handle errors
-      console.log({ err });
+    } catch (error) {
+      setErrorRestaurants(error)
     }
   };
+
   const renderCheckbox = (category) => {
     const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
@@ -463,9 +490,14 @@ const Home = ({ allCategories, error }) => {
       </div>
     );
   };
-  if (error) {
-    return <div>An error occured: {error.message}</div>;
+
+  if (errorCategories) {
+    return <div>An error occured (categories): {errorCategories.message}</div>;
   }
+  if (errorRestaurants) {
+    return <div>An error occured (restaurants): {errorRestaurants.message}</div>;
+  }
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -496,14 +528,15 @@ const Home = ({ allCategories, error }) => {
     </div>
   );
 };
+
 Home.getInitialProps = async (ctx) => {
   try {
-    const categories = await fetch('http://localhost:1337/categories', { method: 'GET', headers })
+    const allCategories = await fetch('http://localhost:1337/categories', { method: 'GET', headers })
       .then(checkStatus)
       .then(parseJSON);
-    return { allCategories: categories };
-  } catch (error) {
-    return { error: error };
+    return { allCategories };
+  } catch (errorCategories) {
+    return { errorCategories };
   }
 };
 export default Home;
@@ -529,17 +562,16 @@ and the id of your category is `3`
 *Request*
 
 ```js
+import axios from 'axios'
+
 axios.put('http://localhost:1337/restaurants/2', {
-  categories: [{
-    id: 3
-  }]
+  categories: [
+    3
+  ]
 })
 .then(response => {
   console.log(response);
 })
-.catch(error => {
-  console.log(error);
-});
 ```
 
 :::
@@ -555,18 +587,15 @@ fetch('http://localhost:1337/restaurants/2', {
      'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    categories: [{
-      id: 3
-    }]
+    categories: [
+      3
+    ]
   })
 })
 .then(response => response.json())
 .then(data => {
   console.log(data);
 })
-.catch((error) => {
-  console.error(error);
-});
 ```
 
 :::
