@@ -44,7 +44,7 @@ const emailTemplate = {
     Your account is now linked with: <%= user.email %>.`,
   html: `<h1>Welcome on mywebsite.fr!</h1>
     <p>Your account is now linked with: <%= user.email %>.<p>`,
-},
+};
 
 await strapi.plugins.email.services.email.sendTemplatedEmail(
   {
