@@ -13,7 +13,7 @@ import cn from 'classnames';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 import makeSelectLocale from '../LanguageProvider/selectors';
 import { changeLocale } from '../LanguageProvider/actions';
-import { languages } from '../../i18n';
+import { languages, languageNativeNames } from '../../i18n';
 import Wrapper from './Wrapper';
 
 export class LocaleToggle extends React.Component {
@@ -33,7 +33,7 @@ export class LocaleToggle extends React.Component {
       <Wrapper>
         <ButtonDropdown isOpen={this.state.isOpen} toggle={this.toggle}>
           <DropdownToggle className="localeDropdownContent">
-            <span>{locale}</span>
+            <span>{languageNativeNames[locale]}</span>
           </DropdownToggle>
 
           <DropdownMenu className={style}>
@@ -46,7 +46,7 @@ export class LocaleToggle extends React.Component {
                   locale === language ? 'localeToggleItemActive' : ''
                 )}
               >
-                {language.toUpperCase()}
+                {languageNativeNames[language]}
               </DropdownItem>
             ))}
           </DropdownMenu>

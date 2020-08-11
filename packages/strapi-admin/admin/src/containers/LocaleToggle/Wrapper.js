@@ -6,7 +6,6 @@ const Wrapper = styled.div`
 
   > div {
     height: 6rem;
-    width: 90px;
     line-height: 5.8rem;
     z-index: 999;
     > button {
@@ -48,15 +47,7 @@ const Wrapper = styled.div`
       font-family: Lato;
       font-weight: 600;
       letter-spacing: 0.5;
-      text-transform: uppercase;
       vertical-align: baseline;
-    }
-
-    img {
-      max-height: 13px;
-      margin-left: 9px;
-      border-radius: 1px;
-      vertical-align: middle;
     }
   }
 

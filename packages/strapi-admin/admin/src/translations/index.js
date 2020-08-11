@@ -44,4 +44,28 @@ const trads = {
   zh,
 };
 
+export const languageNativeNames = {
+  ar: 'العربية',
+  cs: 'čeština',
+  de: 'Deutsch',
+  en: 'English',
+  es: 'español',
+  fr: 'français',
+  it: 'italiano',
+  ja: '日本語',
+  ko: '한국어',
+  ms: 'Melayu',
+  nl: 'Nederlands',
+  pl: 'polski',
+  'pt-BR': 'português (Brasil)',
+  pt: 'português (Portugal)',
+  ru: 'русский',
+  sk: 'slovenčina',
+  tr: 'Türkçe',
+  uk: 'українська',
+  vi: 'Tiếng Việt',
+  'zh-Hans': '中文 (简体)',
+  zh: '中文 (繁體)',
+};
+
 export default trads;

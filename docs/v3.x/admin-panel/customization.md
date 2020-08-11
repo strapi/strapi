@@ -61,6 +61,11 @@ const trads = {
   fr,
 };
 
+export const languageNativeNames = {
+  en: 'English',
+  fr: 'français',
+};
+
 export default trads;
 ```
 
