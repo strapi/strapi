@@ -102,9 +102,9 @@ const checkPermissionsExist = function(permissions) {
   const failIndex = permissions.findIndex(
     permission =>
       !existingActions.some(
-        ea =>
-          ea.actionId === permission.action &&
-          (ea.section !== 'contentTypes' || ea.subjects.includes(permission.subject))
+        action =>
+          action.actionId === permission.action &&
+          (action.section !== 'contentTypes' || action.subjects.includes(permission.subject))
       )
   );
 
