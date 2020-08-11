@@ -94,6 +94,8 @@ const registerPermissions = () => {
     'content-manager'
   ].services.contenttypes.getDisplayedContentTypesUids();
 
+  const hasDraftAndPublish = uid => strapi.contentTypes[uid].options.draftAndPublish;
+
   const actions = [
     {
       section: 'contentTypes',
@@ -122,6 +124,19 @@ const registerPermissions = () => {
       uid: 'explorer.delete',
       pluginName: 'content-manager',
       subjects: contentTypesUids,
+      options: {
+        fieldsGranularity: false,
+      },
+    },
+    {
+      section: 'contentTypes',
+      displayName: 'Publish',
+      uid: 'explorer.publish',
+      pluginName: 'content-manager',
+      subjects: contentTypesUids.filter(hasDraftAndPublish),
+      options: {
+        fieldsGranularity: false,
+      },
     },
     {
       section: 'plugins',

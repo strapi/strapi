@@ -10,7 +10,14 @@ const actionFields = [
   'pluginName',
   'subjects',
   'conditions',
+  'options',
 ];
+
+const defaultAction = {
+  options: {
+    fieldsGranularity: true,
+  },
+};
 
 /**
  * Return a prefixed id that depends on the pluginName
@@ -19,15 +26,13 @@ const actionFields = [
  * @param {Object} params.uid - uid defined by the developer
  */
 const getActionId = ({ pluginName, uid }) => {
-  let id = '';
   if (pluginName === 'admin') {
-    id = `admin::${uid}`;
+    return `admin::${uid}`;
   } else if (pluginName) {
-    id = `plugins::${pluginName}.${uid}`;
-  } else {
-    id = `application::${uid}`;
+    return `plugins::${pluginName}.${uid}`;
   }
-  return id;
+
+  return `application::${uid}`;
 };
 
 /**
@@ -42,7 +47,7 @@ function createAction(attributes) {
     action.subCategory = attributes.subCategory || 'general';
   }
 
-  return action;
+  return _.merge(action, defaultAction);
 }
 
 module.exports = {
