@@ -63,7 +63,7 @@ const registerProviderActionSchema = yup
             ),
         }),
         options: yup.object({
-          fieldsGranularity: yup.boolean(),
+          fieldsRestriction: yup.boolean(),
         }),
       })
       .noUnknown()

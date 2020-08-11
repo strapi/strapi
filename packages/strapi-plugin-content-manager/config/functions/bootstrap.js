@@ -79,7 +79,7 @@ const syncComponentsSchemas = async () => {
   const componentsToAdd = _.difference(realUIDs, DBUIDs);
   const componentsToDelete = _.difference(DBUIDs, realUIDs);
 
-  // delette old schemas
+  // delete old schemas
   await Promise.all(componentsToDelete.map(uid => componentService.deleteConfiguration(uid)));
 
   // create new schemas
@@ -125,7 +125,7 @@ const registerPermissions = () => {
       pluginName: 'content-manager',
       subjects: contentTypesUids,
       options: {
-        fieldsGranularity: false,
+        fieldsRestriction: false,
       },
     },
     {
@@ -135,7 +135,7 @@ const registerPermissions = () => {
       pluginName: 'content-manager',
       subjects: contentTypesUids.filter(hasDraftAndPublish),
       options: {
-        fieldsGranularity: false,
+        fieldsRestriction: false,
       },
     },
     {

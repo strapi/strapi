@@ -2,6 +2,7 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
+const actionDomain = require('../domain/action');
 const {
   checkFieldsAreCorrectlyNested,
   checkFieldsDontHaveDuplicates,
@@ -45,11 +46,18 @@ const arrayOfConditionNames = yup
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
-const checkCTPermsDeleteHaveFieldsToNull = permissions =>
-  !Array.isArray(permissions) ||
-  permissions.every(
-    perm => perm.action !== 'plugins::content-manager.explorer.delete' || _.isNil(perm.fields)
-  );
+const checkContentTypesFieldsRestriction = permissions => {
+  const { actionProvider } = strapi.admin.services.permission;
+
+  if (!_.isArray(permissions)) {
+    return true;
+  }
+
+  return permissions.every(({ action: actionId, fields }) => {
+    const action = actionProvider.getByActionId(actionId);
+    return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
+  });
+};
 
 const permissionsAreEquals = (a, b) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
@@ -94,9 +102,9 @@ const updatePermissions = yup
             checkNoDuplicatedPermissions
           )
           .test(
-            'delete-fields-are-null',
-            'The action "plugins::content-manager.explorer.delete" must have fields set to null or undefined',
-            checkCTPermsDeleteHaveFieldsToNull
+            'fields-restriction',
+            'The actions must have fields set to null or undefined',
+            checkContentTypesFieldsRestriction
           )
           .noUnknown()
       ),

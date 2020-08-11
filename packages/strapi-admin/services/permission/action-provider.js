@@ -62,6 +62,8 @@ const createActionProvider = () => {
         }
 
         actions.set(actionId, createAction(newAction));
+
+        return this;
       });
     },
   };
