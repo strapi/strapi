@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  min-width: 90px;
   -webkit-font-smoothing: antialiased;
 
   > div {
@@ -52,8 +51,6 @@ const Wrapper = styled.div`
   }
 
   .localeDropdownMenu {
-    left: auto !important;
-    right: -5px !important;
     min-width: 90px !important;
     max-height: 162px !important;
     overflow: auto !important;
