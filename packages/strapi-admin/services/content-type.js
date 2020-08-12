@@ -146,30 +146,32 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) =>
   permissions.map(perm => {
     const { action: actionId, fields, subject } = perm;
     const action = strapi.admin.services.permission.actionProvider.getByActionId(actionId);
-    let newFields = fields;
 
     if (!actionDomain.hasFieldsRestriction(action)) {
-      newFields = null;
-    } else if (subject && strapi.contentTypes[subject]) {
-      const possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
-        components: strapi.components,
-        nestingLevel,
-      });
-
-      const requiredFields = getNestedFields(strapi.contentTypes[subject], {
-        components: strapi.components,
-        requiredOnly: true,
-        nestingLevel,
-        existingFields: fields,
-      });
-      const badNestedFields = _.uniq([
-        ..._.intersection(fields, possibleFields),
-        ...requiredFields,
-      ]);
-      newFields = badNestedFields.filter(
-        field => !badNestedFields.some(fp.startsWith(`${field}.`))
-      );
+      return { ...perm, fields: null };
     }
+
+    if (!subject || !strapi.contentTypes[subject]) {
+      return { ...perm, fields };
+    }
+
+    const possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
+      components: strapi.components,
+      nestingLevel,
+    });
+
+    const requiredFields = getNestedFields(strapi.contentTypes[subject], {
+      components: strapi.components,
+      requiredOnly: true,
+      nestingLevel,
+      existingFields: fields,
+    });
+
+    const badNestedFields = _.uniq([..._.intersection(fields, possibleFields), ...requiredFields]);
+
+    const newFields = badNestedFields.filter(
+      field => !badNestedFields.some(fp.startsWith(`${field}.`))
+    );
 
     return { ...perm, fields: newFields };
   }, []);
