@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDebounce } from '@buffetjs/hooks';
-import { HeaderSearch, useGlobalContext, useQuery } from 'strapi-helper-plugin';
+import { HeaderSearch, useGlobalContext, useQuery, LoadingIndicator } from 'strapi-helper-plugin';
 import { useAppContext } from '../../../hooks';
 import { getTrad, getFileModelTimestamps } from '../../../utils';
 
@@ -15,6 +15,7 @@ const HomePageSettings = ({
   areAllCheckboxesSelected,
   filters,
   hasSomeCheckboxSelected,
+  isLoading,
   onChange,
   onFilterDelete,
   onSelectAll,
@@ -54,21 +55,28 @@ const HomePageSettings = ({
         value={searchValue}
         autoFocus="true"
       />
-      <ControlsWrapper>
-        {canUpdate && (
-          <>
-            <SelectAll
-              onChange={onSelectAll}
-              checked={areAllCheckboxesSelected}
-              someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
-            />
-            <Padded right />
-          </>
-        )}
-        <SortPicker onChange={onChange} value={query.get('_sort') || `${updated_at}:DESC`} />
-        <Padded right />
-        <Filters onChange={onChange} filters={filters} onClick={onFilterDelete} />
-      </ControlsWrapper>
+      {isLoading ? (
+        <>
+          <Padded top bottom size="lg" />
+          <LoadingIndicator />
+        </>
+      ) : (
+        <ControlsWrapper>
+          {canUpdate && (
+            <>
+              <SelectAll
+                onChange={onSelectAll}
+                checked={areAllCheckboxesSelected}
+                someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+              />
+              <Padded right />
+            </>
+          )}
+          <SortPicker onChange={onChange} value={query.get('_sort') || `${updated_at}:DESC`} />
+          <Padded right />
+          <Filters onChange={onChange} filters={filters} onClick={onFilterDelete} />
+        </ControlsWrapper>
+      )}
     </>
   );
 };
@@ -86,6 +94,7 @@ HomePageSettings.propTypes = {
   areAllCheckboxesSelected: PropTypes.bool,
   filters: PropTypes.array,
   hasSomeCheckboxSelected: PropTypes.bool,
+  isLoading: PropTypes.bool.isRequired,
   onChange: PropTypes.func,
   onFilterDelete: PropTypes.func,
   onSelectAll: PropTypes.func,
