@@ -470,7 +470,7 @@ module.exports = {
       }
 
       // Refer to https://swagger.io/specification/#pathItemObject
-      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path);
+      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path, current);
 
       if (!verb.includes('post')) {
         if (Array.isArray(verb)) {
@@ -687,7 +687,8 @@ module.exports = {
       const parameters = this.generateVerbParameters(
         verb,
         actionType,
-        `/${pluginName}${current.path}`
+        `/${pluginName}${current.path}`,
+        current
       );
 
       if (_.isEmpty(defaultDocumentation)) {
@@ -1265,8 +1266,9 @@ module.exports = {
    * @param {String} verb
    * @param {String} controllerMethod
    * @param {String} endPoint
+   * @param {String} routeObject
    */
-  generateVerbParameters: function(verb, controllerMethod, endPoint) {
+  generateVerbParameters: function(verb, controllerMethod, endPoint, routeObject) {
     const params = pathToRegexp
       .parse(endPoint)
       .filter(token => _.isObject(token))
@@ -1287,11 +1289,10 @@ module.exports = {
       // parametersOptions corresponds to this section
       // of the documentation https://strapi.io/documentation/guides/filters.html
 
-      const apiElement = this.extractAPIElement(endPoint);
-      if (this.hasAPIElement(apiElement)) {
-        return this.combineMembersAndParameters(apiElement, params);
+      const apiName = this.extractAPIName(routeObject);
+      if (this.hasAPIName(apiName)) {
+        return this.combineMembersAndParameters(apiName, params);
       }
-      return [...params, ...parametersOptions];
     }
     return params;
   },
@@ -1301,14 +1302,18 @@ module.exports = {
    * @param endPoint
    * @return the API route.
    */
-  extractAPIElement: endPoint => pluralize.singular(endPoint.replace(/^\//, '')),
+  extractAPIName: routeObject => {
+    const path = _.get(routeObject, ['path']);
+    const pluginName = _.get(routeObject, ['config', 'tag', 'plugin']);
+    return `${pluginName || ''}${pluralize.singular(path)}`.replace(/^\//, '');
+  },
 
   /**
    * Checks if a candidate element is part of the API.
-   * @param apiElement The candidate API element.
+   * @param apiName The candidate API element.
    * @return true if the strapi api element contains the candidate else false.
    */
-  hasAPIElement: apiElement => _.has(strapi, ['api', apiElement]),
+  hasAPIName: apiName => _.has(strapi, ['api', apiName]),
 
   /**
    * The parameters for the get and find verbs need to be generated from the model
@@ -1317,25 +1322,30 @@ module.exports = {
    * like e.g: city_eq, city_ne, city_lt, city_lte, or country_eq, country_contains.
    * So the parameter are always a combination of the name of the member (e.g. 'city', 'country') and
    * a list of parameter suffixes you can find in parameterSuffixes.json and parameterOptions.json.
-   * @param apiElement The actual entity, like e.g: address, country
+   * @param apiName The actual entity, like e.g: address, country
    * @param params Generated parameter, might be empty.
    * @return {*[]} The list with all parameters for a get or find verb of an entity
    */
-  combineMembersAndParameters: (apiElement, params) => {
-    const apiElementAttrs = _.get(
-      strapi,
-      ['api', apiElement, 'models', apiElement, 'attributes'],
+  combineMembersAndParameters: (apiName, params) => {
+    const attributes = _.get(strapi, ['api', apiName, 'models', apiName, 'attributes'], []);
+
+    const combinedParameters = _.reduce(
+      attributes,
+      (parameters, attribute, attributeName) => {
+        if (!_.has(attribute, 'type')) return parameters;
+
+        const suffixedParameters = parameterSuffixes.map(suffix => {
+          const options = parametersOptions.find(option => option.name === suffix);
+          return {
+            ...options,
+            name: `${attributeName}${suffix}`,
+          };
+        });
+
+        return parameters.concat(suffixedParameters);
+      },
       []
     );
-    const apiElementsWithType = Object.entries(apiElementAttrs).filter(kv => kv[1].type);
-    const combinedParameters = apiElementsWithType.flatMap(kv => {
-      return parameterSuffixes.map(ap => {
-        const fullPo = { ...parametersOptions.find(po => po.name === ap) };
-        // Combining the name of the member in an entity with the parameter suffixes, creating something like e.g: country_ne
-        fullPo['name'] = `${kv[0]}${ap}`;
-        return fullPo;
-      });
-    });
     return [...params, ...combinedParameters];
   },
 
