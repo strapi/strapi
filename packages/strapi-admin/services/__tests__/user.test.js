@@ -26,6 +26,9 @@ describe('User', () => {
   });
 
   describe('create', () => {
+    const count = jest.fn(() => Promise.resolve(1));
+    const sendDidInviteUser = jest.fn();
+
     test('Creates a user by merging given and default attributes', async () => {
       const create = jest.fn(user => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
@@ -36,10 +39,12 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -63,10 +68,12 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -103,10 +110,12 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -122,6 +131,33 @@ describe('User', () => {
       const result = await userService.create(input);
 
       expect(result).toMatchObject(expected);
+    });
+  });
+
+  describe('Count users', () => {
+    test('Count users without params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const amount = await userService.count();
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith({});
+    });
+
+    test('Count users with params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const params = { foo: 'bar' };
+      const amount = await userService.count(params);
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith(params);
     });
   });
 
