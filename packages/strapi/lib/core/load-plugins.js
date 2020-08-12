@@ -38,7 +38,7 @@ const loadLocalPlugins = async ({ dir, config }) => {
     loadConfig(pluginsDir, '*/config/**/*.+(js|json)'),
   ]);
   const userConfigs = Object.keys(files).reduce((acc, plugin) => {
-    acc[plugin] = config.get(['plugins', plugin], {});
+    acc[plugin] = { config: config.get(['plugins', plugin], {}) };
     return acc;
   }, {});
   return _.merge(files, configs, userConfigs);
