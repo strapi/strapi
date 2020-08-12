@@ -11,6 +11,7 @@ const HomePageContent = ({
   data,
   dataCount,
   dataToDelete,
+  isLoading,
   onCardCheck,
   onCardClick,
   onClick,
@@ -41,6 +42,7 @@ const HomePageContent = ({
         areAllCheckboxesSelected={areAllCheckboxesSelected}
         filters={filters}
         hasSomeCheckboxSelected={hasSomeCheckboxSelected}
+        isLoading={isLoading}
         onChange={onParamsChange}
         onFilterDelete={onFilterDelete}
         onSelectAll={onSelectAll}
@@ -63,6 +65,7 @@ HomePageContent.defaultProps = {
   data: [],
   dataCount: 0,
   dataToDelete: [],
+  isLoading: false,
   onCardCheck: () => {},
   onCardClick: () => {},
   onClick: () => {},
@@ -75,6 +78,7 @@ HomePageContent.propTypes = {
   data: PropTypes.array,
   dataCount: PropTypes.number,
   dataToDelete: PropTypes.array,
+  isLoading: PropTypes.bool,
   onCardCheck: PropTypes.func,
   onCardClick: PropTypes.func,
   onClick: PropTypes.func,
