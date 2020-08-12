@@ -115,11 +115,9 @@ module.exports = ({ models, target }, ctx) => {
 
     // Add virtual key to provide populate and reverse populate
     _.forEach(
-      _.pickBy(definition.loadedModel, model => {
-        return model.type === 'virtual';
-      }),
+      _.pickBy(definition.loadedModel, ({ type }) => type === 'virtual'),
       (value, key) => {
-        schema.virtual(key.replace('_v', ''), {
+        schema.virtual(key, {
           ref: value.ref,
           localField: '_id',
           foreignField: value.via,

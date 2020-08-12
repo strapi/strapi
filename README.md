@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/899069a8-ac49-491f-b2d2-791b27799699/Logo.WhiteBackground.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200519%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200519T174202Z&X-Amz-Expires=86400&X-Amz-Signature=8a53d3ee4263f890e83c918313eaa659b8589b6d4a9300fda6b5cc99f89c56f8&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Logo.WhiteBackground.svg%22" width="318px" alt="Strapi logo" />
+    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
   </a>
 </p>
 <h3 align="center">API creation made simple, secure and fast.</h3>

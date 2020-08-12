@@ -9,6 +9,7 @@ import {
   isNaN,
   toNumber,
 } from 'lodash';
+import moment from 'moment';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 
@@ -283,6 +284,14 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
                   }
 
                   return !!value;
+                }
+
+                if (['date', 'datetime'].includes(type)) {
+                  return moment(value)._isValid === true;
+                }
+
+                if (type === 'boolean') {
+                  return value !== undefined;
                 }
 
                 return !isEmpty(value);

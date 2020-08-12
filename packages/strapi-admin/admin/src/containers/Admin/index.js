@@ -97,7 +97,9 @@ export class Admin extends React.Component {
       try {
         await axios.post('https://analytics.strapi.io/track', {
           event,
-          properties,
+          // PROJECT_TYPE is an env variable defined in the webpack config
+          // eslint-disable-next-line no-undef
+          properties: { ...properties, projectType: PROJECT_TYPE },
           uuid,
         });
       } catch (err) {

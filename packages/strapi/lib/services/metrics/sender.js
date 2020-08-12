@@ -6,6 +6,7 @@ const isDocker = require('is-docker');
 const { machineIdSync } = require('node-machine-id');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
+const ee = require('../../utils/ee');
 
 const defaultQueryOpts = {
   timeout: 1000,
@@ -22,6 +23,7 @@ const ANALYTICS_URI = 'https://analytics.strapi.io';
 module.exports = strapi => {
   const uuid = strapi.config.uuid;
   const deviceId = machineIdSync();
+  const isEE = strapi.EE === true && ee.isEE === true;
 
   const anonymous_metadata = {
     environment: strapi.config.environment,
@@ -33,6 +35,7 @@ module.exports = strapi => {
     isCI: ciEnv.isCI,
     version: strapi.config.info.strapi,
     strapiVersion: strapi.config.info.strapi,
+    projectType: isEE ? 'Enterprise' : 'Community',
   };
 
   return async (event, payload = {}, opts = {}) => {
