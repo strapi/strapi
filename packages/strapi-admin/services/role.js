@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { map, filter } = require('lodash/fp');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
 const { createPermission } = require('../domain/permission');
@@ -209,22 +210,26 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   const authorRole = await create({
     name: 'Author',
     code: 'strapi-author',
-    description: 'Authors can manage and publish the content they created.',
+    description: 'Authors can manage the content they have created.',
   });
 
   // create content-type permissions for each role
   const editorPermissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
     contentTypesActions,
     {
-      fieldsNullFor: ['plugins::content-manager.explorer.delete'],
       restrictedSubjects: ['plugins::users-permissions.user'],
     }
   );
 
-  const authorPermissions = editorPermissions.map(p => ({
-    ...p,
-    conditions: ['admin::is-creator'],
-  }));
+  const addIsCreatorCondition = map(p => _.merge({}, p, { conditions: ['admin::is-creator'] }));
+  const removeRestrictedActions = filter(
+    p => !['plugins::content-manager.explorer.publish'].includes(p.action)
+  );
+
+  const authorPermissions = _.flow(
+    removeRestrictedActions,
+    addIsCreatorCondition
+  )(editorPermissions);
 
   editorPermissions.push(...getDefaultPluginPermissions());
   authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));

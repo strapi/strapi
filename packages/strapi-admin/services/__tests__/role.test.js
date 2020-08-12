@@ -402,7 +402,6 @@ describe('Role', () => {
         description: 'Authors can manage and publish the content they created.',
       });
       expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
-        fieldsNullFor: ['plugins::content-manager.explorer.delete'],
         restrictedSubjects: ['plugins::users-permissions.user'],
       });
       expect(assign).toHaveBeenCalledTimes(2);
