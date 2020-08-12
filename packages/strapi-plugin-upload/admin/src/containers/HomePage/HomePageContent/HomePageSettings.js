@@ -53,6 +53,7 @@ const HomePageSettings = ({
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
         name="_q"
         value={searchValue}
+        autoFocus="true"
       />
       {isLoading ? (
         <>
