@@ -98,6 +98,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
   return (
     <>
       {isBulkable && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <td key="i" onClick={e => e.stopPropagation()}>
           <CustomInputCheckbox
             name={row.id}

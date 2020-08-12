@@ -7,6 +7,7 @@ import useDataManager from '../../hooks/useDataManager';
 import Ul from '../SelectMenuUl';
 import Category from './Category';
 
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
