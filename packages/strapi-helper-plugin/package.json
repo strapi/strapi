@@ -46,7 +46,7 @@
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-replace": "^2.2.0",
-    "rollup-plugin-svg": "^1.0.1",
+    "rollup-plugin-svg": "^2.0.0",
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
@@ -68,7 +68,7 @@
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "styled-components": "^5.0.0",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^3.3.1"
   },
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

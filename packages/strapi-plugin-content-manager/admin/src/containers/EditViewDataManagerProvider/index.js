@@ -618,10 +618,6 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const showLoader = useMemo(() => {
-    return !isCreatingEntry && isLoading;
-  }, [isCreatingEntry, isLoading]);
-
   const overlayBlockerParams = useMemo(
     () => ({
       children: <div />,
@@ -679,7 +675,7 @@ const EditViewDataManagerProvider = ({
     >
       <>
         <OverlayBlocker key="overlayBlocker" isOpen={isSubmitting} {...overlayBlockerParams} />
-        {showLoader ? (
+        {isLoading ? (
           <LoadingIndicatorPage />
         ) : (
           <>

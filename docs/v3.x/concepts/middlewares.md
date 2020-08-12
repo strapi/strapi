@@ -90,7 +90,7 @@ module.exports = {
   //...
   settings: {
     cors: {
-      origin: 'http://localhost',
+      origin: ['http://localhost', 'https://mysite.com', 'https://www.mysite.com']
     },
   },
 };
@@ -207,7 +207,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
 - [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
   - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
-  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `*`.
+  - `origin` (string or array): Allowed URLs (`http://example1.com, http://example2.com`, `['http://www.example1.com', 'http://example1.com']` or allows everyone `*`). Default value: `*`.
   - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
   - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
   - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.

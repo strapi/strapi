@@ -6,7 +6,7 @@ Prior to starting this guide, you should have created a [Strapi project](../gett
 
 ### Amazon AWS Install Requirements and creating an IAM non-root user
 
-- You must have an [Amazon AWS](aws.amazon.com/free) account before doing these steps.
+- You must have an [Amazon AWS](https://aws.amazon.com/free) account before doing these steps.
 
 Best practices for using **AWS Amazon** services state to not use your root account user and to use instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is therefore only used for a very few [select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). For example, for **billing**, you create an **Administrator user and Group** for such things. And other, more routine tasks are done with a **regular IAM User**.
 
