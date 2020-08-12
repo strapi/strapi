@@ -215,7 +215,7 @@
   "app.components.UpgradePlanModal.button": "LEARN MORE",
   "app.components.UpgradePlanModal.limit-reached": "You have reached the limit",
   "app.components.UpgradePlanModal.text-ce": "Community Edition",
-  "app.components.UpgradePlanModal.text-ee": "Entreprise Edition",
+  "app.components.UpgradePlanModal.text-ee": "Enterprise Edition",
   "app.components.UpgradePlanModal.text-power": "Unlock the full power",
   "app.components.UpgradePlanModal.text-strapi": "of Strapi by upgrading your plan to the",
   "app.components.Users.MagicLink.connect": "Send this link to the user for them to connect.",

@@ -32,7 +32,7 @@ export const CONTROLS = [
       className: 'underline',
       hideLabel: true,
       handler: 'addContent',
-      text: '__textToReplace__',
+      text: '<u>textToReplace</u>',
     },
     {
       label: 'S',
