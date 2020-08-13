@@ -16,8 +16,6 @@ const defaultSettings = require('../config/settings.json');
 const parametersOptions = require('./utils/parametersOptions.json');
 const parameterSuffixes = require('./utils/parameterSuffixes.json');
 
-const pluralize = require('pluralize');
-
 // keys to pick from the extended config
 const defaultSettingsKeys = Object.keys(defaultSettings);
 
@@ -470,7 +468,7 @@ module.exports = {
       }
 
       // Refer to https://swagger.io/specification/#pathItemObject
-      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path, current);
+      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path, apiName);
 
       if (!verb.includes('post')) {
         if (Array.isArray(verb)) {
@@ -688,7 +686,7 @@ module.exports = {
         verb,
         actionType,
         `/${pluginName}${current.path}`,
-        current
+        null
       );
 
       if (_.isEmpty(defaultDocumentation)) {
@@ -1268,7 +1266,7 @@ module.exports = {
    * @param {String} endPoint
    * @param {String} routeObject
    */
-  generateVerbParameters: function(verb, controllerMethod, endPoint, routeObject) {
+  generateVerbParameters: function(verb, controllerMethod, endPoint, apiName) {
     const params = pathToRegexp
       .parse(endPoint)
       .filter(token => _.isObject(token))
@@ -1288,32 +1286,12 @@ module.exports = {
     if (verb === 'get' && controllerMethod === 'find') {
       // parametersOptions corresponds to this section
       // of the documentation https://strapi.io/documentation/guides/filters.html
-
-      const apiName = this.extractAPIName(routeObject);
-      if (this.hasAPIName(apiName)) {
+      if (apiName) {
         return this.combineMembersAndParameters(apiName, params);
       }
     }
     return params;
   },
-
-  /**
-   * Extract the api route from the endpoint.
-   * @param endPoint
-   * @return the API route.
-   */
-  extractAPIName: routeObject => {
-    const path = _.get(routeObject, ['path']);
-    const pluginName = _.get(routeObject, ['config', 'tag', 'plugin']);
-    return `${pluginName || ''}${pluralize.singular(path)}`.replace(/^\//, '');
-  },
-
-  /**
-   * Checks if a candidate element is part of the API.
-   * @param apiName The candidate API element.
-   * @return true if the strapi api element contains the candidate else false.
-   */
-  hasAPIName: apiName => _.has(strapi, ['api', apiName]),
 
   /**
    * The parameters for the get and find verbs need to be generated from the model
