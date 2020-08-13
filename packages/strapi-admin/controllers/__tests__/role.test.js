@@ -178,6 +178,7 @@ describe('Role controller', () => {
               },
               actionProvider: {
                 getAllByMap: jest.fn(),
+                getByActionId: jest.fn(() => ({ options: { fieldsRestriction: true } })),
               },
             },
           },
