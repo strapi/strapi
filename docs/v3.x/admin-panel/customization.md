@@ -8,7 +8,7 @@ To apply your changes you need to [rebuild](#build) your admin panel
 
 ## Change access URL
 
-By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path. For more advanced settings please see the [server config](https://strapi.io/documentation/v3.x/concepts/configurations.html#server) documentation.
+By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path. For more advanced settings please see the [server config](../concepts/configurations.md#server) documentation.
 
 **Path —** `./config/server.js`.
 
@@ -22,7 +22,7 @@ module.exports = ({ env }) => ({
 });
 ```
 
-The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
+The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configuration above.
 
 ## Development mode
 
@@ -132,7 +132,6 @@ export const SHOW_TUTORIALS = false;
 export const SETTINGS_BASE_URL = '/settings';
 ```
 
-<<<<<<< HEAD
 ### Changing the host and port
 
 By default, the front-development server runs on `localhost:8000`. However, you can change this setting by updating the following configuration:
@@ -147,7 +146,7 @@ module.exports = ({ env }) => ({
     host: 'my-host', // only used along with `strapi develop --watch-admin` command
     port: 3000, // only used along with `strapi develop --watch-admin` command
   },
-};
+});
 ```
 
 =======

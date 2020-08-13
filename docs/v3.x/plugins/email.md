@@ -54,7 +54,7 @@ await strapi.plugins.email.services.email.sendTemplatedEmail(
   emailTemplate,
   {
     user: _.pick(user, ['username', 'email', 'firstname', 'lastname']),
-  },
+  }
 );
 ```
 
