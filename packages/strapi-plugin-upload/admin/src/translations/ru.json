@@ -8,6 +8,7 @@
   "control-card.crop": "Кадрирование",
   "control-card.delete": "Удалить",
   "control-card.download": "Скачать",
+  "control-card.replace-media": "Заменить ресурс",
   "control-card.edit": "Редактировать",
   "control-card.save": "Сохранить",
   "filter.add": "Добавить фильтр",
@@ -55,6 +56,11 @@
   "settings.form.responsiveDimensions.description": "Будут сгенерированы большое, среднее, маленькое изображение",
   "settings.form.responsiveDimensions.label": "Включить адаптивную загрузку",
   "settings.form.sizeOptimization.label": "Включить оптимизацию размера (без потери качества)",
+<<<<<<< HEAD
+=======
+  "settings.form.autoOrientation.label": "Включить автоопределение ориентации",
+  "settings.form.videoPreview.label": "Превью",
+>>>>>>> Auto rotate JPEG images
   "settings.form.videoPreview.description": "Будет сгенерировано шестисекундное превью (GIF)",
   "settings.form.videoPreview.label": "Превью",
   "settings.header.label": "Медиа-библиотека - Настройки",
@@ -68,6 +74,11 @@
   "sort.name_desc": "По алфавиту обратно (Я-А)",
   "sort.updated_at_asc": "Сначала давно обновлённые",
   "sort.updated_at_desc": "Сначала недавно обновлённые",
+<<<<<<< HEAD
   "window.confirm.close-modal.file": "Вы уверены? Изменения будут потеряны.",
   "window.confirm.close-modal.files": "Вы уверены? Некоторые файлы ещё не загружены."
+=======
+  "window.confirm.close-modal.files": "Вы уверены? Некоторые файлы ещё не загружены.",
+  "window.confirm.close-modal.file": "Вы уверены? Изменения будут потеряны."
+>>>>>>> Auto rotate JPEG images
 }
