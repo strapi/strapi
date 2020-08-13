@@ -2,11 +2,12 @@
 
 const body = require('koa-body');
 const qs = require('qs');
+const { omit } = require('lodash');
 
 /**
  * Body parser hook
  */
-const addQsParser = app => {
+const addQsParser = (app, settings) => {
   Object.defineProperty(app.request, 'query', {
     configurable: false,
     enumerable: true,
@@ -16,7 +17,7 @@ const addQsParser = app => {
     get() {
       const qstr = this.querystring;
       const cache = (this._querycache = this._querycache || {});
-      return cache[qstr] || (cache[qstr] = qs.parse(qstr, { depth: 20 }));
+      return cache[qstr] || (cache[qstr] = qs.parse(qstr, settings));
     },
 
     /*
@@ -40,14 +41,13 @@ module.exports = strapi => {
         // disable for graphql
         // TODO: find a better way later
         if (ctx.url === '/graphql') return next();
-
         return body({
           patchKoa: true,
-          ...strapi.config.middleware.settings.parser,
+          ...omit(strapi.config.middleware.settings.parser, 'queryStringParser'),
         })(ctx, next);
       });
 
-      addQsParser(strapi.app);
+      addQsParser(strapi.app, strapi.config.get('middleware.settings.parser.queryStringParser'));
     },
   };
 };
