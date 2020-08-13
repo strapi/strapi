@@ -85,6 +85,11 @@ const updatePermissions = yup
                 'fields-restriction',
                 'The permission at ${path} must have fields set to null or undefined',
                 function(fields) {
+                  // If the parent has no action field, then we ignore this test
+                  if (_.isNil(this.parent.action)) {
+                    return true;
+                  }
+
                   const { actionProvider } = strapi.admin.services.permission;
                   const action = actionProvider.getByActionId(this.parent.action);
 
