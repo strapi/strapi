@@ -46,19 +46,6 @@ const arrayOfConditionNames = yup
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
-const checkContentTypesFieldsRestriction = permissions => {
-  const { actionProvider } = strapi.admin.services.permission;
-
-  if (!_.isArray(permissions)) {
-    return true;
-  }
-
-  return permissions.every(({ action: actionId, fields }) => {
-    const action = actionProvider.getByActionId(actionId);
-    return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
-  });
-};
-
 const permissionsAreEquals = (a, b) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
 
@@ -93,20 +80,25 @@ const updatePermissions = yup
                 'field-nested',
                 'Fields format are incorrect (duplicates).',
                 checkFieldsDontHaveDuplicates
+              )
+              .test(
+                'fields-restriction',
+                'The permission at ${path} must have fields set to null or undefined',
+                function(fields) {
+                  const { actionProvider } = strapi.admin.services.permission;
+                  const action = actionProvider.getByActionId(this.parent.action);
+
+                  return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
+                }
               ),
             conditions: yup.array().of(yup.string()),
           })
-          .test(
-            'delete-fields-are-null',
-            'Some permissions are duplicated (same action and subject)',
-            checkNoDuplicatedPermissions
-          )
-          .test(
-            'fields-restriction',
-            'The actions must have fields set to null or undefined',
-            checkContentTypesFieldsRestriction
-          )
           .noUnknown()
+      )
+      .test(
+        'delete-fields-are-null',
+        'Some permissions are duplicated (same action and subject)',
+        checkNoDuplicatedPermissions
       ),
   })
   .required()
