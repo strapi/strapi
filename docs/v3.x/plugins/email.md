@@ -54,7 +54,7 @@ await strapi.plugins.email.services.email.sendTemplatedEmail(
   emailTemplate,
   {
     user: _.pick(user, ['username', 'email', 'firstname', 'lastname']),
-  },
+  }
 );
 ```
 
@@ -123,7 +123,12 @@ module.exports = ({ env }) => ({
 If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations.md#environments)
 :::
 
-## Create a provider
+::: tip
+When testing the new email provider with one the two templates created during strapi setup, the shipper email used is the one on the template, which is no-reply@strapi.io and it has to be modified to the email used with your email provider, otherwise it will fail the test.
+More info here: [Configure templates Locally](http://localhost:1337/admin/plugins/users-permissions/email-templates)
+:::
+
+## Create new provider
 
 If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier) and customize the `send` function.
 
