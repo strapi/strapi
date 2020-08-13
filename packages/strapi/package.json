@@ -51,17 +51,16 @@
     "qs": "^6.9.3",
     "resolve-cwd": "^3.0.0",
     "rimraf": "^2.6.2",
-    "shelljs": "^0.8.3",
-    "strapi-database": "3.1.2",
-    "strapi-generate": "3.1.2",
-    "strapi-generate-api": "3.1.2",
-    "strapi-generate-controller": "3.1.2",
-    "strapi-generate-model": "3.1.2",
-    "strapi-generate-new": "3.1.2",
-    "strapi-generate-plugin": "3.1.2",
-    "strapi-generate-policy": "3.1.2",
-    "strapi-generate-service": "3.1.2",
-    "strapi-utils": "3.1.2"
+    "strapi-database": "3.1.1",
+    "strapi-generate": "3.1.1",
+    "strapi-generate-api": "3.1.1",
+    "strapi-generate-controller": "3.1.1",
+    "strapi-generate-model": "3.1.1",
+    "strapi-generate-new": "3.1.1",
+    "strapi-generate-plugin": "3.1.1",
+    "strapi-generate-policy": "3.1.1",
+    "strapi-generate-service": "3.1.1",
+    "strapi-utils": "3.1.1"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js"

@@ -93,7 +93,6 @@
     "remove-markdown": "^0.2.2",
     "reselect": "^4.0.0",
     "sanitize.css": "^4.1.0",
-    "shelljs": "^0.7.8",
     "sift": "13.1.10",
     "strapi-helper-plugin": "3.1.2",
     "strapi-utils": "3.1.2",

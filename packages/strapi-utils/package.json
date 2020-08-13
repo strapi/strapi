@@ -18,8 +18,12 @@
     "date-fns": "^2.8.1",
     "lodash": "4.17.19",
     "pino": "^4.7.1",
+<<<<<<< HEAD
     "pluralize": "^8.0.0",
     "shelljs": "^0.8.3",
+=======
+    "pluralize": "^7.0.0",
+>>>>>>> Cleanup shelljs
     "yup": "0.28.1"
   },
   "author": {
