@@ -12,6 +12,27 @@ const RESERVED_ATTRIBUTE_NAMES = [
   'changed',
   'created_by',
   'updated_by',
+  '_posts', // list found here https://mongoosejs.com/docs/api.html#schema_Schema.reserved
+  '_pres',
+  'collection',
+  'emit',
+  'errors',
+  'get',
+  'init',
+  'isModified',
+  'isNew',
+  'listeners',
+  'modelName',
+  'on',
+  'once',
+  'populated',
+  'prototype',
+  'remove',
+  'removeListener',
+  'save',
+  'schema',
+  'toObject',
+  'validate',
 ];
 
 module.exports = {
