@@ -39,7 +39,7 @@ const GlobalStyle = createGlobalStyle`
     background: transparent;
     .modal-dialog {
       max-width: 74.5rem;
-      margin: 16rem auto 3rem calc(50% - #{$left-menu-width});
+      margin: 16rem auto 3rem calc(50% - #{$left - menu - width});
       position: relative;
       z-index: 999;
     }
@@ -135,6 +135,7 @@ const GlobalStyle = createGlobalStyle`
 
   ::-webkit-scrollbar {
     width: 9px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {

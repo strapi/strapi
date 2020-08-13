@@ -58,7 +58,7 @@ Follow the instructions and return to your command line.
 
 Create a [new Strapi project](../getting-started/quick-start.md) (if you want to deploy an existing project go to step 4).
 
-::: warning NOTE
+::: tip NOTE
 
 If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](../guides/databases.md#install-mongodb-locally) then, jump to step 4.
 
@@ -131,7 +131,7 @@ heroku create
 
 You can use `heroku create custom-project-name`, to have Heroku create a `custom-project-name.heroku.com` URL. Otherwise, Heroku will automatically generate a random project name (and URL) for you.
 
-::: warning NOTE
+::: tip NOTE
 If you have a Heroku project app already created. You would use the following step to initialize your local project folder:
 
 `Path: ./my-project/`

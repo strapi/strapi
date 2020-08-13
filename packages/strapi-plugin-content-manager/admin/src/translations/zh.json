@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "找到 {label} 筆資料",
   "containers.List.pluginHeaderDescription.singular": "找到 {label} 筆資料",
   "containers.ListPage.displayedFields": "顯示欄位",
-  "containers.SettingPage.addField": "新增欄位",
-  "containers.SettingPage.addRelationalField": "新增關聯欄位",
   "containers.SettingPage.attributes": "屬性",
   "containers.SettingPage.attributes.description": "調整欄位的順序",
   "containers.SettingPage.editSettings.description": "拖曳欄位以規劃排版",

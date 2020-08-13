@@ -36,10 +36,9 @@ export function freezeApp(data) {
   };
 }
 
-export function getDataSucceeded(hasAdminUser, data) {
+export function getDataSucceeded(data) {
   return {
     type: GET_DATA_SUCCEEDED,
-    hasAdminUser,
     data,
   };
 }

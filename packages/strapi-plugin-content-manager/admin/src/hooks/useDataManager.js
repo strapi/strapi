@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 import EditViewDataManagerContext from '../contexts/EditViewDataManager';
 
-const useDataManager = () => useContext(EditViewDataManagerContext);
+const useDataManager = () => {
+  return useContext(EditViewDataManagerContext);
+};
 
 export default useDataManager;

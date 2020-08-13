@@ -16,7 +16,6 @@ function SelectMany({
   isDisabled,
   isLoading,
   move,
-  nextSearch,
   onInputChange,
   onMenuClose,
   onMenuScrollToBottom,
@@ -96,11 +95,15 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
+                isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
                 moveRelation={moveRelation}
-                nextSearch={nextSearch}
-                onRemove={() => onRemove(`${name}.${index}`)}
+                onRemove={() => {
+                  if (!isDisabled) {
+                    onRemove(`${name}.${index}`);
+                  }
+                }}
                 targetModel={targetModel}
               />
             ))}
@@ -123,7 +126,6 @@ SelectMany.propTypes = {
   mainField: PropTypes.string.isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
-  nextSearch: PropTypes.string.isRequired,
   isLoading: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,

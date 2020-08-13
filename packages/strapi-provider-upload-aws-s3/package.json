@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-aws-s3",
-  "version": "3.0.4",
+  "version": "3.1.3",
   "description": "AWS S3 provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   "main": "./lib",
   "dependencies": {
     "aws-sdk": "^2.457.0",
-    "lodash": "^4.17.11"
+    "lodash": "4.17.19"
   },
   "strapi": {
     "isProvider": true
@@ -43,7 +43,7 @@
     "node": ">=10.10.0",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },
