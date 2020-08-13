@@ -212,6 +212,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const deleteCategory = async categoryUid => {
     try {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
+      // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
           id: getTrad('popUpWarning.bodyMessage.category.delete'),
@@ -244,6 +245,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     try {
       const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
       const isTemporary = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
+      // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
           id: getTrad(

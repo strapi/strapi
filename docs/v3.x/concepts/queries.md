@@ -368,7 +368,7 @@ const result = strapi.query('restaurant').model.find({
   date: { $gte: '2019-01-01T00.00.00Z' },
 });
 
-const fields = result.toObject();
+const fields = result.map(entry => entry.toObject());
 ```
 
 :::

@@ -17,7 +17,7 @@ module.exports = {
       'link',
       {
         rel: 'icon',
-        href: 'https://strapi.io/favicon.ico',
+        href: 'https://strapi.io/assets/favicon-32x32.png',
       },
     ],
 

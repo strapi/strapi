@@ -68,8 +68,10 @@ const sanitizeEntity = (dataSource, options) => {
       return { ...acc, [key]: nextVal };
     }
 
+    const isAllowedField = !includeFields || allowedFieldsHasKey;
+
     // Dynamic zones
-    if (attribute && attribute.type === 'dynamiczone' && value !== null && allowedFieldsHasKey) {
+    if (attribute && attribute.type === 'dynamiczone' && value !== null && isAllowedField) {
       const nextVal = value.map(elem =>
         sanitizeEntity(elem, {
           model: strapi.getModel(elem.__component),
@@ -79,8 +81,8 @@ const sanitizeEntity = (dataSource, options) => {
       );
       return { ...acc, [key]: nextVal };
     }
+
     // Other fields
-    const isAllowedField = !includeFields || allowedFieldsHasKey;
     if (isAllowedField) {
       return { ...acc, [key]: value };
     }
