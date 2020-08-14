@@ -12,7 +12,7 @@ const withLifecycles = ({ query, model, fn }) => async (params, ...rest) => {
   const populate = await executeBeforeLifecycle(query, model, ...queryArguments);
 
   // execute query
-  if (Array.isArray(queryArguments) && populate) {
+  if (populate) {
     queryArguments[1] = populate;
   }
   const result = await fn(...queryArguments);
