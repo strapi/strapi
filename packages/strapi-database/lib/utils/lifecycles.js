@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 const executeLifecycle = async (lifecycle, model, ...args) => {
   if (_.has(model, `lifecycles.${lifecycle}`)) {
-    await model.lifecycles[lifecycle](...args);
+    return await model.lifecycles[lifecycle](...args);
   }
 };
 
