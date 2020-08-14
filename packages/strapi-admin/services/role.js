@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { set } = require('lodash/fp');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
 const { createPermission } = require('../domain/permission');
@@ -226,7 +227,7 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
 
   const authorPermissions = editorPermissions
     .filter(({ action }) => action !== ACTIONS.publish)
-    .map(p => _.merge({}, p, { conditions: ['admin::is-creator'] }));
+    .map(set('conditions', ['admin::is-creator']));
 
   editorPermissions.push(...getDefaultPluginPermissions());
   authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));
