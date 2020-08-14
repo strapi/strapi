@@ -55,6 +55,18 @@ const checkNoDuplicatedPermissions = permissions =>
     permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
   );
 
+const checkNilFields = function(fields) {
+  // If the parent has no action field, then we ignore this test
+  if (_.isNil(this.parent.action)) {
+    return true;
+  }
+
+  const { actionProvider } = strapi.admin.services.permission;
+  const action = actionProvider.getByActionId(this.parent.action);
+
+  return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
+};
+
 const updatePermissions = yup
   .object()
   .shape({
@@ -84,24 +96,14 @@ const updatePermissions = yup
               .test(
                 'fields-restriction',
                 'The permission at ${path} must have fields set to null or undefined',
-                function(fields) {
-                  // If the parent has no action field, then we ignore this test
-                  if (_.isNil(this.parent.action)) {
-                    return true;
-                  }
-
-                  const { actionProvider } = strapi.admin.services.permission;
-                  const action = actionProvider.getByActionId(this.parent.action);
-
-                  return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
-                }
+                checkNilFields
               ),
             conditions: yup.array().of(yup.string()),
           })
           .noUnknown()
       )
       .test(
-        'delete-fields-are-null',
+        'duplicated-permissions',
         'Some permissions are duplicated (same action and subject)',
         checkNoDuplicatedPermissions
       ),
