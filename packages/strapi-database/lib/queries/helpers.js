@@ -9,9 +9,12 @@ const withLifecycles = ({ query, model, fn }) => async (params, ...rest) => {
   const queryArguments = [newParams, ...rest];
 
   // execute before hook
-  await executeBeforeLifecycle(query, model, ...queryArguments);
+  const populate = await executeBeforeLifecycle(query, model, ...queryArguments);
 
   // execute query
+  if (Array.isArray(queryArguments) && populate) {
+    queryArguments[1] = populate;
+  }
   const result = await fn(...queryArguments);
 
   // execute after hook with result and arguments
