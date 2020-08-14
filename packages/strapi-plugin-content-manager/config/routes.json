@@ -170,7 +170,7 @@
       "config": {
         "policies": [
           "routing",
-          "plugins::content-manager.hasDraftAndPublish",
+          "plugins::content-manager.has-draft-and-publish",
           "admin::isAuthenticatedAdmin",
           ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
         ]
