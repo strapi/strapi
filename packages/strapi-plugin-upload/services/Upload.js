@@ -11,11 +11,14 @@ const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { bytesToKbytes } = require('../utils/file');
 
+const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
+
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+
 const generateFileName = name => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
@@ -366,15 +369,12 @@ module.exports = {
   setCreatorInfo(userId, files, { edition = false } = {}) {
     if (!Array.isArray(files)) files = [files];
 
-    const fields = { created_by: userId, updated_by: userId };
-
-    const creationFields = ['updated_by', 'created_by'];
-    const editionFields = ['updated_by'];
+    const params = edition
+      ? { [UPDATED_BY_ATTRIBUTE]: userId }
+      : { [CREATED_BY_ATTRIBUTE]: userId, [UPDATED_BY_ATTRIBUTE]: userId };
 
     return Promise.all(
       files.map(file => {
-        const params = _.pick(fields, edition ? editionFields : creationFields);
-
         return strapi.query('file', 'upload').update({ id: file.id }, params);
       })
     );

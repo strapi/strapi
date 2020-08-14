@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+const { constants } = require('./content-types');
+const { PUBLISHED_AT_ATTRIBUTE } = constants;
 
 const sanitizeEntity = (dataSource, options) => {
   const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
@@ -98,7 +100,14 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
   return _.concat(
     includeFields || [],
     ...(isOutput
-      ? [primaryKey, timestamps, STATIC_FIELDS, COMPONENT_FIELDS, CREATOR_FIELDS]
+      ? [
+          primaryKey,
+          timestamps,
+          STATIC_FIELDS,
+          COMPONENT_FIELDS,
+          CREATOR_FIELDS,
+          PUBLISHED_AT_ATTRIBUTE,
+        ]
       : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
   );
 };

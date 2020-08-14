@@ -12,6 +12,7 @@ const RESERVED_ATTRIBUTE_NAMES = [
   'changed',
   'created_by',
   'updated_by',
+  'published_at',
   '_posts', // list found here https://mongoosejs.com/docs/api.html#schema_Schema.reserved
   '_pres',
   'collection',

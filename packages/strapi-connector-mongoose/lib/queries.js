@@ -5,6 +5,8 @@
 
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
@@ -412,7 +414,13 @@ module.exports = ({ model, strapi }) => {
   async function create(values) {
     // Extract values related to relational data.
     const relations = pickRelations(values);
-    const data = omitExernalValues(values);
+    const data = { ...omitExernalValues(values) };
+
+    if (contentTypesUtils.hasDraftAndPublish) {
+      data[PUBLISHED_AT_ATTRIBUTE] = _.has(values, PUBLISHED_AT_ATTRIBUTE)
+        ? values[PUBLISHED_AT_ATTRIBUTE]
+        : new Date();
+    }
 
     // Create entry with no-relational data.
     const entry = await model.create(data);
