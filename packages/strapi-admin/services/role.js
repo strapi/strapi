@@ -1,10 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { map, filter } = require('lodash/fp');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
 const { createPermission } = require('../domain/permission');
+
+const ACTIONS = {
+  publish: 'plugins::content-manager.explorer.publish',
+};
 
 const sanitizeRole = role => {
   return _.omit(role, ['users', 'permissions']);
@@ -221,15 +224,9 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
     }
   );
 
-  const addIsCreatorCondition = map(p => _.merge({}, p, { conditions: ['admin::is-creator'] }));
-  const removeRestrictedActions = filter(
-    p => !['plugins::content-manager.explorer.publish'].includes(p.action)
-  );
-
-  const authorPermissions = _.flow(
-    removeRestrictedActions,
-    addIsCreatorCondition
-  )(editorPermissions);
+  const authorPermissions = editorPermissions
+    .filter(({ action }) => action !== ACTIONS.publish)
+    .map(p => _.merge({}, p, { conditions: ['admin::is-creator'] }));
 
   editorPermissions.push(...getDefaultPluginPermissions());
   authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));
