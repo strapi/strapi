@@ -1351,10 +1351,10 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.create' },
-              { action: 'plugins::content-manager.explorer.read' },
-              { action: 'plugins::content-manager.explorer.update' },
-              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
             ],
           },
         },
@@ -1391,10 +1391,10 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.create' },
-              { action: 'plugins::content-manager.explorer.read' },
-              { action: 'plugins::content-manager.explorer.update' },
-              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
             ],
           },
         },
@@ -1456,10 +1456,10 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.create' },
-              { action: 'plugins::content-manager.explorer.read' },
-              { action: 'plugins::content-manager.explorer.update' },
-              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
             ],
           },
         },
@@ -1499,10 +1499,10 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.create' },
-              { action: 'plugins::content-manager.explorer.read' },
-              { action: 'plugins::content-manager.explorer.update' },
-              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
             ],
           },
         },
