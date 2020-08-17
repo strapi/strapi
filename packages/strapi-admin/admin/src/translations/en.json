@@ -105,6 +105,7 @@
   "Settings.roles.form.permissions.delete": "Delete",
   "Settings.roles.form.permissions.read": "Read",
   "Settings.roles.form.permissions.update": "Update",
+  "Settings.roles.form.permissions.publish": "Publish",
   "Settings.roles.form.title": "Details",
   "Settings.roles.list.button.add": "Add new role",
   "Settings.roles.list.description": "List of roles",
