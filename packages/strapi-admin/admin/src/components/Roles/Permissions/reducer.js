@@ -312,11 +312,9 @@ const reducer = (state, action) =>
           shouldSetAllContentTypes,
           shouldAddDeleteAction,
         } = action;
-        const staticActionsName = get(
-          state.permissionsLayout,
-          ['sections', 'contentTypes'],
-          []
-        ).map(contentTypeAction => contentTypeAction.action);
+        const staticActionsName = get(state.permissionsLayout, ['sections', 'contentTypes'], [])
+          .filter(contentTypeAction => contentTypeAction.subjects.includes(subject))
+          .map(contentTypeAction => contentTypeAction.action);
 
         let attributesActions = attributes.reduce((acc, attribute) => {
           return {
