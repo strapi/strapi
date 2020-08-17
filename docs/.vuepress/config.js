@@ -168,7 +168,11 @@ module.exports = {
         {
           collapsable: true,
           title: '📄 Content API',
-          children: ['/v3.x/content-api/api-endpoints', '/v3.x/content-api/parameters'],
+          children: [
+            ['/v3.x/content-api/api-endpoints', 'API Endpoints'],
+            ['/v3.x/content-api/parameters', 'Parameters'],
+            ['/v3.x/content-api/integrations', 'Integrations']
+          ],
         },
         {
           collapsable: true,
