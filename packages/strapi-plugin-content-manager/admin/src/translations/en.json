@@ -151,5 +151,6 @@
   "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "success.record.delete": "Deleted",
+  "success.record.publish": "Published",
   "success.record.save": "Saved"
 }

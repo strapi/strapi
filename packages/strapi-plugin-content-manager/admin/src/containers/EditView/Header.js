@@ -24,21 +24,26 @@ const Header = () => {
     isCreatingEntry,
     isSingleType,
     isSubmitting,
+    isPublishing,
     layout,
     modifiedData,
+    onPublish,
     redirectToPreviousPage,
     resetData,
     slug,
     clearData,
   } = useDataManager();
   const {
-    allowedActions: { canDelete, canUpdate, canCreate },
+    allowedActions: { canDelete, canUpdate, canCreate, canPublish },
   } = useEditView();
 
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
     layout,
   ]);
   const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
+  const hasDraftAndPublish = useMemo(() => get(layout, ['schema', 'options', 'draftAndPublish']), [
+    layout,
+  ]);
   const didChangeData = useMemo(() => {
     return !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));
   }, [initialData, isCreatingEntry, modifiedData]);
@@ -65,22 +70,6 @@ const Header = () => {
       headerActions = [
         {
           disabled: !didChangeData,
-          onClick: () => {
-            toggleWarningCancel();
-          },
-          color: 'cancel',
-          label: formatMessage({
-            id: `${pluginId}.containers.Edit.reset`,
-          }),
-          type: 'button',
-          style: {
-            paddingLeft: 15,
-            paddingRight: 15,
-            fontWeight: 600,
-          },
-        },
-        {
-          disabled: !didChangeData,
           color: 'success',
           label: formatMessage({
             id: `${pluginId}.containers.Edit.submit`,
@@ -93,6 +82,23 @@ const Header = () => {
           },
         },
       ];
+    }
+
+    if (hasDraftAndPublish && canPublish) {
+      headerActions.unshift({
+        disabled: didChangeData,
+        label: formatMessage({
+          id: 'app.utils.publish',
+        }),
+        color: 'primary',
+        onClick: onPublish,
+        type: 'button',
+        isLoading: isPublishing,
+        style: {
+          minWidth: 150,
+          fontWeight: 600,
+        },
+      });
     }
 
     if (!isCreatingEntry && canDelete) {
@@ -114,14 +120,18 @@ const Header = () => {
     }
 
     return headerActions;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    canCreate,
-    canDelete,
-    canUpdate,
-    didChangeData,
     isCreatingEntry,
-    isSubmitting,
+    canCreate,
+    canUpdate,
+    hasDraftAndPublish,
+    canPublish,
+    canDelete,
+    didChangeData,
     formatMessage,
+    isSubmitting,
+    isPublishing,
   ]);
 
   const headerProps = useMemo(() => {

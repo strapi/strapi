@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
 import PropTypes from 'prop-types';
-import { Prompt, Redirect, useParams, useLocation, useHistory } from 'react-router-dom';
+import {
+  Prompt,
+  Redirect,
+  useParams,
+  useLocation,
+  useHistory,
+  useRouteMatch,
+} from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   request,
@@ -52,7 +59,11 @@ const EditViewDataManagerProvider = ({
   } = reducerState.toJS();
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+  const {
+    params: { contentType },
+  } = useRouteMatch('/plugins/content-manager/:contentType');
   // This is used for the readonly mode when updating an entry
   const allDynamicZoneFields = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
@@ -406,7 +417,7 @@ const EditViewDataManagerProvider = ({
 
       try {
         // Time to actually send the data
-        await request(
+        const res = await request(
           getRequestUrl(endPoint),
           {
             method,
@@ -426,10 +437,10 @@ const EditViewDataManagerProvider = ({
         });
         strapi.notification.success(`${pluginId}.success.record.save`);
 
-        if (isSingleType) {
-          setIsCreatingEntry(false);
-        } else {
-          redirectToPreviousPage();
+        setIsCreatingEntry(false);
+
+        if (!isSingleType) {
+          push(`/plugins/${pluginId}/${contentType}/${slug}/${res.id}`);
         }
       } catch (err) {
         console.error({ err });
@@ -469,6 +480,85 @@ const EditViewDataManagerProvider = ({
 
       dispatch({
         type: 'SUBMIT_ERRORS',
+        errors,
+      });
+    }
+  };
+
+  const handlePublish = async e => {
+    e.preventDefault();
+
+    // Create yup schema
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      isCreatingEntry
+    );
+
+    try {
+      // Validate the form using yup
+      await schema.validate(modifiedData, { abortEarly: false });
+
+      // Show a loading button in the EditView/Header.js
+      setIsPublishing(true);
+
+      try {
+        // Time to actually send the data
+        await request(
+          getRequestUrl(`${slug}/publish/${id}`),
+          {
+            method: 'POST',
+            signal,
+          },
+          false,
+          false
+        );
+
+        setIsPublishing(false);
+
+        dispatch({
+          type: 'PUBLISH_SUCCESS',
+        });
+        strapi.notification.success(`${pluginId}.success.record.publish`);
+      } catch (err) {
+        // ---------- @Soupette Is this error handling still mandatory? ----------
+        // The api error send response.payload.message: 'The error message'.
+        // There isn't : response.payload.message[0].messages[0].id
+        console.error({ err });
+        setIsPublishing(false);
+
+        const error = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+          'SERVER ERROR'
+        );
+
+        if (error === 'ValidationError') {
+          const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
+          const formattedErrors = Object.keys(errors).reduce((acc, current) => {
+            acc[current] = { id: errors[current][0] };
+
+            return acc;
+          }, {});
+
+          dispatch({
+            type: 'PUBLISH_ERRORS',
+            errors: formattedErrors,
+          });
+        }
+
+        const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
+        strapi.notification.error(errorMessage);
+      }
+    } catch (err) {
+      console.error({ err });
+      const errors = getYupInnerErrors(err);
+      setIsSubmitting(false);
+
+      dispatch({
+        type: 'PUBLISH_ERRORS',
         errors,
       });
     }
@@ -630,6 +720,7 @@ const EditViewDataManagerProvider = ({
         isCreatingEntry,
         isSingleType,
         isSubmitting,
+        isPublishing,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -637,6 +728,7 @@ const EditViewDataManagerProvider = ({
         moveComponentUp,
         moveRelation,
         onChange: handleChange,
+        onPublish: handlePublish,
         onRemoveRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
@@ -650,7 +742,11 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        <OverlayBlocker key="overlayBlocker" isOpen={isSubmitting} {...overlayBlockerParams} />
+        <OverlayBlocker
+          key="overlayBlocker"
+          isOpen={isSubmitting || isPublishing}
+          {...overlayBlockerParams}
+        />
         {isLoading ? (
           <LoadingIndicatorPage />
         ) : (
