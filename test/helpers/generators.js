@@ -20,6 +20,7 @@ module.exports = {
       },
     },
     connection: 'default',
+    draftAndPublish: true,
     name: 'article',
     description: '',
     collectionName: '',

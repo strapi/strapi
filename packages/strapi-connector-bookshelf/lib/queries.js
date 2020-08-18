@@ -6,6 +6,8 @@
 const _ = require('lodash');
 const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -80,7 +82,13 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
   async function create(attributes, { transacting } = {}) {
     const relations = pickRelations(attributes);
-    const data = selectAttributes(attributes);
+    const data = { ...selectAttributes(attributes) };
+
+    if (contentTypesUtils.hasDraftAndPublish(model)) {
+      data[PUBLISHED_AT_ATTRIBUTE] = _.has(attributes, PUBLISHED_AT_ATTRIBUTE)
+        ? attributes[PUBLISHED_AT_ATTRIBUTE]
+        : new Date().toISOString();
+    }
 
     const runCreate = async trx => {
       // Create entry with no-relational data.
