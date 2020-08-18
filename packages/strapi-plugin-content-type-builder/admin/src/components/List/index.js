@@ -19,6 +19,7 @@ import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import Wrapper from './List';
 
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 function List({
