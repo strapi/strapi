@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
 const relations = require('./relations');
 const buildDatabaseSchema = require('./build-database-schema');
 const {
@@ -11,8 +11,13 @@ const {
 } = require('./generate-component-relations');
 const { createParser } = require('./parser');
 const { createFormatter } = require('./formatter');
-
 const populateFetch = require('./populate');
+
+const {
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = contentTypesUtils.constants;
 
 const PIVOT_PREFIX = '_pivot_';
 
@@ -116,14 +121,26 @@ module.exports = ({ models, target }, ctx) => {
     });
 
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      definition.attributes['created_by'] = {
+      if (contentTypesUtils.hasDraftAndPublish(definition)) {
+        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+          type: 'datetime',
+          configurable: false,
+          writable: false,
+        };
+      }
+
+      definition.attributes[CREATED_BY_ATTRIBUTE] = {
         model: 'user',
         plugin: 'admin',
+        configurable: false,
+        writable: false,
       };
 
-      definition.attributes['updated_by'] = {
+      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
         model: 'user',
         plugin: 'admin',
+        configurable: false,
+        writable: false,
       };
     }
 

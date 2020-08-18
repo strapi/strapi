@@ -3,10 +3,16 @@
 const _ = require('lodash');
 const mongoose = require('mongoose');
 
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
 const utils = require('./utils');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
+
+const {
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = contentTypesUtils.constants;
 
 const isPolymorphicAssoc = assoc => {
   return assoc.nature.toLowerCase().indexOf('morph') !== -1;
@@ -28,14 +34,26 @@ module.exports = ({ models, target }, ctx) => {
     });
 
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      definition.attributes['created_by'] = {
+      if (contentTypesUtils.hasDraftAndPublish(definition)) {
+        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+          type: 'datetime',
+          configurable: false,
+          writable: false,
+        };
+      }
+
+      definition.attributes[CREATED_BY_ATTRIBUTE] = {
         model: 'user',
         plugin: 'admin',
+        configurable: false,
+        writable: false,
       };
 
-      definition.attributes['updated_by'] = {
+      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
         model: 'user',
         plugin: 'admin',
+        configurable: false,
+        writable: false,
       };
     }
 

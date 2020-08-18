@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const parseMultipartBody = require('../utils/parse-multipart');
 const {
@@ -8,6 +9,12 @@ const {
   validateCheckUIDAvailabilityInput,
   validateUIDField,
 } = require('./validation');
+
+const {
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = contentTypesUtils.constants;
 
 const ACTIONS = {
   read: 'plugins::content-manager.explorer.read',
@@ -196,7 +203,11 @@ module.exports = {
     try {
       const result = await contentManagerService.create(
         {
-          data: { ...sanitize(data), created_by: user.id, updated_by: user.id },
+          data: {
+            ...sanitize(data),
+            [CREATED_BY_ATTRIBUTE]: user.id,
+            [UPDATED_BY_ATTRIBUTE]: user.id,
+          },
           files,
         },
         { model }
@@ -239,10 +250,21 @@ module.exports = {
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
+    const writableData = _.omit(
+      data,
+      contentTypesUtils.getNonWritableAttributes(strapi.db.getModel(model))
+    );
+
     try {
       const result = await contentManagerService.edit(
         { id },
-        { data: { ...sanitize(_.omit(data, ['created_by'])), updated_by: user.id }, files },
+        {
+          data: {
+            ...sanitize(writableData),
+            [UPDATED_BY_ATTRIBUTE]: user.id,
+          },
+          files,
+        },
         { model }
       );
 
@@ -346,7 +368,7 @@ module.exports = {
       : await contentManagerServices.contenttypes.getConfiguration(modelDef.uid);
 
     const field = _.get(modelConfig, `metadatas.${targetField}.edit.mainField`, 'id');
-    const pickFields = [field, 'id', target.primaryKey];
+    const pickFields = [field, 'id', target.primaryKey, PUBLISHED_AT_ATTRIBUTE];
     const sanitize = d => _.pick(d, pickFields);
 
     ctx.body = _.isArray(entities) ? entities.map(sanitize) : sanitize(entities);
