@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const NON_SORTABLES = ['component', 'json', 'relation', 'media', 'richtext', 'dynamiczone'];
 
@@ -78,7 +79,7 @@ const isVisible = (schema, name) => {
 };
 
 const isPublicationField = name => {
-  return contentTypes.constants.PUBLISHED_AT_ATTRIBUTE.includes(name);
+  return PUBLISHED_AT_ATTRIBUTE === name;
 };
 
 const isTimestamp = (schema, name) => {

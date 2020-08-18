@@ -30,6 +30,7 @@
   "dependencies": {
     "lodash": "4.17.19",
     "p-map": "4.0.0",
+    "strapi-utils": "3.1.4",
     "verror": "^1.10.0"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"

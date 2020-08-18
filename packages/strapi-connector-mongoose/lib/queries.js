@@ -414,12 +414,12 @@ module.exports = ({ model, strapi }) => {
   async function create(values) {
     // Extract values related to relational data.
     const relations = pickRelations(values);
-    const data = { ...omitExernalValues(values) };
+    const data = omitExernalValues(values);
 
     if (contentTypesUtils.hasDraftAndPublish) {
       data[PUBLISHED_AT_ATTRIBUTE] = _.has(values, PUBLISHED_AT_ATTRIBUTE)
         ? values[PUBLISHED_AT_ATTRIBUTE]
-        : new Date();
+        : new Date().toISOString();
     }
 
     // Create entry with no-relational data.

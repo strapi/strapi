@@ -87,7 +87,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     if (contentTypesUtils.hasDraftAndPublish(model)) {
       data[PUBLISHED_AT_ATTRIBUTE] = _.has(attributes, PUBLISHED_AT_ATTRIBUTE)
         ? attributes[PUBLISHED_AT_ATTRIBUTE]
-        : new Date();
+        : new Date().toISOString();
     }
 
     const runCreate = async trx => {
