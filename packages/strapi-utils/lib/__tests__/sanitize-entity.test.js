@@ -72,6 +72,7 @@ describe('Sanitize Entity', () => {
       ...userModel.attributes,
       dz: {
         type: 'dynamiczone',
+        components: ['article'],
       },
     },
   };
@@ -265,9 +266,11 @@ describe('Sanitize Entity', () => {
 
     test(`It should make sure that legacy data parsing returns an object`, () => {
       const dataSource = {
-        toJSON() {
-          return input;
-        },
+        toJSON: jest.fn(() => input),
+      };
+
+      const invalidDataSource = {
+        toJSON: jest.fn(() => null),
       };
 
       const { user: model } = models;
@@ -275,8 +278,10 @@ describe('Sanitize Entity', () => {
       expect(sanitizeEntity(dataSource, { model })).toStrictEqual(
         _.omit(input, ['email', 'password'])
       );
+      expect(dataSource.toJSON).toHaveBeenCalled();
 
-      expect(sanitizeEntity({ toJSON: () => null }, { model })).toBeNull();
+      expect(sanitizeEntity(invalidDataSource, { model })).toBeNull();
+      expect(invalidDataSource.toJSON).toHaveBeenCalled();
     });
 
     test('It should handle custom fields', () => {
