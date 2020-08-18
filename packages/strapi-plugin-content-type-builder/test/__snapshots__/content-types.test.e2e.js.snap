@@ -22,6 +22,28 @@ Object {
 }
 `;
 
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations with draftAndPublish 1`] = `
+Object {
+  "data": Object {
+    "apiID": "ct-with-dp",
+    "schema": Object {
+      "attributes": Object {
+        "title": Object {
+          "type": "string",
+        },
+      },
+      "collectionName": "ct_with_dps",
+      "connection": "default",
+      "description": "",
+      "draftAndPublish": true,
+      "kind": "collectionType",
+      "name": "CT with DP",
+    },
+    "uid": "application::ct-with-dp.ct-with-dp",
+  },
+}
+`;
+
 exports[`Content Type Builder - Content types Single Types Get single type returns full schema and informations 1`] = `
 Object {
   "data": Object {

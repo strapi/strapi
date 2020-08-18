@@ -1,16 +1,30 @@
 'use strict';
 
+const _ = require('lodash');
+const utils = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+
 /**
  * default service
  *
  */
+const createCoreService = ({ model, strapi }) => {
+  const serviceFactory =
+    model.kind === 'singleType' ? createSingleTypeService : createCollectionTypeService;
 
-module.exports = ({ model, strapi }) => {
-  if (model.kind === 'singleType') {
-    return createSingleTypeService({ model, strapi });
-  }
+  return serviceFactory({ model, strapi });
+};
 
-  return createCollectionTypeService({ model, strapi });
+/**
+ * Mixins
+ */
+const createUtils = ({ model }) => {
+  const { getNonWritableAttributes } = utils.contentTypes;
+
+  return {
+    sanitizeInput: data => _.omit(data, getNonWritableAttributes(model)),
+  };
 };
 
 /**
@@ -18,6 +32,7 @@ module.exports = ({ model, strapi }) => {
  */
 const createSingleTypeService = ({ model, strapi }) => {
   const { modelName } = model;
+  const { sanitizeInput } = createUtils({ model });
 
   return {
     /**
@@ -36,16 +51,17 @@ const createSingleTypeService = ({ model, strapi }) => {
      */
     async createOrUpdate(data, { files } = {}) {
       const entity = await this.find();
+      const sanitizedData = sanitizeInput(data);
 
       if (!entity) {
-        return strapi.entityService.create({ data, files }, { model: modelName });
+        return strapi.entityService.create({ data: sanitizedData, files }, { model: modelName });
       } else {
         return strapi.entityService.update(
           {
             params: {
               id: entity.id,
             },
-            data,
+            data: sanitizedData,
             files,
           },
           { model: modelName }
@@ -74,6 +90,7 @@ const createSingleTypeService = ({ model, strapi }) => {
  */
 const createCollectionTypeService = ({ model, strapi }) => {
   const { modelName } = model;
+  const { sanitizeInput } = createUtils({ model });
 
   return {
     /**
@@ -112,7 +129,11 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     create(data, { files } = {}) {
-      return strapi.entityService.create({ data, files }, { model: modelName });
+      const sanitizedData = sanitizeInput(data);
+      if (contentTypesUtils.hasDraftAndPublish(model)) {
+        sanitizedData[PUBLISHED_AT_ATTRIBUTE] = new Date().toISOString();
+      }
+      return strapi.entityService.create({ data: sanitizedData, files }, { model: modelName });
     },
 
     /**
@@ -122,7 +143,11 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     update(params, data, { files } = {}) {
-      return strapi.entityService.update({ params, data, files }, { model: modelName });
+      const sanitizedData = sanitizeInput(data);
+      return strapi.entityService.update(
+        { params, data: sanitizedData, files },
+        { model: modelName }
+      );
     },
 
     /**
@@ -155,3 +180,5 @@ const createCollectionTypeService = ({ model, strapi }) => {
     },
   };
 };
+
+module.exports = createCoreService;

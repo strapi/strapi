@@ -25,6 +25,7 @@ const {
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
 const { generateTimestampCode } = require('./code-generator');
+const contentTypes = require('./content-types');
 
 module.exports = {
   yup,
@@ -52,4 +53,5 @@ module.exports = {
   generateTimestampCode,
   stringIncludes,
   stringEquals,
+  contentTypes,
 };
