@@ -251,6 +251,7 @@
   "app.utils.add-filter": "Add filter",
   "app.utils.defaultMessage": " ",
   "app.utils.delete": "Delete",
+  "app.utils.publish": "Publish",
   "app.utils.filters": "Filters",
   "app.utils.placeholder.defaultMessage": " ",
   "app.utils.select-all": "Select all",

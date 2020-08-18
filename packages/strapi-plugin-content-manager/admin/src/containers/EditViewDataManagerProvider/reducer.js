@@ -210,9 +210,11 @@ const reducer = (state, action) => {
         .update('modifiedDZName', () => null)
         .update('formErrors', () => fromJS(action.errors));
     case 'SUBMIT_ERRORS':
+    case 'PUBLISH_ERRORS':
       return state
         .update('formErrors', () => fromJS(action.errors))
         .update('shouldShowLoadingState', () => false);
+    case 'PUBLISH_SUCCESS':
     case 'SUBMIT_SUCCESS':
     case 'DELETE_SUCCEEDED':
       return state
