@@ -25,6 +25,7 @@ describe('Content Type Builder - Content types', () => {
       'test-collection-type',
       'test-collection',
       'test-single-type',
+      'ct-with-dp',
     ]);
   }, 60000);
 
