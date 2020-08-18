@@ -72,7 +72,7 @@ const createCollectionTypeController = ({ model, service }) => {
         entities = await service.find(ctx.query);
       }
 
-      return entities.map(entity => sanitizeEntity(entity, { model }));
+      return sanitizeEntity(entities, { model });
     },
 
     /**
