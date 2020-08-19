@@ -216,7 +216,7 @@
   "app.components.UpgradePlanModal.limit-reached": "Presiahli ste limit",
   "app.components.UpgradePlanModal.text-ce": "Community Edition",
   "app.components.UpgradePlanModal.text-ee": "Enterprise Edition",
-  "app.components.UpgradePlanModal.text-power": "Odblokovať do plnej sily",
+  "app.components.UpgradePlanModal.text-power": "Odblokovať plný potenciál",
   "app.components.UpgradePlanModal.text-strapi": "rozšírením Vášho Strapi plánu na",
   "app.components.Users.MagicLink.connect": "Odošlite tento link používateľovi pre spojenie.",
   "app.components.Users.ModalCreateBody.block-title.details": "Detaily",
