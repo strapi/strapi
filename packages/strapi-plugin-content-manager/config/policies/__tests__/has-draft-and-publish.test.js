@@ -37,7 +37,7 @@ describe('hasDraftAndPublish policy', () => {
     expect(res).toBe('next');
   });
 
-  test(`It should fails when the model has draft & publish disabled`, () => {
+  test(`It should fail when the model has draft & publish disabled`, () => {
     const ctx = { params: { model: 'bar' } };
     const next = jest.fn(() => 'next');
 
@@ -46,7 +46,7 @@ describe('hasDraftAndPublish policy', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test(`It should fails when the model doesn't exists`, () => {
+  test(`It should fail when the model doesn't exists`, () => {
     const ctx = { params: { model: 'foobar' } };
     const next = jest.fn(() => 'next');
 
@@ -55,8 +55,8 @@ describe('hasDraftAndPublish policy', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test(`It should fails when params.model isn't provided`, () => {
-    const ctx = { params: { model: 'foobar' } };
+  test(`It should fail when params.model isn't provided`, () => {
+    const ctx = { params: {} };
     const next = jest.fn(() => 'next');
 
     expect(() => hasDraftAndPublish(ctx, next)).toThrowError('forbidden');

@@ -25,7 +25,7 @@ const ACTIONS = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+  const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
   const entity = await contentManagerService.fetch(model, id);
 
   if (_.isNil(entity)) {
@@ -86,7 +86,7 @@ module.exports = {
     const { model } = ctx.params;
     const { query } = ctx.request;
 
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
 
     const { kind } = strapi.getModel(model);
     const pm = strapi.admin.services.permission.createPermissionsManager(
@@ -159,7 +159,7 @@ module.exports = {
       params: { model },
       request,
     } = ctx;
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
 
     const pm = strapi.admin.services.permission.createPermissionsManager(
       userAbility,
@@ -185,7 +185,7 @@ module.exports = {
       params: { model },
       request: { body },
     } = ctx;
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
 
     const pm = strapi.admin.services.permission.createPermissionsManager(
       userAbility,
@@ -238,7 +238,7 @@ module.exports = {
       request: { body },
     } = ctx;
 
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
 
     const { pm, entity } = await findEntityAndCheckPermissions(
       userAbility,
@@ -289,7 +289,7 @@ module.exports = {
       state: { userAbility },
       params: { id, model },
     } = ctx;
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
 
     const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.delete, model, id);
 
@@ -307,7 +307,7 @@ module.exports = {
       params: { model },
       request,
     } = ctx;
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
     const pm = strapi.admin.services.permission.createPermissionsManager(
       userAbility,
       ACTIONS.delete,
@@ -329,7 +329,7 @@ module.exports = {
       params: { model, id },
     } = ctx;
 
-    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const contentManagerService = strapi.plugins['content-manager'].services['content-manager'];
     const { entity, pm } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.publish,
