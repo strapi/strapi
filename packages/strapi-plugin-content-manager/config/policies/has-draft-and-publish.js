@@ -1,6 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+const {
+  contentTypes: { hasDraftAndPublish },
+} = require('strapi-utils');
 
 module.exports = (ctx, next) => {
   const {
@@ -8,9 +10,8 @@ module.exports = (ctx, next) => {
   } = ctx;
 
   const model = strapi.contentTypes[modelUid];
-  const hasDraftAndPublish = _.get(model, 'options.draftAndPublish', false);
 
-  if (!hasDraftAndPublish) {
+  if (!hasDraftAndPublish(model)) {
     throw strapi.errors.forbidden();
   }
 
