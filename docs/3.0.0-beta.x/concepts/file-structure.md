@@ -12,7 +12,7 @@ By default, your project's structure will look like this:
     - [`/services`](./services.md): contains the API's custom services.
 - `/build`: contains your admin panel UI build.
 - [`/config`](./configurations.md)
-  - [`/environments`](./configurations.md#environments): contains the project's configurations per environment.
+  - [`/env`](./configurations.md#environments): contains the project's configurations per environment.
     - `/**`
       - `/development`
         - [`custom.json`](./configurations.md#custom): contains the custom configurations for this environment.
