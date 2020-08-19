@@ -4,7 +4,7 @@ const _ = require('lodash');
 const fp = require('lodash/fp');
 const actionDomain = require('../domain/action');
 
-const EXCLUDE_FIELDS = ['created_by', 'updated_by'];
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
@@ -26,10 +26,12 @@ const getNestedFields = (
     return prefix ? [prefix] : [];
   }
 
+  const nonWritableAttributes = contentTypesUtils.getNonWritableAttributes(model);
+
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
-      if (EXCLUDE_FIELDS.includes(key)) return fields;
+      if (nonWritableAttributes.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       const requiredOrNotNeeded = !requiredOnly || attr.required === true;
@@ -82,10 +84,12 @@ const getNestedFieldsWithIntermediate = (
     return [];
   }
 
+  const nonWritableAttributes = contentTypesUtils.getNonWritableAttributes(model);
+
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
-      if (EXCLUDE_FIELDS.includes(key)) return fields;
+      if (nonWritableAttributes.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       fields.push(fieldPath);

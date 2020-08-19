@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 /**
  * A set of functions called "actions" for `ContentManager`
  */
@@ -42,7 +43,13 @@ module.exports = {
   },
 
   create({ data, files }, { model } = {}) {
-    return strapi.entityService.create({ data, files }, { model });
+    const modelDef = strapi.getModel(model);
+    const publishData = { ...data };
+    if (contentTypesUtils.hasDraftAndPublish(modelDef)) {
+      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
+    }
+
+    return strapi.entityService.create({ data: publishData, files }, { model });
   },
 
   edit(params, { data, files }, { model } = {}) {
