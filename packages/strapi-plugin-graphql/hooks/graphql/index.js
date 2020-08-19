@@ -119,6 +119,7 @@ module.exports = strapi => {
         bodyParserConfig: true,
         introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
         engine: _.get(strapi.plugins.graphql, 'config.engine', false),
+        cacheControl: _.get(strapi.plugins.graphql, 'config.cacheControl', {}),
       };
 
       // Disable GraphQL Playground in production environment.
