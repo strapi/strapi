@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
+import { cloneDeep, get, isEmpty, isEqual, pick, set, uniq } from 'lodash';
 import PropTypes from 'prop-types';
 import { Prompt, Redirect, useParams, useLocation, useHistory } from 'react-router-dom';
 import {
@@ -87,7 +87,12 @@ const EditViewDataManagerProvider = ({
       },
     ]);
 
-    return get(matchingPermissions, ['0', 'fields'], []);
+    const allowedFields = matchingPermissions.reduce(
+      (fields, perm) => fields.concat(perm.fields || []),
+      []
+    );
+
+    return uniq(allowedFields);
   }, [userPermissions, slug]);
 
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
@@ -130,7 +135,12 @@ const EditViewDataManagerProvider = ({
       },
     ]);
 
-    return get(matchingPermissions, ['0', 'fields'], []);
+    const allowedFields = matchingPermissions.reduce(
+      (fields, perm) => fields.concat(perm.fields || []),
+      []
+    );
+
+    return uniq(allowedFields);
   }, [slug, userPermissions]);
 
   const updateActionAllowedFields = useMemo(() => {
@@ -141,7 +151,12 @@ const EditViewDataManagerProvider = ({
       },
     ]);
 
-    return get(matchingPermissions, ['0', 'fields'], []);
+    const allowedFields = matchingPermissions.reduce(
+      (fields, perm) => fields.concat(perm.fields || []),
+      []
+    );
+
+    return uniq(allowedFields);
   }, [slug, userPermissions]);
 
   useEffect(() => {
