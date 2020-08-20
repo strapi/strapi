@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const createIdType = (table, definition) => {
@@ -126,7 +127,10 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
         if (!col) return;
 
         if (attribute.required === true) {
-          if (definition.client !== 'sqlite3' || !tableExists) {
+          if (
+            (definition.client !== 'sqlite3' || !tableExists) &&
+            !contentTypesUtils.hasDraftAndPublish(model) // no require constraint to allow drafts
+          ) {
             col.notNullable();
           }
         } else {

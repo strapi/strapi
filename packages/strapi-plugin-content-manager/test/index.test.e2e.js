@@ -158,7 +158,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(0);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Create article2 with tag1', async () => {
@@ -184,44 +184,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags[0].id).toBe(data.tags[0].id);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
-    });
-
-    test('Create article3 - published_at should not be overwritten', async () => {
-      const entry = {
-        title: 'Article 1',
-        content: 'My super content 1',
-        date: '2019-08-13T00:00:00.000Z',
-        published_at: '2019-08-13T00:00:00.000Z',
-      };
-
-      let { body } = await rq({
-        url: '/content-manager/explorer/application::article.article',
-        method: 'POST',
-        body: entry,
-      });
-
-      data.articles.push(body);
-
-      expect(body.id);
-      expect(body.published_at).toBe(null);
-    });
-
-    test('Update article3 - published_at should not be overwritten', async () => {
-      const entry = Object.assign({}, data.articles[2], {
-        published_at: '2019-08-13T00:00:00.000Z',
-      });
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/${entry.id}`,
-        method: 'PUT',
-        body: entry,
-      });
-
-      data.articles.push(body);
-
-      expect(body.id);
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 add tag2', async () => {
@@ -247,7 +210,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags[0].id).toBe(data.tags[1].id);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 add tag1 and tag3', async () => {
@@ -272,7 +235,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(3);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 remove one tag', async () => {
@@ -296,7 +259,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(2);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 remove all tag', async () => {
@@ -321,7 +284,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(0);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Publish article1, expect published_at to be defined', async () => {
@@ -755,7 +718,7 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 with ref1', async () => {
@@ -888,6 +851,45 @@ describe('Content Manager End to End', () => {
 
       if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
+    });
+  });
+
+  describe('Draft & Publish', () => {
+    test('Create article3 - published_at should not be overwritten', async () => {
+      const entry = {
+        title: 'Article 1',
+        content: 'My super content 1',
+        date: '2019-08-13T00:00:00.000Z',
+        published_at: '2019-08-13T00:00:00.000Z',
+      };
+
+      let { body } = await rq({
+        url: '/content-manager/explorer/application::article.article',
+        method: 'POST',
+        body: entry,
+      });
+
+      data.articles.push(body);
+
+      expect(body.id);
+      expect(body.published_at).toBeUndefined();
+    });
+
+    test('Update article3 - published_at should not be overwritten', async () => {
+      const entry = Object.assign({}, data.articles[2], {
+        published_at: '2019-08-13T00:00:00.000Z',
+      });
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::article.article/${entry.id}`,
+        method: 'PUT',
+        body: entry,
+      });
+
+      data.articles.push(body);
+
+      expect(body.id);
+      expect(body.published_at).toBeUndefined();
     });
   });
 });

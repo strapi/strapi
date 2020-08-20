@@ -46,7 +46,7 @@ const productWithDP = {
   collectionName: '',
 };
 
-describe('Core API', () => {
+describe('Content-Type API', () => {
   describe('Basic', () => {
     beforeAll(async () => {
       const token = await registerAndLogin();
@@ -65,7 +65,7 @@ describe('Core API', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/products',
+        url: '/content-manager/explorer/application::product.product',
         body: product,
       });
 
@@ -78,7 +78,7 @@ describe('Core API', () => {
     test('Read Products', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/products',
+        url: '/content-manager/explorer/application::product.product',
       });
 
       expect(res.statusCode).toBe(200);
@@ -101,7 +101,7 @@ describe('Core API', () => {
       };
       const res = await rq({
         method: 'PUT',
-        url: `/products/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product.product/${data.products[0].id}`,
         body: product,
       });
 
@@ -115,7 +115,7 @@ describe('Core API', () => {
     test('Delete Products', async () => {
       const res = await rq({
         method: 'DELETE',
-        url: `/products/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product.product/${data.products[0].id}`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -143,14 +143,13 @@ describe('Core API', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dps',
+        url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
         body: product,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeNull();
       data.products.push(res.body);
     });
 
@@ -162,22 +161,20 @@ describe('Core API', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dps',
+        url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
         body: product,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.omit(product, 'published_at'));
-      expect(res.body.published_at).not.toBeNull();
-      expect(res.body.published_at).not.toBe(product.published_at);
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeNull();
       data.products.push(res.body);
     });
 
-    test('Read Products', async () => {
+    test('Read all products', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/product-with-dps',
+        url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
       });
 
       expect(res.statusCode).toBe(200);
@@ -191,27 +188,25 @@ describe('Core API', () => {
         ])
       );
       res.body.forEach(p => {
-        expect(p.published_at).not.toBeNull();
-        expect(isNaN(new Date(p.published_at).valueOf())).toBe(false);
+        expect(p.published_at).toBeNull();
       });
     });
 
-    test('Update Products', async () => {
+    test('Update a draft', async () => {
       const product = {
         name: 'Product 1 updated',
         description: 'Updated Product description',
       };
       const res = await rq({
         method: 'PUT',
-        url: `/product-with-dps/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.products[0].id}`,
         body: product,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.omit(product, 'published_at'));
       expect(res.body.id).toEqual(data.products[0].id);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeNull();
       data.products[0] = res.body;
     });
 
@@ -222,62 +217,60 @@ describe('Core API', () => {
       };
       const res = await rq({
         method: 'PUT',
-        url: `/product-with-dps/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.products[0].id}`,
         body: product,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
       expect(res.body.id).toEqual(data.products[0].id);
-      expect(res.body.published_at).not.toBe(product.published_at);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeNull();
       data.products[0] = res.body;
     });
 
-    test('Delete Products', async () => {
+    test('Delete a draft', async () => {
       const res = await rq({
         method: 'DELETE',
-        url: `/product-with-dps/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.products[0].id}`,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(data.products[0]);
       expect(res.body.id).toEqual(data.products[0].id);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeNull();
     });
 
     describe('validators', () => {
-      test('Cannot create a product - minLength', async () => {
+      test('Can create a product - minLength', async () => {
         const product = {
           name: 'Product 1',
           description: '',
         };
         const res = await rq({
           method: 'POST',
-          url: '/product-with-dps',
+          url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
           body: product,
         });
 
-        expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.description.0')).toBe(
-          'description must be at least 3 characters'
-        );
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject(product);
       });
 
-      test('Cannot create a product - required', async () => {
+      test('Can create a product - required', async () => {
         const product = {
           description: 'Product description',
         };
         const res = await rq({
           method: 'POST',
-          url: '/product-with-dps',
+          url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
           body: product,
         });
 
-        expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.name.0')).toBe('name must be defined.');
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject({
+          ...product,
+          name: null,
+        });
       });
 
       test('Cannot create a product - maxLength', async () => {
@@ -287,12 +280,12 @@ describe('Core API', () => {
         };
         const res = await rq({
           method: 'POST',
-          url: '/product-with-dps',
+          url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
           body: product,
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.description.0')).toBe(
+        expect(_.get(res, 'body.data.0.errors.description.0')).toBe(
           'description must be at most 30 characters'
         );
       });
