@@ -1,3 +1,6 @@
+'use strict';
+
+const _ = require('lodash');
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
@@ -320,6 +323,32 @@ describe('Content Manager End to End', () => {
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.published_at).toBe(null);
+    });
+
+    test('Publish article1, expect published_at to be defined', async () => {
+      const entry = _.clone(data.articles[0]);
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
+        method: 'POST',
+      });
+
+      data.articles[0] = body;
+
+      expect(body.published_at).toEqual(expect.any(String));
+      expect(new Date(body.published_at)).toEqual(expect.any(Date));
+    });
+
+    test('Publish article1, expect article1 to be already published', async () => {
+      const entry = _.clone(data.articles[0]);
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
+        method: 'POST',
+      });
+
+      expect(body.statusCode).toBe(400);
+      expect(body.message).toBe('Already published');
     });
 
     test('Delete all articles should remove the association in each tags related to them', async () => {

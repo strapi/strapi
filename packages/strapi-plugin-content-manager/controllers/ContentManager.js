@@ -21,6 +21,7 @@ const ACTIONS = {
   create: 'plugins::content-manager.explorer.create',
   edit: 'plugins::content-manager.explorer.update',
   delete: 'plugins::content-manager.explorer.delete',
+  publish: 'plugins::content-manager.explorer.publish',
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
