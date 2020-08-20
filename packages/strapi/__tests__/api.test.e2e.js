@@ -122,6 +122,7 @@ describe('Core API', () => {
       expect(res.body).toMatchObject(data.products[0]);
       expect(res.body.id).toEqual(data.products[0].id);
       expect(res.body.published_at).toBeUndefined();
+      data.products.shift();
     });
   });
 
@@ -134,7 +135,16 @@ describe('Core API', () => {
       await modelsUtils.createContentTypes([productWithDP]);
     }, 60000);
 
-    afterAll(() => modelsUtils.deleteContentTypes(['productWithDP']), 60000);
+    afterAll(async () => {
+      // clean database
+      for (const product of data.products) {
+        await rq({
+          method: 'DELETE',
+          url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${product.id}`,
+        });
+      }
+      await modelsUtils.deleteContentTypes(['product-with-dp']);
+    }, 60000);
 
     test('Create a product', async () => {
       const product = {
@@ -156,7 +166,7 @@ describe('Core API', () => {
 
     test('Create a product + cannot overwrite published_at', async () => {
       const product = {
-        name: 'Product 1',
+        name: 'Product 2',
         description: 'Product description',
         published_at: '2020-08-20T10:27:55.866Z',
       };
@@ -246,6 +256,7 @@ describe('Core API', () => {
       expect(res.body.id).toEqual(data.products[0].id);
       expect(res.body.published_at).not.toBeNull();
       expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      data.products.shift();
     });
 
     describe('validators', () => {
