@@ -11,12 +11,27 @@ const execa = require('execa');
 
 const { logger } = require('strapi-utils');
 const strapi = require('../index');
+const inspector = require('inspector');
+
+cluster.on('fork', (worker) => {
+  inspector.close()
+});
+
+if(cluster.isMaster) {
+  cluster.setupMaster && cluster.setupMaster({
+    inspectPort: process.debugPort
+  });
+}
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin }) {
+module.exports = async function({ build, watchAdmin, inspect }) {
+  if(inspect && !inspector.url() && cluster.isWorker) {
+    inspector.open()
+  }
+
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 
@@ -24,6 +39,7 @@ module.exports = async function({ build, watchAdmin }) {
   const serveAdminPanel = config.get('server.admin.serveAdminPanel', true);
 
   const buildExists = fs.existsSync(path.join(dir, 'build'));
+
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {

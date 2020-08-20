@@ -51,10 +51,7 @@ const getLocalScript = name => (...args) => {
 
   const script = require(cmdPath);
 
-  Promise.resolve()
-    .then(() => {
-      return script(...args);
-    })
+  script(...args)
     .catch(error => {
       console.error(`Error while running command ${name}: ${error.message || error}`);
       process.exit(1);
@@ -127,6 +124,7 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build', false)
   .option('--watch-admin', 'Enable watch', true)
+  .option('--inspect', 'Start node inspector', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
