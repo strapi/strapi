@@ -60,7 +60,7 @@
   "search.placeholder": "Vyhľadávať súbor...",
   "settings.form.responsiveDimensions.description": "Automaticky budú vygenerované rôzne veľkosti Vami nahrávaných súborov (large, medium, small)",
   "settings.form.responsiveDimensions.label": "Povoliť responsive-friendly nahrávanie súborov",
-  "settings.form.sizeOptimization.label": "Povoliť optimalizovanie veľkosti (bez straty kvality)",
+  "settings.form.sizeOptimization.label": "Povoliť optimalizovanie veľkosti obrázkov (bez straty kvality)",
   "settings.form.autoOrientation.label": "Povoliť auto orientation",
   "settings.form.autoOrientation.description": "Automaticky otáčať obrázky podľa EXIF orientation tag",
   "settings.form.videoPreview.description": "Automaticky budú vygenerované 6-sekundové ukážky videa (GIF)",
