@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { BackHeader, LiLink, CheckPermissions, useUserPermissions } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { generatePermissionsObject } from '../../utils';
@@ -20,6 +21,7 @@ import createAttributesLayout from './utils/createAttributesLayout';
 import { LinkWrapper, SubWrapper } from './components';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import DeleteLink from './DeleteLink';
 
 /* eslint-disable  react/no-array-index-key */
 
@@ -258,6 +260,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                     currentEnvironment,
                     slug
                   )}
+                  {allowedActions.canDelete && <DeleteLink />}
                 </ul>
               </LinkWrapper>
             </div>
