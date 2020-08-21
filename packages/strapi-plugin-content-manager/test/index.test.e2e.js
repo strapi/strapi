@@ -351,6 +351,29 @@ describe('Content Manager End to End', () => {
       expect(body.message).toBe('Already published');
     });
 
+    test('Unpublish article1, expect article1 to be set to null', async () => {
+      const entry = _.clone(data.articles[0]);
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
+        method: 'POST',
+      });
+
+      expect(body.published_at).toBeNull();
+    });
+
+    test('Unpublish article1, expect article1 to already be a draft', async () => {
+      const entry = _.clone(data.articles[0]);
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
+        method: 'POST',
+      });
+
+      expect(body.statusCode).toBe(400);
+      expect(body.message).toBe('Already a draft');
+    });
+
     test('Delete all articles should remove the association in each tags related to them', async () => {
       const { body: createdTag } = await rq({
         url: '/content-manager/explorer/application::tag.tag',
