@@ -81,7 +81,7 @@
   "Settings.permissions.menu.link.users.label": "Benutzer",
   "Settings.permissions.users.add-new": "Neuen Benutzer hinzufügen",
   "Settings.permissions.users.create": "Benutzer erstellen",
-  "Settings.permissions.users.form.email": "Em-Mil",
+  "Settings.permissions.users.form.email": "E-Mail",
   "Settings.permissions.users.form.firstname": "Vorname",
   "Settings.permissions.users.form.lastname": "Nachname",
   "Settings.permissions.users.listview.header.description.plural": "{number} Benutzer gefunden",
