@@ -82,4 +82,11 @@ module.exports = {
   countSearch(model, query) {
     return strapi.entityService.countSearch({ params: query }, { model });
   },
+
+  publish(params, model) {
+    return strapi.entityService.update(
+      { params, data: { published_at: new Date().toISOString() } },
+      { model }
+    );
+  },
 };
