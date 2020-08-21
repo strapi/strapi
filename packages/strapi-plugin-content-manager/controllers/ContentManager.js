@@ -337,6 +337,8 @@ module.exports = {
       id
     );
 
+    await strapi.entityValidator.validateEntity(strapi.getModel(model), entity);
+
     if (entity.published_at) {
       return ctx.badRequest('Already published');
     }
