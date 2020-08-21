@@ -1,6 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
+const {
+  contentTypes: { hasDraftAndPublish },
+} = require('strapi-utils');
 const storeUtils = require('../../services/utils/store');
 const {
   createDefaultConfiguration,
@@ -94,7 +97,7 @@ const registerPermissions = () => {
     'content-manager'
   ].services.contenttypes.getDisplayedContentTypesUids();
 
-  const hasDraftAndPublish = uid => strapi.contentTypes[uid].options.draftAndPublish;
+  const hasDraftAndPublishFilter = _.flow(uid => strapi.contentTypes[uid], hasDraftAndPublish);
 
   const actions = [
     {
@@ -133,7 +136,7 @@ const registerPermissions = () => {
       displayName: 'Publish',
       uid: 'explorer.publish',
       pluginName: 'content-manager',
-      subjects: contentTypesUids.filter(hasDraftAndPublish),
+      subjects: contentTypesUids.filter(hasDraftAndPublishFilter),
       options: {
         fieldsRestriction: false,
       },

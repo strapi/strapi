@@ -162,6 +162,24 @@
           ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/explorer/:model/publish/:id",
+      "handler": "ContentManager.publish",
+      "config": {
+        "policies": [
+          "routing",
+          "plugins::content-manager.has-draft-and-publish",
+          "admin::isAuthenticatedAdmin",
+          [
+            "plugins::content-manager.hasPermissions",
+            [
+              "plugins::content-manager.explorer.publish"
+            ]
+          ]
+        ]
+      }
     }
   ]
 }
