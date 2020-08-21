@@ -21,6 +21,7 @@ const ACTIONS = {
   create: 'plugins::content-manager.explorer.create',
   edit: 'plugins::content-manager.explorer.update',
   delete: 'plugins::content-manager.explorer.delete',
+  publish: 'plugins::content-manager.explorer.publish',
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
@@ -320,6 +321,31 @@ module.exports = {
     );
 
     ctx.body = results.map(result => pm.sanitize(result, { action: ACTIONS.read }));
+  },
+
+  async publish(ctx) {
+    const {
+      state: { userAbility },
+      params: { model, id },
+    } = ctx;
+
+    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const { entity, pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.publish,
+      model,
+      id
+    );
+
+    await strapi.entityValidator.validateEntity(strapi.getModel(model), entity);
+
+    if (entity.published_at) {
+      return ctx.badRequest('Already published');
+    }
+
+    const publishedEntry = await contentManagerService.publish({ id }, model);
+
+    ctx.body = pm.sanitize(publishedEntry, { action: ACTIONS.read });
   },
 
   async findRelationList(ctx) {
