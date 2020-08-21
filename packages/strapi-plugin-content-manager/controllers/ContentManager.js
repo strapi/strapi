@@ -348,6 +348,29 @@ module.exports = {
     ctx.body = pm.sanitize(publishedEntry, { action: ACTIONS.read });
   },
 
+  async unpublish(ctx) {
+    const {
+      state: { userAbility },
+      params: { model, id },
+    } = ctx;
+
+    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const { entity, pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.publish,
+      model,
+      id
+    );
+
+    if (!entity.published_at) {
+      return ctx.badRequest('Already a draft');
+    }
+
+    const unpublishedEntry = await contentManagerService.unpublish({ id }, model);
+
+    ctx.body = pm.sanitize(unpublishedEntry, { action: ACTIONS.read });
+  },
+
   async findRelationList(ctx) {
     const { model, targetField } = ctx.params;
     const { _component, ...query } = ctx.request.query;

@@ -172,12 +172,20 @@
           "routing",
           "plugins::content-manager.has-draft-and-publish",
           "admin::isAuthenticatedAdmin",
-          [
-            "plugins::content-manager.hasPermissions",
-            [
-              "plugins::content-manager.explorer.publish"
-            ]
-          ]
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/explorer/:model/unpublish/:id",
+      "handler": "ContentManager.unpublish",
+      "config": {
+        "policies": [
+          "routing",
+          "plugins::content-manager.has-draft-and-publish",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
         ]
       }
     }

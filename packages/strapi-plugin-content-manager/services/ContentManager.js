@@ -89,4 +89,8 @@ module.exports = {
       { model }
     );
   },
+
+  unpublish(params, model) {
+    return strapi.entityService.update({ params, data: { published_at: null } }, { model });
+  },
 };
