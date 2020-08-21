@@ -531,7 +531,7 @@ const EditViewDataManagerProvider = ({
       try {
         // Time to actually send the data
         await request(
-          getRequestUrl(`${slug}/publish/${id}`),
+          getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
           {
             method: 'POST',
             signal,
