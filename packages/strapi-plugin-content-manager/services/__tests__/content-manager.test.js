@@ -27,4 +27,29 @@ describe('Content-Manager', () => {
       );
     });
   });
+
+  describe('Unpublish', () => {
+    beforeEach(() => {
+      global.strapi = {
+        entityService: {
+          update: jest.fn(),
+        },
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('Unpublish a content-type', async () => {
+      const model = 'application::test.test';
+      const params = { id: 1 };
+      await contentManagerService.unpublish(params, model);
+
+      expect(strapi.entityService.update).toHaveBeenCalledWith(
+        { params, data: { published_at: null } },
+        { model }
+      );
+    });
+  });
 });
