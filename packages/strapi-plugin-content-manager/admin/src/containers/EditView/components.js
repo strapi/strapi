@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Flex } from '@buffetjs/core';
 
 const SubWrapper = styled.div`
   background: #ffffff;
@@ -34,4 +35,15 @@ const LinkWrapper = styled(SubWrapper)`
   }
 `;
 
-export { LinkWrapper, MainWrapper, SubWrapper };
+const DeleteButton = styled(Flex)`
+  color: ${({ theme }) => theme.main.colors.lightOrange};
+  align-items: center;
+  cursor: pointer;
+  margin-left: 0.2rem;
+  svg {
+    width: 1.1rem !important;
+    margin-right: 1rem;
+  }
+`;
+
+export { LinkWrapper, MainWrapper, SubWrapper, DeleteButton };
