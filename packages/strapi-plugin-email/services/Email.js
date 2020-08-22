@@ -6,6 +6,9 @@ const getProviderConfig = () => {
   return strapi.plugins.email.config;
 };
 
+const action = async options => {
+  return strapi.plugins.email.provider.action(options);
+};
 const send = async options => {
   return strapi.plugins.email.provider.send(options);
 };
