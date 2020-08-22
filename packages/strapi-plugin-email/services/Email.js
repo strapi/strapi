@@ -41,6 +41,7 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
 };
 
 module.exports = {
+  action,
   getProviderConfig,
   send,
   sendTemplatedEmail,
