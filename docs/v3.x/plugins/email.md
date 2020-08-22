@@ -58,6 +58,26 @@ await strapi.plugins.email.services.email.sendTemplatedEmail(
 );
 ```
 
+### Custom actions via the `.action()` method
+
+The email plugin supports multiple providers, such as [Sendgrid](https://github.com/strapi/strapi/tree/master/packages/strapi-provider-email-sendgrid), [Mailjet](https://github.com/ijsto/strapi-provider-email-mailjet) and [others](https://github.com/strapi/awesome-strapi#email-providers).
+This means that there are virtually countless custom methods (API endpoints) a given email provider may be exposing.
+
+Via the `.action()` method you can access these custom methods based on the documentation of each email provider.
+
+**Example**
+
+```js
+await strapi.plugins.email.services.email.action({
+  type: 'createContactList',
+  name: 'People interested in jobs',
+});
+```
+
+The above will create an email contacts list on your Mailjet account.
+
+To read more about available action types and data you must pass in, please refer to each individual email provider's documentation.
+
 ## Configure the plugin
 
 By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to configure your provider.
@@ -138,7 +158,7 @@ Default template
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
     return {
-      send: async options => {},
+      send: async (options) => {},
     };
   },
 };
