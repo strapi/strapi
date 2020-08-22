@@ -7,6 +7,7 @@ import FiltersCard from './FiltersCard';
 import Wrapper from './Wrapper';
 import Picker from '../Picker';
 
+import { getTrad } from '../../utils';
 import formatFilter from './utils/formatFilter';
 
 const FiltersPicker = ({ onChange }) => {
@@ -20,7 +21,7 @@ const FiltersPicker = ({ onChange }) => {
         renderButtonContent={() => (
           <>
             <FilterIcon />
-            <FormattedMessage id="app.utils.filters" />
+            <FormattedMessage id={getTrad('filter.name')} />
           </>
         )}
         renderSectionContent={onToggle => (
