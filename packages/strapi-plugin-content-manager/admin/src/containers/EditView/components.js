@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex } from '@buffetjs/core';
+import { Flex, Text } from '@buffetjs/core';
 
 const SubWrapper = styled.div`
   background: #ffffff;
@@ -46,4 +46,29 @@ const DeleteButton = styled(Flex)`
   }
 `;
 
-export { LinkWrapper, MainWrapper, SubWrapper, DeleteButton };
+const StatusWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.darkGrey};
+  height: 36px;
+  padding: 0 15px;
+  ${({ theme, isGreen }) =>
+    isGreen
+      ? `
+      ${Text} {
+        color: ${theme.main.colors.green};
+      }
+      background-color: #E6F8D4;
+      border: 1px solid #AAD67C;
+    `
+      : `
+      ${Text} {
+        color: ${theme.main.colors.mediumBlue};
+      }
+      background-color: ${theme.main.colors.lightBlue};
+      border: 1px solid #a5d5ff;
+  `}
+`;
+
+export { LinkWrapper, MainWrapper, SubWrapper, DeleteButton, StatusWrapper };
