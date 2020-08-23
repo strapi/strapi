@@ -1,0 +1,90 @@
+---
+fullnameOverride: strapi
+
+replicaCount: 2
+
+port: 1337
+
+envs:
+  - name: APPLICATION_NAME 
+    value: "strapi"
+  - name: PORT
+    value: '1337'
+  - name: NODE_ENV
+    value: development
+  - name: DATABASE_HOST
+    value: mongodb://{ Change to your mongo service }:27017/starpi-db?authSource=starpi-db&gssapiServiceName=mongodb
+  - name: DATABASE_NAME
+    value: "starpi-db"
+  - name: DATABASE_SRV
+    value: "false"
+  - name: DATABASE_PORT
+    value: "27017"
+  - name: DATABASE_SSl
+    value: "false"    
+
+image:
+  repository: {your registry}
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+    
+liveness:
+  enabled: 1
+  path: "/healthz"
+
+readiness:
+  enabled: 1
+  path: "/healthz"
+ 
+
+nginx:
+  image:
+    tag: 1.15-alpine
+  config:
+    file: nginx.conf
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+ingress:
+  enabled: true 
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host:  admin.domain.com
+      paths: []   
+  tls: []
+  
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 126Mi  
+ 
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: 0
+  minReplicas: 1
+  maxReplicas: 1
+  cpu:
+    enabled: 0
+    targetPercentage: 60
+  memory:
+    enabled: 0
+    targetPercentage: 60
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
