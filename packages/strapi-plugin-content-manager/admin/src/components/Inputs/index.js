@@ -105,7 +105,18 @@ function Inputs({
 
     return foundAttributeType === 'dynamiczone';
   }, [currentContentTypeLayout, fieldName]);
-  const validations = useMemo(() => omit(attribute, validationsToOmit), [attribute]);
+  const validations = useMemo(() => {
+    const hasDraftAndPublish = get(
+      currentContentTypeLayout,
+      ['schema', 'options', 'draftAndPublish'],
+      false
+    );
+
+    return omit(
+      attribute,
+      hasDraftAndPublish ? [...validationsToOmit, 'required', 'minLength'] : validationsToOmit
+    );
+  }, [attribute, currentContentTypeLayout]);
   const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
   const inputType = useMemo(() => {
     return getInputType(type);

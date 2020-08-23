@@ -57,7 +57,11 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
 
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
 
-const createYupSchema = (model, { components }, isCreatingEntry = true) => {
+const createYupSchema = (
+  model,
+  { components },
+  options = { isCreatingEntry: true, isDraft: true }
+) => {
   const attributes = getAttributes(model);
 
   return yup.object().shape(
@@ -69,7 +73,7 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
         attribute.type !== 'component' &&
         attribute.type !== 'dynamiczone'
       ) {
-        const formatted = createYupSchemaAttribute(attribute.type, attribute, isCreatingEntry);
+        const formatted = createYupSchemaAttribute(attribute.type, attribute, options);
         acc[current] = formatted;
       }
 
@@ -143,7 +147,7 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
         if (attribute.required) {
           // dynamicZoneSchema = dynamicZoneSchema.required();
           dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
-            if (isCreatingEntry) {
+            if (options.isCreatingEntry) {
               return value !== null || value !== undefined;
             }
 
@@ -157,7 +161,7 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema
               .test('min', errorsTrads.min, value => {
-                if (isCreatingEntry) {
+                if (options.isCreatingEntry) {
                   return value && value.length > 0;
                 }
 
@@ -168,7 +172,7 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
                 return value !== null && value.length > 0;
               })
               .test('required', errorsTrads.required, value => {
-                if (isCreatingEntry) {
+                if (options.isCreatingEntry) {
                   return value !== null || value !== undefined;
                 }
 
@@ -198,7 +202,7 @@ const createYupSchema = (model, { components }, isCreatingEntry = true) => {
   );
 };
 
-const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
+const createYupSchemaAttribute = (type, validations, options) => {
   let schema = yup.mixed();
 
   let regex = get(validations, 'regex', null);
@@ -264,38 +268,40 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
     ) {
       switch (validation) {
         case 'required': {
-          if (type === 'password' && isCreatingEntry) {
-            schema = schema.required(errorsTrads.required);
-          }
-
-          if (type !== 'password') {
-            if (isCreatingEntry) {
+          if (!options.isDraft) {
+            if (type === 'password' && options.isCreatingEntry) {
               schema = schema.required(errorsTrads.required);
-            } else {
-              schema = schema.test('required', errorsTrads.required, value => {
-                // Field is not touched and the user is editing the entry
-                if (value === undefined) {
-                  return true;
-                }
+            }
 
-                if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
-                  if (value === 0) {
+            if (type !== 'password') {
+              if (options.isCreatingEntry) {
+                schema = schema.required(errorsTrads.required);
+              } else {
+                schema = schema.test('required', errorsTrads.required, value => {
+                  // Field is not touched and the user is editing the entry
+                  if (value === undefined) {
                     return true;
                   }
 
-                  return !!value;
-                }
+                  if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                    if (value === 0) {
+                      return true;
+                    }
 
-                if (['date', 'datetime'].includes(type)) {
-                  return moment(value)._isValid === true;
-                }
+                    return !!value;
+                  }
 
-                if (type === 'boolean') {
-                  return value !== undefined;
-                }
+                  if (['date', 'datetime'].includes(type)) {
+                    return moment(value)._isValid === true;
+                  }
 
-                return !isEmpty(value);
-              });
+                  if (type === 'boolean') {
+                    return value !== undefined;
+                  }
+
+                  return !isEmpty(value);
+                });
+              }
             }
           }
 
@@ -321,9 +327,12 @@ const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
           }
           break;
         }
-        case 'minLength':
-          schema = schema.min(validationValue, errorsTrads.minLength);
+        case 'minLength': {
+          if (!options.isDraft) {
+            schema = schema.min(validationValue, errorsTrads.minLength);
+          }
           break;
+        }
         case 'regex':
           schema = schema.matches(validationValue, errorsTrads.regex);
           break;
