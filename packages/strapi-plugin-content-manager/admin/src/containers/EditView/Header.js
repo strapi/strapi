@@ -148,7 +148,7 @@ const Header = () => {
         content={{
           title: `${pluginId}.popUpWarning.title`,
           message: `${pluginId}.popUpWarning.warning.unpublish`,
-          // secondMessage: `${pluginId}.popUpWarning.warning.unpublish-question`,
+          secondMessage: `${pluginId}.popUpWarning.warning.unpublish-question`,
           cancel: `${pluginId}.popUpWarning.button.cancel`,
           confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
