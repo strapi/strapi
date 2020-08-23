@@ -22,7 +22,7 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { goBack } = useHistory();
+  const { push } = useHistory();
   const permissionsRef = useRef();
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
@@ -86,9 +86,9 @@ const CreatePage = () => {
 
         return res;
       })
-      .then(() => {
+      .then(res => {
         strapi.notification.success('Settings.roles.created');
-        goBack();
+        push(`${settingsBaseURL}/roles/${res.data.id}`);
       })
       .catch(err => {
         console.error(err);

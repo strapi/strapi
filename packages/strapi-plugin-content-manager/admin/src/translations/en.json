@@ -150,7 +150,10 @@
   "popUpWarning.title": "Please confirm",
   "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings",
+  "popUpWarning.warning.unpublish": "Unpublish this content will automatically change it to a draft.",
+  "popUpWarning.warning.unpublish-question": "Are you sure you want to unpublish it?",
   "success.record.delete": "Deleted",
   "success.record.publish": "Published",
+  "success.record.unpublish": "Unpublished",
   "success.record.save": "Saved"
 }

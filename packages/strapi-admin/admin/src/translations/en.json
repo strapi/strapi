@@ -253,6 +253,7 @@
   "app.utils.delete": "Delete",
   "app.utils.delete-entry": "Delete this entry",
   "app.utils.publish": "Publish",
+  "app.utils.unpublish": "Unpublish",
   "app.utils.filters": "Filters",
   "app.utils.placeholder.defaultMessage": " ",
   "app.utils.select-all": "Select all",

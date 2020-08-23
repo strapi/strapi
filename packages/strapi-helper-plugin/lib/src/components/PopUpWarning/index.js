@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import { Button } from '@buffetjs/core';
+import { Button, Padded, Text } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 
 import IcoDanger from '../../assets/icons/icon_danger.svg';
@@ -85,12 +85,19 @@ function PopUpWarning({
         <StyledHeader toggle={handleToggle}>
           <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
         </StyledHeader>
-        <StyledBody>
+        <StyledBody small={content.secondMessage}>
           <div>
             <img src={icons[popUpWarningType]} alt="icon" />
             <p>
               <FormattedMessage id={content.message || 'components.popUpWarning.message'} />
             </p>
+            {content.secondMessage && (
+              <Padded top size="smd">
+                <Text color="lightOrange">
+                  <FormattedMessage id={content.secondMessage} />
+                </Text>
+              </Padded>
+            )}
           </div>
         </StyledBody>
         <StyledFooter>
@@ -113,6 +120,7 @@ PopUpWarning.propTypes = {
     cancel: PropTypes.string,
     confirm: PropTypes.string,
     message: PropTypes.string,
+    secondMessage: PropTypes.string,
     title: PropTypes.string,
   }),
   isConfirmButtonLoading: PropTypes.bool,
@@ -128,6 +136,7 @@ PopUpWarning.defaultProps = {
     cancel: 'components.popUpWarning.button.cancel',
     confirm: 'components.popUpWarning.button.confirm',
     message: 'components.popUpWarning.message',
+    secondMessage: null,
     title: 'components.popUpWarning.title',
   },
   isConfirmButtonLoading: false,

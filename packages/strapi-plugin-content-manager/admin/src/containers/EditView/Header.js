@@ -9,20 +9,28 @@ import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
 
+const primaryButtonObject = {
+  color: 'primary',
+  type: 'button',
+  style: {
+    minWidth: 150,
+    fontWeight: 600,
+  },
+};
+
 const Header = () => {
-  const [showWarningCancel, setWarningCancel] = useState(false);
+  const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
   const {
     initialData,
     isCreatingEntry,
     isSingleType,
-    isSubmitting,
-    isPublishing,
+    sending,
     layout,
     modifiedData,
     onPublish,
-    resetData,
+    onUnpublish,
   } = useDataManager();
   const {
     allowedActions: { canDelete, canUpdate, canCreate, canPublish },
@@ -65,7 +73,7 @@ const Header = () => {
           label: formatMessage({
             id: `${pluginId}.containers.Edit.submit`,
           }),
-          isLoading: isSubmitting,
+          isLoading: sending === 'submit',
           type: 'submit',
           style: {
             minWidth: 150,
@@ -75,20 +83,27 @@ const Header = () => {
       ];
     }
 
-    if (hasDraftAndPublish && canPublish) {
+    if (hasDraftAndPublish && canPublish && !initialData.published_at) {
       headerActions.unshift({
+        ...primaryButtonObject,
         disabled: didChangeData,
         label: formatMessage({
           id: 'app.utils.publish',
         }),
-        color: 'primary',
         onClick: onPublish,
-        type: 'button',
-        isLoading: isPublishing,
-        style: {
-          minWidth: 150,
-          fontWeight: 600,
-        },
+        isLoading: sending === 'publish',
+      });
+    }
+
+    if (hasDraftAndPublish && canPublish && initialData.published_at) {
+      headerActions.unshift({
+        ...primaryButtonObject,
+        disabled: didChangeData,
+        label: formatMessage({
+          id: 'app.utils.unpublish',
+        }),
+        onClick: () => setWarningUnpublish(true),
+        isLoading: sending === 'unpublish',
       });
     }
 
@@ -103,8 +118,8 @@ const Header = () => {
     canDelete,
     didChangeData,
     formatMessage,
-    isSubmitting,
-    isPublishing,
+    sending,
+    initialData,
   ]);
 
   const headerProps = useMemo(() => {
@@ -117,27 +132,28 @@ const Header = () => {
     };
   }, [headerActions, headerTitle, apiID]);
 
-  const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
+  const toggleWarningPublish = () => setWarningUnpublish(prevState => !prevState);
 
-  const handleConfirmReset = () => {
-    toggleWarningCancel();
-    resetData();
+  const handleConfirmUnpublish = e => {
+    onUnpublish(e);
+    setWarningUnpublish(false);
   };
 
   return (
     <>
       <PluginHeader {...headerProps} />
       <PopUpWarning
-        isOpen={showWarningCancel}
-        toggleModal={toggleWarningCancel}
+        isOpen={showWarningUnpublish}
+        toggleModal={toggleWarningPublish}
         content={{
           title: `${pluginId}.popUpWarning.title`,
-          message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+          message: `${pluginId}.popUpWarning.warning.unpublish`,
+          // secondMessage: `${pluginId}.popUpWarning.warning.unpublish-question`,
           cancel: `${pluginId}.popUpWarning.button.cancel`,
           confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
-        onConfirm={handleConfirmReset}
+        onConfirm={handleConfirmUnpublish}
       />
     </>
   );

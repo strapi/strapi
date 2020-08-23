@@ -58,9 +58,13 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
+  const [sending, setSending] = useState();
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+  const hasDraftAndPublish = get(
+    currentContentTypeLayout,
+    ['schema', 'options', 'draftAndPublish'],
+    false
+  );
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -283,7 +287,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      isCreatingEntry
+      { isCreatingEntry, isDraft: hasDraftAndPublish }
     );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
@@ -365,7 +369,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      isCreatingEntry
+      { isCreatingEntry, isDraft: hasDraftAndPublish }
     );
 
     try {
@@ -373,7 +377,7 @@ const EditViewDataManagerProvider = ({
       await schema.validate(modifiedData, { abortEarly: false });
 
       // Show a loading button in the EditView/Header.js
-      setIsSubmitting(true);
+      setSending('submit');
 
       // Set the loading state in the plugin header
       const filesToUpload = getFilesToUpload(modifiedData);
@@ -430,7 +434,7 @@ const EditViewDataManagerProvider = ({
         );
         emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
 
-        setIsSubmitting(false);
+        setSending(null);
 
         dispatch({
           type: 'SUBMIT_SUCCESS',
@@ -444,7 +448,7 @@ const EditViewDataManagerProvider = ({
         }
       } catch (err) {
         console.error({ err });
-        setIsSubmitting(false);
+        setSending(null);
 
         const error = get(
           err,
@@ -476,7 +480,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       console.error({ err });
       const errors = getYupInnerErrors(err);
-      setIsSubmitting(false);
+      setSending(null);
 
       dispatch({
         type: 'SUBMIT_ERRORS',
@@ -494,7 +498,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      isCreatingEntry
+      { isCreatingEntry }
     );
 
     try {
@@ -502,11 +506,11 @@ const EditViewDataManagerProvider = ({
       await schema.validate(modifiedData, { abortEarly: false });
 
       // Show a loading button in the EditView/Header.js
-      setIsPublishing(true);
+      setSending('publish');
 
       try {
         // Time to actually send the data
-        await request(
+        const data = await request(
           getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
           {
             method: 'POST',
@@ -516,10 +520,11 @@ const EditViewDataManagerProvider = ({
           false
         );
 
-        setIsPublishing(false);
+        setSending(null);
 
         dispatch({
           type: 'PUBLISH_SUCCESS',
+          data,
         });
         strapi.notification.success(`${pluginId}.success.record.publish`);
       } catch (err) {
@@ -527,7 +532,7 @@ const EditViewDataManagerProvider = ({
         // The api error send response.payload.message: 'The error message'.
         // There isn't : response.payload.message[0].messages[0].id
         console.error({ err });
-        setIsPublishing(false);
+        setSending(null);
 
         const error = get(
           err,
@@ -555,11 +560,46 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       console.error({ err });
       const errors = getYupInnerErrors(err);
-      setIsSubmitting(false);
+      setSending(null);
 
       dispatch({
         type: 'PUBLISH_ERRORS',
         errors,
+      });
+    }
+  };
+
+  const handleUnpublish = async e => {
+    e.preventDefault();
+
+    try {
+      setSending('unpublish');
+      const data = await request(
+        getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
+        {
+          method: 'POST',
+          signal,
+        },
+        false,
+        false
+      );
+
+      setSending(null);
+
+      dispatch({
+        type: 'UNPUBLISH_SUCCESS',
+        data,
+      });
+      strapi.notification.success(`${pluginId}.success.record.unpublish`);
+    } catch (err) {
+      console.error({ err });
+      setSending(null);
+
+      const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
+      strapi.notification.error(errorMessage);
+
+      dispatch({
+        type: 'UNPUBLISH_ERROR',
       });
     }
   };
@@ -719,8 +759,7 @@ const EditViewDataManagerProvider = ({
         initialData,
         isCreatingEntry,
         isSingleType,
-        isSubmitting,
-        isPublishing,
+        sending,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -729,6 +768,7 @@ const EditViewDataManagerProvider = ({
         moveRelation,
         onChange: handleChange,
         onPublish: handlePublish,
+        onUnpublish: handleUnpublish,
         onRemoveRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
@@ -742,11 +782,7 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        <OverlayBlocker
-          key="overlayBlocker"
-          isOpen={isSubmitting || isPublishing}
-          {...overlayBlockerParams}
-        />
+        <OverlayBlocker key="overlayBlocker" isOpen={sending} {...overlayBlockerParams} />
         {isLoading ? (
           <LoadingIndicatorPage />
         ) : (

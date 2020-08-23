@@ -169,7 +169,7 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
-      await request('/admin/webhooks', {
+      const { data } = await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),
       });
@@ -180,7 +180,7 @@ function EditView() {
         });
 
         strapi.notification.success('Settings.webhooks.created');
-        goBack();
+        push(`/settings/webhooks/${data.id}`);
       }
     } catch (err) {
       if (isMounted.current) {
@@ -199,7 +199,7 @@ function EditView() {
     });
   };
 
-  const goBack = () => push('/settings/webhooks');
+  const goToList = () => push('/settings/webhooks');
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -348,7 +348,7 @@ function EditView() {
   return (
     <Wrapper>
       <PageTitle name="Webhooks" />
-      <BackHeader onClick={goBack} />
+      <BackHeader onClick={goToList} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (
