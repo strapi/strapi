@@ -27,7 +27,7 @@ spec:
 {{ toYaml .Values.envs | indent 12 }}
           ports:
             - name: http
-              containerPort: {{ .Values.port }} 
+              containerPort: {{ .Values.port }}
               protocol: TCP
           resources:
 {{ toYaml .Values.resources | indent 12 }}
