@@ -97,29 +97,11 @@ describe('Sanitize Entity', () => {
     },
   };
 
-  const userWithPrivateModel = {
-    ...userModel,
-    options: {
-      ...userModel.options,
-      privateAttributes: ['firstname'],
-    },
-  };
-
-  const userWithIgnorePrivateModel = {
-    ...userModel,
-    options: {
-      ...userModel.options,
-      ignorePrivateFor: ['id'],
-    },
-  };
-
   const models = {
     user: userModel,
     article: articleModel,
     userRel: userRelModel,
     userDz: userDzModel,
-    userWithPrivate: userWithPrivateModel,
-    userWithIgnorePrivate: userWithIgnorePrivateModel,
   };
 
   beforeEach(() => {
@@ -219,7 +201,13 @@ describe('Sanitize Entity', () => {
         ],
       ];
 
-      const { userWithPrivate: model } = models;
+      const model = {
+        ...models.user,
+        options: {
+          ...models.user.options,
+          privateAttributes: ['firstname'],
+        },
+      };
 
       test.each(tests)(`Test n°%#`, (options, expected) => {
         global.strapi = {
@@ -238,7 +226,7 @@ describe('Sanitize Entity', () => {
       const tests = [
         [
           { withPrivate: false, isOutput: true, includeFields: null },
-          _.pick(input, ['id', 'firstname', 'lastname']),
+          _.pick(input, ['id', 'email', 'firstname', 'lastname']),
         ],
         [{ withPrivate: false, isOutput: false, includeFields: null }, input],
         [
@@ -247,7 +235,7 @@ describe('Sanitize Entity', () => {
         ],
         [
           { withPrivate: false, isOutput: true, includeFields: ['email', 'firstname'] },
-          _.pick(input, ['id', 'firstname']),
+          _.pick(input, ['id', 'email', 'firstname']),
         ],
         [
           { withPrivate: false, isOutput: true, includeFields: ['password'] },
@@ -281,7 +269,13 @@ describe('Sanitize Entity', () => {
         ],
       ];
 
-      const { userWithIgnorePrivate: model } = models;
+      const model = {
+        ...models.user,
+        options: {
+          ...models.user.options,
+          ignorePrivateFor: ['id', 'email'],
+        },
+      };
 
       test.each(tests)(`Test n°%#`, (options, expected) => {
         global.strapi = {
