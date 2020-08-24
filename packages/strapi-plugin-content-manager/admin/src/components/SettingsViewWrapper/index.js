@@ -20,7 +20,7 @@ import Separator from '../Separator';
 const SettingsViewWrapper = ({
   children,
   history: { goBack },
-  getListDisplayedFields,
+  displayedFields,
   inputs,
   initialData,
   isEditSettings,
@@ -94,7 +94,7 @@ const SettingsViewWrapper = ({
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
-        ...getListDisplayedFields().filter(
+        ...displayedFields.filter(
           name =>
             get(getAttributes, [name, 'type'], '') !== 'media' &&
             name !== 'id' &&
@@ -228,7 +228,7 @@ const SettingsViewWrapper = ({
 };
 
 SettingsViewWrapper.defaultProps = {
-  getListDisplayedFields: () => [],
+  displayedFields: [],
   inputs: [],
   initialData: {},
   isEditSettings: false,
@@ -251,7 +251,7 @@ SettingsViewWrapper.defaultProps = {
 
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
-  getListDisplayedFields: PropTypes.func,
+  displayedFields: PropTypes.array,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
