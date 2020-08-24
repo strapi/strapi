@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get } from 'lodash';
+import { cloneDeep, get, omit } from 'lodash';
 import {
   // utils
   request,
@@ -41,7 +41,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
 
-  const getAttributes = useMemo(() => {
+  const attributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
 
@@ -76,22 +76,24 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
     return get(modifiedData, ['schema', 'info', 'name'], '');
   }, [modifiedData]);
 
-  const getListDisplayedFields = () => get(modifiedData, ['layouts', 'list'], []);
+  const displayedFields = useMemo(() => {
+    return get(modifiedData, ['layouts', 'list'], []);
+  }, [modifiedData]);
 
-  const getListRemainingFields = () => {
+  const listRemainingFields = useMemo(() => {
     const metadatas = get(modifiedData, ['metadatas'], {});
-    const attributes = getAttributes;
+    const filteredMetadatas = omit(metadatas, ['published_at']);
 
-    return Object.keys(metadatas)
+    return Object.keys(filteredMetadatas)
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
         return !['json', 'component', 'richtext', 'relation'].includes(type) && !!type;
       })
       .filter(field => {
-        return !getListDisplayedFields().includes(field);
+        return !displayedFields.includes(field);
       });
-  };
+  }, [displayedFields, attributes, modifiedData]);
 
   const handleClickEditLabel = labelToEdit => {
     dispatch({
@@ -178,7 +180,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
           )}
         </FormattedMessage>
       </div>
-      {get(getAttributes, [labelToEdit, 'type'], 'text') !== 'media' && (
+      {get(attributes, [labelToEdit, 'type'], 'text') !== 'media' && (
         <div className="col-6" style={{ marginBottom: 4 }}>
           <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
             {label => (
@@ -202,7 +204,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
       setIsDraggingSibling={setIsDraggingSibling}
     >
       <SettingsViewWrapper
-        getListDisplayedFields={getListDisplayedFields}
+        displayedFields={displayedFields}
         inputs={forms}
         isLoading={isLoading}
         initialData={initialData}
@@ -226,12 +228,12 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
                   width: '100%',
                 }}
               >
-                {getListDisplayedFields().map((item, index) => {
+                {displayedFields.map((item, index) => {
                   const label = get(modifiedData, ['metadatas', item, 'list', 'label'], '');
 
                   return (
                     <Label
-                      count={getListDisplayedFields().length}
+                      count={displayedFields.length}
                       key={item}
                       index={index}
                       isDraggingSibling={isDraggingSibling}
@@ -242,7 +244,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
                       onRemove={e => {
                         e.stopPropagation();
 
-                        if (getListDisplayedFields().length === 1) {
+                        if (displayedFields.length === 1) {
                           strapi.notification.info(`${pluginId}.notification.info.minimumFields`);
                         } else {
                           dispatch({
@@ -262,7 +264,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
           <DropdownButton
             isOpen={isOpen}
             toggle={() => {
-              if (getListRemainingFields().length > 0) {
+              if (listRemainingFields.length > 0) {
                 setIsOpen(prevState => !prevState);
               }
             }}
@@ -273,9 +275,9 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
               right: 10,
             }}
           >
-            <Toggle disabled={getListRemainingFields().length === 0} />
+            <Toggle disabled={listRemainingFields.length === 0} />
             <MenuDropdown>
-              {getListRemainingFields().map(item => (
+              {listRemainingFields.map(item => (
                 <DropdownItem
                   key={item}
                   onClick={() => {
@@ -306,7 +308,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
         onToggle={toggleModalForm}
         renderForm={renderForm}
         subHeaderContent={labelToEdit}
-        type={get(getAttributes, [labelToEdit, 'type'], 'text')}
+        type={get(attributes, [labelToEdit, 'type'], 'text')}
       />
     </LayoutDndProvider>
   );
