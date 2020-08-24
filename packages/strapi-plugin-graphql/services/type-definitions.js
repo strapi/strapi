@@ -41,8 +41,14 @@ const buildTypeDefObj = model => {
     typeDef[updatedAtKey] = 'DateTime!';
   }
 
+  const ignoredPrivateAttributes = getIgnoredPrivateAttributes(model);
+
   Object.keys(attributes)
-    .filter(attributeName => attributes[attributeName].private !== true)
+    .filter(
+      attributeName =>
+        attributes[attributeName].private !== true &&
+        !ignoredPrivateAttributes.includes(attributeName)
+    )
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -56,7 +62,11 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => attributes[association.alias].private !== true)
+    .filter(
+      association =>
+        attributes[association.alias].private !== true &&
+        !ignoredPrivateAttributes.includes(association.alias)
+    )
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
@@ -65,12 +75,7 @@ const buildTypeDefObj = model => {
     });
 
   // Remove private attributes (which are not attributes) defined per model or globally
-  const privateAttributes = _.union(
-    _.get(model, 'options.privateAttributes', []),
-    _.get(model, 'options.ignoreGlobalPrivateAttributes', false)
-      ? []
-      : strapi.config.get('api.responses.privateAttributes', [])
-  );
+  const privateAttributes = getPrivateAttributes(model);
   privateAttributes.forEach(attr => {
     if (typeDef[attr]) {
       delete typeDef[attr];
@@ -78,6 +83,20 @@ const buildTypeDefObj = model => {
   });
 
   return typeDef;
+};
+
+const getIgnoredPrivateAttributes = model => {
+  return _.get(model, 'options.ignorePrivateFor', []);
+};
+
+const getPrivateAttributes = model => {
+  const allPrivatesAttributes = _.union(
+    strapi.config.get('api.responses.privateAttributes', []),
+    _.get(model, 'options.privateAttributes', [])
+  );
+  const ignoredPrivateAttributes = getIgnoredPrivateAttributes(model);
+
+  return _.difference(allPrivatesAttributes, ignoredPrivateAttributes);
 };
 
 const generateEnumDefinitions = (attributes, globalId) => {
