@@ -25,13 +25,12 @@ const sanitizeEntity = (dataSource, options) => {
 
   const { attributes } = model;
   const allowedFields = getAllowedFields({ includeFields, model, isOutput });
-  const privateAttributes = getPrivateAttributes(model);
 
   const reducerFn = (acc, value, key) => {
     const attribute = attributes[key];
     const allowedFieldsHasKey = allowedFields.includes(key);
 
-    if (shouldRemoveAttribute(key, attribute, { withPrivate, isOutput, privateAttributes })) {
+    if (shouldRemoveAttribute(model, key, attribute, { withPrivate, isOutput })) {
       return acc;
     }
 
@@ -121,23 +120,28 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const getPrivateAttributes = model => {
-  return _.difference(
-    _.union(
-      strapi.config.get('api.responses.privateAttributes', []),
-      _.get(model, 'options.privateAttributes', [])
-    ),
-    _.get(model, 'options.ignorePrivateFor', [])
-  );
+const getIgnoredPrivateAttributes = model => {
+  return _.get(model, 'options.ignorePrivateFor', []);
 };
 
-const shouldRemoveAttribute = (
-  key,
-  attribute = {},
-  { withPrivate, isOutput, privateAttributes }
-) => {
+const getPrivateAttributes = model => {
+  const allPrivatesAttributes = _.union(
+    strapi.config.get('api.responses.privateAttributes', []),
+    _.get(model, 'options.privateAttributes', [])
+  );
+  const ignoredPrivateAttributes = getIgnoredPrivateAttributes(model);
+
+  return _.difference(allPrivatesAttributes, ignoredPrivateAttributes);
+};
+
+const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
+  const privateAttributes = getPrivateAttributes(model);
+  const ignoredPrivateAttributes = getIgnoredPrivateAttributes(model);
+
   const isPassword = attribute.type === 'password';
-  const isPrivate = attribute.private === true || privateAttributes.includes(key);
+  const isPrivate =
+    (attribute.private === true && !ignoredPrivateAttributes.includes(key)) ||
+    privateAttributes.includes(key);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
