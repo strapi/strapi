@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
@@ -326,7 +325,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Publish article1, expect published_at to be defined', async () => {
-      const entry = _.clone(data.articles[0]);
+      const entry = data.articles[0];
 
       let { body } = await rq({
         url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
@@ -340,7 +339,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Publish article1, expect article1 to be already published', async () => {
-      const entry = _.clone(data.articles[0]);
+      const entry = data.articles[0];
 
       let { body } = await rq({
         url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
@@ -352,18 +351,20 @@ describe('Content Manager End to End', () => {
     });
 
     test('Unpublish article1, expect article1 to be set to null', async () => {
-      const entry = _.clone(data.articles[0]);
+      const entry = data.articles[0];
 
       let { body } = await rq({
         url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
         method: 'POST',
       });
 
+      data.articles[0] = body;
+
       expect(body.published_at).toBeNull();
     });
 
     test('Unpublish article1, expect article1 to already be a draft', async () => {
-      const entry = _.clone(data.articles[0]);
+      const entry = data.articles[0];
 
       let { body } = await rq({
         url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
