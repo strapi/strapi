@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, sortBy } from 'lodash';
+import { get, sortBy, omit } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
@@ -91,6 +91,9 @@ function ListView({
   const contentTypePath = useMemo(() => {
     return [slug, 'contentType'];
   }, [slug]);
+  const hasDraftAndPublish = useMemo(() => {
+    return get(layouts, [...contentTypePath, 'schema', 'options', 'draftAndPublish'], false);
+  }, [contentTypePath, layouts]);
 
   const getLayoutSetting = useCallback(
     settingName => {
@@ -201,10 +204,16 @@ function ListView({
   }, [listSchema]);
 
   const tableHeaders = useMemo(() => {
-    return listLayout.map(label => {
+    let headers = listLayout.map(label => {
       return { ...getMetaDatas([label, 'list']), name: label };
     });
-  }, [getMetaDatas, listLayout]);
+
+    if (hasDraftAndPublish) {
+      headers.push({ label: 'State', searchable: false, sortable: true, name: 'published_at' });
+    }
+
+    return headers;
+  }, [getMetaDatas, hasDraftAndPublish, listLayout]);
 
   const getFirstSortableElement = useCallback(
     (name = '') => {
@@ -220,8 +229,10 @@ function ListView({
   );
 
   const allLabels = useMemo(() => {
+    const filteredMetadatas = omit(getMetaDatas(), ['published_at']);
+
     return sortBy(
-      Object.keys(getMetaDatas())
+      Object.keys(filteredMetadatas)
         .filter(
           key =>
             !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(

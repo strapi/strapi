@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import { IconLinks } from '@buffetjs/core';
+import { IconLinks, Text } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useIntl } from 'react-intl';
 
 import useListView from '../../hooks/useListView';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
+import getTrad from '../../utils/getTrad';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
+import State from './State';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
@@ -69,6 +72,7 @@ const getDisplayedValue = (type, value, name) => {
 
 function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
   const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
+  const { formatMessage } = useIntl();
 
   const memoizedDisplayedValue = useCallback(
     name => {
@@ -77,6 +81,13 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
       return getDisplayedValue(type, row[name], name);
     },
     [row, schema]
+  );
+
+  const isMedia = useCallback(
+    header => {
+      return get(schema, ['attributes', header.name, 'type']) === 'media';
+    },
+    [schema]
   );
 
   const { emitEvent } = useGlobalContext();
@@ -110,12 +121,20 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
       {headers.map(header => {
         return (
           <td key={header.name}>
-            {get(schema, ['attributes', header.name, 'type']) !== 'media' ? (
+            {isMedia(header) && <MediaPreviewList files={memoizedDisplayedValue(header.name)} />}
+            {header.name === 'published_at' && (
+              <State isGreen={row.published_at}>
+                <Text>
+                  {formatMessage({
+                    id: getTrad(`containers.List.${row.published_at ? 'published' : 'draft'}`),
+                  })}
+                </Text>
+              </State>
+            )}
+            {!isMedia(header) && header.name !== 'published_at' && (
               <Truncate>
                 <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
               </Truncate>
-            ) : (
-              <MediaPreviewList files={memoizedDisplayedValue(header.name)} />
             )}
           </td>
         );
