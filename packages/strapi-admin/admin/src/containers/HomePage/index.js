@@ -4,11 +4,12 @@
  *
  */
 /* eslint-disable */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { get, upperFirst } from 'lodash';
-import { auth } from 'strapi-helper-plugin';
+import { auth, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import PageTitle from '../../components/PageTitle';
+import { useModels } from '../../hooks';
 
 import useFetch from './hooks';
 import { ALink, Block, Container, LinkWrapper, P, Wave, Separator } from './components';
@@ -54,6 +55,9 @@ const SOCIAL_LINKS = [
 
 const HomePage = ({ global: { plugins }, history: { push } }) => {
   const { error, isLoading, posts } = useFetch();
+  // Temporary until we develop the menu API
+  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
+
   const handleClick = e => {
     e.preventDefault();
 
@@ -61,10 +65,18 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
       '/plugins/content-type-builder/content-types/plugins::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
     );
   };
-  const hasAlreadyCreatedContentTypes =
-    get(plugins, ['content-manager', 'leftMenuSections', '0', 'links'], []).filter(
-      contentType => contentType.isDisplayed === true
-    ).length > 1;
+
+  const hasAlreadyCreatedContentTypes = useMemo(() => {
+    const filterContentTypes = contentTypes => contentTypes.filter(c => c.isDisplayed);
+
+    return (
+      filterContentTypes(collectionTypes).length > 1 || filterContentTypes(singleTypes).length > 0
+    );
+  }, [collectionTypes, singleTypes]);
+
+  if (isLoadingForModels) {
+    return <LoadingIndicatorPage />;
+  }
 
   const headerId = hasAlreadyCreatedContentTypes
     ? 'HomePage.greetings'
