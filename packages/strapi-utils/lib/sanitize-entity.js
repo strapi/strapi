@@ -11,8 +11,12 @@ const sanitizeEntity = (dataSource, options) => {
 
   const data = parseOriginalData(dataSource);
 
-  if (typeof data !== 'object') {
+  if (typeof data !== 'object' || _.isNil(data)) {
     return data;
+  }
+
+  if (_.isArray(data)) {
+    return data.map(entity => sanitizeEntity(entity, options));
   }
 
   if (_.isNil(model)) {
