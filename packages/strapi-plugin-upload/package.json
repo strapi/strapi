@@ -5,7 +5,8 @@
   "strapi": {
     "name": "Media Library",
     "icon": "cloud-upload-alt",
-    "description": "upload.plugin.description"
+    "description": "upload.plugin.description",
+    "required": true
   },
   "scripts": {
     "test": "echo \"no tests yet\""
