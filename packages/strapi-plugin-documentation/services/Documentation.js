@@ -195,7 +195,14 @@ module.exports = {
   },
 
   createDocObject: array => {
-    return array.reduce((acc, curr) => _.merge(acc, curr), {});
+    return _.sortBy(array, t => t.tags[0] && t.tags[0].name).reduce((acc, curr) => {
+      function customizer(objValue, srcValue) {
+        if (_.isArray(objValue)) {
+          return objValue.concat(srcValue);
+        }
+      }
+      return _.mergeWith(acc, curr, customizer);
+    }, {});
   },
 
   deleteDocumentation: async function(version = this.getDocumentationVersion()) {
