@@ -10,6 +10,7 @@ let rq;
 let modelsUtils;
 let data = {
   products: [],
+  productsWithDP: [],
   productsWithCompo: [],
   productsWithCompoAndDP: [],
 };
@@ -383,7 +384,7 @@ describe('Content-Type API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
       expect(res.body.published_at).toBeNull();
-      data.products.push(res.body);
+      data.productsWithDP.push(res.body);
     });
 
     test('Create a product + cannot overwrite published_at', async () => {
@@ -401,7 +402,7 @@ describe('Content-Type API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.omit(product, 'published_at'));
       expect(res.body.published_at).toBeNull();
-      data.products.push(res.body);
+      data.productsWithDP.push(res.body);
     });
 
     test('Read all products', async () => {
@@ -432,15 +433,15 @@ describe('Content-Type API', () => {
       };
       const res = await rq({
         method: 'PUT',
-        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
         body: product,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.omit(product, 'published_at'));
-      expect(res.body.id).toEqual(data.products[0].id);
+      expect(res.body.id).toEqual(data.productsWithDP[0].id);
       expect(res.body.published_at).toBeNull();
-      data.products[0] = res.body;
+      data.productsWithDP[0] = res.body;
     });
 
     test('Update Products + cannot overwrite published_at', async () => {
@@ -450,28 +451,79 @@ describe('Content-Type API', () => {
       };
       const res = await rq({
         method: 'PUT',
-        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
         body: product,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
-      expect(res.body.id).toEqual(data.products[0].id);
+      expect(res.body.id).toEqual(data.productsWithDP[0].id);
       expect(res.body.published_at).toBeNull();
-      data.products[0] = res.body;
+      data.productsWithDP[0] = res.body;
+    });
+
+    test('Publish an product, expect published_at to be defined', async () => {
+      const entry = data.productsWithDP[0];
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/publish/${entry.id}`,
+        method: 'POST',
+      });
+
+      data.productsWithDP[0] = body;
+
+      expect(body.published_at).toEqual(expect.any(String));
+      expect(isNaN(new Date(body.published_at).valueOf())).toBe(false);
+    });
+
+    test('Publish article1, expect article1 to be already published', async () => {
+      const entry = data.productsWithDP[0];
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/publish/${entry.id}`,
+        method: 'POST',
+      });
+
+      expect(body.statusCode).toBe(400);
+      expect(body.message).toBe('Already published');
+    });
+
+    test('Unpublish article1, expect article1 to be set to null', async () => {
+      const entry = data.productsWithDP[0];
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/unpublish/${entry.id}`,
+        method: 'POST',
+      });
+
+      data.productsWithDP[0] = body;
+
+      expect(body.published_at).toBeNull();
+    });
+
+    test('Unpublish article1, expect article1 to already be a draft', async () => {
+      const entry = data.productsWithDP[0];
+
+      let { body } = await rq({
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/unpublish/${entry.id}`,
+        method: 'POST',
+      });
+
+      expect(body.statusCode).toBe(400);
+      expect(body.message).toBe('Already a draft');
     });
 
     test('Delete a draft', async () => {
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.products[0].id}`,
+        url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(data.products[0]);
-      expect(res.body.id).toEqual(data.products[0].id);
+      expect(res.body).toMatchObject(data.productsWithDP[0]);
+      expect(res.body.id).toEqual(data.productsWithDP[0].id);
       expect(res.body.published_at).toBeNull();
-      data.products.shift();
+      data.productsWithDP.shift();
     });
 
     describe('validators', () => {
@@ -488,7 +540,7 @@ describe('Content-Type API', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toMatchObject(product);
-        data.products.push(res.body);
+        data.productsWithDP.push(res.body);
       });
 
       test('Can create a product - required', async () => {
@@ -506,7 +558,7 @@ describe('Content-Type API', () => {
           ...product,
           name: null,
         });
-        data.products.push(res.body);
+        data.productsWithDP.push(res.body);
       });
 
       test('Cannot create a product - maxLength', async () => {

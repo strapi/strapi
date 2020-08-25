@@ -287,57 +287,6 @@ describe('Content Manager End to End', () => {
       expect(body.published_at).toBeUndefined();
     });
 
-    test('Publish article1, expect published_at to be defined', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
-        method: 'POST',
-      });
-
-      data.articles[0] = body;
-
-      expect(body.published_at).toEqual(expect.any(String));
-      expect(new Date(body.published_at)).toEqual(expect.any(Date));
-    });
-
-    test('Publish article1, expect article1 to be already published', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
-        method: 'POST',
-      });
-
-      expect(body.statusCode).toBe(400);
-      expect(body.message).toBe('Already published');
-    });
-
-    test('Unpublish article1, expect article1 to be set to null', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
-        method: 'POST',
-      });
-
-      data.articles[0] = body;
-
-      expect(body.published_at).toBeNull();
-    });
-
-    test('Unpublish article1, expect article1 to already be a draft', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
-        method: 'POST',
-      });
-
-      expect(body.statusCode).toBe(400);
-      expect(body.message).toBe('Already a draft');
-    });
-
     test('Delete all articles should remove the association in each tags related to them', async () => {
       const { body: createdTag } = await rq({
         url: '/content-manager/explorer/application::tag.tag',
@@ -654,7 +603,6 @@ describe('Content Manager End to End', () => {
       expect(body.id);
       expect(body.articles.length).toBe(1);
       expect(body.articles[0].id).toBe(data.articles[1].id);
-      expect(body.articles[0].published_at).toBe(null);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
     });
@@ -668,7 +616,6 @@ describe('Content Manager End to End', () => {
       expect(body.id);
       expect(body.articles.length).toBe(1);
       expect(body.articles[0].id).toBe(data.articles[0].id);
-      expect(body.articles[0].published_at).toBe(null);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
     });
@@ -851,45 +798,6 @@ describe('Content Manager End to End', () => {
 
       if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
-    });
-  });
-
-  describe('Draft & Publish', () => {
-    test('Create article3 - published_at should not be overwritten', async () => {
-      const entry = {
-        title: 'Article 1',
-        content: 'My super content 1',
-        date: '2019-08-13T00:00:00.000Z',
-        published_at: '2019-08-13T00:00:00.000Z',
-      };
-
-      let { body } = await rq({
-        url: '/content-manager/explorer/application::article.article',
-        method: 'POST',
-        body: entry,
-      });
-
-      data.articles.push(body);
-
-      expect(body.id);
-      expect(body.published_at).toBeUndefined();
-    });
-
-    test('Update article3 - published_at should not be overwritten', async () => {
-      const entry = Object.assign({}, data.articles[2], {
-        published_at: '2019-08-13T00:00:00.000Z',
-      });
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/${entry.id}`,
-        method: 'PUT',
-        body: entry,
-      });
-
-      data.articles.push(body);
-
-      expect(body.id);
-      expect(body.published_at).toBeUndefined();
     });
   });
 });
