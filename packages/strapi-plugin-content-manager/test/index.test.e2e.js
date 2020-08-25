@@ -29,21 +29,13 @@ describe('Content Manager End to End', () => {
       form.tag,
       form.category,
       form.reference,
-      form.product,
       form.articlewithtag,
     ]);
   }, 60000);
 
   afterAll(
     () =>
-      modelsUtils.deleteContentTypes([
-        'article',
-        'tag',
-        'category',
-        'reference',
-        'product',
-        'articlewithtag',
-      ]),
+      modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'articlewithtag']),
     60000
   );
 

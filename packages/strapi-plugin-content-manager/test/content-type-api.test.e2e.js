@@ -361,7 +361,7 @@ describe('Content-Type API', () => {
 
     afterAll(async () => {
       // clean database
-      for (const product of data.products) {
+      for (const product of data.productsWithDP) {
         await rq({
           method: 'DELETE',
           url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${product.id}`,
@@ -586,6 +586,13 @@ describe('Content-Type API', () => {
     }, 60000);
 
     afterAll(async () => {
+      // clean database
+      for (const product of data.productsWithCompoAndDP) {
+        await rq({
+          method: 'DELETE',
+          url: `/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp/${product.id}`,
+        });
+      }
       await modelsUtils.deleteContentTypes(['product-with-compo-and-dp']);
     }, 60000);
 
@@ -663,7 +670,7 @@ describe('Content-Type API', () => {
     });
 
     describe('validation', () => {
-      test('Cannot create Products with compo - compo required', async () => {
+      test('Can create Products with compo - compo required', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -678,6 +685,7 @@ describe('Content-Type API', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toMatchObject(product);
+        data.productsWithCompoAndDP.push(res.body);
       });
 
       // validation doesn't exist for the moment
