@@ -130,7 +130,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
           if (
             (definition.client !== 'sqlite3' || !tableExists) &&
             !contentTypesUtils.hasDraftAndPublish(model) && // no require constraint to allow drafts
-            definition.modelType !== 'component' // // no require constraint to allow components in drafts
+            definition.modelType !== 'component' // no require constraint to allow components in drafts
           ) {
             col.notNullable();
           }
