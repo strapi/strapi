@@ -194,7 +194,7 @@ module.exports = {
   async getRole(roleID, plugins) {
     const role = await strapi
       .query('role', 'users-permissions')
-      .findOne({ id: roleID }, ['users', 'permissions']);
+      .findOne({ id: roleID }, ['permissions']);
 
     if (!role) {
       throw new Error('Cannot find this role');
