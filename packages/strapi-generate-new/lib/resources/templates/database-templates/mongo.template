@@ -1,0 +1,20 @@
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'mongoose',
+      settings: {
+        host: env('DATABASE_HOST', '<%= settings.host %>'),
+        srv: env.bool('DATABASE_SRV', <%= settings.srv %>),
+        port: env.int('DATABASE_PORT', <%= settings.port %>),
+        database: env('DATABASE_NAME', '<%= settings.database %>'),
+        username: env('DATABASE_USERNAME', '<%= settings.username %>'),
+        password: env('DATABASE_PASSWORD', '<%= settings.password %>'),
+      },
+      options: {
+        authenticationDatabase: env('AUTHENTICATION_DATABASE', <% if (options.authenticationDatabase) { %>'<%= options.authenticationDatabase %>'<% } else { %>null<% } %>),
+        ssl: env.bool('DATABASE_SSL', <%= options.ssl %>),
+      },
+    },
+  },
+});

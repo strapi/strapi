@@ -6,7 +6,7 @@
     "dev": "vuepress dev",
     "build": "vuepress build"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@vuepress/plugin-medium-zoom": "^1.2.0",
     "@vuepress/plugin-google-analytics": "^1.2.0",

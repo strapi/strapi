@@ -26,24 +26,16 @@ module.exports = async () => {
   // Generate plugins' documentation
   const pluginsWithDocumentationNeeded = services.getPluginsWithDocumentationNeeded();
   pluginsWithDocumentationNeeded.forEach(plugin => {
-    const isDocExisting = services.checkIfPluginDocumentationFolderExists(
-      plugin
-    );
+    const isDocExisting = services.checkIfPluginDocumentationFolderExists(plugin);
 
     if (!isDocExisting) {
-      services.createDocumentationDirectory(
-        services.getPluginDocumentationPath(plugin)
-      );
+      services.createDocumentationDirectory(services.getPluginDocumentationPath(plugin));
       // create the overrides directory
-      services.createDocumentationDirectory(
-        services.getPluginOverrideDocumentationPath(plugin)
-      );
+      services.createDocumentationDirectory(services.getPluginOverrideDocumentationPath(plugin));
       services.createPluginDocumentationFile(plugin);
       shouldUpdateFullDoc = true;
     } else {
-      const needToUpdatePluginDoc = services.checkIfPluginDocNeedsUpdate(
-        plugin
-      );
+      const needToUpdatePluginDoc = services.checkIfPluginDocNeedsUpdate(plugin);
 
       if (needToUpdatePluginDoc) {
         services.createPluginDocumentationFile(plugin);
@@ -62,9 +54,7 @@ module.exports = async () => {
       // If the documentation directory doesn't exist create it
       services.createDocumentationDirectory(services.getDocumentationPath(api));
       // Create the overrides directory
-      services.createDocumentationDirectory(
-        services.getDocumentationOverridesPath(api)
-      );
+      services.createDocumentationDirectory(services.getDocumentationOverridesPath(api));
       // Create the documentation files per version
       services.createDocumentationFile(api); // Then create the {api}.json documentation file
       shouldUpdateFullDoc = true;
@@ -97,10 +87,7 @@ module.exports = async () => {
         .sort((a, b) => a - b)
         .join('.');
     };
-    const oldDoc = require(path.resolve(
-      documentationPath,
-      'full_documentation.json'
-    ));
+    const oldDoc = require(path.resolve(documentationPath, 'full_documentation.json'));
     const oldDocTags = getDocTagsToString(oldDoc);
     const currentDocTags = getDocTagsToString(fullDoc);
 
@@ -120,4 +107,31 @@ module.exports = async () => {
       'utf8'
     );
   }
+
+  // Add permissions
+  const actions = [
+    {
+      section: 'plugins',
+      displayName: 'Access the Documentation',
+      uid: 'read',
+      pluginName: 'documentation',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Update and delete',
+      uid: 'settings.update',
+      subCategory: 'settings',
+      pluginName: 'documentation',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Regenerate',
+      uid: 'settings.regenerate',
+      subCategory: 'settings',
+      pluginName: 'documentation',
+    },
+  ];
+
+  const { actionProvider } = strapi.admin.services.permission;
+  actionProvider.register(actions);
 };

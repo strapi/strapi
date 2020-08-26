@@ -9,6 +9,7 @@ import {
   isNaN,
   toNumber,
 } from 'lodash';
+import moment from 'moment';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 
@@ -56,7 +57,7 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
 
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
 
-const createYupSchema = (model, { components }) => {
+const createYupSchema = (model, { components }, isCreatingEntry = true) => {
   const attributes = getAttributes(model);
 
   return yup.object().shape(
@@ -68,7 +69,7 @@ const createYupSchema = (model, { components }) => {
         attribute.type !== 'component' &&
         attribute.type !== 'dynamiczone'
       ) {
-        const formatted = createYupSchemaAttribute(attribute.type, attribute);
+        const formatted = createYupSchemaAttribute(attribute.type, attribute, isCreatingEntry);
         acc[current] = formatted;
       }
 
@@ -140,12 +141,43 @@ const createYupSchema = (model, { components }) => {
         const { max, min } = attribute;
 
         if (attribute.required) {
-          dynamicZoneSchema = dynamicZoneSchema.required();
+          // dynamicZoneSchema = dynamicZoneSchema.required();
+          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
+            if (isCreatingEntry) {
+              return value !== null || value !== undefined;
+            }
+
+            if (value === undefined) {
+              return true;
+            }
+
+            return value !== null;
+          });
 
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema
-              .min(min, errorsTrads.min)
-              .required(errorsTrads.required);
+              .test('min', errorsTrads.min, value => {
+                if (isCreatingEntry) {
+                  return value && value.length > 0;
+                }
+
+                if (value === undefined) {
+                  return true;
+                }
+
+                return value !== null && value.length > 0;
+              })
+              .test('required', errorsTrads.required, value => {
+                if (isCreatingEntry) {
+                  return value !== null || value !== undefined;
+                }
+
+                if (value === undefined) {
+                  return true;
+                }
+
+                return value !== null;
+              });
           }
         } else {
           // eslint-disable-next-line no-lonely-if
@@ -166,7 +198,7 @@ const createYupSchema = (model, { components }) => {
   );
 };
 
-const createYupSchemaAttribute = (type, validations) => {
+const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
   let schema = yup.mixed();
 
   let regex = get(validations, 'regex', null);
@@ -231,9 +263,45 @@ const createYupSchemaAttribute = (type, validations) => {
       validationValue === 0
     ) {
       switch (validation) {
-        case 'required':
-          schema = schema.required(errorsTrads.required);
+        case 'required': {
+          if (type === 'password' && isCreatingEntry) {
+            schema = schema.required(errorsTrads.required);
+          }
+
+          if (type !== 'password') {
+            if (isCreatingEntry) {
+              schema = schema.required(errorsTrads.required);
+            } else {
+              schema = schema.test('required', errorsTrads.required, value => {
+                // Field is not touched and the user is editing the entry
+                if (value === undefined) {
+                  return true;
+                }
+
+                if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                  if (value === 0) {
+                    return true;
+                  }
+
+                  return !!value;
+                }
+
+                if (['date', 'datetime'].includes(type)) {
+                  return moment(value)._isValid === true;
+                }
+
+                if (type === 'boolean') {
+                  return value !== undefined;
+                }
+
+                return !isEmpty(value);
+              });
+            }
+          }
+
           break;
+        }
+
         case 'max': {
           if (type === 'biginteger') {
             schema = schema.isInferior(errorsTrads.max, validationValue);

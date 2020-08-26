@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isArray, includes, isEmpty } from 'lodash';
+import { get, isArray, includes, isEmpty } from 'lodash';
+import { getFileExtension, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 import DefaultIcon from '../../icons/Na';
 import {
   StyledMediaPreviewList,
@@ -13,37 +14,41 @@ import {
 const IMAGE_PREVIEW_COUNT = 3;
 
 function MediaPreviewList({ hoverable, files }) {
-  const getFileType = fileName => fileName.split('.').slice(-1)[0];
-  const getSrc = fileURL =>
-    fileURL.startsWith('/') ? `${strapi.backendURL}${fileURL}` : fileURL;
-
   const renderImage = image => {
     const { name, size, url } = image;
+    const thumbnail = get(image, ['formats', 'thumbnail', 'url'], null);
+    const fileUrl = thumbnail || url;
 
-    if (size > 2000) {
+    if (!thumbnail && size > 20000) {
       return renderFile(image);
     }
 
     return (
       <MediaPreviewImage className={hoverable ? 'hoverable' : ''}>
         <div>
-          <img src={getSrc(url)} alt={`${name}`} />
+          <img src={prefixFileUrlWithBackendUrl(fileUrl)} alt={`${name}`} />
         </div>
-        <img src={getSrc(url)} alt={`${name}`} />
+        <img src={prefixFileUrlWithBackendUrl(fileUrl)} alt={`${name}`} />
       </MediaPreviewImage>
     );
   };
 
   const renderFile = file => {
-    const { mime, name } = file;
-    const fileType = includes(mime, 'image') ? 'image' : getFileType(name);
+    const { ext, name } = file;
+    const fileExtension = getFileExtension(ext);
 
     return (
       <MediaPreviewFile className={hoverable ? 'hoverable' : ''}>
-        <div>
-          <span>{fileType}</span>
-          <i className={`far fa-file-${fileType}`} />
-        </div>
+        {fileExtension ? (
+          <div>
+            <span>{fileExtension}</span>
+          </div>
+        ) : (
+          <MediaPreviewItem>
+            <DefaultIcon />
+          </MediaPreviewItem>
+        )}
+
         <span>{name}</span>
       </MediaPreviewFile>
     );
@@ -73,8 +78,7 @@ function MediaPreviewList({ hoverable, files }) {
     return files.map((file, index) => {
       return (
         <React.Fragment key={JSON.stringify(file)}>
-          {index === IMAGE_PREVIEW_COUNT &&
-          files.length > IMAGE_PREVIEW_COUNT + 1
+          {index === IMAGE_PREVIEW_COUNT && files.length > IMAGE_PREVIEW_COUNT + 1
             ? renderText(files.length - IMAGE_PREVIEW_COUNT)
             : renderItem(file)}
         </React.Fragment>

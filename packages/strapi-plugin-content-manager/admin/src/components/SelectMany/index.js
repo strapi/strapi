@@ -16,13 +16,13 @@ function SelectMany({
   isDisabled,
   isLoading,
   move,
-  nextSearch,
   onInputChange,
   onMenuClose,
   onMenuScrollToBottom,
   onRemove,
   options,
   placeholder,
+  styles,
   targetModel,
   value,
 }) {
@@ -62,8 +62,7 @@ function SelectMany({
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected =
-              value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
 
             if (isSelected) {
               return false;
@@ -85,6 +84,7 @@ function SelectMany({
         onMenuClose={onMenuClose}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={placeholder}
+        styles={styles}
         value={[]}
       />
 
@@ -95,11 +95,15 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
+                isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
                 moveRelation={moveRelation}
-                nextSearch={nextSearch}
-                onRemove={() => onRemove(`${name}.${index}`)}
+                onRemove={() => {
+                  if (!isDisabled) {
+                    onRemove(`${name}.${index}`);
+                  }
+                }}
                 targetModel={targetModel}
               />
             ))}
@@ -122,7 +126,6 @@ SelectMany.propTypes = {
   mainField: PropTypes.string.isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
-  nextSearch: PropTypes.string.isRequired,
   isLoading: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
@@ -130,6 +133,7 @@ SelectMany.propTypes = {
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,
+  styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
 };

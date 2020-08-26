@@ -4,22 +4,35 @@
  *
  */
 
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-
+import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
-class Initializer extends React.PureComponent {
-  // eslint-disable-line react/prefer-stateless-function
-  componentDidMount() {
-    // Emit the event 'pluginReady'
-    this.props.updatePlugin(pluginId, 'isReady', true);
-  }
+const Initializer = ({ updatePlugin }) => {
+  const ref = useRef();
+  ref.current = updatePlugin;
 
-  render() {
-    return null;
-  }
-}
+  useEffect(() => {
+    const getData = async () => {
+      const requestURL = '/content-manager/content-types';
+
+      try {
+        const { data } = await request(requestURL, { method: 'GET' });
+        const fileModel = data.find(model => model.uid === 'plugins::upload.file');
+
+        ref.current(pluginId, 'fileModel', fileModel);
+        ref.current(pluginId, 'isReady', true);
+      } catch (err) {
+        strapi.notification.error('content-manager.error.model.fetch');
+      }
+    };
+
+    getData();
+  }, []);
+
+  return null;
+};
 
 Initializer.propTypes = {
   updatePlugin: PropTypes.func.isRequired,

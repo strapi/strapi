@@ -8,17 +8,9 @@ describe('check-reserved-filename', () => {
     ['config/layout.json', true],
     ['config/hook.json', true],
     ['config/middleware.json', true],
-    ['config/environments/test/database.json', true],
-    ['config/environments/development/request.json', true],
-    ['config/environments/production/server.json', true],
-    ['config/environments/staging/response.json', true],
-    ['config/environments/qa/security.json', true],
-
     // dont match
     ['config/application.json', false],
     ['config/custom.json', false],
-    ['config/environments/qa/custom.json', false],
-    ['config/environments/qa/other.json', false],
   ];
 
   test.each(table)('Path %s should return %s', (path, expected) => {

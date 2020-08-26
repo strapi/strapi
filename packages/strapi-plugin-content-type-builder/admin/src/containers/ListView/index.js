@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useGlobalContext, LayoutIcon } from 'strapi-helper-plugin';
+import { BackHeader, ListWrapper, useGlobalContext } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
+import pluginId from '../../pluginId';
+import getComponents from '../../utils/getComponents';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import ListRow from '../../components/ListRow';
 import List from '../../components/List';
-
+import ListButton from '../../components/ListButton';
 import useDataManager from '../../hooks/useDataManager';
-import pluginId from '../../pluginId';
-
 import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
 import Wrapper from './Wrapper';
@@ -31,7 +31,7 @@ const ListView = () => {
     toggleModalCancel,
   } = useDataManager();
 
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage, plugins } = useGlobalContext();
   const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
@@ -53,6 +53,7 @@ const ListView = () => {
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
+  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
@@ -243,7 +244,6 @@ const ListView = () => {
 
   const addButtonProps = {
     icon: true,
-    className: 'add-button',
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     onClick: () => {
@@ -255,26 +255,28 @@ const ListView = () => {
       handleClickAddField(forTarget, targetUid, headerDisplayObject);
     },
   };
-  const goToCMSettingsPage = () => {
+  const goToCMSettingsPage = useCallback(() => {
     const endPoint = isInContentTypeView
       ? `/plugins/content-manager/${contentTypeKind}/${targetUid}/ctm-configurations/edit-settings/content-types`
       : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
 
-    push(endPoint);
-  };
+    if (!isTemporary) {
+      push(endPoint);
+    }
+  }, [contentTypeKind, isInContentTypeView, isTemporary, push, targetUid]);
 
-  const configureButtonProps = {
-    icon: <LayoutIcon className="colored" fill="#007eff" />,
-    color: 'secondary',
-    label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
-    onClick: goToCMSettingsPage,
-    style: { height: '30px', marginTop: '1px' },
-    className: 'button-secondary',
-  };
+  const listInjectedComponents = useMemo(() => {
+    return getComponents('listView', 'list.link', plugins, {
+      onClick: goToCMSettingsPage,
+      isTemporary,
+      isInContentTypeView,
+      contentTypeKind,
+    });
+  }, [plugins, goToCMSettingsPage, isTemporary, isInContentTypeView, contentTypeKind]);
 
   const listActions = isInDevelopmentMode
-    ? [{ ...configureButtonProps }, { ...addButtonProps }]
-    : [configureButtonProps];
+    ? [...listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]
+    : listInjectedComponents;
 
   const CustomRow = props => {
     const { name } = props;

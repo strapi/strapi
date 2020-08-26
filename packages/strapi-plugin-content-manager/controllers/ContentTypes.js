@@ -22,13 +22,8 @@ module.exports = {
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
-        if (uid === 'plugins::upload.file') return false;
 
-        if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
-          return false;
-        }
-
-        return true;
+        return !(kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind);
       })
       .map(uid => {
         return service.formatContentType(strapi.contentTypes[uid]);
@@ -82,6 +77,7 @@ module.exports = {
    *  - content-manager metadata (placeholders, description, label...)
    */
   async updateContentType(ctx) {
+    const { userAbility } = ctx.state;
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
@@ -90,6 +86,15 @@ module.exports = {
 
     if (!contentType) {
       return ctx.notFound('contentType.notFound');
+    }
+
+    const action =
+      contentType.kind === 'singleType'
+        ? 'plugins::content-manager.single-types.configure-view'
+        : 'plugins::content-manager.collection-types.configure-view';
+
+    if (userAbility.cannot(action)) {
+      throw strapi.errors.forbidden();
     }
 
     const service = strapi.plugins['content-manager'].services.contenttypes;

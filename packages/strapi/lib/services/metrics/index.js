@@ -1,71 +1,94 @@
 'use strict';
 /**
  * Strapi telemetry package.
- * You can learn more at https://strapi.io/documentation/3.0.0-beta.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
+ * You can learn more at https://strapi.io/documentation/v3.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
  */
-const os = require('os');
 
-const isDocker = require('is-docker');
-const { machineIdSync } = require('node-machine-id');
-const fetch = require('node-fetch');
-const ciEnv = require('ci-info');
 const { scheduleJob } = require('node-schedule');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
+const wrapWithRateLimit = require('./rate-limiter');
+const createSender = require('./sender');
 const createMiddleware = require('./middleware');
 const isTruthy = require('./is-truthy');
+const ee = require('../../utils/ee');
+
+const LIMITED_EVENTS = [
+  'didSaveMediaWithAlternativeText',
+  'didSaveMediaWithCaption',
+  'didDisableResponsiveDimensions',
+  'didEnableResponsiveDimensions',
+];
 
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.uuid;
-  const deviceId = machineIdSync();
-
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
-  const anonymous_metadata = {
-    environment: strapi.config.environment,
-    os: os.type(),
-    osPlatform: os.platform(),
-    osRelease: os.release(),
-    nodeVersion: process.version,
-    docker: process.env.DOCKER || isDocker(),
-    isCI: ciEnv.isCI,
-    version: strapi.config.info.strapi,
-    strapiVersion: strapi.config.info.strapi,
-  };
-
-  const sendEvent = async (event, payload) => {
-    // do not send anything when user has disabled analytics
-    if (isDisabled) return true;
-
-    try {
-      const res = await fetch('https://analytics.strapi.io/track', {
-        method: 'POST',
-        body: JSON.stringify({
-          event,
-          uuid,
-          deviceId,
-          properties: {
-            ...payload,
-            ...anonymous_metadata,
-          },
-        }),
-        timeout: 1000,
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      return res.ok;
-    } catch (err) {
-      return false;
-    }
-  };
+  const sender = createSender(strapi);
+  const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
   if (!isDisabled) {
     scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
     strapi.app.use(createMiddleware({ sendEvent }));
   }
 
+  if (strapi.EE === true && ee.isEE === true) {
+    const pingDisabled =
+      isTruthy(process.env.STRAPI_LICENSE_PING_DISABLED) && ee.licenseInfo.type === 'gold';
+
+    const sendLicenseCheck = () => {
+      return sendEvent(
+        'didCheckLicense',
+        {
+          licenseInfo: {
+            ...ee.licenseInfo,
+            projectHash: hashProject(strapi),
+            dependencyHash: hashDep(strapi),
+          },
+        },
+        {
+          headers: { 'x-strapi-project': 'enterprise' },
+        }
+      );
+    };
+
+    if (!pingDisabled) {
+      scheduleJob('0 0 0 * * 7', () => sendLicenseCheck());
+      sendLicenseCheck();
+    }
+  }
+
   return {
-    send: sendEvent,
+    async send(event, payload) {
+      if (isDisabled) return true;
+      return sendEvent(event, payload);
+    },
   };
+};
+
+const hash = str =>
+  crypto
+    .createHash('sha256')
+    .update(str)
+    .digest('hex');
+
+const hashProject = strapi => hash(`${strapi.config.info.name}${strapi.config.info.description}`);
+
+const hashDep = strapi => {
+  const depStr = JSON.stringify(strapi.config.info.dependencies);
+  const readmePath = path.join(strapi.dir, 'README.md');
+
+  try {
+    if (fs.existsSync(readmePath)) {
+      return hash(`${depStr}${fs.readFileSync(readmePath)}`);
+    }
+  } catch (err) {
+    return hash(`${depStr}`);
+  }
+
+  return hash(`${depStr}`);
 };
 
 module.exports = createTelemetryInstance;

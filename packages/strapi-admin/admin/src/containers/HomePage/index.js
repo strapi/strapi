@@ -18,7 +18,7 @@ import SocialLink from './SocialLink';
 const FIRST_BLOCK_LINKS = [
   {
     link:
-      'https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_4-create-a-new-content-type',
+      'https://strapi.io/documentation/v3.x/getting-started/quick-start.html#_4-create-a-category-content-type',
     contentId: 'app.components.BlockLink.documentation.content',
     titleId: 'app.components.BlockLink.documentation',
   },
@@ -50,10 +50,6 @@ const SOCIAL_LINKS = [
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
   },
-  {
-    name: 'Stack Overflow',
-    link: 'https://stackoverflow.com/questions/tagged/strapi',
-  },
 ];
 
 const HomePage = ({ global: { plugins }, history: { push } }) => {
@@ -77,7 +73,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
   const linkProps = hasAlreadyCreatedContentTypes
     ? {
         id: 'app.components.HomePage.button.blog',
-        href: 'https://blog.strapi.io/',
+        href: 'https://strapi.io/blog/',
         onClick: () => {},
         type: 'blog',
         target: '_blank',

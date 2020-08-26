@@ -30,6 +30,9 @@ module.exports = {
         this.createLoader(model.uid);
       });
     });
+
+    // Add the loader for the AdminUser as well, so we can query `created_by` and `updated_by` AdminUsers
+    this.createLoader('strapi::user');
   },
 
   resetLoaders: function() {
@@ -44,15 +47,10 @@ module.exports = {
     this.loaders[modelUID] = new DataLoader(
       keys => {
         // Extract queries from keys and merge similar queries.
-        const { queries, map } = this.extractQueries(
-          modelUID,
-          _.cloneDeep(keys)
-        );
+        const { queries, map } = this.extractQueries(modelUID, _.cloneDeep(keys));
 
         // Run queries in parallel.
-        return Promise.all(
-          queries.map(query => this.makeQuery(modelUID, query))
-        ).then(results => {
+        return Promise.all(queries.map(query => this.makeQuery(modelUID, query))).then(results => {
           // Use to match initial queries order.
           return this.mapData(modelUID, keys, map, results);
         });
@@ -69,9 +67,7 @@ module.exports = {
     // Use map to re-dispatch data correctly based on initial keys.
     return originalMap.map((query, index) => {
       // Find the index of where we should extract the results.
-      const indexResults = map.findIndex(
-        queryMap => queryMap.indexOf(index) !== -1
-      );
+      const indexResults = map.findIndex(queryMap => queryMap.indexOf(index) !== -1);
       const data = results[indexResults];
 
       // Retrieving referring model.
@@ -81,8 +77,7 @@ module.exports = {
         // Return object instead of array for one-to-many relationship.
         return data.find(
           entry =>
-            entry[ref.primaryKey].toString() ===
-            (query.params[ref.primaryKey] || '').toString()
+            entry[ref.primaryKey].toString() === (query.params[ref.primaryKey] || '').toString()
         );
       }
 
@@ -120,11 +115,7 @@ module.exports = {
 
       return data
         .filter(entry => entry !== undefined)
-        .filter(entry =>
-          ids
-            .map(id => id.toString())
-            .includes(entry[ref.primaryKey].toString())
-        )
+        .filter(entry => ids.map(id => id.toString()).includes(entry[ref.primaryKey].toString()))
         .slice(skip, skip + limit);
     });
   },
@@ -165,9 +156,7 @@ module.exports = {
       .value();
 
     // Run query and remove duplicated ID.
-    return strapi.plugins['content-manager'].services[
-      'contentmanager'
-    ].fetchAll({ model: modelUID }, params);
+    return strapi.plugins['content-manager'].services['contentmanager'].fetchAll(modelUID, params);
   },
 
   extractQueries: function(modelUID, keys) {

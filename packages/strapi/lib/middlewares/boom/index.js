@@ -75,7 +75,7 @@ module.exports = strapi => {
           await next();
         } catch (error) {
           // emit error if configured
-          if (_.get(strapi, 'config.currentEnvironment.server.emitErrors', false)) {
+          if (strapi.config.get('server.emitErrors', false)) {
             strapi.app.emit('error', error, ctx);
           }
 
@@ -94,9 +94,8 @@ module.exports = strapi => {
 
       strapi.app.use(async (ctx, next) => {
         await next();
-
         // Empty body is considered as `notFound` response.
-        if (!ctx.body && ctx.body !== 0) {
+        if (_.isNil(ctx.body) && _.isNil(ctx.status)) {
           ctx.notFound();
         }
       });
@@ -130,7 +129,19 @@ module.exports = strapi => {
         this.body = data;
       };
 
-      this.delegator.method('send').method('created');
+      strapi.app.response.deleted = function(data) {
+        if (_.isNil(data)) {
+          this.status = 204;
+        } else {
+          this.status = 200;
+          this.body = data;
+        }
+      };
+
+      this.delegator
+        .method('send')
+        .method('created')
+        .method('deleted');
     },
   };
 };

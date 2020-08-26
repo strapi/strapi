@@ -6,20 +6,30 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const waitRestart = require('../../../test/helpers/waitRestart');
+const createModelsUtils = require('../../../test/helpers/models');
 
 let rq;
+let modelsUtils;
 
 describe('Content Type Builder - Content types', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
+    modelsUtils = createModelsUtils({ rq });
   }, 60000);
 
   afterEach(() => waitRestart());
 
+  afterAll(async () => {
+    await modelsUtils.deleteContentTypes([
+      'test-collection-type',
+      'test-collection',
+      'test-single-type',
+    ]);
+  }, 60000);
+
   describe('Collection Types', () => {
-    const collectionTypeUID =
-      'application::test-collection-type.test-collection-type';
+    const collectionTypeUID = 'application::test-collection-type.test-collection-type';
 
     test('Successfull creation of a collection type', async () => {
       const res = await rq({
@@ -117,9 +127,7 @@ describe('Content Type Builder - Content types', () => {
       expect(res.body).toMatchObject({
         error: {
           ['contentType.attributes.relation.nature']: expect.arrayContaining([
-            expect.stringMatching(
-              'must be one of the following values: oneWay, manyWay'
-            ),
+            expect.stringMatching('must be one of the following values: oneWay, manyWay'),
           ]),
         },
       });

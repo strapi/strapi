@@ -217,6 +217,129 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should remove the default value if the type of date input type has been changed', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'short_movie_time',
+          type: 'time',
+          default: '00:30:00',
+        })
+      );
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['type'],
+        value: 'datetime',
+      };
+      const expected = state
+        .setIn(['modifiedData', 'name'], 'short_movie_time')
+        .setIn(['modifiedData', 'type'], 'datetime')
+        .removeIn(['modifiedData', 'default']);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should not remove the default value if the type of another input type has been changed', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'number_of_movies',
+          type: 'integer',
+          default: '0',
+        })
+      );
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['type'],
+        value: 'biginteger',
+      };
+      const expected = state
+        .setIn(['modifiedData', 'name'], 'number_of_movies')
+        .setIn(['modifiedData', 'type'], 'biginteger');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_ALLOWED_TYPE', () => {
+    it('Should add the missing types', () => {
+      const state = initialState.setIn(
+        ['modifiedData', 'allowedTypes'],
+        fromJS(['images', 'videos'])
+      );
+      const action = {
+        name: 'all',
+        value: true,
+        type: 'ON_CHANGE_ALLOWED_TYPE',
+      };
+      const expected = state.setIn(
+        ['modifiedData', 'allowedTypes'],
+        fromJS(['images', 'videos', 'files'])
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should remove the missing types', () => {
+      const state = initialState.setIn(
+        ['modifiedData', 'allowedTypes'],
+        fromJS(['images', 'videos', 'files'])
+      );
+      const action = {
+        name: 'all',
+        value: false,
+        type: 'ON_CHANGE_ALLOWED_TYPE',
+      };
+      const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Shoul add the missing type', () => {
+      const state = initialState.setIn(
+        ['modifiedData', 'allowedTypes'],
+        fromJS(['videos', 'files'])
+      );
+      const action = {
+        name: 'images',
+        value: null,
+        type: 'ON_CHANGE_ALLOWED_TYPE',
+      };
+      const expected = state.setIn(
+        ['modifiedData', 'allowedTypes'],
+        fromJS(['videos', 'files', 'images'])
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should remove the type', () => {
+      const state = initialState.setIn(
+        ['modifiedData', 'allowedTypes'],
+        fromJS(['videos', 'images', 'files'])
+      );
+      const action = {
+        name: 'images',
+        value: null,
+        type: 'ON_CHANGE_ALLOWED_TYPE',
+      };
+      const expected = state.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos', 'files']));
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should remove set the allowedTypes to null if removing the last type', () => {
+      const state = initialState.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos']));
+      const action = {
+        name: 'videos',
+        value: null,
+        type: 'ON_CHANGE_ALLOWED_TYPE',
+      };
+      const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('RESET_PROPS', () => {
@@ -473,7 +596,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       };
       const expected = initialState.setIn(
         ['modifiedData'],
-        fromJS({ type: 'media', multiple: true })
+        fromJS({ type: 'media', multiple: true, allowedTypes: ['images', 'files', 'videos'] })
       );
 
       expect(reducer(initialState, action)).toEqual(expected);

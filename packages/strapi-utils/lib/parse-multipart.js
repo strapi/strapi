@@ -15,9 +15,7 @@ module.exports = ctx => {
   try {
     data = JSON.parse(body.data);
   } catch (error) {
-    throw strapi.errors.badRequest(
-      `Invalid 'data' field. 'data' should be a valid JSON.`
-    );
+    throw strapi.errors.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
   }
 
   const filesToUpload = Object.keys(files).reduce((acc, key) => {
@@ -25,7 +23,8 @@ module.exports = ctx => {
 
     if (fullPath.length <= 1 || fullPath[0] !== 'files') {
       throw strapi.errors.badRequest(
-        `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.`
+        `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.
+For example, when a media file is named "avatar", make sure the form key name is "files.avatar"`
       );
     }
 

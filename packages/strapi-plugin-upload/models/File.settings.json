@@ -12,14 +12,30 @@
       "configurable": false,
       "required": true
     },
+    "alternativeText": {
+      "type": "string",
+      "configurable": false
+    },
+    "caption": {
+      "type": "string",
+      "configurable": false
+    },
+    "width": {
+      "type": "integer",
+      "configurable": false
+    },
+    "height": {
+      "type": "integer",
+      "configurable": false
+    },
+    "formats": {
+      "type": "json",
+      "configurable": false
+    },
     "hash": {
       "type": "string",
       "configurable": false,
       "required": true
-    },
-    "sha256": {
-      "type": "string",
-      "configurable": false
     },
     "ext": {
       "type": "string",
@@ -39,6 +55,10 @@
       "type": "string",
       "configurable": false,
       "required": true
+    },
+    "previewUrl": {
+      "type": "string",
+      "configurable": false
     },
     "provider": {
       "type": "string",

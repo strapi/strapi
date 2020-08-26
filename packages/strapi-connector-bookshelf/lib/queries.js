@@ -4,9 +4,10 @@
  */
 
 const _ = require('lodash');
-const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
+const pmap = require('p-map');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 
-module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
+module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
   // association key
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -18,15 +19,15 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   const timestamps = _.get(model, ['options', 'timestamps'], []);
 
   // Returns an object with relation keys only to create relations in DB
-  const pickRelations = values => {
-    return _.pick(values, assocKeys);
+  const pickRelations = attributes => {
+    return _.pick(attributes, assocKeys);
   };
 
   // keys to exclude to get attribute keys
   const excludedKeys = assocKeys.concat(componentKeys);
   // Returns an object without relational keys to persist in DB
-  const selectAttributes = values => {
-    return _.pickBy(values, (value, key) => {
+  const selectAttributes = attributes => {
+    return _.pickBy(attributes, (value, key) => {
       if (Array.isArray(timestamps) && timestamps.includes(key)) {
         return false;
       }
@@ -71,17 +72,20 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   function count(params = {}) {
     const { where } = convertRestQueryParams(params);
 
-    return model.query(buildQuery({ model, filters: { where } })).count();
+    return model
+      .query(buildQuery({ model, filters: { where } }))
+      .count()
+      .then(Number);
   }
 
-  async function create(values, { transacting } = {}) {
-    const relations = pickRelations(values);
-    const data = selectAttributes(values);
+  async function create(attributes, { transacting } = {}) {
+    const relations = pickRelations(attributes);
+    const data = selectAttributes(attributes);
 
     const runCreate = async trx => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
-      await createComponents(entry, values, { transacting: trx });
+      await createComponents(entry, attributes, { transacting: trx });
 
       return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
     };
@@ -89,7 +93,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return wrapTransaction(runCreate, { transacting });
   }
 
-  async function update(params, values, { transacting } = {}) {
+  async function update(params, attributes, { transacting } = {}) {
     const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
@@ -98,9 +102,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       throw err;
     }
 
-    // Extract values related to relational data.
-    const relations = pickRelations(values);
-    const data = selectAttributes(values);
+    // Extract attributes related to relational data.
+    const relations = pickRelations(attributes);
+    const data = selectAttributes(attributes);
 
     const runUpdate = async trx => {
       const updatedEntry =
@@ -111,7 +115,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
               patch: true,
             })
           : entry;
-      await updateComponents(updatedEntry, values, { transacting: trx });
+      await updateComponents(updatedEntry, attributes, { transacting: trx });
 
       if (Object.keys(relations).length > 0) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
@@ -132,26 +136,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       throw err;
     }
 
-    const values = {};
-    model.associations.map(association => {
-      switch (association.nature) {
-        case 'oneWay':
-        case 'oneToOne':
-        case 'manyToOne':
-        case 'oneToManyMorph':
-          values[association.alias] = null;
-          break;
-        case 'manyWay':
-        case 'oneToMany':
-        case 'manyToMany':
-        case 'manyToManyMorph':
-          values[association.alias] = [];
-          break;
-        default:
-      }
-    });
-
-    await model.updateRelations({ [model.primaryKey]: id, values }, { transacting });
+    await model.deleteRelations(id, { transacting });
 
     const runDelete = async trx => {
       await deleteComponents(entry, { transacting: trx });
@@ -171,45 +156,35 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       return null;
     }
 
-    const entries = await find(params, null, { transacting });
-    return Promise.all(entries.map(entry => deleteOne(entry.id, { transacting })));
+    const paramsWithDefaults = _.defaults(params, { _limit: -1 });
+    const entries = await find(paramsWithDefaults, null, { transacting });
+    return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
+      concurrency: 100,
+      stopOnError: true,
+    });
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Bookshelf.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(qb => {
-        buildSearchQuery(qb, model, params);
-
-        if (filters.sort) {
-          qb.orderBy(filters.sort.key, filters.sort.order);
-        }
-
-        if (filters.start) {
-          qb.offset(_.toNumber(filters.start));
-        }
-
-        if (filters.limit) {
-          qb.limit(_.toNumber(filters.limit));
-        }
-      })
-      .fetchAll({
-        withRelated: populate,
-      })
+      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query(buildQuery({ model, filters }))
+      .fetchAll({ withRelated: populate })
       .then(results => results.toJSON());
   }
 
   function countSearch(params) {
+    const { where } = convertRestQueryParams(_.omit(params, '_q'));
+
     return model
-      .query(qb => {
-        buildSearchQuery(qb, model, params);
-      })
-      .count();
+      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query(buildQuery({ model, filters: { where } }))
+      .count()
+      .then(Number);
   }
 
-  async function createComponents(entry, values, { transacting }) {
+  async function createComponents(entry, attributes, { transacting }) {
     if (componentKeys.length === 0) return;
 
     const joinModel = model.componentsJoinModel;
@@ -242,15 +217,15 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           const { component, required = false, repeatable = false } = attr;
           const componentModel = strapi.components[component];
 
-          if (required === true && !_.has(values, key)) {
+          if (required === true && !_.has(attributes, key)) {
             const err = new Error(`Component ${key} is required`);
             err.status = 400;
             throw err;
           }
 
-          if (!_.has(values, key)) continue;
+          if (!_.has(attributes, key)) continue;
 
-          const componentValue = values[key];
+          const componentValue = attributes[key];
 
           if (repeatable === true) {
             validateRepeatableInput(componentValue, { key, ...attr });
@@ -280,15 +255,15 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         case 'dynamiczone': {
           const { required = false } = attr;
 
-          if (required === true && !_.has(values, key)) {
+          if (required === true && !_.has(attributes, key)) {
             const err = new Error(`Dynamiczone ${key} is required`);
             err.status = 400;
             throw err;
           }
 
-          if (!_.has(values, key)) continue;
+          if (!_.has(attributes, key)) continue;
 
-          const dynamiczoneValues = values[key];
+          const dynamiczoneValues = attributes[key];
 
           validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
 
@@ -310,7 +285,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     }
   }
 
-  async function updateComponents(entry, values, { transacting }) {
+  async function updateComponents(entry, attributes, { transacting }) {
     if (componentKeys.length === 0) return;
 
     const joinModel = model.componentsJoinModel;
@@ -364,7 +339,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     for (let key of componentKeys) {
       // if key isn't present then don't change the current component data
-      if (!_.has(values, key)) continue;
+      if (!_.has(attributes, key)) continue;
 
       const attr = model.attributes[key];
       const { type } = attr;
@@ -375,7 +350,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
           const componentModel = strapi.components[component];
 
-          const componentValue = values[key];
+          const componentValue = attributes[key];
 
           if (repeatable === true) {
             validateRepeatableInput(componentValue, { key, ...attr });
@@ -420,7 +395,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           break;
         }
         case 'dynamiczone': {
-          const dynamiczoneValues = values[key];
+          const dynamiczoneValues = attributes[key];
 
           validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
 
@@ -657,56 +632,57 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
 /**
  * util to build search query
- * @param {*} qb
  * @param {*} model
  * @param {*} params
  */
-const buildSearchQuery = (qb, model, params) => {
+const buildSearchQuery = ({ model, params }) => qb => {
   const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
+  const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
+  const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
 
-  const searchText = Object.keys(model._attributes)
-    .filter(attribute => attribute !== model.primaryKey && !associations.includes(attribute))
-    .filter(attribute => ['string', 'text'].includes(model._attributes[attribute].type));
-
-  const searchInt = Object.keys(model._attributes)
-    .filter(attribute => attribute !== model.primaryKey && !associations.includes(attribute))
-    .filter(attribute =>
-      ['integer', 'decimal', 'float'].includes(model._attributes[attribute].type)
-    );
-
-  const searchBool = Object.keys(model._attributes)
-    .filter(attribute => attribute !== model.primaryKey && !associations.includes(attribute))
-    .filter(attribute => ['boolean'].includes(model._attributes[attribute].type));
+  const searchColumns = Object.keys(model._attributes)
+    .filter(attribute => !associations.includes(attribute))
+    .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
 
   if (!_.isNaN(_.toNumber(query))) {
-    searchInt.forEach(attribute => {
-      qb.orWhere(attribute, _.toNumber(query));
-    });
+    const numberColumns = Object.keys(model._attributes)
+      .filter(attribute => !associations.includes(attribute))
+      .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
+    searchColumns.push(...numberColumns);
   }
 
-  if (query === 'true' || query === 'false') {
-    searchBool.forEach(attribute => {
-      qb.orWhere(attribute, _.toNumber(query === 'true'));
-    });
+  if ([...numberTypes, ...stringTypes].includes(model.primaryKeyType)) {
+    searchColumns.push(model.primaryKey);
   }
 
   // Search in columns with text using index.
   switch (model.client) {
-    case 'mysql':
-      qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
-      break;
-    case 'pg': {
-      const searchQuery = searchText.map(attribute =>
-        _.toLower(attribute) === attribute
-          ? `to_tsvector(coalesce(${attribute}, ''))`
-          : `to_tsvector(coalesce("${attribute}", ''))`
+    case 'pg':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(
+          `"${model.collectionName}"."${attr}"::text ILIKE ?`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
       );
-
-      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);
       break;
-    }
+    case 'sqlite3':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(
+          `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
+      );
+      break;
+    case 'mysql':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(
+          `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
+          `%${escapeQuery(query, '*%\\')}%`
+        )
+      );
+      break;
   }
 };
 

@@ -11,7 +11,8 @@ import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 import { Header } from '@buffetjs/custom';
-import { GlobalContext, HeaderNav } from 'strapi-helper-plugin';
+import { Button } from '@buffetjs/core';
+import { GlobalContext, HeaderNav, CheckPermissions } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import { HomePageContextProvider } from '../../contexts/HomePage';
@@ -31,9 +32,9 @@ import {
   submit,
   unsetDataToEdit,
 } from './actions';
-import reducer from './reducer';
 import saga from './saga';
 import checkFormValidity from './checkFormValidity';
+import pluginPermissions from '../../permissions';
 
 /* eslint-disable consistent-return */
 /* eslint-disable react/sort-comp */
@@ -44,25 +45,6 @@ const keyBoardShortCuts = [18, 78];
 export class HomePage extends React.Component {
   state = { mapKey: {}, showModalEdit: false };
 
-  headerNavLinks = [
-    {
-      name: getTrad('HeaderNav.link.roles'),
-      to: `/plugins/${pluginId}/roles`,
-    },
-    {
-      name: getTrad('HeaderNav.link.providers'),
-      to: `/plugins/${pluginId}/providers`,
-    },
-    {
-      name: getTrad('HeaderNav.link.emailTemplates'),
-      to: `/plugins/${pluginId}/email-templates`,
-    },
-    {
-      name: getTrad('HeaderNav.link.advancedSettings'),
-      to: `/plugins/${pluginId}/advanced`,
-    },
-  ];
-
   pluginHeaderActions = [
     {
       label: this.context.formatMessage({
@@ -72,6 +54,11 @@ export class HomePage extends React.Component {
       onClick: () => this.props.cancelChanges(),
       type: 'button',
       key: 'button-cancel',
+      Component: props => (
+        <CheckPermissions permissions={pluginPermissions.updateAdvancedSettings}>
+          <Button {...props} />
+        </CheckPermissions>
+      ),
     },
     {
       color: 'success',
@@ -81,6 +68,11 @@ export class HomePage extends React.Component {
       onClick: () => this.props.submit(this.props.match.params.settingType),
       type: 'submit',
       key: 'button-submit',
+      Component: props => (
+        <CheckPermissions permissions={pluginPermissions.updateAdvancedSettings}>
+          <Button {...props} />
+        </CheckPermissions>
+      ),
     },
   ];
 
@@ -99,8 +91,7 @@ export class HomePage extends React.Component {
   UNSAFE_componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect =
-      allowedPaths.filter(el => el === nextProps.match.params.settingType)
-        .length === 0;
+      allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
 
     if (shouldRedirect) {
       this.props.history.push('/404');
@@ -112,9 +103,7 @@ export class HomePage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      prevProps.match.params.settingType !== this.props.match.params.settingType
-    ) {
+    if (prevProps.match.params.settingType !== this.props.match.params.settingType) {
       this.props.fetchData(this.props.match.params.settingType);
     }
   }
@@ -159,10 +148,7 @@ export class HomePage extends React.Component {
       this.getEndPoint(),
       this.props.dataToEdit,
     ]);
-    const initObject = get(this.props.initialData, [
-      this.getEndPoint(),
-      this.props.dataToEdit,
-    ]);
+    const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
     const formErrors = checkFormValidity(
       this.props.match.params.settingType,
       modifiedObject,
@@ -189,12 +175,8 @@ export class HomePage extends React.Component {
     const { data, isLoading, modifiedData } = this.props;
 
     return (
-      (isLoading &&
-        get(data, this.getEndPoint()) === undefined &&
-        !this.isAdvanded()) ||
-      (isLoading &&
-        this.isAdvanded() &&
-        get(modifiedData, this.getEndPoint()) === undefined)
+      (isLoading && get(data, this.getEndPoint()) === undefined && !this.isAdvanded()) ||
+      (isLoading && this.isAdvanded() && get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
 
@@ -202,6 +184,7 @@ export class HomePage extends React.Component {
 
   render() {
     const {
+      allowedActions,
       data,
       didCheckErrors,
       formErrors,
@@ -209,16 +192,16 @@ export class HomePage extends React.Component {
       initialData,
       match,
       dataToEdit,
+      tabs,
     } = this.props;
+
     const { formatMessage } = this.context;
     const headerActions =
-      match.params.settingType === 'advanced' &&
-      !isEqual(modifiedData, initialData)
+      match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData)
         ? this.pluginHeaderActions
         : [];
     const noButtonList =
-      match.params.settingType === 'email-templates' ||
-      match.params.settingType === 'providers';
+      match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
     const values = get(modifiedData, this.getEndPoint(), {});
 
     return (
@@ -242,12 +225,10 @@ export class HomePage extends React.Component {
               })}
               actions={headerActions}
             />
-            <HeaderNav
-              links={this.headerNavLinks}
-              style={{ marginTop: '4.6rem' }}
-            />
+            <HeaderNav links={tabs} style={{ marginTop: '4.6rem' }} />
             {!this.isAdvanded() ? (
               <List
+                allowedActions={allowedActions}
                 data={get(data, this.getEndPoint(), [])}
                 deleteData={this.props.deleteData}
                 noButton={noButtonList}
@@ -258,6 +239,7 @@ export class HomePage extends React.Component {
               />
             ) : (
               <EditForm
+                disabled={!allowedActions.canUpdateAdvancedSettings}
                 onChange={this.props.onChange}
                 values={values}
                 showLoaders={this.showLoaders()}
@@ -324,19 +306,8 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
-const withReducer = strapi.injectReducer({
-  key: 'homePage',
-  reducer,
-  pluginId,
-});
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(injectIntl(HomePage));
+export default compose(withSaga, withConnect)(injectIntl(HomePage));

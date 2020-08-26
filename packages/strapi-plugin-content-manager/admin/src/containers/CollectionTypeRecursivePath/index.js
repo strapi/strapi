@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
+import pluginPermissions from '../../permissions';
 
 const EditView = lazy(() => import('../EditView'));
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
@@ -14,8 +15,15 @@ const CollectionTypeRecursivePath = props => {
   const renderRoute = (routeProps, Component) => {
     return <Component {...props} {...routeProps} slug={slug} />;
   };
+  const renderPermissionsRoute = (routeProps, Component) => {
+    return (
+      <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+        <Component {...props} {...routeProps} slug={slug} />
+      </CheckPagePermissions>
+    );
+  };
 
-  const routes = [
+  const settingsRoutes = [
     {
       path: 'ctm-configurations/list-settings',
       comp: ListSettingsView,
@@ -24,19 +32,27 @@ const CollectionTypeRecursivePath = props => {
       path: 'ctm-configurations/edit-settings/:type',
       comp: EditSettingsView,
     },
-    { path: ':id', comp: EditView },
-    { path: '', comp: ListView },
   ].map(({ path, comp }) => (
     <Route
       key={path}
       path={`${url}/${path}`}
-      render={props => renderRoute(props, comp)}
+      render={props => renderPermissionsRoute(props, comp)}
     />
+  ));
+
+  const routes = [
+    { path: ':id', comp: EditView },
+    { path: '', comp: ListView },
+  ].map(({ path, comp }) => (
+    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
   ));
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
-      <Switch>{routes}</Switch>
+      <Switch>
+        {settingsRoutes}
+        {routes}
+      </Switch>
     </Suspense>
   );
 };

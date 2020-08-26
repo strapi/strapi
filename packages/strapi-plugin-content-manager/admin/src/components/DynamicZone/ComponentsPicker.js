@@ -1,5 +1,6 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
+/* eslint-disable indent */
 const ComponentsPicker = styled.div`
   overflow: hidden;
   max-height: 0;
@@ -13,9 +14,9 @@ const ComponentsPicker = styled.div`
 
   ${({ isOpen }) =>
     isOpen &&
-    css`
-      max-height: 260px;
-    `}
+    `
+    max-height: 260px;
+  `}
 
   .componentPickerTitle {
     margin-bottom: 15px;

@@ -22,7 +22,7 @@ $ strapi generate:controller group user
 
 ## Resources
 
-- [MIT License](LICENSE.md)
+- [License](LICENSE)
 
 ## Links
 

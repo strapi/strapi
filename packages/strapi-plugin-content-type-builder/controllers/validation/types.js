@@ -6,6 +6,7 @@ const yup = require('yup');
 const {
   validators,
   areEnumValuesUnique,
+  isValidDefaultJSON,
   isValidName,
   isValidEnum,
   isValidUID,
@@ -50,6 +51,10 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
+        allowedTypes: yup
+          .array()
+          .of(yup.string().oneOf(['images', 'videos', 'files']))
+          .min(1),
       };
     }
 
@@ -81,6 +86,19 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .test(isValidUID),
         minLength: validators.minLength,
         maxLength: validators.maxLength.max(256).test(maxLengthIsGreaterThanOrEqualToMinLength),
+        options: yup.object().shape({
+          separator: yup.string(),
+          lowercase: yup.boolean(),
+          decamelize: yup.boolean(),
+          customReplacements: yup.array().of(
+            yup
+              .array()
+              .of(yup.string())
+              .min(2)
+              .max(2)
+          ),
+          preserveLeadingUnderscore: yup.boolean(),
+        }),
       };
     }
 
@@ -108,6 +126,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     }
     case 'json': {
       return {
+        default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
         unique: validators.unique,
       };

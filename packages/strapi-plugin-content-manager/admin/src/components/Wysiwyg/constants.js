@@ -32,7 +32,7 @@ export const CONTROLS = [
       className: 'underline',
       hideLabel: true,
       handler: 'addContent',
-      text: '__textToReplace__',
+      text: '<u>textToReplace</u>',
     },
     {
       label: 'S',
@@ -73,7 +73,7 @@ export const CONTROLS = [
       style: 'IMG',
       className: 'img',
       hideLabel: true,
-      handler: 'addSimpleBlockWithSelection',
+      handler: 'handleOpenMediaLibrary',
       text: '![text](textToReplace)',
     },
     {

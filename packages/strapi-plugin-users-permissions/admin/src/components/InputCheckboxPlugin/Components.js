@@ -30,13 +30,16 @@ const Wrapper = styled.div`
       }
     }}
 
+    &:hover {
+      background-color: #e9eaeb;
+    }
     &.highlighted {
       border-radius: 3px;
       background-color: #e9eaeb;
       font-weight: 600;
     }
     &.highlighted,
-    &.is-checked:hover {
+    &:hover {
       > i,
       > svg {
         display: block;
@@ -71,7 +74,6 @@ const Label = styled.label`
       left: 17px;
       font-size: 10px;
       font-family: 'FontAwesome';
-      font-weight: 100;
       color: #1c5de7;
       transition: all 0.2s;
     }

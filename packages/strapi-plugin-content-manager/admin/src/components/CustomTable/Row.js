@@ -1,18 +1,18 @@
 import React, { memo, useCallback } from 'react';
-import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin';
+import { IconLinks } from '@buffetjs/core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import useListView from '../../hooks/useListView';
-import DATE_FORMATS from '../../utils/DATE_FORMATS';
+import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-
-const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
@@ -39,7 +39,7 @@ const getDisplayedValue = (type, value, name) => {
       const date =
         value && isObject(value) && value._isAMomentObject === true ? JSON.stringify(value) : value;
 
-      return dateToUtcTime(date).format(DATE_FORMATS[type]);
+      return moment(date).format(dateFormats[type]);
     }
     case 'password':
       return '••••••••';
@@ -60,14 +60,14 @@ const getDisplayedValue = (type, value, name) => {
       };
       const date = moment().set(timeObj);
 
-      return date.format(DATE_FORMATS.time);
+      return date.format(dateFormats.time);
     }
     default:
       return '-';
   }
 };
 
-function Row({ goTo, isBulkable, row, headers }) {
+function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
   const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
@@ -81,9 +81,24 @@ function Row({ goTo, isBulkable, row, headers }) {
 
   const { emitEvent } = useGlobalContext();
 
+  const links = [
+    {
+      icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
+    },
+    {
+      icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
+      onClick: e => {
+        e.stopPropagation();
+        emitEvent('willDeleteEntryFromList');
+        onClickDelete(row.id);
+      },
+    },
+  ];
+
   return (
     <>
       {isBulkable && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <td key="i" onClick={e => e.stopPropagation()}>
           <CustomInputCheckbox
             name={row.id}
@@ -106,36 +121,18 @@ function Row({ goTo, isBulkable, row, headers }) {
         );
       })}
       <ActionContainer>
-        <IcoContainer
-          style={{ minWidth: 'inherit', width: '100%', lineHeight: 48 }}
-          icons={[
-            {
-              icoType: 'pencil-alt',
-              onClick: () => {
-                emitEvent('willEditEntryFromList');
-                goTo(row.id);
-              },
-            },
-            {
-              id: row.id,
-              icoType: 'trash',
-              onClick: () => {
-                emitEvent('willDeleteEntryFromList');
-                onClickDelete(row.id);
-              },
-            },
-          ]}
-        />
+        <IconLinks links={links} />
       </ActionContainer>
     </>
   );
 }
 
 Row.propTypes = {
-  goTo: PropTypes.func.isRequired,
+  canDelete: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   headers: PropTypes.array.isRequired,
   isBulkable: PropTypes.bool.isRequired,
   row: PropTypes.object.isRequired,
 };
 
-export default withRouter(memo(Row));
+export default memo(Row);

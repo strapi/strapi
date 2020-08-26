@@ -10,7 +10,7 @@ describe('metrics', () => {
     metrics({
       config: {
         uuid: 'test',
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },
@@ -29,7 +29,7 @@ describe('metrics', () => {
     metrics({
       config: {
         uuid: false,
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },
@@ -46,7 +46,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         uuid: 'test',
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },
@@ -59,6 +59,15 @@ describe('metrics', () => {
     send('someEvent');
 
     expect(fetch).toHaveBeenCalled();
+    expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/track');
+    expect(fetch.mock.calls[0][1].method).toBe('POST');
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+      event: 'someEvent',
+      uuid: 'test',
+      properties: {
+        projectType: 'Community',
+      },
+    });
     fetch.mockClear();
   });
 
@@ -66,7 +75,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         uuid: false,
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },

@@ -4,14 +4,14 @@
  */
 
 const _ = require('lodash');
-const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
 
-module.exports = ({ model, modelKey, strapi }) => {
+module.exports = ({ model, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
@@ -316,7 +316,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
-      if (allIds.findIndex(currentId => currentId.toString() === id) === -1) {
+      if (allIds.findIndex(currentId => currentId.toString() === id.toString()) === -1) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
         );
@@ -474,53 +474,32 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     await deleteComponents(entry);
 
-    await Promise.all(
-      model.associations.map(async association => {
-        if (!association.via || !entry._id || association.dominant) {
-          return true;
-        }
-
-        const search =
-          _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
-            ? { [association.via]: entry._id }
-            : { [association.via]: { $in: [entry._id] } };
-        const update =
-          _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
-            ? { [association.via]: null }
-            : { $pull: { [association.via]: entry._id } };
-
-        // Retrieve model.
-        const model = association.plugin
-          ? strapi.plugins[association.plugin].models[association.model || association.collection]
-          : strapi.models[association.model || association.collection];
-
-        return model.updateMany(search, update);
-      })
-    );
+    await model.deleteRelations(entry);
 
     return entry.toObject ? entry.toObject() : null;
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const populateOpt = populate || defaultPopulate;
 
-    const $or = buildSearchOr(model, params._q);
-    if ($or.length === 0) return Promise.resolve([]);
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
 
-    return model
-      .find({ $or })
-      .sort(filters.sort)
-      .skip(filters.start)
-      .limit(filters.limit)
-      .populate(populate || defaultPopulate)
-      .then(results => results.map(result => (result ? result.toObject() : null)));
+    return buildQuery({
+      model,
+      filters,
+      searchParam: params._q,
+      populate: populateOpt,
+    }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
   function countSearch(params) {
-    const $or = buildSearchOr(model, params._q);
-    if ($or.length === 0) return Promise.resolve(0);
-    return model.find({ $or }).countDocuments();
+    const { where } = convertRestQueryParams(_.omit(params, '_q'));
+
+    return buildQuery({
+      model,
+      filters: { where },
+      searchParam: params._q,
+    }).count();
   }
 
   return {
@@ -533,34 +512,6 @@ module.exports = ({ model, modelKey, strapi }) => {
     search,
     countSearch,
   };
-};
-
-const buildSearchOr = (model, query) => {
-  return Object.keys(model.attributes).reduce((acc, curr) => {
-    switch (model.attributes[curr].type) {
-      case 'integer':
-      case 'float':
-      case 'decimal':
-        if (!_.isNaN(_.toNumber(query))) {
-          return acc.concat({ [curr]: query });
-        }
-
-        return acc;
-      case 'string':
-      case 'text':
-      case 'password':
-      case 'uid':
-        return acc.concat({ [curr]: { $regex: query, $options: 'i' } });
-      case 'boolean':
-        if (query === 'true' || query === 'false') {
-          return acc.concat({ [curr]: query === 'true' });
-        }
-
-        return acc;
-      default:
-        return acc;
-    }
-  }, []);
 };
 
 function validateRepeatableInput(value, { key, min, max, required }) {

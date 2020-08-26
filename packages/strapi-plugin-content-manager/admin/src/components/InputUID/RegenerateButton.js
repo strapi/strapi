@@ -8,7 +8,7 @@ const RegenerateButton = styled.div`
   height: 32px;
   background-color: #fafafb;
   z-index: 10;
-  
+
   &:hover {
     cursor: pointer;
     background-color: #aed4fb;

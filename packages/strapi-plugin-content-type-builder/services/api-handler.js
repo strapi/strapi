@@ -93,9 +93,7 @@ const createDeleteApiFunction = baseName => {
     if (fileName === 'routes.json') {
       const { routes } = await fse.readJSON(filePath);
 
-      const routesToKeep = routes.filter(
-        route => !startWithBaseName(route.handler)
-      );
+      const routesToKeep = routes.filter(route => !startWithBaseName(route.handler));
 
       if (routesToKeep.length === 0) {
         return fse.remove(filePath);

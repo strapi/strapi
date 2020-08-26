@@ -68,23 +68,40 @@ module.exports = function(strapi) {
           ORM,
         };
 
-        return Promise.all([
-          mountComponents(connectionName, ctx),
-          mountApis(connectionName, ctx),
-          mountAdmin(connectionName, ctx),
-          mountPlugins(connectionName, ctx),
-        ]);
+        return mountConnection(connectionName, ctx);
       });
 
     return Promise.all(connectionsPromises);
   }
 
+  async function mountConnection(connectionName, ctx) {
+    if (strapi.models['core_store'].connection === connectionName) {
+      await mountCoreStore(ctx);
+    }
+
+    return Promise.all([
+      mountComponents(connectionName, ctx),
+      mountApis(connectionName, ctx),
+      mountAdmin(connectionName, ctx),
+      mountPlugins(connectionName, ctx),
+    ]);
+  }
+
+  function mountCoreStore(ctx) {
+    return mountModels(
+      {
+        models: {
+          core_store: strapi.models['core_store'],
+        },
+        target: strapi.models,
+      },
+      ctx
+    );
+  }
+
   function mountComponents(connectionName, ctx) {
     const options = {
-      models: _.pickBy(
-        strapi.components,
-        ({ connection }) => connection === connectionName
-      ),
+      models: _.pickBy(strapi.components, ({ connection }) => connection === connectionName),
       target: strapi.components,
     };
 
@@ -95,7 +112,7 @@ module.exports = function(strapi) {
     const options = {
       models: _.pickBy(
         strapi.models,
-        ({ connection }) => connection === connectionName
+        ({ connection }, name) => connection === connectionName && name !== 'core_store'
       ),
       target: strapi.models,
     };
@@ -105,10 +122,7 @@ module.exports = function(strapi) {
 
   function mountAdmin(connectionName, ctx) {
     const options = {
-      models: _.pickBy(
-        strapi.admin.models,
-        ({ connection }) => connection === connectionName
-      ),
+      models: _.pickBy(strapi.admin.models, ({ connection }) => connection === connectionName),
       target: strapi.admin.models,
     };
 
@@ -121,10 +135,7 @@ module.exports = function(strapi) {
         const plugin = strapi.plugins[name];
         return mountModels(
           {
-            models: _.pickBy(
-              plugin.models,
-              ({ connection }) => connection === connectionName
-            ),
+            models: _.pickBy(plugin.models, ({ connection }) => connection === connectionName),
             target: plugin.models,
           },
           ctx
@@ -140,5 +151,8 @@ module.exports = function(strapi) {
     buildQuery,
     queries,
     ...relations,
+    get defaultTimestamps() {
+      return ['created_at', 'updated_at'];
+    },
   };
 };

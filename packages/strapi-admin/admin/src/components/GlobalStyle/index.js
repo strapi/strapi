@@ -12,10 +12,6 @@ const GlobalStyle = createGlobalStyle`
     color: #292b2c;
   }
 
-  // ::-webkit-scrollbar {
-  //   width: 0;
-  // }
-
   * {
     -webkit-font-smoothing: antialiased;
     box-sizing: border-box;
@@ -43,7 +39,7 @@ const GlobalStyle = createGlobalStyle`
     background: transparent;
     .modal-dialog {
       max-width: 74.5rem;
-      margin: 16rem auto 3rem calc(50% - #{$left-menu-width});
+      margin: 16rem auto 3rem calc(50% - #{$left - menu - width});
       position: relative;
       z-index: 999;
     }
@@ -137,9 +133,9 @@ const GlobalStyle = createGlobalStyle`
   }
 
 
-  // scrollbar
   ::-webkit-scrollbar {
     width: 9px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {
@@ -163,13 +159,13 @@ const GlobalStyle = createGlobalStyle`
     display: none;
   }
 
-  // firefox scrollbar
+  /* firefox scrollbar */
+  /* stylelint-disable */
   * {
     scrollbar-color: #bbb #eee;
     scrollbar-width: thin;
   }
-
-
+  /* stylelint-enable */
 `;
 
 export default GlobalStyle;
