@@ -13,10 +13,12 @@ const { logger } = require('strapi-utils');
 const strapi = require('../index');
 const inspector = require('inspector');
 
-cluster.on('fork', (worker) => {
+// ensure inspector window is closed on cluster form (auto reloads)
+cluster.on('fork', () => {
   inspector.close()
 });
 
+// for the master cluster, sync the inspector port
 if(cluster.isMaster) {
   cluster.setupMaster && cluster.setupMaster({
     inspectPort: process.debugPort
@@ -28,6 +30,7 @@ if(cluster.isMaster) {
  *
  */
 module.exports = async function({ build, watchAdmin, inspect }) {
+  // Open/connect the inspector if the --inspect option is given
   if(inspect && !inspector.url() && cluster.isWorker) {
     inspector.open()
   }
@@ -39,7 +42,6 @@ module.exports = async function({ build, watchAdmin, inspect }) {
   const serveAdminPanel = config.get('server.admin.serveAdminPanel', true);
 
   const buildExists = fs.existsSync(path.join(dir, 'build'));
-
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
