@@ -144,7 +144,7 @@ describe('Relation-list route', () => {
 
       expect(res.body).toHaveLength(data.products.length);
       data.products.forEach((product, index) => {
-        expect(res.body[index]).toStrictEqual(_.pick(product, ['id', 'name']));
+        expect(res.body[index]).toStrictEqual(_.pick(product, ['_id', 'id', 'name']));
       });
     });
   });
@@ -167,11 +167,15 @@ describe('Relation-list route', () => {
       });
 
       expect(res.body).toHaveLength(data.products.length);
-      expect(res.body[0]).toMatchObject(_.pick(data.products, ['id', 'name']));
-      expect(res.body[0].published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body[0].published_at).valueOf())).toBe(false);
-      expect(res.body[1]).toStrictEqual({
-        ..._.pick(data.products[1], ['id', 'name']),
+
+      const tomatoProductRes = res.body.find(p => p.name === 'tomato');
+      const appleProductRes = res.body.find(p => p.name === 'apple');
+
+      expect(tomatoProductRes).toMatchObject(_.pick(data.products[0], ['_id', 'id', 'name']));
+      expect(tomatoProductRes.published_at).not.toBeNull();
+      expect(isNaN(new Date(tomatoProductRes.published_at).valueOf())).toBe(false);
+      expect(appleProductRes).toStrictEqual({
+        ..._.pick(data.products[1], ['_id', 'id', 'name']),
         published_at: null,
       });
     });
