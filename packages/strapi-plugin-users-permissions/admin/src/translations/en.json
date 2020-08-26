@@ -58,5 +58,7 @@
   "popUpWarning.button.cancel": "Cancel",
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?"
+  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?",
+  "Settings.roles.deleted": "Role deleted",
+  "Settings.roles.edited": "Role edited"
 }

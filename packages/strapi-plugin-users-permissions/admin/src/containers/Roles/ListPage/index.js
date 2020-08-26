@@ -10,6 +10,7 @@ import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
 import { useRolesList } from '../../../hooks';
 import BaselineAlignment from './BaselineAlignment';
 import pluginId from '../../../pluginId';
+import { getTrad } from '../../../utils';
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
@@ -43,7 +44,7 @@ const RoleListPage = () => {
       })
     )
       .then(() => {
-        strapi.notification.success('Settings.roles.deleted');
+        strapi.notification.success(getTrad('Settings.roles.deleted'));
       })
       .catch(err => {
         console.error(err);

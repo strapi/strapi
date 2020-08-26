@@ -64,7 +64,7 @@ const EditPage = () => {
       })
     )
       .then(() => {
-        strapi.notification.success('Settings.roles.edited');
+        strapi.notification.success(getTrad('Settings.roles.edited'));
       })
       .catch(err => {
         console.error(err);
