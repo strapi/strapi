@@ -40,7 +40,7 @@ Strapi modifies/creates files at runtime and needs to restart when new files are
 
 ```
 strapi develop
-options: [--no-build |--watch-admin ]
+options: [--no-build |--watch-admin |--inspect]
 ```
 
 - **strapi develop**<br/>
@@ -49,6 +49,10 @@ options: [--no-build |--watch-admin ]
   Starts your application with the autoReload enabled and skip the administration panel build process
 - **strapi develop --watch-admin**<br/>
   Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
+- **strapi develop --inspect**<br/>
+  Connect to the NodeJS inspector. If you're using Chrome, you can visit [chrome://inspect](chrome://inspect) and click `Open dedicated DevTools for Node`. This will
+  open a devtools window exclusively for NodeJS. You can now add a `debugger` break point in your code and the application will pause inside devtools for debugging
+  at the location of the `debugger`. See the NodeJS [debugging guide](https://nodejs.org/en/docs/guides/debugging-getting-started/) for more details.
 
 ::: tip
 You should never use this command to run a Strapi application in production.
