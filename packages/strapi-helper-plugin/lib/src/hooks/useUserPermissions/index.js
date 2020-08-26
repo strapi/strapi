@@ -7,7 +7,7 @@ import reducer from './reducer';
 import init from './init';
 
 const useUserPermissions = (pluginPermissions) => {
-  const abortController = new AbortController();
+  const abortController = useMemo(() => new AbortController(), []);
   const { signal } = abortController;
 
   const isMounted = useRef(true);
