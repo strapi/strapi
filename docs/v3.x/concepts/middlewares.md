@@ -90,7 +90,7 @@ module.exports = {
   //...
   settings: {
     cors: {
-      origin: 'http://localhost',
+      origin: ['http://localhost', 'https://mysite.com', 'https://www.mysite.com'],
     },
   },
 };
@@ -161,19 +161,18 @@ The following middlewares cannot be disabled: responses, router, logger and boom
 
 - `session`
   - `enabled` (boolean): Enable or disable sessions. Default value: `false`.
-  - `client` (string): Client used to persist sessions. Default value: `redis`.
-  - `settings`
-    - `host` (string): Client host name. Default value: `localhost`.
-    - `port` (integer): Client port. Default value: `6379`.
-    - `database`(integer)|String - Client database name. Default value: `10`.
-    - `password` (string): Client password. Default value: ``.
 - `logger`
   - `level` (string): Default log level. Default value: `debug`.
   - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
   - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
-- `parser`
+- `parser` (See [koa-body](https://github.com/dlau/koa-body#options) for more information)
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
+  - `jsonLimit` (string|integer): The byte (if integer) limit of the JSON body. Default value: `1mb`.
+  - `formLimit` (string|integer): The byte (if integer) limit of the form body. Default value: `56k`.
+  - `queryStringParser` (see [qs](https://github.com/ljharb/qs) for a full list of options).
+    - `arrayLimit` (integer): the maximum length of an array in the query string. Any array members with an index of greater than the limit will instead be converted to an object with the index as the key. Default value: `100`.
+    - `depth` (integer): maximum parsing depth of nested query string objects. Default value: `20`.
 
 ::: tip
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
@@ -207,7 +206,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
 - [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
   - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
-  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `*`.
+  - `origin` (string or array): Allowed URLs (`http://example1.com, http://example2.com`, `['http://www.example1.com', 'http://example1.com']` or allows everyone `*`). Default value: `*`.
   - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
   - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
   - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.

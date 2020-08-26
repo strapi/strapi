@@ -252,7 +252,7 @@ const EditViewDataManagerProvider = ({
   }, [id, slug, isCreatingEntry, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
-    emitEvent('addComponentToDynamicZone');
+    emitEvent('didAddComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
       keys: keys.split('.'),
@@ -618,10 +618,6 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const showLoader = useMemo(() => {
-    return !isCreatingEntry && isLoading;
-  }, [isCreatingEntry, isLoading]);
-
   const overlayBlockerParams = useMemo(
     () => ({
       children: <div />,
@@ -679,7 +675,7 @@ const EditViewDataManagerProvider = ({
     >
       <>
         <OverlayBlocker key="overlayBlocker" isOpen={isSubmitting} {...overlayBlockerParams} />
-        {showLoader ? (
+        {isLoading ? (
           <LoadingIndicatorPage />
         ) : (
           <>
