@@ -32,19 +32,17 @@ npx create-nuxt-app nuxtjs-app
 
 Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
 
-
 :::: tabs
 
 ::: tab @nuxtjs/strapi
 
 For this example we are using the awesome [@nuxt/strapi](https://strapi.nuxtjs.org/) module.
 
-
 ```bash
 yarn add @nuxtjs/strapi
 ```
 
-  - Add `@nuxtjs/strapi` to the module section of `nuxt.config.js` with the following settings
+- Add `@nuxtjs/strapi` to the module section of `nuxt.config.js` with the following settings
 
 ```js
 modules: ['@nuxtjs/strapi'],
@@ -53,7 +51,6 @@ strapi: {
   url: 'http://localhost:1337'
 },
 ```
-
 
 :::
 
@@ -79,16 +76,15 @@ Execute a GET request on the `restaurant` Collection Type in order to fetch all 
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
-
 :::: tabs
 
 ::: tab @nuxtjs/strapi
 
-*Request*
+_Request_
 
 ```js
 try {
-  await this.$strapi.find('restaurants')
+  await this.$strapi.find('restaurants');
 } catch (error) {
   console.log(error);
 }
@@ -98,63 +94,69 @@ try {
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.get('http://localhost:1337/restaurants')
-  .then(response => {
-    console.log(response);
-  })
+axios.get('http://localhost:1337/restaurants').then(response => {
+  console.log(response);
+});
 ```
+
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
-fetch("http://localhost:1337/restaurants", {
-  method: "GET",
+fetch('http://localhost:1337/restaurants', {
+  method: 'GET',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-}).then(response => response.json())
+})
+  .then(response => response.json())
   .then(data => console.log(data));
 ```
+
 :::
 
-*Response*
+_Response_
 
 ```json
-[{
-  "id": 1,
-  "name": "Biscotte Restaurant",
-  "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
-  "created_by": {
+[
+  {
     "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "updated_by": {
-    "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "created_at": "2020-07-31T11:37:16.964Z",
-  "updated_at": "2020-07-31T11:37:16.975Z",
-  "categories": [{
-    "id": 2,
-    "name": "French Food",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-07-31T11:36:23.164Z",
-    "updated_at": "2020-07-31T11:36:23.172Z"
-  }]
-}]
+    "name": "Biscotte Restaurant",
+    "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
+    "created_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "updated_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "created_at": "2020-07-31T11:37:16.964Z",
+    "updated_at": "2020-07-31T11:37:16.975Z",
+    "categories": [
+      {
+        "id": 2,
+        "name": "French Food",
+        "created_by": 1,
+        "updated_by": 1,
+        "created_at": "2020-07-31T11:36:23.164Z",
+        "updated_at": "2020-07-31T11:36:23.172Z"
+      }
+    ]
+  }
+]
 ```
 
 ::::
@@ -192,7 +194,7 @@ export default {
   },
   async mounted () {
     try {
-      this.restaurants = await this.$strapi.find('restaurants')
+      this.restaurants = await this.$strapi.$restaurant.find()
     } catch (error) {
       this.error = error
     }
@@ -315,7 +317,6 @@ Execute a POST request on the `restaurant` Collection Type in order to create a 
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
 
-
 :::: tabs
 
 ::: tab @nuxtjs/strapi
@@ -325,77 +326,78 @@ try {
   await this.$strapi.create('restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-    categories: [
-      3
-    ]
-  })
+    categories: [3],
+  });
 } catch (error) {
-  this.error = error
+  this.error = error;
 }
 ```
+
 :::
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.post('http://localhost:1337/restaurants', {
+axios
+  .post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-    categories: [
-      3
-    ]
+    categories: [3],
   })
   .then(response => {
     console.log(response);
-  })
+  });
 ```
+
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants', {
-   method: 'POST',
-   headers: {
-      'Content-Type': 'application/json'
-   },
-   body: JSON.stringify({
-     name: 'Dolemon Sushi',
-     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-     categories: [
-       3
-     ]
-   })
- }).then(response => response.json())
-   .then(data => console.log(data));
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Dolemon Sushi',
+    description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
+    categories: [3],
+  }),
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
+
 :::
 
-*Response*
+_Response_
 
 ```json
 {
-    "id": 2,
-    "name": "Dolemon Sushi",
-    "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
-    "created_by": null,
-    "updated_by": null,
-    "created_at": "2020-08-04T09:57:11.669Z",
-    "updated_at": "2020-08-04T09:57:11.669Z",
-    "categories": [{
+  "id": 2,
+  "name": "Dolemon Sushi",
+  "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
+  "created_by": null,
+  "updated_by": null,
+  "created_at": "2020-08-04T09:57:11.669Z",
+  "updated_at": "2020-08-04T09:57:11.669Z",
+  "categories": [
+    {
       "id": 3,
       "name": "Japanese",
       "created_by": 1,
       "updated_by": 1,
       "created_at": "2020-07-31T11:36:23.164Z",
       "updated_at": "2020-07-31T11:36:23.172Z"
-    }]
+    }
+  ]
 }
 ```
 
@@ -689,62 +691,56 @@ and the id of your category is `3`
 ```js
 try {
   await this.$strapi.update('restaurants', 2, {
-    categories: [
-      3
-    ]
-  })
+    categories: [3],
+  });
 } catch (error) {
-  this.error = error
+  this.error = error;
 }
 ```
 
 :::
 
-
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.put('http://localhost:1337/restaurants/2', {
-  categories: [
-    3
-  ]
-})
-.then(response => {
-  console.log(response);
-})
+axios
+  .put('http://localhost:1337/restaurants/2', {
+    categories: [3],
+  })
+  .then(response => {
+    console.log(response);
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants/2', {
-  method: "PUT",
+  method: 'PUT',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    categories: [
-      3
-    ]
-  })
+    categories: [3],
+  }),
 })
-.then(response => response.json())
-.then(data => {
-  console.log(data);
-})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+  });
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
@@ -755,18 +751,25 @@ fetch('http://localhost:1337/restaurants/2', {
   "updated_by": null,
   "created_at": "2020-08-04T10:21:30.219Z",
   "updated_at": "2020-08-04T10:21:30.219Z",
-  "categories": [{
-    "id": 3,
-    "name": "Japanese",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-08-04T10:24:26.901Z",
-    "updated_at": "2020-08-04T10:24:26.911Z"
-  }]
+  "categories": [
+    {
+      "id": 3,
+      "name": "Japanese",
+      "created_by": 1,
+      "updated_by": 1,
+      "created_at": "2020-08-04T10:24:26.901Z",
+      "updated_at": "2020-08-04T10:24:26.911Z"
+    }
+  ]
 }
 ```
 
 ::::
+
+## Starter
+
+- [Nuxt.js Blog starter](https://github.com/strapi/strapi-starter-nuxt-blog)
+- [Nuxt.js E-commerce starter](https://github.com/strapi/strapi-starter-nuxt-e-commerce)
 
 ## Conclusion
 
