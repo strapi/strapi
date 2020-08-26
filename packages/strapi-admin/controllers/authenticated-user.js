@@ -28,12 +28,17 @@ module.exports = {
   },
 
   async getOwnPermissions(ctx) {
-    const { findUserPermissions, sanitizePermission } = strapi.admin.services.permission;
+    const {
+      findUserPermissions,
+      sanitizePermission,
+      mergePermissions,
+    } = strapi.admin.services.permission;
 
     const userPermissions = await findUserPermissions(ctx.state.user);
+    const mergedPermissions = await mergePermissions(userPermissions);
 
     ctx.body = {
-      data: userPermissions.map(sanitizePermission),
+      data: mergedPermissions.map(sanitizePermission),
     };
   },
 };

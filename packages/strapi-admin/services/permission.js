@@ -125,6 +125,100 @@ const findUserPermissions = async ({ roles }) => {
 };
 
 /**
+ * Compare 2 permissions
+ * 2 permissions are the same if they have the same action and subject
+ * or they have the same action and one of the subject is nil
+ * @param perm1
+ * @param perm2
+ * @returns {boolean}
+ */
+const areSamePermissions = (perm1, perm2) => {
+  return (
+    perm1.action === perm2.action &&
+    (perm1.subject === perm2.subject || _.isNil(perm1.subject) || _.isNil(perm2.subject))
+  );
+};
+
+/**
+ * Merge 2 identical permissions that may have different fields/conditions
+ * Fields are concatenated and conditions intersected.
+ * @param perm1
+ * @param perm2
+ * @returns {object}
+ */
+const mergeTwoPermissions = (perm1, perm2) => {
+  if (!areSamePermissions(perm1, perm2)) {
+    throw new Error('Can merge permissions that have a different action or subject');
+  }
+
+  const merged = {
+    action: perm1.action,
+    subject: _.isNil(perm1.subject) || _.isNil(perm2.subject) ? null : perm1.subject,
+    fields:
+      _.isNil(perm1.fields) || _.isNil(perm2.fields)
+        ? null
+        : _.uniq((perm1.fields || []).concat(perm2.fields || [])),
+    conditions:
+      _.isNil(perm1.fields) || _.isNil(perm2.fields)
+        ? []
+        : _.intersection(perm1.conditions || [], perm2.conditions || []),
+  };
+
+  return merged;
+};
+
+/**
+ * Return an array of unique conditions. Duplicated permissions are merged.
+ * @param permissions
+ * @returns {array>}
+ */
+const mergePermissions = (permissions = []) => {
+  const permsWithSubjects = [];
+  const permsWithoutSubjects = [];
+  permissions.forEach(p => {
+    if (_.isNil(p.subject)) {
+      permsWithoutSubjects.push(p);
+    } else {
+      permsWithSubjects.push(p);
+    }
+  });
+
+  const mapPermWithSubjects = permsWithSubjects.reduce((map, perm) => {
+    map[perm.action] = map[perm.action] || {};
+    if (map[perm.action][perm.subject]) {
+      map[perm.action][perm.subject] = mergeTwoPermissions(map[perm.action][perm.subject], perm);
+    } else {
+      map[perm.action][perm.subject] = perm;
+    }
+    return map;
+  }, {});
+
+  const mapPermWithoutSubjects = permsWithoutSubjects.reduce((map, perm) => {
+    if (map[perm.action]) {
+      map[perm.action] = mergeTwoPermissions(map[perm.action], perm);
+    } else {
+      map[perm.action] = perm;
+    }
+    return map;
+  }, {});
+
+  const commonActions = _.intersection(_.keys(mapPermWithoutSubjects), _.keys(mapPermWithSubjects));
+
+  for (const action of commonActions) {
+    for (const perm in mapPermWithSubjects[action]) {
+      mapPermWithoutSubjects[action] = mergeTwoPermissions(perm, mapPermWithoutSubjects[action]);
+      delete mapPermWithSubjects[action][perm.subject];
+    }
+  }
+
+  const mergedPermissions = _.concat(
+    _.values(mapPermWithoutSubjects),
+    _.flatten(_.values(mapPermWithSubjects).map(_.values))
+  );
+  return mergedPermissions;
+};
+
+/**
  * Removes permissions in database that don't exist anymore
  * @returns {Promise<>}
  */
@@ -231,4 +325,7 @@ module.exports = {
   conditionProvider,
   cleanPermissionInDatabase,
   resetSuperAdminPermissions,
+  areSamePermissions,
+  mergeTwoPermissions,
+  mergePermissions,
 };

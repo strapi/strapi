@@ -283,4 +283,232 @@ describe('Permission Service', () => {
       ]);
     });
   });
+
+  describe('areSamePermissions', () => {
+    const tests = [
+      [{ action: 'action' }, { action: 'action' }, true],
+      [{ action: 'action', subject: 'subject' }, { action: 'action', subject: 'subject' }, true],
+      [{ action: 'action', subject: 'subject' }, { action: 'action', subject: null }, true],
+      [{ action: 'action' }, { action: 'action2' }, false],
+      [{ action: 'action', subject: 'subject' }, { action: 'action2', subject: 'subject2' }, false],
+      [{ action: 'action', subject: 'subject' }, { action: 'action', subject: 'subject2' }, false],
+    ];
+
+    test.each(tests)('Compare %p and %p', (perm1, perm2, expectedResult) => {
+      expect(permissionService.areSamePermissions(perm1, perm2)).toBe(expectedResult);
+    });
+  });
+
+  describe('mergeTwoPermissions', () => {
+    test('Same permissions', () => {
+      const condition = {
+        action: 'action1',
+        subject: 'subject1',
+        fields: ['field1'],
+        conditions: ['cond1'],
+      };
+
+      const mergedCond = permissionService.mergeTwoPermissions(condition, condition);
+      expect(mergedCond).toStrictEqual(condition);
+    });
+
+    test('One permission with almost all attributes to null', () => {
+      const cond1 = {
+        action: 'action1',
+        subject: null,
+        fields: null,
+        conditions: null,
+      };
+
+      const cond2 = {
+        action: 'action1',
+        subject: 'subject1',
+        fields: ['field1'],
+        conditions: ['cond1'],
+      };
+
+      const mergedCond = permissionService.mergeTwoPermissions(cond1, cond2);
+      expect(mergedCond).toStrictEqual({
+        ...cond1,
+        conditions: [],
+      });
+    });
+
+    test('Merge fields', () => {
+      const cond1 = {
+        action: 'action1',
+        subject: 'subject1',
+        fields: ['field1', 'field2'],
+        conditions: ['cond1'],
+      };
+
+      const cond2 = {
+        action: 'action1',
+        subject: 'subject1',
+        fields: ['field2', 'field3'],
+        conditions: ['cond1'],
+      };
+
+      const mergedCond = permissionService.mergeTwoPermissions(cond1, cond2);
+      expect(mergedCond).toStrictEqual({
+        ...cond1,
+        fields: ['field1', 'field2', 'field3'],
+      });
+    });
+
+    test('Merge conditions', () => {
+      const cond1 = {
+        action: 'action1',
+        subject: 'subject1',
+        fields: ['field1'],
+        conditions: ['cond1', 'cond2'],
+      };
+
+      const cond2 = {
+        action: 'action1',
+        subject: 'subject1',
+        fields: ['field1'],
+        conditions: ['cond2', 'cond3'],
+      };
+
+      const mergedCond = permissionService.mergeTwoPermissions(cond1, cond2);
+      expect(mergedCond).toStrictEqual({
+        ...cond1,
+        conditions: ['cond2'],
+      });
+    });
+
+    describe('mergePermissions', () => {
+      test('Same permissions', () => {
+        const condition = {
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1'],
+          conditions: ['cond1'],
+        };
+
+        const mergedConds = permissionService.mergePermissions([condition, condition]);
+        expect(mergedConds).toStrictEqual([condition]);
+      });
+
+      test('3 permissions, 2 identicals', () => {
+        const cond1 = {
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1'],
+          conditions: ['cond1'],
+        };
+
+        const cond2 = {
+          action: 'action2',
+          subject: 'subject1',
+          fields: ['field1'],
+          conditions: ['cond1'],
+        };
+
+        const mergedConds = permissionService.mergePermissions([cond1, cond1, cond2]);
+        expect(mergedConds).toStrictEqual([cond1, cond2]);
+      });
+
+      test('Merge fields', () => {
+        const cond1action1 = {
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1', 'field2'],
+          conditions: ['cond1'],
+        };
+
+        const cond2action1 = {
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field2', 'field3'],
+          conditions: ['cond1'],
+        };
+
+        const cond1action2 = {
+          action: 'action2',
+          subject: 'subject1',
+          fields: ['field1', 'field2'],
+          conditions: ['cond1'],
+        };
+
+        const cond2action2 = {
+          action: 'action2',
+          subject: 'subject1',
+          fields: ['field2', 'field3'],
+          conditions: ['cond1'],
+        };
+
+        const mergedConds = permissionService.mergePermissions([
+          cond1action1,
+          cond2action1,
+          cond1action2,
+          cond2action2,
+        ]);
+        expect(mergedConds.length).toBe(2);
+        expect(mergedConds).toContainEqual({
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1', 'field2', 'field3'],
+          conditions: ['cond1'],
+        });
+        expect(mergedConds).toContainEqual({
+          action: 'action2',
+          subject: 'subject1',
+          fields: ['field1', 'field2', 'field3'],
+          conditions: ['cond1'],
+        });
+      });
+
+      test('Merge conditions', () => {
+        const cond1action1 = {
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1'],
+          conditions: ['cond1', 'cond2'],
+        };
+
+        const cond2action1 = {
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1'],
+          conditions: ['cond2', 'cond3'],
+        };
+
+        const cond1action2 = {
+          action: 'action1',
+          subject: 'subject2',
+          fields: ['field1'],
+          conditions: ['cond1', 'cond2'],
+        };
+
+        const cond2action2 = {
+          action: 'action1',
+          subject: 'subject2',
+          fields: ['field1'],
+          conditions: ['cond2', 'cond3'],
+        };
+
+        const mergedConds = permissionService.mergePermissions([
+          cond1action1,
+          cond2action1,
+          cond1action2,
+          cond2action2,
+        ]);
+        expect(mergedConds.length).toBe(2);
+        expect(mergedConds).toContainEqual({
+          action: 'action1',
+          subject: 'subject1',
+          fields: ['field1'],
+          conditions: ['cond2'],
+        });
+        expect(mergedConds).toContainEqual({
+          action: 'action1',
+          subject: 'subject2',
+          fields: ['field1'],
+          conditions: ['cond2'],
+        });
+      });
+    });
+  });
 });
