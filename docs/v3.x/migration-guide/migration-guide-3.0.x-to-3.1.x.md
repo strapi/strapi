@@ -146,7 +146,7 @@ Rebuild the admin panel with one of the following commands:
 ```bash
 yarn build --clean
 # or
-npm run build -- --clean
+npm run build --clean
 ```
 
 🎉 Congrats, your application has been migrated!
