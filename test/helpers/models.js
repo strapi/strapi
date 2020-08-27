@@ -79,7 +79,6 @@ module.exports = ({ rq }) => {
   return {
     createComponent,
     deleteComponent,
-
     createContentType,
     createContentTypes,
     createContentTypeWithType,
