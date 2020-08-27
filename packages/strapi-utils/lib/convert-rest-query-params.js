@@ -4,6 +4,7 @@
  */
 
 const _ = require('lodash');
+const { constants } = require('./content-types');
 
 /**
  * Global converter
@@ -35,7 +36,7 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     Object.assign(finalParams, convertLimitQueryParams(params._limit));
   }
 
-  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where']);
+  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState']);
   const whereClauses = [];
 
   if (_.keys(whereParams).length > 0) {
@@ -44,6 +45,12 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
 
   if (_.has(params, '_where')) {
     whereClauses.push(...convertWhereParams(params._where));
+  }
+
+  if (_.has(params, '_publicationState')) {
+    const publicationStateToWhereParam = _.flow(convertPublicationStateParams, convertWhereParams);
+
+    whereClauses.push(...publicationStateToWhereParam(params._publicationState));
   }
 
   Object.assign(finalParams, { where: whereClauses });
@@ -112,6 +119,29 @@ const convertLimitQueryParams = limitQuery => {
   return {
     limit: limitAsANumber,
   };
+};
+
+const PUBLICATION_STATES = {
+  [constants.DP_PUB_STATE_LIVE]: [{ published_at_null: false }],
+  [constants.DP_PUB_STATE_PREVIEW]: [],
+};
+
+/**
+ * publicationState query parser
+ * @param {string} publicationState - eg: 'draft', 'published'
+ */
+const convertPublicationStateParams = publicationState => {
+  const keys = Object.keys(PUBLICATION_STATES);
+
+  if (!keys.includes(publicationState)) {
+    throw new Error(
+      `convertPublicationStateParams expected a value from: ${keys.join(
+        ', '
+      )}. Got ${publicationState} instead`
+    );
+  }
+
+  return PUBLICATION_STATES[publicationState];
 };
 
 // List of all the possible filters
