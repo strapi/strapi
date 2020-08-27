@@ -58,6 +58,7 @@
   "containers.Edit.information.editing": "Editing",
   "containers.Edit.information.draftVersion": "draft version",
   "containers.Edit.information.publishedVersion": "published version",
+  "containers.Edit.delete-entry": "Delete this entry",
   "containers.EditSettingsView.modal-form.edit-field": "Edit the field",
   "containers.EditView.add.new": "ADD NEW ENTRY",
   "containers.EditView.components.missing.plural": "There is {count} missing components",

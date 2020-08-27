@@ -45,7 +45,7 @@ const EditViewDataManagerProvider = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
 
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
   const from = get(state, 'from', '/');
@@ -58,13 +58,17 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
-  const [sending, setSending] = useState();
+  const [status, setStatus] = useState('resolved');
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
-  const hasDraftAndPublish = get(
-    currentContentTypeLayout,
-    ['schema', 'options', 'draftAndPublish'],
-    false
-  );
+  const shouldNotRunValidations = useMemo(() => {
+    const hasDraftAndPublish = get(
+      currentContentTypeLayout,
+      ['schema', 'options', 'draftAndPublish'],
+      false
+    );
+
+    return hasDraftAndPublish && !initialData.published_at;
+  }, [currentContentTypeLayout, initialData]);
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -196,9 +200,9 @@ const EditViewDataManagerProvider = ({
         });
       } catch (err) {
         console.log(err);
-        const status = get(err, 'response.status', null);
+        const resStatus = get(err, 'response.status', null);
 
-        if (id && status === 403) {
+        if (id && resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -211,14 +215,14 @@ const EditViewDataManagerProvider = ({
         }
 
         // Create a single type
-        if (!id && status === 404) {
+        if (!id && resStatus === 404) {
           setIsCreatingEntry(true);
 
           return;
         }
 
         // Not allowed to update or read a ST
-        if (!id && status === 403) {
+        if (!id && resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -311,7 +315,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: hasDraftAndPublish }
+      { isCreatingEntry, isDraft: shouldNotRunValidations }
     );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
@@ -393,7 +397,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: hasDraftAndPublish }
+      { isCreatingEntry, isDraft: shouldNotRunValidations }
     );
 
     try {
@@ -401,7 +405,7 @@ const EditViewDataManagerProvider = ({
       await schema.validate(modifiedData, { abortEarly: false });
 
       // Show a loading button in the EditView/Header.js
-      setSending('submit');
+      setStatus('submit-pending');
 
       // Set the loading state in the plugin header
       const filesToUpload = getFilesToUpload(modifiedData);
@@ -458,7 +462,7 @@ const EditViewDataManagerProvider = ({
         );
         emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
 
-        setSending(null);
+        setStatus('resolved');
 
         dispatch({
           type: 'SUBMIT_SUCCESS',
@@ -468,11 +472,11 @@ const EditViewDataManagerProvider = ({
         setIsCreatingEntry(false);
 
         if (!isSingleType) {
-          push(`/plugins/${pluginId}/${contentType}/${slug}/${res.id}`);
+          replace(`/plugins/${pluginId}/${contentType}/${slug}/${res.id}`);
         }
       } catch (err) {
         console.error({ err });
-        setSending(null);
+        setStatus('resolved');
 
         const error = get(
           err,
@@ -504,7 +508,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       console.error({ err });
       const errors = getYupInnerErrors(err);
-      setSending(null);
+      setStatus('resolved');
 
       dispatch({
         type: 'SUBMIT_ERRORS',
@@ -530,7 +534,7 @@ const EditViewDataManagerProvider = ({
       await schema.validate(modifiedData, { abortEarly: false });
 
       // Show a loading button in the EditView/Header.js
-      setSending('publish');
+      setStatus('publish-pending');
 
       try {
         // Time to actually send the data
@@ -544,7 +548,7 @@ const EditViewDataManagerProvider = ({
           false
         );
 
-        setSending(null);
+        setStatus('resolved');
 
         dispatch({
           type: 'PUBLISH_SUCCESS',
@@ -556,7 +560,7 @@ const EditViewDataManagerProvider = ({
         // The api error send response.payload.message: 'The error message'.
         // There isn't : response.payload.message[0].messages[0].id
         console.error({ err });
-        setSending(null);
+        setStatus('resolved');
 
         const error = get(
           err,
@@ -584,7 +588,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       console.error({ err });
       const errors = getYupInnerErrors(err);
-      setSending(null);
+      setStatus('resolved');
 
       dispatch({
         type: 'PUBLISH_ERRORS',
@@ -597,7 +601,7 @@ const EditViewDataManagerProvider = ({
     e.preventDefault();
 
     try {
-      setSending('unpublish');
+      setStatus('unpublish-pending');
       const data = await request(
         getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
         {
@@ -608,7 +612,7 @@ const EditViewDataManagerProvider = ({
         false
       );
 
-      setSending(null);
+      setStatus('resolved');
 
       dispatch({
         type: 'UNPUBLISH_SUCCESS',
@@ -617,14 +621,10 @@ const EditViewDataManagerProvider = ({
       strapi.notification.success(`${pluginId}.success.record.unpublish`);
     } catch (err) {
       console.error({ err });
-      setSending(null);
+      setStatus('resolved');
 
       const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
       strapi.notification.error(errorMessage);
-
-      dispatch({
-        type: 'UNPUBLISH_ERROR',
-      });
     }
   };
 
@@ -783,7 +783,8 @@ const EditViewDataManagerProvider = ({
         initialData,
         isCreatingEntry,
         isSingleType,
-        sending,
+        shouldNotRunValidations,
+        status,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -806,7 +807,11 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        <OverlayBlocker key="overlayBlocker" isOpen={sending} {...overlayBlockerParams} />
+        <OverlayBlocker
+          key="overlayBlocker"
+          isOpen={status !== 'resolved'}
+          {...overlayBlockerParams}
+        />
         {isLoading ? (
           <LoadingIndicatorPage />
         ) : (

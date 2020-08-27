@@ -209,8 +209,6 @@ const reducer = (state, action) => {
       return state
         .update('modifiedDZName', () => null)
         .update('formErrors', () => fromJS(action.errors));
-    case 'UNPUBLISH_ERROR':
-      return state.update('shouldShowLoadingState', () => false);
     case 'SUBMIT_ERRORS':
     case 'PUBLISH_ERRORS':
       return state

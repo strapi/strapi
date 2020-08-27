@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { get, has, isEmpty } from 'lodash';
 import { useGlobalContext, request, difference } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
@@ -16,7 +16,6 @@ import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const { goBack } = useHistory();
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
@@ -97,7 +96,6 @@ const EditPage = () => {
       }
 
       strapi.notification.success('notification.success.saved');
-      goBack();
     } catch (err) {
       console.error(err.response);
       const message = get(err, 'response.payload.message', 'An error occured');
