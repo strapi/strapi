@@ -446,6 +446,7 @@ module.exports = {
             content: {
               'application/json': {
                 schema: {
+                  type: 'object',
                   properties: {
                     foo: {
                       type: 'string',
