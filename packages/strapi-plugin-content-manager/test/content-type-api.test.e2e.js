@@ -684,6 +684,7 @@ describe('Content-Type API', () => {
           body: product,
         });
 
+        console.log('res.body', res.body);
         expect(res.statusCode).toBe(200);
         expect(res.body).toMatchObject(product);
         data.productsWithCompoAndDP.push(res.body);
