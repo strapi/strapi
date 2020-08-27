@@ -18,6 +18,8 @@ const RoleListPage = () => {
   const { push } = useHistory();
   const { roles, getData, isLoading } = useRolesList();
   const [modalToDelete, setModalDelete] = useState();
+  const [shouldRefetchData, setShouldRefetchData] = useState(false);
+  const [showModalConfirmButtonLoading, setModalButtonLoading] = useState(false);
 
   const updatePermissions = useMemo(() => {
     return {
@@ -38,12 +40,15 @@ const RoleListPage = () => {
   const handleDelete = () => {
     strapi.lockAppWithOverlay();
 
+    setModalButtonLoading(true);
+
     Promise.resolve(
       request(`/${pluginId}/roles/${modalToDelete}`, {
         method: 'DELETE',
       })
     )
       .then(() => {
+        setShouldRefetchData(true);
         strapi.notification.success(getTrad('Settings.roles.deleted'));
       })
       .catch(err => {
@@ -52,9 +57,16 @@ const RoleListPage = () => {
       })
       .finally(() => {
         setModalDelete(null);
-        getData();
         strapi.unlockApp();
       });
+  };
+
+  const handleClosedModalDelete = () => {
+    if (shouldRefetchData) {
+      getData();
+    }
+    setModalButtonLoading(false);
+    setShouldRefetchData(false);
   };
 
   const handleNewRoleClick = () => {
@@ -142,7 +154,9 @@ const RoleListPage = () => {
         <PopUpWarning
           isOpen={Boolean(modalToDelete)}
           onConfirm={handleDelete}
+          onClosed={handleClosedModalDelete}
           toggleModal={() => setModalDelete(null)}
+          isConfirmButtonLoading={showModalConfirmButtonLoading}
         />
       </RoleListWrapper>
     </>
