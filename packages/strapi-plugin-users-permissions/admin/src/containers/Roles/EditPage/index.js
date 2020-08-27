@@ -25,31 +25,37 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/${pluginId}/roles/:id`);
-  const { permissions, routes, policies, isPermissionsLoading } = usePlugins();
+  const { permissions, routes, policies, isLoading } = usePlugins();
   const { role, isLoading: isRoleLoading } = useFetchRole(id);
   const permissionsRef = useRef();
 
-  const headerActions = (handleSubmit, handleReset) => [
-    {
-      label: formatMessage({
-        id: getTrad('app.components.Button.reset'),
-        defaultMessage: 'Reset',
-      }),
-      onClick: handleReset,
-      color: 'cancel',
-      type: 'button',
-    },
-    {
-      label: formatMessage({
-        id: getTrad('app.components.Button.save'),
-        defaultMessage: 'Save',
-      }),
-      onClick: handleSubmit,
-      color: 'success',
-      type: 'submit',
-      isLoading: isSubmiting,
-    },
-  ];
+  const headerActions = (handleSubmit, handleReset) => {
+    if (isLoading) {
+      return [];
+    }
+
+    return [
+      {
+        label: formatMessage({
+          id: getTrad('app.components.Button.reset'),
+          defaultMessage: 'Reset',
+        }),
+        onClick: handleReset,
+        color: 'cancel',
+        type: 'button',
+      },
+      {
+        label: formatMessage({
+          id: getTrad('app.components.Button.save'),
+          defaultMessage: 'Save',
+        }),
+        onClick: handleSubmit,
+        color: 'success',
+        type: 'submit',
+        isLoading: isSubmiting,
+      },
+    ];
+  };
 
   const handleCreateRoleSubmit = data => {
     strapi.lockAppWithOverlay();
@@ -100,6 +106,7 @@ const EditPage = () => {
                 id: getTrad('EditPage.form.roles'),
                 defaultMessage: 'Role details',
               })}
+              isLoading={isLoading}
             >
               <SizedInput
                 label="Settings.roles.form.input.name"
@@ -126,7 +133,7 @@ const EditPage = () => {
             </FormCard>
           </ContainerFluid>
           <div style={{ paddingTop: '1.8rem' }} />
-          {!isPermissionsLoading && !isRoleLoading && (
+          {!isLoading && !isRoleLoading && (
             <UsersPermissions
               ref={permissionsRef}
               permissions={merge(role.permissions, permissions)}

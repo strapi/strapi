@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
-
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormCard from '../../../components/FormBloc';
@@ -18,31 +18,38 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
+  const { goBack } = useHistory();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { permissions, routes, policies, isPermissionsLoading } = usePlugins();
+  const { permissions, routes, policies, isLoading } = usePlugins();
   const permissionsRef = useRef();
 
-  const headerActions = (handleSubmit, handleReset) => [
-    {
-      label: formatMessage({
-        id: getTrad('app.components.Button.reset'),
-        defaultMessage: 'Reset',
-      }),
-      onClick: handleReset,
-      color: 'cancel',
-      type: 'button',
-    },
-    {
-      label: formatMessage({
-        id: getTrad('app.components.Button.save'),
-        defaultMessage: 'Save',
-      }),
-      onClick: handleSubmit,
-      color: 'success',
-      type: 'submit',
-      isLoading: isSubmiting,
-    },
-  ];
+  const headerActions = (handleSubmit, handleReset) => {
+    if (isLoading) {
+      return [];
+    }
+
+    return [
+      {
+        label: formatMessage({
+          id: getTrad('app.components.Button.reset'),
+          defaultMessage: 'Reset',
+        }),
+        onClick: handleReset,
+        color: 'cancel',
+        type: 'button',
+      },
+      {
+        label: formatMessage({
+          id: getTrad('app.components.Button.save'),
+          defaultMessage: 'Save',
+        }),
+        onClick: handleSubmit,
+        color: 'success',
+        type: 'submit',
+        isLoading: isSubmiting,
+      },
+    ];
+  };
 
   const handleCreateRoleSubmit = data => {
     strapi.lockAppWithOverlay();
@@ -59,6 +66,9 @@ const CreatePage = () => {
       .then(() => {
         emitEvent('didCreateRole');
         strapi.notification.success('Settings.roles.created');
+        // Forcing redirecting since we don't have the id in the response
+        // TODO
+        goBack();
       })
       .catch(err => {
         console.error(err);
@@ -76,65 +86,71 @@ const CreatePage = () => {
       onSubmit={handleCreateRoleSubmit}
       validationSchema={schema}
     >
-      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
-        <form onSubmit={handleSubmit}>
-          <ContainerFluid padding="0">
-            <Header
-              title={{
-                label: formatMessage({
-                  id: getTrad('Settings.roles.create.title'),
-                  defaultMessage: 'Create a role',
-                }),
-              }}
-              content={formatMessage({
-                id: getTrad('Settings.roles.create.description'),
-                defaultMessage: 'Define the rights given to the role',
-              })}
-              actions={headerActions(handleSubmit, handleReset)}
-            />
-            <BaselineAlignement top size="3px" />
-            <FormCard
-              title={formatMessage({
-                id: getTrad('EditPage.form.roles'),
-                defaultMessage: 'Role details',
-              })}
-            >
-              <SizedInput
-                label="Settings.roles.form.input.name"
-                defaultMessage="Name"
-                name="name"
-                type="text"
-                error={errors.name ? { id: errors.name } : null}
-                onBlur={handleBlur}
-                value={values.name}
-                onChange={handleChange}
+      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur, touched }) => {
+        return (
+          <form onSubmit={handleSubmit}>
+            <ContainerFluid padding="0">
+              <Header
+                title={{
+                  label: formatMessage({
+                    id: getTrad('Settings.roles.create.title'),
+                    defaultMessage: 'Create a role',
+                  }),
+                }}
+                content={formatMessage({
+                  id: getTrad('Settings.roles.create.description'),
+                  defaultMessage: 'Define the rights given to the role',
+                })}
+                actions={headerActions(handleSubmit, handleReset)}
+                isLoading={isLoading}
               />
-              <SizedInput
-                label="Settings.roles.form.input.description"
-                defaultMessage="Description"
-                name="description"
-                type="textarea"
-                error={errors.description ? { id: errors.description } : null}
-                onBlur={handleBlur}
-                value={values.description}
-                onChange={handleChange}
-                // Override the default height of the textarea
-                style={{ height: 115 }}
+              <BaselineAlignement top size="3px" />
+              <FormCard
+                isLoading={isLoading}
+                title={formatMessage({
+                  id: getTrad('EditPage.form.roles'),
+                  defaultMessage: 'Role details',
+                })}
+              >
+                <SizedInput
+                  label="Settings.roles.form.input.name"
+                  defaultMessage="Name"
+                  name="name"
+                  type="text"
+                  error={errors.name && touched.name ? { id: errors.name } : null}
+                  onBlur={handleBlur}
+                  value={values.name}
+                  onChange={handleChange}
+                />
+                <SizedInput
+                  label="Settings.roles.form.input.description"
+                  defaultMessage="Description"
+                  name="description"
+                  type="textarea"
+                  error={
+                    errors.description && touched.description ? { id: errors.description } : null
+                  }
+                  onBlur={handleBlur}
+                  value={values.description}
+                  onChange={handleChange}
+                  // Override the default height of the textarea
+                  style={{ height: 115 }}
+                />
+              </FormCard>
+            </ContainerFluid>
+            <div style={{ paddingTop: '1.8rem' }} />
+            {!isLoading && (
+              <UsersPermissions
+                ref={permissionsRef}
+                permissions={permissions}
+                routes={routes}
+                policies={policies}
               />
-            </FormCard>
-          </ContainerFluid>
-          <div style={{ paddingTop: '1.8rem' }} />
-          {!isPermissionsLoading && (
-            <UsersPermissions
-              ref={permissionsRef}
-              permissions={permissions}
-              routes={routes}
-              policies={policies}
-            />
-          )}
-          <Padded top size="md" />
-        </form>
-      )}
+            )}
+            <Padded top size="md" />
+          </form>
+        );
+      }}
     </Formik>
   );
 };

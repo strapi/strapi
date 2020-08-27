@@ -1,6 +1,6 @@
 const formatPolicies = policies =>
   policies.reduce((acc, current) => {
-    acc.push({ value: current });
+    acc.push({ label: current, value: current });
 
     return acc;
   }, []);

@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { Col } from 'reactstrap';
 import { get, isEmpty, takeRight, toLower, without } from 'lodash';
-import { InputsIndex as Input } from 'strapi-helper-plugin';
-
+import { getTrad } from '../../utils';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
+import SizedInput from '../SizedInput';
 import { Header, Wrapper } from './Components';
 
 const Policies = () => {
-  const { selectedAction, routes, permissions, policies, onSelectedPolicy } = useUsersPermissions();
+  const { modifiedData, selectedAction, routes, policies, onChange } = useUsersPermissions();
   const baseTitle = 'users-permissions.Policies.header';
   const title = !selectedAction ? 'hint' : 'title';
   const path = without(selectedAction.split('.'), 'controllers');
@@ -17,13 +18,11 @@ const Policies = () => {
     ? []
     : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
 
-  const handleChange = e => {
-    onSelectedPolicy(e.target.value);
-  };
+  const inputName = `${selectedAction}.policy`;
 
   const value = useMemo(() => {
-    return get(permissions, [...selectedAction.split('.'), 'policy'], '');
-  }, [permissions, selectedAction]);
+    return get(modifiedData, inputName, '');
+  }, [inputName, modifiedData]);
 
   return (
     <Wrapper className="col-md-5">
@@ -34,21 +33,22 @@ const Policies = () => {
           </Header>
           {selectedAction && (
             <>
-              <Input
-                customBootstrapClass="col-md-12"
-                label={{ id: 'users-permissions.Policies.InputSelect.label' }}
-                name={selectedAction}
-                onChange={handleChange}
-                selectOptions={policies}
+              <SizedInput
                 type="select"
-                validations={{}}
+                name={inputName}
+                onChange={onChange}
+                label={getTrad('Policies.InputSelect.label')}
+                options={policies}
                 value={value}
               />
+
               <div className="row">
-                {displayedRoutes.map((route, key) => (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <BoundRoute key={key} route={route} />
-                ))}
+                <Col size={{ xs: 12 }}>
+                  {displayedRoutes.map((route, key) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <BoundRoute key={key} route={route} />
+                  ))}
+                </Col>
               </div>
             </>
           )}

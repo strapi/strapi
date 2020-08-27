@@ -1,25 +1,21 @@
-import { useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { request } from 'strapi-helper-plugin';
+import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
+import { formatPolicies, getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
-import { formatPolicies } from '../../utils';
 
 const usePlugins = (shouldFetchData = true) => {
+  const { formatMessage } = useIntl();
   const [{ permissions, routes, policies, isLoading }, dispatch] = useReducer(
     reducer,
     initialState,
     () => init(initialState, shouldFetchData)
   );
 
-  useEffect(() => {
-    if (shouldFetchData) {
-      fetchPlugins();
-    }
-  }, [shouldFetchData]);
-
-  const fetchPlugins = async () => {
+  const fetchPlugins = useCallback(async () => {
     try {
       dispatch({
         type: 'GET_DATA',
@@ -36,7 +32,10 @@ const usePlugins = (shouldFetchData = true) => {
         permissions,
         routes,
         policies: [
-          { name: 'users-permissions.Policies.InputSelect.empty', value: '' },
+          {
+            label: formatMessage({ id: getTrad('Policies.InputSelect.empty') }),
+            value: 'empty__string_value',
+          },
           ...formatPolicies(policies),
         ],
       });
@@ -51,9 +50,21 @@ const usePlugins = (shouldFetchData = true) => {
         strapi.notification.error(message);
       }
     }
-  };
+  }, [formatMessage]);
 
-  return { permissions, routes, policies, isPermissionsLoading: isLoading, getData: fetchPlugins };
+  useEffect(() => {
+    if (shouldFetchData) {
+      fetchPlugins();
+    }
+  }, [fetchPlugins, shouldFetchData]);
+
+  return {
+    permissions,
+    routes,
+    policies,
+    getData: fetchPlugins,
+    isLoading,
+  };
 };
 
 export default usePlugins;

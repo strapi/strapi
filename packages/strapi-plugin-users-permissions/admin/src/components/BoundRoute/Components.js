@@ -11,7 +11,7 @@ const Wrapper = styled.div`
 
 const Header = styled.div`
   margin-bottom: 3rem;
-  padding-top: 1.1rem;
+  padding-top: 1.2rem;
   color: #333740;
   font-size: 18px;
   font-weight: ${({ theme }) => theme.main.fontWeights.bold};

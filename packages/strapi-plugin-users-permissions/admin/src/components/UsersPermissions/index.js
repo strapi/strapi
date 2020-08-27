@@ -20,15 +20,24 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
   useImperativeHandle(ref, () => ({
     getPermissions: () => {
       return {
-        permissions: state.permissions,
+        permissions: state.modifiedData,
       };
     },
   }));
 
-  const handleSetPluginName = useCallback(pluginName => {
+  const handleChange = useCallback(({ target: { name, value } }) => {
     dispatch({
-      type: 'SET_PLUGIN_NAME',
-      pluginName,
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value: value === 'empty__string_value' ? '' : value,
+    });
+  }, []);
+
+  const handleChangeSelectAll = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_SELECT_ALL',
+      keys: name.split('.'),
+      value,
     });
   }, []);
 
@@ -39,35 +48,11 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
     });
   }, []);
 
-  const handleSelectPolicy = useCallback(policyName => {
-    dispatch({
-      type: 'SELECT_POLICY',
-      policyName,
-    });
-  }, []);
-
-  const handleSelectedPermission = useCallback(permissionToSelect => {
-    dispatch({
-      type: 'SELECT_PERMISSION',
-      permissionToSelect,
-    });
-  }, []);
-
-  const handleSelectSubcategory = useCallback(({ subcategoryPath, shouldEnable }) => {
-    dispatch({
-      type: 'SELECT_SUBCATEGORY',
-      subcategoryPath,
-      shouldEnable,
-    });
-  }, []);
-
   const providerValue = {
     ...state,
-    onSetPluginName: handleSetPluginName,
+    onChange: handleChange,
+    onChangeSelectAll: handleChangeSelectAll,
     onSelectedAction: handleSelectedAction,
-    onSelectedPermission: handleSelectedPermission,
-    onSelectedPolicy: handleSelectPolicy,
-    onSelectedSubcategory: handleSelectSubcategory,
   };
 
   return (

@@ -1,8 +1,9 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { set, get, mapValues } from 'lodash';
+import { set, get, take } from 'lodash';
 
 export const initialState = {
+  modifiedData: {},
   permissions: {},
   pluginName: '',
   routes: {},
@@ -13,43 +14,37 @@ export const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'ON_CHANGE': {
+        const keysLength = action.keys.length;
+        const isChangingCheckbox = action.keys[keysLength - 1] === 'enabled';
+
+        if (action.value && isChangingCheckbox) {
+          const selectedAction = take(action.keys, keysLength - 1).join('.');
+          draftState.selectedAction = selectedAction;
+        }
+
+        set(draftState, ['modifiedData', ...action.keys], action.value);
+        break;
+      }
+      case 'ON_CHANGE_SELECT_ALL': {
+        const pathToValue = ['modifiedData', ...action.keys];
+        const oldValues = get(state, pathToValue, {});
+        const updatedValues = Object.keys(oldValues).reduce((acc, current) => {
+          acc[current] = { ...oldValues[current], enabled: action.value };
+
+          return acc;
+        }, {});
+
+        set(draftState, pathToValue, updatedValues);
+
+        break;
+      }
       case 'SELECT_ACTION': {
         const { actionToSelect } = action;
         draftState.selectedAction = actionToSelect === state.selectedAction ? '' : actionToSelect;
         break;
       }
-      case 'SET_PLUGIN_NAME': {
-        draftState.pluginName = action.pluginName;
-        break;
-      }
-      case 'SELECT_POLICY': {
-        const { policyName } = action;
-        const { selectedAction } = state;
-        set(draftState, ['permissions', ...selectedAction.split('.'), 'policy'], policyName);
-        break;
-      }
-      case 'SELECT_PERMISSION': {
-        const { permissionToSelect } = action;
-        const isSelected = get(
-          state.permissions,
-          [...permissionToSelect.split('.'), 'enabled'],
-          false
-        );
-        set(draftState, ['permissions', ...permissionToSelect.split('.'), 'enabled'], !isSelected);
-        break;
-      }
-      case 'SELECT_SUBCATEGORY': {
-        const { subcategoryPath, shouldEnable } = action;
-        const subCategoryValues = mapValues(
-          get(state.permissions, subcategoryPath.split('.'), {}),
-          e => ({
-            ...e,
-            enabled: shouldEnable,
-          })
-        );
-        set(draftState, ['permissions', ...subcategoryPath.split('.')], subCategoryValues);
-        break;
-      }
+
       default:
         return draftState;
     }
