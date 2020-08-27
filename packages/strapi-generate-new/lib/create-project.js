@@ -12,6 +12,7 @@ const { trackUsage, captureStderr } = require('./utils/usage');
 const packageJSON = require('./resources/json/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
 const createServerConfig = require('./resources/templates/server.js');
+const mergeTemplate = require('./merge-template.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log('Creating files.');
@@ -64,8 +65,13 @@ module.exports = async function createProject(scope, { client, connection, depen
 
     // create config/server.js
     await fse.writeFile(join(rootPath, `config/server.js`), createServerConfig());
-
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
+
+    // merge template files if a template is specified
+    const hasTemplate = Boolean(scope.template);
+    if (hasTemplate) {
+      await mergeTemplate(scope.template, rootPath);
+    }
   } catch (err) {
     await fse.remove(scope.rootPath);
     throw err;
