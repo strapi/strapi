@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 module.exports = ({ db, eventHub, entityValidator }) => ({
   /**
@@ -52,9 +53,9 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    */
 
   async create({ data, files }, { model }) {
-    const { kind } = db.getModel(model);
+    const modelDef = db.getModel(model);
 
-    if (kind === 'singleType') {
+    if (modelDef.kind === 'singleType') {
       // check if there is already one entry and throw
       const count = await db.query(model).count();
       if (count >= 1) {
@@ -62,7 +63,9 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       }
     }
 
-    const validData = await entityValidator.validateEntity(db.getModel(model), data);
+    const isDraft = contentTypesUtils.isDraft(data, modelDef);
+
+    const validData = await entityValidator.validateEntity(db.getModel(model), data, { isDraft });
 
     let entry = await db.query(model).create(validData);
 
@@ -86,7 +89,14 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    */
 
   async update({ params, data, files }, { model }) {
-    const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data);
+    const modelDef = db.getModel(model);
+    const existingEntry = await db.query(model).findOne(params);
+
+    const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
+
+    const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data, {
+      isDraft,
+    });
 
     let entry = await db.query(model).update(params, validData);
 
@@ -96,7 +106,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     }
 
     eventHub.emit('entry.update', {
-      model: db.getModel(model).modelName,
+      model: modelDef.modelName,
       entry,
     });
 

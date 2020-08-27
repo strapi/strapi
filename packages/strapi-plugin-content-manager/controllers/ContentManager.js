@@ -339,7 +339,7 @@ module.exports = {
 
     await strapi.entityValidator.validateEntity(strapi.getModel(model), entity);
 
-    if (entity.published_at) {
+    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       return ctx.badRequest('Already published');
     }
 
@@ -362,7 +362,7 @@ module.exports = {
       id
     );
 
-    if (!entity.published_at) {
+    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
       return ctx.badRequest('Already a draft');
     }
 
