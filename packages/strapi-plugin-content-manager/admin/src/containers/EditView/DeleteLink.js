@@ -11,6 +11,7 @@ import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
 import { DeleteButton } from './components';
+import { getTrad } from '../../utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -96,7 +97,7 @@ const DeleteLink = () => {
           <FontAwesomeIcon icon="trash-alt" />
           <Text lineHeight="22px" color="lightOrange">
             {formatMessage({
-              id: 'app.utils.delete-entry',
+              id: getTrad('containers.Edit.delete-entry'),
             })}
           </Text>
         </DeleteButton>

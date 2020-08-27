@@ -20,6 +20,7 @@ function EditView() {
   const isMounted = useRef();
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { push } = useHistory();
   const {
@@ -93,6 +94,7 @@ function EditView() {
         id: 'Settings.webhooks.create',
       })
     : name;
+
   const headersActions = [
     {
       color: 'primary',
@@ -130,6 +132,7 @@ function EditView() {
       label: formatMessage({
         id: 'app.components.Button.save',
       }),
+      isLoading: isSubmitting,
       style: {
         minWidth: 140,
       },
@@ -169,23 +172,23 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
+      strapi.lockAppWithOverlay();
+      setIsSubmitting(true);
       const { data } = await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),
       });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-
-        strapi.notification.success('Settings.webhooks.created');
-        push(`/settings/webhooks/${data.id}`);
-      }
+      setIsSubmitting(false);
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      strapi.notification.success('Settings.webhooks.created');
+      push(`/settings/webhooks/${data.id}`);
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      setIsSubmitting(false);
+      strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
@@ -324,6 +327,9 @@ function EditView() {
 
   const updateWebhook = async () => {
     try {
+      strapi.lockAppWithOverlay();
+      setIsSubmitting(true);
+
       const body = cleanData(modifiedData);
       delete body.id;
 
@@ -331,17 +337,16 @@ function EditView() {
         method: 'PUT',
         body,
       });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-        strapi.notification.success('notification.form.success.fields');
-      }
+      setIsSubmitting(false);
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      strapi.notification.success('notification.form.success.fields');
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      setIsSubmitting(false);
+      strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 

@@ -13,6 +13,7 @@ import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
 import { connect, select } from './utils';
+import useDataManager from '../../hooks/useDataManager';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -84,6 +85,7 @@ function Inputs({
     strapi: { fieldApi },
   } = useStrapi();
   const { layout: currentContentTypeLayout } = useEditView();
+  const { shouldNotRunValidations } = useDataManager();
 
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
@@ -106,17 +108,11 @@ function Inputs({
     return foundAttributeType === 'dynamiczone';
   }, [currentContentTypeLayout, fieldName]);
   const validations = useMemo(() => {
-    const hasDraftAndPublish = get(
-      currentContentTypeLayout,
-      ['schema', 'options', 'draftAndPublish'],
-      false
-    );
-
     return omit(
       attribute,
-      hasDraftAndPublish ? [...validationsToOmit, 'required', 'minLength'] : validationsToOmit
+      shouldNotRunValidations ? [...validationsToOmit, 'required', 'minLength'] : validationsToOmit
     );
-  }, [attribute, currentContentTypeLayout]);
+  }, [attribute, shouldNotRunValidations]);
   const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
   const inputType = useMemo(() => {
     return getInputType(type);
