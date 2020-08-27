@@ -122,7 +122,7 @@ const convertLimitQueryParams = limitQuery => {
 };
 
 const PUBLICATION_STATES = {
-  [constants.DP_PUB_STATE_LIVE]: [{ published_at_null: false }],
+  [constants.DP_PUB_STATE_LIVE]: [{ [`${constants.PUBLISHED_AT_ATTRIBUTE}_null`]: false }],
   [constants.DP_PUB_STATE_PREVIEW]: [],
 };
 
