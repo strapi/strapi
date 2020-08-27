@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | HOOKS | USEFETCHROLE | reducer', () => {
+describe('ADMIN | HOOKS | useFetchRole | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {

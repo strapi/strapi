@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | HOOKS | USEPERMISSIONS | reducer', () => {
+describe('ADMIN | HOOKS | usePlugins | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {

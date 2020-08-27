@@ -1,15 +1,13 @@
 import init from '../init';
 
-describe('ADMIN | HOOKS | USEPERMISSIONS | init', () => {
+describe('ADMIN | HOOKS | usePlugins | init', () => {
   it('should return the initial state and set the isLoading key to true', () => {
     const initialState = {
-      permissions: {},
-      routes: {},
-      isLoading: null,
+      ok: true,
     };
 
     const expected = {
-      permissions: {},
+      ok: true,
       isLoading: true,
     };
 

@@ -5,7 +5,7 @@ import PolicyWrapper from './SubCategory/PolicyWrapper';
 const CheckboxWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  min-width: 33%;
+  min-width: 50%;
   padding: 0.9rem;
   height: 3.6rem;
   position: relative;

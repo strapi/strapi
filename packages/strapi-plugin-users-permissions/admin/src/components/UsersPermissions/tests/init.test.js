@@ -3,8 +3,8 @@ import init from '../init';
 describe('ADMIN | HOOKS | USEPERMISSIONS | init', () => {
   it('should return the initial state and set permissions, routes and policies', () => {
     const initialState = {
-      permissions: {},
-      pluginName: '',
+      initialData: {},
+      modifiedData: {},
       routes: {},
       selectedAction: '',
       policies: [],
@@ -39,8 +39,8 @@ describe('ADMIN | HOOKS | USEPERMISSIONS | init', () => {
     const policies = ['isauthenticated', 'ratelimit', 'custompolicy'];
 
     const expected = {
-      permissions,
-      pluginName: 'application',
+      initialData: permissions,
+      modifiedData: permissions,
       routes,
       selectedAction: '',
       policies,

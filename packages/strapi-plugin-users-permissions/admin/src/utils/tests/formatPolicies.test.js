@@ -5,9 +5,9 @@ describe('formatPolicies', () => {
     const policies = ['custompolicies', 'ratelimit', 'isauthenticated'];
 
     const expected = [
-      { value: 'custompolicies' },
-      { value: 'ratelimit' },
-      { value: 'isauthenticated' },
+      { label: 'custompolicies', value: 'custompolicies' },
+      { label: 'ratelimit', value: 'ratelimit' },
+      { label: 'isauthenticated', value: 'isauthenticated' },
     ];
 
     expect(formatPolicies(policies)).toEqual(expected);

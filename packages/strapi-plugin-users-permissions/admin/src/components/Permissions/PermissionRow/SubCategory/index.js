@@ -27,7 +27,7 @@ const SubCategory = ({ subCategory }) => {
   } = useUsersPermissions();
 
   const currentScopedModifiedData = useMemo(() => {
-    return get(modifiedData, subCategory.testName, {});
+    return get(modifiedData, subCategory.name, {});
   }, [modifiedData, subCategory]);
 
   const hasAllActionsSelected = useMemo(() => {
@@ -48,10 +48,6 @@ const SubCategory = ({ subCategory }) => {
     [hasAllActionsSelected, onChangeSelectAll]
   );
 
-  const handleSelectPolicy = actionName => {
-    onSelectedAction(actionName);
-  };
-
   const isActionSelected = useCallback(
     actionName => {
       return selectedAction === actionName;
@@ -70,14 +66,14 @@ const SubCategory = ({ subCategory }) => {
             fontSize="xs"
             textTransform="uppercase"
           >
-            {subCategory.name}
+            {subCategory.label}
           </Text>
         </Padded>
         <Border />
         <Padded left size="sm">
           <BaselineAlignment />
           <Checkbox
-            name={subCategory.testName}
+            name={subCategory.name}
             message="Select all"
             onChange={handleChangeSelectAll}
             someChecked={hasSomeActionsSelected}
@@ -88,18 +84,18 @@ const SubCategory = ({ subCategory }) => {
       <BaselineAlignment />
       <Padded top size="xs">
         <Flex flexWrap="wrap">
-          {subCategory.testActions.map(action => {
-            const name = `${action.testName}.enabled`;
+          {subCategory.actions.map(action => {
+            const name = `${action.name}.enabled`;
 
             return (
-              <CheckboxWrapper isActive={isActionSelected(action.testName)} key={action.testName}>
+              <CheckboxWrapper isActive={isActionSelected(action.name)} key={action.name}>
                 <Checkbox
                   value={get(modifiedData, name, false)}
                   name={name}
                   message={action.label}
                   onChange={onChange}
                 />
-                <PolicyWrapper onClick={() => handleSelectPolicy(action.testName)}>
+                <PolicyWrapper onClick={() => onSelectedAction(action.name)}>
                   <FontAwesomeIcon icon="cog" />
                 </PolicyWrapper>
               </CheckboxWrapper>

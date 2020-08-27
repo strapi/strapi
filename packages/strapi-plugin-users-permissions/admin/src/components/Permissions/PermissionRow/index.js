@@ -3,6 +3,7 @@ import { Flex, Text } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { sortBy } from 'lodash';
 import getTrad from '../../../utils/getTrad';
 import SubCategory from './SubCategory';
 import RowStyle from './RowStyle';
@@ -17,31 +18,34 @@ const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => 
       return [];
     }
 
-    return Object.values(permissions.controllers).reduce((acc, curr, index) => {
-      const testName = `${name}.controllers.${Object.keys(permissions.controllers)[index]}`;
-      const actions = Object.keys(curr).reduce((acc, current) => {
+    return sortBy(
+      Object.values(permissions.controllers).reduce((acc, curr, index) => {
+        const currentName = `${name}.controllers.${Object.keys(permissions.controllers)[index]}`;
+        const actions = sortBy(
+          Object.keys(curr).reduce((acc, current) => {
+            return [
+              ...acc,
+              {
+                ...curr[current],
+                label: current,
+                name: `${currentName}.${current}`,
+              },
+            ];
+          }, []),
+          'label'
+        );
+
         return [
           ...acc,
           {
-            ...curr[current],
-            name: current,
-            label: current,
-            testName: `${testName}.${current}`,
+            actions,
+            label: Object.keys(permissions.controllers)[index],
+            name: currentName,
           },
         ];
-      }, []);
-
-      return [
-        ...acc,
-        {
-          actions: curr,
-          testActions: actions,
-          testName,
-          name: Object.keys(permissions.controllers)[index],
-          // TODO:
-        },
-      ];
-    }, []);
+      }, []),
+      'label'
+    );
   }, [isOpen, name, permissions]);
 
   return (
