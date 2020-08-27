@@ -619,6 +619,18 @@ module.exports = {
             minItems: min,
             maxItems: max,
           };
+        } else if (type === 'datetime') {
+          acc.properties[current] = {
+            type: 'string',
+            format: 'date-time',
+            description,
+            default: defaultValue,
+            minimum,
+            maxmimun,
+            maxLength,
+            minLength,
+            enum: enumeration,
+          };
         } else {
           acc.properties[current] = {
             type,
