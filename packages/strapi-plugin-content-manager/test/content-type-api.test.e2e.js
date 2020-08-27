@@ -361,12 +361,12 @@ describe('Content-Type API', () => {
 
     afterAll(async () => {
       // clean database
-      for (const product of data.productsWithDP) {
-        await rq({
-          method: 'DELETE',
-          url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${product.id}`,
-        });
-      }
+      const queryString = data.productsWithDP.map((p, i) => `${i}=${p.id}`).join('&');
+      await rq({
+        method: 'DELETE',
+        url: `/content-manager/explorer/deleteAll/application::product-with-dp.product-with-dp?${queryString}`,
+      });
+
       await modelsUtils.deleteContentTypes(['product-with-dp']);
     }, 60000);
 
@@ -448,6 +448,7 @@ describe('Content-Type API', () => {
       const product = {
         name: 'Product 1 updated',
         description: 'Updated Product description',
+        published_at: '2020-08-27T09:50:50.465Z',
       };
       const res = await rq({
         method: 'PUT',
@@ -456,9 +457,9 @@ describe('Content-Type API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      expect(res.body.id).toEqual(data.productsWithDP[0].id);
+      expect(res.body).toMatchObject(_.omit(product, ['published_at']));
       expect(res.body.published_at).toBeNull();
+      expect(res.body.id).toEqual(data.productsWithDP[0].id);
       data.productsWithDP[0] = res.body;
     });
 
@@ -587,12 +588,12 @@ describe('Content-Type API', () => {
 
     afterAll(async () => {
       // clean database
-      for (const product of data.productsWithCompoAndDP) {
-        await rq({
-          method: 'DELETE',
-          url: `/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp/${product.id}`,
-        });
-      }
+      const queryString = data.productsWithCompoAndDP.map((p, i) => `${i}=${p.id}`).join('&');
+      await rq({
+        method: 'DELETE',
+        url: `/content-manager/explorer/deleteAll/application::product-with-compo-and-dp.product-with-compo-and-dp?${queryString}`,
+      });
+
       await modelsUtils.deleteContentTypes(['product-with-compo-and-dp']);
     }, 60000);
 
@@ -683,6 +684,7 @@ describe('Content-Type API', () => {
           body: product,
         });
 
+        console.log('res.body', res.body);
         expect(res.statusCode).toBe(200);
         expect(res.body).toMatchObject(product);
         data.productsWithCompoAndDP.push(res.body);

@@ -63,7 +63,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       }
     }
 
-    const isDraft = contentTypesUtils.hasDraftAndPublish(modelDef) && data.published_at === null;
+    const isDraft = contentTypesUtils.isDraft(data, modelDef);
 
     const validData = await entityValidator.validateEntity(db.getModel(model), data, { isDraft });
 
@@ -92,9 +92,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     const modelDef = db.getModel(model);
     const existingEntry = await db.query(model).findOne(params);
 
-    const isDraft =
-      contentTypesUtils.hasDraftAndPublish(modelDef) &&
-      _.get(existingEntry, 'published_at') === null;
+    const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
 
     const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data, {
       isDraft,

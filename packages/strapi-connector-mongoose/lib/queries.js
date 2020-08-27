@@ -426,7 +426,7 @@ module.exports = ({ model, strapi }) => {
     // Create entry with no-relational data.
     const entry = await model.create(data);
 
-    const isDraft = hasDraftAndPublish && !entry.published_at;
+    const isDraft = contentTypesUtils.isDraft(entry, model);
     await createComponents(entry, values, { isDraft });
 
     // Create relational data and return the entry.
@@ -449,8 +449,10 @@ module.exports = ({ model, strapi }) => {
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
 
-    const publishedAt = _.has(values, 'published_at') ? values.published_at : entry.published_at;
-    const isDraft = hasDraftAndPublish && !publishedAt;
+    const publishedAt = _.has(values, PUBLISHED_AT_ATTRIBUTE)
+      ? values[PUBLISHED_AT_ATTRIBUTE]
+      : entry[PUBLISHED_AT_ATTRIBUTE];
+    const isDraft = contentTypesUtils.isDraft({ publishedAt }, model);
 
     // update components first in case it fails don't update the entity
     await updateComponents(entry, values, { isDraft });

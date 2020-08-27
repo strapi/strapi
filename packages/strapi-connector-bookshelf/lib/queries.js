@@ -94,7 +94,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const runCreate = async trx => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
-      const isDraft = hasDraftAndPublish && !entry.published_at;
+      const isDraft = contentTypesUtils.isDraft(entry.toJSON(), model);
       await createComponents(entry, attributes, { transacting: trx, isDraft });
 
       return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
@@ -126,7 +126,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             })
           : entry;
 
-      const isDraft = hasDraftAndPublish && !entry.publishedAt;
+      const isDraft = contentTypesUtils.isDraft(updatedEntry.toJSON(), model);
 
       await updateComponents(updatedEntry, attributes, { transacting: trx, isDraft });
 

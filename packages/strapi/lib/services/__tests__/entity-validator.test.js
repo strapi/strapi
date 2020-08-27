@@ -181,7 +181,7 @@ describe('Entity validator', () => {
           },
         };
 
-        const input = { title: 'tooSmall' };
+        const input = { title: 'tooLong' };
 
         expect.hasAssertions();
 
@@ -439,7 +439,7 @@ describe('Entity validator', () => {
           },
         };
 
-        const input = { title: 'tooSmall' };
+        const input = { title: 'tooLong' };
 
         expect.hasAssertions();
 

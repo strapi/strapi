@@ -358,12 +358,11 @@ describe('Core API', () => {
 
     afterAll(async () => {
       // clean database
-      for (const product of data.products) {
-        await rq({
-          method: 'DELETE',
-          url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${product.id}`,
-        });
-      }
+      const queryString = data.products.map((p, i) => `${i}=${p.id}`).join('&');
+      await rq({
+        method: 'DELETE',
+        url: `/content-manager/explorer/deleteAll/application::product-with-dp.product-with-dp?${queryString}`,
+      });
       await modelsUtils.deleteContentTypes(['product-with-dp']);
     }, 60000);
 
@@ -450,6 +449,7 @@ describe('Core API', () => {
       const product = {
         name: 'Product 1 updated',
         description: 'Updated Product description',
+        published_at: '2020-08-27T09:50:50.465Z',
       };
       const res = await rq({
         method: 'PUT',
@@ -458,8 +458,8 @@ describe('Core API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      expect(res.body.id).toEqual(data.products[0].id);
+      expect(res.body).toMatchObject(_.pick(data.products[0], ['name', 'description']));
+      expect(res.body.published_at).toBe(data.products[0].published_at);
       expect(res.body.published_at).not.toBe(product.published_at);
       expect(res.body.published_at).not.toBeNull();
       expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
