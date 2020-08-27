@@ -55,9 +55,13 @@ const getVisibleAttributes = model => {
 
 const hasDraftAndPublish = model => _.get(model, 'options.draftAndPublish', false) === true;
 
+const isDraft = (data, model) =>
+  hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
+
 module.exports = {
   constants,
   getNonWritableAttributes,
   getVisibleAttributes,
   hasDraftAndPublish,
+  isDraft,
 };

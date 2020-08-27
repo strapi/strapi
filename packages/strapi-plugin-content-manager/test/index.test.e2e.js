@@ -29,21 +29,13 @@ describe('Content Manager End to End', () => {
       form.tag,
       form.category,
       form.reference,
-      form.product,
       form.articlewithtag,
     ]);
   }, 60000);
 
   afterAll(
     () =>
-      modelsUtils.deleteContentTypes([
-        'article',
-        'tag',
-        'category',
-        'reference',
-        'product',
-        'articlewithtag',
-      ]),
+      modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'articlewithtag']),
     60000
   );
 
@@ -158,7 +150,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(0);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Create article2 with tag1', async () => {
@@ -184,44 +176,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags[0].id).toBe(data.tags[0].id);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
-    });
-
-    test('Create article3 - published_at should not be overwritten', async () => {
-      const entry = {
-        title: 'Article 1',
-        content: 'My super content 1',
-        date: '2019-08-13T00:00:00.000Z',
-        published_at: '2019-08-13T00:00:00.000Z',
-      };
-
-      let { body } = await rq({
-        url: '/content-manager/explorer/application::article.article',
-        method: 'POST',
-        body: entry,
-      });
-
-      data.articles.push(body);
-
-      expect(body.id);
-      expect(body.published_at).toBe(null);
-    });
-
-    test('Update article3 - published_at should not be overwritten', async () => {
-      const entry = Object.assign({}, data.articles[2], {
-        published_at: '2019-08-13T00:00:00.000Z',
-      });
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/${entry.id}`,
-        method: 'PUT',
-        body: entry,
-      });
-
-      data.articles.push(body);
-
-      expect(body.id);
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 add tag2', async () => {
@@ -247,7 +202,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags[0].id).toBe(data.tags[1].id);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 add tag1 and tag3', async () => {
@@ -272,7 +227,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(3);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 remove one tag', async () => {
@@ -296,7 +251,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(2);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 remove all tag', async () => {
@@ -321,58 +276,7 @@ describe('Content Manager End to End', () => {
       expect(body.tags.length).toBe(0);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
-    });
-
-    test('Publish article1, expect published_at to be defined', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
-        method: 'POST',
-      });
-
-      data.articles[0] = body;
-
-      expect(body.published_at).toEqual(expect.any(String));
-      expect(new Date(body.published_at)).toEqual(expect.any(Date));
-    });
-
-    test('Publish article1, expect article1 to be already published', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/publish/${entry.id}`,
-        method: 'POST',
-      });
-
-      expect(body.statusCode).toBe(400);
-      expect(body.message).toBe('Already published');
-    });
-
-    test('Unpublish article1, expect article1 to be set to null', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
-        method: 'POST',
-      });
-
-      data.articles[0] = body;
-
-      expect(body.published_at).toBeNull();
-    });
-
-    test('Unpublish article1, expect article1 to already be a draft', async () => {
-      const entry = data.articles[0];
-
-      let { body } = await rq({
-        url: `/content-manager/explorer/application::article.article/unpublish/${entry.id}`,
-        method: 'POST',
-      });
-
-      expect(body.statusCode).toBe(400);
-      expect(body.message).toBe('Already a draft');
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Delete all articles should remove the association in each tags related to them', async () => {
@@ -691,7 +595,6 @@ describe('Content Manager End to End', () => {
       expect(body.id);
       expect(body.articles.length).toBe(1);
       expect(body.articles[0].id).toBe(data.articles[1].id);
-      expect(body.articles[0].published_at).toBe(null);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
     });
@@ -705,7 +608,6 @@ describe('Content Manager End to End', () => {
       expect(body.id);
       expect(body.articles.length).toBe(1);
       expect(body.articles[0].id).toBe(data.articles[0].id);
-      expect(body.articles[0].published_at).toBe(null);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
     });
@@ -755,7 +657,7 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(body.created_by).toMatchObject({ email: 'admin@strapi.io' });
       expect(body.updated_by).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.published_at).toBe(null);
+      expect(body.published_at).toBeUndefined();
     });
 
     test('Update article1 with ref1', async () => {
