@@ -26,7 +26,7 @@ const EditPage = () => {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/${pluginId}/roles/:id`);
   const { permissions, routes, policies, isLoading } = usePlugins();
-  const { role, isLoading: isRoleLoading } = useFetchRole(id);
+  const { role, isLoading: isRoleLoading, onSubmitSucceeded } = useFetchRole(id);
   const permissionsRef = useRef();
 
   const headerActions = (handleSubmit, handleReset) => {
@@ -40,7 +40,10 @@ const EditPage = () => {
           id: getTrad('app.components.Button.reset'),
           defaultMessage: 'Reset',
         }),
-        onClick: handleReset,
+        onClick: () => {
+          handleReset();
+          permissionsRef.current.resetForm();
+        },
         color: 'cancel',
         type: 'button',
       },
@@ -70,6 +73,8 @@ const EditPage = () => {
       })
     )
       .then(() => {
+        onSubmitSucceeded({ name: data.name, description: data.description });
+        permissionsRef.current.setFormAfterSubmit();
         strapi.notification.success(getTrad('Settings.roles.edited'));
       })
       .catch(err => {

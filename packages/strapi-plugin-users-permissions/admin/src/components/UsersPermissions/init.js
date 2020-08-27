@@ -1,12 +1,10 @@
 const init = (state, permissions, routes, policies) => {
   return {
     ...state,
+    initialData: permissions,
     modifiedData: permissions,
-    permissions,
-    // TO REMOVE
     routes,
     policies,
-    pluginName: Object.keys(permissions)[0],
   };
 };
 

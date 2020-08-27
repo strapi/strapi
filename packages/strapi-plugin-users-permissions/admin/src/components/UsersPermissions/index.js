@@ -23,6 +23,12 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
         permissions: state.modifiedData,
       };
     },
+    resetForm: () => {
+      dispatch({ type: 'ON_RESET' });
+    },
+    setFormAfterSubmit: () => {
+      dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
+    },
   }));
 
   const handleChange = useCallback(({ target: { name, value } }) => {

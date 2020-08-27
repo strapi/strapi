@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
-import { formatPolicies, getTrad } from '../../utils';
+import { cleanPermissions, formatPolicies, getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {
@@ -29,7 +29,7 @@ const usePlugins = (shouldFetchData = true) => {
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
-        permissions,
+        permissions: cleanPermissions(permissions),
         routes,
         policies: [
           {

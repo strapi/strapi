@@ -3,9 +3,8 @@ import produce from 'immer';
 import { set, get, take } from 'lodash';
 
 export const initialState = {
+  initialData: {},
   modifiedData: {},
-  permissions: {},
-  pluginName: '',
   routes: {},
   selectedAction: '',
   policies: [],
@@ -39,12 +38,20 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'ON_RESET': {
+        draftState.modifiedData = state.initialData;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.initialData = state.modifiedData;
+        break;
+      }
+
       case 'SELECT_ACTION': {
         const { actionToSelect } = action;
         draftState.selectedAction = actionToSelect === state.selectedAction ? '' : actionToSelect;
         break;
       }
-
       default:
         return draftState;
     }

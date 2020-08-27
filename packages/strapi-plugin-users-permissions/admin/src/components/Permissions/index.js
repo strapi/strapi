@@ -7,9 +7,9 @@ import init from './init';
 import { initialState, reducer } from './reducer';
 
 const Permissions = () => {
-  const { permissions } = useUsersPermissions();
+  const { modifiedData } = useUsersPermissions();
   const [{ collapses }, dispatch] = useReducer(reducer, initialState, state =>
-    init(state, permissions)
+    init(state, modifiedData)
   );
 
   const handleOpenPlugin = useCallback(index => {
@@ -32,7 +32,7 @@ const Permissions = () => {
               isWhite={index % 2 === 1}
               name={name}
               onOpenPlugin={() => handleOpenPlugin(index)}
-              permissions={permissions[name]}
+              permissions={modifiedData[name]}
             />
           );
         })}

@@ -34,7 +34,10 @@ const CreatePage = () => {
           id: getTrad('app.components.Button.reset'),
           defaultMessage: 'Reset',
         }),
-        onClick: handleReset,
+        onClick: () => {
+          handleReset();
+          permissionsRef.current.resetForm();
+        },
         color: 'cancel',
         type: 'button',
       },

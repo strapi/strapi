@@ -3,7 +3,6 @@ import produce from 'immer';
 
 export const initialState = {
   role: {},
-  permissions: {},
   isLoading: true,
 };
 
@@ -17,6 +16,11 @@ const reducer = (state, action) =>
       }
       case 'GET_DATA_ERROR': {
         draftState.isLoading = false;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.role.name = action.name;
+        draftState.role.description = action.description;
         break;
       }
       default:

@@ -64,13 +64,14 @@ module.exports = {
 
   async getPermissions(ctx) {
     try {
-      const { lang } = ctx.query;
-      const plugins = await strapi.plugins[
-        'users-permissions'
-      ].services.userspermissions.getPlugins(lang);
+      // @alexandrebodin I am removing this as it is not needed anymore
+      // const { lang } = ctx.query;
+      // const plugins = await strapi.plugins[
+      //   'users-permissions'
+      // ].services.userspermissions.getPlugins(lang);
       const permissions = await strapi.plugins[
         'users-permissions'
-      ].services.userspermissions.getActions(plugins);
+      ].services.userspermissions.getActions();
 
       ctx.send({ permissions });
     } catch (err) {

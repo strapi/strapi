@@ -8,7 +8,6 @@ import React from 'react';
 import { get, includes, map, tail, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-
 import { Header, Path, Verb, Wrapper } from './Components';
 
 function BoundRoute({ route }) {
