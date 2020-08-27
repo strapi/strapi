@@ -26,7 +26,7 @@ const Header = () => {
     initialData,
     isCreatingEntry,
     isSingleType,
-    sending,
+    status,
     layout,
     modifiedData,
     onPublish,
@@ -73,7 +73,7 @@ const Header = () => {
           label: formatMessage({
             id: `${pluginId}.containers.Edit.submit`,
           }),
-          isLoading: sending === 'submit',
+          isLoading: status === 'submit-pending',
           type: 'submit',
           style: {
             minWidth: 150,
@@ -91,7 +91,7 @@ const Header = () => {
           id: 'app.utils.publish',
         }),
         onClick: onPublish,
-        isLoading: sending === 'publish',
+        isLoading: status === 'publish-pending',
       });
     }
 
@@ -103,7 +103,7 @@ const Header = () => {
           id: 'app.utils.unpublish',
         }),
         onClick: () => setWarningUnpublish(true),
-        isLoading: sending === 'unpublish',
+        isLoading: status === 'unpublish-pending',
       });
     }
 
@@ -118,7 +118,7 @@ const Header = () => {
     canDelete,
     didChangeData,
     formatMessage,
-    sending,
+    status,
     initialData,
   ]);
 
