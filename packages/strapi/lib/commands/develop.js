@@ -1,4 +1,5 @@
 'use strict';
+/* eslint-disable node/no-unsupported-features/node-builtins -- inspect is experimental but useful in dev */
 
 // required first because it loads env files.
 const loadConfiguration = require('../core/app-configuration');
