@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { contentTypes: contentTypesUtils, sanitizeEntity } = require('strapi-utils');
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 /**
  * A set of functions called "actions" for `ContentManager`
@@ -83,17 +83,34 @@ module.exports = {
     return strapi.entityService.countSearch({ params: query }, { model });
   },
 
-  publish(params, model) {
-    return strapi.entityService.update(
+  async publish(params, model) {
+    const modelDef = strapi.getModel(model);
+
+    const publishedEntry = await strapi.entityService.update(
       { params, data: { [PUBLISHED_AT_ATTRIBUTE]: new Date().toISOString() } },
       { model }
     );
+
+    strapi.eventHub.emit('entry.publish', {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(publishedEntry, { model: modelDef }),
+    });
+
+    return publishedEntry;
   },
 
-  unpublish(params, model) {
-    return strapi.entityService.update(
+  async unpublish(params, model) {
+    const modelDef = strapi.getModel(model);
+
+    const unpublishedEntry = await strapi.entityService.update(
       { params, data: { [PUBLISHED_AT_ATTRIBUTE]: null } },
       { model }
     );
+    strapi.eventHub.emit('entry.unpublish', {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(unpublishedEntry, { model: modelDef }),
+    });
+
+    return unpublishedEntry;
   },
 };

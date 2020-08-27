@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { sanitizeEntity } = require('strapi-utils');
 const uploadFiles = require('./utils/upload-files');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
@@ -65,7 +66,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     const isDraft = contentTypesUtils.isDraft(data, modelDef);
 
-    const validData = await entityValidator.validateEntity(db.getModel(model), data, { isDraft });
+    const validData = await entityValidator.validateEntity(modelDef, data, { isDraft });
 
     let entry = await db.query(model).create(validData);
 
@@ -73,10 +74,9 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
-
     eventHub.emit('entry.create', {
-      model: db.getModel(model).modelName,
-      entry,
+      model: modelDef.modelName,
+      entry: sanitizeEntity(entry, { model: modelDef }),
     });
 
     return entry;
@@ -94,7 +94,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
 
-    const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data, {
+    const validData = await entityValidator.validateEntityUpdate(modelDef, data, {
       isDraft,
     });
 
@@ -107,7 +107,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     eventHub.emit('entry.update', {
       model: modelDef.modelName,
-      entry,
+      entry: sanitizeEntity(entry, { model: modelDef }),
     });
 
     return entry;
@@ -122,9 +122,10 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
   async delete({ params }, { model }) {
     const entry = await db.query(model).delete(params);
 
+    const modelDef = db.getModel(model);
     eventHub.emit('entry.delete', {
-      model: db.getModel(model).modelName,
-      entry,
+      model: modelDef.modelName,
+      entry: sanitizeEntity(entry, { model: modelDef }),
     });
 
     return entry;
