@@ -105,13 +105,20 @@ async function downloadGithubRepo(repoInfo, rootPath) {
 }
 
 // Merge the template's template.json into the Strapi project's package.json
-async function mergePackageJSON(rootPath, templatePath) {
+async function mergePackageJSON(rootPath, templatePath, repoInfo) {
   // Import the package.json and template.json templates
   const packageJSON = require(path.resolve(rootPath, 'package.json'));
   const templateJSON = require(path.resolve(templatePath, 'template.json'));
 
   // Use lodash to deeply merge them
   const mergedConfig = _.merge(packageJSON, templateJSON);
+
+  // Prefix Strapi UUID with starter info
+  const prefix = `STARTER:${repoInfo.username}/${repoInfo.name}:`;
+  mergedConfig.strapi = {
+    uuid: prefix + mergedConfig.strapi.uuid,
+  };
+
   // Save the merged config as the new package.json
   await fse.writeJSON(path.resolve(rootPath, 'package.json'), mergedConfig, {
     spaces: 2,
@@ -144,7 +151,7 @@ module.exports = async function mergeTemplate(templateUrl, rootPath) {
   await checkTemplateShape(templatePath);
 
   // Merge contents of the template in the project
-  await mergePackageJSON(rootPath, templatePath);
+  await mergePackageJSON(rootPath, templatePath, repoInfo);
   await mergeFilesAndDirectories(rootPath, templatePath);
 
   // Delete the downloaded template repo
