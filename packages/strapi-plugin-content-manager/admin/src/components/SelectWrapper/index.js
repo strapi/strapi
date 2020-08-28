@@ -208,11 +208,11 @@ function SelectWrapper({
     }
 
     if (!isCreatingEntry) {
-      return !isFieldAllowed && isFieldReadable;
+      return (!isFieldAllowed && isFieldReadable) || !editable;
     }
 
     return !editable;
-  });
+  }, [isMorph, isCreatingEntry, editable]);
 
   if (!isFieldAllowed && isCreatingEntry) {
     return <NotAllowedInput label={label} />;
