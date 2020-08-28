@@ -119,7 +119,7 @@ module.exports = {
     );
   },
 
-  async uploadFileAndPersist(fileData, { user }) {
+  async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.plugins.upload.config;
 
     const {
