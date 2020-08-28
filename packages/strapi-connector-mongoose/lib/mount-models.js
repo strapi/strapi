@@ -27,6 +27,9 @@ module.exports = ({ models, target }, ctx) => {
     definition.associations = [];
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.loadedModel = {};
+
+    const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(definition);
+
     // Set the default values to model settings.
     _.defaults(definition, {
       primaryKey: '_id',
@@ -90,10 +93,12 @@ module.exports = ({ models, target }, ctx) => {
     // handle scalar attrs
     scalarAttributes.forEach(name => {
       const attr = definition.attributes[name];
-
       definition.loadedModel[name] = {
         ...attr,
         ...utils(instance).convertType(name, attr),
+        // no require constraint to allow components in drafts
+        required:
+          definition.modelType === 'compo' || hasDraftAndPublish ? false : definition.required,
       };
     });
 

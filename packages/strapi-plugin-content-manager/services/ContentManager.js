@@ -85,7 +85,14 @@ module.exports = {
 
   publish(params, model) {
     return strapi.entityService.update(
-      { params, data: { published_at: new Date().toISOString() } },
+      { params, data: { [PUBLISHED_AT_ATTRIBUTE]: new Date().toISOString() } },
+      { model }
+    );
+  },
+
+  unpublish(params, model) {
+    return strapi.entityService.update(
+      { params, data: { [PUBLISHED_AT_ATTRIBUTE]: null } },
       { model }
     );
   },

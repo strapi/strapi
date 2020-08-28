@@ -339,13 +339,36 @@ module.exports = {
 
     await strapi.entityValidator.validateEntity(strapi.getModel(model), entity);
 
-    if (entity.published_at) {
+    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       return ctx.badRequest('Already published');
     }
 
     const publishedEntry = await contentManagerService.publish({ id }, model);
 
     ctx.body = pm.sanitize(publishedEntry, { action: ACTIONS.read });
+  },
+
+  async unpublish(ctx) {
+    const {
+      state: { userAbility },
+      params: { model, id },
+    } = ctx;
+
+    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const { entity, pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.publish,
+      model,
+      id
+    );
+
+    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
+      return ctx.badRequest('Already a draft');
+    }
+
+    const unpublishedEntry = await contentManagerService.unpublish({ id }, model);
+
+    ctx.body = pm.sanitize(unpublishedEntry, { action: ACTIONS.read });
   },
 
   async findRelationList(ctx) {

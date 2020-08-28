@@ -18,6 +18,7 @@ module.exports = ({ model, strapi }) => {
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
   );
+  const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(model);
 
   const excludedKeys = assocKeys.concat(componentKeys);
 
@@ -33,7 +34,7 @@ module.exports = ({ model, strapi }) => {
     return _.omit(values, excludedKeys);
   };
 
-  async function createComponents(entry, values) {
+  async function createComponents(entry, values, { isDraft }) {
     if (componentKeys.length === 0) return;
 
     for (let key of componentKeys) {
@@ -45,7 +46,7 @@ module.exports = ({ model, strapi }) => {
 
         const componentModel = strapi.components[component];
 
-        if (required === true && !_.has(values, key)) {
+        if (!isDraft && required === true && !_.has(values, key)) {
           const err = new Error(`Component ${key} is required`);
           err.status = 400;
           throw err;
@@ -56,7 +57,7 @@ module.exports = ({ model, strapi }) => {
         const componentValue = values[key];
 
         if (repeatable === true) {
-          validateRepeatableInput(componentValue, { key, ...attr });
+          validateRepeatableInput(componentValue, { key, ...attr }, { isDraft });
           const components = await Promise.all(
             componentValue.map(value => {
               return strapi.query(component).create(value);
@@ -71,7 +72,7 @@ module.exports = ({ model, strapi }) => {
           entry[key] = componentsArr;
           await entry.save();
         } else {
-          validateNonRepeatableInput(componentValue, { key, ...attr });
+          validateNonRepeatableInput(componentValue, { key, ...attr }, { isDraft });
           if (componentValue === null) continue;
 
           const componentEntry = await strapi.query(component).create(componentValue);
@@ -88,7 +89,7 @@ module.exports = ({ model, strapi }) => {
       if (type === 'dynamiczone') {
         const { required = false } = attr;
 
-        if (required === true && !_.has(values, key)) {
+        if (!isDraft && required === true && !_.has(values, key)) {
           const err = new Error(`Dynamiczone ${key} is required`);
           err.status = 400;
           throw err;
@@ -98,7 +99,7 @@ module.exports = ({ model, strapi }) => {
 
         const dynamiczoneValues = values[key];
 
-        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
+        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr }, { isDraft });
 
         const dynamiczones = await Promise.all(
           dynamiczoneValues.map(value => {
@@ -130,7 +131,7 @@ module.exports = ({ model, strapi }) => {
     }
   }
 
-  async function updateComponents(entry, values) {
+  async function updateComponents(entry, values, { isDraft }) {
     if (componentKeys.length === 0) return;
 
     const updateOrCreateComponent = async ({ componentUID, value }) => {
@@ -161,7 +162,7 @@ module.exports = ({ model, strapi }) => {
         const componentValue = values[key];
 
         if (repeatable === true) {
-          validateRepeatableInput(componentValue, { key, ...attr });
+          validateRepeatableInput(componentValue, { key, ...attr }, { isDraft });
 
           await deleteOldComponents(entry, componentValue, {
             key,
@@ -179,7 +180,7 @@ module.exports = ({ model, strapi }) => {
           entry[key] = componentsArr;
           await entry.save();
         } else {
-          validateNonRepeatableInput(componentValue, { key, ...attr });
+          validateNonRepeatableInput(componentValue, { key, ...attr }, { isDraft });
 
           await deleteOldComponents(entry, componentValue, {
             key,
@@ -206,7 +207,7 @@ module.exports = ({ model, strapi }) => {
       if (type === 'dynamiczone') {
         const dynamiczoneValues = values[key];
 
-        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
+        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr }, { isDraft });
 
         await deleteDynamicZoneOldComponents(entry, dynamiczoneValues, {
           key,
@@ -416,7 +417,7 @@ module.exports = ({ model, strapi }) => {
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
 
-    if (contentTypesUtils.hasDraftAndPublish) {
+    if (hasDraftAndPublish) {
       data[PUBLISHED_AT_ATTRIBUTE] = _.has(values, PUBLISHED_AT_ATTRIBUTE)
         ? values[PUBLISHED_AT_ATTRIBUTE]
         : new Date().toISOString();
@@ -425,7 +426,8 @@ module.exports = ({ model, strapi }) => {
     // Create entry with no-relational data.
     const entry = await model.create(data);
 
-    await createComponents(entry, values);
+    const isDraft = contentTypesUtils.isDraft(entry, model);
+    await createComponents(entry, values, { isDraft });
 
     // Create relational data and return the entry.
     return model.updateRelations({
@@ -447,8 +449,13 @@ module.exports = ({ model, strapi }) => {
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
 
+    const publishedAt = _.has(values, PUBLISHED_AT_ATTRIBUTE)
+      ? values[PUBLISHED_AT_ATTRIBUTE]
+      : entry[PUBLISHED_AT_ATTRIBUTE];
+    const isDraft = contentTypesUtils.isDraft({ publishedAt }, model);
+
     // update components first in case it fails don't update the entity
-    await updateComponents(entry, values);
+    await updateComponents(entry, values, { isDraft });
     // Update entry with no-relational data.
     await entry.updateOne(data);
 
@@ -522,7 +529,7 @@ module.exports = ({ model, strapi }) => {
   };
 };
 
-function validateRepeatableInput(value, { key, min, max, required }) {
+function validateRepeatableInput(value, { key, min, max, required }, { isDraft }) {
   if (!Array.isArray(value)) {
     const err = new Error(`Component ${key} is repetable. Expected an array`);
     err.status = 400;
@@ -539,7 +546,12 @@ function validateRepeatableInput(value, { key, min, max, required }) {
     }
   });
 
-  if ((required === true || (required !== true && value.length > 0)) && min && value.length < min) {
+  if (
+    !isDraft &&
+    (required === true || (required !== true && value.length > 0)) &&
+    min &&
+    value.length < min
+  ) {
     const err = new Error(`Component ${key} must contain at least ${min} items`);
     err.status = 400;
     throw err;
@@ -552,21 +564,21 @@ function validateRepeatableInput(value, { key, min, max, required }) {
   }
 }
 
-function validateNonRepeatableInput(value, { key, required }) {
+function validateNonRepeatableInput(value, { key, required }, { isDraft }) {
   if (typeof value !== 'object' || Array.isArray(value)) {
     const err = new Error(`Component ${key} should be an object`);
     err.status = 400;
     throw err;
   }
 
-  if (required === true && value === null) {
+  if (!isDraft && required === true && value === null) {
     const err = new Error(`Component ${key} is required`);
     err.status = 400;
     throw err;
   }
 }
 
-function validateDynamiczoneInput(value, { key, min, max, components, required }) {
+function validateDynamiczoneInput(value, { key, min, max, components, required }, { isDraft }) {
   if (!Array.isArray(value)) {
     const err = new Error(`Dynamiczone ${key} is invalid. Expected an array`);
     err.status = 400;
@@ -597,7 +609,12 @@ function validateDynamiczoneInput(value, { key, min, max, components, required }
     }
   });
 
-  if ((required === true || (required !== true && value.length > 0)) && min && value.length < min) {
+  if (
+    !isDraft &&
+    (required === true || (required !== true && value.length > 0)) &&
+    min &&
+    value.length < min
+  ) {
     const err = new Error(`Dynamiczone ${key} must contain at least ${min} items`);
     err.status = 400;
     throw err;
