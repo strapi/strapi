@@ -1,6 +1,6 @@
 import init from '../init';
 
-describe('ADMIN | HOOKS | USEPERMISSIONS | init', () => {
+describe('USERS PERMISSIONS | COMPONENTS | UserPermissions | init', () => {
   it('should return the initial state and set permissions, routes and policies', () => {
     const initialState = {
       initialData: {},

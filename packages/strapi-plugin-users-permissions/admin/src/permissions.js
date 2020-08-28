@@ -3,7 +3,6 @@ const pluginPermissions = {
   accessRoles: [
     { action: 'plugins::users-permissions.roles.create', subject: null },
     { action: 'plugins::users-permissions.roles.read', subject: null },
-    { action: 'plugins::users-permissions.roles.update', subject: null },
   ],
   createRole: [{ action: 'plugins::users-permissions.roles.create', subject: null }],
   deleteRole: [{ action: 'plugins::users-permissions.roles.delete', subject: null }],
@@ -21,17 +20,13 @@ const pluginPermissions = {
   // Emails
   readEmailTemplates: [
     { action: 'plugins::users-permissions.email-templates.read', subject: null },
-    { action: 'plugins::users-permissions.email-templates.update', subject: null },
   ],
   updateEmailTemplates: [
     { action: 'plugins::users-permissions.email-templates.update', subject: null },
   ],
 
   // Providers
-  readProviders: [
-    { action: 'plugins::users-permissions.providers.read', subject: null },
-    { action: 'plugins::users-permissions.providers.update', subject: null },
-  ],
+  readProviders: [{ action: 'plugins::users-permissions.providers.read', subject: null }],
   updateProviders: [{ action: 'plugins::users-permissions.providers.update', subject: null }],
 };
 

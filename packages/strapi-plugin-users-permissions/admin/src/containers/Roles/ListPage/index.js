@@ -16,7 +16,7 @@ const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
   const { push } = useHistory();
-  const { roles, getData, isLoading } = useRolesList();
+
   const [modalToDelete, setModalDelete] = useState();
   const [shouldRefetchData, setShouldRefetchData] = useState(false);
   const [showModalConfirmButtonLoading, setModalButtonLoading] = useState(false);
@@ -26,15 +26,21 @@ const RoleListPage = () => {
       update: permissions.updateRole,
       create: permissions.createRole,
       delete: permissions.deleteRole,
+      read: permissions.readRoles,
     };
   }, []);
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate, canUpdate, canDelete },
+    allowedActions: { canCreate, canUpdate, canDelete, canRead },
   } = useUserPermissions(updatePermissions);
+  const shouldFetchData = !isLoadingForPermissions && canRead;
+
+  const { roles, getData, isLoading } = useRolesList(shouldFetchData);
 
   const handleGoTo = id => {
-    push(`/settings/${pluginId}/roles/${id}`);
+    if (canUpdate) {
+      push(`/settings/${pluginId}/roles/${id}`);
+    }
   };
 
   const handleDelete = () => {
@@ -117,48 +123,50 @@ const RoleListPage = () => {
         isLoading={isLoading || isLoadingForPermissions}
       />
       <BaselineAlignment />
-      <RoleListWrapper>
-        <List
-          title={formatMessage(
-            {
-              id: `Settings.roles.list.title${roles.length > 1 ? '.plural' : '.singular'}`,
-            },
-            { number: roles.length }
-          )}
-          items={roles}
-          isLoading={isLoading || isLoadingForPermissions}
-          customRowComponent={role => (
-            <RoleRow
-              onClick={() => handleGoTo(role.id)}
-              links={[
-                {
-                  icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
-                  onClick: () => {
-                    handleGoTo(role.id);
+      {canRead && (
+        <RoleListWrapper>
+          <List
+            title={formatMessage(
+              {
+                id: `Settings.roles.list.title${roles.length > 1 ? '.plural' : '.singular'}`,
+              },
+              { number: roles.length }
+            )}
+            items={roles}
+            isLoading={isLoading || isLoadingForPermissions}
+            customRowComponent={role => (
+              <RoleRow
+                onClick={() => handleGoTo(role.id)}
+                links={[
+                  {
+                    icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
+                    onClick: () => {
+                      handleGoTo(role.id);
+                    },
                   },
-                },
-                {
-                  icon: checkCanDeleteRole(role) ? <FontAwesomeIcon icon="trash-alt" /> : null,
-                  onClick: e => {
-                    e.preventDefault();
-                    setModalDelete(role.id);
-                    e.stopPropagation();
+                  {
+                    icon: checkCanDeleteRole(role) ? <FontAwesomeIcon icon="trash-alt" /> : null,
+                    onClick: e => {
+                      e.preventDefault();
+                      setModalDelete(role.id);
+                      e.stopPropagation();
+                    },
                   },
-                },
-              ]}
-              role={role}
-            />
-          )}
-        />
-        {!roles && !isLoading && !isLoadingForPermissions && <EmptyRole />}
-        <PopUpWarning
-          isOpen={Boolean(modalToDelete)}
-          onConfirm={handleDelete}
-          onClosed={handleClosedModalDelete}
-          toggleModal={() => setModalDelete(null)}
-          isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
-      </RoleListWrapper>
+                ]}
+                role={role}
+              />
+            )}
+          />
+          {!roles && !isLoading && !isLoadingForPermissions && <EmptyRole />}
+          <PopUpWarning
+            isOpen={Boolean(modalToDelete)}
+            onConfirm={handleDelete}
+            onClosed={handleClosedModalDelete}
+            toggleModal={() => setModalDelete(null)}
+            isConfirmButtonLoading={showModalConfirmButtonLoading}
+          />
+        </RoleListWrapper>
+      )}
     </>
   );
 };

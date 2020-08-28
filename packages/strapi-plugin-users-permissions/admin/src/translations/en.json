@@ -44,6 +44,7 @@
   "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
   "PopUpForm.Providers.enabled.description": "If disabled, users won't be able to use this provider.",
   "PopUpForm.Providers.enabled.label": "Enable",
+  "PopUpForm.header.edit.providers": "Edit Provider",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",

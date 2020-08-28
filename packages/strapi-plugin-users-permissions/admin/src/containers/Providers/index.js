@@ -47,6 +47,8 @@ const ProvidersPage = () => {
     modifiedData,
   } = useForm('providers', updatePermissions);
 
+  console.log({ canUpdate });
+
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
     () => providers.filter(provider => provider.enabled).length,
@@ -93,10 +95,12 @@ const ProvidersPage = () => {
 
   const handleClickEdit = useCallback(
     provider => {
-      setProviderToEditName(provider.name);
-      handleToggle();
+      if (canUpdate) {
+        setProviderToEditName(provider.name);
+        handleToggle();
+      }
     },
-    [handleToggle]
+    [canUpdate, handleToggle]
   );
 
   const handleClosed = useCallback(() => {

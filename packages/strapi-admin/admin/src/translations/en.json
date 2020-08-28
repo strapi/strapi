@@ -252,6 +252,7 @@
   "app.utils.delete": "Delete",
   "app.utils.filters": "Filters",
   "app.utils.placeholder.defaultMessage": " ",
+  "app.utils.select-all": "Select all",
   "component.Input.error.validation.integer": "The value must be an integer",
   "components.AutoReloadBlocker.description": "Run Strapi with one of the following commands:",
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",

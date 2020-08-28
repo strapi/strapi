@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useIntl } from 'react-intl';
 import CheckboxWrapper from '../CheckboxWrapper';
 import BaselineAlignment from '../BaselineAlignment';
 import SubCategoryWrapper from './SubCategoryWrapper';
@@ -18,6 +19,7 @@ const Border = styled.div`
 `;
 
 const SubCategory = ({ subCategory }) => {
+  const { formatMessage } = useIntl();
   const {
     onChange,
     onChangeSelectAll,
@@ -74,7 +76,7 @@ const SubCategory = ({ subCategory }) => {
           <BaselineAlignment />
           <Checkbox
             name={subCategory.name}
-            message="Select all"
+            message={formatMessage({ id: 'app.utils.select-all' })}
             onChange={handleChangeSelectAll}
             someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
