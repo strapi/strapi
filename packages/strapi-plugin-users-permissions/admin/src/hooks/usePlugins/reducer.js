@@ -15,6 +15,7 @@ const reducer = (state, action) =>
         draftState.isLoading = true;
         draftState.permissions = {};
         draftState.routes = {};
+        draftState.policies = [];
         break;
       }
       case 'GET_DATA_SUCCEEDED': {

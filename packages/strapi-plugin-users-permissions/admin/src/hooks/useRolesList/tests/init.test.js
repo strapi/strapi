@@ -1,6 +1,6 @@
 import init from '../init';
 
-describe('ADMIN | HOOKS | useRolesList | init', () => {
+describe('USERS PERMISSIONS | HOOKS | useRolesList | init', () => {
   it('should return the initial state and set the isLoading key to true', () => {
     const initialState = {
       roles: [],

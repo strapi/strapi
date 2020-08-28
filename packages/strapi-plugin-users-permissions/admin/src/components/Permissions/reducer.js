@@ -1,7 +1,7 @@
 import produce from 'immer';
 
 const initialState = {
-  collapses: {},
+  collapses: [],
 };
 
 const reducer = (state, action) =>

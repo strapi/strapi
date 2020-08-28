@@ -1,6 +1,6 @@
 import formatPolicies from '../formatPolicies';
 
-describe('formatPolicies', () => {
+describe('USERS PERMISSIONS | utils | formatPolicies', () => {
   it('should format the policies correclty', () => {
     const policies = ['custompolicies', 'ratelimit', 'isauthenticated'];
 

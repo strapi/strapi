@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | HOOKS | useFetchRole | reducer', () => {
+describe('USERS PERMISSIONS | HOOKS | useFetchRole | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -55,6 +55,36 @@ describe('ADMIN | HOOKS | useFetchRole | reducer', () => {
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_SUBMIT_SUCCEEDED', () => {
+    it("should set the role's name and description correctly", () => {
+      const state = {
+        role: {
+          id: 1,
+          name: 'Authenticated',
+          description: 'This is the Authenticated role',
+          permissions: {},
+        },
+      };
+
+      const action = {
+        type: 'ON_SUBMIT_SUCCEEDED',
+        name: 'Public',
+        description: 'test',
+      };
+
+      const expected = {
+        role: {
+          id: 1,
+          name: 'Public',
+          description: 'test',
+          permissions: {},
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 });

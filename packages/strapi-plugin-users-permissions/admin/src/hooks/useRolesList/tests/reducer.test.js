@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('ADMIN | HOOKS | USEROLESLIST | reducer', () => {
+describe('USERS PERMISSIONS | HOOKS | USEROLESLIST | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -8,6 +8,26 @@ describe('ADMIN | HOOKS | USEROLESLIST | reducer', () => {
       };
 
       expect(reducer(state, {})).toEqual(state);
+    });
+  });
+
+  describe('GET_DATA', () => {
+    it('should set the isLoading key to true', () => {
+      const state = {
+        roles: ['tests'],
+        isLoading: false,
+      };
+
+      const action = {
+        type: 'GET_DATA',
+      };
+
+      const expected = {
+        roles: [],
+        isLoading: true,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 

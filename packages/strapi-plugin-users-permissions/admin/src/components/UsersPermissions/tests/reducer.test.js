@@ -1,55 +1,141 @@
+import produce from 'immer';
 import reducer from '../reducer';
 
-describe('ADMIN | COMPONENTS | USERSPERMISSIONS | reducer', () => {
+describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
+  let state;
+
+  beforeEach(() => {
+    state = {
+      initialData: {},
+      modifiedData: {},
+      routes: {},
+      selectedAction: '',
+      policies: [],
+    };
+  });
+
   describe('DEFAULT_ACTION', () => {
-    it('should return the initialState', () => {
-      const state = {
-        test: true,
+    it('should return the state', () => {
+      const expected = state;
+
+      expect(reducer(state, {})).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE', () => {
+    it('should change the modified data correctly if the input is not a checkbox', () => {
+      state.modifiedData = {
+        find: { enabled: true, policy: '' },
+        findOne: { enabled: false, policy: '' },
       };
 
-      expect(reducer(state, {})).toEqual(state);
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['find', 'policy'],
+        value: 'custom',
+      };
+
+      const expected = produce(state, draft => {
+        draft.modifiedData.find.policy = 'custom';
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should change the modified data correctly and the selectedAction if the input is a checkbox', () => {
+      state.modifiedData = {
+        find: { enabled: true, policy: '' },
+        findOne: { enabled: false, policy: '' },
+      };
+
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['findOne', 'enabled'],
+        value: true,
+      };
+
+      const expected = produce(state, draft => {
+        draft.modifiedData.findOne.enabled = true;
+        draft.selectedAction = 'findOne';
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_SELECT_ALL', () => {
+    it('should set all the enabled keys to true', () => {
+      state.modifiedData = {
+        app: {
+          find: { enabled: true, policy: '' },
+          findOne: { enabled: false, policy: '' },
+          delete: { enabled: false, policy: '' },
+        },
+        app2: {
+          find: { enabled: false, policy: '' },
+          findOne: { enabled: false, policy: '' },
+        },
+      };
+
+      const action = {
+        type: 'ON_CHANGE_SELECT_ALL',
+        keys: ['app'],
+        value: true,
+      };
+
+      const expected = produce(state, draft => {
+        draft.modifiedData.app = {
+          find: { enabled: true, policy: '' },
+          findOne: { enabled: true, policy: '' },
+          delete: { enabled: true, policy: '' },
+        };
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_RESET', () => {
+    it('should set the modifiedData with the initialData', () => {
+      state.initialData = { ok: true };
+      state.modifiedData = { ok: false };
+
+      const action = { type: 'ON_RESET' };
+
+      const expected = produce(state, draft => {
+        draft.modifiedData = { ok: true };
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_SUBMIT_SUCCEEDED', () => {
+    it('should set the initialData with the modifiedData', () => {
+      state.initialData = { ok: true };
+      state.modifiedData = { ok: false };
+
+      const action = { type: 'ON_SUBMIT_SUCCEEDED' };
+
+      const expected = produce(state, draft => {
+        draft.initialData = { ok: false };
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
   describe('SELECT_ACTION', () => {
-    it('should set the selected action correctly if this one doesnt exist', () => {
-      const action = {
-        type: 'SELECT_ACTION',
-        actionToSelect: 'application.controllers.address.delete',
-      };
-      const initialState = {
-        modifiedData: {},
-        routes: {},
-        selectedAction: '',
-      };
+    it('should set the selectedAction correctly', () => {
+      state.selectedAction = 'find';
 
-      const expected = {
-        modifiedData: {},
-        routes: {},
-        selectedAction: 'application.controllers.address.delete',
-      };
+      const action = { type: 'SELECT_ACTION', actionToSelect: 'findOne' };
 
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
+      const expected = produce(state, draft => {
+        draft.selectedAction = 'findOne';
+      });
 
-    it('should empty the selected action if the action to select already exist', () => {
-      const action = {
-        type: 'SELECT_ACTION',
-        actionToSelect: 'application.controllers.address.delete',
-      };
-      const initialState = {
-        modifiedData: {},
-        routes: {},
-        selectedAction: 'application.controllers.address.delete',
-      };
-
-      const expected = {
-        modifiedData: {},
-        routes: {},
-        selectedAction: '',
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 });
