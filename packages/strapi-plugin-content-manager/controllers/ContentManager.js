@@ -247,14 +247,16 @@ module.exports = {
       id
     );
 
+    const modelDef = strapi.getModel(model);
+
     const sanitize = e => pm.pickPermittedFieldsOf(e, { subject: pm.toSubject(entity) });
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
+    const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
 
-    const writableData = _.omit(
-      data,
-      contentTypesUtils.getNonWritableAttributes(strapi.db.getModel(model))
-    );
+    if (!contentTypesUtils.isDraft(entity, modelDef)) {
+      await strapi.entityValidator.validateEntity(modelDef, writableData);
+    }
 
     try {
       const result = await contentManagerService.edit(
