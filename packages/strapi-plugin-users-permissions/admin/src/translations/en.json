@@ -24,6 +24,7 @@
   "List.title.providers.disabled.singular": "{number} is disabled",
   "List.title.providers.enabled.plural": "{number} providers are enabled and",
   "List.title.providers.enabled.singular": "{number} provider is enabled and",
+  "Settings.section-label": "Users & Permissions plugin",
   "Plugin.permissions.plugins.description": "Define all allowed actions for the {name} plugin.",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
   "Plugins.header.title": "Permissions",
@@ -44,7 +45,6 @@
   "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
   "PopUpForm.Providers.enabled.description": "If disabled, users won't be able to use this provider.",
   "PopUpForm.Providers.enabled.label": "Enable",
-  "PopUpForm.header.edit.providers": "Edit Provider",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
@@ -52,6 +52,9 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "Edit Email Templates",
+  "PopUpForm.header.edit.providers": "Edit Provider",
+  "Settings.roles.deleted": "Role deleted",
+  "Settings.roles.edited": "Role edited",
   "notification.success.submit": "Settings have been updated",
   "plugin.description.long": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
   "plugin.description.short": "Protect your API with a full authentication process based on JWT",
@@ -59,7 +62,5 @@
   "popUpWarning.button.cancel": "Cancel",
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?",
-  "Settings.roles.deleted": "Role deleted",
-  "Settings.roles.edited": "Role edited"
+  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?"
 }

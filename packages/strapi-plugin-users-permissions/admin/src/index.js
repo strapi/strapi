@@ -42,7 +42,7 @@ export default strapi => {
     settings: {
       menuSection: {
         id: pluginId,
-        title: getTrad('plugin.name'),
+        title: getTrad('Settings.section-label'),
         links: [
           {
             title: {
