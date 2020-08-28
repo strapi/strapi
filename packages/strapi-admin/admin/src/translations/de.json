@@ -65,7 +65,6 @@
   "Settings.PageTitle": "Einstellungen - {name}",
   "Settings.error": "Fehler",
   "Settings.global": "Globale Einstellungen",
-  "Settings.permissions": "Berechtigungen",
   "Settings.permissions.category": "Berechtigungseinstellungen für die {category}",
   "Settings.permissions.conditions.anytime": "Jederzeit",
   "Settings.permissions.conditions.apply": "Anwenden",

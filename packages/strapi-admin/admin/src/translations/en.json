@@ -69,7 +69,7 @@
   "Settings.PageTitle": "Settings - {name}",
   "Settings.error": "Error",
   "Settings.global": "Global Settings",
-  "Settings.permissions": "Permissions",
+  "Settings.permissions": "Administration panel",
   "Settings.permissions.category": "Permissions settings for the {category}",
   "Settings.permissions.conditions.anytime": "Anytime",
   "Settings.permissions.conditions.apply": "Apply",
