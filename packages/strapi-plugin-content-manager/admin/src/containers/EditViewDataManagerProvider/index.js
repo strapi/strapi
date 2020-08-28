@@ -252,7 +252,7 @@ const EditViewDataManagerProvider = ({
   }, [id, slug, isCreatingEntry, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
-    emitEvent('addComponentToDynamicZone');
+    emitEvent('didAddComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
       keys: keys.split('.'),
