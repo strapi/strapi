@@ -11,8 +11,6 @@ import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import layout from '../../config/layout';
 import pluginId from './pluginId';
-import Initializer from './containers/Initializer';
-import lifecycles from './lifecycles';
 import trads from './translations';
 import RolesPage from './containers/Roles';
 import ProvidersPage from './containers/Providers';
@@ -31,11 +29,11 @@ export default strapi => {
     description: pluginDescription,
     icon,
     id: pluginId,
-    initializer: Initializer,
+    initializer: null,
+    isReady: true,
     injectedComponents: [],
     isRequired: pluginPkg.strapi.required || false,
     layout,
-    lifecycles,
     mainComponent: null,
     name,
     pluginLogo,
