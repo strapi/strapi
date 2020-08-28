@@ -3,7 +3,7 @@ import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   display: flex;
-  height: 2.4rem;
+  min-height: 2.4rem;
   border-radius: 3px;
   background-color: #e9eaeb;
   line-height: 2.4rem;
@@ -44,6 +44,9 @@ Path.propTypes = {
 };
 
 const Verb = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 0 1rem;
   border-radius: 3px;
   color: #ffffff;

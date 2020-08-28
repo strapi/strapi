@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { memo, useReducer, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import { Padded, Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
@@ -88,4 +88,4 @@ UsersPermissions.propTypes = {
   policies: PropTypes.array.isRequired,
 };
 
-export default UsersPermissions;
+export default memo(UsersPermissions);

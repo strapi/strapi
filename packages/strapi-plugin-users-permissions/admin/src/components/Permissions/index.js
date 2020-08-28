@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { memo, useCallback, useReducer } from 'react';
 import { Padded } from '@buffetjs/core';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import ListWrapper from './ListWrapper';
@@ -41,4 +41,4 @@ const Permissions = () => {
   );
 };
 
-export default Permissions;
+export default memo(Permissions);
