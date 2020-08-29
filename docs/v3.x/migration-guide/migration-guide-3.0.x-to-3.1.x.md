@@ -98,7 +98,13 @@ You're done!
 All currently logged in administrators will be disconnected from the app and will need to log in again.
 :::
 
-## 3. Migrate your custom admin panel plugins
+## 3. Update `username` constraint for administrators
+
+The `username` field is no longer required for administrator users.
+
+You will have to remove the `NOT NULL` constraint for this column in your database.
+
+## 4. Migrate your custom admin panel plugins
 
 If you don't have custom plugins, you can jump to the next section.
 
@@ -133,7 +139,7 @@ export default strapi => {
 };
 ```
 
-## 4. Rebuild the admin panel
+## 5. Rebuild the admin panel
 
 Rebuild the admin panel with one of the following commands:
 

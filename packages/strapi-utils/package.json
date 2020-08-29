@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.1.2",
+  "version": "3.1.4",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -19,7 +19,6 @@
     "lodash": "4.17.19",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
-    "shelljs": "^0.8.3",
     "yup": "0.28.1"
   },
   "author": {
@@ -46,5 +45,5 @@
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }
