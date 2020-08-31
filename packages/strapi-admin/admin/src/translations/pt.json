@@ -55,7 +55,6 @@
   "Settings.webhooks.disabled": "Inativo",
   "Settings.webhooks.enabled": "Ativo",
   "Settings.webhooks.events.create": "Ao criar",
-  "Settings.webhooks.events.edit": "Ao editar",
   "Settings.webhooks.form.events": "Eventos",
   "Settings.webhooks.form.headers": "Headers",
   "Settings.webhooks.form.name": "Nome",

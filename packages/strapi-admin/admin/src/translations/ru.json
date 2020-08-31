@@ -51,7 +51,6 @@
   "Settings.webhooks.disabled": "Выключен",
   "Settings.webhooks.enabled": "Включен",
   "Settings.webhooks.events.create": "Создание",
-  "Settings.webhooks.events.edit": "Редактирование",
   "Settings.webhooks.form.events": "События",
   "Settings.webhooks.form.headers": "Заголовки",
   "Settings.webhooks.form.name": "Название",

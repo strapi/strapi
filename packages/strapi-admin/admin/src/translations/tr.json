@@ -56,7 +56,6 @@
   "Settings.webhooks.disabled": "Pasif",
   "Settings.webhooks.enabled": "Aktif",
   "Settings.webhooks.events.create": "Oluştur",
-  "Settings.webhooks.events.edit": "Düzenle",
   "Settings.webhooks.form.events": "Etkinlikler",
   "Settings.webhooks.form.headers": "Başlıklar",
   "Settings.webhooks.form.name": "Ad",

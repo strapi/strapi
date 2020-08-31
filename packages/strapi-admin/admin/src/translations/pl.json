@@ -54,7 +54,6 @@
   "Settings.webhooks.disabled": "Wyłączony",
   "Settings.webhooks.enabled": "Włączony",
   "Settings.webhooks.events.create": "Utwórz",
-  "Settings.webhooks.events.edit": "Edytuj",
   "Settings.webhooks.form.events": "Zdarzenia",
   "Settings.webhooks.form.headers": "Nagłówki",
   "Settings.webhooks.form.name": "Nazwa",
