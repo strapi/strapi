@@ -14,12 +14,9 @@ const BaselineAlignment = styled.div`
 `;
 
 const InformationCard = () => {
-  const { initialData, layout } = useDataManager();
+  const { initialData, hasDraftAndPublish, layout } = useDataManager();
   const { formatMessage } = useIntl();
-  const hasDraftAndPublish = useMemo(
-    () => get(layout, ['schema', 'options', 'draftAndPublish'], false),
-    [layout]
-  );
+
   const updatedAtName = useMemo(
     () => get(layout, ['schema', 'options', 'timestamps'], ['created_at', 'updated_at'])[1],
     [layout]
