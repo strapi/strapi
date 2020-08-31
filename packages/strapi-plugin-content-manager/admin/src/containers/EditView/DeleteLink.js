@@ -4,9 +4,7 @@ import { get } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { Text } from '@buffetjs/core';
-
 import { PopUpWarning, request, useGlobalContext } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -16,14 +14,7 @@ import { getTrad } from '../../utils';
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
 const DeleteLink = () => {
-  const {
-    initialData,
-    isCreatingEntry,
-    isSingleType,
-    redirectToPreviousPage,
-    slug,
-    clearData,
-  } = useDataManager();
+  const { initialData, isCreatingEntry, isSingleType, slug, clearData } = useDataManager();
   const {
     allowedActions: { canDelete },
   } = useEditView();
@@ -70,20 +61,19 @@ const DeleteLink = () => {
     } finally {
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
-      push(`/plugins/${pluginId}/${contentType}/${slug}`);
     }
   };
 
   const handleClosed = () => {
+    setDidDeleteEntry(false);
+
     if (didDeleteEntry) {
       if (!isSingleType) {
-        redirectToPreviousPage();
+        push(`/plugins/${pluginId}/${contentType}/${slug}`);
       } else {
         clearData();
       }
     }
-
-    setDidDeleteEntry(false);
   };
 
   if (isCreatingEntry || !canDelete) {
