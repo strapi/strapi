@@ -3,7 +3,7 @@ import { intersectionWith } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
-
+import { useIntl } from 'react-intl';
 import { usePermissionsContext } from '../../../../../../hooks';
 import ConditionsModal from '../../../../ConditionsModal';
 import ConditionsButton from '../../../../ConditionsButton';
@@ -20,6 +20,7 @@ const Border = styled.div`
 `;
 
 const SubCategory = ({ subCategory }) => {
+  const { formatMessage } = useIntl();
   const [modal, setModal] = useState({ isOpen: false, isMounted: false });
   const {
     pluginsAndSettingsPermissions,
@@ -133,7 +134,7 @@ const SubCategory = ({ subCategory }) => {
             <BaselineAlignment />
             <Checkbox
               name={`select-all-${subCategory.subCategory}`}
-              message="Select all"
+              message={formatMessage({ id: 'app.utils.select-all' })}
               disabled
               onChange={handleSubCategoryPermissions}
               someChecked={hasSomeCategoryActions}
