@@ -313,7 +313,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: shouldNotRunValidations }
+      { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false }
     );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
@@ -395,7 +395,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: shouldNotRunValidations }
+      { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false }
     );
 
     try {
@@ -525,7 +525,7 @@ const EditViewDataManagerProvider = ({
         {
           components: get(allLayoutData, 'components', {}),
         },
-        { isCreatingEntry }
+        { isCreatingEntry, isDraft: false, isFromComponent: false }
       );
 
       try {
@@ -586,6 +586,7 @@ const EditViewDataManagerProvider = ({
       } catch (err) {
         console.error({ err });
         const errors = getYupInnerErrors(err);
+        console.log({ errors });
         setStatus('resolved');
 
         dispatch({
