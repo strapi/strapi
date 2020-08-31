@@ -24,7 +24,12 @@ const EditPage = () => {
   const permissionsRef = useRef();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
-  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
+  const {
+    role,
+    permissions: rolePermissions,
+    isLoading: isRoleLoading,
+    onSubmitSucceeded,
+  } = useFetchRole(id);
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -37,7 +42,10 @@ const EditPage = () => {
               defaultMessage: 'Reset',
             }),
             disabled: role.code === 'strapi-super-admin',
-            onClick: handleReset,
+            onClick: () => {
+              handleReset();
+              permissionsRef.current.resetForm();
+            },
             color: 'cancel',
             type: 'button',
           },
@@ -94,6 +102,9 @@ const EditPage = () => {
           emitEvent('didUpdateConditions');
         }
       }
+
+      permissionsRef.current.setFormAfterSubmit();
+      onSubmitSucceeded({ name: data.name, description: data.description });
 
       strapi.notification.success('notification.success.saved');
     } catch (err) {

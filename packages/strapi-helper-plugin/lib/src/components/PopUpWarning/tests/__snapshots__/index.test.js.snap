@@ -124,6 +124,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 
 .c4 {
   padding: 0;
+  text-align: center;
 }
 
 .c4 > div {
@@ -140,8 +141,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 }
 
 .c4 > div > p {
+  width: 100%;
   line-height: 1.8rem;
-  margin-bottom: 0;
+  margin: auto;
   min-height: 36px;
 }
 
@@ -360,6 +362,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 
 .c4 {
   padding: 0;
+  text-align: center;
 }
 
 .c4 > div {
@@ -376,8 +379,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 }
 
 .c4 > div > p {
+  width: 100%;
   line-height: 1.8rem;
-  margin-bottom: 0;
+  margin: auto;
   min-height: 36px;
 }
 

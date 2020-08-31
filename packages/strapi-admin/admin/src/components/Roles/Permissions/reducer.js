@@ -11,6 +11,7 @@ export const initialState = {
   permissionsLayout: {},
   contentTypesPermissions: {},
   pluginsAndSettingsPermissions: [],
+  initialData: {},
   isSuperAdmin: false,
 };
 
@@ -453,6 +454,16 @@ const reducer = (state, action) =>
           }
         });
 
+        break;
+      }
+      case 'ON_RESET': {
+        draftState.contentTypesPermissions = state.initialData.contentTypesPermissions;
+        draftState.pluginsAndSettingsPermissions = state.initialData.pluginsAndSettingsPermissions;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.initialData.contentTypesPermissions = state.contentTypesPermissions;
+        draftState.initialData.pluginsAndSettingsPermissions = state.pluginsAndSettingsPermissions;
         break;
       }
       default:
