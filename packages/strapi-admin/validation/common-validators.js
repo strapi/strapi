@@ -10,8 +10,7 @@ const {
 const email = yup
   .string()
   .email()
-  .lowercase()
-  .min(5);
+  .lowercase();
 
 const firstname = yup.string().min(1);
 
