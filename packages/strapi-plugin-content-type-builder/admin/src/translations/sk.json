@@ -60,7 +60,7 @@
   "form.attribute.component.option.repeatable.description": "Ideálne pre viacpoložkové (polia) inštancie ako napríklad meta tagy, ingrediencie, atď..",
   "form.attribute.component.option.reuse-existing": "Použiť existujúci komponent",
   "form.attribute.component.option.reuse-existing.description": "Používajte už vytvorené komponenty pre uchovanie konzistentných dát medzi Typmi obsahu.",
-  "form.attribute.component.option.single": "Jednoduchý komponent",
+  "form.attribute.component.option.single": "Jednorazový komponent",
   "form.attribute.component.option.single.description": "Vhodné pre zoskúpenie políčok, napr. celá adresa",
   "form.attribute.item.customColumnName": "Vlastné názvy stĺpcov",
   "form.attribute.item.customColumnName.description": "Umožňuje premenovať databázový stĺpček pre potreby API",
