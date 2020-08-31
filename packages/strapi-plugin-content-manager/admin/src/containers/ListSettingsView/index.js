@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, omit } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import {
   // utils
   request,
@@ -12,8 +12,7 @@ import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-import ItemTypes from '../../utils/ItemTypes';
-import getRequestUrl from '../../utils/getRequestUrl';
+import { ItemTypes, getRequestUrl, removePublishedAtFromMetas } from '../../utils';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
@@ -82,7 +81,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const listRemainingFields = useMemo(() => {
     const metadatas = get(modifiedData, ['metadatas'], {});
-    const filteredMetadatas = omit(metadatas, ['published_at']);
+    const filteredMetadatas = removePublishedAtFromMetas(metadatas);
 
     return Object.keys(filteredMetadatas)
       .filter(key => {

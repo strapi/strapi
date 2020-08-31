@@ -2,14 +2,13 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, sortBy, omit } from 'lodash';
-import { FormattedMessage } from 'react-intl';
+import { get, sortBy } from 'lodash';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
   PopUpWarning,
   generateFiltersFromSearch,
-  useGlobalContext,
   request,
   CheckPermissions,
   useUserPermissions,
@@ -17,7 +16,12 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import { generatePermissionsObject, getRequestUrl } from '../../utils';
+import {
+  generatePermissionsObject,
+  getRequestUrl,
+  getTrad,
+  removePublishedAtFromMetas,
+} from '../../utils';
 
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
@@ -83,7 +87,7 @@ function ListView({
   const query = useQuery();
   const { search } = useLocation();
   const isFirstRender = useRef(true);
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
@@ -209,11 +213,16 @@ function ListView({
     });
 
     if (hasDraftAndPublish) {
-      headers.push({ label: 'State', searchable: false, sortable: true, name: 'published_at' });
+      headers.push({
+        label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
+        searchable: false,
+        sortable: true,
+        name: 'published_at',
+      });
     }
 
     return headers;
-  }, [getMetaDatas, hasDraftAndPublish, listLayout]);
+  }, [formatMessage, getMetaDatas, hasDraftAndPublish, listLayout]);
 
   const getFirstSortableElement = useCallback(
     (name = '') => {
@@ -229,7 +238,7 @@ function ListView({
   );
 
   const allLabels = useMemo(() => {
-    const filteredMetadatas = omit(getMetaDatas(), ['published_at']);
+    const filteredMetadatas = removePublishedAtFromMetas(getMetaDatas());
 
     return sortBy(
       Object.keys(filteredMetadatas)
