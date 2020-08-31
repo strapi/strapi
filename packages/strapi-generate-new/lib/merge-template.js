@@ -30,7 +30,7 @@ const allowedTemplateTree = {
 };
 
 // Traverse template tree to make sure each file and folder is allowed
-async function checkTemplateShape(templatePath) {
+async function checkTemplateStructure(templatePath) {
   // Recursively check if each item in the template is allowed
   const checkPathContents = (pathToCheck, parents) => {
     const contents = fse.readdirSync(pathToCheck);
@@ -110,6 +110,11 @@ async function mergePackageJSON(rootPath, templatePath, repoInfo) {
   const packageJSON = require(path.resolve(rootPath, 'package.json'));
   const templateJSON = require(path.resolve(templatePath, 'template.json'));
 
+  // Make sure the template.json doesn't overwrite the UUID
+  if (templateJSON.strapi && templateJSON.strapi.uuid) {
+    throw Error('A template cannot overwrite the Strapi UUID');
+  }
+
   // Use lodash to deeply merge them
   const mergedConfig = _.merge(packageJSON, templateJSON);
 
@@ -148,7 +153,7 @@ module.exports = async function mergeTemplate(templateUrl, rootPath) {
   const templatePath = path.resolve(templateParentPath, fse.readdirSync(templateParentPath)[0]);
 
   // Make sure the downloaded template matches the required format
-  await checkTemplateShape(templatePath);
+  await checkTemplateStructure(templatePath);
 
   // Merge contents of the template in the project
   await mergePackageJSON(rootPath, templatePath, repoInfo);
