@@ -32,8 +32,9 @@ const Header = () => {
     onPublish,
     onUnpublish,
   } = useDataManager();
+  const onPublishRef = useRef(onPublish);
   const {
-    allowedActions: { canDelete, canUpdate, canCreate, canPublish },
+    allowedActions: { canUpdate, canCreate, canPublish },
   } = useEditView();
 
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
@@ -83,39 +84,30 @@ const Header = () => {
       ];
     }
 
-    if (hasDraftAndPublish && canPublish && !initialData.published_at) {
-      headerActions.unshift({
-        ...primaryButtonObject,
-        disabled: didChangeData,
-        label: formatMessage({
-          id: 'app.utils.publish',
-        }),
-        onClick: onPublish,
-        isLoading: status === 'publish-pending',
-      });
-    }
+    if (hasDraftAndPublish && canPublish) {
+      const isPublished = !isEmpty(initialData.published_at);
+      const isLoading = isPublished ? status === 'unpublish-pending' : status === 'publish-pending';
+      const labelID = isPublished ? 'app.utils.unpublish' : 'app.utils.publish';
+      const onClick = isPublished ? () => setWarningUnpublish(true) : onPublishRef.current;
 
-    if (hasDraftAndPublish && canPublish && initialData.published_at) {
-      headerActions.unshift({
+      const action = {
         ...primaryButtonObject,
-        disabled: didChangeData,
-        label: formatMessage({
-          id: 'app.utils.unpublish',
-        }),
-        onClick: () => setWarningUnpublish(true),
-        isLoading: status === 'unpublish-pending',
-      });
+        disabled: isCreatingEntry,
+        isLoading,
+        label: formatMessage({ id: labelID }),
+        onClick,
+      };
+
+      headerActions.unshift(action);
     }
 
     return headerActions;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isCreatingEntry,
     canCreate,
     canUpdate,
     hasDraftAndPublish,
     canPublish,
-    canDelete,
     didChangeData,
     formatMessage,
     status,

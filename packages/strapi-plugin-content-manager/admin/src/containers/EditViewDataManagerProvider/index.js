@@ -244,7 +244,7 @@ const EditViewDataManagerProvider = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isCreatingEntry, isLoadingForPermissions]);
+  }, [id, slug, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('didAddComponentToDynamicZone');
