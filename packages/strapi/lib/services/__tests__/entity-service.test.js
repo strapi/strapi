@@ -88,6 +88,7 @@ describe('Entity service', () => {
         const fakeModel = {
           kind: 'contentType',
           modelName: 'test-model',
+          options: {},
           attributes: {
             attrStringDefaultRequired: { type: 'string', default: 'default value', required: true },
             attrStringDefault: { type: 'string', default: 'default value' },
