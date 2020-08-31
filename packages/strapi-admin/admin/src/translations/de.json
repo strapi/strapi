@@ -112,7 +112,6 @@
   "Settings.webhooks.disabled": "Deaktiviert",
   "Settings.webhooks.enabled": "Aktiviert",
   "Settings.webhooks.events.create": "Erstellen",
-  "Settings.webhooks.events.edit": "Bearbeiten",
   "Settings.webhooks.form.events": "Events",
   "Settings.webhooks.form.headers": "Header",
   "Settings.webhooks.form.name": "Name",

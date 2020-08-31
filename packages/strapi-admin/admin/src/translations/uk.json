@@ -53,7 +53,6 @@
   "Settings.webhooks.disabled": "Вимкнений",
   "Settings.webhooks.enabled": "Увімкнений",
   "Settings.webhooks.events.create": "Створити",
-  "Settings.webhooks.events.edit": "Змінити",
   "Settings.webhooks.form.events": "Події",
   "Settings.webhooks.form.headers": "Заголовки",
   "Settings.webhooks.form.name": "Назва",

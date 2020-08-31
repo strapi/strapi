@@ -11,8 +11,8 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     'Settings.webhooks.events.create',
     'Settings.webhooks.events.update',
     'app.utils.delete',
-    'Settings.webhooks.events.publish',
-    'Settings.webhooks.events.unpublish',
+    'app.utils.publish',
+    'app.utils.unpublish',
   ];
 
   const events = {
