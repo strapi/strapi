@@ -28,11 +28,12 @@ const Header = () => {
     isSingleType,
     status,
     layout,
+    hasDraftAndPublish,
     modifiedData,
     onPublish,
     onUnpublish,
   } = useDataManager();
-  const onPublishRef = useRef(onPublish);
+
   const {
     allowedActions: { canUpdate, canCreate, canPublish },
   } = useEditView();
@@ -41,9 +42,7 @@ const Header = () => {
     layout,
   ]);
   const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
-  const hasDraftAndPublish = useMemo(() => get(layout, ['schema', 'options', 'draftAndPublish']), [
-    layout,
-  ]);
+
   const didChangeData = useMemo(() => {
     return !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));
   }, [initialData, isCreatingEntry, modifiedData]);
@@ -88,11 +87,11 @@ const Header = () => {
       const isPublished = !isEmpty(initialData.published_at);
       const isLoading = isPublished ? status === 'unpublish-pending' : status === 'publish-pending';
       const labelID = isPublished ? 'app.utils.unpublish' : 'app.utils.publish';
-      const onClick = isPublished ? () => setWarningUnpublish(true) : onPublishRef.current;
+      const onClick = isPublished ? () => setWarningUnpublish(true) : onPublish;
 
       const action = {
         ...primaryButtonObject,
-        disabled: isCreatingEntry,
+        disabled: isCreatingEntry || didChangeData,
         isLoading,
         label: formatMessage({ id: labelID }),
         onClick,
@@ -112,6 +111,7 @@ const Header = () => {
     formatMessage,
     status,
     initialData,
+    onPublish,
   ]);
 
   const headerProps = useMemo(() => {
