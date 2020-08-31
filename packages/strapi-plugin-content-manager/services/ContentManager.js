@@ -1,8 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes: contentTypesUtils, sanitizeEntity } = require('strapi-utils');
+const {
+  contentTypes: contentTypesUtils,
+  sanitizeEntity,
+  webhook: webhookUtils,
+} = require('strapi-utils');
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = webhookUtils.webhookEvents;
 /**
  * A set of functions called "actions" for `ContentManager`
  */
@@ -91,7 +96,7 @@ module.exports = {
       { model }
     );
 
-    strapi.eventHub.emit('entry.publish', {
+    strapi.eventHub.emit(ENTRY_PUBLISH, {
       model: modelDef.modelName,
       entry: sanitizeEntity(publishedEntry, { model: modelDef }),
     });
@@ -106,7 +111,7 @@ module.exports = {
       { params, data: { [PUBLISHED_AT_ATTRIBUTE]: null } },
       { model }
     );
-    strapi.eventHub.emit('entry.unpublish', {
+    strapi.eventHub.emit(ENTRY_UNPUBLISH, {
       model: modelDef.modelName,
       entry: sanitizeEntity(unpublishedEntry, { model: modelDef }),
     });

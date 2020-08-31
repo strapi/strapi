@@ -1,9 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('strapi-utils');
+const {
+  sanitizeEntity,
+  webhook: webhookUtils,
+  contentTypes: contentTypesUtils,
+} = require('strapi-utils');
 const uploadFiles = require('./utils/upload-files');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
 module.exports = ({ db, eventHub, entityValidator }) => ({
   /**
@@ -74,7 +78,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
-    eventHub.emit('entry.create', {
+    eventHub.emit(ENTRY_CREATE, {
       model: modelDef.modelName,
       entry: sanitizeEntity(entry, { model: modelDef }),
     });
@@ -105,7 +109,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
 
-    eventHub.emit('entry.update', {
+    eventHub.emit(ENTRY_UPDATE, {
       model: modelDef.modelName,
       entry: sanitizeEntity(entry, { model: modelDef }),
     });
@@ -123,7 +127,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     const entry = await db.query(model).delete(params);
 
     const modelDef = db.getModel(model);
-    eventHub.emit('entry.delete', {
+    eventHub.emit(ENTRY_DELETE, {
       model: modelDef.modelName,
       entry: sanitizeEntity(entry, { model: modelDef }),
     });

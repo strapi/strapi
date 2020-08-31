@@ -11,7 +11,13 @@ const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
-const { nameToSlug, contentTypes: contentTypesUtils, sanitizeEntity } = require('strapi-utils');
+const {
+  nameToSlug,
+  contentTypes: contentTypesUtils,
+  sanitizeEntity,
+  webhook: webhookUtils,
+} = require('strapi-utils');
+const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
 const { bytesToKbytes } = require('../utils/file');
 
@@ -264,7 +270,7 @@ module.exports = {
 
     const res = await strapi.query('file', 'upload').update(params, fileValues);
     const modelDef = strapi.getModel('file', 'upload');
-    strapi.eventHub.emit('media.update', { media: sanitizeEntity(res, { model: modelDef }) });
+    strapi.eventHub.emit(MEDIA_UPDATE, { media: sanitizeEntity(res, { model: modelDef }) });
     return res;
   },
 
@@ -278,7 +284,7 @@ module.exports = {
 
     const res = await strapi.query('file', 'upload').create(fileValues);
     const modelDef = strapi.getModel('file', 'upload');
-    strapi.eventHub.emit('media.create', { media: sanitizeEntity(res, { model: modelDef }) });
+    strapi.eventHub.emit(MEDIA_CREATE, { media: sanitizeEntity(res, { model: modelDef }) });
     return res;
   },
 
@@ -325,7 +331,7 @@ module.exports = {
     });
 
     const modelDef = strapi.getModel('file', 'upload');
-    strapi.eventHub.emit('media.delete', { media: sanitizeEntity(media, { model: modelDef }) });
+    strapi.eventHub.emit(MEDIA_DELETE, { media: sanitizeEntity(media, { model: modelDef }) });
 
     return strapi.query('file', 'upload').delete({ id: file.id });
   },

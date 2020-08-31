@@ -70,7 +70,7 @@ By default Strapi webhooks can be triggered by the following events:
 ## Payloads
 
 :::tip NOTE
-Private fields are not sent in the payload.
+Private fields and passwords are not sent in the payload.
 :::
 
 ### Headers
