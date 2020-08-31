@@ -224,6 +224,7 @@ const reducer = (state, action) => {
     case 'DELETE_SUCCEEDED':
       return state
         .update('isLoading', () => false)
+        .update('formErrors', () => fromJS({}))
         .update('initialData', () => state.get('modifiedData'));
     case 'TRIGGER_FORM_VALIDATION':
       return state.update('shouldCheckErrors', v => {

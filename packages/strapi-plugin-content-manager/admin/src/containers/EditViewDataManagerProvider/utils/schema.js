@@ -60,7 +60,7 @@ const getAttributes = data => get(data, ['schema', 'attributes'], {});
 const createYupSchema = (
   model,
   { components },
-  options = { isCreatingEntry: true, isDraft: true }
+  options = { isCreatingEntry: true, isDraft: true, isFromComponent: false }
 ) => {
   const attributes = getAttributes(model);
 
@@ -90,16 +90,20 @@ const createYupSchema = (
       }
 
       if (attribute.type === 'component') {
-        const componentFieldSchema = createYupSchema(components[attribute.component], {
-          components,
-        });
+        const componentFieldSchema = createYupSchema(
+          components[attribute.component],
+          {
+            components,
+          },
+          { ...options, isFromComponent: true }
+        );
 
         if (attribute.repeatable === true) {
           const { min, max, required } = attribute;
           let componentSchema = yup.lazy(value => {
             let baseSchema = yup.array().of(componentFieldSchema);
 
-            if (min) {
+            if (min && !options.isDraft) {
               if (required) {
                 baseSchema = baseSchema.min(min, errorsTrads.min);
               } else if (required !== true && isEmpty(value)) {
@@ -122,7 +126,7 @@ const createYupSchema = (
         }
         const componentSchema = yup.lazy(obj => {
           if (obj !== undefined) {
-            return attribute.required === true
+            return attribute.required === true && !options.isDraft
               ? componentFieldSchema.defined()
               : componentFieldSchema.nullable();
           }
@@ -138,14 +142,17 @@ const createYupSchema = (
       if (attribute.type === 'dynamiczone') {
         let dynamicZoneSchema = yup.array().of(
           yup.lazy(({ __component }) => {
-            return createYupSchema(components[__component], { components });
+            return createYupSchema(
+              components[__component],
+              { components },
+              { ...options, isFromComponent: true }
+            );
           })
         );
 
         const { max, min } = attribute;
 
-        if (attribute.required) {
-          // dynamicZoneSchema = dynamicZoneSchema.required();
+        if (attribute.required && !options.isDraft) {
           dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
             if (options.isCreatingEntry) {
               return value !== null || value !== undefined;
@@ -279,7 +286,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
               } else {
                 schema = schema.test('required', errorsTrads.required, value => {
                   // Field is not touched and the user is editing the entry
-                  if (value === undefined) {
+                  if (value === undefined && !options.isFromComponent) {
                     return true;
                   }
 

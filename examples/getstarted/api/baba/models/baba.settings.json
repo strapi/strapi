@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "babas",
+  "info": {
+    "name": "testvalidationspublish",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "namepasrep": {
+      "type": "string"
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "compos.comporeqf"
+      ],
+      "required": true,
+      "min": 1
+    },
+    "ref": {
+      "type": "component",
+      "repeatable": true,
+      "component": "compos.comporeqf",
+      "required": true,
+      "min": 1
+    },
+    "rzeaer": {
+      "type": "component",
+      "repeatable": false,
+      "component": "compos.comporeqf",
+      "required": true
+    }
+  }
+}
