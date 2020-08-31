@@ -444,6 +444,26 @@ const reducer = (state, action) =>
         draftState.contentTypesPermissions[subject].conditions = conditions;
         break;
       }
+      case 'ON_GLOBAL_PUBLISH_ACTION_SELECT': {
+        const contentTypesWithPublishAction = action.contentTypes
+          .filter(contentType => contentType.schema.options.draftAndPublish === true)
+          .map(contentType => contentType.uid);
+
+        contentTypesWithPublishAction.forEach(contentTypeUID => {
+          set(
+            draftState,
+            [
+              'contentTypesPermissions',
+              contentTypeUID,
+              'contentTypeActions',
+              'plugins::content-manager.explorer.publish',
+            ],
+            action.value
+          );
+        });
+
+        break;
+      }
       case 'ON_PLUGIN_SETTING_CONDITIONS_SELECT': {
         const { conditions } = action;
 

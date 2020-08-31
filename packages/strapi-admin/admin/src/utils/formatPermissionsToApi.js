@@ -8,7 +8,9 @@ const formatPermissionsToApi = permissions => {
     (acc, current) => {
       const formatPermission = permission =>
         existingActions.reduce((actionAcc, currentAction) => {
-          const { contentTypeActions, attributes, conditions } = permission[1];
+          const { contentTypeActions, conditions } = permission[1];
+          // @HichamELBSI  the code is breaking when selecting the global delete action when a model does not have any required field
+          const attributes = get(permission, [1, 'attributes'], {});
 
           if (contentTypeActions && contentTypeActions[currentAction]) {
             const hasAction =
@@ -16,7 +18,7 @@ const formatPermissionsToApi = permissions => {
                 item => item.actions && item.actions.includes(currentAction)
               ) !== -1;
             const hasContentTypeAction = contentTypeActions && contentTypeActions[currentAction];
-            const fields = Object.entries(permission[1].attributes)
+            const fields = Object.entries(attributes)
               .map(item => {
                 if (item[1].actions && item[1].actions.includes(currentAction)) {
                   return item[0];
