@@ -42,6 +42,31 @@ module.exports = ({ models, target }, ctx) => {
   // Parse every authenticated model.
   const updates = Object.keys(models).map(async model => {
     const definition = models[model];
+
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
+      if (contentTypesUtils.hasDraftAndPublish(definition)) {
+        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+          type: 'datetime',
+          configurable: false,
+          writable: false,
+        };
+      }
+
+      definition.attributes[CREATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+      };
+
+      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+      };
+    }
+
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.associations = [];
 
@@ -54,16 +79,15 @@ module.exports = ({ models, target }, ctx) => {
     definition.client = _.get(connection.settings, 'client');
     definition.primaryKey = 'id';
     definition.primaryKeyType = 'integer';
+    definition.allAttributes = { ...definition.attributes };
 
-    // Use default timestamp column names if value is `true`
-    if (_.get(definition, 'options.timestamps', false) === true) {
-      _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
-    }
-    // Use false for values other than `Boolean` or `Array`
-    if (
-      !_.isArray(_.get(definition, 'options.timestamps')) &&
-      !_.isBoolean(_.get(definition, 'options.timestamps'))
-    ) {
+    const createAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
+    const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updated_at');
+    if (_.get(definition, 'options.timestamps', false)) {
+      _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
+      definition.allAttributes[createAtCol] = { type: 'timestamp' };
+      definition.allAttributes[updatedAtCol] = { type: 'timestamp' };
+    } else {
       _.set(definition, 'options.timestamps', false);
     }
 
@@ -72,7 +96,7 @@ module.exports = ({ models, target }, ctx) => {
       {
         requireFetch: false,
         tableName: definition.collectionName,
-        hasTimestamps: _.get(definition, 'options.timestamps', false),
+        timestamps: definition.options.timestamps,
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
           if (definition.attributes[current].type && definition.attributes[current].default) {
@@ -119,30 +143,6 @@ module.exports = ({ models, target }, ctx) => {
       ORM,
       GLOBALS,
     });
-
-    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      if (contentTypesUtils.hasDraftAndPublish(definition)) {
-        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
-          type: 'datetime',
-          configurable: false,
-          writable: false,
-        };
-      }
-
-      definition.attributes[CREATED_BY_ATTRIBUTE] = {
-        model: 'user',
-        plugin: 'admin',
-        configurable: false,
-        writable: false,
-      };
-
-      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
-        model: 'user',
-        plugin: 'admin',
-        configurable: false,
-        writable: false,
-      };
-    }
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.

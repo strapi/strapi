@@ -463,7 +463,7 @@ describe('Content-Type API', () => {
       data.productsWithDP[0] = res.body;
     });
 
-    test('Publish an product, expect published_at to be defined', async () => {
+    test('Publish a product, expect published_at to be defined', async () => {
       const entry = data.productsWithDP[0];
 
       let { body } = await rq({
