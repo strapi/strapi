@@ -18,8 +18,14 @@ const toUID = (name, plugin) => {
 const formatContentTypeLabel = contentType => {
   const { kind } = contentType;
   const name = _.get(contentType, ['info', 'name'], contentType.modelName);
+  const pluralizeCollections = strapi.config.get(
+    "server.admin.contentManager.pluralizeCollectionLabels",
+    true
+  );
 
-  return kind === 'singleType' ? _.upperFirst(name) : _.upperFirst(pluralize(name));
+  return kind === "singleType" || !pluralizeCollections
+    ? _.upperFirst(name)
+    : _.upperFirst(pluralize(name));
 };
 
 const HIDDEN_CONTENT_TYPES = [
