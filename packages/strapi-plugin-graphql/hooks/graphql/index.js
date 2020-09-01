@@ -95,14 +95,18 @@ module.exports = strapi => {
         schemaDef.resolvers = resolvers;
       }
 
-      const apolloServerConfig = _.get(strapi.plugins.graphql, 'config.apolloServerConfig', {});
-
       // TODO: Remove these deprecated options in favor of `apolloServerConfig` in the next major version
-      const deprecatedOptions = {
+      const defaultApolloServerConfig = {
         tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
         engine: _.get(strapi.plugins.graphql, 'config.engine', false),
       };
+
+      const apolloServerConfig = _.get(
+        strapi.plugins.graphql,
+        'config.apolloServerConfig',
+        defaultApolloServerConfig
+      );
 
       const serverParams = {
         ...schemaDef,
@@ -125,7 +129,8 @@ module.exports = strapi => {
         playground: false,
         cors: false,
         bodyParserConfig: true,
-        ...deprecatedOptions,
+        // TODO: Remove these deprecated options in favor of `apolloServerConfig` in the next major version
+        ...defaultApolloServerConfig,
         ...apolloServerConfig,
       };
 
