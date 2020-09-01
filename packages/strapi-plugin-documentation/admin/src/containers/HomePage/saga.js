@@ -1,18 +1,9 @@
 import { cloneDeep, isArray } from 'lodash';
 import { all, takeLatest, put, fork, call, select } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
-import {
-  GET_DOC_INFOS,
-  ON_CONFIRM_DELETE_DOC,
-  ON_UPDATE_DOC,
-  ON_SUBMIT,
-} from './constants';
+import { GET_DOC_INFOS, ON_CONFIRM_DELETE_DOC, ON_UPDATE_DOC, ON_SUBMIT } from './constants';
 import { getDocInfosSucceeded, setFormErrors } from './actions';
-import {
-  makeSelectVersionToDelete,
-  makeSelectPrefix,
-  makeSelectForm,
-} from './selectors';
+import { makeSelectVersionToDelete, makeSelectPrefix, makeSelectForm } from './selectors';
 
 /* eslint-disable consistent-return */
 

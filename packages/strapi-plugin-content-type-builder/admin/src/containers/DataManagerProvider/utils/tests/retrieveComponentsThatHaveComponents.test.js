@@ -82,17 +82,13 @@ describe('retrieveComponentsThatHaveComponents', () => {
     });
 
     it('Should return false if none of its attributes is a component', () => {
-      expect(doesComponentHaveAComponentField(data['default.dish'])).toBe(
-        false
-      );
+      expect(doesComponentHaveAComponentField(data['default.dish'])).toBe(false);
     });
   });
 
   describe('retrievComponentsThatHaveComponents', () => {
     it('should return an array with all the components that have nested components', () => {
-      expect(retrieveComponentsThatHaveComponents(data)).toEqual([
-        'blog.slider',
-      ]);
+      expect(retrieveComponentsThatHaveComponents(data)).toEqual(['blog.slider']);
     });
   });
 });

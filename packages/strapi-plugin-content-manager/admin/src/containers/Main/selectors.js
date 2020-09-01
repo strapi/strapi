@@ -5,8 +5,7 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the main state domain
  */
-const selectMainDomain = () => state =>
-  state.get(`${pluginId}_main`) || initialState;
+const selectMainDomain = () => state => state.get(`${pluginId}_main`) || initialState;
 
 /**
  * Other specific selectors
@@ -17,12 +16,9 @@ const selectMainDomain = () => state =>
  */
 
 const makeSelectMain = () =>
-  createSelector(
-    selectMainDomain(),
-    substate => {
-      return substate.toJS();
-    }
-  );
+  createSelector(selectMainDomain(), substate => {
+    return substate.toJS();
+  });
 
 export default makeSelectMain;
 export { selectMainDomain };

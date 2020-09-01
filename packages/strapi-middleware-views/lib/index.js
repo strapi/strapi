@@ -43,12 +43,8 @@ module.exports = strapi => {
                 engine
               ));
             } catch (err) {
-              strapi.log.error(
-                '`' + engine + '` template engine not installed.'
-              );
-              strapi.log.error(
-                'Execute `$ npm install ' + engine + ' --save` to install it.'
-              );
+              strapi.log.error('`' + engine + '` template engine not installed.');
+              strapi.log.error('Execute `$ npm install ' + engine + ' --save` to install it.');
               process.exit(1);
             }
           }
@@ -58,10 +54,7 @@ module.exports = strapi => {
         });
 
         strapi.app.use(
-          koaViews(
-            path.resolve(strapi.config.appPath, strapi.config.paths.views),
-            opts
-          )
+          koaViews(path.resolve(strapi.config.appPath, strapi.config.paths.views), opts)
         );
       }
     },

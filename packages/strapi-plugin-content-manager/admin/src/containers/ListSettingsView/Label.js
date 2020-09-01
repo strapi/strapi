@@ -6,16 +6,7 @@ import ItemTypes from '../../utils/ItemTypes';
 import DraggedField from '../../components/DraggedField';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
 
-const Label = ({
-  count,
-  index,
-  label,
-  move,
-  name,
-  onClick,
-  onRemove,
-  selectedItem,
-}) => {
+const Label = ({ count, index, label, move, name, onClick, onRemove, selectedItem }) => {
   const ref = useRef(null);
   const { setIsDraggingSibling } = useLayoutDnd();
 

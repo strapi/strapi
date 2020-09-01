@@ -2,23 +2,9 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = [
-  'component',
-  'json',
-  'relation',
-  'media',
-  'richtext',
-  'dynamiczone',
-];
+const NON_SORTABLES = ['component', 'json', 'relation', 'media', 'richtext', 'dynamiczone'];
 
-const NON_LISTABLES = [
-  'component',
-  'json',
-  'relation',
-  'password',
-  'richtext',
-  'dynamiczone',
-];
+const NON_LISTABLES = ['component', 'json', 'relation', 'password', 'richtext', 'dynamiczone'];
 
 // hidden fields are fields that are configured to be hidden from list, and edit views
 const isHidden = (schema, name) => {
@@ -26,11 +12,7 @@ const isHidden = (schema, name) => {
     return false;
   }
 
-  const isHidden = _.get(
-    schema,
-    ['config', 'attributes', name, 'hidden'],
-    false
-  );
+  const isHidden = _.get(schema, ['config', 'attributes', name, 'hidden'], false);
   if (isHidden === true) {
     return true;
   }

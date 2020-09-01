@@ -25,9 +25,7 @@ function HeaderNavLink({ custom, isDisabled, id, isActive, onClick }) {
         onClick(id);
       }}
     >
-      <FormattedMessage
-        id={`${pluginId}.popUpForm.navContainer.${custom || id}`}
-      />
+      <FormattedMessage id={`${pluginId}.popUpForm.navContainer.${custom || id}`} />
     </Wrapper>
   );
 }

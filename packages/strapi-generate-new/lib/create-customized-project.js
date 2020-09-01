@@ -17,11 +17,9 @@ module.exports = async scope => {
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
 
   const configuration = await askDbInfosAndTest(scope).catch(error => {
-    return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(
-      () => {
-        throw error;
-      }
-    );
+    return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(() => {
+      throw error;
+    });
   });
 
   console.log();
@@ -49,11 +47,7 @@ async function askDbInfosAndTest(scope) {
       configuration,
     })
       .then(result => {
-        if (
-          result &&
-          result.shouldRetry === true &&
-          retries < MAX_RETRIES - 1
-        ) {
+        if (result && result.shouldRetry === true && retries < MAX_RETRIES - 1) {
           console.log('Retrying...');
           retries++;
           return loop();
@@ -117,15 +111,7 @@ async function testDatabaseConnection({ scope, configuration }) {
   return tester({ scope, connection: configuration.connection });
 }
 
-const SETTINGS_FIELDS = [
-  'database',
-  'host',
-  'srv',
-  'port',
-  'username',
-  'password',
-  'filename',
-];
+const SETTINGS_FIELDS = ['database', 'host', 'srv', 'port', 'username', 'password', 'filename'];
 
 const OPTIONS_FIELDS = ['authenticationDatabase'];
 
@@ -140,9 +126,7 @@ async function askDatabaseInfos(scope) {
     },
   ]);
 
-  const responses = await inquirer.prompt(
-    dbQuestions[client].map(q => q({ scope, client }))
-  );
+  const responses = await inquirer.prompt(dbQuestions[client].map(q => q({ scope, client })));
 
   const connection = merge({}, defaultConfigs[client] || {}, {
     settings: pick(responses, SETTINGS_FIELDS),

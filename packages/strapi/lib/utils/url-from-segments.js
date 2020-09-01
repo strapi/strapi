@@ -6,8 +6,7 @@
 module.exports = ({ hostname, port, ssl = false }) => {
   const protocol = ssl ? 'https' : 'http';
   const defaultPort = ssl ? 443 : 80;
-  const portString =
-    port === undefined || parseInt(port, 10) === defaultPort ? '' : `:${port}`;
+  const portString = port === undefined || parseInt(port, 10) === defaultPort ? '' : `:${port}`;
 
   return `${protocol}://${hostname}${portString}`;
 };

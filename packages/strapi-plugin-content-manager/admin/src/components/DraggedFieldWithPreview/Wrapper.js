@@ -4,8 +4,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   display: flex;
   position: relative;
-  min-height: ${({ withLongerHeight }) =>
-    withLongerHeight ? '102px' : '30px'};
+  min-height: ${({ withLongerHeight }) => (withLongerHeight ? '102px' : '30px')};
 
   .sub {
     width: 100%;

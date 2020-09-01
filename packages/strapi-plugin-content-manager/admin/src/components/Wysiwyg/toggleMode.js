@@ -18,11 +18,7 @@ const ToggleMode = props => {
     <ToggleModeWrapper>
       <FormattedMessage id={label}>
         {msg => (
-          <button
-            type="button"
-            className="toggleModeButton"
-            onClick={props.onClick}
-          >
+          <button type="button" className="toggleModeButton" onClick={props.onClick}>
             {msg}
           </button>
         )}

@@ -10,9 +10,7 @@ module.exports = async ({ dir }) => {
   const apiDir = join(dir, 'api');
 
   if (!existsSync(apiDir)) {
-    throw new Error(
-      `Missing api folder. Please create one in your app root directory`
-    );
+    throw new Error(`Missing api folder. Please create one in your app root directory`);
   }
 
   const apis = await loadFiles(apiDir, '*/!(config)/**/*.*(js|json)');

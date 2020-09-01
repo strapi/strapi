@@ -12,11 +12,7 @@ const getFilesToUpload = (data, prefix = null) => {
       acc[path] = filterFiles(currentData);
     }
 
-    if (
-      isObject(currentData) &&
-      !isArray(currentData) &&
-      hasFile(currentData)
-    ) {
+    if (isObject(currentData) && !isArray(currentData) && hasFile(currentData)) {
       const currentFile = get(currentData, 0);
       acc[path] = [currentFile];
     }
@@ -25,11 +21,7 @@ const getFilesToUpload = (data, prefix = null) => {
       return { ...acc, ...getFilesToUpload(currentData, path) };
     }
 
-    if (
-      isObject(currentData) &&
-      !isArray(currentData) &&
-      !hasFile(currentData)
-    ) {
+    if (isObject(currentData) && !isArray(currentData) && !hasFile(currentData)) {
       return { ...acc, ...getFilesToUpload(currentData, path) };
     }
 

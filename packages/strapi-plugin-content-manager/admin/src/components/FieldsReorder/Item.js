@@ -59,8 +59,7 @@ const Item = ({
       const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
       // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
 
@@ -189,13 +188,11 @@ const Item = ({
     showLeftCarret =
       isOver &&
       getItem.size !== 12 &&
-      Math.abs(clientOffset.x - hoverBoundingRect.left) <
-        hoverBoundingRect.width / 2;
+      Math.abs(clientOffset.x - hoverBoundingRect.left) < hoverBoundingRect.width / 2;
     showRightCarret =
       isOver &&
       getItem.size !== 12 &&
-      Math.abs(clientOffset.x - hoverBoundingRect.left) >
-        hoverBoundingRect.width / 2;
+      Math.abs(clientOffset.x - hoverBoundingRect.left) > hoverBoundingRect.width / 2;
 
     if (name === '_TEMP_') {
       showLeftCarret = isOver && getItem.size !== 12;

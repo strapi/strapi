@@ -4,9 +4,7 @@ import PropTypes from 'prop-types';
 import EditViewContext from '../../contexts/EditView';
 
 function EditViewProvider({ children, ...rest }) {
-  return (
-    <EditViewContext.Provider value={rest}>{children}</EditViewContext.Provider>
-  );
+  return <EditViewContext.Provider value={rest}>{children}</EditViewContext.Provider>;
 }
 
 EditViewProvider.propTypes = {

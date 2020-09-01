@@ -99,12 +99,7 @@ class InputNumberWithErrors extends React.Component {
         className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={label}
-          style={labelStyle}
-        />
+        <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
         <InputNumber
           autoFocus={autoFocus}
           className={inputClassName}

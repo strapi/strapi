@@ -1,5 +1,3 @@
 module.exports = {
-  testPathIgnorePatterns: [
-    '<rootDir>/',
-  ]
+  testPathIgnorePatterns: ['<rootDir>/'],
 };

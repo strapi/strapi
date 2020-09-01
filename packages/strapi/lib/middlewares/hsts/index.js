@@ -20,10 +20,7 @@ module.exports = strapi => {
       strapi.app.use(async (ctx, next) => {
         if (ctx.request.admin) return next();
 
-        return await convert(hsts(strapi.config.middleware.settings.hsts))(
-          ctx,
-          next
-        );
+        return await convert(hsts(strapi.config.middleware.settings.hsts))(ctx, next);
       });
     },
   };

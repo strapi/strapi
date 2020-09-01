@@ -1,10 +1,5 @@
 import { fromJS } from 'immutable';
-import {
-  deleteLayout,
-  deleteLayouts,
-  resetListLabels,
-  onChangeListLabels,
-} from '../actions';
+import { deleteLayout, deleteLayouts, resetListLabels, onChangeListLabels } from '../actions';
 import mainReducer from '../reducer';
 
 describe('Content Manager | Main | reducer', () => {
@@ -71,16 +66,12 @@ describe('Content Manager | Main | reducer', () => {
       },
     };
 
-    expect(
-      mainReducer(fromJS(state), deleteLayout('otherTest')).toJS()
-    ).toEqual(expected);
+    expect(mainReducer(fromJS(state), deleteLayout('otherTest')).toJS()).toEqual(expected);
   });
 
   it('should handle the deleteLayouts action correctly', () => {
     const expected = { ...state, layouts: {} };
-    expect(mainReducer(fromJS(state), deleteLayouts()).toJS()).toEqual(
-      expected
-    );
+    expect(mainReducer(fromJS(state), deleteLayouts()).toJS()).toEqual(expected);
   });
 
   it('should handle the resetListLabels action correctly', () => {
@@ -106,9 +97,7 @@ describe('Content Manager | Main | reducer', () => {
       },
     };
 
-    expect(mainReducer(fromJS(state), resetListLabels('test')).toJS()).toEqual(
-      expected
-    );
+    expect(mainReducer(fromJS(state), resetListLabels('test')).toJS()).toEqual(expected);
   });
 
   it('should handle the onChangeListLabels action correctly when adding a new label', () => {

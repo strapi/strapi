@@ -19,10 +19,7 @@ module.exports = strapi => {
       strapi.app.use(async (ctx, next) => {
         if (ctx.request.admin) return next();
 
-        return await convert(p3p(strapi.config.middleware.settings.p3p))(
-          ctx,
-          next
-        );
+        return await convert(p3p(strapi.config.middleware.settings.p3p))(ctx, next);
       });
     },
   };

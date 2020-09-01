@@ -21,14 +21,8 @@ function ActionCollapse({ colSpan }) {
         >
           {message => <DeleteSpan>{message}</DeleteSpan>}
         </FormattedMessage>
-        <FormattedMessage
-          id={`${pluginId}.components.TableDelete.${deleteMessageId}`}
-        >
-          {message => (
-            <DeletAllSpan onClick={toggleModalDeleteAll}>
-              {message}
-            </DeletAllSpan>
-          )}
+        <FormattedMessage id={`${pluginId}.components.TableDelete.${deleteMessageId}`}>
+          {message => <DeletAllSpan onClick={toggleModalDeleteAll}>{message}</DeletAllSpan>}
         </FormattedMessage>
       </td>
     </TableDelete>

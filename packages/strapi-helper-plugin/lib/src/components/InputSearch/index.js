@@ -42,10 +42,7 @@ class InputSearch extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <Wrapper
-        className={cn('input-group', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Wrapper className={cn('input-group', !isEmpty(className) && className)} style={style}>
         <span
           className={cn(
             'input-group-addon',
@@ -54,20 +51,14 @@ class InputSearch extends React.Component {
             !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
           {message => (
             <input
               autoFocus={autoFocus}
               className={cn(
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !deactivateErrorHighlight &&
-                  error &&
-                  this.state.isFocused &&
-                  'invalidSearch'
+                !deactivateErrorHighlight && error && this.state.isFocused && 'invalidSearch'
               )}
               disabled={disabled}
               id={name}

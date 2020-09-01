@@ -35,10 +35,7 @@ const ManyToOne = ({ isSelected, ...rest }) => {
         <rect stroke={stroke} x="6.5" y="18.5" width="6" height="6" rx="3" />
         <rect stroke={stroke} x="27.5" y="18.5" width="6" height="6" rx="3" />
         <rect stroke={stroke} x="27.5" y="8.5" width="6" height="6" rx="3" />
-        <path
-          stroke={stroke}
-          d="M27.275 30.142l-14.83-7.233-.439.899 14.83 7.233z"
-        />
+        <path stroke={stroke} d="M27.275 30.142l-14.83-7.233-.439.899 14.83 7.233z" />
         <rect
           stroke={stroke}
           transform="matrix(-1 0 0 1 61 0)"

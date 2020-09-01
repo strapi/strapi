@@ -23,9 +23,7 @@ module.exports = strapi => {
      */
     writeAppFile(optPath, data) {
       const writePath = normalizePath(optPath);
-      return fse
-        .ensureFile(writePath)
-        .then(() => fse.writeFile(writePath, data));
+      return fse.ensureFile(writePath).then(() => fse.writeFile(writePath, data));
     },
 
     /**

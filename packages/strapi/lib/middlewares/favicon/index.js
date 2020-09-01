@@ -20,10 +20,7 @@ module.exports = strapi => {
 
     initialize() {
       const { dir } = strapi;
-      const {
-        maxAge,
-        path: faviconPath,
-      } = strapi.config.middleware.settings.favicon;
+      const { maxAge, path: faviconPath } = strapi.config.middleware.settings.favicon;
 
       strapi.app.use(
         favicon(resolve(dir, faviconPath), {

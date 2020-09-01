@@ -42,11 +42,7 @@ function HeaderNav({ links, style }) {
             }}
           >
             <div className="linkText text-center">
-              <FormattedMessage
-                id={link.name}
-                defaultMessage={link.name}
-                values={link.values}
-              />
+              <FormattedMessage id={link.name} defaultMessage={link.name} values={link.values} />
               {link.active && <div className="notifPoint" />}
             </div>
           </NavLink>

@@ -46,9 +46,7 @@ Now we will create a function that will be usable everywhere in your strapi appl
 const axios = require('axios');
 
 module.exports = async () => {
-  const { data } = await axios.get(
-    'https://hub.docker.com/v2/repositories/strapi/strapi/'
-  );
+  const { data } = await axios.get('https://hub.docker.com/v2/repositories/strapi/strapi/');
 
   console.log(data);
 };
@@ -66,9 +64,7 @@ let's programmatically create the entry.
 const axios = require('axios');
 
 module.exports = async () => {
-  const { data } = await axios.get(
-    'https://hub.docker.com/v2/repositories/strapi/strapi/'
-  );
+  const { data } = await axios.get('https://hub.docker.com/v2/repositories/strapi/strapi/');
 
   await strapi.query('hit').create({
     date: new Date(),

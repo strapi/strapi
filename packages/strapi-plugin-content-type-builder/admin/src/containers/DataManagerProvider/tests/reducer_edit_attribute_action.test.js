@@ -87,10 +87,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         .setIn(['modifiedData', 'contentType'], contentType)
         .setIn(['modifiedData', 'components'], fromJS({}));
 
-      const expected = state.setIn(
-        ['modifiedData', 'contentType'],
-        expectedContentType
-      );
+      const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -228,10 +225,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         .setIn(['modifiedData', 'components', componentUID], component)
         .setIn(['components', componentUID], component);
 
-      const expected = state.setIn(
-        ['modifiedData', 'components', componentUID],
-        expectedComponent
-      );
+      const expected = state.setIn(['modifiedData', 'components', componentUID], expectedComponent);
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -356,10 +350,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -489,10 +480,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -622,10 +610,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -749,10 +734,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -882,10 +864,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -1024,10 +1003,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -1147,10 +1123,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -1274,10 +1247,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           .setIn(['modifiedData', 'contentType'], contentType)
           .setIn(['modifiedData', 'components'], fromJS({}));
 
-        const expected = state.setIn(
-          ['modifiedData', 'contentType'],
-          expectedContentType
-        );
+        const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
         expect(reducer(state, action)).toEqual(expected);
       });
@@ -1408,10 +1378,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           .setIn(['modifiedData', 'contentType'], contentType)
           .setIn(['modifiedData', 'components'], fromJS({}));
 
-        const expected = state.setIn(
-          ['modifiedData', 'contentType'],
-          expectedContentType
-        );
+        const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
         expect(reducer(state, action)).toEqual(expected);
       });
@@ -1542,10 +1509,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           .setIn(['modifiedData', 'contentType'], contentType)
           .setIn(['modifiedData', 'components'], fromJS({}));
 
-        const expected = state.setIn(
-          ['modifiedData', 'contentType'],
-          expectedContentType
-        );
+        const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
         expect(reducer(state, action)).toEqual(expected);
       });

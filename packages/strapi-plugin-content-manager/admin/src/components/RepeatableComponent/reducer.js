@@ -7,7 +7,10 @@ const getMax = arr => {
     return -1;
   }
 
-  return Math.max.apply(Math, arr.toJS().map(o => o._temp__id));
+  return Math.max.apply(
+    Math,
+    arr.toJS().map(o => o._temp__id)
+  );
 };
 
 const reducer = (state, action) => {
@@ -23,10 +26,7 @@ const reducer = (state, action) => {
         const oldList = list;
         const newList = list
           .delete(action.dragIndex)
-          .insert(
-            action.hoverIndex,
-            state.getIn(['collapses', action.dragIndex])
-          );
+          .insert(action.hoverIndex, state.getIn(['collapses', action.dragIndex]));
 
         // Fix for
         // https://github.com/react-dnd/react-dnd/issues/1368

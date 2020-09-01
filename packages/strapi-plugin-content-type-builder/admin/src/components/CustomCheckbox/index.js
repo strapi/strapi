@@ -10,14 +10,7 @@ import { isEmpty, isNumber } from 'lodash';
 import { Inputs } from '@buffetjs/custom';
 import StyledCustomCheckbox from './StyledCustomCheckbox';
 
-const CustomCheckbox = ({
-  label,
-  modifiedData,
-  name,
-  onChange,
-  value,
-  ...rest
-}) => {
+const CustomCheckbox = ({ label, modifiedData, name, onChange, value, ...rest }) => {
   const [checked, setChecked] = useState(isNumber(value) || !isEmpty(value));
   const type = modifiedData.type === 'biginteger' ? 'text' : 'number';
   const step = ['decimal', 'float'].includes(modifiedData.type) ? 'any' : '1';

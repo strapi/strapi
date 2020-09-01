@@ -21,12 +21,7 @@ const Wrapper = styled.div`
   .sub_wrapper {
     position: relative;
     cursor: pointer;
-    background-color: ${({
-      isOverEditBlock,
-      isOverRemove,
-      isSelected,
-      isSub,
-    }) => {
+    background-color: ${({ isOverEditBlock, isOverRemove, isSelected, isSub }) => {
       if (isOverRemove) {
         return '#ffe9e0';
       } else if (isSelected || isOverEditBlock) {

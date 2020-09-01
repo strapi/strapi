@@ -38,9 +38,7 @@ module.exports = {
 
         if (_.has(componentsMap, compo.uid)) continue;
 
-        const { component, components } = await this.getComponentInformations(
-          compo.uid
-        );
+        const { component, components } = await this.getComponentInformations(compo.uid);
 
         Object.assign(componentsMap, {
           [compo.uid]: component,
@@ -56,9 +54,7 @@ module.exports = {
 
           if (_.has(componentsMap, compo.uid)) continue;
 
-          const { component, components } = await this.getComponentInformations(
-            compo.uid
-          );
+          const { component, components } = await this.getComponentInformations(compo.uid);
 
           Object.assign(componentsMap, {
             [compo.uid]: component,

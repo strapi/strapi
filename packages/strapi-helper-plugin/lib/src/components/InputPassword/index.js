@@ -35,16 +35,11 @@ class InputPassword extends React.Component {
     } = this.props;
     const formattedPlaceholder =
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
-    const eyeColor = this.state.showPassword
-      ? { color: 'black' }
-      : { color: '#9EA7B8' };
+    const eyeColor = this.state.showPassword ? { color: 'black' } : { color: '#9EA7B8' };
 
     return (
       <>
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
           {message => (
             <Input
               autoComplete="new-password"
@@ -69,11 +64,7 @@ class InputPassword extends React.Component {
           )}
         </FormattedMessage>
         <EyeWrapper>
-          <div
-            className="iconEyeSubWrapper"
-            onClick={this.handleClick}
-            style={eyeColor}
-          >
+          <div className="iconEyeSubWrapper" onClick={this.handleClick} style={eyeColor}>
             <i className="fa fa-eye" />
           </div>
         </EyeWrapper>

@@ -1,11 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const {
-  isListable,
-  hasEditableAttribute,
-  hasRelationAttribute,
-} = require('./attributes');
+const { isListable, hasEditableAttribute, hasRelationAttribute } = require('./attributes');
 
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
@@ -38,11 +34,7 @@ async function createDefaultLayouts(schema) {
     list: createDefaultListLayout(schema),
     editRelations: createDefaultEditRelationsLayout(schema),
     edit: createDefaultEditLayout(schema),
-    ..._.pick(_.get(schema, ['config', 'layouts'], {}), [
-      'list',
-      'edit',
-      'editRelations',
-    ]),
+    ..._.pick(_.get(schema, ['config', 'layouts'], {}), ['list', 'edit', 'editRelations']),
   };
 }
 
@@ -55,17 +47,13 @@ function createDefaultListLayout(schema) {
 function createDefaultEditRelationsLayout(schema) {
   if (schema.modelType === 'component') return [];
 
-  return Object.keys(schema.attributes).filter(name =>
-    hasRelationAttribute(schema, name)
-  );
+  return Object.keys(schema.attributes).filter(name => hasRelationAttribute(schema, name));
 }
 
 const rowSize = els => els.reduce((sum, el) => sum + el.size, 0);
 
 function createDefaultEditLayout(schema) {
-  const keys = Object.keys(schema.attributes).filter(name =>
-    hasEditableAttribute(schema, name)
-  );
+  const keys = Object.keys(schema.attributes).filter(name => hasEditableAttribute(schema, name));
 
   return appendToEditLayout([], keys, schema);
 }
@@ -75,14 +63,11 @@ function createDefaultEditLayout(schema) {
 function syncLayouts(configuration, schema) {
   if (_.isEmpty(configuration.layouts)) return createDefaultLayouts(schema);
 
-  const { list = [], editRelations = [], edit = [] } =
-    configuration.layouts || {};
+  const { list = [], editRelations = [], edit = [] } = configuration.layouts || {};
 
   let cleanList = list.filter(attr => isListable(schema, attr));
 
-  let cleanEditRelations = editRelations.filter(attr =>
-    hasRelationAttribute(schema, attr)
-  );
+  let cleanEditRelations = editRelations.filter(attr => hasRelationAttribute(schema, attr));
 
   let elementsToReAppend = [];
   let cleanEdit = [];
@@ -127,17 +112,13 @@ function syncLayouts(configuration, schema) {
 
   // add new relations to layout
   if (schema.modelType !== 'component') {
-    const newRelations = newAttributes.filter(key =>
-      hasRelationAttribute(schema, key)
-    );
+    const newRelations = newAttributes.filter(key => hasRelationAttribute(schema, key));
 
     cleanEditRelations = _.uniq(cleanEditRelations.concat(newRelations));
   }
 
   // add new attributes to edit view
-  const newEditAttributes = newAttributes.filter(key =>
-    hasEditableAttribute(schema, key)
-  );
+  const newEditAttributes = newAttributes.filter(key => hasEditableAttribute(schema, key));
 
   cleanEdit = appendToEditLayout(cleanEdit, newEditAttributes, schema);
 
@@ -145,9 +126,7 @@ function syncLayouts(configuration, schema) {
     list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
     edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(schema),
     editRelations:
-      cleanEditRelations.length > 0
-        ? cleanEditRelations
-        : createDefaultEditRelationsLayout(schema),
+      cleanEditRelations.length > 0 ? cleanEditRelations : createDefaultEditRelationsLayout(schema),
   };
 }
 

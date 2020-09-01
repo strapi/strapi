@@ -3,9 +3,7 @@
 const _ = require('lodash');
 const dates = require('date-fns');
 
-const timeRegex = new RegExp(
-  '^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$'
-);
+const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
 
 const parseTime = value => {
   if (dates.isDate(value)) return dates.format(value, 'HH:mm:ss.SSS');
@@ -72,9 +70,7 @@ const parseType = ({ type, value }) => {
         return false;
       }
 
-      throw new Error(
-        'Invalid boolean input. Expected "t","1","true","false","0","f"'
-      );
+      throw new Error('Invalid boolean input. Expected "t","1","true","false","0","f"');
     }
     case 'integer':
     case 'biginteger':

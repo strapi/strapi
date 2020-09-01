@@ -1,31 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Na = ({
-  fill,
-  fontFamily,
-  fontSize,
-  fontWeight,
-  height,
-  textFill,
-  width,
-  ...rest
-}) => {
+const Na = ({ fill, fontFamily, fontSize, fontWeight, height, textFill, width, ...rest }) => {
   return (
-    <svg
-      {...rest}
-      width={width}
-      height={height}
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg {...rest} width={width} height={height} xmlns="http://www.w3.org/2000/svg">
       <g fill="none" fillRule="evenodd">
         <rect fill={fill} width={width} height={height} rx="17.5" />
-        <text
-          fontFamily={fontFamily}
-          fontSize={fontSize}
-          fontWeight={fontWeight}
-          fill={textFill}
-        >
+        <text fontFamily={fontFamily} fontSize={fontSize} fontWeight={fontWeight} fill={textFill}>
           <tspan x="6" y="22">
             N/A
           </tspan>

@@ -1,9 +1,8 @@
 /*
-*
-* Shared OverlayBlocker actions
-*
+ *
+ * Shared OverlayBlocker actions
+ *
  */
-
 
 import {
   DISABLE_GLOBAL_OVERLAY_BLOCKER,

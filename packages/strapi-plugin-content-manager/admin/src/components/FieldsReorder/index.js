@@ -80,11 +80,7 @@ const FieldsReorder = ({ className }) => {
           );
         })}
         <Wrapper style={{ marginBottom: 10 }}>
-          <Add
-            data={buttonData}
-            onClick={onAddData}
-            style={{ width: '100%', margin: '0 5px' }}
-          />
+          <Add data={buttonData} onClick={onAddData} style={{ width: '100%', margin: '0 5px' }} />
         </Wrapper>
       </SortWrapper>
     </div>

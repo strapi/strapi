@@ -15,9 +15,7 @@ module.exports = ctx => {
   try {
     data = JSON.parse(body.data);
   } catch (error) {
-    throw strapi.errors.badRequest(
-      `Invalid 'data' field. 'data' should be a valid JSON.`
-    );
+    throw strapi.errors.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
   }
 
   const filesToUpload = Object.keys(files).reduce((acc, key) => {

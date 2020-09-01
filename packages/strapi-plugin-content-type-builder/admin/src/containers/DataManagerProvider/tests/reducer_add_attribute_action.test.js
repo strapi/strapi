@@ -51,9 +51,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const state = initialState
         .setIn(
           ['modifiedData', 'contentType'],
-          fromJS(
-            get(testData, ['contentTypes', 'application::address.address'])
-          ).setIn(
+          fromJS(get(testData, ['contentTypes', 'application::address.address'])).setIn(
             ['schema', 'attributes', 'compo_field'],
             fromJS({
               type: 'component',
@@ -81,14 +79,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       };
 
       const expected = state.setIn(
-        [
-          'modifiedData',
-          'components',
-          compoUID,
-          'schema',
-          'attributes',
-          'test',
-        ],
+        ['modifiedData', 'components', compoUID, 'schema', 'attributes', 'test'],
         fromJS({
           type: 'integer',
           default: 2,
@@ -291,14 +282,8 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
       const state = initialState
         .setIn(['components', componentToCreateUID], fromJS(componentToCreate))
-        .setIn(
-          ['modifiedData', 'components', componentToCreateUID],
-          fromJS(componentToCreate)
-        )
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'components', componentToCreateUID], fromJS(componentToCreate))
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'newCompo'],
@@ -370,10 +355,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        )
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]))
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.setIn(
@@ -418,10 +400,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'component'],
-          fromJS(testData.components[componentUID])
-        )
+        .setIn(['modifiedData', 'component'], fromJS(testData.components[componentUID]))
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.setIn(
@@ -466,10 +445,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[targetContentTypeUID])
-        )
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[targetContentTypeUID]))
         .setIn(
           ['modifiedData', 'components', componentUID],
           fromJS(testData.components[componentUID])
@@ -477,14 +453,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.setIn(
-        [
-          'modifiedData',
-          'components',
-          componentUID,
-          'schema',
-          'attributes',
-          'address',
-        ],
+        ['modifiedData', 'components', componentUID, 'schema', 'attributes', 'address'],
         fromJS({
           nature: 'oneWay',
           targetAttribute: '-',
@@ -524,10 +493,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
         fromJS({
@@ -567,10 +533,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
         fromJS({
@@ -626,24 +589,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 
@@ -689,24 +640,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 
@@ -752,24 +691,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 
@@ -815,24 +742,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 

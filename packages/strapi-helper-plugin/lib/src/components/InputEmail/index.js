@@ -41,10 +41,7 @@ class InputEmail extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <Div
-        className={cn('input-group', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Div className={cn('input-group', !isEmpty(className) && className)} style={style}>
         <span
           className={cn(
             'input-group-addon',
@@ -53,20 +50,14 @@ class InputEmail extends React.Component {
             !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
-        <FormattedMessage
-          id={formattedPlaceholder}
-          defaultMessage={formattedPlaceholder}
-        >
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
           {message => (
             <input
               autoFocus={autoFocus}
               className={cn(
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !deactivateErrorHighlight &&
-                  error &&
-                  this.state.isFocused &&
-                  'invalidEmail'
+                !deactivateErrorHighlight && error && this.state.isFocused && 'invalidEmail'
               )}
               disabled={disabled}
               id={name}

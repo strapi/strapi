@@ -23,11 +23,7 @@ function ListRow({ children, items, onClick, ...rest }) {
 
   return (
     <Li {...rest}>
-      <div
-        className={cn('subContainer', 'row')}
-        onClick={onClick}
-        role="button"
-      >
+      <div className={cn('subContainer', 'row')} onClick={onClick} role="button">
         {data}
       </div>
     </Li>

@@ -8,8 +8,7 @@ const Wrapper = styled.div`
   border-radius: 2px;
   box-shadow: 0 2px 4px #e3e9f3;
   > a {
-    box-shadow: 1px 0 0px rgba(#dbdbdb, 0.5),
-      inset 0px -1px 0px -2px rgba(#dbdbdb, 0.5);
+    box-shadow: 1px 0 0px rgba(#dbdbdb, 0.5), inset 0px -1px 0px -2px rgba(#dbdbdb, 0.5);
     background-color: #f5f5f5;
     &:first-child {
       border-radius: 2px 0 0 0;

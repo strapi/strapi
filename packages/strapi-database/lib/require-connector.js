@@ -9,10 +9,7 @@ const VError = require('verror');
  */
 module.exports = function requireConnector(connector) {
   if (!connector) {
-    throw new VError(
-      { name: 'ConnectorError' },
-      'initialize connector without name'
-    );
+    throw new VError({ name: 'ConnectorError' }, 'initialize connector without name');
   }
 
   try {

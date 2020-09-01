@@ -7,15 +7,7 @@ import Title from '../ListTitle';
 import SubTitle from './SubTitle';
 import Wrapper from './Wrapper';
 
-function ListHeader({
-  button,
-  children,
-  subtitle,
-  subtitleValues,
-  style,
-  title,
-  titleValues,
-}) {
+function ListHeader({ button, children, subtitle, subtitleValues, style, title, titleValues }) {
   return (
     <Wrapper style={style}>
       {button && <Button {...button} />}

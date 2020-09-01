@@ -18,9 +18,7 @@ const LoadingIndicatorPage = props => {
         </h2>
         <p>{props.error && props.error.toString()}</p>
         <br />
-        <details style={{ whiteSpace: 'pre-wrap' }}>
-          {props.error.stack}
-        </details>
+        <details style={{ whiteSpace: 'pre-wrap' }}>{props.error.stack}</details>
       </div>
     );
   }

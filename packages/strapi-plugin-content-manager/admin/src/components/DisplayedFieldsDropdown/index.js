@@ -13,14 +13,7 @@ import LayoutWrapper from './LayoutWrapper';
 import MenuDropdown from './MenuDropdown';
 import Toggle from './Toggle';
 
-const DisplayedFieldsDropdown = ({
-  isOpen,
-  items,
-  onChange,
-  onClickReset,
-  slug,
-  toggle,
-}) => {
+const DisplayedFieldsDropdown = ({ isOpen, items, onChange, onClickReset, slug, toggle }) => {
   const { emitEvent } = useGlobalContext();
 
   return (
@@ -38,9 +31,7 @@ const DisplayedFieldsDropdown = ({
               <FormattedMessage id="app.links.configure-view" />
             </LayoutWrapper>
           </DropdownItemLink>
-          <FormattedMessage
-            id={`${pluginId}.containers.ListPage.displayedFields`}
-          >
+          <FormattedMessage id={`${pluginId}.containers.ListPage.displayedFields`}>
             {msg => (
               <ItemDropdownReset onClick={onClickReset}>
                 <div
@@ -56,11 +47,7 @@ const DisplayedFieldsDropdown = ({
             )}
           </FormattedMessage>
           {items.map(item => (
-            <ItemDropdown
-              key={item.name}
-              toggle={false}
-              onClick={() => onChange(item)}
-            >
+            <ItemDropdown key={item.name} toggle={false} onClick={() => onChange(item)}>
               <div>
                 <InputCheckbox
                   onChange={() => onChange(item)}

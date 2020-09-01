@@ -27,10 +27,7 @@ function InputDescription(props) {
   }
 
   return (
-    <Div
-      className={cn(!isEmpty(props.className) && props.className)}
-      style={props.style}
-    >
+    <Div className={cn(!isEmpty(props.className) && props.className)} style={props.style}>
       <small>{content}</small>
     </Div>
   );

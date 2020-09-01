@@ -38,10 +38,7 @@ function PluginHeader({
         </div>
         <div className="col-lg-6 justify-content-end">
           <PluginHeaderActions actions={subActions} />
-          <PluginHeaderActions
-            actions={actions}
-            overrideRendering={overrideRendering}
-          />
+          <PluginHeaderActions actions={actions} overrideRendering={overrideRendering} />
         </div>
       </div>
     </StyledPluginHeader>

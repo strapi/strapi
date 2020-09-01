@@ -29,14 +29,7 @@ function PluginHeaderTitle({
       <div className="header-title">
         <h1 id={titleId}>
           {contentTitle}
-          {icon && (
-            <i
-              className={`${icon}`}
-              id="editCTName"
-              onClick={onClickIcon}
-              role="button"
-            />
-          )}
+          {icon && <i className={`${icon}`} id="editCTName" onClick={onClickIcon} role="button" />}
         </h1>
       </div>
       {withDescriptionAnim ? (
@@ -50,13 +43,7 @@ function PluginHeaderTitle({
 
 const formatData = data => {
   if (isObject(data) && !isEmpty(data.id)) {
-    return (
-      <FormattedMessage
-        id={data.id}
-        defaultMessage={data.id}
-        values={data.values}
-      />
-    );
+    return <FormattedMessage id={data.id} defaultMessage={data.id} values={data.values} />;
   }
 
   if (isFunction(data)) {

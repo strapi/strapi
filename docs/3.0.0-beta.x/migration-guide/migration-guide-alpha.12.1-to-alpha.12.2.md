@@ -115,21 +115,17 @@ remove: async params => {
   await Promise.all(
     Article.associations.map(async association => {
       const search =
-        _.endsWith(association.nature, 'One') ||
-        association.nature === 'oneToMany'
+        _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
           ? { [association.via]: data._id }
           : { [association.via]: { $in: [data._id] } };
       const update =
-        _.endsWith(association.nature, 'One') ||
-        association.nature === 'oneToMany'
+        _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
           ? { [association.via]: null }
           : { $pull: { [association.via]: data._id } };
 
       // Retrieve model.
       const model = association.plugin
-        ? strapi.plugins[association.plugin].models[
-            association.model || association.collection
-          ]
+        ? strapi.plugins[association.plugin].models[association.model || association.collection]
         : strapi.models[association.model || association.collection];
 
       return model.update(search, update, { multi: true });

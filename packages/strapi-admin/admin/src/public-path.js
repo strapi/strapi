@@ -13,9 +13,7 @@ const remoteURL = (() => {
   return process.env.REMOTE_URL.replace(/\/$/, '');
 })();
 const backendURL =
-  process.env.BACKEND_URL === '/'
-    ? window.location.origin
-    : process.env.BACKEND_URL;
+  process.env.BACKEND_URL === '/' ? window.location.origin : process.env.BACKEND_URL;
 
 // Retrieve development URL to avoid to re-build.
 const $body = document.getElementsByTagName('body')[0];

@@ -8,19 +8,14 @@ const createAttributesLayout = (currentLayout, attributes) => {
   const newLayout = [];
 
   for (let row of currentLayout) {
-    const hasDynamicZone = row.some(
-      ({ name }) => getType(name) === 'dynamiczone'
-    );
+    const hasDynamicZone = row.some(({ name }) => getType(name) === 'dynamiczone');
 
     if (!newLayout[currentRowIndex]) {
       newLayout[currentRowIndex] = [];
     }
 
     if (hasDynamicZone) {
-      currentRowIndex =
-        currentRowIndex === 0 && isEmpty(newLayout[0])
-          ? 0
-          : currentRowIndex + 1;
+      currentRowIndex = currentRowIndex === 0 && isEmpty(newLayout[0]) ? 0 : currentRowIndex + 1;
 
       if (!newLayout[currentRowIndex]) {
         newLayout[currentRowIndex] = [];

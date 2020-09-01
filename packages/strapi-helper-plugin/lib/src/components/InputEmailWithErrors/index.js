@@ -59,11 +59,7 @@ class InputEmailWithErrors extends React.Component {
   handleBlur = ({ target }) => {
     // Prevent from displaying error if the input is initially isEmpty
     if (!isEmpty(target.value) || this.state.hasInitialValue) {
-      const errors = validateInput(
-        target.value,
-        this.props.validations,
-        'email'
-      );
+      const errors = validateInput(target.value, this.props.validations, 'email');
       this.setState({ errors, hasInitialValue: true });
     }
   };
@@ -109,12 +105,7 @@ class InputEmailWithErrors extends React.Component {
         )}
         style={style}
       >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={label}
-          style={labelStyle}
-        />
+        <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
         <InputEmail
           autoFocus={autoFocus}
           className={inputClassName}

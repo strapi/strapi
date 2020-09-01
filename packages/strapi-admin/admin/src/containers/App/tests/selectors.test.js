@@ -80,9 +80,7 @@ describe('<App /> selectors', () => {
         },
       });
 
-      expect(makeSelectOverlayBlockerProps()(mockedState)).toEqual(
-        overlayBlockerData
-      );
+      expect(makeSelectOverlayBlockerProps()(mockedState)).toEqual(overlayBlockerData);
     });
   });
 

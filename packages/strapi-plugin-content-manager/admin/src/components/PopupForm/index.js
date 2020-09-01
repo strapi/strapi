@@ -39,10 +39,7 @@ const PopupForm = ({
       <HeaderModal>
         <section>
           <HeaderModalTitle style={{ textTransform: 'none' }}>
-            <AttributeIcon
-              type={getAttrType()}
-              style={{ margin: 'auto 20px auto 0' }}
-            />
+            <AttributeIcon type={getAttrType()} style={{ margin: 'auto 20px auto 0' }} />
             <FormattedMessage id={headerId} />
           </HeaderModalTitle>
         </section>

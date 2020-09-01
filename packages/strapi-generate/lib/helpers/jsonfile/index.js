@@ -17,22 +17,18 @@ const reportback = require('reportback')();
  */
 
 /* eslint-disable prefer-template */
-module.exports = function (options, handlers) {
-
+module.exports = function(options, handlers) {
   // Provide default values for handlers.
   handlers = reportback.extend(handlers, {
-    alreadyExists: 'error'
+    alreadyExists: 'error',
   });
 
   // Provide defaults and validate required options.
   _.defaults(options, {
-    force: false
+    force: false,
   });
 
-  const missingOpts = _.difference([
-    'rootPath',
-    'data'
-  ], Object.keys(options));
+  const missingOpts = _.difference(['rootPath', 'data'], Object.keys(options));
 
   if (missingOpts.length) {
     return handlers.invalid(missingOpts);
@@ -58,7 +54,7 @@ module.exports = function (options, handlers) {
     }
 
     function _afterwards_() {
-      fs.outputJSON(rootPath, options.data, {spaces: 2}, err => {
+      fs.outputJSON(rootPath, options.data, { spaces: 2 }, err => {
         if (err) {
           return handlers.error(err);
         } else {

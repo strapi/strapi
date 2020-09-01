@@ -200,9 +200,7 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
         },
       ];
 
-      const state = initialState
-        .set('webhooksToDelete', [1])
-        .set('webhooks', fromJS(webhooks));
+      const state = initialState.set('webhooksToDelete', [1]).set('webhooks', fromJS(webhooks));
       const action = {
         type: 'WEBHOOKS_DELETED',
       };

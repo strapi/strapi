@@ -22,9 +22,7 @@ const getInjectedComponents = (
 
     const compos = injectedComponents
       .filter(compo => {
-        return (
-          compo.plugin === `${pluginId}.${container}` && compo.area === area
-        );
+        return compo.plugin === `${pluginId}.${container}` && compo.area === area;
       })
       .map(compo => {
         const Component = compo.component;

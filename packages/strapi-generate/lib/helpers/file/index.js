@@ -18,22 +18,18 @@ const reportback = require('reportback')();
  */
 
 /* eslint-disable prefer-template */
-module.exports = function (options, cb) {
-
+module.exports = function(options, cb) {
   // Provide default values for switchback.
   cb = reportback.extend(cb, {
-    alreadyExists: 'error'
+    alreadyExists: 'error',
   });
 
   // Provide defaults and validate required options.
   _.defaults(options, {
-    force: false
+    force: false,
   });
 
-  const missingOpts = _.difference([
-    'contents',
-    'rootPath'
-  ], Object.keys(options));
+  const missingOpts = _.difference(['contents', 'rootPath'], Object.keys(options));
 
   if (missingOpts.length) {
     return cb.invalid(missingOpts);
@@ -54,16 +50,19 @@ module.exports = function (options, cb) {
       return cb.success();
     }
 
-    async.series([
-      function deleteExistingFileIfNecessary(cb) {
-        if (!exists) {
-          return cb();
-        }
-        return fs.remove(rootPath, cb);
-      },
-      function writeToDisk(cb) {
-        fs.outputFile(rootPath, options.contents, cb);
-      }
-    ], cb);
+    async.series(
+      [
+        function deleteExistingFileIfNecessary(cb) {
+          if (!exists) {
+            return cb();
+          }
+          return fs.remove(rootPath, cb);
+        },
+        function writeToDisk(cb) {
+          fs.outputFile(rootPath, options.contents, cb);
+        },
+      ],
+      cb
+    );
   });
 };

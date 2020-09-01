@@ -29,17 +29,11 @@ const OneToMany = ({ isSelected, ...rest }) => {
         <use fill="#FFF" xlinkHref="#a" />
         <rect {...rectProps} x=".5" y=".5" width="40" height="40" rx="2" />
         <path fill={stroke} d="M13 20.75h14v2H13z" />
-        <path
-          fill={stroke}
-          d="M11.447 19.437l15.73-7.672.876 1.798-15.729 7.672z"
-        />
+        <path fill={stroke} d="M11.447 19.437l15.73-7.672.876 1.798-15.729 7.672z" />
         <rect stroke={stroke} x="6.5" y="18.5" width="6" height="6" rx="3" />
         <rect stroke={stroke} x="27.5" y="18.5" width="6" height="6" rx="3" />
         <rect stroke={stroke} x="27.5" y="8.5" width="6" height="6" rx="3" />
-        <path
-          fill={stroke}
-          d="M27.943 29.912L12.214 22.24l-.657 1.348 15.729 7.672z"
-        />
+        <path fill={stroke} d="M27.943 29.912L12.214 22.24l-.657 1.348 15.729 7.672z" />
         <rect
           stroke={stroke}
           transform="matrix(-1 0 0 1 61 0)"

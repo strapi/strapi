@@ -34,10 +34,7 @@ const ManyToMany = ({ isSelected, ...rest }) => {
         />
         <rect stroke={stroke} x="27.5" y="17.5" width="6" height="6" rx="3" />
         <rect stroke={stroke} x="27.5" y="8.5" width="6" height="6" rx="3" />
-        <path
-          stroke={stroke}
-          d="M26.85 28.813L13.37 22.238l-.439.898 13.482 6.576z"
-        />
+        <path stroke={stroke} d="M26.85 28.813L13.37 22.238l-.439.898 13.482 6.576z" />
         <rect
           stroke={stroke}
           transform="matrix(-1 0 0 1 61 0)"
@@ -47,10 +44,7 @@ const ManyToMany = ({ isSelected, ...rest }) => {
           height="6"
           rx="3"
         />
-        <path
-          stroke={stroke}
-          d="M13.52 12.687l13.482 6.575.439-.898-13.482-6.576z"
-        />
+        <path stroke={stroke} d="M13.52 12.687l13.482 6.575.439-.898-13.482-6.576z" />
         <rect
           stroke={stroke}
           transform="matrix(1 0 0 -1 0 41)"
@@ -69,10 +63,7 @@ const ManyToMany = ({ isSelected, ...rest }) => {
           height="6"
           rx="3"
         />
-        <path
-          stroke={stroke}
-          d="M12.668 29.229l14.335-6.992.439.899-14.335 6.992z"
-        />
+        <path stroke={stroke} d="M12.668 29.229l14.335-6.992.439.899-14.335 6.992z" />
         <rect
           stroke={stroke}
           transform="matrix(1 0 0 -1 0 59)"

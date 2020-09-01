@@ -40,28 +40,12 @@ describe('Content Manager | EditView | utils | getComponents', () => {
 
     const container = shallow(
       <div>
-        {getComponents(
-          'editPage',
-          'right.links',
-          plugins,
-          'test',
-          'test',
-          'test',
-          jest.fn()
-        )}
+        {getComponents('editPage', 'right.links', plugins, 'test', 'test', 'test', jest.fn())}
       </div>
     );
 
     expect(
-      getComponents(
-        'editPage',
-        'right.links',
-        plugins,
-        'test',
-        'test',
-        'test',
-        jest.fn()
-      )
+      getComponents('editPage', 'right.links', plugins, 'test', 'test', 'test', jest.fn())
     ).toHaveLength(1);
     expect(container.find(TestCompo1)).toHaveLength(1);
     expect(container.find(TestCompo2)).toHaveLength(0);

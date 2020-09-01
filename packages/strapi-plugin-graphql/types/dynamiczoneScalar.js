@@ -1,19 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
-const {
-  Kind,
-  GraphQLScalarType,
-  valueFromASTUntyped,
-  GraphQLError,
-} = require('graphql');
+const { Kind, GraphQLScalarType, valueFromASTUntyped, GraphQLError } = require('graphql');
 
-module.exports = function DynamicZoneScalar({
-  name,
-  attribute,
-  globalId,
-  components,
-}) {
+module.exports = function DynamicZoneScalar({ name, attribute, globalId, components }) {
   const parseData = value => {
     const compo = Object.values(strapi.components).find(
       compo => compo.globalId === value.__typename

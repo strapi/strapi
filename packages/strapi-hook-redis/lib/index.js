@@ -105,10 +105,7 @@ module.exports = function(strapi) {
           if (!cache) {
             cache = await cb();
 
-            if (
-              cache &&
-              _.get(connection, 'options.disabledCaching') !== true
-            ) {
+            if (cache && _.get(connection, 'options.disabledCaching') !== true) {
               switch (type) {
                 case 'json':
                   redis.set(serial, JSON.stringify(cache), 'ex', expired);

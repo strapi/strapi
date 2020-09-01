@@ -54,10 +54,7 @@ class InputCheckbox extends React.Component {
 
     if (typeof label === 'string') {
       content = (
-        <label
-          className={cn('form-check-label', disabled && 'disabled')}
-          htmlFor={name}
-        >
+        <label className={cn('form-check-label', disabled && 'disabled')} htmlFor={name}>
           {checkbox}
           <p>{label}</p>
         </label>
@@ -66,10 +63,7 @@ class InputCheckbox extends React.Component {
 
     if (isFunction(label)) {
       content = (
-        <label
-          className={cn('form-check-label', disabled && 'disabled')}
-          htmlFor={name}
-        >
+        <label className={cn('form-check-label', disabled && 'disabled')} htmlFor={name}>
           {checkbox}
           <p>{label()}</p>
         </label>
@@ -78,16 +72,9 @@ class InputCheckbox extends React.Component {
 
     if (isObject(label) && label.id) {
       content = (
-        <FormattedMessage
-          id={label.id}
-          defaultMessage={label.id}
-          values={label.params}
-        >
+        <FormattedMessage id={label.id} defaultMessage={label.id} values={label.params}>
           {message => (
-            <label
-              className={cn('form-check-label', disabled && 'disabled')}
-              htmlFor={name}
-            >
+            <label className={cn('form-check-label', disabled && 'disabled')} htmlFor={name}>
               {checkbox}
               <p>{message}</p>
             </label>
@@ -97,10 +84,7 @@ class InputCheckbox extends React.Component {
     }
 
     return (
-      <Wrapper
-        className={cn('form-check', !isEmpty(className) && className)}
-        style={style}
-      >
+      <Wrapper className={cn('form-check', !isEmpty(className) && className)} style={style}>
         {content}
       </Wrapper>
     );

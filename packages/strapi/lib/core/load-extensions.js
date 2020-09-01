@@ -15,9 +15,7 @@ module.exports = async function({ appPath }) {
   const extensionsDir = path.resolve(appPath, 'extensions');
 
   if (!existsSync(extensionsDir)) {
-    throw new Error(
-      `Missing extensions folder. Please create one in your app root directory`
-    );
+    throw new Error(`Missing extensions folder. Please create one in your app root directory`);
   }
 
   const configs = await loadConfig(extensionsDir, '*/config/**/*.+(js|json)');

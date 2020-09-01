@@ -14,10 +14,7 @@ const createHeadersArray = obj => {
 
     if (ALLOWED_KEYS.includes(currentKeys.join('_'))) {
       const currentKeysIndex = parseInt(splitted[splitted.length - 1] - 1, 10);
-      const path = [
-        currentKeysIndex,
-        ...currentKeys.filter(key => key !== 'header'),
-      ];
+      const path = [currentKeysIndex, ...currentKeys.filter(key => key !== 'header')];
 
       let value = obj[current];
 

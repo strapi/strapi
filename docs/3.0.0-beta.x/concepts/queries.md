@@ -34,17 +34,13 @@ strapi.query('restaurant').find({ _limit: 10, id_in: [1, 2] });
 **Find by date orderBy name**:
 
 ```js
-strapi
-  .query('restaurant')
-  .find({ date_gt: '2019-01-01T00:00:00Z', _sort: 'name:desc' });
+strapi.query('restaurant').find({ date_gt: '2019-01-01T00:00:00Z', _sort: 'name:desc' });
 ```
 
 **Find by id not in and populate a relation. Skip the first ten results**
 
 ```js
-strapi
-  .query('restaurant')
-  .find({ id_nin: [1], _start: 10 }, ['category', 'category.name']);
+strapi.query('restaurant').find({ id_nin: [1], _start: 10 }, ['category', 'category.name']);
 ```
 
 :::
@@ -73,9 +69,7 @@ strapi.query('restaurant').findOne({ name: 'restaurant name' });
 **Find one by name and creation_date**:
 
 ```js
-strapi
-  .query('restaurant')
-  .findOne({ name: 'restaurant name', date: '2019-01-01T00:00:00Z' });
+strapi.query('restaurant').findOne({ name: 'restaurant name', date: '2019-01-01T00:00:00Z' });
 ```
 
 **Find one by id and populate a relation**
@@ -299,17 +293,13 @@ Returns entries based on a search on all fields allowing it. (this feature will 
 **Search first ten starting at 20**
 
 ```js
-strapi
-  .query('restaurant')
-  .search({ _q: 'my search query', _limit: 10, _start: 20 });
+strapi.query('restaurant').search({ _q: 'my search query', _limit: 10, _start: 20 });
 ```
 
 **Search and sort**
 
 ```js
-strapi
-  .query('restaurant')
-  .search({ _q: 'my search query', _limit: 100, _sort: 'date:desc' });
+strapi.query('restaurant').search({ _q: 'my search query', _limit: 100, _sort: 'date:desc' });
 ```
 
 :::

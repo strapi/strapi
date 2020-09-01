@@ -14,12 +14,9 @@ const selectLocaleToggle = () => state => state.get('localeToggle');
  */
 
 const makeSelectLocaleToggle = () =>
-  createSelector(
-    selectLocaleToggle(),
-    substate => {
-      return substate ? substate.toJS() : substate;
-    }
-  );
+  createSelector(selectLocaleToggle(), substate => {
+    return substate ? substate.toJS() : substate;
+  });
 
 export default makeSelectLocaleToggle;
 export { selectLocaleToggle };

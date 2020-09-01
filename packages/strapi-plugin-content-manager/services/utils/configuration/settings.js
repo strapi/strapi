@@ -12,9 +12,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const getDefaultMainField = schema =>
-  Object.keys(schema.attributes).find(
-    key => schema.attributes[key].type === 'string'
-  ) || 'id';
+  Object.keys(schema.attributes).find(key => schema.attributes[key].type === 'string') || 'id';
 
 /**
  * Retunrs a configuration default settings
@@ -46,15 +44,12 @@ async function syncSettings(configuration, schema) {
 
   let defaultField = getDefaultMainField(schema);
 
-  const { mainField = defaultField, defaultSortBy = defaultField } =
-    configuration.settings || {};
+  const { mainField = defaultField, defaultSortBy = defaultField } = configuration.settings || {};
 
   return {
     ...configuration.settings,
     mainField: isSortable(schema, mainField) ? mainField : defaultField,
-    defaultSortBy: isSortable(schema, defaultSortBy)
-      ? defaultSortBy
-      : defaultField,
+    defaultSortBy: isSortable(schema, defaultSortBy) ? defaultSortBy : defaultField,
   };
 }
 

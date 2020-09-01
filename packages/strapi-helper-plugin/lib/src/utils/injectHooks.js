@@ -53,7 +53,7 @@ export default ({ key, pluginId }) => WrappedComponent => {
 
               return acc;
             },
-            { ...prevState.hooks },
+            { ...prevState.hooks }
           );
 
           return { hooks: newHooks };

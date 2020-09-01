@@ -14,7 +14,7 @@ function SelectOption({ id, name, params, value }) {
 
   return (
     <FormattedMessage id={messageId} defaultMessage={messageId} values={params}>
-      {(message) => <option value={value}>{message}</option>}
+      {message => <option value={value}>{message}</option>}
     </FormattedMessage>
   );
 }

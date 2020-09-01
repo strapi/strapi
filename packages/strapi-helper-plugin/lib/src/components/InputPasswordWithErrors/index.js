@@ -86,9 +86,7 @@ class InputPasswordWithErrors extends React.Component {
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(this.props.onBlur)
-      ? this.props.onBlur
-      : this.handleBlur;
+    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
 

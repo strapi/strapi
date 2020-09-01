@@ -19,9 +19,7 @@ const Block = ({ children, description, style, title }) => (
             <FormattedMessage id={title} />
           </p>
         )}
-        {!!description && (
-          <FormattedMessage id={description}>{renderMsg}</FormattedMessage>
-        )}
+        {!!description && <FormattedMessage id={description}>{renderMsg}</FormattedMessage>}
       </Sub>
       {children}
     </Wrapper>

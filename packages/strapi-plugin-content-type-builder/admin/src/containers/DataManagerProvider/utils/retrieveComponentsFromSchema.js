@@ -17,31 +17,16 @@ const retrieveComponentsFromSchema = (attributes, allComponentsData) => {
       );
 
       // Retrieve the nested ones
-      acc.push(
-        ...retrieveComponentsFromSchema(
-          currentComponentAttributes,
-          allComponentsData
-        )
-      );
+      acc.push(...retrieveComponentsFromSchema(currentComponentAttributes, allComponentsData));
     }
 
     if (type === 'dynamiczone') {
       const dynamicZoneComponents = attributes[current].components;
-      const componentsFromDZComponents = dynamicZoneComponents.reduce(
-        (acc2, currentUid) => {
-          const compoAttrs = get(
-            allComponentsData,
-            [currentUid, 'schema', 'attributes'],
-            {}
-          );
+      const componentsFromDZComponents = dynamicZoneComponents.reduce((acc2, currentUid) => {
+        const compoAttrs = get(allComponentsData, [currentUid, 'schema', 'attributes'], {});
 
-          return [
-            ...acc2,
-            ...retrieveComponentsFromSchema(compoAttrs, allComponents),
-          ];
-        },
-        []
-      );
+        return [...acc2, ...retrieveComponentsFromSchema(compoAttrs, allComponents)];
+      }, []);
 
       return [...acc, ...dynamicZoneComponents, ...componentsFromDZComponents];
     }

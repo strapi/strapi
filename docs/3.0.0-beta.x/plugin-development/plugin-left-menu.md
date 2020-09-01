@@ -69,10 +69,7 @@ const addCustomSection = sectionStyles => (
 
 const renderAddLink = (props, customLinkStyles) => (
   <li className={customLinkStyles.pluginLeftMenuLink}>
-    <div
-      className={`${customLinkStyles.liInnerContainer}`}
-      onClick={this.handleAddLinkClick}
-    >
+    <div className={`${customLinkStyles.liInnerContainer}`} onClick={this.handleAddLinkClick}>
       <div>
         <i className={`fa ${props.link.icon}`} />
       </div>

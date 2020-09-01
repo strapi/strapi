@@ -16,23 +16,20 @@ const reportback = require('reportback')();
  * Generate a folder
  */
 /* eslint-disable prefer-template */
-module.exports = function (options, cb) {
-
+module.exports = function(options, cb) {
   // Provide default values for cb.
   cb = reportback.extend(cb, {
     alreadyExists: 'error',
-    invalid: 'error'
+    invalid: 'error',
   });
 
   // Provide defaults and validate required options.
   _.defaults(options, {
     force: false,
-    gitkeep: false
+    gitkeep: false,
   });
 
-  const missingOpts = _.difference([
-    'rootPath'
-  ], Object.keys(options));
+  const missingOpts = _.difference(['rootPath'], Object.keys(options));
 
   if (missingOpts.length) {
     return cb.invalid(missingOpts);
@@ -63,7 +60,6 @@ module.exports = function (options, cb) {
     }
 
     function _afterwards_() {
-
       // Don't actually write the directory if this is a dry run.
       if (options.dry) {
         return cb.success();
