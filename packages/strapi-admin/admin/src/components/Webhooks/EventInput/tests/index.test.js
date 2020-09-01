@@ -101,7 +101,15 @@ describe('<EventInput />', () => {
     const formattedEvent = {
       target: {
         name: 'events',
-        value: ['media.create', 'media.delete', 'entry.create', 'entry.update', 'entry.delete'],
+        value: [
+          'media.create',
+          'media.delete',
+          'entry.create',
+          'entry.update',
+          'entry.delete',
+          'entry.publish',
+          'entry.unpublish',
+        ],
       },
     };
 

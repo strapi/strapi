@@ -5,7 +5,7 @@
     "name": "Homepage"
   },
   "options": {
-    "draftAndPublish": false,
+    "draftAndPublish": true,
     "increments": true,
     "timestamps": true
   },

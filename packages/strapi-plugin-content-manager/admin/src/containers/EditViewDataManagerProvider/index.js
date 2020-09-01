@@ -44,6 +44,8 @@ const EditViewDataManagerProvider = ({
   const { id } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
+  const abortController = new AbortController();
+  const { signal } = abortController;
 
   const { push, replace } = useHistory();
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
@@ -60,15 +62,13 @@ const EditViewDataManagerProvider = ({
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
   const [status, setStatus] = useState('resolved');
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
-  const shouldNotRunValidations = useMemo(() => {
-    const hasDraftAndPublish = get(
-      currentContentTypeLayout,
-      ['schema', 'options', 'draftAndPublish'],
-      false
-    );
+  const hasDraftAndPublish = useMemo(() => {
+    return get(currentContentTypeLayout, ['schema', 'options', 'draftAndPublish'], false);
+  }, [currentContentTypeLayout]);
 
+  const shouldNotRunValidations = useMemo(() => {
     return hasDraftAndPublish && !initialData.published_at;
-  }, [currentContentTypeLayout, initialData]);
+  }, [hasDraftAndPublish, initialData.published_at]);
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -83,8 +83,6 @@ const EditViewDataManagerProvider = ({
     return dynamicZoneFields;
   }, [currentContentTypeLayout]);
 
-  const abortController = new AbortController();
-  const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
   const userPermissions = useUser();
   const generatedPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
@@ -268,7 +266,7 @@ const EditViewDataManagerProvider = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isCreatingEntry, isLoadingForPermissions]);
+  }, [id, slug, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('didAddComponentToDynamicZone');
@@ -315,7 +313,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: shouldNotRunValidations }
+      { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false }
     );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
@@ -397,7 +395,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: shouldNotRunValidations }
+      { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false }
     );
 
     try {
@@ -517,32 +515,100 @@ const EditViewDataManagerProvider = ({
     }
   };
 
-  const handlePublish = async e => {
-    e.preventDefault();
+  const handlePublish = useCallback(
+    async e => {
+      e.preventDefault();
 
-    // Create yup schema
-    const schema = createYupSchema(
-      currentContentTypeLayout,
-      {
-        components: get(allLayoutData, 'components', {}),
-      },
-      { isCreatingEntry }
-    );
-
-    try {
-      // Validate the form using yup
-      await schema.validate(modifiedData, { abortEarly: false });
-
-      // Show a loading button in the EditView/Header.js
-      setStatus('publish-pending');
+      // Create yup schema
+      const schema = createYupSchema(
+        currentContentTypeLayout,
+        {
+          components: get(allLayoutData, 'components', {}),
+        },
+        { isCreatingEntry, isDraft: false, isFromComponent: false }
+      );
 
       try {
-        // Time to actually send the data
+        // Validate the form using yup
+        await schema.validate(modifiedData, { abortEarly: false });
+
+        // Show a loading button in the EditView/Header.js
+        setStatus('publish-pending');
+
+        try {
+          // Time to actually send the data
+          const data = await request(
+            getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
+            {
+              method: 'POST',
+            },
+            false,
+            false
+          );
+
+          setStatus('resolved');
+
+          dispatch({
+            type: 'PUBLISH_SUCCESS',
+            data,
+          });
+          strapi.notification.success(`${pluginId}.success.record.publish`);
+        } catch (err) {
+          // ---------- @Soupette Is this error handling still mandatory? ----------
+          // The api error send response.payload.message: 'The error message'.
+          // There isn't : response.payload.message[0].messages[0].id
+          console.error({ err });
+          setStatus('resolved');
+
+          const error = get(
+            err,
+            ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+            'SERVER ERROR'
+          );
+
+          if (error === 'ValidationError') {
+            const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
+            const formattedErrors = Object.keys(errors).reduce((acc, current) => {
+              acc[current] = { id: errors[current][0] };
+
+              return acc;
+            }, {});
+
+            dispatch({
+              type: 'PUBLISH_ERRORS',
+              errors: formattedErrors,
+            });
+          }
+
+          const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
+          strapi.notification.error(errorMessage);
+        }
+      } catch (err) {
+        console.error({ err });
+        const errors = getYupInnerErrors(err);
+        console.log({ errors });
+        setStatus('resolved');
+
+        dispatch({
+          type: 'PUBLISH_ERRORS',
+          errors,
+        });
+      }
+    },
+    [allLayoutData, currentContentTypeLayout, id, isCreatingEntry, modifiedData, slug]
+  );
+
+  const handleUnpublish = useCallback(
+    async e => {
+      e.preventDefault();
+
+      try {
+        setStatus('unpublish-pending');
+
         const data = await request(
-          getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
+          getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
           {
             method: 'POST',
-            signal,
           },
           false,
           false
@@ -551,82 +617,21 @@ const EditViewDataManagerProvider = ({
         setStatus('resolved');
 
         dispatch({
-          type: 'PUBLISH_SUCCESS',
+          type: 'UNPUBLISH_SUCCESS',
           data,
         });
-        strapi.notification.success(`${pluginId}.success.record.publish`);
+        strapi.notification.success(`${pluginId}.success.record.unpublish`);
       } catch (err) {
-        // ---------- @Soupette Is this error handling still mandatory? ----------
-        // The api error send response.payload.message: 'The error message'.
-        // There isn't : response.payload.message[0].messages[0].id
         console.error({ err });
         setStatus('resolved');
-
-        const error = get(
-          err,
-          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-          'SERVER ERROR'
-        );
-
-        if (error === 'ValidationError') {
-          const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
-          const formattedErrors = Object.keys(errors).reduce((acc, current) => {
-            acc[current] = { id: errors[current][0] };
-
-            return acc;
-          }, {});
-
-          dispatch({
-            type: 'PUBLISH_ERRORS',
-            errors: formattedErrors,
-          });
-        }
 
         const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
         strapi.notification.error(errorMessage);
       }
-    } catch (err) {
-      console.error({ err });
-      const errors = getYupInnerErrors(err);
-      setStatus('resolved');
+    },
 
-      dispatch({
-        type: 'PUBLISH_ERRORS',
-        errors,
-      });
-    }
-  };
-
-  const handleUnpublish = async e => {
-    e.preventDefault();
-
-    try {
-      setStatus('unpublish-pending');
-      const data = await request(
-        getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
-        {
-          method: 'POST',
-          signal,
-        },
-        false,
-        false
-      );
-
-      setStatus('resolved');
-
-      dispatch({
-        type: 'UNPUBLISH_SUCCESS',
-        data,
-      });
-      strapi.notification.success(`${pluginId}.success.record.unpublish`);
-    } catch (err) {
-      console.error({ err });
-      setStatus('resolved');
-
-      const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
-      strapi.notification.error(errorMessage);
-    }
-  };
+    [id, modifiedData, slug]
+  );
 
   const shouldCheckDZErrors = useCallback(
     dzName => {
@@ -780,6 +785,7 @@ const EditViewDataManagerProvider = ({
         createActionAllowedFields,
         deleteSuccess,
         formErrors,
+        hasDraftAndPublish,
         initialData,
         isCreatingEntry,
         isSingleType,

@@ -12,6 +12,7 @@ import {
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
+import { removePublishedAtFromMetas } from '../../utils';
 import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
@@ -35,8 +36,8 @@ const SettingsViewWrapper = ({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
-  const getAttributes = useMemo(() => {
-    return get(modifiedData, ['schema', 'attributes'], {});
+  const attributes = useMemo(() => {
+    return removePublishedAtFromMetas(get(modifiedData, ['schema', 'attributes'], {}));
   }, [modifiedData]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
@@ -96,15 +97,14 @@ const SettingsViewWrapper = ({
         'id',
         ...displayedFields.filter(
           name =>
-            get(getAttributes, [name, 'type'], '') !== 'media' &&
+            get(attributes, [name, 'type'], '') !== 'media' &&
             name !== 'id' &&
-            get(getAttributes, [name, 'type'], '') !== 'richtext'
+            get(attributes, [name, 'type'], '') !== 'richtext'
         ),
       ];
     }
 
     if (input.name === 'settings.mainField') {
-      const attributes = getAttributes;
       const options = Object.keys(attributes).filter(attr => {
         const type = get(attributes, [attr, 'type'], '');
 

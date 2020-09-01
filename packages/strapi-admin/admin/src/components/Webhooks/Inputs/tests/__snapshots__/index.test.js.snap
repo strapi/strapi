@@ -289,12 +289,28 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           </td>
           <td>
             <span>
-              Edit
+              Update
             </span>
           </td>
-          <td>
+          <td
+            title="This event only exists for contents with Draft/Publish system enabled"
+          >
             <span>
               Delete
+            </span>
+          </td>
+          <td
+            title="This event only exists for contents with Draft/Publish system enabled"
+          >
+            <span>
+              Publish
+            </span>
+          </td>
+          <td
+            title="This event only exists for contents with Draft/Publish system enabled"
+          >
+            <span>
+              Unpublish
             </span>
           </td>
         </tr>
@@ -396,6 +412,54 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
               <label
                 className="c1"
                 htmlFor="entry.delete"
+              />
+            </div>
+          </td>
+          <td>
+            <div
+              className="c3"
+              disabled={false}
+            >
+              <input
+                autoComplete="off"
+                autoFocus={false}
+                checked={false}
+                className="c4"
+                disabled={false}
+                id="entry.publish"
+                name="entry.publish"
+                onChange={[Function]}
+                placeholder={null}
+                tabIndex="0"
+                type="checkbox"
+              />
+              <label
+                className="c1"
+                htmlFor="entry.publish"
+              />
+            </div>
+          </td>
+          <td>
+            <div
+              className="c3"
+              disabled={false}
+            >
+              <input
+                autoComplete="off"
+                autoFocus={false}
+                checked={false}
+                className="c4"
+                disabled={false}
+                id="entry.unpublish"
+                name="entry.unpublish"
+                onChange={[Function]}
+                placeholder={null}
+                tabIndex="0"
+                type="checkbox"
+              />
+              <label
+                className="c1"
+                htmlFor="entry.unpublish"
               />
             </div>
           </td>

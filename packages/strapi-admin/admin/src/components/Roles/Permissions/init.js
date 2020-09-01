@@ -3,6 +3,7 @@ const init = (state, permissionsLayout, permissions, role) => {
     ...state,
     ...permissions,
     permissionsLayout,
+    initialData: permissions,
     isSuperAdmin: role && role.code === 'strapi-super-admin',
   };
 };

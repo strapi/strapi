@@ -52,7 +52,6 @@
   "Settings.webhooks.disabled": "無効",
   "Settings.webhooks.enabled": "有効",
   "Settings.webhooks.events.create": "作成",
-  "Settings.webhooks.events.edit": "編集",
   "Settings.webhooks.form.events": "イベント",
   "Settings.webhooks.form.headers": "ヘッダー",
   "Settings.webhooks.form.name": "名前",

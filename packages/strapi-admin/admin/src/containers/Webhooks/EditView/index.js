@@ -22,7 +22,7 @@ function EditView() {
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
@@ -74,8 +74,6 @@ function EditView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isCreating]);
 
-  const { name } = modifiedData;
-
   const areActionDisabled = isEqual(initialData, modifiedData);
 
   const isTriggerActionDisabled = isCreating || (!isCreating && !areActionDisabled) || isTriggering;
@@ -93,7 +91,7 @@ function EditView() {
     ? formatMessage({
         id: 'Settings.webhooks.create',
       })
-    : name;
+    : initialData.name;
 
   const headersActions = [
     {
@@ -183,7 +181,7 @@ function EditView() {
         type: 'SUBMIT_SUCCEEDED',
       });
       strapi.notification.success('Settings.webhooks.created');
-      push(`/settings/webhooks/${data.id}`);
+      replace(`/settings/webhooks/${data.id}`);
     } catch (err) {
       setIsSubmitting(false);
       strapi.notification.error('notification.error');

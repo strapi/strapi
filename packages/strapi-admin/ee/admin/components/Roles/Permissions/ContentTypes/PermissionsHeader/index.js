@@ -16,12 +16,16 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
   const {
     onSetAttributesPermissions,
     onGlobalPermissionsActionSelect,
+    onGlobalPublishActionSelect,
     permissionsLayout,
     contentTypesPermissions,
     isSuperAdmin,
   } = usePermissionsContext();
 
-  const handleCheck = action => {
+  const handleCheck = (action, value) => {
+    const splitAction = action.split('.');
+    const isPublishAction = splitAction[splitAction.length - 1] === 'publish';
+
     // If the action is present in the actions of the attributes
     // Then we set all the attributes contentTypesPermissions otherwise,
     // we only set the global content type actions
@@ -29,14 +33,16 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
       onSetAttributesPermissions({
         attributes: allAttributes,
         action,
-        shouldEnable: !hasAllActions(action),
+        shouldEnable: !value,
         hasContentTypeAction: true,
       });
+    } else if (isPublishAction) {
+      onGlobalPublishActionSelect({ contentTypes, value: !value });
     } else {
       onGlobalPermissionsActionSelect({
         action,
         contentTypes,
-        shouldEnable: !hasAllActions(action),
+        shouldEnable: !value,
       });
     }
   };
@@ -78,20 +84,24 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
   return (
     <Wrapper disabled={isSuperAdmin}>
       <Flex>
-        {permissionsToDisplay.map(permissionLayout => (
-          <PermissionCheckbox
-            key={permissionLayout.action}
-            name={permissionLayout.action}
-            disabled={isSuperAdmin}
-            value={hasAllActions(permissionLayout)}
-            someChecked={hasSomeActions(permissionLayout)}
-            message={formatMessage({
-              id: `Settings.roles.form.permissions.${permissionLayout.displayName.toLowerCase()}`,
-              defaultMessage: permissionLayout.displayName,
-            })}
-            onChange={() => handleCheck(permissionLayout.action)}
-          />
-        ))}
+        {permissionsToDisplay.map(permissionLayout => {
+          const value = hasAllActions(permissionLayout);
+
+          return (
+            <PermissionCheckbox
+              key={permissionLayout.action}
+              name={permissionLayout.action}
+              disabled={isSuperAdmin}
+              value={value}
+              someChecked={hasSomeActions(permissionLayout)}
+              message={formatMessage({
+                id: `Settings.roles.form.permissions.${permissionLayout.displayName.toLowerCase()}`,
+                defaultMessage: permissionLayout.displayName,
+              })}
+              onChange={() => handleCheck(permissionLayout.action, value)}
+            />
+          );
+        })}
       </Flex>
     </Wrapper>
   );
