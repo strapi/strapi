@@ -120,6 +120,7 @@
   "Settings.webhooks.enabled": "Enabled",
   "Settings.webhooks.events.create": "Create",
   "Settings.webhooks.events.update": "Update",
+  "Settings.webhooks.event.publish-tooltip": "This event only exists for contents with Draft/Publish system enabled",
   "Settings.webhooks.form.events": "Events",
   "Settings.webhooks.form.headers": "Headers",
   "Settings.webhooks.form.name": "Name",
