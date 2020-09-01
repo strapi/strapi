@@ -1,9 +1,9 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const { storeDefinition, didDefinitionChange } = require('./utils/store-definition');
+const { getDraftAndPublishMigrationWay, migrateDraftAndPublish } = require('./database-migration');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const definitionDidChange = await didDefinitionChange(definition, ORM);
@@ -15,13 +15,10 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     await migrateDraftAndPublish({ definition, ORM, way: 'disable' });
   }
 
-  const createAtCol = _.get(loadedModel, 'timestamps.0', 'created_at');
-  const updatedAtCol = _.get(loadedModel, 'timestamps.1', 'updated_at');
-
   // Add created_at and updated_at field if timestamp option is true
   if (loadedModel.timestamps) {
-    definition.attributes[createAtCol] = { type: 'currentTimestamp' };
-    definition.attributes[updatedAtCol] = { type: 'currentTimestamp' };
+    definition.attributes[loadedModel.timestamps[0]] = { type: 'currentTimestamp' };
+    definition.attributes[loadedModel.timestamps[1]] = { type: 'currentTimestamp' };
   }
 
   // Equilize tables
@@ -102,8 +99,8 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
   if (loadedModel.timestamps) {
-    delete definition.attributes[createAtCol];
-    delete definition.attributes[updatedAtCol];
+    delete definition.attributes[loadedModel.timestamps[0]];
+    delete definition.attributes[loadedModel.timestamps[1]];
   }
 
   if (draftAndPublishMigrationWay === 'enable') {
@@ -133,49 +130,6 @@ const isColumn = ({ definition, attribute, name }) => {
   }
 
   return true;
-};
-
-const getDefinitionFromStore = async (definition, ORM) => {
-  const coreStoreExists = await ORM.knex.schema.hasTable('core_store');
-
-  if (!coreStoreExists) {
-    return undefined;
-  }
-
-  const def = await strapi.models['core_store']
-    .forge({ key: `model_def_${definition.uid}` })
-    .fetch();
-
-  return def ? def.toJSON() : undefined;
-};
-
-const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
-  const previousDefRow = await getDefinitionFromStore(definition, ORM);
-  const previousDef = JSON.parse(_.get(previousDefRow, 'value', null));
-  const previousDraftAndPublish = _.get(previousDef, 'options.draftAndPublish', false) === true;
-  const actualDraftAndPublish = _.get(definition, 'options.draftAndPublish', false) === true;
-
-  if (previousDraftAndPublish === actualDraftAndPublish) {
-    return 'none';
-  }
-  if (!previousDraftAndPublish && actualDraftAndPublish) {
-    return 'enable';
-  }
-  if (previousDraftAndPublish && !actualDraftAndPublish) {
-    return 'disable';
-  }
-};
-
-const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
-  if (way === 'enable') {
-    await ORM.knex(definition.collectionName)
-      .update({ [PUBLISHED_AT_ATTRIBUTE]: new Date().toISOString() })
-      .where(PUBLISHED_AT_ATTRIBUTE, null);
-  } else if (way === 'disable') {
-    await ORM.knex(definition.collectionName)
-      .delete()
-      .where(PUBLISHED_AT_ATTRIBUTE, null);
-  }
 };
 
 const uniqueColName = (table, key) => `${table}_${key}_unique`;

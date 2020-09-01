@@ -79,14 +79,15 @@ module.exports = ({ models, target }, ctx) => {
     definition.client = _.get(connection.settings, 'client');
     definition.primaryKey = 'id';
     definition.primaryKeyType = 'integer';
-    definition.allAttributes = { ...definition.attributes };
+
+    target[model].allAttributes = { ...definition.attributes };
 
     const createAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
     const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updated_at');
     if (_.get(definition, 'options.timestamps', false)) {
       _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
-      definition.allAttributes[createAtCol] = { type: 'timestamp' };
-      definition.allAttributes[updatedAtCol] = { type: 'timestamp' };
+      target[model].allAttributes[createAtCol] = { type: 'timestamp' };
+      target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
     } else {
       _.set(definition, 'options.timestamps', false);
     }

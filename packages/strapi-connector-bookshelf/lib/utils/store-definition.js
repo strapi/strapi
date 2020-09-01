@@ -46,4 +46,5 @@ const didDefinitionChange = async (definition, ORM) => {
 module.exports = {
   storeDefinition,
   didDefinitionChange,
+  getDefinitionFromStore,
 };
