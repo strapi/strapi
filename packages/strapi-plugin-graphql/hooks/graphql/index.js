@@ -106,10 +106,6 @@ module.exports = strapi => {
         serverConfigOmittedOptions
       );
 
-      serverConfig.engine = _.get(serverConfig, 'engine', false);
-      serverConfig.introspection = _.get(serverConfig, 'introspection', true);
-      serverConfig.tracing = _.get(serverConfig, 'tracing', false);
-
       const serverParams = {
         ...schemaDef,
         context: ({ ctx }) => {
@@ -128,9 +124,12 @@ module.exports = strapi => {
           return typeof formatError === 'function' ? formatError(err) : err;
         },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
+        tracing: _.get(serverConfig, 'tracing', false),
         playground: false,
         cors: false,
         bodyParserConfig: true,
+        introspection: _.get(serverConfig, 'introspection', true),
+        engine: _.get(serverConfig, 'engine', false),
         ...serverConfig,
       };
 
