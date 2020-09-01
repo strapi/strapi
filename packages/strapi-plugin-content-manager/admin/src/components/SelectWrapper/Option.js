@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { components } from 'react-select';
 import PropTypes from 'prop-types';
-import { get, isEmpty } from 'lodash';
+import { get, has, isEmpty } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
 import RelationDPState from '../RelationDPState';
 
@@ -12,7 +12,7 @@ const TextGrow = styled(Text)`
 
 const Option = props => {
   const Component = components.Option;
-  const hasDraftAndPublish = props.selectProps.hasDraftAndPublish;
+  const hasDraftAndPublish = has(get(props, 'data.value'), 'published_at');
   const isDraft = isEmpty(get(props, 'data.value.published_at'));
 
   if (hasDraftAndPublish) {
@@ -43,7 +43,7 @@ const Option = props => {
 };
 
 Option.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   selectProps: PropTypes.shape({
     hasDraftAndPublish: PropTypes.bool,
   }).isRequired,

@@ -12,7 +12,6 @@ function SelectMany({
   components,
   mainField,
   name,
-  hasDraftAndPublish,
   isDisabled,
   isLoading,
   move,
@@ -59,7 +58,6 @@ function SelectMany({
     <>
       <Select
         components={components}
-        hasDraftAndPublish={hasDraftAndPublish}
         isDisabled={isDisabled}
         id={name}
         filterOption={(candidate, input) => {
@@ -97,7 +95,6 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
-                hasDraftAndPublish={hasDraftAndPublish}
                 isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
@@ -127,7 +124,7 @@ SelectMany.defaultProps = {
 SelectMany.propTypes = {
   addRelation: PropTypes.func.isRequired,
   components: PropTypes.object,
-  hasDraftAndPublish: PropTypes.bool.isRequired,
+
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,

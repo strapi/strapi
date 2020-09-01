@@ -1,15 +1,15 @@
 import React from 'react';
 import { components } from 'react-select';
 import PropTypes from 'prop-types';
-import { get, isEmpty } from 'lodash';
+import { get, has, isEmpty } from 'lodash';
 import { Flex, Padded, Text } from '@buffetjs/core';
 import RelationDPState from '../RelationDPState';
 
 const SingleValue = props => {
   const Component = components.SingleValue;
-  const hasDraftAndPublish = props.selectProps.hasDraftAndPublish;
+  const hasDraftAndPublish = has(get(props, 'data.value'), 'published_at');
   const isDraft = isEmpty(get(props, 'data.value.published_at'));
-  const value = props.selectProps.value.label;
+  const value = props.data.label;
 
   if (hasDraftAndPublish) {
     return (
@@ -43,10 +43,6 @@ const SingleValue = props => {
 
 SingleValue.propTypes = {
   data: PropTypes.object.isRequired,
-  selectProps: PropTypes.shape({
-    hasDraftAndPublish: PropTypes.bool,
-    value: PropTypes.object,
-  }).isRequired,
 };
 
 export default SingleValue;
