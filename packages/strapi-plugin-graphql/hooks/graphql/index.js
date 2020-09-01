@@ -95,16 +95,7 @@ module.exports = strapi => {
         schemaDef.resolvers = resolvers;
       }
 
-      const serverConfigOmittedOptions = [
-        'shadowCRUD',
-        'playgroundAlways',
-        'depthLimit',
-        'amountLimit',
-      ];
-      const serverConfig = _.omit(
-        _.get(strapi.plugins.graphql, 'config', {}),
-        serverConfigOmittedOptions
-      );
+      const apolloServerConfig = _.get(strapi.plugins.graphql, 'config.apolloServerConfig', {});
 
       const serverParams = {
         ...schemaDef,
@@ -124,13 +115,14 @@ module.exports = strapi => {
           return typeof formatError === 'function' ? formatError(err) : err;
         },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
-        tracing: false,
         playground: false,
         cors: false,
         bodyParserConfig: true,
-        introspection: true,
-        engine: false,
-        ...serverConfig,
+        // Deprecate `tracing`, `introspection` and `engine` in favor of `apolloServerConfig`.
+        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
+        introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
+        engine: _.get(strapi.plugins.graphql, 'config.engine', false),
+        ...apolloServerConfig,
       };
 
       // Disable GraphQL Playground in production environment.
