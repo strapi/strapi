@@ -20,7 +20,7 @@ import Separator from '../Separator';
 const SettingsViewWrapper = ({
   children,
   history: { goBack },
-  getListDisplayedFields,
+  displayedFields,
   inputs,
   initialData,
   isEditSettings,
@@ -35,7 +35,7 @@ const SettingsViewWrapper = ({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
-  const getAttributes = useMemo(() => {
+  const attributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
 
@@ -94,17 +94,16 @@ const SettingsViewWrapper = ({
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
-        ...getListDisplayedFields().filter(
+        ...displayedFields.filter(
           name =>
-            get(getAttributes, [name, 'type'], '') !== 'media' &&
+            get(attributes, [name, 'type'], '') !== 'media' &&
             name !== 'id' &&
-            get(getAttributes, [name, 'type'], '') !== 'richtext'
+            get(attributes, [name, 'type'], '') !== 'richtext'
         ),
       ];
     }
 
     if (input.name === 'settings.mainField') {
-      const attributes = getAttributes;
       const options = Object.keys(attributes).filter(attr => {
         const type = get(attributes, [attr, 'type'], '');
 
@@ -228,7 +227,7 @@ const SettingsViewWrapper = ({
 };
 
 SettingsViewWrapper.defaultProps = {
-  getListDisplayedFields: () => [],
+  displayedFields: [],
   inputs: [],
   initialData: {},
   isEditSettings: false,
@@ -251,7 +250,7 @@ SettingsViewWrapper.defaultProps = {
 
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
-  getListDisplayedFields: PropTypes.func,
+  displayedFields: PropTypes.array,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,

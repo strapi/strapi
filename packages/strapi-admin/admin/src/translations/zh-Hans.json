@@ -55,7 +55,6 @@
   "Settings.webhooks.disabled": "已禁用",
   "Settings.webhooks.enabled": "已启用",
   "Settings.webhooks.events.create": "创建",
-  "Settings.webhooks.events.edit": "编辑",
   "Settings.webhooks.form.events": "事件",
   "Settings.webhooks.form.headers": "请求头",
   "Settings.webhooks.form.name": "名称",

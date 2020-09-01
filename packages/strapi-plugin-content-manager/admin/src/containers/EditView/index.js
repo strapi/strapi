@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { BackHeader, LiLink, CheckPermissions, useUserPermissions } from 'strapi-helper-plugin';
+import { Padded } from '@buffetjs/core';
+
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { generatePermissionsObject } from '../../utils';
@@ -20,6 +22,8 @@ import createAttributesLayout from './utils/createAttributesLayout';
 import { LinkWrapper, SubWrapper } from './components';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import DeleteLink from './DeleteLink';
+import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 
@@ -198,8 +202,9 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                 );
               })}
             </div>
-
             <div className="col-md-12 col-lg-3">
+              <InformationCard />
+              <Padded size="smd" top />
               {currentContentTypeLayoutRelations.length > 0 && (
                 <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                   <div style={{ paddingTop: '22px' }}>
@@ -258,6 +263,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                     currentEnvironment,
                     slug
                   )}
+                  {allowedActions.canDelete && <DeleteLink />}
                 </ul>
               </LinkWrapper>
             </div>

@@ -20,8 +20,9 @@ function EditView() {
   const isMounted = useRef();
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
@@ -73,8 +74,6 @@ function EditView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isCreating]);
 
-  const { name } = modifiedData;
-
   const areActionDisabled = isEqual(initialData, modifiedData);
 
   const isTriggerActionDisabled = isCreating || (!isCreating && !areActionDisabled) || isTriggering;
@@ -92,7 +91,8 @@ function EditView() {
     ? formatMessage({
         id: 'Settings.webhooks.create',
       })
-    : name;
+    : initialData.name;
+
   const headersActions = [
     {
       color: 'primary',
@@ -130,6 +130,7 @@ function EditView() {
       label: formatMessage({
         id: 'app.components.Button.save',
       }),
+      isLoading: isSubmitting,
       style: {
         minWidth: 140,
       },
@@ -169,23 +170,23 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
-      await request('/admin/webhooks', {
+      strapi.lockAppWithOverlay();
+      setIsSubmitting(true);
+      const { data } = await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),
       });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-
-        strapi.notification.success('Settings.webhooks.created');
-        goBack();
-      }
+      setIsSubmitting(false);
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      strapi.notification.success('Settings.webhooks.created');
+      replace(`/settings/webhooks/${data.id}`);
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      setIsSubmitting(false);
+      strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
@@ -199,7 +200,7 @@ function EditView() {
     });
   };
 
-  const goBack = () => push('/settings/webhooks');
+  const goToList = () => push('/settings/webhooks');
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -324,6 +325,9 @@ function EditView() {
 
   const updateWebhook = async () => {
     try {
+      strapi.lockAppWithOverlay();
+      setIsSubmitting(true);
+
       const body = cleanData(modifiedData);
       delete body.id;
 
@@ -331,24 +335,23 @@ function EditView() {
         method: 'PUT',
         body,
       });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-        strapi.notification.success('notification.form.success.fields');
-      }
+      setIsSubmitting(false);
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      strapi.notification.success('notification.form.success.fields');
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      setIsSubmitting(false);
+      strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
   return (
     <Wrapper>
       <PageTitle name="Webhooks" />
-      <BackHeader onClick={goBack} />
+      <BackHeader onClick={goToList} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (
