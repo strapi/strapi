@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Text } from '@buffetjs/core';
 
-const State = styled.div`
+const Wrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,4 +27,4 @@ const State = styled.div`
     `};
 `;
 
-export default State;
+export default Wrapper;
