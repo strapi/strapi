@@ -5,7 +5,8 @@
   "strapi": {
     "name": "Media Library",
     "icon": "cloud-upload-alt",
-    "description": "upload.plugin.description"
+    "description": "upload.plugin.description",
+    "required": true
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -20,7 +21,7 @@
     "koa-static": "^5.0.0",
     "lodash": "4.17.19",
     "node-fetch": "2.6.0",
-    "react": "^16.9.0",
+    "react": "^16.13.1",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
