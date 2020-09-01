@@ -163,7 +163,7 @@ To make things even easier, Heroku provides a powerful addon system. In this sec
 `Path: ./my-project/`
 
 ```bash
-heroku addons:create heroku-postgresql:hobby-dev
+heroku addons:create heroku-postgresql:hobby-dev -a[your-app-name]
 ```
 
 #### 2. Retrieve database credentials
@@ -173,7 +173,7 @@ The add-on automatically exposes the database credentials into a single environm
 `Path: ./my-project/`
 
 ```bash
-heroku config
+heroku config -a[your-app-name]
 ```
 
 This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:dc59b16dedb3a1eef84d4999sb4baf@ec2-50-37-231-192.compute-2.amazonaws.com: 5432/d516fp1u21ph7b`.
@@ -185,11 +185,11 @@ This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:
 Strapi expects a variable for each database connection configuration (host, username, etc.). So, from the url above, you have to set several environment variables in the Heroku config:
 
 ```bash
-heroku config:set DATABASE_USERNAME=ebitxebvixeeqd
-heroku config:set DATABASE_PASSWORD=dc59b16dedb3a1eef84d4999a0be041bd419c474cd4a0973efc7c9339afb4baf
-heroku config:set DATABASE_HOST=ec2-50-37-231-192.compute-2.amazonaws.com
-heroku config:set DATABASE_PORT=5432
-heroku config:set DATABASE_NAME=d516fp1u21ph7b
+heroku config:set DATABASE_USERNAME=ebitxebvixeeqd -a[your-app-name]
+heroku config:set DATABASE_PASSWORD=dc59b16dedb3a1eef84d4999a0be041bd419c474cd4a0973efc7c9339afb4baf -a[your-app-name]
+heroku config:set DATABASE_HOST=ec2-50-37-231-192.compute-2.amazonaws.com -a[your-app-name]
+heroku config:set DATABASE_PORT=5432 -a[your-app-name]
+heroku config:set DATABASE_NAME=d516fp1u21ph7b -a[your-app-name]
 ```
 
 Please replace these above values with your actual values.
@@ -370,7 +370,7 @@ The deployment may take a few minutes. At the end, logs will display the url of 
 `Path: ./my-project/`
 
 ```bash
-heroku open
+heroku open -a[your-app-name]
 ```
 
 If you see the Strapi Welcome page, you have correctly set-up, configured and deployed your Strapi project on Heroku. You will now need to set-up your `admin user` as the production database is brand-new (and empty).
