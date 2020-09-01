@@ -258,9 +258,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
             Update
           </span>
         </td>
-        <td
-          title="This event only exists for contents with Draft/Publish system enabled"
-        >
+        <td>
           <span>
             Delete
           </span>
