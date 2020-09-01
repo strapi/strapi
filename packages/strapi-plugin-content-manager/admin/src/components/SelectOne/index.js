@@ -8,7 +8,6 @@ function SelectOne({
   components,
   mainField,
   name,
-  hasDraftAndPublish,
   isDisabled,
   isLoading,
   onChange,
@@ -22,7 +21,6 @@ function SelectOne({
 }) {
   return (
     <Select
-      hasDraftAndPublish={hasDraftAndPublish}
       components={{ ...components, SingleValue }}
       id={name}
       isClearable
@@ -47,7 +45,6 @@ SelectOne.defaultProps = {
 
 SelectOne.propTypes = {
   components: PropTypes.object,
-  hasDraftAndPublish: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
