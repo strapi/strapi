@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, sortBy } from 'lodash';
+import { get, isEmpty, sortBy } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
@@ -16,18 +16,14 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import {
-  generatePermissionsObject,
-  getRequestUrl,
-  getTrad,
-  removePublishedAtFromMetas,
-} from '../../utils';
+import { generatePermissionsObject, getRequestUrl, getTrad } from '../../utils';
 
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
+import State from '../../components/State';
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
@@ -218,6 +214,12 @@ function ListView({
         searchable: false,
         sortable: true,
         name: 'published_at',
+        key: '__published_at__',
+        cellFormatter: data => {
+          const isPublished = !isEmpty(data.published_at);
+
+          return <State isPublished={isPublished} />;
+        },
       });
     }
 
@@ -238,7 +240,7 @@ function ListView({
   );
 
   const allLabels = useMemo(() => {
-    const filteredMetadatas = removePublishedAtFromMetas(getMetaDatas());
+    const filteredMetadatas = getMetaDatas();
 
     return sortBy(
       Object.keys(filteredMetadatas)

@@ -12,7 +12,6 @@ import {
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-import { removePublishedAtFromMetas } from '../../utils';
 import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
@@ -37,7 +36,7 @@ const SettingsViewWrapper = ({
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
   const attributes = useMemo(() => {
-    return removePublishedAtFromMetas(get(modifiedData, ['schema', 'attributes'], {}));
+    return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
