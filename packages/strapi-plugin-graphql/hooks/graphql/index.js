@@ -95,6 +95,12 @@ module.exports = strapi => {
         schemaDef.resolvers = resolvers;
       }
 
+      const serverConfig = _.get(strapi.plugins.graphql, 'config', {});
+
+      serverConfig.engine = _.get(serverConfig, 'engine', false);
+      serverConfig.introspection = _.get(serverConfig, 'introspection', true);
+      serverConfig.tracing = _.get(serverConfig, 'tracing', false);
+
       const serverParams = {
         ...schemaDef,
         context: ({ ctx }) => {
@@ -113,12 +119,10 @@ module.exports = strapi => {
           return typeof formatError === 'function' ? formatError(err) : err;
         },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
-        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         playground: false,
         cors: false,
         bodyParserConfig: true,
-        introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
-        engine: _.get(strapi.plugins.graphql, 'config.engine', false),
+        ...serverConfig,
       };
 
       // Disable GraphQL Playground in production environment.
