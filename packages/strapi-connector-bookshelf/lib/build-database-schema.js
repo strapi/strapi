@@ -3,6 +3,8 @@ const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
+const { storeDefinition, didDefinitionChange } = require('./utils/store-definition');
+
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const definitionDidChange = await didDefinitionChange(definition, ORM);
   if (!definitionDidChange) {
@@ -133,11 +135,6 @@ const isColumn = ({ definition, attribute, name }) => {
   return true;
 };
 
-const formatDefinitionToStore = definition =>
-  JSON.stringify(
-    _.pick(definition, ['uid', 'collectionName', 'kind', 'info', 'options', 'attributes'])
-  );
-
 const getDefinitionFromStore = async (definition, ORM) => {
   const coreStoreExists = await ORM.knex.schema.hasTable('core_store');
 
@@ -150,14 +147,6 @@ const getDefinitionFromStore = async (definition, ORM) => {
     .fetch();
 
   return def ? def.toJSON() : undefined;
-};
-
-const didDefinitionChange = async (definition, ORM) => {
-  const previousDefRow = await getDefinitionFromStore(definition, ORM);
-  const previousDefJSON = _.get(previousDefRow, 'value', null);
-  const actualDefJSON = formatDefinitionToStore(definition);
-
-  return previousDefJSON !== actualDefJSON;
 };
 
 const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
@@ -183,25 +172,10 @@ const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
       .update({ [PUBLISHED_AT_ATTRIBUTE]: new Date().toISOString() })
       .where(PUBLISHED_AT_ATTRIBUTE, null);
   } else if (way === 'disable') {
-    const query = ORM.knex(definition.collectionName)
+    await ORM.knex(definition.collectionName)
       .delete()
       .where(PUBLISHED_AT_ATTRIBUTE, null);
-    await query;
   }
-};
-
-const storeDefinition = async (definition, ORM) => {
-  const defToStore = formatDefinitionToStore(definition);
-  const existingDef = await getDefinitionFromStore(definition, ORM);
-
-  await strapi.models['core_store']
-    .forge({
-      id: existingDef ? existingDef.id : undefined,
-      key: `model_def_${definition.uid}`,
-      type: 'object',
-      value: defToStore,
-    })
-    .save();
 };
 
 const uniqueColName = (table, key) => `${table}_${key}_unique`;

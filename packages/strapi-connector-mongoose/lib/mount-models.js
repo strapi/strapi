@@ -7,6 +7,8 @@ const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi
 const utils = require('./utils');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
+const { didDefinitionChange, storeDefinition } = require('./utils/store-definition');
+const { migrateDraftAndPublish } = require('./database-migration');
 
 const {
   PUBLISHED_AT_ATTRIBUTE,
@@ -18,7 +20,7 @@ const isPolymorphicAssoc = assoc => {
   return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
-module.exports = ({ models, target }, ctx) => {
+module.exports = async ({ models, target }, ctx) => {
   const { instance } = ctx;
 
   function mountModel(model) {
@@ -151,33 +153,15 @@ module.exports = ({ models, target }, ctx) => {
 
     target[model].allAttributes = _.clone(definition.attributes);
 
-    // Use provided timestamps if the elemnets in the array are string else use default.
-    const timestampsOption = _.get(definition, 'options.timestamps', true);
-    if (_.isArray(timestampsOption)) {
-      const [createAtCol = 'createdAt', updatedAtCol = 'updatedAt'] = timestampsOption;
-
-      schema.set('timestamps', {
-        createdAt: createAtCol,
-        updatedAt: updatedAtCol,
-      });
-
-      target[model].allAttributes[createAtCol] = {
-        type: 'timestamp',
-      };
-      target[model].allAttributes[updatedAtCol] = {
-        type: 'timestamp',
-      };
-    } else if (timestampsOption === true) {
-      schema.set('timestamps', true);
-
-      _.set(definition, 'options.timestamps', ['createdAt', 'updatedAt']);
-
-      target[model].allAttributes.createdAt = {
-        type: 'timestamp',
-      };
-      target[model].allAttributes.updatedAt = {
-        type: 'timestamp',
-      };
+    const createAtCol = _.get(definition, 'options.timestamps.0', 'createdAt');
+    const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updatedAt');
+    if (_.get(definition, 'options.timestamps', false)) {
+      _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
+      target[model].allAttributes[createAtCol] = { type: 'timestamp' };
+      target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
+      schema.set('timestamps', { createdAt: createAtCol, updatedAt: updatedAtCol });
+    } else {
+      _.set(definition, 'options.timestamps', false);
     }
     schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
@@ -294,8 +278,19 @@ module.exports = ({ models, target }, ctx) => {
     target[model].deleteRelations = relations.deleteRelations;
   }
 
-  // Parse every authenticated model.
-  Object.keys(models).map(mountModel);
+  // Instanciate every models
+  Object.keys(models).forEach(mountModel);
+
+  // Migrations + storing schema
+  for (const model of Object.keys(models)) {
+    const definition = models[model];
+    const modelInstance = target[model];
+    const definitionDidChange = await didDefinitionChange(definition, instance);
+    if (definitionDidChange) {
+      await migrateDraftAndPublish({ definition, model: modelInstance, ORM: instance });
+      await storeDefinition(definition, instance);
+    }
+  }
 };
 
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
