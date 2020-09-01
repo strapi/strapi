@@ -95,7 +95,16 @@ module.exports = strapi => {
         schemaDef.resolvers = resolvers;
       }
 
-      const serverConfig = _.get(strapi.plugins.graphql, 'config', {});
+      const serverConfigOmittedOptions = [
+        'shadowCRUD',
+        'playgroundAlways',
+        'depthLimit',
+        'amountLimit',
+      ];
+      const serverConfig = _.omit(
+        _.get(strapi.plugins.graphql, 'config', {}),
+        serverConfigOmittedOptions
+      );
 
       serverConfig.engine = _.get(serverConfig, 'engine', false);
       serverConfig.introspection = _.get(serverConfig, 'introspection', true);
