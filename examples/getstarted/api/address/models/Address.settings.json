@@ -19,8 +19,8 @@
       "type": "string"
     },
     "categories": {
-      "via": "addresses",
       "collection": "category",
+      "via": "addresses",
       "dominant": true
     },
     "cover": {
@@ -46,6 +46,10 @@
     "city": {
       "type": "string",
       "required": true
+    },
+    "likes": {
+      "collection": "like",
+      "via": "address"
     }
   }
 }
