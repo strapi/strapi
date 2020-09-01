@@ -57,7 +57,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
           <tr>
             <td />
             {headersName.map(header => {
-              if (header.includes('app.utils')) {
+              if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
                   <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
                     {msg => (
