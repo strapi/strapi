@@ -9,6 +9,7 @@ import ListItem from './ListItem';
 
 function SelectMany({
   addRelation,
+  components,
   mainField,
   name,
   hasDraftAndPublish,
@@ -57,6 +58,8 @@ function SelectMany({
   return (
     <>
       <Select
+        components={components}
+        hasDraftAndPublish={hasDraftAndPublish}
         isDisabled={isDisabled}
         id={name}
         filterOption={(candidate, input) => {
@@ -116,12 +119,14 @@ function SelectMany({
 }
 
 SelectMany.defaultProps = {
+  components: {},
   move: () => {},
   value: null,
 };
 
 SelectMany.propTypes = {
   addRelation: PropTypes.func.isRequired,
+  components: PropTypes.object,
   hasDraftAndPublish: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
