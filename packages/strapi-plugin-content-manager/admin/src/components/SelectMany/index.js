@@ -2,10 +2,8 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { useDrop } from 'react-dnd';
-
 import Select, { createFilter } from 'react-select';
 import ItemTypes from '../../utils/ItemTypes';
-
 import { ListShadow, ListWrapper } from './components';
 import ListItem from './ListItem';
 
@@ -13,6 +11,7 @@ function SelectMany({
   addRelation,
   mainField,
   name,
+  hasDraftAndPublish,
   isDisabled,
   isLoading,
   move,
@@ -95,6 +94,7 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
+                hasDraftAndPublish={hasDraftAndPublish}
                 isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
@@ -122,11 +122,12 @@ SelectMany.defaultProps = {
 
 SelectMany.propTypes = {
   addRelation: PropTypes.func.isRequired,
+  hasDraftAndPublish: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,

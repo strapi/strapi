@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "likes",
   "info": {
     "name": "like",
@@ -18,6 +19,10 @@
     "review": {
       "model": "review",
       "via": "likes"
+    },
+    "address": {
+      "via": "likes",
+      "model": "address"
     }
   }
 }

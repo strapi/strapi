@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
+import { cloneDeep, findIndex, get, isArray, isEmpty, set, has } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -34,6 +34,7 @@ function SelectWrapper({
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
   const { isDraggingComponent } = useEditView();
+  const [hasDraftAndPublish, setHasDraftAndPublish] = useState(false);
 
   // This is needed for making requests when used in a component
   const fieldName = useMemo(() => {
@@ -101,6 +102,10 @@ function SelectWrapper({
           params,
           signal,
         });
+
+        if (data.some(value => has(value, 'published_at'))) {
+          setHasDraftAndPublish(true);
+        }
 
         const formattedData = data.map(obj => {
           return { value: obj, label: obj[mainField] };
@@ -240,6 +245,7 @@ function SelectWrapper({
         addRelation={value => {
           addRelation({ target: { name, value } });
         }}
+        hasDraftAndPublish={hasDraftAndPublish}
         id={name}
         isDisabled={isDisabled}
         isLoading={isLoading}

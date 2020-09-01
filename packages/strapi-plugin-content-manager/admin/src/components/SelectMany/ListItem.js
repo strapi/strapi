@@ -12,6 +12,7 @@ import Relation from './Relation';
 function ListItem({
   data,
   findRelation,
+  hasDraftAndPublish,
   isDisabled,
   mainField,
   moveRelation,
@@ -27,6 +28,7 @@ function ListItem({
       id: data.id,
       originalIndex,
       data,
+      hasDraftAndPublish,
       mainField,
     },
     collect: monitor => ({
@@ -60,6 +62,7 @@ function ListItem({
       style={{ opacity }}
     >
       <Relation
+        hasDraftAndPublish={hasDraftAndPublish}
         mainField={mainField}
         onRemove={onRemove}
         data={data}
@@ -80,6 +83,7 @@ ListItem.defaultProps = {
 ListItem.propTypes = {
   data: PropTypes.object.isRequired,
   findRelation: PropTypes.func,
+  hasDraftAndPublish: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   moveRelation: PropTypes.func,
