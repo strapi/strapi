@@ -12,7 +12,7 @@ import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-import { ItemTypes, getRequestUrl, removePublishedAtFromMetas } from '../../utils';
+import { ItemTypes, getRequestUrl } from '../../utils';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
@@ -81,9 +81,8 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const listRemainingFields = useMemo(() => {
     const metadatas = get(modifiedData, ['metadatas'], {});
-    const filteredMetadatas = removePublishedAtFromMetas(metadatas);
 
-    return Object.keys(filteredMetadatas)
+    return Object.keys(metadatas)
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
