@@ -61,6 +61,11 @@ const trads = {
   fr,
 };
 
+export const languageNativeNames = {
+  en: 'English',
+  fr: 'Français',
+};
+
 export default trads;
 ```
 
@@ -115,6 +120,8 @@ npm run build
 ### Logo
 
 To change the top-left displayed admin panel's logo, add your custom image at `./admin/src/assets/images/logo-strapi.png`.
+
+To change the login page's logo, add your custom image at `./admin/src/assets/images/logo_strapi.png`.
 
 ::: tip
 make sure the size of your image is the same as the existing one (434px x 120px).

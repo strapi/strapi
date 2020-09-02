@@ -110,6 +110,29 @@ Additional guides for optional software additions that compliment or improve the
 	</InstallLink>
 </div>
 
+## Recommended requirements
+
+To provide the best possible environment for Strapi there are a few requirements, these apply in both a development (local) as well as a staging and production workflow.
+
+- Node LTS (v10 or V12) **Note that Node v14 is not currently supported**
+- Typical standard build tools for your OS (the `build-essentials` package on most Debian-based systems)
+- At least 1 CPU core (Highly recommended at least 2)
+- At least 2 GB of RAM (Moderately recommended 4)
+- Minimum required storage space recommended by your OS or 32 GB of **free** space
+- A supported database version
+  - MySQL >= 5.6
+  - MariaDB >= 10.1
+  - PostgreSQL >= 10
+  - SQLite >= 3
+  - MongoDB >= 3.6
+- A supported operating system
+  - Ubuntu >= 18.04 (LTS-Only)
+  - Debian >= 9.x
+  - CentOS/RHEL >= 8
+  - macOS Mojave or newer (ARM not supported)
+  - Windows 10
+  - Docker - [docker repo](https://github.com/strapi/strapi-docker)
+
 ## Application Configuration
 
 ### 1. Configure
