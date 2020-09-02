@@ -1,9 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { components } from 'react-select';
+import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
+import { getTrad } from '../../utils';
 import RelationDPState from '../RelationDPState';
 
 const TextGrow = styled(Text)`
@@ -11,9 +13,15 @@ const TextGrow = styled(Text)`
 `;
 
 const Option = props => {
+  const { formatMessage } = useIntl();
   const Component = components.Option;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'published_at');
   const isDraft = isEmpty(get(props, 'data.value.published_at'));
+  const titleLabelID = isDraft
+    ? 'components.Select.draft-info-title'
+    : 'components.Select.publish-info-title';
+  const title = formatMessage({ id: getTrad(titleLabelID) });
+  const fontWeight = props.isFocused ? 'bold' : 'regular';
 
   if (hasDraftAndPublish) {
     return (
@@ -25,9 +33,10 @@ const Option = props => {
             marginRight="10px"
             isDraft={isDraft}
             marginBottom="0"
+            title={title}
           />
 
-          <TextGrow ellipsis as="div">
+          <TextGrow ellipsis as="div" fontWeight={fontWeight}>
             {props.label}
           </TextGrow>
         </Flex>
@@ -44,6 +53,7 @@ const Option = props => {
 
 Option.propTypes = {
   label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  isFocused: PropTypes.bool.isRequired,
   selectProps: PropTypes.shape({
     hasDraftAndPublish: PropTypes.bool,
   }).isRequired,

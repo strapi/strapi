@@ -74,10 +74,15 @@ const styles = {
     return {
       ...base,
       height: 36,
-      backgroundColor: state.isSelected ? '#fff' : base.backgroundColor,
-      color: state.isSelected ? '#007eff' : '#333740',
-      fontWeight: state.isSelected ? '600' : '400',
+      backgroundColor: state.isFocused ? '#f6f6f6' : '#fff',
+      ':active': {
+        ...base[':active'],
+        backgroundColor: '#f6f6f6',
+      },
+      color: '#333740',
+      fontWeight: state.isFocused ? '600' : '400',
       cursor: 'pointer',
+      '-webkit-font-smoothing': 'antialiased',
     };
   },
   placeholder: base => ({
