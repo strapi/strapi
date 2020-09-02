@@ -82,7 +82,7 @@ const styles = {
       color: '#333740',
       fontWeight: state.isFocused ? '600' : '400',
       cursor: 'pointer',
-      '-webkit-font-smoothing': 'antialiased',
+      WebkitFontSmoothing: 'antialiased',
     };
   },
   placeholder: base => ({
