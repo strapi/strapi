@@ -3,6 +3,7 @@ import useEditView from '../../../../hooks/useEditView';
 
 function useSelect() {
   const {
+    allLayoutData,
     initialData,
     isCreatingEntry,
     isSingleType,
@@ -21,6 +22,7 @@ function useSelect() {
     canUpdate,
     canCreate,
     canPublish,
+    componentLayouts: allLayoutData.components,
     initialData,
     isCreatingEntry,
     isSingleType,

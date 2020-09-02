@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header as PluginHeader } from '@buffetjs/custom';
 import { get, isEqual, isEmpty, toString } from 'lodash';
@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
 import { PopUpWarning, templateObject } from 'strapi-helper-plugin';
 import pluginId from '../../../pluginId';
-import { connect, select } from './utils';
+import { getTrad } from '../../../utils';
+import { connect, getDraftRelations, select } from './utils';
 
 const primaryButtonObject = {
   color: 'primary',
@@ -21,6 +22,7 @@ const Header = ({
   canUpdate,
   canCreate,
   canPublish,
+  componentLayouts,
   initialData,
   isCreatingEntry,
   isSingleType,
@@ -34,6 +36,10 @@ const Header = ({
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
+  const [draftRelationsCount, setDraftRelationsCount] = useState(0);
+  const [showWarningDraftRelation, setShowWarningDraftRelation] = useState(false);
+  const [shouldUnpublish, setShouldUnpublish] = useState(false);
+  const [shouldPublish, setShouldPublish] = useState(false);
 
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
     layout,
@@ -58,6 +64,14 @@ const Header = ({
 
     return title || currentContentTypeName;
   }, [currentContentTypeName, entryHeaderTitle, isSingleType]);
+
+  const checkIfHasDraftRelations = useCallback(() => {
+    const count = getDraftRelations(modifiedData, layout, componentLayouts);
+
+    setDraftRelationsCount(count);
+
+    return count > 0;
+  }, [modifiedData, layout, componentLayouts]);
 
   const headerActions = useMemo(() => {
     let headerActions = [];
@@ -84,7 +98,15 @@ const Header = ({
       const isPublished = !isEmpty(initialData.published_at);
       const isLoading = isPublished ? status === 'unpublish-pending' : status === 'publish-pending';
       const labelID = isPublished ? 'app.utils.unpublish' : 'app.utils.publish';
-      const onClick = isPublished ? () => setWarningUnpublish(true) : onPublish;
+      const onClick = isPublished
+        ? () => setWarningUnpublish(true)
+        : e => {
+          if (!checkIfHasDraftRelations()) {
+            onPublish(e);
+          } else {
+            setShowWarningDraftRelation(true);
+          }
+        };
 
       const action = {
         ...primaryButtonObject,
@@ -109,6 +131,7 @@ const Header = ({
     status,
     initialData,
     onPublish,
+    checkIfHasDraftRelations,
   ]);
 
   const headerProps = useMemo(() => {
@@ -123,10 +146,45 @@ const Header = ({
 
   const toggleWarningPublish = () => setWarningUnpublish(prevState => !prevState);
 
-  const handleConfirmUnpublish = e => {
-    onUnpublish(e);
+  const toggleWarningDraftRelation = useCallback(() => {
+    setShowWarningDraftRelation(prev => !prev);
+  }, []);
+
+  const handleConfirmPublish = useCallback(() => {
+    setShouldPublish(true);
+    setShowWarningDraftRelation(false);
+  }, []);
+
+  const handleConfirmUnpublish = useCallback(() => {
+    setShouldUnpublish(true);
     setWarningUnpublish(false);
-  };
+  }, []);
+
+  const handleCloseModalPublish = useCallback(
+    e => {
+      if (shouldPublish) {
+        onPublish(e);
+      }
+
+      setShouldUnpublish(false);
+    },
+    [onPublish, shouldPublish]
+  );
+  const handleCloseModalUnpublish = useCallback(
+    e => {
+      if (shouldUnpublish) {
+        onUnpublish(e);
+      }
+
+      setShouldUnpublish(false);
+    },
+    [onUnpublish, shouldUnpublish]
+  );
+
+  const boldText = formatMessage(
+    { id: getTrad('popUpwarning.warning.has-draft-relations.message.bold-text') },
+    { count: draftRelationsCount }
+  );
 
   return (
     <>
@@ -143,6 +201,22 @@ const Header = ({
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmUnpublish}
+        onClosed={handleCloseModalUnpublish}
+      />
+      <PopUpWarning
+        isOpen={showWarningDraftRelation}
+        toggleModal={toggleWarningDraftRelation}
+        content={{
+          title: getTrad('popUpWarning.title'),
+          message: getTrad('popUpwarning.warning.has-draft-relations.message'),
+          messageValues: { boldText: <b>{boldText}</b> },
+          secondMessage: getTrad('popUpWarning.warning.publish-question'),
+          cancel: getTrad('popUpWarning.button.cancel'),
+          confirm: getTrad('popUpWarning.button.confirm'),
+        }}
+        popUpWarningType="danger"
+        onConfirm={handleConfirmPublish}
+        onClosed={handleCloseModalPublish}
       />
     </>
   );
@@ -152,6 +226,7 @@ Header.propTypes = {
   canUpdate: PropTypes.bool.isRequired,
   canCreate: PropTypes.bool.isRequired,
   canPublish: PropTypes.bool.isRequired,
+  componentLayouts: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
