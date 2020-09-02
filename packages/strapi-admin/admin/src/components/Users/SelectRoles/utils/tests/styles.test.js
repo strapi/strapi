@@ -228,7 +228,7 @@ describe('ADMIN | COMPONENTS | USER | SelectRoles | utils | styles', () => {
         backgroundColor: '#f6f6f6',
         color: '#333740',
         fontWeight: '600',
-        '-webkit-font-smoothing': 'antialiased',
+        WebkitFontSmoothing: 'antialiased',
         ':active': {
           ok: true,
           backgroundColor: '#f6f6f6',
@@ -255,7 +255,7 @@ describe('ADMIN | COMPONENTS | USER | SelectRoles | utils | styles', () => {
         backgroundColor: '#fff',
         color: '#333740',
         fontWeight: '400',
-        '-webkit-font-smoothing': 'antialiased',
+        WebkitFontSmoothing: 'antialiased',
         ':active': {
           ok: true,
           backgroundColor: '#f6f6f6',
