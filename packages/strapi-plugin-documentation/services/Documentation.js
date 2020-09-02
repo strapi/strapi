@@ -21,7 +21,23 @@ const defaultSettingsKeys = Object.keys(defaultSettings);
 module.exports = {
   areObjectsEquals: (obj1, obj2) => {
     // stringify to remove nested empty objects
-    return _.isEqual(JSON.parse(JSON.stringify(obj1)), JSON.parse(JSON.stringify(obj2)))
+    return _.isEqualWith(JSON.parse(JSON.stringify(obj1)), JSON.parse(JSON.stringify(obj2)), this.objectArrayComparator)
+  },
+
+  objectArrayComparator: (val1, val2) => {
+    if (_.isArray(val1) && _.isArray(val2) && !_.isEmpty(val1) && !_.isEmpty(val2)) {
+      if (_.isObject(val1[0])) {
+        const comparator = (a, b) => {
+          const key = Object.keys(a)[0]
+          if (a[key] > b[key])
+            return 1
+          else if (a[key] < b[key])
+            return -1
+          return 0
+        }
+        return _.isEqual(val1.sort(comparator), val2.sort(comparator))
+      }
+    }
   },
 
   arrayCustomizer: (objValue, srcValue) => {
