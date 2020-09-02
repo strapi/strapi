@@ -1,5 +1,6 @@
 'use strict';
 const chalk = require('chalk');
+const _ = require('lodash');
 
 const codeToColor = code => {
   return code >= 500
@@ -29,9 +30,16 @@ module.exports = strapi => {
         requests,
       } = strapi.config.middleware.settings.logger;
 
-      if (level) {
-        strapi.log.level = strapi.config.middleware.settings.logger.level;
+      const logLevels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
+
+      if (!_.includes(logLevels, level)) {
+        throw new Error(
+          'Invalid log level. The value is set middleware configuration. Accepted values are (' +
+            logLevels.join(', ') +
+            ').'
+        );
       }
+      strapi.log.level = level;
 
       if (exposeInContext) {
         strapi.app.context.log = strapi.log;
