@@ -5,7 +5,6 @@ import isEqual from 'react-fast-compare';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
-import useEditView from '../../hooks/useEditView';
 import { getFieldName } from '../../utils';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import NotAllowedInput from '../NotAllowedInput';
@@ -13,7 +12,6 @@ import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
 import { connect, select } from './utils';
-import useDataManager from '../../hooks/useDataManager';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -71,6 +69,7 @@ function Inputs({
   allowedFields,
   autoFocus,
   componentUid,
+  currentContentTypeLayout,
   isCreatingEntry,
   keys,
   layout,
@@ -79,13 +78,12 @@ function Inputs({
   formErrors,
   onChange,
   readableFields,
+  shouldNotRunValidations,
   value,
 }) {
   const {
     strapi: { fieldApi },
   } = useStrapi();
-  const { layout: currentContentTypeLayout } = useEditView();
-  const { shouldNotRunValidations } = useDataManager();
 
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
@@ -320,6 +318,7 @@ Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
   autoFocus: PropTypes.bool,
   componentUid: PropTypes.string,
+  currentContentTypeLayout: PropTypes.object.isRequired,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
@@ -328,6 +327,7 @@ Inputs.propTypes = {
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
+  shouldNotRunValidations: PropTypes.bool.isRequired,
   value: PropTypes.any,
 };
 
