@@ -11,6 +11,10 @@ In this example we will use [Jest](https://jestjs.io/) Testing Framework with a 
 [Supertest](https://github.com/visionmedia/supertest) Super-agent driven library for testing node.js HTTP servers using a fluent API
 :::
 
+::: warning
+Please note that this guide will not work if you are on Windows using the SQLite database due to how windows locks the SQLite file
+:::
+
 ## Install test tools
 
 `Jest` contains a set of guidelines or rules used for creating and designing test cases - a combination of practices and tools that are designed to help testers test more efficiently.
