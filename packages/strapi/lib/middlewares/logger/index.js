@@ -30,7 +30,7 @@ module.exports = strapi => {
 
       if (!_.includes(logLevels, level)) {
         throw new Error(
-          'Invalid log level. The value is set middleware configuration. Accepted values are (' +
+          'Invalid log level value. Set a correct value in middleware configuration. Accepted values are (' +
             logLevels.join(', ') +
             ').'
         );
