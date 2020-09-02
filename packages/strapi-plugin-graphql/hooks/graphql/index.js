@@ -102,11 +102,7 @@ module.exports = strapi => {
         engine: _.get(strapi.plugins.graphql, 'config.engine', false),
       };
 
-      const apolloServerConfig = _.get(
-        strapi.plugins.graphql,
-        'config.apolloServerConfig',
-        deprecatedApolloServerConfig
-      );
+      const apolloServerConfig = _.get(strapi.plugins.graphql, 'config.apolloServerConfig', {});
 
       const serverParams = {
         ...schemaDef,
