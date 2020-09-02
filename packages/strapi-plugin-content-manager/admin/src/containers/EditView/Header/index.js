@@ -4,8 +4,16 @@ import { Header as PluginHeader } from '@buffetjs/custom';
 import { get, isEqual, isEmpty, toString } from 'lodash';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
-import { PopUpWarning, templateObject } from 'strapi-helper-plugin';
-import pluginId from '../../../pluginId';
+import { Button, Text, Padded } from '@buffetjs/core';
+import {
+  PopUpWarning,
+  templateObject,
+  PopUpWarningBody,
+  PopUpWarningFooter,
+  PopUpWarningHeader,
+  PopUpWarningIcon,
+  PopUpWarningModal,
+} from 'strapi-helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, getDraftRelations, select } from './utils';
 
@@ -54,7 +62,7 @@ const Header = ({
   /* eslint-disable indent */
   const entryHeaderTitle = isCreatingEntry
     ? formatMessage({
-        id: `${pluginId}.containers.Edit.pluginHeader.title.new`,
+        id: getTrad('containers.Edit.pluginHeader.title.new'),
       })
     : templateObject({ mainField: currentContentTypeMainField }, initialData).mainField;
   /* eslint-enable indent */
@@ -82,7 +90,7 @@ const Header = ({
           disabled: !didChangeData,
           color: 'success',
           label: formatMessage({
-            id: `${pluginId}.containers.Edit.submit`,
+            id: getTrad('containers.Edit.submit'),
           }),
           isLoading: status === 'submit-pending',
           type: 'submit',
@@ -98,15 +106,17 @@ const Header = ({
       const isPublished = !isEmpty(initialData.published_at);
       const isLoading = isPublished ? status === 'unpublish-pending' : status === 'publish-pending';
       const labelID = isPublished ? 'app.utils.unpublish' : 'app.utils.publish';
+      /* eslint-disable indent */
       const onClick = isPublished
         ? () => setWarningUnpublish(true)
         : e => {
-          if (!checkIfHasDraftRelations()) {
-            onPublish(e);
-          } else {
-            setShowWarningDraftRelation(true);
-          }
-        };
+            if (!checkIfHasDraftRelations()) {
+              onPublish(e);
+            } else {
+              setShowWarningDraftRelation(true);
+            }
+          };
+      /* eslint-enable indent */
 
       const action = {
         ...primaryButtonObject,
@@ -139,7 +149,7 @@ const Header = ({
       title: {
         label: toString(headerTitle),
       },
-      content: `${formatMessageRef.current({ id: `${pluginId}.api.id` })} : ${apiID}`,
+      content: `${formatMessageRef.current({ id: getTrad('api.id') })} : ${apiID}`,
       actions: headerActions,
     };
   }, [headerActions, headerTitle, apiID]);
@@ -170,6 +180,7 @@ const Header = ({
     },
     [onPublish, shouldPublish]
   );
+
   const handleCloseModalUnpublish = useCallback(
     e => {
       if (shouldUnpublish) {
@@ -182,8 +193,29 @@ const Header = ({
   );
 
   const boldText = formatMessage(
-    { id: getTrad('popUpwarning.warning.has-draft-relations.message.bold-text') },
+    {
+      id: getTrad(
+        `popUpwarning.warning.has-draft-relations.message.bold-text.${
+          draftRelationsCount > 1 ? 'plural' : 'singular'
+        }`
+      ),
+    },
     { count: draftRelationsCount }
+  );
+
+  const buttonCancelLabel = useMemo(
+    () =>
+      formatMessage({
+        id: getTrad('popUpwarning.warning.has-draft-relations.button-cancel'),
+      }),
+    [formatMessage]
+  );
+  const buttonConfirmLabel = useMemo(
+    () =>
+      formatMessage({
+        id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
+      }),
+    [formatMessage]
   );
 
   return (
@@ -193,31 +225,59 @@ const Header = ({
         isOpen={showWarningUnpublish}
         toggleModal={toggleWarningPublish}
         content={{
-          title: `${pluginId}.popUpWarning.title`,
-          message: `${pluginId}.popUpWarning.warning.unpublish`,
-          secondMessage: `${pluginId}.popUpWarning.warning.unpublish-question`,
-          cancel: `${pluginId}.popUpWarning.button.cancel`,
-          confirm: `${pluginId}.popUpWarning.button.confirm`,
+          title: getTrad('popUpWarning.title'),
+          message: getTrad('popUpWarning.warning.unpublish'),
+          secondMessage: getTrad('popUpWarning.warning.unpublish-question'),
+          cancel: getTrad('popUpWarning.button.cancel'),
+          confirm: getTrad('popUpWarning.button.confirm'),
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmUnpublish}
         onClosed={handleCloseModalUnpublish}
       />
-      <PopUpWarning
+      <PopUpWarningModal
         isOpen={showWarningDraftRelation}
-        toggleModal={toggleWarningDraftRelation}
-        content={{
-          title: getTrad('popUpWarning.title'),
-          message: getTrad('popUpwarning.warning.has-draft-relations.message'),
-          messageValues: { boldText: <b>{boldText}</b> },
-          secondMessage: getTrad('popUpWarning.warning.publish-question'),
-          cancel: getTrad('popUpWarning.button.cancel'),
-          confirm: getTrad('popUpWarning.button.confirm'),
-        }}
-        popUpWarningType="danger"
-        onConfirm={handleConfirmPublish}
+        toggle={toggleWarningDraftRelation}
         onClosed={handleCloseModalPublish}
-      />
+      >
+        <PopUpWarningHeader
+          onClick={toggleWarningDraftRelation}
+          title={getTrad('popUpWarning.title')}
+        />
+        <PopUpWarningBody>
+          <PopUpWarningIcon type="danger" />
+          <Text lineHeight="18px">
+            <Text as="span" fontWeight="bold">
+              {boldText}&nbsp;
+            </Text>
+            {formatMessage({
+              id: getTrad('popUpwarning.warning.has-draft-relations.first-message'),
+            })}
+          </Text>
+          <Text lineHeight="18px">
+            {formatMessage({
+              id: getTrad('popUpwarning.warning.has-draft-relations.second-message'),
+            })}
+          </Text>
+          <Padded top size="smd">
+            <Text>{formatMessage({ id: getTrad('popUpWarning.warning.publish-question') })}</Text>
+          </Padded>
+        </PopUpWarningBody>
+        <PopUpWarningFooter>
+          <Button
+            color="cancel"
+            type="button"
+            onClick={toggleWarningDraftRelation}
+            label={buttonCancelLabel}
+          />
+          <Button
+            color="success"
+            type="button"
+            onClick={handleConfirmPublish}
+            label={buttonConfirmLabel}
+          />
+        </PopUpWarningFooter>
+      </PopUpWarningModal>
     </>
   );
 };
