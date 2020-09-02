@@ -77,7 +77,7 @@ const styles = {
         ...base[':active'],
         backgroundColor: '#f6f6f6',
       },
-      '-webkit-font-smoothing': 'antialiased',
+      WebkitFontSmoothing: 'antialiased',
       color: '#333740',
       fontWeight: state.isFocused ? '600' : '400',
       cursor: 'pointer',
