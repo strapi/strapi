@@ -1,6 +1,7 @@
 import { get, has, isEmpty } from 'lodash';
 
 const getDraftRelations = (data, ctSchema, components) => {
+  console.log('run');
   const getDraftRelationsCount = (data, schema) =>
     Object.keys(data).reduce((acc, current) => {
       const type = get(schema, ['schema', 'attributes', current, 'type'], 'string');

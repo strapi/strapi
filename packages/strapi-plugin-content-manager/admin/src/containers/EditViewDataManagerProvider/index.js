@@ -491,98 +491,27 @@ const EditViewDataManagerProvider = ({
     }
   };
 
-  const handlePublish = useCallback(
-    async e => {
-      e.preventDefault();
+  const handlePublish = useCallback(async () => {
+    // Create yup schema
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      { isCreatingEntry, isDraft: false, isFromComponent: false }
+    );
 
-      // Create yup schema
-      const schema = createYupSchema(
-        currentContentTypeLayout,
-        {
-          components: get(allLayoutData, 'components', {}),
-        },
-        { isCreatingEntry, isDraft: false, isFromComponent: false }
-      );
+    try {
+      // Validate the form using yup
+      await schema.validate(modifiedData, { abortEarly: false });
 
-      try {
-        // Validate the form using yup
-        await schema.validate(modifiedData, { abortEarly: false });
-
-        // Show a loading button in the EditView/Header.js
-        setStatus('publish-pending');
-
-        try {
-          // Time to actually send the data
-          const data = await request(
-            getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
-            {
-              method: 'POST',
-            },
-            false,
-            false
-          );
-
-          setStatus('resolved');
-
-          dispatch({
-            type: 'PUBLISH_SUCCESS',
-            data,
-          });
-          strapi.notification.success(`${pluginId}.success.record.publish`);
-        } catch (err) {
-          // ---------- @Soupette Is this error handling still mandatory? ----------
-          // The api error send response.payload.message: 'The error message'.
-          // There isn't : response.payload.message[0].messages[0].id
-          console.error({ err });
-          setStatus('resolved');
-
-          const error = get(
-            err,
-            ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-            'SERVER ERROR'
-          );
-
-          if (error === 'ValidationError') {
-            const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
-            const formattedErrors = Object.keys(errors).reduce((acc, current) => {
-              acc[current] = { id: errors[current][0] };
-
-              return acc;
-            }, {});
-
-            dispatch({
-              type: 'PUBLISH_ERRORS',
-              errors: formattedErrors,
-            });
-          }
-
-          const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
-          strapi.notification.error(errorMessage);
-        }
-      } catch (err) {
-        console.error({ err });
-        const errors = getYupInnerErrors(err);
-        console.log({ errors });
-        setStatus('resolved');
-
-        dispatch({
-          type: 'PUBLISH_ERRORS',
-          errors,
-        });
-      }
-    },
-    [allLayoutData, currentContentTypeLayout, id, isCreatingEntry, modifiedData, slug]
-  );
-
-  const handleUnpublish = useCallback(
-    async e => {
-      e.preventDefault();
+      // Show a loading button in the EditView/Header.js
+      setStatus('publish-pending');
 
       try {
-        setStatus('unpublish-pending');
-
+        // Time to actually send the data
         const data = await request(
-          getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
+          getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
           {
             method: 'POST',
           },
@@ -593,21 +522,81 @@ const EditViewDataManagerProvider = ({
         setStatus('resolved');
 
         dispatch({
-          type: 'UNPUBLISH_SUCCESS',
+          type: 'PUBLISH_SUCCESS',
           data,
         });
-        strapi.notification.success(`${pluginId}.success.record.unpublish`);
+        strapi.notification.success(`${pluginId}.success.record.publish`);
       } catch (err) {
+        // ---------- @Soupette Is this error handling still mandatory? ----------
+        // The api error send response.payload.message: 'The error message'.
+        // There isn't : response.payload.message[0].messages[0].id
         console.error({ err });
         setStatus('resolved');
+
+        const error = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+          'SERVER ERROR'
+        );
+
+        if (error === 'ValidationError') {
+          const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
+          const formattedErrors = Object.keys(errors).reduce((acc, current) => {
+            acc[current] = { id: errors[current][0] };
+
+            return acc;
+          }, {});
+
+          dispatch({
+            type: 'PUBLISH_ERRORS',
+            errors: formattedErrors,
+          });
+        }
 
         const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
         strapi.notification.error(errorMessage);
       }
-    },
+    } catch (err) {
+      console.error({ err });
+      const errors = getYupInnerErrors(err);
+      console.log({ errors });
+      setStatus('resolved');
 
-    [id, modifiedData, slug]
-  );
+      dispatch({
+        type: 'PUBLISH_ERRORS',
+        errors,
+      });
+    }
+  }, [allLayoutData, currentContentTypeLayout, id, isCreatingEntry, modifiedData, slug]);
+
+  const handleUnpublish = useCallback(async () => {
+    try {
+      setStatus('unpublish-pending');
+
+      const data = await request(
+        getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
+        {
+          method: 'POST',
+        },
+        false,
+        false
+      );
+
+      setStatus('resolved');
+
+      dispatch({
+        type: 'UNPUBLISH_SUCCESS',
+        data,
+      });
+      strapi.notification.success(`${pluginId}.success.record.unpublish`);
+    } catch (err) {
+      console.error({ err });
+      setStatus('resolved');
+
+      const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
+      strapi.notification.error(errorMessage);
+    }
+  }, [id, modifiedData, slug]);
 
   const shouldCheckDZErrors = useCallback(
     dzName => {
