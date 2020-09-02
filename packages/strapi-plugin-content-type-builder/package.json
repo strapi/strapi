@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "fs-extra": "^7.0.0",
+    "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",
     "lodash": "4.17.19",
     "pluralize": "^8.0.0",

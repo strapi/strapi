@@ -51,7 +51,7 @@
     "font-awesome": "^4.7.0",
     "formik": "^2.1.4",
     "friendly-errors-webpack-plugin": "^1.7.0",
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^9.0.1",
     "history": "^4.9.0",
     "hoist-non-react-statics": "^3.3.0",
     "html-loader": "^0.5.5",
