@@ -3,7 +3,7 @@
 const fs = require('fs');
 
 const { registerAndLogin } = require('../../../test/helpers/auth');
-const { createAuthRequest } = require('../../../test/helpers/request');
+const { createAuthRequest, createRequest } = require('../../../test/helpers/request');
 
 let rq;
 
@@ -26,6 +26,8 @@ const setConfigOptions = assign => {
     },
   });
 };
+
+const data = {};
 
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
@@ -79,6 +81,8 @@ describe('Upload plugin end to end tests', () => {
         },
       },
     });
+
+    data.file = res.body.data.upload;
   });
 
   test('Upload multiple files', async () => {
@@ -125,6 +129,54 @@ describe('Upload plugin end to end tests', () => {
             name: 'rec.jpg',
           }),
         ]),
+      },
+    });
+  });
+
+  test('Update file information', async () => {
+    const rq = createRequest();
+    const res = await rq({
+      url: '/graphql',
+      method: 'POST',
+      body: {
+        query: /* GraphQL */ `
+          mutation updateFileInfo(
+            $id: ID!
+            $name: String
+            $alternativeText: String
+            $caption: String
+          ) {
+            updateFileInfo(
+              id: $id
+              name: $name
+              alternativeText: $alternativeText
+              caption: $caption
+            ) {
+              id
+              name
+              alternativeText
+              caption
+            }
+          }
+        `,
+        variables: {
+          id: data.file.id,
+          name: 'test name',
+          alternativeText: 'alternative text test',
+          caption: 'caption test',
+        },
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      data: {
+        updateFileInfo: {
+          id: data.file.id,
+          name: 'test name',
+          alternativeText: 'alternative text test',
+          caption: 'caption test',
+        },
       },
     });
   });
