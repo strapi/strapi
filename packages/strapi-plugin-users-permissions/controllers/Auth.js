@@ -62,7 +62,7 @@ module.exports = {
 
       // Set the identifier to the appropriate query field.
       if (isEmail) {
-        query.email = params.identifier.toLowerCase();
+        query.email = params.identifier;
       } else {
         query.username = params.identifier;
       }
@@ -276,9 +276,7 @@ module.exports = {
     // Check if the provided email is valid or not.
     const isEmail = emailRegExp.test(email);
 
-    if (isEmail) {
-      email = email.toLowerCase();
-    } else {
+    if (!isEmail) {
       return ctx.badRequest(
         null,
         formatError({
@@ -617,9 +615,7 @@ module.exports = {
 
     const isEmail = emailRegExp.test(params.email);
 
-    if (isEmail) {
-      params.email = params.email.toLowerCase();
-    } else {
+    if (!isEmail) {
       return ctx.badRequest('wrong.email');
     }
 
