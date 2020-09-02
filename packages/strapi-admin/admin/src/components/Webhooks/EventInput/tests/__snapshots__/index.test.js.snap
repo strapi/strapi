@@ -263,20 +263,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
             Delete
           </span>
         </td>
-        <td
-          title="This event only exists for contents with Draft/Publish system enabled"
-        >
-          <span>
-            Publish
-          </span>
-        </td>
-        <td
-          title="This event only exists for contents with Draft/Publish system enabled"
-        >
-          <span>
-            Unpublish
-          </span>
-        </td>
       </tr>
     </thead>
     <tbody>
@@ -376,54 +362,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
             <label
               className="c3"
               htmlFor="entry.delete"
-            />
-          </div>
-        </td>
-        <td>
-          <div
-            className="c1"
-            disabled={false}
-          >
-            <input
-              autoComplete="off"
-              autoFocus={false}
-              checked={false}
-              className="c2"
-              disabled={false}
-              id="entry.publish"
-              name="entry.publish"
-              onChange={[Function]}
-              placeholder={null}
-              tabIndex="0"
-              type="checkbox"
-            />
-            <label
-              className="c3"
-              htmlFor="entry.publish"
-            />
-          </div>
-        </td>
-        <td>
-          <div
-            className="c1"
-            disabled={false}
-          >
-            <input
-              autoComplete="off"
-              autoFocus={false}
-              checked={false}
-              className="c2"
-              disabled={false}
-              id="entry.unpublish"
-              name="entry.unpublish"
-              onChange={[Function]}
-              placeholder={null}
-              tabIndex="0"
-              type="checkbox"
-            />
-            <label
-              className="c3"
-              htmlFor="entry.unpublish"
             />
           </div>
         </td>
