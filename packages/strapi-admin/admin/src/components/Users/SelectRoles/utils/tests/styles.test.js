@@ -212,39 +212,55 @@ describe('ADMIN | COMPONENTS | USER | SelectRoles | utils | styles', () => {
   });
 
   describe('option', () => {
-    it('should return the correct object when it is selected', () => {
+    it('should return the correct object when it is focused', () => {
       const base = {
         ok: true,
-        backgroundColor: 'black',
+        ':active': {
+          ok: true,
+        },
       };
       const state = {
-        isSelected: true,
+        isFocused: true,
       };
       const expected = {
         ok: true,
         height: 36,
-        backgroundColor: '#fff',
-        color: '#007eff',
+        backgroundColor: '#f6f6f6',
+        color: '#333740',
         fontWeight: '600',
+        '-webkit-font-smoothing': 'antialiased',
+        ':active': {
+          ok: true,
+          backgroundColor: '#f6f6f6',
+        },
+        cursor: 'pointer',
       };
 
       expect(styles.option(base, state)).toEqual(expected);
     });
 
-    it('should return the correct object when it is not selected', () => {
+    it('should return the correct object when it is not focused', () => {
       const base = {
         ok: true,
-        backgroundColor: 'black',
+        ':active': {
+          ok: true,
+        },
       };
       const state = {
-        isSelected: false,
+        isFocused: false,
       };
       const expected = {
         ok: true,
         height: 36,
-        backgroundColor: 'black',
+        backgroundColor: '#fff',
         color: '#333740',
         fontWeight: '400',
+        '-webkit-font-smoothing': 'antialiased',
+        ':active': {
+          ok: true,
+          backgroundColor: '#f6f6f6',
+        },
+        cursor: 'pointer',
       };
 
       expect(styles.option(base, state)).toEqual(expected);
