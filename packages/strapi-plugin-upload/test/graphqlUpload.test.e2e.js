@@ -3,7 +3,7 @@
 const fs = require('fs');
 
 const { registerAndLogin } = require('../../../test/helpers/auth');
-const { createAuthRequest, createRequest } = require('../../../test/helpers/request');
+const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 
@@ -134,7 +134,6 @@ describe('Upload plugin end to end tests', () => {
   });
 
   test('Update file information', async () => {
-    const rq = createRequest();
     const res = await rq({
       url: '/graphql',
       method: 'POST',
