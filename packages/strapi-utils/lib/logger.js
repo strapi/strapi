@@ -17,7 +17,7 @@ function getBool(envVar, defaultValue) {
 }
 
 const loggerConfig = {
-  level: 10,
+  level: 'debug',
   timestamp: getBool(process.env.STRAPI_LOG_TIMESTAMP, false),
   // prettyPrint: getBool(process.env.STRAPI_LOG_PRETTY_PRINT, true),
   forceColor: getBool(process.env.STRAPI_LOG_FORCE_COLOR, true),
