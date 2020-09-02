@@ -736,7 +736,7 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const clearData = () => {
+  const clearData = useCallback(() => {
     if (isSingleType) {
       setIsCreatingEntry(true);
     }
@@ -745,7 +745,7 @@ const EditViewDataManagerProvider = ({
       type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
       contentTypeDataStructure: {},
     });
-  };
+  }, [isSingleType]);
 
   const triggerFormValidation = () => {
     dispatch({

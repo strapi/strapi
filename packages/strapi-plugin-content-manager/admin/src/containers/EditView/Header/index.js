@@ -1,13 +1,12 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { memo, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Header as PluginHeader } from '@buffetjs/custom';
 import { get, isEqual, isEmpty, toString } from 'lodash';
-
+import PropTypes from 'prop-types';
+import isEqualFastCompare from 'react-fast-compare';
 import { PopUpWarning, templateObject } from 'strapi-helper-plugin';
-
-import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
-import useEditView from '../../hooks/useEditView';
+import pluginId from '../../../pluginId';
+import { connect, select } from './utils';
 
 const primaryButtonObject = {
   color: 'primary',
@@ -18,25 +17,23 @@ const primaryButtonObject = {
   },
 };
 
-const Header = () => {
+const Header = ({
+  canUpdate,
+  canCreate,
+  canPublish,
+  initialData,
+  isCreatingEntry,
+  isSingleType,
+  status,
+  layout,
+  hasDraftAndPublish,
+  modifiedData,
+  onPublish,
+  onUnpublish,
+}) => {
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
-  const {
-    initialData,
-    isCreatingEntry,
-    isSingleType,
-    status,
-    layout,
-    hasDraftAndPublish,
-    modifiedData,
-    onPublish,
-    onUnpublish,
-  } = useDataManager();
-
-  const {
-    allowedActions: { canUpdate, canCreate, canPublish },
-  } = useEditView();
 
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
     layout,
@@ -151,4 +148,21 @@ const Header = () => {
   );
 };
 
-export default Header;
+Header.propTypes = {
+  canUpdate: PropTypes.bool.isRequired,
+  canCreate: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
+  initialData: PropTypes.object.isRequired,
+  isCreatingEntry: PropTypes.bool.isRequired,
+  isSingleType: PropTypes.bool.isRequired,
+  status: PropTypes.string.isRequired,
+  layout: PropTypes.object.isRequired,
+  hasDraftAndPublish: PropTypes.bool.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  onPublish: PropTypes.func.isRequired,
+  onUnpublish: PropTypes.func.isRequired,
+};
+
+const Memoized = memo(Header, isEqualFastCompare);
+
+export default connect(Memoized, select);
