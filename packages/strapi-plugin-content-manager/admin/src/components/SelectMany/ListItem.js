@@ -2,7 +2,7 @@ import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-
+import { has } from 'lodash';
 import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -19,6 +19,7 @@ function ListItem({
   targetModel,
 }) {
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
+  const hasDraftAndPublish = has(data, 'published_at');
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({
@@ -27,6 +28,7 @@ function ListItem({
       id: data.id,
       originalIndex,
       data,
+      hasDraftAndPublish,
       mainField,
     },
     collect: monitor => ({
@@ -60,6 +62,7 @@ function ListItem({
       style={{ opacity }}
     >
       <Relation
+        hasDraftAndPublish={hasDraftAndPublish}
         mainField={mainField}
         onRemove={onRemove}
         data={data}
