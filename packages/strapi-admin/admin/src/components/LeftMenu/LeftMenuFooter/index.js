@@ -31,7 +31,7 @@ function LeftMenuFooter({ version }) {
         </a>
         &nbsp;
         <a href="https://strapi.io" target="_blank" rel="noopener noreferrer">
-          {projectType} Edition
+          — {projectType} Edition
         </a>
       </div>
     </Wrapper>
