@@ -50,6 +50,10 @@ You can also setup any [Apollo Server options](https://www.apollographql.com/doc
 
 You can edit these configurations by creating following file.
 
+::: warning
+Please note the setting for GraphQL `tracing` as changed and has been moved to `apolloServerConfig`
+:::
+
 **Path —** `./config/plugins.js`
 
 ```js
