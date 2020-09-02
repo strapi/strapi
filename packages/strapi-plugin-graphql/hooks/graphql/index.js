@@ -102,6 +102,16 @@ module.exports = strapi => {
         engine: _.get(strapi.plugins.graphql, 'config.engine', false),
       };
 
+      if (
+        strapi.plugins.graphql.config.tracing ||
+        strapi.plugins.graphql.config.introspection ||
+        strapi.plugins.graphql.config.engine
+      ) {
+        strapi.log.warn(
+          'The `tracing`, `introspection` and `engine` options are deprecated in favor of the `apolloServerConfig` object and they will be removed in the next major version.'
+        );
+      }
+
       const apolloServerConfig = _.get(strapi.plugins.graphql, 'config.apolloServerConfig', {});
 
       const serverParams = {
