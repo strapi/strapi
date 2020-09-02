@@ -347,7 +347,7 @@ You can find [supported database and versions](../installation/cli.md#databases)
       - `options` (object): List of additional options used by the connector.
       - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
       - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
-      - `ssl` (boolean): For ssl database connection.
+      - `ssl` (boolean/object): For ssl database connection. Object is used to pass certificate files as strings.
     - `options` Options used for database connection.
       - `debug` (boolean): Show database exchanges and errors.
       - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
@@ -412,6 +412,18 @@ module.exports = ({ env }) => ({
     },
   },
 });
+```
+
+Please note that if you need client side SSL CA verification you will need to use the `ssl:{}` object with the fs module to convert your CA certificate to a string. You can see an example below:
+
+```js
+settings: {
+  client: 'postgres',
+  ...
+  ssl: {
+    ca: fs.readFileSync(`${__dirname}/path/to/your/ca-certificate.crt`).toString(),
+  }
+},
 ```
 
 :::
