@@ -29,6 +29,7 @@ import {
   getCreatedAndModifiedComponents,
   sortContentType,
 } from './utils/cleanData';
+import displayErrors from './utils/displayErrors';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -103,7 +104,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       });
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     }
   };
 
@@ -235,7 +236,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
@@ -285,7 +286,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
@@ -312,7 +313,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
@@ -458,7 +459,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
 
       console.error({ err: err.response });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
