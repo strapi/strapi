@@ -151,13 +151,13 @@ module.exports = {
           })
         );
       }
+      ctx.request.body.email = ctx.request.body.email.toLowerCase();
     }
 
     let updateData = {
       ...ctx.request.body,
     };
 
-    updateData.email = updateData.email.toLowerCase();
 
     if (_.has(ctx.request.body, 'password') && password === user.password) {
       delete updateData.password;

@@ -199,10 +199,10 @@ module.exports = {
           })
         );
       }
+      body.email = body.email.toLowerCase();
     }
 
     const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
-    sanitizedData.email = sanitizedData.email.toLowerCase();
     const updateData = _.omit({ ...sanitizedData, updated_by: admin.id }, 'created_by');
 
     if (_.has(body, 'password') && password === user.password) {
