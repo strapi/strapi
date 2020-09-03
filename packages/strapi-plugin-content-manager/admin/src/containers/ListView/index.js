@@ -608,10 +608,7 @@ function ListView({
           isOpen={showWarningDelete}
           toggleModal={toggleModalDelete}
           content={{
-            title: `${pluginId}.popUpWarning.title`,
-            message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete`,
-            cancel: `${pluginId}.popUpWarning.button.cancel`,
-            confirm: `${pluginId}.popUpWarning.button.confirm`,
+            message: getTrad('popUpWarning.bodyMessage.contentType.delete'),
           }}
           onConfirm={handleConfirmDeleteData}
           popUpWarningType="danger"
@@ -622,12 +619,11 @@ function ListView({
           isOpen={showWarningDeleteAll}
           toggleModal={toggleModalDeleteAll}
           content={{
-            title: `${pluginId}.popUpWarning.title`,
-            message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete${
-              entriesToDelete.length > 1 ? '.all' : ''
-            }`,
-            cancel: `${pluginId}.popUpWarning.button.cancel`,
-            confirm: `${pluginId}.popUpWarning.button.confirm`,
+            message: getTrad(
+              `popUpWarning.bodyMessage.contentType.delete${
+                entriesToDelete.length > 1 ? '.all' : ''
+              }`
+            ),
           }}
           popUpWarningType="danger"
           onConfirm={handleConfirmDeleteAllData}

@@ -206,7 +206,7 @@ const Header = ({
   const buttonCancelLabel = useMemo(
     () =>
       formatMessage({
-        id: getTrad('popUpwarning.warning.has-draft-relations.button-cancel'),
+        id: 'components.popUpWarning.button.cancel',
       }),
     [formatMessage]
   );
@@ -225,11 +225,8 @@ const Header = ({
         isOpen={showWarningUnpublish}
         toggleModal={toggleWarningPublish}
         content={{
-          title: getTrad('popUpWarning.title'),
           message: getTrad('popUpWarning.warning.unpublish'),
           secondMessage: getTrad('popUpWarning.warning.unpublish-question'),
-          cancel: getTrad('popUpWarning.button.cancel'),
-          confirm: getTrad('popUpWarning.button.confirm'),
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmUnpublish}
@@ -242,7 +239,7 @@ const Header = ({
       >
         <PopUpWarningHeader
           onClick={toggleWarningDraftRelation}
-          title={getTrad('popUpWarning.title')}
+          title="components.popUpWarning.title"
         />
         <PopUpWarningBody>
           <PopUpWarningIcon type="danger" />
