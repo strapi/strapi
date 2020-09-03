@@ -211,7 +211,7 @@ const reducer = (state, action) =>
       }
       case 'SET_FILE_TO_EDIT': {
         draftState.fileToEdit = formatFileForEditing(
-          state.files.find(file => file.id.toString() === action.fileId.toString())
+          [...state.files, ...state.selectedFiles].find(file => file.id.toString() === action.fileId.toString())
         );
         break;
       }

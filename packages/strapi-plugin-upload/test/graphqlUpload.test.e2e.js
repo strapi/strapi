@@ -27,6 +27,8 @@ const setConfigOptions = assign => {
   });
 };
 
+const data = {};
+
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -79,6 +81,8 @@ describe('Upload plugin end to end tests', () => {
         },
       },
     });
+
+    data.file = res.body.data.upload;
   });
 
   test('Upload multiple files', async () => {
@@ -125,6 +129,45 @@ describe('Upload plugin end to end tests', () => {
             name: 'rec.jpg',
           }),
         ]),
+      },
+    });
+  });
+
+  test('Update file information', async () => {
+    const res = await rq({
+      url: '/graphql',
+      method: 'POST',
+      body: {
+        query: /* GraphQL */ `
+          mutation updateFileInfo($id: ID!, $info: FileInfoInput!) {
+            updateFileInfo(id: $id, info: $info) {
+              id
+              name
+              alternativeText
+              caption
+            }
+          }
+        `,
+        variables: {
+          id: data.file.id,
+          info: {
+            name: 'test name',
+            alternativeText: 'alternative text test',
+            caption: 'caption test',
+          },
+        },
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      data: {
+        updateFileInfo: {
+          id: data.file.id,
+          name: 'test name',
+          alternativeText: 'alternative text test',
+          caption: 'caption test',
+        },
       },
     });
   });
