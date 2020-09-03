@@ -194,14 +194,13 @@ export default {
   },
   async mounted () {
     try {
-      this.restaurants = await this.$strapi.$restaurant.find()
+      this.restaurants = await this.$strapi.$restaurants.find()
     } catch (error) {
       this.error = error
     }
   }
 }
 </script>
-
 ```
 
 :::
@@ -468,7 +467,7 @@ export default {
   },
   async mounted() {
     try {
-      this.allCategories = await this.$strapi.find('categories')
+      this.allCategories = await this.$strapi.$categories.find()
     } catch (error) {
       this.error = error
     }
@@ -478,7 +477,7 @@ export default {
       e.preventDefault();
 
       try {
-        await this.$strapi.create('restaurants', this.modifiedData)
+        await this.$strapi.$restaurants.create(this.modifiedData)
       } catch (error) {
         this.error = error
       }
