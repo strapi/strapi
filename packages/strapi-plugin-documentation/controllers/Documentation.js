@@ -158,7 +158,7 @@ module.exports = {
       })
       .get();
 
-    const isValid = strapi.plugins['users-permissions'].services.user.validatePassword(
+    const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
       password,
       storedPassword
     );

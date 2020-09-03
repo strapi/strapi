@@ -14,9 +14,9 @@ In this example, we will use a **Restaurant** API.
 
 Make sure you have a **Content Type** with some entries.
 
-## Create schema.grahql file
+## Create schema.graphql file
 
-To be able to add a new custom query (or mutation), we will have to create a `schema.grahql.js` file in your **Restaurant** API.
+To be able to add a new custom query (or mutation), we will have to create a `schema.graphql.js` file in your **Restaurant** API.
 
 **Path** — `./api/restaurant/config/schema.graphql.js`
 
