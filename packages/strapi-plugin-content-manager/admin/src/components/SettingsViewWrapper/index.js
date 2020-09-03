@@ -48,7 +48,7 @@ const SettingsViewWrapper = ({
         color: 'cancel',
         onClick: toggleWarningCancel,
         label: formatMessage({
-          id: `${pluginId}.popUpWarning.button.cancel`,
+          id: 'app.components.Button.reset',
         }),
         type: 'button',
         disabled: isEqual(modifiedData, initialData),
@@ -194,10 +194,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningCancel}
             toggleModal={toggleWarningCancel}
             content={{
-              title: `${pluginId}.popUpWarning.title`,
               message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
-              cancel: `${pluginId}.popUpWarning.button.cancel`,
-              confirm: `${pluginId}.popUpWarning.button.confirm`,
             }}
             popUpWarningType="danger"
             onConfirm={() => {
@@ -209,10 +206,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningSubmit}
             toggleModal={toggleWarningSubmit}
             content={{
-              title: `${pluginId}.popUpWarning.title`,
               message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
-              cancel: `${pluginId}.popUpWarning.button.cancel`,
-              confirm: `${pluginId}.popUpWarning.button.confirm`,
             }}
             popUpWarningType="danger"
             onConfirm={async () => {
