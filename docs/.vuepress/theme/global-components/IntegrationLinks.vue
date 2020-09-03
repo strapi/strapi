@@ -26,7 +26,7 @@
       </InstallLink>
     </div>
 
-    <!-- Vue -->
+    <!-- Angular -->
     <div>
       <InstallLink link="../getting-started/angular.html">
         <template #icon>
@@ -245,6 +245,26 @@
         <template #title>Jekyll</template>
         <template #description>
           Consume your API with Jekyll
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- 11ty -->
+    <div>
+      <InstallLink link="../getting-started/11ty.html">
+        <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000" preserveAspectRatio="xMidYMid meet">
+        <metadata>
+        Created by potrace 1.16, written by Peter Selinger 2001-2019
+        </metadata>
+        <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none">
+        <path d="M0 2000 l0 -2000 2000 0 2000 0 0 2000 0 2000 -2000 0 -2000 0 0 -2000z m2212 883 c16 -15 18 -35 18 -230 l0 -213 59 0 c86 0 106 -19 106 -103 0 -85 -10 -95 -93 -99 l-67 -3 0 -295 c0 -357 -1 -353 90 -358 81 -4 95 -18 95 -97 0 -90 -12 -98 -137 -93 -113 4 -171 28 -210 87 -50 74 -55 114 -60 449 l-5 312 -34 0 c-43 0 -54 21 -54 104 0 56 3 67 22 80 12 9 32 16 44 16 28 0 34 22 34 130 2 149 15 297 29 314 19 23 137 22 163 -1z m-927 -47 c14 -20 15 -106 13 -720 -3 -811 12 -726 -129 -726 -79 0 -89 2 -103 22 -14 20 -16 92 -16 590 l0 567 -48 -6 c-44 -5 -49 -3 -60 21 -7 15 -12 58 -12 95 0 97 7 103 170 145 164 42 166 42 185 12z m496 7 c12 -13 14 -137 14 -713 0 -820 13 -740 -124 -740 -47 0 -91 4 -98 8 -30 19 -33 70 -33 618 l0 554 -42 -6 c-33 -6 -44 -4 -55 11 -15 22 -18 171 -3 195 9 15 251 86 301 89 15 0 33 -6 40 -16z m869 -413 c24 -13 28 -27 86 -342 27 -142 49 -256 50 -255 3 3 84 541 84 556 0 26 45 51 93 51 70 0 87 -12 87 -62 0 -56 -185 -1013 -212 -1095 -12 -37 -35 -79 -53 -98 -57 -61 -174 -70 -235 -19 -27 23 -30 31 -30 85 0 80 20 102 80 87 54 -14 63 -4 68 75 3 53 -12 128 -102 504 -58 243 -106 453 -106 466 0 44 24 57 101 57 39 0 79 -5 89 -10z"/>
+        </g>
+        </svg>
+        </template>
+        <template #title>11ty</template>
+        <template #description>
+          Consume your API with 11ty
         </template>
       </InstallLink>
     </div>
