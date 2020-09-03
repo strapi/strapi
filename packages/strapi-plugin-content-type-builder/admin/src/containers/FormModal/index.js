@@ -1359,7 +1359,7 @@ const FormModal = () => {
               <section style={{ alignItems: 'center' }}>
                 <Button type="button" color="cancel" onClick={handleToggle}>
                   {formatMessage({
-                    id: 'components.popUpWarning.button.cancel',
+                    id: 'app.components.Button.cancel',
                   })}
                 </Button>
                 <div>
