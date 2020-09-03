@@ -24,11 +24,11 @@ Please note that this guide will not work if you are on Windows using the SQLite
 :::: tabs
 
 ::: tab yarn
-`yarn add jest supertest`
+`yarn add -D jest supertest`
 :::
 
 ::: tab npm
-`npm install jest supertest`
+`npm i -D jest supertest`
 :::
 ::::
 
@@ -89,7 +89,7 @@ The whole file will look like this:
         "useNullAsDefault": true,
         "pool": {
           "min": 0,
-          "max": 15
+          "max": 1
         }
       }
     }
@@ -158,9 +158,8 @@ afterAll(async done => {
   done();
 });
 
-it('strapi is defined', async done => {
+it('strapi is defined', () => {
   expect(strapi).toBeDefined();
-  done();
 });
 ```
 
