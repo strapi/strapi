@@ -115,10 +115,9 @@ module.exports = {
         );
       }
 
-      const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(
-        params.password,
-        user.password
-      );
+      const validPassword = await strapi.plugins[
+        'users-permissions'
+      ].services.user.validatePassword(params.password, user.password);
 
       if (!validPassword) {
         return ctx.badRequest(
