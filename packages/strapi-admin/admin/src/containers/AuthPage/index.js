@@ -22,7 +22,7 @@ const AuthPage = ({ hasAdmin }) => {
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
   const registrationToken = query.get('registrationToken');
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema } = get(
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
     forms,
     authType,
     {}
@@ -285,6 +285,7 @@ const AuthPage = ({ hasAdmin }) => {
         </NavTopRightWrapper>
         <BaselineAlignment top size="78px">
           <Component
+            {...rest}
             fieldsToDisable={fieldsToDisable}
             formErrors={formErrors}
             inputsPrefix={inputsPrefix}

@@ -183,6 +183,14 @@ const EditViewDataManagerProvider = ({
         console.log(err);
         const status = get(err, 'response.status', null);
 
+        // The record does not exists
+        // Redirect the user to the previous page
+        if (id && status === 404) {
+          push(from);
+
+          return;
+        }
+
         if (id && status === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
