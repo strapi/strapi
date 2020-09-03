@@ -104,7 +104,7 @@ module.exports = strapi => {
         engine: _.get(config, 'engine', false),
       };
 
-      if (['tracing', 'introspection', 'engin'].some(key => _.has(config, key))) {
+      if (['tracing', 'introspection', 'engine'].some(key => _.has(config, key))) {
         strapi.log.warn(
           'The `tracing`, `introspection` and `engine` options are deprecated in favor of the `apolloServer` object and they will be removed in the next major version.'
         );
