@@ -95,8 +95,6 @@ const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleTyp
         content={{
           title: `${pluginId}.popUpWarning.title`,
           message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete`,
-          cancel: `${pluginId}.popUpWarning.button.cancel`,
-          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmDelete}

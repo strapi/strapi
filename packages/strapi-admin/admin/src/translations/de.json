@@ -287,8 +287,6 @@
   "components.WysiwygBottomControls.fullscreen": "Vergrößern",
   "components.WysiwygBottomControls.uploadFiles": "Ziehe eine Datei hierher, {browse} eine Datei zum hochladen aus oder füge sie aus der Zwischenablage ein.",
   "components.WysiwygBottomControls.uploadFiles.browse": "wähle",
-  "components.popUpWarning.button.cancel": "Abbrechen",
-  "components.popUpWarning.button.confirm": "Bestätigen",
   "components.popUpWarning.message": "Bist du sicher, dass du dies löschen möchtest?",
   "components.popUpWarning.title": "Bitte bestätigen",
   "form.button.continue": "Weiter",

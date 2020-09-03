@@ -174,8 +174,6 @@
   "components.WysiwygBottomControls.fullscreen": "Plein écran",
   "components.WysiwygBottomControls.uploadFiles": "Ajouter des fichiers en les 'glissant-déposant', {browse}, ou en les collant depuis le presse-papier",
   "components.WysiwygBottomControls.uploadFiles.browse": "en les selectionnant",
-  "components.popUpWarning.button.cancel": "Annuler",
-  "components.popUpWarning.button.confirm": "Confirmer",
   "components.popUpWarning.message": "Etes-vous sure de vouloir le supprimer ?",
   "components.popUpWarning.title": "Merci de confirmer",
   "form.button.done": "Terminer",

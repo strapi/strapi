@@ -210,8 +210,6 @@
   "components.WysiwygBottomControls.fullscreen": "Expandir",
   "components.WysiwygBottomControls.uploadFiles": "Arrasta e solta ficheiros, cola da área de transferência ou {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "selecione-os",
-  "components.popUpWarning.button.cancel": "Cancelar",
-  "components.popUpWarning.button.confirm": "Confirmar",
   "components.popUpWarning.message": "Tens a certeza que pretendes apagar isto?",
   "components.popUpWarning.title": "Por favor confirma",
   "form.button.done": "Concluir",

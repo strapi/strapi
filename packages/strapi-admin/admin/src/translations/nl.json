@@ -207,8 +207,6 @@
   "components.WysiwygBottomControls.fullscreen": "Uitklappen",
   "components.WysiwygBottomControls.uploadFiles": "Sleep bestanden, plak ze of {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "selecteer ze",
-  "components.popUpWarning.button.cancel": "Annuleren",
-  "components.popUpWarning.button.confirm": "Akkoord",
   "components.popUpWarning.message": "Weet je zeker dat je dit wilt verwijderen?",
   "components.popUpWarning.title": "Ga a.u.b. akkoord",
   "form.button.done": "Afgerond",

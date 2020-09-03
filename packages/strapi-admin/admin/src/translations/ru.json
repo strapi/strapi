@@ -211,8 +211,6 @@
   "components.WysiwygBottomControls.fullscreen": "Развернуть",
   "components.WysiwygBottomControls.uploadFiles": "Перетащите файлы в эту область, вставьте из буфера обмена или {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "выберите их",
-  "components.popUpWarning.button.cancel": "Отменить",
-  "components.popUpWarning.button.confirm": "Подтвердить",
   "components.popUpWarning.message": "Вы уверены, что хотите удалить это?",
   "components.popUpWarning.title": "Пожалуйста, подтвердите",
   "notification.error": "Произошла ошибка",
