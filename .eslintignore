@@ -7,7 +7,7 @@ examples/**
 cypress/**
 packages/strapi-generate-plugin/files/admin/src/**
 packages/strapi-helper-plugin/**
-packages/strapi-plugin-users-permissions/admin/**
+packages/strapi-plugin-users-permissions/admin/OLD/**
 .eslintrc.js
 .eslintrc.front.js
 .eslintrc.back.js

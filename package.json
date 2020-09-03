@@ -23,7 +23,7 @@
     "eslint-plugin-react-hooks": "^2.0.0",
     "eslint-plugin-redux-saga": "^1.1.0",
     "execa": "^1.0.0",
-    "fs-extra": "8.1.0",
+    "fs-extra": "9.0.1",
     "glob": "7.1.6",
     "husky": "^3.0.0",
     "istanbul": "~0.4.2",
@@ -93,7 +93,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

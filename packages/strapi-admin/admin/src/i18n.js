@@ -10,8 +10,8 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/admin-panel/customization.md#customize-the-strapi-admin-package
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
-import translationMessages from './translations';
+import translationMessages, { languageNativeNames } from './translations';
 
 const languages = Object.keys(translationMessages);
 
-export { languages, translationMessages };
+export { languages, translationMessages, languageNativeNames };

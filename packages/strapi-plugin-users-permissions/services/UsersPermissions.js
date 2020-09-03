@@ -141,7 +141,7 @@ module.exports = {
     });
   },
 
-  getActions(plugins = [], withInfo = true) {
+  getActions() {
     const generateActions = data =>
       Object.keys(data).reduce((acc, key) => {
         if (_.isFunction(data[key])) {
@@ -169,10 +169,6 @@ module.exports = {
         controllers: {},
       };
 
-      if (withInfo) {
-        initialState.information = plugins.find(plugin => plugin.id === key) || {};
-      }
-
       acc[key] = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
         obj.controllers[k] = generateActions(strapi.plugins[key].controllers[k]);
 
@@ -194,7 +190,7 @@ module.exports = {
   async getRole(roleID, plugins) {
     const role = await strapi
       .query('role', 'users-permissions')
-      .findOne({ id: roleID }, ['users', 'permissions']);
+      .findOne({ id: roleID }, ['permissions']);
 
     if (!role) {
       throw new Error('Cannot find this role');
