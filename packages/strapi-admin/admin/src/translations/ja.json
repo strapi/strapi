@@ -191,8 +191,6 @@
   "components.WysiwygBottomControls.fullscreen": "広げる",
   "components.WysiwygBottomControls.uploadFiles": "ファイルをドラッグ＆ドロップ, クリップボードからペースト もしくは {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "選ぶ",
-  "components.popUpWarning.button.cancel": "キャンセル",
-  "components.popUpWarning.button.confirm": "確認",
   "components.popUpWarning.message": "本当に削除しますか?",
   "components.popUpWarning.title": "確認してください",
   "form.button.done": "完了",

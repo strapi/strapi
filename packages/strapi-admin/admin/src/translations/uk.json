@@ -208,8 +208,6 @@
   "components.WysiwygBottomControls.fullscreen": "Розгорнути",
   "components.WysiwygBottomControls.uploadFiles": "Перетягніть файли сюди, вставте з буфера обміну або {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "обрати їх",
-  "components.popUpWarning.button.cancel": "Скасувати",
-  "components.popUpWarning.button.confirm": "Підтвердити",
   "components.popUpWarning.message": "Ви впевнені, що хочете це відалити?",
   "components.popUpWarning.title": "Підтвердіть, будь ласка",
   "form.button.done": "Готово",

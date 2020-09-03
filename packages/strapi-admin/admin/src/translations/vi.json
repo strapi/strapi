@@ -169,8 +169,6 @@
   "components.WysiwygBottomControls.fullscreen": "Giãn ra",
   "components.WysiwygBottomControls.uploadFiles": "Kéo và thả các tập tin, dán từ bộ nhớ tạm hay {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "chọn chúng",
-  "components.popUpWarning.button.cancel": "Hủy bỏ",
-  "components.popUpWarning.button.confirm": "Xác nhận",
   "components.popUpWarning.message": "Bạn có chắc là bạn muốn xoá nó?",
   "components.popUpWarning.title": "Vui lòng xác nhận",
   "form.button.done": "Hoàn thành",
