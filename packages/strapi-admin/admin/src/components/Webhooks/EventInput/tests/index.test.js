@@ -22,6 +22,7 @@ describe('<EventInput />', () => {
     name: 'events',
     value: ['media.create', 'media.delete'],
     onChange: jest.fn(),
+    shouldShowDPEvents: false,
   };
 
   it('should match the snapshot', () => {
@@ -101,15 +102,7 @@ describe('<EventInput />', () => {
     const formattedEvent = {
       target: {
         name: 'events',
-        value: [
-          'media.create',
-          'media.delete',
-          'entry.create',
-          'entry.update',
-          'entry.delete',
-          'entry.publish',
-          'entry.unpublish',
-        ],
+        value: ['media.create', 'media.delete', 'entry.create', 'entry.update', 'entry.delete'],
       },
     };
 

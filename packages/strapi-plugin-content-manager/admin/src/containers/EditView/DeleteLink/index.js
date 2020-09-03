@@ -1,23 +1,20 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
+import isEqual from 'react-fast-compare';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { Text } from '@buffetjs/core';
 import { PopUpWarning, request, useGlobalContext } from 'strapi-helper-plugin';
-import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
-import useEditView from '../../hooks/useEditView';
-import { DeleteButton } from './components';
-import { getTrad } from '../../utils';
+import PropTypes from 'prop-types';
+import pluginId from '../../../pluginId';
+import { getTrad } from '../../../utils';
+import { DeleteButton } from '../components';
+import { connect, select } from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
-const DeleteLink = () => {
-  const { initialData, isCreatingEntry, isSingleType, slug, clearData } = useDataManager();
-  const {
-    allowedActions: { canDelete },
-  } = useEditView();
+const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleType, slug }) => {
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -38,7 +35,7 @@ const DeleteLink = () => {
 
       emitEvent('willDeleteEntry');
 
-      await request(getRequestUrl(`${slug}/${initialData.id}`), {
+      await request(getRequestUrl(`${slug}/${dataId}`), {
         method: 'DELETE',
       });
 
@@ -110,4 +107,19 @@ const DeleteLink = () => {
   );
 };
 
-export default DeleteLink;
+DeleteLink.defaultProps = {
+  dataId: null,
+};
+
+DeleteLink.propTypes = {
+  canDelete: PropTypes.bool.isRequired,
+  clearData: PropTypes.func.isRequired,
+  dataId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  isCreatingEntry: PropTypes.bool.isRequired,
+  isSingleType: PropTypes.bool.isRequired,
+  slug: PropTypes.string.isRequired,
+};
+
+const Memoized = memo(DeleteLink, isEqual);
+
+export default connect(Memoized, select);
