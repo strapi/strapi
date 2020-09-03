@@ -203,8 +203,6 @@
   "components.WysiwygBottomControls.fullscreen": "Rozszerz",
   "components.WysiwygBottomControls.uploadFiles": "Przeciągnij i upuść pliki, wklej ze schowka lub {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "je wybierz",
-  "components.popUpWarning.button.cancel": "Anuluj",
-  "components.popUpWarning.button.confirm": "Zatwierdź",
   "components.popUpWarning.message": "Czy na pewno chcesz to usunąć?",
   "components.popUpWarning.title": "Potwierdzenie",
   "form.button.done": "Gotowe",
