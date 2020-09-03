@@ -36,11 +36,11 @@ const getDatabaseName = connection => {
   }
 };
 
-module.exports = ({ models, target }, ctx) => {
+module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) => {
   const { GLOBALS, connection, ORM } = ctx;
 
   // Parse every authenticated model.
-  const updates = Object.keys(models).map(async model => {
+  const updateModel = async model => {
     const definition = models[model];
 
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
@@ -627,15 +627,17 @@ module.exports = ({ models, target }, ctx) => {
       target[model].updateRelations = relations.update;
       target[model].deleteRelations = relations.deleteRelations;
 
-      await buildDatabaseSchema({
-        ORM,
-        definition,
-        loadedModel,
-        connection,
-        model: target[model],
-      });
+      return async () => {
+        await buildDatabaseSchema({
+          ORM,
+          definition,
+          loadedModel,
+          connection,
+          model: target[model],
+        });
 
-      await createComponentJoinTables({ definition, ORM });
+        await createComponentJoinTables({ definition, ORM });
+      };
     } catch (err) {
       if (err instanceof TypeError || err instanceof ReferenceError) {
         strapi.stopWithError(err, `Impossible to register the '${model}' model.`);
@@ -650,7 +652,20 @@ When this happens on a manyToMany relation, make sure to set this parameter on t
       }
       strapi.stopWithError(err);
     }
-  });
+  };
 
-  return Promise.all(updates);
+  const finalizeUpdates = [];
+  for (const model of _.keys(models)) {
+    const finalizeUpdate = await updateModel(model);
+    finalizeUpdates.push(finalizeUpdate);
+  }
+
+  if (selfFinalize) {
+    for (const finalizeUpdate of finalizeUpdates) {
+      await finalizeUpdate();
+    }
+    return [];
+  }
+
+  return finalizeUpdates;
 };
