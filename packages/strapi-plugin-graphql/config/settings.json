@@ -6,7 +6,7 @@
   "amountLimit": 100,
   "shareEnabled": false,
   "federation": false,
-  "apolloServerConfig": {
+  "apolloServer": {
     "tracing": false
   }
 }

@@ -85,8 +85,10 @@ module.exports = strapi => {
         return;
       }
 
+      const config = _.get(strapi.plugins.graphql, 'config', {});
+
       // Get federation config
-      const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
+      const isFederated = _.get(config, 'federation', false);
       const schemaDef = {};
       if (isFederated) {
         schemaDef.schema = buildFederatedSchema([{ typeDefs, resolvers }]);
@@ -95,24 +97,20 @@ module.exports = strapi => {
         schemaDef.resolvers = resolvers;
       }
 
-      // TODO: Remove these deprecated options in favor of `apolloServerConfig` in the next major version
+      // TODO: Remove these deprecated options in favor of `apolloServer` in the next major version
       const deprecatedApolloServerConfig = {
-        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
-        introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
-        engine: _.get(strapi.plugins.graphql, 'config.engine', false),
+        tracing: _.get(config, 'tracing', false),
+        introspection: _.get(config, 'introspection', true),
+        engine: _.get(config, 'engine', false),
       };
 
-      if (
-        _.has(strapi.plugins.graphql.config, 'tracing') ||
-        _.has(strapi.plugins.graphql.config, 'introspection') ||
-        _.has(strapi.plugins.graphql.config, 'engine')
-      ) {
+      if (['tracing', 'introspection', 'engin'].some(key => _.has(config, key))) {
         strapi.log.warn(
-          'The `tracing`, `introspection` and `engine` options are deprecated in favor of the `apolloServerConfig` object and they will be removed in the next major version.'
+          'The `tracing`, `introspection` and `engine` options are deprecated in favor of the `apolloServer` object and they will be removed in the next major version.'
         );
       }
 
-      const apolloServerConfig = _.get(strapi.plugins.graphql, 'config.apolloServerConfig', {});
+      const apolloServerConfig = _.get(config, 'apolloServer', {});
 
       const serverParams = {
         ...schemaDef,
@@ -127,11 +125,11 @@ module.exports = strapi => {
           };
         },
         formatError: err => {
-          const formatError = _.get(strapi.plugins.graphql, 'config.formatError', null);
+          const formatError = _.get(config, 'formatError', null);
 
           return typeof formatError === 'function' ? formatError(err) : err;
         },
-        validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
+        validationRules: [depthLimit(config.depthLimit)],
         playground: false,
         cors: false,
         bodyParserConfig: true,
@@ -141,13 +139,10 @@ module.exports = strapi => {
       };
 
       // Disable GraphQL Playground in production environment.
-      if (
-        strapi.config.environment !== 'production' ||
-        strapi.plugins.graphql.config.playgroundAlways
-      ) {
+      if (strapi.config.environment !== 'production' || config.playgroundAlways) {
         serverParams.playground = {
-          endpoint: `${strapi.config.server.url}${strapi.plugins.graphql.config.endpoint}`,
-          shareEnabled: strapi.plugins.graphql.config.shareEnabled,
+          endpoint: `${strapi.config.server.url}${config.endpoint}`,
+          shareEnabled: config.shareEnabled,
         };
       }
 
@@ -155,7 +150,7 @@ module.exports = strapi => {
 
       server.applyMiddleware({
         app: strapi.app,
-        path: strapi.plugins.graphql.config.endpoint,
+        path: config.endpoint,
       });
     },
   };
