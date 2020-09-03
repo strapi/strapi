@@ -10,15 +10,11 @@ const getDraftRelations = (data, ctSchema, components) => {
       const currentData = data[current];
 
       if (type === 'dynamiczone') {
-        const dzDraftCount = currentData.reduce((acc2, curr) => {
+        currentData.forEach(curr => {
           const compoSchema = get(components, curr.__component, {});
 
-          acc2 += getDraftRelationsCount(curr, compoSchema);
-
-          return acc2;
-        }, 0);
-
-        acc += dzDraftCount;
+          acc += getDraftRelationsCount(curr, compoSchema);
+        });
       }
 
       if (type === 'component') {
@@ -27,13 +23,9 @@ const getDraftRelations = (data, ctSchema, components) => {
         const compoSchema = get(components, compoUID, {});
 
         if (isRepeatable) {
-          const compoCount = currentData.reduce((acc2, curr) => {
-            acc2 += getDraftRelationsCount(curr, compoSchema);
-
-            return acc2;
-          }, 0);
-
-          acc += compoCount;
+          currentData.forEach(curr => {
+            acc += getDraftRelationsCount(curr, compoSchema);
+          });
         } else {
           acc += getDraftRelationsCount(currentData, compoSchema);
         }
@@ -47,19 +39,11 @@ const getDraftRelations = (data, ctSchema, components) => {
             acc += 1;
           }
         } else {
-          const hasDraftAndPublish = currentData.some(value => has(value, 'published_at'));
-
-          if (hasDraftAndPublish) {
-            const count = currentData.reduce((acc, current) => {
-              if (isEmpty(current.published_at)) {
-                acc += 1;
-              }
-
-              return acc;
-            }, 0);
-
-            acc += count;
-          }
+          currentData.forEach(value => {
+            if (has(value, 'published_at') && isEmpty(value.published_at)) {
+              acc += 1;
+            }
+          });
         }
       }
 
