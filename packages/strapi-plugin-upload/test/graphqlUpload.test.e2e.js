@@ -139,18 +139,8 @@ describe('Upload plugin end to end tests', () => {
       method: 'POST',
       body: {
         query: /* GraphQL */ `
-          mutation updateFileInfo(
-            $id: ID!
-            $name: String
-            $alternativeText: String
-            $caption: String
-          ) {
-            updateFileInfo(
-              id: $id
-              name: $name
-              alternativeText: $alternativeText
-              caption: $caption
-            ) {
+          mutation updateFileInfo($id: ID!, $info: FileInfoInput!) {
+            updateFileInfo(id: $id, info: $info) {
               id
               name
               alternativeText
@@ -160,9 +150,11 @@ describe('Upload plugin end to end tests', () => {
         `,
         variables: {
           id: data.file.id,
-          name: 'test name',
-          alternativeText: 'alternative text test',
-          caption: 'caption test',
+          info: {
+            name: 'test name',
+            alternativeText: 'alternative text test',
+            caption: 'caption test',
+          },
         },
       },
     });
