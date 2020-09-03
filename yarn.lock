@@ -5353,13 +5353,13 @@ cli-spinners@^2.0.0:
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.2.0.tgz#e8b988d9206c692302d8ee834e7a85c0144d8f77"
   integrity sha512-tgU3fKwzYjiLEQgPMD9Jt+JjHVL9kW93FiIMX/l7rivvOD4/LL0Mf7gda3+4U2KJBloybwgj5KEoQgGRioMiKQ==
 
-cli-table3@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/cli-table3/-/cli-table3-0.5.1.tgz#0252372d94dfc40dbd8df06005f48f31f656f202"
-  integrity sha512-7Qg2Jrep1S/+Q3EceiZtQcDPWxhAvBw+ERf1162v4sikJrvojMHFqXt8QIVha8UlH9rgU0BeWPytZ9/TzYqlUw==
+cli-table3@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/cli-table3/-/cli-table3-0.6.0.tgz#b7b1bc65ca8e7b5cef9124e13dc2b21e2ce4faee"
+  integrity sha512-gnB85c3MGC7Nm9I/FkiasNBOKjOiO1RNuXXarQms37q4QMpWdlbBgD/VnOStA2faG1dpXMv31RFApjX1/QdgWQ==
   dependencies:
     object-assign "^4.1.0"
-    string-width "^2.1.1"
+    string-width "^4.2.0"
   optionalDependencies:
     colors "^1.1.2"
 
@@ -11348,10 +11348,10 @@ koa-static@^5.0.0:
     debug "^3.1.0"
     koa-send "^5.0.0"
 
-koa-views@^6.2.0:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/koa-views/-/koa-views-6.2.1.tgz#67638e754f9467fcb7ccd6ba601164cb5dadfea8"
-  integrity sha512-wU3tw48KuskaJg0x1JZmC73UWGgVmh6B54HuHDzTrkavig+dBI0NbFeGiWsaOCZREQkaTfIVXSPSByDant71ew==
+koa-views@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/koa-views/-/koa-views-6.3.0.tgz#0adaf85699fba910b81e3f0755350c2c7c6c3771"
+  integrity sha512-6FEN3z9B/PSay4XDAqzNBEAxfrQRhgoepoL5XKFkiMYToxTZnbirSt1qJb18YUpmHtbMdTdB4IUHFn1tyQ3SIA==
   dependencies:
     consolidate "0.15.1"
     debug "^4.1.0"
