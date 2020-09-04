@@ -61,6 +61,32 @@ export const CONTROLS = [
   ],
   [
     {
+      label: 'leftAlign',
+      style: 'LEFT-ALIGN',
+      className: 'leftAlign',
+      hideLabel: true,
+      handler: 'changeAlignToLeft',
+      text: '',
+    },
+    {
+      label: 'centerAlign',
+      style: 'CENTER-ALIGN',
+      className: 'centerAlign',
+      hideLabel: true,
+      handler: 'changeAlignToCenter',
+      text: '',
+    },
+    {
+      label: 'rightAlign',
+      style: 'RIGHT-ALIGN',
+      className: 'rightAlign',
+      hideLabel: true,
+      handler: 'changeAlignToRight',
+      text: '',
+    },
+  ],
+  [
+    {
       label: '<>',
       style: 'CODE',
       className: 'code',
