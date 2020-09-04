@@ -70,7 +70,12 @@ module.exports = async function createProject(scope, { client, connection, depen
     // merge template files if a template is specified
     const hasTemplate = Boolean(scope.template);
     if (hasTemplate) {
-      await mergeTemplate(scope.template, rootPath);
+      try {
+        await mergeTemplate(scope.template, rootPath);
+      } catch (error) {
+        await fse.remove(scope.rootPath);
+        stopProcess(`⛔️ Template installation failed: ${error.message}`);
+      }
     }
   } catch (err) {
     await fse.remove(scope.rootPath);

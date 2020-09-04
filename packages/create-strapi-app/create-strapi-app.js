@@ -2,9 +2,7 @@
 
 const commander = require('commander');
 const packageJson = require('./package.json');
-// TODO: restore this line instead:
-// const generateNewApp = require('strapi-generate-new');
-const generateNewApp = require('../strapi-generate-new');
+const generateNewApp = require('strapi-generate-new');
 
 const program = new commander.Command(packageJson.name);
 

@@ -3,40 +3,60 @@
 const path = require('path');
 const fse = require('fs-extra');
 const fetch = require('node-fetch');
-const unzip = require('unzip-stream');
+const tar = require('tar');
 const _ = require('lodash');
+const chalk = require('chalk');
+const gitInfo = require('hosted-git-info');
 
 // Specify all the files and directories a template can have
 const allowChildren = '*';
-const allowedTemplateTree = {
-  // Root template files
-  'template.json': true,
+const allowedTemplateContents = {
   'README.md': true,
-  '.gitignore': true,
-  // Template contents
-  template: {
-    'README.md': true,
-    '.env.example': true,
-    api: allowChildren,
-    components: allowChildren,
-    config: {
-      functions: allowChildren,
-    },
-    data: allowChildren,
-    plugins: allowChildren,
-    public: allowChildren,
-    scripts: allowChildren,
+  '.env.example': true,
+  api: allowChildren,
+  components: allowChildren,
+  config: {
+    functions: allowChildren,
   },
+  data: allowChildren,
+  plugins: allowChildren,
+  public: allowChildren,
+  scripts: allowChildren,
 };
 
+// Make sure the template has the required top-level structure
+async function checkTemplateRootStructure(templatePath) {
+  // Make sure the root of the repo has a template.json and a template/ folder
+  const templateJsonPath = path.resolve(templatePath, 'template.json');
+  try {
+    const hasTemplateJson = !fse.statSync(templateJsonPath).isDirectory();
+    if (!hasTemplateJson) {
+      throw Error();
+    }
+  } catch (error) {
+    throw Error(`A template must have a root ${chalk.green('template.json')} file`);
+  }
+
+  // Make sure the root of the repo has a template.json and a template/ folder
+  const templateDirPath = path.resolve(templatePath, 'template');
+  try {
+    const hasTemplateDir = fse.statSync(templateDirPath).isDirectory();
+    if (!hasTemplateDir) {
+      throw Error();
+    }
+  } catch (error) {
+    throw Error(`A template must have a root ${chalk.green('template/')} directory`);
+  }
+}
+
 // Traverse template tree to make sure each file and folder is allowed
-async function checkTemplateStructure(templatePath) {
-  // Recursively check if each item in the template is allowed
+async function checkTemplateContentsStructure(templateContentsPath) {
+  // Recursively check if each item in a directory is allowed
   const checkPathContents = (pathToCheck, parents) => {
     const contents = fse.readdirSync(pathToCheck);
     contents.forEach(item => {
       const nextParents = [...parents, item];
-      const matchingTreeValue = _.get(allowedTemplateTree, nextParents);
+      const matchingTreeValue = _.get(allowedTemplateContents, nextParents);
 
       // Treat files and directories separately
       const itemPath = path.resolve(pathToCheck, item);
@@ -44,7 +64,9 @@ async function checkTemplateStructure(templatePath) {
 
       if (matchingTreeValue === undefined) {
         // Unknown paths are forbidden
-        throw Error(`Illegal template structure, unknown path ${nextParents.join('/')}`);
+        throw Error(
+          `Illegal template structure, unknown path ${chalk.green(nextParents.join('/'))}`
+        );
       }
 
       if (matchingTreeValue === true) {
@@ -53,8 +75,8 @@ async function checkTemplateStructure(templatePath) {
           return;
         }
         throw Error(
-          `Illegal template structure, expected a file and got a directory at ${nextParents.join(
-            '/'
+          `Illegal template structure, expected a file and got a directory at ${chalk.green(
+            nextParents.join('/')
           )}`
         );
       }
@@ -67,59 +89,60 @@ async function checkTemplateStructure(templatePath) {
         // Check if the contents of the directory are allowed
         checkPathContents(itemPath, nextParents);
       } else {
-        throw Error(`Illegal template structure, unknow file ${nextParents.join('/')}`);
+        throw Error(
+          `Illegal template structure, unknow file ${chalk.green(nextParents.join('/'))}`
+        );
       }
     });
   };
 
-  checkPathContents(templatePath, []);
+  checkPathContents(templateContentsPath, []);
 }
 
 function getRepoInfo(githubURL) {
+  const { type, user, project } = gitInfo.fromUrl(githubURL);
   // Make sure it's a github url
-  const address = githubURL.split('://')[1];
-  if (!address.startsWith('github.com')) {
+  if (type !== 'github') {
     throw Error('A Strapi template can only be a GitHub URL');
   }
 
-  // Parse github address into parts
-  const [, username, name, ...rest] = address.split('/');
-  const isRepo = username != null && name != null;
-  if (!isRepo || rest.length > 0) {
-    throw Error('A template URL must be the root of a GitHub repository');
-  }
-
-  return { username, name };
+  return { user, project };
 }
 
-async function downloadGithubRepo(repoInfo, rootPath) {
-  const { username, name, branch = 'master' } = repoInfo;
-  const codeload = `https://codeload.github.com/${username}/${name}/zip/${branch}`;
-  const templatePath = path.resolve(rootPath, 'tmp-template');
+async function downloadGithubRepo(repoInfo, templatePath) {
+  // Download from GitHub
+  const { user, project } = repoInfo;
+  const codeload = `https://codeload.github.com/${user}/${project}/tar.gz/master`;
   const response = await fetch(codeload);
-  await new Promise(resolve => {
-    response.body.pipe(unzip.Extract({ path: templatePath })).on('close', resolve);
-  });
 
-  return templatePath;
+  // Store locally
+  fse.mkdirSync(templatePath);
+  await new Promise(resolve => {
+    response.body.pipe(tar.extract({ strip: 1, cwd: templatePath })).on('close', resolve);
+  });
 }
 
 // Merge the template's template.json into the Strapi project's package.json
 async function mergePackageJSON(rootPath, templatePath, repoInfo) {
-  // Import the package.json and template.json templates
+  // Import the package.json and template.json objects
   const packageJSON = require(path.resolve(rootPath, 'package.json'));
   const templateJSON = require(path.resolve(templatePath, 'template.json'));
 
+  if (!templateJSON.package) {
+    // Nothing to overwrite
+    return;
+  }
+
   // Make sure the template.json doesn't overwrite the UUID
-  if (templateJSON.strapi && templateJSON.strapi.uuid) {
+  if (templateJSON.package.strapi && templateJSON.package.strapi.uuid) {
     throw Error('A template cannot overwrite the Strapi UUID');
   }
 
   // Use lodash to deeply merge them
-  const mergedConfig = _.merge(packageJSON, templateJSON);
+  const mergedConfig = _.merge(packageJSON, templateJSON.package);
 
   // Prefix Strapi UUID with starter info
-  const prefix = `STARTER:${repoInfo.username}/${repoInfo.name}:`;
+  const prefix = `STARTER:${repoInfo.user}/${repoInfo.project}:`;
   mergedConfig.strapi = {
     uuid: prefix + mergedConfig.strapi.uuid,
   };
@@ -146,19 +169,27 @@ async function mergeFilesAndDirectories(rootPath, templatePath) {
 }
 
 module.exports = async function mergeTemplate(templateUrl, rootPath) {
-  // Download template repository to a temporary directory
+  // Parse template info
   const repoInfo = getRepoInfo(templateUrl);
-  console.log(`Installing ${repoInfo.username}/${repoInfo.name} template.`);
-  const templateParentPath = await downloadGithubRepo(repoInfo, rootPath);
-  const templatePath = path.resolve(templateParentPath, fse.readdirSync(templateParentPath)[0]);
+  const { user, project } = repoInfo;
+  console.log(`Installing ${chalk.yellow(`${user}/${project}`)} template.`);
+
+  // Download template repository to a temporary directory
+  const templatePath = path.resolve(rootPath, '.tmp-template');
+  try {
+    await downloadGithubRepo(repoInfo, templatePath);
+  } catch (error) {
+    throw Error(`Could not download ${chalk.yellow(`${user}/${project}`)} repository`);
+  }
 
   // Make sure the downloaded template matches the required format
-  await checkTemplateStructure(templatePath);
+  await checkTemplateRootStructure(templatePath);
+  await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
   await mergePackageJSON(rootPath, templatePath, repoInfo);
   await mergeFilesAndDirectories(rootPath, templatePath);
 
   // Delete the downloaded template repo
-  await fse.remove(templateParentPath);
+  await fse.remove(templatePath);
 };

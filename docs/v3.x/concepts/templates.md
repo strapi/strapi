@@ -48,23 +48,42 @@ To create a Strapi template, you need to publish a public GitHub repository that
 
 First, a template's only concern should be to adapt Strapi to a use case. It should not deal with environment-specific configs, like databases, or upload and email providers. This is to make sure that templates stay maintainable, and to avoid conflicts with other CLI options like `--quickstart`.
 
-Second, a template must follow the following file structure. If any unexpected file or directory is found, the installation will crash.
+Second, a template must follow the following file structure.
 
 ### File structure
 
-- `README.md`: to document your template
-- `.gitignore`: to remove files from Git
-- `template.json`: to extend the Strapi app's default `package.json`
-- `/template`: where you can extend the file contents of a Strapi project. All the children are optional
-  - `README.md`: the readme of an app made with this template
-  - `.env.example`: to specify required environment variables
-  - `api/`: for collections and single types
-  - `components/` for components
-  - `config/` can only include the `functions` directory (things like `bootstrap.js` or `404.js`), because other config files are environment-specific.
-  - `data/` to store the data imported by a seed script
-  - `plugins/` for custom Strapi plugins
-  - `public/` to serve files
-  - `scripts/` for custom scripts
+You can add as many files as you want to the root of your template repository. But it must at least have a `template.json` file and a `template` directory.
+
+The `template.json` is used to extend the Strapi app's default `package.json`. You can put all the properties that should overwrite the default `package.json` in a root `package` property. For example, a `template.json` might look like this:
+
+```json
+{
+  "package": {
+    "dependencies": {
+      "strapi-plugin-graphql": "latest"
+    },
+    "scripts": {
+      "custom": "node ./scripts/custom.js"
+    }
+  }
+}
+```
+
+The `template` directory is where you can extend the file contents of a Strapi project. All the children are optional, you should only include the files that will overwrite the default Strapi app.
+
+Only the following contents are allowed inside the `template` directory:
+
+- `README.md`: the readme of an app made with this template
+- `.env.example`: to specify required environment variables
+- `api/`: for collections and single types
+- `components/` for components
+- `config/` can only include the `functions` directory (things like `bootstrap.js` or `404.js`), because other config files are environment-specific.
+- `data/` to store the data imported by a seed script
+- `plugins/` for custom Strapi plugins
+- `public/` to serve files
+- `scripts/` for custom scripts
+
+If any unexpected file or directory is found, the installation will crash.
 
 ### Step by step
 
@@ -73,8 +92,8 @@ After reading the above rules, follow these steps to create your template:
 1. Create a standard Strapi app with `create-strapi-app`, using the `--quickstart` option.
 2. Customize your app to match the needs of your use case.
 3. Outside of Strapi, create a new directory for your template.
-4. Create `template.json`, `.gitignore` and `README.md` files in your template directory.
-5. If you have modified your app's `package.json`, include these changes (and _only_ these changes) in `template.json`. Otherwise, leave it as an empty object.
+4. Create a `template.json` file in your template directory.
+5. If you have modified your app's `package.json`, include these changes (and _only_ these changes) in `template.json` in a `package` property. Otherwise, leave it as an empty object.
 6. Create a `/template` subdirectory.
 7. Think of all the files you have modified in your app, and copy them to the `/template` directory
 8. Publish the root template project on GitHub. Make sure that the repository is public, and that the code is on the `master` branch.
