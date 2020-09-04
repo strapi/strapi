@@ -506,8 +506,8 @@ The use of `ngrok` is not needed.
 - Click on **Create app** button
 - Fill the information:
   - **App name**: Strapi auth
-  - **LinkedIn Page**: Enter a LinkedIn page name to associate with the app or click **Create a new LinkedInPage** to create a new one
-  - **App Logo**: Upload a square image that at least 100x100 pixel.
+  - **LinkedIn Page**: Enter a LinkedIn page name to associate with the app or click **Create a new LinkedIn Page** to create a new one
+  - **App Logo**: Upload a square image that is at least 100x100 pixels.
 - Click on the **Create app** to create the app
 - On the app page click on **Auth** tab
 - Fill the information:
