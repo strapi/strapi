@@ -53,7 +53,15 @@ const getVisibleAttributes = model => {
   return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
 };
 
-const hasDraftAndPublish = model => _.get(model, 'options.draftAndPublish', false) === true;
+const isEligibleForDraftAndPublish = model => {
+  return _.get(model, 'options.isEligibleForDraftAndPublish', true) === true;
+};
+
+const hasDraftAndPublish = model => {
+  return (
+    isEligibleForDraftAndPublish(model) && _.get(model, 'options.draftAndPublish', false) === true
+  );
+};
 
 const isDraft = (data, model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
@@ -63,5 +71,6 @@ module.exports = {
   getNonWritableAttributes,
   getVisibleAttributes,
   hasDraftAndPublish,
+  isEligibleForDraftAndPublish,
   isDraft,
 };

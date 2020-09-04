@@ -4,6 +4,10 @@
     "name": "User",
     "description": ""
   },
+  "options": {
+    "draftAndPublish": false,
+    "isEligibleForDraftAndPublish": false
+  },
   "attributes": {
     "firstname": {
       "type": "string",

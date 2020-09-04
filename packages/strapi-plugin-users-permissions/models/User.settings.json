@@ -6,6 +6,7 @@
   },
   "options": {
     "draftAndPublish": false,
+    "isEligibleForDraftAndPublish": false,
     "timestamps": true
   },
   "attributes": {

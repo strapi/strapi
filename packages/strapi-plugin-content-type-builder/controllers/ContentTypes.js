@@ -89,14 +89,14 @@ module.exports = {
 
   async updateContentType(ctx) {
     const { uid } = ctx.params;
-    const { body } = ctx.request;
+    const sanitizedBody = _.omit(ctx.request.body, ['contentType.isEligibleForDraftAndPublish']);
 
     if (!_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
     try {
-      await validateUpdateContentTypeInput(body);
+      await validateUpdateContentTypeInput(sanitizedBody);
     } catch (error) {
       return ctx.send({ error }, 400);
     }
@@ -107,8 +107,8 @@ module.exports = {
       const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
       const component = await contentTypeService.editContentType(uid, {
-        contentType: body.contentType,
-        components: body.components,
+        contentType: sanitizedBody.contentType,
+        components: sanitizedBody.components,
       });
 
       setImmediate(() => strapi.reload());

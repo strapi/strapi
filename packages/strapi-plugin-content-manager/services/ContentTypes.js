@@ -3,8 +3,8 @@
 const _ = require('lodash');
 
 const pluralize = require('pluralize');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const storeUtils = require('./utils/store');
-const { pickSchemaFields } = require('./utils/schema');
 
 const uidToStoreKey = uid => {
   return `content_types::${uid}`;
@@ -107,7 +107,15 @@ const formatAttribute = (key, attribute, { model }) => {
 
 const formatContentTypeSchema = contentType => {
   return {
-    ...pickSchemaFields(contentType),
+    modelType: contentType.modelType,
+    connection: contentType.connection,
+    collectionName: contentType.collectionName,
+    info: contentType.collectionName,
+    options: {
+      ...contentType.options,
+      draftAndPublish: contentTypesUtils.hasDraftAndPublish(contentType),
+      isEligibleForDraftAndPublish: contentTypesUtils.isEligibleForDraftAndPublish(contentType),
+    },
     attributes: {
       id: {
         type: contentType.primaryKeyType,
