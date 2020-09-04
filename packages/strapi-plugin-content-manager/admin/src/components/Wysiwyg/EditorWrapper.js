@@ -127,6 +127,26 @@ const EditorWrapper = styled.div`
       text-align: right;
     }
   }
+
+  .previewMode {
+    &--left-aligned {
+      & > * {
+        text-align: left;
+      }
+    }
+
+    &--center-aligned {
+      & > * {
+        text-align: center;
+      }
+    }
+
+    &--right-aligned {
+      & > * {
+        text-align: right;
+      }
+    }
+  }
 `;
 
 export default EditorWrapper;

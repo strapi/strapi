@@ -55,6 +55,7 @@ class Wysiwyg extends React.Component {
       isPreviewMode: false,
       headerValue: '',
       selection: null,
+      textAlign: 'left',
     };
     this.focus = () => {
       this.setState({ isFocused: true });
@@ -268,6 +269,21 @@ class Wysiwyg extends React.Component {
     return this.setState({
       editorState: EditorState.moveFocusToEnd(newEditorState),
     });
+  };
+
+  changeAlignToLeft = () => {
+    this.setState({ textAlign: 'left' });
+    this.domEditor.focus();
+  };
+
+  changeAlignToCenter = () => {
+    this.setState({ textAlign: 'center' });
+    this.domEditor.focus();
+  };
+
+  changeAlignToRight = () => {
+    this.setState({ textAlign: 'right' });
+    this.domEditor.focus();
   };
 
   /**
@@ -684,6 +700,9 @@ class Wysiwyg extends React.Component {
                     addSimpleBlockWithSelection: this.addSimpleBlockWithSelection,
                     addUlBlock: this.addUlBlock,
                     handleOpenMediaLibrary: this.handleOpenMediaLibrary,
+                    changeAlignToLeft: this.changeAlignToLeft,
+                    changeAlignToCenter: this.changeAlignToCenter,
+                    changeAlignToRight: this.changeAlignToRight,
                   }}
                   onToggle={this.toggleInlineStyle}
                   onToggleBlock={this.toggleBlockType}
@@ -697,7 +716,9 @@ class Wysiwyg extends React.Component {
             </div>
             {/* WYSIWYG PREVIEW NOT FULLSCREEN */}
             {isPreviewMode ? (
-              <PreviewWysiwyg data={this.props.value} />
+              <div className={cn(`previewMode--${this.state.textAlign}-aligned`)}>
+                <PreviewWysiwyg data={this.props.value} />
+              </div>
             ) : (
               <div
                 className={cn('editor', isFullscreen && 'editorFullScreen')}
@@ -717,6 +738,7 @@ class Wysiwyg extends React.Component {
                   stripPastedStyles
                   tabIndex={this.props.tabIndex}
                   spellCheck
+                  textAlignment={this.state.textAlign}
                 />
                 <input className="editorInput" tabIndex="-1" />
               </div>
@@ -743,7 +765,9 @@ class Wysiwyg extends React.Component {
                 onClick={this.toggleFullScreen}
                 characters={this.getCharactersNumber()}
               />
-              <PreviewWysiwyg data={this.props.value} />
+              <div className={cn(`previewMode--${this.state.textAlign}-aligned`)}>
+                <PreviewWysiwyg data={this.props.value} />
+              </div>
             </div>
           )}
         </EditorWrapper>
