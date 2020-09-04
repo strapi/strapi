@@ -1,4 +1,6 @@
 import { includes, mapKeys, reject } from 'lodash';
+import { allowedTlds } from './topLevelDomains';
+
 /**
  * [validateInput description]
  * @param  {String || Number} value  Input's value
@@ -14,6 +16,13 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
   const emailRegex = new RegExp(
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   );
+
+  const hasValidTopLevelDomain = email => {
+    const domain = email.split('@').pop();
+    const topLevelDomain = domain.split('.').pop();
+    return allowedTlds.includes(topLevelDomain.toUpperCase());
+  };
+
   // handle i18n
   const requiredError = { id: 'components.Input.error.validation.required' };
 
@@ -63,7 +72,7 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
     }
   });
 
-  if (type === 'email' && !emailRegex.test(value)) {
+  if (type === 'email' && (!emailRegex.test(value) || !hasValidTopLevelDomain(value))) {
     errors.push({ id: 'components.Input.error.validation.email' });
   }
 
