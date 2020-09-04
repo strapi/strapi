@@ -10,7 +10,10 @@ import Quote from '../../icons/Quote';
 import Striked from '../../icons/Striked';
 import Ul from '../../icons/Ul';
 import Underline from '../../icons/Underline';
+import LeftAlign from '../../icons/LeftAlign';
+import CenterAlign from '../../icons/CenterAlign';
 import StyledButton from './StyledButton';
+import RightAlign from '../../icons/RightAlign';
 
 const icons = {
   bold: Bold,
@@ -23,6 +26,9 @@ const icons = {
   code: Code,
   striked: Striked,
   img: Media,
+  leftAlign: LeftAlign,
+  centerAlign: CenterAlign,
+  rightAlign: RightAlign,
 };
 
 const Button = ({
