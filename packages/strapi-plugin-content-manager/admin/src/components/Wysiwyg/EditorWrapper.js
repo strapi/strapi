@@ -117,6 +117,16 @@ const EditorWrapper = styled.div`
     height: 0;
     width: 0;
   }
+
+  .DraftEditor-root {
+    &.DraftEditor-alignCenter .public-DraftStyleDefault-block {
+      text-align: center;
+    }
+
+    &.DraftEditor-alignRight .public-DraftStyleDefault-block {
+      text-align: right;
+    }
+  }
 `;
 
 export default EditorWrapper;
