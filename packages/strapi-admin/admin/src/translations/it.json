@@ -212,8 +212,6 @@
   "components.WysiwygBottomControls.fullscreen": "Espandi",
   "components.WysiwygBottomControls.uploadFiles": "Trascina file, incolla dagli appunti o {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "selezionali",
-  "components.popUpWarning.button.cancel": "Annulla",
-  "components.popUpWarning.button.confirm": "Conferma",
   "components.popUpWarning.message": "Sei sicuro di volerlo cancellare?",
   "components.popUpWarning.title": "Per favore conferma",
   "form.button.done": "Fatto",

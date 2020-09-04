@@ -203,8 +203,6 @@
   "components.WysiwygBottomControls.fullscreen": "Genişlet",
   "components.WysiwygBottomControls.uploadFiles": "Dosyanızı bu alana sürükleyip bırakın ya da bir dosya yüklemek için {browse}",
   "components.WysiwygBottomControls.uploadFiles.browse": "Bunları seç",
-  "components.popUpWarning.button.cancel": "İptal",
-  "components.popUpWarning.button.confirm": "Onayla",
   "components.popUpWarning.message": "Bunu silmek istediğinizden emin misiniz?",
   "components.popUpWarning.title": "Lütfen onaylayın",
   "form.button.done": "Tamam",

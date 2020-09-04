@@ -93,10 +93,7 @@ const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleTyp
         isOpen={showWarningDelete}
         toggleModal={toggleWarningDelete}
         content={{
-          title: `${pluginId}.popUpWarning.title`,
-          message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete`,
-          cancel: `${pluginId}.popUpWarning.button.cancel`,
-          confirm: `${pluginId}.popUpWarning.button.confirm`,
+          message: getTrad('popUpWarning.bodyMessage.contentType.delete'),
         }}
         popUpWarningType="danger"
         onConfirm={handleConfirmDelete}
