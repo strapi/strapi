@@ -3,6 +3,7 @@
   "dependencies": {},
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@swc-node/jest": "^0.3.4",
     "@testing-library/jest-dom": "^5.8.0",
     "@testing-library/react": "^11.0.2",
     "@testing-library/react-hooks": "^3.2.1",
