@@ -4413,12 +4413,13 @@ aws4@1.9.1, aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.9.1.tgz#7e33d8f7d449b3f673cd72deb9abdc552dbe528e"
   integrity sha512-wMHVg2EOHaMRxbzgFJ9gtjOOCrI80OHLG14rxi28XwOW8ux6IiEbRCGGGqCtdAIg4FQCbW20k9RsT4y3gJlFug==
 
-axios-mock-adapter@^1.17.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/axios-mock-adapter/-/axios-mock-adapter-1.17.0.tgz#0dbee43c606d4aaba5a43d88d96d6661a7cc3c04"
-  integrity sha512-q3efmwJUOO4g+wsLNSk9Ps1UlJoF3fQ3FSEe4uEEhkRtu7SoiAVPj8R3Hc/WP55MBTVFzaDP9QkdJhdVhP8A1Q==
+axios-mock-adapter@^1.18.2:
+  version "1.18.2"
+  resolved "https://registry.yarnpkg.com/axios-mock-adapter/-/axios-mock-adapter-1.18.2.tgz#01fa9e88e692e8f1bbc1ad1200dde672486e03c7"
+  integrity sha512-e5aTsPy2Viov22zNpFTlid76W1Scz82pXeEwwCXdtO85LROhHAF8pHF2qDhiyMONLxKyY3lQ+S4UCsKgrlx8Hw==
   dependencies:
-    deep-equal "^1.0.1"
+    fast-deep-equal "^3.1.1"
+    is-buffer "^2.0.3"
 
 axios@^0.19.2:
   version "0.19.2"
@@ -9952,7 +9953,7 @@ is-buffer@^1.1.5:
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-1.1.6.tgz#efaa2ea9daa0d7ab2ea13a97b2b8ad51fefbe8be"
   integrity sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==
 
-is-buffer@^2.0.0:
+is-buffer@^2.0.0, is-buffer@^2.0.3:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-2.0.4.tgz#3e572f23c8411a5cfd9557c849e3665e0b290623"
   integrity sha512-Kq1rokWXOPXWuaMAqZiJW4XxsmD9zGx9q4aePabbn3qCRGedtH7Cm+zV8WETitMfu1wdh+Rvd6w5egwSngUX2A==
