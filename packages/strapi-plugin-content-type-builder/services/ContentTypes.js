@@ -7,7 +7,7 @@ const generator = require('strapi-generate');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
 
 /**
  * Format a contentType info to be used by the front-end
@@ -23,7 +23,7 @@ const formatContentType = contentType => {
     schema: {
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
-      draftAndPublish: _.get(options, 'draftAndPublish', false),
+      draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       connection,
       kind: kind || 'collectionType',
       collectionName,
@@ -191,6 +191,5 @@ module.exports = {
   createContentType,
   editContentType,
   deleteContentType,
-
   formatContentType,
 };

@@ -85,7 +85,9 @@ describe('Migration - draft and publish', () => {
       });
       expect(body.length).toBe(2);
       const expectDog = expectDog => dog =>
-        dog.name === expectDog.name && dog.published_at === (dog.createdAt || dog.created_at);
+        dog.name === expectDog.name &&
+        dog.published_at === (dog.createdAt || dog.created_at) &&
+        !isNaN(new Date(dog.published_at).valueOf());
       expect(body.find(expectDog(data.dogs[0])));
       expect(body.find(expectDog(data.dogs[1])));
       data.dogs = body;

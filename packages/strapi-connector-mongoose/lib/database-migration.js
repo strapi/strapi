@@ -8,8 +8,8 @@ const { getDefinitionFromStore } = require('./utils/store-definition');
 const getDraftAndPublishMigrationWay = async (definition, ORM) => {
   const previousDefRow = await getDefinitionFromStore(definition, ORM);
   const previousDef = JSON.parse(_.get(previousDefRow, 'value', null));
-  const previousDraftAndPublish = _.get(previousDef, 'options.draftAndPublish', false) === true;
-  const actualDraftAndPublish = _.get(definition, 'options.draftAndPublish', false) === true;
+  const previousDraftAndPublish = contentTypesUtils.hasDraftAndPublish(previousDef);
+  const actualDraftAndPublish = contentTypesUtils.hasDraftAndPublish(definition);
 
   if (previousDraftAndPublish === actualDraftAndPublish) {
     return 'none';
