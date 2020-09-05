@@ -14,9 +14,7 @@ module.exports = {
         return true;
       }
 
-      const numberOfAdministrators = await strapi
-        .query('administrator', 'admin')
-        .find({ _limit: 1 });
+      const numberOfAdministrators = await strapi.query('user', 'admin').find({ _limit: 1 });
 
       return numberOfAdministrators.length > 0;
     } catch (err) {

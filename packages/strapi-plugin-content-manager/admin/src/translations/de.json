@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "{label} Einträge gefunden",
   "containers.List.pluginHeaderDescription.singular": "{label} Eintrag gefunden",
   "containers.ListPage.displayedFields": "Dargestellte Felder",
-  "containers.SettingPage.addField": "Neues Feld hinzufügen",
-  "containers.SettingPage.addRelationalField": "Füge ein neues relationales Feld hinzu",
   "containers.SettingPage.attributes": "Attribut Felder",
   "containers.SettingPage.attributes.description": "Reihenfolge der Attribute festlegen",
   "containers.SettingPage.editSettings.description": "Ziehen die Felder via Drag & Drop, um das Layout zu erstellen",

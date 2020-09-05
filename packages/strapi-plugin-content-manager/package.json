@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.5",
+  "version": "3.1.4",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -9,15 +9,27 @@
     "required": true
   },
   "dependencies": {
-    "@sindresorhus/slugify": "0.9.1",
+    "@sindresorhus/slugify": "1.1.0",
     "classnames": "^2.2.6",
     "codemirror": "^5.46.0",
     "draft-js": "^0.11.5",
+    "highlight.js": "^10.1.1",
     "immutable": "^3.8.2",
-    "lodash": "^4.17.11",
-    "pluralize": "^7.0.0",
-    "react": "^16.9.0",
+    "lodash": "4.17.19",
+    "markdown-it": "^11.0.0",
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-container": "^3.0.0",
+    "markdown-it-deflist": "^2.0.3",
+    "markdown-it-emoji": "^1.4.0",
+    "markdown-it-footnote": "^3.0.2",
+    "markdown-it-ins": "^3.0.0",
+    "markdown-it-mark": "^3.0.0",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "pluralize": "^8.0.0",
+    "react": "^16.13.1",
     "react-dom": "^16.9.0",
+    "react-fast-compare": "^3.2.0",
     "react-intl": "4.5.0",
     "react-redux": "^7.0.2",
     "react-router": "^5.0.0",
@@ -26,9 +38,8 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "showdown": "^1.9.0",
-    "strapi-helper-plugin": "3.0.5",
-    "strapi-utils": "3.0.5",
+    "strapi-helper-plugin": "3.1.4",
+    "strapi-utils": "3.1.4",
     "yup": "^0.27.0"
   },
   "author": {
@@ -48,9 +59,9 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

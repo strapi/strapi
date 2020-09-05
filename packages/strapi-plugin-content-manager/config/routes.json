@@ -21,7 +21,7 @@
       "path": "/content-types/:uid",
       "handler": "ContentTypes.updateContentType",
       "config": {
-        "policies": []
+        "policies": ["admin::isAuthenticatedAdmin"]
       }
     },
     {
@@ -69,7 +69,7 @@
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {
-        "policies": ["routing"]
+        "policies": ["routing", "admin::isAuthenticatedAdmin"]
       }
     },
     {
@@ -77,7 +77,11 @@
       "path": "/explorer/:model/count",
       "handler": "ContentManager.count",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
       }
     },
     {
@@ -85,7 +89,30 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/explorer/:model/relation-list/:targetField",
+      "handler": "ContentManager.findRelationList",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          [
+            "plugins::content-manager.hasPermissions",
+            [
+              "plugins::content-manager.explorer.create",
+              "plugins::content-manager.explorer.update"
+            ],
+            { "hasAtLeastOne": true }
+          ]
+        ]
       }
     },
     {
@@ -93,7 +120,11 @@
       "path": "/explorer/:model",
       "handler": "ContentManager.create",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.create"]]
+        ]
       }
     },
     {
@@ -101,7 +132,11 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.update",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
       }
     },
     {
@@ -109,7 +144,11 @@
       "path": "/explorer/deleteAll/:model",
       "handler": "ContentManager.deleteMany",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+        ]
       }
     },
     {
@@ -117,7 +156,11 @@
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.delete",
       "config": {
-        "policies": ["routing"]
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+        ]
       }
     }
   ]

@@ -1,12 +1,12 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.5",
+  "version": "3.1.4",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
   "author": {
@@ -23,7 +23,7 @@
       "url": "http://strapi.io"
     }
   ],
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "rimraf dist",
@@ -50,20 +50,26 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
+    "@buffetjs/core": "3.2.3",
+    "@buffetjs/hooks": "3.2.3",
+    "@buffetjs/icons": "3.2.3",
+    "@buffetjs/styles": "3.2.3",
+    "@buffetjs/utils": "3.2.3",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
-    "lodash": "^4.17.5",
+    "lodash": "4.17.19",
     "moment": "^2.16.0",
-    "react": "^16.9.0",
+    "react": "^16.13.1",
     "react-dom": "^16.9.0",
+    "react-helmet": "^6.0.0",
     "react-intl": "4.5.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "styled-components": "^5.0.0",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^3.3.1"
   },
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

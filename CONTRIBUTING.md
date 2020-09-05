@@ -6,7 +6,7 @@ All efforts to contribute are highly appreciated, we recommend you talk to a mai
 
 ## Open Development & Community Driven
 
-Strapi is open-source under the [MIT license](https://github.com/strapi/strapi/blob/master/LICENSE.md). All the work done is available on GitHub.
+Strapi is an open-source project. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) file for licensing information. All the work done is available on GitHub.
 
 The core team and the contributors send pull requests which go through the same validation process.
 
@@ -53,6 +53,7 @@ The core team will review your pull request and will either merge it, request ch
 ## Contribution Prerequisites
 
 - You have [Node](https://nodejs.org/en/) at v10.10.0+ only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
+  - Node v14/v13 **are not supported yet**
 - You are familiar with Git.
 
 ## Development Workflow

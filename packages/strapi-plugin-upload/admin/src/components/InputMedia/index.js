@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get, isEmpty } from 'lodash';
-import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
-
+import { CheckPermissions, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlWrapper from './CardControlWrapper';
@@ -18,7 +18,7 @@ import Wrapper from './Wrapper';
 import Input from '../Input';
 import ErrorMessage from './ErrorMessage';
 
-const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }) => {
+const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, id, error }) => {
   const [modal, setModal] = useState({
     isOpen: false,
     step: 'list',
@@ -40,7 +40,14 @@ const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }
   }, [modal.isOpen]);
 
   const handleClickToggleModal = () => {
-    setModal(prev => ({ isDisplayed: true, step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));
+    if (!disabled) {
+      setModal(prev => ({
+        isDisplayed: true,
+        step: 'list',
+        isOpen: !prev.isOpen,
+        fileToEdit: null,
+      }));
+    }
   };
 
   const handleClosed = () => setModal(prev => ({ ...prev, isDisplayed: false }));
@@ -112,25 +119,31 @@ const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }
 
       <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
         <CardControlWrapper>
-          <CardControl
-            small
-            title="add"
-            color="#9EA7B8"
-            type="plus"
-            onClick={handleClickToggleModal}
-          />
-          {!hasNoValue && (
+          {!disabled && (
+            <CardControl
+              small
+              title="add"
+              color="#9EA7B8"
+              type="plus"
+              onClick={handleClickToggleModal}
+            />
+          )}
+          {!hasNoValue && !disabled && (
             <>
-              <CardControl
-                small
-                title="edit"
-                color="#9EA7B8"
-                type="pencil"
-                onClick={handleEditFile}
-              />
-              <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
-                <CardControl small title="copy-link" color="#9EA7B8" type="link" />
-              </CopyToClipboard>
+              <CheckPermissions permissions={pluginPermissions.update}>
+                <CardControl
+                  small
+                  title="edit"
+                  color="#9EA7B8"
+                  type="pencil"
+                  onClick={handleEditFile}
+                />
+              </CheckPermissions>
+              <CheckPermissions permissions={pluginPermissions.copyLink}>
+                <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
+                  <CardControl small title="copy-link" color="#9EA7B8" type="link" />
+                </CopyToClipboard>
+              </CheckPermissions>
               <CardControl
                 small
                 title="delete"
@@ -142,7 +155,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type, id, error }
           )}
         </CardControlWrapper>
         {hasNoValue ? (
-          <EmptyInputMedia onClick={handleClickToggleModal}>
+          <EmptyInputMedia onClick={handleClickToggleModal} disabled={disabled}>
             <IconUpload />
             <EmptyText id={getTrad('input.placeholder')} />
           </EmptyInputMedia>
@@ -181,6 +194,7 @@ InputMedia.propTypes = {
     required: PropTypes.bool,
     type: PropTypes.string,
   }).isRequired,
+  disabled: PropTypes.bool,
   error: PropTypes.string,
   id: PropTypes.string,
   label: PropTypes.string,
@@ -190,6 +204,7 @@ InputMedia.propTypes = {
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 InputMedia.defaultProps = {
+  disabled: false,
   id: null,
   error: null,
   label: '',

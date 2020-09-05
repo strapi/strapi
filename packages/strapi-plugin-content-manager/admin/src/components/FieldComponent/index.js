@@ -1,15 +1,18 @@
 /* eslint-disable  import/no-cycle */
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import isEqual from 'react-fast-compare';
 import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
+import NotAllowedInput from '../NotAllowedInput';
 import RepeatableComponent from '../RepeatableComponent';
+import connect from './utils/connect';
+import select from './utils/select';
 import ComponentIcon from './ComponentIcon';
 import Label from './Label';
 import Reset from './ResetComponent';
@@ -19,6 +22,7 @@ const FieldComponent = ({
   componentFriendlyName,
   componentUid,
   icon,
+  isCreatingEntry,
   isFromDynamicZone,
   isRepeatable,
   isNested,
@@ -26,16 +30,38 @@ const FieldComponent = ({
   max,
   min,
   name,
+  // Passed thanks to the connect function
+  hasChildrenAllowedFields,
+  hasChildrenReadableFields,
+  isReadOnly,
+  componentValue,
+  removeComponentFromField,
 }) => {
-  const { modifiedData, removeComponentFromField } = useDataManager();
   const { allLayoutData } = useEditView();
-  const componentValue = get(modifiedData, name, null);
+
   const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
-  const showResetComponent = !isRepeatable && isInitialized && !isFromDynamicZone;
+  const showResetComponent =
+    !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
   const currentComponentSchema = get(allLayoutData, ['components', componentUid], {});
 
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
+
+  if (!hasChildrenAllowedFields && isCreatingEntry) {
+    return (
+      <div className="col-12">
+        <NotAllowedInput label={label} />
+      </div>
+    );
+  }
+
+  if (!hasChildrenAllowedFields && !isCreatingEntry && !hasChildrenReadableFields) {
+    return (
+      <div className="col-12">
+        <NotAllowedInput label={label} />
+      </div>
+    );
+  }
 
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
@@ -66,11 +92,12 @@ const FieldComponent = ({
         </Reset>
       )}
       {!isRepeatable && !isInitialized && (
-        <ComponentInitializer componentUid={componentUid} name={name} />
+        <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
       )}
 
       {!isRepeatable && isInitialized && (
         <NonRepeatableComponent
+          componentUid={componentUid}
           fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
           name={name}
@@ -85,6 +112,7 @@ const FieldComponent = ({
           fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
           isNested={isNested}
+          isReadOnly={isReadOnly}
           max={max}
           min={min}
           name={name}
@@ -96,9 +124,13 @@ const FieldComponent = ({
 };
 
 FieldComponent.defaultProps = {
+  componentValue: null,
   componentFriendlyName: null,
+  hasChildrenAllowedFields: false,
+  hasChildrenReadableFields: false,
   icon: 'smile',
   isFromDynamicZone: false,
+  isReadOnly: false,
   isRepeatable: false,
   isNested: false,
   max: Infinity,
@@ -108,14 +140,22 @@ FieldComponent.defaultProps = {
 FieldComponent.propTypes = {
   componentFriendlyName: PropTypes.string,
   componentUid: PropTypes.string.isRequired,
+  componentValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  hasChildrenAllowedFields: PropTypes.bool,
+  hasChildrenReadableFields: PropTypes.bool,
   icon: PropTypes.string,
+  isCreatingEntry: PropTypes.bool.isRequired,
   isFromDynamicZone: PropTypes.bool,
+  isReadOnly: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   isNested: PropTypes.bool,
   label: PropTypes.string.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
+  removeComponentFromField: PropTypes.func.isRequired,
 };
 
-export default FieldComponent;
+const Memoized = memo(FieldComponent, isEqual);
+
+export default connect(Memoized, select);
