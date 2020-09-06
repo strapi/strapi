@@ -84,10 +84,10 @@ const buildQuery = ({
   const search = buildSearchOr(model, searchParam);
 
   if (!hasDeepFilters(filters.where) && aggregate === false) {
-    return buildSimpleQuery({ model, filters, search, populate, session });
+    return buildSimpleQuery({ model, filters, search, populate }, { session });
   }
 
-  return buildDeepQuery({ model, filters, populate, search, session });
+  return buildDeepQuery({ model, filters, populate, search }, { session });
 };
 
 /**
@@ -98,7 +98,7 @@ const buildQuery = ({
  * @param {Object} options.search - An object with the possible search params
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildSimpleQuery = ({ model, filters, search, populate, session }) => {
+const buildSimpleQuery = ({ model, filters, search, populate }, { session }) => {
   const { where = [] } = filters;
 
   const wheres = where.map(buildWhereClause);
@@ -125,7 +125,7 @@ const buildSimpleQuery = ({ model, filters, search, populate, session }) => {
  * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildDeepQuery = ({ model, filters, search, populate, session }) => {
+const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
   // Build a tree of paths to populate based on the filtering and the populate option
   const { populatePaths, wherePaths } = computePopulatedPaths({
     model,
