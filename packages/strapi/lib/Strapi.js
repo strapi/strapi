@@ -42,7 +42,7 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
 
-    this.server = http.createServer(this.handleRequest.bind(this));
+    this.initServer();
 
     // Logger.
     this.log = logger;
@@ -152,25 +152,8 @@ class Strapi {
     console.log();
   }
 
-  async start(cb) {
-    try {
-      if (!this.isLoaded) {
-        await this.load();
-      }
-
-      this.app.use(this.router.routes()).use(this.router.allowedMethods());
-
-      // Launch server.
-      this.listen(cb);
-    } catch (err) {
-      this.stopWithError(err);
-    }
-  }
-
-  /**
-   * Add behaviors to the server
-   */
-  async listen(cb) {
+  initServer() {
+    this.server = http.createServer(this.handleRequest.bind(this));
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
@@ -199,7 +182,27 @@ class Strapi {
         connections[key].destroy();
       }
     };
+  }
 
+  async start(cb) {
+    try {
+      if (!this.isLoaded) {
+        await this.load();
+      }
+
+      this.app.use(this.router.routes()).use(this.router.allowedMethods());
+
+      // Launch server.
+      this.listen(cb);
+    } catch (err) {
+      this.stopWithError(err);
+    }
+  }
+
+  /**
+   * Add behaviors to the server
+   */
+  async listen(cb) {
     const onListen = async err => {
       if (err) return this.stopWithError(err);
 

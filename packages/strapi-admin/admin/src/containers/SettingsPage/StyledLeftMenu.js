@@ -3,7 +3,7 @@ import { LeftMenu } from 'strapi-helper-plugin';
 
 const StyledLeftMenu = styled(LeftMenu)`
   > div {
-    margin-bottom: 28px;
+    margin-bottom: 27px;
   }
 `;
 

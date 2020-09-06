@@ -13,7 +13,7 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "fs-extra": "^8.0.1",
+    "fs-extra": "^9.0.1",
     "lodash": "4.17.19",
     "strapi-utils": "3.1.4"
   },
@@ -40,7 +40,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

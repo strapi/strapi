@@ -115,10 +115,9 @@ module.exports = {
         );
       }
 
-      const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(
-        params.password,
-        user.password
-      );
+      const validPassword = await strapi.plugins[
+        'users-permissions'
+      ].services.user.validatePassword(params.password, user.password);
 
       if (!validPassword) {
         return ctx.badRequest(
@@ -413,7 +412,7 @@ module.exports = {
     }
 
     // Throw an error if the password selected by the user
-    // contains more than two times the symbol '$'.
+    // contains more than three times the symbol '$'.
     if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
       return ctx.badRequest(
         null,
