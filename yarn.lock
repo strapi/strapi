@@ -1122,64 +1122,74 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@buffetjs/core@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.2.3.tgz#a4ea35d4b232314cad6f877ba094866409b814de"
-  integrity sha512-PywrDU4SaKLFDmaTPmvc3j1aIKjr71SAWJIzSNzfaj1cAjq8Mpeuxzj4jZQCShG+WMefwcIzSNf/jUtFoFuohA==
+"@buffetjs/core@3.3.0-rc.1":
+  version "3.3.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.3.0-rc.1.tgz#5910f2cbdb5442dbde195eaf8854792ce633c844"
+  integrity sha512-osBNBL7UYcfcqqXm5hcHJALt2WXVCHTez3dlPJ8vMW6/CuXm4HZ/24Gqc0skfo10DSgiTZcaIg477mh/yP0Shw==
   dependencies:
-    "@buffetjs/hooks" "3.2.3"
-    "@buffetjs/icons" "3.2.3"
-    "@buffetjs/styles" "3.2.3"
-    "@buffetjs/utils" "3.2.3"
+    "@buffetjs/hooks" "3.3.0-rc.1"
+    "@buffetjs/icons" "3.3.0-rc.1"
+    "@buffetjs/styles" "3.3.0-rc.1"
+    "@buffetjs/utils" "3.3.0-rc.1"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"
     "@fortawesome/react-fontawesome" "^0.1.4"
     invariant "^2.2.4"
+    lodash "^4.17.19"
     moment "^2.24.0"
+    prop-types "^15.7.2"
     rc-input-number "^4.5.0"
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
+    react-router-dom "^5.2.0"
     react-with-direction "^1.3.1"
+    reactstrap "^8.5.1"
 
-"@buffetjs/custom@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.2.3.tgz#89d619dbdbac69e476457bdfbdaea70eb537d744"
-  integrity sha512-Il/qXCqeYCSQifW5WTv7hUjnIvYDR3555CmxvWnJyCioHjm4ylik9EDkTDND5vSnf7HMAJnSVYf6nBbHGKQHig==
+"@buffetjs/custom@3.3.0-rc.1":
+  version "3.3.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.3.0-rc.1.tgz#07cc26aa874b3fa4293fbf88e99e7b7c59b8b8e2"
+  integrity sha512-yan3VP0A9a6M2QZi6H8e7hfa6jU8G1rxgMN4AE52hAX5gAjKvix09s/uZ83duP6pfz8fRwcbpL/uM3ZjMxFLQw==
   dependencies:
-    "@buffetjs/core" "3.2.3"
-    "@buffetjs/styles" "3.2.3"
-    "@buffetjs/utils" "3.2.3"
+    "@buffetjs/core" "3.3.0-rc.1"
+    "@buffetjs/styles" "3.3.0-rc.1"
+    "@buffetjs/utils" "3.3.0-rc.1"
+    lodash "^4.17.19"
     moment "^2.24.0"
+    prop-types "^15.5.10"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/hooks@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.2.3.tgz#493b123ae00777040de38ef33fa48929e1d5a4c0"
-  integrity sha512-r3h0m8qUFVl/iZ8UWguiBqBkgaLCE56LwbHjj92qx8ghbAO4Qisk1FDMUcDfo2uc/ohgnjFK7iCRzAJ5kDclWg==
+"@buffetjs/hooks@3.3.0-rc.1":
+  version "3.3.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.3.0-rc.1.tgz#a5d838427dd2cb4c514f26ed297df571cefeda33"
+  integrity sha512-b6RV5nKABXI1BcTP8htZxx9T9iDJTH4F0QL1joKUbYVWkXoqEJ8dd1mEd6hpTBkW++FWJ/virRxVYlb1QfmjfQ==
 
-"@buffetjs/icons@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.2.3.tgz#09dbd634942bf11620b292fc8607f5f2ee2f54e0"
-  integrity sha512-uVa1Ics/+PxKoSvf0aRz1b0llFipfrKGQTu9V7PGHvWCHt40N7VYYQlaPYlDD3jVdkTlqdw2nFG9rcAHUTmLRg==
+"@buffetjs/icons@3.3.0-rc.1":
+  version "3.3.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.3.0-rc.1.tgz#e9f51af5882b1306d1534f3b459e40bec7b7082c"
+  integrity sha512-hMBdOdBr93dQyFEbMStPVqJzd6ET6347sE69RffqJBlRYQnG8fPmPb3OSKxfTfcto5/GFYpZibdczG1iAKvtyw==
+  dependencies:
+    prop-types "^15.5.10"
 
-"@buffetjs/styles@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.2.3.tgz#9fa0cad16fe21c0482d71597078ec1cbe31e84db"
-  integrity sha512-BAOTl2WXEfxNcR5TliaHG6I8CtyoC4Wa5B9DzJUJ/9uVDOsflC5ugJ0KqNbQB9My964CHnJvXr+Up9gy5QAW1A==
+"@buffetjs/styles@3.3.0-rc.1":
+  version "3.3.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.3.0-rc.1.tgz#fc8318c02cb0ec280fefc6b868ab0830b01f8779"
+  integrity sha512-iYgLi452X22SGvZH8xS8Fjunf+Z/bwuZoms1D4yZ/gtSZXvj1CTqw5jtRhz9Ayl5gCwoopFA67+LM7DfysR2RA==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
     "@fortawesome/free-regular-svg-icons" "^5.10.2"
     "@fortawesome/free-solid-svg-icons" "^5.10.2"
     "@fortawesome/react-fontawesome" "^0.1.4"
+    prop-types "^15.7.2"
     react-dates "^21.1.0"
 
-"@buffetjs/utils@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.2.3.tgz#0c1a0cccd6ca8df9bd4a7ce5ee2c32e33c576d05"
-  integrity sha512-jn8E++RJdmxWKFn2gY81KRbuLD4M6hqHKZw27h8gU576giUxsufs2yczb6mGmyX4wh/k5or/ppRKsAFbwhDZlg==
+"@buffetjs/utils@3.3.0-rc.1":
+  version "3.3.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.3.0-rc.1.tgz#6846657bc79e1d19df4f0b3d050929e99fdaefb7"
+  integrity sha512-JkR4XjbMCtLanSKmLZLAiNemTdaEKxKgpNQtpmJMT/rU9wAuKK/+2Qsqk+xHrA9H+aA/wfCCy5rdMzrujGLigA==
   dependencies:
+    lodash "^4.17.15"
     yup "^0.27.0"
 
 "@casl/ability@^4.1.5":
@@ -11925,6 +11935,11 @@ lodash@4.17.19, lodash@^4.1.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11,
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
   integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
+lodash@^4.17.19:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
+
 log-symbols@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/log-symbols/-/log-symbols-1.0.2.tgz#376ff7b58ea3086a0f09facc74617eca501e1a18"
@@ -12458,6 +12473,14 @@ mini-create-react-context@^0.3.0:
     "@babel/runtime" "^7.4.0"
     gud "^1.0.0"
     tiny-warning "^1.0.2"
+
+mini-create-react-context@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/mini-create-react-context/-/mini-create-react-context-0.4.0.tgz#df60501c83151db69e28eac0ef08b4002efab040"
+  integrity sha512-b0TytUgFSbgFJGzJqXPKCFCBWigAjpjo+Fl7Vf7ZbKRDptszpppKxXH6DRXEABZ/gcEQczeb0iZ7JvL8e8jjCA==
+  dependencies:
+    "@babel/runtime" "^7.5.5"
+    tiny-warning "^1.0.3"
 
 mini-css-extract-plugin@^0.6.0:
   version "0.6.0"
@@ -15328,6 +15351,19 @@ react-router-dom@^5.0.0:
     tiny-invariant "^1.0.2"
     tiny-warning "^1.0.0"
 
+react-router-dom@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-5.2.0.tgz#9e65a4d0c45e13289e66c7b17c7e175d0ea15662"
+  integrity sha512-gxAmfylo2QUjcwxI63RhQ5G85Qqt4voZpUXSEqCwykV0baaOTQDR1f0PmY8AELqIyVc0NEZUj0Gov5lNGcXgsA==
+  dependencies:
+    "@babel/runtime" "^7.1.2"
+    history "^4.9.0"
+    loose-envify "^1.3.1"
+    prop-types "^15.6.2"
+    react-router "5.2.0"
+    tiny-invariant "^1.0.2"
+    tiny-warning "^1.0.0"
+
 react-router@5.1.2, react-router@^5.0.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-router/-/react-router-5.1.2.tgz#6ea51d789cb36a6be1ba5f7c0d48dd9e817d3418"
@@ -15338,6 +15374,22 @@ react-router@5.1.2, react-router@^5.0.0:
     hoist-non-react-statics "^3.1.0"
     loose-envify "^1.3.1"
     mini-create-react-context "^0.3.0"
+    path-to-regexp "^1.7.0"
+    prop-types "^15.6.2"
+    react-is "^16.6.0"
+    tiny-invariant "^1.0.2"
+    tiny-warning "^1.0.0"
+
+react-router@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/react-router/-/react-router-5.2.0.tgz#424e75641ca8747fbf76e5ecca69781aa37ea293"
+  integrity sha512-smz1DUuFHRKdcJC0jobGo8cVbhO3x50tCL4icacOlcwDOEQPq4TMqwx3sY1TP+DvtTgz4nm3thuo7A+BK2U0Dw==
+  dependencies:
+    "@babel/runtime" "^7.1.2"
+    history "^4.9.0"
+    hoist-non-react-statics "^3.1.0"
+    loose-envify "^1.3.1"
+    mini-create-react-context "^0.4.0"
     path-to-regexp "^1.7.0"
     prop-types "^15.6.2"
     react-is "^16.6.0"
@@ -15456,6 +15508,17 @@ reactstrap@8.4.1:
     classnames "^2.2.3"
     prop-types "^15.5.8"
     react-lifecycles-compat "^3.0.4"
+    react-popper "^1.3.6"
+    react-transition-group "^2.3.1"
+
+reactstrap@^8.5.1:
+  version "8.5.1"
+  resolved "https://registry.yarnpkg.com/reactstrap/-/reactstrap-8.5.1.tgz#dde43539602117888a138042b53703b7621c4318"
+  integrity sha512-igpdw8DiW48ZtwGOo2unwlsILFlF7deiqFUAqc3wrsX/0H0OkvmezJdkjJx2X9jaHfjGdPpm0vu5VN/kk7tv+A==
+  dependencies:
+    "@babel/runtime" "^7.2.0"
+    classnames "^2.2.3"
+    prop-types "^15.5.8"
     react-popper "^1.3.6"
     react-transition-group "^2.3.1"
 
@@ -18208,7 +18271,7 @@ tiny-invariant@^1.0.2:
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.1.0.tgz#634c5f8efdc27714b7f386c35e6760991d230875"
   integrity sha512-ytxQvrb1cPc9WBEI/HSeYYoGD0kWnGEOR8RY6KomWLBVhqz0RgTwVO9dLrGz7dC+nN9llyI7OKAgRq8Vq4ZBSw==
 
-tiny-warning@^1.0.0, tiny-warning@^1.0.2:
+tiny-warning@^1.0.0, tiny-warning@^1.0.2, tiny-warning@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
   integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
