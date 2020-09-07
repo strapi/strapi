@@ -141,4 +141,7 @@ const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutp
   return !!((isPassword && shouldRemovePassword) || (isPrivate && shouldRemovePrivate));
 };
 
-module.exports = sanitizeEntity;
+module.exports = {
+  sanitizeEntity,
+  getPrivateAttributes,
+};
