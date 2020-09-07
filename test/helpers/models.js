@@ -61,6 +61,38 @@ module.exports = ({ rq }) => {
     }
   }
 
+  async function modifyContentType(data) {
+    await rq({
+      url: `/content-type-builder/content-types/application::${data.name}.${data.name}`,
+      method: 'PUT',
+      body: {
+        contentType: {
+          connection: 'default',
+          ...data,
+        },
+      },
+    });
+
+    await waitRestart();
+  }
+
+  async function modifyContentTypes(models) {
+    for (let model of models) {
+      await modifyContentType(model);
+    }
+  }
+
+  async function getContentTypeSchema(model) {
+    const { body } = await rq({
+      url: '/content-type-builder/content-types',
+      method: 'GET',
+    });
+
+    const contentType = body.data.find(ct => ct.uid === `application::${model}.${model}`);
+
+    return (contentType || {}).schema;
+  }
+
   async function deleteContentType(model) {
     await rq({
       url: `/content-type-builder/content-types/application::${model}.${model}`,
@@ -84,5 +116,8 @@ module.exports = ({ rq }) => {
     createContentTypeWithType,
     deleteContentType,
     deleteContentTypes,
+    modifyContentType,
+    modifyContentTypes,
+    getContentTypeSchema,
   };
 };

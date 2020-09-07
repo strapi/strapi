@@ -36,12 +36,37 @@ const getDatabaseName = connection => {
   }
 };
 
-module.exports = ({ models, target }, ctx) => {
+module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) => {
   const { GLOBALS, connection, ORM } = ctx;
 
   // Parse every authenticated model.
-  const updates = Object.keys(models).map(async model => {
+  const updateModel = async model => {
     const definition = models[model];
+
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
+      if (contentTypesUtils.hasDraftAndPublish(definition)) {
+        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+          type: 'datetime',
+          configurable: false,
+          writable: false,
+        };
+      }
+
+      definition.attributes[CREATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+      };
+
+      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+      };
+    }
+
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.associations = [];
 
@@ -55,15 +80,15 @@ module.exports = ({ models, target }, ctx) => {
     definition.primaryKey = 'id';
     definition.primaryKeyType = 'integer';
 
-    // Use default timestamp column names if value is `true`
-    if (_.get(definition, 'options.timestamps', false) === true) {
-      _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
-    }
-    // Use false for values other than `Boolean` or `Array`
-    if (
-      !_.isArray(_.get(definition, 'options.timestamps')) &&
-      !_.isBoolean(_.get(definition, 'options.timestamps'))
-    ) {
+    target[model].allAttributes = { ...definition.attributes };
+
+    const createAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
+    const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updated_at');
+    if (_.get(definition, 'options.timestamps', false)) {
+      _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
+      target[model].allAttributes[createAtCol] = { type: 'timestamp' };
+      target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
+    } else {
       _.set(definition, 'options.timestamps', false);
     }
 
@@ -72,7 +97,7 @@ module.exports = ({ models, target }, ctx) => {
       {
         requireFetch: false,
         tableName: definition.collectionName,
-        hasTimestamps: _.get(definition, 'options.timestamps', false),
+        timestamps: definition.options.timestamps,
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
           if (definition.attributes[current].type && definition.attributes[current].default) {
@@ -119,30 +144,6 @@ module.exports = ({ models, target }, ctx) => {
       ORM,
       GLOBALS,
     });
-
-    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      if (contentTypesUtils.hasDraftAndPublish(definition)) {
-        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
-          type: 'datetime',
-          configurable: false,
-          writable: false,
-        };
-      }
-
-      definition.attributes[CREATED_BY_ATTRIBUTE] = {
-        model: 'user',
-        plugin: 'admin',
-        configurable: false,
-        writable: false,
-      };
-
-      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
-        model: 'user',
-        plugin: 'admin',
-        configurable: false,
-        writable: false,
-      };
-    }
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
@@ -626,15 +627,17 @@ module.exports = ({ models, target }, ctx) => {
       target[model].updateRelations = relations.update;
       target[model].deleteRelations = relations.deleteRelations;
 
-      await buildDatabaseSchema({
-        ORM,
-        definition,
-        loadedModel,
-        connection,
-        model: target[model],
-      });
+      return async () => {
+        await buildDatabaseSchema({
+          ORM,
+          definition,
+          loadedModel,
+          connection,
+          model: target[model],
+        });
 
-      await createComponentJoinTables({ definition, ORM });
+        await createComponentJoinTables({ definition, ORM });
+      };
     } catch (err) {
       if (err instanceof TypeError || err instanceof ReferenceError) {
         strapi.stopWithError(err, `Impossible to register the '${model}' model.`);
@@ -649,7 +652,20 @@ When this happens on a manyToMany relation, make sure to set this parameter on t
       }
       strapi.stopWithError(err);
     }
-  });
+  };
 
-  return Promise.all(updates);
+  const finalizeUpdates = [];
+  for (const model of _.keys(models)) {
+    const finalizeUpdate = await updateModel(model);
+    finalizeUpdates.push(finalizeUpdate);
+  }
+
+  if (selfFinalize) {
+    for (const finalizeUpdate of finalizeUpdates) {
+      await finalizeUpdate();
+    }
+    return [];
+  }
+
+  return finalizeUpdates;
 };
