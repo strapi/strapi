@@ -166,16 +166,13 @@ The options key on the model-json states.
 
 - `privateAttributes`: This configuration allows to treat a set of attributes as private, even if they're not actually defined as attributes in the model. Accepts an `Array` of strings. It could be used to remove from API responses timestamps or `_v` when using MongoDB. The set of `privateAttributes` defined in the model are merged with the `privateAttributes` defined in the global Strapi configuration.
 
-- `ignorePrivateFor`: This configuration allows to ignore some attributes from the global `privateAttributes` configuration. Accepts an `Array` of strings. The attributes defined in this `Array` will be removed from the `Array` of the global and local `privateAttributes` configuration.
-
 **Path —** `User.settings.json`.
 
 ```json
 {
   "options": {
     "timestamps": true,
-    "privateAttributes": ["id", "created_at"],
-    "ignorePrivateFor": ["some_global_private"]
+    "privateAttributes": ["id", "created_at"]
   }
 }
 ```
