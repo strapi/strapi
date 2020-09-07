@@ -116,7 +116,7 @@ let instance;
 
 async function setupStrapi() {
   if (!instance) {
-    /** the following code in copied from `./node_modules/strapi/lib/Strapi.js` */
+    /** the following code is copied from `./node_modules/strapi/lib/Strapi.js` */
     await Strapi().load();
     instance = strapi; // strapi is global now
     await instance.app
