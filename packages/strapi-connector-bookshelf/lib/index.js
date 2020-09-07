@@ -79,12 +79,16 @@ module.exports = function(strapi) {
       await mountCoreStore(ctx);
     }
 
-    return Promise.all([
+    const finalizeMountings = await Promise.all([
       mountComponents(connectionName, ctx),
       mountApis(connectionName, ctx),
       mountAdmin(connectionName, ctx),
       mountPlugins(connectionName, ctx),
     ]);
+
+    for (const finalizeMounting of _.flattenDeep(finalizeMountings)) {
+      await finalizeMounting();
+    }
   }
 
   function mountCoreStore(ctx) {
@@ -95,7 +99,8 @@ module.exports = function(strapi) {
         },
         target: strapi.models,
       },
-      ctx
+      ctx,
+      { selfFinalize: true }
     );
   }
 
