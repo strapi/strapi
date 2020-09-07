@@ -169,4 +169,76 @@ const testData = {
   },
 };
 
+const permissions = [
+  {
+    id: 11,
+    action: 'plugins::content-manager.explorer.read',
+    subject: 'application::article.article',
+    fields: ['name', 'description'],
+    conditions: ['admin::is-creator'],
+  },
+  {
+    id: 12,
+    action: 'plugins::content-manager.explorer.update',
+    subject: 'application::article.article',
+    fields: ['name', 'description'],
+    conditions: ['admin::is-creator'],
+  },
+  {
+    id: 22,
+    action: 'plugins::content-manager.explorer.read',
+    subject: 'plugins::users-permissions.user',
+    fields: [
+      'username',
+      'email',
+      'provider',
+      'password',
+      'resetPasswordToken',
+      'confirmed',
+      'blocked',
+      'role',
+    ],
+    conditions: [],
+  },
+  {
+    id: 24,
+    action: 'plugins::content-manager.explorer.update',
+    subject: 'plugins::users-permissions.user',
+    fields: [
+      'username',
+      'email',
+      'provider',
+      'password',
+      'resetPasswordToken',
+      'confirmed',
+      'blocked',
+      'role',
+    ],
+    conditions: [],
+  },
+  {
+    id: 28,
+    action: 'plugins::upload.read',
+    subject: null,
+    fields: null,
+    conditions: [],
+  },
+  {
+    id: 39,
+    action: 'plugins::users-permissions.roles.update',
+    subject: null,
+    fields: null,
+    conditions: [],
+  },
+
+  {
+    id: 63,
+    action: 'plugins::content-manager.explorer.read',
+    subject: 'application::article.article',
+    fields: ['name', 'description', 'test'],
+    conditions: [],
+  },
+];
+
 export default testData;
+export { permissions };

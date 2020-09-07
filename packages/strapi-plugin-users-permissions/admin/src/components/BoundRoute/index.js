@@ -8,14 +8,11 @@ import React from 'react';
 import { get, includes, map, tail, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-
 import { Header, Path, Verb, Wrapper } from './Components';
 
 function BoundRoute({ route }) {
   const title = get(route, 'handler');
-  const formattedRoute = get(route, 'path')
-    ? tail(get(route, 'path').split('/'))
-    : [];
+  const formattedRoute = get(route, 'path') ? tail(get(route, 'path').split('/')) : [];
   const [controller = '', action = ''] = title ? title.split('.') : [];
 
   return (
@@ -27,15 +24,10 @@ function BoundRoute({ route }) {
         <span>.{action} </span>
       </Header>
       <Wrapper>
-        <Verb className={toLower(get(route, 'method'))}>
-          {get(route, 'method')}
-        </Verb>
+        <Verb className={toLower(get(route, 'method'))}>{get(route, 'method')}</Verb>
         <Path>
           {map(formattedRoute, value => (
-            <span
-              key={value}
-              style={includes(value, ':') ? { color: '#787E8F' } : {}}
-            >
+            <span key={value} style={includes(value, ':') ? { color: '#787E8F' } : {}}>
               /{value}
             </span>
           ))}

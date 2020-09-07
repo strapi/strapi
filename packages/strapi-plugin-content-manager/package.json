@@ -27,7 +27,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "pluralize": "^8.0.0",
-    "react": "^16.9.0",
+    "react": "^16.13.1",
     "react-dom": "^16.9.0",
     "react-fast-compare": "^3.2.0",
     "react-intl": "4.5.0",
@@ -59,7 +59,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
