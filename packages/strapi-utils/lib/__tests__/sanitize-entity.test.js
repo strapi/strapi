@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const sanitizeEntity = require('../sanitize-entity');
+const { sanitizeEntity } = require('../sanitize-entity');
 
 describe('Sanitize Entity', () => {
   const input = {
@@ -206,74 +206,6 @@ describe('Sanitize Entity', () => {
         options: {
           ...models.user.options,
           privateAttributes: ['firstname'],
-        },
-      };
-
-      test.each(tests)(`Test n°%#`, (options, expected) => {
-        global.strapi = {
-          config: {
-            get: jest.fn(path => {
-              return path === 'api.responses.privateAttributes' ? ['id'] : [];
-            }),
-          },
-        };
-
-        expect(sanitizeEntity(input, { ...options, model })).toStrictEqual(expected);
-      });
-    });
-
-    describe('When attribute is in options.ignorePrivateFor, the attribute must be returned', () => {
-      const tests = [
-        [
-          { withPrivate: false, isOutput: true, includeFields: null },
-          _.pick(input, ['id', 'email', 'firstname', 'lastname']),
-        ],
-        [{ withPrivate: false, isOutput: false, includeFields: null }, input],
-        [
-          { withPrivate: false, isOutput: true, includeFields: ['firstname'] },
-          _.pick(input, ['id', 'firstname']),
-        ],
-        [
-          { withPrivate: false, isOutput: true, includeFields: ['email', 'firstname'] },
-          _.pick(input, ['id', 'email', 'firstname']),
-        ],
-        [
-          { withPrivate: false, isOutput: true, includeFields: ['password'] },
-          _.pick(input, ['id']),
-        ],
-        [
-          { withPrivate: true, isOutput: true, includeFields: null },
-          _.pick(input, ['id', 'email', 'firstname', 'lastname']),
-        ],
-        [{ withPrivate: true, isOutput: false, includeFields: null }, input],
-        [
-          { withPrivate: true, isOutput: true, includeFields: ['firstname'] },
-          _.pick(input, ['id', 'firstname']),
-        ],
-        [
-          { withPrivate: true, isOutput: true, includeFields: ['email', 'firstname'] },
-          _.pick(input, ['id', 'email', 'firstname']),
-        ],
-        [{ withPrivate: true, isOutput: true, includeFields: ['password'] }, _.pick(input, ['id'])],
-        [
-          { withPrivate: true, isOutput: false, includeFields: ['firstname'] },
-          _.pick(input, ['id', 'firstname']),
-        ],
-        [
-          { withPrivate: true, isOutput: false, includeFields: ['email', 'firstname'] },
-          _.pick(input, ['id', 'email', 'firstname']),
-        ],
-        [
-          { withPrivate: true, isOutput: false, includeFields: ['password'] },
-          _.pick(input, ['id', 'password']),
-        ],
-      ];
-
-      const model = {
-        ...models.user,
-        options: {
-          ...models.user.options,
-          ignorePrivateFor: ['id', 'email'],
         },
       };
 

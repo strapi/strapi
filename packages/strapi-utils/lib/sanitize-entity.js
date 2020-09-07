@@ -120,28 +120,20 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const getIgnoredPrivateAttributes = model => {
-  return _.get(model, 'options.ignorePrivateFor', []);
-};
-
 const getPrivateAttributes = model => {
   const allPrivatesAttributes = _.union(
     strapi.config.get('api.responses.privateAttributes', []),
     _.get(model, 'options.privateAttributes', [])
   );
-  const ignoredPrivateAttributes = getIgnoredPrivateAttributes(model);
 
-  return _.difference(allPrivatesAttributes, ignoredPrivateAttributes);
+  return allPrivatesAttributes;
 };
 
 const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
   const privateAttributes = getPrivateAttributes(model);
-  const ignoredPrivateAttributes = getIgnoredPrivateAttributes(model);
 
   const isPassword = attribute.type === 'password';
-  const isPrivate =
-    (attribute.private === true && !ignoredPrivateAttributes.includes(key)) ||
-    privateAttributes.includes(key);
+  const isPrivate = attribute.private === true || privateAttributes.includes(key);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
