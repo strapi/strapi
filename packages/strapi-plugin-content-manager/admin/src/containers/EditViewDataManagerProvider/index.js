@@ -13,7 +13,6 @@ import {
   LoadingIndicatorPage,
   request,
   useGlobalContext,
-  findMatchingPermissions,
   useUser,
   useUserPermissions,
   OverlayBlocker,
@@ -27,8 +26,9 @@ import {
   cleanData,
   createDefaultForm,
   createYupSchema,
-  getYupInnerErrors,
+  getFieldsActionMatchingPermissions,
   getFilesToUpload,
+  getYupInnerErrors,
   removePasswordFieldsFromData,
 } from './utils';
 
@@ -96,15 +96,13 @@ const EditViewDataManagerProvider = ({
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate },
   } = useUserPermissions(permissionsToApply);
-  const createActionAllowedFields = useMemo(() => {
-    const matchingPermissions = findMatchingPermissions(userPermissions, [
-      {
-        action: 'plugins::content-manager.explorer.create',
-        subject: slug,
-      },
-    ]);
 
-    return get(matchingPermissions, ['0', 'fields'], []);
+  const {
+    createActionAllowedFields,
+    readActionAllowedFields,
+    updateActionAllowedFields,
+  } = useMemo(() => {
+    return getFieldsActionMatchingPermissions(userPermissions, slug);
   }, [userPermissions, slug]);
 
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
@@ -138,28 +136,6 @@ const EditViewDataManagerProvider = ({
 
     return false;
   }, [isLoadingForPermissions, isLoading, isCreatingEntry, canRead, canUpdate]);
-
-  const readActionAllowedFields = useMemo(() => {
-    const matchingPermissions = findMatchingPermissions(userPermissions, [
-      {
-        action: 'plugins::content-manager.explorer.read',
-        subject: slug,
-      },
-    ]);
-
-    return get(matchingPermissions, ['0', 'fields'], []);
-  }, [slug, userPermissions]);
-
-  const updateActionAllowedFields = useMemo(() => {
-    const matchingPermissions = findMatchingPermissions(userPermissions, [
-      {
-        action: 'plugins::content-manager.explorer.update',
-        subject: slug,
-      },
-    ]);
-
-    return get(matchingPermissions, ['0', 'fields'], []);
-  }, [slug, userPermissions]);
 
   useEffect(() => {
     if (!isLoading) {

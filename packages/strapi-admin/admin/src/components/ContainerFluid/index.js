@@ -7,7 +7,7 @@ const ContainerFluid = styled(Container)`
 
 ContainerFluid.defaultProps = {
   fluid: true,
-  padding: '18px 30px !important',
+  padding: '18px 30px 60px 30px !important',
 };
 
 export default ContainerFluid;
