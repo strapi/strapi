@@ -65,7 +65,7 @@ class Strapi {
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
 
-    this.requireProjectBootstrap();
+    
   }
 
   get EE() {
@@ -84,7 +84,7 @@ class Strapi {
     const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
 
     if (fse.existsSync(bootstrapPath)) {
-      require(bootstrapPath);
+      await (require(bootstrapPath))();
     }
   }
 
@@ -187,6 +187,7 @@ class Strapi {
   async start(cb) {
     try {
       if (!this.isLoaded) {
+        this.requireProjectBootstrap();
         await this.load();
       }
 
