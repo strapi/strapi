@@ -259,7 +259,7 @@ module.exports = {
     grantConfig[provider].redirect_uri = `${strapi.config.server.url}/connect/${provider}/callback`;
     if (grantConfig[provider].subdomain && grantConfig[provider].subdomain !== '') {
       // Adding subdomain to grant object
-      grantConfig[provider].subdomain = strapi.config.server.customProviderHost;
+      grantConfig[provider].subdomain = strapi.config.custom.cognitoHost;
     }
 
     return grant(grantConfig)(ctx, next);
