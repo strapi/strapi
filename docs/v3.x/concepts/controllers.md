@@ -233,7 +233,7 @@ module.exports = {
    */
 
   async find(ctx) {
-    const entity = await strapi.services.restaurant.findOne();
+    const entity = await strapi.services.restaurant.find();
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
   },
 };
