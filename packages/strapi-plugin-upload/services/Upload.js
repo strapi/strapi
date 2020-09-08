@@ -108,7 +108,7 @@ module.exports = {
     });
   },
 
-  async upload({ data, files, user }) {
+  async upload({ data, files }, { user } = {}) {
     const { fileInfo, ...metas } = data;
 
     const fileArray = Array.isArray(files) ? files : [files];
@@ -170,7 +170,7 @@ module.exports = {
     return this.add(fileData, { user });
   },
 
-  async updateFileInfo(id, { name, alternativeText, caption }, { user }) {
+  async updateFileInfo(id, { name, alternativeText, caption }, { user } = {}) {
     const dbFile = await this.fetch({ id });
 
     if (!dbFile) {
@@ -186,7 +186,7 @@ module.exports = {
     return this.update({ id }, newInfos, { user });
   },
 
-  async replace(id, { data, file, user }) {
+  async replace(id, { data, file }, { user } = {}) {
     const config = strapi.plugins.upload.config;
 
     const {
@@ -261,7 +261,7 @@ module.exports = {
     return this.update({ id }, fileData, { user });
   },
 
-  async update(params, values, { user }) {
+  async update(params, values, { user } = {}) {
     const fileValues = { ...values };
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
@@ -274,7 +274,7 @@ module.exports = {
     return res;
   },
 
-  async add(values, { user }) {
+  async add(values, { user } = {}) {
     const fileValues = { ...values };
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
