@@ -379,8 +379,7 @@ describe('Core API', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeISODate();
       data.products.push(res.body);
     });
 
@@ -398,9 +397,8 @@ describe('Core API', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.omit(product, 'published_at'));
-      expect(res.body.published_at).not.toBeNull();
+      expect(res.body.published_at).toBeISODate();
       expect(res.body.published_at).not.toBe(product.published_at);
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
       data.products.push(res.body);
     });
 
@@ -421,8 +419,7 @@ describe('Core API', () => {
         ])
       );
       res.body.forEach(p => {
-        expect(p.published_at).not.toBeNull();
-        expect(isNaN(new Date(p.published_at).valueOf())).toBe(false);
+        expect(p.published_at).toBeISODate();
       });
     });
 
@@ -440,8 +437,7 @@ describe('Core API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.omit(product, 'published_at'));
       expect(res.body.id).toEqual(data.products[0].id);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeISODate();
       data.products[0] = res.body;
     });
 
@@ -460,9 +456,8 @@ describe('Core API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(_.pick(data.products[0], ['name', 'description']));
       expect(res.body.published_at).toBe(data.products[0].published_at);
+      expect(res.body.published_at).toBeISODate();
       expect(res.body.published_at).not.toBe(product.published_at);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
       data.products[0] = res.body;
     });
 
@@ -475,8 +470,7 @@ describe('Core API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(data.products[0]);
       expect(res.body.id).toEqual(data.products[0].id);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeISODate();
       data.products.shift();
     });
 
@@ -557,8 +551,7 @@ describe('Core API', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeISODate();
       data.productsWithCompoAndDP.push(res.body);
     });
 
@@ -573,8 +566,7 @@ describe('Core API', () => {
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.productsWithCompoAndDP[0]);
       res.body.forEach(p => {
-        expect(p.published_at).not.toBeNull();
-        expect(isNaN(new Date(p.published_at).valueOf())).toBe(false);
+        expect(p.published_at).toBeISODate();
       });
     });
 
@@ -596,8 +588,7 @@ describe('Core API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(product);
       expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeISODate();
       data.productsWithCompoAndDP[0] = res.body;
     });
 
@@ -610,8 +601,7 @@ describe('Core API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
       expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-      expect(res.body.published_at).not.toBeNull();
-      expect(isNaN(new Date(res.body.published_at).valueOf())).toBe(false);
+      expect(res.body.published_at).toBeISODate();
       data.productsWithCompoAndDP.shift();
     });
 

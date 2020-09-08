@@ -473,8 +473,7 @@ describe('Content-Type API', () => {
 
       data.productsWithDP[0] = body;
 
-      expect(body.published_at).toEqual(expect.any(String));
-      expect(isNaN(new Date(body.published_at).valueOf())).toBe(false);
+      expect(body.published_at).toBeISODate();
     });
 
     test('Publish article1, expect article1 to be already published', async () => {
