@@ -46,7 +46,9 @@ const Option = props => {
 
   return (
     <Component {...props}>
-      <Text ellipsis>{props.label}</Text>
+      <Text ellipsis fontWeight={fontWeight}>
+        {props.label}
+      </Text>
     </Component>
   );
 };

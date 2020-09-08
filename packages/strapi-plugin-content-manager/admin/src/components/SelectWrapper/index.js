@@ -1,10 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
+import pluralize from 'pluralize';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
-import { request } from 'strapi-helper-plugin';
+import { request, useGlobalContext } from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -35,9 +35,12 @@ function SelectWrapper({
   targetModel,
   placeholder,
 }) {
+  const { settingsBaseURL } = useGlobalContext();
+
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
+
   const { isDraggingComponent } = useEditView();
 
   // This is needed for making requests when used in a component
@@ -149,6 +152,7 @@ function SelectWrapper({
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state._contains, isFieldAllowed]);
 
   useEffect(() => {
@@ -159,6 +163,7 @@ function SelectWrapper({
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state._start]);
 
   const onInputChange = (inputValue, { action }) => {
@@ -183,7 +188,18 @@ function SelectWrapper({
     relationType
   );
 
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
+  const to = useMemo(() => {
+    const isSettingsModel = targetModel.includes('strapi::');
+
+    if (isSettingsModel) {
+      const model = pluralize(targetModel.replace('strapi::', ''));
+
+      return `${settingsBaseURL}/${model}/${value ? value.id : null}`;
+    }
+
+    return `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
+  }, [targetModel, value, settingsBaseURL]);
+
   const link =
     value === null ||
     value === undefined ||
@@ -209,7 +225,7 @@ function SelectWrapper({
     }
 
     return !editable;
-  }, [isMorph, isCreatingEntry, editable]);
+  }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   if (!isFieldAllowed && isCreatingEntry) {
     return <NotAllowedInput label={label} />;
