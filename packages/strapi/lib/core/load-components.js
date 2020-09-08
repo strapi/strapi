@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { join } = require('path');
 const { exists } = require('fs-extra');
 const loadFiles = require('../load/load-files');
+const getSupportedFileExtensions = require('../utils/getSupportedFileExtensions');
 
 module.exports = async strapi => {
   const componentsDir = join(strapi.dir, 'components');
@@ -12,7 +13,8 @@ module.exports = async strapi => {
     return {};
   }
 
-  const map = await loadFiles(componentsDir, '*/*.*(js|json)');
+  const fileExtensions = getSupportedFileExtensions(strapi.config);
+  const map = await loadFiles(componentsDir, `*/*.*(${fileExtensions})`);
 
   return Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach(key => {

@@ -6,6 +6,7 @@ const path = require('path');
 const _ = require('lodash');
 const glob = require('../load/glob');
 const findPackagePath = require('../load/package-path');
+const getSupportedFileExtensions = require('../utils/getSupportedFileExtensions');
 
 /**
  * Load middlewares
@@ -37,8 +38,9 @@ module.exports = async function(strapi) {
  * @param {*} strapi - strapi instance
  */
 const createLoaders = strapi => {
+  const fileExtensions = getSupportedFileExtensions(strapi.config);
   const loadMiddlewaresInDir = async (dir, middlewares) => {
-    const files = await glob('*/*(index|defaults).*(js|json)', {
+    const files = await glob(`*/*(index|defaults).*(${fileExtensions})`, {
       cwd: dir,
     });
 
@@ -85,7 +87,7 @@ const createLoaders = strapi => {
   const loadMiddlewareDependencies = async (packages, middlewares) => {
     for (let packageName of packages) {
       const baseDir = path.dirname(require.resolve(`strapi-middleware-${packageName}`));
-      const files = await glob('*(index|defaults).*(js|json)', {
+      const files = await glob(`*(index|defaults).*(${fileExtensions})`, {
         cwd: baseDir,
         absolute: true,
       });

@@ -6,6 +6,7 @@ const _ = require('lodash');
 const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
 const loadConfig = require('../load/load-config-files');
+const getSupportedFileExtensions = require('../utils/getSupportedFileExtensions');
 
 module.exports = async ({ dir, config }) => {
   const localPlugins = await loadLocalPlugins({ dir, config });
@@ -30,11 +31,12 @@ module.exports = async ({ dir, config }) => {
 
 const loadLocalPlugins = async ({ dir, config }) => {
   const pluginsDir = join(dir, 'plugins');
+  const fileExtenstions = getSupportedFileExtensions(config);
 
   if (!existsSync(pluginsDir)) return {};
 
   const [files, configs] = await Promise.all([
-    loadFiles(pluginsDir, '{*/!(config)/*.*(js|json),*/package.json}'),
+    loadFiles(pluginsDir, `{*/!(config)/*.*(${fileExtenstions}),*/package.json}`),
     loadConfig(pluginsDir, '*/config/**/*.+(js|json)'),
   ]);
   const userConfigs = Object.keys(files).reduce((acc, plugin) => {
@@ -46,13 +48,14 @@ const loadLocalPlugins = async ({ dir, config }) => {
 
 const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
+  const fileExtenstions = getSupportedFileExtensions(config);
 
   for (let plugin of installedPlugins) {
     const pluginPath = findPackagePath(`strapi-plugin-${plugin}`);
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)/*.*(js|json),package.json}'
+      `{!(config|node_modules|test)/*.*(${fileExtenstions}),package.json}`
     );
 
     const { config: pluginConfig } = await loadConfig(pluginPath);
