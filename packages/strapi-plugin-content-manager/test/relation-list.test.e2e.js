@@ -172,8 +172,7 @@ describe('Relation-list route', () => {
       const appleProductRes = res.body.find(p => p.name === 'apple');
 
       expect(tomatoProductRes).toMatchObject(_.pick(data.products[0], ['_id', 'id', 'name']));
-      expect(tomatoProductRes.published_at).not.toBeNull();
-      expect(isNaN(new Date(tomatoProductRes.published_at).valueOf())).toBe(false);
+      expect(tomatoProductRes.published_at).toBeISODate();
       expect(appleProductRes).toStrictEqual({
         ..._.pick(data.products[1], ['_id', 'id', 'name']),
         published_at: null,
