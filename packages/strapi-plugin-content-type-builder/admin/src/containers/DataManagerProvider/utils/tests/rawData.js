@@ -150,19 +150,19 @@ const data = {
     contentTypesToSort: {
       'plugins::myplugins.test': {
         uid: 'plugins::myplugins.test',
-        schema: { name: 'plugins::myplugins.test', kind: 'singleType' },
+        schema: { name: 'plugins::myplugins.test', kind: 'singleType', editable: true },
       },
       'plugins::myplugins.btest': {
         uid: 'plugins::myplugins.btest',
-        schema: { name: 'plugins::myplugins.btest', kind: 'collectionType' },
+        schema: { name: 'plugins::myplugins.btest', kind: 'collectionType', editable: true },
       },
       'plugins::myplugins.atest': {
         uid: 'plugins::myplugins.atest',
-        schema: { name: 'plugins::myplugins.atest', kind: 'collectionType' },
+        schema: { name: 'plugins::myplugins.atest', kind: 'collectionType', editable: true },
       },
       'plugins::myplugins.ctest': {
         uid: 'plugins::myplugins.ctest',
-        schema: { name: 'plugins::myplugins.ctest', kind: 'collectionType' },
+        schema: { name: 'plugins::myplugins.ctest', kind: 'collectionType', editable: true },
       },
     },
     // TODO add test for component
