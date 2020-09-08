@@ -96,7 +96,7 @@ function trackUsage({ event, scope, error }) {
         docker: scope.docker,
         useYarn: scope.useYarn.toString(),
         noRun: (scope.runQuickstartApp !== true).toString(),
-        template: scope.template || '',
+        template: scope.template || null,
       },
     });
   } catch (err) {
