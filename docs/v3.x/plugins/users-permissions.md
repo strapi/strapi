@@ -213,9 +213,7 @@ Use `ngrok` to serve the backend app.
 ngrok http 1337
 ```
 
-:::tip
 Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
-:::
 
 #### Github configuration
 
@@ -250,9 +248,7 @@ Use `ngrok` to serve the backend app.
 ngrok http 1337
 ```
 
-:::tip
 Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
-:::
 
 #### Facebook configuration
 
@@ -332,9 +328,7 @@ Use `ngrok` to serve the backend app.
 ngrok http 1337
 ```
 
-:::tip
 Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
-:::
 
 #### Twitter configuration
 
@@ -437,9 +431,7 @@ Use `ngrok` to serve the backend app.
 ngrok http 1337
 ```
 
-:::tip
 Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
-:::
 
 #### Instagram configuration
 
@@ -498,6 +490,40 @@ The use of `ngrok` is not needed.
   - **Client ID**: 7276416
   - **Client Secret**: cFBUSghLXGuxqnCyw1N3
   - **The redirect URL to your front-end app**: `http://localhost:3000/connect/vk/redirect`
+
+:::
+
+::: tab LinkedIn
+
+#### Using ngrok
+
+LinkedIn accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
+#### LinkedIn configuration
+
+- Visit the Apps list page <br> [https://www.linkedin.com/developers/apps](https://www.linkedin.com/developers/apps)
+- Click on **Create app** button
+- Fill the information:
+  - **App name**: Strapi auth
+  - **LinkedIn Page**: Enter a LinkedIn page name to associate with the app or click **Create a new LinkedIn Page** to create a new one
+  - **App Logo**: Upload a square image that is at least 100x100 pixels.
+- Click on the **Create app** to create the app
+- On the app page click on **Auth** tab
+- Fill the information:
+  - **Authorized redirect URL**: `http://localhost:1337/connect/linkedin/callback`
+- On the app page click on **Products** tab.
+- Select `Sign In with LinkedIn` from the product list to enable it.
+
+#### Strapi configuration
+
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Click on the **LinkedIn** provider
+- Fill the information:
+  - **Enable**: `ON`
+  - **Client ID**: 84witsxk641rlv
+  - **Client Secret**: HdXO7a7mkrU5a6WN
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/linkedin/redirect`
 
 :::
 

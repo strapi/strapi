@@ -18,7 +18,7 @@
     "graphql": "^14.3.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
-    "graphql-playground-middleware-koa": "^1.6.0",
+    "graphql-playground-middleware-koa": "^1.6.19",
     "graphql-tools": "4.0.6",
     "graphql-type-json": "0.3.1",
     "graphql-type-long": "^0.1.1",
@@ -45,7 +45,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

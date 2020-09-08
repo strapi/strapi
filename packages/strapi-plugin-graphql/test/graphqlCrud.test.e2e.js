@@ -181,22 +181,22 @@ describe('Test Graphql API End to End', () => {
 
     test('List posts with `created_by` and `updated_by`', async () => {
       const res = await graphqlQuery({
-	query: /* GraphQL */ `
-	  {
-	    posts(start: 1) {
-	      id
-	      name
-	      bigint
-	      nullable
-	      created_by {
-		username
-	      }
-	      updated_by {
-		username
-	      }
-	    }
-	  }
-	`,
+        query: /* GraphQL */ `
+          {
+            posts(start: 1) {
+              id
+              name
+              bigint
+              nullable
+              created_by {
+                username
+              }
+              updated_by {
+                username
+              }
+            }
+          }
+        `,
       });
 
       expect(res.statusCode).toBe(200);
@@ -306,9 +306,7 @@ describe('Test Graphql API End to End', () => {
 
       // all expected values are in the result
       expected.forEach(expectedPost => {
-        expect(res.body.data.posts).toEqual(
-          expect.arrayContaining([expectedPost])
-        );
+        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
       });
     });
 

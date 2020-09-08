@@ -90,7 +90,10 @@
   "form.button.add-components-to-dynamiczone": "Добавить компоненты в зону",
   "form.button.add-field": "Еще поле",
   "form.button.add-first-field-to-created-component": "Добавить первое поле в компонент",
-  "form.button.add.field.to.component": "Добавить еще поле в компонент",
+  "form.button.add.field.to.component": "Добавить поле в компонент",
+  "form.button.add.field.to.collectionType": "Добавить поле в коллекцию",
+  "form.button.add.field.to.contentType": "Добавить поле в тип контента",
+  "form.button.add.field.to.singleType": "Добавить поле в тип",
   "form.button.cancel": "Отменить",
   "form.button.configure-component": "настроить компонент",
   "form.button.configure-view": "Настроить отображение",
@@ -142,8 +145,8 @@
   "relation.manyToOne": "имеет много",
   "relation.manyWay": "имеет много",
   "relation.oneToMany": "принадлежит многим",
-  "relation.oneToOne": "имеет один",
-  "relation.oneWay": "один принадлежит",
+  "relation.oneToOne": "имеет один и принадлежит одному",
+  "relation.oneWay": "имеет один",
   "table.attributes.title.plural": "Полей - {number}",
   "table.attributes.title.singular": "Поле - {number}"
 }

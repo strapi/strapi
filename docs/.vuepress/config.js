@@ -141,6 +141,7 @@ module.exports = {
     ],
     repo: 'strapi/strapi',
     docsDir: 'docs',
+    docsBranch: 'documentation',
     algolia: {
       apiKey: 'a93451de224096fb34471c8b8b049de7',
       indexName: 'strapi',
@@ -167,7 +168,11 @@ module.exports = {
         {
           collapsable: true,
           title: '📄 Content API',
-          children: ['/v3.x/content-api/api-endpoints', '/v3.x/content-api/parameters'],
+          children: [
+            ['/v3.x/content-api/api-endpoints', 'API Endpoints'],
+            ['/v3.x/content-api/parameters', 'Parameters'],
+            ['/v3.x/content-api/integrations', 'Integrations']
+          ],
         },
         {
           collapsable: true,
