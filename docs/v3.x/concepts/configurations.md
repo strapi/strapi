@@ -191,6 +191,7 @@ module.exports = ({ env }) => ({
 | `admin.forgotPassword.emailTemplate` | Email template as defined in [email plugin](../plugins/email.md#programmatic-usage) | Object | [Default template](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/config/email-templates/forgot-password.js) |
 | `admin.forgotPassword.from` | Sender mail address | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
 | `admin.forgotPassword.replyTo` | Default address or addresses the receiver is asked to reply to | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
+| `loader.extensions` | File extensions that the should be loaded. Note: Can be used to add support for Typescript i.e. [`js`,`json`,`ts`] | Array(string) | [`js`,`json`] |
 
 ## Functions
 
