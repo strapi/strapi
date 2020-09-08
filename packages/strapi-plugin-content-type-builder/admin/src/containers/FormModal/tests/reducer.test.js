@@ -182,6 +182,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         value: 'application::address.address',
         oneThatIsCreatingARelationWithAnother: 'address',
         selectedContentTypeFriendlyName: 'address',
+        targetContentTypeAllowedRelations: null,
       };
       const expected = state
         .setIn(['modifiedData', 'target'], 'application::address.address')
@@ -210,10 +211,71 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         value: 'application::country.country',
         oneThatIsCreatingARelationWithAnother: 'address',
         selectedContentTypeFriendlyName: 'country',
+        targetContentTypeAllowedRelations: null,
       };
       const expected = state
         .setIn(['modifiedData', 'target'], 'application::country.country')
         .setIn(['modifiedData', 'name'], 'countries');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the target change correctly if the target has restricted relations and the nature is not correct', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'categories',
+          nature: 'manyToMany',
+          targetAttribute: 'addresses',
+          target: 'application::category.category',
+          unique: false,
+          dominant: true,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['target'],
+        value: 'application::country.country',
+        oneThatIsCreatingARelationWithAnother: 'address',
+        selectedContentTypeFriendlyName: 'country',
+        targetContentTypeAllowedRelations: ['oneWay'],
+      };
+      const expected = state
+        .setIn(['modifiedData', 'target'], 'application::country.country')
+        .setIn(['modifiedData', 'name'], 'countries')
+        .setIn(['modifiedData', 'nature'], 'oneWay');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the target change correctly if the target has restricted relations and the nature is correct', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'categories',
+          nature: 'manyWay',
+          targetAttribute: 'addresses',
+          target: 'application::category.category',
+          unique: false,
+          dominant: true,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['target'],
+        value: 'application::country.country',
+        oneThatIsCreatingARelationWithAnother: 'address',
+        selectedContentTypeFriendlyName: 'country',
+        targetContentTypeAllowedRelations: ['oneWay', 'manyWay'],
+      };
+      const expected = state
+        .setIn(['modifiedData', 'target'], 'application::country.country')
+        .setIn(['modifiedData', 'name'], 'countries')
+        .setIn(['modifiedData', 'targetAttribute'], '-');
 
       expect(reducer(state, action)).toEqual(expected);
     });
