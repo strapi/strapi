@@ -10,6 +10,7 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
+const mongoose = require("mongoose");
 const { sanitizeEntity, getAbsoluteServerUrl } = require('strapi-utils');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -555,14 +556,46 @@ module.exports = {
         });
       }
     } catch (err) {
-      const adminError = _.includes(err.message, 'username')
-        ? {
-            id: 'Auth.form.error.username.taken',
-            message: 'Username already taken',
-          }
-        : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
+      let adminError = null;
 
-      ctx.badRequest(null, formatError(adminError));
+      // Check if duplicate key error (MongoDB -> unique fields)
+      if (err.name === "MongoError" && err.code === 11000) {
+        adminError = { messages: [] };
+
+        adminError.messages.push({
+          id: "Auth.form.error.duplicates",
+          message:
+            "Cannot use specified value for: " +
+            Object.keys(err.keyValue).join(),
+          field: Object.keys(err.keyValue).join(),
+        });
+      } else if (err instanceof mongoose.Error.ValidationError) {
+        adminError = { messages: [] };
+        for (let field in err.errors) {
+          adminError.messages.push({
+            id: err.errors[field].name,
+            message: err.errors[field].message,
+            field: err.errors[field].path,
+          });
+        }
+      } else {
+        adminError = _.includes(err.message, "username")
+          ? [
+              {
+                id: "Auth.form.error.username.taken",
+                message: "Username already taken",
+              },
+            ]
+          : [
+              {
+                id: "Auth.form.error.email.taken",
+                message: "Email already taken",
+              },
+            ];
+        adminError = formatError(adminError);
+      }
+
+      ctx.badRequest(null, adminError);
     }
   },
 
