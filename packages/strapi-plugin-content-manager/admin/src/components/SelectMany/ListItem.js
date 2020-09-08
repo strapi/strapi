@@ -4,7 +4,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { has } from 'lodash';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import pluralize from 'pluralize';
+
 import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -22,12 +22,10 @@ function ListItem({
 }) {
   const { settingsBaseURL } = useGlobalContext();
   const to = useMemo(() => {
-    const isSettingsModel = targetModel.includes('strapi::');
+    const isAdminUserModel = targetModel === 'strapi::user';
 
-    if (isSettingsModel) {
-      const model = pluralize(targetModel.replace('strapi::', ''));
-
-      return `${settingsBaseURL}/${model}/${data.id}`;
+    if (isAdminUserModel) {
+      return `${settingsBaseURL}/users/${data.id}`;
     }
 
     return `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;

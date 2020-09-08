@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
-import pluralize from 'pluralize';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
@@ -189,12 +188,10 @@ function SelectWrapper({
   );
 
   const to = useMemo(() => {
-    const isSettingsModel = targetModel.includes('strapi::');
+    const isAdminUserModel = targetModel === 'strapi::user';
 
-    if (isSettingsModel) {
-      const model = pluralize(targetModel.replace('strapi::', ''));
-
-      return `${settingsBaseURL}/${model}/${value ? value.id : null}`;
+    if (isAdminUserModel) {
+      return `${settingsBaseURL}/users/${value ? value.id : null}`;
     }
 
     return `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
