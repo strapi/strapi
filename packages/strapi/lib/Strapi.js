@@ -293,6 +293,9 @@ class Strapi {
       logger: this.log,
       configuration: this.config.get('server.webhooks', {}),
     });
+    
+    // Run bootstrap functions
+    await this.runBootstrapFunctions();
 
     // Init core store
     this.models['core_store'] = coreStoreModel(this.config);
@@ -326,7 +329,7 @@ class Strapi {
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
 
-    await this.runBootstrapFunctions();
+
     await this.freeze();
 
     this.isLoaded = true;
