@@ -1,6 +1,6 @@
 # getstarted
 
-This is an example app you can run to test your changes quickly.
+This is an example typescript app you can run to test your changes quickly.
 
 ## Requirements
 
