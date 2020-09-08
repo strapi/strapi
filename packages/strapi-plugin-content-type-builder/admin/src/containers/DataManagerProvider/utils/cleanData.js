@@ -143,6 +143,7 @@ const sortContentType = types =>
   sortBy(
     Object.keys(types)
       .map(uid => ({
+        editable: types[uid].schema.editable,
         name: uid,
         title: types[uid].schema.name,
         uid,
