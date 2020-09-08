@@ -30,7 +30,8 @@ Then create some **Articles** from the Content Manager.
 
 We will create 2 new groups to manage available actions for different kind of users.
 
-- Click on `Roles & Permissions` in the left menu
+- Click on `Settings` in the left menu
+- Select the `Roles` under `USERS & PERMISSIONS PLUGIN` section
 - Then `+ Add New Role`
 - Fill `name` with `Author`
 - Check `Select All` for the Application Article Content Type.
