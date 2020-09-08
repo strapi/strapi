@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
+To access the plugin admin panel, click on the **Settings** link in the left menu and then everything will be under the **USERS & PERMISSIONS PLUGIN** section.
 
 ## Concept
 
@@ -575,7 +575,7 @@ In the following section we will detail steps 3. and 7..
 This action sends an email to a user with the link to your own reset password page.
 The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
 
-First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+First, you must specify the url to your reset password page in the admin panel: **Settings > USERS & PERMISSIONS PLUGIN > Advanced Settings > Reset Password Page**.
 
 Then, your **forgotten password page** has to make the following request to your backend.
 
