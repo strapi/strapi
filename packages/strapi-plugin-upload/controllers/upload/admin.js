@@ -158,7 +158,7 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.replace(id, { data, file: files, user });
+    const file = await uploadService.replace(id, { data, file: files }, { user });
 
     ctx.body = pm.sanitize(file, { action: ACTIONS.read });
   },
@@ -181,7 +181,7 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.upload({ data, files, user });
+    const file = await uploadService.upload({ data, files }, { user });
 
     ctx.body = pm.sanitize(file, { action: ACTIONS.read });
   },
