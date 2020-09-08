@@ -1,8 +1,10 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { has } from 'lodash';
+import { useGlobalContext } from 'strapi-helper-plugin';
+import pluralize from 'pluralize';
 import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -18,7 +20,19 @@ function ListItem({
   onRemove,
   targetModel,
 }) {
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
+  const { settingsBaseURL } = useGlobalContext();
+  const to = useMemo(() => {
+    const isSettingsModel = targetModel.includes('strapi::');
+
+    if (isSettingsModel) {
+      const model = pluralize(targetModel.replace('strapi::', ''));
+
+      return `${settingsBaseURL}/${model}/${data.id}`;
+    }
+
+    return `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
+  }, [targetModel, data.id, settingsBaseURL]);
+
   const hasDraftAndPublish = has(data, 'published_at');
 
   const originalIndex = findRelation(data.id).index;
