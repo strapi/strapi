@@ -135,7 +135,9 @@ const EditForm = forwardRef(
     };
 
     const handleChange = ({ target: { files } }) => {
-      onChange({ target: { name: 'file', value: files[0] } });
+      if (files[0]) {
+        onChange({ target: { name: 'file', value: files[0] } });
+      }
     };
 
     const handleClick = async () => {
