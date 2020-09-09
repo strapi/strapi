@@ -60,7 +60,10 @@ const formatContentType = contentType => {
     name: _.get(contentType, ['info', 'name']),
     apiID: contentType.modelName,
     label: formatContentTypeLabel(contentType),
-    isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
+    isDisplayed:
+      HIDDEN_CONTENT_TYPES.includes(contentType.uid) || _.get(contentType, ['info', 'hidden'])
+        ? false
+        : true,
     schema: {
       ...formatContentTypeSchema(contentType),
       kind: contentType.kind || 'collectionType',
