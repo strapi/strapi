@@ -27,10 +27,19 @@ import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 
-const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugins, slug }) => {
+const EditView = ({
+  components,
+  currentEnvironment,
+  deleteLayout,
+  layouts,
+  models,
+  plugins,
+  slug,
+}) => {
   const formatLayoutRef = useRef();
   formatLayoutRef.current = createAttributesLayout;
   const { goBack } = useHistory();
+
   // Retrieve the search and the pathname
   const { pathname } = useLocation();
   const {
@@ -117,9 +126,10 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
       allowedActions={allowedActions}
       allLayoutData={allLayoutData}
       components={components}
-      layout={currentContentTypeLayoutData}
       isDraggingComponent={isDraggingComponent}
       isSingleType={isSingleType}
+      layout={currentContentTypeLayoutData}
+      models={models}
       setIsDraggingComponent={() => {
         dispatch({
           type: 'SET_IS_DRAGGING_COMPONENT',
@@ -286,6 +296,7 @@ EditView.propTypes = {
   deleteLayout: PropTypes.func.isRequired,
   emitEvent: PropTypes.func,
   layouts: PropTypes.object.isRequired,
+  models: PropTypes.array.isRequired,
   plugins: PropTypes.object,
   slug: PropTypes.string.isRequired,
 };
