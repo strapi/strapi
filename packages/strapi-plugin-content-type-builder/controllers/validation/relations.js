@@ -2,7 +2,7 @@
 
 const yup = require('yup');
 const { validators, isValidName } = require('./common');
-const { typeKinds } = require('./constants');
+const { typeKinds, coreUids } = require('../../services/constants');
 
 const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
 const STRAPI_USER_RELATIONS = ['oneWay', 'manyWay'];
@@ -10,7 +10,7 @@ const STRAPI_USER_RELATIONS = ['oneWay', 'manyWay'];
 const isValidNature = validNatures =>
   function(value) {
     const allowedRelations =
-      this.parent.target === 'strapi::user' ? STRAPI_USER_RELATIONS : validNatures;
+      this.parent.target === coreUids.STRAPI_USER ? STRAPI_USER_RELATIONS : validNatures;
 
     return allowedRelations.includes(value)
       ? true
@@ -23,7 +23,7 @@ const isValidNature = validNatures =>
 module.exports = (obj, validNatures) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter(key => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
-    .filter(key => !key.startsWith('strapi::') || key === 'strapi::user')
+    .filter(key => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 
   return {

@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const yup = require('yup');
 
-const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('./constants');
+const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('../../services/constants');
 const { isValidCollectionName, isValidKey } = require('./common');
 const getTypeValidator = require('./types');
 const getRelationValidator = require('./relations');

@@ -8,19 +8,20 @@ const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { coreUids, pluginsUids } = require('./constants');
 
 const isContentTypeEditable = (contentType = {}) => {
   const { uid } = contentType;
-  return !uid.startsWith('strapi::') && uid !== 'plugins::upload.file';
+  return !uid.startsWith(coreUids.PREFIX) && uid !== pluginsUids.UPLOAD_FILE;
 };
 
 const getRestrictRelationsTo = (contentType = {}) => {
   const { uid } = contentType;
-  if (uid === 'strapi::user') {
+  if (uid === coreUids.STRAPI_USER) {
     return ['oneWay', 'manyWay'];
   }
 
-  if (uid.startsWith('strapi::') || uid === 'plugins::upload.file') {
+  if (uid.startsWith(coreUids.PREFIX) || uid === pluginsUids.UPLOAD_FILE) {
     return [];
   }
 
@@ -29,7 +30,7 @@ const getRestrictRelationsTo = (contentType = {}) => {
 
 const getformattedName = (contentType = {}) => {
   const { uid, info, plugin } = contentType;
-  let name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
+  const name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
   const isUser = name.toLowerCase() === 'user';
 
   if (isUser && plugin === 'admin') {

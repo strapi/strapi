@@ -6,7 +6,7 @@ const pluralize = require('pluralize');
 
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('strapi-utils');
-const { typeKinds } = require('../../controllers/validation/constants');
+const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
