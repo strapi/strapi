@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -23,6 +22,7 @@ import { connect, select, styles } from './utils';
 function SelectWrapper({
   componentUid,
   description,
+  displayNavigationLink,
   editable,
   label,
   isCreatingEntry,
@@ -38,6 +38,7 @@ function SelectWrapper({
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
+
   const { isDraggingComponent } = useEditView();
 
   // This is needed for making requests when used in a component
@@ -149,6 +150,7 @@ function SelectWrapper({
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state._contains, isFieldAllowed]);
 
   useEffect(() => {
@@ -159,6 +161,7 @@ function SelectWrapper({
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state._start]);
 
   const onInputChange = (inputValue, { action }) => {
@@ -184,18 +187,25 @@ function SelectWrapper({
   );
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
-  const link =
-    value === null ||
-    value === undefined ||
-    ['plugins::users-permissions.role', 'plugins::users-permissions.permission'].includes(
-      targetModel
-    ) ? null : (
+
+  const link = useMemo(() => {
+    if (!value) {
+      return null;
+    }
+
+    if (!displayNavigationLink) {
+      return null;
+    }
+
+    return (
       <Link to={{ pathname: to, state: { from: pathname } }}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails">
           {msg => <A color="mediumBlue">{msg}</A>}
         </FormattedMessage>
       </Link>
     );
+  }, [displayNavigationLink, pathname, to, value]);
+
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
 
@@ -209,7 +219,7 @@ function SelectWrapper({
     }
 
     return !editable;
-  }, [isMorph, isCreatingEntry, editable]);
+  }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   if (!isFieldAllowed && isCreatingEntry) {
     return <NotAllowedInput label={label} />;
@@ -245,6 +255,7 @@ function SelectWrapper({
             addRelation({ target: { name, value } });
           }}
           components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
+          displayNavigationLink={displayNavigationLink}
           id={name}
           isDisabled={isDisabled}
           isLoading={isLoading}
@@ -290,6 +301,7 @@ SelectWrapper.defaultProps = {
 
 SelectWrapper.propTypes = {
   componentUid: PropTypes.string,
+  displayNavigationLink: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,

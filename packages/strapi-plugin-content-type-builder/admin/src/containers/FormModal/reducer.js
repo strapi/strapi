@@ -86,6 +86,19 @@ const reducer = (state, action) => {
         if (keys.length === 1 && keys.includes('target')) {
           return obj
             .update('target', () => value)
+            .update('nature', currentNature => {
+              const { targetContentTypeAllowedRelations } = action;
+
+              if (targetContentTypeAllowedRelations === null) {
+                return currentNature;
+              }
+
+              if (!targetContentTypeAllowedRelations.includes(currentNature)) {
+                return targetContentTypeAllowedRelations[0];
+              }
+
+              return currentNature;
+            })
             .update('name', () => {
               return pluralize(
                 snakeCase(selectedContentTypeFriendlyName),

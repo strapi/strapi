@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -106,6 +106,11 @@ function LeftMenu({ wait }) {
       displayNotificationCTNotSaved();
     }
   };
+
+  const displayedContentTypes = useMemo(() => sortedContentTypesList.filter(obj => obj.editable), [
+    sortedContentTypesList,
+  ]);
+
   const data = [
     {
       name: 'models',
@@ -124,7 +129,7 @@ function LeftMenu({ wait }) {
             },
           }
         : null,
-      links: sortedContentTypesList.filter(contentType => contentType.kind === 'collectionType'),
+      links: displayedContentTypes.filter(contentType => contentType.kind === 'collectionType'),
     },
     {
       name: 'singleTypes',
@@ -143,7 +148,7 @@ function LeftMenu({ wait }) {
             },
           }
         : null,
-      links: sortedContentTypesList.filter(singleType => singleType.kind === 'singleType'),
+      links: displayedContentTypes.filter(singleType => singleType.kind === 'singleType'),
     },
     {
       name: 'components',

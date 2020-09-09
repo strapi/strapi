@@ -10,6 +10,7 @@ import ListItem from './ListItem';
 function SelectMany({
   addRelation,
   components,
+  displayNavigationLink,
   mainField,
   name,
   isDisabled,
@@ -95,6 +96,7 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
+                displayNavigationLink={displayNavigationLink}
                 isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
@@ -124,7 +126,7 @@ SelectMany.defaultProps = {
 SelectMany.propTypes = {
   addRelation: PropTypes.func.isRequired,
   components: PropTypes.object,
-
+  displayNavigationLink: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,

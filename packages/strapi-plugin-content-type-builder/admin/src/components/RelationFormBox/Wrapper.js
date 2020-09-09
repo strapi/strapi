@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { colors } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
-  width: 20rem;
+  width: 22rem;
   height: 13.8rem;
   flex-shrink: 0;
   background-color: ${colors.relations.boxBkgd};

@@ -37,7 +37,7 @@ const Option = props => {
           />
 
           <TextGrow ellipsis as="div" fontWeight={fontWeight}>
-            {props.label}
+            {props.label}&nbsp;
           </TextGrow>
         </Flex>
       </Component>
@@ -46,13 +46,19 @@ const Option = props => {
 
   return (
     <Component {...props}>
-      <Text ellipsis>{props.label}</Text>
+      <Text ellipsis fontWeight={fontWeight}>
+        {props.label}
+      </Text>
     </Component>
   );
 };
 
+Option.defaultProps = {
+  label: '',
+};
+
 Option.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isFocused: PropTypes.bool.isRequired,
   selectProps: PropTypes.shape({
     hasDraftAndPublish: PropTypes.bool,

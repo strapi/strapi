@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import { isEmpty } from 'lodash';
@@ -13,6 +13,7 @@ import { Span } from './components';
 
 const Relation = ({
   data,
+  displayNavigationLink,
   hasDraftAndPublish,
   isDisabled,
   isDragging,
@@ -21,7 +22,17 @@ const Relation = ({
   to,
 }) => {
   const { formatMessage } = useIntl();
-  const cursor = isDisabled ? 'not-allowed' : 'pointer';
+  const cursor = useMemo(() => {
+    if (isDisabled) {
+      return 'not-allowed';
+    }
+
+    if (!displayNavigationLink) {
+      return 'default';
+    }
+
+    return 'pointer';
+  }, [displayNavigationLink, isDisabled]);
   const { pathname } = useLocation();
   const isDraft = isEmpty(data.published_at);
   const titleLabelID = isDraft
@@ -31,7 +42,7 @@ const Relation = ({
     ? formatMessage({ id: getTrad(titleLabelID) })
     : formatMessage({ id: getTrad('containers.Edit.clickToJump') });
 
-  if (isDragging) {
+  if (isDragging || !displayNavigationLink) {
     title = '';
   }
 
@@ -46,9 +57,13 @@ const Relation = ({
             <RelationDPState isDraft={isDraft} />
           </div>
         )}
-        <Link to={{ pathname: to, state: { from: pathname } }} title={title}>
-          <Span>{data[mainField]}</Span>
-        </Link>
+        {displayNavigationLink ? (
+          <Link to={{ pathname: to, state: { from: pathname } }} title={title}>
+            <Span>{data[mainField]}&nbsp;</Span>
+          </Link>
+        ) : (
+          <Span>{data[mainField]}&nbsp;</Span>
+        )}
       </div>
       <div style={{ cursor }}>
         <img src={IconRemove} alt="Remove Icon" onClick={onRemove} />
@@ -65,6 +80,7 @@ Relation.defaultProps = {
 
 Relation.propTypes = {
   data: PropTypes.object.isRequired,
+  displayNavigationLink: PropTypes.bool.isRequired,
   hasDraftAndPublish: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isDragging: PropTypes.bool,

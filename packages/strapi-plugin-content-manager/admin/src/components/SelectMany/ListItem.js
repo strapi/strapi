@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { has } from 'lodash';
+
 import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -11,6 +12,7 @@ import Relation from './Relation';
 
 function ListItem({
   data,
+  displayNavigationLink,
   findRelation,
   isDisabled,
   mainField,
@@ -19,6 +21,7 @@ function ListItem({
   targetModel,
 }) {
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
+
   const hasDraftAndPublish = has(data, 'published_at');
 
   const originalIndex = findRelation(data.id).index;
@@ -62,6 +65,7 @@ function ListItem({
       style={{ opacity }}
     >
       <Relation
+        displayNavigationLink={displayNavigationLink}
         hasDraftAndPublish={hasDraftAndPublish}
         mainField={mainField}
         onRemove={onRemove}
@@ -82,6 +86,7 @@ ListItem.defaultProps = {
 
 ListItem.propTypes = {
   data: PropTypes.object.isRequired,
+  displayNavigationLink: PropTypes.bool.isRequired,
   findRelation: PropTypes.func,
   isDisabled: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
