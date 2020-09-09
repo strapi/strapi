@@ -94,7 +94,7 @@ module.exports = async () => {
     },
     cognito: {
       enabled: false,
-      icon: 'amazon',
+      icon: 'aws',
       key: '',
       secret: '',
       subdomain: `${strapi.config.custom.cognitoHost}`,
