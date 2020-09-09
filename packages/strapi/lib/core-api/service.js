@@ -2,15 +2,19 @@
 
 const _ = require('lodash');
 const utils = require('strapi-utils');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const {
+  contentTypes: {
+    hasDraftAndPublish,
+    constants: { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATE_LIVE },
+  },
+} = require('strapi-utils');
 
 const getFetchParams = (params, model) => {
   const defaultParams = {};
 
-  if (contentTypesUtils.hasDraftAndPublish(model)) {
+  if (hasDraftAndPublish(model)) {
     Object.assign(defaultParams, {
-      _publicationState: contentTypesUtils.constants.DP_PUB_STATE_LIVE,
+      _publicationState: DP_PUB_STATE_LIVE,
     });
   }
 
@@ -151,7 +155,7 @@ const createCollectionTypeService = ({ model, strapi }) => {
 
     create(data, { files } = {}) {
       const sanitizedData = sanitizeInput(data);
-      if (contentTypesUtils.hasDraftAndPublish(model)) {
+      if (hasDraftAndPublish(model)) {
         sanitizedData[PUBLISHED_AT_ATTRIBUTE] = new Date().toISOString();
       }
       return strapi.entityService.create({ data: sanitizedData, files }, { model: modelName });

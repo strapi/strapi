@@ -151,22 +151,22 @@ describe('convertRestQueryParams', () => {
   });
 
   describe('Publication State param', () => {
-    test.each([{ _publicationState: 'foobar' }])('Throws on invalid params (%#)', params => {
+    test.each([
+      { _publicationState: 'foobar' },
+      { _publicationState: undefined },
+      { _publicationState: null },
+    ])('Throws on invalid params (%#)', params => {
       expect(() => convertRestQueryParams(params)).toThrow();
     });
 
     test.each([
-      [
-        'Live Mode',
-        { _publicationState: 'live' },
-        [{ field: 'published_at', operator: 'null', value: false }],
-      ],
+      ['Live Mode', { _publicationState: 'live' }],
       ['Preview Mode', { _publicationState: 'preview' }, []],
-    ])('%s', (name, params, expected) => {
+    ])('%s', (name, params) => {
       const result = convertRestQueryParams(params);
 
       expect(result._publicationState).toBeUndefined();
-      expect(result.where).toStrictEqual(expected);
+      expect(result.publicationState).toBe(params._publicationState);
     });
   });
 

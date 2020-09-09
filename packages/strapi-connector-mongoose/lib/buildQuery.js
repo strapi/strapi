@@ -3,7 +3,13 @@
 const _ = require('lodash');
 var semver = require('semver');
 const utils = require('./utils')();
-const { hasDeepFilters } = require('strapi-utils');
+const populateQueries = require('./utils/populate-queries');
+const {
+  hasDeepFilters,
+  contentTypes: {
+    constants: { DP_PUB_STATE_LIVE },
+  },
+} = require('strapi-utils');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -69,7 +75,7 @@ const BOOLEAN_OPERATORS = ['or'];
  * Build a mongo query
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  * @param {boolean} options.aggregate - Force aggregate function to use group by feature
  */
@@ -103,7 +109,8 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
   const wheres = where.map(buildWhereClause);
 
   const findCriteria = combineSearchAndWhere(search, wheres);
-  let query = model.find(findCriteria).populate(populate);
+  const customQueryOptions = _.pick(filters, ['publicationState']);
+  let query = model.find(findCriteria, null, { custom: customQueryOptions }).populate(populate);
   query = applyQueryParams({ query, filters });
 
   return Object.assign(query, {
@@ -118,7 +125,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
  * Builds a deep aggregate query when there are deep filters
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
 const buildDeepQuery = ({ model, filters, search, populate }) => {
@@ -128,6 +135,7 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
     populate,
     where: filters.where,
   });
+  const customQueryOptions = _.pick(filters, ['publicationState']);
 
   // Init the query
   let query = model
@@ -152,11 +160,15 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
           if (ids.length === 0) return [];
 
           const query = model
-            .find({
-              _id: {
-                $in: ids,
+            .find(
+              {
+                _id: {
+                  $in: ids,
+                },
               },
-            })
+              null,
+              { custom: customQueryOptions }
+            )
             .populate(populate);
 
           return applyQueryParams({ query, filters });
@@ -217,6 +229,13 @@ const applyQueryParams = ({ query, filters }) => {
   // Apply limit param
   if (_.has(filters, 'limit') && filters.limit >= 0) {
     query = query.limit(filters.limit);
+  }
+
+  // Apply publication state param
+  if (_.has(filters, 'publicationState')) {
+    if (filters.publicationState === DP_PUB_STATE_LIVE) {
+      query = query.where(populateQueries.publicationState[DP_PUB_STATE_LIVE]);
+    }
   }
 
   return query;
@@ -613,7 +632,7 @@ const findModelByPath = ({ rootModel, path }) => {
  * @param {string} options.path - Attribute path
  */
 const findModelPath = ({ rootModel, path }) => {
-  const parts = path.split('.');
+  const parts = (_.isObject(path) ? path.path : path).split('.');
 
   let tmpModel = rootModel;
   let tmpPath = [];
