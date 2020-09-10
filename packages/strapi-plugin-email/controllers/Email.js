@@ -1,5 +1,7 @@
 'use strict';
 
+const { isNil } = require('lodash');
+
 /**
  * Email.js controller
  *
@@ -15,6 +17,35 @@ module.exports = {
         return ctx.badRequest(e.message);
       } else {
         throw new Error(`Couldn't send email: ${e.message}.`);
+      }
+    }
+
+    // Send 200 `ok`
+    ctx.send({});
+  },
+
+  test: async ctx => {
+    const { to } = ctx.request.body;
+
+    if (isNil(to)) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Email.to.empty', message: 'No recipient(s) are given' }],
+      });
+    }
+
+    const email = {
+      to: to,
+      subject: `Strapi test mail to: ${to}`,
+      text: `Great, you have correctly configured the Strapi email plugin and the ${strapi.plugins.email.config.provider} provider!`,
+    };
+
+    try {
+      await strapi.plugins.email.services.email.send(email);
+    } catch (e) {
+      if (e.statusCode === 400) {
+        return ctx.badRequest(e.message);
+      } else {
+        throw new Error(`Couldn't send test email: ${e.message}.`);
       }
     }
 

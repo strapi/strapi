@@ -12,6 +12,19 @@
           "name": "Email"
         }
       }
+    },
+    {
+      "method": "POST",
+      "path": "/test",
+      "handler": "Email.test",
+      "config": {
+        "policies": [],
+        "description": "Send an test email",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
+      }
     }
   ]
 }
