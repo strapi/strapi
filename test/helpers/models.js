@@ -62,13 +62,17 @@ module.exports = ({ rq }) => {
   }
 
   async function modifyContentType(data) {
+    const sanitizedData = { ...data };
+    delete sanitizedData.editable;
+    delete sanitizedData.restrictRelationsTo;
+
     await rq({
-      url: `/content-type-builder/content-types/application::${data.name}.${data.name}`,
+      url: `/content-type-builder/content-types/application::${sanitizedData.name}.${sanitizedData.name}`,
       method: 'PUT',
       body: {
         contentType: {
           connection: 'default',
-          ...data,
+          ...sanitizedData,
         },
       },
     });

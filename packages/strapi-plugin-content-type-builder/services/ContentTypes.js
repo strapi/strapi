@@ -8,6 +8,41 @@ const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { coreUids, pluginsUids } = require('./constants');
+
+const isContentTypeEditable = (contentType = {}) => {
+  const { uid } = contentType;
+  return !uid.startsWith(coreUids.PREFIX) && uid !== pluginsUids.UPLOAD_FILE;
+};
+
+const getRestrictRelationsTo = (contentType = {}) => {
+  const { uid } = contentType;
+  if (uid === coreUids.STRAPI_USER) {
+    return ['oneWay', 'manyWay'];
+  }
+
+  if (uid.startsWith(coreUids.PREFIX) || uid === pluginsUids.UPLOAD_FILE) {
+    return [];
+  }
+
+  return null;
+};
+
+const getformattedName = (contentType = {}) => {
+  const { uid, info, plugin } = contentType;
+  const name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
+  const isUser = name.toLowerCase() === 'user';
+
+  if (isUser && plugin === 'admin') {
+    return 'User (Admin panel)';
+  }
+
+  if (isUser && plugin === 'users-permissions') {
+    return 'User (Permissions plugin)';
+  }
+
+  return name;
+};
 
 /**
  * Format a contentType info to be used by the front-end
@@ -21,13 +56,15 @@ const formatContentType = contentType => {
     plugin,
     apiID: modelName,
     schema: {
-      name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
+      name: getformattedName(contentType),
       description: _.get(info, 'description', ''),
       draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       connection,
       kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
+      editable: isContentTypeEditable(contentType),
+      restrictRelationsTo: getRestrictRelationsTo(contentType),
     },
   };
 };
