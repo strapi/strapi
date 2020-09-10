@@ -10,6 +10,10 @@ _For a step-by-step guide, please take a look at the following steps. This quick
 
 (Before continuing, please make sure [Node.js and npm are properly installed](../installation/cli.md#step-1-make-sure-requirements-are-met) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
+::: warning
+In the 3.1.5 the **Roles & Permissions** section has been migrated into the **Settings** section.
+:::
+
 ## 1. Install Strapi and Create a new project
 
 :::: tabs
@@ -104,7 +108,7 @@ You have now seen **two different ways** to use the **relation** field type to a
 
 ## 7. Set Roles and Permissions
 
-Navigate to [**PLUGINS** - **Roles & Permissions**](http://localhost:1337/admin/plugins/users-permissions/roles).
+Navigate to [**SETTINGS** - **User's roles**](http://localhost:1337/admin/settings/users-permissions/roles).
 
 - Click the **Public** Role.
 - Scroll down under **Permissions**, find **Restaurant**. Click the checkbox next to **find** and **findone**.

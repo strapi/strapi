@@ -1388,10 +1388,10 @@
   resolved "https://registry.yarnpkg.com/@formatjs/intl-utils/-/intl-utils-2.2.2.tgz#adc448035c2e3f60c550bd27c97eca336e641f5a"
   integrity sha512-rKINaMRYH3FeNwYjEQwPtsA0kP2/hLLMB9mLi/QYfszz/huTqkInFmYilFRCX4oLlhFXDK5UQQMGNfEavN02Sg==
 
-"@fortawesome/fontawesome-common-types@^0.2.27":
-  version "0.2.27"
-  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.2.27.tgz#19706345859fc46adf3684ed01d11b40903b87e9"
-  integrity sha512-97GaByGaXDGMkzcJX7VmR/jRJd8h1mfhtA7RsxDBN61GnWE/PPCZhOdwG/8OZYktiRUF0CvFOr+VgRkJrt6TWg==
+"@fortawesome/fontawesome-common-types@^0.2.27", "@fortawesome/fontawesome-common-types@^0.2.30":
+  version "0.2.30"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.2.30.tgz#2f1cc5b46bd76723be41d0013a8450c9ba92b777"
+  integrity sha512-TsRwpTuKwFNiPhk1UfKgw7zNPeV5RhNp2Uw3pws+9gDAkPGKrtjR1y2lI3SYn7+YzyfuNknflpBA1LRKjt7hMg==
 
 "@fortawesome/fontawesome-free@^5.11.2", "@fortawesome/fontawesome-free@^5.12.0":
   version "5.12.1"
@@ -1419,12 +1419,12 @@
   dependencies:
     "@fortawesome/fontawesome-common-types" "^0.2.27"
 
-"@fortawesome/free-solid-svg-icons@^5.10.2", "@fortawesome/free-solid-svg-icons@^5.11.2":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-5.12.1.tgz#76b6f958a3471821ff146f8f955e6d7cfe87147c"
-  integrity sha512-k3MwRFFUhyL4cuCJSaHDA0YNYMELDXX0h8JKtWYxO5XD3Dn+maXOMrVAAiNGooUyM2v/wz/TOaM0jxYVKeXX7g==
+"@fortawesome/free-solid-svg-icons@^5.10.2", "@fortawesome/free-solid-svg-icons@^5.11.2", "@fortawesome/free-solid-svg-icons@^5.14.0":
+  version "5.14.0"
+  resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-5.14.0.tgz#970453f5e8c4915ad57856c3a0252ac63f6fec18"
+  integrity sha512-M933RDM8cecaKMWDSk3FRYdnzWGW7kBBlGNGfvqLVwcwhUPNj9gcw+xZMrqBdRqxnSXdl3zWzTCNNGEtFUq67Q==
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.27"
+    "@fortawesome/fontawesome-common-types" "^0.2.30"
 
 "@fortawesome/react-fontawesome@^0.1.4", "@fortawesome/react-fontawesome@^0.1.7":
   version "0.1.9"

@@ -7,26 +7,6 @@ const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 
-const defaultProviderConfig = {
-  provider: 'local',
-  name: 'Local server',
-  enabled: true,
-  sizeLimit: 1000000,
-};
-
-const resetProviderConfigToDefault = () => {
-  return setConfigOptions(defaultProviderConfig);
-};
-
-const setConfigOptions = assign => {
-  return rq.put('/upload/settings/development', {
-    body: {
-      ...defaultProviderConfig,
-      ...assign,
-    },
-  });
-};
-
 const data = {};
 
 describe('Upload plugin end to end tests', () => {
@@ -34,10 +14,6 @@ describe('Upload plugin end to end tests', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
   }, 60000);
-
-  afterEach(async () => {
-    await resetProviderConfigToDefault();
-  });
 
   test('Upload a single file', async () => {
     const req = rq.post('/graphql');
