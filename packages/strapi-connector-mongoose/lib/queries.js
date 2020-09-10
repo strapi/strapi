@@ -28,7 +28,10 @@ module.exports = ({ model, strapi }) => {
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => {
         const assocModel = strapi.db.getModelByAssoc(ast);
-        const populate = { path: ast.alias };
+        const populate = {
+          path: ast.alias,
+          options: { publicationState: options.publicationState },
+        };
 
         if (
           contentTypesUtils.hasDraftAndPublish(assocModel) &&

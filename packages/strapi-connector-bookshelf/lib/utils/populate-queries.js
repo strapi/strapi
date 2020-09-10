@@ -59,7 +59,7 @@ const runPopulateQueries = (queries, qb) => {
 };
 
 /**
- * Return an object which associate each given path to a populateQueries's runner
+ * Return an object which associates each given path to a populateQueries's runner
  * @param paths
  * @param options
  * @returns {*}

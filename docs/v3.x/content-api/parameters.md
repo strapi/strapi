@@ -279,7 +279,7 @@ OR
 
 #### Get both published and draft articles
 
-`GET /articles?_pulicationState=preview`
+`GET /articles?_publicationState=preview`
 
 ::: tip NOTE
 If you only want to retrieve your draft entries, you can combine the `preview` mode and the `published_at` field.

@@ -27,18 +27,19 @@ const populateFetch = (definition, options) => {
   }
 };
 
-const populateAssociations = (definition, options) => {
+const populateAssociations = (definition, { prefix = '', publicationState } = {}) => {
   return definition.associations
     .filter(ast => ast.autoPopulate !== false)
     .map(assoc => {
       if (isPolymorphic({ assoc })) {
         return formatPolymorphicPopulate({
           assoc,
-          publicationState: options.publicationState,
+          prefix,
+          publicationState,
         });
       }
 
-      return formatAssociationPopulate({ assoc }, options);
+      return formatAssociationPopulate({ assoc }, { prefix, publicationState });
     })
     .reduce((acc, val) => acc.concat(val), []);
 };
@@ -93,7 +94,7 @@ const formatAssociationPopulate = ({ assoc, prefix = '' }, options = {}) => {
       })
     );
 
-  const components = populateComponents(assocModel, { prefix: `${path}.` });
+  const components = populateComponents(assocModel, { prefix: `${path}.`, publicationState });
 
   return [
     pq.bindPopulateQueries([path], {
@@ -151,13 +152,7 @@ const populateComponent = (key, attr, { prefix = '', publicationState } = {}) =>
     publicationState,
   });
 
-  return [
-    pq.bindPopulateQueries([path], {
-      publicationState: { query: publicationState, model: component },
-    }),
-    ...assocs,
-    ...components,
-  ];
+  return [path, ...assocs, ...components];
 };
 
 const formatPopulateOptions = (definition, { withRelated, publicationState } = {}) => {
@@ -184,17 +179,14 @@ const formatPopulateOptions = (definition, { withRelated, publicationState } = {
 
       if (isComponent(tmpModel, part)) {
         if (attr.type === 'dynamiczone') {
-          const path = `${prefix}${part}.component`;
-          newKey = path;
+          newKey = `${prefix}${part}.component`;
           break;
         }
 
         tmpModel = strapi.components[attr.component];
         // add component path and there relations / images
-        const path = `${prefix}${part}.component`;
-
-        newKey = path;
-        prefix = `${path}.`;
+        newKey = `${prefix}${part}.component`;
+        prefix = `${newKey}.`;
         continue;
       }
 

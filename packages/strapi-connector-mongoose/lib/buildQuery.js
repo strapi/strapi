@@ -4,12 +4,7 @@ const _ = require('lodash');
 var semver = require('semver');
 const utils = require('./utils')();
 const populateQueries = require('./utils/populate-queries');
-const {
-  hasDeepFilters,
-  contentTypes: {
-    constants: { DP_PUB_STATE_LIVE },
-  },
-} = require('strapi-utils');
+const { hasDeepFilters } = require('strapi-utils');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -109,8 +104,9 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
   const wheres = where.map(buildWhereClause);
 
   const findCriteria = combineSearchAndWhere(search, wheres);
-  const customQueryOptions = _.pick(filters, ['publicationState']);
-  let query = model.find(findCriteria, null, { custom: customQueryOptions }).populate(populate);
+  let query = model
+    .find(findCriteria, null, { publicationState: filters.publicationState })
+    .populate(populate);
   query = applyQueryParams({ query, filters });
 
   return Object.assign(query, {
@@ -233,8 +229,10 @@ const applyQueryParams = ({ query, filters }) => {
 
   // Apply publication state param
   if (_.has(filters, 'publicationState')) {
-    if (filters.publicationState === DP_PUB_STATE_LIVE) {
-      query = query.where(populateQueries.publicationState[DP_PUB_STATE_LIVE]);
+    const populateQuery = populateQueries.publicationState[filters.publicationState];
+
+    if (populateQuery) {
+      query = query.where(populateQuery);
     }
   }
 
@@ -439,6 +437,7 @@ const buildLookupMatch = ({ assoc }) => {
  * Match query for lookups
  * @param {Object} model - Mongoose model
  * @param {Object} filters - Filters object
+ * @param {Array} search
  */
 const buildQueryMatches = (model, filters, search = []) => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
