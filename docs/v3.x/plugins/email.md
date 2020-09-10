@@ -128,6 +128,7 @@ If you're using a different provider depending on your environment, you can spec
 
 ::: tip
 Only one email provider will be active at all time. If the email provider setting isn't picked up by strapi, verify you have put the file `plugins.js` in the correct folder, and with correct filename. The selection of email provider is done via configuration file only.               
+:::
 
 ::: tip
 When testing the new email provider with those two email templates created during strapi setup, the *shipper email* on the template, with default no-reply@strapi.io need to be updated in according to your email provider, otherwise it will fail the test.
