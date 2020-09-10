@@ -33,6 +33,10 @@ const VALID_UID_TARGETS = ['string', 'text'];
 
 const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 
+const PREFIX = 'strapi::';
+const STRAPI_USER = 'strapi::user';
+const UPLOAD_FILE = 'plugins::upload.file';
+
 module.exports = {
   DEFAULT_TYPES,
   typeKinds: {
@@ -45,4 +49,11 @@ module.exports = {
   },
   FORBIDDEN_ATTRIBUTE_NAMES,
   VALID_UID_TARGETS,
+  coreUids: {
+    STRAPI_USER,
+    PREFIX,
+  },
+  pluginsUids: {
+    UPLOAD_FILE,
+  },
 };
