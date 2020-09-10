@@ -5,10 +5,14 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
+import React from 'react';
+import { CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
+import pluginPermissions from './permissions';
 import trads from './translations';
+import getTrad from './utils/getTrad';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -30,6 +34,28 @@ export default strapi => {
     pluginLogo,
     preventComponentRendering: false,
     trads,
+    settings: {
+      menuSection: {
+        id: pluginId,
+        title: getTrad('Settings.section-label'),
+        links: [
+          {
+            title: {
+              id: getTrad('Settings.link.email'),
+              defaultMessage: 'Settings',
+            },
+            name: 'settings',
+            to: `${strapi.settingsBaseURL}/${pluginId}`,
+            Component: () => (
+              <CheckPagePermissions permissions={pluginPermissions.settings}>
+                Hello world
+              </CheckPagePermissions>
+            ),
+            permissions: pluginPermissions.settings,
+          },
+        ],
+      },
+    },
   };
 
   return strapi.registerPlugin(plugin);
