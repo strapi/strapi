@@ -4719,10 +4719,10 @@ bonjour@^3.5.0:
     multicast-dns "^6.0.1"
     multicast-dns-service-types "^1.1.0"
 
-bookshelf@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/bookshelf/-/bookshelf-1.1.0.tgz#d456abd70ed4af4c9ae6f3d364424590ea31dcbf"
-  integrity sha512-a4rrDI5pnjnj7xFAT23FJQyVxlrrvRPGUNRNj1upuBC5al7ObvoelTZbmVl9bnj+BZE5x19Y07+p933fCsBHNQ==
+bookshelf@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/bookshelf/-/bookshelf-1.2.0.tgz#cb972aa2316405d3a4af9cb1e2814895ab23283e"
+  integrity sha512-rm04YpHkLej6bkNezKUQjzuXV30rbyEHQoaKvfQ3fOyLYxPeB18uBL+h2t6SmeXjfsB+aReMmbhkMF/lUTbtMA==
   dependencies:
     bluebird "^3.7.2"
     create-error "~0.3.1"
