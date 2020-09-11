@@ -7,7 +7,7 @@ Controllers are JavaScript files which contain a set of methods called **actions
 ```js
 module.exports = {
   // GET /hello
-  index: async ctx => {
+  async index(ctx) {
     return 'Hello World!';
   },
 };
@@ -340,7 +340,7 @@ Our `index` action will return `Hello World!`. You can also return a JSON object
 ```js
 module.exports = {
   // GET /hello
-  index: async ctx => {
+  async index(ctx) {
     ctx.send('Hello World!');
   },
 };
