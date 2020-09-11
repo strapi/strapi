@@ -38,7 +38,19 @@ strapi install graphql
 
 ### Fetch your Restaurant collection type
 
-Play with the [GraphQL Playground](http://localhost:1337/graphql) to fetch your content
+Play with the [GraphQL Playground](http://localhost:1337/graphql) to fetch your content 
+
+*Authorization*
+
+Add the following to your HTTP headers within the GraphQL playground
+
+```
+{
+    "Authorization": "Bearer YOUR_JWT_TOKEN"
+}
+```
+
+You can find your jwt token on the [documentation page of your admin panel](http://localhost:1337/admin/plugins/documentation) `http://localhost:1337/admin/plugins/documentation`, make sure you've installed the Documentation plugin from the marketplace.
 
 *Request*
 
