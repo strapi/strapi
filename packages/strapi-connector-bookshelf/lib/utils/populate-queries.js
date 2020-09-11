@@ -55,7 +55,7 @@ const toQueries = options => {
  * @param qb
  */
 const runPopulateQueries = (queries, qb) => {
-  queries.forEach(query => query(qb));
+  qb.where(qb => queries.forEach(query => query(qb)));
 };
 
 /**
