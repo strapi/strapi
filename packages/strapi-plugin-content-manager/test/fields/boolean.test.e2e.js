@@ -58,6 +58,8 @@ describe('Test type boolean', () => {
       body: { field: 1 },
     });
 
+    console.log('res.body', JSON.stringify(res.body, null, 2));
+
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
       field: true,

@@ -115,7 +115,7 @@ describe('Content-Type API', () => {
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteComponent('compo');
+    await modelsUtils.deleteComponent('default.compo');
   }, 60000);
 
   describe('Basic', () => {

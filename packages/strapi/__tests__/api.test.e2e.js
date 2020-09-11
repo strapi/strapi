@@ -114,7 +114,7 @@ describe('Core API', () => {
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteComponent('compo');
+    await modelsUtils.deleteComponent('default.compo');
   }, 60000);
 
   describe('Basic', () => {
@@ -303,8 +303,8 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.compo.description.0')).toBe(
-          'description must be at least 3 characters'
+        expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at least 3 characters'
         );
       });
 
@@ -325,8 +325,8 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.compo.description.0')).toBe(
-          'description must be at most 10 characters'
+        expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at most 10 characters'
         );
       });
 
@@ -346,7 +346,9 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.compo.name.0')).toBe('name must be defined.');
+        expect(_.get(res.body.data, ['errors', 'compo.name', '0'])).toBe(
+          'compo.name must be defined.'
+        );
       });
     });
   });
@@ -518,7 +520,7 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.description.0')).toBe(
+        expect(_.get(res.body.data, ['errors', 'description', '0'])).toBe(
           'description must be at most 30 characters'
         );
       });
@@ -637,8 +639,8 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.description.0')).toBe(
-          'description must be at least 3 characters'
+        expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at least 3 characters'
         );
       });
 
@@ -658,8 +660,8 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.description.0')).toBe(
-          'description must be at most 10 characters'
+        expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at most 10 characters'
         );
       });
 
@@ -678,7 +680,9 @@ describe('Core API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.errors.name.0')).toBe('name must be defined.');
+        expect(_.get(res.body.data, ['errors', 'compo.name', '0'])).toBe(
+          'compo.name must be defined.'
+        );
       });
     });
   });

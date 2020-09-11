@@ -12,7 +12,32 @@ const validators = require('./validators');
 const isMedia = attr => (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
 
 const isSimpleAttribute = attr =>
-  !attr.collection && !attr.model && attr.type !== 'component' && attr.model !== 'dynamiczone';
+  !attr.collection && !attr.model && attr.type !== 'component' && attr.type !== 'dynamiczone';
+
+const addMinMax = (attr, validator, data) => {
+  if (Number.isInteger(attr.min) && (attr.required || (Array.isArray(data) && data.length > 0))) {
+    validator = validator.min(attr.min);
+  }
+  if (Number.isInteger(attr.max)) {
+    validator = validator.max(attr.max);
+  }
+  return validator;
+};
+
+const addRequiredValidation = createOrUpdate => (attr, validator, isDraft) => {
+  if (!isDraft && attr.required) {
+    if (createOrUpdate === 'creation') {
+      validator = validator.notNil();
+    } else if (createOrUpdate === 'update') {
+      validator = validator.notNull();
+    }
+  } else {
+    validator = validator.nullable();
+  }
+  return validator;
+};
+
+const preventCast = validator => validator.transform((val, originalVal) => originalVal);
 
 const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => {
   let validator;
@@ -21,6 +46,7 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
   } else if (isSimpleAttribute(attr)) {
     // simple attribute
     validator = validators[attr.type](attr, { isDraft });
+    validator = addRequiredValidation(createOrUpdate)(attr, validator, isDraft);
   } else {
     // complex attribute (relations, components, dz)
     const attributeModels = strapi.db.getModelsByAttribute(attr);
@@ -30,43 +56,40 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
     if (attr.type === 'component') {
       // component
       if (_.get(attr, 'repeatable', false) === true) {
-        validator = yup.array().of(createModelValidator(attributeModels[0], data, { isDraft }));
-        if (Number.isInteger(attr.min)) {
-          validator.min(attr.min);
-        }
-        if (Number.isInteger(attr.max)) {
-          validator.max(attr.max);
-        }
+        validator = yup
+          .array()
+          .of(
+            yup.lazy(item =>
+              createModelValidator(createOrUpdate)(attributeModels[0], item, { isDraft }).notNull()
+            )
+          )
+          .notNull();
+        validator = addMinMax(attr, validator, data);
       } else {
         validator = createModelValidator(createOrUpdate)(attributeModels[0], data, { isDraft });
+        validator = addRequiredValidation(createOrUpdate)(attr, validator, isDraft);
       }
     } else if (attr.type === 'dynamiczone') {
       // dynamiczone
       validator = yup
         .array()
         .of(
-          yup.object().shape({
-            __component: yup
-              .string()
-              .required()
-              .oneOf(_.keys(strapi.components)),
+          yup.lazy(item => {
+            const model = strapi.getModel(item.__component);
+            return yup
+              .object()
+              .shape({
+                __component: yup
+                  .string()
+                  .required()
+                  .oneOf(_.keys(strapi.components)),
+              })
+              .concat(createModelValidator(createOrUpdate)(model, item, { isDraft }))
+              .notNull();
           })
         )
-        .concat(
-          yup.array().of(
-            yup.lazy(item => {
-              const model = strapi.getModel(item.__component);
-              return createModelValidator(model, data, { isDraft });
-            })
-          )
-        );
-
-      if (Number.isInteger(attr.min)) {
-        validator.min(attr.min);
-      }
-      if (Number.isInteger(attr.max)) {
-        validator.max(attr.max);
-      }
+        .notNull();
+      validator = addMinMax(attr, validator, data);
     } else {
       // relations
       if (Array.isArray(data)) {
@@ -74,18 +97,10 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
       } else {
         validator = yup.mixed();
       }
+      validator = addRequiredValidation(createOrUpdate)(attr, validator, isDraft);
     }
-  }
 
-  // add required validation
-  if (!isDraft && attr.required) {
-    if (createOrUpdate === 'creation') {
-      validator = validator.notNil();
-    } else if (createOrUpdate === 'update') {
-      validator = validator.notNull();
-    }
-  } else {
-    validator = validator.nullable();
+    validator = preventCast(validator);
   }
 
   if (createOrUpdate === 'creation' && _.has(attr, 'default')) {
@@ -98,18 +113,24 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
 };
 
 const createModelValidator = createOrUpdate => (model, data, { isDraft }) =>
-  yup.object(
-    _.mapValues(model.attributes, (attr, attrName) =>
-      createAttributeValidator(createOrUpdate)(attr, _.get(data, attrName), { isDraft })
-    )
-  );
+  yup
+    .object()
+    .shape(
+      _.mapValues(model.attributes, (attr, attrName) =>
+        createAttributeValidator(createOrUpdate)(attr, _.get(data, attrName), { isDraft })
+      )
+    );
 
-const createValidateEntity = createOrUpdate => (model, data, { isDraft = false } = {}) => {
+const createValidateEntity = createOrUpdate => async (model, data, { isDraft = false } = {}) => {
   const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
+  let validData;
+  try {
+    validData = await validator.validate(data, { abortEarly: false });
+  } catch (e) {
+    throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(e) });
+  }
 
-  return validator.validate(data, { abortEarly: false }).catch(error => {
-    throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(error) });
-  });
+  return validData;
 };
 
 module.exports = {

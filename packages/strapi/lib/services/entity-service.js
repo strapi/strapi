@@ -72,8 +72,6 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     const validData = await entityValidator.validateEntityCreation(modelDef, data, { isDraft });
 
-    console.log('validData', validData);
-
     let entry = await db.query(model).create(validData);
 
     if (files) {
