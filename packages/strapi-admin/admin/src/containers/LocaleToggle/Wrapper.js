@@ -1,12 +1,10 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  min-width: 90px;
   -webkit-font-smoothing: antialiased;
 
   > div {
     height: 6rem;
-    width: 90px;
     line-height: 5.8rem;
     z-index: 999;
     > button {
@@ -48,21 +46,11 @@ const Wrapper = styled.div`
       font-family: Lato;
       font-weight: 600;
       letter-spacing: 0.5;
-      text-transform: uppercase;
       vertical-align: baseline;
-    }
-
-    img {
-      max-height: 13px;
-      margin-left: 9px;
-      border-radius: 1px;
-      vertical-align: middle;
     }
   }
 
   .localeDropdownMenu {
-    left: auto !important;
-    right: -5px !important;
     min-width: 90px !important;
     max-height: 162px !important;
     overflow: auto !important;

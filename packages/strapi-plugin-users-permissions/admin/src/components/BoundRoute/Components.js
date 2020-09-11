@@ -3,7 +3,7 @@ import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   display: flex;
-  height: 2.4rem;
+  min-height: 2.4rem;
   border-radius: 3px;
   background-color: #e9eaeb;
   line-height: 2.4rem;
@@ -11,7 +11,7 @@ const Wrapper = styled.div`
 
 const Header = styled.div`
   margin-bottom: 3rem;
-  padding-top: 1.1rem;
+  padding-top: 1.2rem;
   color: #333740;
   font-size: 18px;
   font-weight: ${({ theme }) => theme.main.fontWeights.bold};
@@ -44,6 +44,9 @@ Path.propTypes = {
 };
 
 const Verb = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 0 1rem;
   border-radius: 3px;
   color: #ffffff;
