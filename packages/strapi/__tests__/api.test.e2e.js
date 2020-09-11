@@ -287,7 +287,7 @@ describe('Core API', () => {
       });
 
       // validation inside components doesn't exist for the moment
-      test.skip('Cannot create Products with compo - minLength', async () => {
+      test('Cannot create Products with compo - minLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -309,7 +309,7 @@ describe('Core API', () => {
       });
 
       // validation inside components doesn't exist for the moment
-      test.skip('Cannot create Products with compo - maxLength', async () => {
+      test('Cannot create Products with compo - maxLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -331,7 +331,7 @@ describe('Core API', () => {
       });
 
       // validation inside components doesn't exist for the moment
-      test.skip('Cannot create Products with compo - required', async () => {
+      test('Cannot create Products with compo - required', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -621,8 +621,7 @@ describe('Core API', () => {
         expect(_.get(res, 'body.data.errors.compo.0')).toBe('compo must be defined.');
       });
 
-      // validation doesn't exist for the moment
-      test.skip('Cannot create Products with compo - minLength', async () => {
+      test('Cannot create Products with compo - minLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -643,8 +642,7 @@ describe('Core API', () => {
         );
       });
 
-      // validation doesn't exist for the moment
-      test.skip('Cannot create Products with compo - maxLength', async () => {
+      test('Cannot create Products with compo - maxLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -665,8 +663,7 @@ describe('Core API', () => {
         );
       });
 
-      // validation doesn't exist for the moment
-      test.skip('Cannot create Products with compo - required', async () => {
+      test('Cannot create Products with compo - required', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',

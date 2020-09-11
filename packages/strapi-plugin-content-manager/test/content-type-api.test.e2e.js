@@ -58,8 +58,8 @@ const compo = {
     },
     description: {
       type: 'text',
-      minLength: 3,
-      maxLength: 10,
+      minLength: 4,
+      maxLength: 30,
     },
   },
 };
@@ -288,8 +288,7 @@ describe('Content-Type API', () => {
         expect(_.get(res, 'body.data.0.errors.compo.0')).toBe('compo must be defined.');
       });
 
-      // validation inside components doesn't exist for the moment
-      test.skip('Cannot create Products with compo - minLength', async () => {
+      test('Cannot create Products with compo - minLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -305,13 +304,12 @@ describe('Content-Type API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.0.errors.compo.description.0')).toBe(
-          'description must be at least 3 characters'
+        expect(_.get(res.body.data, ['0', 'errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at least 4 characters'
         );
       });
 
-      // validation inside components doesn't exist for the moment
-      test.skip('Cannot create Products with compo - maxLength', async () => {
+      test('Cannot create Products with compo - maxLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -327,13 +325,12 @@ describe('Content-Type API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.0.errors.compo.description.0')).toBe(
-          'description must be at most 10 characters'
+        expect(_.get(res.body.data, ['0', 'errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at most 30 characters'
         );
       });
 
-      // validation inside components doesn't exist for the moment
-      test.skip('Cannot create Products with compo - required', async () => {
+      test('Cannot create Products with compo - required', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -348,7 +345,9 @@ describe('Content-Type API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.0.errors.compo.name.0')).toBe('name must be defined.');
+        expect(_.get(res.body.data, ['0', 'errors', 'compo.name', '0'])).toBe(
+          'compo.name must be defined.'
+        );
       });
     });
   });
@@ -709,8 +708,7 @@ describe('Content-Type API', () => {
         data.productsWithCompoAndDP.push(res.body);
       });
 
-      // validation doesn't exist for the moment
-      test.skip('Cannot create Products with compo - maxLength', async () => {
+      test('Cannot create Products with compo - maxLength', async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -727,8 +725,8 @@ describe('Content-Type API', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res, 'body.data.0.errors.description.0')).toBe(
-          'description must be at most 10 characters'
+        expect(_.get(res.body.data, ['0', 'errors', 'compo.description', '0'])).toBe(
+          'compo.description must be at most 30 characters'
         );
       });
 

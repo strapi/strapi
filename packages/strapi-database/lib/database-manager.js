@@ -124,6 +124,19 @@ class DatabaseManager {
     });
   }
 
+  getModelsByAttribute(attr) {
+    let models = [];
+    if (attr.type === 'component') {
+      models.push(this.getModel(attr.component));
+    } else if (attr.type === 'dynamiczone') {
+      models = attr.components.map(compoName => this.getModel(compoName));
+    } else if (attr.model || attr.collection) {
+      models.push(this.getModelByAssoc(attr));
+    }
+
+    return models;
+  }
+
   getModelsByPluginName(pluginName) {
     if (!pluginName) {
       return strapi.models;

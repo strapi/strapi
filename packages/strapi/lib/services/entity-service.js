@@ -70,7 +70,9 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     const isDraft = contentTypesUtils.isDraft(data, modelDef);
 
-    const validData = await entityValidator.validateEntity(modelDef, data, { isDraft });
+    const validData = await entityValidator.validateEntityCreation(modelDef, data, { isDraft });
+
+    console.log('validData', validData);
 
     let entry = await db.query(model).create(validData);
 
