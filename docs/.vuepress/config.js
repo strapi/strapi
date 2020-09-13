@@ -17,7 +17,7 @@ module.exports = {
       'link',
       {
         rel: 'icon',
-        href: 'https://strapi.io/favicon.ico',
+        href: 'https://strapi.io/assets/favicon-32x32.png',
       },
     ],
 
@@ -132,7 +132,7 @@ module.exports = {
       },
       {
         text: 'Blog',
-        link: 'https://blog.strapi.io',
+        link: 'https://strapi.io/blog',
       },
       {
         text: 'Tutorials',
@@ -141,6 +141,7 @@ module.exports = {
     ],
     repo: 'strapi/strapi',
     docsDir: 'docs',
+    docsBranch: 'documentation',
     algolia: {
       apiKey: 'a93451de224096fb34471c8b8b049de7',
       indexName: 'strapi',
@@ -160,14 +161,18 @@ module.exports = {
             ['/v3.x/getting-started/deployment', 'Deployment'],
             ['/v3.x/getting-started/contributing', 'Contributing'],
             ['/v3.x/getting-started/troubleshooting', 'Troubleshooting'],
+            ['/v3.x/getting-started/usage-information', 'Telemetry'],
             '/v3.x/getting-started/quick-start',
-            '/v3.x/getting-started/quick-start-tutorial',
           ],
         },
         {
           collapsable: true,
           title: '📄 Content API',
-          children: ['/v3.x/content-api/api-endpoints', '/v3.x/content-api/parameters'],
+          children: [
+            ['/v3.x/content-api/api-endpoints', 'API Endpoints'],
+            ['/v3.x/content-api/parameters', 'Parameters'],
+            ['/v3.x/content-api/integrations', 'Integrations']
+          ],
         },
         {
           collapsable: true,
@@ -223,6 +228,7 @@ module.exports = {
             '/v3.x/admin-panel/customization',
             '/v3.x/admin-panel/custom-webpack-config',
             '/v3.x/admin-panel/deploy',
+            '/v3.x/admin-panel/forgot-password',
           ],
         },
         {
@@ -256,7 +262,7 @@ module.exports = {
         {
           collapsable: true,
           title: '🏗 Global strapi',
-          children: ['/v3.x/global-strapi/api-reference', '/v3.x/global-strapi/usage-information'],
+          children: ['/v3.x/global-strapi/api-reference'],
         },
         {
           collapsable: false,

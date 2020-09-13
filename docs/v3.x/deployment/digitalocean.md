@@ -3,12 +3,12 @@
 This is a step-by-step guide for deploying a Strapi project to [DigitalOcean](https://www.digitalocean.com/). Databases can be on a [DigitalOcean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md). And have read through the [configuration](../getting-started/deployment.md#configuration) section.
 
 ::: tip
-Strapi does have a [One-Click](../installation/digitalocean-one-click) deployment option for DigitalOcean
+Strapi does have a [One-Click](../installation/digitalocean-one-click.md) deployment option for DigitalOcean
 :::
 
 ### DigitalOcean Install Requirements
 
-- You must have a [DigitalOcean account](https://m.do.co/c/30986c1ff595) before doing these steps.
+- If you don't have a DigitalOcean account you will need to create one, you can use [this referral link](https://try.digitalocean.com/strapi/) to get \$100 of free credits!
 
 ### Create a "Droplet"
 
@@ -109,7 +109,7 @@ git --version
 
 #### 2. **OPTIONAL:** Install Git.
 
-:::note
+::: tip NOTE
 Only do this step if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
 :::
 
@@ -241,7 +241,7 @@ You will next need to [install and configure PM2 Runtime](#install-and-configure
 
 ### Install and configure PM2 Runtime
 
-[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime.
+[PM2 Runtime](https://pm2.keymetrics.io) allows you to keep your Strapi project alive and to reload it without downtime.
 
 Ensure you are logged in as a **non-root** user. You will install **PM2** globally:
 

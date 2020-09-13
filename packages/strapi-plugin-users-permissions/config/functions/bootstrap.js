@@ -10,6 +10,8 @@
 const _ = require('lodash');
 const uuid = require('uuid/v4');
 
+const usersPermissionsActions = require('../users-permissions-actions');
+
 module.exports = async () => {
   const pluginStore = strapi.store({
     environment: '',
@@ -92,6 +94,14 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/twitch/callback`,
       scope: ['user:read:email'],
     },
+    linkedin: {
+      enabled: false,
+      icon: 'linkedin',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/linkedin/callback`,
+      scope: ['r_liteprofile', 'r_emailaddress'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
@@ -156,8 +166,8 @@ module.exports = async () => {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `${strapi.config.admin.url}/admin`,
-      email_reset_password: `${strapi.config.admin.url}/admin`,
+      email_reset_password: null,
+      email_confirmation_redirection: null,
       default_role: 'authenticated',
     };
 
@@ -180,4 +190,7 @@ module.exports = async () => {
 
     strapi.reload.isWatching = true;
   }
+
+  const { actionProvider } = strapi.admin.services.permission;
+  actionProvider.register(usersPermissionsActions.actions);
 };

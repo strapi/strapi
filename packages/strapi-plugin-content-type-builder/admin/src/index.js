@@ -13,15 +13,18 @@ import Link from './InjectedComponents/ContentManager/EditViewLink';
 import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
 import lifecycles from './lifecycles';
 import trads from './translations';
+import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+  const icon = pluginPkg.strapi.icon;
+  const name = pluginPkg.strapi.name;
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
+    icon,
     id: pluginId,
     initializer: Initializer,
     injectedComponents: [
@@ -47,13 +50,25 @@ export default strapi => {
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles,
-    leftMenuLinks: [],
-    leftMenuSections: [],
     mainComponent: App,
-    name: pluginPkg.strapi.name,
+    name,
     pluginLogo,
     preventComponentRendering: false,
     trads,
+    menu: {
+      pluginsSectionLinks: [
+        {
+          destination: `/plugins/${pluginId}`,
+          icon,
+          label: {
+            id: `${pluginId}.plugin.name`,
+            defaultMessage: 'Content-Types Builder',
+          },
+          name,
+          permissions: pluginPermissions.main,
+        },
+      ],
+    },
   };
 
   return strapi.registerPlugin(plugin);

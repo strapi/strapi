@@ -38,7 +38,7 @@ module.exports = {
       other: '',
     };
 
-    const models = attribute.plugin ? strapi.plugins[attribute.plugin].models : strapi.models;
+    const models = strapi.db.getModelsByPluginName(attribute.plugin);
 
     const pluginModels = Object.values(strapi.plugins).reduce((acc, plugin) => {
       return acc.concat(Object.values(plugin.models));
@@ -322,15 +322,8 @@ module.exports = {
       });
 
       if (targetName !== '*') {
-        if (association.plugin) {
-          details = _.get(
-            strapi.plugins,
-            [association.plugin, 'models', targetName, 'attributes', association.via],
-            {}
-          );
-        } else {
-          details = _.get(strapi.models, [targetName, 'attributes', association.via], {});
-        }
+        const model = strapi.db.getModel(targetName, association.plugin);
+        details = _.get(model, ['attributes', association.via], {});
       }
 
       // Build associations object

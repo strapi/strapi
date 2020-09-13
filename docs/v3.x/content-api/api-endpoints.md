@@ -144,7 +144,9 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 ::::
 
-### Here are some Content Type examples
+### Examples
+
+Here are some Content Type examples
 
 #### Single Types
 
@@ -289,11 +291,19 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 Returns entries matching the query filters. You can read more about parameters [here](./parameters.md).
 
+:::: tabs
+
+::: tab Request
+
 **Example request**
 
 ```js
 GET http://localhost:1337/restaurants
 ```
+
+:::
+
+::: tab Response
 
 **Example response**
 
@@ -356,15 +366,27 @@ GET http://localhost:1337/restaurants
 ]
 ```
 
+:::
+
+::::
+
 ## Get an entry
 
 Returns an entry by id.
+
+:::: tabs
+
+::: tab Request
 
 **Example request**
 
 ```js
 GET http://localhost:1337/restaurants/1
 ```
+
+:::
+
+::: tab Response
 
 **Example response**
 
@@ -425,9 +447,17 @@ GET http://localhost:1337/restaurants/1
 }
 ```
 
+:::
+
+::::
+
 ## Count entries
 
 Returns the count of entries matching the query filters. You can read more about parameters [here](./parameters.md).
+
+:::: tabs
+
+::: tab Request
 
 **Example request**
 
@@ -435,15 +465,27 @@ Returns the count of entries matching the query filters. You can read more about
 GET http://localhost:1337/restaurants/count
 ```
 
+:::
+
+::: tab Response
+
 **Example response**
 
 ```
 1
 ```
 
+:::
+
+::::
+
 ## Create an entry
 
 Creates an entry and returns its value.
+
+:::: tabs
+
+::: tab Request
 
 **Example request**
 
@@ -477,6 +519,10 @@ POST http://localhost:1337/restaurants
   ]
 }
 ```
+
+:::
+
+::: tab Response
 
 **Example response**
 
@@ -537,10 +583,18 @@ POST http://localhost:1337/restaurants
 }
 ```
 
+:::
+
+::::
+
 ## Update an entry
 
 Partially updates an entry by id and returns its value.
 Fields that aren't sent in the query are not changed in the db. Send a `null` value if you want to clear them.
+
+:::: tabs
+
+::: tab Request
 
 **Example request**
 
@@ -584,6 +638,10 @@ PUT http://localhost:1337/restaurants/1
 }
 ```
 
+:::
+
+::: tab Response
+
 **Example response**
 
 ```json
@@ -649,9 +707,17 @@ PUT http://localhost:1337/restaurants/1
 }
 ```
 
+:::
+
+::::
+
 ## Delete an entry
 
 Deletes an entry by id and returns its value.
+
+:::: tabs
+
+::: tab Request
 
 **Example request**
 
@@ -659,6 +725,10 @@ Deletes an entry by id and returns its value.
 DELETE http://localhost:1337/restaurants/1
 ```
 
+:::
+
+::: tab Response
+
 **Example response**
 
 ```json
@@ -724,6 +794,6 @@ DELETE http://localhost:1337/restaurants/1
 }
 ```
 
-::: tip
-Whether you are using MongoDB or a SQL database you can use the field `id` as described in this documentation. It will be provided in both cases and work the same way.
 :::
+
+::::

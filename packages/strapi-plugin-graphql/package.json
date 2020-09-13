@@ -1,30 +1,31 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.5",
+  "version": "3.1.4",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
     "icon": "plug",
-    "description": "Description of graphql plugin."
+    "description": "Adds GraphQL endpoint with default API methods."
   },
   "scripts": {
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "apollo-server-koa": "2.9.12",
+    "@apollo/federation": "^0.15.0",
+    "apollo-server-koa": "2.16.0",
     "dataloader": "^1.4.0",
     "glob": "^7.1.4",
     "graphql": "^14.3.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
-    "graphql-playground-middleware-koa": "^1.6.0",
+    "graphql-playground-middleware-koa": "^1.6.19",
     "graphql-tools": "4.0.6",
     "graphql-type-json": "0.3.1",
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.1.0",
-    "lodash": "4.17.12",
-    "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.5"
+    "lodash": "4.17.19",
+    "pluralize": "^8.0.0",
+    "strapi-utils": "3.1.4"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
@@ -44,9 +45,9 @@
     }
   ],
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

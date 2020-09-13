@@ -27,6 +27,18 @@ module.exports = ({ models, target }, ctx) => {
       primaryKeyType: 'string',
     });
 
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
+      definition.attributes['created_by'] = {
+        model: 'user',
+        plugin: 'admin',
+      };
+
+      definition.attributes['updated_by'] = {
+        model: 'user',
+        plugin: 'admin',
+      };
+    }
+
     const componentAttributes = Object.keys(definition.attributes).filter(key =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
@@ -103,11 +115,9 @@ module.exports = ({ models, target }, ctx) => {
 
     // Add virtual key to provide populate and reverse populate
     _.forEach(
-      _.pickBy(definition.loadedModel, model => {
-        return model.type === 'virtual';
-      }),
+      _.pickBy(definition.loadedModel, ({ type }) => type === 'virtual'),
       (value, key) => {
-        schema.virtual(key.replace('_v', ''), {
+        schema.virtual(key, {
           ref: value.ref,
           localField: '_id',
           foreignField: value.via,
@@ -212,14 +222,14 @@ module.exports = ({ models, target }, ctx) => {
           }
 
           if (type === 'dynamiczone') {
-            const components = returned[name].map(el => {
-              return {
-                __component: findComponentByGlobalId(el.kind).uid,
-                ...el.ref,
-              };
-            });
-
-            returned[name] = components;
+            if (returned[name]) {
+              returned[name] = returned[name].map(el => {
+                return {
+                  __component: findComponentByGlobalId(el.kind).uid,
+                  ...el.ref,
+                };
+              });
+            }
           }
         });
       },
@@ -306,7 +316,7 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
   utilsModels.defineAssociations(model.toLowerCase(), definition, attribute, name);
 
   const getRef = (name, plugin) => {
-    return plugin ? strapi.plugins[plugin].models[name].globalId : strapi.models[name].globalId;
+    return strapi.db.getModel(name, plugin).globalId;
   };
 
   const setField = (name, val) => {

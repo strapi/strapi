@@ -145,7 +145,7 @@ You are now ready to create a new **Administrator** and new front-end **User**.
 
 ## 2. Create an Administrator and front-end User
 
-The first step is to create an **Administrator** (or "root user") for your project. An **Administrator** has all administrator privileges and access rights. (You can read more about why **Administrators** and front-end **Users** are separate [here](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/).)
+The first step is to create an **Administrator** (or "root user") for your project. An **Administrator** has all administrator privileges and access rights. (You can read more about why **Administrators** and front-end **Users** are separate [here](https://strapi.io/blog/why-we-split-the-management-of-the-admin-users-and-end-users/).)
 
 You need to complete the following fields:
 
@@ -632,7 +632,7 @@ If you would like to see the route of any specific **Content Type**, you need to
 ::: tip CONGRATULATIONS
 👏 Congratulations, you have now completed the **Strapi Getting Started Tutorial**. Where to go next?
 
-- Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
+- Learn how to use Strapi with React ([Gatsby](https://strapi.io/blog/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://strapi.io/blog/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://strapi.io/blog/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** to deep dive into Strapi.
 - Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.0.5",
+  "version": "3.1.4",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -8,12 +8,12 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@sindresorhus/slugify": "0.9.1",
-    "fs-extra": "^7.0.0",
+    "@sindresorhus/slugify": "1.1.0",
+    "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",
-    "lodash": "^4.17.11",
-    "pluralize": "^7.0.0",
-    "react": "^16.9.0",
+    "lodash": "4.17.19",
+    "pluralize": "^8.0.0",
+    "react": "^16.13.1",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
     "react-redux": "7.2.0",
@@ -23,10 +23,10 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-generate": "3.0.5",
-    "strapi-generate-api": "3.0.5",
-    "strapi-helper-plugin": "3.0.5",
-    "strapi-utils": "3.0.5",
+    "strapi-generate": "3.1.4",
+    "strapi-generate-api": "3.1.4",
+    "strapi-helper-plugin": "3.1.4",
+    "strapi-utils": "3.1.4",
     "yup": "^0.27.0"
   },
   "author": {
@@ -46,9 +46,9 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.10.0",
+    "node": ">=10.10.0 <13",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

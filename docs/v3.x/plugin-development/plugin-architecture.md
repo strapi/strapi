@@ -9,7 +9,6 @@ plugin/
 |     └─── src/ # Source code directory
 |          └─── index.js # Entry point of the plugin
 |          └─── pluginId.js # Name of the plugin
-|          └─── lifecycles.js # File in which the plugin sets the hooks to be ran in another plugin.
 |          |
 |          └─── components/ # Contains the list of React components used by the plugin
 |          └─── containers/

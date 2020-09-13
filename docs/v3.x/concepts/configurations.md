@@ -56,6 +56,8 @@ Instead of writing those credentials into your configuration files, you can defi
 
 **Example**
 
+**Path —** `.env`
+
 ```
 DATABASE_PASSWORD=acme
 ```
@@ -70,7 +72,7 @@ Now you can access those variables in your configuration files and application. 
 
 In your configuration files you will have access to a `env` utility that allows defining defaults and casting values.
 
-`config/database.js`
+**Path —** `./config/database.js`
 
 ```js
 module.exports = ({ env }) => ({
@@ -111,7 +113,7 @@ env.date('VAR', new Date());
 
 ## Environments
 
-What if you need to specific static configurations for specific environments and using environment variables becomes tedious?
+What if you need specific static configurations for specific environments and using environment variables becomes tedious?
 
 Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base configurations defined in the `./config` folder.
 The environment is based on the `NODE_ENV` environment variable (defaults to `development`).
@@ -167,22 +169,28 @@ module.exports = ({ env }) => ({
 ```
 
 **Available options**
-
-| Property                 | Description                                                                                                                                                                                      | Type          | Default     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ----------- |
-| `host`                   | Host name                                                                                                                                                                                        | string        | `localhost` |
-| `port`                   | Port on which the server should be running.                                                                                                                                                      | integer       | `1337`      |
-| `emitErrors`             | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                                                           | boolean       | `false`     |
-| `url`                    | Url of the server. Enable proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. | string        | `''`        |
-| `cron`                   | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule))                                                                                                | Object        |             |
-| `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                                                                 | boolean       | `false`     |
-| `admin`                  | Admin panel configuration                                                                                                                                                                        | Object        |             |
-| `admin.url`              | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`.                                                                              | string        | `/admin`    |
-| `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                                                              | boolean       | `true`      |
-| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`).                                      | Array(string) | `[]`        |
-| `admin.host`             | Use a different host for the admin panel. Only used along with `strapi develop --watch-admin`                                                                                                    | string        | `localhost` |
-| `admin.port`             | Use a different port for the admin panel. Only used along with `strapi develop --watch-admin`                                                                                                    | string        | `8000`      |
-| `admin.serveAdminPanel`  | If false, the admin panel won't be served. Note: the `index.html` will still be served, see [defaultIndex option](./middlewares#global-middlewares)                                              | boolean       | `true`      |
+| Property | Description | Type | Default |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `host` | Host name | string | `localhost` |
+| `port` | Port on which the server should be running. | integer | `1337` |
+| `emitErrors` | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services. | boolean | `false` |
+| `url` | Public url of the server. Required for many different features (ex: reset password, third login providers etc.). Also enables proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. An absolute url is however **recommended**.| string | `''` |
+|`proxy`| Set the koa variable `app.proxy`. When `true`, proxy header fields will be trusted. |boolean|`false`|
+| `cron` | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule)) | Object | |
+| `cron.enabled` | Enable or disable CRON tasks to schedule jobs at specific dates. | boolean | `false` |
+| `admin` | Admin panel configuration | Object | |
+| `admin.auth` | Authentication configuration | Object | |
+| `admin.auth.secret`| Secret used to encode JWT tokens | string| `undefined` |
+| `admin.url` | Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`. | string | `/admin` |
+| `admin.autoOpen` | Enable or disabled administration opening on start. | boolean | `true` |
+| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). | Array(string) | `[]` |
+| `admin.host` | Use a different host for the admin panel. Only used along with `strapi develop --watch-admin` | string | `localhost` |
+| `admin.port` | Use a different port for the admin panel. Only used along with `strapi develop --watch-admin` | string | `8000` |
+| `admin.serveAdminPanel` | If false, the admin panel won't be served. Note: the `index.html` will still be served, see [defaultIndex option](./middlewares.md#global-middlewares) | boolean | `true` |
+| `admin.forgotPassword` | Settings to customize the forgot password email (see more here: [Forgot Password Email](../admin-panel/forgot-password.md)) | Object | {} |
+| `admin.forgotPassword.emailTemplate` | Email template as defined in [email plugin](../plugins/email.md#programmatic-usage) | Object | [Default template](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/config/email-templates/forgot-password.js) |
+| `admin.forgotPassword.from` | Sender mail address | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
+| `admin.forgotPassword.replyTo` | Default address or addresses the receiver is asked to reply to | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
 
 ## Functions
 
@@ -273,6 +281,8 @@ module.exports = {
 
 When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
 
+You will need to install the plugin using the normal `npm install the-plugin-name` or any of the other supported package tools such as yarn then follow the below examples to load them.
+
 :::: tabs
 
 ::: tab Mongoose
@@ -303,7 +313,7 @@ Another example would be using the `bookshelf-uuid` plugin for MySQL, you can re
 'use strict';
 
 module.exports = (bookshelf, connection) => {
-  bookshelf.plugin(require('bookshelf-uuid'));
+  bookshelf.plugin('bookshelf-uuid');
 };
 ```
 
@@ -315,7 +325,7 @@ module.exports = (bookshelf, connection) => {
 
 This file lets you define database connections that will be used to store your application content.
 
-You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
+You can find [supported database and versions](../installation/cli.md#databases) in the local installation process.
 
 **Path —** `./config/database.js`.
 

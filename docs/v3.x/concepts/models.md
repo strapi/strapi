@@ -14,7 +14,7 @@ module.exports = {
     // Called before an entry is created
     beforeCreate(data) {},
     // Called after an entry is created
-    afterCreated(result) {},
+    afterCreate(result) {},
   },
 };
 ```
@@ -113,7 +113,7 @@ Additional settings can be set on models:
 - `connection` (string) - Connection name which must be used. Default value: `default`.
 - `collectionName` (string) - Collection name (or table name) in which the data should be stored.
 - `globalId` (string) - Global variable name for this model (case-sensitive) - _only for Content Types_
-- `attributes` (object) - Define the data structure of your model. Find available options [bellow](#define-the-attributes).
+- `attributes` (object) - Define the data structure of your model. Find available options [below](#define-the-attributes).
 
 **Path —** `Restaurant.settings.json`.
 
@@ -796,7 +796,7 @@ xhr.send(
 
 ## Dynamic Zone
 
-Dynamic Zone field let your create flexible space to content based on a component list.
+Dynamic Zone fields let you create a flexible space, in which to compose content, based on a mixed list of components.
 
 #### Example
 

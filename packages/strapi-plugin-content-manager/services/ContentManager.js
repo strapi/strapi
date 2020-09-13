@@ -6,7 +6,7 @@ const _ = require('lodash');
  * A set of functions called "actions" for `ContentManager`
  */
 module.exports = {
-  fetchAll(params, query) {
+  fetchAll(model, query) {
     const { query: request, populate, ...filters } = query;
 
     const queryFilter = !_.isEmpty(request)
@@ -17,64 +17,62 @@ module.exports = {
       : filters;
 
     return strapi.entityService.find(
-      { params: queryFilter, populate },
-      { model: params.model }
-    );
-  },
-
-  fetch(params, populate) {
-    const { id, model } = params;
-
-    return strapi.entityService.findOne(
       {
-        params: {
-          id,
-        },
+        params: queryFilter,
         populate,
       },
       { model }
     );
   },
 
-  count(params, query) {
-    const { model } = params;
-    const { ...filters } = query;
+  fetch(model, id, config = {}) {
+    const { query = {}, populate } = config;
 
-    return strapi.entityService.count({ params: filters }, { model });
+    return strapi.entityService.findOne(
+      {
+        params: { ...query, id },
+        populate,
+      },
+      { model }
+    );
   },
 
-  create(data, { files, model } = {}) {
+  count(model, query) {
+    return strapi.entityService.count({ params: query }, { model });
+  },
+
+  create({ data, files }, { model } = {}) {
     return strapi.entityService.create({ data, files }, { model });
   },
 
-  edit(params, data, { model, files } = {}) {
+  edit(params, { data, files }, { model } = {}) {
     return strapi.entityService.update({ params, data, files }, { model });
   },
 
-  delete(params) {
-    const { id, model } = params;
-    return strapi.entityService.delete({ params: { id } }, { model });
+  delete(model, query) {
+    return strapi.entityService.delete({ params: query }, { model });
   },
 
-  deleteMany(params, query) {
-    const { model } = params;
-
+  deleteMany(model, ids, query) {
     const { primaryKey } = strapi.query(model);
-    const filter = { [`${primaryKey}_in`]: Object.values(query), _limit: 100 };
 
-    return strapi.entityService.delete({ params: filter }, { model });
+    return strapi.entityService.delete(
+      {
+        params: {
+          _limit: 100,
+          ...query,
+          _where: _.concat({ [`${primaryKey}_in`]: ids }, query._where || {}),
+        },
+      },
+      { model }
+    );
   },
 
-  search(params, query) {
-    const { model } = params;
-
-    return strapi.entityService.search({ params: query }, { model });
+  search(model, query, params) {
+    return strapi.entityService.search({ params: { ...query, ...params } }, { model });
   },
 
-  countSearch(params, query) {
-    const { model } = params;
-    const { _q } = query;
-
-    return strapi.entityService.countSearch({ params: { _q } }, { model });
+  countSearch(model, query) {
+    return strapi.entityService.countSearch({ params: query }, { model });
   },
 };

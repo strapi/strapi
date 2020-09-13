@@ -3,10 +3,16 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
-import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+import {
+  LoadingIndicatorPage,
+  useGlobalContext,
+  request,
+  CheckPagePermissions,
+} from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
+import pluginPermissions from '../../permissions';
 import DragLayer from '../../components/DragLayer';
 import getRequestUrl from '../../utils/getRequestUrl';
 import createPossibleMainFieldsForModelsAndComponents from './utils/createPossibleMainFieldsForModelsAndComponents';
@@ -110,10 +116,6 @@ function Main({
     />
   );
   const routes = [
-    {
-      path: 'ctm-configurations/edit-settings/:type/:componentSlug',
-      comp: EditSettingsView,
-    },
     { path: 'singleType/:slug', comp: SingleTypeRecursivePath },
     { path: 'collectionType/:slug', comp: CollectionTypeRecursivePath },
   ].map(({ path, comp }) => (
@@ -128,7 +130,30 @@ function Main({
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
       <Suspense fallback={<LoadingIndicatorPage />}>
-        <Switch>{routes}</Switch>
+        <Switch>
+          <Route
+            path={`/plugins/${pluginId}/ctm-configurations/edit-settings/:type/:componentSlug`}
+            render={routeProps => (
+              <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
+                <EditSettingsView
+                  currentEnvironment={currentEnvironment}
+                  deleteLayout={deleteLayout}
+                  deleteLayouts={deleteLayouts}
+                  emitEvent={emitEvent}
+                  components={components}
+                  componentsAndModelsMainPossibleMainFields={
+                    componentsAndModelsMainPossibleMainFields
+                  }
+                  layouts={layouts}
+                  models={models}
+                  plugins={plugins}
+                  {...routeProps}
+                />
+              </CheckPagePermissions>
+            )}
+          />
+          {routes}
+        </Switch>
       </Suspense>
     </DndProvider>
   );
