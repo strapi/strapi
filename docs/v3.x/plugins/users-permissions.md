@@ -160,7 +160,8 @@ For better understanding, you may find as follows the description of the login f
 
 #### Understanding the login flow
 
-Let's say that strapi's backend is located at: strapi.website.com and your app frontend is located at: website.com.
+Let's say that strapi's backend is located at: strapi.website.com.
+Let's say that your app frontend is located at: website.com.
 
 1. The user goes on your frontend app (`https://website.com`) and click on your button `connect with Github`.
 2. The frontend redirect the tab to the backend URL: `https://strapi.website.com/connect/github`.
