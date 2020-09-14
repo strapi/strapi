@@ -47,7 +47,7 @@
     "css-loader": "^2.1.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "execa": "^1.0.0",
-    "file-loader": "^3.0.1",
+    "file-loader": "^6.1.0",
     "font-awesome": "^4.7.0",
     "formik": "^2.1.4",
     "friendly-errors-webpack-plugin": "^1.7.0",
