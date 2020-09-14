@@ -9,7 +9,7 @@ If you haven't gone through the getting started guide, the way you request a Str
 Create a basic Angular application using [angular CLI](https://angular.io/guide/setup-locall).
 
 ```bash
-ng new angular-app
+npx -p @angular/cli ng new angular-app
 ```
 
 ### Use an HTTP client
@@ -292,6 +292,24 @@ _Response_
 
 :::: tabs
 
+`./src/app.module.ts`
+
+```js
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, FormsModule, ReactiveFormsModule],
+  providers: [],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
 ::: tab axios
 
 `./src/app/app.component.ts`
@@ -308,12 +326,12 @@ import axios from 'axios'
 })
 
 export class AppComponent implements OnInit {
-  restaurantForm;
+  modifiedData;
 
   constructor(
     private formBuilder: FormBuilder,
   ) {
-    this.restaurantForm = this.formBuilder.group({
+    this.modifiedData = this.formBuilder.group({
       name: '',
       description: '',
       categories: new FormArray([]),
@@ -321,7 +339,7 @@ export class AppComponent implements OnInit {
   }
 
   onCheckChange(event) {
-    const formArray: FormArray = this.restaurantForm.get('categories') as FormArray;
+    const formArray: FormArray = this.modifiedData.get('categories') as FormArray;
 
     if (event.target.checked) {
       formArray.push(new FormControl(event.target.value));
@@ -363,7 +381,7 @@ export class AppComponent implements OnInit {
     } catch (error) {
       this.error = error;
     }
-    this.restaurantForm.reset();
+    this.modifiedData.reset();
   }
 
 }
@@ -401,12 +419,12 @@ const headers = {
 })
 
 export class AppComponent implements OnInit {
-  restaurantForm;
+  modifiedData;
 
   constructor(
     private formBuilder: FormBuilder,
   ) {
-    this.restaurantForm = this.formBuilder.group({
+    this.modifiedData = this.formBuilder.group({
       name: '',
       description: '',
       categories: new FormArray([]),
@@ -414,7 +432,7 @@ export class AppComponent implements OnInit {
   }
 
   onCheckChange(event) {
-    const formArray: FormArray = this.restaurantForm.get('categories') as FormArray;
+    const formArray: FormArray = this.modifiedData.get('categories') as FormArray;
 
     if (event.target.checked) {
       formArray.push(new FormControl(event.target.value));
@@ -463,7 +481,7 @@ export class AppComponent implements OnInit {
     } catch (error) {
       this.error = error
     }
-    this.restaurantForm.reset();
+    this.modifiedData.reset();
   }
 }
 ```
@@ -477,7 +495,7 @@ export class AppComponent implements OnInit {
   {{ error }}
 </div>
 
-<form [formGroup]="restaurantForm" (ngSubmit)="onSubmit(restaurantForm.value)">
+<form [formGroup]="modifiedData" (ngSubmit)="onSubmit(modifiedData.value)">
   <div>
     <label for="name">
       Name
@@ -503,24 +521,6 @@ export class AppComponent implements OnInit {
 
   <button class="button" type="submit">Create</button>
 </form>
-```
-
-`./src/app.module.ts`
-
-```js
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-import { AppComponent } from './app.component';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, FormsModule, ReactiveFormsModule],
-  providers: [],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}
 ```
 
 ::::

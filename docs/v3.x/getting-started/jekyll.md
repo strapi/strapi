@@ -2,7 +2,7 @@
 
 This integration guide is following the [Getting started guide](../getting-started/quick-start.html). We assume that you have completed [Step 8](../getting-started/quick-start.html#_8-consume-the-content-type-s-api) and therefore can consume the API by browsing this [url](http://localhost:1337/restaurants).
 
-If you haven't gone through the getting started guide, the way you request a Strapi API with [Jekyll](https://gohugo.io/) remains the same except that you will not fetch the same content.
+If you haven't gone through the getting started guide, the way you request a Strapi API with [Jekyll](https://jekyllrb.com) remains the same except that you will not fetch the same content.
 
 ### Create a Jekyll app
 
@@ -25,7 +25,7 @@ group :jekyll_plugins do
 end
 ```
 
-- Add `jekyll-strapi` to your plugins in `_config.yml`
+  - Add `jekyll-strapi` to your plugins in `_config.yml`
 
 ```yml
 plugins:
@@ -33,13 +33,7 @@ plugins:
   - jekyll-strapi
 ```
 
-- Run `bundle install` to install your gems
-
-```bash
-bundle install
-```
-
-- Add the configuration of Strapi at the end of the `_config.yml`
+  - Add the configuration of Strapi at the end of the `_config.yml`
 
 ```yml
 strapi:
@@ -51,6 +45,12 @@ strapi:
 
     categories:
       type: categories
+```
+
+  - Run `bundle install` to install your gems
+
+```bash
+bundle install
 ```
 
 ### GET Request your collection type
@@ -109,6 +109,12 @@ layout: default
 </div>
 ```
 
+Run your application with:
+
+```bash
+bundle exec jekyll serve
+```
+
 We can generate pages for each category.
 
 - Tell Jekyll to generate a page for each category by updating the `_config.yml` file with the following:
@@ -128,7 +134,7 @@ strapi:
     categories:
       # Collection name (optional). Used to construct the url requested. Example: type `foo` would generate the following url `http://localhost:1337/foo`.
       type: categories
-      permalink: /category/:name/
+      permalink: categories/:name
       layout: category.html
       # Generate output files or not (default: false)
       output: true

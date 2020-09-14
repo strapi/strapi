@@ -71,7 +71,8 @@ _Response_
           "node": {
             "id": 1,
             "name": "Biscotte Restaurant",
-            "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers."
+            "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
+            "categories": [1]
           }
         }
       ]
@@ -88,7 +89,14 @@ _Response_
 <template>
 <Layout>
   <ul>
-    <li v-for="restaurant in $page.allStrapiRestaurant.edges" :key="restaurant.node.id">{{ restaurant.node.name }}</li>
+    <li v-for="restaurant in $page.allStrapiRestaurant.edges" :key="restaurant.node.id">
+      {{ restaurant.node.name }}
+      <ul>
+        <li v-for="category in restaurant.node.categories">
+          <g-link :to="'categories/' + category.id">{{ category.name }}</g-link>
+        </li>
+      </ul>
+    </li>
   </ul>
 </Layout>
 </template>
@@ -100,6 +108,10 @@ _Response_
           node {
             id
             name
+            categories {
+              id
+              name
+            }
           }
         }
       }
@@ -198,7 +210,7 @@ module.exports = function(api) {
 
     categories.forEach(category => {
       createPage({
-        path: `/category/${category.node.id}`,
+        path: `/categories/${category.node.id}`,
         component: './src/templates/Category.vue',
         context: {
           id: category.node.id,
@@ -236,7 +248,7 @@ module.exports = function(api) {
 </page-query>
 ```
 
-You can find your restaurant categories by browsing `http://localhost:8080/category/<id-of-category>`
+You can find your restaurant categories by browsing `http://localhost:8080/categories/<id-of-category>`
 
 Feel free to do the same for your restaurants!
 

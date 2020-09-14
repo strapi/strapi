@@ -9,15 +9,28 @@ If you haven't gone through the getting started guide, the way you request a Str
 Be sure to have Ruby installed on your computer
 
 ```bash
+mkdir ruby-app && cd ruby-app
 touch script.rb
 ```
+
+
 
 ### Use an HTTP client
 
 Many HTTP clients are available but in this documentation we'll use [HTTParty](https://github.com/jnunemaker/httparty)
 
+  - Create a `Gemfile` containing the following:
+
+```
+source "https://rubygems.org"
+
+gem "httparty"
+```
+
+  - Install your gems by running the following command:
+
 ```bash
-gem install httparty
+bundle install
 ```
 
 ### GET Request your collection type

@@ -74,6 +74,12 @@ _Response_
 </div>
 ```
 
+Run your application with:
+
+```bash
+hugo server -D
+```
+
 Execute a GET request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
 
 Be sure that you activated the `findOne` permission for the `category` Collection Type
