@@ -229,7 +229,7 @@ module.exports = {
   /**
    * Retrieve the record.
    *
-   * @return {Array}
+   * @return {Object}
    */
 
   async find(ctx) {
