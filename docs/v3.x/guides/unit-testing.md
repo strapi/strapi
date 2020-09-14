@@ -69,11 +69,11 @@ Test framework must have a clean empty environment to perform valid test and als
 
 Once `jest` is running it uses the `test` [enviroment](../concepts/configurations.md#environments) (switching `NODE_ENV` to `test`)
 so we need to create a special environment setting for this purpose.
-Create a new config for test env `./config/env/test/database.json` and add the following value `"filename": ".tmp/test.db"` - the reason of that is that we want to have a separate sqlite database for tests, so our test will not touch real data.
+Create a new config for test env `./config/environments/test/database.json` and add the following value `"filename": ".tmp/test.db"` - the reason of that is that we want to have a separate sqlite database for tests, so our test will not touch real data.
 This file will be temporary, each time test is finished, we will remove that file that every time tests are run on the clean database.
 The whole file will look like this:
 
-**Path —** `./config/env/test/database.json`
+**Path —** `./config/environments/test/database.json`
 
 ```json
 {
