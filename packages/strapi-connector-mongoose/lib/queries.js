@@ -439,7 +439,7 @@ module.exports = ({ model, strapi }) => {
     if (hasDraftAndPublish) {
       data[PUBLISHED_AT_ATTRIBUTE] = _.has(values, PUBLISHED_AT_ATTRIBUTE)
         ? values[PUBLISHED_AT_ATTRIBUTE]
-        : new Date().toISOString();
+        : new Date();
     }
 
     // Create entry with no-relational data.

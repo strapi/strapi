@@ -28,7 +28,7 @@ describe('Content-Manager', () => {
       await contentManagerService.publish(params, model);
 
       expect(strapi.entityService.update).toBeCalledWith(
-        { params, data: { published_at: expect.any(String) } },
+        { params, data: { published_at: expect.any(Date) } },
         { model }
       );
     });

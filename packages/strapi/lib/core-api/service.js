@@ -156,7 +156,7 @@ const createCollectionTypeService = ({ model, strapi }) => {
     create(data, { files } = {}) {
       const sanitizedData = sanitizeInput(data);
       if (hasDraftAndPublish(model)) {
-        sanitizedData[PUBLISHED_AT_ATTRIBUTE] = new Date().toISOString();
+        sanitizedData[PUBLISHED_AT_ATTRIBUTE] = new Date();
       }
       return strapi.entityService.create({ data: sanitizedData, files }, { model: modelName });
     },
