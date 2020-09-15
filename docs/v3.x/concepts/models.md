@@ -4,7 +4,7 @@
 
 ### Content Type's models
 
-Models are a representation of the database's structure. They are split into two separate files. A JavaScript file that contains the model options (e.g: lifecycle hooks), and a JSON one that represents the data structure stored in the database.
+Models are a representation of the database's structure. They are split into two separate files. A JavaScript file that contains the model options (e.g: lifecycle hooks), and a JSON file that represents the data structure stored in the database.
 
 **Path —** `./api/restaurant/models/Restaurant.js`.
 
@@ -51,7 +51,7 @@ In this example, there is a `Restaurant` model which contains the attributes `co
 
 ### Component's models
 
-It also exist another type of models named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition
+Another type of model is named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition.
 
 **Path —** `./components/default/simple.json`
 
@@ -76,9 +76,9 @@ In this example, there is a `Simple` component which contains the attributes `na
 
 ### Where are the models defined?
 
-For **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
+The **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
 
-For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component).
+The **Components** models are defined in the `./components` folder. Every component has to be inside a subfolder (the category name of the component).
 
 ## How to create a model?
 
@@ -101,7 +101,7 @@ When you create a new API using the CLI (`strapi generate:api <name>`), a model 
 
 ### For Components models
 
-To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
+To create a component you will have to use the Content Type Builder from the Admin panel, there is not a cli generator command for components.
 
 Or you can create your component manually by following the file path described previously and by following the file structure described below.
 
@@ -197,7 +197,7 @@ The following types are currently available:
 
 ### Validations
 
-You can apply basic validations to the attributes. The following supported validations are _only supported by MongoDB_ connection.
+You can apply basic validations to the attributes. The following supported validations are _only supported by MongoDB_ database connections.
 If you're using SQL databases, you should use the native SQL constraints to apply them.
 
 - `required` (boolean) — If true, adds a required validator for this property.
@@ -210,8 +210,8 @@ If you're using SQL databases, you should use the native SQL constraints to appl
 
 To improve the Developer Experience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
 
-- `private` (boolean) — If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
-- `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
+- `private` (boolean) — If true, the attribute will be removed from the server response. (This is useful to hide sensitive data).
+- `configurable` (boolean) - if false, the attribute will not be configurable from the Content Type Builder plugin.
 
 ### Exceptions
 
@@ -256,7 +256,7 @@ Relations let you create links (relations) between your Content Types.
 
 ::: tab "One-Way" id="one-way"
 
-One-way relationships are useful to link an entry to another. However, only one of the models can be queried with its populated items.
+One-way relationships are useful to link one entry to another. However, only one of the models can be queried with its populated items.
 
 #### Example
 
@@ -400,11 +400,11 @@ xhr.send(
 
 ::: tab "Many-to-Many" id="many-to-many"
 
-Many-to-Many relationships are useful when an entry can be linked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries.
+Many-to-Many relationships are useful when an entry can be linked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries as well.
 
 #### Example
 
-A `product` can be related to many `categories`, so a `category` can have many `products`.
+A `product` can be related to many `categories` and a `category` can have many `products`.
 
 **Path —** `./api/product/models/Product.settings.json`.
 
@@ -425,7 +425,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 (NoSQL databases only) The `dominant` key defines which table/collection should store the array that defines the relationship. Because there are no join tables in NoSQL, this key is required for NoSQL databases (e.g. MongoDB).
 
 **NOTE**:
-(NoSQL databases only) The `collectionName` key defines the name of the join table. It has to be specified once, in the `dominant` attribute of the relation. If it is not specified, Strapi will use a generated default one. It is useful to define the name of the join table when the name generated by Strapi is too long for the database you use.
+(NoSQL databases only) The `collectionName` key defines the name of the join table. It has to be specified once in the `dominant` attribute of the relation. If it is not specified, Strapi will generate a default collectionName. It is useful to define the name of the join table when the name generated by Strapi is too long for the database you use.
 
 **Path —** `./api/category/models/Category.settings.json`.
 
@@ -458,7 +458,7 @@ xhr.send(
 
 ::: tab "Polymorphic" id="polymorphic"
 
-The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc.).
+The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many other models (Article, Product, User, etc.).
 
 #### Single vs Many
 
@@ -480,7 +480,7 @@ In other words, it means that an `Image` entry can be associated to one entry. T
 }
 ```
 
-Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
+Also our `Image` model might belong to **many `Article` or `Product` entries**.
 
 **NOTE**:
 In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
@@ -521,11 +521,11 @@ For example, the `Product` model might have two attributes which are associated 
 }
 ```
 
-The value is the `filter` attribute is the name of the column where the information is stored.
+The value of the `filter` attribute is the name of the column where the information is stored.
 
 #### Example
 
-A `Image` model might belongs to many either `Article` models or a `Product` models.
+An `Image` model might belong to many `Article` models or `Product` models.
 
 **Path —** `./api/image/models/Image.settings.json`.
 
@@ -600,9 +600,9 @@ CREATE TABLE `image` (
 ```
 
 **NOTE**:
-If you've overridden the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
+If you've overridden the default table name given by Strapi in the `collectionName` attribute, use the value set in the `collectionName` to name the table.
 
-The second table will allow us to associate one or many others entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
+The second table will allow us to associate one or many other entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
 
 ```
 CREATE TABLE `image_morph` (
@@ -635,7 +635,7 @@ CREATE TABLE `image_morph` (
 
 ## Components
 
-Component field let your create a relation between your Content Type and a Component structure.
+Component fields let you create a relation between your Content Type and Component structure.
 
 #### Example
 
@@ -751,7 +751,7 @@ xhr.send(
 );
 ```
 
-**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+**NOTE** if you don't specify the `ID`, it will delete and re-create the entry and you will see the `ID` value change.
 
 :::
 
@@ -796,11 +796,11 @@ xhr.send(
 
 ## Dynamic Zone
 
-Dynamic Zone fields let you create a flexible space, in which to compose content, based on a mixed list of components.
+Dynamic Zone fields let you create a flexible space in which to compose content based on a mixed list of components.
 
 #### Example
 
-Lets say we created an `slider` and `content` component in `article` category.
+Lets say we created a `slider` and a `content` component in an `article` category.
 
 **Path —** `./api/article/models/Article.settings.json`.
 
@@ -867,7 +867,7 @@ xhr.send(
 );
 ```
 
-**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+**NOTE** if you don't specify the `ID`, it will delete and re-create the entry and you will see the `ID` value change.
 
 :::
 
