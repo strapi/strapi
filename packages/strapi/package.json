@@ -28,7 +28,7 @@
     "fs-extra": "^9.0.1",
     "glob": "^7.1.2",
     "inquirer": "^6.2.1",
-    "is-docker": "2.0.0",
+    "is-docker": "2.1.1",
     "koa": "^2.8.0",
     "koa-body": "^4.1.0",
     "koa-compose": "^4.1.0",
