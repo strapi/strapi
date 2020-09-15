@@ -13,8 +13,6 @@ mkdir ruby-app && cd ruby-app
 touch script.rb
 ```
 
-
-
 ### Use an HTTP client
 
 Many HTTP clients are available but in this documentation we'll use [HTTParty](https://github.com/jnunemaker/httparty)

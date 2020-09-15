@@ -28,7 +28,7 @@ Be sure that you activated the `find` permission for the `restaurant` Collection
 
 _Request_
 
-```ruby
+```python
 requests.get("http://localhost:1337/restaurants",
   headers={
     'Content-Type': 'application/json'
@@ -102,7 +102,7 @@ In this example a `japanese` category has been created which has the id: 3
 
 _Request_
 
-```ruby
+```python
 requests.post("http://localhost:1337/restaurants",
 data=json_dumps({
     'name': 'Dolemon Sushi',
