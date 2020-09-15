@@ -6,8 +6,6 @@ let rq;
 let modelsUtils;
 let data = {
   products: [],
-  productsWithCompo: [],
-  productsWithCompoAndDP: [],
 };
 
 const product = {

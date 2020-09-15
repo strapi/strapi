@@ -75,8 +75,8 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
         .array()
         .of(
           yup.lazy(item => {
-            const model = strapi.getModel(item.__component);
-            return yup
+            const model = strapi.getModel(_.get(item, '__component'));
+            const schema = yup
               .object()
               .shape({
                 __component: yup
@@ -84,8 +84,11 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
                   .required()
                   .oneOf(_.keys(strapi.components)),
               })
-              .concat(createModelValidator(createOrUpdate)(model, item, { isDraft }))
               .notNull();
+
+            return model
+              ? schema.concat(createModelValidator(createOrUpdate)(model, item, { isDraft }))
+              : schema;
           })
         )
         .notNull();
@@ -116,7 +119,7 @@ const createModelValidator = createOrUpdate => (model, data, { isDraft }) =>
   yup
     .object()
     .shape(
-      _.mapValues(model.attributes, (attr, attrName) =>
+      _.mapValues(_.get(model, 'attributes', {}), (attr, attrName) =>
         createAttributeValidator(createOrUpdate)(attr, _.get(data, attrName), { isDraft })
       )
     );

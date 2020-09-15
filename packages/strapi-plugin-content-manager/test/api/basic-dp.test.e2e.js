@@ -7,10 +7,7 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let rq;
 let modelsUtils;
 let data = {
-  products: [],
   productsWithDP: [],
-  productsWithCompo: [],
-  productsWithCompoAndDP: [],
 };
 
 const productWithDP = {
@@ -272,7 +269,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.0.errors.description.0')).toBe(
+      expect(_.get(res, 'body.data.errors.description.0')).toBe(
         'description must be at most 30 characters'
       );
     });

@@ -39,6 +39,7 @@ const productWithCompoAndDP = {
       type: 'component',
       component: 'default.compo',
       required: true,
+      repeatable: true,
     },
   },
   connection: 'default',
@@ -74,10 +75,12 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
-      compo: {
-        name: 'compo name',
-        description: 'short',
-      },
+      compo: [
+        {
+          name: 'compo name',
+          description: 'short',
+        },
+      ],
     };
     const res = await rq({
       method: 'POST',
@@ -112,10 +115,12 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      compo: {
-        name: 'compo name updated',
-        description: 'update',
-      },
+      compo: [
+        {
+          name: 'compo name updated',
+          description: 'update',
+        },
+      ],
     };
     const res = await rq({
       method: 'PUT',
@@ -144,11 +149,28 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
   });
 
   describe('validation', () => {
-    test('Can create Products with compo - compo required', async () => {
+    test('Can create Products with compo - compo required - []', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: null,
+        compo: [],
+      };
+      const res = await rq({
+        method: 'POST',
+        url:
+          '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body);
+    });
+
+    test('Can create Products with compo - compo required - undefined', async () => {
+      const product = {
+        name: 'Product 1',
+        description: 'Product description',
       };
       const res = await rq({
         method: 'POST',
@@ -166,10 +188,12 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          name: 'compo name',
-          description: '',
-        },
+        compo: [
+          {
+            name: 'compo name',
+            description: '',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
@@ -187,10 +211,12 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          name: 'compo name',
-          description: 'A very long description that exceed the min length.',
-        },
+        compo: [
+          {
+            name: 'compo name',
+            description: 'A very long description that exceed the min length.',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
@@ -200,8 +226,8 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at most 30 characters'
+      expect(_.get(res.body.data, ['errors', 'compo[0].description', '0'])).toBe(
+        'compo[0].description must be at most 30 characters'
       );
     });
 
@@ -209,9 +235,11 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          description: 'short',
-        },
+        compo: [
+          {
+            description: 'short',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',

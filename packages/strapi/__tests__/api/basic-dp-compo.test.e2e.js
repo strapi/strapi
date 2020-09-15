@@ -7,8 +7,6 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let rq;
 let modelsUtils;
 let data = {
-  products: [],
-  productsWithCompo: [],
   productsWithCompoAndDP: [],
 };
 

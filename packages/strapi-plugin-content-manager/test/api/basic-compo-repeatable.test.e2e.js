@@ -19,8 +19,8 @@ const compo = {
     },
     description: {
       type: 'text',
-      minLength: 3,
-      maxLength: 10,
+      minLength: 4,
+      maxLength: 30,
     },
   },
 };
@@ -37,6 +37,7 @@ const productWithCompo = {
       component: 'default.compo',
       type: 'component',
       required: true,
+      repeatable: true,
     },
   },
   connection: 'default',
@@ -45,7 +46,7 @@ const productWithCompo = {
   collectionName: '',
 };
 
-describe('Core API - Basic + compo', () => {
+describe('CM API - Basic + compo', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
@@ -56,22 +57,24 @@ describe('Core API - Basic + compo', () => {
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteComponent('default.compo');
     await modelsUtils.deleteContentTypes(['product-with-compo']);
+    await modelsUtils.deleteComponent('default.compo');
   }, 60000);
 
   test('Create Products with compo', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
-      compo: {
-        name: 'compo name',
-        description: 'short',
-      },
+      compo: [
+        {
+          name: 'compo name',
+          description: 'short',
+        },
+      ],
     };
     const res = await rq({
       method: 'POST',
-      url: '/product-with-compos',
+      url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
       body: product,
     });
 
@@ -84,7 +87,7 @@ describe('Core API - Basic + compo', () => {
   test('Read Products with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/product-with-compos',
+      url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
     });
 
     expect(res.statusCode).toBe(200);
@@ -98,14 +101,16 @@ describe('Core API - Basic + compo', () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      compo: {
-        name: 'compo name updated',
-        description: 'update',
-      },
+      compo: [
+        {
+          name: 'compo name updated',
+          description: 'update',
+        },
+      ],
     };
     const res = await rq({
       method: 'PUT',
-      url: `/product-with-compos/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/explorer/application::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
       body: product,
     });
 
@@ -119,7 +124,7 @@ describe('Core API - Basic + compo', () => {
   test('Delete Products with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/product-with-compos/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/explorer/application::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -137,32 +142,34 @@ describe('Core API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.compo.0')).toBe('compo must be defined.');
+      expect(res.body.data[0].messages[0].message).toBe('Component compo is required');
     });
 
     test('Cannot create Products with compo - minLength', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          name: 'compo name',
-          description: '',
-        },
+        compo: [
+          {
+            name: 'compo name',
+            description: '',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at least 3 characters'
+      expect(_.get(res.body.data, ['0', 'errors', 'compo[0].description', '0'])).toBe(
+        'compo[0].description must be at least 4 characters'
       );
     });
 
@@ -170,20 +177,22 @@ describe('Core API - Basic + compo', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          name: 'compo name',
-          description: 'A very long description that exceed the min length.',
-        },
+        compo: [
+          {
+            name: 'compo name',
+            description: 'A very long description that exceed the min length.',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at most 10 characters'
+      expect(_.get(res.body.data, ['0', 'errors', 'compo[0].description', '0'])).toBe(
+        'compo[0].description must be at most 30 characters'
       );
     });
 
@@ -191,19 +200,21 @@ describe('Core API - Basic + compo', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          description: 'short',
-        },
+        compo: [
+          {
+            description: 'short',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.name', '0'])).toBe(
-        'compo.name must be defined.'
+      expect(_.get(res.body.data, ['0', 'errors', 'compo[0].name', '0'])).toBe(
+        'compo[0].name must be defined.'
       );
     });
   });

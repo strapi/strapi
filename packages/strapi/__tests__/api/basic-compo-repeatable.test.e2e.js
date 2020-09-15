@@ -37,6 +37,7 @@ const productWithCompo = {
       component: 'default.compo',
       type: 'component',
       required: true,
+      repeatable: true,
     },
   },
   connection: 'default',
@@ -64,10 +65,12 @@ describe('Core API - Basic + compo', () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
-      compo: {
-        name: 'compo name',
-        description: 'short',
-      },
+      compo: [
+        {
+          name: 'compo name',
+          description: 'short',
+        },
+      ],
     };
     const res = await rq({
       method: 'POST',
@@ -98,10 +101,12 @@ describe('Core API - Basic + compo', () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      compo: {
-        name: 'compo name updated',
-        description: 'update',
-      },
+      compo: [
+        {
+          name: 'compo name updated',
+          description: 'update',
+        },
+      ],
     };
     const res = await rq({
       method: 'PUT',
@@ -142,17 +147,19 @@ describe('Core API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.compo.0')).toBe('compo must be defined.');
+      expect(res.body.message).toBe('Component compo is required');
     });
 
     test('Cannot create Products with compo - minLength', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          name: 'compo name',
-          description: '',
-        },
+        compo: [
+          {
+            name: 'compo name',
+            description: '',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
@@ -160,9 +167,10 @@ describe('Core API - Basic + compo', () => {
         body: product,
       });
 
+      console.log('res.body', res.body);
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at least 3 characters'
+      expect(_.get(res.body.data, ['errors', 'compo[0].description', '0'])).toBe(
+        'compo[0].description must be at least 3 characters'
       );
     });
 
@@ -170,10 +178,12 @@ describe('Core API - Basic + compo', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          name: 'compo name',
-          description: 'A very long description that exceed the min length.',
-        },
+        compo: [
+          {
+            name: 'compo name',
+            description: 'A very long description that exceed the min length.',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
@@ -182,8 +192,8 @@ describe('Core API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at most 10 characters'
+      expect(_.get(res.body.data, ['errors', 'compo[0].description', '0'])).toBe(
+        'compo[0].description must be at most 10 characters'
       );
     });
 
@@ -191,9 +201,11 @@ describe('Core API - Basic + compo', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: {
-          description: 'short',
-        },
+        compo: [
+          {
+            description: 'short',
+          },
+        ],
       };
       const res = await rq({
         method: 'POST',
@@ -202,8 +214,8 @@ describe('Core API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.name', '0'])).toBe(
-        'compo.name must be defined.'
+      expect(_.get(res.body.data, ['errors', 'compo[0].name', '0'])).toBe(
+        'compo[0].name must be defined.'
       );
     });
   });
