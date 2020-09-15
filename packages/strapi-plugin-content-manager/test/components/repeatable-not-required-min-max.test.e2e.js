@@ -58,7 +58,6 @@ describe.each([
       });
 
       expect(res.statusCode).toBe(200);
-      console.log('res.body', res.body);
       expect(Array.isArray(res.body.field)).toBe(true);
       expect(res.body.field).toEqual(
         expect.arrayContaining([
