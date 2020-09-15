@@ -132,7 +132,7 @@ In this example, the model `Restaurant` will be accessible through the `Restaura
 ::: warning
 If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
 The `globalId` serves as a reference to your model within relations and Strapi APIs. If you chose to rename it (either by renaming your file or by changing the value of the `globalId`), you'd have to migrate your tables manually and update the references.
-Please note that you should not alter the Strapi's models `globalId` (plugins and core models) since it they are used directly within Strapi APIs and other models' relations.
+Please note that you should not alter the Strapi's models `globalId` (plugins and core models) since they are used directly within Strapi APIs and other models' relations.
 :::
 
 ::: tip
