@@ -83,7 +83,7 @@ console.log(data);
 
 ::: tab Postman
 
-If you are using **Postman** for example you will have to set the `body` as `raw` with the `JSON (application/json)` type.
+If you are using **Postman** for example you will have to set the `parameters` with the `x-www-form-urlencoded` type.
 
 ```json
 {
