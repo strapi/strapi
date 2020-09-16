@@ -37,6 +37,23 @@ const addRequiredValidation = createOrUpdate => (required, validator) => {
   return validator;
 };
 
+const addDefault = createOrUpdate => (attr, validator) => {
+  if (createOrUpdate === 'creation') {
+    if (
+      ((attr.type === 'component' && attr.repeatable) || attr.type === 'dynamiczone') &&
+      !attr.required
+    ) {
+      validator = validator.default([]);
+    } else {
+      validator = validator.default(attr.default);
+    }
+  } else {
+    validator = validator.default(undefined);
+  }
+
+  return validator;
+};
+
 const preventCast = validator => validator.transform((val, originalVal) => originalVal);
 
 const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => {
@@ -104,11 +121,7 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
     validator = preventCast(validator);
   }
 
-  if (createOrUpdate === 'creation' && _.has(attr, 'default')) {
-    validator = validator.default(attr.default);
-  } else {
-    validator = validator.default(undefined);
-  }
+  validator = addDefault(createOrUpdate)(attr, validator);
 
   return validator;
 };

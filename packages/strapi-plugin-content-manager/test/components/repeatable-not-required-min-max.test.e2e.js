@@ -174,7 +174,7 @@ describe.each([
   });
 
   describe('GET entries', () => {
-    test('Data is orderd in the order sent', async () => {
+    test('Data is ordered in the order sent', async () => {
       const res = await rq.post('/', {
         body: {
           field: [

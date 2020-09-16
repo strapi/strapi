@@ -167,7 +167,6 @@ describe('Core API - Basic + compo', () => {
         body: product,
       });
 
-      console.log('res.body', res.body);
       expect(res.statusCode).toBe(400);
       expect(_.get(res.body.data, ['errors', 'compo[0].description', '0'])).toBe(
         'compo[0].description must be at least 3 characters'
