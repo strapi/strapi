@@ -168,24 +168,6 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         data.productsWithDzAndDP.push(res.body);
       });
 
-      test(`Can ${method} Products with compo - compo required - undefined`, async () => {
-        const product = {
-          name: 'Product 1',
-          description: 'Product description',
-        };
-        const res = await rq({
-          method: method === 'create' ? 'POST' : 'PUT',
-          url: `/content-manager/explorer/application::product-with-dz-and-dp.product-with-dz-and-dp/${
-            method === 'update' ? data.productsWithDzAndDP[0].id : ''
-          }`,
-          body: product,
-        });
-
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
-      });
-
       test(`Can ${method} Products with compo - minLength`, async () => {
         const product = {
           name: 'Product 1',

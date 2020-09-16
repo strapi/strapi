@@ -167,23 +167,6 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       data.productsWithCompoAndDP.push(res.body);
     });
 
-    test('Can create Products with compo - compo required - undefined', async () => {
-      const product = {
-        name: 'Product 1',
-        description: 'Product description',
-      };
-      const res = await rq({
-        method: 'POST',
-        url:
-          '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
-        body: product,
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
-    });
-
     test('Can create Products with compo - minLength', async () => {
       const product = {
         name: 'Product 1',

@@ -148,7 +148,7 @@ describe('Core API - Basic + dz', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.message).toBe('Dynamiczone dz is required');
+      expect(_.get(res.body.data, ['errors', 'dz', '0'])).toBe('dz must be defined.');
     });
 
     test('Cannot create Products with compo - minLength', async () => {

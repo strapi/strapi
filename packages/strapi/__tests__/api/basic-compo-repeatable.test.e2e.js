@@ -147,7 +147,7 @@ describe('Core API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.message).toBe('Component compo is required');
+      expect(_.get(res.body.data, ['errors', 'compo', '0'])).toBe('compo must be defined.');
     });
 
     test('Cannot create Products with compo - minLength', async () => {
