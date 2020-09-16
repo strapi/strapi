@@ -31,7 +31,7 @@ const migrateDraftAndPublish = async ({ definition, model, ORM }) => {
       .aggregate([
         {
           $addFields: {
-            [PUBLISHED_AT_ATTRIBUTE]: { $ifNull: [`$${createdAtCol}`, new Date().toISOString()] },
+            [PUBLISHED_AT_ATTRIBUTE]: { $ifNull: [`$${createdAtCol}`, new Date()] },
           },
         },
         {

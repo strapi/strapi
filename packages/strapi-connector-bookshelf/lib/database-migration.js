@@ -24,7 +24,7 @@ const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
 
 const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
   if (way === 'enable') {
-    const now = new Date().toISOString();
+    const now = new Date();
     let publishedAtValue = now;
     if (_.get(definition, 'options.timestamps', false)) {
       const createdAtColumn = _.get(definition, 'options.timestamps.0', 'created_at');

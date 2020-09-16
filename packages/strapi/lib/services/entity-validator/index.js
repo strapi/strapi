@@ -14,6 +14,7 @@ module.exports = ({ strapi }) => ({
    * Validate some input based on a model schema
    * @param {Object} model model schema
    * @param {Object} data input data
+   * @param options
    */
   async validateEntity(model, data, options = { isDraft: false }) {
     const validator = createValidator(model, options);
@@ -31,6 +32,7 @@ module.exports = ({ strapi }) => ({
    * Validate some input for updating based on a model schema
    * @param {Object} model model schema
    * @param {Object} data input data
+   * @param options
    */
   async validateEntityUpdate(model, data, options = { isDraft: false }) {
     const validator = createUpdateValidator(model, options);

@@ -4,6 +4,9 @@
  */
 
 const _ = require('lodash');
+const {
+  constants: { DP_PUB_STATES },
+} = require('./content-types');
 
 /**
  * Global converter
@@ -35,7 +38,11 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     Object.assign(finalParams, convertLimitQueryParams(params._limit));
   }
 
-  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where']);
+  if (_.has(params, '_publicationState')) {
+    Object.assign(finalParams, convertPublicationStateParams(params._publicationState));
+  }
+
+  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState']);
   const whereClauses = [];
 
   if (_.keys(whereParams).length > 0) {
@@ -112,6 +119,22 @@ const convertLimitQueryParams = limitQuery => {
   return {
     limit: limitAsANumber,
   };
+};
+
+/**
+ * publicationState query parser
+ * @param {string} publicationState - eg: 'live', 'preview'
+ */
+const convertPublicationStateParams = publicationState => {
+  if (!DP_PUB_STATES.includes(publicationState)) {
+    throw new Error(
+      `convertPublicationStateParams expected a value from: ${DP_PUB_STATES.join(
+        ', '
+      )}. Got ${publicationState} instead`
+    );
+  }
+
+  return { publicationState };
 };
 
 // List of all the possible filters

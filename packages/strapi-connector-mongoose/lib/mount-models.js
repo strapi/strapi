@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
 const utils = require('./utils');
+const populateQueries = require('./utils/populate-queries');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
 const { didDefinitionChange, storeDefinition } = require('./utils/store-definition');
@@ -14,6 +15,7 @@ const {
   PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
+  DP_PUB_STATES,
 } = contentTypesUtils.constants;
 
 const isPolymorphicAssoc = assoc => {
@@ -296,14 +298,34 @@ module.exports = async ({ models, target }, ctx) => {
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
+    const { publicationState } = this.getOptions();
+
+    const getMatchQuery = assoc => {
+      const assocModel = strapi.db.getModelByAssoc(assoc);
+
+      if (
+        contentTypesUtils.hasDraftAndPublish(assocModel) &&
+        DP_PUB_STATES.includes(publicationState)
+      ) {
+        return populateQueries.publicationState[publicationState];
+      }
+
+      return undefined;
+    };
 
     morphAssociations.forEach(association => {
+      const matchQuery = getMatchQuery(association);
       const { alias, nature } = association;
 
       if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate(alias);
+        this.populate({ path: alias, match: matchQuery, options: { publicationState } });
       } else if (populatedPaths.includes(alias)) {
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
+        _.set(this._mongooseOptions.populate, [alias, 'options'], { publicationState });
+
+        if (matchQuery !== undefined) {
+          _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+        }
       }
     });
 
@@ -312,12 +334,16 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
         .filter(assoc => !isPolymorphicAssoc(assoc))
         .filter(ast => ast.autoPopulate !== false)
         .forEach(ast => {
-          this.populate({ path: ast.alias });
+          this.populate({
+            path: ast.alias,
+            match: getMatchQuery(ast),
+            options: { publicationState },
+          });
         });
     }
 
     componentAttributes.forEach(key => {
-      this.populate({ path: `${key}.ref` });
+      this.populate({ path: `${key}.ref`, options: { publicationState } });
     });
   };
 };
