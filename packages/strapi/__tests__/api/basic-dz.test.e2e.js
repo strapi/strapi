@@ -45,7 +45,7 @@ const productWithDz = {
   collectionName: '',
 };
 
-describe('Core API - Basic + compo', () => {
+describe('Core API - Basic + dz', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);

@@ -57,7 +57,7 @@ describe('Core API - Basic + dz', () => {
 
   afterAll(async () => {
     // clean database
-    const queryString = data.productsWithDP.map((p, i) => `${i}=${p.id}`).join('&');
+    const queryString = data.productsWithDz.map((p, i) => `${i}=${p.id}`).join('&');
     await rq({
       method: 'DELETE',
       url: `/content-manager/explorer/deleteAll/application::product-with-dz.product-with-dz?${queryString}`,

@@ -182,7 +182,7 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['0', 'errors', 'compo.description', '0'])).toBe(
+      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
         'compo.description must be at most 30 characters'
       );
     });
