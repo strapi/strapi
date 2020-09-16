@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
+To access the plugin admin panel, click on the **Settings** link in the left menu and then everything will be under the **USERS & PERMISSIONS PLUGIN** section.
 
 ## Concept
 
@@ -493,6 +493,40 @@ The use of `ngrok` is not needed.
 
 :::
 
+::: tab LinkedIn
+
+#### Using ngrok
+
+LinkedIn accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
+#### LinkedIn configuration
+
+- Visit the Apps list page <br> [https://www.linkedin.com/developers/apps](https://www.linkedin.com/developers/apps)
+- Click on **Create app** button
+- Fill the information:
+  - **App name**: Strapi auth
+  - **LinkedIn Page**: Enter a LinkedIn page name to associate with the app or click **Create a new LinkedIn Page** to create a new one
+  - **App Logo**: Upload a square image that is at least 100x100 pixels.
+- Click on the **Create app** to create the app
+- On the app page click on **Auth** tab
+- Fill the information:
+  - **Authorized redirect URL**: `http://localhost:1337/connect/linkedin/callback`
+- On the app page click on **Products** tab.
+- Select `Sign In with LinkedIn` from the product list to enable it.
+
+#### Strapi configuration
+
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Click on the **LinkedIn** provider
+- Fill the information:
+  - **Enable**: `ON`
+  - **Client ID**: 84witsxk641rlv
+  - **Client Secret**: HdXO7a7mkrU5a6WN
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/linkedin/redirect`
+
+:::
+
 ::::
 
 Your configuration is done.
@@ -541,7 +575,7 @@ In the following section we will detail steps 3. and 7..
 This action sends an email to a user with the link to your own reset password page.
 The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
 
-First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+First, you must specify the url to your reset password page in the admin panel: **Settings > USERS & PERMISSIONS PLUGIN > Advanced Settings > Reset Password Page**.
 
 Then, your **forgotten password page** has to make the following request to your backend.
 

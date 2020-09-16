@@ -29,6 +29,8 @@
   "Policies.InputSelect.label": "Povoliť túto akciu pre:",
   "Policies.header.hint": "Vyberte akciu a kliknite na ikonku nastavení pre zobrazenie naviazanej URL",
   "Policies.header.title": "Pokročilé nastavenia",
+  "PopUpForm.Email.email_confirmation.options.message.placeholder": "Prosím kliknite na nasledujúci odkaz pre potvrdenie Vášho účtu",
+  "PopUpForm.Email.email_confirmation.options.object.placeholder": "Prosím potvrdte Vašu emailovú adresu pre %APP_NAME%",
   "PopUpForm.Email.email_templates.inputDescription": "Ak si nie ste istý ako používať premenné, {link}",
   "PopUpForm.Email.options.from.email.label": "E-mail odosielateľa",
   "PopUpForm.Email.options.from.email.placeholder": "janko.hrasko@gmail.com",
