@@ -53,7 +53,7 @@ module.exports = {
       'meta',
       {
         property: 'og:image',
-        content: 'https://strapi.io/documentation/meta.png',
+        content: 'https://strapi.io/documentation/assets/meta.png',
       },
     ],
     [
@@ -108,7 +108,7 @@ module.exports = {
     ],
   ],
   themeConfig: {
-    logo: '/logo.png',
+    logo: '/assets/logo.png',
     nav: [
       {
         text: 'Versions',
