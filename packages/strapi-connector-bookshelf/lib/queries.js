@@ -59,12 +59,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    */
   function find(params, populate, { transacting } = {}) {
     const filters = convertRestQueryParams(params);
+    const query = buildQuery({ model, filters });
 
     return model
-      .query(buildQuery({ model, filters }))
+      .query(query)
       .fetchAll({
         withRelated: populate,
         transacting,
+        publicationState: filters.publicationState,
       })
       .then(results => results.toJSON());
   }
@@ -73,10 +75,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    * Count entries based on filters
    */
   function count(params = {}) {
-    const { where } = convertRestQueryParams(params);
+    const filters = convertRestQueryParams(params);
 
     return model
-      .query(buildQuery({ model, filters: { where } }))
+      .query(buildQuery({ model, filters }))
       .count()
       .then(Number);
   }
@@ -88,7 +90,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     if (hasDraftAndPublish) {
       data[PUBLISHED_AT_ATTRIBUTE] = _.has(attributes, PUBLISHED_AT_ATTRIBUTE)
         ? attributes[PUBLISHED_AT_ATTRIBUTE]
-        : new Date().toISOString();
+        : new Date();
     }
 
     const runCreate = async trx => {
@@ -188,11 +190,11 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   }
 
   function countSearch(params) {
-    const { where } = convertRestQueryParams(_.omit(params, '_q'));
+    const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))
-      .query(buildQuery({ model, filters: { where } }))
+      .query(buildQuery({ model, filters }))
       .count()
       .then(Number);
   }

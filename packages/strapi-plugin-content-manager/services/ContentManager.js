@@ -92,7 +92,7 @@ module.exports = {
     const modelDef = strapi.getModel(model);
 
     const publishedEntry = await strapi.entityService.update(
-      { params, data: { [PUBLISHED_AT_ATTRIBUTE]: new Date().toISOString() } },
+      { params, data: { [PUBLISHED_AT_ATTRIBUTE]: new Date() } },
       { model }
     );
 

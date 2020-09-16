@@ -112,6 +112,28 @@ module.exports = ({ rq }) => {
     }
   }
 
+  async function cleanupContentTypes(models) {
+    for (const model of models) {
+      await cleanupContentType(model);
+    }
+  }
+
+  async function cleanupContentType(model) {
+    const { body } = await rq({
+      url: `/content-manager/explorer/application::${model}.${model}`,
+      method: 'GET',
+    });
+
+    if (Array.isArray(body) && body.length > 0) {
+      const queryString = body.map((item, i) => `${i}=${item.id}`).join('&');
+
+      await rq({
+        url: `/content-manager/explorer/deleteAll/application::${model}.${model}?${queryString}`,
+        method: 'DELETE',
+      });
+    }
+  }
+
   return {
     createComponent,
     deleteComponent,
@@ -123,5 +145,7 @@ module.exports = ({ rq }) => {
     modifyContentType,
     modifyContentTypes,
     getContentTypeSchema,
+    cleanupContentType,
+    cleanupContentTypes,
   };
 };

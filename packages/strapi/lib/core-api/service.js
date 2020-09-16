@@ -2,8 +2,24 @@
 
 const _ = require('lodash');
 const utils = require('strapi-utils');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const {
+  contentTypes: {
+    hasDraftAndPublish,
+    constants: { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATE_LIVE },
+  },
+} = require('strapi-utils');
+
+const getFetchParams = (params, model) => {
+  const defaultParams = {};
+
+  if (hasDraftAndPublish(model)) {
+    Object.assign(defaultParams, {
+      _publicationState: DP_PUB_STATE_LIVE,
+    });
+  }
+
+  return { ...defaultParams, ...params };
+};
 
 /**
  * default service
@@ -99,7 +115,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.entityService.find({ params, populate }, { model: modelName });
+      return strapi.entityService.find(
+        { params: getFetchParams(params, model), populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -109,7 +128,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.entityService.findOne({ params, populate }, { model: modelName });
+      return strapi.entityService.findOne(
+        { params: getFetchParams(params, model), populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -119,7 +141,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.entityService.count({ params }, { model: modelName });
+      return strapi.entityService.count(
+        { params: getFetchParams(params, model) },
+        { model: modelName }
+      );
     },
 
     /**
@@ -130,8 +155,8 @@ const createCollectionTypeService = ({ model, strapi }) => {
 
     create(data, { files } = {}) {
       const sanitizedData = sanitizeInput(data);
-      if (contentTypesUtils.hasDraftAndPublish(model)) {
-        sanitizedData[PUBLISHED_AT_ATTRIBUTE] = new Date().toISOString();
+      if (hasDraftAndPublish(model)) {
+        sanitizedData[PUBLISHED_AT_ATTRIBUTE] = new Date();
       }
       return strapi.entityService.create({ data: sanitizedData, files }, { model: modelName });
     },
@@ -176,7 +201,10 @@ const createCollectionTypeService = ({ model, strapi }) => {
      * @return {Promise}
      */
     countSearch(params) {
-      return strapi.entityService.countSearch({ params }, { model: modelName });
+      return strapi.entityService.countSearch(
+        { params: getFetchParams(params, model) },
+        { model: modelName }
+      );
     },
   };
 };

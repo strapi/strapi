@@ -6,7 +6,8 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const populateQueries = require('./utils/populate-queries');
+const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
@@ -22,9 +23,28 @@ module.exports = ({ model, strapi }) => {
 
   const excludedKeys = assocKeys.concat(componentKeys);
 
-  const defaultPopulate = model.associations
-    .filter(ast => ast.autoPopulate !== false)
-    .map(ast => ast.alias);
+  const defaultPopulate = (options = {}) =>
+    model.associations
+      .filter(ast => ast.autoPopulate !== false)
+      .map(ast => {
+        const assocModel = strapi.db.getModelByAssoc(ast);
+        const populate = {
+          path: ast.alias,
+          options: { publicationState: options.publicationState },
+        };
+
+        if (
+          contentTypesUtils.hasDraftAndPublish(assocModel) &&
+          DP_PUB_STATES.includes(options.publicationState)
+        ) {
+          populate.match = _.merge(
+            populate.match,
+            populateQueries.publicationState[options.publicationState]
+          );
+        }
+
+        return populate;
+      });
 
   const pickRelations = values => {
     return _.pick(values, assocKeys);
@@ -387,9 +407,8 @@ module.exports = ({ model, strapi }) => {
   }
 
   function find(params, populate) {
-    const populateOpt = populate || defaultPopulate;
-
     const filters = convertRestQueryParams(params);
+    const populateOpt = populate || defaultPopulate({ publicationState: filters.publicationState });
 
     return buildQuery({
       model,
@@ -420,7 +439,7 @@ module.exports = ({ model, strapi }) => {
     if (hasDraftAndPublish) {
       data[PUBLISHED_AT_ATTRIBUTE] = _.has(values, PUBLISHED_AT_ATTRIBUTE)
         ? values[PUBLISHED_AT_ATTRIBUTE]
-        : new Date().toISOString();
+        : new Date();
     }
 
     // Create entry with no-relational data.
@@ -479,7 +498,7 @@ module.exports = ({ model, strapi }) => {
   async function deleteOne(id) {
     const entry = await model
       .findOneAndRemove({ [model.primaryKey]: id })
-      .populate(defaultPopulate);
+      .populate(defaultPopulate());
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -495,9 +514,8 @@ module.exports = ({ model, strapi }) => {
   }
 
   function search(params, populate) {
-    const populateOpt = populate || defaultPopulate;
-
     const filters = convertRestQueryParams(_.omit(params, '_q'));
+    const populateOpt = populate || defaultPopulate({ publicationState: filters.publicationState });
 
     return buildQuery({
       model,
