@@ -107,9 +107,27 @@ function LeftMenu({ wait }) {
     }
   };
 
-  const displayedContentTypes = useMemo(() => sortedContentTypesList.filter(obj => obj.editable), [
-    sortedContentTypesList,
-  ]);
+  const displayedContentTypes = useMemo(() => {
+    return sortedContentTypesList
+      .filter(obj => obj.editable)
+      .map(obj => {
+        if (obj.plugin) {
+          return {
+            ...obj,
+            Component: () => (
+              <p style={{ justifyContent: 'normal' }}>
+                {obj.title}&nbsp;
+                <span style={{ fontStyle: 'italic', textTransform: 'none' }}>
+                  ({formatMessage({ id: getTrad('from') })}): : {obj.plugin})
+                </span>
+              </p>
+            ),
+          };
+        }
+
+        return obj;
+      });
+  }, [sortedContentTypesList, formatMessage]);
 
   const data = [
     {

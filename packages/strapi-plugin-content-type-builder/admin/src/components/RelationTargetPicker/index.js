@@ -22,7 +22,23 @@ const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother,
     [sortedContentTypesList]
   );
 
-  const targetFriendlyName = get(contentTypes, [target, 'schema', 'name'], 'error');
+  const pluginInfo = useMemo(() => {
+    const plugin = get(contentTypes, [target, 'plugin'], null);
+
+    if (plugin) {
+      return (
+        <span style={{ fontStyle: 'italic', textTransform: 'none' }}>&nbsp; (from: {plugin})</span>
+      );
+    }
+
+    return null;
+  }, [contentTypes, target]);
+
+  const targetFriendlyName = useMemo(() => {
+    const name = get(contentTypes, [target, 'schema', 'name'], 'error');
+
+    return name;
+  }, [contentTypes, target]);
 
   return (
     <Wrapper>
@@ -39,22 +55,25 @@ const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother,
               style={{ fontSize: 12, marginTop: '-3px' }}
             />
             {targetFriendlyName}
+            {pluginInfo}
           </p>
         </DropdownToggle>
         <DropdownMenu style={{ paddingTop: '3px' }}>
-          {allowedContentTypesForRelation.map(({ uid, title, restrictRelationsTo }) => {
+          {allowedContentTypesForRelation.map(({ uid, title, restrictRelationsTo, plugin }) => {
             return (
               <DropdownItem
                 key={uid}
                 onClick={() => {
                   // Change the target
+                  const selectedContentTypeFriendlyName = plugin ? `${plugin}_${title}` : title;
+
                   onChange({
                     target: {
                       name: 'target',
                       value: uid,
                       type: 'relation',
                       oneThatIsCreatingARelationWithAnother,
-                      selectedContentTypeFriendlyName: title,
+                      selectedContentTypeFriendlyName,
                       targetContentTypeAllowedRelations: restrictRelationsTo,
                     },
                   });
@@ -66,6 +85,11 @@ const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother,
                     style={{ fontSize: 12, marginTop: '-3px' }}
                   />
                   {title}
+                  {plugin && (
+                    <span style={{ fontStyle: 'italic', textTransform: 'none' }}>
+                      &nbsp; (from: {plugin})
+                    </span>
+                  )}
                 </p>
               </DropdownItem>
             );

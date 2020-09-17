@@ -148,6 +148,7 @@ const sortContentType = types =>
         editable: types[uid].schema.editable,
         name: uid,
         title: types[uid].schema.name,
+        plugin: types[uid].plugin || null,
         uid,
         to: `/plugins/${pluginId}/content-types/${uid}`,
         kind: types[uid].schema.kind,
