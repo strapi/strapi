@@ -4,11 +4,11 @@ import { NavLink } from 'react-router-dom';
 
 import Icon from './Icon';
 
-function LeftMenuLink({ children, to }) {
+function LeftMenuLink({ children, to, Component }) {
   return (
     <NavLink to={to}>
       <Icon />
-      <p>{children}</p>
+      {Component ? <Component /> : <p>{children}</p>}
     </NavLink>
   );
 }

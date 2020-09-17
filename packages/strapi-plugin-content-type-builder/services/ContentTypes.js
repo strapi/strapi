@@ -29,17 +29,17 @@ const getRestrictRelationsTo = (contentType = {}) => {
 };
 
 const getformattedName = (contentType = {}) => {
-  const { uid, info, plugin } = contentType;
+  const { uid, info } = contentType;
   const name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
-  const isUser = name.toLowerCase() === 'user';
+  // const isUser = name.toLowerCase() === 'user';
 
-  if (isUser && plugin === 'admin') {
-    return 'User (Admin panel)';
-  }
+  // if (isUser && plugin === 'admin') {
+  //   return 'User (Admin panel)';
+  // }
 
-  if (isUser && plugin === 'users-permissions') {
-    return 'User (Permissions plugin)';
-  }
+  // if (isUser && plugin === 'users-permissions') {
+  //   return 'User (Permissions plugin)';
+  // }
 
   return name;
 };
