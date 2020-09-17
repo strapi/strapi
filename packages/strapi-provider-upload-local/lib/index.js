@@ -12,11 +12,11 @@ module.exports = {
   init({ sizeLimit = 1000000 } = {}) {
     const verifySize = file => {
       if (file.size > sizeLimit) {
-        throw strapi.errors.badRequest('FileTooBig', {
+        throw strapi.errors.entityTooLarge('FileTooBig', {
           errors: [
             {
               id: 'Upload.status.sizeLimit',
-              message: `${file.name} file is bigger than limit size!`,
+              message: `${file.name} file is bigger than the limit size!`,
               values: { file: file.name },
             },
           ],
