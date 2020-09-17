@@ -121,6 +121,13 @@ const reducer = (state, action) => {
                 return '-';
               }
 
+              if (
+                didChangeNatureBecauseOfRestrictedRelation &&
+                ['oneWay', 'manyWay'].includes(targetContentTypeAllowedRelations[0])
+              ) {
+                return '-';
+              }
+
               return pluralize(
                 snakeCase(oneThatIsCreatingARelationWithAnother),
                 shouldPluralizeTargetAttribute(obj.get('nature'))
