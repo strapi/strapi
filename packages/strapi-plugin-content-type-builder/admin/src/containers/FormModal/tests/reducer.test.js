@@ -245,6 +245,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       const expected = state
         .setIn(['modifiedData', 'target'], 'application::country.country')
         .setIn(['modifiedData', 'name'], 'country')
+        .setIn(['modifiedData', 'targetAttribute'], '-')
         .setIn(['modifiedData', 'nature'], 'oneWay');
 
       expect(reducer(state, action)).toEqual(expected);
