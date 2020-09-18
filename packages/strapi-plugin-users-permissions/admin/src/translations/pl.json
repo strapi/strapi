@@ -10,7 +10,7 @@
   "EditForm.inputToggle.label.email": "Jedno konto na adres email",
   "EditForm.inputToggle.label.email-confirmation": "Zezwól na potwierdzenie adresu email",
   "EditForm.inputToggle.label.email-confirmation-redirection": "url przekierowania",
-  "EditForm.inputToggle.label.email-reset-password": "Straona resetowania hasła",
+  "EditForm.inputToggle.label.email-reset-password": "Strona resetowania hasła",
   "EditForm.inputToggle.label.sign-up": "Rejestracja",
   "HeaderNav.link.advancedSettings": "Zaawansowane",
   "HeaderNav.link.emailTemplates": "Szablony e-mail",

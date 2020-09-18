@@ -23,7 +23,7 @@ module.exports = {
     }
 
     try {
-      const res = await fetch(ctx.query.url, {
+      const res = await fetch(new URL(ctx.query.url), {
         headers: _.omit(ctx.request.headers, ['origin', 'host', 'authorization']),
       });
 

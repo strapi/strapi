@@ -217,7 +217,7 @@ To improve the Developer Experience when developing or using the administration 
 
 **uid**
 
-- `targetField`(string) — The value is the name of an attribute thas has `string` of `text` type.
+- `targetField`(string) — The value is the name of an attribute that has `string` of `text` type.
 - `options` (string) — The value is a set of options passed to [the underlying `uid` generator](https://github.com/sindresorhus/slugify). A caveat is that the resulting `uid` must abide to the following RegEx `/^[A-Za-z0-9-_.~]*$`.
 
 ### Example
