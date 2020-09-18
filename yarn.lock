@@ -2439,6 +2439,32 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
+"@node-rs/bcrypt-darwin@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.npmjs.org/@node-rs/bcrypt-darwin/-/bcrypt-darwin-0.5.0.tgz#dbc66ee4143120083a6020d1207aad6b76b262e1"
+  integrity sha512-1A/bAj78FiYk69YeDkhgDzmfVy4fvcbkCmJZOV8EdH+DJc4NeDL+k0YpY1j7YooqLkf4xRc6yCJ00xg8308bMQ==
+
+"@node-rs/bcrypt-linux@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.npmjs.org/@node-rs/bcrypt-linux/-/bcrypt-linux-0.5.0.tgz#582d21b5a14ca7d43555e7d895caa6030f5f0376"
+  integrity sha512-QNrpeRtW9phptg1IcXxp7wqKBSekVMAbd2l/tnz0Web64YsWm5an80mAVsdg1LAt59ClnjXQIzIZV8d028ls9g==
+
+"@node-rs/bcrypt-win32@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.npmjs.org/@node-rs/bcrypt-win32/-/bcrypt-win32-0.5.0.tgz#41b596f07255a2addebdd48ed8268d83bcb9bf54"
+  integrity sha512-4MWX4RU/Vx4xZK3s02HiG96R8luvKKF76gaauKrVcaGO3/iUcLlCsdZ7dYt9HPPDwhmG5aPs5bG1a2pxA7lAqQ==
+
+"@node-rs/bcrypt@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.npmjs.org/@node-rs/bcrypt/-/bcrypt-0.5.0.tgz#8997d9a161805e015470660a8b3c06ffe2818500"
+  integrity sha512-q5Untj+u5m5hELk5mKF/uYKn10Hk2Kv39dDly3rVuOLTg+pA+Cu7AgOkeO0Nr+f09Xh5Zn5SU1jRd6TA2W2osA==
+  dependencies:
+    "@node-rs/helper" "^0.4.0"
+  optionalDependencies:
+    "@node-rs/bcrypt-darwin" "^0.5.0"
+    "@node-rs/bcrypt-linux" "^0.5.0"
+    "@node-rs/bcrypt-win32" "^0.5.0"
+
 "@node-rs/helper@^0.4.0":
   version "0.4.0"
   resolved "https://registry.npmjs.org/@node-rs/helper/-/helper-0.4.0.tgz#deec7d95aafa90535980a51cbd5336b8bbefe93a"
@@ -4663,11 +4689,6 @@ bcrypt-pbkdf@^1.0.0:
   integrity sha1-pDAdOJtqQ/m2f/PKEaP2Y342Dp4=
   dependencies:
     tweetnacl "^0.14.3"
-
-bcryptjs@^2.4.3:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/bcryptjs/-/bcryptjs-2.4.3.tgz#9ab5627b93e60621ff7cdac5da9733027df1d0cb"
-  integrity sha1-mrVie5PmBiH/fNrF2pczAn3x0Ms=
 
 before-after-hook@^2.0.0:
   version "2.1.0"

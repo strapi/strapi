@@ -12,8 +12,8 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "@node-rs/bcrypt": "^0.5.0",
     "@purest/providers": "^1.0.1",
-    "bcryptjs": "^2.4.3",
     "grant-koa": "5.2.0",
     "immutable": "^3.8.2",
     "jsonwebtoken": "^8.1.0",

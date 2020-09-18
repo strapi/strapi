@@ -1,13 +1,13 @@
 'use strict';
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require('@node-rs/bcrypt');
 const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('strapi-utils');
 
 /**
  * hashes a password
  * @param {string} password - password to hash
- * @returns {string} hashed password
+ * @returns {Promise<string>} hashed password
  */
 const hashPassword = password => bcrypt.hash(password, 10);
 
@@ -15,9 +15,9 @@ const hashPassword = password => bcrypt.hash(password, 10);
  * Validate a password
  * @param {string} password
  * @param {string} hash
- * @returns {boolean} is the password valid
+ * @returns {Promise<boolean>} is the password valid
  */
-const validatePassword = (password, hash) => bcrypt.compare(password, hash);
+const validatePassword = (password, hash) => bcrypt.verify(password, hash);
 
 /**
  * Check login credentials

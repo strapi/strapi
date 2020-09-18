@@ -6,7 +6,7 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require('@node-rs/bcrypt');
 
 module.exports = {
   /**
@@ -82,15 +82,10 @@ module.exports = {
   },
 
   hashPassword(user = {}) {
-    return new Promise(resolve => {
-      if (!user.password || this.isHashed(user.password)) {
-        resolve(null);
-      } else {
-        bcrypt.hash(`${user.password}`, 10, (err, hash) => {
-          resolve(hash);
-        });
-      }
-    });
+    if (!user.password || this.isHashed(user.password)) {
+      return Promise.resolve(null);
+    }
+    return bcrypt.hash(`${user.password}`, 10);
   },
 
   isHashed(password) {
@@ -114,6 +109,6 @@ module.exports = {
   },
 
   validatePassword(password, hash) {
-    return bcrypt.compare(password, hash);
+    return bcrypt.verify(password, hash);
   },
 };
