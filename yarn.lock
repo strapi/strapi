@@ -3869,7 +3869,7 @@ ansi-escapes@3.2.0, ansi-escapes@^3.0.0, ansi-escapes@^3.2.0:
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-3.2.0.tgz#8780b98ff9dbf5638152d1f1fe5c1d7b4442976b"
   integrity sha512-cBhpre4ma+U0T1oM5fXg7Dy1Jw7zzwv7lt/GoCpr+hDQJoYnKVPLL4dCvSEFMmQurOQvSrwT7SL/DAlhBI97RQ==
 
-ansi-escapes@^4.1.0, ansi-escapes@^4.2.1:
+ansi-escapes@^4.2.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-4.3.1.tgz#a5c47cc43181f1f38ffd7076837700d395522a61"
   integrity sha512-JWF7ocqNrp8u9oqpgV+wH5ftbt+cfvv+PTjOvKLT3AdYly/LmORARfEVT1iyjwN+4MqE5UmVKoAdIBqeoCHgLA==
@@ -5270,15 +5270,7 @@ chalk@^3.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-chalk@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.0.0.tgz#6e98081ed2d17faab615eb52ac66ec1fe6209e72"
-  integrity sha512-N9oWFcegS0sFr9oh1oz2d7Npos6vNoWW9HvtCg5N1KRFpUhaAhvTv5Y58g880fZaEYSNm3qDz8SU1UrGvp+n7A==
-  dependencies:
-    ansi-styles "^4.1.0"
-    supports-color "^7.1.0"
-
-chalk@^4.1.0:
+chalk@^4.0.0, chalk@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.1.0.tgz#4e14870a618d9e2edd97dd8345fd9d9dc315646a"
   integrity sha512-qwx12AxXe2Q5xQ43Ac//I6v5aXTipYrSESdOgzrN+9XjgEpyjpKuvSGaN4qE93f7TQTlerQQ8S+EQ0EyDoVL1A==
@@ -5831,10 +5823,10 @@ connect-history-api-fallback@^1.6.0:
   resolved "https://registry.yarnpkg.com/connect-history-api-fallback/-/connect-history-api-fallback-1.6.0.tgz#8b32089359308d111115d81cad3fceab888f97bc"
   integrity sha512-e54B99q/OUoH64zYYRf3HBP5z24G38h5D3qXu23JGRoigpX5Ss4r9ZnDk3g0Z8uQC2x2lPaJ+UlWBc1ZWBWdLg==
 
-consola@^2.6.0:
-  version "2.11.3"
-  resolved "https://registry.yarnpkg.com/consola/-/consola-2.11.3.tgz#f7315836224c143ac5094b47fd4c816c2cd1560e"
-  integrity sha512-aoW0YIIAmeftGR8GSpw6CGQluNdkWMWh3yEFjH/hmynTYnMtibXszii3lxCXmk8YxJtI3FAK5aTiquA5VH68Gw==
+consola@^2.10.0:
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/consola/-/consola-2.15.0.tgz#40fc4eefa4d2f8ef2e2806147f056ea207fcc0e9"
+  integrity sha512-vlcSGgdYS26mPf7qNi+dCisbhiyDnrN1zaRbw3CSuc2wGOMEGGPsp46PdRG5gqXwgtJfjxDkxRNAgRPr1B77vQ==
 
 console-browserify@^1.1.0:
   version "1.2.0"
@@ -19211,19 +19203,19 @@ webpack@^4.40.1:
     watchpack "^1.6.0"
     webpack-sources "^1.4.1"
 
-webpackbar@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/webpackbar/-/webpackbar-3.2.0.tgz#bdaad103fad11a4e612500e72aaae98b08ba493f"
-  integrity sha512-PC4o+1c8gWWileUfwabe0gqptlXUDJd5E0zbpr2xHP1VSOVlZVPBZ8j6NCR8zM5zbKdxPhctHXahgpNK1qFDPw==
+webpackbar@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/webpackbar/-/webpackbar-4.0.0.tgz#ee7a87f16077505b5720551af413c8ecd5b1f780"
+  integrity sha512-k1qRoSL/3BVuINzngj09nIwreD8wxV4grcuhHTD8VJgUbGcy8lQSPqv+bM00B7F+PffwIsQ8ISd4mIwRbr23eQ==
   dependencies:
-    ansi-escapes "^4.1.0"
-    chalk "^2.4.1"
-    consola "^2.6.0"
+    ansi-escapes "^4.2.1"
+    chalk "^2.4.2"
+    consola "^2.10.0"
     figures "^3.0.0"
     pretty-time "^1.1.0"
     std-env "^2.2.1"
     text-table "^0.2.0"
-    wrap-ansi "^5.1.0"
+    wrap-ansi "^6.0.0"
 
 websocket-driver@>=0.5.1:
   version "0.7.3"
@@ -19390,7 +19382,7 @@ wrap-ansi@^5.1.0:
     string-width "^3.0.0"
     strip-ansi "^5.0.0"
 
-wrap-ansi@^6.2.0:
+wrap-ansi@^6.0.0, wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
