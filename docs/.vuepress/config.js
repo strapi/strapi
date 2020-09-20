@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Strapi Documentation',
+  title: null,
   description: 'The headless CMS developers love.',
   base: '/documentation/',
   plugins: [
@@ -53,7 +53,7 @@ module.exports = {
       'meta',
       {
         property: 'og:image',
-        content: 'https://strapi.io/assets/images/strapi-website-preview.png',
+        content: 'https://strapi.io/documentation/meta.png',
       },
     ],
     [
@@ -108,6 +108,7 @@ module.exports = {
     ],
   ],
   themeConfig: {
+    logo: '/logo.png',
     nav: [
       {
         text: 'Versions',
@@ -171,7 +172,7 @@ module.exports = {
           children: [
             ['/v3.x/content-api/api-endpoints', 'API Endpoints'],
             ['/v3.x/content-api/parameters', 'Parameters'],
-            ['/v3.x/content-api/integrations', 'Integrations']
+            ['/v3.x/content-api/integrations', 'Integrations'],
           ],
         },
         {
