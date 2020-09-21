@@ -40,8 +40,7 @@ npx create-strapi-app my-project --quickstart
 
 Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
-- Complete the form to create the first **Administrator** user.
-- Click **Ready to start**.
+Complete the form to create the first **Administrator** user.
 
 ## 3. Create a Restaurant Content Type
 
