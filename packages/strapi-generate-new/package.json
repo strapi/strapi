@@ -13,16 +13,16 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "@sentry/node": "^5.7.1",
-    "chalk": "^2.4.2",
-    "execa": "^1.0.0",
+    "@sentry/node": "^5.24.2",
+    "chalk": "^4.1.0",
+    "execa": "^4.0.3",
     "fs-extra": "^9.0.1",
-    "inquirer": "^6.3.1",
-    "lodash": "4.17.19",
+    "inquirer": "^7.3.3",
+    "lodash": "4.17.20",
     "node-fetch": "^2.6.1",
-    "node-machine-id": "^1.1.10",
-    "ora": "^3.4.0",
-    "uuid": "^3.3.2"
+    "node-machine-id": "^1.1.12",
+    "ora": "^5.1.0",
+    "uuid": "^8.3.0"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
