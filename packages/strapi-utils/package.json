@@ -15,11 +15,11 @@
   "main": "./lib",
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "date-fns": "^2.8.1",
-    "lodash": "4.17.19",
-    "pino": "^4.7.1",
+    "date-fns": "^2.16.1",
+    "lodash": "4.17.20",
+    "pino": "<5.0.0",
     "pluralize": "^8.0.0",
-    "yup": "0.28.1"
+    "yup": "0.29.3"
   },
   "author": {
     "email": "hi@strapi.io",
