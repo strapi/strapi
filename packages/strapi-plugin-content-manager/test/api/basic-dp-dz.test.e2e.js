@@ -70,7 +70,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     await modelsUtils.deleteComponent('default.compo');
   }, 60000);
 
-  test('Create Products with compo', async () => {
+  test('Create product with compo', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
@@ -94,7 +94,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     data.productsWithDzAndDP.push(res.body);
   });
 
-  test('Read Products with compo', async () => {
+  test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/explorer/application::product-with-dz-and-dp.product-with-dz-and-dp',
@@ -102,14 +102,14 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBe(1);
+    expect(res.body).toHaveLength(1);
     expect(res.body[0]).toMatchObject(data.productsWithDzAndDP[0]);
     res.body.forEach(p => {
       expect(p.published_at).toBeNull();
     });
   });
 
-  test('Update Products with compo', async () => {
+  test('Update product with compo', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
@@ -134,7 +134,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     data.productsWithDzAndDP[0] = res.body;
   });
 
-  test('Delete Products with compo', async () => {
+  test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
       url: `/content-manager/explorer/application::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
@@ -149,7 +149,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
 
   describe('validation', () => {
     describe.each(['create', 'update'])('%p', method => {
-      test(`Can ${method} Products with compo - compo required - []`, async () => {
+      test(`Can ${method} product with compo - compo required - []`, async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -168,7 +168,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         data.productsWithDzAndDP.push(res.body);
       });
 
-      test(`Can ${method} Products with compo - minLength`, async () => {
+      test(`Can ${method} product with compo - minLength`, async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -193,7 +193,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         data.productsWithDzAndDP.push(res.body);
       });
 
-      test(`Cannot ${method} Products with compo - maxLength`, async () => {
+      test(`Cannot ${method} product with compo - maxLength`, async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -219,7 +219,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         );
       });
 
-      test(`Can ${method} Products with compo - required`, async () => {
+      test(`Can ${method} product with compo - required`, async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',
@@ -243,7 +243,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         data.productsWithDzAndDP.push(res.body);
       });
 
-      test(`Cannot ${method} Products with compo - missing __component`, async () => {
+      test(`Cannot ${method} product with compo - missing __component`, async () => {
         const product = {
           name: 'Product 1',
           description: 'Product description',

@@ -101,7 +101,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     data.products.push(res.body);
   });
 
-  test('Read Products', async () => {
+  test('Read products', async () => {
     const res = await rq({
       method: 'GET',
       url: '/product-with-dps',
@@ -109,6 +109,7 @@ describe('Core API - Basic + draftAndPublish', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveLength(2);
     expect(res.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -122,7 +123,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     });
   });
 
-  test('Update Products', async () => {
+  test('Update product', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
@@ -140,7 +141,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     data.products[0] = res.body;
   });
 
-  test('Update Products + cannot overwrite published_at', async () => {
+  test('Update product + cannot overwrite published_at', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
@@ -160,7 +161,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     data.products[0] = res.body;
   });
 
-  test('Delete Products', async () => {
+  test('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
       url: `/product-with-dps/${data.products[0].id}`,

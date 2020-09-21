@@ -5,9 +5,12 @@
 'use strict';
 
 const _ = require('lodash');
-
-const { yup, formatYupErrors } = require('strapi-utils');
+const fp = require('lodash/fp');
+const { yup, formatYupErrors, contentTypes: contentTypesUtils } = require('strapi-utils');
 const validators = require('./validators');
+
+const mapValuesWithKey = fp.mapValues.convert({ cap: false });
+const pickByWithKey = fp.pickBy.convert({ cap: false });
 
 const isMedia = attr => (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
 
@@ -56,66 +59,92 @@ const addDefault = createOrUpdate => (attr, validator) => {
 
 const preventCast = validator => validator.transform((val, originalVal) => originalVal);
 
+const createComponentValidator = createOrUpdate => (attr, data, { isDraft }) => {
+  let validator;
+
+  const [model] = strapi.db.getModelsByAttribute(attr);
+  if (!model) {
+    throw new Error('Validation failed: Model not found');
+  }
+
+  if (_.get(attr, 'repeatable', false) === true) {
+    validator = yup
+      .array()
+      .of(
+        yup.lazy(item => createModelValidator(createOrUpdate)(model, item, { isDraft }).notNull())
+      );
+    validator = addRequiredValidation(createOrUpdate)(true, validator);
+    validator = addMinMax(attr, validator, data);
+  } else {
+    validator = createModelValidator(createOrUpdate)(model, data, { isDraft });
+    validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+  }
+
+  return validator;
+};
+
+const createDzValidator = createOrUpdate => (attr, data, { isDraft }) => {
+  let validator;
+
+  validator = yup.array().of(
+    yup.lazy(item => {
+      const model = strapi.getModel(_.get(item, '__component'));
+      const schema = yup
+        .object()
+        .shape({
+          __component: yup
+            .string()
+            .required()
+            .oneOf(_.keys(strapi.components)),
+        })
+        .notNull();
+
+      return model
+        ? schema.concat(createModelValidator(createOrUpdate)(model, item, { isDraft }))
+        : schema;
+    })
+  );
+  validator = addRequiredValidation(createOrUpdate)(true, validator);
+  validator = addMinMax(attr, validator, data);
+
+  return validator;
+};
+
+const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
+  let validator;
+
+  if (Array.isArray(data)) {
+    validator = yup.array().of(yup.mixed());
+  } else {
+    validator = yup.mixed();
+  }
+  validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+
+  return validator;
+};
+
+const createSimpleAttributeValidator = createOrUpdate => (attr, { isDraft }) => {
+  let validator;
+
+  validator = validators[attr.type](attr, { isDraft });
+  validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+
+  return validator;
+};
+
 const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => {
   let validator;
   if (isMedia(attr)) {
     validator = yup.mixed();
   } else if (isSimpleAttribute(attr)) {
-    // simple attribute
-    validator = validators[attr.type](attr, { isDraft });
-    validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+    validator = createSimpleAttributeValidator(createOrUpdate)(attr, { isDraft });
   } else {
-    // complex attribute (relations, components, dz)
-    const attributeModels = strapi.db.getModelsByAttribute(attr);
-    if (attributeModels.length === 0) {
-      throw new Error('Validation failed: Model not found');
-    }
     if (attr.type === 'component') {
-      // component
-      if (_.get(attr, 'repeatable', false) === true) {
-        validator = yup
-          .array()
-          .of(
-            yup.lazy(item =>
-              createModelValidator(createOrUpdate)(attributeModels[0], item, { isDraft }).notNull()
-            )
-          );
-        validator = addRequiredValidation(createOrUpdate)(true, validator);
-        validator = addMinMax(attr, validator, data);
-      } else {
-        validator = createModelValidator(createOrUpdate)(attributeModels[0], data, { isDraft });
-        validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
-      }
+      validator = createComponentValidator(createOrUpdate)(attr, data, { isDraft });
     } else if (attr.type === 'dynamiczone') {
-      // dynamiczone
-      validator = yup.array().of(
-        yup.lazy(item => {
-          const model = strapi.getModel(_.get(item, '__component'));
-          const schema = yup
-            .object()
-            .shape({
-              __component: yup
-                .string()
-                .required()
-                .oneOf(_.keys(strapi.components)),
-            })
-            .notNull();
-
-          return model
-            ? schema.concat(createModelValidator(createOrUpdate)(model, item, { isDraft }))
-            : schema;
-        })
-      );
-      validator = addRequiredValidation(createOrUpdate)(true, validator);
-      validator = addMinMax(attr, validator, data);
+      validator = createDzValidator(createOrUpdate)(attr, data, { isDraft });
     } else {
-      // relations
-      if (Array.isArray(data)) {
-        validator = yup.array().of(yup.mixed());
-      } else {
-        validator = yup.mixed();
-      }
-      validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+      validator = createRelationValidator(createOrUpdate)(attr, data, { isDraft });
     }
 
     validator = preventCast(validator);
@@ -126,25 +155,27 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
   return validator;
 };
 
-const createModelValidator = createOrUpdate => (model, data, { isDraft }) =>
-  yup
-    .object()
-    .shape(
-      _.mapValues(_.get(model, 'attributes', {}), (attr, attrName) =>
+const createModelValidator = createOrUpdate => (model, data, { isDraft }) => {
+  const nonWritableAttributes = model ? contentTypesUtils.getNonWritableAttributes(model) : [];
+
+  return yup.object().shape(
+    _.flow(
+      fp.getOr({}, 'attributes'),
+      pickByWithKey((attr, attrName) => !nonWritableAttributes.includes(attrName)),
+      mapValuesWithKey((attr, attrName) =>
         createAttributeValidator(createOrUpdate)(attr, _.get(data, attrName), { isDraft })
       )
-    );
+    )(model)
+  );
+};
 
 const createValidateEntity = createOrUpdate => async (model, data, { isDraft = false } = {}) => {
-  const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
-  let validData;
   try {
-    validData = await validator.validate(data, { abortEarly: false });
+    const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
+    return await validator.validate(data, { abortEarly: false });
   } catch (e) {
     throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(e) });
   }
-
-  return validData;
 };
 
 module.exports = {

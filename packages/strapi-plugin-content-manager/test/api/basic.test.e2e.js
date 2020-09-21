@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -12,22 +13,6 @@ const product = {
   attributes: {
     name: {
       type: 'string',
-    },
-    description: {
-      type: 'text',
-    },
-  },
-  connection: 'default',
-  name: 'product',
-  description: '',
-  collectionName: '',
-};
-
-const compo = {
-  name: 'compo',
-  attributes: {
-    name: {
-      type: 'string',
       required: true,
     },
     description: {
@@ -36,6 +21,10 @@ const compo = {
       maxLength: 30,
     },
   },
+  connection: 'default',
+  name: 'product',
+  description: '',
+  collectionName: '',
 };
 
 describe('CM API - Basic', () => {
@@ -44,16 +33,14 @@ describe('CM API - Basic', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createComponent(compo);
     await modelsUtils.createContentTypes([product]);
   }, 60000);
 
   afterAll(async () => {
     await modelsUtils.deleteContentTypes(['product']);
-    await modelsUtils.deleteComponent('default.compo');
   }, 60000);
 
-  test('Create Products', async () => {
+  test('Create product', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
@@ -70,7 +57,7 @@ describe('CM API - Basic', () => {
     data.products.push(res.body);
   });
 
-  test('Read Products', async () => {
+  test('Read product', async () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/explorer/application::product.product',
@@ -78,6 +65,7 @@ describe('CM API - Basic', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveLength(1);
     expect(res.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -89,7 +77,7 @@ describe('CM API - Basic', () => {
     res.body.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
-  test('Update Products', async () => {
+  test('Update product', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
@@ -107,7 +95,7 @@ describe('CM API - Basic', () => {
     data.products[0] = res.body;
   });
 
-  test('Delete Products', async () => {
+  test('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
       url: `/content-manager/explorer/application::product.product/${data.products[0].id}`,
@@ -118,5 +106,55 @@ describe('CM API - Basic', () => {
     expect(res.body.id).toEqual(data.products[0].id);
     expect(res.body.published_at).toBeUndefined();
     data.products.shift();
+  });
+
+  describe('validators', () => {
+    test('Cannot create a product - minLength', async () => {
+      const product = {
+        name: 'Product 1',
+        description: '',
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/explorer/application::product.product',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res, 'body.data.errors.description.0')).toBe(
+        'description must be at least 4 characters'
+      );
+    });
+
+    test('Cannot create a product - required', async () => {
+      const product = {
+        description: 'Product description',
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/explorer/application::product.product',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res, 'body.data.0.errors.name.0')).toBe('name must be defined.');
+    });
+
+    test('Cannot create a product - maxLength', async () => {
+      const product = {
+        name: 'Product 1',
+        description: "I'm a product description that is very long. At least thirty characters.",
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/explorer/application::product.product',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res, 'body.data.errors.description.0')).toBe(
+        'description must be at most 30 characters'
+      );
+    });
   });
 });

@@ -53,7 +53,7 @@ describe('Core API - Basic', () => {
     await modelsUtils.deleteComponent('default.compo');
   }, 60000);
 
-  test('Create Products', async () => {
+  test('Create product', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
@@ -70,7 +70,7 @@ describe('Core API - Basic', () => {
     data.products.push(res.body);
   });
 
-  test('Read Products', async () => {
+  test('Read product', async () => {
     const res = await rq({
       method: 'GET',
       url: '/products',
@@ -78,6 +78,7 @@ describe('Core API - Basic', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveLength(1);
     expect(res.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -89,7 +90,7 @@ describe('Core API - Basic', () => {
     res.body.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
-  test('Update Products', async () => {
+  test('Update product', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
@@ -107,7 +108,7 @@ describe('Core API - Basic', () => {
     data.products[0] = res.body;
   });
 
-  test('Delete Products', async () => {
+  test('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
       url: `/products/${data.products[0].id}`,

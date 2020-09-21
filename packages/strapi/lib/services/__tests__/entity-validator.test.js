@@ -33,12 +33,6 @@ describe('Entity validator', () => {
       });
 
       it('Returns data on valid input', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -56,12 +50,6 @@ describe('Entity validator', () => {
       });
 
       it('Returns casted data when possible', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -172,16 +160,11 @@ describe('Entity validator', () => {
       });
 
       test('Allows empty strings even when required', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
               type: 'string',
+              required: true,
             },
           },
         };
@@ -195,12 +178,6 @@ describe('Entity validator', () => {
       });
 
       test('Assign default values', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -238,6 +215,32 @@ describe('Entity validator', () => {
           },
         });
       });
+
+      test("Don't assign default value if empty string", async () => {
+        const model = {
+          attributes: {
+            title: {
+              type: 'string',
+              required: true,
+              default: 'default',
+            },
+            content: {
+              type: 'string',
+              default: 'default',
+            },
+          },
+        };
+
+        await expect(
+          entityValidator.validateEntityCreation(model, {
+            title: '',
+            content: '',
+          })
+        ).resolves.toMatchObject({
+          title: '',
+          content: '',
+        });
+      });
     });
   });
 
@@ -271,12 +274,6 @@ describe('Entity validator', () => {
       });
 
       it('Returns data on valid input', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -294,12 +291,6 @@ describe('Entity validator', () => {
       });
 
       it('Returns casted data when possible', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -323,12 +314,6 @@ describe('Entity validator', () => {
       });
 
       test('Does not throws on required not respected', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -354,12 +339,6 @@ describe('Entity validator', () => {
 
     describe('String validator', () => {
       test('Does not throws on min length not respected', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -405,12 +384,6 @@ describe('Entity validator', () => {
       });
 
       test('Allows empty strings even when required', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -428,12 +401,6 @@ describe('Entity validator', () => {
       });
 
       test('Assign default values', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -471,6 +438,36 @@ describe('Entity validator', () => {
             foo: 1,
             bar: 2,
           },
+        });
+      });
+
+      test("Don't assign default value if empty string", async () => {
+        const model = {
+          attributes: {
+            title: {
+              type: 'string',
+              required: true,
+              default: 'default',
+            },
+            content: {
+              type: 'string',
+              default: 'default',
+            },
+          },
+        };
+
+        await expect(
+          entityValidator.validateEntityCreation(
+            model,
+            {
+              title: '',
+              content: '',
+            },
+            { isDraft: true }
+          )
+        ).resolves.toMatchObject({
+          title: '',
+          content: '',
         });
       });
     });

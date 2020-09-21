@@ -109,6 +109,7 @@ describe('CM API - Basic + draftAndPublish', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveLength(2);
     expect(res.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -140,7 +141,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     data.productsWithDP[0] = res.body;
   });
 
-  test('Update Products + cannot overwrite published_at', async () => {
+  test('Update product + cannot overwrite published_at', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',

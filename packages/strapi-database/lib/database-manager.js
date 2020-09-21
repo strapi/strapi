@@ -125,16 +125,17 @@ class DatabaseManager {
   }
 
   getModelsByAttribute(attr) {
-    let models = [];
     if (attr.type === 'component') {
-      models.push(this.getModel(attr.component));
-    } else if (attr.type === 'dynamiczone') {
-      models = attr.components.map(compoName => this.getModel(compoName));
-    } else if (attr.model || attr.collection) {
-      models.push(this.getModelByAssoc(attr));
+      return [this.getModel(attr.component)];
+    }
+    if (attr.type === 'dynamiczone') {
+      return attr.components.map(compoName => this.getModel(compoName));
+    }
+    if (attr.model || attr.collection) {
+      return [this.getModelByAssoc(attr)];
     }
 
-    return models;
+    return [];
   }
 
   getModelsByPluginName(pluginName) {

@@ -61,7 +61,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     await modelsUtils.deleteContentTypes(['product-with-compo-and-dp']);
   }, 60000);
 
-  test('Create Products with compo', async () => {
+  test('Create product with compo', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
@@ -82,7 +82,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     data.productsWithCompoAndDP.push(res.body);
   });
 
-  test('Read Products with compo', async () => {
+  test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
       url: '/product-with-compo-and-dps',
@@ -90,14 +90,14 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBe(1);
+    expect(res.body).toHaveLength(1);
     expect(res.body[0]).toMatchObject(data.productsWithCompoAndDP[0]);
     res.body.forEach(p => {
       expect(p.published_at).toBeISODate();
     });
   });
 
-  test('Update Products with compo', async () => {
+  test('Update product with compo', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
@@ -119,7 +119,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     data.productsWithCompoAndDP[0] = res.body;
   });
 
-  test('Delete Products with compo', async () => {
+  test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
       url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
@@ -133,7 +133,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
   });
 
   describe('validation', () => {
-    test('Cannot create Products with compo - compo required', async () => {
+    test('Cannot create product with compo - compo required', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -148,7 +148,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       expect(_.get(res, 'body.data.errors.compo.0')).toBe('compo must be defined.');
     });
 
-    test('Cannot create Products with compo - minLength', async () => {
+    test('Cannot create product with compo - minLength', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -169,7 +169,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       );
     });
 
-    test('Cannot create Products with compo - maxLength', async () => {
+    test('Cannot create product with compo - maxLength', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -190,7 +190,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       );
     });
 
-    test('Cannot create Products with compo - required', async () => {
+    test('Cannot create product with compo - required', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',

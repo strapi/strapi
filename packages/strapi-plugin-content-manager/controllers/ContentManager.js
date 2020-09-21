@@ -205,6 +205,8 @@ module.exports = {
     const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
 
     await strapi.entityValidator.validateEntityCreation(modelDef, writableData, { isDraft: true });
+    const isDraft = contentTypesUtils.hasDraftAndPublish(modelDef);
+    await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
 
     try {
       const result = await contentManagerService.create(
@@ -259,14 +261,12 @@ module.exports = {
 
     const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
 
-    const existingData = await contentManagerService.fetch(model, id);
-
-    if (!existingData) {
+    if (!entity) {
       ctx.body = null;
       return;
     }
 
-    const isDraft = contentTypesUtils.isDraft(existingData, modelDef);
+    const isDraft = contentTypesUtils.isDraft(entity, modelDef);
     await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
 
     try {
