@@ -261,11 +261,6 @@ module.exports = {
 
     const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
 
-    if (!entity) {
-      ctx.body = null;
-      return;
-    }
-
     const isDraft = contentTypesUtils.isDraft(entity, modelDef);
     await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
 
