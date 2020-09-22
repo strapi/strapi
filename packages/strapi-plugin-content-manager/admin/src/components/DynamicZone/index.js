@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
@@ -116,6 +116,12 @@ const DynamicZone = ({
         return cats;
       }, []);
   }, [dynamicZoneAvailableComponents, getDynamicComponent]);
+
+  useEffect(() => {
+    if (dynamicComponentCategories.length === 1) {
+      setIndexCategory(0);
+    }
+  }, [dynamicComponentCategories]);
 
   const metas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
