@@ -118,7 +118,7 @@ function LeftMenu({ wait }) {
               <p style={{ justifyContent: 'normal' }}>
                 {obj.title}&nbsp;
                 <span style={{ fontStyle: 'italic', textTransform: 'none' }}>
-                  ({formatMessage({ id: getTrad('from') })}): : {obj.plugin})
+                  ({formatMessage({ id: getTrad('from') })}: {obj.plugin})
                 </span>
               </p>
             ),
