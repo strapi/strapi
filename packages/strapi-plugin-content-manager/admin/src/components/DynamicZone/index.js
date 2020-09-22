@@ -5,9 +5,9 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Arrow } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Collapse } from 'reactstrap';
 import pluginId from '../../pluginId';
 import useEditView from '../../hooks/useEditView';
-import DynamicComponentCard from '../DynamicComponentCard';
 import FieldComponent from '../FieldComponent';
 import NotAllowedInput from '../NotAllowedInput';
 import connect from './utils/connect';
@@ -20,6 +20,7 @@ import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Label from './Label';
 import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
+import CategoryItem from './CategoryItem';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -41,17 +42,25 @@ const DynamicZone = ({
   dynamicDisplayedComponents,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [indexCategory, setIndexCategory] = useState(-1);
   const { components } = useEditView();
+
+  const getDynamicComponent = useCallback(
+    componentUid => {
+      const component = components.find(compo => compo.uid === componentUid);
+
+      return component;
+    },
+    [components]
+  );
 
   const getDynamicComponentSchemaData = useCallback(
     componentUid => {
-      const component = components.find(compo => compo.uid === componentUid);
-      const { schema } = component;
+      const { schema } = getDynamicComponent(componentUid);
 
       return schema;
     },
-    [components]
+    [getDynamicComponent]
   );
 
   const getDynamicComponentInfos = useCallback(
@@ -77,6 +86,36 @@ const DynamicZone = ({
     () => get(layout, ['schema', 'attributes', name, 'components'], []),
     [layout, name]
   );
+
+  const dynamicComponentCategories = useMemo(() => {
+    const categories = dynamicZoneAvailableComponents.reduce((cats, componentUid) => {
+      const {
+        category,
+        schema: { info },
+      } = getDynamicComponent(componentUid);
+
+      if (!cats[category]) {
+        cats[category] = [];
+      }
+      cats[category].push({
+        componentUid,
+        info,
+      });
+
+      return cats;
+    }, {});
+
+    return Object.keys(categories)
+      .sort()
+      .reduce((cats, cat) => {
+        cats.push({
+          category: cat,
+          components: categories[cat],
+        });
+
+        return cats;
+      }, []);
+  }, [dynamicZoneAvailableComponents, getDynamicComponent]);
 
   const metas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
@@ -201,32 +240,40 @@ const DynamicZone = ({
               values={{ componentName: name }}
             />
           </div>
-          <ComponentsPicker isOpen={isOpen}>
-            <div>
-              <p className="componentPickerTitle">
-                <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
-              </p>
-              <div className="componentsList">
-                {dynamicZoneAvailableComponents.map(componentUid => {
-                  const { icon, name: friendlyName } = getDynamicComponentInfos(componentUid);
-
-                  return (
-                    <DynamicComponentCard
-                      key={componentUid}
-                      componentUid={componentUid}
-                      friendlyName={friendlyName}
-                      icon={icon}
-                      onClick={() => {
-                        setIsOpen(false);
-                        const shouldCheckErrors = hasError;
-                        addComponentToDynamicZone(name, componentUid, shouldCheckErrors);
-                      }}
-                    />
-                  );
-                })}
+          <Collapse isOpen={isOpen}>
+            <ComponentsPicker>
+              <div>
+                <p className="componentPickerTitle">
+                  <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
+                </p>
+                <div className="categoriesList">
+                  {dynamicComponentCategories.map(({ category, components }, index) => {
+                    return (
+                      <CategoryItem
+                        key={category}
+                        category={category}
+                        components={components}
+                        isOpen={indexCategory === index}
+                        isFirst={index === 0}
+                        onClickToggle={() => {
+                          if (index === indexCategory) {
+                            setIndexCategory(-1);
+                          } else {
+                            setIndexCategory(index);
+                          }
+                        }}
+                        onClickComponent={componentUid => {
+                          setIsOpen(false);
+                          const shouldCheckErrors = hasError;
+                          addComponentToDynamicZone(name, componentUid, shouldCheckErrors);
+                        }}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </ComponentsPicker>
+            </ComponentsPicker>
+          </Collapse>
         </Wrapper>
       ) : (
         <BaselineAlignement top="9px" />

@@ -3,20 +3,12 @@ import styled from 'styled-components';
 /* eslint-disable indent */
 const ComponentsPicker = styled.div`
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.2s ease-out;
 
   > div {
     margin-top: 15px;
     padding: 23px 18px 21px 18px;
     background-color: #f2f3f4;
   }
-
-  ${({ isOpen }) =>
-    isOpen &&
-    `
-    max-height: 260px;
-  `}
 
   .componentPickerTitle {
     margin-bottom: 15px;
@@ -27,7 +19,7 @@ const ComponentsPicker = styled.div`
   }
   .componentsList {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
   }
 `;
 
