@@ -83,6 +83,7 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "URL для переадресації, щоб додати до конфігурації додатку в Discord",
   "PopUpForm.Providers.enabled.description": "Якщо вимкнуто, користувачі не зможуть вікористати цей провайдер.",
   "PopUpForm.Providers.enabled.label": "Увімкнути",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "URL для переадресації, щоб додати до конфігурації додатку в Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "URL для переадресації, щоб додати до конфігурації додатку в GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "URL для переадресації, щоб додати до конфігурації додатку в Google",

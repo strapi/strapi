@@ -78,6 +78,7 @@
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Wenn deaktiviert, kann diese Methode nicht verwendet werden.",
   "PopUpForm.Providers.enabled.label": "Aktivieren",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Discord-App gesetzt wird",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Facebook-App gesetzt wird",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Github-App gesetzt wird",

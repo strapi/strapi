@@ -80,6 +80,7 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Discord приложения",
   "PopUpForm.Providers.enabled.description": "Если отключено, пользователи не смогут использовать этот провайдер.",
   "PopUpForm.Providers.enabled.label": "Включить",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Facebook приложения",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки GitHub приложения",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Google приложения",

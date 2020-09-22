@@ -79,6 +79,7 @@
   "PopUpForm.Providers.callback.placeholder": "METİN",
   "PopUpForm.Providers.enabled.description": "Devre dışı bırakıldıysa kullanıcılar bu sağlayıcıyı kullanamaz.",
   "PopUpForm.Providers.enabled.label": "Etkinleştirme",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebook uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "GitHub uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Google uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",

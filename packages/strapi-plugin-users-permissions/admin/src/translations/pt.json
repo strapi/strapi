@@ -78,6 +78,7 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de Discord",
   "PopUpForm.Providers.enabled.description": "Se desativado, os utilizadores não conseguirão utilizar este serviço de autenticação.",
   "PopUpForm.Providers.enabled.label": "Ativar",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação do Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação da Google",

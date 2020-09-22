@@ -81,6 +81,7 @@
   "PopUpForm.Providers.callback.placeholder": "TEKST",
   "PopUpForm.Providers.enabled.description": "W przypadku wyłączenia, użytkownicy nie będą mogli skorzystać z tego dostawcy.",
   "PopUpForm.Providers.enabled.label": "Włączony",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Google",

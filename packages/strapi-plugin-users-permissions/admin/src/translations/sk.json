@@ -81,6 +81,7 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "URL presmerovania, ktorú je potrebné pridať v nastaveniach aplikácie Discord",
   "PopUpForm.Providers.enabled.description": "Ak je zakázané, používatelia nebudú môcť použiť tohto poskytovateľa.",
   "PopUpForm.Providers.enabled.label": "Povoliť",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "URL presmerovania, ktorú je potrebné pridať v nastaveniach aplikácie Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "URL presmerovania, ktorú je potrebné pridať v nastaveniach aplikácie Github",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "URL presmerovania, ktorú je potrebné pridať v nastaveniach aplikácie Google",

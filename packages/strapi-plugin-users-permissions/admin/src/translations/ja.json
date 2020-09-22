@@ -78,6 +78,7 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Discordアプリケーションの設定で追加するリダイレクトURL",
   "PopUpForm.Providers.enabled.description": "無効にすると、ユーザーはこのプロバイダを使用できなくなります。",
   "PopUpForm.Providers.enabled.label": "有効にする",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebookアプリケーション設定で追加するリダイレクトURL",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "GitHubアプリケーションの設定で追加するリダイレクトURL",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Googleアプリケーション設定で追加するリダイレクトURL",

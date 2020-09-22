@@ -73,6 +73,7 @@
   "PopUpForm.Providers.callback.placeholder": "نص",
   "PopUpForm.Providers.enabled.description": "في حالة التعطيل ، لن يتمكن المستخدمون من استخدام هذا الموفر.",
   "PopUpForm.Providers.enabled.label": "مفعل",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Github",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Google",

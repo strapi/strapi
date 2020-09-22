@@ -72,6 +72,7 @@
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Se disabilitato, gli utenti non potranno usare questo provider.",
   "PopUpForm.Providers.enabled.label": "Abilita",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Github",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Google",
