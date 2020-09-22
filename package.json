@@ -39,7 +39,7 @@
     "request": "^2.87.0",
     "request-promise-native": "^1.0.7",
     "rimraf": "3.0.0",
-    "snyk": "^1.99.0",
+    "snyk": "^1.399.1",
     "stylelint": "10.1.0",
     "stylelint-config-recommended": "3.0.0",
     "stylelint-config-styled-components": "0.1.1",
