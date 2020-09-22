@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
+import { Text } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import CustomLink from '../../components/CustomLink';
@@ -117,9 +118,15 @@ function LeftMenu({ wait }) {
             Component: () => (
               <p style={{ justifyContent: 'normal' }}>
                 {obj.title}&nbsp;
-                <span style={{ fontStyle: 'italic', textTransform: 'none' }}>
+                <Text
+                  as="span"
+                  // This is needed here
+                  style={{ fontStyle: 'italic' }}
+                  fontWeight="inherit"
+                  lineHeight="inherit"
+                >
                   ({formatMessage({ id: getTrad('from') })}: {obj.plugin})
-                </span>
+                </Text>
               </p>
             ),
           };
