@@ -16,7 +16,7 @@
     "highlight.js": "^10.1.1",
     "immutable": "^3.8.2",
     "lodash": "4.17.19",
-    "markdown-it": "^11.0.0",
+    "markdown-it": "^11.0.1",
     "markdown-it-abbr": "^1.0.4",
     "markdown-it-container": "^3.0.0",
     "markdown-it-deflist": "^2.0.3",
