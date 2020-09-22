@@ -174,7 +174,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
     try {
       await apiHandler.clear(uid);
 
-      // generate new api squeleton
+      // generate new api skeleton
       await generateAPI({
         name: updatedContentType.schema.info.name,
         kind: updatedContentType.schema.kind,
