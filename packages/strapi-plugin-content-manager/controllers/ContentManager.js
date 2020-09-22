@@ -186,6 +186,7 @@ module.exports = {
       request: { body },
     } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const modelDef = strapi.getModel(model);
 
     const pm = strapi.admin.services.permission.createPermissionsManager(
       userAbility,
@@ -201,11 +202,17 @@ module.exports = {
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
+    const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
+
+    await strapi.entityValidator.validateEntityCreation(modelDef, writableData, { isDraft: true });
+    const isDraft = contentTypesUtils.hasDraftAndPublish(modelDef);
+    await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
+
     try {
       const result = await contentManagerService.create(
         {
           data: {
-            ...sanitize(data),
+            ...sanitize(writableData),
             [CREATED_BY_ATTRIBUTE]: user.id,
             [UPDATED_BY_ATTRIBUTE]: user.id,
           },
@@ -239,6 +246,7 @@ module.exports = {
     } = ctx;
 
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const modelDef = strapi.getModel(model);
 
     const { pm, entity } = await findEntityAndCheckPermissions(
       userAbility,
@@ -251,10 +259,10 @@ module.exports = {
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
-    const writableData = _.omit(
-      data,
-      contentTypesUtils.getNonWritableAttributes(strapi.db.getModel(model))
-    );
+    const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
+
+    const isDraft = contentTypesUtils.isDraft(entity, modelDef);
+    await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
 
     try {
       const result = await contentManagerService.edit(
@@ -337,7 +345,7 @@ module.exports = {
       id
     );
 
-    await strapi.entityValidator.validateEntity(strapi.getModel(model), entity);
+    await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), entity);
 
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       return ctx.badRequest('Already published');

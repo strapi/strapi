@@ -25,7 +25,7 @@ const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
-const createEntityValidator = require('./services/entity-validator');
+const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const ee = require('./utils/ee');
 
@@ -310,9 +310,7 @@ class Strapi {
 
     await this.startWebhooks();
 
-    this.entityValidator = createEntityValidator({
-      strapi: this,
-    });
+    this.entityValidator = entityValidator;
 
     this.entityService = createEntityService({
       db: this.db,

@@ -1,7 +1,7 @@
 'use strict';
 
 const createEntityService = require('../entity-service');
-const createEntityValidator = require('../entity-validator');
+const entityValidator = require('../entity-validator');
 const { EventEmitter } = require('events');
 
 describe('Entity service', () => {
@@ -72,14 +72,6 @@ describe('Entity service', () => {
       let instance;
 
       beforeAll(() => {
-        const strapi = {
-          errors: {
-            badRequest: jest.fn((_, errors) => errors),
-          },
-        };
-
-        const entityValidator = createEntityValidator({ strapi });
-
         const fakeQuery = {
           count: jest.fn(() => 0),
           create: jest.fn(data => data),

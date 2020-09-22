@@ -1,20 +1,16 @@
 'use strict';
 
-const createEntityValidator = require('../entity-validator');
+const entityValidator = require('../entity-validator');
 
 describe('Entity validator', () => {
   describe('Published input', () => {
     describe('General Errors', () => {
       it('Throws a badRequest error on invalid input', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
           },
-        });
+        };
 
         const model = {
           attributes: {
@@ -28,22 +24,15 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntity(model, input).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', expect.any(Object));
+        await entityValidator.validateEntityCreation(model, input).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith(
+            'ValidationError',
+            expect.any(Object)
+          );
         });
       });
 
       it('Returns data on valid input', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -56,21 +45,11 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input);
+        const data = await entityValidator.validateEntityCreation(model, input);
         expect(data).toEqual(input);
       });
 
       it('Returns casted data when possible', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -86,7 +65,7 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input);
+        const data = await entityValidator.validateEntityCreation(model, input);
         expect(data).toEqual({
           title: 'Test',
           number: 123,
@@ -94,15 +73,11 @@ describe('Entity validator', () => {
       });
 
       test('Throws on required not respected', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
           },
-        });
+        };
 
         const model = {
           attributes: {
@@ -115,14 +90,14 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntity(model, {}).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
+        await entityValidator.validateEntityCreation(model, {}).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
             errors: { title: [expect.stringMatching('must be defined')] },
           });
         });
 
-        await entityValidator.validateEntity(model, { title: null }).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
+        await entityValidator.validateEntityCreation(model, { title: null }).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
             errors: { title: [expect.stringMatching('must be defined')] },
           });
         });
@@ -131,15 +106,11 @@ describe('Entity validator', () => {
 
     describe('String validator', () => {
       test('Throws on min length not respected', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
           },
-        });
+        };
 
         const model = {
           attributes: {
@@ -154,23 +125,19 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntity(model, input).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
+        await entityValidator.validateEntityCreation(model, input).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
             errors: { title: [expect.stringMatching('at least 10 characters')] },
           });
         });
       });
 
       test('Throws on max length not respected', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
           },
-        });
+        };
 
         const model = {
           attributes: {
@@ -185,28 +152,19 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntity(model, input).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
+        await entityValidator.validateEntityCreation(model, input).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
             errors: { title: [expect.stringMatching('at most 2 characters')] },
           });
         });
       });
 
       test('Allows empty strings even when required', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
               type: 'string',
+              required: true,
             },
           },
         };
@@ -215,21 +173,11 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input);
+        const data = await entityValidator.validateEntityCreation(model, input);
         expect(data).toEqual(input);
       });
 
       test('Assign default values', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -257,7 +205,7 @@ describe('Entity validator', () => {
           },
         };
 
-        await expect(entityValidator.validateEntity(model, {})).resolves.toMatchObject({
+        await expect(entityValidator.validateEntityCreation(model, {})).resolves.toMatchObject({
           title: 'New',
           type: 'test',
           testDate: '2020-04-01T04:00:00.000Z',
@@ -267,21 +215,43 @@ describe('Entity validator', () => {
           },
         });
       });
+
+      test("Don't assign default value if empty string", async () => {
+        const model = {
+          attributes: {
+            title: {
+              type: 'string',
+              required: true,
+              default: 'default',
+            },
+            content: {
+              type: 'string',
+              default: 'default',
+            },
+          },
+        };
+
+        await expect(
+          entityValidator.validateEntityCreation(model, {
+            title: '',
+            content: '',
+          })
+        ).resolves.toMatchObject({
+          title: '',
+          content: '',
+        });
+      });
     });
   });
 
   describe('Draft input', () => {
     describe('General Errors', () => {
       it('Throws a badRequest error on invalid input', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
           },
-        });
+        };
 
         const model = {
           attributes: {
@@ -295,22 +265,15 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntity(model, input, { isDraft: true }).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', expect.any(Object));
+        await entityValidator.validateEntityCreation(model, input, { isDraft: true }).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith(
+            'ValidationError',
+            expect.any(Object)
+          );
         });
       });
 
       it('Returns data on valid input', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -323,21 +286,11 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input, { isDraft: true });
+        const data = await entityValidator.validateEntityCreation(model, input, { isDraft: true });
         expect(data).toEqual(input);
       });
 
       it('Returns casted data when possible', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -353,7 +306,7 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input, { isDraft: true });
+        const data = await entityValidator.validateEntityCreation(model, input, { isDraft: true });
         expect(data).toEqual({
           title: 'Test',
           number: 123,
@@ -361,16 +314,6 @@ describe('Entity validator', () => {
       });
 
       test('Does not throws on required not respected', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -382,26 +325,20 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        let data = await entityValidator.validateEntity(model, {}, { isDraft: true });
+        let data = await entityValidator.validateEntityCreation(model, {}, { isDraft: true });
         expect(data).toEqual({});
 
-        data = await entityValidator.validateEntity(model, { title: null }, { isDraft: true });
+        data = await entityValidator.validateEntityCreation(
+          model,
+          { title: null },
+          { isDraft: true }
+        );
         expect(data).toEqual({ title: null });
       });
     });
 
     describe('String validator', () => {
       test('Does not throws on min length not respected', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -415,20 +352,16 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input, { isDraft: true });
+        const data = await entityValidator.validateEntityCreation(model, input, { isDraft: true });
         expect(data).toEqual(input);
       });
 
       test('Throws on max length not respected', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
           },
-        });
+        };
 
         const model = {
           attributes: {
@@ -443,24 +376,14 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntity(model, input, { isDraft: true }).catch(() => {
-          expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
+        await entityValidator.validateEntityCreation(model, input, { isDraft: true }).catch(() => {
+          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
             errors: { title: [expect.stringMatching('at most 2 characters')] },
           });
         });
       });
 
       test('Allows empty strings even when required', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -473,21 +396,11 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        const data = await entityValidator.validateEntity(model, input, { isDraft: true });
+        const data = await entityValidator.validateEntityCreation(model, input, { isDraft: true });
         expect(data).toEqual(input);
       });
 
       test('Assign default values', async () => {
-        const errors = {
-          badRequest: jest.fn(),
-        };
-
-        const entityValidator = createEntityValidator({
-          strapi: {
-            errors,
-          },
-        });
-
         const model = {
           attributes: {
             title: {
@@ -516,7 +429,7 @@ describe('Entity validator', () => {
         };
 
         await expect(
-          entityValidator.validateEntity(model, {}, { isDraft: true })
+          entityValidator.validateEntityCreation(model, {}, { isDraft: true })
         ).resolves.toMatchObject({
           title: 'New',
           type: 'test',
@@ -525,6 +438,36 @@ describe('Entity validator', () => {
             foo: 1,
             bar: 2,
           },
+        });
+      });
+
+      test("Don't assign default value if empty string", async () => {
+        const model = {
+          attributes: {
+            title: {
+              type: 'string',
+              required: true,
+              default: 'default',
+            },
+            content: {
+              type: 'string',
+              default: 'default',
+            },
+          },
+        };
+
+        await expect(
+          entityValidator.validateEntityCreation(
+            model,
+            {
+              title: '',
+              content: '',
+            },
+            { isDraft: true }
+          )
+        ).resolves.toMatchObject({
+          title: '',
+          content: '',
         });
       });
     });

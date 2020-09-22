@@ -39,7 +39,7 @@ const getTimestamps = model => {
 
   return timestamps;
 };
-const getNonWritableAttributes = model => {
+const getNonWritableAttributes = (model = {}) => {
   const nonWritableAttributes = _.reduce(
     model.attributes,
     (acc, attr, attrName) => (attr.writable === false ? acc.concat(attrName) : acc),
