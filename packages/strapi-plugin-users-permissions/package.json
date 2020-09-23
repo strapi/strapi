@@ -12,6 +12,12 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "@buffetjs/core": "3.3.0-rc.4",
+    "@buffetjs/custom": "3.3.0-rc.4",
+    "@buffetjs/hooks": "3.3.0-rc.4",
+    "@buffetjs/icons": "3.3.0-rc.4",
+    "@buffetjs/styles": "3.3.0-rc.4",
+    "@buffetjs/utils": "3.3.0-rc.4",
     "@purest/providers": "^1.0.1",
     "bcryptjs": "^2.4.3",
     "grant-koa": "5.2.0",
