@@ -238,9 +238,15 @@ class Strapi {
       }
     };
 
-    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), err =>
-      onListen(err).catch(err => this.stopWithError(err))
-    );
+    const listenSocket = this.config.get('server.socket');
+    const listenErrHandler = err => onListen(err).catch(err => this.stopWithError(err));
+
+    if (listenSocket) {
+      this.server.listen(listenSocket, listenErrHandler);
+    } else {
+      this.server.listen(this.config.get('server.port'), this.config.get('server.host'), listenErrHandler);
+    }
+
   }
 
   stopWithError(err, customMessage) {
