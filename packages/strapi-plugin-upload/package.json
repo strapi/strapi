@@ -12,12 +12,12 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.0-rc.4",
-    "@buffetjs/custom": "3.3.0-rc.4",
-    "@buffetjs/hooks": "3.3.0-rc.4",
-    "@buffetjs/icons": "3.3.0-rc.4",
-    "@buffetjs/styles": "3.3.0-rc.4",
-    "@buffetjs/utils": "3.3.0-rc.4",
+    "@buffetjs/core": "3.3.0-rc.5",
+    "@buffetjs/custom": "3.3.0-rc.5",
+    "@buffetjs/hooks": "3.3.0-rc.5",
+    "@buffetjs/icons": "3.3.0-rc.5",
+    "@buffetjs/styles": "3.3.0-rc.5",
+    "@buffetjs/utils": "3.3.0-rc.5",
     "byte-size": "^6.2.0",
     "cropperjs": "^1.5.6",
     "immer": "^7.0.8",

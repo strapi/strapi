@@ -126,7 +126,7 @@ function LeftMenu({ wait }) {
                   fontWeight="inherit"
                   lineHeight="inherit"
                 >
-                  ({formatMessage({ id: getTrad('from') })}: {obj.plugin})
+                  ({formatMessage({ id: getTrad('from') })}: {obj.plugin})&nbsp;
                 </Text>
               </p>
             ),
