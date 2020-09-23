@@ -137,7 +137,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 - [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
-- [GitHub Discussions](https://github.com/strapi/strapi/discussions) (Questions and Discussions)
+- [Community Forum](https://forum.strapi.io) (Questions and Discussions)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)

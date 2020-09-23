@@ -148,7 +148,7 @@ Before submitting an issue you need to make sure:
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to [the official Strapi documentation](http://strapi.io).
   - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
-  - Ask a question on [Github Discussions](https://github.com/strapi/strapi/discussions).
+  - Ask a question on [our community forum](https://forum.strapi.io).
 - Your issue title is concise, on-topic and polite.
 - You can and do provide steps to reproduce your issue.
 - You have tried all the following (if relevant) and your issue remains:
