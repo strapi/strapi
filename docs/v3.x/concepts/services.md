@@ -139,7 +139,7 @@ module.exports = {
    */
 
   async create(data, { files } = {}) {
-    const validData = await entityValidator.validateEntity(strapi.models.restaurant, data);
+    const validData = await strapi.entityValidator.validateEntity(strapi.models.restaurant, data);
     const entry = await strapi.query('restaurant').create(validData);
 
     if (files) {
@@ -171,8 +171,8 @@ module.exports = {
    */
 
   async update(params, data, { files } = {}) {
-    const validData = await entityValidator.validateEntity(strapi.models.restaurant, data);
-    const entry = await strapi.query('restaurant').create(validData);
+    const validData = await strapi.entityValidator.validateEntityUpdate(strapi.models.restaurant, data);
+    const entry = await strapi.query('restaurant').update(params, validData);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
