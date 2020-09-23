@@ -3,6 +3,7 @@
   "dependencies": {},
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@swc-node/jest": "^0.3.4",
     "@testing-library/jest-dom": "^5.8.0",
     "@testing-library/react": "^11.0.2",
     "@testing-library/react-hooks": "^3.2.1",
@@ -93,7 +94,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

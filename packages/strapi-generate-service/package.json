@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-service",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "Generate a service for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "lodash": "4.17.19",
-    "strapi-utils": "3.1.4"
+    "strapi-utils": "3.1.5"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -40,7 +40,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

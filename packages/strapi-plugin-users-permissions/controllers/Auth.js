@@ -294,7 +294,9 @@ module.exports = {
     });
 
     // Find the user by email.
-    const user = await strapi.query('user', 'users-permissions').findOne({ email });
+    const user = await strapi
+      .query('user', 'users-permissions')
+      .findOne({ email: email.toLowerCase() });
 
     // User not found.
     if (!user) {

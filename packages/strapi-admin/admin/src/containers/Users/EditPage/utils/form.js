@@ -28,11 +28,13 @@ const form = {
     label: 'Auth.form.username.label',
     placeholder: 'e.g. John_Doe',
     type: 'text',
+    autoComplete: 'no',
     validations: {},
   },
   password: {
     label: 'Auth.form.password.label',
     type: 'password',
+    autoComplete: 'new-password',
     validations: {},
   },
   confirmPassword: {

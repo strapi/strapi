@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -13,13 +13,13 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-proposal-async-generator-functions": "^7.2.0",
+    "@babel/core": "^7.11.6",
+    "@babel/plugin-proposal-async-generator-functions": "^7.10.5",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/plugin-transform-runtime": "^7.9.0",
-    "@babel/polyfill": "^7.8.7",
+    "@babel/polyfill": "^7.11.5",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "@babel/runtime": "^7.9.2",
@@ -39,7 +39,7 @@
     "axios": "^0.19.2",
     "babel-loader": "^8.1.0",
     "bcryptjs": "^2.4.3",
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^4.5.2",
     "chalk": "^2.4.2",
     "chokidar": "^3.2.1",
     "classnames": "^2.2.6",
@@ -47,7 +47,7 @@
     "css-loader": "^2.1.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "execa": "^1.0.0",
-    "file-loader": "^3.0.1",
+    "file-loader": "^6.1.0",
     "font-awesome": "^4.7.0",
     "formik": "^2.1.4",
     "friendly-errors-webpack-plugin": "^1.7.0",
@@ -76,7 +76,7 @@
     "react-dnd-html5-backend": "^10.0.2",
     "react-dom": "^16.9.0",
     "react-fast-compare": "^3.2.0",
-    "react-helmet": "^6.0.0",
+    "react-helmet": "^6.1.0",
     "react-intl": "4.5.0",
     "react-is": "^16.12.0",
     "react-loadable": "^5.5.0",
@@ -94,8 +94,8 @@
     "reselect": "^4.0.0",
     "sanitize.css": "^4.1.0",
     "sift": "13.1.10",
-    "strapi-helper-plugin": "3.1.4",
-    "strapi-utils": "3.1.4",
+    "strapi-helper-plugin": "3.1.5",
+    "strapi-utils": "3.1.5",
     "style-loader": "^0.23.1",
     "styled-components": "^5.0.0",
     "terser-webpack-plugin": "^1.2.3",
@@ -104,7 +104,7 @@
     "webpack": "^4.40.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.4.1",
-    "webpackbar": "^3.2.0",
+    "webpackbar": "^4.0.0",
     "yup": "^0.27.0"
   },
   "author": {
@@ -120,7 +120,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

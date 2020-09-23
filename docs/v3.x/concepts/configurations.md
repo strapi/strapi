@@ -173,6 +173,7 @@ module.exports = ({ env }) => ({
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `host` | Host name | string | `localhost` |
 | `port` | Port on which the server should be running. | integer | `1337` |
+| `socket` | Listens on a socket. Host and port are cosmetic when this option is provided and likewise use `url` to generate proper urls when using this option. This option is useful for running a server without exposing a port and using proxy servers on the same machine (e.g [Heroku nginx buildpack](https://github.com/heroku/heroku-buildpack-nginx#requirements-proxy-mode)) | string \| integer | `/tmp/nginx.socket` |
 | `emitErrors` | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services. | boolean | `false` |
 | `url` | Public url of the server. Required for many different features (ex: reset password, third login providers etc.). Also enables proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. An absolute url is however **recommended**.| string | `''` |
 |`proxy`| Set the koa variable `app.proxy`. When `true`, proxy header fields will be trusted. |boolean|`false`|
@@ -347,7 +348,7 @@ You can find [supported database and versions](../installation/cli.md#databases)
       - `options` (object): List of additional options used by the connector.
       - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
       - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
-      - `ssl` (boolean): For ssl database connection.
+      - `ssl` (boolean/object): For ssl database connection. Object is used to pass certificate files as strings.
     - `options` Options used for database connection.
       - `debug` (boolean): Show database exchanges and errors.
       - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
@@ -412,6 +413,18 @@ module.exports = ({ env }) => ({
     },
   },
 });
+```
+
+Please note that if you need client side SSL CA verification you will need to use the `ssl:{}` object with the fs module to convert your CA certificate to a string. You can see an example below:
+
+```js
+settings: {
+  client: 'postgres',
+  ...
+  ssl: {
+    ca: fs.readFileSync(`${__dirname}/path/to/your/ca-certificate.crt`).toString(),
+  }
+},
 ```
 
 :::
