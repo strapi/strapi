@@ -97,7 +97,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
       {
         requireFetch: false,
         tableName: definition.collectionName,
-        timestamps: definition.options.timestamps,
+        hasTimestamps: definition.options.timestamps,
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
           if (definition.attributes[current].type && definition.attributes[current].default) {

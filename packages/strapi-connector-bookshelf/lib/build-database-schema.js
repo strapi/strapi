@@ -16,9 +16,9 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   }
 
   // Add created_at and updated_at field if timestamp option is true
-  if (loadedModel.timestamps) {
-    definition.attributes[loadedModel.timestamps[0]] = { type: 'currentTimestamp' };
-    definition.attributes[loadedModel.timestamps[1]] = { type: 'currentTimestamp' };
+  if (loadedModel.hasTimestamps) {
+    definition.attributes[loadedModel.hasTimestamps[0]] = { type: 'currentTimestamp' };
+    definition.attributes[loadedModel.hasTimestamps[1]] = { type: 'currentTimestamp' };
   }
 
   // Equilize tables
@@ -98,9 +98,9 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   }
 
   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
-  if (loadedModel.timestamps) {
-    delete definition.attributes[loadedModel.timestamps[0]];
-    delete definition.attributes[loadedModel.timestamps[1]];
+  if (loadedModel.hasTimestamps) {
+    delete definition.attributes[loadedModel.hasTimestamps[0]];
+    delete definition.attributes[loadedModel.hasTimestamps[1]];
   }
 
   if (draftAndPublishMigrationWay === 'enable') {
