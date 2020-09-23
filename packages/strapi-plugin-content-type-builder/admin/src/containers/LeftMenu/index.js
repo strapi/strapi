@@ -115,11 +115,12 @@ function LeftMenu({ wait }) {
         if (obj.plugin) {
           return {
             ...obj,
-            Component: () => (
+            CustomComponent: () => (
               <p style={{ justifyContent: 'normal' }}>
                 {obj.title}&nbsp;
                 <Text
                   as="span"
+                  ellipsis
                   // This is needed here
                   style={{ fontStyle: 'italic' }}
                   fontWeight="inherit"
