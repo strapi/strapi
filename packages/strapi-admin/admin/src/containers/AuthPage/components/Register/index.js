@@ -20,6 +20,7 @@ const Register = ({
   formErrors,
   inputsPrefix,
   modifiedData,
+  noSignin,
   onChange,
   onSubmit,
   requestError,
@@ -135,15 +136,17 @@ const Register = ({
           </Box>
         </Padded>
       </Section>
-      <AuthLink label="Auth.link.signin" to="/auth/login">
-        <Text fontSize="md">
-          {formatMessage({ id: 'Auth.link.signin.account' })}
-          &nbsp;
-          <Text fontSize="md" color="#0097f7" as="span">
-            {formatMessage({ id: 'Auth.link.signin' })}
+      {!noSignin && (
+        <AuthLink label="Auth.link.signin" to="/auth/login">
+          <Text fontSize="md">
+            {formatMessage({ id: 'Auth.link.signin.account' })}
+            &nbsp;
+            <Text fontSize="md" color="#0097f7" as="span">
+              {formatMessage({ id: 'Auth.link.signin' })}
+            </Text>
           </Text>
-        </Text>
-      </AuthLink>
+        </AuthLink>
+      )}
     </>
   );
 };
@@ -151,6 +154,7 @@ const Register = ({
 Register.defaultProps = {
   fieldsToDisable: [],
   inputsPrefix: '',
+  noSignin: false,
   onSubmit: e => e.preventDefault(),
   requestError: null,
 };
@@ -160,6 +164,7 @@ Register.propTypes = {
   formErrors: PropTypes.object.isRequired,
   inputsPrefix: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,
+  noSignin: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   requestError: PropTypes.object,
