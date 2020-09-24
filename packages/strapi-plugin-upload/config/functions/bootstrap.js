@@ -1,9 +1,6 @@
 'use strict';
-/**
- * Upload plugin bootstrap.
- *
- * It initializes the provider and sets the default settings in db.
- */
+
+const { errorTypes } = require('../../constants');
 
 module.exports = async () => {
   // set plugin store
@@ -31,11 +28,37 @@ module.exports = async () => {
   registerPermissionActions();
 };
 
+const wrapFunctionForErrors = fn => async (...args) => {
+  try {
+    return await fn(...args);
+  } catch (err) {
+    switch (err.type) {
+      case errorTypes.ENTITY_TOO_LARGE:
+        throw strapi.errors.entityTooLarge('FileTooBig', {
+          errors: [
+            {
+              id: 'Upload.status.sizeLimit',
+              message: 'file is bigger than the limit size!',
+            },
+          ],
+        });
+      case errorTypes.UNKNOWN_ERROR:
+      default:
+        strapi.log.error(err);
+        throw strapi.errors.badImplementation();
+    }
+  }
+};
+
 const createProvider = ({ provider, providerOptions }) => {
   try {
     const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
 
-    return Object.assign(Object.create(baseProvider), providerInstance);
+    return Object.assign(Object.create(baseProvider), {
+      ...providerInstance,
+      upload: wrapFunctionForErrors(providerInstance.upload),
+      delete: wrapFunctionForErrors(providerInstance.delete),
+    });
   } catch (err) {
     strapi.log.error(err);
     throw new Error(
