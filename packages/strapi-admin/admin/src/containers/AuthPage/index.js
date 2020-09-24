@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit, upperFirst, pick } from 'lodash';
+import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
@@ -206,7 +206,10 @@ const AuthPage = ({ hasAdmin }) => {
         axios({
           method: 'POST',
           url: 'https://analytics.strapi.io/register',
-          data: pick(modifiedData, ['userInfo.email', 'userInfo.firstname']),
+          data: {
+            email: user.email,
+            username: user.firstname,
+          },
         });
       }
       // Redirect to the homePage
