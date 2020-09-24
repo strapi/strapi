@@ -92,7 +92,7 @@ Use the CLI, and run the following command `strapi generate:model restaurant nam
 
 This will create two files located at `./api/restaurant/models`:
 
-- `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
+- `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
 - `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and life cycle callbacks.
 
 ::: tip
@@ -164,12 +164,15 @@ The options key on the model-json states.
 
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
+- `privateAttributes`: This configuration allows to treat a set of attributes as private, even if they're not actually defined as attributes in the model. Accepts an `Array` of strings. It could be used to remove from API responses timestamps or `_v` when using MongoDB. The set of `privateAttributes` defined in the model are merged with the `privateAttributes` defined in the global Strapi configuration.
+
 **Path —** `User.settings.json`.
 
 ```json
 {
   "options": {
-    "timestamps": true
+    "timestamps": true,
+    "privateAttributes": ["id", "created_at"]
   }
 }
 ```

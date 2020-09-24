@@ -193,6 +193,25 @@ module.exports = ({ env }) => ({
 | `admin.forgotPassword.from` | Sender mail address | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
 | `admin.forgotPassword.replyTo` | Default address or addresses the receiver is asked to reply to | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
 
+## API
+
+**Path —** `./config/api.js`.
+
+```js
+module.exports = ({ env }) => ({
+  responses: {
+    privateAttributes: ['_v', 'id', 'created_at'],
+  },
+});
+```
+
+**Available options**
+
+| Property                      | Description                                                                                                                                                       | Type         | Default |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------- |
+| `responses`                   | Global API response configuration                                                                                                                                 | Object       |         |
+| `responses.privateAttributes` | Set of globally defined attributes to be treated as private. E.g. `_v` when using MongoDb or timestamps like `created_at`, `updated_at` can be treated as private | String array | `[]`    |
+
 ## Functions
 
 The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
