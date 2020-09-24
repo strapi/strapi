@@ -128,6 +128,10 @@ module.exports = {
         link: 'https://strapi.io',
       },
       {
+        text: 'Forum',
+        link: 'https://forum.strapi.io',
+      },
+      {
         text: 'Slack',
         link: 'https://slack.strapi.io',
       },
