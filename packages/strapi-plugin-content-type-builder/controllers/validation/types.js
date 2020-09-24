@@ -50,6 +50,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         multiple: yup.boolean(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         allowedTypes: yup
           .array()
@@ -61,6 +62,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     case 'uid': {
       return {
         required: validators.required,
+        index: yup.boolean(),
         targetField: yup
           .string()
           .oneOf(
@@ -110,6 +112,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.string(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
@@ -120,6 +123,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.string(),
         required: validators.required,
+        index: yup.boolean(),
         minLength: validators.minLength,
         maxLength: validators.maxLength,
       };
@@ -128,6 +132,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
       };
     }
@@ -147,12 +152,14 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         default: yup.string().when('enum', enumVal => yup.string().oneOf(enumVal)),
         enumName: yup.string().test(isValidName),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
       };
     }
     case 'password': {
       return {
         required: validators.required,
+        index: yup.boolean(),
         minLength: validators.minLength,
         maxLength: validators.maxLength,
       };
@@ -161,6 +168,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.string().email(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
@@ -170,6 +178,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.number().integer(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         min: yup.number().integer(),
         max: yup.number().integer(),
@@ -182,6 +191,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .nullable()
           .matches(/^\d*$/),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         min: yup
           .string()
@@ -197,6 +207,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.number(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         min: yup.number(),
         max: yup.number(),
@@ -206,6 +217,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.number(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
         min: yup.number(),
         max: yup.number(),
@@ -217,6 +229,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.string(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
       };
     }
@@ -224,6 +237,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.boolean(),
         required: validators.required,
+        index: yup.boolean(),
         unique: validators.unique,
       };
     }
@@ -231,6 +245,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     case 'component': {
       return {
         required: validators.required,
+        index: yup.boolean(),
         repeatable: yup.boolean(),
         component: yup
           .string()
@@ -258,6 +273,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     case 'dynamiczone': {
       return {
         required: validators.required,
+        index: yup.boolean(),
         components: yup
           .array()
           .of(yup.string().required())
