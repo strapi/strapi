@@ -27,15 +27,19 @@ module.exports = ({ models, target }, ctx) => {
       primaryKeyType: 'string',
     });
 
+    const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
+
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
       definition.attributes['created_by'] = {
         model: 'user',
         plugin: 'admin',
+        private: isPrivate,
       };
 
       definition.attributes['updated_by'] = {
         model: 'user',
         plugin: 'admin',
+        private: isPrivate,
       };
     }
 

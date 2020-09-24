@@ -177,6 +177,18 @@ The options key on the model-json states.
 }
 ```
 
+- `populateCreatorFields`: Configure whether or not the API response should include `created_by` and `updated_by` fields.
+
+**Path —** `Article.settings.json`.
+
+```json
+{
+  "options": {
+    "populateCreatorFields": true
+  }
+}
+```
+
 ## Define the attributes
 
 The following types are currently available:
