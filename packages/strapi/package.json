@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MongoDB, MySQL, MariaDB, PostgreSQL, SQLite",
   "homepage": "http://strapi.io",
   "directories": {
@@ -51,16 +51,16 @@
     "qs": "^6.9.3",
     "resolve-cwd": "^3.0.0",
     "rimraf": "^2.6.2",
-    "strapi-database": "3.1.5",
-    "strapi-generate": "3.1.5",
-    "strapi-generate-api": "3.1.5",
-    "strapi-generate-controller": "3.1.5",
-    "strapi-generate-model": "3.1.5",
-    "strapi-generate-new": "3.1.5",
-    "strapi-generate-plugin": "3.1.5",
-    "strapi-generate-policy": "3.1.5",
-    "strapi-generate-service": "3.1.5",
-    "strapi-utils": "3.1.5"
+    "strapi-database": "3.1.6",
+    "strapi-generate": "3.1.6",
+    "strapi-generate-api": "3.1.6",
+    "strapi-generate-controller": "3.1.6",
+    "strapi-generate-model": "3.1.6",
+    "strapi-generate-new": "3.1.6",
+    "strapi-generate-plugin": "3.1.6",
+    "strapi-generate-policy": "3.1.6",
+    "strapi-generate-service": "3.1.6",
+    "strapi-utils": "3.1.6"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js"
@@ -85,7 +85,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

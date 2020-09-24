@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -13,13 +13,13 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-proposal-async-generator-functions": "^7.2.0",
+    "@babel/core": "^7.11.6",
+    "@babel/plugin-proposal-async-generator-functions": "^7.10.5",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/plugin-transform-runtime": "^7.9.0",
-    "@babel/polyfill": "^7.8.7",
+    "@babel/polyfill": "^7.11.5",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "@babel/runtime": "^7.9.2",
@@ -76,7 +76,7 @@
     "react-dnd-html5-backend": "^10.0.2",
     "react-dom": "^16.9.0",
     "react-fast-compare": "^3.2.0",
-    "react-helmet": "^6.0.0",
+    "react-helmet": "^6.1.0",
     "react-intl": "4.5.0",
     "react-is": "^16.12.0",
     "react-loadable": "^5.5.0",
@@ -94,8 +94,8 @@
     "reselect": "^4.0.0",
     "sanitize.css": "^4.1.0",
     "sift": "13.1.10",
-    "strapi-helper-plugin": "3.1.5",
-    "strapi-utils": "3.1.5",
+    "strapi-helper-plugin": "3.1.6",
+    "strapi-utils": "3.1.6",
     "style-loader": "^0.23.1",
     "styled-components": "^5.0.0",
     "terser-webpack-plugin": "^1.2.3",
@@ -104,7 +104,7 @@
     "webpack": "^4.40.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.4.1",
-    "webpackbar": "^3.2.0",
+    "webpackbar": "^4.0.0",
     "yup": "^0.27.0"
   },
   "author": {
@@ -120,7 +120,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

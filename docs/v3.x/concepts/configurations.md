@@ -173,6 +173,7 @@ module.exports = ({ env }) => ({
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `host` | Host name | string | `localhost` |
 | `port` | Port on which the server should be running. | integer | `1337` |
+| `socket` | Listens on a socket. Host and port are cosmetic when this option is provided and likewise use `url` to generate proper urls when using this option. This option is useful for running a server without exposing a port and using proxy servers on the same machine (e.g [Heroku nginx buildpack](https://github.com/heroku/heroku-buildpack-nginx#requirements-proxy-mode)) | string \| integer | `/tmp/nginx.socket` |
 | `emitErrors` | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services. | boolean | `false` |
 | `url` | Public url of the server. Required for many different features (ex: reset password, third login providers etc.). Also enables proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. An absolute url is however **recommended**.| string | `''` |
 |`proxy`| Set the koa variable `app.proxy`. When `true`, proxy header fields will be trusted. |boolean|`false`|
@@ -191,6 +192,25 @@ module.exports = ({ env }) => ({
 | `admin.forgotPassword.emailTemplate` | Email template as defined in [email plugin](../plugins/email.md#programmatic-usage) | Object | [Default template](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/config/email-templates/forgot-password.js) |
 | `admin.forgotPassword.from` | Sender mail address | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
 | `admin.forgotPassword.replyTo` | Default address or addresses the receiver is asked to reply to | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
+
+## API
+
+**Path —** `./config/api.js`.
+
+```js
+module.exports = ({ env }) => ({
+  responses: {
+    privateAttributes: ['_v', 'id', 'created_at'],
+  },
+});
+```
+
+**Available options**
+
+| Property                      | Description                                                                                                                                                       | Type         | Default |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------- |
+| `responses`                   | Global API response configuration                                                                                                                                 | Object       |         |
+| `responses.privateAttributes` | Set of globally defined attributes to be treated as private. E.g. `_v` when using MongoDb or timestamps like `created_at`, `updated_at` can be treated as private | String array | `[]`    |
 
 ## Functions
 
