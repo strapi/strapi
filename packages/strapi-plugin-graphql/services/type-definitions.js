@@ -7,7 +7,7 @@
  */
 
 const _ = require('lodash');
-const { getPrivateAttributes } = require('strapi-utils');
+const { contentTypes } = require('strapi-utils');
 
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
@@ -42,8 +42,10 @@ const buildTypeDefObj = model => {
     typeDef[updatedAtKey] = 'DateTime!';
   }
 
+  const isNotPrivate = attributeName => !contentTypes.isPrivateAttribute(model, attributeName);
+
   Object.keys(attributes)
-    .filter(attributeName => attributes[attributeName].private !== true)
+    .filter(isNotPrivate)
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -57,7 +59,7 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => attributes[association.alias].private !== true)
+    .filter(association => isNotPrivate(association.alias))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
@@ -66,7 +68,7 @@ const buildTypeDefObj = model => {
     });
 
   // Remove private attributes defined per model or globally
-  const privateAttributes = getPrivateAttributes(model);
+  const privateAttributes = contentTypes.getPrivateAttributes(model);
   privateAttributes.forEach(attr => {
     if (typeDef[attr]) {
       delete typeDef[attr];
@@ -143,7 +145,7 @@ const buildAssocResolvers = model => {
   const { primaryKey, associations = [] } = model;
 
   return associations
-    .filter(association => model.attributes[association.alias].private !== true)
+    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
