@@ -21,14 +21,16 @@ Please note that this guide will not work if you are on Windows using the SQLite
 
 `Supertest` allows you to test all the `api` routes as they were instances of [http.Server](https://nodejs.org/api/http.html#http_class_http_server)
 
+`sqlite3` is used to create an on-disk database that is created and deleted between tests.
+
 :::: tabs
 
 ::: tab yarn
-`yarn add -D jest supertest`
+`yarn add --dev jest supertest sqlite3`
 :::
 
 ::: tab npm
-`npm i -D jest supertest`
+`npm install jest supertest sqlite3 --save-dev`
 :::
 ::::
 

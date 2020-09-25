@@ -63,7 +63,7 @@ or
 ## Complex queries
 
 ::: tip NOTE
-`OR` and `AND` operations are availabled starting from v3.1.0
+`OR` and `AND` operations are available starting from v3.1.0
 :::
 
 When building more complex queries you must use the `_where` query parameter in combination with the [`qs`](https://github.com/ljharb/qs) library.
