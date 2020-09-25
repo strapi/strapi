@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
-import { merge } from 'lodash';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
@@ -25,7 +24,7 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/${pluginId}/roles/:id`);
-  const { permissions, routes, policies, isLoading } = usePlugins();
+  const { routes, policies, isLoading } = usePlugins();
   const { role, isLoading: isRoleLoading, onSubmitSucceeded } = useFetchRole(id);
   const permissionsRef = useRef();
 
@@ -141,7 +140,7 @@ const EditPage = () => {
           {!isLoading && !isRoleLoading && (
             <UsersPermissions
               ref={permissionsRef}
-              permissions={merge(role.permissions, permissions)}
+              permissions={role.permissions}
               routes={routes}
               policies={policies}
             />

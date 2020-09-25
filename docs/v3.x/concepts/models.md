@@ -4,7 +4,7 @@
 
 ### Content Type's models
 
-Models are a representation of the database's structure. They are split into two separate files. A JavaScript file that contains the model options (e.g: lifecycle hooks), and a JSON one that represents the data structure stored in the database.
+Models are a representation of the database's structure. They are split into two separate files. A JavaScript file that contains the model options (e.g: lifecycle hooks), and a JSON file that represents the data structure stored in the database.
 
 **Path —** `./api/restaurant/models/Restaurant.js`.
 
@@ -51,7 +51,7 @@ In this example, there is a `Restaurant` model which contains the attributes `co
 
 ### Component's models
 
-It also exist another type of models named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition
+Another type of model is named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition.
 
 **Path —** `./components/default/simple.json`
 
@@ -72,27 +72,27 @@ It also exist another type of models named `components`. A component is a data s
 }
 ```
 
-In this example, there is a `Simple` component which contains the attributes `name`. And the component is in the category `default`.
+In this example, there is a `Simple` component which contains the attribute `name`. And the component is in the category `default`.
 
 ### Where are the models defined?
 
-For **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
+The **Content Types** models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
 
-For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component).
+The **Components** models are defined in the `./components` folder. Every component has to be inside a subfolder (the category name of the component).
 
 ## How to create a model?
 
 ::: tip
-If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a feeling for available features.
+If you are just starting out it is very convenient to generate some models with the Content Type Builder directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a feeling for available features.
 :::
 
 ### For Content Types models
 
-Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
+Use the CLI and run the following command `strapi generate:model restaurant name:string description:text`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
 
 This will create two files located at `./api/restaurant/models`:
 
-- `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
+- `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
 - `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and life cycle callbacks.
 
 ::: tip
@@ -101,7 +101,7 @@ When you create a new API using the CLI (`strapi generate:api <name>`), a model 
 
 ### For Components models
 
-To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
+To create a component you will have to use the Content Type Builder from the Admin panel, there is not a cli generator for components.
 
 Or you can create your component manually by following the file path described previously and by following the file structure described below.
 
@@ -132,7 +132,7 @@ In this example, the model `Restaurant` will be accessible through the `Restaura
 ::: warning
 If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
 The `globalId` serves as a reference to your model within relations and Strapi APIs. If you chose to rename it (either by renaming your file or by changing the value of the `globalId`), you'd have to migrate your tables manually and update the references.
-Please note that you should not alter Strapi's models `globalId` (plugins and core ones) since it is used directly within Strapi APIs and other models' relations.
+Please note that you should not alter the Strapi's models `globalId` (plugins and core models) since they are used directly within Strapi APIs and other models' relations.
 :::
 
 ::: tip
@@ -164,12 +164,15 @@ The options key on the model-json states.
 
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
+- `privateAttributes`: This configuration allows to treat a set of attributes as private, even if they're not actually defined as attributes in the model. Accepts an `Array` of strings. It could be used to remove from API responses timestamps or `_v` when using MongoDB. The set of `privateAttributes` defined in the model are merged with the `privateAttributes` defined in the global Strapi configuration.
+
 **Path —** `User.settings.json`.
 
 ```json
 {
   "options": {
-    "timestamps": true
+    "timestamps": true,
+    "privateAttributes": ["id", "created_at"]
   }
 }
 ```
@@ -197,7 +200,7 @@ The following types are currently available:
 
 ### Validations
 
-You can apply basic validations to the attributes. The following supported validations are _only supported by MongoDB_ connection.
+You can apply basic validations to attributes. The following supported validations are _only supported by MongoDB_ database connections.
 If you're using SQL databases, you should use the native SQL constraints to apply them.
 
 - `required` (boolean) — If true, adds a required validator for this property.
@@ -210,14 +213,14 @@ If you're using SQL databases, you should use the native SQL constraints to appl
 
 To improve the Developer Experience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
 
-- `private` (boolean) — If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
-- `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
+- `private` (boolean) — If true, the attribute will be removed from the server response. (This is useful to hide sensitive data).
+- `configurable` (boolean) - If false, the attribute isn't configurable from the Content Type Builder plugin.
 
 ### Exceptions
 
 **uid**
 
-- `targetField`(string) — The value is the name of an attribute thas has `string` of `text` type.
+- `targetField`(string) — The value is the name of an attribute that has `string` of the `text` type.
 - `options` (string) — The value is a set of options passed to [the underlying `uid` generator](https://github.com/sindresorhus/slugify). A caveat is that the resulting `uid` must abide to the following RegEx `/^[A-Za-z0-9-_.~]*$`.
 
 ### Example
@@ -256,7 +259,7 @@ Relations let you create links (relations) between your Content Types.
 
 ::: tab "One-Way" id="one-way"
 
-One-way relationships are useful to link an entry to another. However, only one of the models can be queried with its populated items.
+One-way relationships are useful to link one entry to one other entry. However, only one of the models can be queried with its linked item.
 
 #### Example
 
@@ -292,7 +295,7 @@ xhr.send(
 
 ::: tab "One-to-One" id="one-to-one"
 
-One-to-One relationships are useful when you have one entity that could be linked to only one other entity. And vice versa.
+One-to-One relationships are useful when you have one entity that could be linked to only one other entity. _**And vice versa**_.
 
 #### Example
 
@@ -345,7 +348,7 @@ One-to-Many relationships are useful when an entry can be linked to multiple ent
 
 #### Example
 
-A `user` can have many `articles`, and an `article` can be related to one `user` (author).
+A `user` can have many `articles`, and an `article` can be related to only one `user` (author).
 
 **Path —** `./api/user/models/User.settings.json`.
 
@@ -404,7 +407,7 @@ Many-to-Many relationships are useful when an entry can be linked to multiple en
 
 #### Example
 
-A `product` can be related to many `categories`, so a `category` can have many `products`.
+A `product` can be related to many `categories` and a `category` can have many `products`.
 
 **Path —** `./api/product/models/Product.settings.json`.
 
@@ -458,7 +461,8 @@ xhr.send(
 
 ::: tab "Polymorphic" id="polymorphic"
 
-The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc.).
+Polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry, or when you want to connect different types of models to a model. 
+A common use case is an `Image` model that can be associated to different types of models (Article, Product, User, etc.).
 
 #### Single vs Many
 
@@ -480,7 +484,7 @@ In other words, it means that an `Image` entry can be associated to one entry. T
 }
 ```
 
-Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
+Also our `Image` model might belong to **many `Article` or `Product` entries**.
 
 **NOTE**:
 In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
@@ -521,11 +525,11 @@ For example, the `Product` model might have two attributes which are associated 
 }
 ```
 
-The value is the `filter` attribute is the name of the column where the information is stored.
+The value of the `filter` attribute is the name of the column where the information is stored.
 
 #### Example
 
-A `Image` model might belongs to many either `Article` models or a `Product` models.
+An `Image` model might belong to many `Article` models or `Product` models.
 
 **Path —** `./api/image/models/Image.settings.json`.
 
@@ -568,7 +572,7 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 
 #### Database implementation
 
-If you're using MongoDB as a database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
+If you're using MongoDB for your database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
 
 **Path —** `./api/image/models/Image.settings.json`.
 
@@ -635,7 +639,7 @@ CREATE TABLE `image_morph` (
 
 ## Components
 
-Component field let your create a relation between your Content Type and a Component structure.
+Component fields let your create a relation between your Content Type and a Component structure.
 
 #### Example
 
@@ -751,7 +755,7 @@ xhr.send(
 );
 ```
 
-**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+**NOTE** if you don't specify the `ID` it will delete and re-create the entry and you will see the `ID` value change.
 
 :::
 
@@ -796,7 +800,7 @@ xhr.send(
 
 ## Dynamic Zone
 
-Dynamic Zone fields let you create a flexible space, in which to compose content, based on a mixed list of components.
+Dynamic Zone fields let you create a flexible space in which to compose content, based on a mixed list of components.
 
 #### Example
 
@@ -815,7 +819,7 @@ Lets say we created an `slider` and `content` component in `article` category.
 }
 ```
 
-- `components` (array): Array of components, that follows this format `<category>.<componentName>`.
+- `components` (array): Array of components that follows this format `<category>.<componentName>`.
 
 :::: tabs
 
@@ -867,7 +871,7 @@ xhr.send(
 );
 ```
 
-**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+**NOTE** if you don't specify the `ID` it will delete and re-create the entry and you will see the `ID` value change.
 
 :::
 

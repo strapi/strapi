@@ -102,7 +102,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 Please note at this time Node v14 **is not** supported
 
-- NodeJS >= 10.10 <13
+- NodeJS >= 10.16 <13
 - NPM >= 6.x
 
 **Database:**

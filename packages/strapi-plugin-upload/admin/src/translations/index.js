@@ -6,6 +6,7 @@ import uk from './uk.json';
 import zhHans from './zh-Hans.json';
 import ptBR from './pt-BR.json';
 import sk from './sk.json';
+import zh from './zh.json';
 
 const trads = {
   en,
@@ -17,6 +18,7 @@ const trads = {
   'zh-Hans': zhHans
   'pt-BR': ptBR,
   sk,
+  zh,
 };
 
 export default trads;
