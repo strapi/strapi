@@ -10,7 +10,7 @@ const State = ({ isPublished }) => {
 
   return (
     <Wrapper isGreen={isPublished}>
-      <Text>
+      <Text lineHeight="19px">
         {formatMessage({
           id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
         })}

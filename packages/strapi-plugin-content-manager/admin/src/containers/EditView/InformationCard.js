@@ -42,7 +42,7 @@ const InformationCard = () => {
           <Padded top size="smd">
             <BaselineAlignment size="2px" />
             <Flex justifyContent="space-between">
-              <Text fontSize="xs" color="grey" textTransform="uppercase">
+              <Text fontSize="xs" color="grey" textTransform="uppercase" fontWeight="semiBold">
                 {formatMessage({
                   id: getTrad('containers.Edit.information.lastUpdate'),
                 })}
@@ -55,7 +55,7 @@ const InformationCard = () => {
           <Padded top size="smd">
             <BaselineAlignment size="3px" />
             <Flex justifyContent="space-between">
-              <Text fontSize="xs" color="grey" textTransform="uppercase">
+              <Text fontSize="xs" color="grey" textTransform="uppercase" fontWeight="semiBold">
                 {formatMessage({
                   id: getTrad('containers.Edit.information.by'),
                 })}
