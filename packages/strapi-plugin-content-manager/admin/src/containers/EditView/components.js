@@ -50,7 +50,7 @@ const StatusWrapper = styled.div`
   display: flex;
   align-items: center;
   border-radius: 2px;
-  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.darkGrey};
+
   height: 36px;
   padding: 0 15px;
   ${({ theme, isGreen }) =>
