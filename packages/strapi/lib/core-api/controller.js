@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 
 /**
@@ -66,7 +67,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async find(ctx) {
       let entities;
-      if (ctx.query._q) {
+      if (_.has(ctx.query, '_q')) {
         entities = await service.search(ctx.query);
       } else {
         entities = await service.find(ctx.query);
