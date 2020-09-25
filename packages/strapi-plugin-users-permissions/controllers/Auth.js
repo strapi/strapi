@@ -257,7 +257,8 @@ module.exports = {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
     // Ability to pass OAuth callback dynamically
-    grantConfig[provider].callback = _.get(ctx, 'query.callback') || grantConfig[provider].callback;
+    grantConfig[provider].callback = _.get(ctx, 'query.callback') || _.get(ctx, 'query.state') || grantConfig[provider].callback;
+    grantConfig[provider].state = _.get(ctx, 'query.callback') || grantConfig[provider].callback;  
     grantConfig[provider].redirect_uri = `${strapi.config.server.url}/connect/${provider}/callback`;
 
     return grant(grantConfig)(ctx, next);
