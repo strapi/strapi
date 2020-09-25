@@ -85,6 +85,7 @@ export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as FormBloc } from './components/FormBloc';
 export { default as IntlInput } from './components/IntlInput';
 export { default as SizedInput } from './components/SizedInput';
+export * from './components/Permissions';
 
 // PopUpWarning
 export { default as PopUpWarningBody } from './components/PopUpWarning/Body';
