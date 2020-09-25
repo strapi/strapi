@@ -10,9 +10,9 @@ What we want here is to add some custom logic and call the email service when a 
 
 To be able to do that, you have first to understand some concepts.
 
-When you create a content type, it generates an API with the following list of [endpoints](../content-api/endpoint.md).
+When you create a content type, it generates an API with the following list of [endpoints](../content-api/api-endpoint.md).
 
-Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
+Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controllers.md) that exist by default when a content type is created.
 
 If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It is because all the default logic is managed by Strapi. But you can override these actions with your own code.
 
@@ -53,7 +53,7 @@ After saving the new function, let's restart the `POST /comment` request. We wil
 
 We now know the function we have to update. Let's get back to the original function.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the create logic.
+In the [controller documentation](../concepts/controllers.md#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the create logic.
 
 **Path —** `./api/comment/controller/Comment.js`
 
@@ -104,11 +104,10 @@ module.exports = {
 
     // check if the comment content contains a bad word
     if (entry.content !== filter.clean(entry.content)) {
-
       // send an email by using the email plugin
       await strapi.plugins['email'].services.email.send({
         to: 'paulbocuse@strapi.io',
-        from: 'admin@strapi.io'
+        from: 'admin@strapi.io',
         subject: 'Comment posted that contains a bad words',
         text: `
           The comment #${entry.id} contain a bad words.

@@ -545,7 +545,9 @@ module.exports = {
           const name = currentAssociation.model || currentAssociation.collection;
           const getter =
             currentAssociation.plugin !== undefined
-              ? ['plugins', currentAssociation.plugin, 'models', name, 'attributes']
+              ? currentAssociation.plugin === 'admin'
+                ? ['admin', 'models', name, 'attributes']
+                : ['plugins', currentAssociation.plugin, 'models', name, 'attributes']
               : ['models', name.toLowerCase(), 'attributes'];
           const associationAttributes = _.get(strapi, getter);
           const associationSchema = this.generateAssociationSchema(associationAttributes, getter);

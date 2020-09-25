@@ -12,7 +12,6 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
 const { nameToSlug } = require('strapi-utils');
-const mime = require('mime-types');
 
 const { bytesToKbytes } = require('../utils/file');
 
@@ -43,16 +42,16 @@ const combineFilters = params => {
 
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const ext = '.' + mime.extension(type) || path.extname(filename);
-    const baseName = path.basename(filename, path.extname(filename));
+    const ext = path.extname(filename);
+    const basename = path.basename(fileInfo.name || filename, ext);
 
-    const usedName = fileInfo.name || baseName;
+    const usedName = fileInfo.name || filename;
 
     const entity = {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
-      hash: generateFileName(usedName),
+      hash: generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),
@@ -362,5 +361,22 @@ module.exports = {
         key: 'settings',
       })
       .set({ value });
+  },
+
+  setCreatorInfo(userId, files, { edition = false } = {}) {
+    if (!Array.isArray(files)) files = [files];
+
+    const fields = { created_by: userId, updated_by: userId };
+
+    const creationFields = ['updated_by', 'created_by'];
+    const editionFields = ['updated_by'];
+
+    return Promise.all(
+      files.map(file => {
+        const params = _.pick(fields, edition ? editionFields : creationFields);
+
+        return strapi.query('file', 'upload').update({ id: file.id }, params);
+      })
+    );
   },
 };

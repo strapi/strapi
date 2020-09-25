@@ -4,7 +4,10 @@ In this guide we will see how you can customize the admin panel.
 
 ## Introduction
 
-For this example, we will see two things: 1) The customization of the admin panel itself, by updating the content of the `/admin/` home page; 2) We will see how to update the interface of a plugin, by replacing the `date` format in the content manager list view.
+For this example, we will see two things:
+
+1. The customization of the admin panel itself, by updating the content of the `/admin/` home page;
+2. How to update the interface of a plugin, by replacing the `date` format in the content manager list view.
 
 First, you will have to read the [customization concept](../concepts/customization.md), it will help you understand how to customize all of your application.
 
@@ -58,7 +61,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
 export default memo(HomePage);
 ```
 
-Now the admin panel home page should just contain the sentence `Hello Wold!`.
+Now the admin panel home page should just contain the sentence `Hello World!`.
 
 ## Update the Content Manager
 
@@ -97,7 +100,7 @@ Here is the code you have to find:
 ```js
 const dateFormats = {
   ...defaultDateFormats,
-  // Customise the format by uncommenting the one you wan to override it corresponds to the type of your field
+  // Customize the format by un-commenting the one you wan to override it corresponds to the type of your field
   // date: 'dddd, MMMM Do YYYY',
   // datetime: 'dddd, MMMM Do YYYY HH:mm',
   // time: 'HH:mm A',

@@ -7,9 +7,9 @@ module.exports = (sender, { limitedEvents = [] } = {}) => {
   let currentDay = new Date().getDate();
   const eventCache = new Map();
 
-  return async (event, payload) => {
+  return async (event, ...args) => {
     if (!limitedEvents.includes(event)) {
-      return sender(event, payload);
+      return sender(event, ...args);
     }
 
     if (new Date().getDate() !== currentDay) {
@@ -22,6 +22,6 @@ module.exports = (sender, { limitedEvents = [] } = {}) => {
     }
 
     eventCache.set(event, true);
-    return sender(event, payload);
+    return sender(event, ...args);
   };
 };

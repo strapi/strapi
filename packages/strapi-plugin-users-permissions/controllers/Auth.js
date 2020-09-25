@@ -10,10 +10,10 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
-const { sanitizeEntity } = require('strapi-utils');
+const { sanitizeEntity, getAbsoluteServerUrl } = require('strapi-utils');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const formatError = error => [
+const formatError = (error) => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
@@ -115,10 +115,9 @@ module.exports = {
         );
       }
 
-      const validPassword = strapi.plugins['users-permissions'].services.user.validatePassword(
-        params.password,
-        user.password
-      );
+      const validPassword = await strapi.plugins[
+        'users-permissions'
+      ].services.user.validatePassword(params.password, user.password);
 
       if (!validPassword) {
         return ctx.badRequest(
@@ -174,7 +173,7 @@ module.exports = {
       });
     }
   },
-  
+
   async resetPassword(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.params);
 
@@ -198,15 +197,14 @@ module.exports = {
         );
       }
 
-      // Delete the current code
-      user.resetPasswordToken = null;
-
-      user.password = await strapi.plugins['users-permissions'].services.user.hashPassword({
+      const password = await strapi.plugins['users-permissions'].services.user.hashPassword({
         password: params.password,
       });
 
       // Update the user.
-      await strapi.query('user', 'users-permissions').update({ id: user.id }, user);
+      await strapi
+        .query('user', 'users-permissions')
+        .update({ id: user.id }, { resetPasswordToken: null, password });
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
@@ -250,15 +248,24 @@ module.exports = {
       .get();
 
     const [requestPath] = ctx.request.url.split('?');
-    const provider =
-      process.platform === 'win32' ? requestPath.split('\\')[2] : requestPath.split('/')[2];
+    const provider = requestPath.split('/')[2];
 
     if (!_.get(grantConfig[provider], 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
+
+    if (!strapi.config.server.url.startsWith('http')) {
+      strapi.log.warn(
+        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://strapi.io/documentation/v3.x/plugins/users-permissions.html#setting-up-the-server-url'
+      );
+    }
+
     // Ability to pass OAuth callback dynamically
     grantConfig[provider].callback = _.get(ctx, 'query.callback') || _.get(ctx, 'query.state') || grantConfig[provider].callback;
-    grantConfig[provider].state = _.get(ctx, 'query.callback') || grantConfig[provider].callback;    grantConfig[provider].redirect_uri = `${strapi.config.server.url}/connect/${provider}/callback`;
+    grantConfig[provider].state = _.get(ctx, 'query.callback') || grantConfig[provider].callback;  
+    grantConfig[provider].redirect_uri = strapi.plugins[
+      'users-permissions'
+    ].services.providers.buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
   },
@@ -288,7 +295,9 @@ module.exports = {
     });
 
     // Find the user by email.
-    const user = await strapi.query('user', 'users-permissions').findOne({ email });
+    const user = await strapi
+      .query('user', 'users-permissions')
+      .findOne({ email: email.toLowerCase() });
 
     // User not found.
     if (!user) {
@@ -304,10 +313,7 @@ module.exports = {
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    // Set the property code.
-    user.resetPasswordToken = resetPasswordToken;
-
-    const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+    const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
       try {
         return storeEmail['reset_password'].options;
       } catch (error) {
@@ -319,16 +325,13 @@ module.exports = {
       key: 'advanced',
     });
 
+    const userInfo = _.omit(user, ['password', 'resetPasswordToken', 'role', 'provider']);
+
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
         URL: advanced.email_reset_password,
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
         TOKEN: resetPasswordToken,
       }
     );
@@ -336,12 +339,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.object,
       {
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
       }
     );
 
@@ -363,7 +361,7 @@ module.exports = {
     }
 
     // Update the user.
-    await strapi.query('user', 'users-permissions').update({ id: user.id }, user);
+    await strapi.query('user', 'users-permissions').update({ id: user.id }, { resetPasswordToken });
 
     ctx.send({ ok: true });
   },
@@ -417,7 +415,7 @@ module.exports = {
     }
 
     // Throw an error if the password selected by the user
-    // contains more than two times the symbol '$'.
+    // contains more than three times the symbol '$'.
     if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
       return ctx.badRequest(
         null,
@@ -496,7 +494,7 @@ module.exports = {
       );
 
       if (settings.email_confirmation) {
-        const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+        const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
           try {
             return storeEmail['email_confirmation'].options;
           } catch (error) {
@@ -507,7 +505,7 @@ module.exports = {
         settings.message = await strapi.plugins[
           'users-permissions'
         ].services.userspermissions.template(settings.message, {
-          URL: `${strapi.config.server.url}/auth/email-confirmation`,
+          URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`,
           USER: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
             'resetPasswordToken',
@@ -643,7 +641,7 @@ module.exports = {
       _.pick(user.toJSON ? user.toJSON() : user, ['id'])
     );
 
-    const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+    const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
       try {
         return storeEmail['email_confirmation'].options;
       } catch (err) {
@@ -651,16 +649,13 @@ module.exports = {
       }
     });
 
+    const userInfo = _.omit(user, ['password', 'resetPasswordToken', 'role', 'provider']);
+
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
-        URL: `${strapi.config.server.url}/auth/email-confirmation`,
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`,
+        USER: userInfo,
         CODE: jwt,
       }
     );
@@ -668,12 +663,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.object,
       {
-        USER: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-          'role',
-          'provider',
-        ]),
+        USER: userInfo,
       }
     );
 

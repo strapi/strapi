@@ -2,9 +2,17 @@ const _ = require('lodash');
 const { streamToBuffer } = require('../utils/file');
 
 module.exports = {
+  definition: `
+    input FileInfoInput {
+      name: String
+      alternativeText: String
+      caption: String
+    }
+  `,
   mutation: `
     upload(refId: ID, ref: String, field: String, source: String, file: Upload!): UploadFile!
     multipleUpload(refId: ID, ref: String, field: String, source: String, files: [Upload]!): [UploadFile]!
+    updateFileInfo(id: ID!, info: FileInfoInput!): UploadFile!
   `,
   resolver: {
     Query: {
@@ -40,6 +48,13 @@ module.exports = {
           const uploadService = strapi.plugins.upload.services.upload;
 
           return Promise.all(files.map(file => uploadService.uploadFileAndPersist(file)));
+        },
+      },
+      updateFileInfo: {
+        description: 'Update file information',
+        resolverOf: 'plugins::upload.upload.upload',
+        resolver: async (obj, { id, info }) => {
+          return await strapi.plugins.upload.services.upload.updateFileInfo(id, info);
         },
       },
     },

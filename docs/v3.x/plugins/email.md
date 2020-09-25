@@ -4,8 +4,12 @@ Thanks to the plugin `Email`, you can send email from your server or externals p
 
 ## Programmatic usage
 
+### Send an email - `.send()`
+
 In your custom controllers or services you may want to send email.
-By using the following function, strapi will use the configured provider to send an email.
+By using the following function, Strapi will use the configured provider to send an email.
+
+**Example**
 
 ```js
 await strapi.plugins['email'].services.email.send({
@@ -20,11 +24,43 @@ await strapi.plugins['email'].services.email.send({
 });
 ```
 
+### Send an email using a template - `.sendTemplatedEmail()`
+
+When you send an email, you will most likely want to build it from a template you wrote.
+The email plugin provides the service `sendTemplatedEmail` that compile the email and then sends it. The function have the following params:
+
+| param           | description                                                                                                              | type   | default |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ | ------ | ------- |
+| `emailOptions`  | Object that contains email options (`to`, `from`, `replyTo`, `cc`, `bcc`) except `subject`, `text` and `html`            | object | `{}`    |
+| `emailTemplate` | Object that contains `subject`, `text` and `html` as [lodash string templates](https://lodash.com/docs/4.17.15#template) | object | `{}`    |
+| `data`          | Object that contains the data used to compile the templates                                                              | object | `{}`    |
+
+**Example**
+
+```js
+const emailTemplate = {
+  subject: 'Welcome <%= user.firstname %>',
+  text: `Welcome on mywebsite.fr!
+    Your account is now linked with: <%= user.email %>.`,
+  html: `<h1>Welcome on mywebsite.fr!</h1>
+    <p>Your account is now linked with: <%= user.email %>.<p>`,
+};
+
+await strapi.plugins.email.services.email.sendTemplatedEmail(
+  {
+    to: user.email,
+    // from: is not specified, so it's the defaultFrom that will be used instead
+  },
+  emailTemplate,
+  {
+    user: _.pick(user, ['username', 'email', 'firstname', 'lastname']),
+  }
+);
+```
+
 ## Configure the plugin
 
-### Install the provider you want
-
-By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to [Configure your provider](#configure-your-provider).
+By default Strapi provides a local email system ([sendmail](https://www.npmjs.com/package/sendmail)). If you want to use a third party to send emails, you need to install the correct provider module. Otherwise you can skip this part and continue to configure your provider.
 
 You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
 
@@ -35,7 +71,7 @@ To install a new provider run:
 ::: tab yarn
 
 ```
-yarn add strapi-provider-email-sendgrid@beta --save
+yarn add strapi-provider-email-sendgrid --save
 ```
 
 :::
@@ -43,16 +79,27 @@ yarn add strapi-provider-email-sendgrid@beta --save
 ::: tab npm
 
 ```
-npm install strapi-provider-email-sendgrid@beta --save
+npm install strapi-provider-email-sendgrid --save
 ```
 
 :::
 
 ::::
 
+#### Using scoped packages as providers
+
+If your package name is [scoped](https://docs.npmjs.com/about-scopes) (for example `@username/strapi-provider-email-gmail-oauth2`) you need to take an extra step by aliasing it in `package.json`. Go to the `dependencies` section and change the provider line to look like this:
+
+`"strapi-provider-email-gmail-oauth2": "npm:@username/strapi-provider-email-gmail-oauth2@0.1.9"`
+
+The string after the last `@` represents your desired [semver](https://docs.npmjs.com/about-semantic-versioning) version range.
+
 ### Configure your provider
 
-After installing your provider you will need to add some settings in `config/plugins.js`. Check the README of each provider to know what configuration settings the provider needs.
+After installing your provider you will need to add some settings in `config/plugins.js`. 
+If this file doesn't exists, you'll need to create it. 
+> ⚠️ Do note that filename has to come with correct spelling, plugin with 's' (plural). -> `plugins.js`
+Check the README of each provider to know what configuration settings the provider needs.
 
 Here is an example of a configuration made for the provider [strapi-provider-email-sendgrid](https://www.npmjs.com/package/strapi-provider-email-sendgrid).
 
@@ -76,7 +123,16 @@ module.exports = ({ env }) => ({
 ```
 
 ::: tip
-If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations#environments)
+If you're using a different provider depending on your environment, you can specify the correct configuration in `config/env/${yourEnvironment}/plugins.js`. More info here: [Environments](../concepts/configurations.md#environments)
+:::
+
+::: tip
+Only one email provider will be active at all time. If the email provider setting isn't picked up by strapi, verify you have put the file `plugins.js` in the correct folder, and with correct filename. The selection of email provider is done via configuration file only.               
+:::
+
+::: tip
+When testing the new email provider with those two email templates created during strapi setup, the *shipper email* on the template, with default no-reply@strapi.io need to be updated in according to your email provider, otherwise it will fail the test.
+More info here: [Configure templates Locally](http://localhost:1337/admin/plugins/users-permissions/email-templates)
 :::
 
 ## Create new provider
@@ -124,7 +180,7 @@ If you want to create your own provider without publishing it on **npm** you can
 
 - Finally, run `yarn install` or `npm install` to install your new custom provider.
 
-## Trouble shooting
+## Troubleshooting
 
 You received an `Auth.form.error.email.invalid` error even though the email is valid and exists in the database.
 

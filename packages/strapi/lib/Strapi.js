@@ -1,6 +1,8 @@
 'use strict';
 
-// Dependencies.
+// required first because it loads env files.
+const loadConfiguration = require('./core/app-configuration');
+
 const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');
@@ -9,12 +11,11 @@ const Router = require('koa-router');
 const _ = require('lodash');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
-const { logger, models } = require('strapi-utils');
+const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
-const loadConfiguration = require('./core/app-configuration');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -26,13 +27,13 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const ee = require('./utils/ee');
 
 /**
  * Construct an Strapi instance.
  *
  * @constructor
  */
-
 class Strapi {
   constructor(opts = {}) {
     this.reload = this.reload();
@@ -40,6 +41,8 @@ class Strapi {
     // Expose `koa`.
     this.app = new Koa();
     this.router = new Router();
+
+    this.initServer();
 
     // Logger.
     this.log = logger;
@@ -50,9 +53,12 @@ class Strapi {
     };
 
     this.dir = opts.dir || process.cwd();
+
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
+    this.app.proxy = this.config.get('server.proxy');
+
     this.isLoaded = false;
 
     // internal services.
@@ -60,6 +66,18 @@ class Strapi {
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
+  }
+
+  get EE() {
+    return ee({ dir: this.dir, logger });
+  }
+
+  handleRequest(req, res) {
+    if (!this.requestHandler) {
+      this.requestHandler = this.app.callback();
+    }
+
+    return this.requestHandler(req, res);
   }
 
   requireProjectBootstrap() {
@@ -81,12 +99,15 @@ class Strapi {
       chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
     });
 
+    const isEE = strapi.EE === true && ee.isEE === true;
+
     infoTable.push(
       [chalk.blue('Time'), `${new Date()}`],
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
+      [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
     );
 
     console.log(infoTable.toString());
@@ -98,14 +119,6 @@ class Strapi {
   logFirstStartupMessage() {
     this.logStats();
 
-    let hostname = strapi.config.host;
-    if (
-      strapi.config.environment === 'development' &&
-      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-    ) {
-      hostname = 'localhost';
-    }
-
     console.log(chalk.bold('One more thing...'));
     console.log(
       chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
@@ -113,13 +126,10 @@ class Strapi {
     console.log();
 
     const addressTable = new CLITable();
-    if (this.config.admin.url.startsWith('http')) {
-      addressTable.push([chalk.bold(this.config.admin.url)]);
-    } else {
-      addressTable.push([
-        chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`),
-      ]);
-    }
+
+    const adminUrl = getAbsoluteAdminUrl(strapi.config);
+    addressTable.push([chalk.bold(adminUrl)]);
+
     console.log(`${addressTable.toString()}`);
     console.log();
   }
@@ -127,57 +137,23 @@ class Strapi {
   logStartupMessage() {
     this.logStats();
 
-    let hostname = strapi.config.host;
-    if (
-      strapi.config.environment === 'development' &&
-      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-    ) {
-      hostname = 'localhost';
-    }
-
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
       console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      if (this.config.admin.url.startsWith('http')) {
-        console.log(chalk.bold(this.config.admin.url));
-      } else {
-        console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`));
-      }
+      const adminUrl = getAbsoluteAdminUrl(strapi.config);
+      console.log(chalk.bold(adminUrl));
       console.log();
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    if (this.config.admin.url.startsWith('http')) {
-      console.log(chalk.bold(this.config.server.url));
-    } else {
-      console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.server.url}`));
-    }
+    const serverUrl = getAbsoluteServerUrl(strapi.config);
+    console.log(chalk.bold(serverUrl));
     console.log();
   }
 
-  async start(cb) {
-    try {
-      if (!this.isLoaded) {
-        await this.load();
-      }
-
-      this.app.use(this.router.routes()).use(this.router.allowedMethods());
-
-      // Launch server.
-      this.listen(cb);
-    } catch (err) {
-      this.stopWithError(err);
-    }
-  }
-
-  /**
-   * Add behaviors to the server
-   */
-  async listen(cb) {
-    // Mount the HTTP server.
-    this.server = http.createServer(this.app.callback());
-
+  initServer() {
+    this.server = http.createServer(this.handleRequest.bind(this));
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
@@ -206,17 +182,44 @@ class Strapi {
         connections[key].destroy();
       }
     };
+  }
 
+  async start(cb) {
+    try {
+      if (!this.isLoaded) {
+        await this.load();
+      }
+
+      this.app.use(this.router.routes()).use(this.router.allowedMethods());
+
+      // Launch server.
+      this.listen(cb);
+    } catch (err) {
+      this.stopWithError(err);
+    }
+  }
+
+  /**
+   * Add behaviors to the server
+   */
+  async listen(cb) {
     const onListen = async err => {
       if (err) return this.stopWithError(err);
 
       // Is the project initialised?
       const isInitialised = await utils.isInitialised(this);
 
-      if (!isInitialised) {
-        this.logFirstStartupMessage();
-      } else {
-        this.logStartupMessage();
+      // Should the startup message be displayed?
+      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
+        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
+        : false;
+
+      if (hideStartupMessage === false) {
+        if (!isInitialised) {
+          this.logFirstStartupMessage();
+        } else {
+          this.logStartupMessage();
+        }
       }
 
       // Emit started event.
@@ -235,9 +238,15 @@ class Strapi {
       }
     };
 
-    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), err =>
-      onListen(err).catch(err => this.stopWithError(err))
-    );
+    const listenSocket = this.config.get('server.socket');
+    const listenErrHandler = err => onListen(err).catch(err => this.stopWithError(err));
+
+    if (listenSocket) {
+      this.server.listen(listenSocket, listenErrHandler);
+    } else {
+      this.server.listen(this.config.get('server.port'), this.config.get('server.host'), listenErrHandler);
+    }
+
   }
 
   stopWithError(err, customMessage) {
@@ -377,26 +386,13 @@ class Strapi {
   }
 
   async runBootstrapFunctions() {
-    const timeoutMs = this.config.bootstrapTimeout || 3500;
-    const warnOnTimeout = () =>
-      setTimeout(() => {
-        this.log.warn(
-          `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
-        );
-        this.log.warn('Make sure you call it?');
-      }, timeoutMs);
-
     const execBootstrap = async fn => {
       if (!fn) return;
 
-      const timer = warnOnTimeout();
-      try {
-        await fn();
-      } finally {
-        clearTimeout(timer);
-      }
+      return fn();
     };
 
+    // plugins bootstrap
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
@@ -404,10 +400,18 @@ class Strapi {
         strapi.stop();
       });
     });
-
     await Promise.all(pluginBoostraps);
 
-    return execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // user bootstrap
+    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+
+    // admin bootstrap : should always run after the others
+    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
+    return execBootstrap(adminBootstrap).catch(err => {
+      strapi.log.error(`Bootstrap function in admin failed`);
+      strapi.log.error(err);
+      strapi.stop();
+    });
   }
 
   async freeze() {

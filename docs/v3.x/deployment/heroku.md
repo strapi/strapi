@@ -58,7 +58,7 @@ Follow the instructions and return to your command line.
 
 Create a [new Strapi project](../getting-started/quick-start.md) (if you want to deploy an existing project go to step 4).
 
-::: warning NOTE
+::: tip NOTE
 
 If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](../guides/databases.md#install-mongodb-locally) then, jump to step 4.
 
@@ -131,7 +131,7 @@ heroku create
 
 You can use `heroku create custom-project-name`, to have Heroku create a `custom-project-name.heroku.com` URL. Otherwise, Heroku will automatically generate a random project name (and URL) for you.
 
-::: warning NOTE
+::: tip NOTE
 If you have a Heroku project app already created. You would use the following step to initialize your local project folder:
 
 `Path: ./my-project/`
@@ -180,19 +180,23 @@ This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:
 
 (This url is read like so: \*postgres:// **USERNAME** : **PASSWORD** @ **HOST** : **PORT** : **DATABASE_NAME\***)
 
-#### 3. Set environment variables
+#### 3. Set Database variables automatically
 
-Strapi expects a variable for each database connection configuration (host, username, etc.). So, from the url above, you have to set several environment variables in the Heroku config:
+Strapi expects a variable for each database connection configuration (host, username, etc.). So, from the url above, we will deconstruct that environment variable using [pg-connection-string](https://www.npmjs.com/package/pg-connection-string). Heroku will sometimes change the above url, so it's best to automate the deconstruction of it, as Heroku will automatically update the `DATABASE_URL` environment variable.
+
+Install the package:
+
+With npm:
 
 ```bash
-heroku config:set DATABASE_USERNAME=ebitxebvixeeqd
-heroku config:set DATABASE_PASSWORD=dc59b16dedb3a1eef84d4999a0be041bd419c474cd4a0973efc7c9339afb4baf
-heroku config:set DATABASE_HOST=ec2-50-37-231-192.compute-2.amazonaws.com
-heroku config:set DATABASE_PORT=5432
-heroku config:set DATABASE_NAME=d516fp1u21ph7b
+npm install pg-connection-string --save
 ```
 
-Please replace these above values with your actual values.
+With yarn:
+
+```bash
+yarn add pg-connection-string
+```
 
 #### 4. Update your database config file
 
@@ -201,6 +205,9 @@ Replace the contents of `database.js` with the following:
 `Path: ./config/database.js`.
 
 ```js
+const parse = require('pg-connection-string').parse;
+const config = parse(process.env.DATABASE_URL)
+
 module.exports = ({ env }) => ({
   defaultConnection: 'default',
   connections: {
@@ -208,11 +215,11 @@ module.exports = ({ env }) => ({
       connector: 'bookshelf',
       settings: {
         client: 'postgres',
-        host: env('DATABASE_HOST', '127.0.0.1'),
-        port: env.int('DATABASE_PORT', 27017),
-        database: env('DATABASE_NAME', 'strapi'),
-        username: env('DATABASE_USERNAME', ''),
-        password: env('DATABASE_PASSWORD', ''),
+        host: config.host,
+        port: config.port,
+        database: config.database,
+        username: config.user,
+        password: config.password,
       },
       options: {
         ssl: false,

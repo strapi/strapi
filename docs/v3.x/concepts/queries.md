@@ -173,7 +173,7 @@ strapi.query('restaurant').update(
 );
 ```
 
-When updating an entry with its components or dynamiczones beware that if you send the components without any `id` the previous components will be deleted and replaced. You can update the components by sending their `id` with the rest of the fields:
+When updating an entry with its components or dynamic zones beware that if you send the components without any `id` the previous components will be deleted and replaced. You can update the components by sending their `id` with the rest of the fields:
 
 **Update by id and update previous components**
 
@@ -368,7 +368,7 @@ const result = strapi.query('restaurant').model.find({
   date: { $gte: '2019-01-01T00.00.00Z' },
 });
 
-const fields = result.toObject();
+const fields = result.map(entry => entry.toObject());
 ```
 
 :::

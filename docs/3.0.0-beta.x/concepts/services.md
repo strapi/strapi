@@ -39,7 +39,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -75,7 +75,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -110,7 +110,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -184,7 +184,7 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
+- `params` (object): it should look like this `{id: 1}`
 
 :::
 
@@ -206,7 +206,7 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
+- `params` (object): it should look like this `{id: 1}`
 
 :::
 
@@ -229,7 +229,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -261,7 +261,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {

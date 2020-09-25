@@ -1,13 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
-import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
+import { useHistory } from 'react-router-dom';
+
+import { useFetchPluginsFromMarketPlace } from '../../hooks';
 import PageTitle from '../../components/PageTitle';
-import PluginCard from '../../components/PluginCard';
+import PluginCard from './PluginCard';
 import Wrapper from './Wrapper';
 
-const MarketPlacePage = ({ history }) => {
+const MarketPlacePage = () => {
+  const history = useHistory();
   const { autoReload, currentEnvironment, formatMessage, plugins } = useGlobalContext();
   const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
 
@@ -82,10 +84,6 @@ const MarketPlacePage = ({ history }) => {
       </Wrapper>
     </div>
   );
-};
-
-MarketPlacePage.propTypes = {
-  history: PropTypes.object.isRequired,
 };
 
 export default MarketPlacePage;

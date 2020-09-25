@@ -65,14 +65,17 @@ It's important to call `throw(error);` to avoid stopping the middleware stack. I
 
 ## Configure the middleware
 
-Make sure your middleware is added at the end of the middleware stack.
+To ensure that your middleware catches all errors including those in other middleware, it needs to be added at the beginning of the stack but after the `boom` middleware.
+
+After, the sentry middleware captures and rethrows the error, boom will return an appropriate HTTP response to the client.
 
 **Path —** `./config/middleware.js`
 
 ```js
 module.exports = {
   load: {
-    after: ['parser', 'router', 'sentry'],
+    before: ['boom', 'sentry', ...],
+    ...
   },
 };
 ```

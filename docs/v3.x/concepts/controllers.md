@@ -7,7 +7,7 @@ Controllers are JavaScript files which contain a set of methods called **actions
 ```js
 module.exports = {
   // GET /hello
-  index: async ctx => {
+  async index(ctx) {
     return 'Hello World!';
   },
 };
@@ -40,8 +40,10 @@ First require the utility functions
 const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 ```
 
-- `parseMultipartData`: This function parses strapi's formData format.
+- `parseMultipartData`: This function parses Strapi's formData format.
 - `sanitizeEntity`: This function removes all private fields from the model and its relations.
+
+#### Collection Type
 
 :::: tabs
 
@@ -194,7 +196,7 @@ const { sanitizeEntity } = require('strapi-utils');
 
 module.exports = {
   /**
-   * delete a record.
+   * Delete a record.
    *
    * @return {Object}
    */
@@ -203,6 +205,90 @@ module.exports = {
     const { id } = ctx.params;
 
     const entity = await strapi.services.restaurant.delete({ id });
+    return sanitizeEntity(entity, { model: strapi.models.restaurant });
+  },
+};
+```
+
+:::
+
+::::
+
+#### Single Type
+
+:::: tabs
+
+::: tab find
+
+#### `find`
+
+```js
+const { sanitizeEntity } = require('strapi-utils');
+
+module.exports = {
+  /**
+   * Retrieve the record.
+   *
+   * @return {Object}
+   */
+
+  async find(ctx) {
+    const entity = await strapi.services.restaurant.find();
+    return sanitizeEntity(entity, { model: strapi.models.restaurant });
+  },
+};
+```
+
+:::
+
+::: tab update
+
+#### `update`
+
+```js
+const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
+
+module.exports = {
+  /**
+   * Update the record.
+   *
+   * @return {Object}
+   */
+
+  async update(ctx) {
+    let entity;
+    if (ctx.is('multipart')) {
+      const { data, files } = parseMultipartData(ctx);
+      entity = await strapi.services.restaurant.createOrUpdate(data, {
+        files,
+      });
+    } else {
+      entity = await strapi.services.restaurant.createOrUpdate(ctx.request.body);
+    }
+
+    return sanitizeEntity(entity, { model: strapi.models.restaurant });
+  },
+};
+```
+
+:::
+
+::: tab delete
+
+#### `delete`
+
+```js
+const { sanitizeEntity } = require('strapi-utils');
+
+module.exports = {
+  /**
+   * Delete the record.
+   *
+   * @return {Object}
+   */
+
+  async delete(ctx) {
+    const entity = await strapi.services.restaurant.delete();
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
   },
 };
@@ -254,7 +340,7 @@ Our `index` action will return `Hello World!`. You can also return a JSON object
 ```js
 module.exports = {
   // GET /hello
-  index: async ctx => {
+  async index(ctx) {
     ctx.send('Hello World!');
   },
 };
