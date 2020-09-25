@@ -1,18 +1,35 @@
 import styled from 'styled-components';
 
+const hoverStyle = `
+  border: 1px solid #aed4fb;
+  background-color: #e6f0fb;
+  > button {
+    :before,
+    :after {
+      background-color: #007eff;
+    }
+    background-color: #aed4fb;
+  }
+
+  > p {
+    color: #007eff;
+  }
+`;
+
+/* eslint-disable indent */
 const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
   padding: 0 20px !important;
 
-  ${({ isEmpty, isFromDynamicZone }) => {
-  if (isEmpty) {
-    return `
+  ${({ isEmpty, isFromDynamicZone, isReadOnly }) => {
+    if (isEmpty) {
+      return `
       position: relative;
       height: 108px;
       margin-bottom: 25px !important;
       background-color: #fafafb;
       text-align: center;
-      cursor: pointer;
+      cursor: ${isReadOnly ? 'not-allowed' : 'pointer'};
       border-radius: 2px;
 
       > button {
@@ -24,41 +41,33 @@ const NonRepeatableWrapper = styled.div`
         line-height: 38px;
         border-radius: 50%;
         background-color: #f3f4f4;
-        cursor: pointer;
+        cursor: ${isReadOnly ? 'not-allowed !important' : 'pointer'};
       }
       border: 1px solid transparent;
 
       &:hover {
-        border: 1px solid #aed4fb;
-        background-color: #e6f0fb;
-        > button {
-          :before,
-          :after {
-            background-color: #007eff;
-          }
-          background-color: #aed4fb;
-        }
-
-        > p {
-          color: #007eff;
-        }
+        ${isReadOnly ? '' : hoverStyle};
       }
     `;
-  }
+    }
 
-  if (isFromDynamicZone) {
-    return `
+    if (isFromDynamicZone) {
+      return `
       background-color: #fff;
       padding: 0 10px !important;
     `;
-  }
+    }
 
-  return `
+    return `
     padding-top: 25px !important;
     background-color: #f7f8f8;
     margin-bottom: 18px !important;
   `;
-}}
+  }}
 `;
+
+NonRepeatableWrapper.defaultProps = {
+  isReadOnly: false,
+};
 
 export default NonRepeatableWrapper;

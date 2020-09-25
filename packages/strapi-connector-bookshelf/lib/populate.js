@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { getComponentAttributes, isComponent } = require('./utils/attributes');
-const { findModelByAssoc, isPolymorphic } = require('./utils/associations');
+const { isPolymorphic } = require('./utils/associations');
 
 /**
  * Create utilities to populate a model on fetch
@@ -54,7 +54,7 @@ const populateBareAssociations = (definition, { prefix = '' } = {}) => {
       }
 
       const path = `${prefix}${assoc.alias}`;
-      const assocModel = findModelByAssoc({ assoc });
+      const assocModel = strapi.db.getModelByAssoc(assoc);
 
       const polyAssocs = assocModel.associations
         .filter(assoc => isPolymorphic({ assoc }))
@@ -72,7 +72,7 @@ const populateBareAssociations = (definition, { prefix = '' } = {}) => {
 
 const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
   const path = `${prefix}${assoc.alias}`;
-  const assocModel = findModelByAssoc({ assoc });
+  const assocModel = strapi.db.getModelByAssoc(assoc);
 
   const polyAssocs = assocModel.associations
     .filter(assoc => isPolymorphic({ assoc }))
@@ -176,7 +176,7 @@ const formatPopulateOptions = (definition, withRelated) => {
 
       if (!assoc) return acc;
 
-      tmpModel = findModelByAssoc({ assoc });
+      tmpModel = strapi.db.getModelByAssoc(assoc);
 
       if (isPolymorphic({ assoc })) {
         const path = formatPolymorphicPopulate({
@@ -206,7 +206,7 @@ const formatPolymorphicPopulate = ({ assoc, prefix = '' }) => {
 
   // oneToMorph or manyToMorph side.
   // Retrieve collection name because we are using it to build our hidden model.
-  const model = findModelByAssoc({ assoc });
+  const model = strapi.db.getModelByAssoc(assoc);
 
   return {
     [`${prefix}${assoc.alias}.${model.collectionName}`]: function(query) {

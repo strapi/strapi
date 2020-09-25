@@ -15,6 +15,7 @@ import CardControl from '../CardControl';
 
 const BrowseAssets = () => {
   const {
+    allowedActions,
     allowedTypes,
     count,
     files,
@@ -80,18 +81,24 @@ const BrowseAssets = () => {
   /* eslint-disable react/jsx-indent */
   const renderCardControl = noNavigation
     ? null
-    : id => (
-        <CardControl
-          small
-          title="edit"
-          color="#9EA7B8"
-          type="pencil"
-          onClick={e => {
-            e.stopPropagation();
-            handleGoToEditFile(id);
-          }}
-        />
-      );
+    : id => {
+        if (!allowedActions.canUpdate) {
+          return null;
+        }
+
+        return (
+          <CardControl
+            small
+            title="edit"
+            color="#9EA7B8"
+            type="pencil"
+            onClick={e => {
+              e.stopPropagation();
+              handleGoToEditFile(id);
+            }}
+          />
+        );
+      };
 
   /* eslint-enable indent */
   /* eslint-enable react/jsx-indent */
@@ -113,57 +120,62 @@ const BrowseAssets = () => {
   const areResultsEmptyWithSearchOrFilters = isEmpty(files) && (hasSearch || hasFilters);
 
   return (
-    <Wrapper>
-      <Padded top>
-        <Flex flexWrap="wrap">
-          {multiple && (
-            <Padded right size="sm">
-              <SelectAll
-                checked={areAllCheckboxesSelected}
-                onChange={handleAllFilesSelection}
-                someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+    <>
+      <Wrapper>
+        <Padded top>
+          {allowedActions.canRead && (
+            <Flex flexWrap="wrap">
+              {multiple && (
+                <Padded right size="sm">
+                  <SelectAll
+                    checked={areAllCheckboxesSelected}
+                    onChange={handleAllFilesSelection}
+                    someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+                  />
+                </Padded>
+              )}
+              <SortPicker onChange={handleChangeParams} value={params._sort} />
+              <Padded left size="sm" />
+              <Filters
+                filters={params.filters}
+                onChange={handleChangeParams}
+                onClick={handleDeleteFilter}
               />
-            </Padded>
+            </Flex>
           )}
-          <SortPicker onChange={handleChangeParams} value={params._sort} />
-          <Padded left size="sm" />
-          <Filters
-            filters={params.filters}
-            onChange={handleChangeParams}
-            onClick={handleDeleteFilter}
+        </Padded>
+        {!files || files.length === 0 ? (
+          <ListEmpty
+            canCreate={allowedActions.canCreate}
+            numberOfRows={2}
+            onClick={handleGoToUpload}
+            hasSearchApplied={areResultsEmptyWithSearchOrFilters}
           />
-        </Flex>
-      </Padded>
-      {!files || files.length === 0 ? (
-        <ListEmpty
-          numberOfRows={2}
-          onClick={handleGoToUpload}
-          hasSearchApplied={areResultsEmptyWithSearchOrFilters}
-        />
-      ) : (
-        <>
-          <List
-            data={files}
-            onChange={handleCheckboxChange}
-            selectedItems={selectedFiles}
-            onCardClick={handleListCardClick}
-            allowedTypes={allowedTypes}
-            smallCards
-            renderCardControl={renderCardControl}
-          />
-          <Padded left right>
-            <Padded left right size="xs">
-              <PageFooter
-                context={{ emitEvent: () => {} }}
-                count={count}
-                onChangeParams={handleChangeListParams}
-                params={paginationParams}
-              />
+        ) : (
+          <>
+            <List
+              data={files}
+              onChange={handleCheckboxChange}
+              selectedItems={selectedFiles}
+              onCardClick={handleListCardClick}
+              allowedTypes={allowedTypes}
+              smallCards
+              renderCardControl={renderCardControl}
+            />
+            <Padded left right>
+              <Padded left right size="xs">
+                <PageFooter
+                  context={{ emitEvent: () => {} }}
+                  count={count}
+                  onChangeParams={handleChangeListParams}
+                  params={paginationParams}
+                />
+              </Padded>
             </Padded>
-          </Padded>
-        </>
-      )}
-    </Wrapper>
+          </>
+        )}
+      </Wrapper>
+    </>
   );
 };
 

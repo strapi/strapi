@@ -1,16 +1,22 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
-
-import { GlobalPagination, InputSelect } from 'strapi-helper-plugin';
+import { GlobalPagination, InputSelect, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
 import { FooterWrapper, SelectWrapper, Label } from './components';
 
 function Footer() {
-  const {
-    count,
-    onChangeParams,
-    searchParams: { _limit, _page },
-  } = useListView();
+  const { emitEvent } = useGlobalContext();
+  const { count, onChangeSearch, _limit, _page } = useListView();
+
+  const handleChangePage = ({ target: { value } }) => {
+    onChangeSearch({ target: { name: '_page', value } });
+  };
+
+  const handleChangeLimit = ({ target: { value } }) => {
+    emitEvent('willChangeNumberOfEntriesPerPage');
+
+    onChangeSearch({ target: { name: '_limit', value } });
+  };
 
   return (
     <FooterWrapper className="row">
@@ -19,7 +25,7 @@ function Footer() {
           <InputSelect
             style={{ width: '75px', height: '32px', marginTop: '-1px' }}
             name="_limit"
-            onChange={onChangeParams}
+            onChange={handleChangeLimit}
             selectOptions={['10', '20', '50', '100']}
             value={_limit}
           />
@@ -31,13 +37,11 @@ function Footer() {
       <div className="col-6">
         <GlobalPagination
           count={count}
-          onChangeParams={({ target: { value } }) => {
-            onChangeParams({ target: { name: '_page', value } });
-          }}
+          onChangeParams={handleChangePage}
           params={{
-            currentPage: parseInt(_page, 10),
-            _limit: parseInt(_limit, 10),
-            _page: parseInt(_page, 10),
+            currentPage: _page,
+            _limit,
+            _page,
           }}
         />
       </div>

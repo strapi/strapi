@@ -8,7 +8,7 @@ Get ready to get Strapi up and running in **less than 5 minutes** 🚀.
 
 _For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.md)._
 
-(Before continuing, please make sure [Node.js and npm are properly installed](install-requirements.md) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
+(Before continuing, please make sure [Node.js and npm are properly installed](../installation/cli.md#step-1-make-sure-requirements-are-met) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
 ## 1. Install Strapi and Create a new project
 
@@ -39,7 +39,7 @@ Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 - Complete the form to create the first **Administrator** user.
 - Click **Ready to start**.
 
-## 3. Create a Restaurant Content Type
+## 3. Create a Restaurant Collection Type
 
 Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
@@ -55,7 +55,7 @@ Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin
   - Click `Finish`
 - Click the **Save** button and wait for Strapi to restart
 
-## 4. Create a Category Content type
+## 4. Create a Category Collection type
 
 Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
@@ -72,7 +72,7 @@ Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/
   - Click `Finish`
 - Click the **Save** button and wait for Strapi to restart
 
-## 5. Add content to "Restaurant" Content Type
+## 5. Add content to "Restaurant" Collection Type
 
 Navigate to [**COLLECTION TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager), in the left-hand menu.
 
@@ -81,7 +81,7 @@ Navigate to [**COLLECTION TYPES** - **Restaurants**](http://localhost:1337/admin
 
 You will see your restaurant listed in the entries.
 
-## 6. Add categories to the "Category" Content Type
+## 6. Add categories to the "Category" Collection Type
 
 Navigate to [**COLLECTION TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
 
@@ -111,14 +111,14 @@ Navigate to [**PLUGINS** - **Roles & Permissions**](http://localhost:1337/admin/
 - Repeat and find **Category**. Click the checkbox next to **find** and **findone**.
 - Click **Save**.
 
-## 8. Consume the Content Type's API
+## 8. Consume the Collection Type's API
 
 Here we are! The list of **restaurants** is accessible at [`http://localhost:1337/restaurants`](http://localhost:1337/restaurants).
 
 ::: tip CONGRATULATIONS
 👏 Congratulations, you have now completed the **Strapi Quick Start**. Where to go next?
 
-- Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
+- Learn how to use Strapi with React ([Gatsby](https://strapi.io/blog/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://strapi.io/blog/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://strapi.io/blog/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
 - Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.

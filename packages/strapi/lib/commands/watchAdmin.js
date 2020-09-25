@@ -1,8 +1,12 @@
+'use strict';
+
+// required first because it loads env files.
+const loadConfiguration = require('../core/app-configuration');
+
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
-const { getConfigUrls } = require('strapi-utils');
+const { getConfigUrls, getAbsoluteServerUrl } = require('strapi-utils');
 
-const loadConfiguration = require('../core/app-configuration');
 const addSlash = require('../utils/addSlash');
 
 module.exports = async function() {
@@ -10,7 +14,7 @@ module.exports = async function() {
 
   const config = loadConfiguration(dir);
 
-  const { serverUrl, adminPath } = getConfigUrls(config.get('server'), true);
+  const { adminPath } = getConfigUrls(config.get('server'), true);
 
   const adminPort = config.get('server.admin.port', 8000);
   const adminHost = config.get('server.admin.host', 'localhost');
@@ -21,7 +25,7 @@ module.exports = async function() {
     port: adminPort,
     host: adminHost,
     options: {
-      backend: serverUrl,
+      backend: getAbsoluteServerUrl(config, true),
       publicPath: addSlash(adminPath),
       watchIgnoreFiles: adminWatchIgnoreFiles,
     },

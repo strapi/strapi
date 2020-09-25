@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "{label} مدخل تم العثور عليه",
   "containers.List.pluginHeaderDescription.singular": "{label} مدخل عثر",
   "containers.ListPage.displayedFields": "اظهار الحقول",
-  "containers.SettingPage.addField": "اضافة حقل جديد",
-  "containers.SettingPage.addRelationalField": "إضافة مجال علاقي جديد",
   "containers.SettingPage.attributes": "حقول السمات",
   "containers.SettingPage.attributes.description": "حدد ترتيب السمات",
   "containers.SettingPage.editSettings.description": "اسحب الحقول وأفلتها لإنشاء التخطيط",

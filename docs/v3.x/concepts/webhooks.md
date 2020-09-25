@@ -2,8 +2,7 @@
 
 ## What is a webhook
 
-A webhook is a way for an application to notify other applications that an event occurred.
-Using a webhook is a good way to tell third party providers to start some processing (CI, build, deployment ...).
+Webhook is a construct used by an application to notify other applications that an event occurred. More precisely, webhook is a user-defined HTTP callback. Using a webhook is a good way to tell third party providers to start some processing (CI, build, deployment ...).
 
 The way a webhook works is by delivering information to a receiving application through HTTP requests (typically POST requests).
 

@@ -7,6 +7,7 @@
  */
 
 const _ = require('lodash');
+const { isValidEmailTemplate } = require('./validation/email-template');
 
 module.exports = {
   /**
@@ -29,17 +30,6 @@ module.exports = {
       strapi.log.error(err);
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
-  },
-
-  async deleteProvider(ctx) {
-    const { provider } = ctx.params;
-
-    if (!provider) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
-    }
-
-    // TODO handle dynamic
-    ctx.send({ ok: true });
   },
 
   async deleteRole(ctx) {
@@ -74,13 +64,9 @@ module.exports = {
 
   async getPermissions(ctx) {
     try {
-      const { lang } = ctx.query;
-      const plugins = await strapi.plugins[
-        'users-permissions'
-      ].services.userspermissions.getPlugins(lang);
       const permissions = await strapi.plugins[
         'users-permissions'
-      ].services.userspermissions.getActions(plugins);
+      ].services.userspermissions.getActions();
 
       ctx.send({ permissions });
     } catch (err) {
@@ -142,12 +128,6 @@ module.exports = {
     ctx.send({ message: 'ok' });
   },
 
-  async init(ctx) {
-    const admins = await strapi.query('administrator', 'admin').find({ _limit: 1 });
-
-    ctx.send({ hasAdmin: admins.length > 0 });
-  },
-
   async searchUsers(ctx) {
     const { id } = ctx.params;
 
@@ -196,6 +176,16 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
 
+    const emailTemplates = ctx.request.body['email-templates'];
+
+    for (let key in emailTemplates) {
+      const template = emailTemplates[key].options.message;
+
+      if (!isValidEmailTemplate(template)) {
+        return ctx.badRequest(null, [{ messages: [{ id: 'Invalid template' }] }]);
+      }
+    }
+
     await strapi
       .store({
         environment: '',
@@ -203,7 +193,7 @@ module.exports = {
         name: 'users-permissions',
         key: 'email',
       })
-      .set({ value: ctx.request.body['email-templates'] });
+      .set({ value: emailTemplates });
 
     ctx.send({ ok: true });
   },
@@ -248,6 +238,14 @@ module.exports = {
         key: 'grant',
       })
       .get();
+
+    for (const provider in providers) {
+      if (provider !== 'email') {
+        providers[provider].redirectUri = strapi.plugins[
+          'users-permissions'
+        ].services.providers.buildRedirectUri(provider);
+      }
+    }
 
     ctx.send(providers);
   },

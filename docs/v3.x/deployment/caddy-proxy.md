@@ -47,7 +47,7 @@ http://api.example.com {
 
 #### Sub-Folder Unified
 
-This config is using a sub-folder that is dedicated to Strapi only. It will bind to port 80 HTTP and hosts the "frontend" files on `/var/www` like a normal web server, but proxies all strapi requests on the `example.com/api` sub-path.
+This config is using a sub-folder that is dedicated to Strapi only. It will bind to port 80 HTTP and hosts the "frontend" files on `/var/www` like a normal web server, but proxies all Strapi requests on the `example.com/api` sub-path.
 
 ::: warning
 Please note that this config is not focused on the frontend hosting, you will most likely need to adjust this to your frontend software requirements, it is only being shown here as an example.
@@ -76,7 +76,7 @@ http://api.example.com {
 
 #### Sub-Folder Split
 
-This config is using two sub-folders that are dedicated to Strapi. It will bind to port 80 HTTP and hosts the "frontend" files on `/var/www` like a normal web server, but proxies all strapi API requests on the `example.com/api` sub-path. Likewise it will proxy all admin requests on the `example.com/dashboard` sub-path.
+This config is using two sub-folders that are dedicated to Strapi. It will bind to port 80 HTTP and hosts the "frontend" files on `/var/www` like a normal web server, but proxies all Strapi API requests on the `example.com/api` sub-path. Likewise it will proxy all admin requests on the `example.com/dashboard` sub-path.
 
 Alternatively for the admin, you can replace the proxy instead with serving the admin `build` folder directly from Caddy, such centralizing the admin but load balancing the backend APIs. The example for this is not shown, but it would likely be something you would build into your CI/CD platform.
 

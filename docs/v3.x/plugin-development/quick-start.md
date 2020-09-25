@@ -7,7 +7,7 @@ Strapi allows you to create local plugins that will work exactly the same as ext
 Create a development project
 
 1. Create a new project `cd .. && strapi new myDevelopmentProject`.
-2. `cd myDevelopmentProject && strapi develop` To start the strapi project
+2. `cd myDevelopmentProject && strapi develop` To start the Strapi project
 
 ## Plugin development Setup
 

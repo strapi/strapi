@@ -8,7 +8,7 @@ This guide could also be used to setup an Axios client instance.
 
 ## Installation
 
-First you will have to install the client package in your application by running one of the following command.
+First you will have to install the client package in your application by running one of the following commands:
 
 :::: tabs
 
@@ -26,7 +26,7 @@ First you will have to install the client package in your application by running
 
 To init the client, we will use the [hooks system](../concepts/hooks.md). Hooks let you add new features in your Strapi application.
 
-Hooks are loaded one time, at the server start.
+Hooks are loaded once at server start.
 
 Lets create our GitHub hook.
 
@@ -42,7 +42,7 @@ module.exports = strapi => {
 };
 ```
 
-When the hook is created, we have set it to `enabled` in order for Strapi to laod it. You will need to create or edit the file `./config/hook.js`.
+When the hook is created, we have set it to `enabled` in order for Strapi to load it. You will need to create or edit the file `./config/hook.js`.
 
 **Path —** `./config/hook.js`
 
@@ -107,7 +107,7 @@ And here it is.
 
 You can now use `strapi.services.github` everywhere in your code to use the GitHub client.
 
-To simply test if it works, lets update the `bootstrap.js` function to log your GitHub profile.
+To simply test if it works, let's update the `bootstrap.js` function to log your GitHub profile.
 
 **Path —** `./config/functions/bootstrap.js`
 

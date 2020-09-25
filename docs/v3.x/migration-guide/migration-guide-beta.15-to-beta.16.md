@@ -90,7 +90,7 @@ To make sure a Wysiwyg field stays the same when deploying, we introduced the `r
 
 ### Custom controllers and services
 
-If you are using [core services](../concepts/services.md), you previously needed to call `result.toJSON()` or `result.toObject()` to get a plain javascript object. This is not the case anymore, you will now receive a simple object directly.
+If you are using [core services](../../3.0.0-beta.x/concepts/services.md), you previously needed to call `result.toJSON()` or `result.toObject()` to get a plain javascript object. This is not the case anymore, you will now receive a simple object directly.
 
 **Before**:
 
@@ -113,9 +113,9 @@ module.exports = {
 };
 ```
 
-The same modification was made to `strapi.query()`. Read more about **Queries** [here](../concepts/queries.md).
+The same modification was made to `strapi.query()`. Read more about **Queries** [here](../../3.0.0-beta.x/concepts/queries.md).
 
-Keep in mind that if you are running custom ORM queries with Bookshelf or Mongoose you will still have to call `toJSON` or `toObject`. Check out this section about [custom queries](../concepts/queries.md#api-reference).
+Keep in mind that if you are running custom ORM queries with Bookshelf or Mongoose you will still have to call `toJSON` or `toObject`. Check out this section about [custom queries](../../3.0.0-beta.x/concepts/queries.md#api-reference).
 
 ### Bootstrap function
 
@@ -167,7 +167,7 @@ module.exports = () => {};
 
 ### Custom hooks
 
-If you have custom [hooks](../concepts/hooks.md) in your project, the `initialize` function will not receive a callback anymore. You can either use an async function, return a promise or simply run a synchronous function.
+If you have custom [hooks](../../3.0.0-beta.x/concepts/hooks.md) in your project, the `initialize` function will not receive a callback anymore. You can either use an async function, return a promise or simply run a synchronous function.
 
 **Before**
 
