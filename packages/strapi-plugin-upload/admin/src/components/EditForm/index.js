@@ -153,19 +153,23 @@ const EditForm = forwardRef(
         try {
           const canvas = cropper.current.getCroppedCanvas();
 
-          canvas.toBlob(async blob => {
-            const {
-              file: { lastModifiedDate, lastModified, name },
-            } = fileToEdit;
+          canvas.toBlob(
+            async blob => {
+              const {
+                file: { lastModifiedDate, lastModified, name },
+              } = fileToEdit;
 
-            resolve(
-              new File([blob], name, {
-                type: mimeType,
-                lastModified,
-                lastModifiedDate,
-              })
-            );
-          });
+              resolve(
+                new File([blob], name, {
+                  type: mimeType,
+                  lastModified,
+                  lastModifiedDate,
+                })
+              );
+            },
+            mimeType,
+            1
+          );
         } catch (err) {
           reject();
         }
