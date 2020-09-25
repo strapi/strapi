@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { Flex, Text } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { PermissionsWrapper, RowContainer } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import SubCategory from 'ee_else_ce/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/SubCategory';
 
 import RowStyle from './RowStyle';
-import PermissionsWrapper from './PermissionsWrapper';
 
 const PermissionRow = ({
   openedCategory,
@@ -24,7 +24,7 @@ const PermissionRow = ({
   }, [permissions]);
 
   return (
-    <>
+    <RowContainer isWhite={isWhite}>
       <RowStyle
         isWhite={isWhite}
         isActive={openedCategory === permissions.category}
@@ -47,13 +47,13 @@ const PermissionRow = ({
         </Flex>
       </RowStyle>
       {openedCategory === permissions.category && (
-        <PermissionsWrapper>
+        <PermissionsWrapper isWhite={isWhite}>
           {permissions.subCategories.map(subCategory => (
             <SubCategory key={subCategory.subCategory} subCategory={subCategory} />
           ))}
         </PermissionsWrapper>
       )}
-    </>
+    </RowContainer>
   );
 };
 
