@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('../sanitize-entity');
+const sanitizeEntity = require('../sanitize-entity');
 
 describe('Sanitize Entity', () => {
   const input = {
