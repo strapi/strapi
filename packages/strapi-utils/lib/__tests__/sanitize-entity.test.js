@@ -1,10 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const sanitizeEntity = require('../sanitize-entity');
+const { sanitizeEntity } = require('../sanitize-entity');
 
 describe('Sanitize Entity', () => {
   const input = {
+    id: 1,
     email: 'foo@bar.com',
     firstname: 'foo',
     lastname: 'bar',
@@ -103,53 +104,58 @@ describe('Sanitize Entity', () => {
     userDz: userDzModel,
   };
 
-  global.strapi = {
-    getModel(name) {
-      return models[name];
-    },
-  };
+  beforeEach(() => {
+    global.strapi = {
+      getModel(name) {
+        return models[name];
+      },
+      config: {
+        get: jest.fn,
+      },
+    };
+  });
 
   describe('Basic', () => {
     const tests = [
       [
         { withPrivate: false, isOutput: true, includeFields: null },
-        _.pick(input, ['firstname', 'lastname']),
+        _.pick(input, ['id', 'firstname', 'lastname']),
       ],
       [{ withPrivate: false, isOutput: false, includeFields: null }, input],
       [
         { withPrivate: false, isOutput: true, includeFields: ['firstname'] },
-        _.pick(input, ['firstname']),
+        _.pick(input, ['id', 'firstname']),
       ],
       [
         { withPrivate: false, isOutput: true, includeFields: ['email', 'firstname'] },
-        _.pick(input, ['firstname']),
+        _.pick(input, ['id', 'firstname']),
       ],
-      [{ withPrivate: false, isOutput: true, includeFields: ['password'] }, {}],
+      [{ withPrivate: false, isOutput: true, includeFields: ['password'] }, _.pick(input, ['id'])],
       [
         { withPrivate: true, isOutput: true, includeFields: null },
-        _.pick(input, ['email', 'firstname', 'lastname']),
+        _.pick(input, ['id', 'email', 'firstname', 'lastname']),
       ],
       [{ withPrivate: true, isOutput: false, includeFields: null }, input],
       [
         { withPrivate: true, isOutput: true, includeFields: ['firstname'] },
-        _.pick(input, ['firstname']),
+        _.pick(input, ['id', 'firstname']),
       ],
       [
         { withPrivate: true, isOutput: true, includeFields: ['email', 'firstname'] },
-        _.pick(input, ['email', 'firstname']),
+        _.pick(input, ['id', 'email', 'firstname']),
       ],
-      [{ withPrivate: true, isOutput: true, includeFields: ['password'] }, {}],
+      [{ withPrivate: true, isOutput: true, includeFields: ['password'] }, _.pick(input, ['id'])],
       [
         { withPrivate: true, isOutput: false, includeFields: ['firstname'] },
-        _.pick(input, ['firstname']),
+        _.pick(input, ['id', 'firstname']),
       ],
       [
         { withPrivate: true, isOutput: false, includeFields: ['email', 'firstname'] },
-        _.pick(input, ['email', 'firstname']),
+        _.pick(input, ['id', 'email', 'firstname']),
       ],
       [
         { withPrivate: true, isOutput: false, includeFields: ['password'] },
-        _.pick(input, ['password']),
+        _.pick(input, ['id', 'password']),
       ],
     ];
 
@@ -159,43 +165,102 @@ describe('Sanitize Entity', () => {
     });
   });
 
+  describe('With private attributes', () => {
+    describe('When options.privateAttributes exists in model, the attributes in options.privateAttributes must be hidden', () => {
+      const tests = [
+        [{ withPrivate: false, isOutput: true, includeFields: null }, _.pick(input, ['lastname'])],
+        [{ withPrivate: false, isOutput: false, includeFields: null }, input],
+        [{ withPrivate: false, isOutput: true, includeFields: ['firstname'] }, {}],
+        [{ withPrivate: false, isOutput: true, includeFields: ['email', 'firstname'] }, {}],
+        [{ withPrivate: false, isOutput: true, includeFields: ['password'] }, {}],
+        [
+          { withPrivate: true, isOutput: true, includeFields: null },
+          _.pick(input, ['id', 'email', 'firstname', 'lastname']),
+        ],
+        [{ withPrivate: true, isOutput: false, includeFields: null }, input],
+        [
+          { withPrivate: true, isOutput: true, includeFields: ['firstname'] },
+          _.pick(input, ['id', 'firstname']),
+        ],
+        [
+          { withPrivate: true, isOutput: true, includeFields: ['email', 'firstname'] },
+          _.pick(input, ['id', 'email', 'firstname']),
+        ],
+        [{ withPrivate: true, isOutput: true, includeFields: ['password'] }, _.pick(input, ['id'])],
+        [
+          { withPrivate: true, isOutput: false, includeFields: ['firstname'] },
+          _.pick(input, ['id', 'firstname']),
+        ],
+        [
+          { withPrivate: true, isOutput: false, includeFields: ['email', 'firstname'] },
+          _.pick(input, ['id', 'email', 'firstname']),
+        ],
+        [
+          { withPrivate: true, isOutput: false, includeFields: ['password'] },
+          _.pick(input, ['id', 'password']),
+        ],
+      ];
+
+      const model = {
+        ...models.user,
+        options: {
+          ...models.user.options,
+          privateAttributes: ['firstname'],
+        },
+      };
+
+      test.each(tests)(`Test n°%#`, (options, expected) => {
+        global.strapi = {
+          config: {
+            get: jest.fn(path => {
+              return path === 'api.responses.privateAttributes' ? ['id'] : [];
+            }),
+          },
+        };
+
+        expect(sanitizeEntity(input, { ...options, model })).toStrictEqual(expected);
+      });
+    });
+  });
+
   describe('With relation', () => {
     const tests = [
       [
         inputWithRelation,
         { withPrivate: false, isOutput: true, includeFields: null },
-        {
-          ..._.pick(inputWithRelation, ['firstname', 'lastname']),
-          article: _.pick(inputWithRelation.article, ['name', 'content']),
-        },
+        _.pick(inputWithRelation, [
+          'id',
+          'firstname',
+          'lastname',
+          'article.name',
+          'article.content',
+        ]),
       ],
       [
         inputWithRelation,
         { withPrivate: false, isOutput: true, includeFields: ['firstname', 'lastname'] },
-        _.pick(inputWithRelation, ['firstname', 'lastname']),
+        _.pick(inputWithRelation, ['id', 'firstname', 'lastname']),
       ],
       [
         inputWithRelation,
         { withPrivate: false, isOutput: true, includeFields: ['article'] },
-        {
-          article: _.pick(inputWithRelation.article, ['name', 'content']),
-        },
+        _.pick(inputWithRelation, ['id', 'article.name', 'article.content']),
       ],
       [
         inputWithRelation,
         { withPrivate: false, isOutput: true, includeFields: ['article.name'] },
-        _.pick(inputWithRelation, ['article.name']),
+        _.pick(inputWithRelation, ['id', 'article.name']),
       ],
       [
         inputWithRelation,
         { withPrivate: true, isOutput: true, includeFields: null },
-        _.pick(inputWithRelation, ['email', 'firstname', 'lastname', 'article']),
+        _.pick(inputWithRelation, ['id', 'email', 'firstname', 'lastname', 'article']),
       ],
       [
         { ...inputWithRelation, article: _.times(3, () => _.clone(article)) },
         { withPrivate: false, isOutput: true, includeFields: null },
         {
-          ..._.pick(inputWithRelation, 'firstname', 'lastname'),
+          ..._.pick(inputWithRelation, ['id', 'firstname', 'lastname']),
           article: _.times(3, () => _.pick(article, ['name', 'content'])),
         },
       ],
@@ -212,7 +277,7 @@ describe('Sanitize Entity', () => {
       const { userDz: model } = models;
       const dataSource = { ...inputWithDz, dz: null };
 
-      const expected = _.pick(dataSource, ['firstname', 'lastname', 'dz']);
+      const expected = _.pick(dataSource, ['id', 'firstname', 'lastname', 'dz']);
 
       expect(sanitizeEntity(dataSource, { model })).toStrictEqual(expected);
     });
@@ -221,7 +286,7 @@ describe('Sanitize Entity', () => {
       const { userDz: model } = models;
 
       const expected = {
-        ..._.pick(inputWithDz, ['firstname', 'lastname']),
+        ..._.pick(inputWithDz, ['id', 'firstname', 'lastname']),
         dz: inputWithDz.dz.map(comp => _.pick(comp, ['__component', 'name', 'content'])),
       };
 
@@ -246,8 +311,8 @@ describe('Sanitize Entity', () => {
       const dataSource = [_.clone(input), _.clone(input)];
 
       const expected = [
-        _.pick(input, 'firstname', 'lastname'),
-        _.pick(input, 'firstname', 'lastname'),
+        _.pick(input, 'id', 'firstname', 'lastname'),
+        _.pick(input, 'id', 'firstname', 'lastname'),
       ];
 
       const { user: model } = models;

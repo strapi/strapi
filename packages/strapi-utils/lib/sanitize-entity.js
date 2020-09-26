@@ -30,7 +30,7 @@ const sanitizeEntity = (dataSource, options) => {
     const attribute = attributes[key];
     const allowedFieldsHasKey = allowedFields.includes(key);
 
-    if (shouldRemoveAttribute(attribute, { withPrivate, isOutput })) {
+    if (shouldRemoveAttribute(model, key, attribute, { withPrivate, isOutput })) {
       return acc;
     }
 
@@ -120,13 +120,20 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const shouldRemoveAttribute = (attribute, { withPrivate, isOutput }) => {
-  if (_.isNil(attribute)) {
-    return false;
-  }
+const getPrivateAttributes = model => {
+  const allPrivatesAttributes = _.union(
+    strapi.config.get('api.responses.privateAttributes', []),
+    _.get(model, 'options.privateAttributes', [])
+  );
+
+  return allPrivatesAttributes;
+};
+
+const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
+  const privateAttributes = getPrivateAttributes(model);
 
   const isPassword = attribute.type === 'password';
-  const isPrivate = attribute.private === true;
+  const isPrivate = attribute.private === true || privateAttributes.includes(key);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
@@ -134,4 +141,7 @@ const shouldRemoveAttribute = (attribute, { withPrivate, isOutput }) => {
   return !!((isPassword && shouldRemovePassword) || (isPrivate && shouldRemovePrivate));
 };
 
-module.exports = sanitizeEntity;
+module.exports = {
+  sanitizeEntity,
+  getPrivateAttributes,
+};

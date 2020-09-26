@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.1.4",
+  "version": "3.1.6",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -11,26 +11,26 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@apollo/federation": "^0.15.0",
-    "apollo-server-koa": "2.16.0",
+    "@apollo/federation": "^0.20.1",
+    "apollo-server-koa": "2.17.0",
     "dataloader": "^1.4.0",
-    "glob": "^7.1.4",
-    "graphql": "^14.3.0",
+    "glob": "^7.1.6",
+    "graphql": "^14.7.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
-    "graphql-playground-middleware-koa": "^1.6.19",
+    "graphql-playground-middleware-koa": "^1.6.20",
     "graphql-tools": "4.0.6",
-    "graphql-type-json": "0.3.1",
+    "graphql-type-json": "0.3.2",
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.1.0",
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "pluralize": "^8.0.0",
-    "strapi-utils": "3.1.4"
+    "strapi-utils": "3.1.6"
   },
   "devDependencies": {
-    "cross-env": "^5.2.0",
-    "koa": "^2.8.0",
-    "rimraf": "3.0.0"
+    "cross-env": "^5.2.1",
+    "koa": "^2.13.0",
+    "rimraf": "3.0.2"
   },
   "author": {
     "name": "A Strapi developer",
@@ -45,7 +45,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

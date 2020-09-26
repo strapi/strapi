@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
+To access the plugin admin panel, click on the **Settings** link in the left menu and then everything will be under the **USERS & PERMISSIONS PLUGIN** section.
 
 ## Concept
 
@@ -164,9 +164,9 @@ Let's say that strapi's backend is located at: strapi.website.com.
 Let's say that your app frontend is located at: website.com.
 
 1. The user goes on your frontend app (`https://website.com`) and click on your button `connect with Github`.
-2. The frontend redirect the tab to `https://strapi.website.com/connect/github` that calls the backend.
-3. The backend redirects the tab to the github login page where the user logs in.
-4. Once done, Github redirects the tab to `https://strapi.website.com/connect/github/callback?code=abcdef` that calls the backend
+2. The frontend redirect the tab to the backend URL: `https://strapi.website.com/connect/github`.
+3. The backend redirects the tab to the GitHub login page where the user logs in.
+4. Once done, Github redirects the tab to the backend URL:`https://strapi.website.com/connect/github/callback?code=abcdef`.
 5. The backend uses the given `code` to get from Github an `access_token` that can be used for a period of time to make authorized requests to Github to get the user info (the email of the user of example).
 6. Then, the backend redirects the tab to the url of your choice with the param `access_token` (example: `http://website.com/connect/github/redirect?access_token=eyfvg`)
 7. The frontend (`http://website.com/connect/github/redirect`) calls the backend with `https://strapi.website.com/auth/github/callback?access_token=eyfvg` that returns the strapi user profile with its `jwt`. <br> (Under the hood, the backend asks Github for the user's profile and a match is done on Github user's email address and Strapi user's email address)
@@ -575,7 +575,7 @@ In the following section we will detail steps 3. and 7..
 This action sends an email to a user with the link to your own reset password page.
 The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
 
-First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+First, you must specify the url to your reset password page in the admin panel: **Settings > USERS & PERMISSIONS PLUGIN > Advanced Settings > Reset Password Page**.
 
 Then, your **forgotten password page** has to make the following request to your backend.
 

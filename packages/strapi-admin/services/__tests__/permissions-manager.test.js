@@ -84,6 +84,9 @@ describe('Permissions Manager', () => {
           options: {},
         };
       },
+      config: {
+        get: jest.fn,
+      },
     };
 
     test('Pick all fields (output) using default model', () => {
