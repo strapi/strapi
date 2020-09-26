@@ -94,6 +94,77 @@ services:
 
 :::
 
+::: tab MySQL
+
+```yaml
+version: '3'
+services:
+  strapi:
+    image: strapi/strapi
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_NAME: strapi
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapi
+      DATABASE_SSL: "false"
+    volumes:
+      - ./app:/srv/app
+    ports:
+      - '1337:1337'
+    depends_on:
+      - mysql
+
+  mysql:
+     image: mysql
+     command: mysqld --default-authentication-plugin=mysql_native_password
+     volumes:
+       - ./data:/var/lib/mysql
+     environment:
+       MYSQL_ROOT_PASSWORD: strapi
+       MYSQL_DATABASE: strapi
+       MYSQL_USER: strapi
+       MYSQL_PASSWORD: strapi
+```
+
+:::
+
+::: tab MariaDB
+
+```yaml
+version: '3'
+services:
+  strapi:
+    image: strapi/strapi
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: mariadb
+      DATABASE_PORT: 3306
+      DATABASE_NAME: strapi
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapi
+      DATABASE_SSL: "false"
+    volumes:
+      - ./app:/srv/app
+    ports:
+      - '1337:1337'
+    depends_on:
+      - mariadb
+
+  mariadb:
+     image: mariadb
+     volumes:
+       - ./data:/var/lib/mysql
+     environment:
+       MYSQL_ROOT_PASSWORD: strapi
+       MYSQL_DATABASE: strapi
+       MYSQL_USER: strapi
+       MYSQL_PASSWORD: strapi
+```
+
+:::
+
 ::::
 
 ## Step 2: Pull the latest images

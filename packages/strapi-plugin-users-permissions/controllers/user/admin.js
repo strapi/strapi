@@ -88,7 +88,7 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email });
+      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail) {
         return ctx.badRequest(
@@ -109,6 +109,8 @@ module.exports = {
       created_by: admin.id,
       updated_by: admin.id,
     };
+
+    user.email = user.email.toLowerCase();
 
     if (!user.role) {
       const defaultRole = await strapi
@@ -185,7 +187,7 @@ module.exports = {
     }
 
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email });
+      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
         return ctx.badRequest(
@@ -197,6 +199,7 @@ module.exports = {
           })
         );
       }
+      body.email = body.email.toLowerCase();
     }
 
     const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });

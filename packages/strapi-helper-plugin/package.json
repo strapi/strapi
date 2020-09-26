@@ -1,12 +1,12 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.1.4",
+  "version": "3.1.6",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "author": {
@@ -32,7 +32,7 @@
     "test": "echo \"no tests yet\""
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
+    "@babel/core": "^7.11.6",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
@@ -55,7 +55,7 @@
     "@buffetjs/icons": "3.2.3",
     "@buffetjs/styles": "3.2.3",
     "@buffetjs/utils": "3.2.3",
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^4.5.2",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
@@ -63,7 +63,7 @@
     "moment": "^2.16.0",
     "react": "^16.13.1",
     "react-dom": "^16.9.0",
-    "react-helmet": "^6.0.0",
+    "react-helmet": "^6.1.0",
     "react-intl": "4.5.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
