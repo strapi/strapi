@@ -33,6 +33,9 @@
     "strapi-utils": "3.1.6",
     "uuid": "^3.1.0"
   },
+  "resolutions": {
+    "mongoose": "5.10.6"
+  },
   "devDependencies": {
     "koa": "^2.8.0"
   },
