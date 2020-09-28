@@ -20,7 +20,7 @@ module.exports = async function() {
 
   // Method to initialize hooks and emit an event.
   const initialize = hookKey => {
-    if (this.hook[hookKey].loaded == true) return;
+    if (this.hook[hookKey].loaded === true) return;
 
     const module = this.hook[hookKey].load;
     const hookTimeout = get(hookConfig, ['settings', hookKey, 'timeout'], hookConfig.timeout);
