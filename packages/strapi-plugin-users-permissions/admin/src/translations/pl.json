@@ -81,7 +81,6 @@
   "PopUpForm.Providers.callback.placeholder": "TEKST",
   "PopUpForm.Providers.enabled.description": "W przypadku wyłączenia, użytkownicy nie będą mogli skorzystać z tego dostawcy.",
   "PopUpForm.Providers.enabled.label": "Włączony",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "ID klienta",
   "PopUpForm.Providers.key.placeholder": "TEKST",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Discord",

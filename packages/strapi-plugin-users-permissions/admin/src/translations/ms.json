@@ -81,7 +81,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "URL pengubah hala untuk ditambahkan dalam konfigurasi aplikasi Discord anda",
   "PopUpForm.Providers.enabled.description": "Sekiranya dinyahaktifkan, pengguna tidak akan dapat menggunakan pembekal ini.",
   "PopUpForm.Providers.enabled.label": "Aktifkan",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "ID Pelanggan",
   "PopUpForm.Providers.key.placeholder": "TEKS",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "URL pengubah hala untuk ditambahkan dalam konfigurasi aplikasi Linkedin anda",

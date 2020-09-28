@@ -79,7 +79,6 @@
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Als deze uitgeschakeld is kunnen gebruikers geen gebruik maken van deze leverancier.",
   "PopUpForm.Providers.enabled.label": "Inschakelen",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "De doorstuur URL om in je Microsoft applicatie configuratie te zetten",

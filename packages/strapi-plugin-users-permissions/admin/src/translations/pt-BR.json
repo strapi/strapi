@@ -73,7 +73,6 @@
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Se desativado, os usuários não poderão usar este provedor",
   "PopUpForm.Providers.enabled.label": "Ativar",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "ID do cliente",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "O URL de redirecionamento a ser adicionado nas configurações do aplicativo Linkedin",

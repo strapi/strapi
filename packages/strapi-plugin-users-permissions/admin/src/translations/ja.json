@@ -78,7 +78,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Discordアプリケーションの設定で追加するリダイレクトURL",
   "PopUpForm.Providers.enabled.description": "無効にすると、ユーザーはこのプロバイダを使用できなくなります。",
   "PopUpForm.Providers.enabled.label": "有効にする",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "クライアントID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "あなたのLinkedinアプリケーション構成に追加するリダイレクトURL",

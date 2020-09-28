@@ -81,7 +81,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Discord 애플리케이션 구성에 추가 할 리다이렉트 URL",
   "PopUpForm.Providers.enabled.description": "사용하지 않을 경우 이 프로바이더(provider) 기능을 이용할 수 없습니다.",
   "PopUpForm.Providers.enabled.label": "사용",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "클라이언트 ID(Client ID)",
   "PopUpForm.Providers.key.placeholder": "텍스트",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Linkedin",

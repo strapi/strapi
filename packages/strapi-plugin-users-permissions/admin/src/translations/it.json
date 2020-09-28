@@ -72,7 +72,6 @@
   "PopUpForm.Providers.callback.placeholder": "TEXT",
   "PopUpForm.Providers.enabled.description": "Se disabilitato, gli utenti non potranno usare questo provider.",
   "PopUpForm.Providers.enabled.label": "Abilita",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Linkdin",
   "PopUpForm.Providers.redirectURL.front-end.label": "L'URL di redirect per la tua app di front-end",

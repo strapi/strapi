@@ -80,7 +80,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Discord приложения",
   "PopUpForm.Providers.enabled.description": "Если отключено, пользователи не смогут использовать этот провайдер.",
   "PopUpForm.Providers.enabled.label": "Включить",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Linkedin приложения",

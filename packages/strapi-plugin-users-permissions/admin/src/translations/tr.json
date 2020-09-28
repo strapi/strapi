@@ -79,7 +79,6 @@
   "PopUpForm.Providers.callback.placeholder": "METİN",
   "PopUpForm.Providers.enabled.description": "Devre dışı bırakıldıysa kullanıcılar bu sağlayıcıyı kullanamaz.",
   "PopUpForm.Providers.enabled.label": "Etkinleştirme",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "Web istemcisi ID",
   "PopUpForm.Providers.key.placeholder": "METİN",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Linkedin uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",

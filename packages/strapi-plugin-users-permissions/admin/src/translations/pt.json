@@ -78,7 +78,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de Discord",
   "PopUpForm.Providers.enabled.description": "Se desativado, os utilizadores não conseguirão utilizar este serviço de autenticação.",
   "PopUpForm.Providers.enabled.label": "Ativar",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "ID de Client",
   "PopUpForm.Providers.key.placeholder": "TEXTO",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de Linkedin",

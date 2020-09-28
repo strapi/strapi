@@ -81,7 +81,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Discord",
   "PopUpForm.Providers.enabled.description": "If disabled, users won't be able to use this provider.",
   "PopUpForm.Providers.enabled.label": "Povolit",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Adresa pro přesměrování, kterou přidejte do nastavení aplikace Linkedin",

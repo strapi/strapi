@@ -83,7 +83,6 @@
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "The redirect URL to add in your Discord application configurations",
   "PopUpForm.Providers.enabled.description": "If disabled, users won't be able to use this provider.",
   "PopUpForm.Providers.enabled.label": "Enable",
-  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your LinkedIn application configurations",
