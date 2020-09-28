@@ -27,6 +27,10 @@ const isMutationEnabled = (schema, name) => {
   return _.get(schema, `resolver.Mutation.${name}`) !== false;
 };
 
+const isNotPrivate = _.curry((model, attributeName) => {
+  return !contentTypes.isPrivateAttribute(model, attributeName);
+});
+
 const buildTypeDefObj = model => {
   const { associations = [], attributes, primaryKey, globalId } = model;
 
@@ -42,10 +46,8 @@ const buildTypeDefObj = model => {
     typeDef[updatedAtKey] = 'DateTime!';
   }
 
-  const isNotPrivate = attributeName => !contentTypes.isPrivateAttribute(model, attributeName);
-
   Object.keys(attributes)
-    .filter(isNotPrivate)
+    .filter(isNotPrivate(model))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -66,14 +68,6 @@ const buildTypeDefObj = model => {
 
       delete typeDef[association.alias];
     });
-
-  // Remove private attributes defined per model or globally
-  const privateAttributes = contentTypes.getPrivateAttributes(model);
-  privateAttributes.forEach(attr => {
-    if (typeDef[attr]) {
-      delete typeDef[attr];
-    }
-  });
 
   return typeDef;
 };
@@ -145,7 +139,7 @@ const buildAssocResolvers = model => {
   const { primaryKey, associations = [] } = model;
 
   return associations
-    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
+    .filter(association => isNotPrivate(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
