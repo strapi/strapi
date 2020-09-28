@@ -23,11 +23,12 @@ module.exports = async function() {
     if (this.hook[hookKey].loaded == true) return;
 
     const module = this.hook[hookKey].load;
+    const hookTimeout = get(hookConfig, ['settings', hookKey, 'timeout'], hookConfig.timeout);
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(
         () => reject(`(hook: ${hookKey}) is taking too long to load.`),
-        hookConfig.timeout || 1000
+        hookTimeout || 1000
       );
 
       this.hook[hookKey] = merge(this.hook[hookKey], module);
