@@ -29,7 +29,7 @@
     "@buffetjs/icons": "3.2.3",
     "@buffetjs/styles": "3.2.3",
     "@buffetjs/utils": "3.2.3",
-    "@casl/ability": "^4.1.5",
+    "@casl/ability": "^4.1.6",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-brands-svg-icons": "^5.11.2",
