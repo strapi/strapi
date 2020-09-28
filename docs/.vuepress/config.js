@@ -116,11 +116,7 @@ module.exports = {
           {
             text: 'Version 3.x',
             link: '/v3.x/',
-          },
-          {
-            text: 'Version 3.0.0-beta.x',
-            link: '/3.0.0-beta.x/',
-          },
+          }
         ],
       },
       {
@@ -277,129 +273,7 @@ module.exports = {
             '/v3.x/migration-guide/',
           ],
         },
-      ],
-      '/3.0.0-beta.x/': [
-        {
-          collapsable: false,
-          title: '🚀 Getting Started',
-          children: [
-            ['/3.0.0-beta.x/getting-started/introduction', 'Introduction'],
-            ['/3.0.0-beta.x/getting-started/installation', 'Installation'],
-            ['/3.0.0-beta.x/getting-started/deployment', 'Deployment'],
-            ['/3.0.0-beta.x/getting-started/contributing', 'Contributing'],
-            ['/3.0.0-beta.x/getting-started/troubleshooting', 'Troubleshooting'],
-            '/3.0.0-beta.x/getting-started/quick-start',
-            '/3.0.0-beta.x/getting-started/quick-start-tutorial',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '📄 Content API',
-          children: [
-            '/3.0.0-beta.x/content-api/api-endpoints',
-            '/3.0.0-beta.x/content-api/parameters',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '💡 Concepts',
-          children: [
-            '/3.0.0-beta.x/concepts/configurations',
-            '/3.0.0-beta.x/concepts/controllers',
-            '/3.0.0-beta.x/concepts/customization',
-            '/3.0.0-beta.x/concepts/file-structure',
-            '/3.0.0-beta.x/concepts/hooks',
-            '/3.0.0-beta.x/concepts/middlewares',
-            '/3.0.0-beta.x/concepts/models',
-            '/3.0.0-beta.x/concepts/plugins',
-            '/3.0.0-beta.x/concepts/policies',
-            '/3.0.0-beta.x/concepts/public-assets',
-            '/3.0.0-beta.x/concepts/queries',
-            '/3.0.0-beta.x/concepts/requests-responses',
-            '/3.0.0-beta.x/concepts/routing',
-            '/3.0.0-beta.x/concepts/services',
-            '/3.0.0-beta.x/concepts/webhooks',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '📚 Guides',
-          children: [
-            '/3.0.0-beta.x/guides/api-token',
-            '/3.0.0-beta.x/guides/auth-request',
-            '/3.0.0-beta.x/guides/count-graphql',
-            '/3.0.0-beta.x/guides/slug',
-            '/3.0.0-beta.x/guides/is-owner',
-            '/3.0.0-beta.x/guides/custom-admin',
-            '/3.0.0-beta.x/guides/custom-data-response',
-            '/3.0.0-beta.x/guides/databases',
-            '/3.0.0-beta.x/guides/draft',
-            '/3.0.0-beta.x/guides/error-catching',
-            '/3.0.0-beta.x/guides/external-data',
-            '/3.0.0-beta.x/guides/jwt-validation',
-            '/3.0.0-beta.x/guides/process-manager',
-            '/3.0.0-beta.x/guides/scheduled-publication',
-            '/3.0.0-beta.x/guides/secure-your-app',
-            '/3.0.0-beta.x/guides/send-email',
-            '/3.0.0-beta.x/guides/registering-a-field-in-admin',
-            '/3.0.0-beta.x/guides/client',
-            '/3.0.0-beta.x/guides/update-version',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '⚙️️ Admin Panel',
-          children: [
-            '/3.0.0-beta.x/admin-panel/customization',
-            '/3.0.0-beta.x/admin-panel/custom-webpack-config',
-            '/3.0.0-beta.x/admin-panel/deploy',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '📦 Plugins',
-          children: [
-            '/3.0.0-beta.x/plugins/documentation',
-            '/3.0.0-beta.x/plugins/email',
-            '/3.0.0-beta.x/plugins/graphql',
-            '/3.0.0-beta.x/plugins/upload',
-            '/3.0.0-beta.x/plugins/users-permissions',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '🔌 Local Plugins',
-          children: [
-            '/3.0.0-beta.x/plugin-development/quick-start',
-            '/3.0.0-beta.x/plugin-development/plugin-architecture',
-            '/3.0.0-beta.x/plugin-development/backend-development',
-            '/3.0.0-beta.x/plugin-development/frontend-development',
-            '/3.0.0-beta.x/plugin-development/frontend-field-api',
-            '/3.0.0-beta.x/plugin-development/frontend-settings-api',
-          ],
-        },
-        {
-          collapsable: true,
-          title: '💻 Command Line Interface',
-          children: ['/3.0.0-beta.x/cli/CLI'],
-        },
-        {
-          collapsable: true,
-          title: '🏗 Global strapi',
-          children: [
-            '/3.0.0-beta.x/global-strapi/api-reference',
-            '/3.0.0-beta.x/global-strapi/usage-information',
-          ],
-        },
-        {
-          collapsable: false,
-          title: '📚 Resources',
-          children: [
-            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
-            '/3.0.0-beta.x/migration-guide/',
-          ],
-        },
-      ],
+      ]
     },
   },
 };
