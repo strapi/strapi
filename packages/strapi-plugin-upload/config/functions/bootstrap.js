@@ -1,6 +1,6 @@
 'use strict';
 
-const { errorTypes } = require('../../constants');
+const { errors, is: isError } = require('../../errors');
 
 module.exports = async () => {
   // set plugin store
@@ -32,20 +32,18 @@ const wrapFunctionForErrors = fn => async (...args) => {
   try {
     return await fn(...args);
   } catch (err) {
-    switch (err.type) {
-      case errorTypes.ENTITY_TOO_LARGE:
-        throw strapi.errors.entityTooLarge('FileTooBig', {
-          errors: [
-            {
-              id: 'Upload.status.sizeLimit',
-              message: 'file is bigger than the limit size!',
-            },
-          ],
-        });
-      case errorTypes.UNKNOWN_ERROR:
-      default:
-        strapi.log.error(err);
-        throw strapi.errors.badImplementation();
+    if (isError(err, errors.entityTooLarge)) {
+      throw strapi.errors.entityTooLarge('FileTooBig', {
+        errors: [
+          {
+            id: 'Upload.status.sizeLimit',
+            message: 'file is bigger than the limit size!',
+          },
+        ],
+      });
+    } else {
+      strapi.log.error(err);
+      throw strapi.errors.badImplementation();
     }
   }
 };
@@ -56,8 +54,8 @@ const createProvider = ({ provider, providerOptions }) => {
 
     return Object.assign(Object.create(baseProvider), {
       ...providerInstance,
-      upload: wrapFunctionForErrors(providerInstance.upload),
-      delete: wrapFunctionForErrors(providerInstance.delete),
+      upload: wrapFunctionForErrors(providerInstance.upload.bind(providerInstance)),
+      delete: wrapFunctionForErrors(providerInstance.delete.bind(providerInstance)),
     });
   } catch (err) {
     strapi.log.error(err);
