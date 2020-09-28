@@ -41,6 +41,7 @@ const CollectionTypeRecursivePath = props => {
   ));
 
   const routes = [
+    { path: ':id/clone/:origin', comp: EditView },
     { path: ':id', comp: EditView },
     { path: '', comp: ListView },
   ].map(({ path, comp }) => (

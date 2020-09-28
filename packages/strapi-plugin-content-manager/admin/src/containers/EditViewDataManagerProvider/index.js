@@ -41,7 +41,7 @@ const EditViewDataManagerProvider = ({
   redirectToPreviousPage,
   slug,
 }) => {
-  const { id } = useParams();
+  const { id, origin } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
   const abortController = new AbortController();
@@ -160,7 +160,7 @@ const EditViewDataManagerProvider = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await request(getRequestUrl(`${slug}/${id || ''}`), {
+        const data = await request(getRequestUrl(`${slug}/${origin || id || ''}`), {
           method: 'GET',
           signal,
         });
@@ -236,7 +236,7 @@ const EditViewDataManagerProvider = ({
         contentTypeDataStructure,
       });
 
-      if (!isCreatingEntry) {
+      if (!isCreatingEntry || (origin && isCreatingEntry)) {
         fetchData();
       } else {
         // Will create default form
@@ -251,7 +251,7 @@ const EditViewDataManagerProvider = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isLoadingForPermissions]);
+  }, [id, origin, slug, isCreatingEntry, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('didAddComponentToDynamicZone');
