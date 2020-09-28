@@ -61,7 +61,7 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => isNotPrivate(association.alias))
+    .filter(association => isNotPrivate(model, association.alias))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
