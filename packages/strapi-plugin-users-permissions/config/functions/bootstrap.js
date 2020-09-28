@@ -102,6 +102,15 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/linkedin/callback`,
       scope: ['r_liteprofile', 'r_emailaddress'],
     },
+    cognito: {
+      enabled: false,
+      icon: 'aws',
+      key: '',
+      secret: '',
+      subdomain: '',
+      callback: `${strapi.config.server.url}/auth/cognito/callback`,
+      scope: ['email'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
