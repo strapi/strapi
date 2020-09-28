@@ -49,7 +49,7 @@ module.exports = {
     }
 
     type UsersPermissionsLoginPayload {
-      jwt: String!
+      jwt: String
       user: UsersPermissionsMe!
     }
 

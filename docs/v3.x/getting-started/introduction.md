@@ -1,4 +1,4 @@
-# 🚀 Welcome to the Strapi documentation!
+# Welcome to the Strapi documentation!
 
 **Strapi is the open-source [Headless CMS](https://strapi.io) developers love.**
 
@@ -43,7 +43,7 @@ Don't be bogged down by tech you don't need!
 
 ### Source Code
 
-Strapi is an open-source project, all of Strapi's source code is under the MIT license. The core project can be found at the [strapi/strapi](https://github.com/strapi/strapi) GitHub repository and you will find all other tools in the [Strapi](https://github.com/strapi) GitHub organization.
+Strapi is an open-source project. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) file for licensing information. The core project can be found at the [strapi/strapi](https://github.com/strapi/strapi) GitHub repository and you will find all other tools in the [Strapi](https://github.com/strapi) GitHub organization.
 
 ### Marketplace
 
@@ -62,7 +62,7 @@ To help you get started with Strapi, we and the community have provided you with
 
 ### Demo
 
-Want to see Strapi in action? check out the [demo video](https://strapi.io/demo) or request a live demo via the form present on the page.
+Want to see Strapi in action? check out the [demo video](https://youtu.be/zd0_S_FPzKg) or request a [live demo](https://strapi.io/demo) via the form present on the page.
 
 ### Blog
 

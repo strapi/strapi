@@ -1,6 +1,6 @@
 # GraphQL
 
-By default Strapi create [REST endpoints](../content-api/api-endpoints) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
+By default Strapi create [REST endpoints](../content-api/api-endpoints.md) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
 
 ## Usage
 
@@ -48,6 +48,8 @@ Security limits on maximum number of items in your response by default is limite
 
 You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/apollo-server/federation/metrics/).
 
+You can also enable Strapi as an implementing service for Apollo Federation, which allows you to set up Strapi as a service behind an Apollo Federation API gateway and allows you to add Strapi to a single exposed data graph across your organization. You can read more about Apollo Federation [here](https://www.apollographql.com/docs/apollo-server/federation/introduction/).
+
 You can edit these configurations by creating following file.
 
 **Path —** `./extensions/graphql/config/settings.json`.
@@ -59,7 +61,8 @@ You can edit these configurations by creating following file.
   "shadowCRUD": true,
   "playgroundAlways": false,
   "depthLimit": 7,
-  "amountLimit": 100
+  "amountLimit": 100,
+  "federation": false
 }
 ```
 
@@ -264,7 +267,7 @@ query {
 To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
 ::: tip NOTE
-If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.html#core-controllers).
+If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.md#core-controllers).
 :::
 
 ### Example

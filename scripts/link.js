@@ -14,9 +14,7 @@ async function run() {
     pkgJSON: fs.readJSONSync(join(dir, 'package.json')),
   }));
 
-  await Promise.all(
-    packages.map(({ dir }) => execa('yarn', ['link'], { cwd: dir }))
-  );
+  await Promise.all(packages.map(({ dir }) => execa('yarn', ['link'], { cwd: dir })));
 
   const packageNames = packages.map(p => p.pkgJSON.name).join(' ');
   console.log(`Package names: \n ${packageNames}\n`);

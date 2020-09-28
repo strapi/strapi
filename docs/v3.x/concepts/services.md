@@ -19,6 +19,8 @@ You can read about `strapi.query` calls [here](./queries.md).
 In the following example your controller, service and model are named `restaurant`.
 :::
 
+#### Collection Type
+
 :::: tabs
 
 ::: tab find
@@ -39,7 +41,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -75,7 +77,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -110,7 +112,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -137,13 +139,14 @@ module.exports = {
    */
 
   async create(data, { files } = {}) {
-    const entry = await strapi.query('restaurant').create(data);
+    const validData = await strapi.entityValidator.validateEntity(strapi.models.restaurant, data);
+    const entry = await strapi.query('restaurant').create(validData);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
         model: 'restaurant',
-        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+        // if you are using a plugin's model you will have to add the `source` key (source: 'users-permissions')
       });
       return this.findOne({ id: entry.id });
     }
@@ -168,13 +171,14 @@ module.exports = {
    */
 
   async update(params, data, { files } = {}) {
-    const entry = await strapi.query('restaurant').update(params, data);
+    const validData = await strapi.entityValidator.validateEntityUpdate(strapi.models.restaurant, data);
+    const entry = await strapi.query('restaurant').update(params, validData);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
         model: 'restaurant',
-        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+        // if you are using a plugin's model you will have to add the `source` key (source: 'users-permissions')
       });
       return this.findOne({ id: entry.id });
     }
@@ -184,7 +188,7 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
+- `params` (object): it should look like this `{id: 1}`
 
 :::
 
@@ -206,7 +210,7 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
+- `params` (object): it should look like this `{id: 1}`
 
 :::
 
@@ -229,7 +233,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -261,7 +265,7 @@ module.exports = {
 ```
 
 - `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+  The object follow the URL query format, [refer to this documentation.](../content-api/parameters.md).
 
 ```json
 {
@@ -271,6 +275,102 @@ module.exports = {
 {
   "name_contains": "sushi"
 }
+```
+
+:::
+
+::::
+
+#### Single Type
+
+:::: tabs
+
+::: tab find
+
+#### `find`
+
+```js
+const _ = require('lodash');
+
+module.exports = {
+  /**
+   * Promise to fetch the record
+   *
+   * @return {Promise}
+   */
+  async find(populate) {
+    const results = await strapi.query('restaurant').find({ _limit: 1 }, populate);
+    return _.first(results) || null;
+  },
+};
+```
+
+- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
+
+:::
+
+::: tab createOrUpdate
+
+#### `createOrUpdate`
+
+```js
+const _ = require('lodash');
+
+module.exports = {
+  /**
+   * Promise to add/update the record
+   *
+   * @return {Promise}
+   */
+
+  async createOrUpdate(data, { files } = {}) {
+    const results = await strapi.query('restaurant').find({ _limit: 1 });
+    const entity = _.first(results) || null;
+
+    let entry;
+    if (!entity) {
+      entry = await strapi.query('restaurant').create(data);
+    } else {
+      entry = await strapi.query('restaurant').update({ id: entity.id }, data);
+    }
+
+    if (files) {
+      // automatically uploads the files based on the entry and the model
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: 'restaurant',
+        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+      });
+      return this.findOne({ id: entry.id });
+    }
+
+    return entry;
+  },
+};
+```
+
+:::
+
+::: tab delete
+
+#### `delete`
+
+```js
+module.exports = {
+  /**
+   * Promise to delete a record
+   *
+   * @return {Promise}
+   */
+
+  delete() {
+    const results = await strapi.query('restaurant').find({ _limit: 1 });
+    const entity = _.first(results) || null;
+
+    if (!entity) return;
+
+    return strapi.query('restaurant').delete({id: entity.id});
+  },
+};
 ```
 
 :::

@@ -10,24 +10,18 @@ import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from '.
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
-  const {
-    emitEvent,
-    entriesToDelete,
-    label,
-    searchParams: { filters, _q },
-  } = useListView();
-  const { pathname, search } = useLocation();
+const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoader }) => {
+  const { emitEvent, entriesToDelete, label, filters, _q } = useListView();
+  const { pathname } = useLocation();
   const { push } = useHistory();
 
-  const redirectUrl = `redirectUrl=${pathname}${search}`;
-  const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
+  const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
   const handleGoTo = id => {
     emitEvent('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
-      search: redirectUrl,
+      state: { from: pathname },
     });
   };
 
@@ -56,10 +50,18 @@ const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
+
               handleGoTo(row.id);
             }}
           >
-            <Row isBulkable={isBulkable} headers={headers} row={row} goTo={handleGoTo} />
+            <Row
+              canDelete={canDelete}
+              canUpdate={canUpdate}
+              isBulkable={isBulkable && canDelete}
+              headers={headers}
+              row={row}
+              goTo={handleGoTo}
+            />
           </TableRow>
         );
       })
@@ -69,7 +71,7 @@ const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
     return (
       <>
         <Table className="table">
-          <TableHeader headers={headers} isBulkable={isBulkable} />
+          <TableHeader headers={headers} isBulkable={isBulkable && canDelete} />
         </Table>
         <LoadingWrapper>
           <LoadingContainer>
@@ -82,7 +84,7 @@ const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
 
   return (
     <Table className="table">
-      <TableHeader headers={headers} isBulkable={isBulkable} />
+      <TableHeader headers={headers} isBulkable={isBulkable && canDelete} />
       <tbody>
         {entriesToDelete.length > 0 && <ActionCollapse colSpan={colSpanLength} />}
         {content}
@@ -92,6 +94,8 @@ const CustomTable = ({ data, headers, isBulkable, showLoader }) => {
 };
 
 CustomTable.defaultProps = {
+  canDelete: false,
+  canUpdate: false,
   data: [],
   headers: [],
   isBulkable: true,
@@ -99,6 +103,8 @@ CustomTable.defaultProps = {
 };
 
 CustomTable.propTypes = {
+  canDelete: PropTypes.bool,
+  canUpdate: PropTypes.bool,
   data: PropTypes.array,
   headers: PropTypes.array,
   isBulkable: PropTypes.bool,

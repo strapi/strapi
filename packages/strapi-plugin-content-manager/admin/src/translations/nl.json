@@ -36,8 +36,6 @@
   "containers.List.pluginHeaderDescription": "{label} item gevonden",
   "containers.List.pluginHeaderDescription.singular": "{label} items gevonden",
   "containers.ListPage.displayedFields": "Weergegeven velden",
-  "containers.SettingPage.addField": "Nieuw veld toevoegen",
-  "containers.SettingPage.addRelationalField": "Nieuw relationeel veld toevoegen",
   "containers.SettingPage.attributes": "Attribuut velden",
   "containers.SettingPage.attributes.description": "Geef de volgorde van de attributen aan",
   "containers.SettingPage.editSettings.description": "Klik & sleep de velden om de layout te bouwen",

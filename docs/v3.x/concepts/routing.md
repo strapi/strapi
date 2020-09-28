@@ -24,9 +24,9 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
       }
     },
     {
-      "method": ["POST", "PUT"],
-      "path": "/restaurants/:id",
-      "handler": "Restaurant.createOrUpdate",
+      "method": "PUT",
+      "path": "/restaurants/bulkUpdate",
+      "handler": "Restaurant.bulkUpdate",
       "config": {
         "policies": []
       }

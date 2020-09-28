@@ -22,7 +22,7 @@ const DEFAULT_PERMISSIONS = [
     type: 'users-permissions',
     roleType: 'public',
   },
-  { action: 'resetPassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'resetpassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   { action: 'init', controller: 'userspermissions', type: null, roleType: null },
   { action: 'me', controller: 'user', type: 'users-permissions', roleType: null },
   { action: 'autoreload', controller: null, type: null, roleType: null },
@@ -141,7 +141,7 @@ module.exports = {
     });
   },
 
-  getActions(plugins = [], withInfo = true) {
+  getActions() {
     const generateActions = data =>
       Object.keys(data).reduce((acc, key) => {
         if (_.isFunction(data[key])) {
@@ -169,10 +169,6 @@ module.exports = {
         controllers: {},
       };
 
-      if (withInfo) {
-        initialState.information = plugins.find(plugin => plugin.id === key) || {};
-      }
-
       acc[key] = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
         obj.controllers[k] = generateActions(strapi.plugins[key].controllers[k]);
 
@@ -194,7 +190,7 @@ module.exports = {
   async getRole(roleID, plugins) {
     const role = await strapi
       .query('role', 'users-permissions')
-      .findOne({ id: roleID }, ['users', 'permissions']);
+      .findOne({ id: roleID }, ['permissions']);
 
     if (!role) {
       throw new Error('Cannot find this role');
@@ -318,26 +314,25 @@ module.exports = {
       const query = strapi.query('permission', 'users-permissions');
 
       // Execute request to update entries in database for each role.
-      await Promise.all([
-        Promise.all(
-          toAdd.map(permission =>
-            query.create({
-              type: permission.type,
-              controller: permission.controller,
-              action: permission.action,
-              enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
-              policy: '',
-              role: permission.roleId,
-            })
-          )
-        ),
-        Promise.all(
-          toRemove.map(permission => {
-            const { type, controller, action, roleId: role } = permission;
-            return query.delete({ type, controller, action, role });
+      await Promise.all(
+        toAdd.map(permission =>
+          query.create({
+            type: permission.type,
+            controller: permission.controller,
+            action: permission.action,
+            enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
+            policy: '',
+            role: permission.roleId,
           })
-        ),
-      ]);
+        )
+      );
+
+      await Promise.all(
+        toRemove.map(permission => {
+          const { type, controller, action, roleId: role } = permission;
+          return query.delete({ type, controller, action, role });
+        })
+      );
     }
   },
 

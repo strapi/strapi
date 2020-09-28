@@ -1,6 +1,6 @@
 # GraphQL
 
-By default Strapi create [REST endpoints](../content-api/api-endpoints) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
+By default Strapi create [REST endpoints](../content-api/api-endpoints.md) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
 
 ## Usage
 
@@ -46,9 +46,13 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 
 Security limits on maximum number of items in your response by default is limited to 100, however you can change this on the following config option `amountLimit`. This should only be changed after careful consideration of the drawbacks of a large query which can cause what would basically be a DDoS (Distributed Denial of Service). And may cause abnormal load on your Strapi server, as well as your database server.
 
-You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/apollo-server/federation/metrics/).
+You can also setup any [Apollo Server options](https://www.apollographql.com/docs/apollo-server/api/apollo-server/#apolloserver) with the `apolloServer` option. For example, you can enable the tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/apollo-server/federation/metrics/).
 
 You can edit these configurations by creating following file.
+
+::: warning
+Please note the setting for GraphQL `tracing` as changed and has been moved to `apolloServer.tracing`
+:::
 
 **Path —** `./config/plugins.js`
 
@@ -57,11 +61,13 @@ module.exports = {
   //
   graphql: {
     endpoint: '/graphql',
-    tracing: false,
     shadowCRUD: true,
     playgroundAlways: false,
     depthLimit: 7,
     amountLimit: 100,
+    apolloServer: {
+      tracing: false,
+    },
   },
 };
 ```
@@ -267,7 +273,7 @@ query {
 To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
 ::: tip NOTE
-If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.html#core-controllers).
+If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.md#core-controllers).
 :::
 
 ### Example

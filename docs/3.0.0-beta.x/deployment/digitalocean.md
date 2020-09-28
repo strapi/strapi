@@ -109,7 +109,7 @@ git --version
 
 #### 2. **OPTIONAL:** Install Git.
 
-:::note
+::: tip NOTE
 Only do this step if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
 :::
 
@@ -241,7 +241,7 @@ You will next need to [install and configure PM2 Runtime](#install-and-configure
 
 ### Install and configure PM2 Runtime
 
-[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime.
+[PM2 Runtime](https://pm2.keymetrics.io) allows you to keep your Strapi project alive and to reload it without downtime.
 
 Ensure you are logged in as a **non-root** user. You will install **PM2** globally:
 

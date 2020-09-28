@@ -14,11 +14,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
-
+import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
@@ -27,25 +25,37 @@ import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
 import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
-
 import { Content, Wrapper } from './components';
-
 import { getDataSucceeded } from './actions';
 
 function App(props) {
   const getDataRef = useRef();
-  const [state, setState] = useState({ hasAdmin: false, isLoading: true });
+  const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
   getDataRef.current = props.getDataSucceeded;
 
   useEffect(() => {
     const getData = async () => {
-      try {
-        const requestURL = '/users-permissions/init';
+      const currentToken = auth.getToken();
 
-        const { hasAdmin } = await request(requestURL, { method: 'GET' }, false, false, {
-          noAuth: true,
-        });
+      if (currentToken) {
+        try {
+          const {
+            data: { token },
+          } = await request('/admin/renew-token', {
+            method: 'POST',
+            body: { token: currentToken },
+          });
+          auth.updateToken(token);
+        } catch (err) {
+          // Refresh app
+          auth.clearAppStorage();
+          window.location.reload();
+        }
+      }
+
+      try {
         const { data } = await request('/admin/init', { method: 'GET' });
+
         const { uuid } = data;
 
         if (uuid) {
@@ -65,8 +75,8 @@ function App(props) {
           }
         }
 
-        getDataRef.current(hasAdmin, data);
-        setState({ hasAdmin, isLoading: false });
+        getDataRef.current(data);
+        setState({ isLoading: false, hasAdmin: data.hasAdmin });
       } catch (err) {
         strapi.notification.error('app.containers.App.notification.error.init');
       }
@@ -75,7 +85,7 @@ function App(props) {
     getData();
   }, [getDataRef]);
 
-  if (state.isLoading) {
+  if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
@@ -88,7 +98,7 @@ function App(props) {
           <Switch>
             <Route
               path="/auth/:authType"
-              render={routerProps => <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />}
+              render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
               exact
             />
             <PrivateRoute path="/" component={Admin} />
