@@ -11,7 +11,7 @@ const getPrivateAttributes = (model = {}) => {
 };
 
 const isPrivateAttribute = (model = {}, attributeName) => {
-  return getPrivateAttributes(model).includes(attributeName);
+  return model.privateAttributes.includes(attributeName);
 };
 
 module.exports = {

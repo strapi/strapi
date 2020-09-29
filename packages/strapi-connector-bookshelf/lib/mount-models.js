@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, contentTypes } = require('strapi-utils');
 const relations = require('./relations');
 const buildDatabaseSchema = require('./build-database-schema');
 const {
@@ -612,6 +612,8 @@ module.exports = ({ models, target }, ctx) => {
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
       target[model].deleteRelations = relations.deleteRelations;
+
+      target[model].privateAttributes = contentTypes.getPrivateAttributes(target[model]);
 
       await buildDatabaseSchema({
         ORM,

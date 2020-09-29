@@ -65,6 +65,7 @@ describe('Content-Types', () => {
     test('Attribute is private in the model attributes', () => {
       const model = createModel();
       global.strapi = { config: createConfig() };
+      Object.assign(model, { privateAttributes: getPrivateAttributes(model) });
 
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeFalsy();
@@ -74,6 +75,7 @@ describe('Content-Types', () => {
     test('Attribute is set to private in the app config', () => {
       const model = createModel();
       global.strapi = { config: createConfig(['bar']) };
+      Object.assign(model, { privateAttributes: getPrivateAttributes(model) });
 
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeTruthy();
@@ -83,6 +85,7 @@ describe('Content-Types', () => {
     test('Attribute is set to private in the model options', () => {
       const model = createModel(['foobar']);
       global.strapi = { config: createConfig() };
+      Object.assign(model, { privateAttributes: getPrivateAttributes(model) });
 
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeFalsy();

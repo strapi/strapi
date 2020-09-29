@@ -3,6 +3,10 @@
 const _ = require('lodash');
 const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 
+const createSanitizeFn = model => data => {
+  return sanitizeEntity(data, { model: strapi.getModel(model.uid) });
+};
+
 /**
  * default bookshelf controller
  *
@@ -19,6 +23,8 @@ module.exports = ({ service, model }) => {
  * Returns a single type controller to handle default core-api actions
  */
 const createSingleTypeController = ({ model, service }) => {
+  const sanitize = createSanitizeFn(model);
+
   return {
     /**
      * Retrieve single type content
@@ -27,7 +33,7 @@ const createSingleTypeController = ({ model, service }) => {
      */
     async find() {
       const entity = await service.find();
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
 
     /**
@@ -44,12 +50,12 @@ const createSingleTypeController = ({ model, service }) => {
         entity = await service.createOrUpdate(ctx.request.body);
       }
 
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
 
     async delete() {
       const entity = await service.delete();
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
   };
 };
@@ -59,6 +65,8 @@ const createSingleTypeController = ({ model, service }) => {
  * Returns a collection type controller to handle default core-api actions
  */
 const createCollectionTypeController = ({ model, service }) => {
+  const sanitize = createSanitizeFn(model);
+
   return {
     /**
      * Retrieve records.
@@ -73,7 +81,7 @@ const createCollectionTypeController = ({ model, service }) => {
         entities = await service.find(ctx.query);
       }
 
-      return sanitizeEntity(entities, { model });
+      return sanitize(entities);
     },
 
     /**
@@ -83,7 +91,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async findOne(ctx) {
       const entity = await service.findOne({ id: ctx.params.id });
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
 
     /**
@@ -112,7 +120,7 @@ const createCollectionTypeController = ({ model, service }) => {
         entity = await service.create(ctx.request.body);
       }
 
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
 
     /**
@@ -129,7 +137,7 @@ const createCollectionTypeController = ({ model, service }) => {
         entity = await service.update({ id: ctx.params.id }, ctx.request.body);
       }
 
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
 
     /**
@@ -139,7 +147,7 @@ const createCollectionTypeController = ({ model, service }) => {
      */
     async delete(ctx) {
       const entity = await service.delete({ id: ctx.params.id });
-      return sanitizeEntity(entity, { model });
+      return sanitize(entity);
     },
   };
 };
