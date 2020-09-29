@@ -6,7 +6,7 @@ If you haven't gone through the getting started guide, the way you request a Str
 
 ### Create a Ruby file
 
-Be sure to have Ruby installed on your computer
+Be sure to have Ruby installed on your computer.
 
 ```bash
 mkdir ruby-app && cd ruby-app
@@ -15,7 +15,7 @@ touch script.rb
 
 ### Use an HTTP client
 
-Many HTTP clients are available but in this documentation we'll use [HTTParty](https://github.com/jnunemaker/httparty)
+Many HTTP clients are available but in this documentation we'll use [HTTParty](https://github.com/jnunemaker/httparty).
 
   - Create a `Gemfile` containing the following:
 
@@ -33,7 +33,7 @@ bundle install
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
@@ -106,11 +106,11 @@ puts restaurant.all
 
 ### POST Request your collection type
 
-Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
+Execute a `POST` request on the `restaurant` Collection Type in order to create a restaurant.
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
 
-In this example a `japanese` category has been created which has the id: 3
+In this example a `japanese` category has been created which has the id: 3.
 
 _Request_
 
@@ -192,7 +192,7 @@ puts restaurant.create({
 
 ### PUT Request your collection type
 
-Execute a PUT request on the `restaurant` Collection Type in order to update the category of a restaurant.
+Execute a `PUT` request on the `restaurant` Collection Type in order to update the category of a restaurant.
 
 Be sure that you activated the `put` permission for the `restaurant` Collection Type.
 

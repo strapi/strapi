@@ -40,9 +40,9 @@ module.exports = {
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
-Be sure that you activated the `find` permission for the `restaurant` Collection Type
+Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
 _Request_
 
@@ -119,9 +119,9 @@ _Response_
 </page-query>
 ```
 
-Execute a GET request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
+Execute a `GET` request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
 
-Be sure that you activated the `findOne` permission for the `category` Collection Type
+Be sure that you activated the `findOne` permission for the `category` Collection Type.
 
 _Request_
 
@@ -248,7 +248,7 @@ module.exports = function(api) {
 </page-query>
 ```
 
-You can find your restaurant categories by browsing `http://localhost:8080/categories/<id-of-category>`
+You can find your restaurant categories by browsing `http://localhost:8080/categories/<id-of-category>`.
 
 Feel free to do the same for your restaurants!
 

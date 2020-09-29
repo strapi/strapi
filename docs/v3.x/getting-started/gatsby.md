@@ -38,9 +38,9 @@ yarn add gatsby-source-strapi
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
-Be sure that you activated the `find` permission for the `restaurant` Collection Type
+Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
 _Request_
 
@@ -87,21 +87,23 @@ import React from 'react';
 
 import { StaticQuery, graphql } from 'gatsby';
 
-const IndexPage = () => (
-  <StaticQuery
-    query={graphql`
-      query {
-        allStrapiRestaurant {
-          edges {
-            node {
-              strapiId
-              name
-              description
-            }
-          }
+const query = graphql`
+  query {
+    allStrapiRestaurant {
+      edges {
+        node {
+          strapiId
+          name
+          description
         }
       }
-    `}
+    }
+  }
+`
+
+const IndexPage = () => (
+  <StaticQuery
+    query={query}
     render={data => (
       <ul>
         {data.allStrapiRestaurant.edges.map(restaurant => (
@@ -115,9 +117,9 @@ const IndexPage = () => (
 export default IndexPage;
 ```
 
-Execute a GET request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
+Execute a `GET` request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
 
-Be sure that you activated the `findOne` permission for the `category` Collection Type
+Be sure that you activated the `findOne` permission for the `category` Collection Type.
 
 _Request_
 
@@ -163,21 +165,23 @@ import React from 'react';
 
 import { StaticQuery, graphql } from 'gatsby';
 
+const query = graphql`
+  query {
+    strapiCategory(strapiId: { eq: 1 }) {
+      id
+      name
+      restaurants {
+        id
+        name
+        description
+      }
+    }
+  }
+`
+
 const IndexPage = () => (
   <StaticQuery
-    query={graphql`
-      query {
-        strapiCategory(strapiId: { eq: 1 }) {
-          id
-          name
-          restaurants {
-            id
-            name
-            description
-          }
-        }
-      }
-    `}
+    query={query}
     render={data => (
       <div>
         <h1>{data.strapiCategory.name}</h1>
@@ -273,7 +277,7 @@ const Category = ({ data }) => {
 export default Category;
 ```
 
-You can find your restaurant categories by browsing `http://localhost:8000/category/<name-of-category>`
+You can find your restaurant categories by browsing `http://localhost:8000/category/<name-of-category>`.
 
 Feel free to do the same for your restaurants!
 
@@ -285,4 +289,4 @@ Feel free to do the same for your restaurants!
 ## Conclusion
 
 Here is how to request your Collection Types in Strapi using Gatsby.
-Learn more about [GraphQL](../plugins/graphql.html)
+Learn more about [GraphQL](../plugins/graphql.html).

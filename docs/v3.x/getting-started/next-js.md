@@ -30,7 +30,7 @@ npx create-next-app nextjs-app
 
 ### Use an HTTP client
 
-Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
 
 :::: tabs
 
@@ -44,7 +44,7 @@ yarn add axios
 
 ::: tab fetch
 
-No installation needed
+No installation needed.
 
 :::
 
@@ -52,7 +52,7 @@ No installation needed
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
@@ -66,7 +66,7 @@ _Request_
 import axios from 'axios';
 
 axios.get('http://localhost:1337/restaurants').then(response => {
-  console.log(response);
+  console.error(response);
 });
 ```
 
@@ -84,7 +84,7 @@ fetch('http://localhost:1337/restaurants', {
   },
 })
   .then(response => response.json())
-  .then(data => console.log(data));
+  .then(data => console.error(data));
 ```
 
 :::
@@ -224,11 +224,11 @@ export default Home;
 
 ### POST Request your collection type
 
-Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
+Execute a `POST` request on the `restaurant` Collection Type in order to create a restaurant.
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
 
-In this example a `japanese` category has been created which has the id: 3
+In this example a `japanese` category has been created which has the id: 3.
 
 :::: tabs
 
@@ -246,7 +246,7 @@ axios
     categories: [3],
   })
   .then(response => {
-    console.log(response);
+    console.error(response);
   });
 ```
 
@@ -269,7 +269,7 @@ fetch('http://localhost:1337/restaurants', {
   }),
 })
   .then(response => response.json())
-  .then(data => console.log(data));
+  .then(data => console.error(data));
 ```
 
 :::
@@ -332,7 +332,7 @@ const Home = ({ allCategories, errorCategories }) => {
 
     try {
       const response = await axios.post('http://localhost:1337/restaurants', modifiedData);
-      console.log(response);
+      console.error(response);
     } catch (error) {
       setErrorRestaurants(error);
     }
@@ -554,14 +554,14 @@ export default Home;
 
 ### PUT Request your collection type
 
-Execute a PUT request on the `restaurant` Collection Type in order to update the category of a restaurant.
+Execute a `PUT` request on the `restaurant` Collection Type in order to update the category of a restaurant.
 
 Be sure that you activated the `put` permission for the `restaurant` Collection Type.
 
 :::: tabs
 
-We consider that the id of your restaurant is `2`
-and the id of your category is `2`
+We consider that the id of your restaurant is `2`.
+and the id of your category is `2`.
 
 ::: tab axios
 
@@ -575,7 +575,7 @@ axios
     categories: [2],
   })
   .then(response => {
-    console.log(response);
+    console.error(response);
   });
 ```
 
@@ -597,7 +597,7 @@ fetch('http://localhost:1337/restaurants/2', {
 })
   .then(response => response.json())
   .then(data => {
-    console.log(data);
+    console.error(data);
   });
 ```
 
@@ -631,11 +631,11 @@ _Response_
 
 ## Starter
 
-- [Next.js Blog starter](https://github.com/strapi/strapi-starter-next-blog)
-- [Next.js Corporate starter](https://github.com/strapi/strapi-starter-next-corporate)
+- [Next.js Blog starter](https://github.com/strapi/strapi-starter-next-blog).
+- [Next.js Corporate starter](https://github.com/strapi/strapi-starter-next-corporate).
 
 ## Conclusion
 
 Here is how to request your Collection Types in Strapi using Next.js. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
 
-We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)
+We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints).

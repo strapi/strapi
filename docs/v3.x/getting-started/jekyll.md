@@ -25,7 +25,7 @@ group :jekyll_plugins do
 end
 ```
 
-  - Add `jekyll-strapi` to your plugins in `_config.yml`
+  - Add `jekyll-strapi` to your plugins in `_config.yml`.
 
 ```yml
 plugins:
@@ -33,7 +33,7 @@ plugins:
   - jekyll-strapi
 ```
 
-  - Add the configuration of Strapi at the end of the `_config.yml`
+  - Add the configuration of Strapi at the end of the `_config.yml`.
 
 ```yml
 strapi:
@@ -47,7 +47,7 @@ strapi:
       type: categories
 ```
 
-  - Run `bundle install` to install your gems
+  - Run `bundle install` to install your gems.
 
 ```bash
 bundle install
@@ -55,9 +55,9 @@ bundle install
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
-Be sure that you activated the `find` permission for the `restaurant` Collection Type
+Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
 ### Example
 
@@ -82,9 +82,9 @@ layout: default
 </div>
 ```
 
-Execute a GET request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
+Execute a `GET` request on the `category` Collection Type in order to fetch a specific category with all the associated restaurants.
 
-Be sure that you activated the `findOne` permission for the `category` Collection Type
+Be sure that you activated the `findOne` permission for the `category` Collection Type.
 
 ### Example
 
@@ -155,11 +155,11 @@ strapi:
 
 After building your application, you'll be able to see a `category` folder in your `_site` folder.
 
-You can find your restaurant categories by browsing `http://localhost:4000/category/<name-of-category>`
+You can find your restaurant categories by browsing `http://localhost:4000/category/<name-of-category>`.
 
 Feel free to do the same for your restaurants!
 
 ## Conclusion
 
 Here is how to request your Collection Types in Strapi using Jekyll.
-Learn more about Jekyll with their [official documentation](https://jekyllrb.com/docs/)
+Learn more about Jekyll with their [official documentation](https://jekyllrb.com/docs/).

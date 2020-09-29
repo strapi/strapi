@@ -6,7 +6,7 @@ If you haven't gone through the getting started guide, the way you request a Str
 
 ### Create a Python file
 
-Be sure to have Python installed on your computer
+Be sure to have Python installed on your computer.s
 
 ```bash
 touch script.py
@@ -14,7 +14,7 @@ touch script.py
 
 ### Use an HTTP client
 
-Many HTTP clients are available but in this documentation we'll use [Requests](https://github.com/psf/requests)
+Many HTTP clients are available but in this documentation we'll use [Requests](https://github.com/psf/requests).
 
 ```bash
 python -m pip install requests
@@ -22,7 +22,7 @@ python -m pip install requests
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type.
 
@@ -94,11 +94,11 @@ print(restaurant.all())
 
 ### POST Request your collection type
 
-Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
+Execute a `POST` request on the `restaurant` Collection Type in order to create a restaurant.
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
 
-In this example a `japanese` category has been created which has the id: 3
+In this example a `japanese` category has been created which has the id: 3.
 
 _Request_
 
@@ -174,7 +174,7 @@ print(restaurant.create({
 
 ### PUT Request your collection type
 
-Execute a PUT request on the `restaurant` Collection Type in order to update the category of a restaurant.
+Execute a `PUT` request on the `restaurant` Collection Type in order to update the category of a restaurant.
 
 Be sure that you activated the `put` permission for the `restaurant` Collection Type.
 
