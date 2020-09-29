@@ -45,7 +45,7 @@ describe('Role CRUD End to End', () => {
         {
           name: 'Author',
           code: 'strapi-author',
-          description: 'Authors can manage and publish the content they created.',
+          description: 'Authors can manage the content they have created.',
           usersCount: 0,
         },
       ];
@@ -185,7 +185,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          fields: null,
           conditions: ['admin::is-creator'],
         },
         {
@@ -660,9 +660,22 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data.length > 0).toBe(true);
-        expect(res.body.data).toMatchObject(
-          permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              subject: null,
+              fields: null,
+              conditions: [],
+              ...permissions[0],
+            }),
+            expect.objectContaining({
+              subject: null,
+              fields: null,
+              conditions: [],
+              ...permissions[1],
+            }),
+          ])
         );
       });
 

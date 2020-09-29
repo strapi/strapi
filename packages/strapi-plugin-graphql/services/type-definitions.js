@@ -143,7 +143,8 @@ const buildAssocResolvers = model => {
         case 'oneToManyMorph':
         case 'manyMorphToOne':
         case 'manyMorphToMany':
-        case 'manyToManyMorph': {
+        case 'manyToManyMorph':
+        case 'manyWay': {
           resolver[association.alias] = async obj => {
             if (obj[association.alias]) {
               return obj[association.alias];

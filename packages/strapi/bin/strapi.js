@@ -137,6 +137,7 @@ program
   .option('-p, --plugin <api>', 'Name of the local plugin')
   .option('-e, --extend <api>', 'Name of the plugin to extend')
   .option('-c, --connection <connection>', 'The name of the connection to use')
+  .option('--draft-and-publish <value>', 'Enable draft/publish', false)
   .description('generate a basic API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
@@ -158,6 +159,7 @@ program
   .option('-a, --api <api>', 'API name to generate a sub API')
   .option('-p, --plugin <api>', 'plugin name')
   .option('-c, --connection <connection>', 'The name of the connection to use')
+  .option('--draft-and-publish <value>', 'Enable draft/publish', false)
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;

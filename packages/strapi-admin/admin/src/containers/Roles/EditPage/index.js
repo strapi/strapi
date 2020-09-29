@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { get, has, isEmpty } from 'lodash';
 import { useGlobalContext, request, difference } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
@@ -16,7 +16,6 @@ import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const { goBack } = useHistory();
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
@@ -25,7 +24,12 @@ const EditPage = () => {
   const permissionsRef = useRef();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
-  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
+  const {
+    role,
+    permissions: rolePermissions,
+    isLoading: isRoleLoading,
+    onSubmitSucceeded,
+  } = useFetchRole(id);
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -38,7 +42,10 @@ const EditPage = () => {
               defaultMessage: 'Reset',
             }),
             disabled: role.code === 'strapi-super-admin',
-            onClick: handleReset,
+            onClick: () => {
+              handleReset();
+              permissionsRef.current.resetForm();
+            },
             color: 'cancel',
             type: 'button',
           },
@@ -96,8 +103,10 @@ const EditPage = () => {
         }
       }
 
+      permissionsRef.current.setFormAfterSubmit();
+      onSubmitSucceeded({ name: data.name, description: data.description });
+
       strapi.notification.success('notification.success.saved');
-      goBack();
     } catch (err) {
       console.error(err.response);
       const message = get(err, 'response.payload.message', 'An error occured');

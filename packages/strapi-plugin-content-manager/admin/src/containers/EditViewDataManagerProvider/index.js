@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
 import PropTypes from 'prop-types';
-import { Prompt, Redirect, useParams, useLocation, useHistory } from 'react-router-dom';
+import {
+  Prompt,
+  Redirect,
+  useParams,
+  useLocation,
+  useHistory,
+  useRouteMatch,
+} from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   request,
@@ -37,8 +44,10 @@ const EditViewDataManagerProvider = ({
   const { id } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
+  const abortController = new AbortController();
+  const { signal } = abortController;
 
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
   const from = get(state, 'from', '/');
@@ -51,8 +60,18 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
   const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState('resolved');
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+  const hasDraftAndPublish = useMemo(() => {
+    return get(currentContentTypeLayout, ['schema', 'options', 'draftAndPublish'], false);
+  }, [currentContentTypeLayout]);
+
+  const shouldNotRunValidations = useMemo(() => {
+    return hasDraftAndPublish && !initialData.published_at;
+  }, [hasDraftAndPublish, initialData.published_at]);
+  const {
+    params: { contentType },
+  } = useRouteMatch('/plugins/content-manager/:contentType');
   // This is used for the readonly mode when updating an entry
   const allDynamicZoneFields = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
@@ -64,8 +83,6 @@ const EditViewDataManagerProvider = ({
     return dynamicZoneFields;
   }, [currentContentTypeLayout]);
 
-  const abortController = new AbortController();
-  const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
   const userPermissions = useUser();
   const generatedPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
@@ -157,9 +174,9 @@ const EditViewDataManagerProvider = ({
         });
       } catch (err) {
         console.log(err);
-        const status = get(err, 'response.status', null);
+        const resStatus = get(err, 'response.status', null);
 
-        if (id && status === 403) {
+        if (id && resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -172,14 +189,14 @@ const EditViewDataManagerProvider = ({
         }
 
         // Create a single type
-        if (!id && status === 404) {
+        if (!id && resStatus === 404) {
           setIsCreatingEntry(true);
 
           return;
         }
 
         // Not allowed to update or read a ST
-        if (!id && status === 403) {
+        if (!id && resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -225,7 +242,7 @@ const EditViewDataManagerProvider = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isCreatingEntry, isLoadingForPermissions]);
+  }, [id, slug, isLoadingForPermissions]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('didAddComponentToDynamicZone');
@@ -272,7 +289,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      isCreatingEntry
+      { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false }
     );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
@@ -354,7 +371,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      isCreatingEntry
+      { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false }
     );
 
     try {
@@ -362,7 +379,7 @@ const EditViewDataManagerProvider = ({
       await schema.validate(modifiedData, { abortEarly: false });
 
       // Show a loading button in the EditView/Header.js
-      setIsSubmitting(true);
+      setStatus('submit-pending');
 
       // Set the loading state in the plugin header
       const filesToUpload = getFilesToUpload(modifiedData);
@@ -406,7 +423,7 @@ const EditViewDataManagerProvider = ({
 
       try {
         // Time to actually send the data
-        await request(
+        const res = await request(
           getRequestUrl(endPoint),
           {
             method,
@@ -419,21 +436,21 @@ const EditViewDataManagerProvider = ({
         );
         emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
 
-        setIsSubmitting(false);
+        setStatus('resolved');
 
         dispatch({
           type: 'SUBMIT_SUCCESS',
         });
         strapi.notification.success(`${pluginId}.success.record.save`);
 
-        if (isSingleType) {
-          setIsCreatingEntry(false);
-        } else {
-          redirectToPreviousPage();
+        setIsCreatingEntry(false);
+
+        if (!isSingleType) {
+          replace(`/plugins/${pluginId}/${contentType}/${slug}/${res.id}`);
         }
       } catch (err) {
         console.error({ err });
-        setIsSubmitting(false);
+        setStatus('resolved');
 
         const error = get(
           err,
@@ -465,7 +482,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       console.error({ err });
       const errors = getYupInnerErrors(err);
-      setIsSubmitting(false);
+      setStatus('resolved');
 
       dispatch({
         type: 'SUBMIT_ERRORS',
@@ -473,6 +490,113 @@ const EditViewDataManagerProvider = ({
       });
     }
   };
+
+  const handlePublish = useCallback(async () => {
+    // Create yup schema
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      { isCreatingEntry, isDraft: false, isFromComponent: false }
+    );
+
+    try {
+      // Validate the form using yup
+      await schema.validate(modifiedData, { abortEarly: false });
+
+      // Show a loading button in the EditView/Header.js
+      setStatus('publish-pending');
+
+      try {
+        // Time to actually send the data
+        const data = await request(
+          getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
+          {
+            method: 'POST',
+          },
+          false,
+          false
+        );
+
+        setStatus('resolved');
+
+        dispatch({
+          type: 'PUBLISH_SUCCESS',
+          data,
+        });
+        strapi.notification.success(`${pluginId}.success.record.publish`);
+      } catch (err) {
+        // ---------- @Soupette Is this error handling still mandatory? ----------
+        // The api error send response.payload.message: 'The error message'.
+        // There isn't : response.payload.message[0].messages[0].id
+        console.error({ err });
+        setStatus('resolved');
+
+        const error = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+          'SERVER ERROR'
+        );
+
+        if (error === 'ValidationError') {
+          const errors = get(err, ['response', 'payload', 'data', '0', 'errors'], {});
+          const formattedErrors = Object.keys(errors).reduce((acc, current) => {
+            acc[current] = { id: errors[current][0] };
+
+            return acc;
+          }, {});
+
+          dispatch({
+            type: 'PUBLISH_ERRORS',
+            errors: formattedErrors,
+          });
+        }
+
+        const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
+        strapi.notification.error(errorMessage);
+      }
+    } catch (err) {
+      console.error({ err });
+      const errors = getYupInnerErrors(err);
+      console.log({ errors });
+      setStatus('resolved');
+
+      dispatch({
+        type: 'PUBLISH_ERRORS',
+        errors,
+      });
+    }
+  }, [allLayoutData, currentContentTypeLayout, id, isCreatingEntry, modifiedData, slug]);
+
+  const handleUnpublish = useCallback(async () => {
+    try {
+      setStatus('unpublish-pending');
+
+      const data = await request(
+        getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
+        {
+          method: 'POST',
+        },
+        false,
+        false
+      );
+
+      setStatus('resolved');
+
+      dispatch({
+        type: 'UNPUBLISH_SUCCESS',
+        data,
+      });
+      strapi.notification.success(`${pluginId}.success.record.unpublish`);
+    } catch (err) {
+      console.error({ err });
+      setStatus('resolved');
+
+      const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
+      strapi.notification.error(errorMessage);
+    }
+  }, [id, modifiedData, slug]);
 
   const shouldCheckDZErrors = useCallback(
     dzName => {
@@ -577,7 +701,7 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const clearData = () => {
+  const clearData = useCallback(() => {
     if (isSingleType) {
       setIsCreatingEntry(true);
     }
@@ -586,7 +710,7 @@ const EditViewDataManagerProvider = ({
       type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
       contentTypeDataStructure: {},
     });
-  };
+  }, [isSingleType]);
 
   const triggerFormValidation = () => {
     dispatch({
@@ -626,10 +750,12 @@ const EditViewDataManagerProvider = ({
         createActionAllowedFields,
         deleteSuccess,
         formErrors,
+        hasDraftAndPublish,
         initialData,
         isCreatingEntry,
         isSingleType,
-        isSubmitting,
+        shouldNotRunValidations,
+        status,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -637,6 +763,8 @@ const EditViewDataManagerProvider = ({
         moveComponentUp,
         moveRelation,
         onChange: handleChange,
+        onPublish: handlePublish,
+        onUnpublish: handleUnpublish,
         onRemoveRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
@@ -650,7 +778,11 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        <OverlayBlocker key="overlayBlocker" isOpen={isSubmitting} {...overlayBlockerParams} />
+        <OverlayBlocker
+          key="overlayBlocker"
+          isOpen={status !== 'resolved'}
+          {...overlayBlockerParams}
+        />
         {isLoading ? (
           <LoadingIndicatorPage />
         ) : (

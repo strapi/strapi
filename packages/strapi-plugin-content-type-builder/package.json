@@ -8,6 +8,12 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
+    "@buffetjs/core": "3.3.0",
+    "@buffetjs/custom": "3.3.0",
+    "@buffetjs/hooks": "3.3.0",
+    "@buffetjs/icons": "3.3.0",
+    "@buffetjs/styles": "3.3.0",
+    "@buffetjs/utils": "3.3.0",
     "@sindresorhus/slugify": "1.1.0",
     "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",
@@ -46,7 +52,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <13",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

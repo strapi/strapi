@@ -36,7 +36,7 @@ function TableHeader({ headers, isBulkable }) {
         {headers.map(header => {
           return (
             <th
-              key={header.name}
+              key={header.key || header.name}
               onClick={() => {
                 if (header.sortable) {
                   emitEvent('didSortEntries');

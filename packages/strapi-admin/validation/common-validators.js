@@ -2,6 +2,7 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
+const actionDomain = require('../domain/action');
 const {
   checkFieldsAreCorrectlyNested,
   checkFieldsDontHaveDuplicates,
@@ -45,12 +46,6 @@ const arrayOfConditionNames = yup
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
-const checkCTPermsDeleteHaveFieldsToNull = permissions =>
-  !Array.isArray(permissions) ||
-  permissions.every(
-    perm => perm.action !== 'plugins::content-manager.explorer.delete' || _.isNil(perm.fields)
-  );
-
 const permissionsAreEquals = (a, b) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
 
@@ -59,6 +54,18 @@ const checkNoDuplicatedPermissions = permissions =>
   permissions.every((permA, i) =>
     permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
   );
+
+const checkNilFields = function(fields) {
+  // If the parent has no action field, then we ignore this test
+  if (_.isNil(this.parent.action)) {
+    return true;
+  }
+
+  const { actionProvider } = strapi.admin.services.permission;
+  const action = actionProvider.getByActionId(this.parent.action);
+
+  return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
+};
 
 const updatePermissions = yup
   .object()
@@ -85,20 +92,20 @@ const updatePermissions = yup
                 'field-nested',
                 'Fields format are incorrect (duplicates).',
                 checkFieldsDontHaveDuplicates
+              )
+              .test(
+                'fields-restriction',
+                'The permission at ${path} must have fields set to null or undefined',
+                checkNilFields
               ),
             conditions: yup.array().of(yup.string()),
           })
-          .test(
-            'delete-fields-are-null',
-            'Some permissions are duplicated (same action and subject)',
-            checkNoDuplicatedPermissions
-          )
-          .test(
-            'delete-fields-are-null',
-            'The action "plugins::content-manager.explorer.delete" must have fields set to null or undefined',
-            checkCTPermsDeleteHaveFieldsToNull
-          )
           .noUnknown()
+      )
+      .test(
+        'duplicated-permissions',
+        'Some permissions are duplicated (same action and subject)',
+        checkNoDuplicatedPermissions
       ),
   })
   .required()
