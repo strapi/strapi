@@ -61,8 +61,10 @@ module.exports = {
         resolverOf: 'plugins::upload.upload.destroy',
         resolver: async (obj, options, { context }) => {
           const file = await strapi.plugins.upload.services.upload.fetch({ id: context.params.id });
-          const fileResult = await strapi.plugins.upload.services.upload.remove(file);
-          return { file: fileResult };
+          if (file) {
+            const fileResult = await strapi.plugins.upload.services.upload.remove(file);
+            return { file: fileResult };
+          }
         },
       },
     },
