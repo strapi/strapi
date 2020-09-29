@@ -37,7 +37,7 @@
     "prettier": "^1.18.2",
     "react-test-renderer": "^16.9.0",
     "request": "^2.87.0",
-    "request-promise-native": "^1.0.7",
+    "request-promise-native": "^1.0.9",
     "rimraf": "3.0.0",
     "snyk": "^1.99.0",
     "stylelint": "10.1.0",

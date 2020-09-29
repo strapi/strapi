@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-sendmail",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,7 +13,7 @@
   "main": "./lib",
   "dependencies": {
     "sendmail": "^1.6.1",
-    "strapi-utils": "3.1.5"
+    "strapi-utils": "3.1.6"
   },
   "strapi": {
     "isProvider": true

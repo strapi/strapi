@@ -40,7 +40,7 @@ Strapi modifies/creates files at runtime and needs to restart when new files are
 
 ```
 strapi develop
-options: [--no-build |--watch-admin ]
+options: [--no-build |--watch-admin |--browser ]
 ```
 
 - **strapi develop**<br/>
@@ -49,6 +49,8 @@ options: [--no-build |--watch-admin ]
   Starts your application with the autoReload enabled and skip the administration panel build process
 - **strapi develop --watch-admin**<br/>
   Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
+- **strapi develop --watch-admin --browser 'google chrome'**<br/>
+  Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel. Provide a browser name to use instead of the default one, `false` means stop opening the browser.
 
 ::: tip
 You should never use this command to run a Strapi application in production.

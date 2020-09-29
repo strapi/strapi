@@ -351,11 +351,16 @@ const ModalStepper = ({
       console.error(err);
       const status = get(err, 'response.status', get(err, 'status', null));
       const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
-      const errorMessage = get(
+      let errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
         get(err, ['response', 'payload', 'message'], statusText)
       );
+
+      // TODO fix errors globally when the back-end sends readable one
+      if (status === 413) {
+        errorMessage = formatMessage({ id: 'app.utils.errors.file-too-big.message' });
+      }
 
       if (status) {
         dispatch({
@@ -437,11 +442,16 @@ const ModalStepper = ({
           console.error(err);
           const status = get(err, 'response.status', get(err, 'status', null));
           const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
-          const errorMessage = get(
+          let errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
             get(err, ['response', 'payload', 'message'], statusText)
           );
+
+          // TODO fix errors globally when the back-end sends readable one
+          if (status === 413) {
+            errorMessage = formatMessage({ id: 'app.utils.errors.file-too-big.message' });
+          }
 
           if (status) {
             dispatch({
