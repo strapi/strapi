@@ -1,6 +1,6 @@
 'use strict';
 
-const { errors, is: isError } = require('../../errors');
+const { convertToStrapiError } = require('../../errors');
 
 module.exports = async () => {
   // set plugin store
@@ -32,19 +32,7 @@ const wrapFunctionForErrors = fn => async (...args) => {
   try {
     return await fn(...args);
   } catch (err) {
-    if (isError(err, errors.entityTooLarge)) {
-      throw strapi.errors.entityTooLarge('FileTooBig', {
-        errors: [
-          {
-            id: 'Upload.status.sizeLimit',
-            message: 'file is bigger than the limit size!',
-          },
-        ],
-      });
-    } else {
-      strapi.log.error(err);
-      throw strapi.errors.badImplementation();
-    }
+    throw convertToStrapiError(err);
   }
 };
 

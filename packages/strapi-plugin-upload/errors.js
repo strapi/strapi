@@ -21,10 +21,26 @@ const is = (err, errorFactory) => {
   return err.type && err.type === errorFactory.type;
 };
 
+const convertToStrapiError = err => {
+  if (is(err, entityTooLarge)) {
+    return strapi.errors.entityTooLarge('FileTooBig', {
+      errors: [
+        {
+          id: 'Upload.status.sizeLimit',
+          message: 'file is bigger than the limit size!',
+        },
+      ],
+    });
+  } else {
+    strapi.log.error(err);
+    return strapi.errors.badImplementation();
+  }
+};
+
 module.exports = {
   errors: {
     entityTooLarge,
     unknownError,
   },
-  is,
+  convertToStrapiError,
 };
