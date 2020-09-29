@@ -1089,6 +1089,14 @@
   dependencies:
     yup "^0.27.0"
 
+"@buffetjs/utils@3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.3.0.tgz#dc0e981ebcd9e4741659a7952c026d315d8e58e7"
+  integrity sha512-qceyIh53hClRzNLvunuMBbR/ZYsltzM8G7MzQQSSveuIDsWm+L2D61Q9BCSuN11ZhaCJ3/zbMA573pFj/x3+Jw==
+  dependencies:
+    lodash "4.17.19"
+    yup "^0.27.0"
+
 "@casl/ability@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-4.1.5.tgz#c34fedc1fd7e631f9f70309eecd5c8a2a7550ead"

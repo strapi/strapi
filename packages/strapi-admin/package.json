@@ -28,7 +28,7 @@
     "@buffetjs/hooks": "3.2.3",
     "@buffetjs/icons": "3.2.3",
     "@buffetjs/styles": "3.2.3",
-    "@buffetjs/utils": "3.2.3",
+    "@buffetjs/utils": "3.3.0",
     "@casl/ability": "^4.1.5",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
