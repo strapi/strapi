@@ -30,6 +30,9 @@
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
   },
+  "peerDependencies": {
+    "strapi-plugin-upload": "3.1.5"
+  },
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
   },
