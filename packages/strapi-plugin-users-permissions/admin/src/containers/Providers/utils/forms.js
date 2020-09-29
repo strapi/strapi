@@ -59,6 +59,17 @@ const forms = {
       },
       {
         autoFocus: false,
+        label: getTrad('PopUpForm.Providers.subdomain.label'),
+        name: 'subdomain',
+        type: 'text',
+        placeholder: getTrad('PopUpForm.Providers.subdomain.placeholder'),
+        size: { xs: 12 },
+        validations: {
+          required: true,
+        },
+      },
+      {
+        autoFocus: false,
         label: getTrad('PopUpForm.Providers.redirectURL.front-end.label'),
         placeholder: 'http://www.client-app.com',
         name: 'callback',

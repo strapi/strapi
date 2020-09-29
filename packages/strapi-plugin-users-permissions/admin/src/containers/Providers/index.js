@@ -30,6 +30,7 @@ const ProvidersPage = () => {
   const buttonSubmitRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
+  const [providerIsWithSubdomain, setProviderIsWithSubdomain] = useState(false);
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -46,8 +47,6 @@ const ProvidersPage = () => {
     isLoadingForPermissions,
     modifiedData,
   } = useForm('providers', updatePermissions);
-
-  console.log({ canUpdate });
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
@@ -83,7 +82,7 @@ const ProvidersPage = () => {
 
   const formToRender = useMemo(() => {
     return providerToEditName === 'email' ? forms.email : forms.providers;
-  }, [providerToEditName]);
+  }, [providerToEditName, providerIsWithSubdomain]);
 
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
@@ -97,6 +96,7 @@ const ProvidersPage = () => {
     provider => {
       if (canUpdate) {
         setProviderToEditName(provider.name);
+        setProviderIsWithSubdomain(provider.subdomain ? true : false)
         handleToggle();
       }
     },
@@ -105,6 +105,7 @@ const ProvidersPage = () => {
 
   const handleClosed = useCallback(() => {
     setProviderToEditName(null);
+    setProviderIsWithSubdomain(false);
     setShowForm(false);
     dispatchResetForm();
   }, [dispatchResetForm]);
@@ -162,6 +163,7 @@ const ProvidersPage = () => {
       handleToggle,
       modifiedData,
       providerToEditName,
+      providerIsWithSubdomain
     ]
   );
 
@@ -219,26 +221,53 @@ const ProvidersPage = () => {
           <form onSubmit={handleSubmit}>
             <Row>
               {formToRender.form.map(input => {
-                const label = input.label.params
-                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                  : input.label;
+                if (input.name === 'subdomain') {
+                  if (providerIsWithSubdomain) {
+                    const label = input.label.params
+                      ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
+                      : input.label;
 
-                const value =
-                  input.name === 'noName'
-                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
+                    const value =
+                      input.name === 'noName'
+                        ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
+                        : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
 
-                return (
-                  <SizedInput
-                    key={input.name}
-                    {...input}
-                    label={label}
-                    error={formErrors[input.name]}
-                    name={`${providerToEditName}.${input.name}`}
-                    onChange={handleChange}
-                    value={value}
-                  />
-                );
+                    return (
+                      <SizedInput
+                        key={input.name}
+                        {...input}
+                        label={label}
+                        error={formErrors[input.name]}
+                        name={`${providerToEditName}.${input.name}`}
+                        onChange={handleChange}
+                        value={value}
+                      />
+                    );
+                  } else {
+                    return null;
+                  }
+                } else {
+                  const label = input.label.params
+                    ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
+                    : input.label;
+
+                  const value =
+                    input.name === 'noName'
+                      ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
+                      : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
+
+                  return (
+                    <SizedInput
+                      key={input.name}
+                      {...input}
+                      label={label}
+                      error={formErrors[input.name]}
+                      name={`${providerToEditName}.${input.name}`}
+                      onChange={handleChange}
+                      value={value}
+                    />
+                  );
+                }
               })}
             </Row>
             <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>

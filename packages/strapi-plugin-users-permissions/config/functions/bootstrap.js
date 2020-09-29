@@ -107,7 +107,7 @@ module.exports = async () => {
       icon: 'aws',
       key: '',
       secret: '',
-      subdomain: '',
+      subdomain: 'my.subdomain.com',
       callback: `${strapi.config.server.url}/auth/cognito/callback`,
       scope: ['email'],
     },
