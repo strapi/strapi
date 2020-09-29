@@ -34,7 +34,8 @@ class Search extends React.Component {
     }
 
     clearTimeout(this.timer);
-    this.setState({ value: target.value, didType: true });
+    this.setState({ value: target.value, didType: !!target.value });
+
     this.timer = setTimeout(() => this.triggerChange(target.value), WAIT);
   };
 
