@@ -250,6 +250,7 @@
   "app.utils.add-filter": "Add filter",
   "app.utils.defaultMessage": " ",
   "app.utils.delete": "Delete",
+  "app.utils.errors.file-too-big.message": "The file is too big",
   "app.utils.filters": "Filters",
   "app.utils.placeholder.defaultMessage": " ",
   "app.utils.select-all": "Select all",
