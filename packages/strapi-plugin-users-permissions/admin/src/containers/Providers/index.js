@@ -59,7 +59,7 @@ const ProvidersPage = () => {
 
     const providerToEdit = providers.find(obj => obj.name === providerToEditName);
 
-    return has(providerToEdit, 'subdomain') && providerToEdit.subdomain !== undefined;
+    return has(providerToEdit, 'subdomain');
   }, [providers, providerToEditName]);
   const disabledProvidersCount = useMemo(() => {
     return providers.length - enabledProvidersCount;
