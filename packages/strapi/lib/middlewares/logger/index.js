@@ -30,15 +30,25 @@ module.exports = strapi => {
 
       if (!_.includes(logLevels, level)) {
         throw new Error(
-          'Invalid log level value. Set a correct value in middleware configuration. Accepted values are (' +
-            logLevels.join(', ') +
-            ').'
+          "Invalid log level set in middleware configuration. Accepted values are: '" +
+            logLevels.join("', '") +
+            "'."
         );
       }
+
       strapi.log.level = level;
 
       if (exposeInContext) {
         strapi.app.context.log = strapi.log;
+      }
+
+      const isLogLevelEnvVariableSet = _.isString(process.env.STRAPI_LOG_LEVEL);
+
+      if (isLogLevelEnvVariableSet && strapi.log.levelVal <= 20) {
+        strapi.log.debug(
+          `STRAPI_LOG_LEVEL environment variable is overridden by logger middleware.
+           STRAPI_LOG_LEVEL works only outside Strapi's middleware context.`
+        );
       }
 
       if (requests && strapi.log.levelVal <= 20) {
