@@ -21,7 +21,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-node": "11.0.0",
     "eslint-plugin-react": "^7.14.0",
-    "eslint-plugin-react-hooks": "^2.0.0",
+    "eslint-plugin-react-hooks": "^4.1.2",
     "eslint-plugin-redux-saga": "^1.1.0",
     "execa": "^1.0.0",
     "fs-extra": "9.0.1",
