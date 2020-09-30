@@ -107,6 +107,9 @@ To upload files that will be linked to a specific entry.
 - `source` (optional): The name of the plugin where the model is located.
 - `field`: The field of the entry which the file(s) will be precisely linked to.
 
+note: please note that you need to append a formdata called 'source' with value 'users-permissions' in order to upload pictures to the internal user collection type.
+
+
 ### Examples
 
 The `Restaurant` model attributes:
