@@ -50,7 +50,7 @@ _Request_
 import axios from 'axios';
 
 axios.get('http://localhost:1337/restaurants').then(response => {
-  console.error(response);
+  console.log(response);
 });
 ```
 
@@ -68,7 +68,7 @@ fetch('http://localhost:1337/restaurants', {
   },
 })
   .then(response => response.json())
-  .then(data => console.error(data));
+  .then(data => console.log(data));
 ```
 
 :::
@@ -244,7 +244,7 @@ axios
     categories: [3],
   })
   .then(response => {
-    console.error(response);
+    console.log(response);
   });
 ```
 
@@ -267,7 +267,7 @@ fetch('http://localhost:1337/restaurants', {
   }),
 })
   .then(response => response.json())
-  .then(data => console.error(data));
+  .then(data => console.log(data));
 ```
 
 :::
@@ -371,7 +371,7 @@ export default {
 
       try {
         const response = await axios.post('http://localhost:1337/restaurants', this.modifiedData)
-        console.error(response);
+        console.log(response);
       } catch(error) {
         this.error = error;
       }
@@ -475,7 +475,7 @@ export default {
             body: JSON.stringify(this.modifiedData)
           }).then(this.checkStatus)
             .then(this.parseJSON);
-            console.error(response);
+            console.log(response);
       } catch (error) {
         this.error = error
       }
@@ -512,7 +512,7 @@ axios
     categories: [2],
   })
   .then(response => {
-    console.error(response);
+    console.log(response);
   });
 ```
 
@@ -534,7 +534,7 @@ fetch('http://localhost:1337/restaurants/2', {
 })
   .then(response => response.json())
   .then(data => {
-    console.error(data);
+    console.log(data);
   });
 ```
 

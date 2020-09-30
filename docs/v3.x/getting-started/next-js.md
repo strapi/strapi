@@ -66,7 +66,7 @@ _Request_
 import axios from 'axios';
 
 axios.get('http://localhost:1337/restaurants').then(response => {
-  console.error(response);
+  console.log(response);
 });
 ```
 
@@ -84,7 +84,7 @@ fetch('http://localhost:1337/restaurants', {
   },
 })
   .then(response => response.json())
-  .then(data => console.error(data));
+  .then(data => console.log(data));
 ```
 
 :::
@@ -246,7 +246,7 @@ axios
     categories: [3],
   })
   .then(response => {
-    console.error(response);
+    console.log(response);
   });
 ```
 
@@ -269,7 +269,7 @@ fetch('http://localhost:1337/restaurants', {
   }),
 })
   .then(response => response.json())
-  .then(data => console.error(data));
+  .then(data => console.log(data));
 ```
 
 :::
@@ -332,7 +332,7 @@ const Home = ({ allCategories, errorCategories }) => {
 
     try {
       const response = await axios.post('http://localhost:1337/restaurants', modifiedData);
-      console.error(response);
+      console.log(response);
     } catch (error) {
       setErrorRestaurants(error);
     }
@@ -575,7 +575,7 @@ axios
     categories: [2],
   })
   .then(response => {
-    console.error(response);
+    console.log(response);
   });
 ```
 
@@ -597,7 +597,7 @@ fetch('http://localhost:1337/restaurants/2', {
 })
   .then(response => response.json())
   .then(data => {
-    console.error(data);
+    console.log(data);
   });
 ```
 

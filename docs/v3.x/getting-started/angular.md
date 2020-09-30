@@ -50,7 +50,7 @@ _Request_
 import axios from 'axios';
 
 axios.get('http://localhost:1337/restaurants').then(response => {
-  console.error(response);
+  console.log(response);
 });
 ```
 
@@ -68,7 +68,7 @@ fetch('http://localhost:1337/restaurants', {
   },
 })
   .then(response => response.json())
-  .then(data => console.error(data));
+  .then(data => console.log(data));
 ```
 
 :::
@@ -234,7 +234,7 @@ axios
     categories: [3],
   })
   .then(response => {
-    console.error(response);
+    console.log(response);
   });
 ```
 
@@ -257,7 +257,7 @@ fetch('http://localhost:1337/restaurants', {
   }),
 })
   .then(response => response.json())
-  .then(data => console.error(data));
+  .then(data => console.log(data));
 ```
 
 :::
@@ -368,7 +368,7 @@ export class AppComponent implements OnInit {
     } catch (error) {
       this.error = error
     }
-    console.error(this.allCategories);
+    console.log(this.allCategories);
   }
 
   async onSubmit(restaurantData) {
@@ -377,7 +377,7 @@ export class AppComponent implements OnInit {
         'http://localhost:1337/restaurants',
         restaurantData
       );
-      console.error(response);
+      console.log(response);
     } catch (error) {
       this.error = error;
     }
@@ -466,7 +466,7 @@ export class AppComponent implements OnInit {
     } catch (error) {
       this.error = error
     }
-    console.error(this.allCategories);
+    console.log(this.allCategories);
   }
 
   async onSubmit(restaurantData) {
@@ -548,7 +548,7 @@ axios
     categories: [2],
   })
   .then(response => {
-    console.error(response);
+    console.log(response);
   });
 ```
 
@@ -570,7 +570,7 @@ fetch('http://localhost:1337/restaurants/2', {
 })
   .then(response => response.json())
   .then(data => {
-    console.error(data);
+    console.log(data);
   });
 ```
 
