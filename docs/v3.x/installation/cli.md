@@ -8,7 +8,7 @@ Fast-track local install for getting Strapi running on your computer.
 
 #### Node.js
 
-Strapi only requires [Node.js](https://nodejs.org). The current recommended version to run strapi is **Node v12** (current LTS).
+Strapi only requires [Node.js](https://nodejs.org). The current recommended version to run Strapi is **Node v12** (please note that Node v14 is **not supported** at this time and does not go into LTS until the end of October 2020).
 
 This is everything you need to run Strapi on your local environment.
 

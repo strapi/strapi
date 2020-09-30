@@ -7,6 +7,7 @@
  */
 
 const _ = require('lodash');
+const { getPrivateAttributes } = require('strapi-utils');
 
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
@@ -63,6 +64,14 @@ const buildTypeDefObj = model => {
 
       delete typeDef[association.alias];
     });
+
+  // Remove private attributes defined per model or globally
+  const privateAttributes = getPrivateAttributes(model);
+  privateAttributes.forEach(attr => {
+    if (typeDef[attr]) {
+      delete typeDef[attr];
+    }
+  });
 
   return typeDef;
 };
