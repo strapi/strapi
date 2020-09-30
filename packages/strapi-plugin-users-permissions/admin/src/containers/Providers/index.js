@@ -243,28 +243,29 @@ const ProvidersPage = () => {
                       />
                     );
                   }
-                } else {
-                  const label = input.label.params
+
+                  return null;
+                }
+                const label = input.label.params
                     ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
                     : input.label;
 
-                  const value =
+                const value =
                     input.name === 'noName'
                       ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
                       : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
 
-                  return (
-                    <SizedInput
-                      key={input.name}
-                      {...input}
-                      label={label}
-                      error={formErrors[input.name]}
-                      name={`${providerToEditName}.${input.name}`}
-                      onChange={handleChange}
-                      value={value}
-                    />
-                  );
-                }
+                return (
+                  <SizedInput
+                    key={input.name}
+                    {...input}
+                    label={label}
+                    error={formErrors[input.name]}
+                    name={`${providerToEditName}.${input.name}`}
+                    onChange={handleChange}
+                    value={value}
+                  />
+                );
               })}
             </Row>
             <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
