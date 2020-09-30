@@ -55,9 +55,9 @@ export function getBlockContent(style) {
       };
     case 'LINK':
       return {
-        innerContent: 'link',
-        endReplacer: ')',
-        startReplacer: '[text](',
+        innerContent: 'text',
+        endReplacer: ']',
+        startReplacer: '[',
       };
     default:
       return {
