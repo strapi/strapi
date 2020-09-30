@@ -82,7 +82,7 @@ const ProvidersPage = () => {
 
   const formToRender = useMemo(() => {
     return providerToEditName === 'email' ? forms.email : forms.providers;
-  }, [providerToEditName, providerIsWithSubdomain]);
+  }, [providerToEditName]);
 
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
@@ -96,7 +96,7 @@ const ProvidersPage = () => {
     provider => {
       if (canUpdate) {
         setProviderToEditName(provider.name);
-        setProviderIsWithSubdomain(provider.subdomain ? true : false)
+        setProviderIsWithSubdomain(provider.subdomain && provider.subdomain !== '');
         handleToggle();
       }
     },
@@ -162,8 +162,7 @@ const ProvidersPage = () => {
       formToRender,
       handleToggle,
       modifiedData,
-      providerToEditName,
-      providerIsWithSubdomain
+      providerToEditName
     ]
   );
 
@@ -243,8 +242,6 @@ const ProvidersPage = () => {
                         value={value}
                       />
                     );
-                  } else {
-                    return null;
                   }
                 } else {
                   const label = input.label.params
