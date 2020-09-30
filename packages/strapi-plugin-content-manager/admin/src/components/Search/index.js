@@ -14,6 +14,8 @@ import getTrad from '../../utils/getTrad';
 const WAIT = 400;
 
 class Search extends React.Component {
+  static contextType = GlobalContext;
+
   state = { didType: false, value: this.props.initValue };
 
   timer = null;
@@ -50,8 +52,6 @@ class Search extends React.Component {
         value,
       },
     });
-
-  static contextType = GlobalContext;
 
   render() {
     const { model } = this.props;
