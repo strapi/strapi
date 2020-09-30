@@ -4,22 +4,24 @@ Thanks to the plugin `Upload`, you can upload any kind of file on your server or
 
 ## Configuration
 
-Currently the Strapi middleware in charge of parsing request needs to be configured to support bigger file sizes if you need to upload file with a size greater than 200MB.
+Currently the strapi middleware in charge of parsing requests needs to be configured to support file sizes larger than the default of **200MB**.
 
-The library we use is [`koa-body`](https://github.com/dlau/koa-body), and itself uses the [`node-formidable`](https://github.com/felixge/node-formidable) library to process files.
+The library we use is [`koa-body`](https://github.com/dlau/koa-body) and it uses the [`node-formidable`](https://github.com/felixge/node-formidable) library to process files.
 
-You can pass configuration to the middleware directly by setting it in the `parser` middleware configuration:
+You can pass configuration to the middleware directly by setting it in the `parser` middleware configuration in `config/middleware.js`:
 
-```json
-{
-  "parser": {
-    "enabled": true,
-    "multipart": true,
-    "formidable": {
-      "maxFileSize": 20000000 // defaults to 200mb
+```
+module.exports = {
+  settings: {
+    parser: {
+      enabled: true,
+      multipart: true,
+      formidable: {
+        maxFileSize: 200 * 1024 * 1024 // Defaults to 200mb
+      }
     }
-  }
-}
+  },
+};
 ```
 
 ## Endpoints
