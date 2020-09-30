@@ -6,11 +6,7 @@ const createProvidersArray = data => {
       const { icon: iconName, enabled, subdomain } = data[current];
       const icon = iconName === 'envelope' ? ['fas', 'envelope'] : ['fab', iconName];
 
-      if (subdomain) {
-        acc.push({ name: current, icon, enabled, subdomain });
-      } else {
-        acc.push({ name: current, icon, enabled });
-      }
+      acc.push({ name: current, icon, enabled, subdomain });
 
       return acc;
     }, []),

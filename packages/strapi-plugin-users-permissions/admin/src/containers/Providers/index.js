@@ -10,7 +10,7 @@ import {
   getYupInnerErrors,
   request,
 } from 'strapi-helper-plugin';
-import { get, upperFirst } from 'lodash';
+import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { useForm } from '../../hooks';
@@ -30,7 +30,6 @@ const ProvidersPage = () => {
   const buttonSubmitRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
-  const [providerIsWithSubdomain, setProviderIsWithSubdomain] = useState(false);
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -53,6 +52,15 @@ const ProvidersPage = () => {
     () => providers.filter(provider => provider.enabled).length,
     [providers]
   );
+  const isProviderWithSubdomain = useMemo(() => {
+    if (!providerToEditName) {
+      return false;
+    }
+
+    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+
+    return has(providerToEdit, 'subdomain') && providerToEdit.subdomain !== undefined;
+  }, [providers, providerToEditName]);
   const disabledProvidersCount = useMemo(() => {
     return providers.length - enabledProvidersCount;
   }, [providers, enabledProvidersCount]);
@@ -81,8 +89,16 @@ const ProvidersPage = () => {
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
 
   const formToRender = useMemo(() => {
-    return providerToEditName === 'email' ? forms.email : forms.providers;
-  }, [providerToEditName]);
+    if (providerToEditName === 'email') {
+      return forms.email;
+    }
+
+    if (isProviderWithSubdomain) {
+      return forms.providersWithSubdomain;
+    }
+
+    return forms.providers;
+  }, [providerToEditName, isProviderWithSubdomain]);
 
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
@@ -96,7 +112,6 @@ const ProvidersPage = () => {
     provider => {
       if (canUpdate) {
         setProviderToEditName(provider.name);
-        setProviderIsWithSubdomain(provider.subdomain && provider.subdomain !== '');
         handleToggle();
       }
     },
@@ -105,7 +120,6 @@ const ProvidersPage = () => {
 
   const handleClosed = useCallback(() => {
     setProviderToEditName(null);
-    setProviderIsWithSubdomain(false);
     setShowForm(false);
     dispatchResetForm();
   }, [dispatchResetForm]);
@@ -220,32 +234,6 @@ const ProvidersPage = () => {
           <form onSubmit={handleSubmit}>
             <Row>
               {formToRender.form.map(input => {
-                if (input.name === 'subdomain') {
-                  if (providerIsWithSubdomain) {
-                    const label = input.label.params
-                      ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                      : input.label;
-
-                    const value =
-                      input.name === 'noName'
-                        ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                        : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
-
-                    return (
-                      <SizedInput
-                        key={input.name}
-                        {...input}
-                        label={label}
-                        error={formErrors[input.name]}
-                        name={`${providerToEditName}.${input.name}`}
-                        onChange={handleChange}
-                        value={value}
-                      />
-                    );
-                  }
-
-                  return null;
-                }
                 const label = input.label.params
                     ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
                     : input.label;
