@@ -47,8 +47,6 @@ const ProvidersPage = () => {
     modifiedData,
   } = useForm('providers', updatePermissions);
 
-  console.log({ canUpdate });
-
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
     () => providers.filter(provider => provider.enabled).length,

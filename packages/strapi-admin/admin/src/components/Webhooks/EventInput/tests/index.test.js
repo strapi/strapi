@@ -22,6 +22,7 @@ describe('<EventInput />', () => {
     name: 'events',
     value: ['media.create', 'media.delete'],
     onChange: jest.fn(),
+    shouldShowDPEvents: false,
   };
 
   it('should match the snapshot', () => {

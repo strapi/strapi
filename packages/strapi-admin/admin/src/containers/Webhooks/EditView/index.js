@@ -4,12 +4,19 @@
  *
  */
 
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { get, isEmpty, isEqual, omit } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
-import { request, useGlobalContext, getYupInnerErrors, BackHeader } from 'strapi-helper-plugin';
+import {
+  request,
+  useGlobalContext,
+  getYupInnerErrors,
+  BackHeader,
+  LoadingIndicatorPage,
+} from 'strapi-helper-plugin';
+import { useModels } from '../../../hooks';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 import reducer, { initialState } from './reducer';
@@ -17,11 +24,14 @@ import { cleanData, form, schema } from './utils';
 import Wrapper from './Wrapper';
 
 function EditView() {
+  const { isLoading: isLoadingForModels, collectionTypes } = useModels();
+
   const isMounted = useRef();
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
@@ -34,6 +44,7 @@ function EditView() {
     formErrors,
     modifiedData,
     initialData,
+    isLoading,
     isTriggering,
     triggerResponse,
   } = reducerState.toJS();
@@ -55,6 +66,8 @@ function EditView() {
         }
       } catch (err) {
         if (isMounted.current) {
+          dispatch({ type: 'UNSET_LOADER' });
+
           if (err.code !== 20) {
             strapi.notification.error('notification.error');
           }
@@ -64,6 +77,8 @@ function EditView() {
 
     if (!isCreating) {
       fetchData();
+    } else {
+      dispatch({ type: 'UNSET_LOADER' });
     }
 
     return () => {
@@ -72,8 +87,6 @@ function EditView() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isCreating]);
-
-  const { name } = modifiedData;
 
   const areActionDisabled = isEqual(initialData, modifiedData);
 
@@ -92,7 +105,8 @@ function EditView() {
     ? formatMessage({
         id: 'Settings.webhooks.create',
       })
-    : name;
+    : initialData.name;
+
   const headersActions = [
     {
       color: 'primary',
@@ -130,6 +144,7 @@ function EditView() {
       label: formatMessage({
         id: 'app.components.Button.save',
       }),
+      isLoading: isSubmitting,
       style: {
         minWidth: 140,
       },
@@ -169,23 +184,23 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
-      await request('/admin/webhooks', {
+      strapi.lockAppWithOverlay();
+      setIsSubmitting(true);
+      const { data } = await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),
       });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-
-        strapi.notification.success('Settings.webhooks.created');
-        goBack();
-      }
+      setIsSubmitting(false);
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      strapi.notification.success('Settings.webhooks.created');
+      replace(`/settings/webhooks/${data.id}`);
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      setIsSubmitting(false);
+      strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
 
@@ -199,7 +214,7 @@ function EditView() {
     });
   };
 
-  const goBack = () => push('/settings/webhooks');
+  const goToList = () => push('/settings/webhooks');
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -324,6 +339,9 @@ function EditView() {
 
   const updateWebhook = async () => {
     try {
+      strapi.lockAppWithOverlay();
+      setIsSubmitting(true);
+
       const body = cleanData(modifiedData);
       delete body.id;
 
@@ -331,24 +349,32 @@ function EditView() {
         method: 'PUT',
         body,
       });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-        strapi.notification.success('notification.form.success.fields');
-      }
+      setIsSubmitting(false);
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      strapi.notification.success('notification.form.success.fields');
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      setIsSubmitting(false);
+      strapi.notification.error('notification.error');
+    } finally {
+      strapi.unlockApp();
     }
   };
+
+  const shouldShowDPEvents = useMemo(
+    () => collectionTypes.some(ct => ct.schema.options.draftAndPublish === true),
+    [collectionTypes]
+  );
+
+  if (isLoading || isLoadingForModels) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <Wrapper>
       <PageTitle name="Webhooks" />
-      <BackHeader onClick={goBack} />
+      <BackHeader onClick={goToList} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (
@@ -378,6 +404,7 @@ function EditView() {
                       error={getErrorMessage(get(formErrors, key, null))}
                       name={key}
                       onChange={handleChange}
+                      shouldShowDPEvents={shouldShowDPEvents}
                       validations={form[key].validations}
                       value={modifiedData[key] || form[key].value}
                       {...(form[key].type === 'headers' && {

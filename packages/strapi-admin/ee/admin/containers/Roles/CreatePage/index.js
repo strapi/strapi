@@ -22,7 +22,7 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { goBack } = useHistory();
+  const { replace } = useHistory();
   const permissionsRef = useRef();
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
@@ -68,7 +68,7 @@ const CreatePage = () => {
         body: data,
       })
     )
-      .then(res => {
+      .then(async res => {
         const permissionsToSend = permissionsRef.current.getPermissions();
 
         if (id) {
@@ -78,7 +78,7 @@ const CreatePage = () => {
         }
 
         if (res.data.id && !isEmpty(permissionsToSend)) {
-          return request(`/admin/roles/${res.data.id}/permissions`, {
+          await request(`/admin/roles/${res.data.id}/permissions`, {
             method: 'PUT',
             body: { permissions: formatPermissionsToApi(permissionsToSend) },
           });
@@ -86,16 +86,17 @@ const CreatePage = () => {
 
         return res;
       })
-      .then(() => {
+      .then(res => {
+        setIsSubmiting(false);
         strapi.notification.success('Settings.roles.created');
-        goBack();
+        replace(`${settingsBaseURL}/roles/${res.data.id}`);
       })
       .catch(err => {
         console.error(err);
+        setIsSubmiting(false);
         strapi.notification.error('notification.error');
       })
       .finally(() => {
-        setIsSubmiting(false);
         strapi.unlockApp();
       });
   };

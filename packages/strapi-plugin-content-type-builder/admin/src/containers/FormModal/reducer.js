@@ -84,16 +84,47 @@ const reducer = (state, action) => {
         }
 
         if (keys.length === 1 && keys.includes('target')) {
+          const { targetContentTypeAllowedRelations } = action;
+          let didChangeNatureBecauseOfRestrictedRelation = false;
+
           return obj
             .update('target', () => value)
+            .update('nature', currentNature => {
+              if (targetContentTypeAllowedRelations === null) {
+                return currentNature;
+              }
+
+              if (!targetContentTypeAllowedRelations.includes(currentNature)) {
+                didChangeNatureBecauseOfRestrictedRelation = true;
+
+                return targetContentTypeAllowedRelations[0];
+              }
+
+              return currentNature;
+            })
             .update('name', () => {
+              if (didChangeNatureBecauseOfRestrictedRelation) {
+                return pluralize(
+                  snakeCase(selectedContentTypeFriendlyName),
+                  shouldPluralizeName(targetContentTypeAllowedRelations[0])
+                );
+              }
+
               return pluralize(
                 snakeCase(selectedContentTypeFriendlyName),
+
                 shouldPluralizeName(obj.get('nature'))
               );
             })
             .update('targetAttribute', () => {
               if (['oneWay', 'manyWay'].includes(obj.get('nature'))) {
+                return '-';
+              }
+
+              if (
+                didChangeNatureBecauseOfRestrictedRelation &&
+                ['oneWay', 'manyWay'].includes(targetContentTypeAllowedRelations[0])
+              ) {
                 return '-';
               }
 
