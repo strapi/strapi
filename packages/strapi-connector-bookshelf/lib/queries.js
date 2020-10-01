@@ -75,7 +75,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    * Count entries based on filters
    */
   function count(params = {}) {
-    const filters = convertRestQueryParams(params);
+    const filters = convertRestQueryParams(_.omit(params, ['_sort', '_limit', '_start']));
 
     return model
       .query(buildQuery({ model, filters }))
@@ -188,7 +188,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   }
 
   function countSearch(params) {
-    const filters = convertRestQueryParams(_.omit(params, '_q'));
+    const filters = convertRestQueryParams(_.omit(params, ['_q', '_sort', '_limit', '_start']));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))
