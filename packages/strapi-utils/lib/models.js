@@ -103,6 +103,14 @@ module.exports = {
         types.other = 'model';
       } else if (_.has(relatedAttribute, 'collection') || _.has(relatedAttribute, 'model')) {
         types.other = 'morphTo';
+      } else {
+        throw new Error(
+          `The attribute \`${
+            attribute.via
+          }\` is not correctly configured in the model ${_.upperFirst(attribute.collection)} ${
+            attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''
+          }`
+        );
       }
     } else if (_.has(attribute, 'via') && _.has(attribute, 'model')) {
       types.current = 'modelD';
@@ -111,6 +119,14 @@ module.exports = {
       const model = models[attribute.model];
 
       const reverseAttribute = model.attributes[attribute.via];
+
+      if (!reverseAttribute) {
+        throw new Error(
+          `The attribute \`${attribute.via}\` is missing in the model ${_.upperFirst(
+            attribute.model
+          )} ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+        );
+      }
 
       if (
         _.has(reverseAttribute, 'via') &&
@@ -123,6 +139,14 @@ module.exports = {
         types.other = 'model';
       } else if (_.has(reverseAttribute, 'collection') || _.has(reverseAttribute, 'model')) {
         types.other = 'morphTo';
+      } else {
+        throw new Error(
+          `The attribute \`${
+            attribute.via
+          }\` is not correctly configured in the model ${_.upperFirst(attribute.model)} ${
+            attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''
+          }`
+        );
       }
     } else if (_.has(attribute, 'model')) {
       types.current = 'model';
