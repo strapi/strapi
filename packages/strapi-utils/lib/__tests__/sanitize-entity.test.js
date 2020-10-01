@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('../sanitize-entity');
+const sanitizeEntity = require('../sanitize-entity');
 
 describe('Sanitize Entity', () => {
   const input = {
@@ -40,6 +40,7 @@ describe('Sanitize Entity', () => {
     options: {
       timestamps: ['created_at', 'updated_at'],
     },
+    privateAttributes: ['email'],
     attributes: {
       email: {
         type: 'text',
@@ -83,6 +84,7 @@ describe('Sanitize Entity', () => {
     options: {
       timestamps: ['created_at', 'updated_at'],
     },
+    privateAttributes: ['secret'],
     attributes: {
       name: {
         type: 'text',
@@ -207,17 +209,10 @@ describe('Sanitize Entity', () => {
           ...models.user.options,
           privateAttributes: ['firstname'],
         },
+        privateAttributes: [].concat(models.user.privateAttributes, ['firstname'], ['id']),
       };
 
       test.each(tests)(`Test n°%#`, (options, expected) => {
-        global.strapi = {
-          config: {
-            get: jest.fn(path => {
-              return path === 'api.responses.privateAttributes' ? ['id'] : [];
-            }),
-          },
-        };
-
         expect(sanitizeEntity(input, { ...options, model })).toStrictEqual(expected);
       });
     });

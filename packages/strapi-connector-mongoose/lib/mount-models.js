@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const mongoose = require('mongoose');
 
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, contentTypes } = require('strapi-utils');
 const utils = require('./utils');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
@@ -27,15 +27,19 @@ module.exports = ({ models, target }, ctx) => {
       primaryKeyType: 'string',
     });
 
+    const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
+
     if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
       definition.attributes['created_by'] = {
         model: 'user',
         plugin: 'admin',
+        private: isPrivate,
       };
 
       definition.attributes['updated_by'] = {
         model: 'user',
         plugin: 'admin',
+        private: isPrivate,
       };
     }
 
@@ -128,7 +132,7 @@ module.exports = ({ models, target }, ctx) => {
 
     target[model].allAttributes = _.clone(definition.attributes);
 
-    // Use provided timestamps if the elemnets in the array are string else use default.
+    // Use provided timestamps if the elements in the array are string else use default.
     const timestampsOption = _.get(definition, 'options.timestamps', true);
     if (_.isArray(timestampsOption)) {
       const [createAtCol = 'createdAt', updatedAtCol = 'updatedAt'] = timestampsOption;
@@ -269,6 +273,8 @@ module.exports = ({ models, target }, ctx) => {
     target[model]._attributes = definition.attributes;
     target[model].updateRelations = relations.update;
     target[model].deleteRelations = relations.deleteRelations;
+
+    target[model].privateAttributes = contentTypes.getPrivateAttributes(target[model]);
   }
 
   // Parse every authenticated model.
