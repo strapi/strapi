@@ -14,7 +14,15 @@ import { connect, select } from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
-const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleType, slug }) => {
+const DeleteLink = ({
+  canDelete,
+  clearData,
+  dataId,
+  isCreatingEntry,
+  isSingleType,
+  property,
+  slug,
+}) => {
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -33,7 +41,7 @@ const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleTyp
       // Show the loading state
       setIsModalConfirmButtonLoading(true);
 
-      emitEvent('willDeleteEntry');
+      emitEvent('willDeleteEntry', property);
 
       await request(getRequestUrl(`${slug}/${dataId}`), {
         method: 'DELETE',
@@ -41,14 +49,14 @@ const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleTyp
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
 
-      emitEvent('didDeleteEntry');
+      emitEvent('didDeleteEntry', property);
 
       // This is used to perform action after the modal is closed
       // so the transitions are smoother
       // Actions will be performed in the handleClosed function
       setDidDeleteEntry(true);
     } catch (err) {
-      emitEvent('didNotDeleteEntry', { error: err });
+      emitEvent('didNotDeleteEntry', { error: err, ...property });
       const errorMessage = get(
         err,
         'response.payload.message',
@@ -106,6 +114,7 @@ const DeleteLink = ({ canDelete, clearData, dataId, isCreatingEntry, isSingleTyp
 
 DeleteLink.defaultProps = {
   dataId: null,
+  property: {},
 };
 
 DeleteLink.propTypes = {
@@ -114,6 +123,7 @@ DeleteLink.propTypes = {
   dataId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isCreatingEntry: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
+  property: PropTypes.object,
   slug: PropTypes.string.isRequired,
 };
 
