@@ -34,9 +34,9 @@ module.exports = {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
     const query = pm.queryFrom(ctx.query);
-    const result = await strapi.plugins.upload.services.upload[method](query);
+    const files = await strapi.plugins.upload.services.upload[method](query);
 
-    ctx.body = pm.sanitize(result, { withPrivate: false });
+    ctx.body = pm.sanitize(files, { withPrivate: false });
   },
 
   async findOne(ctx) {
@@ -160,11 +160,11 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.replace(id, { data, file: files });
+    const replacedFiles = await uploadService.replace(id, { data, file: files });
 
-    await uploadService.setCreatorInfo(user.id, file, { edition: true });
+    await uploadService.setCreatorInfo(user.id, replacedFiles, { edition: true });
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = pm.sanitize(replacedFiles, { action: ACTIONS.read, withPrivate: false });
   },
 
   async uploadFiles(ctx) {
@@ -185,11 +185,11 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.upload({ data, files });
+    const uploadedFiles = await uploadService.upload({ data, files });
 
-    await uploadService.setCreatorInfo(user.id, file);
+    await uploadService.setCreatorInfo(user.id, uploadedFiles);
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
   },
 };
 

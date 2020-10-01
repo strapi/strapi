@@ -16,9 +16,9 @@ module.exports = {
   async find(ctx) {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
-    const results = await strapi.plugins.upload.services.upload[method](ctx.query);
+    const files = await strapi.plugins.upload.services.upload[method](ctx.query);
 
-    ctx.body = sanitize(results);
+    ctx.body = sanitize(files);
   },
 
   async findOne(ctx) {
@@ -26,13 +26,13 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const data = await strapi.plugins.upload.services.upload.fetch({ id });
+    const file = await strapi.plugins.upload.services.upload.fetch({ id });
 
-    if (!data) {
+    if (!file) {
       return ctx.notFound('file.notFound');
     }
 
-    ctx.body = sanitize(data);
+    ctx.body = sanitize(file);
   },
 
   async count(ctx) {
@@ -102,12 +102,12 @@ module.exports = {
       });
     }
 
-    const result = await strapi.plugins.upload.services.upload.replace(id, {
+    const replacedFiles = await strapi.plugins.upload.services.upload.replace(id, {
       data: await validateUploadBody(body),
       file: files,
     });
 
-    ctx.body = sanitize(result);
+    ctx.body = sanitize(replacedFiles);
   },
 
   async uploadFiles(ctx) {
@@ -115,11 +115,11 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    const result = await strapi.plugins.upload.services.upload.upload({
+    const uploadedFiles = await strapi.plugins.upload.services.upload.upload({
       data: await validateUploadBody(body),
       files,
     });
 
-    ctx.body = sanitize(result);
+    ctx.body = sanitize(uploadedFiles);
   },
 };
