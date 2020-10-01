@@ -26,6 +26,10 @@ const createConfig = (privateAttributes = []) => ({
 });
 
 describe('Content-Types', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('getPrivateAttributes', () => {
     test('Attribute is private in the model attributes', () => {
       const model = createModel();
@@ -36,6 +40,7 @@ describe('Content-Types', () => {
       expect(privateAttributes).toContain('foo');
       expect(privateAttributes).not.toContain('bar');
       expect(privateAttributes).not.toContain('foobar');
+      expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
 
     test('Attribute is set to private in the app config', () => {
@@ -47,6 +52,7 @@ describe('Content-Types', () => {
       expect(privateAttributes).toContain('foo');
       expect(privateAttributes).toContain('bar');
       expect(privateAttributes).not.toContain('foobar');
+      expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
 
     test('Attribute is set to private in the model options', () => {
@@ -58,6 +64,7 @@ describe('Content-Types', () => {
       expect(privateAttributes).toContain('foo');
       expect(privateAttributes).not.toContain('bar');
       expect(privateAttributes).toContain('foobar');
+      expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
   });
 
@@ -70,6 +77,7 @@ describe('Content-Types', () => {
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeFalsy();
       expect(isPrivateAttribute(model, 'foobar')).toBeFalsy();
+      expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
 
     test('Attribute is set to private in the app config', () => {
@@ -80,6 +88,7 @@ describe('Content-Types', () => {
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeTruthy();
       expect(isPrivateAttribute(model, 'foobar')).toBeFalsy();
+      expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
 
     test('Attribute is set to private in the model options', () => {
@@ -90,6 +99,7 @@ describe('Content-Types', () => {
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeFalsy();
       expect(isPrivateAttribute(model, 'foobar')).toBeTruthy();
+      expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
   });
 });
