@@ -78,6 +78,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
+
     eventHub.emit(ENTRY_CREATE, {
       model: modelDef.modelName,
       entry: sanitizeEntity(entry, { model: modelDef }),

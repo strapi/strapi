@@ -5,6 +5,15 @@ const entityValidator = require('../entity-validator');
 const { EventEmitter } = require('events');
 
 describe('Entity service', () => {
+  global.strapi = {
+    getModel: jest.fn(() => {}),
+    config: {
+      get() {
+        return [];
+      },
+    },
+  };
+
   describe('Find', () => {
     test('Returns first element for single types', async () => {
       const data = {
