@@ -170,7 +170,8 @@ const EditViewDataManagerProvider = ({
           data: removePasswordFieldsFromData(
             data,
             allLayoutData.contentType,
-            allLayoutData.components
+            allLayoutData.components,
+            !!origin
           ),
         });
       } catch (err) {
