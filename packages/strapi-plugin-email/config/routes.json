@@ -18,8 +18,25 @@
       "path": "/test",
       "handler": "Email.test",
       "config": {
-        "policies": [],
+        "policies": [
+
+        ],
         "description": "Send an test email",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/settings",
+      "handler": "Email.getSettings",
+      "config": {
+        "policies": [
+
+        ],
+        "description": "Get the email settings",
         "tag": {
           "plugin": "email",
           "name": "Email"

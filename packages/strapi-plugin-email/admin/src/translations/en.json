@@ -3,8 +3,15 @@
   "plugin.description.short": "Send emails.",
   "SettingsNav.section-label": "Email plugin",
   "SettingsNav.link.settings": "Settings",
-  "Settings.PageTitle": "Settings title",
+  "Settings.PageTitle": "Settings",
   "Settings.actions.test-email": "Test email",
   "Settings.notifications.test.success": "Email test succeeded, check {to} mailbox",
-  "Settings.notifications.test.error": "Failed to send test mail to {to}"
+  "Settings.notifications.test.error": "Failed to send test mail to {to}",
+  "Settings.notifications.config.error": "Failed to retrieve email config",
+  "Settings.form.title": "Configuration",
+  "Settings.form.label.provider": "Email provider",
+  "Settings.form.label.defaultFrom": "Default shipper email",
+  "Settings.form.label.defaultReplyTo": "Default response  email",
+  "Settings.form.placeholder.defaultFrom": "Not set, ex: Strapi <no-reply@strapi.io>",
+  "Settings.form.placeholder.defaultReplyTo": "Not set, ex: Strapi <example@strapi.io>"
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil } = require('lodash');
+const { isNil, pick } = require('lodash');
 
 /**
  * Email.js controller
@@ -51,5 +51,14 @@ module.exports = {
 
     // Send 200 `ok`
     ctx.send({});
+  },
+
+  getSettings: async ctx => {
+    const { config, providers } = strapi.plugins.email.services.email.getProviderSettings();
+
+    ctx.send({
+      config: pick(config, ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo']),
+      providers,
+    });
   },
 };

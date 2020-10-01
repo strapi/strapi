@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
+import { get } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
-import { request, SettingsPageTitle } from 'strapi-helper-plugin';
+import { FormBloc, request, SettingsPageTitle, SizedInput } from 'strapi-helper-plugin';
+import ListBaselineAlignment from 'strapi-plugin-users-permissions/admin/src/components/ListBaselineAlignment';
+import form from './form';
 import getTrad from '../../utils/getTrad';
 
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const [isTestButtonLoading, setIsTestButtonLoading] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+  const [config, setConfig] = useState({
+    provider: '',
+    settings: { defaultFrom: '', defaultReplyTo: '' },
+  });
+  const [providers, setProviders] = useState([]);
 
   const to = 'mattiasvandebelt@gmail.com';
 
@@ -22,7 +31,12 @@ const SettingsPage = () => {
     })
       .then(() =>
         strapi.notification.success(
-          formatMessage({ id: getTrad('Settings.notification.test.success') }, { to })
+          formatMessage(
+            {
+              id: getTrad('Settings.notification.test.success'),
+            },
+            { to }
+          )
         )
       )
       .catch(() =>
@@ -52,11 +66,45 @@ const SettingsPage = () => {
     },
   ];
 
+  useEffect(() => {
+    const fetchEmailSettings = () => {
+      setShowLoader(true);
+
+      request('/email/settings', {
+        method: 'GET',
+      })
+        .then(data => {
+          setConfig(data.config);
+          setProviders(data.providers);
+        })
+        .catch(() =>
+          strapi.notification.error(
+            formatMessage({ id: getTrad('Settings.notification.config.error') })
+          )
+        )
+        .finally(() => setShowLoader(false));
+    };
+
+    fetchEmailSettings();
+  }, [formatMessage]);
+
   return (
     <>
       <SettingsPageTitle name={pageTitle} />
       <div>
-        <Header actions={headerActions} title={{ label: pageTitle }} isLoading={false} />
+        <form>
+          <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
+          <ListBaselineAlignment />
+          <FormBloc title="Configuration" isLoading={showLoader}>
+            {form.map(input => {
+              input.options = input.name === 'provider' ? providers : [];
+
+              return (
+                <SizedInput key={input.name} {...input} disabled value={get(config, input.name)} />
+              );
+            })}
+          </FormBloc>
+        </form>
       </div>
     </>
   );
