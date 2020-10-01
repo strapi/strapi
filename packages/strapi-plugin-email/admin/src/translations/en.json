@@ -1,6 +1,10 @@
 {
   "plugin.description.long": "Send emails.",
   "plugin.description.short": "Send emails.",
-  "Settings.section-label": "Email plugin",
-  "Settings.link.settings": "Settings"
+  "SettingsNav.section-label": "Email plugin",
+  "SettingsNav.link.settings": "Settings",
+  "Settings.PageTitle": "Settings title",
+  "Settings.actions.test-email": "Test email",
+  "Settings.notifications.test.success": "Email test succeeded, check {to} mailbox",
+  "Settings.notifications.test.error": "Failed to send test mail to {to}"
 }

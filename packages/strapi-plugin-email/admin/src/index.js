@@ -1,7 +1,7 @@
 // NOTE TO PLUGINS DEVELOPERS:
 // If you modify this file by adding new options to the plugin entry point
-// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
-// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
+// Here's the file: strapi/docs/3.x/plugin-development/frontend-field-api.md
+// Here's the file: strapi/docs/3.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
@@ -13,6 +13,7 @@ import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import trads from './translations';
 import getTrad from './utils/getTrad';
+import SettingsPage from './containers/Settings';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -37,18 +38,18 @@ export default strapi => {
     settings: {
       menuSection: {
         id: pluginId,
-        title: getTrad('Settings.section-label'),
+        title: getTrad('SettingsNav.section-label'),
         links: [
           {
             title: {
-              id: getTrad('Settings.link.email'),
+              id: getTrad('SettingsNav.link.settings'),
               defaultMessage: 'Settings',
             },
             name: 'settings',
             to: `${strapi.settingsBaseURL}/${pluginId}`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.settings}>
-                Hello world
+                <SettingsPage />
               </CheckPagePermissions>
             ),
             permissions: pluginPermissions.settings,
