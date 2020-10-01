@@ -7,6 +7,7 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import PropTypes from 'prop-types';
+import init from 'ee_else_ce/components/Roles/Permissions/init';
 
 import Tabs from '../Tabs';
 import ContentTypes from './ContentTypes';
@@ -15,7 +16,6 @@ import { roleTabsLabel } from '../../../utils';
 import { useModels } from '../../../hooks';
 import PermissionsProvider from './PermissionsProvider';
 import reducer, { initialState } from './reducer';
-import init from './init';
 import { getAllAttributes, formatPermissionsLayout } from './utils';
 
 const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, ref) => {
