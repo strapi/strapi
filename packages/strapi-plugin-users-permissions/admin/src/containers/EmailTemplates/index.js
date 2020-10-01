@@ -4,6 +4,7 @@ import { Header, List } from '@buffetjs/custom';
 import { Pencil } from '@buffetjs/icons';
 import { get } from 'lodash';
 import {
+  displayErrors,
   SettingsPageTitle,
   SizedInput,
   useGlobalContext,
@@ -119,7 +120,7 @@ const EmailTemplatesPage = () => {
         } catch (err) {
           console.error(err);
 
-          strapi.notification.error('notification.error');
+          displayErrors(err);
         }
       } catch (err) {
         errors = getYupInnerErrors(err);

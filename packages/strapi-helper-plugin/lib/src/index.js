@@ -102,9 +102,10 @@ export { default as StrapiProvider } from './providers/StrapiProvider';
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
-export { default as difference } from './utils/difference';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
+export { default as difference } from './utils/difference';
+export { default as displayErrors } from './utils/displayErrors';
 export { default as hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';

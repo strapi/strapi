@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { cloneDeep, get, set } from 'lodash';
 import {
+  displayErrors,
   // utils
   request,
   // contexts
@@ -190,7 +191,7 @@ const EditSettingsView = ({
 
       emitEvent('didEditEditSettings');
     } catch (err) {
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     }
   };
 

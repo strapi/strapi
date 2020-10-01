@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get } from 'lodash';
 import {
+  displayErrors,
   // utils
   request,
   // contexts
@@ -143,7 +144,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
       deleteLayout(slug);
       emitEvent('didEditListSettings');
     } catch (err) {
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     }
   };
 

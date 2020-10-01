@@ -6,6 +6,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
+  displayErrors,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -103,7 +104,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       });
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     }
   };
 
@@ -235,7 +236,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
@@ -285,7 +286,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
@@ -312,7 +313,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }
@@ -458,7 +459,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
 
       console.error({ err: err.response });
-      strapi.notification.error('notification.error');
+      displayErrors(err);
     } finally {
       strapi.unlockApp();
     }

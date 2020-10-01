@@ -9,7 +9,13 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { get, isEmpty, isEqual, omit } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
-import { request, useGlobalContext, getYupInnerErrors, BackHeader } from 'strapi-helper-plugin';
+import {
+  displayErrors,
+  request,
+  useGlobalContext,
+  getYupInnerErrors,
+  BackHeader,
+} from 'strapi-helper-plugin';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 import reducer, { initialState } from './reducer';
@@ -184,7 +190,7 @@ function EditView() {
       }
     } catch (err) {
       if (isMounted.current) {
-        strapi.notification.error('notification.error');
+        displayErrors(err);
       }
     }
   };
@@ -340,7 +346,7 @@ function EditView() {
       }
     } catch (err) {
       if (isMounted.current) {
-        strapi.notification.error('notification.error');
+        displayErrors(err);
       }
     }
   };
