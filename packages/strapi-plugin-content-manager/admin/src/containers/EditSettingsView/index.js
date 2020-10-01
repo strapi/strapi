@@ -107,6 +107,13 @@ const EditSettingsView = ({
       const targetKey = formType === 'component' ? 'component' : 'targetModel';
       const key = get(modifiedData, ['schema', 'attributes', metaToEdit, targetKey], '');
 
+      if (formType === 'component') {
+        return [
+          { value: '', label: 'default' },
+          { value: 'tabs', label: 'tabs' },
+        ];
+      }
+
       return get(componentsAndModelsMainPossibleMainFields, [key], []);
     },
 
@@ -242,7 +249,10 @@ const EditSettingsView = ({
         return null;
       }
 
-      if ((formType === 'component' || formType === 'media') && meta !== 'label') {
+      if (
+        (formType === 'component' || formType === 'media') &&
+        !['label', 'display'].includes(meta)
+      ) {
         return null;
       }
 
@@ -251,6 +261,10 @@ const EditSettingsView = ({
       }
 
       if (formType === 'richtext' && meta === 'editable') {
+        return null;
+      }
+
+      if (meta === 'display' && formType !== 'component') {
         return null;
       }
 

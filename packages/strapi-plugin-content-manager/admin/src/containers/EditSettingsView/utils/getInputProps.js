@@ -15,6 +15,9 @@ const getInputProps = fieldName => {
     case 'editable':
       type = 'bool';
       break;
+    case 'display':
+      type = 'enum';
+      break;
     default:
       type = '';
   }

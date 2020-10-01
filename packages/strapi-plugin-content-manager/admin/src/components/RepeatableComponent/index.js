@@ -28,6 +28,7 @@ const RepeatableComponent = ({
   min,
   name,
   schema,
+  display,
 }) => {
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
 
@@ -112,6 +113,7 @@ const RepeatableComponent = ({
                 parentName={name}
                 schema={schema}
                 toggleCollapses={toggleCollapses}
+                display={display}
               />
             );
           })}
@@ -168,6 +170,7 @@ RepeatableComponent.defaultProps = {
   isNested: false,
   max: Infinity,
   min: -Infinity,
+  display: '',
 };
 
 RepeatableComponent.propTypes = {
@@ -183,6 +186,7 @@ RepeatableComponent.propTypes = {
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
   schema: PropTypes.object.isRequired,
+  display: PropTypes.string,
 };
 
 const Memoized = memo(RepeatableComponent);

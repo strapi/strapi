@@ -164,6 +164,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                               const { max, min } = getField(name);
 
                               const label = get(getFieldMetas(name), 'label', componentUid);
+                              const display = get(getFieldMetas(name), 'display', componentUid);
 
                               return (
                                 <FieldComponent
@@ -171,6 +172,7 @@ const EditView = ({ components, currentEnvironment, deleteLayout, layouts, plugi
                                   componentUid={componentUid}
                                   isRepeatable={isRepeatable}
                                   label={label}
+                                  display={display}
                                   max={max}
                                   min={min}
                                   name={name}

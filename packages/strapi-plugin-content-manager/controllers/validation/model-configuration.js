@@ -69,6 +69,7 @@ const createMetadasSchema = (model, schema) => {
             .shape({
               label: yup.string(),
               description: yup.string(),
+              display: yup.string(),
               placeholder: yup.string(),
               editable: yup.boolean(),
               visible: yup.boolean(),

@@ -112,6 +112,7 @@
   "form.Input.description.placeholder": "Afficher le nom dans le profil",
   "form.Input.editable": "Champ editable",
   "form.Input.filters": "Autoriser les filtres",
+  "form.Input.display": "Affichage",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "Cette valeur modifie celle du champs de la table",
   "form.Input.pageEntries": "Nombre d'entrées par page",

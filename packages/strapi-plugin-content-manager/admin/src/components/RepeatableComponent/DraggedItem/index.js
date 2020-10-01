@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, filter } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -11,6 +11,7 @@ import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 import Banner from '../Banner';
 import FormWrapper from '../FormWrapper';
+import TabsWrapper from './TabsWrapper';
 import { connect, select } from './utils';
 
 /* eslint-disable react/no-array-index-key */
@@ -34,11 +35,13 @@ const DraggedItem = ({
   removeCollapse,
   schema,
   toggleCollapses,
+  display,
 
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
   triggerFormValidation,
+  formErrors,
   checkFormErrors,
   displayedValue,
 }) => {
@@ -46,6 +49,7 @@ const DraggedItem = ({
   const dragRef = useRef(null);
   const dropRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
+  const [selectedTabIndex, setSelectedTabIndex] = useState('0_0');
 
   useEffect(() => {
     if (isOpen) {
@@ -146,6 +150,13 @@ const DraggedItem = ({
 
   const getField = fieldName => get(schema, ['schema', 'attributes', fieldName], {});
   const getMeta = fieldName => get(schema, ['metadatas', fieldName, 'edit'], {});
+  const getError = fieldName =>
+    filter(
+      formErrors,
+      (err, fieldErrorKey) =>
+        fieldErrorKey === `${componentFieldName}.${fieldName}` ||
+        fieldErrorKey.startsWith(`${componentFieldName}.${fieldName}.`)
+    );
 
   // Create the refs
   // We need 1 for the drop target
@@ -154,6 +165,134 @@ const DraggedItem = ({
     dragRef: drag(dragRef),
     dropRef: drop(dropRef),
   };
+
+  if (display === 'tabs') {
+    return (
+      <>
+        <Banner
+          componentFieldName={componentFieldName}
+          hasErrors={hasErrors}
+          hasMinError={hasMinError}
+          isFirst={isFirst}
+          displayedValue={displayedValue}
+          doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
+          isDragging={isDragging}
+          isOpen={isOpen}
+          isReadOnly={isReadOnly}
+          onClickToggle={onClickToggle}
+          onClickRemove={() => {
+            removeRepeatableField(componentFieldName);
+            removeCollapse();
+          }}
+          ref={refs}
+        />
+        <Collapse
+          isOpen={isOpen}
+          style={{
+            backgroundColor: '#FAFAFB',
+            border: hasErrors ? 'solid 1px rgb(255, 167, 132)' : 'solid 1px rgb(174, 212, 251)',
+            borderTop: '0px',
+          }}
+          onExited={() => setShowForm(false)}
+        >
+          {!isDragging && (
+            <TabsWrapper>
+              <ul className="tabs">
+                {showForm &&
+                  fields.map((fieldRow, key) => {
+                    return fieldRow.map((field, rowKey) => {
+                      const metas = getMeta(field.name);
+                      const error = getError(field.name);
+
+                      return (
+                        <li
+                          key={rowKey}
+                          className={
+                            (selectedTabIndex === `${key}_${rowKey}` ? 'selected' : '') +
+                            (error.length !== 0 ? ' has-error' : '')
+                          }
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setSelectedTabIndex(`${key}_${rowKey}`)}
+                          >
+                            {metas.label}
+                          </button>
+                        </li>
+                      );
+                    });
+                  })}
+              </ul>
+
+              <FormWrapper
+                className={`wrapper${hasErrors ? ' has-error' : ''}`}
+                hasErrors={hasErrors}
+                isOpen={isOpen}
+                isReadOnly={isReadOnly}
+              >
+                {showForm &&
+                  fields.map((fieldRow, key) => {
+                    return (
+                      <div className="row component" key={key}>
+                        {fieldRow.map((field, rowKey) => {
+                          const currentField = getField(field.name);
+                          const isComponent = get(currentField, 'type', '') === 'component';
+                          const keys = `${componentFieldName}.${field.name}`;
+
+                          if (isComponent) {
+                            const componentUid = currentField.component;
+                            const metas = getMeta(field.name);
+
+                            return (
+                              <div
+                                key={field.name}
+                                className={
+                                  selectedTabIndex !== `${key}_${rowKey}` ? 'hidden' : 'sub-wrapper'
+                                }
+                              >
+                                <FieldComponent
+                                  componentUid={componentUid}
+                                  isRepeatable={currentField.repeatable}
+                                  label={metas.label}
+                                  display={metas.display}
+                                  isNested
+                                  name={keys}
+                                  max={currentField.max}
+                                  min={currentField.min}
+                                />
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div
+                              key={field.name}
+                              className={`${
+                                selectedTabIndex !== `${key}_${rowKey}` ? 'hidden ' : ''
+                              }col-12`}
+                            >
+                              <Inputs
+                                autoFocus={false}
+                                componentUid={componentUid}
+                                keys={keys}
+                                layout={schema}
+                                name={field.name}
+                                onChange={() => {}}
+                                onBlur={hasErrors ? checkFormErrors : null}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+              </FormWrapper>
+            </TabsWrapper>
+          )}
+        </Collapse>
+      </>
+    );
+  }
 
   return (
     <>
@@ -200,6 +339,7 @@ const DraggedItem = ({
                             isRepeatable={currentField.repeatable}
                             key={field.name}
                             label={metas.label}
+                            display={metas.display}
                             isNested
                             name={keys}
                             max={currentField.max}
@@ -238,6 +378,8 @@ DraggedItem.defaultProps = {
   hasMinError: false,
   isFirst: false,
   isOpen: false,
+  formErrors: {},
+  display: '',
   moveCollapse: () => {},
   toggleCollapses: () => {},
 };
@@ -262,6 +404,8 @@ DraggedItem.propTypes = {
   triggerFormValidation: PropTypes.func.isRequired,
   checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
+  formErrors: PropTypes.object,
+  display: PropTypes.string,
 };
 
 const Memoized = memo(DraggedItem);

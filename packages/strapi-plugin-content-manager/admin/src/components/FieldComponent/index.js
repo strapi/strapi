@@ -27,6 +27,7 @@ const FieldComponent = ({
   isRepeatable,
   isNested,
   label,
+  display,
   max,
   min,
   name,
@@ -102,6 +103,7 @@ const FieldComponent = ({
           isFromDynamicZone={isFromDynamicZone}
           name={name}
           schema={currentComponentSchema}
+          display={display}
         />
       )}
       {isRepeatable && (
@@ -117,6 +119,7 @@ const FieldComponent = ({
           min={min}
           name={name}
           schema={currentComponentSchema}
+          display={display}
         />
       )}
     </Wrapper>
@@ -135,6 +138,7 @@ FieldComponent.defaultProps = {
   isNested: false,
   max: Infinity,
   min: -Infinity,
+  display: '',
 };
 
 FieldComponent.propTypes = {
@@ -150,6 +154,7 @@ FieldComponent.propTypes = {
   isRepeatable: PropTypes.bool,
   isNested: PropTypes.bool,
   label: PropTypes.string.isRequired,
+  display: PropTypes.string,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,

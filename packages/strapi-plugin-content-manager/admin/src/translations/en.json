@@ -118,6 +118,7 @@
   "form.Input.description.placeholder": "Display name in the profile",
   "form.Input.editable": "Editable field",
   "form.Input.filters": "Enable filters",
+  "form.Input.display": "Display",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
   "form.Input.pageEntries": "Entries per page",
