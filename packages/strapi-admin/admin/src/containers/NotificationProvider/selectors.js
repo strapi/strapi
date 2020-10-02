@@ -14,13 +14,15 @@ const selectNotificationProviderDomain = () => state => state.get('notification'
  */
 
 const selectNotificationProvider = () =>
-  createSelector(selectNotificationProviderDomain(), notificationProviderState =>
-    notificationProviderState.toJS()
+  createSelector(
+    selectNotificationProviderDomain(),
+    notificationProviderState => notificationProviderState
   );
 
 const selectNotifications = () =>
-  createSelector(selectNotificationProviderDomain(), notificationProviderState =>
-    notificationProviderState.get('notifications')
+  createSelector(
+    selectNotificationProviderDomain(),
+    notificationProviderState => notificationProviderState.notifications
   );
 
 export default selectNotificationProvider;

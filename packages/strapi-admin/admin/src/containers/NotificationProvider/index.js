@@ -25,7 +25,7 @@ export class NotificationProvider extends React.Component {
 }
 
 NotificationProvider.propTypes = {
-  notifications: PropTypes.object.isRequired,
+  notifications: PropTypes.array.isRequired,
   onHideNotification: PropTypes.func.isRequired,
 };
 

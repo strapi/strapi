@@ -147,13 +147,19 @@ const EditViewDataManagerProvider = ({
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
-      strapi.notification.info(getTrad('permissions.not-allowed.update'));
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('permissions.not-allowed.update') },
+      });
     }
   }, [shouldRedirectToHomepageWhenEditingEntry]);
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenCreatingEntry) {
-      strapi.notification.info(getTrad('permissions.not-allowed.create'));
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('permissions.not-allowed.create') },
+      });
     }
   }, [shouldRedirectToHomepageWhenCreatingEntry]);
 
@@ -186,7 +192,10 @@ const EditViewDataManagerProvider = ({
         }
 
         if (id && resStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+          strapi.notification.toggle({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
 
           push(from);
 
@@ -194,7 +203,10 @@ const EditViewDataManagerProvider = ({
         }
 
         if (id && err.code !== 20) {
-          strapi.notification.error(`${pluginId}.error.record.fetch`);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: `${pluginId}.error.record.fetch` },
+          });
         }
 
         // Create a single type
@@ -206,7 +218,10 @@ const EditViewDataManagerProvider = ({
 
         // Not allowed to update or read a ST
         if (!id && resStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+          strapi.notification.toggle({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
 
           push(from);
         }
@@ -453,7 +468,10 @@ const EditViewDataManagerProvider = ({
         dispatch({
           type: 'SUBMIT_SUCCESS',
         });
-        strapi.notification.success(`${pluginId}.success.record.save`);
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: `${pluginId}.success.record.save` },
+        });
 
         setIsCreatingEntry(false);
 
@@ -490,7 +508,10 @@ const EditViewDataManagerProvider = ({
           });
         }
 
-        strapi.notification.error(error);
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: `${pluginId}.error.record.fetch` },
+        });
       }
     } catch (err) {
       console.error({ err });
@@ -542,7 +563,10 @@ const EditViewDataManagerProvider = ({
           type: 'PUBLISH_SUCCESS',
           data,
         });
-        strapi.notification.success(`${pluginId}.success.record.publish`);
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: `${pluginId}.success.record.publish` },
+        });
       } catch (err) {
         // ---------- @Soupette Is this error handling still mandatory? ----------
         // The api error send response.payload.message: 'The error message'.
@@ -571,7 +595,10 @@ const EditViewDataManagerProvider = ({
         }
 
         const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
-        strapi.notification.error(errorMessage);
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: errorMessage },
+        });
       }
     } catch (err) {
       console.error({ err });
@@ -608,13 +635,19 @@ const EditViewDataManagerProvider = ({
         type: 'UNPUBLISH_SUCCESS',
         data,
       });
-      strapi.notification.success(`${pluginId}.success.record.unpublish`);
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: `${pluginId}.success.record.unpublish` },
+      });
     } catch (err) {
       console.error({ err });
       setStatus('resolved');
 
       const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: errorMessage },
+      });
     }
   }, [id, modifiedData, slug]);
 

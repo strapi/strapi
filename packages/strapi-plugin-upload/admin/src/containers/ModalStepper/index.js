@@ -199,7 +199,10 @@ const ModalStepper = ({
     } catch (err) {
       const errorMessage = get(err, 'response.payload.message', 'An error occured');
 
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: errorMessage },
+      });
     } finally {
       setShowModalConfirmButtonLoading(true);
       toggleModalWarning();

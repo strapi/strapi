@@ -78,7 +78,10 @@ const ListPage = () => {
       });
     } catch (err) {
       console.error(err.response);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -182,7 +185,10 @@ const ListPage = () => {
     } catch (err) {
       const errorMessage = get(err, 'response.payload.data', 'An error occured');
 
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: errorMessage },
+      });
     }
 
     // Only dispatch the action once

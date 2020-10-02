@@ -67,7 +67,10 @@ const AuthPage = ({ hasAdmin }) => {
         } catch (err) {
           const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
 
-          strapi.notification.error(errorMessage);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: errorMessage },
+          });
 
           // Redirect to the oops page in case of an invalid token
           // @alexandrebodin @JAB I am not sure it is the wanted behavior
@@ -138,7 +141,10 @@ const AuthPage = ({ hasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 

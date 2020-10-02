@@ -1,6 +1,8 @@
 {
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "react-transition-group": "4.4.1"
+  },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@swc-node/jest": "^0.3.4",

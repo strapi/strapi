@@ -9,33 +9,29 @@ import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
 
 import Notification from '../Notification';
-import Wrapper from './Wrapper';
-
-/* eslint-disable */
+import NotificationsWrapper from './NotificationsWrapper';
 
 const NotificationsContainer = ({ notifications, onHideNotification }) => {
   if (notifications.length === 0) {
-    return false;
+    return null;
   }
 
-  const notifs = notifications.map((notification, i) => (
-    <CSSTransition
-      key={i}
-      classNames="notification"
-      timeout={{
-        enter: 500,
-        exit: 300,
-      }}
-    >
-      <Notification
-        key={notification.id}
-        onHideNotification={onHideNotification}
-        notification={notification}
-      />
-    </CSSTransition>
-  ));
-
-  return <Wrapper>{notifs}</Wrapper>;
+  return (
+    <NotificationsWrapper>
+      {notifications.map(notification => (
+        <CSSTransition
+          key={notification.id}
+          classNames="notification"
+          timeout={{
+            enter: 500,
+            exit: 300,
+          }}
+        >
+          <Notification notification={notification} onHideNotification={onHideNotification} />
+        </CSSTransition>
+      ))}
+    </NotificationsWrapper>
+  );
 };
 
 NotificationsContainer.defaultProps = {
@@ -43,7 +39,9 @@ NotificationsContainer.defaultProps = {
     {
       id: 1,
       message: 'app.utils.defaultMessage',
-      status: 'success',
+      title: null,
+      link: null,
+      type: 'success',
     },
   ],
 };

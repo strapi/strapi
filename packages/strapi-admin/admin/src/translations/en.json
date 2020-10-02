@@ -333,5 +333,7 @@
   "notification.permission.not-allowed-read": "You are not allowed to see this document",
   "notification.success.delete": "The item has been deleted",
   "notification.success.saved": "Saved",
+  "notification.version.update.message": "A new version of Strapi is available!",
+  "notification.version.update.link": "See more",
   "request.error.model.unknown": "This model doesn't exist"
 }

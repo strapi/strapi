@@ -47,7 +47,10 @@ const DeleteLink = ({
         method: 'DELETE',
       });
 
-      strapi.notification.success(`${pluginId}.success.record.delete`);
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: `${pluginId}.success.record.delete` },
+      });
 
       emitEvent('didDeleteEntry', trackerProperty);
 
@@ -62,7 +65,10 @@ const DeleteLink = ({
         'response.payload.message',
         formatMessage({ id: `${pluginId}.error.record.delete` })
       );
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: errorMessage },
+      });
     } finally {
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
