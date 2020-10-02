@@ -9,10 +9,11 @@ const _ = require('lodash');
 
 const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
+const mergeTemplate = require('./utils/merge-template.js');
+
 const packageJSON = require('./resources/json/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
 const createServerConfig = require('./resources/templates/server.js');
-const mergeTemplate = require('./merge-template.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log('Creating files.');
@@ -73,8 +74,7 @@ module.exports = async function createProject(scope, { client, connection, depen
       try {
         await mergeTemplate(scope.template, rootPath);
       } catch (error) {
-        await fse.remove(scope.rootPath);
-        stopProcess(`⛔️ Template installation failed: ${error.message}`);
+        throw new Error(`⛔️ Template installation failed: ${error.message}`);
       }
     }
   } catch (err) {
