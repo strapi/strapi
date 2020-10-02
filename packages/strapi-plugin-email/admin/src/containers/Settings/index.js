@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useIntl } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
-import { Button } from '@buffetjs/core';
 import { Header } from '@buffetjs/custom';
-import { Play } from '@buffetjs/icons';
+import { Envelope } from '@buffetjs/icons';
 import {
   FormBloc,
   request,
@@ -12,6 +11,7 @@ import {
   validateInput,
 } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
+import { AlignedButton, Text } from './components';
 
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
@@ -31,7 +31,7 @@ const SettingsPage = () => {
 
     request('/email/test', {
       method: 'POST',
-      body: { testAddress },
+      body: { to: testAddress },
     })
       .then(() =>
         strapi.notification.success(
@@ -110,6 +110,23 @@ const SettingsPage = () => {
               type="select"
               value={config.provider}
             />
+            <Text>
+              <FormattedMessage
+                id={getTrad('Settings.form.text.configuration')}
+                values={{
+                  file: <code>./config/plugins.js</code>,
+                  link: (
+                    <a
+                      href="https://strapi.io/documentation/v3.x/plugins/email.html#configure-the-plugin"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      link
+                    </a>
+                  ),
+                }}
+              />
+            </Text>
           </FormBloc>
           <FormBloc title="Testing" isLoading={showLoader}>
             <SizedInput
@@ -121,23 +138,17 @@ const SettingsPage = () => {
               type="email"
               value={testAddress}
             />
-            <Button
+            <AlignedButton
               color="success"
               disabled={!validateEmail(testAddress)}
-              icon={(
-                <Play
-                  width="8px"
-                  height="10px"
-                  fill={isTestButtonLoading ? '#b4b6ba' : '#ffffff'}
-                />
-              )}
+              icon={<Envelope style={{ verticalAlign: 'middle' }} />}
               isLoading={isTestButtonLoading}
               onClick={handleEmailTest}
               style={{ minWidth: 150, fontWeight: 600 }}
               type="button"
             >
               {formatMessage({ id: getTrad('Settings.button.test-email') })}
-            </Button>
+            </AlignedButton>
           </FormBloc>
         </form>
       </div>

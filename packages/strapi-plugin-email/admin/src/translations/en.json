@@ -15,5 +15,6 @@
   "Settings.form.label.testAddress": "Test delivery email address",
   "Settings.form.placeholder.defaultFrom": "ex: Strapi No-Reply <no-reply@strapi.io>",
   "Settings.form.placeholder.defaultReplyTo": "ex: Strapi <example@strapi.io>",
-  "Settings.form.placeholder.testAddress": "ex: developer@example.com"
+  "Settings.form.placeholder.testAddress": "ex: developer@example.com",
+  "Settings.form.text.configuration": "The plugin is configured through the {file} file, checkout this {link} for the documentation."
 }
