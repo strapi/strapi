@@ -36,9 +36,19 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (**GraphQL Playground**) that will help you to write GraphQL query to explore your data.
 
-::: tip
-Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
-:::
+## Authentication
+
+To perform authorized requests, you must first get a JWT:
+
+```graphql
+mutation {
+  login(input: { identifier: "email", password: "password" }) {
+    jwt
+  }
+}
+```
+
+Then on each request, send along an `Authorization` header in the form of `{ Authorization: "Bearer YOUR_JWT_GOES_HERE" }`. This can be set in the HTTP Headers section of your GraphQL Playground.
 
 ## Configurations
 
