@@ -226,6 +226,7 @@ You can also apply different parameters to the query to make more complex querie
 - `limit` (integer): Define the number of returned entries.
 - `start` (integer): Define the amount of entries to skip.
 - `sort` (string): Define how the data should be sorted.
+  - `<field>:asc` or `<field>:desc`
 - `where` (object): Define the filters to apply in the query.
   - `<field>`: Equals.
   - `<field>_ne`: Not equals.
