@@ -100,13 +100,13 @@ async function checkTemplateContentsStructure(templateContentsPath) {
 }
 
 function getRepoInfo(githubURL) {
-  const { type, user, project } = gitInfo.fromUrl(githubURL);
+  const info = gitInfo.fromUrl(githubURL);
   // Make sure it's a github url
-  if (type !== 'github') {
+  if (info == null || info.type !== 'github') {
     throw Error('A Strapi template can only be a GitHub URL');
   }
 
-  return { user, project };
+  return { user: info.user, project: info.project };
 }
 
 async function downloadGithubRepo(repoInfo, templatePath) {
