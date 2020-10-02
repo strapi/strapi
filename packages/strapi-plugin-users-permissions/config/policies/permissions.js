@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 module.exports = async (ctx, next) => {
   let role;
 
@@ -34,14 +32,16 @@ module.exports = async (ctx, next) => {
       return await next();
     }
 
-    const store = await strapi.store({
+    const pluginStore = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'users-permissions',
     });
+    const advancedSettings = await pluginStore.get({ key: 'advanced' });
 
     if (
-      _.get(await store.get({ key: 'advanced' }), 'email_confirmation') &&
+      advancedSettings.email_confirmation &&
+      !advancedSettings.email_confirmation_allow_login &&
       !ctx.state.user.confirmed
     ) {
       return handleErrors(ctx, 'Your account email is not confirmed.', 'unauthorized');

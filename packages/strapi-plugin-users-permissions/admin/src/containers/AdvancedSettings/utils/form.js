@@ -40,6 +40,13 @@ const form = [
     size: { xs: 12 },
   },
   {
+    description: getTrad('EditForm.inputToggle.description.email-confirmation-allow-login'),
+    label: getTrad('EditForm.inputToggle.label.email-confirmation-allow-login'),
+    name: 'email_confirmation_allow_login',
+    type: 'bool',
+    size: { xs: 12 },
+  },
+  {
     description: getTrad('EditForm.inputToggle.description.email-confirmation-redirection'),
     label: getTrad('EditForm.inputToggle.label.email-confirmation-redirection'),
     name: 'email_confirmation_redirection',

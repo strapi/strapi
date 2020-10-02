@@ -165,8 +165,9 @@ module.exports = async () => {
     const value = {
       unique_email: true,
       allow_register: true,
-      email_confirmation: false,
       email_reset_password: null,
+      email_confirmation: false,
+      email_confirmation_allow_login: false,
       email_confirmation_redirection: null,
       default_role: 'authenticated',
     };

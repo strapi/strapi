@@ -22,14 +22,14 @@ module.exports = {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
-    const store = await strapi.store({
+    const pluginStore = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'users-permissions',
     });
 
     if (provider === 'local') {
-      if (!_.get(await store.get({ key: 'grant' }), 'email.enabled')) {
+      if (!_.get(await pluginStore.get({ key: 'grant' }), 'email.enabled')) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -79,10 +79,12 @@ module.exports = {
           })
         );
       }
+      const advancedSettings = await pluginStore.get({ key: 'advanced' });
 
       if (
-        _.get(await store.get({ key: 'advanced' }), 'email_confirmation') &&
-        user.confirmed !== true
+        advancedSettings.email_confirmation &&
+        !advancedSettings.email_confirmation_allow_login &&
+        !user.confirmed
       ) {
         return ctx.badRequest(
           null,
@@ -138,7 +140,7 @@ module.exports = {
         });
       }
     } else {
-      if (!_.get(await store.get({ key: 'grant' }), [provider, 'enabled'])) {
+      if (!_.get(await pluginStore.get({ key: 'grant' }), [provider, 'enabled'])) {
         return ctx.badRequest(
           null,
           formatError({
@@ -320,16 +322,13 @@ module.exports = {
       }
     });
 
-    const advanced = await pluginStore.get({
-      key: 'advanced',
-    });
-
+    const advancedSettings = await pluginStore.get({ key: 'advanced' });
     const userInfo = _.omit(user, ['password', 'resetPasswordToken', 'role', 'provider']);
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(
       settings.message,
       {
-        URL: advanced.email_reset_password,
+        URL: advancedSettings.email_reset_password,
         USER: userInfo,
         TOKEN: resetPasswordToken,
       }
