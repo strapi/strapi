@@ -69,6 +69,8 @@ const generateSchema = () => {
       type AdminUser {
         id: ID!
         username: String
+        firstname: String!
+        lastname: String!
       }
 
       type Query {

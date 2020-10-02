@@ -78,7 +78,23 @@ module.exports = {
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    const readBuffer = await util.promisify(fs.readFile)(file.path);
+    let readBuffer;
+    try {
+      readBuffer = await util.promisify(fs.readFile)(file.path);
+    } catch (e) {
+      if (e.code === 'ERR_FS_FILE_TOO_LARGE') {
+        throw strapi.errors.entityTooLarge('FileTooBig', {
+          errors: [
+            {
+              id: 'Upload.status.sizeLimit',
+              message: `${file.name} file is bigger than the limit size!`,
+              values: { file: file.name },
+            },
+          ],
+        });
+      }
+      throw e;
+    }
 
     const { optimize } = strapi.plugins.upload.services['image-manipulation'];
 

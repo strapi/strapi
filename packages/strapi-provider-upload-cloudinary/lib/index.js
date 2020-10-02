@@ -7,6 +7,7 @@
 // Public node modules.
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
+const { errors } = require('strapi-plugin-upload');
 
 module.exports = {
   init(config) {
@@ -19,8 +20,10 @@ module.exports = {
             { resource_type: 'auto', public_id: file.hash, ...customConfig },
             (err, image) => {
               if (err) {
-                strapi.log.error(`Error uploading to cloudinary: ${err.message}`);
-                return reject(new Error('Upload to cloudinary failed'));
+                if (err.message.includes('File size too large')) {
+                  return reject(errors.entityTooLarge());
+                }
+                return reject(errors.unknownError(`Error uploading to cloudinary: ${err.message}`));
               }
 
               if (image.resource_type === 'video') {
@@ -55,12 +58,10 @@ module.exports = {
           });
 
           if (response.result !== 'ok') {
-            throw {
-              error: new Error(response.result),
-            };
+            throw errors.unknownError(`Error deleting on cloudinary: ${response.result}`);
           }
         } catch (error) {
-          throw new Error(error.error);
+          throw errors.unknownError(`Error deleting on cloudinary: ${error.error.message}`);
         }
       },
     };
