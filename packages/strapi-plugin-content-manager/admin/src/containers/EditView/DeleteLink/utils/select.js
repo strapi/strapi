@@ -16,12 +16,12 @@ function useSelect() {
     allowedActions: { canDelete },
   } = useEditView();
 
-  let property = {};
+  let trackerProperty = {};
 
   if (hasDraftAndPublish) {
     const isDraft = isEmpty(modifiedData.published_at);
 
-    property = isDraft ? { status: 'draft' } : { status: 'published' };
+    trackerProperty = isDraft ? { status: 'draft' } : { status: 'published' };
   }
 
   return {
@@ -31,7 +31,7 @@ function useSelect() {
     hasDraftAndPublish,
     isCreatingEntry,
     isSingleType,
-    property,
+    trackerProperty,
     slug,
   };
 }

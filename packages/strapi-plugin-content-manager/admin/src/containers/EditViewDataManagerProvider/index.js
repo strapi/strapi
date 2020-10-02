@@ -373,7 +373,7 @@ const EditViewDataManagerProvider = ({
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const property = hasDraftAndPublish ? { status: 'draft' } : {};
+    const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
     // Create yup schema
     const schema = createYupSchema(
@@ -430,7 +430,7 @@ const EditViewDataManagerProvider = ({
       }
 
       if (!isCreatingEntry) {
-        emitEvent('willEditEntry', property);
+        emitEvent('willEditEntry', trackerProperty);
       }
 
       try {
@@ -446,7 +446,7 @@ const EditViewDataManagerProvider = ({
           false,
           false
         );
-        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry', property);
+        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry', trackerProperty);
 
         setStatus('resolved');
 
@@ -486,7 +486,7 @@ const EditViewDataManagerProvider = ({
         } else {
           emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
             error: err,
-            ...property,
+            ...trackerProperty,
           });
         }
 

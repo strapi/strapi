@@ -20,7 +20,7 @@ const DeleteLink = ({
   dataId,
   isCreatingEntry,
   isSingleType,
-  property,
+  trackerProperty,
   slug,
 }) => {
   const {
@@ -41,7 +41,7 @@ const DeleteLink = ({
       // Show the loading state
       setIsModalConfirmButtonLoading(true);
 
-      emitEvent('willDeleteEntry', property);
+      emitEvent('willDeleteEntry', trackerProperty);
 
       await request(getRequestUrl(`${slug}/${dataId}`), {
         method: 'DELETE',
@@ -49,14 +49,14 @@ const DeleteLink = ({
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
 
-      emitEvent('didDeleteEntry', property);
+      emitEvent('didDeleteEntry', trackerProperty);
 
       // This is used to perform action after the modal is closed
       // so the transitions are smoother
       // Actions will be performed in the handleClosed function
       setDidDeleteEntry(true);
     } catch (err) {
-      emitEvent('didNotDeleteEntry', { error: err, ...property });
+      emitEvent('didNotDeleteEntry', { error: err, ...trackerProperty });
       const errorMessage = get(
         err,
         'response.payload.message',
@@ -114,7 +114,7 @@ const DeleteLink = ({
 
 DeleteLink.defaultProps = {
   dataId: null,
-  property: {},
+  trackerProperty: {},
 };
 
 DeleteLink.propTypes = {
@@ -123,7 +123,7 @@ DeleteLink.propTypes = {
   dataId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isCreatingEntry: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
-  property: PropTypes.object,
+  trackerProperty: PropTypes.object,
   slug: PropTypes.string.isRequired,
 };
 

@@ -292,17 +292,17 @@ function ListView({
 
   const handleConfirmDeleteData = useCallback(async () => {
     try {
-      let property = {};
+      let trackerProperty = {};
 
       if (hasDraftAndPublish) {
         const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
         const isDraftEntry = isEmpty(dataToDelete.published_at);
         const status = isDraftEntry ? 'draft' : 'published';
 
-        property = { status };
+        trackerProperty = { status };
       }
 
-      emitEvent('willDeleteEntry', property);
+      emitEvent('willDeleteEntry', trackerProperty);
       setModalLoadingState();
 
       await request(getRequestUrl(`explorer/${slug}/${idToDelete}`), {
@@ -313,7 +313,7 @@ function ListView({
 
       // Close the modal and refetch data
       onDeleteDataSucceeded();
-      emitEvent('didDeleteEntry', property);
+      emitEvent('didDeleteEntry', trackerProperty);
     } catch (err) {
       const errorMessage = get(
         err,
@@ -478,9 +478,9 @@ function ListView({
             }
           ),
           onClick: () => {
-            const property = hasDraftAndPublish ? { status: 'draft' } : {};
+            const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
-            emitEvent('willCreateEntry', property);
+            emitEvent('willCreateEntry', trackerProperty);
             push({
               pathname: `${pathname}/create`,
             });
