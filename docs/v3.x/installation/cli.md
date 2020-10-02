@@ -59,6 +59,10 @@ npx create-strapi-app my-project --quickstart
 If you want to use specific database, you don't have to use the `--quickstart` flag. The CLI will let you choose the database of your choice.
 :::
 
+:::tip
+By default, `create-strapi-app` will generate an empty Strapi project. If you want an application that is pre-configured for a specific use case, see the [Templates section](../concepts/templates.md).
+:::
+
 ::: warning
 If you use a custom database, this one has to be up and running before creating your Strapi project
 :::

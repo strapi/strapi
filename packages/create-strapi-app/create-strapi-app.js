@@ -12,10 +12,7 @@ program
   .version(packageJson.version)
   .arguments('<directory>')
   .option('--no-run', 'Do not start the application after it is created')
-  .option(
-    '--use-npm',
-    'Force usage of npm instead of yarn to create the project'
-  )
+  .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
@@ -29,6 +26,7 @@ program
   .option('--dbauth <dbauth>', 'Authentication Database')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
+  .option('--template <templateurl>', 'Specify a Strapi template')
   .description('create a new application')
   .action(directory => {
     projectName = directory;

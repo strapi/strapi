@@ -108,7 +108,7 @@ services:
       DATABASE_NAME: strapi
       DATABASE_USERNAME: strapi
       DATABASE_PASSWORD: strapi
-      DATABASE_SSL: "false"
+      DATABASE_SSL: 'false'
     volumes:
       - ./app:/srv/app
     ports:
@@ -117,15 +117,15 @@ services:
       - mysql
 
   mysql:
-     image: mysql
-     command: mysqld --default-authentication-plugin=mysql_native_password
-     volumes:
-       - ./data:/var/lib/mysql
-     environment:
-       MYSQL_ROOT_PASSWORD: strapi
-       MYSQL_DATABASE: strapi
-       MYSQL_USER: strapi
-       MYSQL_PASSWORD: strapi
+    image: mysql
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: strapi
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
 ```
 
 :::
@@ -144,7 +144,7 @@ services:
       DATABASE_NAME: strapi
       DATABASE_USERNAME: strapi
       DATABASE_PASSWORD: strapi
-      DATABASE_SSL: "false"
+      DATABASE_SSL: 'false'
     volumes:
       - ./app:/srv/app
     ports:
@@ -153,14 +153,14 @@ services:
       - mariadb
 
   mariadb:
-     image: mariadb
-     volumes:
-       - ./data:/var/lib/mysql
-     environment:
-       MYSQL_ROOT_PASSWORD: strapi
-       MYSQL_DATABASE: strapi
-       MYSQL_USER: strapi
-       MYSQL_PASSWORD: strapi
+    image: mariadb
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: strapi
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
 ```
 
 :::
