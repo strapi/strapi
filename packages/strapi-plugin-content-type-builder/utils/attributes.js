@@ -85,6 +85,7 @@ const formatAttribute = (key, attribute, { model }) => {
         ['attributes', attribute.via, 'columnName'],
         undefined
       ),
+      private: attribute.private ? true : false,
       unique: attribute.unique ? true : false,
       autoPopulate: attribute.autoPopulate,
     };
