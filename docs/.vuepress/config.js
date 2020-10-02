@@ -197,6 +197,7 @@ module.exports = {
             '/v3.x/concepts/requests-responses',
             '/v3.x/concepts/routing',
             '/v3.x/concepts/services',
+            '/v3.x/concepts/templates',
             '/v3.x/concepts/webhooks',
           ],
         },
