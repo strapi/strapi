@@ -25,7 +25,7 @@ const SettingsPage = () => {
   const [testAddress, setTestAddress] = useState();
   const [testSuccess, setTestSuccess] = useState(false);
 
-  const pageTitle = formatMessage({ id: getTrad('Settings.PageTitle') });
+  const title = formatMessage({ id: getTrad('Settings.title') });
 
   const handleEmailTest = () => {
     setIsTestButtonLoading(true);
@@ -75,11 +75,18 @@ const SettingsPage = () => {
 
   return (
     <>
-      <SettingsPageTitle name={pageTitle} />
+      <SettingsPageTitle name={title} />
       <div>
         <form>
-          <Header title={{ label: pageTitle }} isLoading={showLoader} />
-          <FormBloc title="Configuration" isLoading={showLoader}>
+          <Header
+            title={{ label: title }}
+            content={formatMessage({ id: getTrad('Settings.subTitle') })}
+            isLoading={showLoader}
+          />
+          <FormBloc
+            title={formatMessage({ id: getTrad('Settings.form.title.config') })}
+            isLoading={showLoader}
+          >
             <SizedInput
               disabled
               label={getTrad('Settings.form.label.defaultFrom')}
@@ -125,7 +132,10 @@ const SettingsPage = () => {
               />
             </Text>
           </FormBloc>
-          <FormBloc title="Testing" isLoading={showLoader}>
+          <FormBloc
+            title={formatMessage({ id: getTrad('Settings.form.title.test') })}
+            isLoading={showLoader}
+          >
             <SizedInput
               label={getTrad('Settings.form.label.testAddress')}
               name="test-address"
