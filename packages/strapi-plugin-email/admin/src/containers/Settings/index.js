@@ -23,29 +23,26 @@ const SettingsPage = () => {
   });
   const [providers, setProviders] = useState([]);
   const [testAddress, setTestAddress] = useState();
+  const [testSuccess, setTestSuccess] = useState(false);
 
   const pageTitle = formatMessage({ id: getTrad('Settings.PageTitle') });
 
   const handleEmailTest = () => {
-    setIsTestButtonLoading(!isTestButtonLoading);
+    setIsTestButtonLoading(true);
 
     request('/email/test', {
       method: 'POST',
       body: { to: testAddress },
     })
-      .then(() =>
+      .then(() => {
+        setTestSuccess(true);
         strapi.notification.success(
-          formatMessage(
-            {
-              id: getTrad('Settings.notification.test.success'),
-            },
-            { to: testAddress }
-          )
-        )
-      )
+          formatMessage({ id: getTrad('Settings.notification.test.success') }, { to: testAddress })
+        );
+      })
       .catch(() =>
         strapi.notification.error(
-          formatMessage({ id: getTrad('Settings.notification.test.error') })
+          formatMessage({ id: getTrad('Settings.notification.test.error') }, { to: testAddress })
         )
       )
       .finally(() => setIsTestButtonLoading(false));
@@ -63,7 +60,7 @@ const SettingsPage = () => {
         .then(data => {
           setConfig(data.config);
           setProviders(data.providers);
-          setTestAddress(get(data, 'config.testAddress'));
+          setTestAddress(get(data, 'config.settings.testAddress'));
         })
         .catch(() =>
           strapi.notification.error(
@@ -140,7 +137,7 @@ const SettingsPage = () => {
             />
             <AlignedButton
               color="success"
-              disabled={!validateEmail(testAddress)}
+              disabled={testSuccess || !validateEmail(testAddress)}
               icon={<Envelope style={{ verticalAlign: 'middle' }} />}
               isLoading={isTestButtonLoading}
               onClick={handleEmailTest}

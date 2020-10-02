@@ -57,7 +57,12 @@ module.exports = {
     const { config, providers } = strapi.plugins.email.services.email.getProviderSettings();
 
     ctx.send({
-      config: pick(config, ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo']),
+      config: pick(config, [
+        'provider',
+        'settings.defaultFrom',
+        'settings.defaultReplyTo',
+        'settings.testAddress',
+      ]),
       providers,
     });
   },
