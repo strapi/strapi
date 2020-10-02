@@ -1,7 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('strapi-utils');
+const {
+  yup,
+  formatYupErrors,
+  contentTypes: { hasDraftAndPublish },
+} = require('strapi-utils');
 const validators = require('./common-validators');
 const { AUTHOR_CODE } = require('../services/constants');
 
@@ -9,26 +13,25 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 
 // validatedUpdatePermissionsInput
 
-const BOUND_ACTIONS = [
-  'plugins::content-manager.explorer.read',
-  'plugins::content-manager.explorer.create',
-  'plugins::content-manager.explorer.update',
-  'plugins::content-manager.explorer.delete',
-];
+const READ_ACTION = 'plugins::content-manager.explorer.read';
+const CREATE_ACTION = 'plugins::content-manager.explorer.create';
+const UPDATE_ACTION = 'plugins::content-manager.explorer.update';
+const DELETE_ACTION = 'plugins::content-manager.explorer.delete';
+const PUBLISH_ACTION = 'plugins::content-manager.explorer.publish';
 
-const getBoundActions = role => {
-  if (role.code === AUTHOR_CODE) {
-    return BOUND_ACTIONS;
+const BOUND_ACTIONS = [READ_ACTION, CREATE_ACTION, UPDATE_ACTION, DELETE_ACTION, PUBLISH_ACTION];
+
+const BOUND_ACTIONS_FOR_FIELDS = [READ_ACTION, CREATE_ACTION, UPDATE_ACTION];
+
+const getBoundActionsBySubject = (role, subject) => {
+  const model = strapi.getModel(subject);
+
+  if (role.code === AUTHOR_CODE || !hasDraftAndPublish(model)) {
+    return [READ_ACTION, UPDATE_ACTION, CREATE_ACTION, DELETE_ACTION];
   }
 
-  return BOUND_ACTIONS.concat('plugins::content-manager.explorer.publish');
+  return BOUND_ACTIONS;
 };
-
-const BOUND_ACTIONS_FOR_FIELDS = [
-  'plugins::content-manager.explorer.read',
-  'plugins::content-manager.explorer.create',
-  'plugins::content-manager.explorer.update',
-];
 
 const actionFieldsAreEqual = (a, b) => {
   const aFields = a.fields || [];
@@ -42,13 +45,13 @@ const haveSameFieldsAsOtherActions = (a, i, allActions) =>
 
 const checkPermissionsAreBound = role =>
   function(permissions) {
-    const boundActions = getBoundActions(role);
     const permsBySubject = _.groupBy(
-      permissions.filter(perm => boundActions.includes(perm.action)),
+      permissions.filter(perm => BOUND_ACTIONS.includes(perm.action)),
       'subject'
     );
 
-    for (const perms of Object.values(permsBySubject)) {
+    for (const [subject, perms] of Object.entries(permsBySubject)) {
+      const boundActions = getBoundActionsBySubject(role, subject);
       const missingActions =
         _.xor(
           perms.map(p => p.action),
@@ -67,24 +70,14 @@ const checkPermissionsAreBound = role =>
 const noPublishPermissionForAuthorRole = role =>
   function(permissions) {
     const isAuthor = role.code === AUTHOR_CODE;
-    const hasPublishPermission = permissions.some(
-      perm => perm.action === 'plugins::content-manager.explorer.publish'
-    );
+    const hasPublishPermission = permissions.some(perm => perm.action === PUBLISH_ACTION);
 
     return !(isAuthor && hasPublishPermission);
   };
 
 const getUpdatePermissionsSchemas = role => [
   validators.updatePermissions,
-  yup.object().shape({
-    permissions: yup
-      .array()
-      .test(
-        'are-bond',
-        'Read, Create, Update and Delete have to be defined all together for a subject field or not at all',
-        checkPermissionsAreBound(role)
-      ),
-  }),
+  yup.object().shape({ permissions: actionsExistSchema.clone() }),
   yup.object().shape({
     permissions: yup
       .array()
@@ -92,6 +85,15 @@ const getUpdatePermissionsSchemas = role => [
         'author-no-publish',
         'The author role cannot have the publish permission.',
         noPublishPermissionForAuthorRole(role)
+      ),
+  }),
+  yup.object().shape({
+    permissions: yup
+      .array()
+      .test(
+        'are-bond',
+        'Permissions have to be defined all together for a subject field or not at all',
+        checkPermissionsAreBound(role)
       ),
   }),
 ];
