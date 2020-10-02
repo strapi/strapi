@@ -6,7 +6,7 @@ If you haven't gone through the getting started guide, the way you request a Str
 
 ### Install the GraphQL plugin
 
-Install the graphql plugin in your Strapi project
+Install the graphql plugin in your Strapi project.
 
 :::: tabs
 
@@ -38,7 +38,7 @@ strapi install graphql
 
 ### Fetch your Restaurant collection type
 
-Play with the [GraphQL Playground](http://localhost:1337/graphql) to fetch your content
+Play with the [GraphQL Playground](http://localhost:1337/graphql) to fetch your content.
 
 *Request*
 
@@ -78,7 +78,7 @@ query Restaurants {
 
 ### Examples
 
-These examples do not guide you to configure your client with Apollo for your [GraphQL endpoint](http://localhost:1337/graphql). Please follow the associated documentation for each client ([React](https://www.apollographql.com/docs/react/get-started/) and [Vue.js](https://apollo.vuejs.org/guide/installation.html#_1-apollo-client) here)
+These examples do not guide you to configure your client with Apollo for your [GraphQL endpoint](http://localhost:1337/graphql). Please follow the associated documentation for each client: ([React](https://www.apollographql.com/docs/react/get-started/) and [Vue.js](https://apollo.vuejs.org/guide/installation.html#_1-apollo-client) here)
 
 :::: tabs
 
@@ -299,4 +299,4 @@ export default {
 
 This is how you request your Collection Types in Strapi using GraphQL.
 
-Feel free to explore more about [GraphQL](../plugins/graphql.html)
+Feel free to explore more about [GraphQL](../plugins/graphql.html).

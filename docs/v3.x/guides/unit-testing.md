@@ -160,9 +160,8 @@ afterAll(async done => {
   done();
 });
 
-it('strapi is defined', async done => {
+it('strapi is defined', () => {
   expect(strapi).toBeDefined();
-  done();
 });
 ```
 
@@ -181,6 +180,8 @@ Time:        4.187 s
 Ran all test suites.
 ✨  Done in 5.73s.
 ```
+
+> Note: if you receive a timeout error for Jest, please add the following line right before the `beforeAll` method in the `app.test.js` file:  `jest.setTimeout(15000)` and adjust the milliseconds value as you need.
 
 ### Testing basic endpoint controller.
 

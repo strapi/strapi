@@ -189,4 +189,47 @@ describe('Content Type Builder - Content types', () => {
       expect(updateRes.body.error).toMatch('multiple entries in DB');
     });
   });
+
+  describe('Private relation field', () => {
+    const singleTypeUID = 'application::test-single-type.test-single-type';
+
+    test('should add a relation field', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${singleTypeUID}`,
+        body: {
+          contentType: {
+            kind: 'singleType',
+            name: 'test-collection',
+            attributes: {
+              relation: {
+                private: true,
+                nature: 'oneWay',
+                target: 'plugins::users-permissions.user',
+                targetAttribute: 'test',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body).toEqual({
+        data: {
+          uid: singleTypeUID,
+        },
+      });
+    });
+
+    test('should contain a private relation field', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-type-builder/content-types/${singleTypeUID}`,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.schema.attributes.relation).toBeDefined();
+      expect(res.body.data.schema.attributes.relation.private).toBeTruthy();
+    });
+  });
 });
