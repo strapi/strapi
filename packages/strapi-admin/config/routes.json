@@ -17,6 +17,16 @@
       "handler": "Admin.init"
     },
     {
+      "method": "GET",
+      "path": "/information",
+      "handler": "Admin.information",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin"
+        ]
+      }
+    },
+    {
       "method": "POST",
       "path": "/plugins/install",
       "handler": "Admin.installPlugin",
