@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import { FormBloc, request, SettingsPageTitle, SizedInput } from 'strapi-helper-plugin';
-import ListBaselineAlignment from 'strapi-plugin-users-permissions/admin/src/components/ListBaselineAlignment';
-import form from './form';
 import getTrad from '../../utils/getTrad';
 
 const SettingsPage = () => {
@@ -94,15 +91,39 @@ const SettingsPage = () => {
       <div>
         <form>
           <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
-          <ListBaselineAlignment />
           <FormBloc title="Configuration" isLoading={showLoader}>
-            {form.map(input => {
-              input.options = input.name === 'provider' ? providers : [];
-
-              return (
-                <SizedInput key={input.name} {...input} disabled value={get(config, input.name)} />
-              );
-            })}
+            <SizedInput
+              disabled
+              label={getTrad('Settings.form.label.defaultFrom')}
+              name="default-from"
+              placeholder={getTrad('Settings.form.placeholder.defaultFrom')}
+              size={{ xs: 6 }}
+              type="text"
+              value={config.provider}
+            />
+            <SizedInput
+              disabled
+              label={getTrad('Settings.form.label.defaultReplyTo')}
+              name="default-reply-to"
+              placeholder={getTrad('Settings.form.placeholder.defaultReplyTo')}
+              size={{ xs: 6 }}
+              type="text"
+              value={config.settings.defaultReplyTo}
+            />
+            <SizedInput
+              discription={(
+                <a key="website" href="https://strapi.io" target="_blank" rel="noopener noreferrer">
+                  Strapi
+                </a>
+              )}
+              disabled
+              label={getTrad('Settings.form.label.provider')}
+              name="provider"
+              options={providers}
+              size={{ xs: 6 }}
+              type="select"
+              value={config.provider}
+            />
           </FormBloc>
         </form>
       </div>
