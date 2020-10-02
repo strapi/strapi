@@ -123,6 +123,7 @@ const reducer = (state, action) =>
           contentTypeActions: generateContentTypeActions(
             subjectPermissions,
             existingContentTypeActions,
+            state.permissionsLayout.sections.contentTypes,
             shouldAddDeleteAction
           ),
         };
@@ -349,6 +350,7 @@ const reducer = (state, action) =>
           : generateContentTypeActions(
               attributesActions,
               existingContentTypeActions,
+              state.permissionsLayout.sections.contentTypes,
               shouldAddDeleteAction
             );
 
