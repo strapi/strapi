@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
+import { get } from 'lodash';
+import { Button } from '@buffetjs/core';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
-import { FormBloc, request, SettingsPageTitle, SizedInput } from 'strapi-helper-plugin';
+import {
+  FormBloc,
+  request,
+  SettingsPageTitle,
+  SizedInput,
+  validateInput,
+} from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 
 const SettingsPage = () => {
@@ -11,11 +19,10 @@ const SettingsPage = () => {
   const [showLoader, setShowLoader] = useState(false);
   const [config, setConfig] = useState({
     provider: '',
-    settings: { defaultFrom: '', defaultReplyTo: '' },
+    settings: { defaultFrom: '', defaultReplyTo: '', testAddress: '' },
   });
   const [providers, setProviders] = useState([]);
-
-  const to = 'mattiasvandebelt@gmail.com';
+  const [testAddress, setTestAddress] = useState();
 
   const pageTitle = formatMessage({ id: getTrad('Settings.PageTitle') });
 
@@ -24,7 +31,7 @@ const SettingsPage = () => {
 
     request('/email/test', {
       method: 'POST',
-      body: { to },
+      body: { testAddress },
     })
       .then(() =>
         strapi.notification.success(
@@ -32,7 +39,7 @@ const SettingsPage = () => {
             {
               id: getTrad('Settings.notification.test.success'),
             },
-            { to }
+            { to: testAddress }
           )
         )
       )
@@ -44,24 +51,7 @@ const SettingsPage = () => {
       .finally(() => setIsTestButtonLoading(false));
   };
 
-  const headerActions = [
-    {
-      onClick: () => {
-        handleEmailTest();
-      },
-      color: 'success',
-      label: formatMessage({
-        id: getTrad('Settings.actions.test-email'),
-      }),
-      isLoading: isTestButtonLoading,
-      type: 'submit',
-      style: {
-        minWidth: 150,
-        fontWeight: 600,
-      },
-      icon: <Play width="8px" height="10px" fill={isTestButtonLoading ? '#b4b6ba' : '#ffffff'} />,
-    },
-  ];
+  const validateEmail = email => !validateInput(email, {}, 'email').length;
 
   useEffect(() => {
     const fetchEmailSettings = () => {
@@ -73,6 +63,7 @@ const SettingsPage = () => {
         .then(data => {
           setConfig(data.config);
           setProviders(data.providers);
+          setTestAddress(get(data, 'config.testAddress'));
         })
         .catch(() =>
           strapi.notification.error(
@@ -90,7 +81,7 @@ const SettingsPage = () => {
       <SettingsPageTitle name={pageTitle} />
       <div>
         <form>
-          <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
+          <Header title={{ label: pageTitle }} isLoading={showLoader} />
           <FormBloc title="Configuration" isLoading={showLoader}>
             <SizedInput
               disabled
@@ -98,8 +89,8 @@ const SettingsPage = () => {
               name="default-from"
               placeholder={getTrad('Settings.form.placeholder.defaultFrom')}
               size={{ xs: 6 }}
-              type="text"
-              value={config.provider}
+              type="email"
+              value={config.settings.defaultFrom}
             />
             <SizedInput
               disabled
@@ -107,15 +98,10 @@ const SettingsPage = () => {
               name="default-reply-to"
               placeholder={getTrad('Settings.form.placeholder.defaultReplyTo')}
               size={{ xs: 6 }}
-              type="text"
+              type="email"
               value={config.settings.defaultReplyTo}
             />
             <SizedInput
-              discription={(
-                <a key="website" href="https://strapi.io" target="_blank" rel="noopener noreferrer">
-                  Strapi
-                </a>
-              )}
               disabled
               label={getTrad('Settings.form.label.provider')}
               name="provider"
@@ -124,6 +110,34 @@ const SettingsPage = () => {
               type="select"
               value={config.provider}
             />
+          </FormBloc>
+          <FormBloc title="Testing" isLoading={showLoader}>
+            <SizedInput
+              label={getTrad('Settings.form.label.testAddress')}
+              name="test-address"
+              placeholder={getTrad('Settings.form.placeholder.testAddress')}
+              onChange={event => setTestAddress(event.target.value)}
+              size={{ xs: 6 }}
+              type="email"
+              value={testAddress}
+            />
+            <Button
+              color="success"
+              disabled={!validateEmail(testAddress)}
+              icon={(
+                <Play
+                  width="8px"
+                  height="10px"
+                  fill={isTestButtonLoading ? '#b4b6ba' : '#ffffff'}
+                />
+              )}
+              isLoading={isTestButtonLoading}
+              onClick={handleEmailTest}
+              style={{ minWidth: 150, fontWeight: 600 }}
+              type="button"
+            >
+              {formatMessage({ id: getTrad('Settings.button.test-email') })}
+            </Button>
           </FormBloc>
         </form>
       </div>
