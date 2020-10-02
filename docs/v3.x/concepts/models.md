@@ -166,13 +166,16 @@ The options key on the model-json states.
 
 - `privateAttributes`: This configuration allows to treat a set of attributes as private, even if they're not actually defined as attributes in the model. Accepts an `Array` of strings. It could be used to remove from API responses timestamps or `_v` when using MongoDB. The set of `privateAttributes` defined in the model are merged with the `privateAttributes` defined in the global Strapi configuration.
 
+- `populateCreatorFields`: Configure whether the API response should include `created_by` and `updated_by` fields or not. Accepts a `boolean`. The default value is `false`.
+
 **Path —** `User.settings.json`.
 
 ```json
 {
   "options": {
     "timestamps": true,
-    "privateAttributes": ["id", "created_at"]
+    "privateAttributes": ["id", "created_at"],
+    "populateCreatorFields": true
   }
 }
 ```
