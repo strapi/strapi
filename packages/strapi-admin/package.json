@@ -46,7 +46,7 @@
     "cross-env": "^5.0.5",
     "css-loader": "^2.1.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
-    "execa": "^1.0.0",
+    "execa": "^4.0.3",
     "file-loader": "^6.1.0",
     "font-awesome": "^4.7.0",
     "formik": "^2.1.4",
