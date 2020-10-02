@@ -18,6 +18,7 @@ const ModalConfirm = ({
   title,
   toggle,
   type,
+  ...rest
 }) => {
   const handleToggle = useCallback(
     e => {
@@ -33,7 +34,7 @@ const ModalConfirm = ({
 
   let displayedButtons = buttons;
 
-  // If type is info buttons have more control
+  // If type is info the buttons array allows more control on a specific button behaviour: label, onClick...
   if (type !== 'info' && !buttons) {
     const confirmButtonColor = ['xwarning', 'warning'].includes(type) ? 'delete' : 'success';
 
@@ -54,7 +55,7 @@ const ModalConfirm = ({
   }
 
   return (
-    <StyledModal isOpen={isOpen} toggle={handleToggle}>
+    <StyledModal isOpen={isOpen} toggle={handleToggle} {...rest}>
       <Header title={title} toggle={handleToggle} />
       <Body>
         <Img src={Src} alt="icon" />;

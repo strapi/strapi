@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const Body = styled.div`
   padding-top: 2.1rem;
-  padding-bottom: 1.5rem
+  padding-bottom: 1.5rem;
   padding-right: ${props => props.theme.main.sizes.paddings.md};
   padding-left: ${props => props.theme.main.sizes.paddings.md};
   text-align: center;

@@ -56,7 +56,9 @@ async function run() {
     .map(dir => {
       const translationFiles = fs
         .readdirSync(join(dir, ...pathToTranslationsFolder))
-        .filter(file => !file.includes('index.js') && !file.includes('en.json'))
+        .filter(
+          file => !file.includes('.js') && !file.includes('en.json') && !file.includes('test')
+        )
         .map(file => join(dir, ...pathToTranslationsFolder, file));
 
       return {
