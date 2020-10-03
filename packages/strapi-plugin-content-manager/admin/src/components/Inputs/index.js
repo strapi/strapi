@@ -89,6 +89,7 @@ function Inputs({
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
+  const widget = useMemo(() => get(attribute, 'widget', null), [attribute]);
   const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
   const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
   const errorId = useMemo(() => {
@@ -108,7 +109,7 @@ function Inputs({
   const validations = useMemo(() => omit(attribute, validationsToOmit), [attribute]);
   const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
   const inputType = useMemo(() => {
-    return getInputType(type);
+    return getInputType(widget ? widget : type);
   }, [type]);
   const inputValue = useMemo(() => {
     // Fix for input file multipe
