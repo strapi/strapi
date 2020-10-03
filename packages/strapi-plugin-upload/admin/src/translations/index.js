@@ -3,6 +3,7 @@ import he from './he.json';
 import ja from './ja.json';
 import ms from './ms.json';
 import ru from './ru.json';
+import th from './th.json';
 import uk from './uk.json';
 import ptBR from './pt-BR.json';
 import sk from './sk.json';
@@ -14,6 +15,7 @@ const trads = {
   ja,
   ms,
   ru,
+  th,
   uk,
   'pt-BR': ptBR,
   sk,

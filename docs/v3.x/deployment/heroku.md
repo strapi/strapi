@@ -206,7 +206,7 @@ Replace the contents of `database.js` with the following:
 
 ```js
 const parse = require('pg-connection-string').parse;
-const config = parse(process.env.DATABASE_URL)
+const config = parse(process.env.DATABASE_URL);
 
 module.exports = ({ env }) => ({
   defaultConnection: 'default',
