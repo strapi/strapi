@@ -127,6 +127,7 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build', false)
   .option('--watch-admin', 'Enable watch', true)
+  .option('--browser <name>', 'Open the browser', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
@@ -211,6 +212,7 @@ program
 //   `$ strapi watch-admin`
 program
   .command('watch-admin')
+  .option('--browser <name>', 'Open the browser', true)
   .description('Starts the admin dev server')
   .action(getLocalScript('watchAdmin'));
 

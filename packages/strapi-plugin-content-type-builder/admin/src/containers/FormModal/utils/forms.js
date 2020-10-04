@@ -331,6 +331,7 @@ const forms = {
         const nameValue = get(data, 'name', null);
         const relationItems = [
           [fields.divider],
+          [fields.private],
           [fields.unique],
           [
             {
