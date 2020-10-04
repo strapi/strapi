@@ -194,6 +194,7 @@ module.exports = {
             '/v3.x/concepts/routing',
             '/v3.x/concepts/services',
             '/v3.x/concepts/webhooks',
+            '/v3.x/concepts/draft-and-publish',
           ],
         },
         {
