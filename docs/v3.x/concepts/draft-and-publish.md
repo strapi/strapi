@@ -2,7 +2,7 @@
 
 The draft and publish feature allows you to save your content as a draft, to publish it later.
 
-## Activating and deactivating the draft and publish feature
+## Activating or deactivating the draft and publish feature
 
 By default, the draft and publish feature is activated for all newly created collection and single types. It is however possible to deactive the feature at content type level (i.e. it can be activated for one content type, but deactivated for another).
 
@@ -10,7 +10,7 @@ By default, the draft and publish feature is activated for all newly created col
 If the feature is deactivated while contents are saved as drafts, they will automatically be deleted. Make sure all contents are published before deactivating the feature.
 :::
 
-To deactivate the draft and publish mode for a content type:
+To deactivate the draft and publish feature for a content type:
 
 1. Go the Plugins > Content-Types Builder.
 2. Select the collection or single type for which you want the draft and publish feature to be deactivated.
@@ -35,18 +35,18 @@ Drafts can be modified and saved at will, until they are ready to be published.
 
 ### Publishing a draft
 
-To publish a draft, click on the **Publish** button.
+To publish a draft, click on the **Publish** button in the top right corner of the content edition interface.
 
 :::warning CAUTION
 Before publishing a draft, make sure it doesn't have relations with other non-published content, otherwise some of the content may not be available through the API.
 :::
 
-When a content is not in a draft anymore, but a published content, it is indicated on the right of the interface, below the Information box.
+When a content is not a draft anymore, but a published content, it is indicated on the right of the interface, below the Information box.
 
 ![Editing published version](../assets/concepts/draft-publish/editing_published_version.png)
 
 ### Unpublishing content
 
-Published contents can be unpublished, switching back to drafts again.
+Published contents can be unpublished, switching back to being drafts again.
 
-To unpublish content, click on the **Unpublish** button.
+To unpublish content, click on the **Unpublish** button in the top right corner of the content edition interface.
