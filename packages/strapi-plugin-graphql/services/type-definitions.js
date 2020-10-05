@@ -224,6 +224,8 @@ const buildAssocResolvers = model => {
               }
             }
 
+            console.log(queryOpts);
+
             const results = association.model
               ? await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
                   {
@@ -437,7 +439,7 @@ const buildCollectionType = model => {
             [pluralName]: async (parent, args, ctx, ast) => {
               const results = await buildQuery(pluralName, resolverOpts)(parent, args, ctx, ast);
 
-              const __options__ = { _publicationState: args.publicationState };
+              const __options__ = _.pick(args, 'publicationState');
               return assignOptions(results, { __options__ });
             },
           },
