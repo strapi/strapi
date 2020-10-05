@@ -19,13 +19,13 @@ To deactivate the draft and publish mode for a content type:
 5. In the DRAFT/PUBLISH section, click on the **OFF** button.
 6. Click on the **Finish** button to confirm the deactivation of the feature.
 
-[screenshot]
+![Deactivate Draft & Publish](../assets/concepts/draft-publish/deactivating_draft_publish.png)
 
 ## Switching from draft to published content
 
 By default, each newly created content is a draft, which is indicated on the right of the interface, below the Information box.
 
-[screenshot]
+![Editing draft version](../assets/concepts/draft-publish/editing_draft_version.png)
 
 Drafts can be modified and saved at will, until they are ready to be published.
 
@@ -39,7 +39,7 @@ Before publishing a draft, make sure it doesn't have relations with other non-pu
 
 When a content is not in a draft anymore, but a published content, it is indicated on the right of the interface, below the Information box.
 
-[screenshot]
+![Editing published version](../assets/concepts/draft-publish/editing_published_version.png)
 
 ### Unpublishing content
 
