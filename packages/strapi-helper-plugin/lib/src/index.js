@@ -62,6 +62,7 @@ export { default as LoadingBar } from './components/LoadingBar';
 export { default as LoadingIndicator } from './components/LoadingIndicator';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 
+export { default as ModalConfirm } from './components/ModalConfirm';
 export { default as Modal } from './components/Modal';
 export { default as ModalBody } from './components/BodyModal';
 export { default as ModalHeader } from './components/ModalHeader';

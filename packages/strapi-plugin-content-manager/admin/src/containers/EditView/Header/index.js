@@ -4,16 +4,8 @@ import { Header as PluginHeader } from '@buffetjs/custom';
 import { get, isEqual, isEmpty, toString } from 'lodash';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
-import { Button, Text, Padded } from '@buffetjs/core';
-import {
-  PopUpWarning,
-  templateObject,
-  PopUpWarningBody,
-  PopUpWarningFooter,
-  PopUpWarningHeader,
-  PopUpWarningIcon,
-  PopUpWarningModal,
-} from 'strapi-helper-plugin';
+import { Text } from '@buffetjs/core';
+import { templateObject, ModalConfirm } from 'strapi-helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, getDraftRelations, select } from './utils';
 
@@ -192,89 +184,51 @@ const Header = ({
     [onUnpublish, shouldUnpublish]
   );
 
-  const boldText = formatMessage(
-    {
-      id: getTrad(
-        `popUpwarning.warning.has-draft-relations.message.bold-text.${
-          draftRelationsCount > 1 ? 'plural' : 'singular'
-        }`
-      ),
-    },
-    { count: draftRelationsCount }
-  );
-
-  const buttonCancelLabel = useMemo(
-    () =>
-      formatMessage({
-        id: 'components.popUpWarning.button.cancel',
-      }),
-    [formatMessage]
-  );
-  const buttonConfirmLabel = useMemo(
-    () =>
-      formatMessage({
-        id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
-      }),
-    [formatMessage]
-  );
+  const contentIdSuffix = draftRelationsCount > 1 ? 'plural' : 'singular';
 
   return (
     <>
       <PluginHeader {...headerProps} />
-      <PopUpWarning
+
+      <ModalConfirm
         isOpen={showWarningUnpublish}
-        toggleModal={toggleWarningPublish}
+        toggle={toggleWarningPublish}
         content={{
-          message: getTrad('popUpWarning.warning.unpublish'),
-          secondMessage: getTrad('popUpWarning.warning.unpublish-question'),
+          id: getTrad('popUpWarning.warning.unpublish'),
+          values: {
+            br: () => <br />,
+          },
         }}
-        popUpWarningType="danger"
+        type="xwarning"
         onConfirm={handleConfirmUnpublish}
         onClosed={handleCloseModalUnpublish}
-      />
-      <PopUpWarningModal
+      >
+        <Text>{formatMessage({ id: getTrad('popUpWarning.warning.unpublish-question') })}</Text>
+      </ModalConfirm>
+      <ModalConfirm
+        confirmButtonLabel={{
+          id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
+        }}
         isOpen={showWarningDraftRelation}
         toggle={toggleWarningDraftRelation}
         onClosed={handleCloseModalPublish}
+        onConfirm={handleConfirmPublish}
+        type="success"
+        content={{
+          id: getTrad(`popUpwarning.warning.has-draft-relations.message.${contentIdSuffix}`),
+          values: {
+            count: draftRelationsCount,
+            b: chunks => (
+              <Text as="span" fontWeight="bold">
+                {chunks}
+              </Text>
+            ),
+            br: () => <br />,
+          },
+        }}
       >
-        <PopUpWarningHeader
-          onClick={toggleWarningDraftRelation}
-          title="components.popUpWarning.title"
-        />
-        <PopUpWarningBody>
-          <PopUpWarningIcon type="danger" />
-          <Text lineHeight="18px">
-            <Text as="span" fontWeight="bold">
-              {boldText}&nbsp;
-            </Text>
-            {formatMessage({
-              id: getTrad('popUpwarning.warning.has-draft-relations.first-message'),
-            })}
-          </Text>
-          <Text lineHeight="18px">
-            {formatMessage({
-              id: getTrad('popUpwarning.warning.has-draft-relations.second-message'),
-            })}
-          </Text>
-          <Padded top size="smd">
-            <Text>{formatMessage({ id: getTrad('popUpWarning.warning.publish-question') })}</Text>
-          </Padded>
-        </PopUpWarningBody>
-        <PopUpWarningFooter>
-          <Button
-            color="cancel"
-            type="button"
-            onClick={toggleWarningDraftRelation}
-            label={buttonCancelLabel}
-          />
-          <Button
-            color="success"
-            type="button"
-            onClick={handleConfirmPublish}
-            label={buttonConfirmLabel}
-          />
-        </PopUpWarningFooter>
-      </PopUpWarningModal>
+        <Text>{formatMessage({ id: getTrad('popUpWarning.warning.publish-question') })}</Text>
+      </ModalConfirm>
     </>
   );
 };
