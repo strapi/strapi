@@ -14,7 +14,7 @@ To deactivate the draft and publish mode for a content type:
 
 1. Go the Plugins > Content-Types Builder.
 2. Select the collection or single type for which you want the draft and publish feature to be deactivated.
-3. Click on the Edit [] button to access the content type's configurations.
+3. Click on the Edit <Fa-PencilAlt /> button to access the content type's configurations.
 4. Click on the "Advanced Settings" tab.
 5. In the DRAFT/PUBLISH section, click on the **OFF** button.
 6. Click on the **Finish** button to confirm the deactivation of the feature.
