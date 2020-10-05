@@ -10,15 +10,8 @@ const DP_PUB_STATE_LIVE = 'live';
 const DP_PUB_STATE_PREVIEW = 'preview';
 const DP_PUB_STATES = [DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW];
 
-const HIDDEN_ATTRIBUTES = [
-  ID_ATTRIBUTE,
-  PUBLISHED_AT_ATTRIBUTE,
-  CREATED_BY_ATTRIBUTE,
-  UPDATED_BY_ATTRIBUTE,
-];
-
-// making it clear hidden attributes could still be writable
 const NON_WRITABLE_ATTRIBUTES = [ID_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE];
+const NON_VISIBLE_ATTRIBUTES = [...NON_WRITABLE_ATTRIBUTES, PUBLISHED_AT_ATTRIBUTE];
 
 const constants = {
   ID_ATTRIBUTE,
@@ -52,7 +45,7 @@ const getNonWritableAttributes = (model = {}) => {
 };
 
 const getNonVisibleAttributes = model => {
-  return _.uniq([model.primaryKey, ...getTimestamps(model), ...HIDDEN_ATTRIBUTES]);
+  return _.uniq([model.primaryKey, ...getTimestamps(model), ...NON_VISIBLE_ATTRIBUTES]);
 };
 
 const getVisibleAttributes = model => {
@@ -81,6 +74,7 @@ module.exports = {
   isPrivateAttribute,
   constants,
   getNonWritableAttributes,
+  getNonVisibleAttributes,
   getVisibleAttributes,
   hasDraftAndPublish,
   isDraft,

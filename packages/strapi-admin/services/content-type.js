@@ -26,12 +26,12 @@ const getNestedFields = (
     return prefix ? [prefix] : [];
   }
 
-  const nonWritableAttributes = contentTypesUtils.getNonWritableAttributes(model);
+  const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
 
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
-      if (nonWritableAttributes.includes(key)) return fields;
+      if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       const requiredOrNotNeeded = !requiredOnly || attr.required === true;
@@ -84,12 +84,12 @@ const getNestedFieldsWithIntermediate = (
     return [];
   }
 
-  const nonWritableAttributes = contentTypesUtils.getNonWritableAttributes(model);
+  const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
 
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
-      if (nonWritableAttributes.includes(key)) return fields;
+      if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       fields.push(fieldPath);
