@@ -33,7 +33,7 @@ Drafts can be modified and saved at will, until they are ready to be published.
 
 To publish a draft, click on the **Publish** button.
 
-:::caution
+:::warning CAUTION
 Before publishing a draft, make sure it doesn't have relations with other non-published content, otherwise some of the content may not be available through the API.
 :::
 
