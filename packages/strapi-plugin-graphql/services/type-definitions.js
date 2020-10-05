@@ -397,9 +397,13 @@ const buildCollectionType = model => {
       ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
     };
     if (actionExists(resolverOpts)) {
+      const draftAndPublishArgument = contentTypes.hasDraftAndPublish(model)
+        ? 'publicationState: PublicationState'
+        : '';
+      const queryArguments = `(sort: String, limit: Int, start: Int, where: JSON ${draftAndPublishArgument})`;
       _.merge(localSchema, {
         query: {
-          [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
+          [`${pluralName}${queryArguments}`]: `[${model.globalId}]`,
         },
         resolvers: {
           Query: {
