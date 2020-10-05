@@ -59,7 +59,6 @@ describe('Content types utils', () => {
 
       expect(getNonWritableAttributes(model)).toEqual([
         'id',
-        constants.PUBLISHED_AT_ATTRIBUTE,
         constants.CREATED_BY_ATTRIBUTE,
         constants.UPDATED_BY_ATTRIBUTE,
       ]);
