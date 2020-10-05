@@ -9,6 +9,11 @@
 const _ = require('lodash');
 const { contentTypes } = require('strapi-utils');
 
+const {
+  hasDraftAndPublish,
+  constants: { DP_PUB_STATE_LIVE },
+} = contentTypes;
+
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const { formatModelConnectionsGQL } = require('./build-aggregation');
@@ -18,6 +23,14 @@ const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 const { actionExists } = require('./utils');
+
+const assignOptions = (element, parent) => {
+  if (Array.isArray(element)) {
+    return element.map(el => assignOptions(el, parent));
+  }
+
+  return _.set(element, '__options__', _.get(parent, '__options__', {}));
+};
 
 const isQueryEnabled = (schema, name) => {
   return _.get(schema, `resolver.Query.${name}`) !== false;
@@ -170,7 +183,15 @@ const buildAssocResolvers = model => {
               model: targetModel.uid,
             };
 
-            let queryOpts = {};
+            let queryOpts = {
+              ...obj.__options__,
+            };
+
+            if (hasDraftAndPublish(targetModel)) {
+              _.assign(queryOpts, {
+                _publicationState: queryOpts._publicationState || DP_PUB_STATE_LIVE,
+              });
+            }
 
             if (association.type === 'model') {
               params[targetModel.primaryKey] = _.get(
@@ -182,7 +203,7 @@ const buildAssocResolvers = model => {
               const queryParams = amountLimiting(options);
               queryOpts = {
                 ...queryOpts,
-                ...convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
+                ...convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip, publicationState)
                 ...convertToQuery(queryParams.where),
               };
 
@@ -203,16 +224,22 @@ const buildAssocResolvers = model => {
               }
             }
 
-            return association.model
-              ? strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load({
-                  params,
-                  options: queryOpts,
-                  single: true,
-                })
-              : strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load({
-                  options: queryOpts,
-                  association,
-                });
+            const results = association.model
+              ? await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
+                  {
+                    params,
+                    options: queryOpts,
+                    single: true,
+                  }
+                )
+              : await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
+                  {
+                    options: queryOpts,
+                    association,
+                  }
+                );
+
+            return assignOptions(results, obj);
           };
           break;
         }
@@ -407,7 +434,12 @@ const buildCollectionType = model => {
         },
         resolvers: {
           Query: {
-            [pluralName]: buildQuery(pluralName, resolverOpts),
+            [pluralName]: async (parent, args, ctx, ast) => {
+              const results = await buildQuery(pluralName, resolverOpts)(parent, args, ctx, ast);
+
+              const __options__ = { _publicationState: args.publicationState };
+              return assignOptions(results, { __options__ });
+            },
           },
         },
       });

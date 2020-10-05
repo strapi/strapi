@@ -208,14 +208,15 @@ const formatPopulateOptions = (definition, { withRelated, publicationState } = {
 
       newKey = `${prefix}${part}`;
       prefix = `${newKey}.`;
+
+      _.extend(acc, {
+        [newKey]: pq.extendWithPopulateQueries(obj[key], {
+          publicationState: { query: publicationState, model: tmpModel },
+        }),
+      });
     }
 
-    return {
-      ...acc,
-      [newKey]: pq.extendWithPopulateQueries(obj[key], {
-        publicationState: { query: publicationState, model: tmpModel },
-      }),
-    };
+    return acc;
   }, {});
 
   return [finalObj];
