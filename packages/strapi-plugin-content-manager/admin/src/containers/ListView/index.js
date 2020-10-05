@@ -292,7 +292,17 @@ function ListView({
 
   const handleConfirmDeleteData = useCallback(async () => {
     try {
-      emitEvent('willDeleteEntry');
+      let trackerProperty = {};
+
+      if (hasDraftAndPublish) {
+        const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
+        const isDraftEntry = isEmpty(dataToDelete.published_at);
+        const status = isDraftEntry ? 'draft' : 'published';
+
+        trackerProperty = { status };
+      }
+
+      emitEvent('willDeleteEntry', trackerProperty);
       setModalLoadingState();
 
       await request(getRequestUrl(`explorer/${slug}/${idToDelete}`), {
@@ -303,7 +313,7 @@ function ListView({
 
       // Close the modal and refetch data
       onDeleteDataSucceeded();
-      emitEvent('didDeleteEntry');
+      emitEvent('didDeleteEntry', trackerProperty);
     } catch (err) {
       const errorMessage = get(
         err,
@@ -316,7 +326,7 @@ function ListView({
       onDeleteDataError();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setModalLoadingState, slug, idToDelete, onDeleteDataSucceeded]);
+  }, [setModalLoadingState, slug, idToDelete, onDeleteDataSucceeded, hasDraftAndPublish, data]);
 
   const handleConfirmDeleteAllData = useCallback(async () => {
     const params = Object.assign(entriesToDelete);
@@ -468,7 +478,9 @@ function ListView({
             }
           ),
           onClick: () => {
-            emitEvent('willCreateEntry');
+            const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
+
+            emitEvent('willCreateEntry', trackerProperty);
             push({
               pathname: `${pathname}/create`,
             });
@@ -485,7 +497,7 @@ function ListView({
       ];
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [label, pathname, search, canCreate, formatMessage]
+    [label, pathname, search, canCreate, formatMessage, hasDraftAndPublish]
   );
 
   const headerProps = useMemo(() => {

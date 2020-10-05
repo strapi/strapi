@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
 import PropTypes from 'prop-types';
 import {
@@ -84,6 +84,7 @@ const EditViewDataManagerProvider = ({
   }, [currentContentTypeLayout]);
 
   const { emitEvent, formatMessage } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
   const userPermissions = useUser();
   const generatedPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
 
@@ -372,6 +373,7 @@ const EditViewDataManagerProvider = ({
 
   const handleSubmit = async e => {
     e.preventDefault();
+    const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
     // Create yup schema
     const schema = createYupSchema(
@@ -427,7 +429,9 @@ const EditViewDataManagerProvider = ({
         endPoint = `${slug}/${id}`;
       }
 
-      emitEvent(isCreatingEntry ? 'willCreateEntry' : 'willEditEntry');
+      if (!isCreatingEntry) {
+        emitEvent('willEditEntry', trackerProperty);
+      }
 
       try {
         // Time to actually send the data
@@ -442,7 +446,7 @@ const EditViewDataManagerProvider = ({
           false,
           false
         );
-        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
+        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry', trackerProperty);
 
         setStatus('resolved');
 
@@ -482,6 +486,7 @@ const EditViewDataManagerProvider = ({
         } else {
           emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
             error: err,
+            ...trackerProperty,
           });
         }
 
@@ -517,6 +522,8 @@ const EditViewDataManagerProvider = ({
       setStatus('publish-pending');
 
       try {
+        emitEventRef.current('willPublishEntry');
+
         // Time to actually send the data
         const data = await request(
           getRequestUrl(`${slug}/publish/${id || modifiedData.id}`),
@@ -526,6 +533,8 @@ const EditViewDataManagerProvider = ({
           false,
           false
         );
+
+        emitEventRef.current('didPublishEntry');
 
         setStatus('resolved');
 
@@ -581,6 +590,8 @@ const EditViewDataManagerProvider = ({
     try {
       setStatus('unpublish-pending');
 
+      emitEventRef.current('willUnpublishEntry');
+
       const data = await request(
         getRequestUrl(`${slug}/unpublish/${id || modifiedData.id}`),
         {
@@ -590,6 +601,7 @@ const EditViewDataManagerProvider = ({
         false
       );
 
+      emitEventRef.current('didUnpublishEntry');
       setStatus('resolved');
 
       dispatch({
