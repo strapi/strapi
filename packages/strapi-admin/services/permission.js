@@ -1,13 +1,16 @@
 'use strict';
 
 const _ = require('lodash');
+const { flatMap, filter } = require('lodash/fp');
 const pmap = require('p-map');
-const { createPermission } = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
 const actionProvider = require('./permission/action-provider');
+const { EDITOR_CODE } = require('./constants');
+const { getBoundActionsBySubject, BOUND_ACTIONS_FOR_FIELDS } = require('../domain/role');
+const { createPermission } = require('../domain/permission');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
@@ -52,6 +55,25 @@ const deleteByRolesIds = rolesIds => {
  */
 const deleteByIds = ids => {
   return strapi.query('permission', 'admin').delete({ id_in: ids });
+};
+
+/**
+ * Create many permissions
+ * @param permissions
+ * @returns {Promise<*[]|*>}
+ */
+const createMany = async permissions => {
+  return strapi.query('permission', 'admin').createMany(permissions);
+};
+
+/**
+ * Update a permission
+ * @returns {Promise<*[]|*>}
+ * @param params
+ * @param attributes
+ */
+const update = async (params, attributes) => {
+  return strapi.query('permission', 'admin').update(params, attributes);
 };
 
 /**
@@ -100,9 +122,7 @@ const assign = async (roleId, permissions = []) => {
     await deleteByIds(permissionsToDelete.map(p => p.id));
   }
   if (permissionsToAdd.length > 0) {
-    const createdPermissions = await strapi
-      .query('permission', 'admin')
-      .createMany(permissionsToAdd);
+    const createdPermissions = await createMany(permissionsToAdd);
     permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
   }
 
@@ -166,8 +186,7 @@ const cleanPermissionInDatabase = async () => {
       permissionsInDb,
       (a, b) => a.id === b.id && _.xor(a.fields, b.fields).length === 0
     );
-    const promiseProvider = perm =>
-      strapi.query('permission', 'admin').update({ id: perm.id }, perm);
+    const promiseProvider = perm => update({ id: perm.id }, perm);
 
     //Update the database
     await Promise.all([
@@ -177,6 +196,53 @@ const cleanPermissionInDatabase = async () => {
         stopOnError: true,
       }),
     ]);
+  }
+};
+
+const ensureBoundPermissionsInDatabase = async () => {
+  if (strapi.EE) {
+    return;
+  }
+
+  const contentTypes = Object.values(strapi.contentTypes);
+  const editorRole = await strapi.query('role', 'admin').findOne({ code: EDITOR_CODE }, []);
+
+  if (_.isNil(editorRole)) {
+    return;
+  }
+
+  for (const contentType of contentTypes) {
+    const boundActions = getBoundActionsBySubject(editorRole, contentType.uid);
+    const permissions = await strapi.query('permission', 'admin').find(
+      {
+        subject: contentType.uid,
+        action_in: boundActions,
+        role: editorRole.id,
+      },
+      []
+    );
+
+    if (permissions.length === 0) {
+      return;
+    }
+
+    const fields = _.flow(flatMap('fields'), filter(_.negate(_.isNil)), _.uniq)(permissions);
+
+    // Handle the scenario where permissions are missing
+
+    const missingActions = _.difference(boundActions, _.map(permissions, 'action'));
+
+    if (missingActions.length > 0) {
+      const permissions = missingActions.map(action =>
+        createPermission({
+          action,
+          subject: contentType.uid,
+          role: editorRole.id,
+          fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
+        })
+      );
+      await createMany(permissions);
+    }
   }
 };
 
@@ -225,4 +291,5 @@ module.exports = {
   conditionProvider,
   cleanPermissionInDatabase,
   resetSuperAdminPermissions,
+  ensureBoundPermissionsInDatabase,
 };
