@@ -109,7 +109,7 @@ module.exports = async () => {
       secret: '',
       subdomain: 'my.subdomain.com',
       callback: `${strapi.config.server.url}/auth/cognito/callback`,
-      scope: ['email'],
+      scope: ['email', 'openid', 'profile'],
     },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};

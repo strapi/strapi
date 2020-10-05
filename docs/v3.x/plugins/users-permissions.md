@@ -336,20 +336,20 @@ The use of `ngrok` is not needed.
 - You should now have an **App client id** and by clicking on the button **Show Details** you will be able to see the **App client secret**. Do copy those two values **App client id** and **App client secret** somewhere for later use when configuring the AWS Cognito provider in Strapi.
 - Go to the **App integration section** and click on **App client settings**
 - Look for your app client named `Strapi Auth` and enable Cognito User Pool by checking it in the **Enabled Identity Providers** section of your newly created App client
-- Feel in your callback URL and Sign out URL with the value `http://localhost:1337/connect/cognito/callback` or the one provided by your AWS Cognito provider in Strapi
+- Fill in your callback URL and Sign out URL with the value `http://localhost:1337/connect/cognito/callback` or the one provided by your AWS Cognito provider in Strapi
 - In the **Oauth 2.0** section select `Authorization code grant` and `Implicit grant` for the **Allowed OAuth Flows** and select `email`, `openid` and `profile` for the **Allowed OAuth Scopes**
-- You can now click on **Save changes** and a link to the **Launch Hosted UI** will now be visible. You can click on it in order to display the AWS Cognito login page. Copy the URL of that login page (everything between `https` and `/login`). This will be the **Host URI (Subdomain)** value for your strapi configuration
+- You can now click on **Save changes** and if you have already configured your domain name then you should be able to see a link to the **Launch Hosted UI**. You can click on it in order to display the AWS Cognito login page. In case you haven't yet configured your domain name, use the link **Choose domain name** at the bottom right of the page in order to configure your domain name. On that page you will have an `Amazon Cognito Domain` section where a `Domain prefix` is already setup. Type a domain prefix to use for the sign-up and sign-in pages that are hosted by Amazon Cognito, this domain prefix together with the `.auth.YOUR_REGION.amazoncognito.com` will be the **Host URI (Subdomain)** value for your strapi configuration later on.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Cognito** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
   - **Client ID**: fill in the **App client id** (`5bd7a786qdupjmi0b3s10vegdt`)
   - **Client Secret**: fill in the **App client secret** (`19c5c78dsfsdfssfsdfhpdb4nkpb145vesdfdsfsffgh7vwd6g45jlipbpb`)
   - **Host URI (Subdomain)**: fill in the URL value that you copied earlier (`myapp67b50345-67b50b17-local.auth.eu-central-1.amazoncognito.com`)
-  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/cognito/redirect`
+  - **The redirect URL to your front-end app**: `http://localhost:1337/auth/cognito/callback`
 
 :::
 
@@ -896,7 +896,3 @@ module.exports = {
 ::: tip
 You can learn more on configuration in the documentation [here](../concepts/configurations.md)
 :::
-
-## Custom providers HOST URI (subdomain) configuration
-
-Some external Identity providers like AWS Cognito will require you to provide the link to the IDP host url (e.g. your_idp_name.auth.eu-central-1.amazoncognito.com) so that you can access the IDP login page using `htts://your_strapi_url/connect/your_custom_provider_name`. In order to do that you will have to fill in that value in the configuration popup of the provider in the Host URI (subdomain) field.
