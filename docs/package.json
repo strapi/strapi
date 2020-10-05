@@ -8,9 +8,10 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "@vuepress/plugin-medium-zoom": "^1.2.0",
     "@vuepress/plugin-google-analytics": "^1.2.0",
+    "@vuepress/plugin-medium-zoom": "^1.2.0",
     "vuepress": "^1.2.0",
-    "vuepress-plugin-element-tabs": "^0.1.8"
+    "vuepress-plugin-element-tabs": "^0.1.8",
+    "vuepress-plugin-font-awesome": "1.90.6"
   }
 }
