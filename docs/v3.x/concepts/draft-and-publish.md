@@ -23,6 +23,10 @@ To deactivate the draft and publish mode for a content type:
 
 ## Switching from draft to published content
 
+:::tip NOTE
+Publishing content may require specific roles and permissions. For example, in the Community version, the default roles grant permission to editors to publish content, but authors can only create and edit drafts.
+:::
+
 By default, each newly created content is a draft, which is indicated on the right of the interface, below the Information box.
 
 ![Editing draft version](../assets/concepts/draft-publish/editing_draft_version.png)
