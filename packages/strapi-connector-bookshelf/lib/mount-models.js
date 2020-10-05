@@ -48,7 +48,6 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
-          writable: false,
         };
       }
 
