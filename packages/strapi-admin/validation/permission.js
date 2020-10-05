@@ -1,37 +1,18 @@
 'use strict';
 
 const _ = require('lodash');
-const {
-  yup,
-  formatYupErrors,
-  contentTypes: { hasDraftAndPublish },
-} = require('strapi-utils');
+const { yup, formatYupErrors } = require('strapi-utils');
 const validators = require('./common-validators');
-const { AUTHOR_CODE } = require('../services/constants');
+const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
+const {
+  BOUND_ACTIONS_FOR_FIELDS,
+  BOUND_ACTIONS,
+  getBoundActionsBySubject,
+} = require('../domain/role');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
 // validatedUpdatePermissionsInput
-
-const READ_ACTION = 'plugins::content-manager.explorer.read';
-const CREATE_ACTION = 'plugins::content-manager.explorer.create';
-const UPDATE_ACTION = 'plugins::content-manager.explorer.update';
-const DELETE_ACTION = 'plugins::content-manager.explorer.delete';
-const PUBLISH_ACTION = 'plugins::content-manager.explorer.publish';
-
-const BOUND_ACTIONS = [READ_ACTION, CREATE_ACTION, UPDATE_ACTION, DELETE_ACTION, PUBLISH_ACTION];
-
-const BOUND_ACTIONS_FOR_FIELDS = [READ_ACTION, CREATE_ACTION, UPDATE_ACTION];
-
-const getBoundActionsBySubject = (role, subject) => {
-  const model = strapi.getModel(subject);
-
-  if (role.code === AUTHOR_CODE || !hasDraftAndPublish(model)) {
-    return [READ_ACTION, UPDATE_ACTION, CREATE_ACTION, DELETE_ACTION];
-  }
-
-  return BOUND_ACTIONS;
-};
 
 const actionFieldsAreEqual = (a, b) => {
   const aFields = a.fields || [];

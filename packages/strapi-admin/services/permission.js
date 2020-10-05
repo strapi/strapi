@@ -2,12 +2,14 @@
 
 const _ = require('lodash');
 const pmap = require('p-map');
-const { createPermission } = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
 const actionProvider = require('./permission/action-provider');
+const { EDITOR_CODE } = require('./constants');
+const { getBoundActionsBySubject, BOUND_ACTIONS_FOR_FIELDS } = require('../domain/role');
+const { createPermission } = require('../domain/permission');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
@@ -100,13 +102,20 @@ const assign = async (roleId, permissions = []) => {
     await deleteByIds(permissionsToDelete.map(p => p.id));
   }
   if (permissionsToAdd.length > 0) {
-    const createdPermissions = await strapi
-      .query('permission', 'admin')
-      .createMany(permissionsToAdd);
+    const createdPermissions = await createMany(permissionsToAdd);
     permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
   }
 
   return permissionsToReturn;
+};
+
+/**
+ * Create many permissions
+ * @param permissions
+ * @returns {Promise<*[]|*>}
+ */
+const createMany = async permissions => {
+  return strapi.query('permission', 'admin').createMany(permissions);
 };
 
 /**
@@ -180,6 +189,43 @@ const cleanPermissionInDatabase = async () => {
   }
 };
 
+const ensureBoundPermissionsInDatabase = async () => {
+  if (strapi.EE) return;
+
+  const models = Object.values(strapi.contentTypes);
+  const role = await strapi.query('role', 'admin').findOne({ code: EDITOR_CODE }, []);
+
+  for (const model of models) {
+    const actions = getBoundActionsBySubject(role, model.uid);
+    const perms = await strapi.query('permission', 'admin').find(
+      {
+        subject: model.uid,
+        action_in: actions,
+        role: role.id,
+      },
+      []
+    );
+
+    if (perms.length > 0) {
+      const missingActions = _.difference(actions, _.map(perms, 'action'));
+
+      if (missingActions.length > 0) {
+        const { fields } = perms[0];
+
+        const permissions = missingActions.map(action =>
+          createPermission({
+            action,
+            subject: model.uid,
+            role: role.id,
+            fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
+          })
+        );
+        await createMany(permissions);
+      }
+    }
+  }
+};
+
 /**
  * Reset super admin permissions (giving it all permissions)
  * @returns {Promise<>}
@@ -225,4 +271,5 @@ module.exports = {
   conditionProvider,
   cleanPermissionInDatabase,
   resetSuperAdminPermissions,
+  ensureBoundPermissionsInDatabase,
 };
