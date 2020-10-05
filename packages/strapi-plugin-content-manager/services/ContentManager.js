@@ -58,7 +58,8 @@ module.exports = {
   },
 
   edit(params, { data, files }, { model } = {}) {
-    return strapi.entityService.update({ params, data, files }, { model });
+    const publishData = _.omit(data, PUBLISHED_AT_ATTRIBUTE);
+    return strapi.entityService.update({ params, data: publishData, files }, { model });
   },
 
   delete(model, query) {
