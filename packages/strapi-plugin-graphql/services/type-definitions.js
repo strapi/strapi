@@ -7,7 +7,7 @@
  */
 
 const _ = require('lodash');
-const { getPrivateAttributes } = require('strapi-utils');
+const { contentTypes } = require('strapi-utils');
 
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
@@ -27,6 +27,10 @@ const isMutationEnabled = (schema, name) => {
   return _.get(schema, `resolver.Mutation.${name}`) !== false;
 };
 
+const isNotPrivate = _.curry((model, attributeName) => {
+  return !contentTypes.isPrivateAttribute(model, attributeName);
+});
+
 const buildTypeDefObj = model => {
   const { associations = [], attributes, primaryKey, globalId } = model;
 
@@ -43,7 +47,7 @@ const buildTypeDefObj = model => {
   }
 
   Object.keys(attributes)
-    .filter(attributeName => attributes[attributeName].private !== true)
+    .filter(isNotPrivate(model))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -57,21 +61,13 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => attributes[association.alias].private !== true)
+    .filter(association => isNotPrivate(model, association.alias))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
 
       delete typeDef[association.alias];
     });
-
-  // Remove private attributes defined per model or globally
-  const privateAttributes = getPrivateAttributes(model);
-  privateAttributes.forEach(attr => {
-    if (typeDef[attr]) {
-      delete typeDef[attr];
-    }
-  });
 
   return typeDef;
 };
@@ -143,7 +139,7 @@ const buildAssocResolvers = model => {
   const { primaryKey, associations = [] } = model;
 
   return associations
-    .filter(association => model.attributes[association.alias].private !== true)
+    .filter(association => isNotPrivate(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);

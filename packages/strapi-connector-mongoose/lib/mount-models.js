@@ -49,11 +49,14 @@ module.exports = async ({ models, target }, ctx) => {
         };
       }
 
+      const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
+
       definition.attributes[CREATED_BY_ATTRIBUTE] = {
         model: 'user',
         plugin: 'admin',
         configurable: false,
         writable: false,
+        private: isPrivate,
       };
 
       definition.attributes[UPDATED_BY_ATTRIBUTE] = {
@@ -61,6 +64,7 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        private: isPrivate,
       };
     }
 
@@ -157,14 +161,20 @@ module.exports = async ({ models, target }, ctx) => {
 
     const createAtCol = _.get(definition, 'options.timestamps.0', 'createdAt');
     const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updatedAt');
+
     if (_.get(definition, 'options.timestamps', false)) {
       _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
-      target[model].allAttributes[createAtCol] = { type: 'timestamp' };
-      target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
+
+      _.assign(target[model].allAttributes, {
+        [createAtCol]: { type: 'timestamp' },
+        [updatedAtCol]: { type: 'timestamp' },
+      });
+
       schema.set('timestamps', { createdAt: createAtCol, updatedAt: updatedAtCol });
     } else {
       _.set(definition, 'options.timestamps', false);
     }
+
     schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
     const refToStrapiRef = obj => {
@@ -278,6 +288,8 @@ module.exports = async ({ models, target }, ctx) => {
     target[model]._attributes = definition.attributes;
     target[model].updateRelations = relations.update;
     target[model].deleteRelations = relations.deleteRelations;
+
+    target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
   }
 
   // Instanciate every models

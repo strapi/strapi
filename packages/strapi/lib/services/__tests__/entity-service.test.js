@@ -6,7 +6,7 @@ const { EventEmitter } = require('events');
 
 describe('Entity service', () => {
   global.strapi = {
-    getModel: jest.fn(() => {}),
+    getModel: jest.fn(() => ({})),
     config: {
       get() {
         return [];
@@ -27,7 +27,7 @@ describe('Entity service', () => {
 
       const fakeDB = {
         getModel: jest.fn(() => {
-          return { kind: 'singleType' };
+          return { kind: 'singleType', privateAttributes: [] };
         }),
         query: jest.fn(() => fakeQuery),
       };
@@ -56,7 +56,7 @@ describe('Entity service', () => {
 
       const fakeDB = {
         getModel: jest.fn(() => {
-          return { kind: 'singleType' };
+          return { kind: 'singleType', privateAttributes: [] };
         }),
         query: jest.fn(() => fakeQuery),
       };
@@ -89,6 +89,7 @@ describe('Entity service', () => {
         const fakeModel = {
           kind: 'contentType',
           modelName: 'test-model',
+          privateAttributes: [],
           options: {},
           attributes: {
             attrStringDefaultRequired: { type: 'string', default: 'default value', required: true },

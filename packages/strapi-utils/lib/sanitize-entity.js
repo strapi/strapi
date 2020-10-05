@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { constants } = require('./content-types');
+const { constants, isPrivateAttribute } = require('./content-types');
 const {
   ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
@@ -134,20 +134,9 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const getPrivateAttributes = model => {
-  const allPrivatesAttributes = _.union(
-    strapi.config.get('api.responses.privateAttributes', []),
-    _.get(model, 'options.privateAttributes', [])
-  );
-
-  return allPrivatesAttributes;
-};
-
 const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
-  const privateAttributes = getPrivateAttributes(model);
-
   const isPassword = attribute.type === 'password';
-  const isPrivate = attribute.private === true || privateAttributes.includes(key);
+  const isPrivate = isPrivateAttribute(model, key);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
@@ -155,7 +144,4 @@ const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutp
   return !!((isPassword && shouldRemovePassword) || (isPrivate && shouldRemovePrivate));
 };
 
-module.exports = {
-  sanitizeEntity,
-  getPrivateAttributes,
-};
+module.exports = sanitizeEntity;

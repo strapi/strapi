@@ -20,19 +20,23 @@
       "method": "POST",
       "path": "/plugins/install",
       "handler": "Admin.installPlugin",
-      "policies": [
-        "admin::isAuthenticatedAdmin",
-        ["admin::hasPermissions", ["admin::marketplace.plugins.install"]]
-      ]
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::marketplace.plugins.install"]]
+        ]
+      }
     },
     {
       "method": "DELETE",
       "path": "/plugins/uninstall/:plugin",
       "handler": "Admin.uninstallPlugin",
-      "policies": [
-        "admin::isAuthenticatedAdmin",
-        ["admin::hasPermissions", ["admin::marketplace.plugins.uninstall"]]
-      ]
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::marketplace.plugins.uninstall"]]
+        ]
+      }
     },
     {
       "method": "POST",

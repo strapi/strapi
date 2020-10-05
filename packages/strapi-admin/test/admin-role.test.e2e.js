@@ -6,6 +6,7 @@ const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+const sortPermissionArray = arr => _.sortBy(arr, ['action', 'subject']);
 
 let rq;
 
@@ -660,22 +661,11 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data.length).toBe(2);
-        expect(res.body.data).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              subject: null,
-              fields: null,
-              conditions: [],
-              ...permissions[0],
-            }),
-            expect.objectContaining({
-              subject: null,
-              fields: null,
-              conditions: [],
-              ...permissions[1],
-            }),
-          ])
+        expect(res.body.data.length > 0).toBe(true);
+        expect(sortPermissionArray(res.body.data)).toMatchObject(
+          sortPermissionArray(
+            permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+          )
         );
       });
 

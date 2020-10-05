@@ -128,6 +128,10 @@ module.exports = {
         link: 'https://strapi.io',
       },
       {
+        text: 'Forum',
+        link: 'https://forum.strapi.io',
+      },
+      {
         text: 'Slack',
         link: 'https://slack.strapi.io',
       },
@@ -193,6 +197,7 @@ module.exports = {
             '/v3.x/concepts/requests-responses',
             '/v3.x/concepts/routing',
             '/v3.x/concepts/services',
+            '/v3.x/concepts/templates',
             '/v3.x/concepts/webhooks',
             '/v3.x/concepts/draft-and-publish',
           ],

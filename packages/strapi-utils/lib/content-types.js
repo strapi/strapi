@@ -64,7 +64,21 @@ const hasDraftAndPublish = model => _.get(model, 'options.draftAndPublish', fals
 const isDraft = (data, model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
+const getPrivateAttributes = (model = {}) => {
+  return _.union(
+    strapi.config.get('api.responses.privateAttributes', []),
+    _.get(model, 'options.privateAttributes', []),
+    _.keys(_.pickBy(model.attributes, attr => !!attr.private))
+  );
+};
+
+const isPrivateAttribute = (model = {}, attributeName) => {
+  return model.privateAttributes.includes(attributeName);
+};
+
 module.exports = {
+  getPrivateAttributes,
+  isPrivateAttribute,
   constants,
   getNonWritableAttributes,
   getVisibleAttributes,
