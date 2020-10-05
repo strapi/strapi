@@ -7,14 +7,7 @@
  */
 
 const _ = require('lodash');
-<<<<<<< HEAD
 const { contentTypes } = require('strapi-utils');
-=======
-const {
-  getPrivateAttributes,
-  contentTypes: { hasDraftAndPublish },
-} = require('strapi-utils');
->>>>>>> Add publicationState argument for graphql queries
 
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
@@ -404,13 +397,13 @@ const buildCollectionType = model => {
       ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
     };
     if (actionExists(resolverOpts)) {
-      const draftAndPublishArgument = hasDraftAndPublish(model)
+      const draftAndPublishArgument = contentTypes.hasDraftAndPublish(model)
         ? 'publicationState: PublicationState'
         : '';
-      const params = `(sort: String, limit: Int, start: Int, where: JSON ${draftAndPublishArgument})`;
+      const queryArguments = `(sort: String, limit: Int, start: Int, where: JSON ${draftAndPublishArgument})`;
       _.merge(localSchema, {
         query: {
-          [`${pluralName}${params}`]: `[${model.globalId}]`,
+          [`${pluralName}${queryArguments}`]: `[${model.globalId}]`,
         },
         resolvers: {
           Query: {
