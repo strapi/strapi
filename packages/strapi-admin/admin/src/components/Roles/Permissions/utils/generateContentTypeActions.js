@@ -3,6 +3,7 @@ import { staticAttributeActions } from './permissonsConstantsActions';
 const generateContentTypeActions = (
   subjectPermissions,
   existingContentTypeActions,
+  permissionsLayout,
   shouldAddDeleteAction = false
 ) => {
   const additionalActions = Object.entries(existingContentTypeActions).reduce((acc, current) => {
@@ -29,13 +30,17 @@ const generateContentTypeActions = (
     {}
   );
 
+  const layoutAttributeActions = permissionsLayout
+    .filter(perm => !staticAttributeActions.includes(perm.action))
+    .reduce((acc, current) => {
+      return { ...acc, [current.action]: true };
+    }, {});
+
   if (shouldAddDeleteAction) {
     return {
       ...generatedContentTypeActions,
       ...additionalActions,
-      // TODO : Add all permissionLayout actions
-      'plugins::content-manager.explorer.delete': true,
-      'plugins::content-manager.explorer.publish': true,
+      ...layoutAttributeActions,
     };
   }
 

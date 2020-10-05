@@ -561,6 +561,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
         },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
+          },
+        },
       };
       const expected = {
         collapsePath: [],
@@ -579,6 +587,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
                 actions: staticAttributeActions,
               },
             },
+          },
+        },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
           },
         },
       };
@@ -606,6 +622,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
         },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
+          },
+        },
       };
       const expected = {
         collapsePath: [],
@@ -624,6 +648,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
                 actions: staticAttributeActions,
               },
             },
+          },
+        },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
           },
         },
       };
@@ -661,6 +693,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
         },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
+          },
+        },
       };
       const expected = {
         collapsePath: [],
@@ -686,6 +726,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
                 actions: ['plugins::content-manager.explorer.create'],
               },
             },
+          },
+        },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
           },
         },
       };
@@ -725,6 +773,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
         },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
+          },
+        },
       };
       const expected = {
         collapsePath: [],
@@ -747,6 +803,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
                 actions: [],
               },
             },
+          },
+        },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
           },
         },
       };
@@ -1291,6 +1355,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
         },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
+            ],
+          },
+        },
       };
 
       const expected = {
@@ -1326,6 +1398,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
           },
         },
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
+            ],
+          },
+        },
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
@@ -1345,6 +1425,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         ],
         shouldEnable: true,
         shouldSetAllContentTypes: true,
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
+          },
+        },
       };
 
       const initialState = {
@@ -1450,6 +1538,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         ],
         shouldEnable: false,
         shouldSetAllContentTypes: true,
+        permissionsLayout: {
+          sections: {
+            contentTypes: [
+              { action: 'plugins::content-manager.explorer.delete' },
+              { action: 'plugins::content-manager.explorer.publish' },
+            ],
+          },
+        },
       };
 
       const initialState = {
