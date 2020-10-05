@@ -18,7 +18,7 @@ const HIDDEN_ATTRIBUTES = [
 ];
 
 // making it clear hidden attributes could still be writable
-const NON_WRITABLE_ATTRIBUTES = [...HIDDEN_ATTRIBUTES];
+const NON_WRITABLE_ATTRIBUTES = [ID_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE];
 
 const constants = {
   ID_ATTRIBUTE,
