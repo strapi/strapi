@@ -4,7 +4,7 @@ import { Button, Padded, Text } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import Src from '../../assets/icons/icon_danger.svg';
 import Header from './Header';
-import { Body, Footer, Img, StyledModal, TextWrapper } from './styled';
+import { Body, Footer, Img, StyledModal, TextWrapper } from './styledComponents';
 
 const ModalConfirm = ({
   buttons,
@@ -58,7 +58,7 @@ const ModalConfirm = ({
     <StyledModal isOpen={isOpen} toggle={handleToggle} {...rest}>
       <Header title={title} toggle={handleToggle} />
       <Body>
-        <Img src={Src} alt="icon" />;
+        <Img src={Src} alt="icon" />
         <TextWrapper>
           <Text lineHeight="18px">
             <FormattedMessage {...content} />

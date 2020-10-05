@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Text } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import Close from '../../svgs/Close';
-import { CloseButton, HeaderWrapper } from './styled';
+import { CloseButton, HeaderWrapper } from './styledComponents';
 
 const Header = ({ title, toggle }) => {
   return (
@@ -12,7 +12,7 @@ const Header = ({ title, toggle }) => {
         <FormattedMessage {...title} />
       </Text>
 
-      <CloseButton>
+      <CloseButton onClick={toggle} type="button">
         <Close />
       </CloseButton>
     </HeaderWrapper>

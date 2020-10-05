@@ -39,7 +39,7 @@ const Footer = styled.div`
   width: 100%;
   margin-top: 19px;
   justify-content: space-between;
-  background-color: #eff3f6;
+  background-color: ${props => props.theme.main.colors.strapi['gray-light']};
   padding: 15px 30px 17px 30px;
   > button {
     padding: 0 30px;
