@@ -26,12 +26,12 @@ const Header = ({
   initialData,
   isCreatingEntry,
   isSingleType,
-  status,
-  layout,
   hasDraftAndPublish,
+  layout,
   modifiedData,
   onPublish,
   onUnpublish,
+  status,
 }) => {
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
@@ -189,46 +189,49 @@ const Header = ({
   return (
     <>
       <PluginHeader {...headerProps} />
-
-      <ModalConfirm
-        isOpen={showWarningUnpublish}
-        toggle={toggleWarningPublish}
-        content={{
-          id: getTrad('popUpWarning.warning.unpublish'),
-          values: {
-            br: () => <br />,
-          },
-        }}
-        type="xwarning"
-        onConfirm={handleConfirmUnpublish}
-        onClosed={handleCloseModalUnpublish}
-      >
-        <Text>{formatMessage({ id: getTrad('popUpWarning.warning.unpublish-question') })}</Text>
-      </ModalConfirm>
-      <ModalConfirm
-        confirmButtonLabel={{
-          id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
-        }}
-        isOpen={showWarningDraftRelation}
-        toggle={toggleWarningDraftRelation}
-        onClosed={handleCloseModalPublish}
-        onConfirm={handleConfirmPublish}
-        type="success"
-        content={{
-          id: getTrad(`popUpwarning.warning.has-draft-relations.message.${contentIdSuffix}`),
-          values: {
-            count: draftRelationsCount,
-            b: chunks => (
-              <Text as="span" fontWeight="bold">
-                {chunks}
-              </Text>
-            ),
-            br: () => <br />,
-          },
-        }}
-      >
-        <Text>{formatMessage({ id: getTrad('popUpWarning.warning.publish-question') })}</Text>
-      </ModalConfirm>
+      {hasDraftAndPublish && (
+        <>
+          <ModalConfirm
+            isOpen={showWarningUnpublish}
+            toggle={toggleWarningPublish}
+            content={{
+              id: getTrad('popUpWarning.warning.unpublish'),
+              values: {
+                br: () => <br />,
+              },
+            }}
+            type="xwarning"
+            onConfirm={handleConfirmUnpublish}
+            onClosed={handleCloseModalUnpublish}
+          >
+            <Text>{formatMessage({ id: getTrad('popUpWarning.warning.unpublish-question') })}</Text>
+          </ModalConfirm>
+          <ModalConfirm
+            confirmButtonLabel={{
+              id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
+            }}
+            isOpen={showWarningDraftRelation}
+            toggle={toggleWarningDraftRelation}
+            onClosed={handleCloseModalPublish}
+            onConfirm={handleConfirmPublish}
+            type="success"
+            content={{
+              id: getTrad(`popUpwarning.warning.has-draft-relations.message.${contentIdSuffix}`),
+              values: {
+                count: draftRelationsCount,
+                b: chunks => (
+                  <Text as="span" fontWeight="bold">
+                    {chunks}
+                  </Text>
+                ),
+                br: () => <br />,
+              },
+            }}
+          >
+            <Text>{formatMessage({ id: getTrad('popUpWarning.warning.publish-question') })}</Text>
+          </ModalConfirm>
+        </>
+      )}
     </>
   );
 };
