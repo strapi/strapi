@@ -35,13 +35,13 @@ Drafts can be modified and saved at will, until they are ready to be published.
 
 ### Publishing a draft
 
-To publish a draft, click on the **Publish** button in the top right corner of the content edition interface.
+To publish a draft, click on the **Publish** button in the top right corner of the content editor.
 
 :::warning CAUTION
 Before publishing a draft, make sure it doesn't have relations with other non-published content, otherwise some of the content may not be available through the API.
 :::
 
-When a content is not a draft anymore, but a published content, it is indicated on the right of the interface, below the Information box.
+When a content is not a draft anymore, but has been published, it is indicated on the right of the interface, below the Information box.
 
 ![Editing published version](../assets/concepts/draft-publish/editing_published_version.png)
 
@@ -49,4 +49,4 @@ When a content is not a draft anymore, but a published content, it is indicated 
 
 Published contents can be unpublished, switching back to being drafts again.
 
-To unpublish content, click on the **Unpublish** button in the top right corner of the content edition interface.
+To unpublish content, click on the **Unpublish** button in the top right corner of the content editor.
