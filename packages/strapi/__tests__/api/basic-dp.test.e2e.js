@@ -86,7 +86,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     const product = {
       name: 'Product 2',
       description: 'Product description',
-      published_at: '2020-08-20T10:27:55.866Z',
+      published_at: '2020-08-20T10:27:55.000Z',
     };
     const res = await rq({
       method: 'POST',
@@ -145,7 +145,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      published_at: '2020-08-27T09:50:50.465Z',
+      published_at: '2020-08-27T09:50:50.000Z',
     };
     const res = await rq({
       method: 'PUT',
