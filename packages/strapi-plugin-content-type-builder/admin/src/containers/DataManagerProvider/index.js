@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, size } from 'lodash';
 import {
@@ -382,16 +382,22 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
-  const shouldRedirect = () => {
+  const shouldRedirect = useMemo(() => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
     return !Object.keys(dataSet).includes(currentUid) && !isLoading;
-  };
+  }, [components, contentTypes, currentUid, isInContentTypeView, isLoading]);
 
-  if (shouldRedirect()) {
-    const firstCTUid = Object.keys(contentTypes).sort()[0];
+  const redirectEndpoint = useMemo(() => {
+    const allowedEndpoints = Object.keys(contentTypes)
+      .filter(uid => get(contentTypes, [uid, 'schema', 'editable'], true))
+      .sort();
 
-    return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
+    return get(allowedEndpoints, '0', '');
+  }, [contentTypes]);
+
+  if (shouldRedirect) {
+    return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
   const submitData = async additionalContentTypeData => {

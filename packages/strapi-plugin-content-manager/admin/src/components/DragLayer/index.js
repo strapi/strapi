@@ -66,7 +66,13 @@ const CustomDragLayer = () => {
       case ItemTypes.RELATION:
         return (
           <Li>
-            <RelationItem data={item.data} mainField={item.mainField} isDisabled={false} />
+            <RelationItem
+              data={item.data}
+              mainField={item.mainField}
+              isDisabled={false}
+              isDragging
+              hasDraftAndPublish={item.hasDraftAndPublish}
+            />
           </Li>
         );
       case ItemTypes.EDIT_FIELD:
