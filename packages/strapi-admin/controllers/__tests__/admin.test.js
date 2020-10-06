@@ -1,6 +1,5 @@
 'use strict';
 
-// const createContext = require('../../../../test/helpers/create-context');
 const adminController = require('../admin');
 
 describe('Admin Controller', () => {
