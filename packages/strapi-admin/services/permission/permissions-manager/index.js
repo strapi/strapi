@@ -3,7 +3,10 @@
 const _ = require('lodash');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
-const { sanitizeEntity } = require('strapi-utils');
+const {
+  sanitizeEntity,
+  contentTypes: { constants },
+} = require('strapi-utils');
 const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
 
 module.exports = (ability, action, model) => ({
@@ -59,6 +62,9 @@ module.exports = (ability, action, model) => ({
       isOutput,
     });
 
-    return _.omit(sanitizedEntity, ['created_by.roles', 'updated_by.roles']);
+    return _.omit(sanitizedEntity, [
+      `${constants.CREATED_BY_ATTRIBUTE}.roles`,
+      `${constants.UPDATED_BY_ATTRIBUTE}.roles`,
+    ]);
   },
 });
