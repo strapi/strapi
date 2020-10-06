@@ -3,6 +3,7 @@ const { existsSync } = require('fs-extra');
 const ora = require('ora');
 const execa = require('execa');
 const findPackagePath = require('../load/package-path');
+const { createAudio } = require('node-mp3-player');
 
 module.exports = async plugins => {
   const loader = ora();
@@ -11,6 +12,12 @@ module.exports = async plugins => {
   const version = require(join(dir, 'package.json')).dependencies.strapi;
 
   const pluginArgs = plugins.map(name => `strapi-plugin-${name}@${version}`);
+
+  const Audio = createAudio();
+
+  const elevatorMusic = await Audio(`${__dirname}/../utils/resources/elevator-music.mp3`);
+
+  elevatorMusic.play();
 
   try {
     loader.start(`Installing dependencies`);
@@ -43,4 +50,6 @@ module.exports = async plugins => {
     console.error(err.message);
     process.exit(1);
   }
+
+  elevatorMusic.stop();
 };
