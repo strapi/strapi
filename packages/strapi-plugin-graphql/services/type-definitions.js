@@ -14,6 +14,8 @@ const {
   constants: { DP_PUB_STATE_LIVE },
 } = contentTypes;
 
+const OPTIONS = Symbol();
+
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const { formatModelConnectionsGQL } = require('./build-aggregation');
@@ -29,7 +31,7 @@ const assignOptions = (element, parent) => {
     return element.map(el => assignOptions(el, parent));
   }
 
-  return _.set(element, '__options__', _.get(parent, '__options__', {}));
+  return _.set(element, OPTIONS, _.get(parent, OPTIONS, {}));
 };
 
 const isQueryEnabled = (schema, name) => {
@@ -146,6 +148,16 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
     });
 };
 
+const initQueryOptions = (targetModel, parent) => {
+  if (hasDraftAndPublish(targetModel)) {
+    return {
+      _publicationState: _.get(parent, [OPTIONS, 'publicationState'], DP_PUB_STATE_LIVE),
+    };
+  }
+
+  return {};
+};
+
 const buildAssocResolvers = model => {
   const contentManager = strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -168,11 +180,14 @@ const buildAssocResolvers = model => {
               return obj[association.alias];
             }
 
+            const queryOpts = initQueryOptions(targetModel, obj);
+
             const entry = await contentManager.fetch(model.uid, obj[primaryKey], {
+              query: queryOpts,
               populate: [association.alias],
             });
 
-            return entry[association.alias];
+            return assignOptions(entry[association.alias], obj);
           };
           break;
         }
@@ -183,15 +198,7 @@ const buildAssocResolvers = model => {
               model: targetModel.uid,
             };
 
-            let queryOpts = {
-              ...obj.__options__,
-            };
-
-            if (hasDraftAndPublish(targetModel)) {
-              _.assign(queryOpts, {
-                _publicationState: queryOpts._publicationState || DP_PUB_STATE_LIVE,
-              });
-            }
+            let queryOpts = initQueryOptions(targetModel, obj);
 
             if (association.type === 'model') {
               params[targetModel.primaryKey] = _.get(
@@ -223,8 +230,6 @@ const buildAssocResolvers = model => {
                 _.set(queryOpts, ['query', association.via], obj[targetModel.primaryKey]);
               }
             }
-
-            console.log(queryOpts);
 
             const results = association.model
               ? await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
@@ -439,8 +444,8 @@ const buildCollectionType = model => {
             [pluralName]: async (parent, args, ctx, ast) => {
               const results = await buildQuery(pluralName, resolverOpts)(parent, args, ctx, ast);
 
-              const __options__ = _.pick(args, 'publicationState');
-              return assignOptions(results, { __options__ });
+              const queryOptions = _.pick(args, 'publicationState');
+              return assignOptions(results, { [OPTIONS]: queryOptions });
             },
           },
         },
