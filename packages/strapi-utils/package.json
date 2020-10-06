@@ -17,7 +17,7 @@
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "^2.8.1",
     "lodash": "4.17.19",
-    "pino": "^4.7.1",
+    "pino": "^6.7.0",
     "pluralize": "^8.0.0",
     "yup": "0.28.1"
   },
