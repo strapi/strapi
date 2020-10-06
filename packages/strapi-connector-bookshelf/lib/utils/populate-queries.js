@@ -11,8 +11,11 @@ const {
 const optionsMap = {
   publicationState: {
     queries: {
-      [DP_PUB_STATE_LIVE]: qb => qb.whereNotNull(PUBLISHED_AT_ATTRIBUTE),
-      [DP_PUB_STATE_PREVIEW]: null,
+      [DP_PUB_STATE_LIVE]: ({ model }) => qb => {
+        const { collectionName } = model;
+        qb.whereNotNull(`${collectionName}.${PUBLISHED_AT_ATTRIBUTE}`);
+      },
+      [DP_PUB_STATE_PREVIEW]: () => null,
     },
     validate({ model, query: publicationState }) {
       return hasDraftAndPublish(model) && _.has(this.queries, publicationState);
@@ -26,7 +29,7 @@ const validate = (option, params) => {
   const opt = _.get(optionsMap, option, {});
   return !_.isFunction(opt.validate) || opt.validate(params);
 };
-const resolveQuery = (option, params) => optionsMap[option].queries[params.query];
+const resolveQuery = (option, params) => optionsMap[option].queries[params.query](params);
 
 /**
  * Transform given options to populate queries based on the optionsMap

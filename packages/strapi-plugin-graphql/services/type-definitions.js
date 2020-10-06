@@ -9,6 +9,13 @@
 const _ = require('lodash');
 const { contentTypes } = require('strapi-utils');
 
+const {
+  hasDraftAndPublish,
+  constants: { DP_PUB_STATE_LIVE },
+} = contentTypes;
+
+const OPTIONS = Symbol();
+
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const { formatModelConnectionsGQL } = require('./build-aggregation');
@@ -18,6 +25,14 @@ const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 const { actionExists } = require('./utils');
+
+const assignOptions = (element, parent) => {
+  if (Array.isArray(element)) {
+    return element.map(el => assignOptions(el, parent));
+  }
+
+  return _.set(element, OPTIONS, _.get(parent, OPTIONS, {}));
+};
 
 const isQueryEnabled = (schema, name) => {
   return _.get(schema, `resolver.Query.${name}`) !== false;
@@ -133,6 +148,16 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
     });
 };
 
+const initQueryOptions = (targetModel, parent) => {
+  if (hasDraftAndPublish(targetModel)) {
+    return {
+      _publicationState: _.get(parent, [OPTIONS, 'publicationState'], DP_PUB_STATE_LIVE),
+    };
+  }
+
+  return {};
+};
+
 const buildAssocResolvers = model => {
   const contentManager = strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -155,11 +180,14 @@ const buildAssocResolvers = model => {
               return obj[association.alias];
             }
 
+            const queryOpts = initQueryOptions(targetModel, obj);
+
             const entry = await contentManager.fetch(model.uid, obj[primaryKey], {
+              query: queryOpts,
               populate: [association.alias],
             });
 
-            return entry[association.alias];
+            return assignOptions(entry[association.alias], obj);
           };
           break;
         }
@@ -170,7 +198,7 @@ const buildAssocResolvers = model => {
               model: targetModel.uid,
             };
 
-            let queryOpts = {};
+            let queryOpts = initQueryOptions(targetModel, obj);
 
             if (association.type === 'model') {
               params[targetModel.primaryKey] = _.get(
@@ -182,7 +210,7 @@ const buildAssocResolvers = model => {
               const queryParams = amountLimiting(options);
               queryOpts = {
                 ...queryOpts,
-                ...convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
+                ...convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip, publicationState)
                 ...convertToQuery(queryParams.where),
               };
 
@@ -203,16 +231,22 @@ const buildAssocResolvers = model => {
               }
             }
 
-            return association.model
-              ? strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load({
-                  params,
-                  options: queryOpts,
-                  single: true,
-                })
-              : strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load({
-                  options: queryOpts,
-                  association,
-                });
+            const results = association.model
+              ? await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
+                  {
+                    params,
+                    options: queryOpts,
+                    single: true,
+                  }
+                )
+              : await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
+                  {
+                    options: queryOpts,
+                    association,
+                  }
+                );
+
+            return assignOptions(results, obj);
           };
           break;
         }
@@ -407,7 +441,12 @@ const buildCollectionType = model => {
         },
         resolvers: {
           Query: {
-            [pluralName]: buildQuery(pluralName, resolverOpts),
+            [pluralName]: async (parent, args, ctx, ast) => {
+              const results = await buildQuery(pluralName, resolverOpts)(parent, args, ctx, ast);
+
+              const queryOptions = _.pick(args, 'publicationState');
+              return assignOptions(results, { [OPTIONS]: queryOptions });
+            },
           },
         },
       });
