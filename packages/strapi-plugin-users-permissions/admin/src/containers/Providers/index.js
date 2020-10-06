@@ -10,7 +10,7 @@ import {
   getYupInnerErrors,
   request,
 } from 'strapi-helper-plugin';
-import { get, upperFirst } from 'lodash';
+import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { useForm } from '../../hooks';
@@ -52,6 +52,15 @@ const ProvidersPage = () => {
     () => providers.filter(provider => provider.enabled).length,
     [providers]
   );
+  const isProviderWithSubdomain = useMemo(() => {
+    if (!providerToEditName) {
+      return false;
+    }
+
+    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+
+    return has(providerToEdit, 'subdomain');
+  }, [providers, providerToEditName]);
   const disabledProvidersCount = useMemo(() => {
     return providers.length - enabledProvidersCount;
   }, [providers, enabledProvidersCount]);
@@ -80,8 +89,16 @@ const ProvidersPage = () => {
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
 
   const formToRender = useMemo(() => {
-    return providerToEditName === 'email' ? forms.email : forms.providers;
-  }, [providerToEditName]);
+    if (providerToEditName === 'email') {
+      return forms.email;
+    }
+
+    if (isProviderWithSubdomain) {
+      return forms.providersWithSubdomain;
+    }
+
+    return forms.providers;
+  }, [providerToEditName, isProviderWithSubdomain]);
 
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
@@ -159,7 +176,7 @@ const ProvidersPage = () => {
       formToRender,
       handleToggle,
       modifiedData,
-      providerToEditName,
+      providerToEditName
     ]
   );
 
@@ -218,13 +235,13 @@ const ProvidersPage = () => {
             <Row>
               {formToRender.form.map(input => {
                 const label = input.label.params
-                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                  : input.label;
+                    ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
+                    : input.label;
 
                 const value =
-                  input.name === 'noName'
-                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
+                    input.name === 'noName'
+                      ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
+                      : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
 
                 return (
                   <SizedInput

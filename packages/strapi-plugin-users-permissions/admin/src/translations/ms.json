@@ -46,6 +46,8 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEKS",
   "PopUpForm.header.edit.email-templates": "Edit Templat E-mel",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Tetapan telah dikemas kini",
   "plugin.description.long": "Lindungi API anda dengan proses pengesahan penuh berdasarkan JWT. Plugin ini juga dilengkapi dengan strategi ACL yang membolehkan anda mengurus pengizinan antara kumpulan pengguna.",
   "plugin.description.short": "Lindungi API anda dengan proses pengesahan penuh berdasarkan JWT"

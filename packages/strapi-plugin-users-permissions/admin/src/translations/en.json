@@ -52,6 +52,8 @@
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "Edit Email Templates",
   "PopUpForm.header.edit.providers": "Edit Provider",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "Settings.roles.deleted": "Role deleted",
   "Settings.roles.edited": "Role edited",
   "Settings.section-label": "Users & Permissions plugin",
