@@ -52,11 +52,13 @@ module.exports = (ability, action, model) => ({
     );
     const shouldIncludeAllFields = _.isEmpty(permittedFields) && !hasAtLeastOneRegisteredField;
 
-    return sanitizeEntity(data, {
+    const sanitizedEntity = sanitizeEntity(data, {
       model: strapi.getModel(model),
       includeFields: shouldIncludeAllFields ? null : permittedFields,
       withPrivate,
       isOutput,
     });
+
+    return _.omit(sanitizedEntity, ['created_by.roles', 'updated_by.roles']);
   },
 });

@@ -43,7 +43,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     throw strapi.errors.forbidden();
   }
 
-  return { pm, entity };
+  return { pm, entity: entityWithRoles };
 };
 
 module.exports = {
