@@ -32,7 +32,7 @@
     "koa": "^2.8.0",
     "koa-body": "^4.2.0",
     "koa-compose": "^4.1.0",
-    "koa-compress": "^3.0.0",
+    "koa-compress": "^5.0.1",
     "koa-convert": "^1.2.0",
     "koa-favicon": "^2.0.0",
     "koa-i18n": "^2.1.0",
