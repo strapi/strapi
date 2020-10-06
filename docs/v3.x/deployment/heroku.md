@@ -206,7 +206,7 @@ Create a new `database.js` in a new [env](../concepts/configurations.html#enviro
 
 ```js
 const parse = require('pg-connection-string').parse;
-const config = parse(process.env.DATABASE_URL)
+const config = parse(process.env.DATABASE_URL);
 
 module.exports = ({ env }) => ({
   defaultConnection: 'default',

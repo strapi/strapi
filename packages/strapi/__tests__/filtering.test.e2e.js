@@ -109,6 +109,7 @@ describe('Filtering API', () => {
 
     modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createContentTypes([product]);
+    await modelsUtils.cleanupContentTypes([product]);
     await createFixtures();
   }, 60000);
 

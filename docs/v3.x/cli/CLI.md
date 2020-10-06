@@ -164,6 +164,9 @@ options: [--plugin <name>]
 - **strapi generate:api &#60;name&#62;**<br/>
   Generates an API called **&#60;name&#62;** in the `./api` folder at the root of your project.
 
+- **strapi generate:api --draft-and-publish=true**<br/>
+  Generates an API called **&#60;name&#62;** in the `./api` folder at the root of your project and enabled the draft/publish feature.
+
 - **strapi generate:api &#60;name&#62; &#60;attribute:type&#62;**<br/>
   Generates an API called **&#60;name&#62;** in the `./api` folder at the root of your project. The model will already contain an attribute called **&#60;attribute&#62;** with the type property set to **&#60;type&#62;**.
 
@@ -212,7 +215,7 @@ Create a new model.
 ```bash
 strapi generate:model <name> [<attribute:type>]
 
-options: [--api <name>|--plugin <name>]
+options: [--api <name>|--plugin <name>|--draft-and-publish <boolean>]
 ```
 
 - **strapi generate:model &#60;name&#62;**<br/>
@@ -236,6 +239,9 @@ options: [--api <name>|--plugin <name>]
 
 * **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
+
+* **strapi generate:model &#60;name&#62; --draft-and-publish=true**<br/>
+  Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder with the draft/publish feature enabled
 
 ::: tip
 The first letter of the filename will be uppercase.

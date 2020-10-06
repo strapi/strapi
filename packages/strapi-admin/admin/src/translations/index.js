@@ -14,6 +14,7 @@ import pl from './pl.json';
 import ptBR from './pt-BR.json';
 import pt from './pt.json';
 import ru from './ru.json';
+import th from './th.json';
 import tr from './tr.json';
 import vi from './vi.json';
 import zhHans from './zh-Hans.json';
@@ -39,6 +40,7 @@ const trads = {
   pt,
   ru,
   sk,
+  th,
   tr,
   uk,
   vi,
@@ -64,6 +66,7 @@ export const languageNativeNames = {
   pt: 'Português (Portugal)',
   ru: 'Русский',
   sk: 'Slovenčina',
+  th: 'ไทย',
   tr: 'Türkçe',
   uk: 'Українська',
   vi: 'Tiếng Việt',

@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
+const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
 const BOOLEAN_OPERATORS = ['or'];
 
@@ -30,6 +31,13 @@ const buildQuery = ({ model, filters }) => qb => {
 
   if (_.has(filters, 'limit') && filters.limit >= 0) {
     qb.limit(filters.limit);
+  }
+
+  if (_.has(filters, 'publicationState')) {
+    runPopulateQueries(
+      toQueries({ publicationState: { query: filters.publicationState, model } }),
+      qb
+    );
   }
 };
 

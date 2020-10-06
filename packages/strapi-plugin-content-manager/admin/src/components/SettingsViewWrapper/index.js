@@ -20,7 +20,7 @@ import Separator from '../Separator';
 const SettingsViewWrapper = ({
   children,
   history: { goBack },
-  getListDisplayedFields,
+  displayedFields,
   inputs,
   initialData,
   isEditSettings,
@@ -35,7 +35,7 @@ const SettingsViewWrapper = ({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
-  const getAttributes = useMemo(() => {
+  const attributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
 
@@ -48,7 +48,7 @@ const SettingsViewWrapper = ({
         color: 'cancel',
         onClick: toggleWarningCancel,
         label: formatMessage({
-          id: `${pluginId}.popUpWarning.button.cancel`,
+          id: 'app.components.Button.reset',
         }),
         type: 'button',
         disabled: isEqual(modifiedData, initialData),
@@ -94,17 +94,16 @@ const SettingsViewWrapper = ({
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
-        ...getListDisplayedFields().filter(
+        ...displayedFields.filter(
           name =>
-            get(getAttributes, [name, 'type'], '') !== 'media' &&
+            get(attributes, [name, 'type'], '') !== 'media' &&
             name !== 'id' &&
-            get(getAttributes, [name, 'type'], '') !== 'richtext'
+            get(attributes, [name, 'type'], '') !== 'richtext'
         ),
       ];
     }
 
     if (input.name === 'settings.mainField') {
-      const attributes = getAttributes;
       const options = Object.keys(attributes).filter(attr => {
         const type = get(attributes, [attr, 'type'], '');
 
@@ -195,10 +194,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningCancel}
             toggleModal={toggleWarningCancel}
             content={{
-              title: `${pluginId}.popUpWarning.title`,
               message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
-              cancel: `${pluginId}.popUpWarning.button.cancel`,
-              confirm: `${pluginId}.popUpWarning.button.confirm`,
             }}
             popUpWarningType="danger"
             onConfirm={() => {
@@ -210,10 +206,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningSubmit}
             toggleModal={toggleWarningSubmit}
             content={{
-              title: `${pluginId}.popUpWarning.title`,
               message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
-              cancel: `${pluginId}.popUpWarning.button.cancel`,
-              confirm: `${pluginId}.popUpWarning.button.confirm`,
             }}
             popUpWarningType="danger"
             onConfirm={async () => {
@@ -228,7 +221,7 @@ const SettingsViewWrapper = ({
 };
 
 SettingsViewWrapper.defaultProps = {
-  getListDisplayedFields: () => [],
+  displayedFields: [],
   inputs: [],
   initialData: {},
   isEditSettings: false,
@@ -251,7 +244,7 @@ SettingsViewWrapper.defaultProps = {
 
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
-  getListDisplayedFields: PropTypes.func,
+  displayedFields: PropTypes.array,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,

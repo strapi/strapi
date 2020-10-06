@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.1.7",
+  "version": "3.2.0",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -19,7 +19,7 @@
     "lodash": "4.17.19",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
-    "yup": "0.28.1"
+    "yup": "0.29.3"
   },
   "author": {
     "email": "hi@strapi.io",

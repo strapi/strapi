@@ -236,6 +236,14 @@ You can also apply different parameters to the query to make more complex querie
 - `limit` (integer): Define the number of returned entries.
 - `start` (integer): Define the amount of entries to skip.
 - `sort` (string): Define how the data should be sorted.
+- `publicationState` (PublicationState): Only select entries matching the publication state provided.
+
+  Handled states are:
+
+  - `LIVE`: Return only published values (default)
+  - `PREVIEW`: Return both draft & published entries
+
+- `<field>:asc` or `<field>:desc`
 - `where` (object): Define the filters to apply in the query.
   - `<field>`: Equals.
   - `<field>_ne`: Not equals.

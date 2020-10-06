@@ -158,8 +158,6 @@
   "components.WysiwygBottomControls.fullscreen": "Expandir",
   "components.WysiwygBottomControls.uploadFiles": "Arrastrar y soltar archivos, pegar desde el portapapeles o {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "seleccionarlos",
-  "components.popUpWarning.button.cancel": "Cancelar",
-  "components.popUpWarning.button.confirm": "Confirmar",
   "components.popUpWarning.message": "¿Estás seguro de que quieres borrar esto?",
   "components.popUpWarning.title": "Por favor, confirme",
   "notification.error": "Se ha producido un error",
