@@ -240,8 +240,8 @@ You can also apply different parameters to the query to make more complex querie
 
   Handled states are:
 
-  - `LIVE`: Return only published values (default)
-  - `PREVIEW`: Return both draft & published entries
+  - `live`: Return only published entries (default)
+  - `preview`: Return both draft entries & published entries
 
 - `<field>:asc` or `<field>:desc`
 - `where` (object): Define the filters to apply in the query.
