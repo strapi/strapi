@@ -16,7 +16,7 @@ const strapi = require('../index');
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin, browser }) {
+module.exports = async function({ build, watchAdmin, browser, repl }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 
@@ -39,7 +39,7 @@ module.exports = async function({ build, watchAdmin, browser }) {
     if (cluster.isMaster) {
       if (watchAdmin) {
         try {
-          execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
+          execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser, '--repl', repl], {
             stdio: 'inherit',
           });
         } catch (err) {
@@ -93,7 +93,24 @@ module.exports = async function({ build, watchAdmin, browser }) {
         }
       });
 
-      return strapiInstance.start();
+      
+      if (!repl) {
+        return strapiInstance.start();
+      } else {
+        return strapiInstance.start(() => {
+          const repl_ = REPL.start(strapiInstance.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
+      
+          repl_.on('exit', function(err) {
+            if (err) {
+              strapiInstance.log.error(err);
+              process.exit(1);
+            }
+      
+            strapiInstance.server.destroy();
+            process.exit(0);
+          });
+        });
+      }
     }
   } catch (e) {
     logger.error(e);
