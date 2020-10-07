@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-const { models: utilsModels, contentTypes } = require('strapi-utils');
+const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
 const relations = require('./relations');
 const buildDatabaseSchema = require('./build-database-schema');
 const {
@@ -11,8 +11,13 @@ const {
 } = require('./generate-component-relations');
 const { createParser } = require('./parser');
 const { createFormatter } = require('./formatter');
-
 const populateFetch = require('./populate');
+
+const {
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = contentTypesUtils.constants;
 
 const PIVOT_PREFIX = '_pivot_';
 
@@ -31,12 +36,40 @@ const getDatabaseName = connection => {
   }
 };
 
-module.exports = ({ models, target }, ctx) => {
+module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) => {
   const { GLOBALS, connection, ORM } = ctx;
 
   // Parse every authenticated model.
-  const updates = Object.keys(models).map(async model => {
+  const updateModel = async model => {
     const definition = models[model];
+
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
+      if (contentTypesUtils.hasDraftAndPublish(definition)) {
+        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+          type: 'datetime',
+          configurable: false,
+        };
+      }
+
+      const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
+
+      definition.attributes[CREATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+        private: isPrivate,
+      };
+
+      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+        private: isPrivate,
+      };
+    }
+
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.associations = [];
 
@@ -50,15 +83,15 @@ module.exports = ({ models, target }, ctx) => {
     definition.primaryKey = 'id';
     definition.primaryKeyType = 'integer';
 
-    // Use default timestamp column names if value is `true`
-    if (_.get(definition, 'options.timestamps', false) === true) {
-      _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
-    }
-    // Use false for values other than `Boolean` or `Array`
-    if (
-      !_.isArray(_.get(definition, 'options.timestamps')) &&
-      !_.isBoolean(_.get(definition, 'options.timestamps'))
-    ) {
+    target[model].allAttributes = { ...definition.attributes };
+
+    const createAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
+    const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updated_at');
+    if (_.get(definition, 'options.timestamps', false)) {
+      _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
+      target[model].allAttributes[createAtCol] = { type: 'timestamp' };
+      target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
+    } else {
       _.set(definition, 'options.timestamps', false);
     }
 
@@ -67,7 +100,7 @@ module.exports = ({ models, target }, ctx) => {
       {
         requireFetch: false,
         tableName: definition.collectionName,
-        hasTimestamps: _.get(definition, 'options.timestamps', false),
+        hasTimestamps: definition.options.timestamps,
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
           if (definition.attributes[current].type && definition.attributes[current].default) {
@@ -114,22 +147,6 @@ module.exports = ({ models, target }, ctx) => {
       ORM,
       GLOBALS,
     });
-
-    const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
-
-    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
-      definition.attributes['created_by'] = {
-        model: 'user',
-        plugin: 'admin',
-        private: isPrivate,
-      };
-
-      definition.attributes['updated_by'] = {
-        model: 'user',
-        plugin: 'admin',
-        private: isPrivate,
-      };
-    }
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
@@ -612,18 +629,19 @@ module.exports = ({ models, target }, ctx) => {
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
       target[model].deleteRelations = relations.deleteRelations;
+      target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
 
-      target[model].privateAttributes = contentTypes.getPrivateAttributes(target[model]);
+      return async () => {
+        await buildDatabaseSchema({
+          ORM,
+          definition,
+          loadedModel,
+          connection,
+          model: target[model],
+        });
 
-      await buildDatabaseSchema({
-        ORM,
-        definition,
-        loadedModel,
-        connection,
-        model: target[model],
-      });
-
-      await createComponentJoinTables({ definition, ORM });
+        await createComponentJoinTables({ definition, ORM });
+      };
     } catch (err) {
       if (err instanceof TypeError || err instanceof ReferenceError) {
         strapi.stopWithError(err, `Impossible to register the '${model}' model.`);
@@ -638,7 +656,20 @@ When this happens on a manyToMany relation, make sure to set this parameter on t
       }
       strapi.stopWithError(err);
     }
-  });
+  };
 
-  return Promise.all(updates);
+  const finalizeUpdates = [];
+  for (const model of _.keys(models)) {
+    const finalizeUpdate = await updateModel(model);
+    finalizeUpdates.push(finalizeUpdate);
+  }
+
+  if (selfFinalize) {
+    for (const finalizeUpdate of finalizeUpdates) {
+      await finalizeUpdate();
+    }
+    return [];
+  }
+
+  return finalizeUpdates;
 };

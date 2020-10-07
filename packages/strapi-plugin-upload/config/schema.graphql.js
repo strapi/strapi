@@ -24,7 +24,6 @@ module.exports = {
     Mutation: {
       createFile: false,
       updateFile: false,
-      deleteFile: false,
       upload: {
         description: 'Upload one file',
         resolverOf: 'plugins::upload.upload.upload',
@@ -55,6 +54,17 @@ module.exports = {
         resolverOf: 'plugins::upload.upload.upload',
         resolver: async (obj, { id, info }) => {
           return await strapi.plugins.upload.services.upload.updateFileInfo(id, info);
+        },
+      },
+      deleteFile: {
+        description: 'Delete one file',
+        resolverOf: 'plugins::upload.upload.destroy',
+        resolver: async (obj, options, { context }) => {
+          const file = await strapi.plugins.upload.services.upload.fetch({ id: context.params.id });
+          if (file) {
+            const fileResult = await strapi.plugins.upload.services.upload.remove(file);
+            return { file: fileResult };
+          }
         },
       },
     },

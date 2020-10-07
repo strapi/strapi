@@ -31,6 +31,11 @@ Object {
         ],
       },
       Object {
+        "action": "plugins::content-manager.explorer.publish",
+        "displayName": "Publish",
+        "subjects": Array [],
+      },
+      Object {
         "action": "plugins::content-manager.explorer.read",
         "displayName": "Read",
         "subjects": Array [

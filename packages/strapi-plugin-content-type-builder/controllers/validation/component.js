@@ -7,7 +7,7 @@ const { formatYupErrors } = require('strapi-utils');
 const { isValidCategoryName, isValidIcon } = require('./common');
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults } = require('./data-transform');
-const { modelTypes, DEFAULT_TYPES } = require('./constants');
+const { modelTypes, DEFAULT_TYPES } = require('../../services/constants');
 
 const VALID_RELATIONS = ['oneWay', 'manyWay'];
 const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
