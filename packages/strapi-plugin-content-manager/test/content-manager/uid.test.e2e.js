@@ -173,7 +173,7 @@ describe('Content Manager single types', () => {
       expect(secondRes.body.data).toBe('this-is-a-super-title-1');
     });
 
-    test('Avoids colisions with already generated uids', async () => {
+    test('Avoids collisions with already generated uids', async () => {
       const res = await rq({
         url: `/content-manager/explorer/uid/generate`,
         method: 'POST',

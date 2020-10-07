@@ -34,9 +34,9 @@ module.exports = {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
     const query = pm.queryFrom(ctx.query);
-    const result = await strapi.plugins.upload.services.upload[method](query);
+    const files = await strapi.plugins.upload.services.upload[method](query);
 
-    ctx.body = pm.sanitize(result);
+    ctx.body = pm.sanitize(files, { withPrivate: false });
   },
 
   async findOne(ctx) {
@@ -52,7 +52,7 @@ module.exports = {
       id
     );
 
-    ctx.body = pm.sanitize(file);
+    ctx.body = pm.sanitize(file, { withPrivate: false });
   },
 
   async count(ctx) {
@@ -89,7 +89,7 @@ module.exports = {
 
     await strapi.plugins['upload'].services.upload.remove(file);
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
 
   async updateSettings(ctx) {
@@ -134,11 +134,9 @@ module.exports = {
     const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.updateFileInfo(id, data.fileInfo);
+    const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
-    await uploadService.setCreatorInfo(user.id, file, { edition: true });
-
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
 
   async replaceFile(ctx) {
@@ -160,11 +158,9 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.replace(id, { data, file: files });
+    const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
-    await uploadService.setCreatorInfo(user.id, file, { edition: true });
-
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(replacedFiles, { action: ACTIONS.read, withPrivate: false });
   },
 
   async uploadFiles(ctx) {
@@ -185,11 +181,9 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.upload({ data, files });
+    const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
-    await uploadService.setCreatorInfo(user.id, file);
-
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
   },
 };
 

@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.1.6",
+  "version": "3.2.1",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -50,11 +50,12 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "@buffetjs/core": "3.2.3",
-    "@buffetjs/hooks": "3.2.3",
-    "@buffetjs/icons": "3.2.3",
-    "@buffetjs/styles": "3.2.3",
-    "@buffetjs/utils": "3.2.3",
+    "@buffetjs/core": "3.3.1",
+    "@buffetjs/custom": "3.3.1",
+    "@buffetjs/hooks": "3.3.1",
+    "@buffetjs/icons": "3.3.1",
+    "@buffetjs/styles": "3.3.1",
+    "@buffetjs/utils": "3.3.1",
     "bootstrap": "^4.5.2",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",

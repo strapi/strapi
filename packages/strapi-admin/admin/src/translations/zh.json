@@ -144,8 +144,6 @@
   "components.WysiwygBottomControls.fullscreen": "展開",
   "components.WysiwygBottomControls.uploadFiles": "拖曳檔案、從剪貼簿貼上或 {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "選擇檔案",
-  "components.popUpWarning.button.cancel": "取消",
-  "components.popUpWarning.button.confirm": "確認",
   "components.popUpWarning.message": "您確定要刪除此項目嗎？",
   "components.popUpWarning.title": "請確認",
   "notification.error": "發生錯誤",

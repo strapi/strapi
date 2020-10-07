@@ -43,7 +43,7 @@ module.exports = (ability, action, model) => ({
     } = options;
 
     if (_.isArray(data)) {
-      return data.map(this.sanitize.bind(this));
+      return data.map(entity => this.sanitize(entity, { action, withPrivate, isOutput }));
     }
 
     const permittedFields = permittedFieldsOf(ability, actionOverride, subject);

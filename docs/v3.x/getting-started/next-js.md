@@ -4,7 +4,6 @@ This integration guide is following the [Getting started guide](../getting-start
 
 If you haven't gone through the getting started guide, the way you request a Strapi API with [Next.js](https://nextjs.org/) remains the same except that you will not fetch the same content.
 
-
 ### Create a Next.js app
 
 Create a basic Next.js application.
@@ -31,8 +30,7 @@ npx create-next-app nextjs-app
 
 ### Use an HTTP client
 
-Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
-
+Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
 
 :::: tabs
 
@@ -46,7 +44,7 @@ yarn add axios
 
 ::: tab fetch
 
-No installation needed
+No installation needed.
 
 :::
 
@@ -54,75 +52,77 @@ No installation needed
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type.
-
 
 :::: tabs
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.get('http://localhost:1337/restaurants')
-  .then(response => {
-    console.log(response);
-  })
-
+axios.get('http://localhost:1337/restaurants').then(response => {
+  console.log(response);
+});
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
-fetch("http://localhost:1337/restaurants", {
-  method: "GET",
+fetch('http://localhost:1337/restaurants', {
+  method: 'GET',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-}).then(response => response.json())
+})
+  .then(response => response.json())
   .then(data => console.log(data));
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
-[{
-  "id": 1,
-  "name": "Biscotte Restaurant",
-  "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
-  "created_by": {
+[
+  {
     "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "updated_by": {
-    "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "created_at": "2020-07-31T11:37:16.964Z",
-  "updated_at": "2020-07-31T11:37:16.975Z",
-  "categories": [{
-    "id": 2,
-    "name": "French Food",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-07-31T11:36:23.164Z",
-    "updated_at": "2020-07-31T11:36:23.172Z"
-  }]
-}]
+    "name": "Biscotte Restaurant",
+    "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
+    "created_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "updated_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "created_at": "2020-07-31T11:37:16.964Z",
+    "updated_at": "2020-07-31T11:37:16.975Z",
+    "categories": [
+      {
+        "id": 1,
+        "name": "French Food",
+        "created_by": 1,
+        "updated_by": 1,
+        "created_at": "2020-07-31T11:36:23.164Z",
+        "updated_at": "2020-07-31T11:36:23.172Z"
+      }
+    ]
+  }
+]
 ```
 
 ::::
@@ -136,28 +136,30 @@ fetch("http://localhost:1337/restaurants", {
 `./pages/index.js`
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
 const Home = ({ restaurants, error }) => {
   if (error) {
-    return <div>An error occured: {error.message}</div>
+    return <div>An error occured: {error.message}</div>;
   }
   return (
     <ul>
-      {restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>)}
+      {restaurants.map(restaurant => (
+        <li key={restaurant.id}>{restaurant.name}</li>
+      ))}
     </ul>
-  )
-}
+  );
+};
 
-Home.getInitialProps = async (ctx) => {
+Home.getInitialProps = async ctx => {
   try {
-    const res = await axios.get('http://localhost:1337/restaurants')
-    const restaurants = res.data
-    return { restaurants }
+    const res = await axios.get('http://localhost:1337/restaurants');
+    const restaurants = res.data;
+    return { restaurants };
   } catch (error) {
-    return { error }
+    return { error };
   }
-}
+};
 
 export default Home;
 ```
@@ -175,23 +177,23 @@ const Home = ({ restaurants, error }) => {
   }
   return (
     <ul>
-      {restaurants.map((restaurant) => (
+      {restaurants.map(restaurant => (
         <li key={restaurant.id}>{restaurant.name}</li>
       ))}
     </ul>
   );
 };
-Home.getInitialProps = async (ctx) => {
+Home.getInitialProps = async ctx => {
   try {
     // Parses the JSON returned by a network request
-    const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+    const parseJSON = resp => (resp.json ? resp.json() : resp);
     // Checks if a network request came back fine, and throws an error if not
-    const checkStatus = (resp) => {
+    const checkStatus = resp => {
       if (resp.status >= 200 && resp.status < 300) {
         return resp;
       }
 
-      return parseJSON(resp).then((resp) => {
+      return parseJSON(resp).then(resp => {
         throw resp;
       });
     };
@@ -222,76 +224,77 @@ export default Home;
 
 ### POST Request your collection type
 
-Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
+Execute a `POST` request on the `restaurant` Collection Type in order to create a restaurant.
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
 
+In this example a `japanese` category has been created which has the id: 3.
 
 :::: tabs
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.post('http://localhost:1337/restaurants', {
+axios
+  .post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-    categories: [
-      3
-    ]
+    categories: [3],
   })
   .then(response => {
     console.log(response);
-  })
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants', {
-   method: 'POST',
-   headers: {
-      'Content-Type': 'application/json'
-   },
-   body: JSON.stringify({
-     name: 'Dolemon Sushi',
-     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-     categories: [
-       3
-     ]
-   })
- }).then(response => response.json())
-   .then(data => console.log(data));
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Dolemon Sushi',
+    description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
+    categories: [3],
+  }),
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
-    "id": 2,
-    "name": "Dolemon Sushi",
-    "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
-    "created_by": null,
-    "updated_by": null,
-    "created_at": "2020-08-04T09:57:11.669Z",
-    "updated_at": "2020-08-04T09:57:11.669Z",
-    "categories": [{
+  "id": 2,
+  "name": "Dolemon Sushi",
+  "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
+  "created_by": null,
+  "updated_by": null,
+  "created_at": "2020-08-04T09:57:11.669Z",
+  "updated_at": "2020-08-04T09:57:11.669Z",
+  "categories": [
+    {
       "id": 3,
       "name": "Japanese",
       "created_by": 1,
       "updated_by": 1,
       "created_at": "2020-07-31T11:36:23.164Z",
       "updated_at": "2020-07-31T11:36:23.172Z"
-    }]
+    }
+  ]
 }
 ```
 
@@ -315,27 +318,27 @@ const Home = ({ allCategories, errorCategories }) => {
     description: '',
     categories: [],
   });
-  const [errorRestaurants, setErrorRestaurants] = useState(null)
+  const [errorRestaurants, setErrorRestaurants] = useState(null);
 
   const handleChange = ({ target: { name, value } }) => {
-    setModifiedData((prev) => ({
+    setModifiedData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     try {
       const response = await axios.post('http://localhost:1337/restaurants', modifiedData);
       console.log(response);
     } catch (error) {
-      setErrorRestaurants(error)
+      setErrorRestaurants(error);
     }
   };
 
-  const renderCheckbox = (category) => {
+  const renderCheckbox = category => {
     const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
     const handleCheckboxChange = () => {
@@ -343,7 +346,7 @@ const Home = ({ allCategories, errorCategories }) => {
         handleChange({ target: { name: 'categories', value: categories.concat(category.id) } });
       } else {
         handleChange({
-          target: { name: 'categories', value: categories.filter((v) => v !== category.id) },
+          target: { name: 'categories', value: categories.filter(v => v !== category.id) },
         });
       }
     };
@@ -397,10 +400,10 @@ const Home = ({ allCategories, errorCategories }) => {
   );
 };
 
-Home.getInitialProps = async (ctx) => {
+Home.getInitialProps = async ctx => {
   try {
     const res = await axios.get('http://localhost:1337/categories');
-    const allCategories = res.data
+    const allCategories = res.data;
     return { allCategories };
   } catch (errorCategories) {
     return { errorCategories };
@@ -420,13 +423,13 @@ export default Home;
 import { useState } from 'react';
 
 // Parses the JSON returned by a network request
-const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+const parseJSON = resp => (resp.json ? resp.json() : resp);
 // Checks if a network request came back fine, and throws an error if not
-const checkStatus = (resp) => {
+const checkStatus = resp => {
   if (resp.status >= 200 && resp.status < 300) {
     return resp;
   }
-  return parseJSON(resp).then((resp) => {
+  return parseJSON(resp).then(resp => {
     throw resp;
   });
 };
@@ -440,16 +443,16 @@ const Home = ({ allCategories, errorCategories }) => {
     description: '',
     categories: [],
   });
-  const [errorRestaurants, setErrorRestaurants] = useState(null)
+  const [errorRestaurants, setErrorRestaurants] = useState(null);
 
   const handleChange = ({ target: { name, value } }) => {
-    setModifiedData((prev) => ({
+    setModifiedData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     try {
@@ -461,11 +464,11 @@ const Home = ({ allCategories, errorCategories }) => {
         .then(checkStatus)
         .then(parseJSON);
     } catch (error) {
-      setErrorRestaurants(error)
+      setErrorRestaurants(error);
     }
   };
 
-  const renderCheckbox = (category) => {
+  const renderCheckbox = category => {
     const { categories } = modifiedData;
     const isChecked = categories.includes(category.id);
     const handleCheckboxChange = () => {
@@ -473,7 +476,7 @@ const Home = ({ allCategories, errorCategories }) => {
         handleChange({ target: { name: 'categories', value: categories.concat(category.id) } });
       } else {
         handleChange({
-          target: { name: 'categories', value: categories.filter((v) => v !== category.id) },
+          target: { name: 'categories', value: categories.filter(v => v !== category.id) },
         });
       }
     };
@@ -529,9 +532,12 @@ const Home = ({ allCategories, errorCategories }) => {
   );
 };
 
-Home.getInitialProps = async (ctx) => {
+Home.getInitialProps = async ctx => {
   try {
-    const allCategories = await fetch('http://localhost:1337/categories', { method: 'GET', headers })
+    const allCategories = await fetch('http://localhost:1337/categories', {
+      method: 'GET',
+      headers,
+    })
       .then(checkStatus)
       .then(parseJSON);
     return { allCategories };
@@ -548,59 +554,56 @@ export default Home;
 
 ### PUT Request your collection type
 
-Execute a PUT request on the `restaurant` Collection Type in order to update the category of a restaurant.
+Execute a `PUT` request on the `restaurant` Collection Type in order to update the category of a restaurant.
 
 Be sure that you activated the `put` permission for the `restaurant` Collection Type.
 
 :::: tabs
 
-We consider that the id of your restaurant is `2`
-and the id of your category is `3`
+We consider that the id of your restaurant is `2`.
+and the id of your category is `2`.
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.put('http://localhost:1337/restaurants/2', {
-  categories: [
-    3
-  ]
-})
-.then(response => {
-  console.log(response);
-})
+axios
+  .put('http://localhost:1337/restaurants/2', {
+    categories: [2],
+  })
+  .then(response => {
+    console.log(response);
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants/2', {
-  method: "PUT",
+  method: 'PUT',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    categories: [
-      3
-    ]
-  })
+    categories: [2],
+  }),
 })
-.then(response => response.json())
-.then(data => {
-  console.log(data);
-})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+  });
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
@@ -611,21 +614,28 @@ fetch('http://localhost:1337/restaurants/2', {
   "updated_by": null,
   "created_at": "2020-08-04T10:21:30.219Z",
   "updated_at": "2020-08-04T10:21:30.219Z",
-  "categories": [{
-    "id": 3,
-    "name": "Japanese",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-08-04T10:24:26.901Z",
-    "updated_at": "2020-08-04T10:24:26.911Z"
-  }]
+  "categories": [
+    {
+      "id": 2,
+      "name": "Brunch",
+      "created_by": 1,
+      "updated_by": 1,
+      "created_at": "2020-08-04T10:24:26.901Z",
+      "updated_at": "2020-08-04T10:24:26.911Z"
+    }
+  ]
 }
 ```
 
 ::::
 
+## Starter
+
+- [Next.js Blog starter](https://github.com/strapi/strapi-starter-next-blog).
+- [Next.js Corporate starter](https://github.com/strapi/strapi-starter-next-corporate).
+
 ## Conclusion
 
 Here is how to request your Collection Types in Strapi using Next.js. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
 
-We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)
+We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints).

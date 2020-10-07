@@ -1,16 +1,16 @@
 const path = require('path');
-
 const alias = [
   'object-assign',
   'whatwg-fetch',
   '@babel/polyfill',
-  '@buffetjs/core',
-  '@buffetjs/custom',
-  '@buffetjs/icons',
-  '@buffetjs/styles',
-  '@buffetjs/utils',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
+  '@buffetjs/core',
+  '@buffetjs/custom',
+  '@buffetjs/custom',
+  '@buffetjs/utils',
+  '@buffetjs/icons',
+  '@buffetjs/hooks',
   'classnames',
   'history',
   'hoist-non-react-statics',
@@ -45,8 +45,7 @@ const alias = [
 
 module.exports = alias.reduce(
   (acc, curr) => {
-    acc[curr] = require.resolve(curr);
-
+    acc[`${curr}$`] = require.resolve(curr);
     return acc;
   },
   {
