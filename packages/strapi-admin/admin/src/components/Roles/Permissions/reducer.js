@@ -11,6 +11,7 @@ export const initialState = {
   permissionsLayout: {},
   contentTypesPermissions: {},
   pluginsAndSettingsPermissions: [],
+  initialData: {},
   isSuperAdmin: false,
 };
 
@@ -122,6 +123,7 @@ const reducer = (state, action) =>
           contentTypeActions: generateContentTypeActions(
             subjectPermissions,
             existingContentTypeActions,
+            state.permissionsLayout.sections.contentTypes,
             shouldAddDeleteAction
           ),
         };
@@ -312,11 +314,9 @@ const reducer = (state, action) =>
           shouldSetAllContentTypes,
           shouldAddDeleteAction,
         } = action;
-        const staticActionsName = get(
-          state.permissionsLayout,
-          ['sections', 'contentTypes'],
-          []
-        ).map(contentTypeAction => contentTypeAction.action);
+        const staticActionsName = get(state.permissionsLayout, ['sections', 'contentTypes'], [])
+          .filter(contentTypeAction => contentTypeAction.subjects.includes(subject))
+          .map(contentTypeAction => contentTypeAction.action);
 
         let attributesActions = attributes.reduce((acc, attribute) => {
           return {
@@ -350,6 +350,7 @@ const reducer = (state, action) =>
           : generateContentTypeActions(
               attributesActions,
               existingContentTypeActions,
+              state.permissionsLayout.sections.contentTypes,
               shouldAddDeleteAction
             );
 
@@ -445,6 +446,26 @@ const reducer = (state, action) =>
         draftState.contentTypesPermissions[subject].conditions = conditions;
         break;
       }
+      case 'ON_GLOBAL_PUBLISH_ACTION_SELECT': {
+        const contentTypesWithPublishAction = action.contentTypes
+          .filter(contentType => contentType.schema.options.draftAndPublish === true)
+          .map(contentType => contentType.uid);
+
+        contentTypesWithPublishAction.forEach(contentTypeUID => {
+          set(
+            draftState,
+            [
+              'contentTypesPermissions',
+              contentTypeUID,
+              'contentTypeActions',
+              'plugins::content-manager.explorer.publish',
+            ],
+            action.value
+          );
+        });
+
+        break;
+      }
       case 'ON_PLUGIN_SETTING_CONDITIONS_SELECT': {
         const { conditions } = action;
 
@@ -455,6 +476,16 @@ const reducer = (state, action) =>
           }
         });
 
+        break;
+      }
+      case 'ON_RESET': {
+        draftState.contentTypesPermissions = state.initialData.contentTypesPermissions;
+        draftState.pluginsAndSettingsPermissions = state.initialData.pluginsAndSettingsPermissions;
+        break;
+      }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.initialData.contentTypesPermissions = state.contentTypesPermissions;
+        draftState.initialData.pluginsAndSettingsPermissions = state.pluginsAndSettingsPermissions;
         break;
       }
       default:

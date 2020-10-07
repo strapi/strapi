@@ -198,15 +198,15 @@ With yarn:
 yarn add pg-connection-string
 ```
 
-#### 4. Update your database config file
+#### 4. Create your Heroku database config file
 
-Replace the contents of `database.js` with the following:
+Create a new `database.js` in a new [env](../concepts/configurations.html#environments) folder. By default Heroku applies the `NODE_ENV` environment variable as production. When you run locally you should be using the `./config/database.js` which should be set to use SQLite.
 
-`Path: ./config/database.js`.
+`Path: ./config/env/production/database.js`
 
 ```js
 const parse = require('pg-connection-string').parse;
-const config = parse(process.env.DATABASE_URL)
+const config = parse(process.env.DATABASE_URL);
 
 module.exports = ({ env }) => ({
   defaultConnection: 'default',

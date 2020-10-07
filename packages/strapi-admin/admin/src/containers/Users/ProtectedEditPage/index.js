@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useUserPermissions, LoadingIndicatorPage } from 'strapi-helper-plugin';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
+import { get } from 'lodash';
 import adminPermissions from '../../../permissions';
 import EditPage from '../EditPage';
 
@@ -16,13 +17,23 @@ const ProtectedEditPage = () => {
     isLoading,
     allowedActions: { canRead, canUpdate },
   } = useUserPermissions(permissions);
+  const { state } = useLocation();
+  const from = get(state, 'from', '/');
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!canRead && !canUpdate) {
+        strapi.notification.info('notification.permission.not-allowed-read');
+      }
+    }
+  }, [isLoading, canRead, canUpdate]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
   if (!canRead && !canUpdate) {
-    return <Redirect to="/" />;
+    return <Redirect to={from} />;
   }
 
   return <EditPage canUpdate={canUpdate} />;

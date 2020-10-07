@@ -16,7 +16,7 @@ describe('Upload plugin end to end tests', () => {
     test('Return the remote URL', async () => {
       const res = await rq.get('/upload/proxy', {
         qs: {
-          url: 'https://strapi.io/'
+          url: 'https://strapi.io/',
         },
       });
       expect(res.statusCode).toBe(200);
@@ -25,7 +25,7 @@ describe('Upload plugin end to end tests', () => {
     test('Accept an url with utf-8 characters', async () => {
       const res = await rq.get('/upload/proxy', {
         qs: {
-          url: 'https://strapi.io/?foo=网'
+          url: 'https://strapi.io/?foo=网',
         },
       });
 

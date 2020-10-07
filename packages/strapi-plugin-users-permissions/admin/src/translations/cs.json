@@ -46,6 +46,8 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "Upravit e-mailové šablony",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Nastavení bylo aktualizování",
   "plugin.description.long": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT. Tento zásuvný modul obsahuje ACL strategii, která vám umožní spravovat oprávnění mezi skupinami uživatelů.",
   "plugin.description.short": "Chraňte své API pomocí kompletního autentifikačního procesu, založeného na JWT",

@@ -6,6 +6,7 @@
     "description": ""
   },
   "options": {
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": true,
     "comment": ""

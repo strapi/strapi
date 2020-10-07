@@ -1,7 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { isPrivateAttribute } = require('./content-types');
+const { constants, isPrivateAttribute } = require('./content-types');
+const {
+  ID_ATTRIBUTE,
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = constants;
 
 const sanitizeEntity = (dataSource, options) => {
   const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
@@ -91,9 +97,8 @@ const sanitizeEntity = (dataSource, options) => {
 
 const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
-const CREATOR_FIELDS = ['created_by', 'updated_by'];
 const COMPONENT_FIELDS = ['__component'];
-const STATIC_FIELDS = ['id', '__v'];
+const STATIC_FIELDS = [ID_ATTRIBUTE, '__v'];
 
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
   const { options, primaryKey } = model;
@@ -103,7 +108,15 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
   return _.concat(
     includeFields || [],
     ...(isOutput
-      ? [primaryKey, timestamps, STATIC_FIELDS, COMPONENT_FIELDS, CREATOR_FIELDS]
+      ? [
+          primaryKey,
+          timestamps,
+          STATIC_FIELDS,
+          COMPONENT_FIELDS,
+          CREATED_BY_ATTRIBUTE,
+          UPDATED_BY_ATTRIBUTE,
+          PUBLISHED_AT_ATTRIBUTE,
+        ]
       : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
   );
 };
