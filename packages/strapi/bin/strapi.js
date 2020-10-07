@@ -128,6 +128,7 @@ program
   .option('--no-build', 'Disable build', false)
   .option('--watch-admin', 'Enable watch', true)
   .option('--browser <name>', 'Open the browser', true)
+  .option('--repl', 'Open the Strapi framework console', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
