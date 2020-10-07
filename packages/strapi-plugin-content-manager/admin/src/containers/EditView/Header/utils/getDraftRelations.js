@@ -26,7 +26,7 @@ const getDraftRelations = (data, ctSchema, components) => {
           currentData.forEach(curr => {
             acc += getDraftRelationsCount(curr, compoSchema);
           });
-        } else {
+        } else if (currentData !== null) {
           acc += getDraftRelationsCount(currentData, compoSchema);
         }
       }
