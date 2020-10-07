@@ -252,6 +252,17 @@ class Strapi {
     }
   }
 
+  async runTeardownFunctions() {
+    const execTeardown = async fn => {
+      if (!fn) return;
+
+      return fn();
+    };
+
+    // user teardown
+    await execTeardown(_.get(this.config, ['functions', 'teardown']));
+  }
+
   stopWithError(err, customMessage) {
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
@@ -263,16 +274,18 @@ class Strapi {
 
   stop(exitCode = 1) {
     // Destroy server and available connections.
-    if (_.has(this, 'server.destroy')) {
-      this.server.destroy();
-    }
+    this.runTeardownFunctions().then(() => {
+      if (_.has(this, 'server.destroy')) {
+        this.server.destroy();
+      }
 
-    if (this.config.autoReload) {
-      process.send('stop');
-    }
+      if (this.config.autoReload) {
+        process.send('stop');
+      }
 
-    // Kill process.
-    process.exit(exitCode);
+      // Kill process.
+      process.exit(exitCode);
+    });
   }
 
   async load() {
@@ -360,8 +373,10 @@ class Strapi {
       }
 
       if (this.config.autoReload) {
-        this.server.close();
-        process.send('reload');
+        this.runTeardownFunctions().then(() => {
+          this.server.close();
+          process.send('reload');
+        });
       }
     };
 
