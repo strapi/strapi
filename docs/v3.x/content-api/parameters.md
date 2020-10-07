@@ -266,8 +266,8 @@ Only select entries matching the publication state provided.
 
 Handled states are:
 
-- `live`: Return only published values (default)
-- `preview`: Return both draft & published entries
+- `live`: Return only published entries (default)
+- `preview`: Return both draft entries & published entries
 
 ### Example
 
