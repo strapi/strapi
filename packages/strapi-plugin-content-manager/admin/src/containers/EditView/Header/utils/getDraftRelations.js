@@ -1,4 +1,4 @@
-import { get, has, isEmpty } from 'lodash';
+import { get, has, isEmpty, isNil } from 'lodash';
 
 const getDraftRelations = (data, ctSchema, components) => {
   const getDraftRelationsCount = (data, schema) =>
@@ -8,6 +8,10 @@ const getDraftRelations = (data, ctSchema, components) => {
       const isMorph = relationType.toLowerCase().includes('morph');
       const oneWayTypes = ['oneWay', 'oneToOne', 'manyToOne'];
       const currentData = data[current];
+
+      if (isNil(currentData)) {
+        return acc;
+      }
 
       if (type === 'dynamiczone') {
         currentData.forEach(curr => {
@@ -26,7 +30,7 @@ const getDraftRelations = (data, ctSchema, components) => {
           currentData.forEach(curr => {
             acc += getDraftRelationsCount(curr, compoSchema);
           });
-        } else if (currentData !== null) {
+        } else {
           acc += getDraftRelationsCount(currentData, compoSchema);
         }
       }
