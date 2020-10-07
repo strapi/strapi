@@ -256,6 +256,38 @@ module.exports = async () => {
 };
 ```
 
+### Teardown
+
+**Path —** `./config/functions/teardown.js`.
+
+The `teardown` function is called before the server is destroyed or reloded when any file changes.
+
+The teardown function can be synchronous or asynchronous.
+
+**Synchronous**
+
+```js
+module.exports = () => {
+  // some sync code
+};
+```
+
+**Return a promise**
+
+```js
+module.exports = () => {
+  return new Promise(/* some code */);
+};
+```
+
+**Asynchronous**
+
+```js
+module.exports = async () => {
+  await someSetup();
+};
+```
+
 ### CRON tasks
 
 CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
