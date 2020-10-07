@@ -78,17 +78,15 @@ const bindPopulateQueries = (paths, options) => {
 
 /**
  * Extend the behavior of an already existing populate query, and bind generated (from options) ones to it
- * @param fn
+ * @param fns
  * @param options
  * @returns {function(...[*]=)}
  */
-const extendWithPopulateQueries = (fn, options) => {
+const extendWithPopulateQueries = (fns, options) => {
   const queries = toQueries(options);
 
   return qb => {
-    if (_.isFunction(fn)) {
-      fn(qb);
-    }
+    fns.filter(_.isFunction).forEach(fn => fn(qb));
     runPopulateQueries(queries, qb);
   };
 };
