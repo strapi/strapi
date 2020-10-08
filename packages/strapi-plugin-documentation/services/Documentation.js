@@ -401,6 +401,8 @@ module.exports = {
         key = 'unclassified';
       }
 
+      let operationId = current.handler.split('.').reverse();
+      operationId = operationId.join("-");
       const verbObject = {
         deprecated: false,
         description: this.generateVerbDescription(
@@ -413,6 +415,7 @@ module.exports = {
         responses: this.generateResponses(verb, current, key),
         summary: '',
         tags: _.isEmpty(tags) ? [_.upperFirst(key)] : [_.upperFirst(tags)],
+        operationId: operationId
       };
 
       // Swagger is not support key with ',' symbol, for array of methods need generate documentation for each method
@@ -1455,8 +1458,10 @@ module.exports = {
       case 'email':
       case 'text':
       case 'enumeration':
-      case 'date':
       case 'richtext':
+      case 'date':
+      case 'datetime':
+      case 'uid':
         return 'string';
       case 'float':
       case 'decimal':
