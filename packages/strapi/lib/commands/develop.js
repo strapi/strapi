@@ -10,6 +10,7 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
+const REPL = require('repl');
 const strapi = require('../index');
 
 /**
