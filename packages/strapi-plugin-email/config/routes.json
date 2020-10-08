@@ -18,9 +18,7 @@
       "path": "/test",
       "handler": "Email.test",
       "config": {
-        "policies": [
-
-        ],
+        "policies": [["admin::hasPermissions", ["plugins::email.settings.test"]]],
         "description": "Send an test email",
         "tag": {
           "plugin": "email",
@@ -33,9 +31,7 @@
       "path": "/settings",
       "handler": "Email.getSettings",
       "config": {
-        "policies": [
-
-        ],
+        "policies": [["admin::hasPermissions", ["plugins::email.settings.read"]]],
         "description": "Get the email settings",
         "tag": {
           "plugin": "email",
