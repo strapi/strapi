@@ -45,8 +45,16 @@ const connect = (provider, query) => {
 
       try {
         const users = await strapi.query('user', 'users-permissions').find({
-          email: profile.email.toLowerCase(),
+          _where: {
+            _or: [{
+              email: profile.email.toLowerCase()
+            }, {
+              email: profile.email
+            }]
+          }
         });
+
+        // If exists as an upper case should we send another request to lowercase it?
 
         const advanced = await strapi
           .store({
