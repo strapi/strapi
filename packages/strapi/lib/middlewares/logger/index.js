@@ -26,7 +26,7 @@ module.exports = strapi => {
     initialize() {
       const { level, exposeInContext, requests } = strapi.config.middleware.settings.logger;
 
-      const logLevels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
+      const logLevels = Object.keys(strapi.log.levels.values);
 
       if (!_.includes(logLevels, level)) {
         throw new Error(
@@ -46,8 +46,8 @@ module.exports = strapi => {
 
       if (isLogLevelEnvVariableSet && strapi.log.levelVal <= 20) {
         strapi.log.debug(
-          `STRAPI_LOG_LEVEL environment variable is overridden by logger middleware.
-           STRAPI_LOG_LEVEL works only outside Strapi's middleware context.`
+          'STRAPI_LOG_LEVEL environment variable is overridden by logger middleware. ' +
+            "It only applies outside Strapi's middleware context."
         );
       }
 
