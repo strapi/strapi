@@ -145,6 +145,12 @@ const reducer = (state, action) =>
         draftState.selectedFiles = draftState.selectedFiles.filter(file => file && file.id);
         break;
       }
+      case 'ON_SUBMIT_EDIT_NEW_FILE': {
+        const originalIndex = draftState.fileToEdit.originalIndex;
+        draftState.filesToUpload[originalIndex] = draftState.fileToEdit;
+        draftState.fileToEdit = null;
+        break;
+      }
       case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
         draftState.fileToEdit.isUploading = true;
         break;
