@@ -79,7 +79,7 @@ module.exports = {
    * @return {Number}
    */
   async count(ctx) {
-    if (ctx.query._q) {
+    if (_.has(ctx.query, '_q')) {
       return await strapi.plugins['users-permissions'].services.user.countSearch(ctx.query);
     }
     ctx.body = await strapi.plugins['users-permissions'].services.user.count(ctx.query);
