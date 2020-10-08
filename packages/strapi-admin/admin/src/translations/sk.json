@@ -310,8 +310,6 @@
   "components.WysiwygBottomControls.fullscreen": "Rozbaliť",
   "components.WysiwygBottomControls.uploadFiles": "Pretiahnite súbory, vložte zo schránky alebo {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "vyberte",
-  "components.popUpWarning.button.cancel": "Zrušiť",
-  "components.popUpWarning.button.confirm": "Potvrdiť",
   "components.popUpWarning.message": "Ste si istý, že to chcete odstrániť?",
   "components.popUpWarning.title": "Prosím potvrďte",
   "form.button.continue": "Pokračovať",

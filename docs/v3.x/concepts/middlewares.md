@@ -182,6 +182,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
   - `enabled` (boolean): Enable or not GZIP response compression.
+  - `options` (Object): Allow passing of options from [koa-compress](https://github.com/koajs/compress#options).
 - `responseTime`
   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
 - `poweredBy`

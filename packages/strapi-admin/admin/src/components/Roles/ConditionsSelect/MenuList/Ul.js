@@ -65,11 +65,12 @@ const Ul = styled.ul`
     disabled &&
     `
     label {
-      cursor: default !important;
+      cursor: not-allowed !important;
     }
     input[type='checkbox'] {
+      cursor: not-allowed;
       &:after {
-        cursor: default;
+        cursor: not-allowed;
         color: ${theme.main.colors.grey};
       }
     }

@@ -78,7 +78,9 @@ function createDefaultMetadata(schema, name) {
 
 async function syncMetadatas(configuration, schema) {
   // clear all keys that do not exist anymore
-  if (_.isEmpty(configuration.metadatas)) return createDefaultMetadatas(schema);
+  if (_.isEmpty(configuration.metadatas)) {
+    return createDefaultMetadatas(schema);
+  }
 
   // remove old keys
   const metasWithValidKeys = _.pick(configuration.metadatas, Object.keys(schema.attributes));

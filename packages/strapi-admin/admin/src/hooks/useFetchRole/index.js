@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'react';
+import { useCallback, useReducer, useEffect } from 'react';
 import { request } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
@@ -44,7 +44,14 @@ const useFetchRole = id => {
     }
   };
 
-  return state;
+  const handleSubmitSucceeded = useCallback(data => {
+    dispatch({
+      type: 'ON_SUBMIT_SUCCEEDED',
+      ...data,
+    });
+  }, []);
+
+  return { ...state, onSubmitSucceeded: handleSubmitSucceeded };
 };
 
 export default useFetchRole;
