@@ -222,4 +222,8 @@ if (edition === 'EE') {
       expect(res.body).toMatchObject(localTestData.entry);
     });
   });
+} else {
+  describe('Admin Permissions - Conditions ', () => {
+    test.skip('Only in EE', () => {});
+  });
 }
