@@ -45,7 +45,7 @@ const connect = (provider, query) => {
 
       try {
         const users = await strapi.query('user', 'users-permissions').find({
-          email: profile.email,
+          email: profile.email.toLowerCase(),
         });
 
         const advanced = await strapi
@@ -63,7 +63,7 @@ const connect = (provider, query) => {
           return resolve([
             null,
             [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
-            'Register action is actualy not available.',
+            'Register action is actually not available.',
           ]);
         }
 
@@ -88,6 +88,7 @@ const connect = (provider, query) => {
           .findOne({ type: advanced.default_role }, []);
 
         // Create the new user.
+        profile.email = profile.email.toLowerCase();
         const params = _.assign(profile, {
           provider: provider,
           role: defaultRole.id,
