@@ -138,8 +138,6 @@
   "components.WysiwygBottomControls.fullscreen": "توسيع",
   "components.WysiwygBottomControls.uploadFiles": "اسحب الملفات وأفلتها ، والصقها من الحافظة أو {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "حددهم",
-  "components.popUpWarning.button.cancel": "الغاء",
-  "components.popUpWarning.button.confirm": "تأكيد",
   "components.popUpWarning.message": "هل انت متاكد من حذف هذا؟",
   "components.popUpWarning.title": "ارجو التأكيد",
   "notification.error": "حدث خطأ",

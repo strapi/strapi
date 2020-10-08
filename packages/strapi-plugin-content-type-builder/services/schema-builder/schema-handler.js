@@ -51,6 +51,10 @@ module.exports = function createSchemaHandler(infos) {
       return state.uid;
     },
 
+    get writable() {
+      return _.get(state, 'plugin') !== 'admin';
+    },
+
     setUID(val) {
       modified = true;
 
@@ -85,7 +89,8 @@ module.exports = function createSchemaHandler(infos) {
     set(path, val) {
       modified = true;
 
-      _.set(state.schema, path, val || _.get(state.schema, path));
+      const value = _.defaultTo(val, _.get(state.schema, path));
+      _.set(state.schema, path, value);
 
       return this;
     },
@@ -200,6 +205,10 @@ module.exports = function createSchemaHandler(infos) {
 
     // save the schema to disk
     async flush() {
+      if (!this.writable) {
+        return;
+      }
+
       const initialPath = path.join(initialState.dir, initialState.filename);
       const filePath = path.join(state.dir, state.filename);
 
@@ -243,6 +252,10 @@ module.exports = function createSchemaHandler(infos) {
 
     // reset the schema to its initial value
     async rollback() {
+      if (!this.writable) {
+        return;
+      }
+
       const initialPath = path.join(initialState.dir, initialState.filename);
       const filePath = path.join(state.dir, state.filename);
 

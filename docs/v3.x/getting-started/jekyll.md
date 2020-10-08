@@ -25,7 +25,7 @@ group :jekyll_plugins do
 end
 ```
 
-  - Add `jekyll-strapi` to your plugins in `_config.yml`.
+- Add `jekyll-strapi` to your plugins in `_config.yml`.
 
 ```yml
 plugins:
@@ -33,7 +33,7 @@ plugins:
   - jekyll-strapi
 ```
 
-  - Add the configuration of Strapi at the end of the `_config.yml`.
+- Add the configuration of Strapi at the end of the `_config.yml`.
 
 ```yml
 strapi:
@@ -47,7 +47,7 @@ strapi:
       type: categories
 ```
 
-  - Run `bundle install` to install your gems.
+- Run `bundle install` to install your gems.
 
 ```bash
 bundle install

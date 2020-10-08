@@ -12,6 +12,7 @@ const request = require('request');
 const purest = require('purest')({ request });
 const purestConfig = require('@purest/providers');
 const { getAbsoluteServerUrl } = require('strapi-utils');
+const jwt = require('jsonwebtoken');
 
 /**
  * Connect thanks to a third-party provider.
@@ -159,6 +160,23 @@ const getProfile = async (provider, query, callback) => {
             });
           }
         });
+      break;
+    }
+    case 'cognito': {
+      // get the id_token
+      const idToken = query.id_token;
+      // decode the jwt token
+      const tokenPayload = jwt.decode(idToken);
+      if (!tokenPayload) {
+        callback(new Error('unable to decode jwt token'));
+      } else {
+        // Combine username and discriminator because discord username is not unique
+        var username = `${tokenPayload['cognito:username']}`;
+        callback(null, {
+          username: username,
+          email: tokenPayload.email,
+        });
+      }
       break;
     }
     case 'facebook': {

@@ -44,6 +44,8 @@
   "PopUpForm.Providers.secret.label": "クライアントの秘密",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "メールテンプレートの編集",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "設定が更新されました",
   "plugin.description.long": "JWTに基づいた完全な認証プロセスでAPIを保護します。このプラグインには、ユーザーのグループ間で権限を管理できるACL戦略もあります。",
   "plugin.description.short": "JWTに基づく完全な認証プロセスでAPIを保護する",

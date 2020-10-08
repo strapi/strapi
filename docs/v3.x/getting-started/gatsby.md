@@ -99,7 +99,7 @@ const query = graphql`
       }
     }
   }
-`
+`;
 
 const IndexPage = () => (
   <StaticQuery
@@ -177,7 +177,7 @@ const query = graphql`
       }
     }
   }
-`
+`;
 
 const IndexPage = () => (
   <StaticQuery
