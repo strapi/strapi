@@ -46,8 +46,7 @@ module.exports = strapi => {
 
       if (isLogLevelEnvVariableSet && strapi.log.levelVal <= 20) {
         strapi.log.debug(
-          'STRAPI_LOG_LEVEL environment variable is overridden by logger middleware. ' +
-            "It only applies outside Strapi's middleware context."
+          `STRAPI_LOG_LEVEL environment variable is overridden by logger middleware. It only applies outside Strapi's middleware context.`
         );
       }
 
