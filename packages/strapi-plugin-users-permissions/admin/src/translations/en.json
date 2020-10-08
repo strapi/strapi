@@ -4,7 +4,7 @@
   "EditForm.inputSelect.label.role": "Default role for authenticated users",
   "EditForm.inputToggle.description.email": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
   "EditForm.inputToggle.description.email-confirmation": "When enabled (ON), new registred users receive a confirmation email.",
-  "EditForm.inputToggle.description.email-confirmation-redirection": "After confirmed your email, choose where you will be redirected.",
+  "EditForm.inputToggle.description.email-confirmation-redirection": "After you confirmed your email, choose where you will be redirected.",
   "EditForm.inputToggle.description.email-reset-password": "URL of your application's reset password page",
   "EditForm.inputToggle.description.sign-up": "When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.",
   "EditForm.inputToggle.label.email": "One account per email address",
