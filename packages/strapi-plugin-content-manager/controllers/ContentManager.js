@@ -33,7 +33,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   }
 
   const roles = _.has(entity, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: entity[CREATED_BY_ATTRIBUTE].id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': entity[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
   const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
 

@@ -400,7 +400,7 @@ describe('Role CRUD End to End', () => {
         });
       });
 
-      test('Cannot super admin role', async () => {
+      test('Cannot update super admin role', async () => {
         const updates = {
           name: 'new name - Cannot update the name of a role',
           description: 'new description - Can update a role successfully',

@@ -28,7 +28,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
   const roles = _.has(entity, `${CREATED_BY_ATTRIBUTE}.id`)
-    ? await strapi.query('role', 'admin').find({ users: entity[CREATED_BY_ATTRIBUTE].id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': entity[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
   const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
 
