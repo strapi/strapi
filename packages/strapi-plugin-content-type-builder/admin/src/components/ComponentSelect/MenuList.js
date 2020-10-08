@@ -35,7 +35,7 @@ const MenuList = ({
             return (
               <li key={categoryName}>
                 <Category categoryName={categoryName} />
-                <Ul style={{ marginTop: '-4px' }}>
+                <Ul style={{ marginTop: '-4px' }} maxHeight="100%">
                   {componentsGroupedByCategory[categoryName].map(component => {
                     if (
                       (isAddingAComponentToAnotherComponent &&

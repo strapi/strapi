@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-api",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Generate an API for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   "dependencies": {
     "lodash": "4.17.19",
     "pluralize": "^8.0.0",
-    "strapi-utils": "3.2.0"
+    "strapi-utils": "3.2.1"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
