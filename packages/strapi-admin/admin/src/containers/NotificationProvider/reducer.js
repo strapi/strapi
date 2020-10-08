@@ -15,6 +15,7 @@ const initialState = {
 const notificationReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
+    console.log(state);
     switch (action.type) {
       case SHOW_NEW_NOTIFICATION: {
         draftState.notifications.push({
