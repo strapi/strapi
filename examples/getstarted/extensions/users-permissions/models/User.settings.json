@@ -5,10 +5,8 @@
     "description": ""
   },
   "options": {
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ]
+    "draftAndPublish": false,
+    "timestamps": ["created_at", "updated_at"]
   },
   "attributes": {
     "username": {

@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
+import { get } from 'lodash';
 import useDataManager from '../../../hooks/useDataManager';
+import useEditView from '../../../hooks/useEditView';
 
-function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name }) {
+function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, targetModel }) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
@@ -9,6 +11,13 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name })
     slug,
     updateActionAllowedFields,
   } = useDataManager();
+  const { models } = useEditView();
+
+  const displayNavigationLink = useMemo(() => {
+    const targetModelSchema = models.find(obj => obj.uid === targetModel);
+
+    return get(targetModelSchema, 'isDisplayed', false);
+  }, [targetModel, models]);
 
   const isFieldAllowed = useMemo(() => {
     if (isUserAllowedToEditField === true) {
@@ -37,6 +46,7 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name })
   }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
 
   return {
+    displayNavigationLink,
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,

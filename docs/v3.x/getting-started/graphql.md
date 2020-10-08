@@ -40,7 +40,7 @@ strapi install graphql
 
 Play with the [GraphQL Playground](http://localhost:1337/graphql) to fetch your content.
 
-*Request*
+_Request_
 
 ```graphql
 query Restaurants {
@@ -55,7 +55,7 @@ query Restaurants {
 }
 ```
 
-*Response*
+_Response_
 
 ```json
 {
@@ -100,14 +100,17 @@ function Restaurants() {
           name
         }
       }
-    }`);
+    }
+  `);
 
   if (loading) return 'Loading...';
   if (error) return `Error! ${error.message}`;
 
   return (
     <ul>
-      { data.restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>) }
+      {data.restaurants.map(restaurant => (
+        <li key={restaurant.id}>{restaurant.name}</li>
+      ))}
     </ul>
   );
 }
@@ -162,7 +165,7 @@ export default {
 
 ### Fetch your Category collection type
 
-*Request*
+_Request_
 
 ```graphql
 query Category {
@@ -178,7 +181,7 @@ query Category {
 }
 ```
 
-*Response*
+_Response_
 
 ```json
 {
@@ -210,27 +213,33 @@ Using [React](../getting-started/react.html) and [Apollo](https://www.apollograp
 import { gql, useQuery } from '@apollo/client';
 
 function Category({ id }) {
-  const { loading, error, data } = useQuery(gql`
-    query Category($id: ID!) {
-      category(id: $id) {
-        id
-        name
-        restaurants {
+  const { loading, error, data } = useQuery(
+    gql`
+      query Category($id: ID!) {
+        category(id: $id) {
           id
           name
-          description
+          restaurants {
+            id
+            name
+            description
+          }
         }
       }
-    }`, { variables: { id } });
+    `,
+    { variables: { id } }
+  );
 
   if (loading) return 'Loading...';
   if (error) return `Error! ${error.message}`;
 
   return (
     <div>
-      <h1>{ data.category.name }</h1>
+      <h1>{data.category.name}</h1>
       <ul>
-        { data.category.restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>) }
+        {data.category.restaurants.map(restaurant => (
+          <li key={restaurant.id}>{restaurant.name}</li>
+        ))}
       </ul>
     </div>
   );

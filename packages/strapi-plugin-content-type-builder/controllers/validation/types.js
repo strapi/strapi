@@ -13,7 +13,7 @@ const {
   isValidRegExpPattern,
 } = require('./common');
 const { hasComponent } = require('../../utils/attributes');
-const { modelTypes, VALID_UID_TARGETS } = require('./constants');
+const { modelTypes, VALID_UID_TARGETS } = require('../../services/constants');
 
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
