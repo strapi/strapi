@@ -6,106 +6,84 @@
 /* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Padded, Text, Flex } from '@buffetjs/core';
-import { useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
+import { isObject } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Remove } from '@buffetjs/icons';
+import Li, { GlobalNotification } from './Li';
 
-import { NotificationWrapper, IconWrapper, LinkArrow, RemoveWrapper } from './styledComponents';
-
-const types = {
-  success: {
-    icon: 'check',
-    color: 'green',
-  },
-  warning: {
-    icon: 'exclamation',
-    color: 'orange',
-  },
-  info: {
-    icon: 'info',
-    color: 'blue',
-  },
-};
-
-const Notification = ({ notification, onHideNotification }) => {
-  const { formatMessage } = useIntl();
-  const { title, message, link, type, id, onClose } = notification;
-
-  const formattedMessage = formatMessage(typeof message === 'string' ? { id: message } : message);
-
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
-
-    onHideNotification(id);
+class Notification extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  handleCloseClicked = () => {
+    this.props.onHideNotification(this.props.notification.id);
   };
 
-  return (
-    <NotificationWrapper color={types[type].color}>
-      <Padded top left right bottom size="smd">
-        <Flex alignItems="center" justifyContent="space-between">
-          <IconWrapper>
-            <FontAwesomeIcon icon={types[type].icon} />
-          </IconWrapper>
-          <Padded left size="sm" style={{ width: '80%', flex: 1 }}>
-            {title && (
-              <Text
-                fontSize="xs"
-                textTransform="uppercase"
-                color="grey"
-                title={formatMessage(title)}
-              >
-                {formatMessage(title)}
-              </Text>
-            )}
-            <Flex>
-              {message && (
-                <Text title={formattedMessage} ellipsis>
-                  {formattedMessage}
-                </Text>
-              )}
-              {link && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
-                  <Padded left size="xs">
-                    <Flex alignItems="center">
-                      <Text
-                        style={{ maxWidth: '120px' }}
-                        ellipsis
-                        fontWeight="bold"
-                        color="blue"
-                        title={formatMessage(link.label)}
-                      >
-                        {formatMessage(link.label)}
-                      </Text>
-                      <Padded left size="xs" />
-                      <LinkArrow />
-                    </Flex>
-                  </Padded>
-                </a>
-              )}
-            </Flex>
-          </Padded>
-          <RemoveWrapper>
-            <Remove onClick={handleClose} />
-          </RemoveWrapper>
-        </Flex>
-      </Padded>
-    </NotificationWrapper>
-  );
-};
+  options = {
+    success: {
+      icon: 'check',
+      title: 'Success',
+      class: 'notificationSuccess',
+    },
+    warning: {
+      icon: 'exclamation',
+      title: 'Warning',
+      class: 'notificationWarning',
+    },
+    error: {
+      icon: 'exclamation',
+      title: 'Error',
+      class: 'notificationError',
+    },
+    info: {
+      icon: 'info',
+      title: 'Info',
+      class: 'notificationInfo',
+    },
+  };
+
+  render() {
+    const options = this.options[this.props.notification.status] || this.options.info;
+    const {
+      notification: { message },
+    } = this.props;
+    const content =
+      isObject(message) && message.id ? (
+        <FormattedMessage id={message.id} defaultMessage={message.id} values={message.values} />
+      ) : (
+        <FormattedMessage id={message} defaultMessage={message} />
+      );
+
+    return (
+      <>
+        <GlobalNotification />
+        <Li
+          key={this.props.notification.id}
+          className={`${options.class}`}
+          onClick={this.handleCloseClicked}
+        >
+          <div className={`notificationIcon`}>
+            <div>
+              <FontAwesomeIcon icon={options.icon} />
+            </div>
+          </div>
+          <div className="notificationContent">
+            <p className="notificationTitle">{content}</p>
+          </div>
+          <div className={`notificationClose`}>
+            <Remove onClick={this.handleCloseClicked} />
+          </div>
+        </Li>
+      </>
+    );
+  }
+}
 
 Notification.defaultProps = {
   notification: {
     id: 1,
-    type: 'success',
-    message: {
-      id: 'notification.success.saved',
-      defaultMessage: 'Saved',
-    },
+    message: 'app.utils.defaultMessage',
+    status: 'success',
   },
-  onClose: () => null,
 };
 
 Notification.propTypes = {
@@ -114,27 +92,12 @@ Notification.propTypes = {
     message: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        defaultMessage: PropTypes.string,
+        id: PropTypes.string,
         values: PropTypes.object,
       }),
     ]),
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-      values: PropTypes.object,
-    }),
-    link: PropTypes.shape({
-      url: PropTypes.string.isRequired,
-      label: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        defaultMessage: PropTypes.string,
-        values: PropTypes.object,
-      }).isRequired,
-    }),
-    type: PropTypes.string,
+    status: PropTypes.string,
   }),
-  onClose: PropTypes.func,
   onHideNotification: PropTypes.func.isRequired,
 };
 

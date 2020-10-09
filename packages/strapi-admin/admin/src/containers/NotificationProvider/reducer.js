@@ -4,52 +4,45 @@
  *
  */
 
-import produce from 'immer';
-import { get } from 'lodash';
-import { SHOW_NOTIFICATION, SHOW_NEW_NOTIFICATION, HIDE_NOTIFICATION } from './constants';
+import { fromJS } from 'immutable';
+import { SHOW_NOTIFICATION, HIDE_NOTIFICATION } from './constants';
 
-const initialState = {
+const initialState = fromJS({
   notifications: [],
-};
+});
 
-const notificationReducer = (state = initialState, action) =>
-  // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
-    console.log(state);
-    switch (action.type) {
-      case SHOW_NEW_NOTIFICATION: {
-        draftState.notifications.push({
-          ...action.config,
-          id: action.id,
-          type: get(action, ['config', 'type'], 'success'),
-          message: get(action, ['config', 'message'], {
-            id: 'notification.success.saved',
-            defaultMessage: 'Saved',
-          }),
-        });
-        break;
-      }
-      case SHOW_NOTIFICATION: {
-        draftState.notifications.push({
+function notificationProviderReducer(state = initialState, action) {
+  // Init variable
+  let index;
+
+  switch (action.type) {
+    case SHOW_NOTIFICATION:
+      return state.set(
+        'notifications',
+        state.get('notifications').push({
           message: action.message || 'app.utils.defaultMessage',
-          type: action.status || 'success',
+          status: action.status || 'success',
           id: action.id,
-        });
-        break;
-      }
-      case HIDE_NOTIFICATION: {
-        const indexToRemove = state.notifications.findIndex(notif => notif.id === action.id);
-
-        if (indexToRemove !== -1) {
-          draftState.notifications.splice(indexToRemove, 1);
+        })
+      );
+    case HIDE_NOTIFICATION:
+      // Check that the index exists
+      state.get('notifications').forEach((notification, i) => {
+        if (notification.id === action.id) {
+          index = i;
         }
-        break;
+      });
+
+      if (typeof index !== 'undefined') {
+        // Remove the notification
+        return state.set('notifications', state.get('notifications').splice(index, 1));
       }
 
-      default: {
-        return draftState;
-      }
-    }
-  });
+      // Notification not found, return the current state
+      return state;
+    default:
+      return state;
+  }
+}
 
-export default notificationReducer;
+export default notificationProviderReducer;

@@ -32,7 +32,8 @@ import { StrapiProvider } from 'strapi-helper-plugin';
 import { merge } from 'lodash';
 import Fonts from './components/Fonts';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
-import { showNotification, showNewNotification } from './containers/NotificationProvider/actions';
+import { showNotification } from './containers/NotificationProvider/actions';
+import { showNotification as showNewNotification } from './containers/NewNotification/actions';
 
 import basename from './utils/basename';
 import getInjectors from './utils/reducerInjectors';

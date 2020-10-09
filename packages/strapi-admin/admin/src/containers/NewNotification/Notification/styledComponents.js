@@ -43,7 +43,6 @@ const RemoveWrapper = styled.div`
   position: relative;
   display: flex;
   width: 20px;
-  margin-right: 15px;
   cursor: pointer;
   opacity: 0.6;
   font-size: 1.4rem;
