@@ -1,7 +1,7 @@
 module.exports = {
   name: 'API integration tests',
   testMatch: ['**/?(*.)+(spec|test).e2e.js'],
-  testEnvironment: 'node',
+  testEnvironment: '<rootDir>/test/jest-environment/test-environment',
   setupFilesAfterEnv: ['<rootDir>/test/jest2e2.setup.js'],
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',

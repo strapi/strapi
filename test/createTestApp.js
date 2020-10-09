@@ -1,7 +1,7 @@
 'use strict';
 
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('./helpers/testAppGenerator');
+const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
 const appName = 'testApp';
 

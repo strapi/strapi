@@ -2,7 +2,6 @@
 
 const path = require('path');
 const rimraf = require('rimraf');
-const execa = require('execa');
 const generateNew = require('../../packages/strapi-generate-new/lib/generate-new');
 
 /**
@@ -34,7 +33,7 @@ const generateTestApp = async ({ appName, database }) => {
     name: appName,
     // disable quickstart run app after creation
     runQuickstartApp: false,
-    // use pacakge version as strapiVersion (all packages have the same version);
+    // use package version as strapiVersion (all packages have the same version);
     strapiVersion: require('../../packages/strapi/package.json').version,
     debug: false,
     quick: false,
@@ -61,24 +60,7 @@ const generateTestApp = async ({ appName, database }) => {
   await generateNew(scope);
 };
 
-/**
- * Starts the test App in the appName folder
- * @param {Object} options - Options
- * @param {string} options.appName - Name of the app / folder in which run the start script
- */
-const startTestApp = ({ appName }) => {
-  return execa('strapi', ['develop', '--no-build'], {
-    stdio: 'inherit',
-    cwd: path.resolve(appName),
-    env: {
-      FORCE_COLOR: 1,
-      BROWSER: 'none',
-    },
-  });
-};
-
 module.exports = {
   cleanTestApp,
   generateTestApp,
-  startTestApp,
 };
