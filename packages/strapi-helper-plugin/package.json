@@ -1,7 +1,7 @@
 {
   "name": "strapi-helper-plugin",
   "version": "3.2.1",
-  "description": "Helper for Strapi plugins development",
+  "description": "Helper for Strapi plugins development.",
   "files": [
     "dist"
   ],

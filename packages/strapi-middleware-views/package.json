@@ -1,7 +1,7 @@
 {
   "name": "strapi-middleware-views",
   "version": "3.2.1",
-  "description": "Views middleware to enable server-side rendering for the Strapi framework",
+  "description": "Views middleware to enable server-side rendering for the Strapi framework.",
   "homepage": "http://strapi.io",
   "keywords": [
     "redis",

@@ -1,7 +1,7 @@
 {
   "name": "strapi-connector-mongoose",
   "version": "3.2.1",
-  "description": "Mongoose hook for the Strapi framework",
+  "description": "Mongoose hook for the Strapi framework.",
   "homepage": "http://strapi.io",
   "keywords": [
     "mongoose",

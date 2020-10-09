@@ -1,7 +1,7 @@
 {
   "name": "strapi-provider-upload-rackspace",
   "version": "3.2.1",
-  "description": "Rackspace provider for strapi upload",
+  "description": "Rackspace provider for strapi upload.",
   "main": "./lib",
   "keywords": [],
   "author": "Pongstr Ordillo <https://github.com/pongstr>",

@@ -1,7 +1,7 @@
 {
   "name": "strapi-database",
   "version": "3.2.1",
-  "description": "Strapi's database layer",
+  "description": "Strapi's database layer.",
   "homepage": "http://strapi.io",
   "main": "./lib/index.js",
   "scripts": {

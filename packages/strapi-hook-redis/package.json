@@ -1,7 +1,7 @@
 {
   "name": "strapi-hook-redis",
   "version": "3.2.1",
-  "description": "Redis hook for the Strapi framework",
+  "description": "Redis hook for the Strapi framework.",
   "homepage": "http://strapi.io",
   "keywords": [
     "redis",
