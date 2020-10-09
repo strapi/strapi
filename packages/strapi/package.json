@@ -50,7 +50,7 @@
     "ora": "^3.0.0",
     "qs": "^6.9.3",
     "resolve-cwd": "^3.0.0",
-    "rimraf": "^2.6.2",
+    "rimraf": "^3.0.2",
     "strapi-database": "3.2.1",
     "strapi-generate": "3.2.1",
     "strapi-generate-api": "3.2.1",

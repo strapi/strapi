@@ -22,7 +22,7 @@
     "lodash": "4.17.19",
     "p-map": "4.0.0",
     "pluralize": "^8.0.0",
-    "rimraf": "3.0.0",
+    "rimraf": "3.0.2",
     "strapi-utils": "3.2.1"
   },
   "peerDependencies": {
