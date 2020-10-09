@@ -42,6 +42,7 @@ import Logout from './Logout';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
+  getInfosDataSucceeded,
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
@@ -67,7 +68,8 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     this.emitEvent('didAccessAuthenticatedAdministration');
-    this.fetchUserPermissions(true);
+    // this.fetchUserPermissions(true);
+    this.initApp();
   }
 
   shouldComponentUpdate(prevProps) {
@@ -108,6 +110,17 @@ export class Admin extends React.Component {
     }
   };
 
+  fetchAppInfo = async () => {
+    try {
+      const { data } = await request('/admin/information', { method: 'GET' });
+
+      this.props.getInfosDataSucceeded(data);
+    } catch (err) {
+      console.error(err);
+      strapi.notification.error('notification.error');
+    }
+  };
+
   fetchUserPermissions = async (resetState = false) => {
     const { getUserPermissions, getUserPermissionsError, getUserPermissionsSucceeded } = this.props;
 
@@ -132,6 +145,11 @@ export class Admin extends React.Component {
     } = props;
 
     return !Object.keys(plugins).every(plugin => plugins[plugin].isReady === true);
+  };
+
+  initApp = async () => {
+    await this.fetchAppInfo();
+    await this.fetchUserPermissions(true);
   };
 
   /**
@@ -279,6 +297,7 @@ Admin.propTypes = {
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  getInfosDataSucceeded: PropTypes.func.isRequired,
   getUserPermissions: PropTypes.func.isRequired,
   getUserPermissionsError: PropTypes.func.isRequired,
   getUserPermissionsSucceeded: PropTypes.func.isRequired,
@@ -311,6 +330,7 @@ export function mapDispatchToProps(dispatch) {
     {
       disableGlobalOverlayBlocker,
       enableGlobalOverlayBlocker,
+      getInfosDataSucceeded,
       getUserPermissions,
       getUserPermissionsError,
       getUserPermissionsSucceeded,

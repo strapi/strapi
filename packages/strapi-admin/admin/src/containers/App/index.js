@@ -34,25 +34,31 @@ function App(props) {
   getDataRef.current = props.getDataSucceeded;
 
   useEffect(() => {
-    const getData = async () => {
-      const currentToken = auth.getToken();
+    const currentToken = auth.getToken();
 
-      if (currentToken) {
-        try {
-          const {
-            data: { token },
-          } = await request('/admin/renew-token', {
-            method: 'POST',
-            body: { token: currentToken },
-          });
-          auth.updateToken(token);
-        } catch (err) {
-          // Refresh app
-          auth.clearAppStorage();
-          window.location.reload();
-        }
+    const renewToken = async () => {
+      try {
+        const {
+          data: { token },
+        } = await request('/admin/renew-token', {
+          method: 'POST',
+          body: { token: currentToken },
+        });
+        auth.updateToken(token);
+      } catch (err) {
+        // Refresh app
+        auth.clearAppStorage();
+        window.location.reload();
       }
+    };
 
+    if (currentToken) {
+      renewToken();
+    }
+  }, []);
+
+  useEffect(() => {
+    const getData = async () => {
       try {
         const { data } = await request('/admin/init', { method: 'GET' });
 
@@ -83,7 +89,7 @@ function App(props) {
     };
 
     getData();
-  }, [getDataRef]);
+  }, []);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
