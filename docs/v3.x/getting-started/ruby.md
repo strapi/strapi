@@ -17,7 +17,7 @@ touch script.rb
 
 Many HTTP clients are available but in this documentation we'll use [HTTParty](https://github.com/jnunemaker/httparty).
 
-  - Create a `Gemfile` containing the following:
+- Create a `Gemfile` containing the following:
 
 ```
 source "https://rubygems.org"
@@ -25,7 +25,7 @@ source "https://rubygems.org"
 gem "httparty"
 ```
 
-  - Install your gems by running the following command:
+- Install your gems by running the following command:
 
 ```bash
 bundle install

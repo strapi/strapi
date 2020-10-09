@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.1.7",
+  "version": "3.2.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -11,6 +11,12 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "@buffetjs/core": "3.3.1",
+    "@buffetjs/custom": "3.3.1",
+    "@buffetjs/hooks": "3.3.1",
+    "@buffetjs/icons": "3.3.1",
+    "@buffetjs/styles": "3.3.1",
+    "@buffetjs/utils": "3.3.1",
     "cheerio": "^1.0.0-rc.3",
     "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",
@@ -29,8 +35,8 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.1.7",
-    "swagger-ui-dist": "3.24.3"
+    "strapi-helper-plugin": "3.2.1",
+    "swagger-ui-dist": "3.35.0"
   },
   "author": {
     "name": "soupette",

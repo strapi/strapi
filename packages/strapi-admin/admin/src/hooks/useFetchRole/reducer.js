@@ -20,6 +20,11 @@ const reducer = (state, action) =>
         draftState.isLoading = false;
         break;
       }
+      case 'ON_SUBMIT_SUCCEEDED': {
+        draftState.role.name = action.name;
+        draftState.role.description = action.description;
+        break;
+      }
       default:
         return draftState;
     }
