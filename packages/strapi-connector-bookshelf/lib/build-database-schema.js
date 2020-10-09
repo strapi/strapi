@@ -10,6 +10,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   if (!definitionDidChange) {
     return;
   }
+
   const draftAndPublishMigrationWay = await getDraftAndPublishMigrationWay({ definition, ORM });
   if (draftAndPublishMigrationWay === 'disable') {
     await migrateDraftAndPublish({ definition, ORM, way: 'disable' });
