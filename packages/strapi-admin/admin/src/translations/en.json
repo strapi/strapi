@@ -66,6 +66,7 @@
   "Roles.RoleRow.user-count.plural": "{number} users",
   "Roles.RoleRow.user-count.singular": "{number} user",
   "Roles.components.List.empty.withSearch": "There is no role corresponding to the search ({search})...",
+  "Settings.application.title": "Application",
   "Settings.PageTitle": "Settings - {name}",
   "Settings.error": "Error",
   "Settings.global": "Global Settings",
