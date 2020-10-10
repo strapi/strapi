@@ -3,9 +3,9 @@
 This guide will explain how to create a draft system that will allow you to manage draft, published, and archive status.
 
 ::: warning
-The native **Draft & Publish feature** has been released in the **version 3.2**. We suggest you to use the native feature instead of this guide.
+The native **Draft & Publish feature** has been released in **version 3.2**. We suggest you to use the native feature instead of this guide.
 
-This guide still useful if you want to see the concept of "force filtering" in action.
+This guide is still useful if you want to see the concept of "force filtering" in action.
 :::
 
 ## Introduction
