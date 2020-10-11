@@ -29,7 +29,7 @@ const Notification = ({ notification }) => {
   const dispatch = useDispatch();
   const { title, message, link, type, id, onClose, timeout, blockTransition } = notification;
 
-  const formattedMessage = formatMessage(typeof message === 'string' ? { id: message } : message);
+  const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg));
 
   const handleClose = useCallback(() => {
     if (onClose) {
@@ -69,15 +69,15 @@ const Notification = ({ notification }) => {
                 fontSize="xs"
                 textTransform="uppercase"
                 color="grey"
-                title={formatMessage(title)}
+                title={formattedMessage(title)}
               >
-                {formatMessage(title)}
+                {formattedMessage(title)}
               </Text>
             )}
             <Flex>
               {message && (
-                <Text title={formattedMessage} ellipsis>
-                  {formattedMessage}
+                <Text title={formattedMessage(message)} ellipsis>
+                  {formattedMessage(message)}
                 </Text>
               )}
               {link && (
@@ -89,9 +89,9 @@ const Notification = ({ notification }) => {
                         ellipsis
                         fontWeight="bold"
                         color="blue"
-                        title={formatMessage(link.label)}
+                        title={formattedMessage(link.label)}
                       >
-                        {formatMessage(link.label)}
+                        {formattedMessage(link.label)}
                       </Text>
                       <Padded left size="xs" />
                       <LinkArrow />
@@ -135,18 +135,24 @@ Notification.propTypes = {
         values: PropTypes.object,
       }),
     ]),
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-      values: PropTypes.object,
-    }),
-    link: PropTypes.shape({
-      url: PropTypes.string.isRequired,
-      label: PropTypes.shape({
+    title: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
         id: PropTypes.string.isRequired,
         defaultMessage: PropTypes.string,
         values: PropTypes.object,
-      }).isRequired,
+      }),
+    ]),
+    link: PropTypes.shape({
+      url: PropTypes.string.isRequired,
+      label: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          defaultMessage: PropTypes.string,
+          values: PropTypes.object,
+        }),
+      ]).isRequired,
     }),
     type: PropTypes.string,
     onClose: PropTypes.func,

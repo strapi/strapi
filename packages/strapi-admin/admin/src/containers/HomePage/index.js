@@ -9,6 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, isNil, upperFirst } from 'lodash';
 import { auth, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 import PageTitle from '../../components/PageTitle';
 import { useModels } from '../../hooks';
@@ -60,12 +61,18 @@ const SOCIAL_LINKS = [
 ];
 
 const HomePage = ({ global: { strapiVersion }, history: { push } }) => {
+  const notifications = useSelector(state => state.get('newNotification').notifications);
+
   useEffect(() => {
     const getStrapiLatestRelease = async () => {
       try {
+        const notificationAlreadyExist =
+          notifications.findIndex(notification => notification.uid === 'STRAPI_UPDATE_NOTIF') != -1;
+
         const showUpdateNotif =
-          process.env.STRAPI_UPDATE_NOTIF_DISABLED ||
-          !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
+          (process.env.STRAPI_UPDATE_NOTIF_DISABLED ||
+            !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'))) &&
+          !notificationAlreadyExist;
 
         if (showUpdateNotif) {
           const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
@@ -83,6 +90,9 @@ const HomePage = ({ global: { strapiVersion }, history: { push } }) => {
                 },
               },
               blockTransition: true,
+              // Used to check if the notification is already displayed
+              // to avoid multiple notifications each time the user goes back to the home page.
+              uid: 'STRAPI_UPDATE_NOTIF',
               onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
             });
           }

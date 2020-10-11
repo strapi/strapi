@@ -1,9 +1,3 @@
-/*
- *
- * NotificationProvider reducer
- *
- */
-
 import produce from 'immer';
 import { get } from 'lodash';
 import { SHOW_NEW_NOTIFICATION, HIDE_NEW_NOTIFICATION } from './constants';
@@ -18,13 +12,19 @@ const notificationReducer = (state = initialState, action) =>
     switch (action.type) {
       case SHOW_NEW_NOTIFICATION: {
         draftState.notifications.push({
-          ...action.config,
+          // No action.config spread to limit the notification API and avoid customization
           id: action.id,
           type: get(action, ['config', 'type'], 'success'),
           message: get(action, ['config', 'message'], {
             id: 'notification.success.saved',
             defaultMessage: 'Saved',
           }),
+          title: get(action, ['config', 'title'], null),
+          link: get(action, ['config', 'link'], null),
+          timeout: get(action, ['config', 'timeout'], 2500),
+          blockTransition: get(action, ['config', 'blockTransition'], false),
+          uid: get(action, ['config', 'uid'], null),
+          onClose: get(action, ['config', 'onClose'], null),
         });
         break;
       }

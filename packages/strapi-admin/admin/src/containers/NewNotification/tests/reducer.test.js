@@ -28,7 +28,19 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
         notifications: [],
       };
       const expected = {
-        notifications: [{ id: 1, message: { id: 'notification.message' }, type: 'success' }],
+        notifications: [
+          {
+            id: 1,
+            type: 'success',
+            message: { id: 'notification.message' },
+            title: null,
+            link: null,
+            timeout: 2500,
+            blockTransition: false,
+            uid: null,
+            onClose: null,
+          },
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

@@ -14,10 +14,6 @@ import NotificationsWrapper from './Wrapper';
 const NotificationsContainer = () => {
   const notifications = useSelector(state => state.get('newNotification').notifications);
 
-  if (notifications.length === 0) {
-    return null;
-  }
-
   return (
     <NotificationsWrapper>
       {notifications.map(notification => (

@@ -124,7 +124,7 @@ const remoteURL = (() => {
 const displayNotification = (message, status) => {
   console.warn(
     // Validate the text + TODO: Change the link to the docs.
-    'Deprecated: Will be deleted.\nPlease use strapi.notification.toggle(config).\nDocs : https://google.fr'
+    'Deprecated: Will be deleted.\nPlease use strapi.notification.toggle(config).\nDocs : https://strapi.io/documentation/v3.x/plugin-development/frontend-development.html#strapi-notification'
   );
   dispatch(showNotification(message, status));
 };
