@@ -140,7 +140,7 @@ After a few minutes, you may refresh your page and see that your database has be
 
 ### Configure S3 for image hosting
 
-Amazon calls cloud storage services **S3**. You create a **bucket**, which holds the files, images, folders, etc... which then can be accessed and served by your application. This guide will show you have to use **Amazon S3** to host the images for your project.
+Amazon calls cloud storage services **S3**. You create a **bucket**, which holds the files, images, folders, etc... which then can be accessed and served by your application. This guide will show you how to use **Amazon S3** to host the images for your project.
 
 #### 1. Navigate to the `Amazon S3`
 
