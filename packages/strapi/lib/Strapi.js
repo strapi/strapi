@@ -25,7 +25,7 @@ const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
-const createEntityValidator = require('./services/entity-validator');
+const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const ee = require('./utils/ee');
 
@@ -277,7 +277,7 @@ class Strapi {
 
   async load() {
     this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
+      if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
         ctx.set('strapi', 'You are so French!');
         ctx.status = 204;
       } else {
@@ -319,9 +319,7 @@ class Strapi {
 
     await this.startWebhooks();
 
-    this.entityValidator = createEntityValidator({
-      strapi: this,
-    });
+    this.entityValidator = entityValidator;
 
     this.entityService = createEntityService({
       db: this.db,

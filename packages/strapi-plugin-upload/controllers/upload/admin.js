@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const ACTIONS = {
   read: 'plugins::upload.read',
@@ -134,9 +136,7 @@ module.exports = {
     const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.updateFileInfo(id, data.fileInfo);
-
-    await uploadService.setCreatorInfo(user.id, file, { edition: true });
+    const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
     ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
@@ -160,9 +160,7 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const replacedFiles = await uploadService.replace(id, { data, file: files });
-
-    await uploadService.setCreatorInfo(user.id, replacedFiles, { edition: true });
+    const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
     ctx.body = pm.sanitize(replacedFiles, { action: ACTIONS.read, withPrivate: false });
   },
@@ -185,9 +183,7 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const uploadedFiles = await uploadService.upload({ data, files });
-
-    await uploadService.setCreatorInfo(user.id, uploadedFiles);
+    const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
     ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
   },
@@ -203,7 +199,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
   const roles = _.has(file, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: file.created_by.id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': file[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
   const fileWithRoles = _.set(_.cloneDeep(file), 'created_by.roles', roles);
 

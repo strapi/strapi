@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const parseMultipartBody = require('../utils/parse-multipart');
 const {
@@ -9,11 +10,18 @@ const {
   validateUIDField,
 } = require('./validation');
 
+const {
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = contentTypesUtils.constants;
+
 const ACTIONS = {
   read: 'plugins::content-manager.explorer.read',
   create: 'plugins::content-manager.explorer.create',
   edit: 'plugins::content-manager.explorer.update',
   delete: 'plugins::content-manager.explorer.delete',
+  publish: 'plugins::content-manager.explorer.publish',
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
@@ -25,9 +33,9 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   }
 
   const roles = _.has(entity, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: entity.created_by.id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': entity[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
-  const entityWithRoles = _.set(_.cloneDeep(entity), 'created_by.roles', roles);
+  const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
 
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
@@ -35,7 +43,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     throw strapi.errors.forbidden();
   }
 
-  return { pm, entity };
+  return { pm, entity: entityWithRoles };
 };
 
 module.exports = {
@@ -178,6 +186,7 @@ module.exports = {
       request: { body },
     } = ctx;
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const modelDef = strapi.getModel(model);
 
     const pm = strapi.admin.services.permission.createPermissionsManager(
       userAbility,
@@ -193,10 +202,20 @@ module.exports = {
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
+    const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
+
+    await strapi.entityValidator.validateEntityCreation(modelDef, writableData, { isDraft: true });
+    const isDraft = contentTypesUtils.hasDraftAndPublish(modelDef);
+    await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
+
     try {
       const result = await contentManagerService.create(
         {
-          data: { ...sanitize(data), created_by: user.id, updated_by: user.id },
+          data: {
+            ...sanitize(writableData),
+            [CREATED_BY_ATTRIBUTE]: user.id,
+            [UPDATED_BY_ATTRIBUTE]: user.id,
+          },
           files,
         },
         { model }
@@ -227,6 +246,7 @@ module.exports = {
     } = ctx;
 
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const modelDef = strapi.getModel(model);
 
     const { pm, entity } = await findEntityAndCheckPermissions(
       userAbility,
@@ -239,10 +259,21 @@ module.exports = {
 
     const { data, files } = ctx.is('multipart') ? parseMultipartBody(ctx) : { data: body };
 
+    const writableData = _.omit(data, contentTypesUtils.getNonWritableAttributes(modelDef));
+
+    const isDraft = contentTypesUtils.isDraft(entity, modelDef);
+    await strapi.entityValidator.validateEntityUpdate(modelDef, writableData, { isDraft });
+
     try {
       const result = await contentManagerService.edit(
         { id },
-        { data: { ...sanitize(_.omit(data, ['created_by'])), updated_by: user.id }, files },
+        {
+          data: {
+            ...sanitize(writableData),
+            [UPDATED_BY_ATTRIBUTE]: user.id,
+          },
+          files,
+        },
         { model }
       );
 
@@ -300,6 +331,54 @@ module.exports = {
     ctx.body = results.map(result => pm.sanitize(result, { action: ACTIONS.read }));
   },
 
+  async publish(ctx) {
+    const {
+      state: { userAbility },
+      params: { model, id },
+    } = ctx;
+
+    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const { entity, pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.publish,
+      model,
+      id
+    );
+
+    await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), entity);
+
+    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
+      return ctx.badRequest('Already published');
+    }
+
+    const publishedEntry = await contentManagerService.publish({ id }, model);
+
+    ctx.body = pm.sanitize(publishedEntry, { action: ACTIONS.read });
+  },
+
+  async unpublish(ctx) {
+    const {
+      state: { userAbility },
+      params: { model, id },
+    } = ctx;
+
+    const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
+    const { entity, pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.publish,
+      model,
+      id
+    );
+
+    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
+      return ctx.badRequest('Already a draft');
+    }
+
+    const unpublishedEntry = await contentManagerService.unpublish({ id }, model);
+
+    ctx.body = pm.sanitize(unpublishedEntry, { action: ACTIONS.read });
+  },
+
   async findRelationList(ctx) {
     const { model, targetField } = ctx.params;
     const { _component, ...query } = ctx.request.query;
@@ -346,7 +425,7 @@ module.exports = {
       : await contentManagerServices.contenttypes.getConfiguration(modelDef.uid);
 
     const field = _.get(modelConfig, `metadatas.${targetField}.edit.mainField`, 'id');
-    const pickFields = [field, 'id', target.primaryKey];
+    const pickFields = [field, 'id', target.primaryKey, PUBLISHED_AT_ATTRIBUTE];
     const sanitize = d => _.pick(d, pickFields);
 
     ctx.body = _.isArray(entities) ? entities.map(sanitize) : sanitize(entities);

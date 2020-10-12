@@ -155,6 +155,9 @@ async function downloadGithubRepo(repoInfo, templatePath) {
   const { user, project } = repoInfo;
   const codeload = `https://codeload.github.com/${user}/${project}/tar.gz/master`;
   const response = await fetch(codeload);
+  if (!response.ok) {
+    throw Error(`Could not download the ${chalk.green(`${user}/${project}`)} repository`);
+  }
 
   await new Promise(resolve => {
     response.body.pipe(tar.extract({ strip: 1, cwd: templatePath })).on('close', resolve);

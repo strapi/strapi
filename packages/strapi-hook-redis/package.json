@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-redis",
-  "version": "3.1.7",
+  "version": "3.2.3",
   "description": "Redis hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -17,9 +17,9 @@
   "dependencies": {
     "ioredis": "^4.9.3",
     "lodash": "4.17.19",
-    "rimraf": "3.0.0",
+    "rimraf": "3.0.2",
     "stack-trace": "0.0.10",
-    "strapi-utils": "3.1.7"
+    "strapi-utils": "3.2.3"
   },
   "author": {
     "email": "hi@strapi.io",

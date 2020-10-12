@@ -186,6 +186,7 @@ module.exports = {
             '/v3.x/concepts/configurations',
             '/v3.x/concepts/controllers',
             '/v3.x/concepts/customization',
+            '/v3.x/concepts/draft-and-publish',
             '/v3.x/concepts/file-structure',
             '/v3.x/concepts/hooks',
             '/v3.x/concepts/middlewares',
