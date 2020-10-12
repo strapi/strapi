@@ -9,8 +9,6 @@ const program = new Command();
 
 const packageJSON = require('../package.json');
 
-program.storeOptionsAsProperties(false).passCommandToAction(false);
-
 const checkCwdIsStrapiApp = name => {
   let logErrorAndExit = () => {
     console.log(
@@ -56,20 +54,14 @@ const getLocalScript = name => (...args) => {
     });
 };
 
-/**
- * Normalize version argument
- *
- * `$ strapi -v`
- * `$ strapi -V`
- * `$ strapi --version`
- * `$ strapi version`
- */
-
-program.allowUnknownOption(true);
-
-program.option('-v, --version', 'output the version number');
+// Initial program setup
+program
+  .storeOptionsAsProperties(false)
+  .passCommandToAction(false)
+  .allowUnknownOption(true);
 
 // `$ strapi version` (--version synonym)
+program.option('-v, --version', 'output the version number');
 program
   .command('version')
   .description('output your version of Strapi')
@@ -115,7 +107,7 @@ program
 program
   .command('develop')
   .alias('dev')
-  .option('--no-build', 'Disable build', false)
+  .option('--no-build', 'Disable build')
   .option('--watch-admin', 'Enable watch', false)
   .option('--browser <name>', 'Open the browser', true)
   .description('Start your Strapi application in development mode')
@@ -128,7 +120,7 @@ program
   .option('-p, --plugin <api>', 'Name of the local plugin')
   .option('-e, --extend <api>', 'Name of the plugin to extend')
   .option('-c, --connection <connection>', 'The name of the connection to use')
-  .option('--draft-and-publish <value>', 'Enable draft/publish', false)
+  .option('--draft-and-publish', 'Enable draft/publish', false)
   .description('generate a basic API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
@@ -150,7 +142,7 @@ program
   .option('-a, --api <api>', 'API name to generate a sub API')
   .option('-p, --plugin <api>', 'plugin name')
   .option('-c, --connection <connection>', 'The name of the connection to use')
-  .option('--draft-and-publish <value>', 'Enable draft/publish', false)
+  .option('--draft-and-publish', 'Enable draft/publish', false)
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
@@ -184,7 +176,7 @@ program
 program
   .command('build')
   .option('--clean', 'Remove the build and .cache folders', false)
-  .option('--no-optimization', 'Build the Administration without assets optimization', false)
+  .option('--no-optimization', 'Build the Administration without assets optimization')
   .description('Builds the strapi admin app')
   .action(getLocalScript('build'));
 
