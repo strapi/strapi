@@ -60,16 +60,18 @@ const AuthPage = ({ hasAdmin }) => {
             `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
           );
 
-          dispatch({
-            type: 'SET_DATA',
-            data: { registrationToken, userInfo: data },
-          });
+          if (data) {
+            dispatch({
+              type: 'SET_DATA',
+              data: { registrationToken, userInfo: data },
+            });
+          }
         } catch (err) {
           const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
 
           strapi.notification.toggle({
             type: 'warning',
-            message: { id: errorMessage },
+            message: errorMessage,
           });
 
           // Redirect to the oops page in case of an invalid token

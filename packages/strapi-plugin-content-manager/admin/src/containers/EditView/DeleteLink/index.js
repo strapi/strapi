@@ -67,7 +67,7 @@ const DeleteLink = ({
       );
       strapi.notification.toggle({
         type: 'warning',
-        message: { id: errorMessage },
+        message: errorMessage,
       });
     } finally {
       setIsModalConfirmButtonLoading(false);

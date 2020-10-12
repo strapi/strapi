@@ -116,7 +116,7 @@ const EditPage = () => {
 
       strapi.notification.toggle({
         type: 'warning',
-        message: { id: message },
+        message,
       });
     } finally {
       setIsSubmiting(false);

@@ -210,7 +210,7 @@ const InputModalStepper = ({
         );
         strapi.notification.toggle({
           type: 'warning',
-          message: { id: errorMessage },
+          message: errorMessage,
         });
 
         if (status) {

@@ -597,7 +597,7 @@ const EditViewDataManagerProvider = ({
         const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
         strapi.notification.toggle({
           type: 'warning',
-          message: { id: errorMessage },
+          message: errorMessage,
         });
       }
     } catch (err) {
@@ -646,7 +646,7 @@ const EditViewDataManagerProvider = ({
       const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
       strapi.notification.toggle({
         type: 'warning',
-        message: { id: errorMessage },
+        message: errorMessage,
       });
     }
   }, [id, modifiedData, slug]);

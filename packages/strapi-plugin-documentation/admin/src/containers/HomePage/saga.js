@@ -38,7 +38,7 @@ function* deleteDoc() {
   } catch (err) {
     strapi.notification.toggle({
       type: 'warning',
-      message: { id: err.response.payload.message },
+      message: err.response.payload.message,
     });
   }
 }
@@ -78,7 +78,7 @@ function* submit() {
   } catch (err) {
     strapi.notification.toggle({
       type: 'warning',
-      message: { id: err.response.payload.message },
+      message: err.response.payload.message,
     });
   }
 }
@@ -102,7 +102,7 @@ function* updateDoc(action) {
   } catch (err) {
     strapi.notification.toggle({
       type: 'warning',
-      message: { id: err.response.payload.message },
+      message: err.response.payload.message,
     });
   }
 }

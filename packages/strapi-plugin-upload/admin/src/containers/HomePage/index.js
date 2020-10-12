@@ -235,7 +235,7 @@ const HomePage = () => {
     } catch (err) {
       strapi.notification.toggle({
         type: 'warning',
-        message: { id: err },
+        message: err,
       });
 
       dispatch({

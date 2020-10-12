@@ -96,12 +96,12 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         if (has(data, 'data') && typeof data.data === 'string') {
           strapi.notification.toggle({
             type: 'warning',
-            message: { id: data.data },
+            message: data.data,
           });
         } else {
           strapi.notification.toggle({
             type: 'warning',
-            message: { id: data.message },
+            message: data.message,
           });
         }
 

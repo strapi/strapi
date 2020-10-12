@@ -49,7 +49,7 @@ const usePlugins = (shouldFetchData = true) => {
       if (message !== 'Forbidden') {
         strapi.notification.toggle({
           type: 'warning',
-          message: { id: message },
+          message,
         });
       }
     }

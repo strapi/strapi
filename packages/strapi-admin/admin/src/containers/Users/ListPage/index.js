@@ -187,7 +187,7 @@ const ListPage = () => {
 
       strapi.notification.toggle({
         type: 'warning',
-        message: { id: errorMessage },
+        message: errorMessage,
       });
     }
 

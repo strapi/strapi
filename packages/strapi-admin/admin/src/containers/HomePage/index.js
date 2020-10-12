@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 
 import PageTitle from '../../components/PageTitle';
 import { useModels } from '../../hooks';
+import { STRAPI_UPDATE_NOTIF } from '../../config';
 
 import useFetch from './hooks';
 import { ALink, Block, Container, LinkWrapper, P, Wave, Separator } from './components';
@@ -70,8 +71,8 @@ const HomePage = ({ global: { strapiVersion }, history: { push } }) => {
           notifications.findIndex(notification => notification.uid === 'STRAPI_UPDATE_NOTIF') != -1;
 
         const showUpdateNotif =
-          (process.env.STRAPI_UPDATE_NOTIF_DISABLED ||
-            !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'))) &&
+          STRAPI_UPDATE_NOTIF &&
+          !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF')) &&
           !notificationAlreadyExist;
 
         if (showUpdateNotif) {
