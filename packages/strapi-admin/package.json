@@ -90,7 +90,6 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.16.0",
-    "remove-markdown": "^0.2.2",
     "reselect": "^4.0.0",
     "sanitize.css": "^4.1.0",
     "sift": "13.1.10",
