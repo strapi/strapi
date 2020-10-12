@@ -39,7 +39,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install modules
-        run: yarn
+        run: |
+          yarn && yarn global add codecov
+          echo "$(yarn global bin)" >> $GITHUB_PATH
       - name: Run test
         run: yarn run -s test:unit --coverage && codecov -C -F unit
 
@@ -56,7 +58,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install modules
-        run: yarn
+        run: |
+          yarn && yarn global add codecov
+          echo "$(yarn global bin)" >> $GITHUB_PATH
       - name: Run test
         run: yarn run -s test:unit && codecov -C -F front
 
