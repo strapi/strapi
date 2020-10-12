@@ -46,7 +46,7 @@ describe('Role CRUD End to End', () => {
         {
           name: 'Author',
           code: 'strapi-author',
-          description: 'Authors can manage and publish the content they created.',
+          description: 'Authors can manage the content they have created.',
           usersCount: 0,
         },
       ];
@@ -186,7 +186,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          fields: null,
           conditions: ['admin::is-creator'],
         },
         {
@@ -400,7 +400,7 @@ describe('Role CRUD End to End', () => {
         });
       });
 
-      test('Cannot super admin role', async () => {
+      test('Cannot update super admin role', async () => {
         const updates = {
           name: 'new name - Cannot update the name of a role',
           description: 'new description - Can update a role successfully',

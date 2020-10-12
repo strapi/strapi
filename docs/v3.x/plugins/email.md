@@ -97,7 +97,6 @@ The string after the last `@` represents your desired [semver](https://docs.npmj
 ### Configure your provider
 
 After installing your provider you will need to add some settings in `config/plugins.js`.
-If this file doesn't exist, you'll need to create it.
 
 ::: warning
 Do note that filename has to come with correct spelling, plugin with 's' (plural). -> `plugins.js`

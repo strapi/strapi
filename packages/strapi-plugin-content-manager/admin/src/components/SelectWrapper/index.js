@@ -1,10 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
 import { request } from 'strapi-helper-plugin';
+import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -12,12 +12,17 @@ import { getFieldName } from '../../utils';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
-import { Nav, Wrapper } from './components';
-import { connect, select } from './utils';
+import ClearIndicator from './ClearIndicator';
+import DropdownIndicator from './DropdownIndicator';
+import IndicatorSeparator from './IndicatorSeparator';
+import Option from './Option';
+import { A, BaselineAlignment } from './components';
+import { connect, select, styles } from './utils';
 
 function SelectWrapper({
   componentUid,
   description,
+  displayNavigationLink,
   editable,
   label,
   isCreatingEntry,
@@ -33,6 +38,7 @@ function SelectWrapper({
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
+
   const { isDraggingComponent } = useEditView();
 
   // This is needed for making requests when used in a component
@@ -137,11 +143,14 @@ function SelectWrapper({
 
     if (isFieldAllowed) {
       ref.current();
+    } else {
+      setIsLoading(false);
     }
 
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state._contains, isFieldAllowed]);
 
   useEffect(() => {
@@ -152,6 +161,7 @@ function SelectWrapper({
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state._start]);
 
   const onInputChange = (inputValue, { action }) => {
@@ -177,30 +187,27 @@ function SelectWrapper({
   );
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
-  const link =
-    value === null ||
-    value === undefined ||
-    ['plugins::users-permissions.role', 'plugins::users-permissions.permission'].includes(
-      targetModel
-    ) ? null : (
+
+  const link = useMemo(() => {
+    if (!value) {
+      return null;
+    }
+
+    if (!displayNavigationLink) {
+      return null;
+    }
+
+    return (
       <Link to={{ pathname: to, state: { from: pathname } }}>
-        <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
+        <FormattedMessage id="content-manager.containers.Edit.seeDetails">
+          {msg => <A color="mediumBlue">{msg}</A>}
+        </FormattedMessage>
       </Link>
     );
+  }, [displayNavigationLink, pathname, to, value]);
+
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
-
-  const customStyles = {
-    option: provided => {
-      return {
-        ...provided,
-        maxWidth: '100% !important',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      };
-    },
-  };
 
   const isDisabled = useMemo(() => {
     if (isMorph) {
@@ -212,7 +219,7 @@ function SelectWrapper({
     }
 
     return !editable;
-  }, [isMorph, isCreatingEntry, editable]);
+  }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   if (!isFieldAllowed && isCreatingEntry) {
     return <NotAllowedInput label={label} />;
@@ -223,53 +230,63 @@ function SelectWrapper({
   }
 
   return (
-    <Wrapper className="form-group">
-      <Nav>
-        <div>
-          <label htmlFor={name}>
-            {label}
-            {!isSingle && (
-              <span style={{ fontWeight: 400, fontSize: 12 }}>&nbsp;({associationsLength})</span>
-            )}
-          </label>
-          {isSingle && link}
-        </div>
-        {!isEmpty(description) && <p className="description">{description}</p>}
-      </Nav>
-      <Component
-        addRelation={value => {
-          addRelation({ target: { name, value } });
-        }}
-        id={name}
-        isDisabled={isDisabled}
-        isLoading={isLoading}
-        isClearable
-        mainField={mainField}
-        move={moveRelation}
-        name={name}
-        options={filteredOptions}
-        onChange={value => {
-          onChange({ target: { name, value: value ? value.value : value } });
-        }}
-        onInputChange={onInputChange}
-        onMenuClose={() => {
-          setState(prevState => ({ ...prevState, _contains: '' }));
-        }}
-        onMenuScrollToBottom={onMenuScrollToBottom}
-        onRemove={onRemoveRelation}
-        placeholder={
-          isEmpty(placeholder) ? (
-            <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
-          ) : (
-            placeholder
-          )
-        }
-        styles={customStyles}
-        targetModel={targetModel}
-        value={value}
-      />
-      <div style={{ marginBottom: 18 }} />
-    </Wrapper>
+    <Padded>
+      <BaselineAlignment />
+      <Flex justifyContent="space-between">
+        <Text fontWeight="semiBold">
+          {label}
+          {!isSingle && ` (${associationsLength})`}
+        </Text>
+        {isSingle && link}
+      </Flex>
+      {!isEmpty(description) && (
+        <Padded top size="xs">
+          <BaselineAlignment />
+          <Text fontSize="sm" color="grey" lineHeight="12px" ellipsis>
+            {description}
+          </Text>
+        </Padded>
+      )}
+      <Padded top size="sm">
+        <BaselineAlignment />
+
+        <Component
+          addRelation={value => {
+            addRelation({ target: { name, value } });
+          }}
+          components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
+          displayNavigationLink={displayNavigationLink}
+          id={name}
+          isDisabled={isDisabled}
+          isLoading={isLoading}
+          isClearable
+          mainField={mainField}
+          move={moveRelation}
+          name={name}
+          options={filteredOptions}
+          onChange={value => {
+            onChange({ target: { name, value: value ? value.value : value } });
+          }}
+          onInputChange={onInputChange}
+          onMenuClose={() => {
+            setState(prevState => ({ ...prevState, _contains: '' }));
+          }}
+          onMenuScrollToBottom={onMenuScrollToBottom}
+          onRemove={onRemoveRelation}
+          placeholder={
+            isEmpty(placeholder) ? (
+              <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
+            ) : (
+              placeholder
+            )
+          }
+          styles={styles}
+          targetModel={targetModel}
+          value={value}
+        />
+      </Padded>
+      <div style={{ marginBottom: 28 }} />
+    </Padded>
   );
 }
 
@@ -284,6 +301,7 @@ SelectWrapper.defaultProps = {
 
 SelectWrapper.propTypes = {
   componentUid: PropTypes.string,
+  displayNavigationLink: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,

@@ -13,10 +13,37 @@ Object {
       "collectionName": "test_collection_types",
       "connection": "default",
       "description": "",
+      "draftAndPublish": false,
+      "editable": true,
       "kind": "collectionType",
       "name": "Test Collection Type",
+      "restrictRelationsTo": null,
     },
     "uid": "application::test-collection-type.test-collection-type",
+  },
+}
+`;
+
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations with draftAndPublish 1`] = `
+Object {
+  "data": Object {
+    "apiID": "ct-with-dp",
+    "schema": Object {
+      "attributes": Object {
+        "title": Object {
+          "type": "string",
+        },
+      },
+      "collectionName": "ct_with_dps",
+      "connection": "default",
+      "description": "",
+      "draftAndPublish": true,
+      "editable": true,
+      "kind": "collectionType",
+      "name": "CT with DP",
+      "restrictRelationsTo": null,
+    },
+    "uid": "application::ct-with-dp.ct-with-dp",
   },
 }
 `;
@@ -34,8 +61,11 @@ Object {
       "collectionName": "test_single_types",
       "connection": "default",
       "description": "",
+      "draftAndPublish": false,
+      "editable": true,
       "kind": "singleType",
       "name": "Test Single Type",
+      "restrictRelationsTo": null,
     },
     "uid": "application::test-single-type.test-single-type",
   },

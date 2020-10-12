@@ -107,7 +107,7 @@ module.exports = {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);
       }
-      await validatedUpdatePermissionsInput(input);
+      await validatedUpdatePermissionsInput(input, role);
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
     }

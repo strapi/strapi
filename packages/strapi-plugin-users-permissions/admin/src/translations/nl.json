@@ -44,6 +44,8 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "E-mail sjablonen aanpassen",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Instellingen zijn geüpdatet",
   "plugin.description.long": "Beveilig je API met een volledig authenticatie proces op JWT. Deze extensie komt ook met een ACL strategie welke ervoor zorgt dat je de permissies tussen groepen van gebruikers kan beheren.",
   "plugin.description.short": "Beveilig je API met een volledig authenticatie proces op JWT",

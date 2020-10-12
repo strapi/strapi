@@ -30,7 +30,7 @@ import { BrowserRouter } from 'react-router-dom';
 // Strapi provider with the internal APIs
 import { StrapiProvider } from 'strapi-helper-plugin';
 import { merge } from 'lodash';
-import { Fonts } from '@buffetjs/styles';
+import Fonts from './components/Fonts';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
 
