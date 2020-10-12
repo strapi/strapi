@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { stringIncludes } = require('strapi-utils');
 const { createUser, hasSuperAdminRole } = require('../domain/user');
 const { SUPER_ADMIN_CODE } = require('./constants');
+const { password: passwordValidator } = require('../validation/common-validators');
 
 const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
 
@@ -43,7 +44,7 @@ const create = async attributes => {
 
 /**
  * Update a user in database
- * @param params query params to find the user to update
+ * @param id query params to find the user to update
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
@@ -87,6 +88,31 @@ const updateById = async (id, attributes) => {
   }
 
   return strapi.query('user', 'admin').update({ id }, attributes);
+};
+
+/**
+ * Reset a user password by email. (Used in admin:reset CLI)
+ * @param {string} email - user email
+ * @param {string} password - new password
+ */
+const resetPasswordByEmail = async (email, password) => {
+  const user = await findOne({ email });
+
+  if (!user) {
+    throw new Error(`User not found for email: ${email}`);
+  }
+
+  try {
+    await passwordValidator.validate(password);
+  } catch (error) {
+    throw new Error(
+      'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
+    );
+  }
+
+  const { id: userId } = user;
+
+  await updateById(userId, { password });
 };
 
 /**
@@ -320,4 +346,5 @@ module.exports = {
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
   migrateUsers,
+  resetPasswordByEmail,
 };
