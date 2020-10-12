@@ -126,7 +126,13 @@ const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
 const createSimpleAttributeValidator = createOrUpdate => (attr, { isDraft }) => {
   let validator;
 
-  validator = validators[attr.type](attr, { isDraft });
+  if (attr.type in validators) {
+    validator = validators[attr.type](attr, { isDraft });
+  } else {
+    // No validators specified - fall back to mixed
+    validator = yup.mixed();
+  }
+
   validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
 
   return validator;
