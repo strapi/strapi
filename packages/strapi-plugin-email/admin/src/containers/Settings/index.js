@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { Header } from '@buffetjs/custom';
@@ -8,13 +8,15 @@ import {
   request,
   SettingsPageTitle,
   SizedInput,
-  validateInput,
+  getYupInnerErrors,
 } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
-import { AlignedButton, Text } from './components';
+import { AlignedButton, Text, BaselineAlignment } from './components';
+import schema from '../../utils/schema';
 
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
+  const [formErrors, setFormErrors] = useState({});
   const [isTestButtonLoading, setIsTestButtonLoading] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
   const [config, setConfig] = useState({
@@ -24,31 +26,45 @@ const SettingsPage = () => {
   const [providers, setProviders] = useState([]);
   const [testAddress, setTestAddress] = useState();
   const [testSuccess, setTestSuccess] = useState(false);
+  const isMounted = useRef(true);
 
   const title = formatMessage({ id: getTrad('Settings.title') });
 
-  const handleEmailTest = () => {
-    setIsTestButtonLoading(true);
+  const handleSubmit = async event => {
+    event.preventDefault();
+    let errors = {};
 
-    request('/email/test', {
-      method: 'POST',
-      body: { to: testAddress },
-    })
-      .then(() => {
+    try {
+      await schema.validate({ email: testAddress }, { abortEarly: false });
+
+      try {
+        setIsTestButtonLoading(true);
+
+        await request('/email/test', {
+          method: 'POST',
+          body: { to: testAddress },
+        });
+
         setTestSuccess(true);
+
         strapi.notification.success(
           formatMessage({ id: getTrad('Settings.notification.test.success') }, { to: testAddress })
         );
-      })
-      .catch(() =>
+      } catch (err) {
         strapi.notification.error(
           formatMessage({ id: getTrad('Settings.notification.test.error') }, { to: testAddress })
-        )
-      )
-      .finally(() => setIsTestButtonLoading(false));
+        );
+      } finally {
+        if (isMounted.current) {
+          setIsTestButtonLoading(false);
+        }
+      }
+    } catch (error) {
+      errors = getYupInnerErrors(error);
+      setFormErrors(errors);
+      console.log(errors);
+    }
   };
-
-  const validateEmail = email => !validateInput(email, {}, 'email').length;
 
   useEffect(() => {
     const fetchEmailSettings = () => {
@@ -73,11 +89,18 @@ const SettingsPage = () => {
     fetchEmailSettings();
   }, [formatMessage]);
 
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   return (
     <>
       <SettingsPageTitle name={title} />
+      <BaselineAlignment />
       <div>
-        <form>
+        <form onSubmit={handleSubmit}>
           <Header
             title={{ label: title }}
             content={formatMessage({ id: getTrad('Settings.subTitle') })}
@@ -112,9 +135,9 @@ const SettingsPage = () => {
               options={providers}
               size={{ xs: 6 }}
               type="select"
-              value={config.provider}
+              value={`strapi-provider-email-${config.provider}`}
             />
-            <Text>
+            <Text fontSize="md" lineHeight="18px">
               <FormattedMessage
                 id={getTrad('Settings.form.text.configuration')}
                 values={{
@@ -144,15 +167,15 @@ const SettingsPage = () => {
               size={{ xs: 6 }}
               type="email"
               value={testAddress}
+              error={formErrors.email}
             />
             <AlignedButton
               color="success"
-              disabled={testSuccess || !validateEmail(testAddress)}
+              disabled={testSuccess}
               icon={<Envelope style={{ verticalAlign: 'middle' }} />}
               isLoading={isTestButtonLoading}
-              onClick={handleEmailTest}
               style={{ minWidth: 150, fontWeight: 600 }}
-              type="button"
+              type="submit"
             >
               {formatMessage({ id: getTrad('Settings.button.test-email') })}
             </AlignedButton>

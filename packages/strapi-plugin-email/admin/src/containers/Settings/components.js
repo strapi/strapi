@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { Button } from '@buffetjs/core';
+import { Button, Text as TextBase } from '@buffetjs/core';
 
-const Text = styled.p`
-  padding: 0 15px;
+const Text = styled(TextBase)`
+  padding: 0 15px 13px 15px;
 `;
 
 const AlignedButton = styled(Button)`
@@ -10,4 +10,9 @@ const AlignedButton = styled(Button)`
   height: 34px;
 `;
 
-export { Text, AlignedButton };
+// TODO : Temporary baseline alignment
+const BaselineAlignment = styled.div`
+  padding-top: 3px;
+`;
+
+export { Text, AlignedButton, BaselineAlignment };
