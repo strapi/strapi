@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-controller",
-  "version": "3.2.1",
+  "version": "3.2.3",
   "description": "Generate a controller for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "lodash": "4.17.19",
-    "strapi-utils": "3.2.1"
+    "strapi-utils": "3.2.3"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
