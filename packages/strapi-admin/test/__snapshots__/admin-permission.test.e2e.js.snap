@@ -103,7 +103,6 @@ Object {
         "action": "plugins::email.settings.test",
         "displayName": "Send test emails",
         "plugin": "plugin::email",
-        "subjects": Array [],
         "subCategory": "settings",
       },
       Object {
