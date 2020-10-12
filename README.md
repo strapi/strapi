@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
-    <img src="https://assets.strapi.io/uploads/one-click-platform-sh-btn-1.png_2190489590.png"  />
+    <img src="https://assets.strapi.io/uploads/deploy_button_platform_sh_d032f646a7.png"  />
   </a>
 
 <a href="https://marketplace.digitalocean.com/apps/strapi">
