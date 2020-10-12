@@ -1,4 +1,4 @@
-name: 'CI'
+name: 'Tests'
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
       - 'docs/**'
 
 env:
+  CODECOV_TOKEN: ${{ secrets.codecov }}
   STRAPI_LICENSE: ${{ secrets.strapiLicense }}
 
 jobs:
@@ -40,7 +41,7 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Run test
-        run: yarn run -s test:unit
+        run: yarn run -s test:unit --coverage && codecov -C -F unit
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -57,7 +58,7 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Run test
-        run: yarn run -s test:unit
+        run: yarn run -s test:unit && codecov -C -F front
 
   e2e_ce_pg:
     runs-on: ubuntu-latest
@@ -195,7 +196,6 @@ jobs:
         run: |
           STRAPI_DISABLE_EE=true yarn run -s test:start-app & wait-on http://localhost:1337
           STRAPI_DISABLE_EE=true yarn run -s test:e2e
-
   # EE
 
   e2e_ee_pg:
