@@ -146,7 +146,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_SUBMIT_EDIT_NEW_FILE': {
-        const originalIndex = draftState.fileToEdit.originalIndex;
+        const originalIndex = state.fileToEdit.originalIndex;
         draftState.filesToUpload[originalIndex] = draftState.fileToEdit;
         draftState.fileToEdit = null;
         break;
@@ -217,7 +217,9 @@ const reducer = (state, action) =>
       }
       case 'SET_FILE_TO_EDIT': {
         draftState.fileToEdit = formatFileForEditing(
-          [...state.files, ...state.selectedFiles].find(file => file.id.toString() === action.fileId.toString())
+          [...state.files, ...state.selectedFiles].find(
+            file => file.id.toString() === action.fileId.toString()
+          )
         );
         break;
       }
