@@ -4,17 +4,12 @@
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
-const program = require('commander');
+const { Command } = require('commander');
+const program = new Command();
 
 const packageJSON = require('../package.json');
 
-// Allow us to display `help()`, but omit the wildcard (`*`) command.
-program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = () => {
-  program.commands = _.reject(program.commands, {
-    _name: '*',
-  });
-  program.help();
-};
+program.storeOptionsAsProperties(false).passCommandToAction(false);
 
 const checkCwdIsStrapiApp = name => {
   let logErrorAndExit = () => {
@@ -72,20 +67,15 @@ const getLocalScript = name => (...args) => {
 
 program.allowUnknownOption(true);
 
-// Expose version.
-program.version(packageJSON.version, '-v, --version');
-
-// Make `-v` option case-insensitive.
-process.argv = _.map(process.argv, arg => {
-  return arg === '-V' ? '-v' : arg;
-});
+program.option('-v, --version', 'output the version number');
 
 // `$ strapi version` (--version synonym)
 program
   .command('version')
   .description('output your version of Strapi')
   .action(() => {
-    console.log(packageJSON.version);
+    process.stdout.write(packageJSON.version + '\n');
+    process.exit(0);
   });
 
 // `$ strapi console`
@@ -126,7 +116,7 @@ program
   .command('develop')
   .alias('dev')
   .option('--no-build', 'Disable build', false)
-  .option('--watch-admin', 'Enable watch', true)
+  .option('--watch-admin', 'Enable watch', false)
   .option('--browser <name>', 'Open the browser', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
@@ -221,38 +211,25 @@ program
 program
   .command('configuration:dump')
   .alias('config:dump')
+  .description('Dump configurations of your application')
   .option('-f, --file <file>', 'Output file, default output is stdout')
   .action(getLocalScript('configurationDump'));
 
 program
   .command('configuration:restore')
   .alias('config:restore')
+  .description('Restore configurations of your application')
   .option('-f, --file <file>', 'Input file, default input is stdin')
   .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
   .action(getLocalScript('configurationRestore'));
 
-/**
- * Normalize help argument
- */
-
-// `$ strapi help` (--help synonym)
+// Admin
 program
-  .command('help')
-  .description('output the help')
-  .action(program.usageMinusWildcard);
+  .command('admin:reset-password')
+  .alias('admin:reset')
+  .description('Reset an admin user password')
+  .option('-e, --email <email>', 'The user email')
+  .option('-p, --password <password>', 'New password for the user')
+  .action(getLocalScript('admin-reset'));
 
-// `$ strapi <unrecognized_cmd>`
-// Mask the '*' in `help`.
-program.command('*').action(program.usageMinusWildcard);
-
-// Don't balk at unknown options.
-
-/**
- * `$ strapi`
- */
-
-program.parse(process.argv);
-const NO_COMMAND_SPECIFIED = program.args.length === 0;
-if (NO_COMMAND_SPECIFIED) {
-  program.usageMinusWildcard();
-}
+program.parseAsync(process.argv);

@@ -20,7 +20,7 @@
     "index.js"
   ],
   "dependencies": {
-    "commander": "^2.20.0",
+    "commander": "6.1.0",
     "strapi-generate-new": "3.2.3"
   },
   "scripts": {
