@@ -2,11 +2,12 @@ const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
-const { storeDefinition, didDefinitionChange } = require('./utils/store-definition');
+const { storeDefinition, didDefinitionOrTableChange } = require('./utils/store-definition');
 const { getDraftAndPublishMigrationWay, migrateDraftAndPublish } = require('./database-migration');
+const { getManyRelations } = require('./utils/associations');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
-  const definitionDidChange = await didDefinitionChange(definition, ORM);
+  const definitionDidChange = await didDefinitionOrTableChange(definition, ORM);
   if (!definitionDidChange) {
     return;
   }
@@ -59,9 +60,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
   }
 
   // Equilize many to many relations
-  const manyRelations = definition.associations.filter(({ nature }) =>
-    ['manyToMany', 'manyWay'].includes(nature)
-  );
+  const manyRelations = getManyRelations(definition);
 
   for (const manyRelation of manyRelations) {
     const { plugin, collection, via, dominant, alias } = manyRelation;
