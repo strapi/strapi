@@ -143,6 +143,10 @@ module.exports = {
         text: 'Tutorials',
         link: 'https://strapi.io/tutorials',
       },
+      {
+        text: 'Academy',
+        link: 'https://academy.strapi.io/',
+      },
     ],
     repo: 'strapi/strapi',
     docsDir: 'docs',
