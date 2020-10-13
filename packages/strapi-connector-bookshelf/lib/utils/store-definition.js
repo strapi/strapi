@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { getManyRelations } = require('./associations');
 
 const formatDefinitionToStore = definition =>
   JSON.stringify(
@@ -38,7 +39,20 @@ const storeDefinition = async (definition, ORM) => {
   return strapi.models['core_store'].forge(defData).save();
 };
 
-const didDefinitionChange = async (definition, ORM) => {
+const didDefinitionOrTableChange = async (definition, ORM) => {
+  // Checks if the tables exist in DB
+  const manyRelations = getManyRelations(definition);
+  const tablesToCheck = manyRelations.map(r => r.tableCollectionName);
+  tablesToCheck.push(definition.collectionName);
+
+  for (const tableToCheck of tablesToCheck) {
+    const tableExists = await ORM.knex.schema.hasTable(tableToCheck);
+    if (!tableExists) {
+      return true;
+    }
+  }
+
+  // Checks if the definition has changed
   const previousDefRow = await getDefinitionFromStore(definition, ORM);
   const previousDefJSON = _.get(previousDefRow, 'value', null);
   const actualDefJSON = formatDefinitionToStore(definition);
@@ -48,6 +62,6 @@ const didDefinitionChange = async (definition, ORM) => {
 
 module.exports = {
   storeDefinition,
-  didDefinitionChange,
+  didDefinitionOrTableChange,
   getDefinitionFromStore,
 };
