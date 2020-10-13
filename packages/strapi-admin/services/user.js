@@ -110,9 +110,7 @@ const resetPasswordByEmail = async (email, password) => {
     );
   }
 
-  const { id: userId } = user;
-
-  await updateById(userId, { password });
+  await updateById(user.id, { password });
 };
 
 /**

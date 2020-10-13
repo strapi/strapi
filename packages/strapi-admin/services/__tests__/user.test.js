@@ -762,12 +762,11 @@ describe('User', () => {
         },
       };
 
-      expect.hasAssertions();
+      await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+        new Error(`User not found for email: ${email}`)
+      );
 
-      await userService.resetPasswordByEmail(email, password).catch(error => {
-        expect(findOne).toHaveBeenCalledWith({ email }, undefined);
-        expect(error).toEqual(new Error(`User not found for email: ${email}`));
-      });
+      expect(findOne).toHaveBeenCalledWith({ email }, undefined);
     });
 
     test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
@@ -785,16 +784,13 @@ describe('User', () => {
           },
         };
 
-        expect.hasAssertions();
+        await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+          new Error(
+            'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
+          )
+        );
 
-        await userService.resetPasswordByEmail(email, password).catch(error => {
-          expect(findOne).toHaveBeenCalledWith({ email }, undefined);
-          expect(error).toEqual(
-            new Error(
-              'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
-            )
-          );
-        });
+        expect(findOne).toHaveBeenCalledWith({ email }, undefined);
       }
     );
   });

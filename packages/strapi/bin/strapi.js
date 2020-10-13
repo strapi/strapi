@@ -60,11 +60,14 @@ program
   .passCommandToAction(false)
   .allowUnknownOption(true);
 
+program.helpOption('-h, --help', 'Display help for command');
+program.addHelpCommand('help [command]', 'Display help for command');
+
 // `$ strapi version` (--version synonym)
-program.option('-v, --version', 'output the version number');
+program.option('-v, --version', 'Output the version number');
 program
   .command('version')
-  .description('output your version of Strapi')
+  .description('Output your version of Strapi')
   .action(() => {
     process.stdout.write(packageJSON.version + '\n');
     process.exit(0);
@@ -73,7 +76,7 @@ program
 // `$ strapi console`
 program
   .command('console')
-  .description('open the Strapi framework console')
+  .description('Open the Strapi framework console')
   .action(getLocalScript('console'));
 
 // `$ strapi new`
@@ -94,7 +97,7 @@ program
   .option('--dbauth <dbauth>', 'Authentication Database')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
-  .description('create a new application')
+  .description('Create a new application')
   .action(require('../lib/commands/new'));
 
 // `$ strapi start`
@@ -121,7 +124,7 @@ program
   .option('-e, --extend <api>', 'Name of the plugin to extend')
   .option('-c, --connection <connection>', 'The name of the connection to use')
   .option('--draft-and-publish', 'Enable draft/publish', false)
-  .description('generate a basic API')
+  .description('Generate a basic API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
     getLocalScript('generate')(id, cliArguments);
@@ -133,7 +136,7 @@ program
   .option('-a, --api <api>', 'API name to generate the files in')
   .option('-p, --plugin <api>', 'Name of the local plugin')
   .option('-e, --extend <api>', 'Name of the plugin to extend')
-  .description('generate a controller for an API')
+  .description('Generate a controller for an API')
   .action(getLocalScript('generate'));
 
 // `$ strapi generate:model`
@@ -143,7 +146,7 @@ program
   .option('-p, --plugin <api>', 'plugin name')
   .option('-c, --connection <connection>', 'The name of the connection to use')
   .option('--draft-and-publish', 'Enable draft/publish', false)
-  .description('generate a model for an API')
+  .description('Generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
     getLocalScript('generate')(id, cliArguments);
@@ -154,7 +157,7 @@ program
   .command('generate:policy <id>')
   .option('-a, --api <api>', 'API name')
   .option('-p, --plugin <api>', 'plugin name')
-  .description('generate a policy for an API')
+  .description('Generate a policy for an API')
   .action(getLocalScript('generate'));
 
 // `$ strapi generate:service`
@@ -163,14 +166,14 @@ program
   .option('-a, --api <api>', 'API name')
   .option('-p, --plugin <api>', 'plugin name')
   .option('-t, --tpl <template>', 'template name')
-  .description('generate a service for an API')
+  .description('Generate a service for an API')
   .action(getLocalScript('generate'));
 
 // `$ strapi generate:plugin`
 program
   .command('generate:plugin <id>')
   .option('-n, --name <name>', 'Plugin name')
-  .description('generate a basic plugin')
+  .description('Generate a basic plugin')
   .action(getLocalScript('generate'));
 
 program
@@ -183,13 +186,13 @@ program
 // `$ strapi install`
 program
   .command('install [plugins...]')
-  .description('install a Strapi plugin')
+  .description('Install a Strapi plugin')
   .action(getLocalScript('install'));
 
 // `$ strapi uninstall`
 program
   .command('uninstall [plugins...]')
-  .description('uninstall a Strapi plugin')
+  .description('Uninstall a Strapi plugin')
   .option('-d, --delete-files', 'Delete files', false)
   .action(getLocalScript('uninstall'));
 
@@ -217,9 +220,9 @@ program
 
 // Admin
 program
-  .command('admin:reset-password')
-  .alias('admin:reset')
-  .description('Reset an admin user password')
+  .command('admin:reset-user-password')
+  .alias('admin:reset-password')
+  .description("Reset an admin user's password")
   .option('-e, --email <email>', 'The user email')
   .option('-p, --password <password>', 'New password for the user')
   .action(getLocalScript('admin-reset'));
