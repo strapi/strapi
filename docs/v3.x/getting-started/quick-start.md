@@ -10,6 +10,10 @@ _For a step-by-step guide, please take a look at the following steps. This quick
 
 (Before continuing, please make sure [Node.js and npm are properly installed](../installation/cli.md#step-1-make-sure-requirements-are-met) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
+::: warning
+In the 3.1.5 the **Roles & Permissions** section has been migrated into the **Settings** section.
+:::
+
 ## 1. Install Strapi and Create a new project
 
 :::: tabs
@@ -36,8 +40,7 @@ npx create-strapi-app my-project --quickstart
 
 Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
-- Complete the form to create the first **Administrator** user.
-- Click **Ready to start**.
+Complete the form to create the first **Administrator** user.
 
 ## 3. Create a Restaurant Content Type
 
@@ -104,7 +107,7 @@ You have now seen **two different ways** to use the **relation** field type to a
 
 ## 7. Set Roles and Permissions
 
-Navigate to [**PLUGINS** - **Roles & Permissions**](http://localhost:1337/admin/plugins/users-permissions/roles).
+Navigate to [**SETTINGS** - **User's roles**](http://localhost:1337/admin/settings/users-permissions/roles).
 
 - Click the **Public** Role.
 - Scroll down under **Permissions**, find **Restaurant**. Click the checkbox next to **find** and **findone**.
@@ -121,7 +124,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 - Consume your API with your favorite frameworks, frontend or backend programming languages just below.
 - Learn how to use Strapi with React ([Gatsby](https://strapi.io/blog/build-a-static-blog-with-gatsby-and-strapi) or [Next.js](https://strapi.io/blog/nextjs-react-hooks-strapi-food-app-1)) or Vue.js ([Nuxt.js](https://strapi.io/blog/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
-- Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
+- Get help on [our community forum](https://forum.strapi.io).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
 - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.

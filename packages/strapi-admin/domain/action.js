@@ -10,7 +10,14 @@ const actionFields = [
   'pluginName',
   'subjects',
   'conditions',
+  'options',
 ];
+
+const defaultAction = {
+  options: {
+    fieldsRestriction: true,
+  },
+};
 
 /**
  * Return a prefixed id that depends on the pluginName
@@ -19,22 +26,20 @@ const actionFields = [
  * @param {Object} params.uid - uid defined by the developer
  */
 const getActionId = ({ pluginName, uid }) => {
-  let id = '';
   if (pluginName === 'admin') {
-    id = `admin::${uid}`;
+    return `admin::${uid}`;
   } else if (pluginName) {
-    id = `plugins::${pluginName}.${uid}`;
-  } else {
-    id = `application::${uid}`;
+    return `plugins::${pluginName}.${uid}`;
   }
-  return id;
+
+  return `application::${uid}`;
 };
 
 /**
  * Create a permission action
  * @param {Object} attributes - action attributes
  */
-function createAction(attributes) {
+const createAction = attributes => {
   const action = _.cloneDeep(_.pick(attributes, actionFields));
   action.actionId = getActionId(attributes);
 
@@ -42,10 +47,13 @@ function createAction(attributes) {
     action.subCategory = attributes.subCategory || 'general';
   }
 
-  return action;
-}
+  return _.merge({}, defaultAction, action);
+};
+
+const hasFieldsRestriction = _.matchesProperty('options.fieldsRestriction', true);
 
 module.exports = {
   getActionId,
   createAction,
+  hasFieldsRestriction,
 };

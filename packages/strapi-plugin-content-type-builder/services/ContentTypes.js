@@ -7,26 +7,55 @@ const generator = require('strapi-generate');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { coreUids, pluginsUids } = require('./constants');
+
+const isContentTypeEditable = (contentType = {}) => {
+  const { uid } = contentType;
+  return !uid.startsWith(coreUids.PREFIX) && uid !== pluginsUids.UPLOAD_FILE;
+};
+
+const getRestrictRelationsTo = (contentType = {}) => {
+  const { uid } = contentType;
+  if (uid === coreUids.STRAPI_USER) {
+    return ['oneWay', 'manyWay'];
+  }
+
+  if (uid.startsWith(coreUids.PREFIX) || uid === pluginsUids.UPLOAD_FILE) {
+    return [];
+  }
+
+  return null;
+};
+
+const getformattedName = (contentType = {}) => {
+  const { uid, info } = contentType;
+  const name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
+
+  return name;
+};
 
 /**
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
  */
 const formatContentType = contentType => {
-  const { uid, kind, modelName, plugin, connection, collectionName, info } = contentType;
+  const { uid, kind, modelName, plugin, connection, collectionName, info, options } = contentType;
 
   return {
     uid,
     plugin,
     apiID: modelName,
     schema: {
-      name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
+      name: getformattedName(contentType),
       description: _.get(info, 'description', ''),
+      draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       connection,
       kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
+      editable: isContentTypeEditable(contentType),
+      restrictRelationsTo: getRestrictRelationsTo(contentType),
     },
   };
 };
@@ -145,7 +174,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
     try {
       await apiHandler.clear(uid);
 
-      // generate new api squeleton
+      // generate new api skeleton
       await generateAPI({
         name: updatedContentType.schema.info.name,
         kind: updatedContentType.schema.kind,
@@ -190,6 +219,5 @@ module.exports = {
   createContentType,
   editContentType,
   deleteContentType,
-
   formatContentType,
 };

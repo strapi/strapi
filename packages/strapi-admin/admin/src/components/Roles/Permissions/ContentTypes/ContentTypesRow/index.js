@@ -79,9 +79,14 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     return getAttributesByModel(contentType, components);
   }, [contentType, components]);
 
+  const contentTypesActions = useMemo(
+    () => permissionsLayout.filter(layout => layout.subjects.includes(contentType.uid)),
+    [contentType, permissionsLayout]
+  );
+
   const allActionsSize = useMemo(() => {
-    return attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length + permissionsLayout.length;
-  }, [attributes, permissionsLayout]);
+    return attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length + contentTypesActions.length;
+  }, [attributes, contentTypesActions]);
 
   const hasContentTypeAction = useCallback(
     action => get(contentTypesPermissions, [contentType.uid, 'contentTypeActions', action], false),
@@ -163,6 +168,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     onContentTypeConditionsSelect({ subject: contentType.uid, conditions });
   };
 
+  const permissionsToDisplay = useMemo(() => {
+    return permissionsLayout.filter(permission => permission.subjects.includes(contentType.uid));
+  }, [contentType, permissionsLayout]);
+
   return (
     <RowWrapper withMargin={index % 2 !== 0}>
       <StyledRow disabled={isSuperAdmin} isActive={isActive} isGrey={index % 2 === 0}>
@@ -200,7 +209,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
             </CollapseLabel>
           </PermissionName>
           <PermissionWrapper disabled>
-            {permissionsLayout.map(permissionLayout =>
+            {permissionsToDisplay.map(permissionLayout =>
               !isAttributeAction(permissionLayout.action) ? (
                 <PermissionCheckbox
                   key={permissionLayout.action}

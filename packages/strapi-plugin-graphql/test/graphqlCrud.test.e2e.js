@@ -179,7 +179,7 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
-    test('List posts with `created_by` and `updated_by`', async () => {
+    test.skip('List posts with `created_by` and `updated_by`', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {

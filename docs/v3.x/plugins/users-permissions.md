@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
+To access the plugin admin panel, click on the **Settings** link in the left menu and then everything will be under the **USERS & PERMISSIONS PLUGIN** section.
 
 ## Concept
 
@@ -164,9 +164,9 @@ Let's say that strapi's backend is located at: strapi.website.com.
 Let's say that your app frontend is located at: website.com.
 
 1. The user goes on your frontend app (`https://website.com`) and click on your button `connect with Github`.
-2. The frontend redirect the tab to `https://strapi.website.com/connect/github` that calls the backend.
-3. The backend redirects the tab to the github login page where the user logs in.
-4. Once done, Github redirects the tab to `https://strapi.website.com/connect/github/callback?code=abcdef` that calls the backend
+2. The frontend redirect the tab to the backend URL: `https://strapi.website.com/connect/github`.
+3. The backend redirects the tab to the GitHub login page where the user logs in.
+4. Once done, Github redirects the tab to the backend URL:`https://strapi.website.com/connect/github/callback?code=abcdef`.
 5. The backend uses the given `code` to get from Github an `access_token` that can be used for a period of time to make authorized requests to Github to get the user info (the email of the user of example).
 6. Then, the backend redirects the tab to the url of your choice with the param `access_token` (example: `http://website.com/connect/github/redirect?access_token=eyfvg`)
 7. The frontend (`http://website.com/connect/github/redirect`) calls the backend with `https://strapi.website.com/auth/github/callback?access_token=eyfvg` that returns the strapi user profile with its `jwt`. <br> (Under the hood, the backend asks Github for the user's profile and a match is done on Github user's email address and Strapi user's email address)
@@ -314,6 +314,42 @@ Wait a few seconds while the application is created.
   - **Client ID**: 226437944084-o2mojv5i4lfnng9q8kq3jkf5v03avemk.apps.googleusercontent.com
   - **Client Secret**: aiTbMoiuJQflSBy6uQrfgsni
   - **The redirect URL to your front-end app**: `http://localhost:3000/connect/google/redirect`
+
+:::
+
+::: tab AWS Cognito
+
+#### Using ngrok
+
+AWS Cognito accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
+#### AWS Cognito configuration
+
+- Visit the AWS Management Console <br> [https://aws.amazon.com/console/](https://aws.amazon.com/console/)
+- If needed, select your **Region** in the top right corner next to the Support dropdown
+- Select the **Services** dropdown in the top left corner
+- Click on **Cognito** in the `Security, Identity & Compliance` section
+- Then click on the **Manage User Pools** button
+- If applicable either create or use an existing user pool. You will find hereafter a tutorial to create a User Pool <br> [https://docs.aws.amazon.com/cognito/latest/developerguide/tutorial-create-user-pool.html](https://docs.aws.amazon.com/cognito/latest/developerguide/tutorial-create-user-pool.html)
+- Go to the **App clients** section in your cognito user pool and create a new client with the name `Strapi Auth` and set all the parameters and then click on **Create app client**
+- You should now have an **App client id** and by clicking on the button **Show Details** you will be able to see the **App client secret**. Do copy those two values **App client id** and **App client secret** somewhere for later use when configuring the AWS Cognito provider in Strapi.
+- Go to the **App integration section** and click on **App client settings**
+- Look for your app client named `Strapi Auth` and enable Cognito User Pool by checking it in the **Enabled Identity Providers** section of your newly created App client
+- Fill in your callback URL and Sign out URL with the value `http://localhost:1337/connect/cognito/callback` or the one provided by your AWS Cognito provider in Strapi
+- In the **Oauth 2.0** section select `Authorization code grant` and `Implicit grant` for the **Allowed OAuth Flows** and select `email`, `openid` and `profile` for the **Allowed OAuth Scopes**
+- You can now click on **Save changes** and if you have already configured your domain name then you should be able to see a link to the **Launch Hosted UI**. You can click on it in order to display the AWS Cognito login page. In case you haven't yet configured your domain name, use the link **Choose domain name** at the bottom right of the page in order to configure your domain name. On that page you will have an `Amazon Cognito Domain` section where a `Domain prefix` is already setup. Type a domain prefix to use for the sign-up and sign-in pages that are hosted by Amazon Cognito, this domain prefix together with the `.auth.YOUR_REGION.amazoncognito.com` will be the **Host URI (Subdomain)** value for your strapi configuration later on.
+
+#### Strapi configuration
+
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
+- Click on the **Cognito** provider
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: fill in the **App client id** (`5bd7a786qdupjmi0b3s10vegdt`)
+  - **Client Secret**: fill in the **App client secret** (`19c5c78dsfsdfssfsdfhpdb4nkpb145vesdfdsfsffgh7vwd6g45jlipbpb`)
+  - **Host URI (Subdomain)**: fill in the URL value that you copied earlier (`myapp67b50345-67b50b17-local.auth.eu-central-1.amazoncognito.com`)
+  - **The redirect URL to your front-end app**: if you are using strapi react-login [https://github.com/strapi/strapi-examples/tree/master/login-react/](https://github.com/strapi/strapi-examples/tree/master/login-react/) use `http://localhost:3000/connect/cognito/redirect` but if you do not yet have a front-end app to test your Cognito configuration you can then use the following URL `http://localhost:1337/auth/cognito/callback`
 
 :::
 
@@ -575,7 +611,7 @@ In the following section we will detail steps 3. and 7..
 This action sends an email to a user with the link to your own reset password page.
 The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
 
-First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+First, you must specify the url to your reset password page in the admin panel: **Settings > USERS & PERMISSIONS PLUGIN > Advanced Settings > Reset Password Page**.
 
 Then, your **forgotten password page** has to make the following request to your backend.
 

@@ -127,6 +127,7 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build', false)
   .option('--watch-admin', 'Enable watch', true)
+  .option('--browser <name>', 'Open the browser', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
@@ -137,6 +138,7 @@ program
   .option('-p, --plugin <api>', 'Name of the local plugin')
   .option('-e, --extend <api>', 'Name of the plugin to extend')
   .option('-c, --connection <connection>', 'The name of the connection to use')
+  .option('--draft-and-publish <value>', 'Enable draft/publish', false)
   .description('generate a basic API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
@@ -158,6 +160,7 @@ program
   .option('-a, --api <api>', 'API name to generate a sub API')
   .option('-p, --plugin <api>', 'plugin name')
   .option('-c, --connection <connection>', 'The name of the connection to use')
+  .option('--draft-and-publish <value>', 'Enable draft/publish', false)
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
@@ -211,6 +214,7 @@ program
 //   `$ strapi watch-admin`
 program
   .command('watch-admin')
+  .option('--browser <name>', 'Open the browser', true)
   .description('Starts the admin dev server')
   .action(getLocalScript('watchAdmin'));
 

@@ -173,6 +173,7 @@ module.exports = ({ env }) => ({
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `host` | Host name | string | `localhost` |
 | `port` | Port on which the server should be running. | integer | `1337` |
+| `socket` | Listens on a socket. Host and port are cosmetic when this option is provided and likewise use `url` to generate proper urls when using this option. This option is useful for running a server without exposing a port and using proxy servers on the same machine (e.g [Heroku nginx buildpack](https://github.com/heroku/heroku-buildpack-nginx#requirements-proxy-mode)) | string \| integer | `/tmp/nginx.socket` |
 | `emitErrors` | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services. | boolean | `false` |
 | `url` | Public url of the server. Required for many different features (ex: reset password, third login providers etc.). Also enables proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. The url can be relative, if so, it is used with `http://${host}:${port}` as the base url. An absolute url is however **recommended**.| string | `''` |
 |`proxy`| Set the koa variable `app.proxy`. When `true`, proxy header fields will be trusted. |boolean|`false`|
@@ -191,6 +192,25 @@ module.exports = ({ env }) => ({
 | `admin.forgotPassword.emailTemplate` | Email template as defined in [email plugin](../plugins/email.md#programmatic-usage) | Object | [Default template](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/config/email-templates/forgot-password.js) |
 | `admin.forgotPassword.from` | Sender mail address | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
 | `admin.forgotPassword.replyTo` | Default address or addresses the receiver is asked to reply to | string | Default value defined in your [provider configuration](../plugins/email.md#configure-the-plugin) |
+
+## API
+
+**Path —** `./config/api.js`.
+
+```js
+module.exports = ({ env }) => ({
+  responses: {
+    privateAttributes: ['_v', 'id', 'created_at'],
+  },
+});
+```
+
+**Available options**
+
+| Property                      | Description                                                                                                                                                       | Type         | Default |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------- |
+| `responses`                   | Global API response configuration                                                                                                                                 | Object       |         |
+| `responses.privateAttributes` | Set of globally defined attributes to be treated as private. E.g. `_v` when using MongoDb or timestamps like `created_at`, `updated_at` can be treated as private | String array | `[]`    |
 
 ## Functions
 
@@ -344,21 +364,20 @@ You can find [supported database and versions](../installation/cli.md#databases)
       - `database` (string): Database name.
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
-      - `options` (object): List of additional options used by the connector.
       - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
       - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
-      - `ssl` (boolean): For ssl database connection.
+      - `ssl` (boolean/object): For ssl database connection. Object is used to pass certificate files as strings.
     - `options` Options used for database connection.
       - `debug` (boolean): Show database exchanges and errors.
       - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
-      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
-        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
-        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
-        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
-        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
-        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
-        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
-        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
+      - `pool` Options used for database connection pooling. For default value and more information, look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
+        - `min` (integer): Minimum number of connections to keep in the pool.
+        - `max` (integer): Maximum number of connections to keep in the pool.
+        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool.
+        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool.
+        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections.
+        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds.
+        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds.
 
 :::
 
@@ -412,6 +431,18 @@ module.exports = ({ env }) => ({
     },
   },
 });
+```
+
+Please note that if you need client side SSL CA verification you will need to use the `ssl:{}` object with the fs module to convert your CA certificate to a string. You can see an example below:
+
+```js
+settings: {
+  client: 'postgres',
+  ...
+  ssl: {
+    ca: fs.readFileSync(`${__dirname}/path/to/your/ca-certificate.crt`).toString(),
+  }
+},
 ```
 
 :::

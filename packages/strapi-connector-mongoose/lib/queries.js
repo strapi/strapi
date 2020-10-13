@@ -5,6 +5,9 @@
 
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const populateQueries = require('./utils/populate-queries');
+const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
@@ -16,12 +19,32 @@ module.exports = ({ model, strapi }) => {
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
   );
+  const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(model);
 
   const excludedKeys = assocKeys.concat(componentKeys);
 
-  const defaultPopulate = model.associations
-    .filter(ast => ast.autoPopulate !== false)
-    .map(ast => ast.alias);
+  const defaultPopulate = (options = {}) =>
+    model.associations
+      .filter(ast => ast.autoPopulate !== false)
+      .map(ast => {
+        const assocModel = strapi.db.getModelByAssoc(ast);
+        const populate = {
+          path: ast.alias,
+          options: { publicationState: options.publicationState },
+        };
+
+        if (
+          contentTypesUtils.hasDraftAndPublish(assocModel) &&
+          DP_PUB_STATES.includes(options.publicationState)
+        ) {
+          populate.match = _.merge(
+            populate.match,
+            populateQueries.publicationState[options.publicationState]
+          );
+        }
+
+        return populate;
+      });
 
   const pickRelations = values => {
     return _.pick(values, assocKeys);
@@ -30,8 +53,7 @@ module.exports = ({ model, strapi }) => {
   const omitExernalValues = values => {
     return _.omit(values, excludedKeys);
   };
-
-  async function createComponents(entry, values, { session = null } = {}) {
+  async function createComponents(entry, values, { isDraft, session = null } = {}) {
     if (componentKeys.length === 0) return;
 
     for (let key of componentKeys) {
@@ -43,7 +65,7 @@ module.exports = ({ model, strapi }) => {
 
         const componentModel = strapi.components[component];
 
-        if (required === true && !_.has(values, key)) {
+        if (!isDraft && required === true && !_.has(values, key)) {
           const err = new Error(`Component ${key} is required`);
           err.status = 400;
           throw err;
@@ -54,7 +76,6 @@ module.exports = ({ model, strapi }) => {
         const componentValue = values[key];
 
         if (repeatable === true) {
-          validateRepeatableInput(componentValue, { key, ...attr });
           const components = await Promise.all(
             componentValue.map(value => {
               return strapi.query(component).create(value, { session });
@@ -69,7 +90,6 @@ module.exports = ({ model, strapi }) => {
           entry[key] = componentsArr;
           await entry.save({ session });
         } else {
-          validateNonRepeatableInput(componentValue, { key, ...attr });
           if (componentValue === null) continue;
 
           const componentEntry = await strapi.query(component).create(componentValue, { session });
@@ -86,7 +106,7 @@ module.exports = ({ model, strapi }) => {
       if (type === 'dynamiczone') {
         const { required = false } = attr;
 
-        if (required === true && !_.has(values, key)) {
+        if (!isDraft && required === true && !_.has(values, key)) {
           const err = new Error(`Dynamiczone ${key} is required`);
           err.status = 400;
           throw err;
@@ -95,8 +115,6 @@ module.exports = ({ model, strapi }) => {
         if (!_.has(values, key)) continue;
 
         const dynamiczoneValues = values[key];
-
-        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
 
         const dynamiczones = await Promise.all(
           dynamiczoneValues.map(value => {
@@ -160,8 +178,6 @@ module.exports = ({ model, strapi }) => {
         const componentValue = values[key];
 
         if (repeatable === true) {
-          validateRepeatableInput(componentValue, { key, ...attr });
-
           await deleteOldComponents(entry, componentValue, {
             key,
             componentModel,
@@ -179,8 +195,6 @@ module.exports = ({ model, strapi }) => {
           entry[key] = componentsArr;
           await entry.save({ session });
         } else {
-          validateNonRepeatableInput(componentValue, { key, ...attr });
-
           await deleteOldComponents(entry, componentValue, {
             key,
             componentModel,
@@ -206,8 +220,6 @@ module.exports = ({ model, strapi }) => {
 
       if (type === 'dynamiczone') {
         const dynamiczoneValues = values[key];
-
-        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
 
         await deleteDynamicZoneOldComponents(entry, dynamiczoneValues, {
           key,
@@ -397,9 +409,8 @@ module.exports = ({ model, strapi }) => {
   }
 
   function find(params, populate, { session = null } = {}) {
-    const populateOpt = populate || defaultPopulate;
-
     const filters = convertRestQueryParams(params);
+    const populateOpt = populate || defaultPopulate({ publicationState: filters.publicationState });
 
     return buildQuery({
       model,
@@ -429,11 +440,17 @@ module.exports = ({ model, strapi }) => {
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
 
+    if (hasDraftAndPublish) {
+      data[PUBLISHED_AT_ATTRIBUTE] = _.has(values, PUBLISHED_AT_ATTRIBUTE)
+        ? values[PUBLISHED_AT_ATTRIBUTE]
+        : new Date();
+    }
+
     // Create entry with no-relational data.
     // When specify options, data must be an array.
     const [entry] = await model.create([data], { session });
-
-    await createComponents(entry, values, { session });
+    const isDraft = contentTypesUtils.isDraft(entry, model);
+    await createComponents(entry, values, { session, isDraft });
 
     // Create relational data and return the entry.
     return model.updateRelations(
@@ -483,7 +500,7 @@ module.exports = ({ model, strapi }) => {
   async function deleteOne(id, { session = null } = {}) {
     const entry = await model
       .findOneAndRemove({ [model.primaryKey]: id }, { session })
-      .populate(defaultPopulate);
+      .populate(defaultPopulate());
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -499,9 +516,8 @@ module.exports = ({ model, strapi }) => {
   }
 
   function search(params, populate, { session = null } = {}) {
-    const populateOpt = populate || defaultPopulate;
-
     const filters = convertRestQueryParams(_.omit(params, '_q'));
+    const populateOpt = populate || defaultPopulate({ publicationState: filters.publicationState });
 
     return buildQuery({
       model,
@@ -534,90 +550,3 @@ module.exports = ({ model, strapi }) => {
     countSearch,
   };
 };
-
-function validateRepeatableInput(value, { key, min, max, required }) {
-  if (!Array.isArray(value)) {
-    const err = new Error(`Component ${key} is repetable. Expected an array`);
-    err.status = 400;
-    throw err;
-  }
-
-  value.forEach(val => {
-    if (typeof val !== 'object' || Array.isArray(val) || val === null) {
-      const err = new Error(
-        `Component ${key} has invalid items. Expected each items to be objects`
-      );
-      err.status = 400;
-      throw err;
-    }
-  });
-
-  if ((required === true || (required !== true && value.length > 0)) && min && value.length < min) {
-    const err = new Error(`Component ${key} must contain at least ${min} items`);
-    err.status = 400;
-    throw err;
-  }
-
-  if (max && value.length > max) {
-    const err = new Error(`Component ${key} must contain at most ${max} items`);
-    err.status = 400;
-    throw err;
-  }
-}
-
-function validateNonRepeatableInput(value, { key, required }) {
-  if (typeof value !== 'object' || Array.isArray(value)) {
-    const err = new Error(`Component ${key} should be an object`);
-    err.status = 400;
-    throw err;
-  }
-
-  if (required === true && value === null) {
-    const err = new Error(`Component ${key} is required`);
-    err.status = 400;
-    throw err;
-  }
-}
-
-function validateDynamiczoneInput(value, { key, min, max, components, required }) {
-  if (!Array.isArray(value)) {
-    const err = new Error(`Dynamiczone ${key} is invalid. Expected an array`);
-    err.status = 400;
-    throw err;
-  }
-
-  value.forEach(val => {
-    if (typeof val !== 'object' || Array.isArray(val) || val === null) {
-      const err = new Error(
-        `Dynamiczone ${key} has invalid items. Expected each items to be objects`
-      );
-      err.status = 400;
-      throw err;
-    }
-
-    if (!_.has(val, '__component')) {
-      const err = new Error(
-        `Dynamiczone ${key} has invalid items. Expected each items to have a valid __component key`
-      );
-      err.status = 400;
-      throw err;
-    } else if (!components.includes(val.__component)) {
-      const err = new Error(
-        `Dynamiczone ${key} has invalid items. Each item must have a __component key that is present in the attribute definition`
-      );
-      err.status = 400;
-      throw err;
-    }
-  });
-
-  if ((required === true || (required !== true && value.length > 0)) && min && value.length < min) {
-    const err = new Error(`Dynamiczone ${key} must contain at least ${min} items`);
-    err.status = 400;
-    throw err;
-  }
-  if (max && value.length > max) {
-    const err = new Error(`Dynamiczone ${key} must contain at most ${max} items`);
-    err.status = 400;
-    throw err;
-  }
-}

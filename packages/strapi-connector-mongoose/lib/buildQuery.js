@@ -3,7 +3,11 @@
 const _ = require('lodash');
 var semver = require('semver');
 const utils = require('./utils')();
-const { hasDeepFilters } = require('strapi-utils');
+const populateQueries = require('./utils/populate-queries');
+const {
+  hasDeepFilters,
+  contentTypes: { hasDraftAndPublish },
+} = require('strapi-utils');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -69,7 +73,7 @@ const BOOLEAN_OPERATORS = ['or'];
  * Build a mongo query
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  * @param {boolean} options.aggregate - Force aggregate function to use group by feature
  */
@@ -105,10 +109,10 @@ const buildSimpleQuery = ({ model, filters, search, populate }, { session }) => 
 
   const findCriteria = combineSearchAndWhere(search, wheres);
   let query = model
-    .find(findCriteria)
+    .find(findCriteria, null, { publicationState: filters.publicationState })
     .session(session)
     .populate(populate);
-  query = applyQueryParams({ query, filters });
+  query = applyQueryParams({ model, query, filters });
 
   return Object.assign(query, {
     // Override count to use countDocuments on simple find query
@@ -122,7 +126,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }, { session }) => 
  * Builds a deep aggregate query when there are deep filters
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
 const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
@@ -132,6 +136,7 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
     populate,
     where: filters.where,
   });
+  const customQueryOptions = _.pick(filters, ['publicationState']);
 
   // Init the query
   let query = model
@@ -157,15 +162,19 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
           if (ids.length === 0) return [];
 
           const query = model
-            .find({
-              _id: {
-                $in: ids,
+            .find(
+              {
+                _id: {
+                  $in: ids,
+                },
               },
-            })
+              null,
+              { custom: customQueryOptions }
+            )
             .session(session)
             .populate(populate);
 
-          return applyQueryParams({ query, filters });
+          return applyQueryParams({ model, query, filters });
         })
         .then(...args);
     },
@@ -203,7 +212,7 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
  * @param {Object} options.query - Mongoose query
  * @param {Object} options.filters - Filters object
  */
-const applyQueryParams = ({ query, filters }) => {
+const applyQueryParams = ({ model, query, filters }) => {
   // Apply sort param
   if (_.has(filters, 'sort')) {
     const sortFilter = filters.sort.reduce((acc, sort) => {
@@ -223,6 +232,15 @@ const applyQueryParams = ({ query, filters }) => {
   // Apply limit param
   if (_.has(filters, 'limit') && filters.limit >= 0) {
     query = query.limit(filters.limit);
+  }
+
+  // Apply publication state param
+  if (_.has(filters, 'publicationState')) {
+    const populateQuery = populateQueries.publicationState[filters.publicationState];
+
+    if (hasDraftAndPublish(model) && populateQuery) {
+      query = query.where(populateQuery);
+    }
   }
 
   return query;
@@ -426,6 +444,7 @@ const buildLookupMatch = ({ assoc }) => {
  * Match query for lookups
  * @param {Object} model - Mongoose model
  * @param {Object} filters - Filters object
+ * @param {Array} search
  */
 const buildQueryMatches = (model, filters, search = []) => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
@@ -619,7 +638,7 @@ const findModelByPath = ({ rootModel, path }) => {
  * @param {string} options.path - Attribute path
  */
 const findModelPath = ({ rootModel, path }) => {
-  const parts = path.split('.');
+  const parts = (_.isObject(path) ? path.path : path).split('.');
 
   let tmpModel = rootModel;
   let tmpPath = [];

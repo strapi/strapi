@@ -44,6 +44,8 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "Редактировать шаблон письма",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Настройки обновлены",
   "plugin.description.long": "Защитите ваш API с помощью процесса полной аутентификации, основанном на JWT. Этот плагин также включает в себя возможности ACL (Access Control List), которые позволят вам настраивать доступы для групп пользователей.",
   "plugin.description.short": "Защитите ваш API с помощью процесса полной аутентификации, основанном на JWT",

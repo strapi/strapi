@@ -331,6 +331,7 @@ const forms = {
         const nameValue = get(data, 'name', null);
         const relationItems = [
           [fields.divider],
+          [fields.private],
           [fields.unique],
           [
             {
@@ -823,6 +824,7 @@ const forms = {
           .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
           .required(errorsTrads.required),
         collectionName: yup.string(),
+        draftAndPublish: yup.boolean(),
         kind: yup.string().oneOf(['singleType', 'collectionType']),
       });
     },
@@ -889,6 +891,25 @@ const forms = {
       advanced() {
         return {
           items: [
+            [
+              {
+                type: 'dividerDraftPublish',
+              },
+            ],
+            [
+              {
+                label: {
+                  id: `${pluginId}.contentType.draftAndPublish.label`,
+                },
+                description: {
+                  id: `${pluginId}.contentType.draftAndPublish.description`,
+                },
+                name: 'draftAndPublish',
+                type: 'bool',
+                validations: {},
+              },
+            ],
+            [fields.divider],
             [
               {
                 autoFocus: true,
