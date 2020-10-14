@@ -61,7 +61,7 @@ module.exports = {
             throw errors.unknownError(`Error deleting on cloudinary: ${response.result}`);
           }
         } catch (error) {
-          throw errors.unknownError(`Error deleting on cloudinary: ${error.error.message}`);
+          throw errors.unknownError(`Error deleting on cloudinary: ${error.message}`);
         }
       },
     };

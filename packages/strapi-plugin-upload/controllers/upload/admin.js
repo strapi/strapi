@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const ACTIONS = {
   read: 'plugins::upload.read',
@@ -98,7 +100,7 @@ module.exports = {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.cannot(ACTIONS.read, fileModel)) {
+    if (userAbility.cannot(ACTIONS.readSettings, fileModel)) {
       return ctx.forbidden();
     }
 
@@ -197,7 +199,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
   const roles = _.has(file, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: file.created_by.id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': file[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
   const fileWithRoles = _.set(_.cloneDeep(file), 'created_by.roles', roles);
 

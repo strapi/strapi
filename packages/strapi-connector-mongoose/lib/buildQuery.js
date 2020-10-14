@@ -4,7 +4,10 @@ const _ = require('lodash');
 var semver = require('semver');
 const utils = require('./utils')();
 const populateQueries = require('./utils/populate-queries');
-const { hasDeepFilters } = require('strapi-utils');
+const {
+  hasDeepFilters,
+  contentTypes: { hasDraftAndPublish },
+} = require('strapi-utils');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -107,7 +110,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
   let query = model
     .find(findCriteria, null, { publicationState: filters.publicationState })
     .populate(populate);
-  query = applyQueryParams({ query, filters });
+  query = applyQueryParams({ model, query, filters });
 
   return Object.assign(query, {
     // Override count to use countDocuments on simple find query
@@ -167,7 +170,7 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
             )
             .populate(populate);
 
-          return applyQueryParams({ query, filters });
+          return applyQueryParams({ model, query, filters });
         })
         .then(...args);
     },
@@ -205,7 +208,7 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
  * @param {Object} options.query - Mongoose query
  * @param {Object} options.filters - Filters object
  */
-const applyQueryParams = ({ query, filters }) => {
+const applyQueryParams = ({ model, query, filters }) => {
   // Apply sort param
   if (_.has(filters, 'sort')) {
     const sortFilter = filters.sort.reduce((acc, sort) => {
@@ -231,7 +234,7 @@ const applyQueryParams = ({ query, filters }) => {
   if (_.has(filters, 'publicationState')) {
     const populateQuery = populateQueries.publicationState[filters.publicationState];
 
-    if (populateQuery) {
+    if (hasDraftAndPublish(model) && populateQuery) {
       query = query.where(populateQuery);
     }
   }
