@@ -619,6 +619,18 @@ module.exports = {
             minItems: min,
             maxItems: max,
           };
+        } else if (['datetime', 'date', 'password'].includes(type)) {
+          acc.properties[current] = {
+            type: 'string',
+            format: this.getFormat(type),
+            description,
+            default: defaultValue,
+            minimum,
+            maxmimun,
+            maxLength,
+            minLength,
+            enum: enumeration,
+          };
         } else {
           acc.properties[current] = {
             type,
@@ -1451,11 +1463,9 @@ module.exports = {
       case 'string':
       case 'byte':
       case 'binary':
-      case 'password':
       case 'email':
       case 'text':
       case 'enumeration':
-      case 'date':
       case 'richtext':
         return 'string';
       case 'float':
@@ -1468,6 +1478,20 @@ module.exports = {
         return 'integer';
       case 'json':
         return 'object';
+      default:
+        return type;
+    }
+  },
+
+  /**
+   * Refer to https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#dataTypes
+   * @param {String} type
+   * @returns {String}
+   */
+  getFormat: type => {
+    switch (type) {
+      case 'datetime':
+        return 'date-time';
       default:
         return type;
     }
