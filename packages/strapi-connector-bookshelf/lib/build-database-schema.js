@@ -2,21 +2,29 @@ const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
-const { storeDefinition, didDefinitionOrTableChange } = require('./utils/store-definition');
+const { storeDefinition, didColumnDefinitionChange } = require('./utils/store-definition');
 const { getDraftAndPublishMigrationWay, migrateDraftAndPublish } = require('./database-migration');
 const { getManyRelations } = require('./utils/associations');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
-  const definitionDidChange = await didDefinitionOrTableChange(definition, ORM);
-  if (!definitionDidChange) {
-    return;
-  }
-
+  // Migrations to do before updating/creating the tables in database
   const draftAndPublishMigrationWay = await getDraftAndPublishMigrationWay({ definition, ORM });
   if (draftAndPublishMigrationWay === 'disable') {
     await migrateDraftAndPublish({ definition, ORM, way: 'disable' });
   }
 
+  // Update/create the tables in database
+  await createOrUpdateTables({ ORM, loadedModel, definition, connection, model });
+
+  // Migrations to do after updating/creating the tables in database
+  if (draftAndPublishMigrationWay === 'enable') {
+    await migrateDraftAndPublish({ definition, ORM, way: 'enable' });
+  }
+
+  await storeDefinition(definition, ORM);
+};
+
+const createOrUpdateTables = async ({ ORM, loadedModel, definition, connection, model }) => {
   // Add created_at and updated_at field if timestamp option is true
   if (loadedModel.hasTimestamps) {
     definition.attributes[loadedModel.hasTimestamps[0]] = { type: 'currentTimestamp' };
@@ -102,12 +110,6 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     delete definition.attributes[loadedModel.hasTimestamps[0]];
     delete definition.attributes[loadedModel.hasTimestamps[1]];
   }
-
-  if (draftAndPublishMigrationWay === 'enable') {
-    await migrateDraftAndPublish({ definition, ORM, way: 'enable' });
-  }
-
-  await storeDefinition(definition, ORM);
 };
 
 const isColumn = ({ definition, attribute, name }) => {
@@ -277,21 +279,21 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
     return;
   }
 
-  const columns = Object.keys(attributes);
+  const attributesNames = Object.keys(attributes);
 
   // Fetch existing column
   const columnsExist = await Promise.all(
-    columns.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
+    attributesNames.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
   );
 
   const columnsToAdd = {};
 
   // Get columns to add
   columnsExist.forEach((columnExist, index) => {
-    const attribute = attributes[columns[index]];
+    const attribute = attributes[attributesNames[index]];
 
     if (!columnExist) {
-      columnsToAdd[columns[index]] = attribute;
+      columnsToAdd[attributesNames[index]] = attribute;
     }
   });
 
@@ -302,83 +304,97 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
     });
   }
 
-  if (definition.client === 'sqlite3') {
-    const tmpTable = `tmp_${table}`;
+  const attrNamesWithoutTimestamps = attributesNames.filter(
+    attributeName => !(definition.options.timestamps || []).includes(attributeName)
+  );
+  const changedAttributesResult = await Promise.all(
+    attrNamesWithoutTimestamps.map(attributeName =>
+      didColumnDefinitionChange(attributeName, definition, ORM)
+    )
+  );
+  const columnsToAlter = attrNamesWithoutTimestamps.filter(
+    (attributeName, index) => changedAttributesResult[index]
+  );
 
-    const rebuildTable = async trx => {
-      await trx.schema.renameTable(table, tmpTable);
+  if (columnsToAlter.length > 0) {
+    if (definition.client === 'sqlite3') {
+      const tmpTable = `tmp_${table}`;
 
-      // drop possible conflicting indexes
-      await Promise.all(
-        columns.map(key => trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key)))
-      );
+      const rebuildTable = async trx => {
+        await trx.schema.renameTable(table, tmpTable);
 
-      // create the table
-      await createTable(table, { trx });
-
-      const attrs = Object.keys(attributes).filter(attribute =>
-        isColumn({
-          definition,
-          attribute: attributes[attribute],
-          name: attribute,
-        })
-      );
-
-      const allAttrs = ['id', ...attrs];
-
-      await trx.insert(qb => qb.select(allAttrs).from(tmpTable)).into(table);
-      await trx.schema.dropTableIfExists(tmpTable);
-    };
-
-    try {
-      await ORM.knex.transaction(trx => rebuildTable(trx));
-    } catch (err) {
-      if (err.message.includes('UNIQUE constraint failed')) {
-        strapi.log.error(
-          `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.stack}`
+        // drop possible conflicting indexes
+        await Promise.all(
+          attributesNames.map(key => trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key)))
         );
-      } else {
-        strapi.log.error(`Migration failed`);
-        strapi.log.error(err);
-      }
 
-      return false;
-    }
-  } else {
-    const alterTable = async trx => {
-      await Promise.all(
-        columns.map(col => {
-          return ORM.knex.schema
-            .alterTable(table, tbl => {
-              tbl.dropUnique(col, uniqueColName(table, col));
-            })
-            .catch(() => {});
-        })
-      );
-      await trx.schema.alterTable(table, tbl => {
-        alterColumns(tbl, _.pick(attributes, columns), {
-          tableExists,
+        // create the table
+        await createTable(table, { trx });
+
+        const attrs = attributesNames.filter(attributeName =>
+          isColumn({
+            definition,
+            attribute: attributes[attributeName],
+            name: attributeName,
+          })
+        );
+
+        const allAttrs = ['id', ...attrs];
+
+        await trx.insert(qb => qb.select(allAttrs).from(tmpTable)).into(table);
+        await trx.schema.dropTableIfExists(tmpTable);
+      };
+
+      try {
+        await ORM.knex.transaction(trx => rebuildTable(trx));
+      } catch (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.stack}`
+          );
+        } else {
+          strapi.log.error(`Migration failed`);
+          strapi.log.error(err);
+        }
+
+        return false;
+      }
+    } else {
+      const alterTable = async trx => {
+        await Promise.all(
+          columnsToAlter.map(col => {
+            return ORM.knex.schema
+              .alterTable(table, tbl => {
+                tbl.dropUnique(col, uniqueColName(table, col));
+              })
+              .catch(() => {});
+          })
+        );
+        await trx.schema.alterTable(table, tbl => {
+          alterColumns(tbl, _.pick(attributes, columnsToAlter), {
+            tableExists,
+          });
         });
-      });
-    };
+      };
 
-    try {
-      await ORM.knex.transaction(trx => alterTable(trx));
-    } catch (err) {
-      if (err.code === '23505' && definition.client === 'pg') {
-        strapi.log.error(
-          `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.message}\n\t- ${err.detail}`
-        );
-      } else if (definition.client === 'mysql' && err.errno === 1062) {
-        strapi.log.error(
-          `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
-        );
-      } else {
-        strapi.log.error(`Migration failed`);
-        strapi.log.error(err);
+      try {
+        await ORM.knex.transaction(trx => alterTable(trx));
+      } catch (err) {
+        if (err.code === '23505' && definition.client === 'pg') {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.message}\n\t- ${err.detail}`
+          );
+        } else if (definition.client === 'mysql' && err.errno === 1062) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
+          );
+        } else {
+          strapi.log.error(`Migration failed`);
+          strapi.log.error(err);
+        }
+
+        return false;
       }
-
-      return false;
     }
   }
 };
