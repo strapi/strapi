@@ -55,6 +55,10 @@ const SOCIAL_LINKS = [
     name: 'Forum',
     link: 'https://forum.strapi.io',
   },
+  {
+    name: 'Academy',
+    link: 'https://academy.strapi.io',
+  },
 ];
 
 const HomePage = ({ global: { plugins }, history: { push } }) => {
