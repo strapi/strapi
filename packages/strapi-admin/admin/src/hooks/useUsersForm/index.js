@@ -23,7 +23,10 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         });
       } catch (err) {
         console.error(err.response);
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
     };
 
@@ -83,14 +86,23 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           data,
         });
 
-        strapi.notification.success('notification.success.saved');
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: 'notification.success.saved' },
+        });
       } catch (err) {
         const data = get(err, 'response.payload', { data: {} });
 
         if (has(data, 'data') && typeof data.data === 'string') {
-          strapi.notification.error(data.data);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: data.data,
+          });
         } else {
-          strapi.notification.error(data.message);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: data.message,
+          });
         }
 
         const apiErrors = formatAPIErrors(data);
