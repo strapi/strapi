@@ -19,11 +19,13 @@ describe('<Admin />', () => {
     props = {
       admin: {
         appError: false,
+        latestStrapiReleaseTag: '3',
       },
       disableGlobalOverlayBlocker: jest.fn(),
       emitEvent: jest.fn(),
       enableGlobalOverlayBlocker: jest.fn(),
       getInfosDataSucceeded: jest.fn(),
+      getStrapiLatestReleaseSucceeded: jest.fn(),
       getUserPermissions: jest.fn(),
       getUserPermissionsError: jest.fn(),
       getUserPermissionsSucceeded: jest.fn(),
@@ -43,6 +45,7 @@ describe('<Admin />', () => {
       intl: {
         formatMessage: jest.fn(),
       },
+
       location: {},
       setAppError: jest.fn(),
       showGlobalAppBlocker: jest.fn(),
