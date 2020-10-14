@@ -410,3 +410,20 @@ heroku open
 Like with project updates on Heroku, the file system doesn't support local uploading of files as they will be wiped when Heroku "Cycles" the dyno. This type of file system is called [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem), which means the file system only lasts until the dyno is restarted (with Heroku this happens any time you redeploy or during their regular restart which can happen every few hours or every day).
 
 Due to Heroku's filesystem you will need to use an upload provider such as AWS S3, Cloudinary, or Rackspace. You can view the documentation for installing providers [here](../plugins/upload.md#install-providers) and you can see a list of providers from both Strapi and the community on [npmjs.com](https://www.npmjs.com/search?q=strapi-provider-upload-&page=0&perPage=20).
+
+### Gzip
+
+As of version `3.2.1`, Strapi uses [`koa-compress`](https://github.com/koajs/compress) v5, which enables [Brotli](https://en.wikipedia.org/wiki/Brotli) compression by default. At the time of writing, the default configuration for Brotli results in poor performance, causing very slow response times and potentially response timeouts. If you plan on enabling the [gzip middleware](../concepts/middlewares.html#core-middleware-configurations), it is recommended that you disable Brotli or define better configuration params.
+
+To disable Brotli, provide the following configuration in `config/middleware.js`.
+
+```jsonify
+gzip: {
+  enabled: true,
+  options: {
+    br: false
+  }
+},
+```
+
+For more on Brotli configuration for `koa-compress`, reference [this issue](https://github.com/koajs/compress/issues/121).
