@@ -4,6 +4,7 @@ import { request } from 'strapi-helper-plugin';
 import { GET_DOC_INFOS, ON_CONFIRM_DELETE_DOC, ON_UPDATE_DOC, ON_SUBMIT } from './constants';
 import { getDocInfosSucceeded, setFormErrors } from './actions';
 import { makeSelectVersionToDelete, makeSelectPrefix, makeSelectForm } from './selectors';
+import getTrad from '../../utils/getTrad';
 
 /* eslint-disable consistent-return */
 
@@ -32,7 +33,7 @@ function* deleteDoc() {
       yield call(getData);
       strapi.notification.toggle({
         type: 'info',
-        message: { id: 'notification.delete.success' },
+        message: { id: getTrad('notification.delete.success') },
       });
     }
   } catch (err) {
@@ -73,7 +74,7 @@ function* submit() {
 
     strapi.notification.toggle({
       type: 'success',
-      message: { id: 'documentation.notification.update.success' },
+      message: { id: getTrad('notification.update.success') },
     });
   } catch (err) {
     strapi.notification.toggle({
@@ -96,7 +97,7 @@ function* updateDoc(action) {
       yield call(getData);
       strapi.notification.toggle({
         type: 'info',
-        message: { id: 'notification.generate.success' },
+        message: { id: getTrad('notification.generate.success') },
       });
     }
   } catch (err) {

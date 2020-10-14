@@ -16,7 +16,6 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
     it('should add a notification', () => {
       const action = {
         type: SHOW_NEW_NOTIFICATION,
-        id: 1,
         config: {
           type: 'success',
           message: {
@@ -26,11 +25,12 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
       };
       const initialState = {
         notifications: [],
+        notifId: 0,
       };
       const expected = {
         notifications: [
           {
-            id: 1,
+            id: 0,
             type: 'success',
             message: { id: 'notification.message' },
             title: null,
@@ -41,6 +41,7 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
             onClose: null,
           },
         ],
+        notifId: 1,
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

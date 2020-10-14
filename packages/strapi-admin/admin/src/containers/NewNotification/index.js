@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
 
@@ -32,4 +32,4 @@ const NotificationsContainer = () => {
   );
 };
 
-export default NotificationsContainer;
+export default memo(NotificationsContainer);

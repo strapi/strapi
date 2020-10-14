@@ -29,7 +29,7 @@ const Notification = ({ notification }) => {
   const dispatch = useDispatch();
   const { title, message, link, type, id, onClose, timeout, blockTransition } = notification;
 
-  const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg));
+  const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
 
   const handleClose = useCallback(() => {
     if (onClose) {
@@ -53,8 +53,7 @@ const Notification = ({ notification }) => {
     }
 
     return () => clearTimeout(timeoutToClear);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockTransition]);
+  }, [blockTransition, handleClose, timeout]);
 
   return (
     <NotificationWrapper color={types[type].color}>
