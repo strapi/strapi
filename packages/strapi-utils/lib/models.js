@@ -79,7 +79,7 @@ module.exports = {
         throw new Error(
           `The collection \`${_.upperFirst(
             attribute.collection
-          )}\` is missing from the models ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+          )}\` is missing from the ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''} models`
         );
       }
       const relatedAttribute = models[attribute.collection].attributes[attribute.via];
