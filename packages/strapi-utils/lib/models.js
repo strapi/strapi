@@ -91,7 +91,7 @@ module.exports = {
         throw new Error(
           `The attribute \`${attribute.via}\` is missing in the model ${_.upperFirst(
             attribute.collection
-          )} ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+          )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
         );
       }
 
@@ -117,8 +117,8 @@ module.exports = {
         throw new Error(
           `The attribute \`${
             attribute.via
-          }\` is not correctly configured in the model ${_.upperFirst(attribute.collection)} ${
-            attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''
+          }\` is not correctly configured in the model ${_.upperFirst(attribute.collection)}${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
           }`
         );
       }
@@ -142,7 +142,7 @@ module.exports = {
         throw new Error(
           `The attribute \`${attribute.via}\` is missing in the model ${_.upperFirst(
             attribute.model
-          )} ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+          )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
         );
       }
 
@@ -161,8 +161,8 @@ module.exports = {
         throw new Error(
           `The attribute \`${
             attribute.via
-          }\` is not correctly configured in the model ${_.upperFirst(attribute.model)} ${
-            attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''
+          }\` is not correctly configured in the model ${_.upperFirst(attribute.model)}${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
           }`
         );
       }
@@ -212,7 +212,7 @@ module.exports = {
       throw new Error(
         `The attribute \`${attributeName}\` is not correctly configured in the model ${_.upperFirst(
           modelName
-        )} ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+        )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
       );
     }
 
