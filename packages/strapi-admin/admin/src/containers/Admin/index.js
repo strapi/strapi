@@ -23,7 +23,7 @@ import {
   CheckPagePermissions,
   request,
 } from 'strapi-helper-plugin';
-import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
+import { SETTINGS_BASE_URL, SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
 
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
@@ -47,6 +47,7 @@ import {
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
 import {
+  getStrapiLatestReleaseSucceeded,
   getUserPermissions,
   getUserPermissionsError,
   getUserPermissionsSucceeded,
@@ -121,6 +122,49 @@ export class Admin extends React.Component {
     }
   };
 
+  fetchStrapiLatestRelease = async () => {
+    const {
+      global: { strapiVersion },
+      getStrapiLatestReleaseSucceeded,
+    } = this.props;
+
+    if (!STRAPI_UPDATE_NOTIF) {
+      return;
+    }
+
+    try {
+      const {
+        data: { tag_name },
+      } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
+
+      getStrapiLatestReleaseSucceeded(tag_name);
+
+      const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
+
+      if (!showUpdateNotif) {
+        return;
+      }
+
+      if (`v${strapiVersion}` !== tag_name) {
+        strapi.notification.toggle({
+          type: 'info',
+          message: { id: 'notification.version.update.message' },
+          link: {
+            url: `https://github.com/strapi/strapi/releases/tag/${tag_name}`,
+            label: {
+              id: 'notification.version.update.link',
+            },
+          },
+          blockTransition: true,
+
+          onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
+        });
+      }
+    } catch (err) {
+      // Silent
+    }
+  };
+
   fetchUserPermissions = async (resetState = false) => {
     const { getUserPermissions, getUserPermissionsError, getUserPermissionsSucceeded } = this.props;
 
@@ -149,6 +193,7 @@ export class Admin extends React.Component {
 
   initApp = async () => {
     await this.fetchAppInfo();
+    await this.fetchStrapiLatestRelease();
     await this.fetchUserPermissions(true);
   };
 
@@ -188,7 +233,7 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: { isLoading, userPermissions },
+      admin: { isLoading, latestStrapiReleaseTag, userPermissions },
       global: {
         autoReload,
         blockApp,
@@ -229,14 +274,21 @@ export class Admin extends React.Component {
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
         fetchUserPermissions={this.fetchUserPermissions}
         formatMessage={formatMessage}
+        latestStrapiReleaseTag={latestStrapiReleaseTag}
         menu={this.menuRef.current}
         plugins={plugins}
         settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
+        strapiVersion={strapiVersion}
         updatePlugin={updatePlugin}
       >
         <UserProvider value={userPermissions}>
           <Wrapper>
-            <LeftMenu version={strapiVersion} plugins={plugins} ref={this.menuRef} />
+            <LeftMenu
+              latestStrapiReleaseTag={latestStrapiReleaseTag}
+              version={strapiVersion}
+              plugins={plugins}
+              ref={this.menuRef}
+            />
             <NavTopRightWrapper>
               {/* Injection zone not ready yet */}
               <Logout />
@@ -293,11 +345,13 @@ Admin.propTypes = {
   admin: PropTypes.shape({
     appError: PropTypes.bool,
     isLoading: PropTypes.bool,
+    latestStrapiReleaseTag: PropTypes.string.isRequired,
     userPermissions: PropTypes.array,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getInfosDataSucceeded: PropTypes.func.isRequired,
+  getStrapiLatestReleaseSucceeded: PropTypes.func.isRequired,
   getUserPermissions: PropTypes.func.isRequired,
   getUserPermissionsError: PropTypes.func.isRequired,
   getUserPermissionsSucceeded: PropTypes.func.isRequired,
@@ -331,6 +385,7 @@ export function mapDispatchToProps(dispatch) {
       disableGlobalOverlayBlocker,
       enableGlobalOverlayBlocker,
       getInfosDataSucceeded,
+      getStrapiLatestReleaseSucceeded,
       getUserPermissions,
       getUserPermissionsError,
       getUserPermissionsSucceeded,

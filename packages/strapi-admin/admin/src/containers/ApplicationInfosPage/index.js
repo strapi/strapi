@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Header } from '@buffetjs/custom';
 import { Flex, Padded, Text } from '@buffetjs/core';
 import { useSelector } from 'react-redux';
@@ -8,14 +8,19 @@ import BaselineAlignement from '../../components/BaselineAlignement';
 import Bloc from '../../components/Bloc';
 import PageTitle from '../../components/SettingsPageTitle';
 import makeSelectApp from '../App/selectors';
+import makeSelectAdmin from '../Admin/selectors';
 import { Detail, InfoText } from './components';
 
 const makeSelectAppInfos = () => createSelector(makeSelectApp(), appState => appState.appInfos);
+const makeSelectLatestRelease = () =>
+  createSelector(makeSelectAdmin(), adminState => adminState.latestStrapiReleaseTag);
 
 const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
-  const selectAppInfos = React.useMemo(makeSelectAppInfos, []);
+  const selectAppInfos = useMemo(makeSelectAppInfos, []);
+  const selectLatestRealase = useMemo(makeSelectLatestRelease, []);
   const appInfos = useSelector(state => selectAppInfos(state));
+  const latestStrapiReleaseTag = useSelector(state => selectLatestRealase(state));
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -29,9 +34,17 @@ const ApplicationInfosPage = () => {
   };
   const pricingLabel = formatMessage({ id: 'Settings.application.link-pricing' });
   const upgradeLabel = formatMessage({ id: 'Settings.application.link-upgrade' });
-  // TODO when notification is ready
-  const shouldShowUpgradeLink = false;
-  const upgradeLink = shouldShowUpgradeLink ? { label: upgradeLabel, href: '' } : null;
+
+  const shouldShowUpgradeLink = `v${appInfos.strapiVersion}` !== latestStrapiReleaseTag;
+
+  /* eslint-disable indent */
+  const upgradeLink = shouldShowUpgradeLink
+    ? {
+        label: upgradeLabel,
+        href: `https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`,
+      }
+    : null;
+  /* eslint-enable indent */
 
   return (
     <div>

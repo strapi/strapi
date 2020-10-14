@@ -10,10 +10,12 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
+import { Text } from '@buffetjs/core';
 
 import en from '../../../translations/en.json';
 import LeftMenuIcon from './LeftMenuIcon';
 import A from './A';
+import NotificationCount from './NotificationCount';
 
 const LinkLabel = styled.span`
   display: inline-block;
@@ -23,7 +25,7 @@ const LinkLabel = styled.span`
 `;
 
 // TODO: refacto this file
-const LeftMenuLinkContent = ({ destination, iconName, label, location }) => {
+const LeftMenuLinkContent = ({ destination, iconName, label, location, notificationsCount }) => {
   const isLinkActive = startsWith(
     location.pathname.replace('/admin', '').concat('/'),
     destination.concat('/')
@@ -67,6 +69,13 @@ const LeftMenuLinkContent = ({ destination, iconName, label, location }) => {
     >
       <LeftMenuIcon icon={iconName} />
       {content}
+      {notificationsCount > 0 && (
+        <NotificationCount>
+          <Text fontWeight="bold" fontSize="xs" lineHeight="14px" color="white">
+            {notificationsCount}
+          </Text>
+        </NotificationCount>
+      )}
     </A>
   );
 };
@@ -78,6 +87,7 @@ LeftMenuLinkContent.propTypes = {
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
+  notificationsCount: PropTypes.number.isRequired,
 };
 
 export default withRouter(LeftMenuLinkContent);
