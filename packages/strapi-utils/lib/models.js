@@ -75,7 +75,17 @@ module.exports = {
         });
       });
     } else if (_.has(attribute, 'via') && _.has(attribute, 'collection')) {
-      const relatedAttribute = models[attribute.collection].attributes[attribute.via];
+      const model = models[attribute.collection];
+
+      if (!model) {
+        throw new Error(
+          `The provided 'collection' in the attribute \`${attributeName}\` in the model ${_.upperFirst(
+            modelName
+          )} doesn't exist`
+        );
+      }
+
+      const relatedAttribute = model.attributes[attribute.via];
 
       if (!relatedAttribute) {
         throw new Error(
@@ -117,6 +127,14 @@ module.exports = {
 
       // We have to find if they are a model linked to this attributeName
       const model = models[attribute.model];
+
+      if (!model) {
+        throw new Error(
+          `The provided 'model' in the attribute \`${attributeName}\` in the model ${_.upperFirst(
+            modelName
+          )} doesn't exist`
+        );
+      }
 
       const reverseAttribute = model.attributes[attribute.via];
 
@@ -190,6 +208,12 @@ module.exports = {
           }
         });
       });
+    } else {
+      throw new Error(
+        `The attribute \`${attributeName}\` is not correctly configured in the model ${_.upperFirst(
+          modelName
+        )} ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+      );
     }
 
     if (types.current === 'collection' && types.other === 'morphTo') {
