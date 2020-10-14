@@ -16,7 +16,7 @@
   "main": "./lib",
   "dependencies": {
     "lodash": "4.17.19",
-    "mongoose": "5.10.7",
+    "mongoose": "5.10.8",
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.3.2",
     "pluralize": "^8.0.0",
