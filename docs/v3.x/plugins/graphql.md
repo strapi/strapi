@@ -36,9 +36,19 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (**GraphQL Playground**) that will help you to write GraphQL query to explore your data.
 
-::: tip
-Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
-:::
+## Authentication
+
+To perform authorized requests, you must first get a JWT:
+
+```graphql
+mutation {
+  login(input: { identifier: "email", password: "password" }) {
+    jwt
+  }
+}
+```
+
+Then on each request, send along an `Authorization` header in the form of `{ Authorization: "Bearer YOUR_JWT_GOES_HERE" }`. This can be set in the HTTP Headers section of your GraphQL Playground.
 
 ## Configurations
 
@@ -226,6 +236,14 @@ You can also apply different parameters to the query to make more complex querie
 - `limit` (integer): Define the number of returned entries.
 - `start` (integer): Define the amount of entries to skip.
 - `sort` (string): Define how the data should be sorted.
+- `publicationState` (PublicationState): Only select entries matching the publication state provided.
+
+  Handled states are:
+
+  - `live`: Return only published entries (default)
+  - `preview`: Return both draft entries & published entries
+
+- `<field>:asc` or `<field>:desc`
 - `where` (object): Define the filters to apply in the query.
   - `<field>`: Equals.
   - `<field>_ne`: Not equals.

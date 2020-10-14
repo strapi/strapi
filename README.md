@@ -9,19 +9,19 @@
 
 <p align="center">
   <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
-    <img src="https://blog.strapi.io/content/images/2020/05/Platform-sh.png"  />
+    <img src="https://assets.strapi.io/uploads/deploy_button_platform_sh_d032f646a7.png"  />
   </a>
 
 <a href="https://marketplace.digitalocean.com/apps/strapi">
-<img src="https://blog.strapi.io/content/images/2020/05/DigitalOcean.png" />
+<img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
 </a>
 
 <a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
-<img src="https://blog.strapi.io/content/images/2020/05/Heroku.png" />
+<img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
 </a>
 
 <a href="https://fastandcomfy.io/strapi/">
-<img src="https://blog.strapi.io/content/images/2020/05/FastandComfy.png" />
+<img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
 </a>
 
 </p>
@@ -137,7 +137,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 - [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
-- [GitHub Discussions](https://github.com/strapi/strapi/discussions) (Questions and Discussions)
+- [Community Forum](https://forum.strapi.io) (Questions and Discussions)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)

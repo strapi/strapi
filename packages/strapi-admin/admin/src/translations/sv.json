@@ -119,8 +119,6 @@
   "components.WysiwygBottomControls.fullscreen": "Expandera",
   "components.WysiwygBottomControls.uploadFiles": "Dra och släpp filer, klistra in från urklipp eller {bläddra}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "välj dem",
-  "components.popUpWarning.button.cancel": "Avbryt",
-  "components.popUpWarning.button.confirm": "Bekräfta",
   "components.popUpWarning.message": "Är du säker på att du vill radera detta?",
   "components.popUpWarning.title": "Var god bekräfta",
   "notification.error": "Ett fel uppstod",
