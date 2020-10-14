@@ -4,11 +4,9 @@ This integration guide is following the [Getting started guide](../getting-start
 
 If you haven't gone through the getting started guide, the way you request a Strapi API with [React](https://reactjs.org/) remains the same except that you will not fetch the same content.
 
-
 ### Create a React app
 
 Create a basic React application using [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html).
-
 
 :::: tabs
 
@@ -32,8 +30,7 @@ npx create-react-app react-app
 
 ### Use an HTTP client
 
-Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
-
+Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
 
 :::: tabs
 
@@ -55,7 +52,7 @@ No installation needed
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type
 
@@ -63,65 +60,69 @@ Be sure that you activated the `find` permission for the `restaurant` Collection
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.get('http://localhost:1337/restaurants')
-  .then(response => {
-    console.log(response);
-  })
+axios.get('http://localhost:1337/restaurants').then(response => {
+  console.log(response);
+});
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
-fetch("http://localhost:1337/restaurants", {
-  method: "GET",
+fetch('http://localhost:1337/restaurants', {
+  method: 'GET',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-}).then(response => response.json())
+})
+  .then(response => response.json())
   .then(data => console.log(data));
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
-[{
-  "id": 1,
-  "name": "Biscotte Restaurant",
-  "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
-  "created_by": {
+[
+  {
     "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "updated_by": {
-    "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "created_at": "2020-07-31T11:37:16.964Z",
-  "updated_at": "2020-07-31T11:37:16.975Z",
-  "categories": [{
-    "id": 2,
-    "name": "French Food",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-07-31T11:36:23.164Z",
-    "updated_at": "2020-07-31T11:36:23.172Z"
-  }]
-}]
+    "name": "Biscotte Restaurant",
+    "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
+    "created_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "updated_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "created_at": "2020-07-31T11:37:16.964Z",
+    "updated_at": "2020-07-31T11:37:16.975Z",
+    "categories": [
+      {
+        "id": 1,
+        "name": "French Food",
+        "created_by": 1,
+        "updated_by": 1,
+        "created_at": "2020-07-31T11:36:23.164Z",
+        "updated_at": "2020-07-31T11:36:23.172Z"
+      }
+    ]
+  }
+]
 ```
 
 ::::
@@ -136,38 +137,39 @@ fetch("http://localhost:1337/restaurants", {
 
 ```js
 import React from 'react';
-import axios from 'axios'
+import axios from 'axios';
 
 class App extends React.Component {
-
   // State of your application
   state = {
     restaurants: [],
-    error: null
-  }
+    error: null,
+  };
 
   // Fetch your restaurants immediately after the component is mounted
   componentDidMount = async () => {
     try {
       const response = await axios.get('http://localhost:1337/restaurants');
-      this.setState({ restaurants: response.data })
-    } catch(error) {
-      this.setState({ error })
+      this.setState({ restaurants: response.data });
+    } catch (error) {
+      this.setState({ error });
     }
-  }
+  };
 
   render() {
-    const { error, restaurant } = this.state
+    const { error, restaurant } = this.state;
 
     // Print errors if any
     if (error) {
-       return <div>An error occured: {error.message}</div>
+      return <div>An error occured: {error.message}</div>;
     }
 
     return (
       <div className="App">
         <ul>
-          {this.state.restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>)}
+          {this.state.restaurants.map(restaurant => (
+            <li key={restaurant.id}>{restaurant.name}</li>
+          ))}
         </ul>
       </div>
     );
@@ -187,24 +189,23 @@ export default App;
 import React from 'react';
 
 class App extends React.Component {
-
   // State of your application
   state = {
     restaurants: [],
-    error: null
-  }
+    error: null,
+  };
 
   // Fetch your restaurants immediately after the component is mounted
   componentDidMount = async () => {
     // Parses the JSON returned by a network request
-    const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+    const parseJSON = resp => (resp.json ? resp.json() : resp);
 
     // Checks if a network request came back fine, and throws an error if not
-    const checkStatus = (resp) => {
+    const checkStatus = resp => {
       if (resp.status >= 200 && resp.status < 300) {
         return resp;
       }
-      return parseJSON(resp).then((resp) => {
+      return parseJSON(resp).then(resp => {
         throw resp;
       });
     };
@@ -213,29 +214,32 @@ class App extends React.Component {
     };
 
     try {
-      const restaurants = await fetch("http://localhost:1337/restaurants", {
-        method: "GET",
+      const restaurants = await fetch('http://localhost:1337/restaurants', {
+        method: 'GET',
         headers: headers,
-      }).then(checkStatus)
+      })
+        .then(checkStatus)
         .then(parseJSON);
-        this.setState({ restaurants })
+      this.setState({ restaurants });
     } catch (error) {
-      this.setState({ error })
+      this.setState({ error });
     }
-  }
+  };
 
   render() {
-    const { error, restaurant } = this.state
+    const { error, restaurant } = this.state;
 
     // Print errors if any
     if (error) {
-       return <div>An error occured: {error.message}</div>
+      return <div>An error occured: {error.message}</div>;
     }
 
     return (
       <div className="App">
         <ul>
-          { this.state.restaurants.map(restaurant => <li key={restaurant.id}>{restaurant.name}</li>)}
+          {this.state.restaurants.map(restaurant => (
+            <li key={restaurant.id}>{restaurant.name}</li>
+          ))}
         </ul>
       </div>
     );
@@ -251,75 +255,77 @@ export default App;
 
 ### POST Request your collection type
 
-Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
+Execute a `POST` request on the `restaurant` Collection Type in order to create a restaurant.
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission fot the `category` Collection type.
+
+In this example a `japanese` category has been created which has the id: 3.
 
 :::: tabs
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.post('http://localhost:1337/restaurants', {
+axios
+  .post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-    categories: [
-      3
-    ]
+    categories: [3],
   })
   .then(response => {
     console.log(response);
-  })
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants', {
-   method: 'POST',
-   headers: {
-      'Content-Type': 'application/json'
-   },
-   body: JSON.stringify({
-     name: 'Dolemon Sushi',
-     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-     categories: [
-       3
-     ]
-   })
- }).then(response => response.json())
-   .then(data => console.log(data));
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Dolemon Sushi',
+    description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
+    categories: [3],
+  }),
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
-    "id": 2,
-    "name": "Dolemon Sushi",
-    "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
-    "created_by": null,
-    "updated_by": null,
-    "created_at": "2020-08-04T09:57:11.669Z",
-    "updated_at": "2020-08-04T09:57:11.669Z",
-    "categories": [{
+  "id": 2,
+  "name": "Dolemon Sushi",
+  "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
+  "created_by": null,
+  "updated_by": null,
+  "created_at": "2020-08-04T09:57:11.669Z",
+  "updated_at": "2020-08-04T09:57:11.669Z",
+  "categories": [
+    {
       "id": 3,
       "name": "Japanese",
       "created_by": 1,
       "updated_by": 1,
       "created_at": "2020-07-31T11:36:23.164Z",
       "updated_at": "2020-07-31T11:36:23.172Z"
-    }]
+    }
+  ]
 }
 ```
 
@@ -335,7 +341,7 @@ fetch('http://localhost:1337/restaurants', {
 
 ```js
 import React from 'react';
-import axios from 'axios'
+import axios from 'axios';
 
 class App extends React.Component {
   constructor(props) {
@@ -344,12 +350,12 @@ class App extends React.Component {
     // State of your application
     this.state = {
       modifiedData: {
-        name: "",
-        description: "",
-        categories: []
+        name: '',
+        description: '',
+        categories: [],
       },
       allCategories: [],
-      error: null
+      error: null,
     };
   }
 
@@ -358,18 +364,18 @@ class App extends React.Component {
     try {
       const response = await axios.get('http://localhost:1337/categories');
       this.setState({ allCategories: response.data });
-    } catch(error) {
-      this.setState({ error })
+    } catch (error) {
+      this.setState({ error });
     }
-  }
+  };
 
   handleInputChange = ({ target: { name, value } }) => {
     this.setState(prev => ({
       ...prev,
       modifiedData: {
         ...prev.modifiedData,
-        [name]: value
-      }
+        [name]: value,
+      },
     }));
   };
 
@@ -377,29 +383,32 @@ class App extends React.Component {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:1337/restaurants', this.state.modifiedData);
+      const response = await axios.post(
+        'http://localhost:1337/restaurants',
+        this.state.modifiedData
+      );
       console.log(response);
-    } catch(error) {
+    } catch (error) {
       this.setState({ error });
     }
-}
+  };
 
   renderCheckbox = category => {
     const {
-      modifiedData: { categories }
+      modifiedData: { categories },
     } = this.state;
     const isChecked = categories.includes(category.id);
     const handleChange = () => {
       if (!categories.includes(category.id)) {
         this.handleInputChange({
-          target: { name: "categories", value: categories.concat(category.id) }
+          target: { name: 'categories', value: categories.concat(category.id) },
         });
       } else {
         this.handleInputChange({
           target: {
-            name: "categories",
-            value: categories.filter(v => v !== category.id)
-          }
+            name: 'categories',
+            value: categories.filter(v => v !== category.id),
+          },
         });
       }
     };
@@ -472,17 +481,17 @@ export default App;
 `./src/App.js`
 
 ```js
-import React from "react";
+import React from 'react';
 
 // Parses the JSON returned by a network request
-const parseJSON = (resp) => (resp.json ? resp.json() : resp);
+const parseJSON = resp => (resp.json ? resp.json() : resp);
 
 // Checks if a network request came back fine, and throws an error if not
-const checkStatus = (resp) => {
+const checkStatus = resp => {
   if (resp.status >= 200 && resp.status < 300) {
     return resp;
   }
-  return parseJSON(resp).then((resp) => {
+  return parseJSON(resp).then(resp => {
     throw resp;
   });
 };
@@ -495,70 +504,71 @@ class App extends React.Component {
     super(props);
     this.state = {
       modifiedData: {
-        name: "",
-        description: "",
-        categories: []
+        name: '',
+        description: '',
+        categories: [],
       },
       allCategories: [],
-      error: null
+      error: null,
     };
   }
 
   componentDidMount = async () => {
     try {
-      const allCategories = await fetch("http://localhost:1337/categories", {
-        method: "GET",
+      const allCategories = await fetch('http://localhost:1337/categories', {
+        method: 'GET',
         headers: headers,
-      }).then(checkStatus)
+      })
+        .then(checkStatus)
         .then(parseJSON);
-        this.setState({ allCategories })
+      this.setState({ allCategories });
     } catch (error) {
       this.setState({ error });
     }
-  }
+  };
 
   handleInputChange = ({ target: { name, value } }) => {
     this.setState(prev => ({
       ...prev,
       modifiedData: {
         ...prev.modifiedData,
-        [name]: value
-      }
+        [name]: value,
+      },
     }));
   };
 
-  handleSubmit = async(e) => {
+  handleSubmit = async e => {
     e.preventDefault();
 
     try {
       await fetch('http://localhost:1337/restaurants', {
-        method: "POST",
+        method: 'POST',
         headers: headers,
-        body: JSON.stringify(this.state.modifiedData)
+        body: JSON.stringify(this.state.modifiedData),
       })
-      .then(checkStatus)
-      .then(parseJSON);
+        .then(checkStatus)
+        .then(parseJSON);
     } catch (error) {
-      this.setState({ error })
+      this.setState({ error });
     }
   };
 
   renderCheckbox = category => {
     const {
-      modifiedData: { categories }
+      modifiedData: { categories },
     } = this.state;
     const isChecked = categories.includes(category.id);
     const handleChange = () => {
       if (!categories.includes(category.id)) {
         this.handleInputChange({
-          target: { name: "categories", value: categories.concat(category.id) }
+          target: { name: 'categories', value: categories.concat(category.id) },
         });
       } else {
         this.handleInputChange({
           target: {
-            name: "categories",
-            value: categories.filter(v => v !== category.id)
-          }
+            name: 'categories',
+            value: categories.filter(v => v !== category.id),
+          },
         });
       }
     };
@@ -630,59 +640,56 @@ export default App;
 
 ### PUT Request your collection type
 
-Execute a PUT request on the `restaurant` Collection Type in order to update the category of a restaurant.
+Execute a `PUT` request on the `restaurant` Collection Type in order to update the category of a restaurant.
 
 Be sure that you activated the `put` permission for the `restaurant` Collection Type.
 
 :::: tabs
 
-We consider that the id of your restaurant is `2`
-and the id of your category is `3`
+We consider that the id of your restaurant is `2`.
+and the id of your category is `2`.
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.put('http://localhost:1337/restaurants/2', {
-  categories: [
-    3
-  ]
-})
-.then(response => {
-  console.log(response);
-})
+axios
+  .put('http://localhost:1337/restaurants/2', {
+    categories: [2],
+  })
+  .then(response => {
+    console.log(response);
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants/2', {
-  method: "PUT",
+  method: 'PUT',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    categories: [
-      3
-    ]
-  })
+    categories: [2],
+  }),
 })
-.then(response => response.json())
-.then(data => {
-  console.log(data);
-})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+  });
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
@@ -693,21 +700,27 @@ fetch('http://localhost:1337/restaurants/2', {
   "updated_by": null,
   "created_at": "2020-08-04T10:21:30.219Z",
   "updated_at": "2020-08-04T10:21:30.219Z",
-  "categories": [{
-    "id": 3,
-    "name": "Japanese",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-08-04T10:24:26.901Z",
-    "updated_at": "2020-08-04T10:24:26.911Z"
-  }]
+  "categories": [
+    {
+      "id": 2,
+      "name": "Brunch",
+      "created_by": 1,
+      "updated_by": 1,
+      "created_at": "2020-08-04T10:24:26.901Z",
+      "updated_at": "2020-08-04T10:24:26.911Z"
+    }
+  ]
 }
 ```
 
 ::::
 
+## Starter
+
+- [React Blog starter](https://github.com/strapi/strapi-starter-react-blog)
+
 ## Conclusion
 
 Here is how to request your Collection Types in Strapi using React. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
 
-We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)
+We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)/

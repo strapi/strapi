@@ -11,6 +11,7 @@ import Slack from '../../assets/images/social_slack.png';
 import Medium from '../../assets/images/social_medium.png';
 import Twitter from '../../assets/images/social_twitter.png';
 import Reddit from '../../assets/images/social_reddit.png';
+import Forum from '../../assets/images/social_forum.png';
 
 import { SocialLinkWrapper } from './components';
 
@@ -26,6 +27,9 @@ function getSrc(name) {
       return Slack;
     case 'Twitter':
       return Twitter;
+    case 'Forum':
+    case 'Academy':
+      return Forum;
     default:
       return Gh;
   }

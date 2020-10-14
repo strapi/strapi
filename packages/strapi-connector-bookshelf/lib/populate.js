@@ -208,14 +208,15 @@ const formatPopulateOptions = (definition, { withRelated, publicationState } = {
 
       newKey = `${prefix}${part}`;
       prefix = `${newKey}.`;
+
+      _.extend(acc, {
+        [newKey]: pq.extendWithPopulateQueries([obj[newKey], acc[newKey]], {
+          publicationState: { query: publicationState, model: tmpModel },
+        }),
+      });
     }
 
-    return {
-      ...acc,
-      [newKey]: pq.extendWithPopulateQueries(obj[key], {
-        publicationState: { query: publicationState, model: tmpModel },
-      }),
-    };
+    return acc;
   }, {});
 
   return [finalObj];
@@ -237,9 +238,14 @@ const formatPolymorphicPopulate = ({ assoc, prefix = '', publicationState }) => 
   const path = `${prefix}${assoc.alias}.${model.collectionName}`;
 
   return {
-    [path]: pq.extendWithPopulateQueries(qb => {
-      qb.orderBy('created_at', 'desc');
-    }, populateOptions),
+    [path]: pq.extendWithPopulateQueries(
+      [
+        qb => {
+          qb.orderBy('created_at', 'desc');
+        },
+      ],
+      populateOptions
+    ),
   };
 };
 

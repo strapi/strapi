@@ -44,6 +44,8 @@
   "PopUpForm.Providers.secret.label": "客戶端密鑰",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "編輯郵件範本",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "設定已更新",
   "plugin.description.long": "使用 JWT 認證保護您的 API。這個擴充功能也使用 ACL 來讓你管理不同群組使用者的權限。",
   "plugin.description.short": "使用 JWT 認證保護您的 API",

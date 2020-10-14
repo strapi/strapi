@@ -48,15 +48,17 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
-          writable: false,
         };
       }
+
+      const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
 
       definition.attributes[CREATED_BY_ATTRIBUTE] = {
         model: 'user',
         plugin: 'admin',
         configurable: false,
         writable: false,
+        private: isPrivate,
       };
 
       definition.attributes[UPDATED_BY_ATTRIBUTE] = {
@@ -64,6 +66,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         plugin: 'admin',
         configurable: false,
         writable: false,
+        private: isPrivate,
       };
     }
 
@@ -234,7 +237,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
 
           // Force singular foreign key
           details.attribute = singular(details.collection);
-          details.column = targetModel.primaryKey;
+          details.column = 'id';
 
           // Set this info to be able to see if this field is a real database's field.
           details.isVirtual = true;
@@ -626,6 +629,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
       target[model].deleteRelations = relations.deleteRelations;
+      target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
 
       return async () => {
         await buildDatabaseSchema({

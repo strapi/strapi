@@ -11,8 +11,11 @@ const {
 const optionsMap = {
   publicationState: {
     queries: {
-      [DP_PUB_STATE_LIVE]: qb => qb.whereNotNull(PUBLISHED_AT_ATTRIBUTE),
-      [DP_PUB_STATE_PREVIEW]: null,
+      [DP_PUB_STATE_LIVE]: ({ model }) => qb => {
+        const { collectionName } = model;
+        qb.whereNotNull(`${collectionName}.${PUBLISHED_AT_ATTRIBUTE}`);
+      },
+      [DP_PUB_STATE_PREVIEW]: () => null,
     },
     validate({ model, query: publicationState }) {
       return hasDraftAndPublish(model) && _.has(this.queries, publicationState);
@@ -26,7 +29,7 @@ const validate = (option, params) => {
   const opt = _.get(optionsMap, option, {});
   return !_.isFunction(opt.validate) || opt.validate(params);
 };
-const resolveQuery = (option, params) => optionsMap[option].queries[params.query];
+const resolveQuery = (option, params) => optionsMap[option].queries[params.query](params);
 
 /**
  * Transform given options to populate queries based on the optionsMap
@@ -75,17 +78,15 @@ const bindPopulateQueries = (paths, options) => {
 
 /**
  * Extend the behavior of an already existing populate query, and bind generated (from options) ones to it
- * @param fn
+ * @param fns
  * @param options
  * @returns {function(...[*]=)}
  */
-const extendWithPopulateQueries = (fn, options) => {
+const extendWithPopulateQueries = (fns, options) => {
   const queries = toQueries(options);
 
   return qb => {
-    if (_.isFunction(fn)) {
-      fn(qb);
-    }
+    fns.filter(_.isFunction).forEach(fn => fn(qb));
     runPopulateQueries(queries, qb);
   };
 };

@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const ACTIONS = {
   read: 'plugins::upload.read',
@@ -34,9 +36,9 @@ module.exports = {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
     const query = pm.queryFrom(ctx.query);
-    const result = await strapi.plugins.upload.services.upload[method](query);
+    const files = await strapi.plugins.upload.services.upload[method](query);
 
-    ctx.body = pm.sanitize(result);
+    ctx.body = pm.sanitize(files, { withPrivate: false });
   },
 
   async findOne(ctx) {
@@ -52,7 +54,7 @@ module.exports = {
       id
     );
 
-    ctx.body = pm.sanitize(file);
+    ctx.body = pm.sanitize(file, { withPrivate: false });
   },
 
   async count(ctx) {
@@ -89,7 +91,7 @@ module.exports = {
 
     await strapi.plugins['upload'].services.upload.remove(file);
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
 
   async updateSettings(ctx) {
@@ -98,7 +100,7 @@ module.exports = {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.cannot(ACTIONS.read, fileModel)) {
+    if (userAbility.cannot(ACTIONS.readSettings, fileModel)) {
       return ctx.forbidden();
     }
 
@@ -136,7 +138,7 @@ module.exports = {
     const data = await validateUploadBody(body);
     const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
 
   async replaceFile(ctx) {
@@ -158,9 +160,9 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.replace(id, { data, file: files }, { user });
+    const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(replacedFiles, { action: ACTIONS.read, withPrivate: false });
   },
 
   async uploadFiles(ctx) {
@@ -181,9 +183,9 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const file = await uploadService.upload({ data, files }, { user });
+    const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read });
+    ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
   },
 };
 
@@ -197,7 +199,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
   const roles = _.has(file, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: file.created_by.id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': file[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
   const fileWithRoles = _.set(_.cloneDeep(file), 'created_by.roles', roles);
 

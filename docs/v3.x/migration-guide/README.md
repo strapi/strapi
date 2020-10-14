@@ -1,14 +1,24 @@
 # Migrations guides
 
-Please also refer to the following [documentation](../guides/update-version.md) for a better understanding of how to update your project
+Please also refer to the following [documentation](../guides/update-version.md) for a better understanding of how to update your project.
 
-## Guides
+## Instructions
 
+When upgrading you will need to follow every migration guide between your current version and the one you are upgrading to.
+
+**Example**
+
+If you were upgrading from the `3.0.0-beta.19.5` to `3.2.0`, here are the following guides you would have to follow:
+
+- Migration guide from beta.19.4+ to beta.20.
+- Migration guide from beta.20+ to 3.0.0.
+- Migration guide from 3.0.x to 3.1.x.
+- Migration guide from 3.1.x to 3.2.x.
+
+## V3 guides
+
+- [Migration guide from 3.1.x to 3.2.x](migration-guide-3.1.x-to-3.2.x.md)
 - [Migration guide from 3.0.x to 3.1.x](migration-guide-3.0.x-to-3.1.x.md)
-
-## Migrating from Beta ?
-
-Read the [Migration guide from beta.20+ to stable](migration-guide-beta.20-to-3.0.0.md).
 
 ## Beta guides
 

@@ -177,6 +177,7 @@ describe('Role controller', () => {
                 getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
               actionProvider: {
+                getAll: jest.fn(() => [{ actionId: 'test', subjects: ['model1'] }]),
                 getAllByMap: jest.fn(),
                 getByActionId: jest.fn(() => ({ options: { fieldsRestriction: true } })),
               },

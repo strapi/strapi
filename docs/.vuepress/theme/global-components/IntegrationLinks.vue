@@ -26,6 +26,30 @@
       </InstallLink>
     </div>
 
+    <!-- Angular -->
+    <div>
+      <InstallLink link="../getting-started/angular.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 250 250" style="enable-background:new 0 0 250 250;" xml:space="preserve">
+          <style type="text/css">
+          	.st0{fill:#DD0031;}
+          	.st1{fill:#C3002F;}
+          	.st2{fill:#FFFFFF;}
+          </style>
+          <g>
+          	<polygon class="st0" points="125,30 125,30 125,30 31.9,63.2 46.1,186.3 125,230 125,230 125,230 203.9,186.3 218.1,63.2  "/>
+          	<polygon class="st0" points="125,30 125,52.2 125,52.1 125,153.4 125,153.4 125,230 125,230 203.9,186.3 218.1,63.2 125,30  "/>
+          	<path class="st3" d="M125,52.1L66.8,182.6h0h21.7h0l11.7-29.2h49.4l11.7,29.2h0h21.7h0L125,52.1L125,52.1L125,52.1L125,52.1   L125,52.1z M142,135.4H108l17-40.9L142,135.4z"/>
+          </g>
+          </svg>
+        </template>
+        <template #title>Angular</template>
+        <template #description>
+          Consume your API with Angular
+        </template>
+      </InstallLink>
+    </div>
+
     <!-- Next.js -->
     <div>
       <InstallLink link="../getting-started/next-js.html">
@@ -70,19 +94,6 @@
         <template #title>Nuxt.js</template>
         <template #description>
           Consume your API with Nuxt.js
-        </template>
-      </InstallLink>
-    </div>
-
-    <!-- Gatsby -->
-    <div>
-      <InstallLink link="../getting-started/gatsby.html">
-        <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" focusable="false"><title>Gatsby</title><path fill="#663399" d="M14,0C6.268,0,0,6.268,0,14s6.268,14,14,14s14-6.268,14-14S21.732,0,14,0z M6.2,21.8 C4.1,19.7,3,16.9,3,14.2L13.9,25C11.1,24.9,8.3,23.9,6.2,21.8z M16.4,24.7L3.3,11.6C4.4,6.7,8.8,3,14,3c3.7,0,6.9,1.8,8.9,4.5 l-1.5,1.3C19.7,6.5,17,5,14,5c-3.9,0-7.2,2.5-8.5,6L17,22.5c2.9-1,5.1-3.5,5.8-6.5H18v-2h7C25,19.2,21.3,23.6,16.4,24.7z"></path><g id="innards" fill="white"><path d="M6.2,21.8C4.1,19.7,3,16.9,3,14.2L13.9,25C11.1,24.9,8.3,23.9,6.2,21.8z"></path><path d="M16.4,24.7L3.3,11.6C4.4,6.7,8.8,3,14,3c3.7,0,6.9,1.8,8.9,4.5l-1.5,1.3C19.7,6.5,17,5,14,5 c-3.9,0-7.2,2.5-8.5,6L17,22.5c2.9-1,5.1-3.5,5.8-6.5H18v-2h7C25,19.2,21.3,23.6,16.4,24.7z"></path></g></svg>
-        </template>
-        <template #title>Gatsby</template>
-        <template #description>
-          Consume your API with Gatsby
         </template>
       </InstallLink>
     </div>
@@ -161,6 +172,276 @@
       </InstallLink>
     </div>
 
+    <!-- Gatsby -->
+    <div>
+      <InstallLink link="../getting-started/gatsby.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" focusable="false"><title>Gatsby</title><path fill="#663399" d="M14,0C6.268,0,0,6.268,0,14s6.268,14,14,14s14-6.268,14-14S21.732,0,14,0z M6.2,21.8 C4.1,19.7,3,16.9,3,14.2L13.9,25C11.1,24.9,8.3,23.9,6.2,21.8z M16.4,24.7L3.3,11.6C4.4,6.7,8.8,3,14,3c3.7,0,6.9,1.8,8.9,4.5 l-1.5,1.3C19.7,6.5,17,5,14,5c-3.9,0-7.2,2.5-8.5,6L17,22.5c2.9-1,5.1-3.5,5.8-6.5H18v-2h7C25,19.2,21.3,23.6,16.4,24.7z"></path><g id="innards" fill="white"><path d="M6.2,21.8C4.1,19.7,3,16.9,3,14.2L13.9,25C11.1,24.9,8.3,23.9,6.2,21.8z"></path><path d="M16.4,24.7L3.3,11.6C4.4,6.7,8.8,3,14,3c3.7,0,6.9,1.8,8.9,4.5l-1.5,1.3C19.7,6.5,17,5,14,5 c-3.9,0-7.2,2.5-8.5,6L17,22.5c2.9-1,5.1-3.5,5.8-6.5H18v-2h7C25,19.2,21.3,23.6,16.4,24.7z"></path></g></svg>
+        </template>
+        <template #title>Gatsby</template>
+        <template #description>
+          Consume your API with Gatsby
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- Grisdome -->
+    <div>
+      <InstallLink link="../getting-started/gridsome.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+            <rect width="512" height="512" rx="256" fill="white"/>
+            <path d="M405.171 228.04C422.837 227.19 438.475 240.895 440 258.577C446.608 344.114 368.326 439.935 258.01 442.999C165.046 445.294 73.1016 370.866 73.1016 258.331C73.1016 240.596 87.7568 226.219 105.443 226.219C123.129 226.219 137.466 240.596 137.466 258.331C137.466 332.355 196.986 380.261 256.434 378.794C329.618 376.761 377.194 313.393 374.719 261.654C373.871 243.939 387.505 228.89 405.171 228.04Z" fill="url(#paint0_linear)"/>
+            <path d="M325.172 260.822C325.172 242.664 339.982 227.945 358.252 227.945H406.462C424.731 227.945 440 242.664 440 260.822C440 278.979 424.731 293.699 406.462 293.699H358.252C339.982 293.699 325.172 278.979 325.172 260.822Z" fill="#00A672"/>
+            <path d="M224.018 260.87C224.018 242.686 238.735 227.945 256.868 227.945C275.002 227.945 289.719 242.686 289.719 260.87C289.719 279.054 275.002 293.795 256.868 293.795C238.735 293.795 224.018 279.054 224.018 260.87Z" fill="#00A672"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M288.808 107.038C289.542 124.758 275.812 139.719 258.141 140.455C181.858 143.632 135.288 203.587 137.555 260.515C138.261 278.236 124.794 293.176 107.122 293.883C89.4496 294.591 73.9088 280.289 73.2032 262.568C69.5093 169.798 146.755 78.0864 255.483 76.2853C273.154 75.5494 288.074 89.3177 288.808 107.038Z" fill="#00A672"/>
+            <defs>
+            <linearGradient id="paint0_linear" x1="256.745" y1="226.219" x2="256.745" y2="443.051" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00583E"/>
+            <stop offset="1" stop-color="#00835C"/>
+            </linearGradient>
+            </defs>
+          </svg>
+        </template>
+        <template #title>Grisdome</template>
+        <template #description>
+          Consume your API with Grisdome
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- Jekyll -->
+    <div>
+      <InstallLink link="../getting-started/jekyll.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32"><defs><linearGradient id="A" y2="277.465" x2="296.661" y1="238.547" x1="195.456" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#919191"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="B" y2="327.266" x2="254.14" y1="303.705" x1="192.87" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#900"/><stop offset="1" stop-color="#e80000"/></linearGradient></defs><g transform="matrix(.077756 0 0 .077756 -3.451258 -3.954841)"><path d="M269.02 59.15c-.184.737-.188 1.53-.033 2.365 0 0 2.507 16.642-.34 24.048L147.652 400.2c-8.636 23.1 2.937 48.91 26.014 57.787s48.955-2.524 58.03-25.464l.01.005 121.005-314.634c2.366-6.155 15.86-18.08 15.86-18.08.677-.516 1.202-1.108 1.56-1.778l.06-.122c.065-.132.14-.258.193-.395 3.12-8.113-17.005-23.405-44.952-34.152s-53.133-12.884-56.253-4.77c-.053.137-.083.28-.122.422l-.037.13z" opacity=".3"/><path d="M265.523 56.477c-.185.737-.2 1.53-.033 2.365 0 0 2.508 16.642-.34 24.048L144.155 397.526c-8.635 23.1 2.937 48.91 26.014 57.787s48.955-2.524 58.03-25.464v.005L349.215 115.22c2.365-6.155 15.86-18.08 15.86-18.08.677-.516 1.202-1.107 1.56-1.778l.058-.122c.065-.13.14-.258.193-.395 3.12-8.113-17.005-23.404-44.95-34.152s-53.133-12.884-56.253-4.77c-.053.137-.083.28-.122.422l-.037.132z" fill="url(#A)"/><path d="M303.48 198.814L216.275 425.73c-6.436 16.262-25.166 24.723-41.78 18.333s-25.608-25.512-19.488-41.897l55.758-144.982s6.964-11.233 20.637-19.225 24.95-6.305 40.132-13.053 31.947-26.093 31.947-26.093z" fill="url(#B)"/><ellipse ry="8.85" rx="33.648" cy="76.201" cx="315.97" transform="matrix(.9334 .359 -.359 .9334 48.4129 -108.3439)" fill="#333"/><g fill="#fff"><path d="M265.49 58.84s2.47 16.737-.34 24.048L144.155 397.526c-8.635 23.1 2.937 48.91 26.014 57.787 4.005 1.54 8.092 2.455 12.164 2.822-15.556-11.702-22.23-32.632-15.093-51.73l-.01-.004L285.833 98.01S269.69 82.85 265.49 58.84z" opacity=".3"/><circle r="3.506" cy="261.806" cx="226.531" opacity=".5"/><circle r="5.285" cy="287.227" cx="249.514" opacity=".5"/><circle r="9.915" cy="317.459" cx="214.429" opacity=".5"/><circle r="5.286" cy="335.795" cx="198.375" opacity=".5"/><circle r="3.506" cy="375.008" cx="219.43" opacity=".5"/></g></g></svg>
+        </template>
+        <template #title>Jekyll</template>
+        <template #description>
+          Consume your API with Jekyll
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- 11ty -->
+    <div>
+      <InstallLink link="../getting-started/11ty.html">
+        <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000" preserveAspectRatio="xMidYMid meet">
+        <metadata>
+        Created by potrace 1.16, written by Peter Selinger 2001-2019
+        </metadata>
+        <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none">
+        <path d="M0 2000 l0 -2000 2000 0 2000 0 0 2000 0 2000 -2000 0 -2000 0 0 -2000z m2212 883 c16 -15 18 -35 18 -230 l0 -213 59 0 c86 0 106 -19 106 -103 0 -85 -10 -95 -93 -99 l-67 -3 0 -295 c0 -357 -1 -353 90 -358 81 -4 95 -18 95 -97 0 -90 -12 -98 -137 -93 -113 4 -171 28 -210 87 -50 74 -55 114 -60 449 l-5 312 -34 0 c-43 0 -54 21 -54 104 0 56 3 67 22 80 12 9 32 16 44 16 28 0 34 22 34 130 2 149 15 297 29 314 19 23 137 22 163 -1z m-927 -47 c14 -20 15 -106 13 -720 -3 -811 12 -726 -129 -726 -79 0 -89 2 -103 22 -14 20 -16 92 -16 590 l0 567 -48 -6 c-44 -5 -49 -3 -60 21 -7 15 -12 58 -12 95 0 97 7 103 170 145 164 42 166 42 185 12z m496 7 c12 -13 14 -137 14 -713 0 -820 13 -740 -124 -740 -47 0 -91 4 -98 8 -30 19 -33 70 -33 618 l0 554 -42 -6 c-33 -6 -44 -4 -55 11 -15 22 -18 171 -3 195 9 15 251 86 301 89 15 0 33 -6 40 -16z m869 -413 c24 -13 28 -27 86 -342 27 -142 49 -256 50 -255 3 3 84 541 84 556 0 26 45 51 93 51 70 0 87 -12 87 -62 0 -56 -185 -1013 -212 -1095 -12 -37 -35 -79 -53 -98 -57 -61 -174 -70 -235 -19 -27 23 -30 31 -30 85 0 80 20 102 80 87 54 -14 63 -4 68 75 3 53 -12 128 -102 504 -58 243 -106 453 -106 466 0 44 24 57 101 57 39 0 79 -5 89 -10z"/>
+        </g>
+        </svg>
+        </template>
+        <template #title>11ty</template>
+        <template #description>
+          Consume your API with 11ty
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- Svelte -->
+    <div>
+      <InstallLink link="../getting-started/svelte.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 98.1 118" style="enable-background:new 0 0 98.1 118;" xml:space="preserve">
+          <style type="text/css">
+            .st0{fill:#FF3E00;}
+            .st1{fill:#FFFFFF;}
+          </style>
+          <path class="st0" d="M91.8,15.6C80.9-0.1,59.2-4.7,43.6,5.2L16.1,22.8C8.6,27.5,3.4,35.2,1.9,43.9c-1.3,7.3-0.2,14.8,3.3,21.3  c-2.4,3.6-4,7.6-4.7,11.8c-1.6,8.9,0.5,18.1,5.7,25.4c11,15.7,32.6,20.3,48.2,10.4l27.5-17.5c7.5-4.7,12.7-12.4,14.2-21.1  c1.3-7.3,0.2-14.8-3.3-21.3c2.4-3.6,4-7.6,4.7-11.8C99.2,32.1,97.1,22.9,91.8,15.6"/>
+          <path class="st1" d="M40.9,103.9c-8.9,2.3-18.2-1.2-23.4-8.7c-3.2-4.4-4.4-9.9-3.5-15.3c0.2-0.9,0.4-1.7,0.6-2.6l0.5-1.6l1.4,1  c3.3,2.4,6.9,4.2,10.8,5.4l1,0.3l-0.1,1c-0.1,1.4,0.3,2.9,1.1,4.1c1.6,2.3,4.4,3.4,7.1,2.7c0.6-0.2,1.2-0.4,1.7-0.7L65.5,72  c1.4-0.9,2.3-2.2,2.6-3.8c0.3-1.6-0.1-3.3-1-4.6c-1.6-2.3-4.4-3.3-7.1-2.6c-0.6,0.2-1.2,0.4-1.7,0.7l-10.5,6.7  c-1.7,1.1-3.6,1.9-5.6,2.4c-8.9,2.3-18.2-1.2-23.4-8.7c-3.1-4.4-4.4-9.9-3.4-15.3c0.9-5.2,4.1-9.9,8.6-12.7l27.5-17.5  c1.7-1.1,3.6-1.9,5.6-2.5c8.9-2.3,18.2,1.2,23.4,8.7c3.2,4.4,4.4,9.9,3.5,15.3c-0.2,0.9-0.4,1.7-0.7,2.6l-0.5,1.6l-1.4-1  c-3.3-2.4-6.9-4.2-10.8-5.4l-1-0.3l0.1-1c0.1-1.4-0.3-2.9-1.1-4.1c-1.6-2.3-4.4-3.3-7.1-2.6c-0.6,0.2-1.2,0.4-1.7,0.7L32.4,46.1  c-1.4,0.9-2.3,2.2-2.6,3.8s0.1,3.3,1,4.6c1.6,2.3,4.4,3.3,7.1,2.6c0.6-0.2,1.2-0.4,1.7-0.7l10.5-6.7c1.7-1.1,3.6-1.9,5.6-2.5  c8.9-2.3,18.2,1.2,23.4,8.7c3.2,4.4,4.4,9.9,3.5,15.3c-0.9,5.2-4.1,9.9-8.6,12.7l-27.5,17.5C44.8,102.5,42.9,103.3,40.9,103.9"/>
+          </svg>
+        </template>
+        <template #title>Svelte</template>
+        <template #description>
+          Consume your API with Svelte
+        </template>
+      </InstallLink>
+    </div>
+
+
+    <!-- Sapper -->
+    <div>
+      <InstallLink link="../getting-started/sapper.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 98.1 118" style="enable-background:new 0 0 98.1 118;" xml:space="preserve">
+          <style type="text/css">
+            .st2{fill:#159497;}
+            .st3{fill:#FFFFFF;}
+          </style>
+          <path class="st2" d="M91.8,15.6C80.9-0.1,59.2-4.7,43.6,5.2L16.1,22.8C8.6,27.5,3.4,35.2,1.9,43.9c-1.3,7.3-0.2,14.8,3.3,21.3  c-2.4,3.6-4,7.6-4.7,11.8c-1.6,8.9,0.5,18.1,5.7,25.4c11,15.7,32.6,20.3,48.2,10.4l27.5-17.5c7.5-4.7,12.7-12.4,14.2-21.1  c1.3-7.3,0.2-14.8-3.3-21.3c2.4-3.6,4-7.6,4.7-11.8C99.2,32.1,97.1,22.9,91.8,15.6"/>
+          <path class="st3" d="M40.9,103.9c-8.9,2.3-18.2-1.2-23.4-8.7c-3.2-4.4-4.4-9.9-3.5-15.3c0.2-0.9,0.4-1.7,0.6-2.6l0.5-1.6l1.4,1  c3.3,2.4,6.9,4.2,10.8,5.4l1,0.3l-0.1,1c-0.1,1.4,0.3,2.9,1.1,4.1c1.6,2.3,4.4,3.4,7.1,2.7c0.6-0.2,1.2-0.4,1.7-0.7L65.5,72  c1.4-0.9,2.3-2.2,2.6-3.8c0.3-1.6-0.1-3.3-1-4.6c-1.6-2.3-4.4-3.3-7.1-2.6c-0.6,0.2-1.2,0.4-1.7,0.7l-10.5,6.7  c-1.7,1.1-3.6,1.9-5.6,2.4c-8.9,2.3-18.2-1.2-23.4-8.7c-3.1-4.4-4.4-9.9-3.4-15.3c0.9-5.2,4.1-9.9,8.6-12.7l27.5-17.5  c1.7-1.1,3.6-1.9,5.6-2.5c8.9-2.3,18.2,1.2,23.4,8.7c3.2,4.4,4.4,9.9,3.5,15.3c-0.2,0.9-0.4,1.7-0.7,2.6l-0.5,1.6l-1.4-1  c-3.3-2.4-6.9-4.2-10.8-5.4l-1-0.3l0.1-1c0.1-1.4-0.3-2.9-1.1-4.1c-1.6-2.3-4.4-3.3-7.1-2.6c-0.6,0.2-1.2,0.4-1.7,0.7L32.4,46.1  c-1.4,0.9-2.3,2.2-2.6,3.8s0.1,3.3,1,4.6c1.6,2.3,4.4,3.3,7.1,2.6c0.6-0.2,1.2-0.4,1.7-0.7l10.5-6.7c1.7-1.1,3.6-1.9,5.6-2.5  c8.9-2.3,18.2,1.2,23.4,8.7c3.2,4.4,4.4,9.9,3.5,15.3c-0.9,5.2-4.1,9.9-8.6,12.7l-27.5,17.5C44.8,102.5,42.9,103.3,40.9,103.9"/>
+          </svg>
+        </template>
+        <template #title>Sapper</template>
+        <template #description>
+          Consume your API with Sapper
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- Ruby -->
+    <div>
+      <InstallLink link="../getting-started/ruby.html">
+        <template #icon>
+          <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" id="Layer_1" width="198.13" height="197.58" viewBox="0 0 198.13 197.58" overflow="visible" enable-background="new 0 0 198.13 197.58" xml:space="preserve" inkscape:version="0.48.0 r9654" sodipodi:docname="Logo-Ruby.svg"><metadata id="metadata3320"><rdf:RDF><cc:Work rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/></cc:Work></rdf:RDF></metadata><defs id="defs3489"><linearGradient id="XMLID_17_-9" gradientUnits="userSpaceOnUse" x1="174.0737" y1="215.5488" x2="132.27631" y2="141.7533"><stop offset="0" style="stop-color:#FB7655" id="stop3272-4"/><stop offset="0" style="stop-color:#FB7655" id="stop3274-5"/><stop offset="0.41" style="stop-color:#E42B1E" id="stop3276-1"/><stop offset="0.99" style="stop-color:#990000" id="stop3278-0"/><stop offset="1" style="stop-color:#990000" id="stop3280-3"/></linearGradient><linearGradient id="XMLID_18_-7" gradientUnits="userSpaceOnUse" x1="194.895" y1="153.5576" x2="141.0276" y2="117.4093"><stop offset="0" style="stop-color:#871101" id="stop3285-8"/><stop offset="0" style="stop-color:#871101" id="stop3287-8"/><stop offset="0.99" style="stop-color:#911209" id="stop3289-6"/><stop offset="1" style="stop-color:#911209" id="stop3291-0"/></linearGradient><linearGradient id="XMLID_19_-4" gradientUnits="userSpaceOnUse" x1="151.79539" y1="217.7852" x2="97.929703" y2="181.638"><stop offset="0" style="stop-color:#871101" id="stop3296-6"/><stop offset="0" style="stop-color:#871101" id="stop3298-7"/><stop offset="0.99" style="stop-color:#911209" id="stop3300-6"/><stop offset="1" style="stop-color:#911209" id="stop3302-0"/></linearGradient><linearGradient id="XMLID_20_-9" gradientUnits="userSpaceOnUse" x1="38.696301" y1="127.3906" x2="47.046902" y2="181.66141"><stop offset="0" style="stop-color:#FFFFFF" id="stop3307-7"/><stop offset="0" style="stop-color:#FFFFFF" id="stop3309-5"/><stop offset="0.23" style="stop-color:#E57252" id="stop3311-9"/><stop offset="0.46" style="stop-color:#DE3B20" id="stop3313-7"/><stop offset="0.99" style="stop-color:#A60003" id="stop3315-8"/><stop offset="1" style="stop-color:#A60003" id="stop3317-5"/></linearGradient><linearGradient id="XMLID_21_-3" gradientUnits="userSpaceOnUse" x1="96.132797" y1="76.715302" x2="99.209602" y2="132.1021"><stop offset="0" style="stop-color:#FFFFFF" id="stop3322-3"/><stop offset="0" style="stop-color:#FFFFFF" id="stop3324-8"/><stop offset="0.23" style="stop-color:#E4714E" id="stop3326-3"/><stop offset="0.56" style="stop-color:#BE1A0D" id="stop3328-7"/><stop offset="0.99" style="stop-color:#A80D00" id="stop3330-9"/><stop offset="1" style="stop-color:#A80D00" id="stop3332-3"/></linearGradient><linearGradient id="XMLID_22_-7" gradientUnits="userSpaceOnUse" x1="147.103" y1="25.521" x2="156.3141" y2="65.216202"><stop offset="0" style="stop-color:#FFFFFF" id="stop3337-8"/><stop offset="0" style="stop-color:#FFFFFF" id="stop3339-7"/><stop offset="0.18" style="stop-color:#E46342" id="stop3341-4"/><stop offset="0.4" style="stop-color:#C82410" id="stop3343-1"/><stop offset="0.99" style="stop-color:#A80D00" id="stop3345-9"/><stop offset="1" style="stop-color:#A80D00" id="stop3347-0"/></linearGradient><linearGradient id="XMLID_23_-9" gradientUnits="userSpaceOnUse" x1="118.9761" y1="11.5415" x2="158.66859" y2="-8.3048"><stop offset="0" style="stop-color:#FFFFFF" id="stop3352-8"/><stop offset="0" style="stop-color:#FFFFFF" id="stop3354-8"/><stop offset="0.54" style="stop-color:#C81F11" id="stop3356-5"/><stop offset="0.99" style="stop-color:#BF0905" id="stop3358-8"/><stop offset="1" style="stop-color:#BF0905" id="stop3360-4"/></linearGradient><linearGradient id="XMLID_24_-3" gradientUnits="userSpaceOnUse" x1="3.9033" y1="113.5547" x2="7.1701999" y2="146.2628"><stop offset="0" style="stop-color:#FFFFFF" id="stop3365-7"/><stop offset="0" style="stop-color:#FFFFFF" id="stop3367-1"/><stop offset="0.31" style="stop-color:#DE4024" id="stop3369-3"/><stop offset="0.99" style="stop-color:#BF190B" id="stop3371-8"/><stop offset="1" style="stop-color:#BF190B" id="stop3373-0"/></linearGradient><linearGradient id="XMLID_25_-9" gradientUnits="userSpaceOnUse" x1="-18.5557" y1="155.10451" x2="135.0152" y2="-2.8092999"><stop offset="0" style="stop-color:#BD0012" id="stop3380-7"/><stop offset="0" style="stop-color:#BD0012" id="stop3382-9"/><stop offset="0.07" style="stop-color:#FFFFFF" id="stop3384-9"/><stop offset="0.17" style="stop-color:#FFFFFF" id="stop3386-3"/><stop offset="0.27" style="stop-color:#C82F1C" id="stop3388-2"/><stop offset="0.33" style="stop-color:#820C01" id="stop3390-4"/><stop offset="0.46" style="stop-color:#A31601" id="stop3392-3"/><stop offset="0.72" style="stop-color:#B31301" id="stop3394-7"/><stop offset="0.99" style="stop-color:#E82609" id="stop3396-1"/><stop offset="1" style="stop-color:#E82609" id="stop3398-2"/></linearGradient><linearGradient id="XMLID_26_-2" gradientUnits="userSpaceOnUse" x1="99.074699" y1="171.0332" x2="52.817699" y2="159.61659"><stop offset="0" style="stop-color:#8C0C01" id="stop3403-0"/><stop offset="0" style="stop-color:#8C0C01" id="stop3405-2"/><stop offset="0.54" style="stop-color:#990C00" id="stop3407-1"/><stop offset="0.99" style="stop-color:#A80D0E" id="stop3409-7"/><stop offset="1" style="stop-color:#A80D0E" id="stop3411-5"/></linearGradient><linearGradient id="XMLID_27_-1" gradientUnits="userSpaceOnUse" x1="178.52589" y1="115.5146" x2="137.43269" y2="78.683998"><stop offset="0" style="stop-color:#7E110B" id="stop3416-7"/><stop offset="0" style="stop-color:#7E110B" id="stop3418-4"/><stop offset="0.99" style="stop-color:#9E0C00" id="stop3420-1"/><stop offset="1" style="stop-color:#9E0C00" id="stop3422-7"/></linearGradient><linearGradient id="XMLID_28_-1" gradientUnits="userSpaceOnUse" x1="193.6235" y1="47.937" x2="173.15421" y2="26.053801"><stop offset="0" style="stop-color:#79130D" id="stop3427-1"/><stop offset="0" style="stop-color:#79130D" id="stop3429-1"/><stop offset="0.99" style="stop-color:#9E120B" id="stop3431-7"/><stop offset="1" style="stop-color:#9E120B" id="stop3433-0"/></linearGradient><radialGradient id="XMLID_29_-4" cx="143.8315" cy="79.388199" r="50.357601" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:#A80D00" id="stop3440-0"/><stop offset="0" style="stop-color:#A80D00" id="stop3442-8"/><stop offset="0.99" style="stop-color:#7E0E08" id="stop3444-5"/><stop offset="1" style="stop-color:#7E0E08" id="stop3446-1"/></radialGradient><radialGradient id="XMLID_30_-6" cx="74.0923" cy="145.75101" r="66.943703" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:#A30C00" id="stop3451-6"/><stop offset="0" style="stop-color:#A30C00" id="stop3453-2"/><stop offset="0.99" style="stop-color:#800E08" id="stop3455-1"/><stop offset="1" style="stop-color:#800E08" id="stop3457-9"/></radialGradient><linearGradient id="XMLID_31_-6" gradientUnits="userSpaceOnUse" x1="26.669901" y1="197.33591" x2="9.9886999" y2="140.742"><stop offset="0" style="stop-color:#8B2114" id="stop3462-4"/><stop offset="0" style="stop-color:#8B2114" id="stop3464-8"/><stop offset="0.43" style="stop-color:#9E100A" id="stop3466-0"/><stop offset="0.99" style="stop-color:#B3100C" id="stop3468-8"/><stop offset="1" style="stop-color:#B3100C" id="stop3470-1"/></linearGradient><linearGradient id="XMLID_32_-0" gradientUnits="userSpaceOnUse" x1="154.6411" y1="9.7979002" x2="192.039" y2="26.305901"><stop offset="0" style="stop-color:#B31000" id="stop3475-2"/><stop offset="0" style="stop-color:#B31000" id="stop3477-2"/><stop offset="0.44" style="stop-color:#910F08" id="stop3479-9"/><stop offset="0.99" style="stop-color:#791C12" id="stop3481-7"/><stop offset="1" style="stop-color:#791C12" id="stop3483-5"/></linearGradient><linearGradient y2="141.7533" x2="132.27631" y1="215.5488" x1="174.0737" gradientUnits="userSpaceOnUse" id="linearGradient3448" xlink:href="#XMLID_17_-9" inkscape:collect="always"/></defs><sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="1036" inkscape:window-height="1124" id="namedview3487" showgrid="false" inkscape:zoom="1.3412289" inkscape:cx="99.065005" inkscape:cy="98.790004" inkscape:window-x="882" inkscape:window-y="24" inkscape:window-maximized="0" inkscape:current-layer="Layer_1"/>
+          <linearGradient id="XMLID_17_" gradientUnits="userSpaceOnUse" x1="174.0737" y1="215.5488" x2="132.2763" y2="141.7533">
+            <stop offset="0" style="stop-color:#FB7655" id="stop3272"/>
+            <stop offset="0" style="stop-color:#FB7655" id="stop3274"/>
+            <stop offset="0.41" style="stop-color:#E42B1E" id="stop3276"/>
+            <stop offset="0.99" style="stop-color:#990000" id="stop3278"/>
+            <stop offset="1" style="stop-color:#990000" id="stop3280"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_18_" gradientUnits="userSpaceOnUse" x1="194.895" y1="153.5576" x2="141.0276" y2="117.4093">
+            <stop offset="0" style="stop-color:#871101" id="stop3285"/>
+            <stop offset="0" style="stop-color:#871101" id="stop3287"/>
+            <stop offset="0.99" style="stop-color:#911209" id="stop3289"/>
+            <stop offset="1" style="stop-color:#911209" id="stop3291"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_19_" gradientUnits="userSpaceOnUse" x1="151.7954" y1="217.7852" x2="97.9297" y2="181.638">
+            <stop offset="0" style="stop-color:#871101" id="stop3296"/>
+            <stop offset="0" style="stop-color:#871101" id="stop3298"/>
+            <stop offset="0.99" style="stop-color:#911209" id="stop3300"/>
+            <stop offset="1" style="stop-color:#911209" id="stop3302"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_20_" gradientUnits="userSpaceOnUse" x1="38.6963" y1="127.3906" x2="47.0469" y2="181.6614">
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3307"/>
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3309"/>
+            <stop offset="0.23" style="stop-color:#E57252" id="stop3311"/>
+            <stop offset="0.46" style="stop-color:#DE3B20" id="stop3313"/>
+            <stop offset="0.99" style="stop-color:#A60003" id="stop3315"/>
+            <stop offset="1" style="stop-color:#A60003" id="stop3317"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_21_" gradientUnits="userSpaceOnUse" x1="96.1328" y1="76.7153" x2="99.2096" y2="132.1021">
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3322"/>
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3324"/>
+            <stop offset="0.23" style="stop-color:#E4714E" id="stop3326"/>
+            <stop offset="0.56" style="stop-color:#BE1A0D" id="stop3328"/>
+            <stop offset="0.99" style="stop-color:#A80D00" id="stop3330"/>
+            <stop offset="1" style="stop-color:#A80D00" id="stop3332"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_22_" gradientUnits="userSpaceOnUse" x1="147.103" y1="25.521" x2="156.3141" y2="65.2162">
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3337"/>
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3339"/>
+            <stop offset="0.18" style="stop-color:#E46342" id="stop3341"/>
+            <stop offset="0.4" style="stop-color:#C82410" id="stop3343"/>
+            <stop offset="0.99" style="stop-color:#A80D00" id="stop3345"/>
+            <stop offset="1" style="stop-color:#A80D00" id="stop3347"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_23_" gradientUnits="userSpaceOnUse" x1="118.9761" y1="11.5415" x2="158.6686" y2="-8.3048">
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3352"/>
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3354"/>
+            <stop offset="0.54" style="stop-color:#C81F11" id="stop3356"/>
+            <stop offset="0.99" style="stop-color:#BF0905" id="stop3358"/>
+            <stop offset="1" style="stop-color:#BF0905" id="stop3360"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_24_" gradientUnits="userSpaceOnUse" x1="3.9033" y1="113.5547" x2="7.1702" y2="146.2628">
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3365"/>
+            <stop offset="0" style="stop-color:#FFFFFF" id="stop3367"/>
+            <stop offset="0.31" style="stop-color:#DE4024" id="stop3369"/>
+            <stop offset="0.99" style="stop-color:#BF190B" id="stop3371"/>
+            <stop offset="1" style="stop-color:#BF190B" id="stop3373"/>
+          </linearGradient>
+
+
+          <linearGradient id="XMLID_25_" gradientUnits="userSpaceOnUse" x1="-18.5557" y1="155.1045" x2="135.0152" y2="-2.8093">
+            <stop offset="0" style="stop-color:#BD0012" id="stop3380"/>
+            <stop offset="0" style="stop-color:#BD0012" id="stop3382"/>
+            <stop offset="0.07" style="stop-color:#FFFFFF" id="stop3384"/>
+            <stop offset="0.17" style="stop-color:#FFFFFF" id="stop3386"/>
+            <stop offset="0.27" style="stop-color:#C82F1C" id="stop3388"/>
+            <stop offset="0.33" style="stop-color:#820C01" id="stop3390"/>
+            <stop offset="0.46" style="stop-color:#A31601" id="stop3392"/>
+            <stop offset="0.72" style="stop-color:#B31301" id="stop3394"/>
+            <stop offset="0.99" style="stop-color:#E82609" id="stop3396"/>
+            <stop offset="1" style="stop-color:#E82609" id="stop3398"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_26_" gradientUnits="userSpaceOnUse" x1="99.0747" y1="171.0332" x2="52.8177" y2="159.6166">
+            <stop offset="0" style="stop-color:#8C0C01" id="stop3403"/>
+            <stop offset="0" style="stop-color:#8C0C01" id="stop3405"/>
+            <stop offset="0.54" style="stop-color:#990C00" id="stop3407"/>
+            <stop offset="0.99" style="stop-color:#A80D0E" id="stop3409"/>
+            <stop offset="1" style="stop-color:#A80D0E" id="stop3411"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_27_" gradientUnits="userSpaceOnUse" x1="178.5259" y1="115.5146" x2="137.4327" y2="78.684">
+            <stop offset="0" style="stop-color:#7E110B" id="stop3416"/>
+            <stop offset="0" style="stop-color:#7E110B" id="stop3418"/>
+            <stop offset="0.99" style="stop-color:#9E0C00" id="stop3420"/>
+            <stop offset="1" style="stop-color:#9E0C00" id="stop3422"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_28_" gradientUnits="userSpaceOnUse" x1="193.6235" y1="47.937" x2="173.1542" y2="26.0538">
+            <stop offset="0" style="stop-color:#79130D" id="stop3427"/>
+            <stop offset="0" style="stop-color:#79130D" id="stop3429"/>
+            <stop offset="0.99" style="stop-color:#9E120B" id="stop3431"/>
+            <stop offset="1" style="stop-color:#9E120B" id="stop3433"/>
+          </linearGradient>
+
+
+          <radialGradient id="XMLID_29_" cx="143.8315" cy="79.3882" r="50.3576" gradientUnits="userSpaceOnUse">
+            <stop offset="0" style="stop-color:#A80D00" id="stop3440"/>
+            <stop offset="0" style="stop-color:#A80D00" id="stop3442"/>
+            <stop offset="0.99" style="stop-color:#7E0E08" id="stop3444"/>
+            <stop offset="1" style="stop-color:#7E0E08" id="stop3446"/>
+          </radialGradient>
+
+          <radialGradient id="XMLID_30_" cx="74.0923" cy="145.751" r="66.9437" gradientUnits="userSpaceOnUse">
+            <stop offset="0" style="stop-color:#A30C00" id="stop3451"/>
+            <stop offset="0" style="stop-color:#A30C00" id="stop3453"/>
+            <stop offset="0.99" style="stop-color:#800E08" id="stop3455"/>
+            <stop offset="1" style="stop-color:#800E08" id="stop3457"/>
+          </radialGradient>
+
+          <linearGradient id="XMLID_31_" gradientUnits="userSpaceOnUse" x1="26.6699" y1="197.3359" x2="9.9887" y2="140.742">
+            <stop offset="0" style="stop-color:#8B2114" id="stop3462"/>
+            <stop offset="0" style="stop-color:#8B2114" id="stop3464"/>
+            <stop offset="0.43" style="stop-color:#9E100A" id="stop3466"/>
+            <stop offset="0.99" style="stop-color:#B3100C" id="stop3468"/>
+            <stop offset="1" style="stop-color:#B3100C" id="stop3470"/>
+          </linearGradient>
+
+          <linearGradient id="XMLID_32_" gradientUnits="userSpaceOnUse" x1="154.6411" y1="9.7979" x2="192.039" y2="26.3059">
+            <stop offset="0" style="stop-color:#B31000" id="stop3475"/>
+            <stop offset="0" style="stop-color:#B31000" id="stop3477"/>
+            <stop offset="0.44" style="stop-color:#910F08" id="stop3479"/>
+            <stop offset="0.99" style="stop-color:#791C12" id="stop3481"/>
+            <stop offset="1" style="stop-color:#791C12" id="stop3483"/>
+          </linearGradient>
+
+          <polygon style="fill:url(#linearGradient3448);fill-rule:evenodd" clip-rule="evenodd" points="153.5,130.41 40.38,197.58 186.849,187.641 198.13,39.95 " id="polygon3282"/><polygon style="fill:url(#XMLID_18_-7);fill-rule:evenodd" clip-rule="evenodd" points="187.089,187.54 174.5,100.65 140.209,145.93 " id="polygon3293"/><polygon style="fill:url(#XMLID_19_-4);fill-rule:evenodd" clip-rule="evenodd" points="187.259,187.54 95.03,180.3 40.87,197.391 " id="polygon3304"/><polygon style="fill:url(#XMLID_20_-9);fill-rule:evenodd" clip-rule="evenodd" points="41,197.41 64.04,121.93 13.34,132.771 " id="polygon3319"/><polygon style="fill:url(#XMLID_21_-3);fill-rule:evenodd" clip-rule="evenodd" points="140.2,146.18 119,63.14 58.33,120.01 " id="polygon3334"/><polygon style="fill:url(#XMLID_22_-7);fill-rule:evenodd" clip-rule="evenodd" points="193.32,64.31 135.97,17.47 120,69.1 " id="polygon3349"/><polygon style="fill:url(#XMLID_23_-9);fill-rule:evenodd" clip-rule="evenodd" points="166.5,0.77 132.77,19.41 111.49,0.52 " id="polygon3362"/><polygon style="fill:url(#XMLID_24_-3);fill-rule:evenodd" clip-rule="evenodd" points="0,158.09 14.13,132.32 2.7,101.62 " id="polygon3375"/><path style="fill:#ffffff;fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 1.94,100.65 11.5,32.62 49.97,-11.211 57.05,-53.02 L 136.56,17.9 111.209,0 68.109,16.13 C 54.53,28.76 28.18,53.75 27.23,54.22 26.29,54.7 9.83,85.81 1.94,100.65 z" id="path3377"/><path style="fill:url(#XMLID_25_-9);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 42.32,42.05 c 29.43,-29.18 67.37,-46.42 81.93,-31.73 14.551,14.69 -0.88,50.39 -30.31,79.56 -29.43,29.17 -66.9,47.36 -81.45,32.67 -14.56,-14.68 0.4,-51.33 29.83,-80.5 z" id="path3400"/><path style="fill:url(#XMLID_26_-2);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 41,197.38 22.86,-75.72 75.92,24.39 C 112.33,171.79 81.8,193.55 41,197.38 z" id="path3413"/><path style="fill:url(#XMLID_27_-1);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 120.56,68.89 19.49,77.2 C 162.98,121.98 183.56,96.06 193.639,64 l -73.079,4.89 z" id="path3424"/><path style="fill:url(#XMLID_28_-1);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 193.44,64.39 c 7.8,-23.54 9.6,-57.31 -27.181,-63.58 l -30.18,16.67 57.361,46.91 z" id="path3435"/><path style="fill:#9e1209;fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 0,157.75 c 1.08,38.851 29.11,39.43 41.05,39.771 L 13.47,133.11 0,157.75 z" id="path3437"/><path style="fill:url(#XMLID_29_-4);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 120.669,69.01 c 17.62,10.83 53.131,32.58 53.851,32.98 1.119,0.63 15.31,-23.93 18.53,-37.81 l -72.381,4.83 z" id="path3448"/><path style="fill:url(#XMLID_30_-6);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 63.83,121.66 30.56,58.96 c 18.07,-9.8 32.22,-21.74 45.18,-34.53 L 63.83,121.66 z" id="path3459"/><path style="fill:url(#XMLID_31_-6);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 13.35,133.19 -4.33,51.56 c 8.17,11.16 19.41,12.13 31.2,11.26 -8.53,-21.23 -25.57,-63.68 -26.87,-62.82 z" id="path3472"/><path style="fill:url(#XMLID_32_-0);fill-rule:evenodd" inkscape:connector-curvature="0" clip-rule="evenodd" d="m 135.9,17.61 60.71,8.52 C 193.37,12.4 183.42,3.54 166.46,0.77 L 135.9,17.61 z" id="path3485"/></svg>
+        </template>
+        <template #title>Ruby</template>
+        <template #description>
+          Consume your API with Ruby
+        </template>
+      </InstallLink>
+    </div>
+
+    <!-- Python -->
+    <div>
+      <InstallLink link="../getting-started/python.html">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" width="2500" height="2490" viewBox="0 0 256 255" preserveAspectRatio="xMinYMin meet"><defs><linearGradient x1="12.959%" y1="12.039%" x2="79.639%" y2="78.201%" id="a"><stop stop-color="#387EB8" offset="0%"/><stop stop-color="#366994" offset="100%"/></linearGradient><linearGradient x1="19.128%" y1="20.579%" x2="90.742%" y2="88.429%" id="b"><stop stop-color="#FFE052" offset="0%"/><stop stop-color="#FFC331" offset="100%"/></linearGradient></defs><path d="M126.916.072c-64.832 0-60.784 28.115-60.784 28.115l.072 29.128h61.868v8.745H41.631S.145 61.355.145 126.77c0 65.417 36.21 63.097 36.21 63.097h21.61v-30.356s-1.165-36.21 35.632-36.21h61.362s34.475.557 34.475-33.319V33.97S194.67.072 126.916.072zM92.802 19.66a11.12 11.12 0 0 1 11.13 11.13 11.12 11.12 0 0 1-11.13 11.13 11.12 11.12 0 0 1-11.13-11.13 11.12 11.12 0 0 1 11.13-11.13z" fill="url(#a)"/><path d="M128.757 254.126c64.832 0 60.784-28.115 60.784-28.115l-.072-29.127H127.6v-8.745h86.441s41.486 4.705 41.486-60.712c0-65.416-36.21-63.096-36.21-63.096h-21.61v30.355s1.165 36.21-35.632 36.21h-61.362s-34.475-.557-34.475 33.32v56.013s-5.235 33.897 62.518 33.897zm34.114-19.586a11.12 11.12 0 0 1-11.13-11.13 11.12 11.12 0 0 1 11.13-11.131 11.12 11.12 0 0 1 11.13 11.13 11.12 11.12 0 0 1-11.13 11.13z" fill="url(#b)"/></svg>
+        </template>
+        <template #title>Python</template>
+        <template #description>
+          Consume your API with Python
+        </template>
+      </InstallLink>
+    </div>
 
 
   </div>

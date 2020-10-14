@@ -82,11 +82,11 @@ describe('Core API - Basic + draftAndPublish', () => {
     data.products.push(res.body);
   });
 
-  test('Create a product + cannot overwrite published_at', async () => {
+  test('Create a product + can overwrite published_at', async () => {
     const product = {
       name: 'Product 2',
       description: 'Product description',
-      published_at: '2020-08-20T10:27:55.866Z',
+      published_at: '2020-08-20T10:27:55.000Z',
     };
     const res = await rq({
       method: 'POST',
@@ -97,7 +97,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(_.omit(product, 'published_at'));
     expect(res.body.published_at).toBeISODate();
-    expect(res.body.published_at).not.toBe(product.published_at);
+    expect(res.body.published_at).toBe(product.published_at);
     data.products.push(res.body);
   });
 
@@ -141,11 +141,11 @@ describe('Core API - Basic + draftAndPublish', () => {
     data.products[0] = res.body;
   });
 
-  test('Update product + cannot overwrite published_at', async () => {
+  test('Update product + can overwrite published_at', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      published_at: '2020-08-27T09:50:50.465Z',
+      published_at: '2020-08-27T09:50:50.000Z',
     };
     const res = await rq({
       method: 'PUT',
@@ -155,9 +155,8 @@ describe('Core API - Basic + draftAndPublish', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(_.pick(data.products[0], ['name', 'description']));
-    expect(res.body.published_at).toBe(data.products[0].published_at);
     expect(res.body.published_at).toBeISODate();
-    expect(res.body.published_at).not.toBe(product.published_at);
+    expect(res.body.published_at).toBe(product.published_at);
     data.products[0] = res.body;
   });
 

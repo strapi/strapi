@@ -102,6 +102,25 @@ describe('Entity validator', () => {
           });
         });
       });
+
+      it('Supports custom field types', async () => {
+        const model = {
+          attributes: {
+            uuid: {
+              type: 'uuid',
+            },
+          },
+        };
+
+        const input = { uuid: '2479d6d7-2497-478d-8a34-a9e8ce45f8a7' };
+
+        expect.hasAssertions();
+
+        const data = await entityValidator.validateEntityCreation(model, input);
+        expect(data).toEqual({
+          uuid: '2479d6d7-2497-478d-8a34-a9e8ce45f8a7',
+        });
+      });
     });
 
     describe('String validator', () => {
@@ -334,6 +353,25 @@ describe('Entity validator', () => {
           { isDraft: true }
         );
         expect(data).toEqual({ title: null });
+      });
+
+      it('Supports custom field types', async () => {
+        const model = {
+          attributes: {
+            uuid: {
+              type: 'uuid',
+            },
+          },
+        };
+
+        const input = { uuid: '2479d6d7-2497-478d-8a34-a9e8ce45f8a7' };
+
+        expect.hasAssertions();
+
+        const data = await entityValidator.validateEntityCreation(model, input, { isDraft: true });
+        expect(data).toEqual({
+          uuid: '2479d6d7-2497-478d-8a34-a9e8ce45f8a7',
+        });
       });
     });
 
