@@ -68,14 +68,20 @@ const CreatePage = () => {
     )
       .then(() => {
         emitEvent('didCreateRole');
-        strapi.notification.success('Settings.roles.created');
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: 'Settings.roles.created' },
+        });
         // Forcing redirecting since we don't have the id in the response
         // TODO
         goBack();
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       })
       .finally(() => {
         setIsSubmiting(false);

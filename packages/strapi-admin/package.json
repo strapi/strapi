@@ -84,7 +84,7 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-select": "^3.0.8",
-    "react-transition-group": "^4.3.0",
+    "react-transition-group": "4.4.1",
     "react-virtualized": "^9.21.2",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
