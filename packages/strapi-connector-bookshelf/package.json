@@ -1,6 +1,6 @@
 {
   "name": "strapi-connector-bookshelf",
-  "version": "3.2.0",
+  "version": "3.2.3",
   "description": "Bookshelf hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -22,8 +22,8 @@
     "lodash": "4.17.19",
     "p-map": "4.0.0",
     "pluralize": "^8.0.0",
-    "rimraf": "3.0.0",
-    "strapi-utils": "3.2.0"
+    "rimraf": "3.0.2",
+    "strapi-utils": "3.2.3"
   },
   "peerDependencies": {
     "knex": "^0.20.0"

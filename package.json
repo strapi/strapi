@@ -38,7 +38,7 @@
     "react-test-renderer": "^16.9.0",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.9",
-    "rimraf": "3.0.0",
+    "rimraf": "3.0.2",
     "snyk": "^1.99.0",
     "stylelint": "10.1.0",
     "stylelint-config-recommended": "3.0.0",

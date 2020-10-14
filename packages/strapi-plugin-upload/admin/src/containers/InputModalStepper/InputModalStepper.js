@@ -51,6 +51,7 @@ const InputModalStepper = ({
     isWarningDeleteOpen,
     multiple,
     selectedFiles,
+    submitEditNewFile,
     submitEditExistingFile,
     toggleModalWarning,
   } = useModalContext();
@@ -175,6 +176,7 @@ const InputModalStepper = ({
 
   const handleSubmitEditNewFile = e => {
     e.preventDefault();
+    submitEditNewFile();
     goNext();
   };
 

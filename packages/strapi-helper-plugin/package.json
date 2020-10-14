@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.2.0",
+  "version": "3.2.3",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -38,7 +38,7 @@
     "@babel/preset-react": "^7.9.4",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.8.0",
-    "rimraf": "3.0.0",
+    "rimraf": "3.0.2",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",

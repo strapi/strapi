@@ -96,7 +96,7 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
   const handleCopy = () => {
     strapi.notification.toggle({
       type: 'info',
-      message: { id: getTrad('notification.link-copied') },
+      message: { id: 'notification.link-copied' },
     });
   };
 

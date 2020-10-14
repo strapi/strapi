@@ -185,6 +185,12 @@ const InputModalStepperProvider = ({
     });
   };
 
+  const submitEditNewFile = () => {
+    dispatch({
+      type: 'ON_SUBMIT_EDIT_NEW_FILE',
+    });
+  };
+
   const submitEditExistingFile = () => {
     dispatch({
       type: 'ON_SUBMIT_EDIT_EXISTING_FILE',
@@ -504,6 +510,7 @@ const InputModalStepperProvider = ({
         onInputMediaChange,
         removeFilter,
         setParam,
+        submitEditNewFile,
         submitEditExistingFile,
         toggleModalWarning,
       }}
