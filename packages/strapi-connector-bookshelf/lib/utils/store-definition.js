@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const { getManyRelations } = require('./associations');
 
 const formatDefinitionToStore = definition =>
   JSON.stringify(
@@ -39,29 +38,18 @@ const storeDefinition = async (definition, ORM) => {
   return strapi.models['core_store'].forge(defData).save();
 };
 
-const didDefinitionOrTableChange = async (definition, ORM) => {
-  // Checks if the tables exist in DB
-  const manyRelations = getManyRelations(definition);
-  const tablesToCheck = manyRelations.map(r => r.tableCollectionName);
-  tablesToCheck.push(definition.collectionName);
-
-  for (const tableToCheck of tablesToCheck) {
-    const tableExists = await ORM.knex.schema.hasTable(tableToCheck);
-    if (!tableExists) {
-      return true;
-    }
-  }
-
+const didColumnDefinitionChange = async (attributeName, definition, ORM) => {
   // Checks if the definition has changed
-  const previousDefRow = await getDefinitionFromStore(definition, ORM);
-  const previousDefJSON = _.get(previousDefRow, 'value', null);
-  const actualDefJSON = formatDefinitionToStore(definition);
+  const previousDefinitionRow = await getDefinitionFromStore(definition, ORM);
+  const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
+  const previousAttribute = _.get(previousDefinition, ['attributes', attributeName], null);
+  const actualAttribute = _.get(definition, ['attributes', attributeName], null);
 
-  return previousDefJSON !== actualDefJSON;
+  return !_.isEqual(previousAttribute, actualAttribute);
 };
 
 module.exports = {
   storeDefinition,
-  didDefinitionOrTableChange,
   getDefinitionFromStore,
+  didColumnDefinitionChange,
 };

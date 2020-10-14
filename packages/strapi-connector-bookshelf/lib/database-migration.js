@@ -42,13 +42,11 @@ const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
       .delete()
       .where(PUBLISHED_AT_ATTRIBUTE, null);
 
-    // column are automatically deleted in sqlite because the table is recreated
-    // for other databases, we need to do it ourselves
     const publishedAtColumnExists = await ORM.knex.schema.hasColumn(
       definition.collectionName,
       PUBLISHED_AT_ATTRIBUTE
     );
-    if (definition.client !== 'sqlite3' && publishedAtColumnExists) {
+    if (publishedAtColumnExists) {
       await ORM.knex.schema.table(definition.collectionName, table => {
         table.dropColumn(PUBLISHED_AT_ATTRIBUTE);
       });
