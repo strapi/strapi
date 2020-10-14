@@ -37,7 +37,6 @@ const alias = [
   'react-select',
   'redux',
   'redux-immutable',
-  'remove-markdown',
   'reselect',
   'styled-components',
   'yup',

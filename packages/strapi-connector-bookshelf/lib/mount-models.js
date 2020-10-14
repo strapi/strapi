@@ -237,7 +237,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
 
           // Force singular foreign key
           details.attribute = singular(details.collection);
-          details.column = targetModel.primaryKey;
+          details.column = 'id';
 
           // Set this info to be able to see if this field is a real database's field.
           details.isVirtual = true;
