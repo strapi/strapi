@@ -98,7 +98,6 @@ const SettingsPage = () => {
   return (
     <>
       <SettingsPageTitle name={title} />
-      <BaselineAlignment />
       <div>
         <form onSubmit={handleSubmit}>
           <Header
@@ -106,6 +105,7 @@ const SettingsPage = () => {
             content={formatMessage({ id: getTrad('Settings.subTitle') })}
             isLoading={showLoader}
           />
+          <BaselineAlignment />
           <FormBloc
             title={formatMessage({ id: getTrad('Settings.form.title.config') })}
             isLoading={showLoader}
