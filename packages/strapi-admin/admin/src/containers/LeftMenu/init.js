@@ -3,7 +3,7 @@ import { SETTINGS_BASE_URL } from '../../config';
 import { sortLinks } from '../../utils';
 import { getSettingsMenuLinksPermissions } from './utils';
 
-const init = (initialState, plugins = {}, settingsMenu = []) => {
+const init = (initialState, plugins = {}, settingsMenu = [], settingsLinkNotificationCount = 0) => {
   const settingsLinkPermissions = getSettingsMenuLinksPermissions(settingsMenu);
 
   const pluginsLinks = Object.values(plugins).reduce((acc, current) => {
@@ -21,8 +21,10 @@ const init = (initialState, plugins = {}, settingsMenu = []) => {
 
   if (!settingsLinkPermissions.filter(perm => perm === null).length && settingsLinkIndex !== -1) {
     const permissionsPath = ['generalSectionLinks', settingsLinkIndex, 'permissions'];
+    const notificationPath = ['generalSectionLinks', settingsLinkIndex, 'notificationsCount'];
 
     set(initialState, permissionsPath, settingsLinkPermissions);
+    set(initialState, notificationPath, settingsLinkNotificationCount);
   }
 
   if (sortedLinks.length) {

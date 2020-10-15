@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 const A = styled.a`
+  display: flex;
   position: relative;
   padding-top: 0.7rem;
   padding-bottom: 0.2rem;
@@ -10,7 +11,6 @@ const A = styled.a`
   cursor: pointer;
   color: ${props => props.theme.main.colors.leftMenu['link-color']};
   text-decoration: none;
-  display: block;
   -webkit-font-smoothing: antialiased;
 
   &:hover {
@@ -31,6 +31,8 @@ const A = styled.a`
   }
 
   &.linkActive {
+    padding-right: 2.3rem;
+
     color: white !important;
     border-left: 0.3rem solid ${props => props.theme.main.colors.strapi.blue};
   }

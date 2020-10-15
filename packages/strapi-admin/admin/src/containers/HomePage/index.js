@@ -4,16 +4,12 @@
  *
  */
 /* eslint-disable */
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { get, isNil, upperFirst } from 'lodash';
+import { get, upperFirst } from 'lodash';
 import { auth, LoadingIndicatorPage } from 'strapi-helper-plugin';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-
 import PageTitle from '../../components/PageTitle';
 import { useModels } from '../../hooks';
-import { STRAPI_UPDATE_NOTIF } from '../../config';
 
 import useFetch from './hooks';
 import { ALink, Block, Container, LinkWrapper, P, Wave, Separator } from './components';
@@ -65,54 +61,7 @@ const SOCIAL_LINKS = [
   },
 ];
 
-const HomePage = ({ global: { strapiVersion }, history: { push } }) => {
-  const notifications = useSelector(state => state.get('newNotification').notifications);
-
-  useEffect(() => {
-    const getStrapiLatestRelease = async () => {
-      try {
-        const notificationAlreadyExist =
-          notifications.findIndex(notification => notification.uid === 'STRAPI_UPDATE_NOTIF') != -1;
-
-        const showUpdateNotif =
-          STRAPI_UPDATE_NOTIF &&
-          !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF')) &&
-          !notificationAlreadyExist;
-
-        if (showUpdateNotif) {
-          const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
-
-          const data = await res.json();
-
-          if (strapiVersion !== data.name.split('v').join('')) {
-            strapi.notification.toggle({
-              type: 'info',
-              message: { id: 'notification.version.update.message' },
-              link: {
-                url: `https://github.com/strapi/strapi/releases/tag/${data.name}`,
-                label: {
-                  id: 'notification.version.update.link',
-                },
-              },
-              blockTransition: true,
-              // Used to check if the notification is already displayed
-              // to avoid multiple notifications each time the user goes back to the home page.
-              uid: 'STRAPI_UPDATE_NOTIF',
-              onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
-            });
-          }
-        }
-      } catch (e) {
-        strapi.notification.toggle({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
-    };
-
-    getStrapiLatestRelease();
-  }, []);
-
+const HomePage = ({ history: { push } }) => {
   const { error, isLoading, posts } = useFetch();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
