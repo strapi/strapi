@@ -3,12 +3,18 @@ name: 🐛 Bug Report
 about: Create a report to help us improve Strapi.
 ---
 
-> Hello 👋 Thank you for submitting an issue.
->
-> Before you start, please make sure your issue is understandable and reproducible.
-> To make your issue readable make sure you use valid [Markdown syntax](https://guides.github.com/features/mastering-markdown)
->
-> Please ensure you have also read and understand the [contributing guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue)
+<!--
+Hello 👋 Thank you for submitting an issue.
+
+Before you start, please make sure your issue is understandable and reproducible.
+To make your issue readable make sure you use valid Markdown syntax.
+
+https://guides.github.com/features/mastering-markdown/
+
+Please ensure you have also read and understand the contributing guide.
+
+https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue
+-->
 
 ## Bug report
 
