@@ -15,7 +15,7 @@
     "knex": "^0.20.0",
     "lodash": "4.17.19",
     "mysql": "^2.17.1",
-    "pg": "^7.10.0",
+    "pg": "8.4.0",
     "sqlite3": "^5.0.0",
     "strapi": "3.2.3",
     "strapi-admin": "3.2.3",
@@ -38,7 +38,7 @@
     "uuid": "getstarted"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE"
