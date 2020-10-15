@@ -100,7 +100,7 @@ npm install @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic
 ```
 # Go back to to strapi root folder
 cd ../..
-yarn develop --watch-admin
+yarn develop --watch-admin / npm run develop -- --watch-admin
 ```
 
 :::
