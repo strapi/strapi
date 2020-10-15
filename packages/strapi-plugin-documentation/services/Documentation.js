@@ -619,21 +619,10 @@ module.exports = {
             minItems: min,
             maxItems: max,
           };
-        } else if (['datetime', 'date', 'password'].includes(type)) {
-          acc.properties[current] = {
-            type: 'string',
-            format: this.getFormat(type),
-            description,
-            default: defaultValue,
-            minimum,
-            maxmimun,
-            maxLength,
-            minLength,
-            enum: enumeration,
-          };
         } else {
           acc.properties[current] = {
             type,
+            format: this.getFormat(attribute.type),
             description,
             default: defaultValue,
             minimum,
@@ -1490,10 +1479,14 @@ module.exports = {
    */
   getFormat: type => {
     switch (type) {
+      case 'date':
+        return 'date';
       case 'datetime':
         return 'date-time';
+      case 'password':
+        return 'password';
       default:
-        return type;
+        return undefined;
     }
   },
 
