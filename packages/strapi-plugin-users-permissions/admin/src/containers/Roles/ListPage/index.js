@@ -104,6 +104,29 @@ const RoleListPage = () => {
     [canDelete]
   );
 
+  const getLinks = role => {
+    const links = [];
+
+    if (canUpdate) {
+      links.push({
+        icon: <FontAwesomeIcon icon="pencil-alt" />,
+        onClick: () => handleGoTo(role.id),
+      });
+    }
+    if (checkCanDeleteRole(role)) {
+      links.push({
+        icon: <FontAwesomeIcon icon="trash-alt" />,
+        onClick: e => {
+          e.preventDefault();
+          setModalDelete(role.id);
+          e.stopPropagation();
+        },
+      });
+    }
+
+    return links;
+  };
+
   return (
     <>
       <Header
@@ -135,26 +158,7 @@ const RoleListPage = () => {
             items={roles}
             isLoading={isLoading || isLoadingForPermissions}
             customRowComponent={role => (
-              <RoleRow
-                onClick={() => handleGoTo(role.id)}
-                links={[
-                  {
-                    icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
-                    onClick: () => {
-                      handleGoTo(role.id);
-                    },
-                  },
-                  {
-                    icon: checkCanDeleteRole(role) ? <FontAwesomeIcon icon="trash-alt" /> : null,
-                    onClick: e => {
-                      e.preventDefault();
-                      setModalDelete(role.id);
-                      e.stopPropagation();
-                    },
-                  },
-                ]}
-                role={role}
-              />
+              <RoleRow onClick={() => handleGoTo(role.id)} links={getLinks(role)} role={role} />
             )}
           />
           {!roles && !isLoading && !isLoadingForPermissions && <EmptyRole />}
