@@ -1452,9 +1452,11 @@ module.exports = {
       case 'string':
       case 'byte':
       case 'binary':
+      case 'password':
       case 'email':
       case 'text':
       case 'enumeration':
+      case 'date':
       case 'richtext':
         return 'string';
       case 'float':
