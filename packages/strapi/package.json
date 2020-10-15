@@ -19,7 +19,7 @@
     "chokidar": "3.3.1",
     "ci-info": "2.0.0",
     "cli-table3": "^0.6.0",
-    "commander": "^2.20.0",
+    "commander": "6.1.0",
     "cross-spawn": "^6.0.5",
     "debug": "^4.1.1",
     "delegates": "^1.0.0",
@@ -85,7 +85,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
