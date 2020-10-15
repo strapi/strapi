@@ -97,10 +97,10 @@ The string after the last `@` represents your desired [semver](https://docs.npmj
 ### Configure your provider
 
 After installing your provider you will need to add some settings in `config/plugins.js`.
-
-::: warning
-Do note that filename has to come with correct spelling, plugin with 's' (plural). -> `plugins.js`
 Check the README of each provider to know what configuration settings the provider needs.
+
+::: tip
+Make sure you have the correct spelling of the configuration filename, it is written in plural (with a trailing 's'): `plugins.js`.
 :::
 
 Here is an example of a configuration made for the provider [strapi-provider-email-sendgrid](https://www.npmjs.com/package/strapi-provider-email-sendgrid).
