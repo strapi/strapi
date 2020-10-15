@@ -10,8 +10,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
-import { Text } from '@buffetjs/core';
-
 import en from '../../../translations/en.json';
 import LeftMenuIcon from './LeftMenuIcon';
 import A from './A';
@@ -69,13 +67,7 @@ const LeftMenuLinkContent = ({ destination, iconName, label, location, notificat
     >
       <LeftMenuIcon icon={iconName} />
       {content}
-      {notificationsCount > 0 && (
-        <NotificationCount>
-          <Text fontWeight="bold" fontSize="xs" lineHeight="14px" color="white">
-            {notificationsCount}
-          </Text>
-        </NotificationCount>
-      )}
+      {notificationsCount > 0 && <NotificationCount count={notificationsCount} />}
     </A>
   );
 };

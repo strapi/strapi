@@ -47,13 +47,9 @@ function appReducer(state = initialState, action) {
     case GET_INFOS_DATA_SUCCEEDED: {
       if (action.data.strapiVersion !== state.get('strapiVersion')) {
         console.error(
-          `%c It seems that the built version ${packageVersion} is different than your project's one (${action.data.strapiVersion})`,
-          'color: yellow; font-size: 20px;'
+          `It seems that the built version ${packageVersion} is different than your project's one (${action.data.strapiVersion})`
         );
-        console.error(
-          '%c Please delete your `.cache` and `build` folders and restart your app',
-          'color: yellow; font-size: 15px'
-        );
+        console.error('Please delete your `.cache` and `build` folders and restart your app');
       }
 
       return (

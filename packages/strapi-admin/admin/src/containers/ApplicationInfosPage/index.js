@@ -34,6 +34,9 @@ const ApplicationInfosPage = () => {
   };
   const pricingLabel = formatMessage({ id: 'Settings.application.link-pricing' });
   const upgradeLabel = formatMessage({ id: 'Settings.application.link-upgrade' });
+  const strapiVersion = formatMessage({ id: 'Settings.application.strapi-version' });
+  const nodeVersion = formatMessage({ id: 'Settings.application.node-version' });
+  const editionTitle = formatMessage({ id: 'Settings.application.edition-title' });
 
   const shouldShowUpgradeLink = `v${appInfos.strapiVersion}` !== latestStrapiReleaseTag;
 
@@ -57,18 +60,18 @@ const ApplicationInfosPage = () => {
             <Flex justifyContent="space-between">
               <Detail
                 link={upgradeLink}
-                title="STRAPI VERSION"
+                title={strapiVersion}
                 content={`v${appInfos.strapiVersion}`}
               />
               <Detail
                 link={{ label: pricingLabel, href: 'https://strapi.io/pricing' }}
-                title="CURRENT PLAN"
+                title={editionTitle}
                 content={formatMessage({ id: currentPlan })}
               />
             </Flex>
             <Padded top size="lg">
               <Text fontSize="xs" color="grey" fontWeight="bold">
-                NODE VERSION
+                {nodeVersion}
               </Text>
               <InfoText content={appInfos.nodeVersion} />
             </Padded>

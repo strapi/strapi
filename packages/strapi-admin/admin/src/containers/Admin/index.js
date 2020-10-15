@@ -69,7 +69,6 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     this.emitEvent('didAccessAuthenticatedAdministration');
-    // this.fetchUserPermissions(true);
     this.initApp();
   }
 
@@ -156,7 +155,6 @@ export class Admin extends React.Component {
             },
           },
           blockTransition: true,
-
           onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
         });
       }

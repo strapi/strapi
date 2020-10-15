@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { Text } from '@buffetjs/core';
 import { Arrow } from '@buffetjs/icons';
 
-const A = styled(Text)`
+const LinkText = styled(Text)`
   color: ${({ theme }) => theme.main.colors.mediumBlue};
   > a {
     &:hover {
@@ -12,7 +12,6 @@ const A = styled(Text)`
   }
 `;
 
-// TODO delete when notif ready
 export const LinkArrow = styled(Arrow)`
   transform: rotate(45deg);
   margin-top: 2px;
@@ -20,4 +19,4 @@ export const LinkArrow = styled(Arrow)`
   color: ${({ theme }) => theme.main.colors.blue};
 `;
 
-export default A;
+export default LinkText;
