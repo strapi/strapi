@@ -4,7 +4,11 @@
  * Export shared utilities
  */
 const { buildQuery, hasDeepFilters } = require('./build-query');
-const { convertRestQueryParams, VALID_REST_OPERATORS } = require('./convert-rest-query-params');
+const {
+  convertRestQueryParams,
+  VALID_REST_OPERATORS,
+  QUERY_OPERATORS,
+} = require('./convert-rest-query-params');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
@@ -38,6 +42,7 @@ module.exports = {
   templateConfiguration,
   convertRestQueryParams,
   VALID_REST_OPERATORS,
+  QUERY_OPERATORS,
   buildQuery,
   hasDeepFilters,
   parseMultipartData,
