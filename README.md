@@ -58,11 +58,11 @@ Strapi is a free and open-source headless CMS delivering your content anywhere y
 - **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
 
-## Getting Started
+## Getting Started :-
 
 <a href="https://strapi.io/documentation/v3.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
-### ⏳ Installation
+### ⏳ Installation :-
 
 Install Strapi with this **Quickstart** command to create a Strapi project instantly:
 
@@ -84,7 +84,7 @@ This command generates a brand new project with the default features (authentica
 
 Enjoy 🎉
 
-### 🖐 Requirements
+### 🖐 Requirements :-
 
 Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
 
@@ -115,7 +115,7 @@ Please note at this time Node v14 **is not** supported
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 
-## Features
+## Features :-
 
 - **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
 - **Secure by default:** Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
@@ -127,11 +127,11 @@ Please note at this time Node v14 **is not** supported
 
 **[See more on our website](https://strapi.io/overview)**.
 
-## Contributing
+## Contributing :-
 
 Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 
-## Community support
+## Community support :-
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
@@ -143,14 +143,14 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)
 - [YouTube Channel](https://www.youtube.com/strapi) (Learn from Video Tutorials)
 
-## Migration
+## Migration :-
 
 Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
 
-## Roadmap
+## Roadmap :-
 
 Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
 
-## License
+## License :-
 
 See the [LICENSE](./LICENSE) file for licensing information.
