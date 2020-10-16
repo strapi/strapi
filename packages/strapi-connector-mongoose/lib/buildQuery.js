@@ -137,7 +137,6 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
     populate,
     where: filters.where,
   });
-  const customQueryOptions = _.pick(filters, ['publicationState']);
 
   // Init the query
   let query = model
@@ -169,7 +168,6 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
                 },
               },
               null,
-              { custom: customQueryOptions }
             )
             .populate(populate);
 
