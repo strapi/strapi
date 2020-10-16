@@ -1457,6 +1457,7 @@ module.exports = {
       case 'text':
       case 'enumeration':
       case 'date':
+      case 'datetime':
       case 'richtext':
         return 'string';
       case 'float':
