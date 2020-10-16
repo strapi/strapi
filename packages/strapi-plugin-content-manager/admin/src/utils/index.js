@@ -1,3 +1,4 @@
+export { default as checkIfAttributeIsDisplayable } from './checkIfAttributeIsDisplayable';
 export { default as dateFormats } from './dateFormats';
 export { default as generatePermissionsObject } from './generatePermissionsObject';
 export { default as getFieldName } from './getFieldName';

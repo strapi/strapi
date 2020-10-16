@@ -85,6 +85,7 @@
   "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
   "containers.SettingPage.editSettings.entry.title": "Entry title",
   "containers.SettingPage.editSettings.entry.title.description": "Set the displayed field of your entry",
+  "containers.SettingPage.editSettings.relation-field.description": "Set the displayed field in both the edit and list views",
   "containers.SettingPage.editSettings.title": "Edit view (settings)",
   "containers.SettingPage.layout": "Layout",
   "containers.SettingPage.listSettings.description": "Configure the options for this collection type",
