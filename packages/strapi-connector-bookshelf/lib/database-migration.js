@@ -22,7 +22,9 @@ const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
   }
 };
 
-const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
+const migrateDraftAndPublish = async ({ definition, ORM }) => {
+  const way = await getDraftAndPublishMigrationWay({ definition, ORM });
+
   if (way === 'enable') {
     const now = new Date();
     let publishedAtValue = now;
@@ -55,6 +57,5 @@ const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
 };
 
 module.exports = {
-  getDraftAndPublishMigrationWay,
   migrateDraftAndPublish,
 };

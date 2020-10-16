@@ -2,25 +2,18 @@ const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
-const { storeDefinition, didColumnDefinitionChange } = require('./utils/store-definition');
-const { getDraftAndPublishMigrationWay, migrateDraftAndPublish } = require('./database-migration');
+const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
+const { migrateDraftAndPublish } = require('./database-migration');
 const { getManyRelations } = require('./utils/associations');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
-  // Migrations to do before updating/creating the tables in database
-  const draftAndPublishMigrationWay = await getDraftAndPublishMigrationWay({ definition, ORM });
-  if (draftAndPublishMigrationWay === 'disable') {
-    await migrateDraftAndPublish({ definition, ORM, way: 'disable' });
-  }
-
   // Update/create the tables in database
   await createOrUpdateTables({ ORM, loadedModel, definition, connection, model });
 
-  // Migrations to do after updating/creating the tables in database
-  if (draftAndPublishMigrationWay === 'enable') {
-    await migrateDraftAndPublish({ definition, ORM, way: 'enable' });
-  }
+  // migrations
+  await migrateDraftAndPublish({ definition, ORM });
 
+  // store new definitions
   await storeDefinition(definition, ORM);
 };
 
@@ -110,6 +103,15 @@ const createOrUpdateTables = async ({ ORM, loadedModel, definition, connection, 
     delete definition.attributes[loadedModel.hasTimestamps[0]];
     delete definition.attributes[loadedModel.hasTimestamps[1]];
   }
+};
+
+const getColumnInfo = async (columnName, tableName, ORM) => {
+  const exists = await ORM.knex.schema.hasColumn(tableName, columnName);
+
+  return {
+    columnName,
+    exists,
+  };
 };
 
 const isColumn = ({ definition, attribute, name }) => {
@@ -282,20 +284,12 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
   const attributesNames = Object.keys(attributes);
 
   // Fetch existing column
-  const columnsExist = await Promise.all(
-    attributesNames.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
+  const columnsInfo = await Promise.all(
+    attributesNames.map(attributeName => getColumnInfo(attributeName, table, ORM))
   );
+  const nameOfColumnsToAdd = columnsInfo.filter(info => !info.exists).map(info => info.columnName);
 
-  const columnsToAdd = {};
-
-  // Get columns to add
-  columnsExist.forEach((columnExist, index) => {
-    const attribute = attributes[attributesNames[index]];
-
-    if (!columnExist) {
-      columnsToAdd[attributesNames[index]] = attribute;
-    }
-  });
+  const columnsToAdd = _.pick(attributes, nameOfColumnsToAdd);
 
   // Generate and execute query to add missing column
   if (Object.keys(columnsToAdd).length > 0) {
@@ -304,16 +298,14 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
     });
   }
 
-  const attrNamesWithoutTimestamps = attributesNames.filter(
-    attributeName => !(definition.options.timestamps || []).includes(attributeName)
+  const attrsNameWithoutTimestamps = attributesNames.filter(
+    columnName => !(definition.options.timestamps || []).includes(columnName)
   );
-  const changedAttributesResult = await Promise.all(
-    attrNamesWithoutTimestamps.map(attributeName =>
-      didColumnDefinitionChange(attributeName, definition, ORM)
-    )
-  );
-  const columnsToAlter = attrNamesWithoutTimestamps.filter(
-    (attributeName, index) => changedAttributesResult[index]
+
+  const columnsToAlter = getColumnsWhereDefinitionChanged(
+    attrsNameWithoutTimestamps,
+    definition,
+    ORM
   );
 
   if (columnsToAlter.length > 0) {
