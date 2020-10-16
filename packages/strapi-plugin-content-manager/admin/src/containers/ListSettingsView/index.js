@@ -12,7 +12,7 @@ import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-import { ItemTypes, getRequestUrl } from '../../utils';
+import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl } from '../../utils';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
@@ -84,9 +84,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
     return Object.keys(metadatas)
       .filter(key => {
-        const type = get(attributes, [key, 'type'], '');
-
-        return !['json', 'component', 'richtext', 'relation'].includes(type) && !!type;
+        return checkIfAttributeIsDisplayable(get(attributes, key, {}));
       })
       .filter(field => {
         return !displayedFields.includes(field);
@@ -157,44 +155,49 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const [, drop] = useDrop({ accept: ItemTypes.FIELD });
 
-  const renderForm = () => (
-    <>
-      <div className="col-6" style={{ marginBottom: 4 }}>
-        <FormattedMessage id={`${pluginId}.form.Input.label`}>
-          {label => (
-            <FormattedMessage id={`${pluginId}.form.Input.label.inputDescription`}>
-              {description => (
+  const renderForm = () => {
+    const type = get(attributes, [labelToEdit, 'type'], 'text');
+    const shouldDisplaySortToggle = !['media', 'relation'].includes(type);
+
+    return (
+      <>
+        <div className="col-6" style={{ marginBottom: 4 }}>
+          <FormattedMessage id={`${pluginId}.form.Input.label`}>
+            {label => (
+              <FormattedMessage id={`${pluginId}.form.Input.label.inputDescription`}>
+                {description => (
+                  <Input
+                    description={description}
+                    label={label}
+                    type="text"
+                    name="label"
+                    onBlur={() => {}}
+                    value={get(labelForm, 'label', '')}
+                    onChange={handleChangeEditLabel}
+                  />
+                )}
+              </FormattedMessage>
+            )}
+          </FormattedMessage>
+        </div>
+        {shouldDisplaySortToggle && (
+          <div className="col-6" style={{ marginBottom: 4 }}>
+            <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
+              {label => (
                 <Input
-                  description={description}
                   label={label}
-                  type="text"
-                  name="label"
-                  onBlur={() => {}}
-                  value={get(labelForm, 'label', '')}
+                  type="bool"
+                  name="sortable"
+                  value={get(labelForm, 'sortable', false)}
                   onChange={handleChangeEditLabel}
                 />
               )}
             </FormattedMessage>
-          )}
-        </FormattedMessage>
-      </div>
-      {get(attributes, [labelToEdit, 'type'], 'text') !== 'media' && (
-        <div className="col-6" style={{ marginBottom: 4 }}>
-          <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
-            {label => (
-              <Input
-                label={label}
-                type="bool"
-                name="sortable"
-                value={get(labelForm, 'sortable', false)}
-                onChange={handleChangeEditLabel}
-              />
-            )}
-          </FormattedMessage>
-        </div>
-      )}
-    </>
-  );
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <LayoutDndProvider
