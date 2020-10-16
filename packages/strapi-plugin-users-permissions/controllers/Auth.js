@@ -525,19 +525,19 @@ module.exports = {
   async emailConfirmation(ctx, next, returnUser) {
     const { confirmation: confirmationToken } = ctx.query;
 
-    const { user: userServie, jwt: jwtService } = strapi.plugins['users-permissions'].services;
+    const { user: userService, jwt: jwtService } = strapi.plugins['users-permissions'].services;
 
     if (_.isEmpty(confirmationToken)) {
       return ctx.badRequest('token.invalid');
     }
 
-    const user = await userServie.fetch({ confirmationToken }, []);
+    const user = await userService.fetch({ confirmationToken }, []);
 
     if (!user) {
       return ctx.badRequest('token.invalid');
     }
 
-    await userServie.edit({ id: user.id }, { confirmed: true, confirmationToken: null });
+    await userService.edit({ id: user.id }, { confirmed: true, confirmationToken: null });
 
     if (returnUser) {
       ctx.send({

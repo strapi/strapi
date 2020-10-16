@@ -46,4 +46,4 @@ If you have extended the model in any way, you will need to add the new attribut
 }
 ```
 
-That's it now you can follow the basic [version update guide](../guides/update-version.md).
+That's it, now you can follow the basic [version update guide](../guides/update-version.md).
