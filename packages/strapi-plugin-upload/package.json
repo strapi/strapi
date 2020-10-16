@@ -35,7 +35,7 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "sharp": "0.26.0",
+    "sharp": "0.26.2",
     "strapi-helper-plugin": "3.2.3",
     "strapi-provider-upload-local": "3.2.3",
     "strapi-utils": "3.2.3",
