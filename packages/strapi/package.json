@@ -60,7 +60,8 @@
     "strapi-generate-plugin": "3.2.3",
     "strapi-generate-policy": "3.2.3",
     "strapi-generate-service": "3.2.3",
-    "strapi-utils": "3.2.3"
+    "strapi-utils": "3.2.3",
+    "update-notifier": "5.0.0"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js"

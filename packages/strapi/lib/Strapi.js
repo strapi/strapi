@@ -28,6 +28,7 @@ const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const ee = require('./utils/ee');
+const { logWarningIfNewStrapiVersion } = require('./utils/update-notifier');
 
 /**
  * Construct an Strapi instance.
@@ -89,6 +90,8 @@ class Strapi {
   }
 
   logStats() {
+    logWarningIfNewStrapiVersion();
+
     const columns = Math.min(process.stderr.columns, 80) - 2;
     console.log();
     console.log(chalk.black.bgWhite(_.padEnd(' Project information', columns)));
