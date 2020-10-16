@@ -1,4 +1,4 @@
-# Migration guide from 3.1.x to 3.2.x
+# Migration guide from 3.1.x to 3.2.3
 
 **Make sure your server is not running until the end of the migration**
 

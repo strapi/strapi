@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.2.2",
+  "version": "3.2.4",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Media Library",
@@ -35,10 +35,10 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "sharp": "0.26.0",
-    "strapi-helper-plugin": "3.2.2",
-    "strapi-provider-upload-local": "3.2.2",
-    "strapi-utils": "3.2.2",
+    "sharp": "0.26.2",
+    "strapi-helper-plugin": "3.2.4",
+    "strapi-provider-upload-local": "3.2.4",
+    "strapi-utils": "3.2.4",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
@@ -55,7 +55,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

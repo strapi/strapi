@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.2.2",
+  "version": "3.2.4",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -44,8 +44,8 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.2.2",
-    "strapi-utils": "3.2.2",
+    "strapi-helper-plugin": "3.2.4",
+    "strapi-utils": "3.2.4",
     "yup": "^0.27.0"
   },
   "author": {
@@ -65,7 +65,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

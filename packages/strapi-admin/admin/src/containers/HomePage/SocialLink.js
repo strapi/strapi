@@ -28,6 +28,7 @@ function getSrc(name) {
     case 'Twitter':
       return Twitter;
     case 'Forum':
+    case 'Academy':
       return Forum;
     default:
       return Gh;

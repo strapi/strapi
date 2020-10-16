@@ -1,6 +1,6 @@
 {
   "name": "strapi-database",
-  "version": "3.2.2",
+  "version": "3.2.4",
   "description": "Strapi's database layer",
   "homepage": "http://strapi.io",
   "main": "./lib/index.js",
@@ -23,14 +23,14 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "lodash": "4.17.19",
     "p-map": "4.0.0",
-    "strapi-utils": "3.2.2",
+    "strapi-utils": "3.2.4",
     "verror": "^1.10.0"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
