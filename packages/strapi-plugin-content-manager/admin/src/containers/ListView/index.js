@@ -16,7 +16,12 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import { generatePermissionsObject, getRequestUrl, getTrad } from '../../utils';
+import {
+  checkIfAttributeIsDisplayable,
+  generatePermissionsObject,
+  getRequestUrl,
+  getTrad,
+} from '../../utils';
 
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
@@ -244,12 +249,9 @@ function ListView({
 
     return sortBy(
       Object.keys(filteredMetadatas)
-        .filter(
-          key =>
-            !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
-              get(listSchema, ['attributes', key, 'type'], '')
-            )
-        )
+        .filter(key => {
+          return checkIfAttributeIsDisplayable(get(listSchema, ['attributes', key], {}));
+        })
         .map(label => ({
           name: label,
           value: listLayout.includes(label),
