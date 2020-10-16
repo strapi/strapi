@@ -259,10 +259,10 @@ module.exports = {
     const dbPermissions = await strapi
       .query('permission', 'users-permissions')
       .find({ _limit: -1 });
-    let permissionsFoundInDB = dbPermissions.map(
+    let permissionsFoundInDB = _.attempt(()=>dbPermissions.map(
       p => `${p.type}.${p.controller}.${p.action}.${p.role[primaryKey]}`
-    );
-    permissionsFoundInDB = _.uniq(permissionsFoundInDB);
+    ))
+    permissionsFoundInDB = _.isError(permissionsFoundInDB)?[]:_.uniq(permissionsFoundInDB);
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
