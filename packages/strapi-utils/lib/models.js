@@ -75,17 +75,18 @@ module.exports = {
         });
       });
     } else if (_.has(attribute, 'via') && _.has(attribute, 'collection')) {
-      const model = models[attribute.collection];
-
-      if (!model) {
+      if (!_.has(models, attribute.collection)) {
         throw new Error(
-          `The provided 'collection' in the attribute \`${attributeName}\` in the model ${_.upperFirst(
+          `The collection \`${_.upperFirst(
+            attribute.collection
+          )}\`, used in the attribute \`${attributeName}\` in the model ${_.upperFirst(
             modelName
-          )} doesn't exist`
+          )}, is missing from the${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
+          } models`
         );
       }
-
-      const relatedAttribute = model.attributes[attribute.via];
+      const relatedAttribute = models[attribute.collection].attributes[attribute.via];
 
       if (!relatedAttribute) {
         throw new Error(
@@ -126,17 +127,18 @@ module.exports = {
       types.current = 'modelD';
 
       // We have to find if they are a model linked to this attributeName
-      const model = models[attribute.model];
-
-      if (!model) {
+      if (!_.has(models, attribute.model)) {
         throw new Error(
-          `The provided 'model' in the attribute \`${attributeName}\` in the model ${_.upperFirst(
+          `The model \`${_.upperFirst(
+            attribute.model
+          )}\`, used in the attribute \`${attributeName}\` in the model ${_.upperFirst(
             modelName
-          )} doesn't exist`
+          )}, is missing from the${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
+          } models`
         );
       }
-
-      const reverseAttribute = model.attributes[attribute.via];
+      const reverseAttribute = models[attribute.model].attributes[attribute.via];
 
       if (!reverseAttribute) {
         throw new Error(
