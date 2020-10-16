@@ -7,7 +7,7 @@ import {
   // contexts
   useGlobalContext,
 } from 'strapi-helper-plugin';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
@@ -30,6 +30,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  const { formatMessage } = useIntl();
 
   const { emitEvent } = useGlobalContext();
 
@@ -158,27 +159,21 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
   const renderForm = () => {
     const type = get(attributes, [labelToEdit, 'type'], 'text');
     const shouldDisplaySortToggle = !['media', 'relation'].includes(type);
+    const label = formatMessage({ id: `${pluginId}.form.Input.label` });
+    const description = formatMessage({ id: `${pluginId}.form.Input.label.inputDescription` });
 
     return (
       <>
         <div className="col-6" style={{ marginBottom: 4 }}>
-          <FormattedMessage id={`${pluginId}.form.Input.label`}>
-            {label => (
-              <FormattedMessage id={`${pluginId}.form.Input.label.inputDescription`}>
-                {description => (
-                  <Input
-                    description={description}
-                    label={label}
-                    type="text"
-                    name="label"
-                    onBlur={() => {}}
-                    value={get(labelForm, 'label', '')}
-                    onChange={handleChangeEditLabel}
-                  />
-                )}
-              </FormattedMessage>
-            )}
-          </FormattedMessage>
+          <Input
+            description={description}
+            label={label}
+            type="text"
+            name="label"
+            onBlur={() => {}}
+            value={get(labelForm, 'label', '')}
+            onChange={handleChangeEditLabel}
+          />
         </div>
         {shouldDisplaySortToggle && (
           <div className="col-6" style={{ marginBottom: 4 }}>
