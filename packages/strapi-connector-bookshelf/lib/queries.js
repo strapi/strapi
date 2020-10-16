@@ -8,6 +8,7 @@ const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const { handleDatabaseError } = require('./utils/errors');
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -94,12 +95,16 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
 
     const runCreate = async trx => {
-      // Create entry with no-relational data.
-      const entry = await model.forge(data).save(null, { transacting: trx });
-      const isDraft = contentTypesUtils.isDraft(entry.toJSON(), model);
-      await createComponents(entry, attributes, { transacting: trx, isDraft });
+      try {
+        // Create entry with no-relational data.
+        const entry = await model.forge(data).save(null, { transacting: trx });
+        const isDraft = contentTypesUtils.isDraft(entry.toJSON(), model);
+        await createComponents(entry, attributes, { transacting: trx, isDraft });
 
-      return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
+        return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
+      } catch (err) {
+        handleDatabaseError(err);
+      }
     };
 
     return wrapTransaction(runCreate, { transacting });
@@ -119,19 +124,23 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const data = selectAttributes(attributes);
 
     const runUpdate = async trx => {
-      const updatedEntry =
-        Object.keys(data).length > 0
-          ? await entry.save(data, {
-              transacting: trx,
-              method: 'update',
-              patch: true,
-            })
-          : entry;
+      try {
+        const updatedEntry =
+          Object.keys(data).length > 0
+            ? await entry.save(data, {
+                transacting: trx,
+                method: 'update',
+                patch: true,
+              })
+            : entry;
 
-      await updateComponents(updatedEntry, attributes, { transacting: trx });
+        await updateComponents(updatedEntry, attributes, { transacting: trx });
 
-      if (Object.keys(relations).length > 0) {
-        return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
+        if (Object.keys(relations).length > 0) {
+          return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
+        }
+      } catch (err) {
+        handleDatabaseError(err);
       }
 
       return this.findOne(params, null, { transacting: trx });

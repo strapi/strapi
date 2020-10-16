@@ -333,5 +333,6 @@
   "notification.permission.not-allowed-read": "Nemáte povolený prístup k tomuto dokumentu",
   "notification.success.delete": "Položka bola odstránená",
   "notification.success.saved": "Uložené",
-  "request.error.model.unknown": "Tento model neexistuje"
+  "request.error.model.unknown": "Tento model neexistuje",
+  "request.error.entry.duplicate": "Duplikátny záznam"
 }
