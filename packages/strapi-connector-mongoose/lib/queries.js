@@ -8,8 +8,8 @@ const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const populateQueries = require('./utils/populate-queries');
 const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
-
 const { findComponentByGlobalId } = require('./utils/helpers');
+const { handleDatabaseError } = require('./utils/errors');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
@@ -432,17 +432,21 @@ module.exports = ({ model, strapi }) => {
         : new Date();
     }
 
-    // Create entry with no-relational data.
-    const entry = await model.create(data);
+    try {
+      // Create entry with no-relational data.
+      const entry = await model.create(data);
 
-    const isDraft = contentTypesUtils.isDraft(entry, model);
-    await createComponents(entry, values, { isDraft });
+      const isDraft = contentTypesUtils.isDraft(entry, model);
+      await createComponents(entry, values, { isDraft });
 
-    // Create relational data and return the entry.
-    return model.updateRelations({
-      [model.primaryKey]: getPK(entry, model),
-      values: relations,
-    });
+      // Create relational data and return the entry.
+      return model.updateRelations({
+        [model.primaryKey]: getPK(entry, model),
+        values: relations,
+      });
+    } catch (err) {
+      handleDatabaseError(err);
+    }
   }
 
   async function update(params, values) {
@@ -454,17 +458,21 @@ module.exports = ({ model, strapi }) => {
       throw err;
     }
 
-    // Extract values related to relational data.
-    const relations = pickRelations(values);
-    const data = omitExernalValues(values);
+    try {
+      // Extract values related to relational data.
+      const relations = pickRelations(values);
+      const data = omitExernalValues(values);
 
-    // update components first in case it fails don't update the entity
-    await updateComponents(entry, values);
-    // Update entry with no-relational data.
-    await entry.updateOne(data);
+      // update components first in case it fails don't update the entity
+      await updateComponents(entry, values);
+      // Update entry with no-relational data.
+      await entry.updateOne(data);
 
-    // Update relational data and return the entry.
-    return model.updateRelations(Object.assign(params, { values: relations }));
+      // Update relational data and return the entry.
+      return model.updateRelations(Object.assign(params, { values: relations }));
+    } catch (err) {
+      handleDatabaseError(err);
+    }
   }
 
   async function deleteMany(params) {
