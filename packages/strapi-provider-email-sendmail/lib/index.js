@@ -1,13 +1,17 @@
 'use strict';
 
+const fs = require('fs');
 const sendmailFactory = require('sendmail');
 const { removeUndefined } = require('strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {
+    const dkimPrivateKey = fs.existsSync('./dkim-private.pem') ? fs.readFileSync('./dkim-private.pem', 'utf8') : null;
+    const dkim = dkimPrivateKey ? { privateKey: dkimPrivateKey, keySelector: 'default' } : false;
+    const thisProviderOptions = Object.assign({}, { dkim: dkim }, providerOptions);
     const sendmail = sendmailFactory({
       silent: true,
-      ...providerOptions,
+      ...thisProviderOptions,
     });
     return {
       send: options => {
