@@ -5,5 +5,4 @@ module.exports = {
   testMatch: ['<rootDir>/packages/**/__tests__/?(*.)+(spec|test).js'],
   modulePathIgnorePatterns: ['.cache'],
   transform: {},
-  testEnvironment: 'node',
 };

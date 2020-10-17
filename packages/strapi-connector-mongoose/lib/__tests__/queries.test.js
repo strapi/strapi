@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 const queries = require('../queries');
 
 const strapi = {};
