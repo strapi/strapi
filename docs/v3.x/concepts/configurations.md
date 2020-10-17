@@ -297,6 +297,27 @@ module.exports = {
 };
 ```
 
+If your CRON task is required to run based on a specific timezone then you can configure the task like below:
+
+```js
+module.exports = {
+  /**
+   * CRON task with timezone example.
+   * Every monday at 1am for Asia/Dhaka timezone.
+   * List of valid timezones: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+   */
+
+  '0 0 1 * * 1': {
+    task: () => {
+      // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
+    },
+    options: {
+      tz: 'Asia/Dhaka',
+    },
+  },
+};
+```
+
 ### Database ORM customization
 
 When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
