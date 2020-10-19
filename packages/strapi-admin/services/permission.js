@@ -62,12 +62,8 @@ const deleteByIds = ids => {
  * @param permissions
  * @returns {Promise<*[]|*>}
  */
-const createMany = async permissions => {
-  try {
-    await validatePermissionsExist(permissions);
-  } catch (err) {
-    throw strapi.errors.badRequest('ValidationError', err);
-  }
+const createMany = async (roleId, permissions) => {
+  permissions.forEach(p => p.role = roleId);
 
   return strapi.query('permission', 'admin').createMany(permissions);
 };
@@ -131,7 +127,7 @@ const assign = async (roleId, permissions = []) => {
     await deleteByIds(permissionsToDelete.map(p => p.id));
   }
   if (permissionsToAdd.length > 0) {
-    const createdPermissions = await createMany(permissionsToAdd);
+    const createdPermissions = await createMany(roleId, permissionsToAdd);
     permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
   }
 
@@ -254,7 +250,7 @@ const ensureBoundPermissionsInDatabase = async () => {
           fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
         })
       );
-      await createMany(permissions);
+      await createMany(editorRole.id, permissions);
     }
   }
 };

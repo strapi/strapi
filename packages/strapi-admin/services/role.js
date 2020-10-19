@@ -233,14 +233,8 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));
 
   // assign permissions to roles
-  editorPermissions.forEach(p => {
-    p.role = editorRole.id;
-  });
-  authorPermissions.forEach(p => {
-    p.role = authorRole.id;
-  });
-  await strapi.admin.services.permission.createMany(editorPermissions);
-  await strapi.admin.services.permission.createMany(authorPermissions);
+  await strapi.admin.services.permission.createMany(editorRole.id, editorPermissions);
+  await strapi.admin.services.permission.createMany(authorRole.id, authorPermissions);
 
   if (createPermissionsForAdmin) {
     await strapi.admin.services.permission.resetSuperAdminPermissions();
