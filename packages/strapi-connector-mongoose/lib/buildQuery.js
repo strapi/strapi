@@ -167,7 +167,7 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
                   $in: ids,
                 },
               },
-              null,
+              null
             )
             .populate(populate);
 
@@ -445,12 +445,14 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         },
         {
           $match: {
-            $expr: {
-              $and: defaultMatches.concat(
-                { $eq: [`$${assoc.via}.ref`, '$$localId'] },
-                { $eq: [`$${assoc.via}.${assoc.filter}`, assoc.alias] }
-              ),
-            },
+            $and: defaultMatches.concat({
+              $expr: {
+                $and: [
+                  { $eq: [`$${assoc.via}.ref`, '$$localId'] },
+                  { $eq: [`$${assoc.via}.${assoc.filter}`, assoc.alias] },
+                ],
+              },
+            }),
           },
         },
       ];
