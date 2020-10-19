@@ -29,7 +29,19 @@ Let's eject this file to be able to customize it.
 
 In this new file, paste the current [HomePage container](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin/src/containers/HomePage/index.js) code.
 
-To run your application, you will have to run the `yarn develop --watch-admin` / `npm run develop -- --watch-admin` command.
+To run your application, run the following command:
+
+yarn
+
+```bash
+yarn develop --watch-admin
+```
+
+npm
+
+```bash
+npm run develop -- --watch-admin
+```
 
 If you visit the admin, nothing will have changed in the home page. And it's normal!
 
@@ -87,7 +99,19 @@ Let's eject the file to be able to customize it.
 
 In this new file, paste the current [dateFormats](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/utils/dateFormats.js) code.
 
-To run your application, you will have to run the `yarn develop --watch-admin` / `npm run develop -- --watch-admin` command.
+To run your application, run the following command:
+
+yarn
+
+```bash
+yarn develop --watch-admin
+```
+
+npm
+
+```bash
+npm run develop -- --watch-admin
+```
 
 If you visit the entry list view of your content type, nothing will have changed. And it's normal!
 

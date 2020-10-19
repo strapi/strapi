@@ -10,7 +10,7 @@ To enable local plugin development, you need to start your application with the 
 
 ```bash
 $ cd my-app
-$ yarn develop --watch-admin / npm run develop -- --watch-admin
+$ yarn develop --watch-admin
 ```
 
 ## API

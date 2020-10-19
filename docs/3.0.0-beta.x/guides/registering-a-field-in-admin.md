@@ -33,7 +33,7 @@ yarn add @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic
 
 ```bash
 cd my-app
-yarn develop --watch-admin / npm run develop -- --watch-admin
+yarn develop --watch-admin
 ```
 
 Once this step is over all we need to do is to create our new WYSIWYG which will replace the default one in the **Content Manager** plugin.
