@@ -341,11 +341,9 @@ const assignPermissions = async (roleId, permissions = []) => {
 };
 
 const addPermissions = async (roleId, permissions) => {
-  permissions.forEach(p => {
-    p.role = roleId;
-  });
+  const permissionsWithRole = permissions.map(set('role', roleId));
 
-  return strapi.admin.services.permission.createMany(permissions);
+  return strapi.admin.services.permission.createMany(permissionsWithRole);
 };
 
 /**
