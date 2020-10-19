@@ -227,7 +227,7 @@ Don't forget to update the server url in the backend config file `config/server.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **GitHub** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -265,7 +265,7 @@ Don't forget to update the server url in the backend config file `config/server.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Facebook** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -307,7 +307,7 @@ Wait a few seconds while the application is created.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Google** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -385,7 +385,7 @@ Don't forget to update the server url in the backend config file `config/server.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Twitter** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -415,7 +415,7 @@ The use of `ngrok` is not needed.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Discord** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -446,7 +446,7 @@ The use of `ngrok` is not needed.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Twitch** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -486,7 +486,7 @@ Don't forget to update the server url in the backend config file `config/server.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **Instagram** provider
 - Fill the information (replace with your own client ID and secret):
   - **Enable**: `ON`
@@ -519,7 +519,7 @@ The use of `ngrok` is not needed.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **VK** provider
 - Fill the information:
   - **Enable**: `ON`
@@ -553,7 +553,7 @@ The use of `ngrok` is not needed.
 
 #### Strapi configuration
 
-- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
 - Click on the **LinkedIn** provider
 - Fill the information:
   - **Enable**: `ON`
