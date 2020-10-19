@@ -368,7 +368,7 @@ describe('Role', () => {
       let id = 1;
       const create = jest.fn(role => ({ ...role, id: id++ }));
       const getAll = jest.fn(() => actions);
-      const assign = jest.fn();
+      const createMany = jest.fn();
       const assignARoleToAll = jest.fn();
       const getPermissionsWithNestedFields = jest.fn(() => [...permissions]); // cloned, otherwise it is modified inside createRolesIfNoneExist()
 
@@ -376,7 +376,7 @@ describe('Role', () => {
         query: () => ({ count, create }),
         admin: {
           services: {
-            permission: { actionProvider: { getAll }, assign },
+            permission: { actionProvider: { getAll }, createMany },
             'content-type': { getPermissionsWithNestedFields },
             user: { assignARoleToAll },
           },
@@ -404,8 +404,8 @@ describe('Role', () => {
       expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
         restrictedSubjects: ['plugins::users-permissions.user'],
       });
-      expect(assign).toHaveBeenCalledTimes(2);
-      expect(assign).toHaveBeenNthCalledWith(1, 2, [
+      expect(createMany).toHaveBeenCalledTimes(2);
+      expect(createMany).toHaveBeenNthCalledWith(1, 2, [
         ...permissions,
         ...defaultPermissions.map(d => ({
           ...d,
@@ -413,7 +413,7 @@ describe('Role', () => {
         })),
       ]);
 
-      expect(assign).toHaveBeenNthCalledWith(2, 3, [
+      expect(createMany).toHaveBeenNthCalledWith(2, 3, [
         { ...permissions[0], conditions: ['admin::is-creator'] },
         ...defaultPermissions,
       ]);

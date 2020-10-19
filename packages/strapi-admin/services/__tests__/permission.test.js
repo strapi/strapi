@@ -22,12 +22,20 @@ describe('Permission Service', () => {
   describe('Assign permissions', () => {
     test('Delete previous permissions', async () => {
       const createMany = jest.fn(() => Promise.resolve([]));
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
+      const sendDidUpdateRolePermissions = jest.fn();
       const find = jest.fn(() => Promise.resolve([{ id: 3 }]));
       const deleteFn = jest.fn();
       const getAll = jest.fn(() => []);
 
       global.strapi = {
-        admin: { services: { permission: { actionProvider: { getAll } } } },
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            permission: { actionProvider: { getAll } },
+            role: { getSuperAdmin },
+          }
+        },
         query() {
           return { delete: deleteFn, createMany, find };
         },
@@ -45,6 +53,8 @@ describe('Permission Service', () => {
 
       const deleteFn = jest.fn(() => Promise.resolve([]));
       const createMany = jest.fn(() => Promise.resolve([]));
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
+      const sendDidUpdateRolePermissions = jest.fn();
       const find = jest.fn(() => Promise.resolve([]));
       const getAll = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
       const removeUnkownConditionIds = jest.fn(conds => _.intersection(conds, ['cond']));
@@ -52,6 +62,8 @@ describe('Permission Service', () => {
       global.strapi = {
         admin: {
           services: {
+            metrics: { sendDidUpdateRolePermissions },
+            role: { getSuperAdmin },
             permission: {
               actionProvider: { getAll },
               conditionProvider: {
