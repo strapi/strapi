@@ -63,6 +63,12 @@ const deleteByIds = ids => {
  * @returns {Promise<*[]|*>}
  */
 const createMany = async permissions => {
+  try {
+    await validatePermissionsExist(permissions);
+  } catch (err) {
+    throw strapi.errors.badRequest('ValidationError', err);
+  }
+
   return strapi.query('permission', 'admin').createMany(permissions);
 };
 
@@ -97,6 +103,9 @@ const assign = async (roleId, permissions = []) => {
     throw strapi.errors.badRequest('ValidationError', err);
   }
 
+  const superAdmin = await strapi.admin.services.role.getSuperAdmin();
+  const isSuperAdmin = superAdmin && superAdmin.id === roleId;
+
   const permissionsWithRole = permissions.map(permission =>
     createPermission({
       ...permission,
@@ -124,6 +133,10 @@ const assign = async (roleId, permissions = []) => {
   if (permissionsToAdd.length > 0) {
     const createdPermissions = await createMany(permissionsToAdd);
     permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
+  }
+
+  if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
+    await strapi.admin.services.metrics.sendDidUpdateRolePermissions();
   }
 
   return permissionsToReturn;
@@ -279,6 +292,7 @@ const resetSuperAdminPermissions = async () => {
 };
 
 module.exports = {
+  createMany,
   find,
   deleteByRolesIds,
   deleteByIds,
