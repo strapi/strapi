@@ -275,7 +275,6 @@ describe('Role', () => {
       });
     });
   });
-
   describe('Count roles', () => {
     test('Count roles without params', async () => {
       const count = jest.fn(() => Promise.resolve(2));
@@ -302,7 +301,6 @@ describe('Role', () => {
       expect(count).toHaveBeenCalledWith(params);
     });
   });
-
   describe('createRolesIfNoneExist', () => {
     test("Don't create roles if one already exist", async () => {
       const count = jest.fn(() => Promise.resolve(1));
@@ -405,21 +403,26 @@ describe('Role', () => {
         restrictedSubjects: ['plugins::users-permissions.user'],
       });
       expect(createMany).toHaveBeenCalledTimes(2);
-      expect(createMany).toHaveBeenNthCalledWith(1, 2, [
-        ...permissions,
-        ...defaultPermissions.map(d => ({
-          ...d,
-          conditions: [],
-        })),
-      ]);
+      expect(createMany).toHaveBeenNthCalledWith(
+        1,
+        [
+          ...permissions,
+          ...defaultPermissions.map(d => ({
+            ...d,
+            conditions: [],
+          })),
+        ].map(p => ({ ...p, role: 2 }))
+      );
 
-      expect(createMany).toHaveBeenNthCalledWith(2, 3, [
-        { ...permissions[0], conditions: ['admin::is-creator'] },
-        ...defaultPermissions,
-      ]);
+      expect(createMany).toHaveBeenNthCalledWith(
+        2,
+        [
+          { ...permissions[0], conditions: ['admin::is-creator'] },
+          ...defaultPermissions,
+        ].map(p => ({ ...p, role: 3 }))
+      );
     });
   });
-
   describe('displayWarningIfNoSuperAdmin', () => {
     test('superAdmin role exists & a user is superAdmin', async () => {
       const findOne = jest.fn(() => ({ id: 1 }));
@@ -468,6 +471,147 @@ describe('Role', () => {
       await roleService.displayWarningIfNoSuperAdmin();
 
       expect(warn).toHaveBeenCalledWith("Your application doesn't have a super admin user.");
+    });
+  });
+  describe('resetSuperAdminPermissions', () => {
+    test('No superAdmin role exist', async () => {
+      const getSuperAdmin = jest.fn(() => Promise.resolve(undefined));
+      const createMany = jest.fn();
+
+      global.strapi = {
+        query: () => ({ createMany }),
+        admin: { services: { role: { getSuperAdmin } } },
+      };
+
+      await roleService.resetSuperAdminPermissions();
+
+      expect(createMany).toHaveBeenCalledTimes(0);
+    });
+    test('Reset super admin permissions', async () => {
+      const actions = [
+        {
+          actionId: 'action-1',
+          subjects: ['country'],
+          section: 'contentTypes',
+        },
+      ];
+      const permissions = [
+        {
+          action: 'action-1',
+          subject: 'country',
+          fields: ['name'],
+          conditions: [],
+        },
+      ];
+      const getAll = jest.fn(() => actions);
+      const getAllConditions = jest.fn(() => []);
+      const find = jest.fn(() => [{ action: 'action-2', id: 2 }]);
+      const getPermissionsWithNestedFields = jest.fn(() => [...permissions]); // cloned, otherwise it is modified inside resetSuperAdminPermissions()
+      const deleteByIds = jest.fn();
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 1 }));
+      const createMany = jest.fn(() => Promise.resolve([{ ...permissions[0], role: { id: 1 } }]));
+      const removeUnkownConditionIds = jest.fn(conds => conds);
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              createMany,
+              find,
+              actionProvider: { getAll },
+              conditionProvider: { getAll: getAllConditions },
+              deleteByIds,
+            },
+            condition: { removeUnkownConditionIds },
+            'content-type': { getPermissionsWithNestedFields },
+            role: { getSuperAdmin },
+          },
+        },
+      };
+
+      await roleService.resetSuperAdminPermissions();
+
+      expect(deleteByIds).toHaveBeenCalledWith([2]);
+      expect(createMany).toHaveBeenCalledWith([
+        {
+          ...permissions[0],
+          role: 1,
+        },
+      ]);
+    });
+  });
+  describe('Assign permissions', () => {
+    test('Delete previous permissions', async () => {
+      const createMany = jest.fn(() => Promise.resolve([]));
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
+      const sendDidUpdateRolePermissions = jest.fn();
+      const find = jest.fn(() => Promise.resolve([{ id: 3 }]));
+      const deleteByIds = jest.fn();
+      const getAll = jest.fn(() => []);
+
+      global.strapi = {
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            permission: { find, createMany, actionProvider: { getAll }, deleteByIds },
+            role: { getSuperAdmin },
+          },
+        },
+      };
+
+      await roleService.assignPermissions(1, []);
+
+      expect(deleteByIds).toHaveBeenCalledWith([3]);
+    });
+
+    test('Create new permissions', async () => {
+      const permissions = Array(5)
+        .fill(0)
+        .map((v, i) => ({ action: `action-${i}` }));
+
+      const createMany = jest.fn(() => Promise.resolve([]));
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
+      const sendDidUpdateRolePermissions = jest.fn();
+      const find = jest.fn(() => Promise.resolve([]));
+      const getAll = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
+      const removeUnkownConditionIds = jest.fn(conds => _.intersection(conds, ['cond']));
+
+      global.strapi = {
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            role: { getSuperAdmin },
+            permission: {
+              find,
+              createMany,
+              actionProvider: { getAll },
+              conditionProvider: {
+                getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
+              },
+            },
+            condition: {
+              removeUnkownConditionIds,
+            },
+          },
+        },
+      };
+
+      const permissionsToAssign = [...permissions];
+      permissionsToAssign[4] = {
+        ...permissions[4],
+        conditions: ['cond', 'unknown-cond'],
+      };
+
+      await roleService.assignPermissions(1, permissionsToAssign);
+
+      expect(createMany).toHaveBeenCalledTimes(1);
+      expect(createMany).toHaveBeenCalledWith([
+        { action: 'action-0', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-1', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-2', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-3', conditions: [], fields: null, role: 1, subject: null },
+        { action: 'action-4', conditions: ['cond'], fields: null, role: 1, subject: null },
+      ]);
     });
   });
 });
