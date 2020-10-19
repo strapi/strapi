@@ -20,7 +20,7 @@
   "Auth.form.error.password.matching": "Parolalar uyuşmuyor.",
   "Auth.form.error.password.provide": "Lütfen şifrenizi girin.",
   "Auth.form.error.ratelimit": "Çok fazla deneme var. Lütfen bir dakika sonra tekrar deneyin.",
-  "Auth.form.error.user.not-exist": "Bu e-posta bulunmamaktadır..",
+  "Auth.form.error.user.not-exist": "Bu E-Posta bulunmamaktadır..",
   "Auth.form.error.username.taken": "Kullanıcı adı zaten alınmış",
   "Auth.form.forgot-password.email.label": "E-postanızı giriniz",
   "Auth.form.forgot-password.email.label.success": "E-posta başarıyla gönderildi, ",
