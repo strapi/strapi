@@ -51,6 +51,10 @@
       "configurable": false,
       "required": true
     },
+    "path": {
+      "type": "string",
+      "configurable": false
+    },
     "url": {
       "type": "string",
       "configurable": false,
