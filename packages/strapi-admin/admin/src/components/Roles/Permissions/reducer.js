@@ -3,7 +3,13 @@
 import produce from 'immer';
 import { get, set, differenceWith } from 'lodash';
 
-import { staticAttributeActions, getAttributePermissionsSizeByContentTypeAction } from './utils';
+import requiredActions from 'ee_else_ce/components/Roles/Permissions/requiredActions';
+import {
+  staticAttributeActions,
+  getAttributePermissionsSizeByContentTypeAction,
+  contentManagerPermissionPrefix,
+  isCreateAndRequired,
+} from './utils';
 import generateContentTypeActions from './utils/generateContentTypeActions';
 
 export const initialState = {
@@ -48,9 +54,9 @@ const reducer = (state, action) =>
           }
 
           // Don't remove an action of a required field
-          return !attribute.required
-            ? attributeActions.filter(action => action !== permissionAction)
-            : attributeActions;
+          return isCreateAndRequired(attribute, permissionAction)
+            ? attributeActions
+            : attributeActions.filter(action => action !== permissionAction);
         };
 
         const permissions = attributes.reduce((acc, current) => {
@@ -95,15 +101,22 @@ const reducer = (state, action) =>
         const { subject, attribute, shouldAddDeleteAction } = action;
 
         const isAll =
-          get(state.contentTypesPermissions, [subject, 'attributes', attribute, 'actions'], [])
-            .length === staticAttributeActions.length;
+          get(
+            state.contentTypesPermissions,
+            [subject, 'attributes', attribute.attributeName, 'actions'],
+            []
+          ).length === staticAttributeActions.length;
 
         let attributesToSet = {};
 
         if (isAll) {
-          set(attributesToSet, [attribute, 'actions'], []);
+          set(
+            attributesToSet,
+            [attribute.attributeName, 'actions'],
+            attribute.required ? [`${contentManagerPermissionPrefix}.create`] : []
+          );
         } else {
-          set(attributesToSet, [attribute, 'actions'], staticAttributeActions);
+          set(attributesToSet, [attribute.attributeName, 'actions'], staticAttributeActions);
         }
 
         const subjectPermissions = {
@@ -234,7 +247,7 @@ const reducer = (state, action) =>
 
         if (!shouldEnable) {
           attributesPermissions = attributes
-            .filter(attribute => !attribute.required)
+            .filter(attribute => !isCreateAndRequired(attribute, permissionAction))
             .reduce((acc, attribute) => {
               return {
                 ...acc,
@@ -319,6 +332,12 @@ const reducer = (state, action) =>
           .map(contentTypeAction => contentTypeAction.action);
 
         let attributesActions = attributes.reduce((acc, attribute) => {
+          let actions = attribute.required ? requiredActions : [];
+
+          if (shouldEnable) {
+            actions = staticAttributeActions;
+          }
+
           return {
             ...get(state.contentTypesPermissions, [subject, 'attributes'], {}),
             ...acc,
@@ -328,7 +347,7 @@ const reducer = (state, action) =>
                 [subject, 'attributes', attribute.attributeName],
                 {}
               ),
-              actions: !attribute.required && !shouldEnable ? [] : staticAttributeActions,
+              actions,
             },
           };
         }, {});
