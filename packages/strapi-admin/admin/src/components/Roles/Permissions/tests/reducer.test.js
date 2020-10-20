@@ -462,7 +462,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
           { attributeName: 'picture', contentTypeUid: 'place' },
           { attributeName: 'number', contentTypeUid: 'like', required: true },
         ],
-        action: 'create',
+        action: 'plugins::content-manager.explorer.create',
         shouldEnable: false,
         hasContentTypeAction: true,
       };
@@ -471,14 +471,17 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         contentTypesPermissions: {
           place: {
             contentTypeActions: {
-              create: true,
+              'plugins::content-manager.explorer.create': true,
             },
             attributes: {
               'address.city': {
-                actions: ['read'],
+                actions: ['plugins::content-manager.explorer.read'],
               },
               'address.street': {
-                actions: ['read', 'create'],
+                actions: [
+                  'plugins::content-manager.explorer.read',
+                  'plugins::content-manager.explorer.create',
+                ],
               },
               picture: {
                 actions: [],
@@ -487,12 +490,12 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
           },
           like: {
             contentTypeActions: {
-              delete: true,
-              create: true,
+              'plugins::content-manager.explorer.delete': true,
+              'plugins::content-manager.explorer.create': true,
             },
             attributes: {
               number: {
-                actions: ['create'],
+                actions: ['plugins::content-manager.explorer.create'],
               },
             },
           },
@@ -503,14 +506,17 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         contentTypesPermissions: {
           place: {
             contentTypeActions: {
-              create: false,
+              'plugins::content-manager.explorer.create': false,
             },
             attributes: {
               'address.city': {
-                actions: ['read'],
+                actions: ['plugins::content-manager.explorer.read'],
               },
               'address.street': {
-                actions: ['read', 'create'],
+                actions: [
+                  'plugins::content-manager.explorer.read',
+                  'plugins::content-manager.explorer.create',
+                ],
               },
               picture: {
                 actions: [],
@@ -519,12 +525,12 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
           },
           like: {
             contentTypeActions: {
-              delete: true,
-              create: false,
+              'plugins::content-manager.explorer.delete': true,
+              'plugins::content-manager.explorer.create': false,
             },
             attributes: {
               number: {
-                actions: ['create'],
+                actions: ['plugins::content-manager.explorer.create'],
               },
             },
           },
@@ -540,7 +546,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const action = {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
-        attribute: 'picture',
+        attribute: { attributeName: 'picture', required: false },
       };
       const initialState = {
         collapsePath: [],
@@ -606,7 +612,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const action = {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
-        attribute: 'picture',
+        attribute: { attributeName: 'picture', required: false },
       };
       const initialState = {
         collapsePath: [],
@@ -667,7 +673,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const action = {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
-        attribute: 'picture',
+        attribute: { attributeName: 'picture', required: false },
       };
       const initialState = {
         collapsePath: [],
@@ -745,7 +751,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const action = {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
-        attribute: 'picture',
+        attribute: { attributeName: 'picture', required: false },
       };
       const initialState = {
         collapsePath: [],
@@ -1106,7 +1112,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       const action = {
         type: 'ON_ATTRIBUTES_SELECT',
         subject: 'place',
-        action: 'create',
+        action: 'plugins::content-manager.explorer.create',
         attributes: [
           { attributeName: 'address', required: true },
           { attributeName: 'city', required: false },
@@ -1119,14 +1125,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         contentTypesPermissions: {
           place: {
             contentTypeActions: {
-              delete: true,
+              'plugins::content-manager.explorer.delete': true,
             },
             attributes: {
               postal_code: {
-                actions: ['create'],
+                actions: ['plugins::content-manager.explorer.create'],
               },
               picture: {
-                actions: ['read'],
+                actions: ['plugins::content-manager.explorer.read'],
               },
             },
           },
@@ -1137,18 +1143,18 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         contentTypesPermissions: {
           place: {
             contentTypeActions: {
-              delete: true,
-              create: false,
+              'plugins::content-manager.explorer.delete': true,
+              'plugins::content-manager.explorer.create': false,
             },
             attributes: {
               city: {
                 actions: [],
               },
               postal_code: {
-                actions: ['create'],
+                actions: ['plugins::content-manager.explorer.create'],
               },
               picture: {
-                actions: ['read'],
+                actions: ['plugins::content-manager.explorer.read'],
               },
             },
           },

@@ -9,4 +9,5 @@ export { default as getRecursivePermissionsBySubject } from './getRecursivePermi
 export { default as getRecursivePermissions } from './getRecursivePermissions';
 export { default as getAllAttributesActionsSize } from './getAllAttributesActionsSize';
 export { default as formatPermissionsLayout } from './formatPermissionsLayout';
+export { default as isCreateAndRequired } from './isCreateAndRequired';
 export * from './permissonsConstantsActions';

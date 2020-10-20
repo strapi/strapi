@@ -12,6 +12,7 @@ import {
   getAttributesByModel,
   getRecursivePermissions,
   ATTRIBUTES_PERMISSIONS_ACTIONS,
+  isCreateAndRequired,
 } from '../../../../../../../../admin/src/components/Roles/Permissions/utils';
 import PermissionCheckbox from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
 import PermissionName from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionName';
@@ -88,7 +89,7 @@ const AttributeRow = ({ attribute, contentType }) => {
     } else {
       onAllAttributeActionsSelect({
         subject: contentType.uid,
-        attribute: attribute.attributeName,
+        attribute,
       });
     }
   };
@@ -185,12 +186,9 @@ const AttributeRow = ({ attribute, contentType }) => {
       <AttributeRowWrapper isActive={isActive} isCollapsable={isCollapsable} alignItems="center">
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <PermissionName
-            disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
-            width="15rem"
-          >
+          <PermissionName disabled={isSuperAdmin} width="15rem">
             <Checkbox
-              disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
+              disabled={isSuperAdmin}
               name={attribute.attributeName}
               value={hasAllActions}
               someChecked={hasSomeActions}
@@ -216,11 +214,15 @@ const AttributeRow = ({ attribute, contentType }) => {
               <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
             </CollapseLabel>
           </PermissionName>
-          <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
+          <PermissionWrapper>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={action}
-                disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
+                disabled={
+                  isSuperAdmin ||
+                  (isCreateAndRequired(attribute, `${contentManagerPermissionPrefix}.${action}`) &&
+                    !isCollapsable)
+                }
                 value={
                   allRecursiveChecked(`${contentManagerPermissionPrefix}.${action}`) ||
                   checkPermission(`${contentManagerPermissionPrefix}.${action}`)

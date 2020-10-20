@@ -12,6 +12,7 @@ import {
   getAttributesByModel,
   getAttributePermissionsSizeByContentTypeAction,
   getNumberOfRecursivePermissionsByAction,
+  isCreateAndRequired,
 } from '../../../../../../../../admin/src/components/Roles/Permissions/utils';
 import CollapseLabel from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/CollapseLabel';
 import PermissionCheckbox from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
@@ -197,7 +198,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
           <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
             {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
               <PermissionCheckbox
-                disabled={isSuperAdmin || (attribute.required && !isCollapsable)}
+                disabled={
+                  isSuperAdmin ||
+                  (isCreateAndRequired(attribute, `${contentManagerPermissionPrefix}.${action}`) &&
+                    !isCollapsable)
+                }
                 key={`${attribute.attributeName}-${action}`}
                 onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
                 someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
