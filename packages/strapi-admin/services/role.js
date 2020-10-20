@@ -204,7 +204,7 @@ const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_AD
 /** Create superAdmin, Author and Editor role is no role already exist
  * @returns {Promise<>}
  */
-const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}) => {
+const createRolesIfNoneExist = async () => {
   const someRolesExist = await exists();
   if (someRolesExist) {
     return;
@@ -252,10 +252,6 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   // assign permissions to roles
   await addPermissions(editorRole.id, editorPermissions);
   await addPermissions(authorRole.id, authorPermissions);
-
-  if (createPermissionsForAdmin) {
-    await strapi.admin.services.permission.resetSuperAdminPermissions();
-  }
 };
 
 const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
