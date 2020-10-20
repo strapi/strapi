@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-controller",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "Generate a controller for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "lodash": "4.17.19",
-    "strapi-utils": "3.2.3"
+    "strapi-utils": "3.2.4"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -40,7 +40,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

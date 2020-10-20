@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-sendmail",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,7 +13,7 @@
   "main": "./lib",
   "dependencies": {
     "sendmail": "^1.6.1",
-    "strapi-utils": "3.2.3"
+    "strapi-utils": "3.2.4"
   },
   "strapi": {
     "isProvider": true
@@ -38,7 +38,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -29,10 +29,10 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-generate": "3.2.3",
-    "strapi-generate-api": "3.2.3",
-    "strapi-helper-plugin": "3.2.3",
-    "strapi-utils": "3.2.3",
+    "strapi-generate": "3.2.4",
+    "strapi-generate-api": "3.2.4",
+    "strapi-helper-plugin": "3.2.4",
+    "strapi-utils": "3.2.4",
     "yup": "^0.27.0"
   },
   "author": {
@@ -52,7 +52,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
