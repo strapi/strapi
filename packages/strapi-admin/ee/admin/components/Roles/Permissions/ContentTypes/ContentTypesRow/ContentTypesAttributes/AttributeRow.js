@@ -8,10 +8,9 @@ import { getAttributesToDisplay } from '../../../../../../../../admin/src/utils'
 import {
   contentManagerPermissionPrefix,
   getNumberOfRecursivePermissionsByAction,
-  getAttributePermissionsSizeByContentTypeAction,
   getAttributesByModel,
   getRecursivePermissions,
-  ATTRIBUTES_PERMISSIONS_ACTIONS,
+  staticAttributeActions,
   isCreateAndRequired,
 } from '../../../../../../../../admin/src/components/Roles/Permissions/utils';
 import PermissionCheckbox from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
@@ -22,19 +21,18 @@ import Chevron from '../../../../../../../../admin/src/components/Roles/Permissi
 import PermissionWrapper from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/PermissionWrapper';
 import AttributeRowWrapper from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ContentTypesAttributes/AttributeRowWrapper';
 import Required from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/Required';
+import useFillRequiredPermissions from '../../useFillRequiredPermissions';
 
 const AttributeRow = ({ attribute, contentType }) => {
   const {
-    onCollapse,
+    dispatch,
     collapsePath,
     components,
     contentTypesPermissions,
-    onAttributePermissionSelect,
-    onAllContentTypeActions,
-    onAllAttributeActionsSelect,
-    onAttributesSelect,
     isSuperAdmin,
   } = usePermissionsContext();
+  const fillRequiredPermissions = useFillRequiredPermissions(contentType);
+
   const isCollapsable = attribute.type === 'component';
   const isActive = collapsePath[1] === attribute.attributeName;
   const attributeActions = get(
@@ -60,39 +58,46 @@ const AttributeRow = ({ attribute, contentType }) => {
   }, [isCollapsable, attribute, components]);
 
   const hasAllActions = useMemo(() => {
-    return (
-      recursivePermissions === ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
-    );
+    return recursivePermissions === staticAttributeActions.length * recursiveAttributes.length;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentTypesPermissions]);
 
   const hasSomeActions = useMemo(() => {
     return (
       recursivePermissions > 0 &&
-      recursivePermissions < ATTRIBUTES_PERMISSIONS_ACTIONS.length * recursiveAttributes.length
+      recursivePermissions < staticAttributeActions.length * recursiveAttributes.length
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentTypesPermissions]);
+  }, [recursiveAttributes, recursivePermissions]);
 
-  const handleCheckAllAction = () => {
+  const attributesToDisplay = useMemo(() => {
+    return getAttributesToDisplay(components.find(comp => comp.uid === attribute.component));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attribute]);
+
+  const handleCheckAllAction = useCallback(() => {
+    fillRequiredPermissions();
+
     if (isCollapsable) {
       const attributes = recursiveAttributes;
-      const allActionsSize = attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
+      const allActionsSize = attributes.length * staticAttributeActions.length;
       const shouldEnable = recursivePermissions >= 0 && recursivePermissions < allActionsSize;
 
-      onAllContentTypeActions({
+      dispatch({
+        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
         subject: contentType.uid,
         attributes,
         shouldEnable,
-        shouldSetAllContentTypes: false,
       });
     } else {
-      onAllAttributeActionsSelect({
+      dispatch({
+        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: contentType.uid,
         attribute,
+        shouldEnable: !hasAllActions,
       });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attribute, contentType.uid, isCollapsable, recursiveAttributes, recursivePermissions]);
 
   const getRecursiveAttributesPermissions = useCallback(
     action => {
@@ -105,79 +110,77 @@ const AttributeRow = ({ attribute, contentType }) => {
         contentTypesPermissions
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [attribute, contentTypesPermissions]
-  );
-
-  const getContentTypePermissions = useCallback(
-    action => {
-      return getAttributePermissionsSizeByContentTypeAction(
-        contentTypesPermissions,
-        contentType.uid,
-        action
-      );
-    },
-    [contentType, contentTypesPermissions]
+    [attribute, contentType, contentTypesPermissions, isCollapsable]
   );
 
   const checkPermission = useCallback(
     action => {
       return attributeActions.findIndex(permAction => permAction === action) !== -1;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [contentTypesPermissions, attribute, contentType]
+    [attributeActions]
   );
+
+  const allRecursiveChecked = action => {
+    return (
+      isCollapsable && getRecursiveAttributesPermissions(action) === recursiveAttributes.length
+    );
+  };
 
   const handleCheck = useCallback(
     action => {
-      if (isCollapsable) {
-        const shouldEnable = !allRecursiveChecked(action);
-        const hasContentTypeAction =
-          (!shouldEnable &&
-            getContentTypePermissions(action) === getRecursiveAttributesPermissions(action)) ||
-          (shouldEnable && getContentTypePermissions(action) === 0);
+      const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
 
-        onAttributesSelect({
-          action,
+      if (shouldSetRequiredFields) {
+        fillRequiredPermissions();
+      }
+
+      if (isCollapsable) {
+        dispatch({
+          type: 'SELECT_MULTIPLE_ATTRIBUTE',
           subject: contentType.uid,
-          attributes: recursiveAttributes,
-          shouldEnable,
-          hasContentTypeAction,
+          shouldEnable: !allRecursiveChecked(action),
+          attributes:
+            action === `${contentManagerPermissionPrefix}.create`
+              ? recursiveAttributes.filter(attribute => !attribute.required)
+              : recursiveAttributes,
+          action,
         });
       } else {
-        onAttributePermissionSelect({
+        dispatch({
+          type: 'SELECT_ACTION',
           subject: contentType.uid,
-          action,
           attribute: attribute.attributeName,
+          action,
         });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [attribute, collapsePath, contentType, isCollapsable, contentTypesPermissions]
+    [
+      contentType,
+      contentTypesPermissions,
+      isCollapsable,
+      components,
+      allRecursiveChecked,
+      recursiveAttributes,
+      attribute,
+    ]
   );
 
   const handleToggleAttributes = () => {
     if (isCollapsable) {
-      onCollapse(1, attribute.attributeName);
+      dispatch({
+        type: 'COLLAPSE_PATH',
+        index: 1,
+        value: attribute.attributeName,
+      });
     }
   };
-
-  const attributesToDisplay = useMemo(() => {
-    return getAttributesToDisplay(components.find(comp => comp.uid === attribute.component));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attribute]);
 
   const someChecked = action => {
     return (
       isCollapsable &&
       getRecursiveAttributesPermissions(action) > 0 &&
       getRecursiveAttributesPermissions(action) < recursiveAttributes.length
-    );
-  };
-
-  const allRecursiveChecked = action => {
-    return (
-      isCollapsable && getRecursiveAttributesPermissions(action) === recursiveAttributes.length
     );
   };
 
@@ -215,27 +218,28 @@ const AttributeRow = ({ attribute, contentType }) => {
             </CollapseLabel>
           </PermissionName>
           <PermissionWrapper>
-            {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
+            {staticAttributeActions.map(action => (
               <PermissionCheckbox
                 key={action}
                 disabled={
-                  isSuperAdmin ||
-                  (isCreateAndRequired(attribute, `${contentManagerPermissionPrefix}.${action}`) &&
-                    !isCollapsable)
+                  isSuperAdmin || (isCreateAndRequired(attribute, action) && !isCollapsable)
                 }
                 value={
-                  allRecursiveChecked(`${contentManagerPermissionPrefix}.${action}`) ||
-                  checkPermission(`${contentManagerPermissionPrefix}.${action}`)
+                  isCreateAndRequired(attribute, action) ||
+                  allRecursiveChecked(action) ||
+                  checkPermission(action)
                 }
                 name={`${attribute.attributeName}-${action}`}
-                onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
-                someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
+                onChange={() => handleCheck(action)}
+                someChecked={someChecked(action)}
               />
             ))}
           </PermissionWrapper>
         </Flex>
       </AttributeRowWrapper>
-      {isActive && <ComponentsAttributes attributes={attributesToDisplay} />}
+      {isActive && (
+        <ComponentsAttributes contentType={contentType} attributes={attributesToDisplay} />
+      )}
     </>
   );
 };

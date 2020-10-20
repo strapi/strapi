@@ -14,7 +14,7 @@ const TopTimeline = styled.div`
   border-top-right-radius: 2px;
 `;
 
-const ComponentsAttributes = ({ attributes, recursiveLevel }) => (
+const ComponentsAttributes = ({ contentType, attributes, recursiveLevel }) => (
   <Wrapper>
     <TopTimeline />
     {attributes &&
@@ -25,6 +25,7 @@ const ComponentsAttributes = ({ attributes, recursiveLevel }) => (
           key={attribute.attributeName}
           index={index}
           recursiveLevel={recursiveLevel}
+          contentType={contentType}
         />
       ))}
   </Wrapper>
@@ -32,10 +33,12 @@ const ComponentsAttributes = ({ attributes, recursiveLevel }) => (
 
 ComponentsAttributes.defaultProps = {
   recursiveLevel: 0,
+  contentType: null,
 };
 ComponentsAttributes.propTypes = {
   attributes: PropTypes.array.isRequired,
   recursiveLevel: PropTypes.number,
+  contentType: PropTypes.object,
 };
 
 export default ComponentsAttributes;

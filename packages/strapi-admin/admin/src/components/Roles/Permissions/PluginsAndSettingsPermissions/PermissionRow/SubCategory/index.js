@@ -22,12 +22,7 @@ const Border = styled.div`
 const SubCategory = ({ subCategory }) => {
   const { formatMessage } = useIntl();
   const [modal, setModal] = useState({ isOpen: false, isMounted: false });
-  const {
-    pluginsAndSettingsPermissions,
-    onPluginSettingPermission,
-    onPluginSettingSubCategoryPermission,
-    onPluginSettingConditionsSelect,
-  } = usePermissionsContext();
+  const { pluginsAndSettingsPermissions, dispatch } = usePermissionsContext();
 
   const checkPermission = useCallback(
     action => {
@@ -39,7 +34,10 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const handlePermission = action => {
-    onPluginSettingPermission(action);
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_ACTION',
+      action,
+    });
   };
 
   const currentPermissions = useMemo(() => {
@@ -72,7 +70,8 @@ const SubCategory = ({ subCategory }) => {
   }, [categoryConditions]);
 
   const handleSubCategoryPermissions = () => {
-    onPluginSettingSubCategoryPermission({
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
       actions: subCategory.actions,
       shouldEnable: !hasAllCategoryActions,
     });
@@ -111,7 +110,10 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const handleConditionsSubmit = conditions => {
-    onPluginSettingConditionsSelect(conditions);
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
+      conditions,
+    });
   };
 
   return (

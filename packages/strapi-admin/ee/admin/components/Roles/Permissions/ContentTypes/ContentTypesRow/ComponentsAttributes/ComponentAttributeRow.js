@@ -8,9 +8,8 @@ import { usePermissionsContext } from '../../../../../../../../admin/src/hooks';
 import { getAttributesToDisplay } from '../../../../../../../../admin/src/utils';
 import {
   contentManagerPermissionPrefix,
-  ATTRIBUTES_PERMISSIONS_ACTIONS,
+  staticAttributeActions,
   getAttributesByModel,
-  getAttributePermissionsSizeByContentTypeAction,
   getNumberOfRecursivePermissionsByAction,
   isCreateAndRequired,
 } from '../../../../../../../../admin/src/components/Roles/Permissions/utils';
@@ -22,6 +21,7 @@ import Required from '../../../../../../../../admin/src/components/Roles/Permiss
 import Curve from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/Curve';
 import ComponentsAttributes from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes';
 import RowStyle from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/ContentTypesRow/ComponentsAttributes/RowStyle';
+import useFillRequiredPermissions from '../../useFillRequiredPermissions';
 
 // Those styles will be used only in this file.
 const LeftBorderTimeline = styled.div`
@@ -34,19 +34,28 @@ const AttributeRowWrapper = styled(Flex)`
   height: ${({ isSmall }) => (isSmall ? '28px' : '36px')};
 `;
 
-const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursiveLevel }) => {
+const ComponentAttributeRow = ({
+  contentType,
+  attribute,
+  index,
+  numberOfAttributes,
+  recursiveLevel,
+}) => {
   const {
     components,
-    onCollapse,
+    dispatch,
     contentTypesPermissions,
     collapsePath,
-    onAttributePermissionSelect,
-    onAttributesSelect,
     isSuperAdmin,
   } = usePermissionsContext();
+  const component = useMemo(
+    () => components.find(component => component.uid === attribute.component),
+    [attribute, components]
+  );
   const isCollapsable = attribute.type === 'component';
   const contentTypeUid = collapsePath[0];
   const isActive = collapsePath[recursiveLevel + 2] === attribute.attributeName;
+  const fillRequiredPermissions = useFillRequiredPermissions(contentType);
 
   const attributePermissionName = useMemo(
     () => [...collapsePath.slice(1), attribute.attributeName].join('.'),
@@ -63,23 +72,10 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
   }, [attributePermissionName, contentTypeUid, contentTypesPermissions]);
 
   const recursiveAttributes = useMemo(() => {
-    const component = components.find(component => component.uid === attribute.component);
-
     return isCollapsable
       ? getAttributesByModel(component, components, attributePermissionName)
       : [attribute];
-  }, [components, attribute, attributePermissionName, isCollapsable]);
-
-  const getContentTypePermissions = useCallback(
-    action => {
-      return getAttributePermissionsSizeByContentTypeAction(
-        contentTypesPermissions,
-        contentTypeUid,
-        action
-      );
-    },
-    [contentTypeUid, contentTypesPermissions]
-  );
+  }, [isCollapsable, component, components, attributePermissionName, attribute]);
 
   const getRecursiveAttributesPermissions = useCallback(
     action => {
@@ -97,29 +93,26 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const handleCheck = useCallback(
     action => {
-      // If the current attribute is a component,
-      // we need select all the component attributes.
-      // Otherwhise, we just need to select the current attribute
+      const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
+
+      if (shouldSetRequiredFields) {
+        fillRequiredPermissions();
+      }
 
       if (isCollapsable) {
-        const shouldEnable = !allRecursiveChecked(action);
-        const hasContentTypeAction =
-          (!shouldEnable &&
-            getContentTypePermissions(action) === getRecursiveAttributesPermissions(action)) ||
-          (shouldEnable && getContentTypePermissions(action) === 0);
-
-        onAttributesSelect({
-          action,
+        dispatch({
+          type: 'SELECT_MULTIPLE_ATTRIBUTE',
           subject: contentTypeUid,
-          attributes: recursiveAttributes,
           shouldEnable: !allRecursiveChecked(action),
-          hasContentTypeAction,
+          attributes: recursiveAttributes,
+          action,
         });
       } else {
-        onAttributePermissionSelect({
+        dispatch({
+          type: 'SELECT_ACTION',
           subject: contentTypeUid,
-          action,
           attribute: attributePermissionName,
+          action,
         });
       }
     },
@@ -142,7 +135,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const handleToggleAttributes = () => {
     if (isCollapsable) {
-      onCollapse(recursiveLevel + 2, attribute.attributeName);
+      dispatch({
+        type: 'COLLAPSE_PATH',
+        index: recursiveLevel + 2,
+        value: attribute.attributeName,
+      });
     }
   };
 
@@ -196,17 +193,15 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
             </CollapseLabel>
           </RowStyle>
           <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
-            {ATTRIBUTES_PERMISSIONS_ACTIONS.map(action => (
+            {staticAttributeActions.map(action => (
               <PermissionCheckbox
                 disabled={
-                  isSuperAdmin ||
-                  (isCreateAndRequired(attribute, `${contentManagerPermissionPrefix}.${action}`) &&
-                    !isCollapsable)
+                  isSuperAdmin || (isCreateAndRequired(attribute, action) && !isCollapsable)
                 }
                 key={`${attribute.attributeName}-${action}`}
-                onChange={() => handleCheck(`${contentManagerPermissionPrefix}.${action}`)}
-                someChecked={someChecked(`${contentManagerPermissionPrefix}.${action}`)}
-                value={isChecked(`${contentManagerPermissionPrefix}.${action}`)}
+                onChange={() => handleCheck(action)}
+                someChecked={someChecked(action)}
+                value={isChecked(action)}
                 name={`${attribute.attributeName}-${action}`}
               />
             ))}
@@ -218,6 +213,7 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
           <ComponentsAttributes
             recursiveLevel={recursiveLevel + 1}
             attributes={attributesToDisplay}
+            contentType={contentType}
           />
         </SubLevelWrapper>
       )}
@@ -230,5 +226,6 @@ ComponentAttributeRow.propTypes = {
   index: PropTypes.number.isRequired,
   numberOfAttributes: PropTypes.number.isRequired,
   recursiveLevel: PropTypes.number.isRequired,
+  contentType: PropTypes.object.isRequired,
 };
 export default ComponentAttributeRow;

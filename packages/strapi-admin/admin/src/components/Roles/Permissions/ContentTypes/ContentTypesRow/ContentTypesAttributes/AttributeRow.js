@@ -23,12 +23,10 @@ import Required from '../Required';
 
 const AttributeRow = ({ attribute, contentType }) => {
   const {
-    onCollapse,
+    dispatch,
     collapsePath,
     components,
     contentTypesPermissions,
-    onAllContentTypeActions,
-    onAllAttributeActionsSelect,
     isSuperAdmin,
   } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
@@ -76,7 +74,8 @@ const AttributeRow = ({ attribute, contentType }) => {
       const allActionsSize = attributes.length * ATTRIBUTES_PERMISSIONS_ACTIONS.length;
       const shouldEnable = recursivePermissions >= 0 && recursivePermissions < allActionsSize;
 
-      onAllContentTypeActions({
+      dispatch({
+        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
         subject: contentType.uid,
         attributes,
         shouldEnable,
@@ -84,7 +83,8 @@ const AttributeRow = ({ attribute, contentType }) => {
         shouldAddDeleteAction: true,
       });
     } else {
-      onAllAttributeActionsSelect({
+      dispatch({
+        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: contentType.uid,
         attribute,
         shouldAddDeleteAction: true,
@@ -117,7 +117,11 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const handleToggleAttributes = () => {
     if (isCollapsable) {
-      onCollapse(1, attribute.attributeName);
+      dispatch({
+        type: 'COLLAPSE_PATH',
+        index: 1,
+        value: attribute.attributeName,
+      });
     }
   };
 

@@ -1,13 +1,7 @@
-import React, {
-  memo,
-  useCallback,
-  useReducer,
-  forwardRef,
-  useMemo,
-  useImperativeHandle,
-} from 'react';
+import React, { memo, useReducer, forwardRef, useMemo, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import init from 'ee_else_ce/components/Roles/Permissions/init';
+import reducer, { initialState } from 'ee_else_ce/components/Roles/Permissions/reducer';
 
 import Tabs from '../Tabs';
 import ContentTypes from './ContentTypes';
@@ -15,7 +9,6 @@ import PluginsAndSettingsPermissions from './PluginsAndSettingsPermissions';
 import { roleTabsLabel } from '../../../utils';
 import { useModels } from '../../../hooks';
 import PermissionsProvider from './PermissionsProvider';
-import reducer, { initialState } from './reducer';
 import { getAllAttributes, formatPermissionsLayout } from './utils';
 
 const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, ref) => {
@@ -55,152 +48,10 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     return formatPermissionsLayout(permissionsLayout.sections.settings, 'category');
   }, [permissionsLayout]);
 
-  const handleCollapse = (index, value) => {
-    dispatch({
-      type: 'COLLAPSE_PATH',
-      index,
-      value,
-    });
-  };
-
-  const handleAttributePermissionSelect = ({ subject, action, attribute }) => {
-    dispatch({
-      type: 'ATTRIBUTE_PERMISSION_SELECT',
-      subject,
-      action,
-      attribute,
-    });
-  };
-
-  const handleSetAttributesPermissions = ({
-    attributes,
-    action,
-    shouldEnable,
-    hasContentTypeAction,
-  }) => {
-    dispatch({
-      type: 'SET_ATTRIBUTES_PERMISSIONS',
-      attributes,
-      action,
-      shouldEnable,
-      hasContentTypeAction,
-    });
-  };
-
-  const handleAttributesSelect = ({
-    subject,
-    action,
-    attributes,
-    shouldEnable,
-    hasContentTypeAction,
-  }) => {
-    dispatch({
-      type: 'ON_ATTRIBUTES_SELECT',
-      subject,
-      action,
-      attributes,
-      shouldEnable,
-      hasContentTypeAction,
-    });
-  };
-
-  const handleContentTypeActionSelect = ({ subject, action }) => {
-    dispatch({
-      type: 'CONTENT_TYPE_ACTION_SELECT',
-      subject,
-      action,
-    });
-  };
-
-  const handleAllContentTypeActions = ({
-    subject,
-    attributes,
-    shouldEnable,
-    shouldSetAllContentTypes,
-    shouldAddDeleteAction,
-  }) => {
-    dispatch({
-      type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-      subject,
-      attributes,
-      shouldEnable,
-      shouldSetAllContentTypes,
-      shouldAddDeleteAction,
-    });
-  };
-
-  const handleGlobalPermissionsActionSelect = ({ contentTypes, action, shouldEnable }) => {
-    dispatch({
-      type: 'GLOBAL_PERMISSIONS_SELECT',
-      contentTypes,
-      action,
-      shouldEnable,
-    });
-  };
-
-  const handleAllAttributeActionsSelect = ({ subject, attribute, shouldAddDeleteAction }) => {
-    dispatch({
-      type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-      subject,
-      attribute,
-      shouldAddDeleteAction,
-    });
-  };
-
-  const handlePluginSettingPermission = action => {
-    dispatch({
-      type: 'ON_PLUGIN_SETTING_ACTION',
-      action,
-    });
-  };
-
-  const handlePluginSettingSubCategoryPermission = ({ actions, shouldEnable }) => {
-    dispatch({
-      type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
-      actions,
-      shouldEnable,
-    });
-  };
-
-  const handleContentTypeConditionsSelect = ({ subject, conditions }) => {
-    dispatch({
-      type: 'ON_CONTENT_TYPE_CONDITIONS_SELECT',
-      subject,
-      conditions,
-    });
-  };
-
-  const handlePluginSettingConditionsSelect = conditions => {
-    dispatch({
-      type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
-      conditions,
-    });
-  };
-
-  const handleGlobalPublishActionSelect = useCallback(({ contentTypes, value }) => {
-    dispatch({
-      type: 'ON_GLOBAL_PUBLISH_ACTION_SELECT',
-      contentTypes,
-      value,
-    });
-  }, []);
-
   const providerValues = {
     ...state,
+    dispatch,
     components,
-    onCollapse: handleCollapse,
-    onAttributePermissionSelect: handleAttributePermissionSelect,
-    onAllAttributeActionsSelect: handleAllAttributeActionsSelect,
-    onContentTypeActionSelect: handleContentTypeActionSelect,
-    onAttributesSelect: handleAttributesSelect,
-    onAllContentTypeActions: handleAllContentTypeActions,
-    onGlobalPermissionsActionSelect: handleGlobalPermissionsActionSelect,
-    onSetAttributesPermissions: handleSetAttributesPermissions,
-    onPluginSettingPermission: handlePluginSettingPermission,
-    onContentTypeConditionsSelect: handleContentTypeConditionsSelect,
-    onPluginSettingSubCategoryPermission: handlePluginSettingSubCategoryPermission,
-    onPluginSettingConditionsSelect: handlePluginSettingConditionsSelect,
-    onGlobalPublishActionSelect: handleGlobalPublishActionSelect,
   };
 
   return (

@@ -34,7 +34,7 @@ const AttributeRowWrapper = styled(Flex)`
 `;
 
 const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursiveLevel }) => {
-  const { components, onCollapse, contentTypesPermissions, collapsePath } = usePermissionsContext();
+  const { components, dispatch, contentTypesPermissions, collapsePath } = usePermissionsContext();
   const isCollapsable = attribute.type === 'component';
   const contentTypeUid = collapsePath[0];
   const isActive = collapsePath[recursiveLevel + 2] === attribute.attributeName;
@@ -88,7 +88,11 @@ const ComponentAttributeRow = ({ attribute, index, numberOfAttributes, recursive
 
   const handleToggleAttributes = () => {
     if (isCollapsable) {
-      onCollapse(recursiveLevel + 2, attribute.attributeName);
+      dispatch({
+        type: 'COLLAPSE_PATH',
+        index: recursiveLevel + 2,
+        value: attribute.attributeName,
+      });
     }
   };
 

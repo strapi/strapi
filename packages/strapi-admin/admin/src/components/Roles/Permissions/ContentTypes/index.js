@@ -3,15 +3,12 @@ import PropTypes from 'prop-types';
 import { Padded } from '@buffetjs/core';
 import ContentTypeRow from 'ee_else_ce/components/Roles/Permissions/ContentTypes/ContentTypesRow';
 import PermissionsHeader from 'ee_else_ce/components/Roles/Permissions/ContentTypes/PermissionsHeader';
-import useFillRequiredPermissions from 'ee_else_ce/components/Roles/Permissions/ContentTypes/useFillRequiredPermissions';
 
 import Wrapper from './Wrapper';
 import { usePermissionsContext } from '../../../../hooks';
 
 const ContentTypesPermissions = ({ contentTypes, allContentTypesAttributes }) => {
   const { permissionsLayout } = usePermissionsContext();
-
-  useFillRequiredPermissions(allContentTypesAttributes);
 
   return (
     <Wrapper>
