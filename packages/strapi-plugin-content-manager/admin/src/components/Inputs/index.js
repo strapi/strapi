@@ -271,7 +271,7 @@ function Inputs({
         return (
           <InputsIndex
             {...metadatas}
-            autoComplete="new-password"
+            autoComplete="off"
             autoFocus={autoFocus}
             disabled={shouldDisableField}
             error={
