@@ -218,6 +218,7 @@ To improve the Developer Experience when developing or using the administration 
 
 - `private` (boolean) — If true, the attribute will be removed from the server response. (This is useful to hide sensitive data).
 - `configurable` (boolean) - If false, the attribute isn't configurable from the Content Type Builder plugin.
+- `autoPopulate` (boolean) - If false, the related data will not populate within REST responses. (This will not stop querying the relational data on GraphQL)
 
 ### Exceptions
 
