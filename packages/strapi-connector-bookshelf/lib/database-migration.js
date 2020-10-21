@@ -22,7 +22,9 @@ const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
   }
 };
 
-const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
+const migrateDraftAndPublish = async ({ definition, ORM }) => {
+  const way = await getDraftAndPublishMigrationWay({ definition, ORM });
+
   if (way === 'enable') {
     const now = new Date();
     let publishedAtValue = now;
@@ -42,13 +44,11 @@ const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
       .delete()
       .where(PUBLISHED_AT_ATTRIBUTE, null);
 
-    // column are automatically deleted in sqlite because the table is recreated
-    // for other databases, we need to do it ourselves
     const publishedAtColumnExists = await ORM.knex.schema.hasColumn(
       definition.collectionName,
       PUBLISHED_AT_ATTRIBUTE
     );
-    if (definition.client !== 'sqlite3' && publishedAtColumnExists) {
+    if (publishedAtColumnExists) {
       await ORM.knex.schema.table(definition.collectionName, table => {
         table.dropColumn(PUBLISHED_AT_ATTRIBUTE);
       });
@@ -57,6 +57,5 @@ const migrateDraftAndPublish = async ({ definition, ORM, way }) => {
 };
 
 module.exports = {
-  getDraftAndPublishMigrationWay,
   migrateDraftAndPublish,
 };
