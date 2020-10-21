@@ -6,6 +6,7 @@ import { Text } from '@buffetjs/core';
 const NotificationWrapper = styled.div`
   height: 14px;
   margin-top: 4px;
+  margin-right: 20px;
   padding: 0px 4px;
   background-color: #383d49;
   border-radius: 2px;
