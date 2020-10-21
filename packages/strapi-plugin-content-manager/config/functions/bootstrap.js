@@ -10,21 +10,21 @@ const {
   syncConfiguration,
 } = require('../../services/utils/configuration');
 
-const contentTypeService = require('../../services/ContentTypes');
+const contentTypeConfigurationService = require('../../services/content-types');
 const componentService = require('../../services/Components');
 
 const updateContentTypes = async configurations => {
   const updateConfiguration = async uid => {
     const conf = configurations.find(conf => conf.uid === uid);
 
-    return contentTypeService.setConfiguration(
+    return contentTypeConfigurationService.setConfiguration(
       uid,
       await syncConfiguration(conf, strapi.contentTypes[uid])
     );
   };
 
   const generateNewConfiguration = async uid => {
-    return contentTypeService.setConfiguration(
+    return contentTypeConfigurationService.setConfiguration(
       uid,
       await createDefaultConfiguration(strapi.contentTypes[uid])
     );
@@ -38,7 +38,9 @@ const updateContentTypes = async configurations => {
   const contentTypesToDelete = _.difference(DBUIDs, currentUIDS);
 
   // delette old schemas
-  await Promise.all(contentTypesToDelete.map(uid => contentTypeService.deleteConfiguration(uid)));
+  await Promise.all(
+    contentTypesToDelete.map(uid => contentTypeConfigurationService.deleteConfiguration(uid))
+  );
 
   // create new schemas
   await Promise.all(contentTypesToAdd.map(uid => generateNewConfiguration(uid)));
@@ -93,9 +95,9 @@ const syncComponentsSchemas = async () => {
 };
 
 const registerPermissions = () => {
-  const contentTypesUids = strapi.plugins[
-    'content-manager'
-  ].services.contenttypes.getDisplayedContentTypesUids();
+  const contentTypesUids = strapi.plugins['content-manager'].services[
+    'content-types'
+  ].getDisplayedContentTypesUids();
 
   const hasDraftAndPublishFilter = _.flow(uid => strapi.contentTypes[uid], hasDraftAndPublish);
 

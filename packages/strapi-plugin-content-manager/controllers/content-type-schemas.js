@@ -1,7 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
-
 const { createModelConfigurationSchema, validateKind } = require('./validation');
 
 module.exports = {
@@ -9,7 +7,7 @@ module.exports = {
    * Returns the list of available content types
    */
   async listContentTypes(ctx) {
-    const { kind } = ctx.query;
+    const { kind = 'collectionType' } = ctx.query;
 
     try {
       await validateKind(kind);
@@ -17,20 +15,10 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const service = strapi.plugins['content-manager'].services.contenttypes;
-
-    const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => {
-        if (uid.startsWith('strapi::')) return false;
-
-        return !(kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind);
-      })
-      .map(uid => {
-        return service.formatContentType(strapi.contentTypes[uid]);
-      });
+    const { getContentTypesByKind } = strapi.plugins['content-manager'].services['content-types'];
 
     ctx.body = {
-      data: contentTypes,
+      data: getContentTypesByKind(kind),
     };
   },
 
@@ -51,7 +39,7 @@ module.exports = {
       return ctx.notFound('contentType.notFound');
     }
 
-    const service = strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services['content-types'];
     const componentService = strapi.plugins['content-manager'].services.components;
 
     const contentTypeConfigurations = await service.getConfiguration(uid);
@@ -88,16 +76,13 @@ module.exports = {
       return ctx.notFound('contentType.notFound');
     }
 
-    const action =
-      contentType.kind === 'singleType'
-        ? 'plugins::content-manager.single-types.configure-view'
-        : 'plugins::content-manager.collection-types.configure-view';
+    const { canConfigure } = strapi.plugins['content-manager'].services.permission;
 
-    if (userAbility.cannot(action)) {
+    if (!canConfigure(userAbility, contentType)) {
       throw strapi.errors.forbidden();
     }
 
-    const service = strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services['content-types'];
 
     const schema = service.formatContentTypeSchema(contentType);
 
@@ -117,6 +102,7 @@ module.exports = {
 
     await service.setConfiguration(uid, input);
     const contentTypeConfigurations = await service.getConfiguration(uid);
+
     const data = {
       uid,
       schema,

@@ -8,7 +8,7 @@ const uidToStoreKey = uid => `components::${uid}`;
 
 module.exports = {
   async getComponentInformations(uid) {
-    const ctService = strapi.plugins['content-manager'].services.contenttypes;
+    const ctService = strapi.plugins['content-manager'].services['content-types'];
 
     const component = strapi.components[uid];
 
@@ -38,9 +38,7 @@ module.exports = {
 
         if (_.has(componentsMap, compo.uid)) continue;
 
-        const { component, components } = await this.getComponentInformations(
-          compo.uid
-        );
+        const { component, components } = await this.getComponentInformations(compo.uid);
 
         Object.assign(componentsMap, {
           [compo.uid]: component,
@@ -56,9 +54,7 @@ module.exports = {
 
           if (_.has(componentsMap, compo.uid)) continue;
 
-          const { component, components } = await this.getComponentInformations(
-            compo.uid
-          );
+          const { component, components } = await this.getComponentInformations(compo.uid);
 
           Object.assign(componentsMap, {
             [compo.uid]: component,

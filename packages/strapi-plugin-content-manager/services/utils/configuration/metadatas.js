@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { isSortable, isSearchable, isVisible, isRelation } = require('./attributes');
-const { formatContentTypeSchema } = require('../../ContentTypes');
+const { formatContentTypeSchema } = require('../../content-types');
 
 function createDefaultMetadatas(schema) {
   return {

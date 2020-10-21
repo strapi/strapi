@@ -2,52 +2,53 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/content-types",
-      "handler": "ContentTypes.listContentTypes",
+      "path": "/schemas/content-types",
+      "handler": "content-type-schemas.listContentTypes",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/content-types/:uid",
-      "handler": "ContentTypes.findContentType",
+      "path": "/schemas/content-types/:uid",
+      "handler": "content-type-schemas.findContentType",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/content-types/:uid",
-      "handler": "ContentTypes.updateContentType",
+      "path": "/schemas/content-types/:uid",
+      "handler": "content-type-schemas.updateContentType",
       "config": {
         "policies": ["admin::isAuthenticatedAdmin"]
       }
     },
     {
       "method": "GET",
-      "path": "/components",
-      "handler": "Components.listComponents",
+      "path": "/schemas/components",
+      "handler": "component-schemas.listComponents",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/components/:uid",
-      "handler": "Components.findComponent",
+      "path": "/schemas/components/:uid",
+      "handler": "component-schemas.findComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/components/:uid",
-      "handler": "Components.updateComponent",
+      "path": "/schemas/components/:uid",
+      "handler": "component-schemas.updateComponent",
       "config": {
         "policies": []
       }
     },
+
     {
       "method": "POST",
       "path": "/explorer/uid/generate",

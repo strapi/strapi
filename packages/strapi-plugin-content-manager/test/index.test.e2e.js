@@ -42,7 +42,7 @@ describe('Content Manager End to End', () => {
   describe('Content Types api', () => {
     test('Label is pluralized', async () => {
       const res = await rq({
-        url: `/content-manager/content-types`,
+        url: `/content-manager/schemas/content-types`,
         method: 'GET',
       });
 

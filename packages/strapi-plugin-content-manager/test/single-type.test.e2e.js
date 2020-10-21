@@ -29,7 +29,7 @@ describe('Content Manager single types', () => {
 
   test('Label is not pluralized', async () => {
     const res = await rq({
-      url: `/content-manager/content-types?kind=singleType`,
+      url: `/content-manager/schemas/content-types?kind=singleType`,
       method: 'GET',
     });
 
