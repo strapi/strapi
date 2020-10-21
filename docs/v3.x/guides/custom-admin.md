@@ -31,17 +31,25 @@ In this new file, paste the current [HomePage container](https://github.com/stra
 
 To run your application, run the following command:
 
-yarn
+:::: tabs
+
+::: tab yarn
 
 ```bash
 yarn develop --watch-admin
 ```
 
-npm
+:::
+
+::: tab npm
 
 ```bash
 npm run develop -- --watch-admin
 ```
+
+:::
+
+::::
 
 If you visit the admin, nothing will have changed in the home page. And it's normal!
 
@@ -101,17 +109,25 @@ In this new file, paste the current [dateFormats](https://github.com/strapi/stra
 
 To run your application, run the following command:
 
-yarn
+:::: tabs
+
+::: tab yarn
 
 ```bash
 yarn develop --watch-admin
 ```
 
-npm
+:::
+
+::: tab npm
 
 ```bash
 npm run develop -- --watch-admin
 ```
+
+:::
+
+::::
 
 If you visit the entry list view of your content type, nothing will have changed. And it's normal!
 
