@@ -6,6 +6,11 @@ const sendDidInviteUser = async () => {
   return strapi.telemetry.send('didInviteUser', { numberOfRoles, numberOfUsers });
 };
 
+const sendDidUpdateRolePermissions = async () => {
+  return strapi.telemetry.send('didUpdateRolePermissions');
+};
+
 module.exports = {
   sendDidInviteUser,
+  sendDidUpdateRolePermissions,
 };

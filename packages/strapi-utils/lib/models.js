@@ -75,6 +75,13 @@ module.exports = {
         });
       });
     } else if (_.has(attribute, 'via') && _.has(attribute, 'collection')) {
+      if (!_.has(models, attribute.collection)) {
+        throw new Error(
+          `The collection \`${_.upperFirst(
+            attribute.collection
+          )}\` is missing from the ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''} models`
+        );
+      }
       const relatedAttribute = models[attribute.collection].attributes[attribute.via];
 
       if (!relatedAttribute) {
