@@ -44,6 +44,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
+    "sanitize-html": "2.1.1",
     "strapi-helper-plugin": "3.2.4",
     "strapi-utils": "3.2.4",
     "yup": "^0.27.0"
