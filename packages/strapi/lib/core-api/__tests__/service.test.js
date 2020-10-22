@@ -1,5 +1,22 @@
 'use strict';
+
+const _ = require('lodash');
 const createService = require('../service');
+
+// init global strapi
+global.strapi = {
+  config: {
+    get(path, defaultValue) {
+      return _.get(this, path, defaultValue);
+    },
+    api: {
+      rest: {
+        defaultLimit: 20,
+        maxLimit: 50,
+      },
+    },
+  },
+};
 
 describe('Default Service', () => {
   describe('Collection Type', () => {
@@ -62,7 +79,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live' } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: 20 } },
           {
             model: 'testModel',
           }
@@ -95,7 +112,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live' } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: 20 } },
           {
             model: 'testModel',
           }
@@ -130,7 +147,7 @@ describe('Default Service', () => {
         await service.delete();
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live' } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: 20 } },
           {
             model: 'testModel',
           }
@@ -145,6 +162,20 @@ describe('Default Service', () => {
           }
         );
       });
+    });
+  });
+});
+
+describe('getFetchParams', () => {
+  test.each([
+    ['1', 1],
+    ['0', 0],
+    ['500', 50], // returns max limit if exceeds max allowed limit
+    ['', 20], // returns default if not specified
+    ['-1', 50], // -1 should return all items but max limit is set, so return max allowed limit
+  ])('Sets _limit parameter "%s" correctly', (input, expected) => {
+    expect(createService.getFetchParams({ _limit: input })).toMatchObject({
+      _limit: expected,
     });
   });
 });
