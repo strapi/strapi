@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/plugin-transform-runtime": "^7.9.0",
-    "@babel/polyfill": "^7.11.5",
+    "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "@babel/runtime": "^7.9.2",
@@ -31,7 +31,7 @@
     "@buffetjs/utils": "3.3.1",
     "@casl/ability": "^4.1.5",
     "@fortawesome/fontawesome-free": "^5.11.2",
-    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/fontawesome-svg-core": "^1.2.32",
     "@fortawesome/free-brands-svg-icons": "^5.11.2",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@fortawesome/react-fontawesome": "^0.1.7",
@@ -93,8 +93,8 @@
     "reselect": "^4.0.0",
     "sanitize.css": "^4.1.0",
     "sift": "13.1.10",
-    "strapi-helper-plugin": "3.2.3",
-    "strapi-utils": "3.2.3",
+    "strapi-helper-plugin": "3.2.4",
+    "strapi-utils": "3.2.4",
     "style-loader": "^0.23.1",
     "styled-components": "^5.0.0",
     "terser-webpack-plugin": "^1.2.3",
@@ -119,7 +119,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

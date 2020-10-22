@@ -19,11 +19,15 @@ To deactivate the draft and publish feature for a content type:
 5. In the DRAFT/PUBLISH section, click on the **OFF** button.
 6. Click on the **Finish** button to confirm the deactivation of the feature.
 
+::: tip
+It is also possible to activate or deactivate the feature when creating a new content type. To do so: after clicking on the **Create new collection/single type** button in the Content-Types Builder, follow steps 4 and 5 from the procedure above.
+:::
+
 ![Deactivate Draft & Publish](../assets/concepts/draft-publish/deactivating_draft_publish.png)
 
 ## Switching from draft to published content
 
-:::tip NOTE
+::: tip NOTE
 Publishing content may require specific roles and permissions. For example, in the Community version, the default roles grant permission to editors to publish content, but authors can only create and edit drafts.
 :::
 
@@ -37,7 +41,7 @@ Drafts can be modified and saved at will, until they are ready to be published.
 
 To publish a draft, click on the **Publish** button in the top right corner of the content editor.
 
-:::warning CAUTION
+::: warning CAUTION
 Before publishing a draft, make sure it doesn't have relations with other non-published content, otherwise some of the content may not be available through the API.
 :::
 

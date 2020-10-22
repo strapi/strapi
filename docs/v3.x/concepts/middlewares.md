@@ -189,6 +189,10 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
+::: tip
+`gzip` compression via `koa-compress` uses [Brotli](https://en.wikipedia.org/wiki/Brotli) by default, but is not configured with sensible defaults for most cases. If you experience slow response times with `gzip` enabled, consider disabling Brotli by passing `{br: false}` as an option. You may also pass more sensible params with `{br: { params: { // YOUR PARAMS HERE } }}`
+:::
+
 ### Security middlewares
 
 - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)

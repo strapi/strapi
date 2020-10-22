@@ -19,7 +19,7 @@
     "eslint-config-prettier": "^6.2.0",
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-node": "11.0.0",
+    "eslint-plugin-node": "11.1.0",
     "eslint-plugin-react": "^7.14.0",
     "eslint-plugin-react-hooks": "^4.1.2",
     "eslint-plugin-redux-saga": "^1.1.0",
@@ -32,7 +32,7 @@
     "jest-cli": "^26.0.1",
     "jest-styled-components": "^7.0.2",
     "lerna": "^3.13.1",
-    "lint-staged": "^9.2.0",
+    "lint-staged": "^10.4.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.18.2",
     "react-test-renderer": "^16.9.0",
@@ -94,7 +94,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
@@ -110,12 +110,10 @@
   },
   "lint-staged": {
     "*.{js,md,css,scss,yaml,yml}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "*.js": [
-      "eslint --fix",
-      "git add"
+      "eslint --fix"
     ]
   }
 }

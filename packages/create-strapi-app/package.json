@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "http://strapi.io",
@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "commander": "6.1.0",
-    "strapi-generate-new": "3.2.3"
+    "strapi-generate-new": "3.2.4"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -39,7 +39,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
