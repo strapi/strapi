@@ -139,7 +139,7 @@ module.exports = {
    */
 
   async create(data, { files } = {}) {
-    const validData = await strapi.entityValidator.validateEntity(strapi.models.restaurant, data);
+    const validData = await strapi.entityValidator.validateEntityCreation(strapi.models.restaurant, data);
     const entry = await strapi.query('restaurant').create(validData);
 
     if (files) {
