@@ -18,8 +18,7 @@ For example moving from `3.0.4` to `3.0.5`
   "dependencies": {
     "strapi": "3.0.5",
     "strapi-admin": "3.0.5",
-    "strapi-hook-bookshelf": "3.0.5",
-    "strapi-hook-knex": "3.0.5",
+    "strapi-connector-bookshelf": "3.0.5",
     "strapi-plugin-content-manager": "3.0.5",
     "strapi-plugin-content-type-builder": "3.0.5",
     "strapi-plugin-email": "3.0.5",
@@ -42,8 +41,7 @@ For example moving from `3.0.4` to `3.0.5`
   "dependencies": {
     "strapi": "3.0.6",
     "strapi-admin": "3.0.6",
-    "strapi-hook-bookshelf": "3.0.6",
-    "strapi-hook-knex": "3.0.6",
+    "strapi-connector-bookshelf": "3.0.6",
     "strapi-plugin-content-manager": "3.0.6",
     "strapi-plugin-content-type-builder": "3.0.6",
     "strapi-plugin-email": "3.0.6",
