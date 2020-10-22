@@ -6,7 +6,6 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | reducer', () => {
 
   beforeEach(() => {
     state = {
-      formattedContentTypeLayout: [],
       isDraggingComponent: false,
     };
   });
@@ -27,39 +26,6 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | reducer', () => {
 
       const expected = produce(state, draft => {
         draft.isDraggingComponent = true;
-      });
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('SET_LAYOUT_DATA', () => {
-    it('should set the isDraggingComponent to true', () => {
-      const action = {
-        type: 'SET_LAYOUT_DATA',
-        formattedContentTypeLayout: ['test', 'test1'],
-      };
-
-      const expected = produce(state, draft => {
-        draft.formattedContentTypeLayout = ['test', 'test1'];
-      });
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('RESET_PROPS', () => {
-    it('should set the isDraggingComponent to true', () => {
-      const action = {
-        type: 'RESET_PROPS',
-      };
-
-      state.isDraggingComponent = true;
-      state.formattedContentTypeLayout = ['test', 'test1'];
-
-      const expected = produce(state, draft => {
-        draft.isDraggingComponent = false;
-        draft.formattedContentTypeLayout = [];
       });
 
       expect(reducer(state, action)).toEqual(expected);

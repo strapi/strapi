@@ -1,7 +1,6 @@
 import produce from 'immer';
 
 const initialState = {
-  formattedContentTypeLayout: [],
   isDraggingComponent: false,
 };
 
@@ -13,13 +12,6 @@ const reducer = (state, action) =>
         drafState.isDraggingComponent = true;
         break;
       }
-
-      case 'SET_LAYOUT_DATA': {
-        drafState.formattedContentTypeLayout = action.formattedContentTypeLayout;
-        break;
-      }
-      case 'RESET_PROPS':
-        return initialState;
       case 'UNSET_IS_DRAGGING_COMPONENT': {
         drafState.isDraggingComponent = false;
         break;
