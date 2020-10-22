@@ -1,171 +1,69 @@
 'use strict';
 
-const _ = require('lodash');
-const { prop, propOr, startsWith, pipe } = require('lodash/fp');
-const pluralize = require('pluralize');
+const { isNil, propEq, mapValues } = require('lodash/fp');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
+const { getService } = require('../utils');
 const storeUtils = require('./utils/store');
-const { pickSchemaFields } = require('./utils/schema');
+const createConfigurationService = require('./configuration');
 
-const SINGLE_TYPE = 'singleType';
-const COLLECTION_TYPE = 'collectionType';
+const configurationService = createConfigurationService({
+  storeUtils,
+  prefix: 'content_types',
+  getModels() {
+    const { toContentManagerModel } = getService('data-mapper');
 
-const toUID = (name, plugin) => {
-  const model = strapi.getModel(name, plugin);
-  return model.uid;
-};
+    return mapValues(toContentManagerModel, strapi.contentTypes);
+  },
+});
 
-const formatContentTypeLabel = contentType => {
-  const { kind } = contentType;
-  const name = _.get(contentType, ['info', 'name'], contentType.modelName);
+const service = {
+  findAllContentTypes() {
+    const { toContentManagerModel } = getService('data-mapper');
 
-  return kind === SINGLE_TYPE ? _.upperFirst(name) : _.upperFirst(pluralize(name));
-};
+    return Object.values(strapi.contentTypes).map(toContentManagerModel);
+  },
 
-// TODO: find a way to get ride of this
-const HIDDEN_CONTENT_TYPES = [
-  'strapi::admin',
-  'plugins::upload.file',
-  'plugins::users-permissions.permission',
-  'plugins::users-permissions.role',
-  'strapi::permission',
-  'strapi::role',
-  'strapi::user',
-];
+  findContentType(uid) {
+    const { toContentManagerModel } = getService('data-mapper');
 
-const formatContentType = contentType => {
-  return {
-    uid: contentType.uid,
-    name: _.get(contentType, ['info', 'name']),
-    apiID: contentType.modelName,
-    label: formatContentTypeLabel(contentType),
-    isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
-    schema: {
-      ...formatContentTypeSchema(contentType),
-      kind: contentType.kind || COLLECTION_TYPE,
-    },
-  };
-};
+    const contentType = strapi.contentTypes[uid];
 
-const formatAttributes = model => {
-  return Object.keys(model.attributes).reduce((acc, key) => {
-    if (['created_by', 'updated_by'].includes(key)) {
-      return acc;
-    }
+    return isNil(contentType) ? contentType : toContentManagerModel(contentType);
+  },
 
-    acc[key] = formatAttribute(key, model.attributes[key], { model });
-    return acc;
-  }, {});
-};
+  findDisplayedContentTypes() {
+    return this.findAllContentTypes().filter(propEq(true, 'isDisplayed'));
+  },
 
-const formatAttribute = (key, attribute, { model }) => {
-  if (_.has(attribute, 'type')) return attribute;
+  findContentTypesByKind(kind = contentTypesUtils.constants.COLLECTION_TYPE) {
+    return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
+  },
 
-  // format relations
-  const relation = (model.associations || []).find(assoc => assoc.alias === key);
+  // configuration
 
-  const { plugin } = attribute;
-  let targetEntity = attribute.model || attribute.collection;
+  async findConfiguration(contentType) {
+    const configuration = await configurationService.getConfiguration(contentType.uid);
 
-  if (plugin === 'upload' && targetEntity === 'file') {
     return {
-      type: 'media',
-      multiple: attribute.collection ? true : false,
-      required: attribute.required ? true : false,
-      allowedTypes: attribute.allowedTypes,
+      uid: contentType.uid,
+      ...configuration,
     };
-  } else {
-    return {
-      ...attribute,
-      type: 'relation',
-      targetModel: targetEntity === '*' ? '*' : toUID(targetEntity, plugin),
-      relationType: relation.nature,
-    };
-  }
+  },
+
+  async updateConfiguration(contentType, newConfiguration) {
+    await configurationService.setConfiguration(contentType.uid, newConfiguration);
+    return this.findConfiguration(contentType);
+  },
+
+  findComponentsConfigurations(contentType) {
+    // delegate to componentService
+    return getService('components').findComponentsConfigurations(contentType);
+  },
+
+  syncConfigurations() {
+    return configurationService.syncConfigurations();
+  },
 };
 
-const formatContentTypeSchema = contentType => {
-  return {
-    ...pickSchemaFields(contentType),
-    attributes: {
-      id: {
-        type: contentType.primaryKeyType,
-      },
-      ...formatAttributes(contentType),
-      ...createTimestampsSchema(contentType),
-    },
-  };
-};
-
-const createTimestampsSchema = contentType => {
-  if (_.get(contentType, 'options.timestamps', false) === false) {
-    return {};
-  }
-
-  const [createdAtAttribute, updatedAtAttribute] = _.get(contentType, ['options', 'timestamps']);
-
-  return {
-    [createdAtAttribute]: {
-      type: 'timestamp',
-    },
-    [updatedAtAttribute]: {
-      type: 'timestamp',
-    },
-  };
-};
-
-const getDisplayedContentTypesUids = () => {
-  return Object.keys(strapi.contentTypes).filter(ct => !HIDDEN_CONTENT_TYPES.includes(ct));
-};
-
-const getKind = propOr(COLLECTION_TYPE, 'kind');
-
-const isStrapiContentType = pipe([prop('uid'), startsWith('strapi::')]);
-
-const getContentTypesByKind = ({ kind = COLLECTION_TYPE } = {}) => {
-  return Object.values(strapi.contentTypes)
-    .filter(contentType => {
-      return !isStrapiContentType(contentType) && getKind(contentType) === kind;
-    })
-    .map(formatContentType);
-};
-
-//  Configuration methods
-
-const STORE_KEY_PREFIX = 'content_types';
-
-const uidToStoreKey = uid => {
-  return `${STORE_KEY_PREFIX}::${uid}`;
-};
-
-const getConfiguration = uid => {
-  const storeKey = uidToStoreKey(uid);
-  return storeUtils.getModelConfiguration(storeKey);
-};
-
-const setConfiguration = (uid, input) => {
-  const { settings, metadatas, layouts } = input;
-
-  const storeKey = uidToStoreKey(uid);
-  return storeUtils.setModelConfiguration(storeKey, {
-    uid,
-    settings,
-    metadatas,
-    layouts,
-  });
-};
-
-const deleteConfiguration = uid => {
-  const storeKey = uidToStoreKey(uid);
-  return storeUtils.deleteKey(storeKey);
-};
-
-module.exports = {
-  getContentTypesByKind,
-  formatContentType,
-  formatContentTypeSchema,
-  getDisplayedContentTypesUids,
-  getConfiguration,
-  setConfiguration,
-  deleteConfiguration,
-};
+module.exports = service;

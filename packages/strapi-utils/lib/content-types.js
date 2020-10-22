@@ -2,6 +2,9 @@
 
 const _ = require('lodash');
 
+const SINGLE_TYPE = 'singleType';
+const COLLECTION_TYPE = 'collectionType';
+
 const ID_ATTRIBUTE = 'id';
 const PUBLISHED_AT_ATTRIBUTE = 'published_at';
 const CREATED_BY_ATTRIBUTE = 'created_by';
@@ -21,6 +24,8 @@ const constants = {
   DP_PUB_STATES,
   DP_PUB_STATE_LIVE,
   DP_PUB_STATE_PREVIEW,
+  SINGLE_TYPE,
+  COLLECTION_TYPE,
 };
 
 const getTimestamps = model => {
@@ -32,6 +37,19 @@ const getTimestamps = model => {
 
   return timestamps;
 };
+
+const getTimestampsAttributes = model => {
+  const timestamps = getTimestamps(model);
+
+  return timestamps.reduce(
+    (attributes, attributeName) => ({
+      ...attributes,
+      [attributeName]: { type: 'timestamp' },
+    }),
+    {}
+  );
+};
+
 const getNonWritableAttributes = (model = {}) => {
   const nonWritableAttributes = _.reduce(
     model.attributes,
@@ -69,8 +87,13 @@ const isPrivateAttribute = (model = {}, attributeName) => {
   return model.privateAttributes.includes(attributeName);
 };
 
+const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
+const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
+const isKind = kind => model => model.kind === kind;
+
 module.exports = {
   getPrivateAttributes,
+  getTimestampsAttributes,
   isPrivateAttribute,
   constants,
   getNonWritableAttributes,
@@ -78,4 +101,7 @@ module.exports = {
   getVisibleAttributes,
   hasDraftAndPublish,
   isDraft,
+  isSingleType,
+  isCollectionType,
+  isKind,
 };

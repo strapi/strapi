@@ -15,8 +15,10 @@ module.exports = {
     strapi: false,
   },
   rules: {
-    'node/no-unpublished-require': 0,
-    'require-atomic-updates': 0,
-    'no-process-exit': 0,
+    'node/no-unpublished-require': 'off',
+    'require-atomic-updates': 'off',
+    'no-process-exit': 'off',
+    strict: ['error', 'global'],
+    'import/order': 'error',
   },
 };

@@ -3,31 +3,22 @@
 const { createDefaultSettings, syncSettings } = require('./settings');
 const { createDefaultMetadatas, syncMetadatas } = require('./metadatas');
 const { createDefaultLayouts, syncLayouts } = require('./layouts');
-const { formatContentTypeSchema } = require('../../content-types');
 const { createModelConfigurationSchema } = require('../../../controllers/validation');
 
-async function validateCustomConfig(model, schema) {
+async function validateCustomConfig(schema) {
   try {
-    await createModelConfigurationSchema(model, schema, {
+    await createModelConfigurationSchema(schema, {
       allowUndefined: true,
-    }).validate(model.config);
+    }).validate(schema.config);
   } catch (error) {
     throw new Error(
-      `Invalid Model configuration for model ${model.uid}. Verify your {{modelName}}.config.js(on) file:\n  - ${error.message}\n`
+      `Invalid Model configuration for model ${schema.uid}. Verify your {{modelName}}.config.js(on) file:\n  - ${error.message}\n`
     );
   }
 }
 
-async function createDefaultConfiguration(model) {
-  // convert model to schema
-
-  const schema = formatContentTypeSchema(model);
-  schema.primaryKey = model.primaryKey;
-
-  if (model.config) {
-    await validateCustomConfig(model, schema);
-    schema.config = model.config;
-  }
+async function createDefaultConfiguration(schema) {
+  await validateCustomConfig(schema);
 
   return {
     settings: await createDefaultSettings(schema),
@@ -36,15 +27,8 @@ async function createDefaultConfiguration(model) {
   };
 }
 
-async function syncConfiguration(conf, model) {
-  // convert model to schema
-  const schema = formatContentTypeSchema(model);
-  schema.primaryKey = model.primaryKey;
-
-  if (model.config) {
-    await validateCustomConfig(model, schema);
-    schema.config = model.config;
-  }
+async function syncConfiguration(conf, schema) {
+  await validateCustomConfig(schema);
 
   return {
     settings: await syncSettings(conf, schema),
