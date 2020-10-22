@@ -1,7 +1,7 @@
-import React, { memo, useCallback, useMemo, useEffect, useReducer, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { BackHeader, LiLink, CheckPermissions, useUserPermissions } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 
@@ -18,10 +18,9 @@ import getInjectedComponents from '../../utils/getComponents';
 import EditViewDataManagerProvider from '../SingleTypeEditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
-import createAttributesLayout from './utils/createAttributesLayout';
+import { createAttributesLayout, formatLayoutWithMetas } from './utils';
 import { LinkWrapper, SubWrapper } from './components';
-import init from './init';
-import reducer, { initialState } from './reducer';
+
 import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
@@ -36,30 +35,20 @@ const EditView = ({
   plugins,
   slug,
 }) => {
-  const formatLayoutRef = useRef();
-  formatLayoutRef.current = createAttributesLayout;
-  const { goBack } = useHistory();
+  // TODO REFACTO THIS CONTAINER SINCE IT IS VERY SIMILAR TO THE CT ONE
 
-  // Retrieve the search and the pathname
+  const { goBack } = useHistory();
+  // DIFF WITH CT
   const { pathname } = useLocation();
-  const {
-    params: { contentType },
-  } = useRouteMatch('/plugins/content-manager/:contentType');
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions } = useUserPermissions(viewPermissions);
 
-  const isSingleType = useMemo(() => contentType === 'singleType', [contentType]);
-  const [{ formattedContentTypeLayout }, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState)
-  );
   const allLayoutData = useMemo(() => get(layouts, [slug], {}), [layouts, slug]);
+
   const currentContentTypeLayoutData = useMemo(() => get(allLayoutData, ['contentType'], {}), [
     allLayoutData,
   ]);
-  const currentContentTypeLayout = useMemo(
-    () => get(currentContentTypeLayoutData, ['layouts', 'edit'], []),
-    [currentContentTypeLayoutData]
-  );
+
   const currentContentTypeLayoutRelations = useMemo(
     () => get(currentContentTypeLayoutData, ['layouts', 'editRelations'], []),
     [currentContentTypeLayoutData]
@@ -69,69 +58,36 @@ const EditView = ({
     [currentContentTypeLayoutData]
   );
 
-  const getFieldMetas = useCallback(
-    fieldName => {
-      return get(currentContentTypeLayoutData, ['metadatas', fieldName, 'edit'], {});
-    },
-    [currentContentTypeLayoutData]
-  );
-  const getField = useCallback(
-    fieldName => {
-      return get(currentContentTypeSchema, ['attributes', fieldName], {});
-    },
-    [currentContentTypeSchema]
-  );
-  const getFieldType = useCallback(
-    fieldName => {
-      return get(getField(fieldName), ['type'], '');
-    },
-    [getField]
-  );
-  const getFieldComponentUid = useCallback(
-    fieldName => {
-      return get(getField(fieldName), ['component'], '');
-    },
-    [getField]
-  );
-
   // Check if a block is a dynamic zone
-  const isDynamicZone = useCallback(
-    block => {
-      return block.every(subBlock => {
-        return subBlock.every(obj => getFieldType(obj.name) === 'dynamiczone');
-      });
-    },
-    [getFieldType]
-  );
+  const isDynamicZone = useCallback(block => {
+    return block.every(subBlock => {
+      return subBlock.every(obj => obj.fieldSchema.type === 'dynamiczone');
+    });
+  }, []);
 
   useEffect(() => {
-    // Force state to be cleared when navigation from one entry to another
-    dispatch({ type: 'RESET_PROPS' });
-    dispatch({
-      type: 'SET_LAYOUT_DATA',
-      formattedContentTypeLayout: formatLayoutRef.current(
-        currentContentTypeLayout,
-        currentContentTypeSchema.attributes
-      ),
-    });
-
     return () => deleteLayout(slug);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentContentTypeLayout, currentContentTypeSchema.attributes]);
+  }, [deleteLayout, slug]);
+
+  const formattedContentTypeLayout = useMemo(() => {
+    const enhancedLayout = formatLayoutWithMetas(currentContentTypeLayoutData);
+
+    return createAttributesLayout(enhancedLayout, currentContentTypeSchema.attributes);
+  }, [currentContentTypeLayoutData, currentContentTypeSchema.attributes]);
 
   return (
     <EditViewProvider
       allowedActions={allowedActions}
       allLayoutData={allLayoutData}
       components={components}
-      isSingleType={isSingleType}
+      isSingleType
       layout={currentContentTypeLayoutData}
       models={models}
     >
       <EditViewDataManagerProvider
         allLayoutData={allLayoutData}
         redirectToPreviousPage={goBack}
-        isSingleType={isSingleType}
+        isSingleType
         slug={slug}
       >
         <BackHeader onClick={goBack} />
@@ -143,12 +99,18 @@ const EditView = ({
                 if (isDynamicZone(block)) {
                   const {
                     0: {
-                      0: { name },
+                      0: { name, fieldSchema },
                     },
                   } = block;
-                  const { max, min } = getField(name);
 
-                  return <DynamicZone key={blockIndex} name={name} max={max} min={min} />;
+                  return (
+                    <DynamicZone
+                      key={blockIndex}
+                      name={name}
+                      max={fieldSchema.max}
+                      min={fieldSchema.min}
+                    />
+                  );
                 }
 
                 return (
@@ -156,42 +118,41 @@ const EditView = ({
                     {block.map((fieldsBlock, fieldsBlockIndex) => {
                       return (
                         <div className="row" key={fieldsBlockIndex}>
-                          {fieldsBlock.map(({ name, size }, fieldIndex) => {
-                            const isComponent = getFieldType(name) === 'component';
+                          {fieldsBlock.map(
+                            ({ name, size, fieldSchema, metadatas: { label } }, fieldIndex) => {
+                              const isComponent = fieldSchema.type === 'component';
 
-                            if (isComponent) {
-                              const componentUid = getFieldComponentUid(name);
-                              const isRepeatable = get(getField(name), 'repeatable', false);
-                              const { max, min } = getField(name);
+                              if (isComponent) {
+                                const { component, max, min, repeatable = false } = fieldSchema;
+                                const componentUid = fieldSchema.component;
 
-                              const label = get(getFieldMetas(name), 'label', componentUid);
+                                return (
+                                  <FieldComponent
+                                    key={componentUid}
+                                    componentUid={component}
+                                    isRepeatable={repeatable}
+                                    label={label}
+                                    max={max}
+                                    min={min}
+                                    name={name}
+                                  />
+                                );
+                              }
 
                               return (
-                                <FieldComponent
-                                  key={componentUid}
-                                  componentUid={componentUid}
-                                  isRepeatable={isRepeatable}
-                                  label={label}
-                                  max={max}
-                                  min={min}
-                                  name={name}
-                                />
+                                <div className={`col-${size}`} key={name}>
+                                  <Inputs
+                                    autoFocus={
+                                      blockIndex === 0 && fieldsBlockIndex === 0 && fieldIndex === 0
+                                    }
+                                    keys={name}
+                                    layout={currentContentTypeLayoutData}
+                                    name={name}
+                                  />
+                                </div>
                               );
                             }
-
-                            return (
-                              <div className={`col-${size}`} key={name}>
-                                <Inputs
-                                  autoFocus={
-                                    blockIndex === 0 && fieldsBlockIndex === 0 && fieldIndex === 0
-                                  }
-                                  keys={name}
-                                  layout={currentContentTypeLayoutData}
-                                  name={name}
-                                />
-                              </div>
-                            );
-                          })}
+                          )}
                         </div>
                       );
                     })}
@@ -232,22 +193,16 @@ const EditView = ({
               )}
               <LinkWrapper>
                 <ul>
-                  <CheckPermissions
-                    permissions={
-                      isSingleType
-                        ? pluginPermissions.singleTypesConfigurations
-                        : pluginPermissions.collectionTypesConfigurations
-                    }
-                  >
+                  {/* DIFF WITH CT */}
+                  <CheckPermissions permissions={pluginPermissions.singleTypesConfigurations}>
                     <LiLink
                       message={{
                         id: 'app.links.configure-view',
                       }}
                       icon="layout"
                       key={`${pluginId}.link`}
-                      url={`${
-                        isSingleType ? `${pathname}/` : ''
-                      }ctm-configurations/edit-settings/content-types`}
+                      // DIFF WITH CT
+                      url={`${pathname}/ctm-configurations/edit-settings/content-types`}
                       onClick={() => {
                         // emitEvent('willEditContentTypeLayoutFromEditView');
                       }}
