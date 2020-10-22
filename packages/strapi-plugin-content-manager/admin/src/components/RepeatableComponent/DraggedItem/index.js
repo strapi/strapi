@@ -5,7 +5,6 @@ import { get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import useEditView from '../../../hooks/useEditView';
 import ItemTypes from '../../../utils/ItemTypes';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
@@ -42,7 +41,6 @@ const DraggedItem = ({
   checkFormErrors,
   displayedValue,
 }) => {
-  const { setIsDraggingComponent, unsetIsDraggingComponent } = useEditView();
   const dragRef = useRef(null);
   const dropRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
@@ -126,12 +124,8 @@ const DraggedItem = ({
     begin: () => {
       // Close all collapses
       toggleCollapses(-1);
-      // Prevent the relations select from firing requests
-      setIsDraggingComponent();
     },
     end: () => {
-      // Enable the relations select to fire requests
-      unsetIsDraggingComponent();
       // Update the errors
       triggerFormValidation();
     },

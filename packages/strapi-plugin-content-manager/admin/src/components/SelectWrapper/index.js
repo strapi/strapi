@@ -7,7 +7,6 @@ import { request } from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-import useEditView from '../../hooks/useEditView';
 import { getFieldName } from '../../utils';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
@@ -38,8 +37,6 @@ function SelectWrapper({
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
-
-  const { isDraggingComponent } = useEditView();
 
   // This is needed for making requests when used in a component
   const fieldName = useMemo(() => {
@@ -88,46 +85,44 @@ function SelectWrapper({
       return;
     }
 
-    if (!isDraggingComponent) {
-      try {
-        const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
+    try {
+      const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
 
-        const containsKey = `${mainField}_contains`;
-        const { _contains, ...restState } = cloneDeep(state);
-        const params = isEmpty(state._contains)
-          ? restState
-          : { [containsKey]: _contains, ...restState };
+      const containsKey = `${mainField}_contains`;
+      const { _contains, ...restState } = cloneDeep(state);
+      const params = isEmpty(state._contains)
+        ? restState
+        : { [containsKey]: _contains, ...restState };
 
-        if (componentUid) {
-          set(params, '_component', componentUid);
-        }
+      if (componentUid) {
+        set(params, '_component', componentUid);
+      }
 
-        const data = await request(requestUrl, {
-          method: 'GET',
-          params,
-          signal,
-        });
+      const data = await request(requestUrl, {
+        method: 'GET',
+        params,
+        signal,
+      });
 
-        const formattedData = data.map(obj => {
-          return { value: obj, label: obj[mainField] };
-        });
+      const formattedData = data.map(obj => {
+        return { value: obj, label: obj[mainField] };
+      });
 
-        setOptions(prevState =>
-          prevState.concat(formattedData).filter((obj, index) => {
-            const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
+      setOptions(prevState =>
+        prevState.concat(formattedData).filter((obj, index) => {
+          const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
 
-            if (objIndex === -1) {
-              return true;
-            }
+          if (objIndex === -1) {
+            return true;
+          }
 
-            return prevState.findIndex(el => el.value.id === obj.value.id) === index;
-          })
-        );
-        setIsLoading(false);
-      } catch (err) {
-        if (err.code !== 20) {
-          strapi.notification.error('notification.error');
-        }
+          return prevState.findIndex(el => el.value.id === obj.value.id) === index;
+        })
+      );
+      setIsLoading(false);
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
       }
     }
   };

@@ -49,10 +49,8 @@ const EditView = ({
   const { allowedActions } = useUserPermissions(viewPermissions);
 
   const isSingleType = useMemo(() => contentType === 'singleType', [contentType]);
-  const [{ formattedContentTypeLayout, isDraggingComponent }, dispatch] = useReducer(
-    reducer,
-    initialState,
-    () => init(initialState)
+  const [{ formattedContentTypeLayout }, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState)
   );
   const allLayoutData = useMemo(() => get(layouts, [slug], {}), [layouts, slug]);
   const currentContentTypeLayoutData = useMemo(() => get(allLayoutData, ['contentType'], {}), [
@@ -126,20 +124,9 @@ const EditView = ({
       allowedActions={allowedActions}
       allLayoutData={allLayoutData}
       components={components}
-      isDraggingComponent={isDraggingComponent}
       isSingleType={isSingleType}
       layout={currentContentTypeLayoutData}
       models={models}
-      setIsDraggingComponent={() => {
-        dispatch({
-          type: 'SET_IS_DRAGGING_COMPONENT',
-        });
-      }}
-      unsetIsDraggingComponent={() => {
-        dispatch({
-          type: 'UNSET_IS_DRAGGING_COMPONENT',
-        });
-      }}
     >
       <EditViewDataManagerProvider
         allLayoutData={allLayoutData}

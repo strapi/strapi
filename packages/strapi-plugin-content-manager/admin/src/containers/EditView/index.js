@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useEffect, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -20,8 +20,6 @@ import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
 import { createAttributesLayout, formatLayoutWithMetas } from './utils';
 import { LinkWrapper, SubWrapper } from './components';
-
-import reducer, { initialState } from './reducer';
 import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
@@ -40,8 +38,6 @@ const EditView = ({
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions } = useUserPermissions(viewPermissions);
-
-  const [{ isDraggingComponent }, dispatch] = useReducer(reducer, initialState);
 
   const allLayoutData = useMemo(() => get(layouts, [slug], {}), [layouts, slug]);
 
@@ -65,18 +61,6 @@ const EditView = ({
     });
   }, []);
 
-  const handleDragComponent = useCallback(() => {
-    dispatch({
-      type: 'SET_IS_DRAGGING_COMPONENT',
-    });
-  }, []);
-
-  const handleDropComponent = useCallback(() => {
-    dispatch({
-      type: 'UNSET_IS_DRAGGING_COMPONENT',
-    });
-  }, []);
-
   useEffect(() => {
     return () => deleteLayout(slug);
   }, [deleteLayout, slug]);
@@ -92,12 +76,9 @@ const EditView = ({
       allowedActions={allowedActions}
       allLayoutData={allLayoutData}
       components={components}
-      isDraggingComponent={isDraggingComponent}
       isSingleType={false}
       layout={currentContentTypeLayoutData}
       models={models}
-      setIsDraggingComponent={handleDragComponent}
-      unsetIsDraggingComponent={handleDropComponent}
     >
       <EditViewDataManagerProvider
         allLayoutData={allLayoutData}
