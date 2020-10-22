@@ -13,7 +13,7 @@ const BOOLEAN_OPERATORS = ['or'];
 const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
-    buildJoinsAndFilter(qb, model, filters.where);
+    buildJoinsAndFilter(qb, model, filters);
   }
 
   if (_.has(filters, 'sort')) {
@@ -45,9 +45,11 @@ const buildQuery = ({ model, filters }) => qb => {
  * Add joins and where filters
  * @param {Object} qb - knex query builder
  * @param {Object} model - Bookshelf model
- * @param {Array<Object>} whereClauses - an array of where clause
+ * @param {Object} filters - The query filters
  */
-const buildJoinsAndFilter = (qb, model, whereClauses) => {
+const buildJoinsAndFilter = (qb, model, filters) => {
+  const { where: whereClauses } = filters;
+
   /**
    * Returns an alias for a name (simple incremental alias name)
    * @param {string} name - name to alias
@@ -210,12 +212,29 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     });
   };
 
-  const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
+  /**
+   * Add queries on tree's joins (deep search) based on given filters
+   * @param tree - joins tree
+   */
+  const addFiltersQueriesToJoinTree = tree => {
+    _.each(tree.joins, value => {
+      const { alias, model } = value;
 
-  buildJoinsFromTree(qb, tree);
+      runPopulateQueries(
+        toQueries({
+          publicationState: { query: filters.publicationState, model, alias },
+        }),
+        qb
+      );
+      addFiltersQueriesToJoinTree(value);
+    });
+  };
+
+  const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
   aliasedWhereClauses.forEach(w => buildWhereClause({ qb, ...w }));
 
-  return;
+  buildJoinsFromTree(qb, tree);
+  addFiltersQueriesToJoinTree(tree);
 };
 
 /**
