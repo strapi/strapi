@@ -85,11 +85,11 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
 
     target[model].allAttributes = { ...definition.attributes };
 
-    const createAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
+    const createdAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
     const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updated_at');
     if (_.get(definition, 'options.timestamps', false)) {
-      _.set(definition, 'options.timestamps', [createAtCol, updatedAtCol]);
-      target[model].allAttributes[createAtCol] = { type: 'timestamp' };
+      _.set(definition, 'options.timestamps', [createdAtCol, updatedAtCol]);
+      target[model].allAttributes[createdAtCol] = { type: 'timestamp' };
       target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
     } else {
       _.set(definition, 'options.timestamps', false);

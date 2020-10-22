@@ -38,16 +38,20 @@ const storeDefinition = async (definition, ORM) => {
   return strapi.models['core_store'].forge(defData).save();
 };
 
-const didDefinitionChange = async (definition, ORM) => {
-  const previousDefRow = await getDefinitionFromStore(definition, ORM);
-  const previousDefJSON = _.get(previousDefRow, 'value', null);
-  const actualDefJSON = formatDefinitionToStore(definition);
+const getColumnsWhereDefinitionChanged = async (columnsName, definition, ORM) => {
+  const previousDefinitionRow = await getDefinitionFromStore(definition, ORM);
+  const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
 
-  return previousDefJSON !== actualDefJSON;
+  return columnsName.filter(columnName => {
+    const previousAttribute = _.get(previousDefinition, ['attributes', columnName], null);
+    const actualAttribute = _.get(definition, ['attributes', columnName], null);
+
+    return !_.isEqual(previousAttribute, actualAttribute);
+  });
 };
 
 module.exports = {
   storeDefinition,
-  didDefinitionChange,
   getDefinitionFromStore,
+  getColumnsWhereDefinitionChanged,
 };
