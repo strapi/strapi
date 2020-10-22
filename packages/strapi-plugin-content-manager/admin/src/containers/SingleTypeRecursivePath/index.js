@@ -3,7 +3,7 @@ import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 
-const EditView = lazy(() => import('../EditView'));
+const EditView = lazy(() => import('../SingleTypeEditView'));
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
 
 const SingleTypeRecursivePath = props => {
