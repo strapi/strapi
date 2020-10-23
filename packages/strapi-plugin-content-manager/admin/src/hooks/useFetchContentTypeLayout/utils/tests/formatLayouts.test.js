@@ -1,7 +1,7 @@
 import formatLayouts, { formatLayoutWithMetas } from '../formatLayouts';
 
 describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLayoutWithMetas', () => {
-  describe('formatLayout', () => {
+  describe('formatLayouts', () => {
     it('should format the content type and components layouts', () => {
       const data = {
         components: {
@@ -95,6 +95,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
             },
           },
           layouts: {
+            editRelations: [],
             edit: [
               [{ name: 'dz', size: 12 }],
               [
