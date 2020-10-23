@@ -33,6 +33,8 @@ function SelectWrapper({
   slug,
   targetModel,
   placeholder,
+  //
+  // queryInfos,
 }) {
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');

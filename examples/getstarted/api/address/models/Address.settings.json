@@ -50,6 +50,14 @@
     "likes": {
       "collection": "like",
       "via": "address"
+    },
+    "dish": {
+      "type": "component",
+      "repeatable": true,
+      "component": "default.dish"
+    },
+    "test": {
+      "collection": "category"
     }
   }
 }

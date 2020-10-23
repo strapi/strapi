@@ -156,11 +156,12 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                   <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                     <div style={{ paddingTop: '22px' }}>
                       {currentContentTypeLayoutData.layouts.editRelations.map(
-                        ({ name, fieldSchema, metadatas }) => {
+                        ({ name, fieldSchema, metadatas, queryInfos }) => {
                           return (
                             <SelectWrapper
                               {...fieldSchema}
                               {...metadatas}
+                              queryInfos={queryInfos}
                               key={name}
                               name={name}
                               relationsType={fieldSchema.relationType}

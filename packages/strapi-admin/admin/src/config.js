@@ -8,5 +8,6 @@
 // IMPORTANT: It also needs to be added to the migration guide.
 
 export const LOGIN_LOGO = null;
-export const SHOW_TUTORIALS = true;
+// export const SHOW_TUTORIALS = true;
+export const SHOW_TUTORIALS = false;
 export const SETTINGS_BASE_URL = '/settings';

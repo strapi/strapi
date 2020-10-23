@@ -1,4 +1,5 @@
 import { get, set } from 'lodash';
+import pluginId from '../../../pluginId';
 
 const formatLayoutWithMetas = obj => {
   const formatted = obj.layouts.edit.reduce((acc, current) => {
@@ -19,6 +20,21 @@ const formatLayoutWithMetas = obj => {
   return formatted;
 };
 
+const generateRelationQueryInfos = (obj, fieldName) => {
+  const uid = obj.uid;
+  const endPoint = `/${pluginId}/explorer/${uid}/relation-list/${fieldName}`;
+  const mainField = get(obj, ['metadatas', fieldName, 'edit', 'mainField'], '');
+
+  const queryInfo = {
+    endPoint,
+    defaultParams: {
+      [`${mainField}_contains`]: null,
+    },
+  };
+
+  return queryInfo;
+};
+
 // editRelations is an array of strings...
 const formatEditRelationsLayoutWithMetas = obj => {
   const formatted = obj.layouts.editRelations.reduce((acc, current) => {
@@ -26,11 +42,14 @@ const formatEditRelationsLayoutWithMetas = obj => {
     const metadatas = get(obj, ['metadatas', current, 'edit'], {});
     const size = 6;
 
+    const queryInfo = generateRelationQueryInfos(obj, current);
+
     acc.push({
       name: current,
       size,
       fieldSchema,
       metadatas,
+      queryInfo,
     });
 
     return acc;
