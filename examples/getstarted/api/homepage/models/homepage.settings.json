@@ -2,7 +2,8 @@
   "kind": "singleType",
   "collectionName": "homepages",
   "info": {
-    "name": "Homepage"
+    "name": "Homepage",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true,
@@ -21,16 +22,32 @@
     "single": {
       "model": "file",
       "via": "related",
-      "allowedTypes": ["images", "files", "videos"],
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
       "plugin": "upload",
       "required": false
     },
     "multiple": {
       "collection": "file",
       "via": "related",
-      "allowedTypes": ["images", "videos"],
+      "allowedTypes": [
+        "images",
+        "videos"
+      ],
       "plugin": "upload",
       "required": false
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice"
+      ]
     }
   }
 }

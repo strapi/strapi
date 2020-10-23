@@ -10,18 +10,15 @@ import {
   useUserPermissions,
 } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
-
-import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import { generatePermissionsObject } from '../../utils';
+import { generatePermissionsObject, getInjectedComponents } from '../../utils';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
-import useFetchContentTypeLayout from '../../hooks/useFetchContentTypeLayout';
-import getInjectedComponents from '../../utils/getComponents';
+import { useFetchContentTypeLayout } from '../../hooks';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
@@ -154,28 +151,19 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
               {currentContentTypeLayoutData.layouts.editRelations.length > 0 && (
                 <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                   <div style={{ paddingTop: '22px' }}>
-                    {currentContentTypeLayoutData.layouts.editRelations.map(relationName => {
-                      const relation = get(
-                        currentContentTypeLayoutData,
-                        ['schema', 'attributes', relationName],
-                        {}
-                      );
-                      const relationMetas = get(
-                        currentContentTypeLayoutData,
-                        ['metadatas', relationName, 'edit'],
-                        {}
-                      );
-
-                      return (
-                        <SelectWrapper
-                          {...relation}
-                          {...relationMetas}
-                          key={relationName}
-                          name={relationName}
-                          relationsType={relation.relationType}
-                        />
-                      );
-                    })}
+                    {currentContentTypeLayoutData.layouts.editRelations.map(
+                      ({ name, fieldSchema, metadatas }) => {
+                        return (
+                          <SelectWrapper
+                            {...fieldSchema}
+                            {...metadatas}
+                            key={name}
+                            name={name}
+                            relationsType={fieldSchema.relationType}
+                          />
+                        );
+                      }
+                    )}
                   </div>
                 </SubWrapper>
               )}
@@ -187,7 +175,6 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                         id: 'app.links.configure-view',
                       }}
                       icon="layout"
-                      key={`${pluginId}.link`}
                       url="ctm-configurations/edit-settings/content-types"
                       onClick={() => {
                         // emitEvent('willEditContentTypeLayoutFromEditView');
@@ -221,9 +208,7 @@ EditView.defaultProps = {
 EditView.propTypes = {
   components: PropTypes.array.isRequired,
   currentEnvironment: PropTypes.string,
-  deleteLayout: PropTypes.func.isRequired,
   emitEvent: PropTypes.func,
-  layouts: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
   plugins: PropTypes.object,
   slug: PropTypes.string.isRequired,
