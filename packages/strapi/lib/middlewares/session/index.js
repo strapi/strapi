@@ -21,7 +21,7 @@ module.exports = strapi => {
       return strapi.log.error(
         '(middleware:session) please provide connection for the session store'
       );
-    } else if (strapi.config.get(`database.connections.${session.connection}`)) {
+    } else if (!strapi.config.get(`database.connections.${session.connection}`)) {
       return strapi.log.error(
         '(middleware:session) please provide a valid connection for the session store'
       );
