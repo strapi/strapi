@@ -81,6 +81,7 @@ function Main({
   };
   resetPropsRef.current = resetProps;
 
+  // TODO change the layouts logic
   const shouldShowLoader = !pathname.includes('ctm-configurations/') && layouts[slug] === undefined;
 
   useEffect(() => {

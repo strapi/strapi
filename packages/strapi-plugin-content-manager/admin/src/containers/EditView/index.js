@@ -1,8 +1,14 @@
-import React, { memo, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { BackHeader, LiLink, CheckPermissions, useUserPermissions } from 'strapi-helper-plugin';
+import {
+  BackHeader,
+  LiLink,
+  LoadingIndicatorPage,
+  CheckPermissions,
+  useUserPermissions,
+} from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 
 import pluginId from '../../pluginId';
@@ -14,45 +20,26 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
+import useFetchContentTypeLayout from '../../hooks/useFetchContentTypeLayout';
 import getInjectedComponents from '../../utils/getComponents';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
-import { createAttributesLayout, formatLayoutWithMetas } from './utils';
+import { createAttributesLayout } from './utils';
 import { LinkWrapper, SubWrapper } from './components';
 import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 
-const EditView = ({
-  components,
-  currentEnvironment,
-  deleteLayout,
-  layouts,
-  models,
-  plugins,
-  slug,
-}) => {
+const EditView = ({ components, currentEnvironment, models, plugins, slug }) => {
+  const { isLoading, layout } = useFetchContentTypeLayout(slug);
   const { goBack } = useHistory();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions } = useUserPermissions(viewPermissions);
 
-  const allLayoutData = useMemo(() => get(layouts, [slug], {}), [layouts, slug]);
-
-  const currentContentTypeLayoutData = useMemo(() => get(allLayoutData, ['contentType'], {}), [
-    allLayoutData,
-  ]);
-
-  const currentContentTypeLayouts = useMemo(() => {
-    return get(currentContentTypeLayoutData, ['layouts'], { edit: [], editRelations: [] });
-  }, [currentContentTypeLayoutData]);
-
-  const currentContentTypeSchema = useMemo(
-    () => get(currentContentTypeLayoutData, ['schema'], {}),
-    [currentContentTypeLayoutData]
-  );
+  const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);
 
   // Check if a block is a dynamic zone
   const isDynamicZone = useCallback(block => {
@@ -61,27 +48,32 @@ const EditView = ({
     });
   }, []);
 
-  useEffect(() => {
-    return () => deleteLayout(slug);
-  }, [deleteLayout, slug]);
-
   const formattedContentTypeLayout = useMemo(() => {
-    const enhancedLayout = formatLayoutWithMetas(currentContentTypeLayoutData);
+    if (!currentContentTypeLayoutData.layouts) {
+      return [];
+    }
 
-    return createAttributesLayout(enhancedLayout, currentContentTypeSchema.attributes);
-  }, [currentContentTypeLayoutData, currentContentTypeSchema.attributes]);
+    return createAttributesLayout(
+      currentContentTypeLayoutData.layouts.edit,
+      currentContentTypeLayoutData.schema.attributes
+    );
+  }, [currentContentTypeLayoutData]);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <EditViewProvider
       allowedActions={allowedActions}
-      allLayoutData={allLayoutData}
+      allLayoutData={layout}
       components={components}
       isSingleType={false}
       layout={currentContentTypeLayoutData}
       models={models}
     >
       <EditViewDataManagerProvider
-        allLayoutData={allLayoutData}
+        allLayoutData={layout}
         redirectToPreviousPage={goBack}
         isSingleType={false}
         slug={slug}
@@ -159,10 +151,10 @@ const EditView = ({
             <div className="col-md-12 col-lg-3">
               <InformationCard />
               <Padded size="smd" top />
-              {currentContentTypeLayouts.editRelations.length > 0 && (
+              {currentContentTypeLayoutData.layouts.editRelations.length > 0 && (
                 <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                   <div style={{ paddingTop: '22px' }}>
-                    {currentContentTypeLayouts.editRelations.map(relationName => {
+                    {currentContentTypeLayoutData.layouts.editRelations.map(relationName => {
                       const relation = get(
                         currentContentTypeLayoutData,
                         ['schema', 'attributes', relationName],
