@@ -3,23 +3,18 @@ import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Arrow } from '@buffetjs/icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
-import useEditView from '../../hooks/useEditView';
-import DynamicComponentCard from '../DynamicComponentCard';
-import FieldComponent from '../FieldComponent';
 import NotAllowedInput from '../NotAllowedInput';
 import connect from './utils/connect';
 import select from './utils/select';
 import BaselineAlignement from './BaselineAlignement';
 import Button from './Button';
-import ComponentsPicker from './ComponentsPicker';
+import Component from './Component';
 import ComponentWrapper from './ComponentWrapper';
 import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Label from './Label';
-import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
+import Picker from './Picker';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -41,31 +36,9 @@ const DynamicZone = ({
   metadatas,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { components } = useEditView();
 
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = fieldSchema;
-
-  const getDynamicComponentSchemaData = useCallback(
-    componentUid => {
-      const component = components.find(compo => compo.uid === componentUid);
-      const { schema } = component;
-
-      return schema;
-    },
-    [components]
-  );
-
-  const getDynamicComponentInfos = useCallback(
-    componentUid => {
-      const {
-        info: { icon, name },
-      } = getDynamicComponentSchemaData(componentUid);
-
-      return { icon, name };
-    },
-    [getDynamicComponentSchemaData]
-  );
 
   const dynamicZoneErrors = useMemo(() => {
     return Object.keys(formErrors)
@@ -86,6 +59,15 @@ const DynamicZone = ({
   const hasRequiredError = hasError && !hasMinError;
   const hasMaxError =
     hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
+
+  const handleAddComponent = useCallback(
+    componentUid => {
+      setIsOpen(false);
+
+      addComponentToDynamicZone(name, componentUid, hasError);
+    },
+    [addComponentToDynamicZone, hasError, name]
+  );
 
   // TODO
   if (!isFieldAllowed && isCreatingEntry) {
@@ -114,6 +96,7 @@ const DynamicZone = ({
         </Label>
       )}
 
+      {/* List of displayed components */}
       <ComponentWrapper>
         {dynamicDisplayedComponents.map((componentUid, index) => {
           const showDownIcon =
@@ -123,39 +106,18 @@ const DynamicZone = ({
           const showUpIcon = isFieldAllowed && dynamicDisplayedComponentsLength > 0 && index > 0;
 
           return (
-            <div key={index}>
-              <div className="arrow-icons">
-                {showDownIcon && (
-                  <RoundCTA
-                    className="arrow-btn arrow-down"
-                    onClick={() => moveComponentDown(name, index)}
-                  >
-                    <Arrow />
-                  </RoundCTA>
-                )}
-                {showUpIcon && (
-                  <RoundCTA
-                    className="arrow-btn arrow-up"
-                    onClick={() => moveComponentUp(name, index)}
-                  >
-                    <Arrow />
-                  </RoundCTA>
-                )}
-              </div>
-              {isFieldAllowed && (
-                <RoundCTA onClick={() => removeComponentFromDynamicZone(name, index)}>
-                  <FontAwesomeIcon icon="trash-alt" />
-                </RoundCTA>
-              )}
-              <FieldComponent
-                componentUid={componentUid}
-                componentFriendlyName={getDynamicComponentInfos(componentUid).name}
-                icon={getDynamicComponentInfos(componentUid).icon}
-                label=""
-                name={`${name}.${index}`}
-                isFromDynamicZone
-              />
-            </div>
+            <Component
+              componentUid={componentUid}
+              key={index}
+              index={index}
+              isFieldAllowed={isFieldAllowed}
+              moveComponentDown={moveComponentDown}
+              moveComponentUp={moveComponentUp}
+              name={name}
+              removeComponentFromDynamicZone={removeComponentFromDynamicZone}
+              showDownIcon={showDownIcon}
+              showUpIcon={showUpIcon}
+            />
           );
         })}
       </ComponentWrapper>
@@ -201,32 +163,11 @@ const DynamicZone = ({
               values={{ componentName: metadatas.label }}
             />
           </div>
-          <ComponentsPicker isOpen={isOpen}>
-            <div>
-              <p className="componentPickerTitle">
-                <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
-              </p>
-              <div className="componentsList">
-                {dynamicZoneAvailableComponents.map(componentUid => {
-                  const { icon, name: friendlyName } = getDynamicComponentInfos(componentUid);
-
-                  return (
-                    <DynamicComponentCard
-                      key={componentUid}
-                      componentUid={componentUid}
-                      friendlyName={friendlyName}
-                      icon={icon}
-                      onClick={() => {
-                        setIsOpen(false);
-                        const shouldCheckErrors = hasError;
-                        addComponentToDynamicZone(name, componentUid, shouldCheckErrors);
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </ComponentsPicker>
+          <Picker
+            isOpen={isOpen}
+            components={dynamicZoneAvailableComponents}
+            onClickAddComponent={handleAddComponent}
+          />
         </Wrapper>
       ) : (
         <BaselineAlignement top="9px" />

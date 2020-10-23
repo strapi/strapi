@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 /* eslint-disable indent */
-const ComponentsPicker = styled.div`
+const Wrapper = styled.div`
   overflow: hidden;
   max-height: 0;
   transition: max-height 0.2s ease-out;
@@ -31,4 +31,4 @@ const ComponentsPicker = styled.div`
   }
 `;
 
-export default ComponentsPicker;
+export default Wrapper;
