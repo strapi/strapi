@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const { flatMap, filter } = require('lodash/fp');
 const pmap = require('p-map');
-const { validatePermissionsExist } = require('../validation/permission');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
@@ -14,20 +13,6 @@ const { createPermission } = require('../domain/permission');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
-
-const fieldsToCompare = ['action', 'subject', 'fields', 'conditions'];
-const getPermissionWithSortedFields = perm => {
-  const sortedPerm = _.cloneDeep(perm);
-  if (Array.isArray(sortedPerm.fields)) {
-    sortedPerm.fields.sort();
-  }
-  return sortedPerm;
-};
-const arePermissionsEqual = (perm1, perm2) =>
-  _.isEqual(
-    _.pick(getPermissionWithSortedFields(perm1), fieldsToCompare),
-    _.pick(getPermissionWithSortedFields(perm2), fieldsToCompare)
-  );
 
 /**
  * Removes unwanted fields from a permission
@@ -83,50 +68,6 @@ const update = async (params, attributes) => {
  */
 const find = (params = {}) => {
   return strapi.query('permission', 'admin').find(params, []);
-};
-
-/**
- * Assign permissions to a role
- * @param {string|int} roleId - role ID
- * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
- */
-const assign = async (roleId, permissions = []) => {
-  try {
-    await validatePermissionsExist(permissions);
-  } catch (err) {
-    throw strapi.errors.badRequest('ValidationError', err);
-  }
-
-  const permissionsWithRole = permissions.map(permission =>
-    createPermission({
-      ...permission,
-      conditions: strapi.admin.services.condition.removeUnkownConditionIds(permission.conditions),
-      role: roleId,
-    })
-  );
-
-  const existingPermissions = await find({ role: roleId, _limit: -1 });
-  const permissionsToAdd = _.differenceWith(
-    permissionsWithRole,
-    existingPermissions,
-    arePermissionsEqual
-  );
-  const permissionsToDelete = _.differenceWith(
-    existingPermissions,
-    permissionsWithRole,
-    arePermissionsEqual
-  );
-  const permissionsToReturn = _.differenceBy(existingPermissions, permissionsToDelete, 'id');
-
-  if (permissionsToDelete.length > 0) {
-    await deleteByIds(permissionsToDelete.map(p => p.id));
-  }
-  if (permissionsToAdd.length > 0) {
-    const createdPermissions = await createMany(permissionsToAdd);
-    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
-  }
-
-  return permissionsToReturn;
 };
 
 /**
@@ -246,43 +187,11 @@ const ensureBoundPermissionsInDatabase = async () => {
   }
 };
 
-/**
- * Reset super admin permissions (giving it all permissions)
- * @returns {Promise<>}
- */
-const resetSuperAdminPermissions = async () => {
-  const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
-  if (!superAdminRole) {
-    return;
-  }
-
-  const allActions = strapi.admin.services.permission.actionProvider.getAll();
-  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
-
-  const permissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
-    contentTypesActions
-  );
-
-  const otherActions = allActions.filter(a => a.section !== 'contentTypes');
-  otherActions.forEach(action => {
-    if (action.subjects) {
-      const newPerms = action.subjects.map(subject =>
-        createPermission({ action: action.actionId, subject })
-      );
-      permissions.push(...newPerms);
-    } else {
-      permissions.push(createPermission({ action: action.actionId }));
-    }
-  });
-
-  await assign(superAdminRole.id, permissions);
-};
-
 module.exports = {
+  createMany,
   find,
   deleteByRolesIds,
   deleteByIds,
-  assign,
   sanitizePermission,
   findUserPermissions,
   actionProvider,
@@ -290,6 +199,5 @@ module.exports = {
   engine,
   conditionProvider,
   cleanPermissionInDatabase,
-  resetSuperAdminPermissions,
   ensureBoundPermissionsInDatabase,
 };
