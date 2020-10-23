@@ -89,8 +89,10 @@ module.exports = {
     const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
     const { body } = ctx.request;
+    const { uid } = ctx.query;
 
     const entityManager = getService('entity-manager');
+    const editingLockService = getService('editing-lock');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.update()) {
@@ -113,6 +115,8 @@ module.exports = {
 
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
+    await editingLockService.validateAndExtendLock({ model, id, lockUID: uid });
+
     await wrapBadRequest(async () => {
       const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
 
@@ -123,8 +127,10 @@ module.exports = {
   async delete(ctx) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
+    const { uid } = ctx.query;
 
     const entityManager = getService('entity-manager');
+    const editingLockService = getService('editing-lock');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -141,6 +147,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    await editingLockService.validateAndExtendLock({ model, id, lockUID: uid });
+
     const result = await entityManager.delete(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
@@ -149,8 +157,10 @@ module.exports = {
   async publish(ctx) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
+    const { uid } = ctx.query;
 
     const entityManager = getService('entity-manager');
+    const editingLockService = getService('editing-lock');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -167,6 +177,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    await editingLockService.validateAndExtendLock({ model, id, lockUID: uid });
+
     const result = await entityManager.publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
@@ -175,8 +187,10 @@ module.exports = {
   async unpublish(ctx) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
+    const { uid } = ctx.query;
 
     const entityManager = getService('entity-manager');
+    const editingLockService = getService('editing-lock');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -193,13 +207,15 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    await editingLockService.validateAndExtendLock({ model, id, lockUID: uid });
+
     const result = await entityManager.unpublish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },
 
   async bulkdDelete(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query, body } = ctx.request;
     const { ids } = body;
@@ -207,6 +223,7 @@ module.exports = {
     await validateBulkDeleteInput(body);
 
     const entityManager = getService('entity-manager');
+    const editingLockService = getService('editing-lock');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -220,6 +237,12 @@ module.exports = {
       ...permissionQuery,
       _where: [idsWhereClause].concat(permissionQuery._where || {}),
     };
+
+    await Promise.all(
+      ids.map(entityId =>
+        editingLockService.setLock({ model, entityId, user }, { force: true })
+      )
+    );
 
     const results = await entityManager.findAndDelete(params, model);
 

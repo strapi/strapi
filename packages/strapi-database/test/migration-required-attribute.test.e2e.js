@@ -3,9 +3,11 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const createModelsUtils = require('../../../test/helpers/models');
+const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
+let lockUtils;
 let data = {
   dogs: [],
 };
@@ -38,6 +40,7 @@ describe('Migration - required attribute', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
     await modelsUtils.createContentTypes([dogModel]);
 
     for (const dog of dogs) {
@@ -75,11 +78,12 @@ describe('Migration - required attribute', () => {
 
     test('Cannot create an entry with null after migration', async () => {
       // remove null values otherwise the migration would fail
-
+      const lockUid = await lockUtils.getLockUid('application::dog.dog', data.dogs[0].id);
       const { body } = await rq({
         method: 'PUT',
         url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
         body: { name: 'Nelson' },
+        qs: { uid: lockUid },
       });
       data.dogs[0] = body;
 

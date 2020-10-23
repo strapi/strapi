@@ -4,8 +4,10 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 let uid = 'application::single-type-model.single-type-model';
 
@@ -15,6 +17,7 @@ describe('Content Manager single types', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentType({
       kind: 'singleType',
@@ -57,12 +60,14 @@ describe('Content Manager single types', () => {
   });
 
   test('Create content', async () => {
+    const lockUid = await lockUtils.getLockUid(uid, null, true);
     const res = await rq({
       url: `/content-manager/single-types/${uid}`,
       method: 'PUT',
       body: {
         title: 'Title',
       },
+      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);

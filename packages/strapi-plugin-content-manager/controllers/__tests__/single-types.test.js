@@ -102,6 +102,7 @@ describe('Single Types', () => {
 
     const createFn = jest.fn(() => ({}));
     const sendTelemetry = jest.fn(() => ({}));
+    const validateAndExtendLock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -130,16 +131,13 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve();
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
-              },
+              assocCreatorRoles: entity => entity,
               create: createFn,
             },
             'permission-checker': {
-              create() {
-                return permissionChecker;
-              },
+              create: () => permissionChecker,
             },
+            'editing-lock': { validateAndExtendLock },
           },
         },
       },
@@ -211,6 +209,7 @@ describe('Single Types', () => {
     };
 
     const deleteFn = jest.fn(() => ({}));
+    const validateAndExtendLock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -249,6 +248,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'editing-lock': { validateAndExtendLock },
           },
         },
       },
@@ -304,6 +304,7 @@ describe('Single Types', () => {
     };
 
     const publishFn = jest.fn(() => ({}));
+    const validateAndExtendLock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -342,6 +343,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'editing-lock': { validateAndExtendLock },
           },
         },
       },
@@ -397,6 +399,7 @@ describe('Single Types', () => {
     };
 
     const unpublishFn = jest.fn(() => ({}));
+    const validateAndExtendLock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -435,6 +438,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'editing-lock': { validateAndExtendLock },
           },
         },
       },

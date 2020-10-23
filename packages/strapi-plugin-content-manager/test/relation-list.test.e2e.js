@@ -7,9 +7,11 @@ const _ = require('lodash');
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
+let lockUtils;
 let data = {
   products: [],
   shops: [],
@@ -96,27 +98,31 @@ async function createFixtures({ publishAProduct = false } = {}) {
   }
 
   if (publishAProduct) {
+    const lockUid = await lockUtils.getLockUid('application::product.product', data.products[0].id);
     const res = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/application::product.product/${data.products[0].id}/actions/publish`,
+      qs: { uid: lockUid },
     });
     data.products[0] = res.body;
   }
 }
 
 async function deleteFixtures() {
-  for (let shop of data.shops) {
-    await rq({
-      method: 'DELETE',
-      url: `/content-manager/collection-types/application::shop.shop/${shop.id}`,
-    });
-  }
-  for (let product of data.products) {
-    await rq({
-      method: 'DELETE',
-      url: `/content-manager/collection-types/application::product.product/${product.id}`,
-    });
-  }
+  await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/application::shop.shop/actions/bulkDelete',
+    body: {
+      ids: data.shops.map(({ id }) => id),
+    },
+  });
+  await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/application::product.product/actions/bulkDelete',
+    body: {
+      ids: data.products.map(({ id }) => id),
+    },
+  });
 }
 
 describe('Relation-list route', () => {
@@ -125,6 +131,7 @@ describe('Relation-list route', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
   }, 60000);
 
   describe('without draftAndPublish', () => {

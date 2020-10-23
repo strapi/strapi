@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type integer', () => {
@@ -13,6 +15,7 @@ describe('Test type integer', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withinteger', 'integer');
   }, 60000);
@@ -77,12 +80,14 @@ describe('Test type integer', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid('application::withinteger.withinteger', res.body.id);
     const updatedRes = await rq.put(
       `/content-manager/collection-types/application::withinteger.withinteger/${res.body.id}`,
       {
         body: {
           field: 543,
         },
+        qs: { uid: lockUid },
       }
     );
 

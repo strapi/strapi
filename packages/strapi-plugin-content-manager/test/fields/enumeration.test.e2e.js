@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type enumeration', () => {
@@ -13,6 +15,7 @@ describe('Test type enumeration', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withenumeration', 'enumeration', {
       enum: ['one', 'two'],
@@ -62,12 +65,17 @@ describe('Test type enumeration', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid(
+      'application::withenumeration.withenumeration',
+      res.body.id
+    );
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withenumeration.withenumeration/${res.body.id}`,
       {
         body: {
           field: 'one',
         },
+        qs: { uid: lockUid },
       }
     );
 

@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type decimal', () => {
@@ -13,6 +15,7 @@ describe('Test type decimal', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withdecimal', 'decimal');
   }, 60000);
@@ -78,12 +81,14 @@ describe('Test type decimal', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid('application::withdecimal.withdecimal', res.body.id);
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withdecimal.withdecimal/${res.body.id}`,
       {
         body: {
           field: 14,
         },
+        qs: { uid: lockUid },
       }
     );
 

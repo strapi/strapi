@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 const defaultBody = {
@@ -44,12 +46,14 @@ describe.each([
   ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
   const hasPagination = path.includes('/content-manager');
+  const hasLock = path.includes('/content-manager');
 
   beforeAll(async () => {
     const token = await registerAndLogin();
     const authRq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq: authRq });
+    lockUtils = createLockUtils({ rq: authRq });
 
     await modelsUtils.createComponent({
       name: 'simple-compo',
@@ -245,10 +249,18 @@ describe.each([
       expect(createRes.statusCode).toBe(200);
       const entryId = createRes.body.id;
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withdynamiczone.withdynamiczone',
+          entryId
+        );
+      }
       const res = await rq.put(`/${entryId}`, {
         body: {
           field: [],
         },
+        qs,
       });
 
       expect(res.statusCode).toBe(200);
@@ -262,8 +274,16 @@ describe.each([
       expect(createRes.statusCode).toBe(200);
       const entryId = createRes.body.id;
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withdynamiczone.withdynamiczone',
+          entryId
+        );
+      }
       const res = await rq.put(`/${entryId}`, {
         body: defaultBody,
+        qs,
       });
 
       expect(res.statusCode).toBe(200);
@@ -293,6 +313,13 @@ describe.each([
       expect(createRes.statusCode).toBe(200);
       const entryId = createRes.body.id;
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withdynamiczone.withdynamiczone',
+          entryId
+        );
+      }
       const res = await rq.put(`/${entryId}`, {
         body: {
           field: [
@@ -306,6 +333,7 @@ describe.each([
             },
           ],
         },
+        qs,
       });
 
       expect(res.statusCode).toBe(200);
@@ -372,7 +400,14 @@ describe.each([
       expect(createRes.statusCode).toBe(200);
       const entryId = createRes.body.id;
 
-      const res = await rq.delete(`/${entryId}`);
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withdynamiczone.withdynamiczone',
+          entryId
+        );
+      }
+      const res = await rq.delete(`/${entryId}`, { qs });
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.field)).toBe(true);

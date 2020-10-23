@@ -253,6 +253,102 @@
           ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model/:id/actions/lock",
+      "handler": "EditingLock.lock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/single-types/:model/actions/lock",
+      "handler": "EditingLock.lock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model/:id/actions/extend-lock",
+      "handler": "EditingLock.extendLock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/single-types/:model/actions/extend-lock",
+      "handler": "EditingLock.extendLock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model/:id/actions/unlock",
+      "handler": "EditingLock.unlock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/single-types/:model/actions/unlock",
+      "handler": "EditingLock.unlock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/collection-types/:model/:id/actions/lock",
+      "handler": "EditingLock.getLock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/single-types/:model/actions/lock",
+      "handler": "EditingLock.getLock",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
     }
   ]
 }

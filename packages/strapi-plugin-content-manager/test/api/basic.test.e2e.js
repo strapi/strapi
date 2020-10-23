@@ -4,9 +4,11 @@ const _ = require('lodash');
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
+let lockUtils;
 let data = {
   products: [],
 };
@@ -35,6 +37,8 @@ describe('CM API - Basic', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
+
     await modelsUtils.createContentTypes([product]);
   }, 60000);
 
@@ -84,10 +88,12 @@ describe('CM API - Basic', () => {
       name: 'Product 1 updated',
       description: 'Updated Product description',
     };
+    const lockUid = await lockUtils.getLockUid('application::product.product', data.products[0].id);
     const res = await rq({
       method: 'PUT',
       url: `/content-manager/collection-types/application::product.product/${data.products[0].id}`,
       body: product,
+      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);
@@ -98,9 +104,11 @@ describe('CM API - Basic', () => {
   });
 
   test('Delete product', async () => {
+    const lockUid = await lockUtils.getLockUid('application::product.product', data.products[0].id);
     const res = await rq({
       method: 'DELETE',
       url: `/content-manager/collection-types/application::product.product/${data.products[0].id}`,
+      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);

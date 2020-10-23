@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type email', () => {
@@ -13,6 +15,7 @@ describe('Test type email', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withemail', 'email');
   }, 60000);
@@ -90,12 +93,14 @@ describe('Test type email', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid('application::withemail.withemail', res.body.id);
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withemail.withemail/${res.body.id}`,
       {
         body: {
           field: 'new-email@email.fr',
         },
+        qs: { uid: lockUid },
       }
     );
 

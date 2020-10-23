@@ -1,5 +1,8 @@
 'use strict';
 
+// required first because it loads env files.
+const loadConfiguration = require('./core/app-configuration'); // eslint-disable-line import/order
+
 const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');
@@ -10,7 +13,6 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
-const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
@@ -22,6 +24,7 @@ const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
+const { lockModel, createLockService } = require('./services/lock');
 const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
@@ -305,6 +308,7 @@ class Strapi {
     });
 
     // Init core store
+    this.models['strapi_locks'] = lockModel(this.config);
     this.models['core_store'] = coreStoreModel(this.config);
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
@@ -321,6 +325,8 @@ class Strapi {
     await this.startWebhooks();
 
     this.entityValidator = entityValidator;
+
+    this.lockService = createLockService({ db: this.db });
 
     this.entityService = createEntityService({
       db: this.db,

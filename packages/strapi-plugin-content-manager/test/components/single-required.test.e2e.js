@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe.each([
@@ -12,12 +14,14 @@ describe.each([
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and required component', (_, path) => {
   const hasPagination = path.includes('/content-manager');
+  const hasLock = path.includes('/content-manager');
 
   beforeAll(async () => {
     const token = await registerAndLogin();
     const authRq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq: authRq });
+    lockUtils = createLockUtils({ rq: authRq });
 
     await modelsUtils.createComponent({
       name: 'somecomponent',
@@ -156,10 +160,18 @@ describe.each([
           },
         });
 
+        const qs = {};
+        if (hasLock) {
+          qs.uid = await lockUtils.getLockUid(
+            'application::withcomponent.withcomponent',
+            res.body.id
+          );
+        }
         const updateRes = await rq.put(`/${res.body.id}`, {
           body: {
             field: value,
           },
+          qs,
         });
 
         expect(updateRes.statusCode).toBe(400);
@@ -184,8 +196,16 @@ describe.each([
         },
       });
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withcomponent.withcomponent',
+          res.body.id
+        );
+      }
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {},
+        qs,
       });
 
       expect(updateRes.statusCode).toBe(200);
@@ -212,10 +232,18 @@ describe.each([
         },
       });
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withcomponent.withcomponent',
+          res.body.id
+        );
+      }
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
           field: null,
         },
+        qs,
       });
 
       expect(updateRes.statusCode).toBe(400);
@@ -235,12 +263,20 @@ describe.each([
         },
       });
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withcomponent.withcomponent',
+          res.body.id
+        );
+      }
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
           field: {
             name: 'new String',
           },
         },
+        qs,
       });
 
       expect(updateRes.statusCode).toBe(200);
@@ -272,6 +308,13 @@ describe.each([
         },
       });
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withcomponent.withcomponent',
+          res.body.id
+        );
+      }
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
           field: {
@@ -279,6 +322,7 @@ describe.each([
             name: 'new String',
           },
         },
+        qs,
       });
 
       expect(updateRes.statusCode).toBe(400);
@@ -293,6 +337,13 @@ describe.each([
         },
       });
 
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withcomponent.withcomponent',
+          res.body.id
+        );
+      }
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
           field: {
@@ -300,6 +351,7 @@ describe.each([
             name: 'new String',
           },
         },
+        qs,
       });
 
       const expectedResult = {
@@ -330,7 +382,14 @@ describe.each([
         },
       });
 
-      const deleteRes = await rq.delete(`/${res.body.id}`);
+      const qs = {};
+      if (hasLock) {
+        qs.uid = await lockUtils.getLockUid(
+          'application::withcomponent.withcomponent',
+          res.body.id
+        );
+      }
+      const deleteRes = await rq.delete(`/${res.body.id}`, { qs });
 
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.body).toMatchObject(res.body);

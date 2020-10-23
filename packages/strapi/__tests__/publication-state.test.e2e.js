@@ -3,9 +3,11 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
+let lockUtils;
 let data = {
   raw: {
     products: [
@@ -157,9 +159,11 @@ const createFixtures = async () => {
       let res = await rq({ method: 'POST', url: `/${name}`, body });
 
       if (!rawItem.published) {
+        const lockUid = await lockUtils.getLockUid(uid, res.body.id);
         await rq({
           method: 'POST',
           url: `/content-manager/collection-types/${uid}/${res.body.id}/actions/unpublish`,
+          qs: { uid: lockUid },
         });
       }
 
@@ -173,6 +177,7 @@ describe('Publication State', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentType(country);
     await modelsUtils.createComponent(comp);

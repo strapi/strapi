@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type float', () => {
@@ -13,6 +15,7 @@ describe('Test type float', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withfloat', 'float');
   }, 60000);
@@ -76,12 +79,14 @@ describe('Test type float', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid('application::withfloat.withfloat', res.body.id);
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withfloat.withfloat/${res.body.id}`,
       {
         body: {
           field: 14,
         },
+        qs: { uid: lockUid },
       }
     );
 

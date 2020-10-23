@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type string', () => {
@@ -13,6 +15,7 @@ describe('Test type string', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withstring', 'string');
   }, 60000);
@@ -58,10 +61,12 @@ describe('Test type string', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid('application::withstring.withstring', res.body.id);
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withstring.withstring/${res.body.id}`,
       {
         body: { field: 'Updated string' },
+        qs: { uid: lockUid },
       }
     );
     expect(updateRes.statusCode).toBe(200);

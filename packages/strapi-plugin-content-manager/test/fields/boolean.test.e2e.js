@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type boolean', () => {
@@ -13,6 +15,7 @@ describe('Test type boolean', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withboolean', 'boolean');
   }, 60000);
@@ -94,12 +97,14 @@ describe('Test type boolean', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid('application::withboolean.withboolean', res.body.id);
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withboolean.withboolean/${res.body.id}`,
       {
         body: {
           field: false,
         },
+        qs: { uid: lockUid },
       }
     );
 

@@ -3,8 +3,10 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
+let lockUtils;
 let rq;
 
 describe('Test type richtext', () => {
@@ -13,6 +15,7 @@ describe('Test type richtext', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withrichtext', 'richtext');
   }, 60000);
@@ -58,10 +61,15 @@ describe('Test type richtext', () => {
       }
     );
 
+    const lockUid = await lockUtils.getLockUid(
+      'application::withrichtext.withrichtext',
+      res.body.id
+    );
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withrichtext.withrichtext/${res.body.id}`,
       {
         body: { field: 'Updated \nstring' },
+        qs: { uid: lockUid },
       }
     );
     expect(updateRes.statusCode).toBe(200);

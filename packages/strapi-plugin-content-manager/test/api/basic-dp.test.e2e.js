@@ -5,9 +5,11 @@ const _ = require('lodash');
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
+let lockUtils;
 let data = {
   productsWithDP: [],
 };
@@ -52,6 +54,8 @@ describe('CM API - Basic + draftAndPublish', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
+    lockUtils = createLockUtils({ rq });
+
     await modelsUtils.createComponent(compo);
     await modelsUtils.createContentTypes([productWithDP]);
   }, 60000);
@@ -132,10 +136,15 @@ describe('CM API - Basic + draftAndPublish', () => {
       name: 'Product 1 updated',
       description: 'Updated Product description',
     };
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      data.productsWithDP[0].id
+    );
     const res = await rq({
       method: 'PUT',
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       body: product,
+      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);
@@ -151,10 +160,15 @@ describe('CM API - Basic + draftAndPublish', () => {
       description: 'Updated Product description',
       published_at: '2020-08-27T09:50:50.465Z',
     };
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      data.productsWithDP[0].id
+    );
     const res = await rq({
       method: 'PUT',
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       body: product,
+      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);
@@ -167,9 +181,14 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Publish a product, expect published_at to be defined', async () => {
     const entry = data.productsWithDP[0];
 
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      entry.id
+    );
     let { body } = await rq({
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
+      qs: { uid: lockUid },
     });
 
     data.productsWithDP[0] = body;
@@ -180,9 +199,14 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Publish article1, expect article1 to be already published', async () => {
     const entry = data.productsWithDP[0];
 
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      entry.id
+    );
     let { body } = await rq({
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
+      qs: { uid: lockUid },
     });
 
     expect(body.statusCode).toBe(400);
@@ -192,9 +216,14 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Unpublish article1, expect article1 to be set to null', async () => {
     const entry = data.productsWithDP[0];
 
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      entry.id
+    );
     let { body } = await rq({
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
+      qs: { uid: lockUid },
     });
 
     data.productsWithDP[0] = body;
@@ -205,9 +234,14 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Unpublish article1, expect article1 to already be a draft', async () => {
     const entry = data.productsWithDP[0];
 
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      entry.id
+    );
     let { body } = await rq({
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
+      qs: { uid: lockUid },
     });
 
     expect(body.statusCode).toBe(400);
@@ -215,9 +249,14 @@ describe('CM API - Basic + draftAndPublish', () => {
   });
 
   test('Delete a draft', async () => {
+    const lockUid = await lockUtils.getLockUid(
+      'application::product-with-dp.product-with-dp',
+      data.productsWithDP[0].id
+    );
     const res = await rq({
       method: 'DELETE',
       url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);
