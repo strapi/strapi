@@ -79,7 +79,11 @@ module.exports = {
         throw new Error(
           `The collection \`${_.upperFirst(
             attribute.collection
-          )}\` is missing from the ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''} models`
+          )}\`, used in the attribute \`${attributeName}\` in the model ${_.upperFirst(
+            modelName
+          )}, is missing from the${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
+          } models`
         );
       }
       const relatedAttribute = models[attribute.collection].attributes[attribute.via];
@@ -88,7 +92,7 @@ module.exports = {
         throw new Error(
           `The attribute \`${attribute.via}\` is missing in the model ${_.upperFirst(
             attribute.collection
-          )} ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''}`
+          )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
         );
       }
 
@@ -110,14 +114,39 @@ module.exports = {
         types.other = 'model';
       } else if (_.has(relatedAttribute, 'collection') || _.has(relatedAttribute, 'model')) {
         types.other = 'morphTo';
+      } else {
+        throw new Error(
+          `The attribute \`${
+            attribute.via
+          }\` is not correctly configured in the model ${_.upperFirst(attribute.collection)}${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
+          }`
+        );
       }
     } else if (_.has(attribute, 'via') && _.has(attribute, 'model')) {
       types.current = 'modelD';
 
       // We have to find if they are a model linked to this attributeName
-      const model = models[attribute.model];
+      if (!_.has(models, attribute.model)) {
+        throw new Error(
+          `The model \`${_.upperFirst(
+            attribute.model
+          )}\`, used in the attribute \`${attributeName}\` in the model ${_.upperFirst(
+            modelName
+          )}, is missing from the${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
+          } models`
+        );
+      }
+      const reverseAttribute = models[attribute.model].attributes[attribute.via];
 
-      const reverseAttribute = model.attributes[attribute.via];
+      if (!reverseAttribute) {
+        throw new Error(
+          `The attribute \`${attribute.via}\` is missing in the model ${_.upperFirst(
+            attribute.model
+          )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
+        );
+      }
 
       if (
         _.has(reverseAttribute, 'via') &&
@@ -130,6 +159,14 @@ module.exports = {
         types.other = 'model';
       } else if (_.has(reverseAttribute, 'collection') || _.has(reverseAttribute, 'model')) {
         types.other = 'morphTo';
+      } else {
+        throw new Error(
+          `The attribute \`${
+            attribute.via
+          }\` is not correctly configured in the model ${_.upperFirst(attribute.model)}${
+            attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''
+          }`
+        );
       }
     } else if (_.has(attribute, 'model')) {
       types.current = 'model';
@@ -173,6 +210,12 @@ module.exports = {
           }
         });
       });
+    } else {
+      throw new Error(
+        `The attribute \`${attributeName}\` is not correctly configured in the model ${_.upperFirst(
+          modelName
+        )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
+      );
     }
 
     if (types.current === 'collection' && types.other === 'morphTo') {
