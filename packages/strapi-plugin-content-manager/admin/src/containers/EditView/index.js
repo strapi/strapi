@@ -84,7 +84,7 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                 if (isDynamicZone(block)) {
                   const {
                     0: {
-                      0: { name, fieldSchema },
+                      0: { name, fieldSchema, metadatas },
                     },
                   } = block;
 
@@ -92,8 +92,8 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                     <DynamicZone
                       key={blockIndex}
                       name={name}
-                      max={fieldSchema.max}
-                      min={fieldSchema.min}
+                      fieldSchema={fieldSchema}
+                      metadatas={metadatas}
                     />
                   );
                 }

@@ -24,8 +24,6 @@ import Wrapper from './Wrapper';
 /* eslint-disable react/no-array-index-key */
 
 const DynamicZone = ({
-  max,
-  min,
   name,
 
   // Passed with the select function
@@ -34,15 +32,19 @@ const DynamicZone = ({
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
-  layout,
   moveComponentUp,
   moveComponentDown,
   removeComponentFromDynamicZone,
   dynamicDisplayedComponents,
+
+  fieldSchema,
+  metadatas,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const { components } = useEditView();
+
+  // We cannot use the default props here
+  const { max = Infinity, min = -Infinity } = fieldSchema;
 
   const getDynamicComponentSchemaData = useCallback(
     componentUid => {
@@ -73,12 +75,8 @@ const DynamicZone = ({
       .map(key => formErrors[key]);
   }, [formErrors, name]);
 
-  const dynamicZoneAvailableComponents = useMemo(
-    () => get(layout, ['schema', 'attributes', name, 'components'], []),
-    [layout, name]
-  );
+  const dynamicZoneAvailableComponents = useMemo(() => fieldSchema.components || [], [fieldSchema]);
 
-  const metas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
   const missingComponentNumber = min - dynamicDisplayedComponentsLength;
   const hasError = dynamicZoneErrors.length > 0;
@@ -89,18 +87,20 @@ const DynamicZone = ({
   const hasMaxError =
     hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
 
+  // TODO
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <BaselineAlignement>
-        <NotAllowedInput label={metas.label} spacerHeight="3px" />
+        <NotAllowedInput label={metadatas.label} spacerHeight="3px" />
       </BaselineAlignement>
     );
   }
 
+  // TODO
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
       <BaselineAlignement>
-        <NotAllowedInput label={metas.label} spacerHeight="3px" />
+        <NotAllowedInput label={metadatas.label} spacerHeight="3px" />
       </BaselineAlignement>
     );
   }
@@ -109,8 +109,8 @@ const DynamicZone = ({
     <DynamicZoneWrapper>
       {dynamicDisplayedComponentsLength > 0 && (
         <Label>
-          <p>{metas.label}</p>
-          <p>{metas.description}</p>
+          <p>{metadatas.label}</p>
+          <p>{metadatas.description}</p>
         </Label>
       )}
 
@@ -198,7 +198,7 @@ const DynamicZone = ({
           <div className="info">
             <FormattedMessage
               id={`${pluginId}.components.DynamicZone.add-compo`}
-              values={{ componentName: name }}
+              values={{ componentName: metadatas.label }}
             />
           </div>
           <ComponentsPicker isOpen={isOpen}>
@@ -237,22 +237,33 @@ const DynamicZone = ({
 
 DynamicZone.defaultProps = {
   dynamicDisplayedComponents: [],
-  max: Infinity,
-  min: -Infinity,
+  fieldSchema: {
+    max: Infinity,
+    min: -Infinity,
+  },
 };
 
 DynamicZone.propTypes = {
   addComponentToDynamicZone: PropTypes.func.isRequired,
   dynamicDisplayedComponents: PropTypes.array,
+  fieldSchema: PropTypes.shape({
+    components: PropTypes.array.isRequired,
+    max: PropTypes.number,
+    min: PropTypes.number,
+  }),
   formErrors: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isFieldReadable: PropTypes.bool.isRequired,
-  layout: PropTypes.object.isRequired,
+  metadatas: PropTypes.shape({
+    description: PropTypes.string,
+    // editable: PropTypes.bool,
+    label: PropTypes.string,
+    // placeholder: PropTypes.string,
+    // visible: PropTypes.bool,
+  }).isRequired,
   moveComponentUp: PropTypes.func.isRequired,
   moveComponentDown: PropTypes.func.isRequired,
-  max: PropTypes.number,
-  min: PropTypes.number,
   name: PropTypes.string.isRequired,
   removeComponentFromDynamicZone: PropTypes.func.isRequired,
 };
