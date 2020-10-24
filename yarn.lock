@@ -9632,10 +9632,10 @@ immediate@~3.0.5:
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
   integrity sha1-nbHb0Pr43m++D13V5Wu2BigN5ps=
 
-immer@^7.0.8:
-  version "7.0.9"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-7.0.9.tgz#28e7552c21d39dd76feccd2b800b7bc86ee4a62e"
-  integrity sha512-Vs/gxoM4DqNAYR7pugIxi0Xc8XAun/uy7AQu4fLLqaTBHxjOP9pJ266Q9MWA/ly4z6rAFZbvViOtihxUZ7O28A==
+immer@^7.0.14:
+  version "7.0.14"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-7.0.14.tgz#3e605f8584b15a9520d2f2f3fda9441cc9170d25"
+  integrity sha512-BxCs6pJwhgSEUEOZjywW7OA8DXVzfHjkBelSEl0A+nEu0+zS4cFVdNOONvt55N4WOm8Pu4xqSPYxhm1Lv2iBBA==
 
 immutable@^3.8.2:
   version "3.8.2"
