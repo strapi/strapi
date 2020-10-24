@@ -5,7 +5,9 @@
       "path": "/reserved-names",
       "handler": "Builder.getReservedNames",
       "config": {
-        "policies": []
+        "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -13,7 +15,9 @@
       "path": "/connections",
       "handler": "Connections.getConnections",
       "config": {
-        "policies": []
+        "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -21,7 +25,9 @@
       "path": "/content-types",
       "handler": "ContentTypes.getContentTypes",
       "config": {
-        "policies": []
+        "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -29,7 +35,9 @@
       "path": "/content-types/:uid",
       "handler": "ContentTypes.getContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -37,7 +45,9 @@
       "path": "/content-types",
       "handler": "ContentTypes.createContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -45,7 +55,9 @@
       "path": "/content-types/:uid",
       "handler": "ContentTypes.updateContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -53,7 +65,9 @@
       "path": "/content-types/:uid",
       "handler": "ContentTypes.deleteContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -61,7 +75,9 @@
       "path": "/components",
       "handler": "Components.getComponents",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -69,7 +85,9 @@
       "path": "/components/:uid",
       "handler": "Components.getComponent",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -77,7 +95,9 @@
       "path": "/components",
       "handler": "Components.createComponent",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -85,7 +105,9 @@
       "path": "/components/:uid",
       "handler": "Components.updateComponent",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -93,7 +115,9 @@
       "path": "/components/:uid",
       "handler": "Components.deleteComponent",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -101,7 +125,9 @@
       "path": "/component-categories/:name",
       "handler": "ComponentCategories.editCategory",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
@@ -109,7 +135,9 @@
       "path": "/component-categories/:name",
       "handler": "ComponentCategories.deleteCategory",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     }
   ]

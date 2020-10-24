@@ -168,11 +168,11 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: {
+              assignPermissions,
               findOne: findOneRole,
               getSuperAdmin: jest.fn(() => undefined),
             },
             permission: {
-              assign: assignPermissions,
               conditionProvider: {
                 getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
