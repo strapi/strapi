@@ -260,6 +260,7 @@ module.exports = {
 };
 ```
 
-::: tip
-A route handler can only access the controllers defined in the `./api/**/controllers` folders.
+::: tips
+- A route handler can only access the controllers defined in the `./api/**/controllers` folders.
+- You must set permisions ([7. Set Roles and Permissions](https://strapi.io/documentation/v3.x/getting-started/quick-start.html#_7-set-roles-and-permissions)) for new routes before they are accessible to the client.
 :::
