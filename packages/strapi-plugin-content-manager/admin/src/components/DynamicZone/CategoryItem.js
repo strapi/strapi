@@ -24,7 +24,7 @@ const CategoryItem = ({
   return (
     <>
       <Banner onClickToggle={onClickToggle} isFirst={isFirst} isOpen={isOpen} category={category} />
-      <Collapse isOpen={isOpen} style={{ backgroundColor: '#F3F3F3' }} onExited={handleExited}>
+      <Collapse isOpen={isOpen} onExited={handleExited}>
         {showComponents && (
           <div
             className="componentsList"
