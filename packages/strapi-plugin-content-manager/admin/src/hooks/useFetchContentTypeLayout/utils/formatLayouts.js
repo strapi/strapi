@@ -25,14 +25,12 @@ const generateRelationQueryInfos = (obj, fieldName) => {
   const endPoint = `/${pluginId}/explorer/${uid}/relation-list/${fieldName}`;
   const mainField = get(obj, ['metadatas', fieldName, 'edit', 'mainField'], '');
 
-  const queryInfo = {
+  const queryInfos = {
     endPoint,
-    defaultParams: {
-      [`${mainField}_contains`]: null,
-    },
+    containsKey: `${mainField}_contains`,
   };
 
-  return queryInfo;
+  return queryInfos;
 };
 
 // editRelations is an array of strings...
@@ -42,14 +40,14 @@ const formatEditRelationsLayoutWithMetas = obj => {
     const metadatas = get(obj, ['metadatas', current, 'edit'], {});
     const size = 6;
 
-    const queryInfo = generateRelationQueryInfos(obj, current);
+    const queryInfos = generateRelationQueryInfos(obj, current);
 
     acc.push({
       name: current,
       size,
       fieldSchema,
       metadatas,
-      queryInfo,
+      queryInfos,
     });
 
     return acc;

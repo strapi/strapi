@@ -1,13 +1,27 @@
-import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+  // useRef,
+  memo,
+} from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
+import {
+  // cloneDeep,
+  findIndex,
+  get,
+  isArray,
+  isEmpty,
+  set,
+} from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-import { getFieldName } from '../../utils';
+// import { getFieldName } from '../../utils';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -30,22 +44,15 @@ function SelectWrapper({
   mainField,
   name,
   relationType,
-  slug,
+  // slug,
   targetModel,
   placeholder,
   //
-  // queryInfos,
+  queryInfos,
 }) {
   // Disable the input in case of a polymorphic relation
-  const isMorph = relationType.toLowerCase().includes('morph');
+  const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
-
-  // This is needed for making requests when used in a component
-  const fieldName = useMemo(() => {
-    const fieldNameArray = getFieldName(name);
-
-    return fieldNameArray[fieldNameArray.length - 1];
-  }, [name]);
 
   const { pathname } = useLocation();
 
@@ -57,10 +64,6 @@ function SelectWrapper({
   });
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const abortController = new AbortController();
-  const { signal } = abortController;
-  const ref = useRef();
-  const startRef = useRef();
 
   const filteredOptions = useMemo(() => {
     return options.filter(option => {
@@ -78,88 +81,69 @@ function SelectWrapper({
     });
   }, [options, value]);
 
-  startRef.current = state._start;
+  const endPoint = useMemo(() => queryInfos.endPoint, [queryInfos]);
+  const containsKey = useMemo(() => queryInfos.containsKey, [queryInfos]);
 
-  ref.current = async () => {
-    if (isMorph) {
-      setIsLoading(false);
+  const getData = useCallback(
+    async signal => {
+      // Currently polymorphic relations are not handled
+      if (isMorph) {
+        setIsLoading(false);
 
-      return;
-    }
+        return;
+      }
 
-    try {
-      const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
+      if (!isFieldAllowed) {
+        setIsLoading(false);
 
-      const containsKey = `${mainField}_contains`;
-      const { _contains, ...restState } = cloneDeep(state);
-      const params = isEmpty(state._contains)
-        ? restState
-        : { [containsKey]: _contains, ...restState };
+        return;
+      }
+
+      const { _limit, _start } = state;
+      const params = { _limit, _start };
+
+      if (state._contains) {
+        params[containsKey] = state._contains;
+      }
 
       if (componentUid) {
         set(params, '_component', componentUid);
       }
 
-      const data = await request(requestUrl, {
-        method: 'GET',
-        params,
-        signal,
-      });
+      try {
+        const data = await request(endPoint, { method: 'GET', params, signal });
 
-      const formattedData = data.map(obj => {
-        return { value: obj, label: obj[mainField] };
-      });
+        const formattedData = data.map(obj => {
+          return { value: obj, label: obj[mainField] };
+        });
 
-      setOptions(prevState =>
-        prevState.concat(formattedData).filter((obj, index) => {
-          const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
+        setOptions(prevState =>
+          prevState.concat(formattedData).filter((obj, index) => {
+            const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
 
-          if (objIndex === -1) {
-            return true;
-          }
+            if (objIndex === -1) {
+              return true;
+            }
 
-          return prevState.findIndex(el => el.value.id === obj.value.id) === index;
-        })
-      );
-      setIsLoading(false);
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
+            return prevState.findIndex(el => el.value.id === obj.value.id) === index;
+          })
+        );
+        setIsLoading(false);
+      } catch (err) {
+        // Silent
       }
-    }
-  };
+    },
+    [componentUid, containsKey, endPoint, isFieldAllowed, isMorph, mainField, state]
+  );
 
   useEffect(() => {
-    if (state._contains !== '') {
-      let timer = setTimeout(() => {
-        ref.current();
-      }, 300);
+    const abortController = new AbortController();
+    const { signal } = abortController;
 
-      return () => clearTimeout(timer);
-    }
+    getData(signal);
 
-    if (isFieldAllowed) {
-      ref.current();
-    } else {
-      setIsLoading(false);
-    }
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state._contains, isFieldAllowed]);
-
-  useEffect(() => {
-    if (state._start !== 0) {
-      ref.current();
-    }
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state._start]);
+    return () => abortController.abort();
+  }, [getData]);
 
   const onInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
@@ -309,8 +293,12 @@ SelectWrapper.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
-  slug: PropTypes.string.isRequired,
+  // slug: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
+  queryInfos: PropTypes.exact({
+    endPoint: PropTypes.string.isRequired,
+    containsKey: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 const Memoized = memo(SelectWrapper);

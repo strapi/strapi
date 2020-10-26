@@ -8,7 +8,7 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, t
     isCreatingEntry,
     createActionAllowedFields,
     readActionAllowedFields,
-    slug,
+    // slug,
     updateActionAllowedFields,
   } = useDataManager();
   const { models } = useEditView();
@@ -50,7 +50,7 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, t
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,
-    slug,
+    // slug,
   };
 }
 
