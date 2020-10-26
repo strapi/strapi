@@ -94,12 +94,25 @@ rm -rf build
 ```
 
 Build the administration panel:
+:::: tabs
+
+::: tab yarn
 
 ```bash
 yarn build
-# or
+```
+
+:::
+
+::: tab npm
+
+```bash
 npm run build
 ```
+
+:::
+
+::::
 
 ::: tip
 If the operation doesn't work, you should probably remove the `.cache` folder too.
