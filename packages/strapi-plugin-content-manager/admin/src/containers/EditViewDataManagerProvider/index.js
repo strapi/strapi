@@ -14,11 +14,10 @@ import {
   request,
   useGlobalContext,
   useUser,
-  useUserPermissions,
   OverlayBlocker,
 } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import { generatePermissionsObject, getTrad } from '../../utils';
+import { getTrad } from '../../utils';
 import pluginId from '../../pluginId';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -36,11 +35,13 @@ const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
+  allowedActions: { canCreate, canRead, canUpdate },
   children,
   isSingleType,
   redirectToPreviousPage,
   slug,
 }) => {
+  // return null;
   const { id } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { state } = useLocation();
@@ -59,7 +60,9 @@ const EditViewDataManagerProvider = ({
     modifiedDZName,
     shouldCheckErrors,
   } = reducerState.toJS();
-  const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
+
+  const isCreatingEntry = id === 'create';
+  const [isCreatingEntryState, setIsCreatingEntry] = useState(id === 'create');
   const [status, setStatus] = useState('resolved');
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
   const hasDraftAndPublish = useMemo(() => {
@@ -72,6 +75,8 @@ const EditViewDataManagerProvider = ({
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
+
+  // TODO this could be removed and done in the dynamic zone component
   // This is used for the readonly mode when updating an entry
   const allDynamicZoneFields = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
@@ -86,17 +91,6 @@ const EditViewDataManagerProvider = ({
   const { emitEvent, formatMessage } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
   const userPermissions = useUser();
-  const generatedPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-
-  const permissionsToApply = useMemo(() => {
-    const fieldsToPick = isCreatingEntry ? ['create'] : ['read', 'update'];
-
-    return pick(generatedPermissions, fieldsToPick);
-  }, [isCreatingEntry, generatedPermissions]);
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate, canRead, canUpdate },
-  } = useUserPermissions(permissionsToApply);
 
   const {
     createActionAllowedFields,
@@ -107,7 +101,7 @@ const EditViewDataManagerProvider = ({
   }, [userPermissions, slug]);
 
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
-    if (isLoadingForPermissions || isLoading) {
+    if (isLoading) {
       return false;
     }
 
@@ -120,10 +114,10 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoadingForPermissions, isCreatingEntry, canCreate, isLoading]);
+  }, [isCreatingEntry, canCreate, isLoading]);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (isLoadingForPermissions || isLoading) {
+    if (isLoading) {
       return false;
     }
 
@@ -136,7 +130,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoadingForPermissions, isLoading, isCreatingEntry, canRead, canUpdate]);
+  }, [isLoading, isCreatingEntry, canRead, canUpdate]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -144,6 +138,8 @@ const EditViewDataManagerProvider = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldCheckErrors]);
+
+  // TODO effect to reset the props
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
@@ -157,62 +153,20 @@ const EditViewDataManagerProvider = ({
     }
   }, [shouldRedirectToHomepageWhenCreatingEntry]);
 
+  // Reset all props when changing from one ct to another
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await request(getRequestUrl(`${slug}/${id || ''}`), {
-          method: 'GET',
-          signal,
-        });
+    console.log('slug');
+    dispatch({ type: 'RESET_PROPS' });
+  }, [slug]);
 
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data: removePasswordFieldsFromData(
-            data,
-            allLayoutData.contentType,
-            allLayoutData.components
-          ),
-        });
-      } catch (err) {
-        console.log(err);
-        const resStatus = get(err, 'response.status', null);
+  // Reset all props when navigating from one entry to another in the same ct
+  useEffect(() => {
+    console.log('id');
+    dispatch({ type: 'RESET_FORM' });
+  }, [id]);
 
-        // The record does not exists
-        // Redirect the user to the previous page
-        if (id && resStatus === 404) {
-          push(from);
-
-          return;
-        }
-
-        if (id && resStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
-
-          push(from);
-
-          return;
-        }
-
-        if (id && err.code !== 20) {
-          strapi.notification.error(`${pluginId}.error.record.fetch`);
-        }
-
-        // Create a single type
-        if (!id && resStatus === 404) {
-          setIsCreatingEntry(true);
-
-          return;
-        }
-
-        // Not allowed to update or read a ST
-        if (!id && resStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
-
-          push(from);
-        }
-      }
-    };
-
+  // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
+  useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       acc[current] = createDefaultForm(
         get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
@@ -227,31 +181,75 @@ const EditViewDataManagerProvider = ({
       allLayoutData.components
     );
 
-    if (!isLoadingForPermissions) {
-      // Force state to be cleared when navigation from one entry to another
-      dispatch({ type: 'RESET_PROPS' });
-      dispatch({
-        type: 'SET_DEFAULT_DATA_STRUCTURES',
-        componentsDataStructure,
-        contentTypeDataStructure,
-      });
+    console.log('initialize');
+    dispatch({
+      type: 'SET_DEFAULT_DATA_STRUCTURES',
+      componentsDataStructure,
+      contentTypeDataStructure,
+    });
+  }, [allLayoutData, currentContentTypeLayout.schema.attributes]);
 
-      if (!isCreatingEntry) {
-        fetchData();
-      } else {
-        // Will create default form
+  useEffect(() => {
+    if (isCreatingEntry) {
+      dispatch({ type: 'INITIALIZE_FORM' });
+    }
+  }, [isCreatingEntry]);
+
+  const fetchURL = useMemo(() => {
+    if (isCreatingEntry) {
+      return null;
+    }
+
+    return getRequestUrl(`${slug}/${id}`);
+  }, [slug, id, isCreatingEntry]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    const getData = async signal => {
+      dispatch({ type: 'GET_DATA' });
+
+      try {
+        const data = await request(fetchURL, { method: 'GET', signal });
+
         dispatch({
-          type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
-          contentTypeDataStructure,
+          type: 'GET_DATA_SUCCEEDED',
+          data: removePasswordFieldsFromData(
+            data,
+            allLayoutData.contentType,
+            allLayoutData.components
+          ),
         });
+      } catch (err) {
+        console.error(err);
+        const resStatus = get(err, 'response.status', null);
+
+        if (resStatus === 404) {
+          push(from);
+
+          return;
+        }
+
+        // Not allowed to read a document
+        if (resStatus === 403) {
+          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+
+          push(from);
+        }
       }
+    };
+
+    if (fetchURL) {
+      console.log('will fetch');
+      getData(signal);
     }
 
     return () => {
+      console.log('end fetch');
       abortController.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isLoadingForPermissions]);
+  }, [fetchURL, allLayoutData, push, from]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('didAddComponentToDynamicZone');
@@ -825,6 +823,7 @@ EditViewDataManagerProvider.defaultProps = {
 
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
+  allowedActions: PropTypes.object.isRequired,
   children: PropTypes.node.isRequired,
   isSingleType: PropTypes.bool.isRequired,
   redirectToPreviousPage: PropTypes.func,

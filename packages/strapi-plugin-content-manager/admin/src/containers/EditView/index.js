@@ -35,7 +35,9 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
   const { goBack } = useHistory();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-  const { allowedActions } = useUserPermissions(viewPermissions);
+  const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
+    viewPermissions
+  );
 
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);
 
@@ -61,6 +63,10 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
     return <LoadingIndicatorPage />;
   }
 
+  if (isLoadingForPermissions) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <EditViewProvider
       allowedActions={allowedActions}
@@ -72,6 +78,8 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
     >
       <ContentTypeLayoutContext.Provider value={layout}>
         <EditViewDataManagerProvider
+          allowedActions={allowedActions}
+          //
           allLayoutData={layout}
           redirectToPreviousPage={goBack}
           isSingleType={false}

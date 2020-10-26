@@ -17,7 +17,8 @@
   "attributes": {
     "postal_coder": {
       "type": "string",
-      "minLength": 3
+      "minLength": 3,
+      "default": "test"
     },
     "categories": {
       "collection": "category",
@@ -55,7 +56,9 @@
     "dish": {
       "type": "component",
       "repeatable": true,
-      "component": "default.dish"
+      "component": "default.dish",
+      "required": true,
+      "min": 1
     },
     "test": {
       "collection": "category"
@@ -66,6 +69,9 @@
         "un",
         "deux"
       ]
+    },
+    "address": {
+      "model": "address"
     }
   }
 }

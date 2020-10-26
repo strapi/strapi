@@ -76,11 +76,20 @@ const reducer = (state, action) => {
 
         return fromJS([el]);
       });
+    case 'GET_DATA': {
+      return state.update('isLoading', () => true);
+    }
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
+    case 'INITIALIZE_FORM': {
+      return state
+        .update('isLoading', () => false)
+        .update('initialData', () => state.get('contentTypeDataStructure'))
+        .update('modifiedData', () => state.get('contentTypeDataStructure'));
+    }
     case 'MOVE_COMPONENT_FIELD':
       return state.updateIn(['modifiedData', ...action.pathToComponent], list => {
         return list
@@ -189,6 +198,14 @@ const reducer = (state, action) => {
 
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
+    case 'RESET_FORM': {
+      return state
+        .update('formErrors', () => fromJS({}))
+        .update('initialData', () => state.get('contentTypeDataStructure'))
+        .update('modifiedData', () => state.get('contentTypeDataStructure'))
+        .update('shouldCheckErrors', () => false)
+        .update('modifiedDzName', () => null);
+    }
     case 'RESET_DATA':
       return state
         .update('modifiedData', () => state.get('initialData'))
