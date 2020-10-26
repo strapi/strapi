@@ -59,12 +59,25 @@ For example moving from `3.0.4` to `3.0.5`
 ::::
 
 Install the specified version:
+:::: tabs
+
+::: tab yarn
 
 ```bash
 yarn install
-# or
+```
+
+:::
+
+::: tab npm
+
+```bash
 npm install
 ```
+
+:::
+
+::::
 
 ::: tip
 If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. If it still does not work, let's run the hard mode `rm -Rf node_modules`
