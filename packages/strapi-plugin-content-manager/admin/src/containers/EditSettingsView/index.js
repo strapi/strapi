@@ -41,7 +41,6 @@ const EditSettingsView = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  console.log({ type });
 
   const fieldsReorderClassName = type === 'content-types' ? 'col-8' : 'col-12';
   const abortController = new AbortController();
