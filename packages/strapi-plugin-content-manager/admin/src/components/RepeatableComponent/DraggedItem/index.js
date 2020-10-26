@@ -19,7 +19,6 @@ import { connect, select } from './utils';
 
 const DraggedItem = ({
   componentFieldName,
-  componentUid,
   doesPreviousFieldContainErrorsAndIsOpen,
   hasErrors,
   hasMinError,
@@ -201,10 +200,9 @@ const DraggedItem = ({
                         <div key={name} className={`col-${size}`}>
                           <Inputs
                             autoFocus={false}
-                            componentUid={componentUid}
+                            fieldSchema={fieldSchema}
                             keys={keys}
-                            layout={schema}
-                            name={name}
+                            metadatas={metadatas}
                             onBlur={hasErrors ? checkFormErrors : null}
                             queryInfos={queryInfos}
                           />
@@ -233,7 +231,6 @@ DraggedItem.defaultProps = {
 
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
-  componentUid: PropTypes.string.isRequired,
   doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
   hasErrors: PropTypes.bool,
   hasMinError: PropTypes.bool,

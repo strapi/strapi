@@ -45,8 +45,8 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, name }) => {
                 <div key={fieldName} className={`col-${size}`}>
                   <Inputs
                     keys={keys}
-                    layout={componentLayoutData}
-                    name={fieldName}
+                    fieldSchema={fieldSchema}
+                    metadatas={metadatas}
                     componentUid={componentUid}
                     queryInfos={queryInfos}
                   />
