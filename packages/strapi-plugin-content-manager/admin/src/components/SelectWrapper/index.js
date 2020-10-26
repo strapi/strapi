@@ -15,7 +15,7 @@ import {
   get,
   isArray,
   isEmpty,
-  set,
+  // set,
 } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
@@ -33,7 +33,7 @@ import { A, BaselineAlignment } from './components';
 import { connect, select, styles } from './utils';
 
 function SelectWrapper({
-  componentUid,
+  // componentUid,
   description,
   displayNavigationLink,
   editable,
@@ -83,6 +83,7 @@ function SelectWrapper({
 
   const endPoint = useMemo(() => queryInfos.endPoint, [queryInfos]);
   const containsKey = useMemo(() => queryInfos.containsKey, [queryInfos]);
+  const defaultParams = useMemo(() => queryInfos.defaultParams, [queryInfos]);
 
   const getData = useCallback(
     async signal => {
@@ -99,15 +100,10 @@ function SelectWrapper({
         return;
       }
 
-      const { _limit, _start } = state;
-      const params = { _limit, _start };
+      const params = { _limit: state._limit, _start: state._start, ...defaultParams };
 
       if (state._contains) {
         params[containsKey] = state._contains;
-      }
-
-      if (componentUid) {
-        set(params, '_component', componentUid);
       }
 
       try {
@@ -133,10 +129,22 @@ function SelectWrapper({
         // Silent
       }
     },
-    [componentUid, containsKey, endPoint, isFieldAllowed, isMorph, mainField, state]
+
+    [
+      containsKey,
+      defaultParams,
+      endPoint,
+      isFieldAllowed,
+      isMorph,
+      mainField,
+      state._limit,
+      state._start,
+      state._contains,
+    ]
   );
 
   useEffect(() => {
+    console.log('ooo');
     const abortController = new AbortController();
     const { signal } = abortController;
 
@@ -272,7 +280,7 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
-  componentUid: null,
+  // componentUid: null,
   editable: true,
   description: '',
   label: '',
@@ -281,7 +289,7 @@ SelectWrapper.defaultProps = {
 };
 
 SelectWrapper.propTypes = {
-  componentUid: PropTypes.string,
+  // componentUid: PropTypes.string,
   displayNavigationLink: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   description: PropTypes.string,
@@ -296,8 +304,9 @@ SelectWrapper.propTypes = {
   // slug: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.exact({
-    endPoint: PropTypes.string.isRequired,
     containsKey: PropTypes.string.isRequired,
+    defaultParams: PropTypes.object,
+    endPoint: PropTypes.string.isRequired,
   }).isRequired,
 };
 

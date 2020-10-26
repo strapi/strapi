@@ -41,6 +41,7 @@ const EditSettingsView = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  console.log({ type });
 
   const fieldsReorderClassName = type === 'content-types' ? 'col-8' : 'col-12';
   const abortController = new AbortController();
@@ -91,7 +92,13 @@ const EditSettingsView = ({
     const displayedFields = getEditLayout().reduce((acc, curr) => [...acc, ...curr.rowContent], []);
 
     return Object.keys(attributes)
-      .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
+      .filter(attr => {
+        if (type === 'components') {
+          return true;
+        }
+
+        return get(attributes, [attr, 'type'], '') !== 'relation';
+      })
       .filter(attr => get(metadatas, [attr, 'edit', 'visible'], false) === true)
       .filter(attr => {
         return displayedFields.findIndex(el => el.name === attr) === -1;

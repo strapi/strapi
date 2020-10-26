@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+
 import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -138,9 +138,6 @@ const DraggedItem = ({
     preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
-  const getField = fieldName => get(schema, ['schema', 'attributes', fieldName], {});
-  const getMeta = fieldName => get(schema, ['metadatas', fieldName, 'edit'], {});
-
   // Create the refs
   // We need 1 for the drop target
   // 1 for the drag target
@@ -148,6 +145,8 @@ const DraggedItem = ({
     dragRef: drag(dragRef),
     dropRef: drop(dropRef),
   };
+
+  console.log({ fields });
 
   return (
     <>
@@ -179,38 +178,37 @@ const DraggedItem = ({
               fields.map((fieldRow, key) => {
                 return (
                   <div className="row" key={key}>
-                    {fieldRow.map(field => {
-                      const currentField = getField(field.name);
-                      const isComponent = get(currentField, 'type', '') === 'component';
-                      const keys = `${componentFieldName}.${field.name}`;
+                    {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
+                      const isComponent = fieldSchema.type === 'component';
+                      const keys = `${componentFieldName}.${name}`;
 
                       if (isComponent) {
-                        const componentUid = currentField.component;
-                        const metas = getMeta(field.name);
+                        const componentUid = fieldSchema.component;
 
                         return (
                           <FieldComponent
                             componentUid={componentUid}
-                            isRepeatable={currentField.repeatable}
-                            key={field.name}
-                            label={metas.label}
+                            isRepeatable={fieldSchema.repeatable}
+                            key={name}
+                            label={metadatas.label}
                             isNested
                             name={keys}
-                            max={currentField.max}
-                            min={currentField.min}
+                            max={fieldSchema.max}
+                            min={fieldSchema.min}
                           />
                         );
                       }
 
                       return (
-                        <div key={field.name} className={`col-${field.size}`}>
+                        <div key={name} className={`col-${size}`}>
                           <Inputs
                             autoFocus={false}
                             componentUid={componentUid}
                             keys={keys}
                             layout={schema}
-                            name={field.name}
+                            name={name}
                             onBlur={hasErrors ? checkFormErrors : null}
+                            queryInfos={queryInfos}
                           />
                         </div>
                       );

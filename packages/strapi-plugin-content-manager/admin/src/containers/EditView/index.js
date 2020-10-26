@@ -61,6 +61,8 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
     return <LoadingIndicatorPage />;
   }
 
+  console.log({ layout });
+
   return (
     <EditViewProvider
       allowedActions={allowedActions}

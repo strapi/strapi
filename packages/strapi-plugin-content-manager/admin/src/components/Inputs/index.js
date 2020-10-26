@@ -68,7 +68,7 @@ const validationsToOmit = [
 function Inputs({
   allowedFields,
   autoFocus,
-  componentUid,
+  // componentUid,
   currentContentTypeLayout,
   isCreatingEntry,
   keys,
@@ -79,6 +79,7 @@ function Inputs({
   onChange,
   readableFields,
   shouldNotRunValidations,
+  queryInfos,
   value,
 }) {
   const {
@@ -241,13 +242,14 @@ function Inputs({
       <div key={keys}>
         <SelectWrapper
           {...metadatas}
-          componentUid={componentUid}
+          // componentUid={componentUid}
           isUserAllowedToEditField={isUserAllowedToEditField}
           isUserAllowedToReadField={isUserAllowedToReadField}
           name={keys}
           plugin={attribute.plugin}
           relationType={attribute.relationType}
           targetModel={attribute.targetModel}
+          queryInfos={queryInfos}
           value={value}
         />
       </div>
@@ -311,6 +313,7 @@ Inputs.defaultProps = {
   componentUid: null,
   formErrors: {},
   onBlur: null,
+  queryInfos: {},
   value: null,
 };
 
@@ -328,6 +331,11 @@ Inputs.propTypes = {
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
   shouldNotRunValidations: PropTypes.bool.isRequired,
+  queryInfos: PropTypes.shape({
+    containsKey: PropTypes.string,
+    defaultParams: PropTypes.object,
+    endPoint: PropTypes.string,
+  }),
   value: PropTypes.any,
 };
 
