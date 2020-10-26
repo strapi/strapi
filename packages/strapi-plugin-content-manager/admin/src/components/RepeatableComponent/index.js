@@ -1,11 +1,12 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useReducer } from 'react';
+import React, { memo, useMemo, useReducer } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
+import { useContentTypeLayout } from '../../hooks';
 import ItemTypes from '../../utils/ItemTypes';
 import connect from './utils/connect';
 import select from './utils/select';
@@ -21,15 +22,18 @@ const RepeatableComponent = ({
   componentUid,
   componentValue,
   componentValueLength,
-  fields,
   isNested,
   isReadOnly,
   max,
   min,
   name,
-  schema,
 }) => {
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
+  const { getComponentLayout } = useContentTypeLayout();
+  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
+    componentUid,
+    getComponentLayout,
+  ]);
 
   const componentErrorKeys = Object.keys(formErrors)
     .filter(errorKey => {
@@ -82,7 +86,7 @@ const RepeatableComponent = ({
 
             return (
               <DraggedItem
-                fields={fields}
+                // fields={fields}
                 componentFieldName={componentFieldName}
                 componentUid={componentUid}
                 doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
@@ -110,7 +114,7 @@ const RepeatableComponent = ({
                   });
                 }}
                 parentName={name}
-                schema={schema}
+                schema={componentLayoutData}
                 toggleCollapses={toggleCollapses}
               />
             );
@@ -163,7 +167,6 @@ const RepeatableComponent = ({
 RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
-  fields: [],
   formErrors: {},
   isNested: false,
   max: Infinity,
@@ -175,14 +178,12 @@ RepeatableComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
-  fields: PropTypes.array,
   formErrors: PropTypes.object,
   isNested: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
-  schema: PropTypes.object.isRequired,
 };
 
 const Memoized = memo(RepeatableComponent);

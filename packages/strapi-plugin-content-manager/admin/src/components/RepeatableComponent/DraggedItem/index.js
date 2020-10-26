@@ -1,7 +1,6 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-
 import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -22,7 +21,6 @@ const DraggedItem = ({
   componentFieldName,
   componentUid,
   doesPreviousFieldContainErrorsAndIsOpen,
-  fields,
   hasErrors,
   hasMinError,
   isFirst,
@@ -44,6 +42,8 @@ const DraggedItem = ({
   const dragRef = useRef(null);
   const dropRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
+
+  const fields = schema.layouts.edit;
 
   useEffect(() => {
     if (isOpen) {
@@ -146,8 +146,6 @@ const DraggedItem = ({
     dropRef: drop(dropRef),
   };
 
-  console.log({ fields });
-
   return (
     <>
       <Banner
@@ -225,7 +223,6 @@ const DraggedItem = ({
 
 DraggedItem.defaultProps = {
   doesPreviousFieldContainErrorsAndIsOpen: false,
-  fields: [],
   hasErrors: false,
   hasMinError: false,
   isFirst: false,
@@ -238,7 +235,6 @@ DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
   componentUid: PropTypes.string.isRequired,
   doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
-  fields: PropTypes.array,
   hasErrors: PropTypes.bool,
   hasMinError: PropTypes.bool,
   isFirst: PropTypes.bool,

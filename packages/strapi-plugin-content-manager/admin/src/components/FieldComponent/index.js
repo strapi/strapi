@@ -1,12 +1,13 @@
 /* eslint-disable  import/no-cycle */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEqual from 'react-fast-compare';
 import pluginId from '../../pluginId';
-import useEditView from '../../hooks/useEditView';
+// import useEditView from '../../hooks/useEditView';
+import { useContentTypeLayout } from '../../hooks';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import NotAllowedInput from '../NotAllowedInput';
@@ -37,13 +38,16 @@ const FieldComponent = ({
   componentValue,
   removeComponentFromField,
 }) => {
-  const { allLayoutData } = useEditView();
+  const { getComponentLayout } = useContentTypeLayout();
 
   const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
-  const currentComponentSchema = get(allLayoutData, ['components', componentUid], {});
+
+  const currentComponentSchema = useMemo(() => {
+    return getComponentLayout(componentUid);
+  }, [componentUid, getComponentLayout]);
 
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
 

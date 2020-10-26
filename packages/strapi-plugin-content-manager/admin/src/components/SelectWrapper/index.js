@@ -144,7 +144,6 @@ function SelectWrapper({
   );
 
   useEffect(() => {
-    console.log('ooo');
     const abortController = new AbortController();
     const { signal } = abortController;
 

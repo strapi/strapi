@@ -15,6 +15,7 @@ function useSelect({ schema, componentFieldName }) {
   const displayedValue = toString(
     get(modifiedData, [...componentFieldName.split('.'), mainField], '')
   );
+  console.log({ mainField });
 
   return {
     displayedValue,
@@ -22,6 +23,7 @@ function useSelect({ schema, componentFieldName }) {
     checkFormErrors,
     moveComponentField,
     removeRepeatableField,
+    schema,
     triggerFormValidation,
   };
 }
