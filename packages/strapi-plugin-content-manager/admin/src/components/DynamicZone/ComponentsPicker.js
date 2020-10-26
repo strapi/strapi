@@ -21,6 +21,10 @@ const ComponentsPicker = styled.div`
     display: flex;
     flex-wrap: wrap;
   }
+
+  .categoriesList {
+    padding-bottom: 4px;
+  }
 `;
 
 export default ComponentsPicker;
