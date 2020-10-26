@@ -62,9 +62,11 @@ const EditViewDataManagerProvider = ({
   } = reducerState.toJS();
 
   const isCreatingEntry = id === 'create';
+  // TODO: remove logic
   const [isCreatingEntryState, setIsCreatingEntry] = useState(id === 'create');
   const [status, setStatus] = useState('resolved');
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+
   const hasDraftAndPublish = useMemo(() => {
     return get(currentContentTypeLayout, ['schema', 'options', 'draftAndPublish'], false);
   }, [currentContentTypeLayout]);
@@ -72,6 +74,8 @@ const EditViewDataManagerProvider = ({
   const shouldNotRunValidations = useMemo(() => {
     return hasDraftAndPublish && !initialData.published_at;
   }, [hasDraftAndPublish, initialData.published_at]);
+
+  // TODO: remove
   const {
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
@@ -138,8 +142,6 @@ const EditViewDataManagerProvider = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldCheckErrors]);
-
-  // TODO effect to reset the props
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
@@ -252,14 +254,14 @@ const EditViewDataManagerProvider = ({
   }, [fetchURL, allLayoutData, push, from]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
-    emitEvent('didAddComponentToDynamicZone');
+    emitEventRef.current('didAddComponentToDynamicZone');
+
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
       keys: keys.split('.'),
       componentUid,
       shouldCheckErrors,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addNonRepeatableComponentToField = useCallback((keys, componentUid) => {
@@ -290,6 +292,7 @@ const EditViewDataManagerProvider = ({
     []
   );
 
+  // TODO: switch to useCallback
   const checkFormErrors = async (dataToSet = {}) => {
     const schema = createYupSchema(
       currentContentTypeLayout,
@@ -369,6 +372,7 @@ const EditViewDataManagerProvider = ({
     []
   );
 
+  // TODO split the PUT and POST logic
   const handleSubmit = async e => {
     e.preventDefault();
     const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
@@ -628,22 +632,22 @@ const EditViewDataManagerProvider = ({
 
   const moveComponentDown = useCallback(
     (dynamicZoneName, currentIndex) => {
-      emitEvent('changeComponentsOrder');
+      emitEventRef.current('changeComponentsOrder');
+
       dispatch({
         type: 'MOVE_COMPONENT_DOWN',
         dynamicZoneName,
         currentIndex,
         shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [shouldCheckDZErrors]
   );
 
   const moveComponentUp = useCallback(
     (dynamicZoneName, currentIndex) => {
-      emitEvent('changeComponentsOrder');
+      emitEventRef.current('changeComponentsOrder');
+
       dispatch({
         type: 'MOVE_COMPONENT_UP',
         dynamicZoneName,
@@ -651,7 +655,6 @@ const EditViewDataManagerProvider = ({
         shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [shouldCheckDZErrors]
   );
 
@@ -680,17 +683,20 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const removeComponentFromDynamicZone = useCallback((dynamicZoneName, index) => {
-    emitEvent('removeComponentFromDynamicZone');
+  const removeComponentFromDynamicZone = useCallback(
+    (dynamicZoneName, index) => {
+      emitEventRef.current('removeComponentFromDynamicZone');
 
-    dispatch({
-      type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
-      dynamicZoneName,
-      index,
-      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      dispatch({
+        type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+        dynamicZoneName,
+        index,
+        shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      });
+    },
+    [shouldCheckDZErrors]
+  );
+
   const removeComponentFromField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_FIELD',
@@ -707,18 +713,21 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  // TODO: same here I am not sure this is needed anymore
   const deleteSuccess = () => {
     dispatch({
       type: 'DELETE_SUCCEEDED',
     });
   };
 
+  // TODO: I am not sure this is needed anymore
   const resetData = () => {
     dispatch({
       type: 'RESET_DATA',
     });
   };
 
+  // TODO
   const clearData = useCallback(() => {
     if (isSingleType) {
       setIsCreatingEntry(true);
