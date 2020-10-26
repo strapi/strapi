@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
 import Banner from './Banner';
+import ComponentsList from './ComponentsList';
 import DynamicComponentCard from '../DynamicComponentCard';
 
 const CategoryItem = ({
@@ -26,10 +27,7 @@ const CategoryItem = ({
       <Banner onClickToggle={onClickToggle} isFirst={isFirst} isOpen={isOpen} category={category} />
       <Collapse isOpen={isOpen} onExited={handleExited}>
         {showComponents && (
-          <div
-            className="componentsList"
-            style={{ paddingTop: '10px', paddingLeft: '15px', paddingRight: '15px' }}
-          >
+          <ComponentsList className="componentsList">
             {components.map(component => {
               const {
                 info: { icon, name: friendlyName },
@@ -48,7 +46,7 @@ const CategoryItem = ({
                 />
               );
             })}
-          </div>
+          </ComponentsList>
         )}
       </Collapse>
     </>
