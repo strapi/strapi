@@ -19,14 +19,12 @@ const CategoryItem = ({
     }
   }, [isOpen]);
 
+  const handleExited = () => setShowComponents(false);
+
   return (
     <>
       <Banner onClickToggle={onClickToggle} isFirst={isFirst} isOpen={isOpen} category={category} />
-      <Collapse
-        isOpen={isOpen}
-        style={{ backgroundColor: '#F3F3F3' }}
-        onExited={() => setShowComponents(false)}
-      >
+      <Collapse isOpen={isOpen} style={{ backgroundColor: '#F3F3F3' }} onExited={handleExited}>
         {showComponents && (
           <div
             className="componentsList"
