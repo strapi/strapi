@@ -11,7 +11,7 @@ const ComponentsPicker = styled.div`
   }
 
   .componentPickerTitle {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: #919bae;
     font-weight: 600;
     font-size: 13px;
