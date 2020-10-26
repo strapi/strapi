@@ -16,7 +16,8 @@
   },
   "attributes": {
     "postal_coder": {
-      "type": "string"
+      "type": "string",
+      "minLength": 3
     },
     "categories": {
       "collection": "category",
@@ -58,6 +59,13 @@
     },
     "test": {
       "collection": "category"
+    },
+    "enum": {
+      "type": "enumeration",
+      "enum": [
+        "un",
+        "deux"
+      ]
     }
   }
 }

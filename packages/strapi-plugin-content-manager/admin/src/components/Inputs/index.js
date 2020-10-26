@@ -1,79 +1,31 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, omit, toLower, take } from 'lodash';
+import { get, omit, take } from 'lodash';
 import isEqual from 'react-fast-compare';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
+import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
-import { connect, select } from './utils';
-
-const getInputType = (type = '') => {
-  switch (toLower(type)) {
-    case 'boolean':
-      return 'bool';
-    case 'biginteger':
-      return 'text';
-    case 'decimal':
-    case 'float':
-    case 'integer':
-      return 'number';
-    case 'date':
-    case 'datetime':
-    case 'time':
-      return type;
-    case 'email':
-      return 'email';
-    case 'enumeration':
-      return 'select';
-    case 'password':
-      return 'password';
-    case 'string':
-      return 'text';
-    case 'text':
-      return 'textarea';
-    case 'media':
-    case 'file':
-    case 'files':
-      return 'media';
-    case 'json':
-      return 'json';
-    case 'wysiwyg':
-    case 'WYSIWYG':
-    case 'richtext':
-      return 'wysiwyg';
-    case 'uid':
-      return 'uid';
-    default:
-      return type || 'text';
-  }
-};
-
-const validationsToOmit = [
-  'type',
-  'model',
-  'via',
-  'collection',
-  'default',
-  'plugin',
-  'enum',
-  'regex',
-];
+import {
+  connect,
+  generateOptions,
+  getInputType,
+  getStep,
+  select,
+  VALIDATIONS_TO_OMIT,
+} from './utils';
 
 function Inputs({
   allowedFields,
   autoFocus,
-  // componentUid,
-  currentContentTypeLayout,
   isCreatingEntry,
   keys,
-  layout,
-  name,
   onBlur,
   formErrors,
   onChange,
@@ -81,24 +33,50 @@ function Inputs({
   shouldNotRunValidations,
   queryInfos,
   value,
+  fieldSchema,
+  metadatas,
 }) {
   const {
     strapi: { fieldApi },
   } = useStrapi();
+  const { contentType: currentContentTypeLayout } = useContentTypeLayout();
+  const { formatMessage } = useIntl();
 
-  const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
-  const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
-  const type = useMemo(() => get(attribute, 'type', null), [attribute]);
-  const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
-  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
+  const type = fieldSchema.type;
+
   const errorId = useMemo(() => {
-    return get(formErrors, [keys, 'id'], temporaryErrorIdUntilBuffetjsSupportsFormattedMessage);
+    return get(formErrors, [keys, 'id'], null);
   }, [formErrors, keys]);
+
+  const errorMessage = errorId ? formatMessage({ id: errorId, defaultMessage: errorId }) : null;
 
   const fieldName = useMemo(() => {
     return getFieldName(keys);
   }, [keys]);
+
+  const validations = useMemo(() => {
+    const inputValidations = omit(
+      fieldSchema,
+      shouldNotRunValidations
+        ? [...VALIDATIONS_TO_OMIT, 'required', 'minLength']
+        : VALIDATIONS_TO_OMIT
+    );
+
+    const regexpString = fieldSchema.regex || null;
+
+    if (regexpString) {
+      const regexp = new RegExp(regexpString);
+
+      if (regexp) {
+        inputValidations.regex = regexp;
+      }
+    }
+
+    return inputValidations;
+  }, [fieldSchema, shouldNotRunValidations]);
+
+  const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
 
   const isChildOfDynamicZone = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
@@ -106,16 +84,11 @@ function Inputs({
 
     return foundAttributeType === 'dynamiczone';
   }, [currentContentTypeLayout, fieldName]);
-  const validations = useMemo(() => {
-    return omit(
-      attribute,
-      shouldNotRunValidations ? [...validationsToOmit, 'required', 'minLength'] : validationsToOmit
-    );
-  }, [attribute, shouldNotRunValidations]);
-  const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
+
   const inputType = useMemo(() => {
     return getInputType(type);
   }, [type]);
+
   const inputValue = useMemo(() => {
     // Fix for input file multipe
     if (type === 'media' && !value) {
@@ -126,22 +99,8 @@ function Inputs({
   }, [type, value]);
 
   const step = useMemo(() => {
-    let step;
-
-    if (type === 'float' || type === 'decimal') {
-      step = 0.01;
-    } else if (type === 'time' || type === 'datetime') {
-      step = 30;
-    } else {
-      step = 1;
-    }
-
-    return step;
+    return getStep(type);
   }, [type]);
-
-  const isMultiple = useMemo(() => {
-    return get(attribute, 'multiple', false);
-  }, [attribute]);
 
   const isUserAllowedToEditField = useMemo(() => {
     const joinedName = fieldName.join('.');
@@ -205,27 +164,14 @@ function Inputs({
     return disabled;
   }, [disabled, isCreatingEntry, isUserAllowedToEditField, isUserAllowedToReadField]);
 
-  const options = useMemo(() => {
-    return get(attribute, 'enum', []).map(v => {
-      return (
-        <option key={v} value={v}>
-          {v}
-        </option>
-      );
-    });
-  }, [attribute]);
+  const options = useMemo(() => generateOptions(fieldSchema.enum || [], isRequired), [
+    fieldSchema,
+    isRequired,
+  ]);
 
   const otherFields = useMemo(() => {
     return fieldApi.getFields();
   }, [fieldApi]);
-
-  if (regexpString) {
-    const regexp = new RegExp(regexpString);
-
-    if (regexp) {
-      validations.regex = regexp;
-    }
-  }
 
   const { description, visible } = metadatas;
 
@@ -242,13 +188,10 @@ function Inputs({
       <div key={keys}>
         <SelectWrapper
           {...metadatas}
-          // componentUid={componentUid}
+          {...fieldSchema}
           isUserAllowedToEditField={isUserAllowedToEditField}
           isUserAllowedToReadField={isUserAllowedToReadField}
           name={keys}
-          plugin={attribute.plugin}
-          relationType={attribute.relationType}
-          targetModel={attribute.targetModel}
           queryInfos={queryInfos}
           value={value}
         />
@@ -256,61 +199,40 @@ function Inputs({
     );
   }
 
-  const enumOptions = [
-    <FormattedMessage id="components.InputSelect.option.placeholder" key="__enum_option_null">
-      {msg => (
-        <option disabled={isRequired} hidden={isRequired} value="">
-          {msg}
-        </option>
-      )}
-    </FormattedMessage>,
-    ...options,
-  ];
-
   return (
-    <FormattedMessage id={errorId} defaultMessage={errorId}>
-      {error => {
-        return (
-          <InputsIndex
-            {...metadatas}
-            autoComplete="new-password"
-            autoFocus={autoFocus}
-            disabled={shouldDisableField}
-            error={
-              isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
-                ? null
-                : error
-            }
-            inputDescription={description}
-            description={description}
-            contentTypeUID={layout.uid}
-            customInputs={{
-              json: InputJSONWithErrors,
-              wysiwyg: WysiwygWithErrors,
-              uid: InputUID,
-              ...otherFields,
-            }}
-            multiple={isMultiple}
-            attribute={attribute}
-            name={keys}
-            onBlur={onBlur}
-            onChange={onChange}
-            options={enumOptions}
-            step={step}
-            type={inputType}
-            validations={validations}
-            value={inputValue}
-            withDefaultValue={false}
-          />
-        );
+    <InputsIndex
+      {...metadatas}
+      autoComplete="new-password"
+      autoFocus={autoFocus}
+      disabled={shouldDisableField}
+      error={errorMessage}
+      inputDescription={description}
+      description={description}
+      contentTypeUID={currentContentTypeLayout.uid}
+      customInputs={{
+        json: InputJSONWithErrors,
+        wysiwyg: WysiwygWithErrors,
+        uid: InputUID,
+        ...otherFields,
       }}
-    </FormattedMessage>
+      multiple={fieldSchema.multiple || false}
+      attribute={fieldSchema}
+      name={keys}
+      onBlur={onBlur}
+      onChange={onChange}
+      options={options}
+      step={step}
+      type={inputType}
+      validations={validations}
+      value={inputValue}
+      withDefaultValue={false}
+    />
   );
 }
 
 Inputs.defaultProps = {
   autoFocus: false,
-  componentUid: null,
+
   formErrors: {},
   onBlur: null,
   queryInfos: {},
@@ -320,13 +242,11 @@ Inputs.defaultProps = {
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
   autoFocus: PropTypes.bool,
-  componentUid: PropTypes.string,
-  currentContentTypeLayout: PropTypes.object.isRequired,
+  fieldSchema: PropTypes.object.isRequired,
   keys: PropTypes.string.isRequired,
-  layout: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   formErrors: PropTypes.object,
-  name: PropTypes.string.isRequired,
+  metadatas: PropTypes.object.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,

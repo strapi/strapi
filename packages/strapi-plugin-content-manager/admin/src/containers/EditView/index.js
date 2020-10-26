@@ -108,7 +108,7 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                         return (
                           <div className="row" key={fieldsBlockIndex}>
                             {fieldsBlock.map(
-                              ({ name, size, fieldSchema, metadatas: { label } }, fieldIndex) => {
+                              ({ name, size, fieldSchema, metadatas }, fieldIndex) => {
                                 const isComponent = fieldSchema.type === 'component';
 
                                 if (isComponent) {
@@ -120,7 +120,7 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                                       key={componentUid}
                                       componentUid={component}
                                       isRepeatable={repeatable}
-                                      label={label}
+                                      label={metadatas.label}
                                       max={max}
                                       min={min}
                                       name={name}
@@ -136,9 +136,9 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                                         fieldsBlockIndex === 0 &&
                                         fieldIndex === 0
                                       }
+                                      fieldSchema={fieldSchema}
                                       keys={name}
-                                      layout={currentContentTypeLayoutData}
-                                      name={name}
+                                      metadatas={metadatas}
                                     />
                                   </div>
                                 );
