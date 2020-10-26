@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { get } from 'lodash';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { get, groupBy } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -42,7 +42,9 @@ const DynamicZone = ({
   dynamicDisplayedComponents,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [indexCategory, setIndexCategory] = useState(-1);
+
+  const [categoryToOpen, setCategoryToOpen] = useState('');
+
   const { components } = useEditView();
 
   const getDynamicComponent = useCallback(
@@ -88,40 +90,32 @@ const DynamicZone = ({
   );
 
   const dynamicComponentCategories = useMemo(() => {
-    const categories = dynamicZoneAvailableComponents.reduce((cats, componentUid) => {
+    const componentsWithInfos = dynamicZoneAvailableComponents.map(componentUid => {
       const {
         category,
         schema: { info },
       } = getDynamicComponent(componentUid);
 
-      if (!cats[category]) {
-        cats[category] = [];
-      }
-      cats[category].push({
-        componentUid,
-        info,
-      });
+      return { componentUid, category, info };
+    });
 
-      return cats;
-    }, {});
-
-    return Object.keys(categories)
-      .sort()
-      .reduce((cats, cat) => {
-        cats.push({
-          category: cat,
-          components: categories[cat],
-        });
-
-        return cats;
-      }, []);
+    return groupBy(componentsWithInfos, 'category');
   }, [dynamicZoneAvailableComponents, getDynamicComponent]);
 
-  useEffect(() => {
-    if (dynamicComponentCategories.length === 1) {
-      setIndexCategory(0);
-    }
-  }, [dynamicComponentCategories]);
+  // useEffect(() => {
+  //   if (dynamicComponentCategories.length === 1) {
+  //     setIndexCategory(0);
+  //   }
+  // }, [dynamicComponentCategories]);
+
+  const handleClickToggle = useCallback(
+    categoryName => {
+      const nextCategoryToOpen = categoryToOpen === categoryName ? '' : categoryName;
+
+      setCategoryToOpen(nextCategoryToOpen);
+    },
+    [categoryToOpen]
+  );
 
   const metas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
@@ -253,23 +247,21 @@ const DynamicZone = ({
                   <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
                 </p>
                 <div className="categoriesList">
-                  {dynamicComponentCategories.map(({ category, components }, index) => {
+                  {Object.keys(dynamicComponentCategories).map((categoryName, index) => {
+                    const components = dynamicComponentCategories[categoryName];
+
                     return (
                       <CategoryItem
-                        key={category}
-                        category={category}
+                        key={categoryName}
+                        category={categoryName}
                         components={components}
-                        isOpen={indexCategory === index}
+                        isOpen={categoryToOpen === categoryName}
                         isFirst={index === 0}
                         onClickToggle={() => {
-                          if (index === indexCategory) {
-                            setIndexCategory(-1);
-                          } else {
-                            setIndexCategory(index);
-                          }
+                          handleClickToggle(categoryName);
                         }}
                         onClickComponent={componentUid => {
-                          setIsOpen(false);
+                          setCategoryToOpen('');
                           const shouldCheckErrors = hasError;
                           addComponentToDynamicZone(name, componentUid, shouldCheckErrors);
                         }}
