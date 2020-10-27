@@ -73,7 +73,7 @@
     "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --runInBand --verbose --forceExit --detectOpenHandles",
     "test:generate-app": "node test/createTestApp.js",
     "test:start-app": "node test/startTestApp.js",
-    "doc:api": "node scripts/serve-package-oas.js"
+    "doc:api": "node scripts/open-api/serve.js"
   },
   "author": {
     "email": "hi@strapi.io",

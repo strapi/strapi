@@ -44,17 +44,14 @@ paths:
                         type: object
                       token:
                         type: string
+
   /content-manager/content-types:
     get:
       tags:
         - ContentTypes
       description: List content types
       parameters:
-        - in: query
-          name: kind
-          schema:
-            $ref: '#/components/parameters/kind'
-          description: The number of items to skip before starting to collect the result set
+        - $ref: '#/components/parameters/kind'
       responses:
         200:
           description: A list of content types
@@ -194,6 +191,80 @@ paths:
                   data:
                     $ref: '#/components/schemas/component-configuration'
 
+  /content-manager/uid/generate:
+    post:
+      tags:
+        - UID attribute utils
+      description: Generate a uid
+  /content-manager/uid/check-availability:
+    post:
+      tags:
+        - UID attribute utils
+      description: Check availability of a uid
+
+  /content-manager/relationships/{modelUid}/{targetField}:
+    get:
+      tags:
+        - Relational fields
+      description: Fetch list of possible related content
+
+  /content-manager/collection-type/{modelUid}:
+    get:
+      tags:
+        - Collection Types content management
+      description: Get a list of entries
+    post:
+      tags:
+        - Collection Types content management
+      description: Create an entry
+  /content-manager/collection-type/{modelUid}/actions/bulkDelete:
+    post:
+      tags:
+        - Collection Types content management
+      description: Bulk delete entries
+  /content-manager/collection-type/{modelUid}/{id}:
+    get:
+      tags:
+        - Collection Types content management
+      description: Get one entry
+    put:
+      tags:
+        - Collection Types content management
+      description: Update one entry
+    delete:
+      tags:
+        - Collection Types content management
+      description: Delete one entry
+  /content-manager/collection-type/{modelUid}/{id}/actions/publish:
+    post:
+      tags:
+        - Collection Types content management
+      description: Publish one entry
+  /content-manager/collection-type/{modelUid}/{id}/actions/unpublish:
+    post:
+      tags:
+        - Collection Types content management
+      description: Unpublish one entry
+
+  /content-manager/single-type/{modelUid}:
+    get:
+      tags:
+        - Single Types content management
+    put:
+      tags:
+        - Single Types content management
+    delete:
+      tags:
+        - Single Types content management
+  /content-manager/single-type/{modelUid}/actions/publish:
+    post:
+      tags:
+        - Single Types content management
+  /content-manager/single-type/{modelUid}/actions/unpublish:
+    post:
+      tags:
+        - Single Types content management
+
 components:
   schemas:
     contentType:
@@ -203,7 +274,7 @@ components:
           type: string
           description: Model uid
         kind:
-          $ref: '#/components/parameters/kind'
+          $ref: '#/components/schemas/kind'
         isDisplayed:
           type: boolean
         apiID:
@@ -332,6 +403,12 @@ components:
               type: boolean
         - $ref: '#/components/schemas/configuration'
 
+    kind:
+      type: string
+      enum:
+        - singleType
+        - collectionType
+
   examples:
     restaurant:
       uid: application::restaurant.restaurant
@@ -362,10 +439,11 @@ components:
 
   parameters:
     kind:
-      type: string
-      enum:
-        - singleType
-        - collectionType
+      in: query
+      name: kind
+      schema:
+        $ref: '#/components/schemas/kind'
+      description: The number of items to skip before starting to collect the result set
 
   securitySchemes:
     bearerAuth:

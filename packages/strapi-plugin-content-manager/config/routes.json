@@ -52,7 +52,7 @@
 
     {
       "method": "POST",
-      "path": "/explorer/uid/generate",
+      "path": "/uid/generate",
       "handler": "ContentManager.generateUID",
       "config": {
         "policies": []
@@ -60,7 +60,7 @@
     },
     {
       "method": "POST",
-      "path": "/explorer/uid/check-availability",
+      "path": "/uid/check-availability",
       "handler": "ContentManager.checkUIDAvailability",
       "config": {
         "policies": []
