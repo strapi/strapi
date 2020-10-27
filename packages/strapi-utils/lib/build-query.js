@@ -103,33 +103,40 @@ const hasDeepFilters = (whereClauses = [], { minDepth = 1 } = {}) => {
 };
 
 const normalizeClauses = (whereClauses, { model }) => {
-  return whereClauses
-    .filter(({ value }) => !_.isNil(value))
-    .map(({ field, operator, value }) => {
-      if (BOOLEAN_OPERATORS.includes(operator)) {
-        return {
-          field,
-          operator,
-          value: value.map(clauses => normalizeClauses(clauses, { model })),
-        };
-      }
-
-      const { model: assocModel, attribute } = getAssociationFromFieldKey({
-        model,
-        field,
-      });
-
-      const { type } = _.get(assocModel, ['allAttributes', attribute], {});
-
-      // cast value or array of values
-      const castedValue = castInput({ type, operator, value });
-
+  return whereClauses.map(({ field, operator, value }) => {
+    if (BOOLEAN_OPERATORS.includes(operator)) {
       return {
-        field: normalizeFieldName({ model, field }),
+        field,
         operator,
-        value: castedValue,
+        value: value.map(clauses => normalizeClauses(clauses, { model })),
       };
+    }
+
+    const { model: assocModel, attribute } = getAssociationFromFieldKey({
+      model,
+      field,
     });
+
+    if (_.isNil(value)) {
+      const err = new Error(
+        `Your filter contains the field '${field}' that has an undefined value.`
+      );
+
+      err.status = 400;
+      throw err;
+    }
+
+    const { type } = _.get(assocModel, ['allAttributes', attribute], {});
+
+    // cast value or array of values
+    const castedValue = castInput({ type, operator, value });
+
+    return {
+      field: normalizeFieldName({ model, field }),
+      operator,
+      value: castedValue,
+    };
+  });
 };
 
 /**
