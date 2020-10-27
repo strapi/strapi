@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil, propEq, mapValues } = require('lodash/fp');
+const { isNil, mapValues } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { getService } = require('../utils');
@@ -33,7 +33,7 @@ const service = {
   },
 
   findDisplayedContentTypes() {
-    return this.findAllContentTypes().filter(propEq(true, 'isDisplayed'));
+    return this.findAllContentTypes().filter(({ isDisplayed }) => isDisplayed === true);
   },
 
   findContentTypesByKind(kind = contentTypesUtils.constants.COLLECTION_TYPE) {

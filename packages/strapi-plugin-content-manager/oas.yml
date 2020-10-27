@@ -2,7 +2,16 @@ openapi: 3.0.2
 info:
   version: 1.0.0
   title: Strapi Content Manager API
-  description: This is nice
+  description: |
+    ## REST API Reference
+
+    This doc contains all the available routes in the content manager REST API.
+
+    ### Requirements
+
+    - An authenticated admin token that you can get using the login route
+    ---
+
 servers:
   - url: http://localhost:1337
     description: Local server
@@ -191,23 +200,89 @@ paths:
                   data:
                     $ref: '#/components/schemas/component-configuration'
 
+  # UID
   /content-manager/uid/generate:
     post:
       tags:
         - UID attribute utils
       description: Generate a uid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contentTypeUID
+                - field
+                - data
+              properties:
+                contentTypeUID:
+                  type: string
+                field:
+                  type: string
+                data:
+                  type: object
+                  description: Current value of the entry being created or edited
+      responses:
+        200:
+          description: A generated uid value
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: string
+
   /content-manager/uid/check-availability:
     post:
       tags:
         - UID attribute utils
       description: Check availability of a uid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contentTypeUID
+                - field
+                - data
+              properties:
+                contentTypeUID:
+                  type: string
+                field:
+                  type: string
+                value:
+                  type: string
+      responses:
+        200:
+          description: A generated uid value
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - isAvailable
+                properties:
+                  isAvailable:
+                    type: boolean
+                  suggestion:
+                    type: string
+                    description: Suggestion if request value is not available
 
+  # Relationships
   /content-manager/relationships/{modelUid}/{targetField}:
     get:
       tags:
         - Relational fields
       description: Fetch list of possible related content
 
+  # Collection type
   /content-manager/collection-type/{modelUid}:
     get:
       tags:
@@ -246,6 +321,7 @@ paths:
         - Collection Types content management
       description: Unpublish one entry
 
+  # Single type
   /content-manager/single-type/{modelUid}:
     get:
       tags:

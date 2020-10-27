@@ -53,7 +53,7 @@
     {
       "method": "POST",
       "path": "/uid/generate",
-      "handler": "ContentManager.generateUID",
+      "handler": "uid.generateUID",
       "config": {
         "policies": []
       }
@@ -61,11 +61,13 @@
     {
       "method": "POST",
       "path": "/uid/check-availability",
-      "handler": "ContentManager.checkUIDAvailability",
+      "handler": "uid.checkUIDAvailability",
       "config": {
         "policies": []
       }
     },
+
+
     {
       "method": "GET",
       "path": "/explorer/:model",

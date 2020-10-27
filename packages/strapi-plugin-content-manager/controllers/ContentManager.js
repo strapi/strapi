@@ -4,11 +4,6 @@ const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const parseMultipartBody = require('../utils/parse-multipart');
-const {
-  validateGenerateUIDInput,
-  validateCheckUIDAvailabilityInput,
-  validateUIDField,
-} = require('./validation');
 
 const {
   PUBLISHED_AT_ATTRIBUTE,
@@ -47,37 +42,6 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 };
 
 module.exports = {
-  async generateUID(ctx) {
-    const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
-
-    await validateUIDField(contentTypeUID, field);
-
-    const uidService = strapi.plugins['content-manager'].services.uid;
-
-    ctx.body = {
-      data: await uidService.generateUIDField({ contentTypeUID, field, data }),
-    };
-  },
-
-  async checkUIDAvailability(ctx) {
-    const { contentTypeUID, field, value } = await validateCheckUIDAvailabilityInput(
-      ctx.request.body
-    );
-
-    await validateUIDField(contentTypeUID, field);
-
-    const uidService = strapi.plugins['content-manager'].services.uid;
-
-    const isAvailable = await uidService.checkUIDAvailability({ contentTypeUID, field, value });
-
-    ctx.body = {
-      isAvailable,
-      suggestion: !isAvailable
-        ? await uidService.findUniqueUID({ contentTypeUID, field, value })
-        : null,
-    };
-  },
-
   /**
    * Returns a list of entities of a content-type matching the query parameters
    */
