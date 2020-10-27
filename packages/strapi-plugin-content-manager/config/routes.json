@@ -67,6 +67,24 @@
       }
     },
 
+    {
+      "method": "GET",
+      "path": "/relations/:model/:targetField",
+      "handler": "relations.find",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          [
+            "plugins::content-manager.hasPermissions",
+            [
+              "plugins::content-manager.explorer.create",
+              "plugins::content-manager.explorer.update"
+            ],
+            { "hasAtLeastOne": true }
+          ]
+        ]
+      }
+    },
 
     {
       "method": "GET",
@@ -100,25 +118,7 @@
         ]
       }
     },
-    {
-      "method": "GET",
-      "path": "/explorer/:model/relation-list/:targetField",
-      "handler": "ContentManager.findRelationList",
-      "config": {
-        "policies": [
-          "routing",
-          "admin::isAuthenticatedAdmin",
-          [
-            "plugins::content-manager.hasPermissions",
-            [
-              "plugins::content-manager.explorer.create",
-              "plugins::content-manager.explorer.update"
-            ],
-            { "hasAtLeastOne": true }
-          ]
-        ]
-      }
-    },
+
     {
       "method": "POST",
       "path": "/explorer/:model",

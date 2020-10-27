@@ -1,10 +1,10 @@
 'use strict';
 
 const createContext = require('../../../../test/helpers/create-context');
-const ContentManager = require('../ContentManager');
+const relations = require('../relations');
 
-describe('ContentManager', () => {
-  describe('findRelationList', () => {
+describe('Relations', () => {
+  describe('find', () => {
     test('Fails on model not found', async () => {
       const notFound = jest.fn();
       const ctx = createContext(
@@ -26,7 +26,7 @@ describe('ContentManager', () => {
         },
       };
 
-      await ContentManager.findRelationList(ctx);
+      await relations.find(ctx);
 
       expect(notFound).toHaveBeenCalledWith('model.notFound');
     });
@@ -55,7 +55,7 @@ describe('ContentManager', () => {
         },
       };
 
-      await ContentManager.findRelationList(ctx);
+      await relations.find(ctx);
 
       expect(badRequest).toHaveBeenCalledWith('targetField.invalid');
     });
@@ -84,7 +84,7 @@ describe('ContentManager', () => {
         },
       };
 
-      await ContentManager.findRelationList(ctx);
+      await relations.find(ctx);
 
       expect(notFound).toHaveBeenCalledWith('target.notFound');
     });
@@ -111,8 +111,8 @@ describe('ContentManager', () => {
         plugins: {
           'content-manager': {
             services: {
-              contenttypes: {
-                getConfiguration() {
+              'content-types': {
+                findConfiguration() {
                   return {
                     metadatas: {
                       target: {
@@ -145,7 +145,7 @@ describe('ContentManager', () => {
         },
       };
 
-      await ContentManager.findRelationList(ctx);
+      await relations.find(ctx);
 
       expect(ctx.body).toEqual([
         {

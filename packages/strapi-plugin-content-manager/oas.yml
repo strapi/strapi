@@ -276,14 +276,50 @@ paths:
                     description: Suggestion if request value is not available
 
   # Relationships
-  /content-manager/relationships/{modelUid}/{targetField}:
+  /content-manager/relations/{model}/{targetField}:
     get:
       tags:
         - Relational fields
       description: Fetch list of possible related content
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - in: path
+          name: targetField
+          schema:
+            type: string
+          required: true
+          description: name of the field in the model that holds the relation
+        - in: query
+          name: _component
+          schema:
+            type: string
+          description: Component uid if the targetField is in a component
+      responses:
+        200:
+          description: Returns a list of sanitized entries based of the relational attribute info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      oneOf:
+                        - type: string
+                        - type: integer
+                    '[primaryKey]':
+                      oneOf:
+                        - type: string
+                        - type: integer
+                    '[mainField]':
+                      type: string
+                      description: value of the mainField of the entry
+                    published_at:
+                      type: date
 
   # Collection type
-  /content-manager/collection-type/{modelUid}:
+  /content-manager/collection-type/{model}:
     get:
       tags:
         - Collection Types content management
@@ -292,12 +328,12 @@ paths:
       tags:
         - Collection Types content management
       description: Create an entry
-  /content-manager/collection-type/{modelUid}/actions/bulkDelete:
+  /content-manager/collection-type/{model}/actions/bulkDelete:
     post:
       tags:
         - Collection Types content management
       description: Bulk delete entries
-  /content-manager/collection-type/{modelUid}/{id}:
+  /content-manager/collection-type/{model}/{id}:
     get:
       tags:
         - Collection Types content management
@@ -310,19 +346,19 @@ paths:
       tags:
         - Collection Types content management
       description: Delete one entry
-  /content-manager/collection-type/{modelUid}/{id}/actions/publish:
+  /content-manager/collection-type/{model}/{id}/actions/publish:
     post:
       tags:
         - Collection Types content management
       description: Publish one entry
-  /content-manager/collection-type/{modelUid}/{id}/actions/unpublish:
+  /content-manager/collection-type/{model}/{id}/actions/unpublish:
     post:
       tags:
         - Collection Types content management
       description: Unpublish one entry
 
   # Single type
-  /content-manager/single-type/{modelUid}:
+  /content-manager/single-type/{model}:
     get:
       tags:
         - Single Types content management
@@ -332,11 +368,11 @@ paths:
     delete:
       tags:
         - Single Types content management
-  /content-manager/single-type/{modelUid}/actions/publish:
+  /content-manager/single-type/{model}/actions/publish:
     post:
       tags:
         - Single Types content management
-  /content-manager/single-type/{modelUid}/actions/unpublish:
+  /content-manager/single-type/{model}/actions/unpublish:
     post:
       tags:
         - Single Types content management
@@ -520,6 +556,14 @@ components:
       schema:
         $ref: '#/components/schemas/kind'
       description: The number of items to skip before starting to collect the result set
+
+    model:
+      in: path
+      name: model
+      schema:
+        type: string
+      required: true
+      description: Model uid
 
   securitySchemes:
     bearerAuth:

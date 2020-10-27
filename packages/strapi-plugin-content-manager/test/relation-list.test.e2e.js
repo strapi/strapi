@@ -141,7 +141,7 @@ describe('Relation-list route', () => {
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::shop.shop/relation-list/products',
+        url: '/content-manager/relations/application::shop.shop/products',
       });
 
       expect(res.body).toHaveLength(data.products.length);
@@ -165,7 +165,7 @@ describe('Relation-list route', () => {
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::shop.shop/relation-list/products',
+        url: '/content-manager/relations/application::shop.shop/products',
       });
 
       expect(res.body).toHaveLength(data.products.length);
