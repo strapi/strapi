@@ -1,7 +1,7 @@
 'use strict';
 
-const { buildStrapiQuery } = require('../permission/permissions-manager/query-builers');
 const { defineAbility } = require('@casl/ability');
+const { buildStrapiQuery } = require('../permission/permissions-manager/query-builers');
 const createPermissionsManager = require('../permission/permissions-manager');
 
 describe('Permissions Manager', () => {

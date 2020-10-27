@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
@@ -61,7 +62,7 @@ describe('Upload plugin end to end tests', () => {
     test('Simple image upload', async () => {
       const res = await rq.post('/upload', {
         formData: {
-          files: fs.createReadStream(__dirname + '/rec.jpg'),
+          files: fs.createReadStream(path.join(__dirname, 'rec.jpg')),
         },
       });
 
@@ -95,7 +96,7 @@ describe('Upload plugin end to end tests', () => {
     test('Generates a thumbnail on large enough files', async () => {
       const res = await rq.post('/upload', {
         formData: {
-          files: fs.createReadStream(__dirname + '/thumbnail_target.png'),
+          files: fs.createReadStream(path.join(__dirname, 'thumbnail_target.png')),
         },
       });
 

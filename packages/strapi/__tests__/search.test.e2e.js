@@ -1,3 +1,5 @@
+'use strict';
+
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');

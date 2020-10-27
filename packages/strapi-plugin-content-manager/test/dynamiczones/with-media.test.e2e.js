@@ -1,4 +1,7 @@
+'use strict';
+
 const fs = require('fs');
+const path = require('path');
 
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
@@ -10,7 +13,7 @@ let authRq;
 const uploadImg = () => {
   return authRq.post('/upload', {
     formData: {
-      files: fs.createReadStream(__dirname + '/rec.jpg'),
+      files: fs.createReadStream(path.join(__dirname, 'rec.jpg')),
     },
   });
 };

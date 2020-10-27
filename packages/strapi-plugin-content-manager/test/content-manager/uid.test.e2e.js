@@ -1,3 +1,5 @@
+'use strict';
+
 // Helpers.
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');

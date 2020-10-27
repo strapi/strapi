@@ -1,3 +1,5 @@
+'use strict';
+
 const { convertRestQueryParams } = require('../convert-rest-query-params');
 
 describe('convertRestQueryParams', () => {

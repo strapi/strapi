@@ -6,6 +6,7 @@ const {
   sanitizeEntity,
   webhook: webhookUtils,
 } = require('strapi-utils');
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = webhookUtils.webhookEvents;
 /**

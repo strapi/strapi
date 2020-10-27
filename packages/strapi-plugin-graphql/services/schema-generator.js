@@ -9,12 +9,12 @@
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
+const PublicationState = require('../types/publication-state');
 const Types = require('./type-builder');
 const { buildModels } = require('./type-definitions');
 const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
-const PublicationState = require('../types/publication-state');
 
 /**
  * Generate GraphQL schema.

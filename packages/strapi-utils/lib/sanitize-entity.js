@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { constants, isPrivateAttribute } = require('./content-types');
+
 const {
   ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,

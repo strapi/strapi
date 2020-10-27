@@ -2,13 +2,13 @@
 
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
-const validators = require('./common-validators');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
 const {
   BOUND_ACTIONS_FOR_FIELDS,
   BOUND_ACTIONS,
   getBoundActionsBySubject,
 } = require('../domain/role');
+const validators = require('./common-validators');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 

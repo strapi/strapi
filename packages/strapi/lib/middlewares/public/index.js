@@ -7,12 +7,11 @@
 // Node.js core.
 const fs = require('fs');
 const path = require('path');
+const stream = require('stream');
 const _ = require('lodash');
 const koaStatic = require('koa-static');
-const stream = require('stream');
-const serveStatic = require('./serve-static');
-
 const utils = require('../../utils');
+const serveStatic = require('./serve-static');
 
 /**
  * Public assets hook

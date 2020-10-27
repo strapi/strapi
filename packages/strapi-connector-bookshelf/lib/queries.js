@@ -7,6 +7,7 @@ const _ = require('lodash');
 const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 module.exports = function createQueryBuilder({ model, strapi }) {

@@ -7,6 +7,7 @@ const {
   contentTypes: contentTypesUtils,
 } = require('strapi-utils');
 const uploadFiles = require('./utils/upload-files');
+
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
 module.exports = ({ db, eventHub, entityValidator }) => ({

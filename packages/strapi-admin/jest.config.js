@@ -1,5 +1,5 @@
+'use strict';
+
 module.exports = {
-  testPathIgnorePatterns: [
-    '<rootDir>/',
-  ]
+  testPathIgnorePatterns: ['<rootDir>/'],
 };

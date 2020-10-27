@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -35,10 +37,7 @@ const createEmpty = () => {
 };
 
 describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/explorer/application::withdynamiczone.withdynamiczone',
-  ],
+  ['CONTENT MANAGER', '/content-manager/explorer/application::withdynamiczone.withdynamiczone'],
   ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
   beforeAll(async () => {
@@ -66,16 +65,12 @@ describe.each([
       },
     });
 
-    await modelsUtils.createContentTypeWithType(
-      'withdynamiczone',
-      'dynamiczone',
-      {
-        components: ['default.compo-with-other-compo', 'default.simple-compo'],
-        required: false,
-        min: 2,
-        max: 5,
-      }
-    );
+    await modelsUtils.createContentTypeWithType('withdynamiczone', 'dynamiczone', {
+      components: ['default.compo-with-other-compo', 'default.simple-compo'],
+      required: false,
+      min: 2,
+      max: 5,
+    });
 
     rq = authRq.defaults({
       baseUrl: `http://localhost:1337${path}`,

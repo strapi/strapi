@@ -1,9 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+
 const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const ACTIONS = {

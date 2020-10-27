@@ -1,5 +1,7 @@
-const koaStatic = require('koa-static');
+'use strict';
+
 const path = require('path');
+const koaStatic = require('koa-static');
 
 // serveStatic is not supposed to be used to serve a folder that have sub-folders
 const serveStatic = (filesDir, koaStaticOptions = {}) => {

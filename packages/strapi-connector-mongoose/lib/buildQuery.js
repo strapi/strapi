@@ -2,8 +2,6 @@
 
 const _ = require('lodash');
 var semver = require('semver');
-const utils = require('./utils')();
-const populateQueries = require('./utils/populate-queries');
 const {
   hasDeepFilters,
   contentTypes: {
@@ -11,6 +9,8 @@ const {
     hasDraftAndPublish,
   },
 } = require('strapi-utils');
+const utils = require('./utils')();
+const populateQueries = require('./utils/populate-queries');
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};

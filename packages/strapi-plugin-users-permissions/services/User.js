@@ -6,8 +6,8 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const { sanitizeEntity, getAbsoluteServerUrl } = require('strapi-utils');
 
@@ -85,11 +85,14 @@ module.exports = {
   },
 
   hashPassword(user = {}) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       if (!user.password || this.isHashed(user.password)) {
         resolve(null);
       } else {
         bcrypt.hash(`${user.password}`, 10, (err, hash) => {
+          if (err) {
+            reject(err);
+          }
           resolve(hash);
         });
       }

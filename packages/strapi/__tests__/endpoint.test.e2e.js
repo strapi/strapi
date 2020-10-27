@@ -1,3 +1,5 @@
+'use strict';
+
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
@@ -33,13 +35,7 @@ describe('Create Strapi API End to End', () => {
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteContentTypes([
-      'article',
-      'tag',
-      'category',
-      'reference',
-      'product',
-    ]);
+    await modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'product']);
   }, 60000);
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
@@ -616,8 +612,7 @@ describe('Create Strapi API End to End', () => {
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
-        return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -6,10 +8,7 @@ let modelsUtils;
 let rq;
 
 describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/explorer/application::withcomponent.withcomponent',
-  ],
+  ['CONTENT MANAGER', '/content-manager/explorer/application::withcomponent.withcomponent'],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and required component', (_, path) => {
   beforeAll(async () => {

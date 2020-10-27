@@ -1,3 +1,5 @@
+'use strict';
+
 const waitRestart = require('./waitRestart');
 
 module.exports = ({ rq }) => {
