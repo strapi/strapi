@@ -31,8 +31,6 @@ const A = styled.a`
   }
 
   &.linkActive {
-    padding-right: 2.3rem;
-
     color: white !important;
     border-left: 0.3rem solid ${props => props.theme.main.colors.strapi.blue};
   }
