@@ -235,6 +235,7 @@ const reducer = (state, action) => {
       return state
         .update('formErrors', () => fromJS(action.errors))
         .update('shouldShowLoadingState', () => false);
+    // TODO case not used anymore
     case 'UNPUBLISH_SUCCESS':
     case 'PUBLISH_SUCCESS':
       return state
@@ -250,6 +251,7 @@ const reducer = (state, action) => {
         .update('initialData', () => state.get('modifiedData'));
     case 'SUBMIT_SUCCEEDED': {
       return state
+        .update('formErrors', () => fromJS({}))
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data));
     }
