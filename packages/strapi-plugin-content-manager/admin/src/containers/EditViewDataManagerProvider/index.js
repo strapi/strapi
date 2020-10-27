@@ -69,18 +69,6 @@ const EditViewDataManagerProvider = ({
     return hasDraftAndPublish && !initialData.published_at;
   }, [hasDraftAndPublish, initialData.published_at]);
 
-  // TODO this could be removed and done in the FieldComponent component
-  // This is used for the readonly mode when updating an entry
-  const allDynamicZoneFields = useMemo(() => {
-    const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
-
-    const dynamicZoneFields = Object.keys(attributes).filter(attrName => {
-      return get(attributes, [attrName, 'type'], '') === 'dynamiczone';
-    });
-
-    return dynamicZoneFields;
-  }, [currentContentTypeLayout]);
-
   const { emitEvent, formatMessage } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
   const userPermissions = useUser();
@@ -776,7 +764,6 @@ const EditViewDataManagerProvider = ({
         addRelation,
         addRepeatableComponentToField,
         allLayoutData,
-        allDynamicZoneFields,
         checkFormErrors,
         clearData,
         createActionAllowedFields,

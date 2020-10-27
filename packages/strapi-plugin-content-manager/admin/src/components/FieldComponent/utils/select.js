@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { get, take } from 'lodash';
 import useDataManager from '../../../hooks/useDataManager';
 import { getFieldName } from '../../../utils';
+import { useContentTypeLayout } from '../../../hooks';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {
-    allDynamicZoneFields,
     createActionAllowedFields,
     isCreatingEntry,
     modifiedData,
@@ -13,6 +13,18 @@ function useSelect({ isFromDynamicZone, name }) {
     readActionAllowedFields,
     updateActionAllowedFields,
   } = useDataManager();
+  const { contentType } = useContentTypeLayout();
+
+  // This is used for the readonly mode when updating an entry
+  const allDynamicZoneFields = useMemo(() => {
+    const attributes = get(contentType, ['schema', 'attributes'], {});
+
+    const dynamicZoneFields = Object.keys(attributes).filter(attrName => {
+      return get(attributes, [attrName, 'type'], '') === 'dynamiczone';
+    });
+
+    return dynamicZoneFields;
+  }, [contentType]);
 
   const allowedFields = useMemo(() => {
     return isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
