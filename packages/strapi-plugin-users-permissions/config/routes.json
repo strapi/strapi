@@ -52,7 +52,7 @@
       "handler": "UsersPermissions.getRoles",
       "config": {
         "policies": [
-          ["admin::hasPermissions", ["plugins::users-permissions.roles.create"]]
+          ["admin::hasPermissions", ["plugins::users-permissions.roles.read"]]
         ],
         "description": "Retrieve all role documents",
         "tag": {

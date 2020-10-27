@@ -92,6 +92,7 @@ const Li = styled.li`
   > div {
     width: 90%;
     > a {
+      flex-grow: 2;
       max-width: 100%;
       color: rgb(35, 56, 77);
     }
@@ -143,7 +144,7 @@ const Li = styled.li`
 
 const Span = styled.span`
   display: block;
-  max-width: 100%;
+  max-width: calc(100% - 10px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

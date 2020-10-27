@@ -99,6 +99,9 @@ const expectedData = {
       title: 'plugins::myplugins.atest',
       to: '/plugins/content-type-builder/content-types/plugins::myplugins.atest',
       kind: 'collectionType',
+      editable: true,
+      plugin: null,
+      restrictRelationsTo: [],
     },
     {
       uid: 'plugins::myplugins.btest',
@@ -106,6 +109,9 @@ const expectedData = {
       title: 'plugins::myplugins.btest',
       to: '/plugins/content-type-builder/content-types/plugins::myplugins.btest',
       kind: 'collectionType',
+      editable: true,
+      plugin: null,
+      restrictRelationsTo: null,
     },
     {
       uid: 'plugins::myplugins.ctest',
@@ -113,6 +119,9 @@ const expectedData = {
       title: 'plugins::myplugins.ctest',
       to: '/plugins/content-type-builder/content-types/plugins::myplugins.ctest',
       kind: 'collectionType',
+      editable: true,
+      plugin: null,
+      restrictRelationsTo: ['oneWay'],
     },
     {
       uid: 'plugins::myplugins.test',
@@ -120,6 +129,9 @@ const expectedData = {
       title: 'plugins::myplugins.test',
       to: '/plugins/content-type-builder/content-types/plugins::myplugins.test',
       kind: 'singleType',
+      editable: true,
+      plugin: null,
+      restrictRelationsTo: null,
     },
   ],
 

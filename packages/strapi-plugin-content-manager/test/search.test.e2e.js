@@ -57,7 +57,7 @@ const bedFixtures = [
     sku: 'sleepybed_0152',
     savEmail: 'sav@bed.fr',
     type: 'foam',
-    serialNumber: 2908199401091998,
+    serialNumber: 9999999999999999,
     peopleNumber: 6,
     fabricThickness: 1.14157,
   },
