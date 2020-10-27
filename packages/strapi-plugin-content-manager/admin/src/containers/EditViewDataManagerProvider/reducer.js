@@ -249,7 +249,9 @@ const reducer = (state, action) => {
         .update('formErrors', () => fromJS({}))
         .update('initialData', () => state.get('modifiedData'));
     case 'SUBMIT_SUCCEEDED': {
-      return state.update('initialData', () => state.get('modifiedData'));
+      return state
+        .update('initialData', () => fromJS(action.data))
+        .update('modifiedData', () => fromJS(action.data));
     }
     case 'TRIGGER_FORM_VALIDATION':
       return state.update('shouldCheckErrors', v => {

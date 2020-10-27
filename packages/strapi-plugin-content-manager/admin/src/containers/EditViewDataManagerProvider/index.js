@@ -114,6 +114,17 @@ const EditViewDataManagerProvider = ({
     return getFieldsActionMatchingPermissions(userPermissions, slug);
   }, [userPermissions, slug]);
 
+  const cleanReceivedDataFromPasswords = useCallback(
+    data => {
+      return removePasswordFieldsFromData(
+        data,
+        allLayoutData.contentType,
+        allLayoutData.components
+      );
+    },
+    [allLayoutData.components, allLayoutData.contentType]
+  );
+
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
     if (isLoading) {
       return false;
@@ -227,11 +238,7 @@ const EditViewDataManagerProvider = ({
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data: removePasswordFieldsFromData(
-            data,
-            allLayoutData.contentType,
-            allLayoutData.components
-          ),
+          data: cleanReceivedDataFromPasswords(data),
         });
       } catch (err) {
         console.error(err);
@@ -261,7 +268,7 @@ const EditViewDataManagerProvider = ({
       console.log('end fetch');
       abortController.abort();
     };
-  }, [fetchURL, allLayoutData, push, from]);
+  }, [fetchURL, push, from, cleanReceivedDataFromPasswords]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEventRef.current('didAddComponentToDynamicZone');
@@ -433,6 +440,23 @@ const EditViewDataManagerProvider = ({
     // return isDraft ? { status: 'draft' } : {};
   }, [hasDraftAndPublish]);
 
+  const displayErrors = useCallback(err => {
+    const errorPayload = err.response.payload;
+    console.error(errorPayload);
+    let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+
+    if (typeof errorMessage === 'string') {
+      strapi.notification.error(errorMessage);
+    }
+
+    // TODO handle errors correctly when back-end ready
+    if (Array.isArray(errorMessage)) {
+      errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
+
+      strapi.notification.error(errorMessage);
+    }
+  }, []);
+
   const onPost = useCallback(
     async data => {
       const formData = createFormData(data);
@@ -454,19 +478,53 @@ const EditViewDataManagerProvider = ({
         // Enable navigation and remove loaders
         setStatus('resolved');
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED' });
+        dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
 
         replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
       } catch (err) {
-        //
+        displayErrors(err);
+        emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
         // Enable navigation and remove loaders
         setStatus('resolved');
       }
     },
-    [createFormData, replace, slug, trackerProperty]
+    [createFormData, displayErrors, replace, slug, trackerProperty]
   );
 
-  const onPut = useCallback(async () => {}, []);
+  const onPut = useCallback(
+    async data => {
+      const formData = createFormData(data);
+      const endPoint = getRequestUrl(`${slug}/${data.id}`);
+
+      try {
+        // Show a loading button in the EditView/Header.js && lock the app => no navigation
+        setStatus('submit-pending');
+        // TODO fix tracker property
+        // emitEventRef.current('willEditEntry', trackerProperty);
+
+        const response = await request(
+          endPoint,
+          { method: 'PUT', headers: {}, body: formData },
+          false,
+          false
+        );
+
+        // TODO
+        // emitEventRef.current('didEditEntry', { trackerProperty });
+        // Enable navigation and remove loaders
+        setStatus('resolved');
+
+        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+      } catch (err) {
+        console.log({ err });
+        displayErrors(err);
+        // emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
+        // Enable navigation and remove loaders
+        setStatus('resolved');
+      }
+    },
+    [cleanReceivedDataFromPasswords, createFormData, displayErrors, slug]
+  );
 
   const handleSubmit = useCallback(
     async e => {
@@ -866,6 +924,7 @@ const EditViewDataManagerProvider = ({
     });
   }, [isSingleType]);
 
+  // TODO switch to useCallback
   const triggerFormValidation = () => {
     dispatch({
       type: 'TRIGGER_FORM_VALIDATION',
