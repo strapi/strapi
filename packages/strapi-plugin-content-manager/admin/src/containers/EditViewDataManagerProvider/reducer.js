@@ -226,6 +226,10 @@ const reducer = (state, action) => {
       return state
         .update('modifiedDZName', () => null)
         .update('formErrors', () => fromJS(action.errors));
+    // TODO
+    case 'SET_FORM_ERRORS': {
+      return state.update('formErrors', () => fromJS(action.errors));
+    }
     case 'SUBMIT_ERRORS':
     case 'PUBLISH_ERRORS':
       return state
@@ -237,12 +241,16 @@ const reducer = (state, action) => {
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.data))
         .update('initialData', () => fromJS(action.data));
+    // TODO: SUBMIT_SUCCESS case not used anymore
     case 'SUBMIT_SUCCESS':
     case 'DELETE_SUCCEEDED':
       return state
         .update('isLoading', () => false)
         .update('formErrors', () => fromJS({}))
         .update('initialData', () => state.get('modifiedData'));
+    case 'SUBMIT_SUCCEEDED': {
+      return state.update('initialData', () => state.get('modifiedData'));
+    }
     case 'TRIGGER_FORM_VALIDATION':
       return state.update('shouldCheckErrors', v => {
         const hasErrors = state.get('formErrors').keySeq().size > 0;

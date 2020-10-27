@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'react';
-import { cloneDeep, get, isEmpty, isEqual, pick, set } from 'lodash';
+import {
+  cloneDeep,
+  get,
+  isEmpty,
+  isEqual,
+  // pick,
+  set,
+} from 'lodash';
 import PropTypes from 'prop-types';
 import {
   Prompt,
@@ -61,9 +68,12 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
 
+  // This isCreatingEntry logic will be needed, but it needs to be passed from the parent
   const isCreatingEntry = id === 'create';
   // TODO: remove logic
-  const [isCreatingEntryState, setIsCreatingEntry] = useState(id === 'create');
+  const [, setIsCreatingEntry] = useState(id === 'create');
+
+  // TODO: this should be in the reducer
   const [status, setStatus] = useState('resolved');
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
@@ -80,7 +90,7 @@ const EditViewDataManagerProvider = ({
     params: { contentType },
   } = useRouteMatch('/plugins/content-manager/:contentType');
 
-  // TODO this could be removed and done in the dynamic zone component
+  // TODO this could be removed and done in the FieldComponent component
   // This is used for the readonly mode when updating an entry
   const allDynamicZoneFields = useMemo(() => {
     const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
@@ -372,9 +382,124 @@ const EditViewDataManagerProvider = ({
     []
   );
 
+  const yupSchema = useMemo(() => {
+    // TODO
+    const options = { isCreatingEntry, isDraft: false, isFromComponent: false };
+
+    return createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: allLayoutData.components || {},
+      },
+      options
+    );
+  }, [allLayoutData.components, currentContentTypeLayout, isCreatingEntry]);
+
+  const createFormData = useCallback(
+    data => {
+      // Set the loading state in the plugin header
+      const filesToUpload = getFilesToUpload(modifiedData);
+      // Remove keys that are not needed
+      // Clean relations
+      const cleanedData = cleanData(data, currentContentTypeLayout, allLayoutData.components);
+
+      const formData = new FormData();
+
+      formData.append('data', JSON.stringify(cleanedData));
+
+      // We don't do upload anymore since we are using the ML in the CM
+      // however, I am leaving the code here just in case we need it sometime and it also a great
+      // example on how to do upload upon entry creation/edition.
+      Object.keys(filesToUpload).forEach(key => {
+        const files = filesToUpload[key];
+
+        files.forEach(file => {
+          formData.append(`files.${key}`, file);
+        });
+      });
+
+      return formData;
+    },
+    [allLayoutData.components, currentContentTypeLayout, modifiedData]
+  );
+
+  const trackerProperty = useMemo(() => {
+    if (!hasDraftAndPublish) {
+      return {};
+    }
+
+    // TODO
+    return { status: 'draft' };
+    // return isDraft ? { status: 'draft' } : {};
+  }, [hasDraftAndPublish]);
+
+  const onPost = useCallback(
+    async data => {
+      const formData = createFormData(data);
+      const endPoint = getRequestUrl(slug);
+
+      try {
+        // Show a loading button in the EditView/Header.js && lock the app => no navigation
+        setStatus('submit-pending');
+
+        const response = await request(
+          endPoint,
+          { method: 'POST', headers: {}, body: formData },
+          false,
+          false
+        );
+
+        emitEventRef.current('didCreateEntry', trackerProperty);
+        strapi.notification.success(getTrad('success.record.save'));
+        // Enable navigation and remove loaders
+        setStatus('resolved');
+
+        dispatch({ type: 'SUBMIT_SUCCEEDED' });
+
+        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
+      } catch (err) {
+        //
+        // Enable navigation and remove loaders
+        setStatus('resolved');
+      }
+    },
+    [createFormData, replace, slug, trackerProperty]
+  );
+
+  const onPut = useCallback(async () => {}, []);
+
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault();
+      let errors = {};
+
+      // First validate the form
+      try {
+        await yupSchema.validate(modifiedData, { abortEarly: false });
+
+        if (isCreatingEntry) {
+          onPost(modifiedData);
+        } else {
+          onPut(modifiedData);
+        }
+      } catch (err) {
+        console.error('ValidationError');
+        console.error(err);
+
+        errors = getYupInnerErrors(err);
+      }
+      dispatch({
+        type: 'SET_FORM_ERRORS',
+        errors,
+      });
+    },
+    [isCreatingEntry, modifiedData, onPost, onPut, yupSchema]
+  );
+
   // TODO split the PUT and POST logic
-  const handleSubmit = async e => {
+  const handleSubmitOld = async e => {
     e.preventDefault();
+    // TODO fix this because it needs the draft info
     const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
     // Create yup schema
@@ -505,6 +630,8 @@ const EditViewDataManagerProvider = ({
       });
     }
   };
+
+  console.log({ handleSubmitOld });
 
   const handlePublish = useCallback(async () => {
     // Create yup schema
