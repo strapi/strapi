@@ -110,7 +110,7 @@ yarn develop --watch-admin
 ```
 # Go back to to strapi root folder
 cd ../..
-npm run develop --watch-admin
+npm run develop -- --watch-admin
 ```
 
 :::

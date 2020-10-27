@@ -8,10 +8,27 @@ The admin panel is a [React](https://facebook.github.io/react/) application whic
 
 To enable local plugin development, you need to start your application with the front-end development mode activated:
 
+:::: tabs
+
+::: tab yarn
+
 ```bash
 $ cd my-app
 $ yarn develop --watch-admin
 ```
+
+:::
+
+::: tab npm
+
+```bash
+$ cd my-app
+$ npm run develop -- --watch-admin
+```
+
+:::
+
+::::
 
 ## API
 
