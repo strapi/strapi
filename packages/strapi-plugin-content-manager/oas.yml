@@ -1,0 +1,376 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: Strapi Content Manager API
+  description: This is nice
+servers:
+  - url: http://localhost:1337
+    description: Local server
+externalDocs:
+  url: https://strapi.io/documentation
+  description: Strapi documentation
+paths:
+  /admin/login:
+    post:
+      summary: Login admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+
+      responses:
+        200:
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                      token:
+                        type: string
+  /content-manager/content-types:
+    get:
+      tags:
+        - ContentTypes
+      description: List content types
+      parameters:
+        - in: query
+          name: kind
+          schema:
+            $ref: '#/components/parameters/kind'
+          description: The number of items to skip before starting to collect the result set
+      responses:
+        200:
+          description: A list of content types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/contentType'
+              examples:
+                one:
+                  value:
+                    data:
+                      - $ref: '#/components/examples/restaurant'
+                      - $ref: '#/components/examples/category'
+
+  /content-manager/content-types/{uid}/configuration:
+    get:
+      tags:
+        - ContentTypes
+      description: Get content type configuration
+      parameters:
+        - in: path
+          name: uid
+          schema:
+            type: string
+          required: true
+          description: Content Type uid
+      responses:
+        200:
+          description: A content type configuration with its components configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      contentType:
+                        $ref: '#/components/schemas/configuration'
+                      components:
+                        type: object
+                        additionalProperties:
+                          $ref: '#/components/schemas/component-configuration'
+    put:
+      tags:
+        - ContentTypes
+      description: Edit content type configuration
+      parameters:
+        - in: path
+          name: uid
+          schema:
+            type: string
+          required: true
+          description: Content Type uid
+      responses:
+        200:
+          description: A content type configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/configuration'
+
+  /content-manager/components:
+    get:
+      tags:
+        - Components
+      description: List components
+      responses:
+        200:
+          description: A list of components
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/component'
+
+  /content-manager/components/{uid}/configuration:
+    get:
+      tags:
+        - Components
+      description: Get content type configuration
+      parameters:
+        - in: path
+          name: uid
+          schema:
+            type: string
+          required: true
+          description: Component uid
+      responses:
+        200:
+          description: A component configuration with its components configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      component:
+                        $ref: '#/components/schemas/component-configuration'
+                      components:
+                        type: object
+                        additionalProperties:
+                          $ref: '#/components/schemas/component-configuration'
+    put:
+      tags:
+        - Components
+      description: Edit component configuration
+      parameters:
+        - in: path
+          name: uid
+          schema:
+            type: string
+          required: true
+          description: Component uid
+      responses:
+        200:
+          description: A component configuration with its components configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/component-configuration'
+
+components:
+  schemas:
+    contentType:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Model uid
+        kind:
+          $ref: '#/components/parameters/kind'
+        isDisplayed:
+          type: boolean
+        apiID:
+          type: string
+          description: Model key based on filename
+        info:
+          type: object
+          properties:
+            name:
+              type: string
+              description: User defined name
+            label:
+              type: string
+              description: Computed label with pluralization
+            description:
+              type: string
+              description: Content type description
+
+        options:
+          type: object
+          properties:
+            increments:
+              type: boolean
+            timestamps:
+              type: array
+              uniqueItems: true
+              minItems: 2
+              maxItems: 2
+              items:
+                type: string
+            hasDraftAndPublish:
+              type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+              - $ref: '#/components/schemas/scalarAttribute'
+              - $ref: '#/components/schemas/relationalAttribute'
+
+    component:
+      allOf:
+        - type: object
+          properties:
+            category:
+              type: string
+              description: Component category
+
+        - $ref: '#/components/schemas/contentType'
+
+    scalarAttribute:
+      type: object
+      properties:
+        type:
+          type: string
+        required:
+          type: boolean
+
+    relationalAttribute:
+      type: object
+      properties:
+        type:
+          type: string
+
+        targetModel:
+          type: string
+        relationType:
+          type: string
+          enum:
+            - oneWay
+            - manyWay
+            - oneToOne
+            - oneToMany
+            - manyToOne
+            - manyToMany
+
+    configuration:
+      type: object
+      properties:
+        uid:
+          type: string
+        settings:
+          type: object
+          properties:
+            searchable:
+              type: boolean
+            bulkable:
+              type: boolean
+            filterable:
+              type: boolean
+            pageSize:
+              type: integer
+            mainField:
+              type: string
+            defaultSortBy:
+              type: string
+            defaultSortOrder:
+              type: string
+        metadatas:
+          type: object
+        layouts:
+          type: object
+          properties:
+            list:
+              type: array
+              items:
+                type: string
+            editRelations:
+              type: array
+              items:
+                type: string
+            edit:
+              type: array
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name: string
+                    size: integer
+
+    component-configuration:
+      allOf:
+        - type: object
+          properties:
+            isComponent:
+              type: boolean
+        - $ref: '#/components/schemas/configuration'
+
+  examples:
+    restaurant:
+      uid: application::restaurant.restaurant
+      apiID: restaurant
+      kind: collectionType
+      isDisplayed: true
+      info:
+        name: Restaurant
+        label: Restaurants
+        description: My restaurant Model
+      options:
+        hasDraftAndPublish: false
+        timestamps: ['created_at', 'updated_at']
+      attributes:
+        title:
+          type: string
+          required: true
+        slug:
+          type: uid
+          required: true
+          targetField: title
+        categories:
+          type: relation
+          relationTarget: application::category.category
+          relationType: manyWay
+    category:
+      uid: application::category.category
+
+  parameters:
+    kind:
+      type: string
+      enum:
+        - singleType
+        - collectionType
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - bearerAuth: []
