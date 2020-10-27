@@ -12,7 +12,8 @@
   },
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "default": "coucou"
     },
     "slug": {
       "type": "uid",
