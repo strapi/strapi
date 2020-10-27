@@ -154,7 +154,7 @@ And tada, the date will now display with the new format.
 
 ## Build the new admin
 
-Well now you have the admin panel you want. But during all the process, the admin panel was updated on the run time because of the command `yarn develop --watch-admin` / `npm run develop -- --watch-admin`.
+Well now you have the admin panel you want. But during all the process, the admin panel was updated on the run time because of the command `yarn develop --watch-admin` or `npm run develop -- --watch-admin`.
 
 If you start your application using `yarn start` or `yarn develop` the admin will be the old version. Your updates are not applied.
 
