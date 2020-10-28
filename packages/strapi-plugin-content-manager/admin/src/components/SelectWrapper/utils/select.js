@@ -11,6 +11,9 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, t
     // slug,
     updateActionAllowedFields,
   } = useDataManager();
+
+  // TODO important! remove models dependency from the useEditView hook,
+  // This info should be handle in the layout?
   const { models } = useEditView();
 
   const displayNavigationLink = useMemo(() => {

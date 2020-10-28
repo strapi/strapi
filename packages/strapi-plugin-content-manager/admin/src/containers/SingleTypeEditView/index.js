@@ -36,6 +36,7 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
   const { goBack } = useHistory();
   // DIFF WITH CT
   const { pathname } = useLocation();
+
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
     viewPermissions

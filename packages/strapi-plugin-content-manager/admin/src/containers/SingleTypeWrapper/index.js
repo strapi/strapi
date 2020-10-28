@@ -1,39 +1,29 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import { useParams, useLocation, useHistory } from 'react-router-dom';
+import { memo, useCallback, useEffect, useRef, useReducer } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
-import pluginId from '../../pluginId';
 import { getRequestUrl } from './utils';
 import reducer, { initialState } from './reducer';
 
 // This container is used to handle the data fetching management part
-const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
+const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
   const { emitEvent } = useGlobalContext();
-  const { push, replace } = useHistory();
+  const { push } = useHistory();
   const { state } = useLocation();
-  const { id } = useParams();
-  const [
-    { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
-    dispatch,
-  ] = useReducer(reducer, initialState);
-
   const emitEventRef = useRef(emitEvent);
 
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
   const from = get(state, 'from', '/');
 
-  const isCreatingEntry = id === 'create';
+  const [
+    { componentsDataStructure, contentTypeDataStructure, data, isCreatingEntry, isLoading, status },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
-  const fetchURL = useMemo(() => {
-    if (isCreatingEntry) {
-      return null;
-    }
-
-    return getRequestUrl(`${slug}/${id}`);
-  }, [slug, id, isCreatingEntry]);
+  const id = get(data, 'id', '');
 
   const cleanReceivedDataFromPasswords = useCallback(
     data => {
@@ -69,32 +59,31 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
     });
   }, [allLayoutData]);
 
+  // Check if creation mode or editing mode
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const getData = async signal => {
+    const fetchData = async signal => {
       dispatch({ type: 'GET_DATA' });
 
       try {
-        const data = await request(fetchURL, { method: 'GET', signal });
+        const data = await request(getRequestUrl(slug), { method: 'GET', signal });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data: cleanReceivedDataFromPasswords(data),
         });
       } catch (err) {
-        console.error(err);
-        const resStatus = get(err, 'response.status', null);
+        const responseStatus = get(err, 'response.status', null);
 
-        if (resStatus === 404) {
-          push(from);
-
-          return;
+        // Creating an st
+        if (responseStatus === 404) {
+          dispatch({ type: 'INIT_FORM' });
+          // setIsCreatingEntry(true);
         }
 
-        // Not allowed to read a document
-        if (resStatus === 403) {
+        if (responseStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -102,16 +91,10 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
       }
     };
 
-    if (fetchURL) {
-      getData(signal);
-    } else {
-      dispatch({ type: 'INIT_FORM' });
-    }
+    fetchData(signal);
 
-    return () => {
-      abortController.abort();
-    };
-  }, [fetchURL, push, from, cleanReceivedDataFromPasswords]);
+    return () => abortController.abort();
+  }, [cleanReceivedDataFromPasswords, from, push, slug]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -131,11 +114,9 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
 
   const onPost = useCallback(
     async (formData, trackerProperty) => {
-      // const formData = createFormData(data);
       const endPoint = getRequestUrl(slug);
 
       try {
-        // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
         const response = await request(
@@ -148,20 +129,18 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
+        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
-
-        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
       } catch (err) {
         displayErrors(err);
+
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
-        // Enable navigation and remove loaders
+
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [displayErrors, replace, slug]
+    [cleanReceivedDataFromPasswords, displayErrors, slug]
   );
-
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
@@ -213,9 +192,10 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [cleanReceivedDataFromPasswords, displayErrors, slug, id]
+    [cleanReceivedDataFromPasswords, id, displayErrors, slug]
   );
 
+  // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
     const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
@@ -251,14 +231,13 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
   });
 };
 
-CollectionTypeWrapper.propTypes = {
+SingleTypeWrapper.propTypes = {
   allLayoutData: PropTypes.shape({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.object.isRequired,
   }).isRequired,
-  // allowedActions: PropTypes.object.isRequired,
   children: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
 };
 
-export default memo(CollectionTypeWrapper);
+export default memo(SingleTypeWrapper);

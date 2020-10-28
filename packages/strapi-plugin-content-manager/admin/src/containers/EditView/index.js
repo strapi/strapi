@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   BackHeader,
   LiLink,
@@ -24,6 +24,7 @@ import { generatePermissionsObject, getInjectedComponents } from '../../utils';
 import CollectionTypeWrapper from '../CollectionTypeWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
+import SingleTypeWrapper from '../SingleTypeWrapper';
 import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
 import { LinkWrapper, SubWrapper } from './components';
@@ -32,7 +33,8 @@ import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 
-const EditView = ({ components, currentEnvironment, models, plugins, slug }) => {
+// TODO check needed props
+const EditView = ({ components, currentEnvironment, models, isSingleType, plugins, slug }) => {
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
   const { goBack } = useHistory();
   // Permissions
@@ -41,7 +43,8 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
     viewPermissions
   );
   const userPermissions = useUser();
-
+  // Legacy to remove for the configurations
+  const { pathname } = useLocation();
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -49,8 +52,22 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
   } = useMemo(() => {
     return getFieldsActionMatchingPermissions(userPermissions, slug);
   }, [userPermissions, slug]);
+  const configurationPermissions = useMemo(() => {
+    return isSingleType
+      ? pluginPermissions.singleTypesConfigurations
+      : pluginPermissions.collectionTypesConfigurations;
+  }, [isSingleType]);
+  // TODO check why the routing needs to be different... (not prio)
+  const configurationsURL = isSingleType
+    ? `${pathname}/ctm-configurations/edit-settings/content-types`
+    : 'ctm-configurations/edit-settings/content-types';
 
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);
+
+  const DataManagementWrapper = useMemo(
+    () => (isSingleType ? SingleTypeWrapper : CollectionTypeWrapper),
+    [isSingleType]
+  );
 
   // Check if a block is a dynamic zone
   const isDynamicZone = useCallback(block => {
@@ -83,12 +100,13 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
       allowedActions={allowedActions}
       allLayoutData={layout}
       components={components}
-      isSingleType={false}
+      isSingleType={isSingleType}
       layout={currentContentTypeLayoutData}
+      // TODO: check if still needed
       models={models}
     >
       <ContentTypeLayoutContext.Provider value={layout}>
-        <CollectionTypeWrapper allLayoutData={layout} slug={slug}>
+        <DataManagementWrapper allLayoutData={layout} slug={slug}>
           {({
             componentsDataStructure,
             contentTypeDataStructure,
@@ -111,7 +129,7 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                 initialValues={data}
                 isCreatingEntry={isCreatingEntry}
                 isLoadingForData={isLoadingForData}
-                isSingleType={false}
+                isSingleType={isSingleType}
                 onPost={onPost}
                 onPublish={onPublish}
                 onPut={onPut}
@@ -225,15 +243,13 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                       )}
                       <LinkWrapper>
                         <ul>
-                          <CheckPermissions
-                            permissions={pluginPermissions.collectionTypesConfigurations}
-                          >
+                          <CheckPermissions permissions={configurationPermissions}>
                             <LiLink
                               message={{
                                 id: 'app.links.configure-view',
                               }}
                               icon="layout"
-                              url="ctm-configurations/edit-settings/content-types"
+                              url={configurationsURL}
                               onClick={() => {
                                 // emitEvent('willEditContentTypeLayoutFromEditView');
                               }}
@@ -255,22 +271,25 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
               </EditViewDataManagerProvider>
             );
           }}
-        </CollectionTypeWrapper>
+        </DataManagementWrapper>
       </ContentTypeLayoutContext.Provider>
     </EditViewProvider>
   );
 };
 
 EditView.defaultProps = {
+  // TODO
   currentEnvironment: 'production',
   emitEvent: () => {},
   plugins: {},
+  isSingleType: false,
 };
 
 EditView.propTypes = {
   components: PropTypes.array.isRequired,
   currentEnvironment: PropTypes.string,
   emitEvent: PropTypes.func,
+  isSingleType: PropTypes.bool,
   models: PropTypes.array.isRequired,
   plugins: PropTypes.object,
   slug: PropTypes.string.isRequired,
