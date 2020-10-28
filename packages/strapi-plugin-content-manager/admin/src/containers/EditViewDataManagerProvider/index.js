@@ -1,28 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
-import { Prompt, Redirect, useParams, useLocation, useHistory } from 'react-router-dom';
+import { Prompt, Redirect, useLocation } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   request,
   useGlobalContext,
-  useUser,
   OverlayBlocker,
 } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import { getTrad } from '../../utils';
+import { getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import {
-  cleanData,
-  createDefaultForm,
-  createYupSchema,
-  getFieldsActionMatchingPermissions,
-  getFilesToUpload,
-  getYupInnerErrors,
-  removePasswordFieldsFromData,
-} from './utils';
+import { cleanData, createYupSchema, getFilesToUpload, getYupInnerErrors } from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -30,17 +21,26 @@ const EditViewDataManagerProvider = ({
   allLayoutData,
   allowedActions: { canCreate, canRead, canUpdate },
   children,
+  componentsDataStructure,
+  contentTypeDataStructure,
+  createActionAllowedFields,
+  initialValues,
+  isCreatingEntry,
+  isLoadingForData,
   isSingleType,
+  onPost,
+  onPut,
+  readActionAllowedFields,
+  // Not sure this is needed anymore
   redirectToPreviousPage,
   slug,
+  status,
+  updateActionAllowedFields,
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
 
-  const { id } = useParams();
-  const isCreatingEntry = id === 'create';
-
   const { state } = useLocation();
-  const { push, replace } = useHistory();
+
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
   const from = get(state, 'from', '/');
@@ -48,16 +48,13 @@ const EditViewDataManagerProvider = ({
   const {
     formErrors,
     initialData,
-    isLoading,
     modifiedData,
     modifiedDZName,
     shouldCheckErrors,
   } = reducerState.toJS();
 
-  // This isCreatingEntry logic will be needed, but it needs to be passed from the parent
-
   // TODO: this should be in the reducer
-  const [status, setStatus] = useState('resolved');
+  const [, setStatus] = useState('resolved');
 
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
@@ -71,15 +68,6 @@ const EditViewDataManagerProvider = ({
 
   const { emitEvent, formatMessage } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const userPermissions = useUser();
-
-  const {
-    createActionAllowedFields,
-    readActionAllowedFields,
-    updateActionAllowedFields,
-  } = useMemo(() => {
-    return getFieldsActionMatchingPermissions(userPermissions, slug);
-  }, [userPermissions, slug]);
 
   const cleanReceivedDataFromPasswords = useCallback(
     data => {
@@ -93,7 +81,7 @@ const EditViewDataManagerProvider = ({
   );
 
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
-    if (isLoading) {
+    if (isLoadingForData) {
       return false;
     }
 
@@ -106,10 +94,10 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isCreatingEntry, canCreate, isLoading]);
+  }, [isCreatingEntry, canCreate, isLoadingForData]);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (isLoading) {
+    if (isLoadingForData) {
       return false;
     }
 
@@ -122,11 +110,11 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoading, isCreatingEntry, canRead, canUpdate]);
+  }, [isLoadingForData, isCreatingEntry, canRead, canUpdate]);
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoadingForData) {
       checkFormErrors();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,94 +132,20 @@ const EditViewDataManagerProvider = ({
     }
   }, [shouldRedirectToHomepageWhenCreatingEntry]);
 
-  // Reset all props when changing from one ct to another
   useEffect(() => {
-    dispatch({ type: 'RESET_PROPS' });
-  }, [slug]);
-
-  // Reset all props when navigating from one entry to another in the same ct
-  useEffect(() => {
-    dispatch({ type: 'RESET_FORM' });
-  }, [id]);
-
-  // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
-  useEffect(() => {
-    const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
-      acc[current] = createDefaultForm(
-        get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
-        allLayoutData.components
-      );
-
-      return acc;
-    }, {});
-
-    const contentTypeDataStructure = createDefaultForm(
-      currentContentTypeLayout.schema.attributes,
-      allLayoutData.components
-    );
-
     dispatch({
       type: 'SET_DEFAULT_DATA_STRUCTURES',
       componentsDataStructure,
       contentTypeDataStructure,
     });
-  }, [allLayoutData, currentContentTypeLayout.schema.attributes]);
+  }, [componentsDataStructure, contentTypeDataStructure]);
 
   useEffect(() => {
-    if (isCreatingEntry) {
-      dispatch({ type: 'INITIALIZE_FORM' });
-    }
-  }, [isCreatingEntry]);
-
-  const fetchURL = useMemo(() => {
-    if (isCreatingEntry) {
-      return null;
-    }
-
-    return getRequestUrl(`${slug}/${id}`);
-  }, [slug, id, isCreatingEntry]);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
-    const getData = async signal => {
-      dispatch({ type: 'GET_DATA' });
-
-      try {
-        const data = await request(fetchURL, { method: 'GET', signal });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data: cleanReceivedDataFromPasswords(data),
-        });
-      } catch (err) {
-        console.error(err);
-        const resStatus = get(err, 'response.status', null);
-
-        if (resStatus === 404) {
-          push(from);
-
-          return;
-        }
-
-        // Not allowed to read a document
-        if (resStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
-
-          push(from);
-        }
-      }
-    };
-
-    if (fetchURL) {
-      getData(signal);
-    }
-
-    return () => {
-      abortController.abort();
-    };
-  }, [fetchURL, push, from, cleanReceivedDataFromPasswords]);
+    dispatch({
+      type: 'INIT_FORM',
+      initialValues,
+    });
+  }, [initialValues]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     emitEventRef.current('didAddComponentToDynamicZone');
@@ -367,7 +281,7 @@ const EditViewDataManagerProvider = ({
   const createFormData = useCallback(
     data => {
       // Set the loading state in the plugin header
-      const filesToUpload = getFilesToUpload(modifiedData);
+      const filesToUpload = getFilesToUpload(data);
       // Remove keys that are not needed
       // Clean relations
       const cleanedData = cleanData(data, currentContentTypeLayout, allLayoutData.components);
@@ -389,7 +303,7 @@ const EditViewDataManagerProvider = ({
 
       return formData;
     },
-    [allLayoutData.components, currentContentTypeLayout, modifiedData]
+    [allLayoutData.components, currentContentTypeLayout]
   );
 
   const trackerProperty = useMemo(() => {
@@ -416,74 +330,6 @@ const EditViewDataManagerProvider = ({
     }
   }, []);
 
-  const onPost = useCallback(
-    async data => {
-      const formData = createFormData(data);
-      const endPoint = getRequestUrl(slug);
-
-      try {
-        // Show a loading button in the EditView/Header.js && lock the app => no navigation
-        setStatus('submit-pending');
-
-        const response = await request(
-          endPoint,
-          { method: 'POST', headers: {}, body: formData },
-          false,
-          false
-        );
-
-        emitEventRef.current('didCreateEntry', trackerProperty);
-        strapi.notification.success(getTrad('success.record.save'));
-        // Enable navigation and remove loaders
-        setStatus('resolved');
-
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
-
-        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
-      } catch (err) {
-        displayErrors(err);
-        emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
-        // Enable navigation and remove loaders
-        setStatus('resolved');
-      }
-    },
-    [createFormData, displayErrors, replace, slug, trackerProperty]
-  );
-
-  const onPut = useCallback(
-    async data => {
-      const formData = createFormData(data);
-      const endPoint = getRequestUrl(`${slug}/${data.id}`);
-
-      try {
-        // Show a loading button in the EditView/Header.js && lock the app => no navigation
-        setStatus('submit-pending');
-        emitEventRef.current('willEditEntry', trackerProperty);
-
-        const response = await request(
-          endPoint,
-          { method: 'PUT', headers: {}, body: formData },
-          false,
-          false
-        );
-
-        emitEventRef.current('didEditEntry', { trackerProperty });
-
-        // Enable navigation and remove loaders
-        setStatus('resolved');
-
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
-      } catch (err) {
-        displayErrors(err);
-
-        emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
-        // Enable navigation and remove loaders
-        setStatus('resolved');
-      }
-    },
-    [cleanReceivedDataFromPasswords, createFormData, displayErrors, slug, trackerProperty]
-  );
-
   const handleSubmit = useCallback(
     async e => {
       e.preventDefault();
@@ -492,11 +338,16 @@ const EditViewDataManagerProvider = ({
       // First validate the form
       try {
         await yupSchema.validate(modifiedData, { abortEarly: false });
+        console.log({ modifiedData });
+
+        const formData = createFormData(modifiedData);
+
+        // console.log()
 
         if (isCreatingEntry) {
-          onPost(modifiedData);
+          onPost(formData, trackerProperty);
         } else {
-          onPut(modifiedData);
+          onPut(formData, trackerProperty);
         }
       } catch (err) {
         console.error('ValidationError');
@@ -510,7 +361,7 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [isCreatingEntry, modifiedData, onPost, onPut, yupSchema]
+    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
   );
 
   const handlePublish = useCallback(async () => {
@@ -802,7 +653,7 @@ const EditViewDataManagerProvider = ({
           isOpen={status !== 'resolved'}
           {...overlayBlockerParams}
         />
-        {isLoading ? (
+        {isLoadingForData ? (
           <LoadingIndicatorPage />
         ) : (
           <>
@@ -825,10 +676,21 @@ EditViewDataManagerProvider.defaultProps = {
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
   allowedActions: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
+  children: PropTypes.arrayOf(PropTypes.element).isRequired,
+  componentsDataStructure: PropTypes.object.isRequired,
+  contentTypeDataStructure: PropTypes.object.isRequired,
+  createActionAllowedFields: PropTypes.array.isRequired,
+  initialValues: PropTypes.object.isRequired,
+  isCreatingEntry: PropTypes.bool.isRequired,
+  isLoadingForData: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
+  onPost: PropTypes.func.isRequired,
+  onPut: PropTypes.func.isRequired,
+  readActionAllowedFields: PropTypes.array.isRequired,
   redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  updateActionAllowedFields: PropTypes.array.isRequired,
 };
 
 export default EditViewDataManagerProvider;

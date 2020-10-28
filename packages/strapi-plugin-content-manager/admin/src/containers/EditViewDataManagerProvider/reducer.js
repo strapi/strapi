@@ -84,6 +84,15 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
+
+    case 'INIT_FORM': {
+      return state
+        .update('formErrors', () => fromJS({}))
+        .update('initialData', () => fromJS(action.initialValues))
+        .update('modifiedData', () => fromJS(action.initialValues))
+        .update('modifiedDZName', () => null)
+        .update('shouldCheckErrors', () => false);
+    }
     case 'INITIALIZE_FORM': {
       return state
         .update('isLoading', () => false)

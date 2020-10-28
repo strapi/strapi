@@ -1,7 +1,7 @@
+import { testData } from '../../testUtils';
 import removePasswordFieldsFromData from '../removePasswordFieldsFromData';
-import testData from './testData';
 
-describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
+describe('CONTENT MANAGER | utils', () => {
   describe('removePasswordFieldsFromData', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;
