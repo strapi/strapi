@@ -1,55 +1,55 @@
 # Update Strapi version
 
-How to upgrade your application to the latest version of Strapi.
+With this guide you will know how to upgrade your application to the latest version of Strapi.<br>
+Before you start make sure **your server is not running until the end** of the guide.
 
-## Upgrading your dependencies
+## Upgrade your dependencies
 
-Start by upgrading all your Strapi package version.
-
-For example moving from `3.0.4` to `3.0.5`
+Start by upgrading all your Strapi packages in your `package.json`.<br>
+For example upgrading from `3.2.4` to `3.2.5`:
 
 :::: tabs
 
-::: tab 3.0.5
+::: tab 3.2.4
 
 ```json
 {
   //...
   "dependencies": {
-    "strapi": "3.0.5",
-    "strapi-admin": "3.0.5",
-    "strapi-connector-bookshelf": "3.0.5",
-    "strapi-plugin-content-manager": "3.0.5",
-    "strapi-plugin-content-type-builder": "3.0.5",
-    "strapi-plugin-email": "3.0.5",
-    "strapi-plugin-graphql": "3.0.5",
-    "strapi-plugin-settings-manager": "3.0.5",
-    "strapi-plugin-upload": "3.0.5",
-    "strapi-plugin-users-permissions": "3.0.5",
-    "strapi-utils": "3.0.5"
+    "strapi": "3.2.4",
+    "strapi-admin": "3.2.4",
+    "strapi-connector-bookshelf": "3.2.4",
+    "strapi-plugin-content-manager": "3.2.4",
+    "strapi-plugin-content-type-builder": "3.2.4",
+    "strapi-plugin-email": "3.2.4",
+    "strapi-plugin-graphql": "3.2.4",
+    "strapi-plugin-upload": "3.2.4",
+    "strapi-plugin-users-permissions": "3.2.4",
+    "strapi-utils": "3.2.4"
+    //...
   }
 }
 ```
 
 :::
 
-::: tab 3.0.6
+::: tab 3.2.5
 
 ```json
 {
   //...
   "dependencies": {
-    "strapi": "3.0.6",
-    "strapi-admin": "3.0.6",
-    "strapi-connector-bookshelf": "3.0.6",
-    "strapi-plugin-content-manager": "3.0.6",
-    "strapi-plugin-content-type-builder": "3.0.6",
-    "strapi-plugin-email": "3.0.6",
-    "strapi-plugin-graphql": "3.0.6",
-    "strapi-plugin-settings-manager": "3.0.6",
-    "strapi-plugin-upload": "3.0.6",
-    "strapi-plugin-users-permissions": "3.0.6",
-    "strapi-utils": "3.0.6"
+    "strapi": "3.2.5",
+    "strapi-admin": "3.2.5",
+    "strapi-connector-bookshelf": "3.2.5",
+    "strapi-plugin-content-manager": "3.2.5",
+    "strapi-plugin-content-type-builder": "3.2.5",
+    "strapi-plugin-email": "3.2.5",
+    "strapi-plugin-graphql": "3.2.5",
+    "strapi-plugin-upload": "3.2.5",
+    "strapi-plugin-users-permissions": "3.2.5",
+    "strapi-utils": "3.2.5"
+    //...
   }
 }
 ```
@@ -58,70 +58,41 @@ For example moving from `3.0.4` to `3.0.5`
 
 ::::
 
-Install the specified version:
-:::: tabs
-
-::: tab yarn
-
-```bash
-yarn install
-```
-
-:::
-
-::: tab npm
-
-```bash
-npm install
-```
-
-:::
-
-::::
+After editing the file run either `yarn install` or `npm install` to install the specified version.
 
 ::: tip
-If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. If it still does not work, let's run the hard mode `rm -Rf node_modules`
+If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. If it still does not work, try again after also removing the folder `node_modules`.
 :::
 
-## Building your administration panel
+## Rebuild your administration panel
 
 New releases can introduce changes to the administration panel that require a rebuild.
-
-Start by deleting your current build:
-
-```bash
-rm -rf build
-```
-
-Build the administration panel:
-:::: tabs
-
-::: tab yarn
+Rebuild the admin panel with one of the following commands:
 
 ```bash
-yarn build
+yarn build --clean
+# or
+npm run build -- --clean
 ```
 
-:::
+## Extensions
 
-::: tab npm
-
-```bash
-npm run build
-```
-
-:::
-
-::::
-
-::: tip
-If the operation doesn't work, you should probably remove the `.cache` folder too.
-:::
+If you are using [extensions](../concepts/customization.md) to create custom code or modify existing code, you will need to update your code and compare your version to the new changes on the repository. Not updating your extensions can **break your app** in unexpected ways we cannot predict.
 
 ## Migration guides
 
-Sometimes Strapi introduces changes that need more than just the previous updates.
-
-That is the reason for the [Migration Guide](../migration-guide/README.md) page.
-
+Sometimes Strapi introduces **breaking changes** that need more than just the previous steps.
+That is the reason for the [Migration guides](../migration-guide/README.md) page.
 Just make sure when you update your version that a migration guide exists or not.
+
+## Start your application
+
+If you have followed the information above, you can start your application with:
+
+```bash
+yarn develop
+# or
+npm run develop
+```
+
+🎉 Congrats, your application has been migrated!
