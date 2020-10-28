@@ -31,7 +31,7 @@ describe('Content Manager single types', () => {
 
   test('Label is not pluralized', async () => {
     const res = await rq({
-      url: `/content-manager/schemas/content-types?kind=singleType`,
+      url: `/content-manager/content-types?kind=singleType`,
       method: 'GET',
     });
 
@@ -39,7 +39,9 @@ describe('Content Manager single types', () => {
     expect(res.body.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Single-type-model',
+          info: expect.objectContaining({
+            label: 'Single-type-model',
+          }),
         }),
       ])
     );
@@ -47,7 +49,7 @@ describe('Content Manager single types', () => {
 
   test('find single type content returns 404 when not created', async () => {
     const res = await rq({
-      url: `/content-manager/explorer/${uid}`,
+      url: `/content-manager/single-types/${uid}`,
       method: 'GET',
     });
 
@@ -56,8 +58,8 @@ describe('Content Manager single types', () => {
 
   test('Create content', async () => {
     const res = await rq({
-      url: `/content-manager/explorer/${uid}`,
-      method: 'POST',
+      url: `/content-manager/single-types/${uid}`,
+      method: 'PUT',
       body: {
         title: 'Title',
       },
@@ -72,7 +74,7 @@ describe('Content Manager single types', () => {
 
   test('find single type content returns an object ', async () => {
     const res = await rq({
-      url: `/content-manager/explorer/${uid}`,
+      url: `/content-manager/single-types/${uid}`,
       method: 'GET',
     });
 

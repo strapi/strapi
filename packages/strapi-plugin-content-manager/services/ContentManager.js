@@ -13,7 +13,7 @@ const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = webhookUtils.webhookEvents;
  * A set of functions called "actions" for `ContentManager`
  */
 module.exports = {
-  fetchAll(model, query) {
+  fetchAll(model, query = {}) {
     const { query: request, populate, ...filters } = query;
 
     const queryFilter = !_.isEmpty(request)
@@ -113,6 +113,7 @@ module.exports = {
       { params, data: { [PUBLISHED_AT_ATTRIBUTE]: null } },
       { model }
     );
+
     strapi.eventHub.emit(ENTRY_UNPUBLISH, {
       model: modelDef.modelName,
       entry: sanitizeEntity(unpublishedEntry, { model: modelDef }),

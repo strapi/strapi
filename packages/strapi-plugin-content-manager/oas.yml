@@ -305,9 +305,7 @@ paths:
                   type: object
                   properties:
                     id:
-                      oneOf:
-                        - type: string
-                        - type: integer
+                      $ref: '#/components/schemas/id'
                     '[primaryKey]':
                       oneOf:
                         - type: string
@@ -338,47 +336,129 @@ paths:
       tags:
         - Collection Types content management
       description: Get one entry
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
     put:
       tags:
         - Collection Types content management
       description: Update one entry
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
     delete:
       tags:
         - Collection Types content management
       description: Delete one entry
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
   /content-manager/collection-type/{model}/{id}/actions/publish:
     post:
       tags:
         - Collection Types content management
       description: Publish one entry
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
   /content-manager/collection-type/{model}/{id}/actions/unpublish:
     post:
       tags:
         - Collection Types content management
       description: Unpublish one entry
-
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
   # Single type
-  /content-manager/single-type/{model}:
+  /content-manager/single-types/{model}:
     get:
       tags:
         - Single Types content management
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
     put:
       tags:
         - Single Types content management
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
     delete:
       tags:
         - Single Types content management
-  /content-manager/single-type/{model}/actions/publish:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
+
+  /content-manager/single-types/{model}/actions/publish:
     post:
       tags:
         - Single Types content management
-  /content-manager/single-type/{model}/actions/unpublish:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
+
+  /content-manager/single-types/{model}/actions/unpublish:
     post:
       tags:
         - Single Types content management
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
 
 components:
   schemas:
+    id:
+      oneOf:
+        - type: string
+        - type: integer
+
+    entity:
+      type: object
+      required:
+        - id
+        - created_by
+        - updated_by
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        created_by:
+          $ref: '#/components/schemas/user'
+        updated_by:
+          $ref: '#/components/schemas/user'
+      additionalProperties:
+        type: any
+
     contentType:
       type: object
       properties:
@@ -520,6 +600,20 @@ components:
       enum:
         - singleType
         - collectionType
+
+    user:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
 
   examples:
     restaurant:

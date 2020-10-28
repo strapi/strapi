@@ -88,10 +88,81 @@
 
     {
       "method": "GET",
+      "path": "/single-types/:model",
+      "handler": "single-types.find",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/single-types/:model",
+      "handler": "single-types.createOrUpdate",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          [
+            "plugins::content-manager.hasPermissions",
+            [
+              "plugins::content-manager.explorer.create",
+              "plugins::content-manager.explorer.update"
+            ],
+            { "hasAtLeastOne": true }
+          ]
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/single-types/:model",
+      "handler": "single-types.delete",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/single-types/:model/actions/publish",
+      "handler": "single-types.publish",
+      "config": {
+        "policies": [
+          "routing",
+          "plugins::content-manager.has-draft-and-publish",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/single-types/:model/actions/unpublish",
+      "handler": "single-types.unpublish",
+      "config": {
+        "policies": [
+          "routing",
+          "plugins::content-manager.has-draft-and-publish",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+        ]
+      }
+    },
+
+    {
+      "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {
         "policies": ["routing", "admin::isAuthenticatedAdmin"]
+        
       }
     },
     {
