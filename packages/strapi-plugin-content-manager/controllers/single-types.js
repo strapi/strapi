@@ -1,10 +1,9 @@
 'use strict';
 
-const { prop, pipe, assoc, assign } = require('lodash/fp');
+const { omit, pipe, assoc, assign } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { getService } = require('../utils');
 const parseBody = require('../utils/parse-body');
-const { ACTIONS } = require('./constants');
 
 const {
   CREATED_BY_ATTRIBUTE,
@@ -12,8 +11,8 @@ const {
   PUBLISHED_AT_ATTRIBUTE,
 } = contentTypesUtils.constants;
 
-const pickPermittedFields = ({ pm, action, model }) => data => {
-  return pm.pickPermittedFieldsOf(data, { action, subject: model });
+const pickWritableFields = ({ model }) => {
+  return omit(contentTypesUtils.getNonWritableAttributes(strapi.getModel(model)));
 };
 
 const setCreatorFields = ({ user, isEdition = false }) => data => {
@@ -27,35 +26,35 @@ const setCreatorFields = ({ user, isEdition = false }) => data => {
   });
 };
 
+const findEntity = async model => {
+  const service = getService('entity');
+
+  return service.find({}, model).then(entity => service.assocCreateRoles(entity));
+};
+
 module.exports = {
   async find(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const pm = strapi.admin.services.permission.createPermissionsManager(
-      userAbility,
-      ACTIONS.read,
-      model
-    );
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const singleTypeService = getService('single-types');
-
-    const entity = await singleTypeService.fetchEntitiyWithCreatorRoles(model);
+    const entity = await findEntity(model);
 
     // allow user with create permission to know a single type is not created
     if (!entity) {
-      if (pm.ability.cannot(ACTIONS.create, model)) {
+      if (permissionChecker.cannot.create()) {
         return ctx.forbidden();
       }
 
       return ctx.notFound();
     }
 
-    if (pm.ability.cannot(ACTIONS.read, pm.toSubject(entity))) {
+    if (permissionChecker.cannot.read(entity)) {
       return ctx.forbidden();
     }
 
-    ctx.body = pm.sanitize(entity, { action: ACTIONS.read });
+    ctx.body = permissionChecker.sanitizeOutput(entity);
   },
 
   async createOrUpdate(ctx) {
@@ -64,151 +63,131 @@ module.exports = {
 
     const { data, files } = parseBody(ctx);
 
-    const singleTypeService = getService('single-types');
-    const existingEntity = await singleTypeService.fetchEntitiyWithCreatorRoles(model);
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    try {
-      if (!existingEntity) {
-        const pm = strapi.admin.services.permission.createPermissionsManager(
-          userAbility,
-          ACTIONS.create,
-          model
-        );
-
-        const sanitizedData = pipe([
-          pickPermittedFields({ pm, action: ACTIONS.create, model }),
-          setCreatorFields({ user }),
-        ])(data);
-
-        const entity = await singleTypeService.create({ data: sanitizedData, files }, { model });
-
-        ctx.body = pm.sanitize(entity, { action: ACTIONS.read });
-        return;
-      }
-
-      const pm = strapi.admin.services.permission.createPermissionsManager(
-        userAbility,
-        ACTIONS.edit,
-        model
-      );
-
-      if (pm.ability.cannot(ACTIONS.edit, pm.toSubject(existingEntity))) {
-        return strapi.errors.forbidden();
-      }
-
-      const sanitizedData = pipe([
-        pickPermittedFields({ pm, action: ACTIONS.edit, model: pm.toSubject(existingEntity) }),
-        setCreatorFields({ user, isEdition: true }),
-      ])(data);
-
-      const entity = await singleTypeService.update(
-        existingEntity,
-        { data: sanitizedData, files },
-        { model }
-      );
-
-      ctx.body = pm.sanitize(entity, { action: ACTIONS.read });
-    } catch (error) {
-      strapi.log.error(error);
-      ctx.badRequest(null, [
-        {
-          messages: [{ id: error.message, message: error.message, field: error.field }],
-          errors: prop('data.errors', error),
-        },
-      ]);
+    if (permissionChecker.cannot.create() && permissionChecker.cannot.update()) {
+      return ctx.forbidden();
     }
+
+    const entity = await findEntity(model);
+
+    const pickWritables = pickWritableFields({ model });
+
+    const pickPermittedFields = entity
+      ? data => permissionChecker.sanitizeInput.update(data, entity)
+      : permissionChecker.sanitizeInput.create;
+
+    const setCreator = entity
+      ? setCreatorFields({ user, isEdition: true })
+      : setCreatorFields({ user });
+
+    const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
+
+    if (!entity) {
+      const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
+
+      ctx.body = permissionChecker.sanitizeOutput(entity);
+
+      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      return;
+    }
+
+    if (permissionChecker.cannot.update(entity)) {
+      return ctx.forbidden();
+    }
+
+    const updatedEntity = await getService('entity').update(
+      entity,
+      { data: sanitizeFn(data), files },
+      model
+    );
+
+    ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
   },
 
   async delete(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const singleTypeService = getService('single-types');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const existingEntity = await singleTypeService.fetchEntitiyWithCreatorRoles(model);
-
-    const pm = strapi.admin.services.permission.createPermissionsManager(
-      userAbility,
-      ACTIONS.delete,
-      model
-    );
-
-    if (pm.ability.cannot(ACTIONS.delete, pm.toSubject(existingEntity))) {
-      return strapi.errors.forbidden();
+    if (permissionChecker.cannot.delete()) {
+      return ctx.forbidden();
     }
 
-    const deletedEntity = await singleTypeService.delete(existingEntity, { userAbility, model });
+    const existingEntity = await findEntity(model);
 
-    ctx.body = pm.sanitize(deletedEntity, { action: ACTIONS.read });
+    if (!existingEntity) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.delete(existingEntity)) {
+      return ctx.forbidden();
+    }
+
+    const deletedEntity = await getService('entity').delete(existingEntity, model);
+
+    ctx.body = permissionChecker.sanitizeOutput(deletedEntity);
   },
 
   async publish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const singleTypeService = getService('single-types');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const existingEntity = await singleTypeService.fetchEntitiyWithCreatorRoles(model);
+    if (permissionChecker.cannot.publish()) {
+      return ctx.forbidden();
+    }
+
+    const existingEntity = await findEntity(model);
 
     if (!existingEntity) {
       return ctx.notFound();
     }
 
-    const pm = strapi.admin.services.permission.createPermissionsManager(
-      userAbility,
-      ACTIONS.publish,
-      model
-    );
-
-    if (pm.ability.cannot(ACTIONS.publish, pm.toSubject(existingEntity))) {
+    if (permissionChecker.cannot.publish(existingEntity)) {
       return ctx.forbidden();
     }
 
+    // TODO: avoid doing it here and in the entity Service
     await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), existingEntity);
 
     if (existingEntity[PUBLISHED_AT_ATTRIBUTE]) {
-      return ctx.badRequest('Already published');
+      return ctx.badRequest('already.published');
     }
 
-    const publishedEntry = await getService('contentmanager').publish(
-      { id: existingEntity.id },
-      model
-    );
+    const publishedEntity = await getService('entity').publish(existingEntity, model);
 
-    ctx.body = pm.sanitize(publishedEntry, { action: ACTIONS.read });
+    ctx.body = permissionChecker.sanitizeOutput(publishedEntity);
   },
 
   async unpublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const singleTypeService = getService('single-types');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const existingEntity = await singleTypeService.fetchEntitiyWithCreatorRoles(model);
+    if (permissionChecker.cannot.unpublish()) {
+      return ctx.forbidden();
+    }
+
+    const existingEntity = await findEntity(model);
 
     if (!existingEntity) {
       return ctx.notFound();
     }
 
-    const pm = strapi.admin.services.permission.createPermissionsManager(
-      userAbility,
-      ACTIONS.publish,
-      model
-    );
-
-    if (pm.ability.cannot(ACTIONS.publish, pm.toSubject(existingEntity))) {
+    if (permissionChecker.cannot.unpublish(existingEntity)) {
       return ctx.forbidden();
     }
 
     if (!existingEntity[PUBLISHED_AT_ATTRIBUTE]) {
-      return ctx.badRequest('Already a draft');
+      return ctx.badRequest('already.draft');
     }
 
-    const unpublishedEntry = await getService('contentmanager').unpublish(
-      { id: existingEntity.id },
-      model
-    );
+    const unpublishedEntity = await getService('entity').unpublish(existingEntity, model);
 
-    ctx.body = pm.sanitize(unpublishedEntry, { action: ACTIONS.read });
+    ctx.body = permissionChecker.sanitizeOutput(unpublishedEntity);
   },
 };

@@ -158,11 +158,109 @@
 
     {
       "method": "GET",
+      "path": "/collection-types/:model",
+      "handler": "collection-types.find",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model",
+      "handler": "collection-types.create",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.create"]]
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/collection-types/:model/:id",
+      "handler": "collection-types.findOne",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/collection-types/:model/:id",
+      "handler": "collection-types.update",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/collection-types/:model/:id",
+      "handler": "collection-types.delete",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model/:id/actions/publish",
+      "handler": "collection-types.publish",
+      "config": {
+        "policies": [
+          "routing",
+          "plugins::content-manager.has-draft-and-publish",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model/:id/actions/unpublish",
+      "handler": "collection-types.unpublish",
+      "config": {
+        "policies": [
+          "routing",
+          "plugins::content-manager.has-draft-and-publish",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collection-types/:model/actions/bulkDelete",
+      "handler": "collection-types.bulkdDelete",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+        ]
+      }
+    },
+
+    {
+      "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {
         "policies": ["routing", "admin::isAuthenticatedAdmin"]
-        
       }
     },
     {

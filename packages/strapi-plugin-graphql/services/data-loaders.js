@@ -141,22 +141,28 @@ module.exports = {
     const ref = strapi.getModel(modelUID);
     const ast = ref.associations.find(ast => ast.alias === query.alias);
 
-    const params = {
-      ...query.options,
-      populate: ast ? [query.alias] : [],
-      query: {},
-      _start: 0, // Don't apply start or skip
-      _limit: -1, // Don't apply a limit
-    };
+    console.log(query);
 
-    params.query[`${query.alias}_in`] = _.chain(query.ids)
+    const ids = _.chain(query.ids)
       .filter(id => !_.isEmpty(id) || _.isInteger(id)) // Only keep valid ids
       .map(id => id.toString()) // convert ids to string
       .uniq() // Remove redundant ids
       .value();
 
+    const params = {
+      ...query.options,
+      [`${query.alias}_in`]: ids,
+      _start: 0, // Don't apply start or skip
+      _limit: -1, // Don't apply a limit
+    };
+
+    console.log(params);
+
     // Run query and remove duplicated ID.
-    return strapi.plugins['content-manager'].services['contentmanager'].fetchAll(modelUID, params);
+    return strapi.entityService.find(
+      { params, populate: ast ? [query.alias] : [] },
+      { model: modelUID }
+    );
   },
 
   extractQueries: function(modelUID, keys) {

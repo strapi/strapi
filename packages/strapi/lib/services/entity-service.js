@@ -8,6 +8,7 @@ const {
 } = require('strapi-utils');
 const uploadFiles = require('./utils/upload-files');
 
+// TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
 module.exports = ({ db, eventHub, entityValidator }) => ({

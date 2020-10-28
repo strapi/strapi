@@ -182,6 +182,7 @@ const ensureBoundPermissionsInDatabase = async () => {
           fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
         })
       );
+
       await createMany(permissions);
     }
   }
