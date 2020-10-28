@@ -114,7 +114,7 @@ Additional guides for optional software additions that compliment or improve the
 
 To provide the best possible environment for Strapi there are a few requirements, these apply in both a development (local) as well as a staging and production workflow.
 
-- Node LTS (v12 or V14) **Note that Node "odd" releases will never be supported (v13/v15)**
+- Node LTS (v12 or V14) **Note that odd-number releases of Node will never be supported (e.g. v13, v15).**
 - NPM v6 or whatever ships with the LTS Node versions
 - Typical standard build tools for your OS (the `build-essentials` package on most Debian-based systems)
 - At least 1 CPU core (Highly recommended at least 2)
