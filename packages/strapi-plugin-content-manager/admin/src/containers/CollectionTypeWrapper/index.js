@@ -148,7 +148,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
         strapi.notification.success(getTrad('success.record.save'));
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
-        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
+        dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
         replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
       } catch (err) {
@@ -160,6 +160,28 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
     },
     [displayErrors, replace, slug]
   );
+
+  const onPublish = useCallback(async () => {
+    try {
+      emitEventRef.current('willPublishEntry');
+      const endPoint = getRequestUrl(`${slug}/publish/${id}`);
+
+      dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
+
+      const data = await request(endPoint, { method: 'POST' });
+
+      emitEventRef.current('didPublishEntry');
+
+      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(data) });
+
+      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+
+      strapi.notification.success(getTrad('success.record.publish'));
+    } catch (err) {
+      displayErrors(err);
+      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+    }
+  }, [cleanReceivedDataFromPasswords, displayErrors, id, slug]);
 
   const onPut = useCallback(
     async (formData, trackerProperty) => {
@@ -193,6 +215,27 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
     [cleanReceivedDataFromPasswords, displayErrors, slug, id]
   );
 
+  const onUnpublish = useCallback(async () => {
+    const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
+    dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
+
+    try {
+      emitEventRef.current('willUnpublishEntry');
+
+      const response = await request(endPoint, { method: 'POST' });
+
+      emitEventRef.current('didUnpublishEntry');
+      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+
+      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+
+      strapi.notification.success(getTrad('success.record.unpublish'));
+    } catch (err) {
+      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+      displayErrors(err);
+    }
+  }, [cleanReceivedDataFromPasswords, displayErrors, id, slug]);
+
   return children({
     componentsDataStructure,
     contentTypeDataStructure,
@@ -200,7 +243,9 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
     isCreatingEntry,
     isLoadingForData: isLoading,
     onPost,
+    onPublish,
     onPut,
+    onUnpublish,
     status,
   });
 };

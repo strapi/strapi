@@ -96,7 +96,9 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
             isCreatingEntry,
             isLoadingForData,
             onPost,
+            onPublish,
             onPut,
+            onUnpublish,
             status,
           }) => {
             return (
@@ -111,7 +113,9 @@ const EditView = ({ components, currentEnvironment, models, plugins, slug }) => 
                 isLoadingForData={isLoadingForData}
                 isSingleType={false}
                 onPost={onPost}
+                onPublish={onPublish}
                 onPut={onPut}
+                onUnpublish={onUnpublish}
                 readActionAllowedFields={readActionAllowedFields}
                 // TODO check if needed
                 redirectToPreviousPage={goBack}

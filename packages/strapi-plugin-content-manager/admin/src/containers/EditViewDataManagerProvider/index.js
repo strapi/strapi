@@ -1,21 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { Prompt, Redirect, useLocation } from 'react-router-dom';
-import {
-  LoadingIndicatorPage,
-  request,
-  useGlobalContext,
-  OverlayBlocker,
-} from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import { getTrad, removePasswordFieldsFromData } from '../../utils';
-import pluginId from '../../pluginId';
-import init from './init';
+import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getFilesToUpload, getYupInnerErrors } from './utils';
-
-const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -29,7 +20,9 @@ const EditViewDataManagerProvider = ({
   isLoadingForData,
   isSingleType,
   onPost,
+  onPublish,
   onPut,
+  onUnpublish,
   readActionAllowedFields,
   // Not sure this is needed anymore
   redirectToPreviousPage,
@@ -37,7 +30,7 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const [reducerState, dispatch] = useReducer(reducer, initialState);
 
   const { state } = useLocation();
 
@@ -53,9 +46,6 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
 
-  // TODO: this should be in the reducer
-  const [, setStatus] = useState('resolved');
-
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
   const hasDraftAndPublish = useMemo(() => {
@@ -68,17 +58,6 @@ const EditViewDataManagerProvider = ({
 
   const { emitEvent, formatMessage } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-
-  const cleanReceivedDataFromPasswords = useCallback(
-    data => {
-      return removePasswordFieldsFromData(
-        data,
-        allLayoutData.contentType,
-        allLayoutData.components
-      );
-    },
-    [allLayoutData.components, allLayoutData.contentType]
-  );
 
   const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
     if (isLoadingForData) {
@@ -314,22 +293,6 @@ const EditViewDataManagerProvider = ({
     return shouldNotRunValidations ? { status: 'draft' } : {};
   }, [hasDraftAndPublish, shouldNotRunValidations]);
 
-  const displayErrors = useCallback(err => {
-    const errorPayload = err.response.payload;
-    console.error(errorPayload);
-
-    let errorMessage = get(errorPayload, ['message'], 'Bad Request');
-
-    // TODO handle errors correctly when back-end ready
-    if (Array.isArray(errorMessage)) {
-      errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
-    }
-
-    if (typeof errorMessage === 'string') {
-      strapi.notification.error(errorMessage);
-    }
-  }, []);
-
   const handleSubmit = useCallback(
     async e => {
       e.preventDefault();
@@ -338,11 +301,8 @@ const EditViewDataManagerProvider = ({
       // First validate the form
       try {
         await yupSchema.validate(modifiedData, { abortEarly: false });
-        console.log({ modifiedData });
 
         const formData = createFormData(modifiedData);
-
-        // console.log()
 
         if (isCreatingEntry) {
           onPost(formData, trackerProperty);
@@ -379,36 +339,7 @@ const EditViewDataManagerProvider = ({
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
 
-      // Show a loading button in the EditView/Header.js
-      setStatus('publish-pending');
-
-      try {
-        emitEventRef.current('willPublishEntry');
-
-        // Time to actually send the data
-        const data = await request(
-          getRequestUrl(`${slug}/publish/${modifiedData.id}`),
-          {
-            method: 'POST',
-          },
-          false,
-          false
-        );
-
-        emitEventRef.current('didPublishEntry');
-
-        setStatus('resolved');
-
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-          data: cleanReceivedDataFromPasswords(data),
-        });
-
-        strapi.notification.success(`${pluginId}.success.record.publish`);
-      } catch (err) {
-        displayErrors(err);
-        setStatus('resolved');
-      }
+      onPublish();
     } catch (err) {
       console.error('ValidationError');
       console.error(err);
@@ -420,47 +351,7 @@ const EditViewDataManagerProvider = ({
       type: 'SET_FORM_ERRORS',
       errors,
     });
-  }, [
-    allLayoutData,
-    cleanReceivedDataFromPasswords,
-    currentContentTypeLayout,
-    displayErrors,
-    isCreatingEntry,
-    modifiedData,
-    slug,
-  ]);
-
-  const handleUnpublish = useCallback(async () => {
-    try {
-      setStatus('unpublish-pending');
-
-      emitEventRef.current('willUnpublishEntry');
-
-      const data = await request(
-        getRequestUrl(`${slug}/unpublish/${modifiedData.id}`),
-        {
-          method: 'POST',
-        },
-        false,
-        false
-      );
-
-      emitEventRef.current('didUnpublishEntry');
-      setStatus('resolved');
-
-      dispatch({
-        type: 'SUBMIT_SUCCEEDED',
-        data: cleanReceivedDataFromPasswords(data),
-      });
-      strapi.notification.success(getTrad('success.record.unpublish'));
-    } catch (err) {
-      console.error({ err });
-      setStatus('resolved');
-
-      const errorMessage = get(err, ['response', 'payload', 'message'], 'SERVER ERROR');
-      strapi.notification.error(errorMessage);
-    }
-  }, [cleanReceivedDataFromPasswords, modifiedData.id, slug]);
+  }, [allLayoutData, currentContentTypeLayout, isCreatingEntry, modifiedData, onPublish]);
 
   const shouldCheckDZErrors = useCallback(
     dzName => {
@@ -634,7 +525,7 @@ const EditViewDataManagerProvider = ({
         moveRelation,
         onChange: handleChange,
         onPublish: handlePublish,
-        onUnpublish: handleUnpublish,
+        onUnpublish,
         onRemoveRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
@@ -685,7 +576,9 @@ EditViewDataManagerProvider.propTypes = {
   isLoadingForData: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
   onPost: PropTypes.func.isRequired,
+  onPublish: PropTypes.func.isRequired,
   onPut: PropTypes.func.isRequired,
+  onUnpublish: PropTypes.func.isRequired,
   readActionAllowedFields: PropTypes.array.isRequired,
   redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,
