@@ -1,6 +1,6 @@
 # Migrations guides
 
-Please also refer to the following [documentation](../guides/update-version.md) for a better understanding of how to update your project.
+Please also refer to the following [update guide](../guides/update-version.md) for a better understanding of how to update your project.
 
 ## Instructions
 
