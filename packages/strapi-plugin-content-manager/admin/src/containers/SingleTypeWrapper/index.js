@@ -36,7 +36,6 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
     [allLayoutData.components, allLayoutData.contentType]
   );
 
-  // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       acc[current] = createDefaultForm(
@@ -77,10 +76,9 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
       } catch (err) {
         const responseStatus = get(err, 'response.status', null);
 
-        // Creating an st
+        // Creating a single type
         if (responseStatus === 404) {
           dispatch({ type: 'INIT_FORM' });
-          // setIsCreatingEntry(true);
         }
 
         if (responseStatus === 403) {
@@ -132,10 +130,9 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       } catch (err) {
-        displayErrors(err);
-
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
 
+        displayErrors(err);
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
@@ -151,12 +148,10 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
       const data = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didPublishEntry');
+      strapi.notification.success(getTrad('success.record.publish'));
 
       dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(data) });
-
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
-
-      strapi.notification.success(getTrad('success.record.publish'));
     } catch (err) {
       displayErrors(err);
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
@@ -168,9 +163,9 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
       const endPoint = getRequestUrl(`${slug}/${id}`);
 
       try {
-        // Show a loading button in the EditView/Header.js && lock the app => no navigation
-        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
         emitEventRef.current('willEditEntry', trackerProperty);
+
+        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
         const response = await request(
           endPoint,
@@ -182,13 +177,11 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
         emitEventRef.current('didEditEntry', { trackerProperty });
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
-        // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       } catch (err) {
         displayErrors(err);
 
         emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
-        // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
@@ -206,11 +199,10 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
-
-      dispatch({ type: 'SET_STATUS', status: 'resolved' });
-
       strapi.notification.success(getTrad('success.record.unpublish'));
+
+      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+      dispatch({ type: 'SET_STATUS', status: 'resolved' });
     } catch (err) {
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
       displayErrors(err);

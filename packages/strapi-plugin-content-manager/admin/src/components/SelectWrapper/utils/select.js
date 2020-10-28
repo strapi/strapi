@@ -8,7 +8,6 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, t
     isCreatingEntry,
     createActionAllowedFields,
     readActionAllowedFields,
-    // slug,
     updateActionAllowedFields,
   } = useDataManager();
 
@@ -53,7 +52,6 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, t
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,
-    // slug,
   };
 }
 

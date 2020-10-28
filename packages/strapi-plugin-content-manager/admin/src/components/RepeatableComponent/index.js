@@ -86,7 +86,6 @@ const RepeatableComponent = ({
 
             return (
               <DraggedItem
-                // fields={fields}
                 componentFieldName={componentFieldName}
                 componentUid={componentUid}
                 doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
@@ -97,7 +96,6 @@ const RepeatableComponent = ({
                 isOpen={get(collapses, [index, 'isOpen'], false)}
                 key={get(collapses, [index, '_temp__id'], null)}
                 onClickToggle={() => {
-                  // Close all other collapses and open the selected one
                   toggleCollapses(index);
                 }}
                 removeCollapse={() => {

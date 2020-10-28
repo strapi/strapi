@@ -18,13 +18,11 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
   ] = useReducer(reducer, initialState);
-
   const emitEventRef = useRef(emitEvent);
 
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
   const from = get(state, 'from', '/');
-
   const isCreatingEntry = id === 'create';
 
   const fetchURL = useMemo(() => {
@@ -131,7 +129,6 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
 
   const onPost = useCallback(
     async (formData, trackerProperty) => {
-      // const formData = createFormData(data);
       const endPoint = getRequestUrl(slug);
 
       try {
@@ -149,13 +146,13 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
         strapi.notification.success(getTrad('success.record.save'));
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
+        // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
         replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
       } catch (err) {
-        displayErrors(err);
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
-        // Enable navigation and remove loaders
+        displayErrors(err);
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
@@ -174,7 +171,6 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
       emitEventRef.current('didPublishEntry');
 
       dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(data) });
-
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
       strapi.notification.success(getTrad('success.record.publish'));
@@ -189,9 +185,9 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
       const endPoint = getRequestUrl(`${slug}/${id}`);
 
       try {
-        // Show a loading button in the EditView/Header.js && lock the app => no navigation
-        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
         emitEventRef.current('willEditEntry', trackerProperty);
+
+        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
         const response = await request(
           endPoint,
@@ -203,13 +199,10 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
         emitEventRef.current('didEditEntry', { trackerProperty });
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
-        // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       } catch (err) {
-        displayErrors(err);
-
         emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
-        // Enable navigation and remove loaders
+        displayErrors(err);
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
@@ -218,6 +211,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
 
   const onUnpublish = useCallback(async () => {
     const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
+
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
 
     try {
@@ -226,11 +220,10 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
-
-      dispatch({ type: 'SET_STATUS', status: 'resolved' });
-
       strapi.notification.success(getTrad('success.record.unpublish'));
+
+      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+      dispatch({ type: 'SET_STATUS', status: 'resolved' });
     } catch (err) {
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
       displayErrors(err);
@@ -256,7 +249,6 @@ CollectionTypeWrapper.propTypes = {
     components: PropTypes.object.isRequired,
     contentType: PropTypes.object.isRequired,
   }).isRequired,
-  // allowedActions: PropTypes.object.isRequired,
   children: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
 };

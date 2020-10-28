@@ -1,27 +1,12 @@
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  useMemo,
-  // useRef,
-  memo,
-} from 'react';
+import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  // cloneDeep,
-  findIndex,
-  get,
-  isArray,
-  isEmpty,
-  // set,
-} from 'lodash';
+import { findIndex, get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-// import { getFieldName } from '../../utils';
 import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -33,7 +18,6 @@ import { A, BaselineAlignment } from './components';
 import { connect, select, styles } from './utils';
 
 function SelectWrapper({
-  // componentUid,
   description,
   displayNavigationLink,
   editable,
@@ -44,10 +28,8 @@ function SelectWrapper({
   mainField,
   name,
   relationType,
-  // slug,
   targetModel,
   placeholder,
-  //
   queryInfos,
 }) {
   // Disable the input in case of a polymorphic relation
@@ -279,7 +261,6 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
-  // componentUid: null,
   editable: true,
   description: '',
   label: '',
@@ -288,7 +269,6 @@ SelectWrapper.defaultProps = {
 };
 
 SelectWrapper.propTypes = {
-  // componentUid: PropTypes.string,
   displayNavigationLink: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   description: PropTypes.string,
@@ -300,7 +280,6 @@ SelectWrapper.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
-  // slug: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.exact({
     containsKey: PropTypes.string.isRequired,
