@@ -56,6 +56,7 @@ const RepeatableComponent = ({
   }, [componentValueLength]);
 
   const { collapses } = state.toJS();
+
   const toggleCollapses = index => {
     dispatch({
       type: 'TOGGLE_COLLAPSE',
@@ -79,6 +80,7 @@ const RepeatableComponent = ({
       )}
       <div ref={drop}>
         {componentValueLength > 0 &&
+          componentValueLength === collapses.length &&
           componentValue.map((data, index) => {
             const componentFieldName = `${name}.${index}`;
             const doesPreviousFieldContainErrorsAndIsOpen =

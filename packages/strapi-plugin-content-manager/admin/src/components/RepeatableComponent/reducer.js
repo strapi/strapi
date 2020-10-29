@@ -37,7 +37,7 @@ const reducer = (state, action) => {
 
           const newCollapses = Array.from({ length: collapsesLength }).map((_, i) => {
             const shouldOpenLastCollapse = state.get('shouldOpenLastCollapse');
-            const isOpen = shouldOpenLastCollapse && i === action.dataLength.length - 1;
+            const isOpen = shouldOpenLastCollapse && i === action.dataLength - 1;
 
             return {
               isOpen,
