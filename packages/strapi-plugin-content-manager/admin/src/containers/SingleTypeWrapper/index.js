@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useReducer } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
@@ -8,15 +8,10 @@ import { getRequestUrl } from './utils';
 import reducer, { initialState } from './reducer';
 
 // This container is used to handle the data fetching management part
-const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
+const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push } = useHistory();
-  const { state } = useLocation();
   const emitEventRef = useRef(emitEvent);
-
-  // Here in case of a 403 response when fetching data we will either redirect to the previous page
-  // Or to the homepage if there's no state in the history stack
-  const from = get(state, 'from', '/');
 
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isCreatingEntry, isLoading, status },
@@ -223,12 +218,17 @@ const SingleTypeWrapper = ({ allLayoutData, children, slug }) => {
   });
 };
 
+SingleTypeWrapper.defaultProps = {
+  from: '/',
+};
+
 SingleTypeWrapper.propTypes = {
   allLayoutData: PropTypes.shape({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.object.isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
+  from: PropTypes.string,
   slug: PropTypes.string.isRequired,
 };
 

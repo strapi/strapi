@@ -37,14 +37,19 @@ import InformationCard from './InformationCard';
 const EditView = ({ components, currentEnvironment, models, isSingleType, plugins, slug }) => {
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
   const { goBack } = useHistory();
+  // Legacy to remove for the configurations
+  const { pathname, state } = useLocation();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
     viewPermissions
   );
   const userPermissions = useUser();
-  // Legacy to remove for the configurations
-  const { pathname } = useLocation();
+
+  // Here in case of a 403 response when fetching data we will either redirect to the previous page
+  // Or to the homepage if there's no state in the history stack
+  const from = get(state, 'from', '/');
+
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -126,6 +131,7 @@ const EditView = ({ components, currentEnvironment, models, isSingleType, plugin
                 createActionAllowedFields={createActionAllowedFields}
                 componentsDataStructure={componentsDataStructure}
                 contentTypeDataStructure={contentTypeDataStructure}
+                from={from}
                 initialValues={data}
                 isCreatingEntry={isCreatingEntry}
                 isLoadingForData={isLoadingForData}

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
-import { Prompt, Redirect, useLocation } from 'react-router-dom';
+import { Prompt, Redirect } from 'react-router-dom';
 import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import { getTrad } from '../../utils';
@@ -15,6 +15,7 @@ const EditViewDataManagerProvider = ({
   componentsDataStructure,
   contentTypeDataStructure,
   createActionAllowedFields,
+  from,
   initialValues,
   isCreatingEntry,
   isLoadingForData,
@@ -31,13 +32,6 @@ const EditViewDataManagerProvider = ({
   updateActionAllowedFields,
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-
-  const { state } = useLocation();
-
-  // Here in case of a 403 response when fetching data we will either redirect to the previous page
-  // Or to the homepage if there's no state in the history stack
-  const from = get(state, 'from', '/');
-
   const {
     formErrors,
     initialData,
@@ -561,6 +555,7 @@ const EditViewDataManagerProvider = ({
 };
 
 EditViewDataManagerProvider.defaultProps = {
+  from: '/',
   redirectToPreviousPage: () => {},
 };
 
@@ -571,6 +566,7 @@ EditViewDataManagerProvider.propTypes = {
   componentsDataStructure: PropTypes.object.isRequired,
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,
+  from: PropTypes.string,
   initialValues: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   isLoadingForData: PropTypes.bool.isRequired,

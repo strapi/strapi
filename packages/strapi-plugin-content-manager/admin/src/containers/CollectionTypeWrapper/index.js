@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import { useParams, useLocation, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
@@ -9,10 +9,10 @@ import { getRequestUrl } from './utils';
 import reducer, { initialState } from './reducer';
 
 // This container is used to handle the data fetching management part
-const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
+const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
-  const { state } = useLocation();
+
   const { id } = useParams();
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
@@ -20,9 +20,6 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
   ] = useReducer(reducer, initialState);
   const emitEventRef = useRef(emitEvent);
 
-  // Here in case of a 403 response when fetching data we will either redirect to the previous page
-  // Or to the homepage if there's no state in the history stack
-  const from = get(state, 'from', '/');
   const isCreatingEntry = id === 'create';
 
   const fetchURL = useMemo(() => {
@@ -244,12 +241,17 @@ const CollectionTypeWrapper = ({ allLayoutData, children, slug }) => {
   });
 };
 
+CollectionTypeWrapper.defaultProps = {
+  from: '/',
+};
+
 CollectionTypeWrapper.propTypes = {
   allLayoutData: PropTypes.shape({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.object.isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
+  from: PropTypes.string,
   slug: PropTypes.string.isRequired,
 };
 
