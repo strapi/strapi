@@ -1,2 +1,4 @@
-// eslint-disable-next-line import/prefer-default-export
+import { permissions } from './data';
+
 export { default as testData } from './data';
+export { permissions };

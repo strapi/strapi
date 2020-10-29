@@ -1,9 +1,7 @@
 import getFieldsActionMatchingPermissions from '../getFieldsActionMatchingPermissions';
-import { testData } from '../../../../testUtils';
+import { permissions } from '../../../../testUtils';
 
-const { permissions } = testData;
-
-describe('CONTENT MANAGER | CONTAINERS | EditViewDataManager | utils | getFieldsActionMatchingPermissions', () => {
+describe('CONTENT MANAGER | CONTAINERS | EditView | utils | getFieldsActionMatchingPermissions', () => {
   it('should return an object with all the allowed action for the fields', () => {
     const expected = {
       createActionAllowedFields: [],
