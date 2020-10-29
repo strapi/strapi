@@ -84,14 +84,20 @@ const InputUID = ({
 
   const checkAvailability = async () => {
     setIsLoading(true);
+
     const requestURL = getRequestUrl('explorer/uid/check-availability');
+
+    if (!value) {
+      return;
+    }
+
     try {
       const data = await request(requestURL, {
         method: 'POST',
         body: {
           contentTypeUID,
           field: name,
-          value: value ? value.trim() : null,
+          value: value ? value.trim() : '',
         },
       });
       setAvailability(data);

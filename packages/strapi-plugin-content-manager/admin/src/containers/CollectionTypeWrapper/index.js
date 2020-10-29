@@ -124,6 +124,34 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     }
   }, []);
 
+  const onDelete = useCallback(
+    async trackerProperty => {
+      try {
+        emitEventRef.current('willDeleteEntry', trackerProperty);
+
+        const response = await request(getRequestUrl(`${slug}/${id}`), {
+          method: 'DELETE',
+        });
+
+        strapi.notification.success(getTrad('success.record.delete'));
+
+        emitEventRef.current('didDeleteEntry', trackerProperty);
+
+        return Promise.resolve(response);
+      } catch (err) {
+        emitEventRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
+
+        return Promise.reject(err);
+      }
+    },
+    [id, slug]
+  );
+
+  const onDeleteSucceeded = useCallback(() => {
+    console.log({ from });
+    replace(from);
+  }, [from, replace]);
+
   const onPost = useCallback(
     async (formData, trackerProperty) => {
       const endPoint = getRequestUrl(slug);
@@ -233,6 +261,8 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     data,
     isCreatingEntry,
     isLoadingForData: isLoading,
+    onDelete,
+    onDeleteSucceeded,
     onPost,
     onPublish,
     onPut,

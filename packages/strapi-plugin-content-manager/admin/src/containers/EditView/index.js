@@ -111,13 +111,15 @@ const EditView = ({ components, currentEnvironment, models, isSingleType, plugin
       models={models}
     >
       <ContentTypeLayoutContext.Provider value={layout}>
-        <DataManagementWrapper allLayoutData={layout} slug={slug}>
+        <DataManagementWrapper allLayoutData={layout} from={from} slug={slug}>
           {({
             componentsDataStructure,
             contentTypeDataStructure,
             data,
             isCreatingEntry,
             isLoadingForData,
+            onDelete,
+            onDeleteSucceeded,
             onPost,
             onPublish,
             onPut,
@@ -268,7 +270,13 @@ const EditView = ({ components, currentEnvironment, models, isSingleType, plugin
                             currentEnvironment,
                             slug
                           )}
-                          {allowedActions.canDelete && <DeleteLink />}
+                          {allowedActions.canDelete && (
+                            <DeleteLink
+                              isCreatingEntry={isCreatingEntry}
+                              onDelete={onDelete}
+                              onDeleteSucceeded={onDeleteSucceeded}
+                            />
+                          )}
                         </ul>
                       </LinkWrapper>
                     </div>
