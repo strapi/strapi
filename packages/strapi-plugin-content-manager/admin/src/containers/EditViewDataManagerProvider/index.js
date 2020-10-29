@@ -205,7 +205,7 @@ const EditViewDataManagerProvider = ({
       }
 
       dispatch({
-        type: 'SET_ERRORS',
+        type: 'SET_FORM_ERRORS',
         errors,
       });
     },
@@ -440,39 +440,11 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  // TODO: same here I am not sure this is needed anymore
-  const deleteSuccess = () => {
-    dispatch({
-      type: 'DELETE_SUCCEEDED',
-    });
-  };
-
-  // TODO: I am not sure this is needed anymore
-  const resetData = () => {
-    dispatch({
-      type: 'RESET_DATA',
-    });
-  };
-
-  // TODO
-  const clearData = useCallback(() => {
-    if (isSingleType) {
-      // setIsCreatingEntry(true);
-      console.log('TODO');
-    }
-
-    dispatch({
-      type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
-      contentTypeDataStructure: {},
-    });
-  }, [isSingleType]);
-
-  // TODO switch to useCallback and improve logic
-  const triggerFormValidation = () => {
+  const triggerFormValidation = useCallback(() => {
     dispatch({
       type: 'TRIGGER_FORM_VALIDATION',
     });
-  };
+  }, []);
 
   const overlayBlockerParams = useMemo(
     () => ({
@@ -501,9 +473,7 @@ const EditViewDataManagerProvider = ({
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
-        clearData,
         createActionAllowedFields,
-        deleteSuccess,
         formErrors,
         hasDraftAndPublish,
         initialData,
@@ -526,7 +496,6 @@ const EditViewDataManagerProvider = ({
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
-        resetData,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,

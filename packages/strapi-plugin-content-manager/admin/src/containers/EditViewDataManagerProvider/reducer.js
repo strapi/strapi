@@ -4,7 +4,6 @@ const initialState = fromJS({
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   formErrors: {},
-  isLoading: true,
   initialData: {},
   modifiedData: {},
   shouldCheckErrors: false,
@@ -76,15 +75,6 @@ const reducer = (state, action) => {
 
         return fromJS([el]);
       });
-    case 'GET_DATA': {
-      return state.update('isLoading', () => true);
-    }
-    case 'GET_DATA_SUCCEEDED':
-      return state
-        .update('initialData', () => fromJS(action.data))
-        .update('modifiedData', () => fromJS(action.data))
-        .update('isLoading', () => false);
-
     case 'INIT_FORM': {
       return state
         .update('formErrors', () => fromJS({}))
@@ -92,12 +82,6 @@ const reducer = (state, action) => {
         .update('modifiedData', () => fromJS(action.initialValues))
         .update('modifiedDZName', () => null)
         .update('shouldCheckErrors', () => false);
-    }
-    case 'INITIALIZE_FORM': {
-      return state
-        .update('isLoading', () => false)
-        .update('initialData', () => state.get('contentTypeDataStructure'))
-        .update('modifiedData', () => state.get('contentTypeDataStructure'));
     }
     case 'MOVE_COMPONENT_FIELD':
       return state.updateIn(['modifiedData', ...action.pathToComponent], list => {
@@ -204,65 +188,16 @@ const reducer = (state, action) => {
         })
         .deleteIn(componentPathToRemove);
     }
-
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
-    case 'RESET_FORM': {
-      return state
-        .update('formErrors', () => fromJS({}))
-        .update('initialData', () => state.get('contentTypeDataStructure'))
-        .update('modifiedData', () => state.get('contentTypeDataStructure'))
-        .update('shouldCheckErrors', () => false)
-        .update('modifiedDzName', () => null);
-    }
-    case 'RESET_DATA':
-      return state
-        .update('modifiedData', () => state.get('initialData'))
-        .update('formErrors', () => fromJS({}));
-
-    case 'RESET_PROPS':
-      return initialState;
     case 'SET_DEFAULT_DATA_STRUCTURES':
       return state
         .update('componentsDataStructure', () => fromJS(action.componentsDataStructure))
         .update('contentTypeDataStructure', () => fromJS(action.contentTypeDataStructure));
-    case 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE':
-      return state
-        .update('isLoading', () => false)
-        .update('initialData', () => fromJS(action.contentTypeDataStructure))
-        .update('modifiedData', () => fromJS(action.contentTypeDataStructure));
-    case 'SET_ERRORS':
+    case 'SET_FORM_ERRORS': {
       return state
         .update('modifiedDZName', () => null)
         .update('formErrors', () => fromJS(action.errors));
-    // TODO
-    case 'SET_FORM_ERRORS': {
-      return state.update('formErrors', () => fromJS(action.errors));
-    }
-    case 'SUBMIT_ERRORS':
-    case 'PUBLISH_ERRORS':
-      return state
-        .update('formErrors', () => fromJS(action.errors))
-        .update('shouldShowLoadingState', () => false);
-    // TODO case not used anymore
-    case 'UNPUBLISH_SUCCESS':
-    case 'PUBLISH_SUCCESS':
-      return state
-        .update('isLoading', () => false)
-        .update('modifiedData', () => fromJS(action.data))
-        .update('initialData', () => fromJS(action.data));
-    // TODO: SUBMIT_SUCCESS case not used anymore
-    case 'SUBMIT_SUCCESS':
-    case 'DELETE_SUCCEEDED':
-      return state
-        .update('isLoading', () => false)
-        .update('formErrors', () => fromJS({}))
-        .update('initialData', () => state.get('modifiedData'));
-    case 'SUBMIT_SUCCEEDED': {
-      return state
-        .update('formErrors', () => fromJS({}))
-        .update('initialData', () => fromJS(action.data))
-        .update('modifiedData', () => fromJS(action.data));
     }
     case 'TRIGGER_FORM_VALIDATION':
       return state.update('shouldCheckErrors', v => {
