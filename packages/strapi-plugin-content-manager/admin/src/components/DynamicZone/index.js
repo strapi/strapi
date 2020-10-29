@@ -102,12 +102,6 @@ const DynamicZone = ({
     return groupBy(componentsWithInfos, 'category');
   }, [dynamicZoneAvailableComponents, getDynamicComponent]);
 
-  // useEffect(() => {
-  //   if (dynamicComponentCategories.length === 1) {
-  //     setIndexCategory(0);
-  //   }
-  // }, [dynamicComponentCategories]);
-
   const handleClickToggle = useCallback(
     categoryName => {
       const nextCategoryToOpen = categoryToOpen === categoryName ? '' : categoryName;
