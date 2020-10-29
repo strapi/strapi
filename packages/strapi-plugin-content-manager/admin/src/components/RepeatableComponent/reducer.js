@@ -1,32 +1,21 @@
 import { fromJS } from 'immutable';
 
-const initialState = fromJS({ collapses: [] });
-
-const getMax = arr => {
-  if (arr.size === 0) {
-    return -1;
-  }
-
-  return Math.max.apply(Math, arr.toJS().map(o => o._temp__id));
-};
+const initialState = fromJS({ collapses: [], shouldOpenLastCollapse: false });
 
 const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NEW_FIELD':
-      return state.update('collapses', list => {
-        return list
-          .map(obj => obj.update('isOpen', () => false))
-          .push(fromJS({ isOpen: true, _temp__id: getMax(list) + 1 }));
-      });
+      return state
+        .update('collapses', list => {
+          return list.map(obj => obj.update('isOpen', () => false));
+        })
+        .set('shouldOpenLastCollapse', true);
     case 'MOVE_COLLAPSE':
       return state.updateIn(['collapses'], list => {
         const oldList = list;
         const newList = list
           .delete(action.dragIndex)
-          .insert(
-            action.hoverIndex,
-            state.getIn(['collapses', action.dragIndex])
-          );
+          .insert(action.hoverIndex, state.getIn(['collapses', action.dragIndex]));
 
         // Fix for
         // https://github.com/react-dnd/react-dnd/issues/1368
@@ -41,6 +30,25 @@ const reducer = (state, action) => {
 
         return newList;
       });
+    case 'SET_COLLAPSES': {
+      return state
+        .update('collapses', () => {
+          const collapsesLength = action.dataLength;
+
+          const newCollapses = Array.from({ length: collapsesLength }).map((_, i) => {
+            const shouldOpenLastCollapse = state.get('shouldOpenLastCollapse');
+            const isOpen = shouldOpenLastCollapse && i === action.dataLength.length - 1;
+
+            return {
+              isOpen,
+              _temp__id: i,
+            };
+          });
+
+          return fromJS(newCollapses);
+        })
+        .set('shouldOpenLastCollapse', false);
+    }
     case 'TOGGLE_COLLAPSE':
       return state.update('collapses', list => {
         return list.map((obj, index) => {

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useMemo, useReducer } from 'react';
+import React, { memo, useEffect, useMemo, useReducer } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get, take } from 'lodash';
@@ -13,7 +13,6 @@ import select from './utils/select';
 import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
 import EmptyComponent from './EmptyComponent';
-import init from './init';
 import reducer, { initialState } from './reducer';
 
 const RepeatableComponent = ({
@@ -49,9 +48,13 @@ const RepeatableComponent = ({
   // We need to synchronize the collapses array with the data
   // The key needed for react in the list will be the one from the collapses data
   // This way we don't have to mutate the data when it is received and we can use a unique key
-  const [state, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, componentValue)
-  );
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Synchronize the collapse only when the length of the component's value changes
+  useEffect(() => {
+    dispatch({ type: 'SET_COLLAPSES', dataLength: componentValueLength });
+  }, [componentValueLength]);
+
   const { collapses } = state.toJS();
   const toggleCollapses = index => {
     dispatch({

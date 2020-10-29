@@ -2,13 +2,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from 're
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { cloneDeep, get, set } from 'lodash';
-import {
-  // utils
-  request,
-  // contexts
-  // TODO add emit event
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { request, useGlobalContext } from 'strapi-helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';

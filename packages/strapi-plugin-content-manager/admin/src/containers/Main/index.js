@@ -92,6 +92,9 @@ function Main({
     };
   }, [getDataRef]);
 
+  // This effect is fetching the layout of each content type, however the logic of fetching a specific
+  // ct has been re introduced in the EditView with the useFetchContentType hook this causes, sometimes, the layout to be fetched twice
+  // I am leaving this legacy for now and will redo the logic when the back-end when the endpoints for the single types and the collection types will be split
   useEffect(() => {
     if (shouldShowLoader) {
       getLayoutRef.current(slug);

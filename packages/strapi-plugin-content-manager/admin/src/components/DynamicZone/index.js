@@ -20,7 +20,6 @@ import Picker from './Picker';
 
 const DynamicZone = ({
   name,
-
   // Passed with the select function
   addComponentToDynamicZone,
   formErrors,
@@ -31,7 +30,6 @@ const DynamicZone = ({
   moveComponentDown,
   removeComponentFromDynamicZone,
   dynamicDisplayedComponents,
-
   fieldSchema,
   metadatas,
 }) => {
@@ -69,7 +67,6 @@ const DynamicZone = ({
     [addComponentToDynamicZone, hasError, name]
   );
 
-  // TODO
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <BaselineAlignement>
@@ -78,7 +75,6 @@ const DynamicZone = ({
     );
   }
 
-  // TODO
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
       <BaselineAlignement>
@@ -198,10 +194,7 @@ DynamicZone.propTypes = {
   isFieldReadable: PropTypes.bool.isRequired,
   metadatas: PropTypes.shape({
     description: PropTypes.string,
-    // editable: PropTypes.bool,
     label: PropTypes.string,
-    // placeholder: PropTypes.string,
-    // visible: PropTypes.bool,
   }).isRequired,
   moveComponentUp: PropTypes.func.isRequired,
   moveComponentDown: PropTypes.func.isRequired,

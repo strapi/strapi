@@ -31,12 +31,9 @@ import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
-
-// TODO check needed props
 const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
   const { goBack } = useHistory();
-  // Legacy to remove for the configurations
   const { pathname, state } = useLocation();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
@@ -98,6 +95,8 @@ const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
   if (isLoadingForPermissions) {
     return <LoadingIndicatorPage />;
   }
+
+  // TODO: create a hook to handle/provide the permissions this should be done for the i18n feature
 
   return (
     <ContentTypeLayoutContext.Provider value={layout}>

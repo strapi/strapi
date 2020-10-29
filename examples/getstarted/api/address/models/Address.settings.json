@@ -16,9 +16,7 @@
   },
   "attributes": {
     "postal_coder": {
-      "type": "string",
-      "minLength": 3,
-      "default": "test"
+      "type": "string"
     },
     "categories": {
       "collection": "category",
@@ -52,30 +50,6 @@
     "likes": {
       "collection": "like",
       "via": "address"
-    },
-    "dish": {
-      "type": "component",
-      "repeatable": true,
-      "component": "default.dish",
-      "required": true,
-      "min": 1
-    },
-    "test": {
-      "collection": "category"
-    },
-    "enum": {
-      "type": "enumeration",
-      "enum": [
-        "un",
-        "deux"
-      ]
-    },
-    "address": {
-      "model": "address"
-    },
-    "admin_user": {
-      "plugin": "admin",
-      "model": "user"
     }
   }
 }
