@@ -5,10 +5,10 @@ import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
+import { crudInitialState, crudReducer } from '../../sharedReducers';
 import { getRequestUrl } from './utils';
-import reducer, { initialState } from './reducer';
 
-// This container is used to handle the data fetching management part
+// This container is used to handle the CRUD
 const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
@@ -17,7 +17,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
-  ] = useReducer(reducer, initialState);
+  ] = useReducer(crudReducer, crudInitialState);
   const emitEventRef = useRef(emitEvent);
 
   const isCreatingEntry = id === 'create';

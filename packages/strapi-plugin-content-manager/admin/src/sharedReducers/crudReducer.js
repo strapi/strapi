@@ -1,32 +1,34 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 
-const initialState = {
+// NOTE: instead of creating a shared reducer here, we could also create a hook
+// that returns the dispatch and the state, however it will mess with the linter
+// and force us to either disable the linter for the hooks dependencies array rule or
+// require us to add the dispatch to the array wich is not wanted. This refacto does not require us to
+// to do any of this.
+
+const crudInitialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
-  isCreatingEntry: true,
   isLoading: true,
   data: {},
   status: 'resolved',
 };
 
-const reducer = (state, action) =>
+const crudReducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'GET_DATA': {
-        draftState.isCreatingEntry = true;
         draftState.isLoading = true;
         draftState.data = {};
         break;
       }
       case 'GET_DATA_SUCCEEDED': {
-        draftState.isCreatingEntry = false;
         draftState.isLoading = false;
         draftState.data = action.data;
         break;
       }
       case 'INIT_FORM': {
-        draftState.isCreatingEntry = true;
         draftState.isLoading = false;
         draftState.data = state.contentTypeDataStructure;
         break;
@@ -42,8 +44,6 @@ const reducer = (state, action) =>
       }
       case 'SUBMIT_SUCCEEDED': {
         draftState.data = action.data;
-        draftState.isCreatingEntry = false;
-
         break;
       }
       default:
@@ -51,5 +51,5 @@ const reducer = (state, action) =>
     }
   });
 
-export default reducer;
-export { initialState };
+export default crudReducer;
+export { crudInitialState };

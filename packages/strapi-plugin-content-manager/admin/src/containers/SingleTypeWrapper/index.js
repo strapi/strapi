@@ -1,22 +1,23 @@
-import { memo, useCallback, useEffect, useRef, useReducer } from 'react';
+import { memo, useCallback, useEffect, useRef, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
+import { crudInitialState, crudReducer } from '../../sharedReducers';
 import { getRequestUrl } from './utils';
-import reducer, { initialState } from './reducer';
 
-// This container is used to handle the data fetching management part
+// This container is used to handle the CRUD
 const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push } = useHistory();
   const emitEventRef = useRef(emitEvent);
+  const [isCreatingEntry, setIsCreatingEntry] = useState(true);
 
   const [
-    { componentsDataStructure, contentTypeDataStructure, data, isCreatingEntry, isLoading, status },
+    { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
-  ] = useReducer(reducer, initialState);
+  ] = useReducer(crudReducer, crudInitialState);
 
   const id = get(data, 'id', '');
 
@@ -61,6 +62,8 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     const fetchData = async signal => {
       dispatch({ type: 'GET_DATA' });
 
+      setIsCreatingEntry(true);
+
       try {
         const data = await request(getRequestUrl(slug), { method: 'GET', signal });
 
@@ -68,6 +71,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
           type: 'GET_DATA_SUCCEEDED',
           data: cleanReceivedDataFromPasswords(data),
         });
+        setIsCreatingEntry(false);
       } catch (err) {
         const responseStatus = get(err, 'response.status', null);
 
@@ -123,6 +127,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         strapi.notification.success(getTrad('success.record.save'));
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+        setIsCreatingEntry(false);
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       } catch (err) {
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
