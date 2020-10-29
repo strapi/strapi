@@ -1,0 +1,52 @@
+{
+  "name": "strapi-provider-email-nodemailer",
+  "version": "3.2.5",
+  "description": "Nodemailer provider for Strapi 3",
+  "main": "./lib",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "lodash": "4.17.19",
+    "nodemailer": "6.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git"
+  },
+  "keywords": [
+    "Strapi",
+    "Email",
+    "Provider",
+    "Strapi 3"
+  ],
+  "author": {
+    "name": "Yurii Tykhomyrov"
+  },
+  "contributors": [
+    {
+      "name": "Veit Bjarsch",
+      "email": "vb@poweruplink.com",
+      "url": "https://poweruplink.com"
+    },
+    {
+      "name": "Saunved Mutalik"
+    },
+    {
+      "name": "Robert Schäfer",
+      "email": "git@roschaefer.de"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "homepage": "https://github.com/strapi/strapi/tree/master/packages/strapi-provider-email-nodemailer"
+}
