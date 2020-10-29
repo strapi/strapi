@@ -28,7 +28,7 @@ This project and everyone participating in it are governed by the [Strapi Code o
 
 ## Documentation
 
-Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation branch](https://github.com/strapi/strapi/tree/documentation) **not** towards the master branch. Any PRs made towards the master branch will not be released until the next Strapi version release.
+All issues, requests, changes, and anything related to our documentation will need to be done on our [Documentation repository](https://github.com/strapi/documentation). Please note that if you are contributing a new feature or changing an existing one, you may be asked to update the documentation and this will require a separate pull request to the documentation repository.
 
 ## Bugs
 

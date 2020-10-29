@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Strapi Documentation requests and bug reports
+    url: https://github.com/strapi/documentation
+    about: Please see our documentation repository.
   - name: Strapi Questions and Discussions
     url: https://forum.strapi.io
     about: Please ask and answer questions on our forums.

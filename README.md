@@ -151,6 +151,9 @@ Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-gui
 
 Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
 
+## Documentation
+Please see our [documentation repo](https://github.com/strapi/documentation) for contributing to our docs.
+
 ## License
 
 See the [LICENSE](./LICENSE) file for licensing information.
