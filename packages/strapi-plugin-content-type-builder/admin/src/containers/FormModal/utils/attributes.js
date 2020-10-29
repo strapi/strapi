@@ -1,4 +1,4 @@
-const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
+const getAttributes = (dataTarget = '', targetUid, nestedComponents, customFields = []) => {
   const defaultAttributes = [
     [
       'text',
@@ -28,6 +28,15 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
 
   if (canAddComponentInAnotherComponent) {
     items.push(['component']);
+  }
+
+  if (customFields.length) {
+    const alreadyPresentFields = items.flat();
+    const uniqueCustomFields = customFields.filter(field => !alreadyPresentFields.includes(field));
+
+    if (uniqueCustomFields.length) {
+      items.push(uniqueCustomFields);
+    }
   }
 
   return items;

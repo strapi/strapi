@@ -27,13 +27,13 @@ class FieldApi {
   };
 
   registerField = field => {
-    const { type, Component } = field;
+    const { type, Component, collectionType, icon, pluginId } = field;
 
     invariant(Component, 'A Component must be provided');
     invariant(type, 'A type must be provided');
     invariant(this.fields[type] === undefined, 'A similar field already exists');
 
-    this.fields[type] = { Component };
+    this.fields[type] = { Component, collectionType, icon, pluginId };
   };
 
   removeField = type => {

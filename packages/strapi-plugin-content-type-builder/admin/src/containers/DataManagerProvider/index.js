@@ -6,6 +6,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
+  useStrapi,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -28,6 +29,7 @@ import {
   formatMainDataType,
   getCreatedAndModifiedComponents,
   sortContentType,
+  mapCustomInputTypesToCollectionTypes,
 } from './utils/cleanData';
 
 const DataManagerProvider = ({ allIcons, children }) => {
@@ -41,6 +43,9 @@ const DataManagerProvider = ({ allIcons, children }) => {
     formatMessage,
     menu,
   } = useGlobalContext();
+  const {
+    strapi: { fieldApi },
+  } = useStrapi();
   const {
     components,
     contentTypes,
@@ -403,7 +408,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const submitData = async additionalContentTypeData => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
-      const body = {
+      let body = {
         components: getComponentsToPost(
           modifiedData.components,
           components,
@@ -424,6 +429,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
         emitEvent('willSaveComponent');
       }
+      body = mapCustomInputTypesToCollectionTypes(body, fieldApi);
 
       const method = isCreating ? 'POST' : 'PUT';
 

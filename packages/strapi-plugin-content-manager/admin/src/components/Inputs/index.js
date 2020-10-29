@@ -88,7 +88,9 @@ function Inputs({
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
-  const type = useMemo(() => get(attribute, 'type', null), [attribute]);
+  const type = useMemo(() => get(attribute, 'inputType', get(attribute, 'type', null)), [
+    attribute,
+  ]);
   const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
   const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
   const errorId = useMemo(() => {

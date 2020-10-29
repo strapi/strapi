@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   HeaderModal,
   HeaderModalTitle,
@@ -11,6 +11,7 @@ import {
   useGlobalContext,
   useQuery,
   InputsIndex,
+  useStrapi,
 } from 'strapi-helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
@@ -54,6 +55,9 @@ const FormModal = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
+  const {
+    strapi: { fieldApi },
+  } = useStrapi();
   const query = useQuery();
   const attributeOptionRef = useRef();
 
@@ -83,6 +87,7 @@ const FormModal = () => {
     isCreatingComponentWhileAddingAField,
     modifiedData,
   } = reducerState.toJS();
+  const customFields = useMemo(() => Object.keys(fieldApi.getFields()), [fieldApi]);
 
   useEffect(() => {
     if (!isEmpty(search)) {
@@ -1057,7 +1062,9 @@ const FormModal = () => {
     state.forTarget,
     state.targetUid,
     // We need the nested components so we know when to remove the component option
-    nestedComponents
+    nestedComponents,
+    // We need the registered custom fields to display them inside the modal
+    customFields
   );
 
   // Styles
@@ -1133,9 +1140,13 @@ const FormModal = () => {
               <div className="container-fluid">
                 {isPickingAttribute
                   ? displayedAttributes.map((row, i) => {
+                      const totalItems = displayedAttributes
+                        .filter((_, index) => index < i)
+                        .reduce((sum, c) => sum + c.length, 0);
+
                       return (
                         <div key={i} className="row">
-                          {i === 1 && (
+                          {i >= 1 && (
                             <hr
                               style={{
                                 width: 'calc(100% - 30px)',
@@ -1146,8 +1157,7 @@ const FormModal = () => {
                             />
                           )}
                           {row.map((attr, index) => {
-                            const tabIndex =
-                              i === 0 ? index : displayedAttributes[0].length + index;
+                            const tabIndex = i === 0 ? index : totalItems + index;
 
                             return (
                               <AttributeOption

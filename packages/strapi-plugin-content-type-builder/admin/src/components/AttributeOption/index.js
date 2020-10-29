@@ -4,24 +4,38 @@
  *
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
+import { useGlobalContext, useQuery, useStrapi } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import Button from './Button';
 import Card from './Card';
+import CustomIcon from '../CustomAttributeIcon';
 
 const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
+  const {
+    strapi: { fieldApi },
+  } = useStrapi();
   const buttonRef = useRef();
   const tabRef = useRef();
   const query = useQuery();
   const { push } = useHistory();
   const { emitEvent } = useGlobalContext();
+  // eslint-disable-next-line no-mixed-operators
+  const customField = useMemo(() => (type && fieldApi.getField(type)) || {}, [fieldApi, type]);
+
   tabRef.current = tabIndex;
+
+  const CustomAttributeIcon = props =>
+    customField && customField.icon ? (
+      <CustomIcon icon={customField.icon} {...props} />
+    ) : (
+      <AttributeIcon type={type} {...props} />
+    );
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -101,11 +115,11 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     <div className="col-6">
       <Button ref={buttonRef} type="button" onClick={handleClick}>
         <Card>
-          <AttributeIcon type={type} style={{ marginRight: 10 }} className="attributeIcon" />
-          <FormattedMessage id={getTrad(`attribute.${type}`)}>
+          <CustomAttributeIcon style={{ marginRight: 10 }} className="attributeIcon" />
+          <FormattedMessage id={getTrad(`attribute.${type}`, customField.pluginId)}>
             {message => <span className="attributeType">{message}</span>}
           </FormattedMessage>
-          <FormattedMessage id={getTrad(`attribute.${type}.description`)} />
+          <FormattedMessage id={getTrad(`attribute.${type}.description`, customField.pluginId)} />
         </Card>
       </Button>
     </div>

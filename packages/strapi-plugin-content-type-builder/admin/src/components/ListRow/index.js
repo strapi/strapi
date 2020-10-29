@@ -1,9 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AttributeIcon, IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useStrapi } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
@@ -11,6 +12,7 @@ import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
 import Wrapper from './Wrapper';
+import CustomIcon from '../CustomAttributeIcon';
 
 function ListRow({
   configurable,
@@ -32,9 +34,17 @@ function ListRow({
   secondLoopComponentUid,
   isNestedInDZComponent,
 }) {
+  const {
+    strapi: { fieldApi },
+  } = useStrapi();
   const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
   const isMorph = target === '*';
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
+
+  const customField = useMemo(() => (type ? fieldApi.getField(type) : null), [fieldApi, type]);
+  const fieldPluginId = useMemo(() => (customField ? customField.pluginId : pluginId), [
+    customField,
+  ]);
 
   let readableType = type;
 
@@ -46,6 +56,12 @@ function ListRow({
 
   const contentTypeFriendlyName = get(contentTypes, [target, 'schema', 'name'], '');
   const src = target ? 'relation' : ico;
+  const CustomAttributeIcon = () =>
+    customField && customField.icon ? (
+      <CustomIcon icon={customField.icon} />
+    ) : (
+      <AttributeIcon key={src} type={src} />
+    );
 
   const handleClick = () => {
     if (isMorph) {
@@ -203,7 +219,7 @@ function ListRow({
       loopNumber={loopNumber}
     >
       <td>
-        <AttributeIcon key={src} type={src} />
+        <CustomAttributeIcon />
         <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} />
       </td>
       <td style={{ fontWeight: 600 }}>
@@ -230,7 +246,7 @@ function ListRow({
           </div>
         ) : (
           <>
-            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
+            <FormattedMessage id={getTrad(`attribute.${readableType}`, fieldPluginId)} />
             &nbsp;
             {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
           </>

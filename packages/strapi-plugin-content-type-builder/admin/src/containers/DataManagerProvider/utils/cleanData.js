@@ -158,10 +158,54 @@ const sortContentType = types =>
     obj => camelCase(obj.title)
   );
 
+const collectionTypeFactory = getField => obj => {
+  const attributes = Object.keys(obj.attributes).reduce((acc, current) => {
+    const attribute = get(obj, ['attributes', current]);
+    const type = get(attribute, 'type', 'text');
+    const inputType = has(getField(type), 'collectionType') ? type : null;
+    const collectionType = get(getField(type), 'collectionType');
+
+    acc[current] =
+      inputType && collectionType
+        ? Object.assign({}, attribute, {
+          inputType,
+          type: collectionType || 'text',
+        })
+        : attribute;
+
+    return acc;
+  }, {});
+
+  return Object.assign({}, obj, { attributes });
+};
+
+/**
+ * @description Body mapper for custom fields. If the field is registered in the Field API, we need to
+ * - update the `type` property to an acceptable value (default to 'text')
+ * - create the `inputType` property to store the custom field type
+ * @param {Object} body Payload to send to the API
+ * @param {Object} fieldApi (Field API)[packages/strapi-admin/admin/src/utils/FieldApi.js] provided by Strapi
+ * @returns {Object} A body with modified `type` property + new `inputType` property if needed
+ */
+const mapCustomInputTypesToCollectionTypes = (body, { getField }) => {
+  const addCollectionType = collectionTypeFactory(getField);
+
+  return Object.keys(body).reduce((acc, current) => {
+    if (Array.isArray(body[current])) {
+      acc[current] = body[current].map(addCollectionType);
+    } else {
+      acc[current] = addCollectionType(body[current]);
+    }
+
+    return acc;
+  }, {});
+};
+
 export {
   formatComponent,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
   formatMainDataType,
   sortContentType,
+  mapCustomInputTypesToCollectionTypes,
 };
