@@ -1,25 +1,13 @@
 import { useMemo } from 'react';
-import { get } from 'lodash';
 import useDataManager from '../../../hooks/useDataManager';
-import useEditView from '../../../hooks/useEditView';
 
-function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, targetModel }) {
+function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name }) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
     readActionAllowedFields,
     updateActionAllowedFields,
   } = useDataManager();
-
-  // TODO important! remove models dependency from the useEditView hook,
-  // This info should be handle in the layout?
-  const { models } = useEditView();
-
-  const displayNavigationLink = useMemo(() => {
-    const targetModelSchema = models.find(obj => obj.uid === targetModel);
-
-    return get(targetModelSchema, 'isDisplayed', false);
-  }, [targetModel, models]);
 
   const isFieldAllowed = useMemo(() => {
     if (isUserAllowedToEditField === true) {
@@ -48,7 +36,6 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, t
   }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
 
   return {
-    displayNavigationLink,
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,

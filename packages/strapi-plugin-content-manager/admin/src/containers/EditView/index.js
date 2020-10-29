@@ -23,7 +23,6 @@ import { useFetchContentTypeLayout } from '../../hooks';
 import { generatePermissionsObject, getInjectedComponents } from '../../utils';
 import CollectionTypeWrapper from '../CollectionTypeWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
-import EditViewProvider from '../EditViewProvider';
 import SingleTypeWrapper from '../SingleTypeWrapper';
 import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
@@ -34,7 +33,7 @@ import InformationCard from './InformationCard';
 /* eslint-disable  react/no-array-index-key */
 
 // TODO check needed props
-const EditView = ({ components, currentEnvironment, models, isSingleType, plugins, slug }) => {
+const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
   const { goBack } = useHistory();
   // Legacy to remove for the configurations
@@ -101,210 +100,195 @@ const EditView = ({ components, currentEnvironment, models, isSingleType, plugin
   }
 
   return (
-    <EditViewProvider
-      allowedActions={allowedActions}
-      allLayoutData={layout}
-      components={components}
-      isSingleType={isSingleType}
-      layout={currentContentTypeLayoutData}
-      // TODO: check if still needed
-      models={models}
-    >
-      <ContentTypeLayoutContext.Provider value={layout}>
-        <DataManagementWrapper allLayoutData={layout} from={from} slug={slug}>
-          {({
-            componentsDataStructure,
-            contentTypeDataStructure,
-            data,
-            isCreatingEntry,
-            isLoadingForData,
-            onDelete,
-            onDeleteSucceeded,
-            onPost,
-            onPublish,
-            onPut,
-            onUnpublish,
-            status,
-          }) => {
-            return (
-              <EditViewDataManagerProvider
-                allowedActions={allowedActions}
-                allLayoutData={layout}
-                createActionAllowedFields={createActionAllowedFields}
-                componentsDataStructure={componentsDataStructure}
-                contentTypeDataStructure={contentTypeDataStructure}
-                from={from}
-                initialValues={data}
-                isCreatingEntry={isCreatingEntry}
-                isLoadingForData={isLoadingForData}
-                isSingleType={isSingleType}
-                onPost={onPost}
-                onPublish={onPublish}
-                onPut={onPut}
-                onUnpublish={onUnpublish}
-                readActionAllowedFields={readActionAllowedFields}
-                // TODO check if needed
-                redirectToPreviousPage={goBack}
-                slug={slug}
-                status={status}
-                updateActionAllowedFields={updateActionAllowedFields}
-              >
-                <BackHeader onClick={goBack} />
-                <Container className="container-fluid">
-                  <Header />
-                  <div className="row" style={{ paddingTop: 3 }}>
-                    <div className="col-md-12 col-lg-9" style={{ marginBottom: 13 }}>
-                      {formattedContentTypeLayout.map((block, blockIndex) => {
-                        if (isDynamicZone(block)) {
-                          const {
-                            0: {
-                              0: { name, fieldSchema, metadatas },
-                            },
-                          } = block;
-
-                          return (
-                            <DynamicZone
-                              key={blockIndex}
-                              name={name}
-                              fieldSchema={fieldSchema}
-                              metadatas={metadatas}
-                            />
-                          );
-                        }
+    <ContentTypeLayoutContext.Provider value={layout}>
+      <DataManagementWrapper allLayoutData={layout} from={from} slug={slug}>
+        {({
+          componentsDataStructure,
+          contentTypeDataStructure,
+          data,
+          isCreatingEntry,
+          isLoadingForData,
+          onDelete,
+          onDeleteSucceeded,
+          onPost,
+          onPublish,
+          onPut,
+          onUnpublish,
+          status,
+        }) => {
+          return (
+            <EditViewDataManagerProvider
+              allowedActions={allowedActions}
+              allLayoutData={layout}
+              createActionAllowedFields={createActionAllowedFields}
+              componentsDataStructure={componentsDataStructure}
+              contentTypeDataStructure={contentTypeDataStructure}
+              from={from}
+              initialValues={data}
+              isCreatingEntry={isCreatingEntry}
+              isLoadingForData={isLoadingForData}
+              isSingleType={isSingleType}
+              onPost={onPost}
+              onPublish={onPublish}
+              onPut={onPut}
+              onUnpublish={onUnpublish}
+              readActionAllowedFields={readActionAllowedFields}
+              // TODO check if needed
+              redirectToPreviousPage={goBack}
+              slug={slug}
+              status={status}
+              updateActionAllowedFields={updateActionAllowedFields}
+            >
+              <BackHeader onClick={goBack} />
+              <Container className="container-fluid">
+                <Header allowedActions={allowedActions} />
+                <div className="row" style={{ paddingTop: 3 }}>
+                  <div className="col-md-12 col-lg-9" style={{ marginBottom: 13 }}>
+                    {formattedContentTypeLayout.map((block, blockIndex) => {
+                      if (isDynamicZone(block)) {
+                        const {
+                          0: {
+                            0: { name, fieldSchema, metadatas },
+                          },
+                        } = block;
 
                         return (
-                          <FormWrapper key={blockIndex}>
-                            {block.map((fieldsBlock, fieldsBlockIndex) => {
-                              return (
-                                <div className="row" key={fieldsBlockIndex}>
-                                  {fieldsBlock.map(
-                                    ({ name, size, fieldSchema, metadatas }, fieldIndex) => {
-                                      const isComponent = fieldSchema.type === 'component';
+                          <DynamicZone
+                            key={blockIndex}
+                            name={name}
+                            fieldSchema={fieldSchema}
+                            metadatas={metadatas}
+                          />
+                        );
+                      }
 
-                                      if (isComponent) {
-                                        const {
-                                          component,
-                                          max,
-                                          min,
-                                          repeatable = false,
-                                        } = fieldSchema;
-                                        const componentUid = fieldSchema.component;
+                      return (
+                        <FormWrapper key={blockIndex}>
+                          {block.map((fieldsBlock, fieldsBlockIndex) => {
+                            return (
+                              <div className="row" key={fieldsBlockIndex}>
+                                {fieldsBlock.map(
+                                  ({ name, size, fieldSchema, metadatas }, fieldIndex) => {
+                                    const isComponent = fieldSchema.type === 'component';
 
-                                        return (
-                                          <FieldComponent
-                                            key={componentUid}
-                                            componentUid={component}
-                                            isRepeatable={repeatable}
-                                            label={metadatas.label}
-                                            max={max}
-                                            min={min}
-                                            name={name}
-                                          />
-                                        );
-                                      }
+                                    if (isComponent) {
+                                      const {
+                                        component,
+                                        max,
+                                        min,
+                                        repeatable = false,
+                                      } = fieldSchema;
+                                      const componentUid = fieldSchema.component;
 
                                       return (
-                                        <div className={`col-${size}`} key={name}>
-                                          <Inputs
-                                            autoFocus={
-                                              blockIndex === 0 &&
-                                              fieldsBlockIndex === 0 &&
-                                              fieldIndex === 0
-                                            }
-                                            fieldSchema={fieldSchema}
-                                            keys={name}
-                                            metadatas={metadatas}
-                                          />
-                                        </div>
+                                        <FieldComponent
+                                          key={componentUid}
+                                          componentUid={component}
+                                          isRepeatable={repeatable}
+                                          label={metadatas.label}
+                                          max={max}
+                                          min={min}
+                                          name={name}
+                                        />
                                       );
                                     }
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </FormWrapper>
-                        );
-                      })}
-                    </div>
-                    <div className="col-md-12 col-lg-3">
-                      <InformationCard />
-                      <Padded size="smd" top />
-                      {currentContentTypeLayoutData.layouts.editRelations.length > 0 && (
-                        <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
-                          <div style={{ paddingTop: '22px' }}>
-                            {currentContentTypeLayoutData.layouts.editRelations.map(
-                              ({ name, fieldSchema, metadatas, queryInfos }) => {
-                                return (
-                                  <SelectWrapper
-                                    {...fieldSchema}
-                                    {...metadatas}
-                                    queryInfos={queryInfos}
-                                    key={name}
-                                    name={name}
-                                    relationsType={fieldSchema.relationType}
-                                  />
-                                );
-                              }
-                            )}
-                          </div>
-                        </SubWrapper>
-                      )}
-                      <LinkWrapper>
-                        <ul>
-                          <CheckPermissions permissions={configurationPermissions}>
-                            <LiLink
-                              message={{
-                                id: 'app.links.configure-view',
-                              }}
-                              icon="layout"
-                              url={configurationsURL}
-                              onClick={() => {
-                                // emitEvent('willEditContentTypeLayoutFromEditView');
-                              }}
-                            />
-                          </CheckPermissions>
-                          {getInjectedComponents(
-                            'editView',
-                            'right.links',
-                            plugins,
-                            currentEnvironment,
-                            slug
-                          )}
-                          {allowedActions.canDelete && (
-                            <DeleteLink
-                              isCreatingEntry={isCreatingEntry}
-                              onDelete={onDelete}
-                              onDeleteSucceeded={onDeleteSucceeded}
-                            />
-                          )}
-                        </ul>
-                      </LinkWrapper>
-                    </div>
+
+                                    return (
+                                      <div className={`col-${size}`} key={name}>
+                                        <Inputs
+                                          autoFocus={
+                                            blockIndex === 0 &&
+                                            fieldsBlockIndex === 0 &&
+                                            fieldIndex === 0
+                                          }
+                                          fieldSchema={fieldSchema}
+                                          keys={name}
+                                          metadatas={metadatas}
+                                        />
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            );
+                          })}
+                        </FormWrapper>
+                      );
+                    })}
                   </div>
-                </Container>
-              </EditViewDataManagerProvider>
-            );
-          }}
-        </DataManagementWrapper>
-      </ContentTypeLayoutContext.Provider>
-    </EditViewProvider>
+                  <div className="col-md-12 col-lg-3">
+                    <InformationCard />
+                    <Padded size="smd" top />
+                    {currentContentTypeLayoutData.layouts.editRelations.length > 0 && (
+                      <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
+                        <div style={{ paddingTop: '22px' }}>
+                          {currentContentTypeLayoutData.layouts.editRelations.map(
+                            ({ name, fieldSchema, metadatas, queryInfos }) => {
+                              return (
+                                <SelectWrapper
+                                  {...fieldSchema}
+                                  {...metadatas}
+                                  queryInfos={queryInfos}
+                                  key={name}
+                                  name={name}
+                                  relationsType={fieldSchema.relationType}
+                                />
+                              );
+                            }
+                          )}
+                        </div>
+                      </SubWrapper>
+                    )}
+                    <LinkWrapper>
+                      <ul>
+                        <CheckPermissions permissions={configurationPermissions}>
+                          <LiLink
+                            message={{
+                              id: 'app.links.configure-view',
+                            }}
+                            icon="layout"
+                            url={configurationsURL}
+                            onClick={() => {
+                              // emitEvent('willEditContentTypeLayoutFromEditView');
+                            }}
+                          />
+                        </CheckPermissions>
+                        {getInjectedComponents(
+                          'editView',
+                          'right.links',
+                          plugins,
+                          currentEnvironment,
+                          slug
+                        )}
+                        {allowedActions.canDelete && (
+                          <DeleteLink
+                            isCreatingEntry={isCreatingEntry}
+                            onDelete={onDelete}
+                            onDeleteSucceeded={onDeleteSucceeded}
+                          />
+                        )}
+                      </ul>
+                    </LinkWrapper>
+                  </div>
+                </div>
+              </Container>
+            </EditViewDataManagerProvider>
+          );
+        }}
+      </DataManagementWrapper>
+    </ContentTypeLayoutContext.Provider>
   );
 };
 
 EditView.defaultProps = {
-  // TODO
   currentEnvironment: 'production',
-  emitEvent: () => {},
   plugins: {},
   isSingleType: false,
 };
 
 EditView.propTypes = {
-  components: PropTypes.array.isRequired,
   currentEnvironment: PropTypes.string,
-  emitEvent: PropTypes.func,
   isSingleType: PropTypes.bool,
-  models: PropTypes.array.isRequired,
   plugins: PropTypes.object,
   slug: PropTypes.string.isRequired,
 };

@@ -72,6 +72,10 @@
     },
     "address": {
       "model": "address"
+    },
+    "admin_user": {
+      "plugin": "admin",
+      "model": "user"
     }
   }
 }

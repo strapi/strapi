@@ -11,13 +11,7 @@ import { getTrad } from '../../../utils';
 import { DeleteButton } from '../components';
 import { connect, select } from './utils';
 
-const DeleteLink = ({
-  canDelete,
-  isCreatingEntry,
-  onDelete,
-  onDeleteSucceeded,
-  trackerProperty,
-}) => {
+const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerProperty }) => {
   const [showWarningDelete, setWarningDelete] = useState(false);
   const [didDeleteEntry, setDidDeleteEntry] = useState(false);
   const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
@@ -57,7 +51,7 @@ const DeleteLink = ({
     }
   };
 
-  if (isCreatingEntry || !canDelete) {
+  if (isCreatingEntry) {
     return null;
   }
 
@@ -89,7 +83,6 @@ const DeleteLink = ({
 };
 
 DeleteLink.propTypes = {
-  canDelete: PropTypes.bool.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   onDelete: PropTypes.func.isRequired,
   onDeleteSucceeded: PropTypes.func.isRequired,

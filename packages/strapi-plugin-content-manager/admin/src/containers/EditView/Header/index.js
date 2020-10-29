@@ -19,9 +19,7 @@ const primaryButtonObject = {
 };
 
 const Header = ({
-  canUpdate,
-  canCreate,
-  canPublish,
+  allowedActions: { canUpdate, canCreate, canPublish },
   componentLayouts,
   initialData,
   isCreatingEntry,
@@ -237,9 +235,11 @@ const Header = ({
 };
 
 Header.propTypes = {
-  canUpdate: PropTypes.bool.isRequired,
-  canCreate: PropTypes.bool.isRequired,
-  canPublish: PropTypes.bool.isRequired,
+  allowedActions: PropTypes.shape({
+    canUpdate: PropTypes.bool.isRequired,
+    canCreate: PropTypes.bool.isRequired,
+    canPublish: PropTypes.bool.isRequired,
+  }).isRequired,
   componentLayouts: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,

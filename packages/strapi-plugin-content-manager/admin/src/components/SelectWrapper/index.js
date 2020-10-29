@@ -19,7 +19,6 @@ import { connect, select, styles } from './utils';
 
 function SelectWrapper({
   description,
-  displayNavigationLink,
   editable,
   label,
   isCreatingEntry,
@@ -163,7 +162,7 @@ function SelectWrapper({
       return null;
     }
 
-    if (!displayNavigationLink) {
+    if (!queryInfos.shouldDisplayRelationLink) {
       return null;
     }
 
@@ -174,7 +173,7 @@ function SelectWrapper({
         </FormattedMessage>
       </Link>
     );
-  }, [displayNavigationLink, pathname, to, value]);
+  }, [queryInfos.shouldDisplayRelationLink, pathname, to, value]);
 
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
@@ -225,7 +224,7 @@ function SelectWrapper({
             addRelation({ target: { name, value } });
           }}
           components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
-          displayNavigationLink={displayNavigationLink}
+          displayNavigationLink={queryInfos.shouldDisplayRelationLink}
           id={name}
           isDisabled={isDisabled}
           isLoading={isLoading}
@@ -269,7 +268,6 @@ SelectWrapper.defaultProps = {
 };
 
 SelectWrapper.propTypes = {
-  displayNavigationLink: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
@@ -285,6 +283,7 @@ SelectWrapper.propTypes = {
     containsKey: PropTypes.string.isRequired,
     defaultParams: PropTypes.object,
     endPoint: PropTypes.string.isRequired,
+    shouldDisplayRelationLink: PropTypes.bool.isRequired,
   }).isRequired,
 };
 
