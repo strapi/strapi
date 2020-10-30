@@ -93,8 +93,6 @@ Create another database, named `strapi` for example. It may be useful to delete 
 
 Create the `app.yaml` file in the project root.
 
-Add `app.yaml` to `.gitignore`.
-
 The instance identifier looks like `myapi-123456:europe-west1:myapi`.
 
 The `myapi-123456` part is the project identifier. (The number is automatically added to short project names).
@@ -127,7 +125,7 @@ beta_settings:
 ::: tab Flexible Environment
 
 ```yaml
-runtime: nodejs10
+runtime: nodejs
 
 env: flex
 
@@ -147,10 +145,9 @@ beta_settings:
 
 ::::
 
-Create `.gcloudignore` in the project root, include `app.yaml` here as well.
+Create `.gcloudignore` in the project root.
 
 ```
-app.yaml
 .gcloudignore
 .git
 .gitignore
