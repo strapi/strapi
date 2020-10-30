@@ -360,7 +360,11 @@ module.exports = {
       arr.map(file => {
         return this.enhanceFile(
           file,
-          {},
+          {
+            alternativeText: file.alternativeText,
+            caption: file.caption,
+            name: file.name,
+          },
           {
             refId: id,
             ref: model,
