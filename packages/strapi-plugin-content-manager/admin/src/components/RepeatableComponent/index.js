@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useEffect, useMemo, useReducer } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get, take } from 'lodash';
@@ -13,7 +13,17 @@ import select from './utils/select';
 import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
 import EmptyComponent from './EmptyComponent';
-import reducer, { initialState } from './reducer';
+
+const getMax = arr => {
+  if (arr.length === 0) {
+    return -1;
+  }
+
+  return Math.max.apply(
+    Math,
+    arr.map(o => o.__temp_key__)
+  );
+};
 
 const RepeatableComponent = ({
   addRepeatableComponentToField,
@@ -27,6 +37,7 @@ const RepeatableComponent = ({
   min,
   name,
 }) => {
+  const [collapseToOpen, setCollapseToOpen] = useState('');
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
@@ -45,29 +56,13 @@ const RepeatableComponent = ({
         .join('.');
     });
 
-  // We need to synchronize the collapses array with the data
-  // The key needed for react in the list will be the one from the collapses data
-  // This way we don't have to mutate the data when it is received and we can use a unique key
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  // Synchronize the collapse only when the length of the component's value changes
-  useEffect(() => {
-    dispatch({ type: 'SET_COLLAPSES', dataLength: componentValueLength });
-  }, [componentValueLength]);
-
-  const { collapses } = state.toJS();
-
-  const toggleCollapses = index => {
-    dispatch({
-      type: 'TOGGLE_COLLAPSE',
-      index,
-    });
+  const toggleCollapses = () => {
+    setCollapseToOpen('');
   };
   const missingComponentsValue = min - componentValueLength;
   const errorsArray = componentErrorKeys.map(key => get(formErrors, [key, 'id'], ''));
 
-  const hasMinError =
-    get(errorsArray, [0], '').includes('min') && !collapses.some(obj => obj.isOpen === true);
+  const hasMinError = get(errorsArray, [0], '').includes('min');
 
   return (
     <div>
@@ -80,13 +75,16 @@ const RepeatableComponent = ({
       )}
       <div ref={drop}>
         {componentValueLength > 0 &&
-          componentValueLength === collapses.length &&
           componentValue.map((data, index) => {
+            const key = data.__temp_key__;
+            const isOpen = collapseToOpen === key;
             const componentFieldName = `${name}.${index}`;
+            const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
             const doesPreviousFieldContainErrorsAndIsOpen =
               componentErrorKeys.includes(`${name}.${index - 1}`) &&
               index !== 0 &&
-              get(collapses, [index - 1, 'isOpen'], false) === false;
+              collapseToOpen === previousComponentTempKey;
+
             const hasErrors = componentErrorKeys.includes(componentFieldName);
 
             return (
@@ -98,23 +96,14 @@ const RepeatableComponent = ({
                 hasMinError={hasMinError}
                 isFirst={index === 0}
                 isReadOnly={isReadOnly}
-                isOpen={get(collapses, [index, 'isOpen'], false)}
-                key={get(collapses, [index, '_temp__id'], null)}
+                isOpen={isOpen}
+                key={key}
                 onClickToggle={() => {
-                  toggleCollapses(index);
-                }}
-                removeCollapse={() => {
-                  dispatch({
-                    type: 'REMOVE_COLLAPSE',
-                    index,
-                  });
-                }}
-                moveCollapse={(dragIndex, hoverIndex) => {
-                  dispatch({
-                    type: 'MOVE_COLLAPSE',
-                    dragIndex,
-                    hoverIndex,
-                  });
+                  if (isOpen) {
+                    setCollapseToOpen('');
+                  } else {
+                    setCollapseToOpen(key);
+                  }
                 }}
                 parentName={name}
                 schema={componentLayoutData}
@@ -130,7 +119,7 @@ const RepeatableComponent = ({
         doesPreviousFieldContainErrorsAndIsClosed={
           componentValueLength > 0 &&
           componentErrorKeys.includes(`${name}.${componentValueLength - 1}`) &&
-          collapses[componentValueLength - 1].isOpen === false
+          componentValue[componentValueLength - 1].__temp_key__ !== collapseToOpen
         }
         type="button"
         onClick={() => {
@@ -139,9 +128,8 @@ const RepeatableComponent = ({
               const shouldCheckErrors = hasMinError;
 
               addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
-              dispatch({
-                type: 'ADD_NEW_FIELD',
-              });
+
+              setCollapseToOpen(getMax(componentValue) + 1);
             } else if (componentValueLength >= max) {
               strapi.notification.info(
                 `${pluginId}.components.notification.info.maximum-requirement`

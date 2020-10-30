@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Prompt, Redirect } from 'react-router-dom';
 import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import { getTrad } from '../../utils';
+import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getFilesToUpload, getYupInnerErrors } from './utils';
 
@@ -257,7 +257,10 @@ const EditViewDataManagerProvider = ({
       const filesToUpload = getFilesToUpload(data);
       // Remove keys that are not needed
       // Clean relations
-      const cleanedData = cleanData(data, currentContentTypeLayout, allLayoutData.components);
+      const cleanedData = removeKeyInObject(
+        cleanData(data, currentContentTypeLayout, allLayoutData.components),
+        '__temp_key__'
+      );
 
       const formData = new FormData();
 

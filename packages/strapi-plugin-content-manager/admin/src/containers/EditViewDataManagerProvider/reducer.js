@@ -10,6 +10,17 @@ const initialState = fromJS({
   modifiedDZName: null,
 });
 
+const getMax = arr => {
+  if (arr.size === 0) {
+    return -1;
+  }
+
+  return Math.max.apply(
+    Math,
+    arr.toJS().map(o => o.__temp_key__)
+  );
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD':
@@ -21,10 +32,9 @@ const reducer = (state, action) => {
     case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
       return state
         .updateIn(['modifiedData', ...action.keys], list => {
-          const defaultDataStructure = state.getIn([
-            'componentsDataStructure',
-            action.componentUid,
-          ]);
+          const defaultDataStructure = state
+            .getIn(['componentsDataStructure', action.componentUid])
+            .set('__temp_key__', getMax(list) + 1);
 
           if (list) {
             return list.push(defaultDataStructure);

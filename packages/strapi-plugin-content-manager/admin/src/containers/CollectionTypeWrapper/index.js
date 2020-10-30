@@ -3,7 +3,12 @@ import { useParams, useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
-import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
+import {
+  createDefaultForm,
+  formatComponentData,
+  getTrad,
+  removePasswordFieldsFromData,
+} from '../../utils';
 import pluginId from '../../pluginId';
 import { crudInitialState, crudReducer } from '../../sharedReducers';
 import { getRequestUrl } from './utils';
@@ -30,22 +35,30 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     return getRequestUrl(`${slug}/${id}`);
   }, [slug, id, isCreatingEntry]);
 
-  const cleanReceivedDataFromPasswords = useCallback(
+  const cleanReceivedData = useCallback(
     data => {
-      return removePasswordFieldsFromData(
+      const cleaned = removePasswordFieldsFromData(
         data,
         allLayoutData.contentType,
         allLayoutData.components
       );
+
+      return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
-    [allLayoutData.components, allLayoutData.contentType]
+    [allLayoutData]
   );
 
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
-      acc[current] = createDefaultForm(
+      const defaultComponentForm = createDefaultForm(
         get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
+        allLayoutData.components
+      );
+
+      acc[current] = formatComponentData(
+        defaultComponentForm,
+        allLayoutData.components[current],
         allLayoutData.components
       );
 
@@ -60,7 +73,11 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     dispatch({
       type: 'SET_DATA_STRUCTURES',
       componentsDataStructure,
-      contentTypeDataStructure,
+      contentTypeDataStructure: formatComponentData(
+        contentTypeDataStructure,
+        allLayoutData.contentType,
+        allLayoutData.components
+      ),
     });
   }, [allLayoutData]);
 
@@ -76,7 +93,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data: cleanReceivedDataFromPasswords(data),
+          data: cleanReceivedData(data),
         });
       } catch (err) {
         console.error(err);
@@ -106,7 +123,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     return () => {
       abortController.abort();
     };
-  }, [fetchURL, push, from, cleanReceivedDataFromPasswords]);
+  }, [fetchURL, push, from, cleanReceivedData]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -148,7 +165,6 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   );
 
   const onDeleteSucceeded = useCallback(() => {
-    console.log({ from });
     replace(from);
   }, [from, replace]);
 
@@ -195,7 +211,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
       emitEventRef.current('didPublishEntry');
 
-      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(data) });
+      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(data) });
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
       strapi.notification.success(getTrad('success.record.publish'));
@@ -203,7 +219,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       displayErrors(err);
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
     }
-  }, [cleanReceivedDataFromPasswords, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, id, slug]);
 
   const onPut = useCallback(
     async (formData, trackerProperty) => {
@@ -223,7 +239,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         emitEventRef.current('didEditEntry', { trackerProperty });
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       } catch (err) {
         emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
@@ -231,7 +247,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [cleanReceivedDataFromPasswords, displayErrors, slug, id]
+    [cleanReceivedData, displayErrors, slug, id]
   );
 
   const onUnpublish = useCallback(async () => {
@@ -247,13 +263,13 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       emitEventRef.current('didUnpublishEntry');
       strapi.notification.success(getTrad('success.record.unpublish'));
 
-      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedDataFromPasswords(response) });
+      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
     } catch (err) {
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
       displayErrors(err);
     }
-  }, [cleanReceivedDataFromPasswords, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, id, slug]);
 
   return children({
     componentsDataStructure,
