@@ -102,12 +102,7 @@ const DraggedItem = ({
       }
       // Time to actually perform the action in the data
       moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
-      // // Time to actually perform the action in the synchronized collapses
-      // moveCollapse(dragIndex, hoverIndex);
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
+
       item.originalPath = hoverPath;
     },
   });

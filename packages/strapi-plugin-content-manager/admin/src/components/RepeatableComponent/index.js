@@ -1,11 +1,12 @@
+import React, { memo, useCallback, useMemo, useState } from 'react';
 /* eslint-disable import/no-cycle */
-import React, { memo, useMemo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
+import { getMaxTempKey } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
 import ItemTypes from '../../utils/ItemTypes';
 import connect from './utils/connect';
@@ -13,17 +14,6 @@ import select from './utils/select';
 import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
 import EmptyComponent from './EmptyComponent';
-
-const getMax = arr => {
-  if (arr.length === 0) {
-    return -1;
-  }
-
-  return Math.max.apply(
-    Math,
-    arr.map(o => o.__temp_key__)
-  );
-};
 
 const RepeatableComponent = ({
   addRepeatableComponentToField,
@@ -45,6 +35,10 @@ const RepeatableComponent = ({
     getComponentLayout,
   ]);
 
+  const nextTempKey = useMemo(() => {
+    return getMaxTempKey(componentValue || []) + 1;
+  }, [componentValue]);
+
   const componentErrorKeys = Object.keys(formErrors)
     .filter(errorKey => {
       return take(errorKey.split('.'), isNested ? 3 : 1).join('.') === name;
@@ -63,6 +57,29 @@ const RepeatableComponent = ({
   const errorsArray = componentErrorKeys.map(key => get(formErrors, [key, 'id'], ''));
 
   const hasMinError = get(errorsArray, [0], '').includes('min');
+
+  const handleClick = useCallback(() => {
+    if (!isReadOnly) {
+      if (componentValueLength < max) {
+        const shouldCheckErrors = hasMinError;
+
+        addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
+
+        setCollapseToOpen(nextTempKey);
+      } else if (componentValueLength >= max) {
+        strapi.notification.info(`${pluginId}.components.notification.info.maximum-requirement`);
+      }
+    }
+  }, [
+    addRepeatableComponentToField,
+    componentUid,
+    componentValueLength,
+    hasMinError,
+    isReadOnly,
+    max,
+    name,
+    nextTempKey,
+  ]);
 
   return (
     <div>
@@ -122,21 +139,7 @@ const RepeatableComponent = ({
           componentValue[componentValueLength - 1].__temp_key__ !== collapseToOpen
         }
         type="button"
-        onClick={() => {
-          if (!isReadOnly) {
-            if (componentValueLength < max) {
-              const shouldCheckErrors = hasMinError;
-
-              addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
-
-              setCollapseToOpen(getMax(componentValue) + 1);
-            } else if (componentValueLength >= max) {
-              strapi.notification.info(
-                `${pluginId}.components.notification.info.maximum-requirement`
-              );
-            }
-          }
-        }}
+        onClick={handleClick}
       >
         <i className="fa fa-plus" />
         <FormattedMessage id={`${pluginId}.containers.EditView.add.new`} />

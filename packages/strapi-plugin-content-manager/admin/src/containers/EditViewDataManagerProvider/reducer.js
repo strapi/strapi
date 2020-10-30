@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import { getMaxTempKey } from '../../utils';
 
 const initialState = fromJS({
   componentsDataStructure: {},
@@ -9,17 +10,6 @@ const initialState = fromJS({
   shouldCheckErrors: false,
   modifiedDZName: null,
 });
-
-const getMax = arr => {
-  if (arr.size === 0) {
-    return -1;
-  }
-
-  return Math.max.apply(
-    Math,
-    arr.toJS().map(o => o.__temp_key__)
-  );
-};
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -34,7 +24,7 @@ const reducer = (state, action) => {
         .updateIn(['modifiedData', ...action.keys], list => {
           const defaultDataStructure = state
             .getIn(['componentsDataStructure', action.componentUid])
-            .set('__temp_key__', getMax(list) + 1);
+            .set('__temp_key__', getMaxTempKey(list.toJS()) + 1);
 
           if (list) {
             return list.push(defaultDataStructure);
