@@ -193,7 +193,7 @@
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No hay plugins instalados todavía",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.LeftMenuLinkContainer.settings": "Configuraciones",
-  "app.components.LeftMenuLinkContainer.singleTypes": "Tipos Individuales",
+  "app.components.LeftMenuLinkContainer.singleTypes": "Tipos Únicos",
   "app.components.ListPluginsPage.deletePlugin.description": "Es posible que la desinstalación del plugin tarde unos segundos.",
   "app.components.ListPluginsPage.deletePlugin.title": "Desinstalar",
   "app.components.ListPluginsPage.description": "Lista de los plugins instalados en el proyecto.",
