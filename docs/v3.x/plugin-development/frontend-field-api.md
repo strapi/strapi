@@ -2,12 +2,6 @@
 
 As plugins developer you may need to add custom fields in your application. To do so, a **Field API** is available in order for a plugin to register a field which will be available for all plugins.
 
-::: warning NOTE
-
-Currently, only the content manager uses this API to extend its current fields.
-
-:::
-
 ## Registering a new field
 
 Registering a field can be made in two different ways:
@@ -149,6 +143,93 @@ export default strapi => {
   return strapi.registerPlugin(plugin);
 };
 ```
+
+## Creating a new field
+
+Creating a new field works the same as registering a new field, except it needs additional properties:
+
+1. Follow the steps for [registering a new field while loading the plugin](#registering-a-field-during-the-load-of-a-plugin)
+
+**IMPORTANT**: Please use the provided data shape to notify changes from your component:
+
+**Path -** `plugins/my-plugin/admin/src/components/CustomField/index.js`.
+
+```js
+import React from 'react';
+
+const CustomField = ({ onChange, name, ...props }) => {
+  const handleChange = value => {
+    // Only allow a string or string-like value because only a text type can pass backend validations for now
+    if (typeof value !== 'string') return;
+    onChange({ target: { name, value } });
+  };
+
+  return <Input onChange={handleChange} value={props.value} />;
+};
+
+export default CustomField;
+```
+
+2. Register the field into the application:
+
+**Path -** `plugins/my-plugin/admin/src/index.js`.
+
+```js
+import pluginPkg from '../../package.json';
+import CustomField from './components/CustomField';
+// Optional: add an icon to your custom field
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import pluginId from './pluginId';
+
+export default strapi => {
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+
+  const plugin = {
+    blockerComponent: null,
+    blockerComponentProps: {},
+    description: pluginDescription,
+    icon: pluginPkg.strapi.icon,
+    id: pluginId,
+    initializer: () => null,
+    injectedComponents: [],
+    isReady: true,
+    leftMenuLinks: [],
+    leftMenuSections: [],
+    mainComponent: null,
+    name: pluginPkg.strapi.name,
+    preventComponentRendering: false,
+    trads: {},
+  };
+
+  strapi.registerField({
+    type: 'customfield', // must be unique, or an error will be thrown
+    Component: CustomField, // mandatory, or an error will be thrown
+    /**
+     * Additional properties
+     */
+    collectionType: 'text', // mandatory when creating a new field
+    pluginId, // mandatory, used for translation keys
+    icon: faPlus, // optional, must be a valid icon exported by @fortawesome to work
+  });
+
+  return strapi.registerPlugin(plugin);
+};
+```
+
+`collectionType` **must** be an existing database type, for now only `text` is supported by the backend validators.
+
+3. Add translation keys for your new field (the registerd `type` must be used as the translation key in the following format: `"attribute.${type}"`):
+
+**Path -** `plugins/my-plugin/admin/src/translations/fr.json`
+
+```json
+{
+  "attribute.customfield": "Custom",
+  "attribute.customfield.description": "Un champ particulier"
+}
+```
+
+By doing so, your custom field name should appear in the Content-Type builder as an option when adding an attribute to a collection type, a single type or a component, and its custom input should be displayed in the Content-Type manager.
 
 ## Consuming the Field API
 
