@@ -54,6 +54,7 @@ services:
     environment:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: strapi
     volumes:
       - ./data:/var/lib/postgresql/data
     ports:
