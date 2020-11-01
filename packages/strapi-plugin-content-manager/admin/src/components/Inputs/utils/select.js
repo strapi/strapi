@@ -26,6 +26,8 @@ function useSelect(keys) {
 
   const value = get(modifiedData, keys, null);
 
+  const valueAllFields = modifiedData;
+
   return {
     allowedFields,
     currentContentTypeLayout,
@@ -35,6 +37,7 @@ function useSelect(keys) {
     readableFields,
     shouldNotRunValidations,
     value,
+    valueAllFields,
   };
 }
 
