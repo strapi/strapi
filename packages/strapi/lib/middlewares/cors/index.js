@@ -32,8 +32,20 @@ module.exports = strapi => {
 
       strapi.app.use(
         cors({
-          origin: function(ctx) {
-            const whitelist = Array.isArray(origin) ? origin : origin.split(/\s*,\s*/);
+          origin: async function(ctx) {
+            let originList;
+
+            if (typeof origin === 'function') {
+              if (origin.constructor.name === 'AsyncFunction') {
+                originList = await origin();
+              } else {
+                originList = origin();
+              }
+            } else {
+              originList = origin;
+            }
+
+            const whitelist = Array.isArray(originList) ? originList : originList.split(/\s*,\s*/);
 
             const requestOrigin = ctx.accept.headers.origin;
             if (whitelist.includes('*')) {
