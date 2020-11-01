@@ -131,6 +131,8 @@ Follow these steps to complete installation of a `PostgreSQL` database:
     - **Master username:** Keep as `postgres`, or change (optional)
     - `Uncheck` _Auto generate a password_, and then type in a new secret password.
 - **Connectivity**, and **Additional connectivity configuration**: Set `Publicly accessible` to `Yes`.
+- **Security** Edit the existing security group to use a new rule where 
+    - **Type:** `PostgresSQL`, **Protocol:** `TCP`, **Port Range** `54321`, **Source:** `0.0.0.0/0, ::/0`
 - **OPTIONAL:** Review any further options (**DB Instance size**, **Storage**, **Connectivity**), and modify to your project needs.
 - You need to give you Database a name. Under **Additional configuration**:
   - **Additional configuration**, and then **Initial database name:** Give your database a name, e.g. `strapi`.
