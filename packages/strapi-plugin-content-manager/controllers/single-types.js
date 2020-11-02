@@ -2,8 +2,7 @@
 
 const { omit, pipe, assoc, assign } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { getService } = require('../utils');
-const parseBody = require('../utils/parse-body');
+const { getService, wrapBadRequest, parseBody } = require('../utils');
 
 const {
   CREATED_BY_ATTRIBUTE,
@@ -29,7 +28,7 @@ const setCreatorFields = ({ user, isEdition = false }) => data => {
 const findEntity = async model => {
   const service = getService('entity');
 
-  return service.find({}, model).then(entity => service.assocCreateRoles(entity));
+  return service.find({}, model).then(entity => service.assocCreatorRoles(entity));
 };
 
 module.exports = {
@@ -38,6 +37,10 @@ module.exports = {
     const { model } = ctx.params;
 
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
 
     const entity = await findEntity(model);
 
@@ -83,26 +86,28 @@ module.exports = {
 
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
-    if (!entity) {
-      const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
+    await wrapBadRequest(async () => {
+      if (!entity) {
+        const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
 
-      ctx.body = permissionChecker.sanitizeOutput(entity);
+        ctx.body = permissionChecker.sanitizeOutput(entity);
 
-      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
-      return;
-    }
+        await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+        return;
+      }
 
-    if (permissionChecker.cannot.update(entity)) {
-      return ctx.forbidden();
-    }
+      if (permissionChecker.cannot.update(entity)) {
+        return ctx.forbidden();
+      }
 
-    const updatedEntity = await getService('entity').update(
-      entity,
-      { data: sanitizeFn(data), files },
-      model
-    );
+      const updatedEntity = await getService('entity').update(
+        entity,
+        { data: sanitizeFn(data), files },
+        model
+      );
 
-    ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
+      ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
+    })();
   },
 
   async delete(ctx) {
@@ -115,17 +120,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const existingEntity = await findEntity(model);
+    const entity = await findEntity(model);
 
-    if (!existingEntity) {
+    if (!entity) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.delete(existingEntity)) {
+    if (permissionChecker.cannot.delete(entity)) {
       return ctx.forbidden();
     }
 
-    const deletedEntity = await getService('entity').delete(existingEntity, model);
+    const deletedEntity = await getService('entity').delete(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(deletedEntity);
   },
@@ -140,24 +145,24 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const existingEntity = await findEntity(model);
+    const entity = await findEntity(model);
 
-    if (!existingEntity) {
+    if (!entity) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.publish(existingEntity)) {
+    if (permissionChecker.cannot.publish(entity)) {
       return ctx.forbidden();
     }
 
     // TODO: avoid doing it here and in the entity Service
-    await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), existingEntity);
+    await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), entity);
 
-    if (existingEntity[PUBLISHED_AT_ATTRIBUTE]) {
+    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       return ctx.badRequest('already.published');
     }
 
-    const publishedEntity = await getService('entity').publish(existingEntity, model);
+    const publishedEntity = await getService('entity').publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(publishedEntity);
   },
@@ -172,21 +177,21 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const existingEntity = await findEntity(model);
+    const entity = await findEntity(model);
 
-    if (!existingEntity) {
+    if (!entity) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.unpublish(existingEntity)) {
+    if (permissionChecker.cannot.unpublish(entity)) {
       return ctx.forbidden();
     }
 
-    if (!existingEntity[PUBLISHED_AT_ATTRIBUTE]) {
+    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
       return ctx.badRequest('already.draft');
     }
 
-    const unpublishedEntity = await getService('entity').unpublish(existingEntity, model);
+    const unpublishedEntity = await getService('entity').unpublish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(unpublishedEntity);
   },

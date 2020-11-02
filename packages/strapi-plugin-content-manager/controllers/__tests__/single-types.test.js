@@ -2,7 +2,6 @@
 
 const createContext = require('../../../../test/helpers/create-context');
 const singleTypes = require('../single-types');
-const { ACTIONS } = require('../constants');
 
 describe('Single Types', () => {
   test('find', async () => {
@@ -18,6 +17,13 @@ describe('Single Types', () => {
       ability: state.userAbility,
     }));
 
+    const permissionChecker = {
+      cannot: {
+        read: jest.fn(() => false),
+        create: jest.fn(() => false),
+      },
+    };
+
     global.strapi = {
       admin: {
         services: {
@@ -29,9 +35,17 @@ describe('Single Types', () => {
       plugins: {
         'content-manager': {
           services: {
-            'single-types': {
-              fetchEntitiyWithCreatorRoles() {
-                return null;
+            entity: {
+              find() {
+                return Promise.resolve();
+              },
+              assocCreatorRoles(enitty) {
+                return enitty;
+              },
+            },
+            'permission-checker': {
+              create() {
+                return permissionChecker;
               },
             },
           },
@@ -55,7 +69,8 @@ describe('Single Types', () => {
 
     await singleTypes.find(ctx);
 
-    expect(state.userAbility.cannot).toHaveBeenCalledWith(ACTIONS.create, modelUid);
+    expect(permissionChecker.cannot.read).toHaveBeenCalled();
+    expect(permissionChecker.cannot.create).toHaveBeenCalled();
     expect(notFound).toHaveBeenCalled();
   });
 });

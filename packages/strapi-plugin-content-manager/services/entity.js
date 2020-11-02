@@ -36,7 +36,7 @@ const findCreatorRoles = entity => {
 };
 
 module.exports = {
-  async assocCreateRoles(entity) {
+  async assocCreatorRoles(entity) {
     if (!entity) {
       return entity;
     }
@@ -53,6 +53,10 @@ module.exports = {
     return strapi.entityService.search({ params }, { model });
   },
 
+  count(params, model) {
+    return strapi.entityService.count({ params }, { model });
+  },
+
   async findOne(id, model) {
     return strapi.entityService.findOne({ params: { id } }, { model });
   },
@@ -65,7 +69,7 @@ module.exports = {
       return entity;
     }
 
-    return this.assocCreateRoles(entity);
+    return this.assocCreatorRoles(entity);
   },
 
   async create(body, model) {

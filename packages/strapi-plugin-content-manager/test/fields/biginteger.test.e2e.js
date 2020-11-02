@@ -24,7 +24,7 @@ describe('Test type biginteger', () => {
   test('Create entry with value input JSON', async () => {
     const inputValue = '1223372036854775';
     const res = await rq.post(
-      '/content-manager/explorer/application::withbiginteger.withbiginteger',
+      '/content-manager/collection-types/application::withbiginteger.withbiginteger',
       {
         body: {
           field: inputValue,
@@ -41,7 +41,7 @@ describe('Test type biginteger', () => {
   test('Create entry with value input Formdata', async () => {
     const inputValue = '1223372036854775';
     const res = await rq.post(
-      '/content-manager/explorer/application::withbiginteger.withbiginteger',
+      '/content-manager/collection-types/application::withbiginteger.withbiginteger',
       {
         formData: {
           data: JSON.stringify({ field: inputValue }),
@@ -58,7 +58,7 @@ describe('Test type biginteger', () => {
   test('Create entry with integer should return a string', async () => {
     const inputValue = 1821;
     const res = await rq.post(
-      '/content-manager/explorer/application::withbiginteger.withbiginteger',
+      '/content-manager/collection-types/application::withbiginteger.withbiginteger',
       {
         body: {
           field: inputValue,
@@ -74,7 +74,7 @@ describe('Test type biginteger', () => {
 
   test('Reading entry, returns correct value', async () => {
     const res = await rq.get(
-      '/content-manager/explorer/application::withbiginteger.withbiginteger'
+      '/content-manager/collection-types/application::withbiginteger.withbiginteger'
     );
 
     expect(res.statusCode).toBe(200);
@@ -87,7 +87,7 @@ describe('Test type biginteger', () => {
   test('Updating entry sets the right value and format', async () => {
     const inputValue = '1223372036854775';
     const res = await rq.post(
-      '/content-manager/explorer/application::withbiginteger.withbiginteger',
+      '/content-manager/collection-types/application::withbiginteger.withbiginteger',
       {
         body: {
           field: inputValue,
@@ -97,7 +97,7 @@ describe('Test type biginteger', () => {
 
     const newVal = '9882823782712112';
     const updateRes = await rq.put(
-      `/content-manager/explorer/application::withbiginteger.withbiginteger/${res.body.id}`,
+      `/content-manager/collection-types/application::withbiginteger.withbiginteger/${res.body.id}`,
       {
         body: {
           field: newVal,

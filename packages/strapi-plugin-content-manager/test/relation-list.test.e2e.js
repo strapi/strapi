@@ -77,7 +77,7 @@ async function createFixtures({ publishAProduct = false } = {}) {
   for (const shop of shops) {
     const res = await rq({
       method: 'POST',
-      url: 'content-manager/explorer/application::shop.shop',
+      url: 'content-manager/collection-types/application::shop.shop',
       body: shop,
     });
     data.shops.push(res.body);
@@ -86,7 +86,7 @@ async function createFixtures({ publishAProduct = false } = {}) {
   for (const product of products) {
     const res = await rq({
       method: 'POST',
-      url: 'content-manager/explorer/application::product.product',
+      url: 'content-manager/collection-types/application::product.product',
       body: {
         ...product,
         shops: [data.shops[0].id],
@@ -98,7 +98,7 @@ async function createFixtures({ publishAProduct = false } = {}) {
   if (publishAProduct) {
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/explorer/application::product.product/publish/${data.products[0].id}`,
+      url: `/content-manager/collection-types/application::product.product/${data.products[0].id}/actions/publish`,
     });
     data.products[0] = res.body;
   }
@@ -108,13 +108,13 @@ async function deleteFixtures() {
   for (let shop of data.shops) {
     await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::shop.shop/${shop.id}`,
+      url: `/content-manager/collection-types/application::shop.shop/${shop.id}`,
     });
   }
   for (let product of data.products) {
     await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::product.product/${product.id}`,
+      url: `/content-manager/collection-types/application::product.product/${product.id}`,
     });
   }
 }

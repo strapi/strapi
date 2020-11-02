@@ -1,12 +1,15 @@
 'use strict';
 
-const { assign, assoc, omit, has, pipe } = require('lodash/fp');
+const { assign, assoc, has, omit, pipe } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
-const { getService } = require('../utils');
-const parseBody = require('../utils/parse-body');
+const { getService, wrapBadRequest, parseBody } = require('../utils');
 
-const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
+const {
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+  PUBLISHED_AT_ATTRIBUTE,
+} = contentTypesUtils.constants;
 
 const pickWritableFields = ({ model }) => {
   return omit(contentTypesUtils.getNonWritableAttributes(strapi.getModel(model)));
@@ -84,11 +87,12 @@ module.exports = {
 
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
-    const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
+    await wrapBadRequest(async () => {
+      const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
+      ctx.body = permissionChecker.sanitizeOutput(entity);
 
-    ctx.body = permissionChecker.sanitizeOutput(entity);
-
-    await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+    })();
   },
 
   async update(ctx) {
@@ -118,13 +122,15 @@ module.exports = {
 
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
-    const updatedEntity = await getService('entity').update(
-      entity,
-      { data: sanitizeFn(data), files },
-      model
-    );
+    await wrapBadRequest(async () => {
+      const updatedEntity = await getService('entity').update(
+        entity,
+        { data: sanitizeFn(data), files },
+        model
+      );
 
-    ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
+      ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
+    })();
   },
 
   async delete(ctx) {
@@ -172,6 +178,10 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
+      return ctx.badRequest('already.published');
+    }
+
     await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), entity);
 
     const result = await getService('entity').publish(entity, model);
@@ -197,6 +207,10 @@ module.exports = {
 
     if (permissionChecker.cannot.unpublish(entity)) {
       return ctx.forbidden();
+    }
+
+    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
+      return ctx.badRequest('already.draft');
     }
 
     const result = await getService('entity').unpublish(entity, model);

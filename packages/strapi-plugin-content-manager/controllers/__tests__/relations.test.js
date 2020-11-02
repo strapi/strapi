@@ -124,8 +124,8 @@ describe('Relations', () => {
                   };
                 },
               },
-              contentmanager: {
-                fetchAll() {
+              entity: {
+                find() {
                   return [
                     {
                       id: 1,

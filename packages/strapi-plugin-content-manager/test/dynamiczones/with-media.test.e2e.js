@@ -21,7 +21,7 @@ const uploadImg = () => {
 describe.each([
   [
     'CONTENT MANAGER',
-    '/content-manager/explorer/application::withdynamiczonemedia.withdynamiczonemedia',
+    '/content-manager/collection-types/application::withdynamiczonemedia.withdynamiczonemedia',
   ],
   ['GENERATED API', '/withdynamiczonemedias'],
 ])('[%s] => Not required dynamiczone', (_, path) => {

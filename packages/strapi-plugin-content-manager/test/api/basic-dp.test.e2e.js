@@ -58,10 +58,12 @@ describe('CM API - Basic + draftAndPublish', () => {
 
   afterAll(async () => {
     // clean database
-    const queryString = data.productsWithDP.map((p, i) => `${i}=${p.id}`).join('&');
     await rq({
-      method: 'DELETE',
-      url: `/content-manager/explorer/deleteAll/application::product-with-dp.product-with-dp?${queryString}`,
+      method: 'POST',
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/actions/bulkDelete`,
+      body: {
+        ids: data.productsWithDP.map(({ id }) => id),
+      },
     });
 
     await modelsUtils.deleteContentTypes(['product-with-dp']);
@@ -75,7 +77,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
+      url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
       body: product,
     });
 
@@ -93,7 +95,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
+      url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
       body: product,
     });
 
@@ -106,7 +108,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Read all products', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
+      url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
     });
 
     expect(res.statusCode).toBe(200);
@@ -132,7 +134,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       body: product,
     });
 
@@ -151,7 +153,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       body: product,
     });
 
@@ -166,7 +168,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/publish/${entry.id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
 
@@ -179,19 +181,19 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/publish/${entry.id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
 
     expect(body.statusCode).toBe(400);
-    expect(body.message).toBe('Already published');
+    expect(body.message).toBe('already.published');
   });
 
   test('Unpublish article1, expect article1 to be set to null', async () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/unpublish/${entry.id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });
 
@@ -204,18 +206,18 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/unpublish/${entry.id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });
 
     expect(body.statusCode).toBe(400);
-    expect(body.message).toBe('Already a draft');
+    expect(body.message).toBe('already.draft');
   });
 
   test('Delete a draft', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -233,7 +235,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
+        url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
         body: product,
       });
 
@@ -248,7 +250,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
+        url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
         body: product,
       });
 
@@ -267,7 +269,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-dp.product-with-dp',
+        url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
         body: product,
       });
 

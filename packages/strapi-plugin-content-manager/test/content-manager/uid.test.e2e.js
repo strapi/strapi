@@ -114,7 +114,7 @@ describe('Content Manager single types', () => {
       expect(res.body.data).toBe('uid-model');
 
       await rq({
-        url: `/content-manager/explorer/${uid}`,
+        url: `/content-manager/collection-types/${uid}`,
         method: 'POST',
         body: {
           slug: res.body.data,
@@ -152,7 +152,7 @@ describe('Content Manager single types', () => {
       expect(res.body.data).toBe('this-is-a-super-title');
 
       await rq({
-        url: `/content-manager/explorer/${uid}`,
+        url: `/content-manager/collection-types/${uid}`,
         method: 'POST',
         body: {
           slug: res.body.data,
@@ -192,7 +192,7 @@ describe('Content Manager single types', () => {
       expect(res.body.data).toBe('my-title');
 
       await rq({
-        url: `/content-manager/explorer/${uid}`,
+        url: `/content-manager/collection-types/${uid}`,
         method: 'POST',
         body: {
           slug: res.body.data,
@@ -215,7 +215,7 @@ describe('Content Manager single types', () => {
       expect(secondRes.body.data).toBe('my-title-1');
 
       await rq({
-        url: `/content-manager/explorer/${uid}`,
+        url: `/content-manager/collection-types/${uid}`,
         method: 'POST',
         body: {
           slug: secondRes.body.data,
@@ -342,7 +342,7 @@ describe('Content Manager single types', () => {
     test('Gives a suggestion when not available', async () => {
       // create data
       await rq({
-        url: `/content-manager/explorer/${uid}`,
+        url: `/content-manager/collection-types/${uid}`,
         method: 'POST',
         body: {
           slug: 'custom-slug',

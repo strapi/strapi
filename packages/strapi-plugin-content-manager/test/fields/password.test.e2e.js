@@ -22,11 +22,14 @@ describe('Test type password', () => {
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withpassword.withpassword', {
-      body: {
-        field: 'somePassword',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withpassword.withpassword',
+      {
+        body: {
+          field: 'somePassword',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body.field).toBeUndefined();
@@ -35,18 +38,23 @@ describe('Test type password', () => {
   test.todo('Should be private by default');
 
   test('Create entry with value input Formdata', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withpassword.withpassword', {
-      body: {
-        field: '1234567',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withpassword.withpassword',
+      {
+        body: {
+          field: '1234567',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body.field).toBeUndefined();
   });
 
   test('Reading entry returns correct value', async () => {
-    const res = await rq.get('/content-manager/explorer/application::withpassword.withpassword');
+    const res = await rq.get(
+      '/content-manager/collection-types/application::withpassword.withpassword'
+    );
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -57,14 +65,17 @@ describe('Test type password', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withpassword.withpassword', {
-      body: {
-        field: 'somePassword',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withpassword.withpassword',
+      {
+        body: {
+          field: 'somePassword',
+        },
+      }
+    );
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/application::withpassword.withpassword/${res.body.id}`,
+      `/content-manager/collection-types/application::withpassword.withpassword/${res.body.id}`,
       {
         body: {
           field: 'otherPwd',

@@ -22,11 +22,14 @@ describe('Test type email', () => {
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withemail.withemail', {
-      body: {
-        field: 'validemail@test.fr',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withemail.withemail',
+      {
+        body: {
+          field: 'validemail@test.fr',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -35,21 +38,27 @@ describe('Test type email', () => {
   });
 
   test('Should Throw on invalid email', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withemail.withemail', {
-      body: {
-        field: 'invalidemail',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withemail.withemail',
+      {
+        body: {
+          field: 'invalidemail',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(400);
   });
 
   test('Create entry with value input Formdata', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withemail.withemail', {
-      body: {
-        field: 'test@email.fr',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withemail.withemail',
+      {
+        body: {
+          field: 'test@email.fr',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -58,7 +67,7 @@ describe('Test type email', () => {
   });
 
   test('Reading entry returns correct value', async () => {
-    const res = await rq.get('/content-manager/explorer/application::withemail.withemail');
+    const res = await rq.get('/content-manager/collection-types/application::withemail.withemail');
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -72,14 +81,17 @@ describe('Test type email', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withemail.withemail', {
-      body: {
-        field: 'valid@email.fr',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withemail.withemail',
+      {
+        body: {
+          field: 'valid@email.fr',
+        },
+      }
+    );
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/application::withemail.withemail/${res.body.id}`,
+      `/content-manager/collection-types/application::withemail.withemail/${res.body.id}`,
       {
         body: {
           field: 'new-email@email.fr',

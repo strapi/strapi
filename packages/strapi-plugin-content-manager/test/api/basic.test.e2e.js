@@ -49,7 +49,7 @@ describe('CM API - Basic', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/explorer/application::product.product',
+      url: '/content-manager/collection-types/application::product.product',
       body: product,
     });
 
@@ -62,7 +62,7 @@ describe('CM API - Basic', () => {
   test('Read product', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/explorer/application::product.product',
+      url: '/content-manager/collection-types/application::product.product',
     });
 
     expect(res.statusCode).toBe(200);
@@ -86,7 +86,7 @@ describe('CM API - Basic', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/explorer/application::product.product/${data.products[0].id}`,
+      url: `/content-manager/collection-types/application::product.product/${data.products[0].id}`,
       body: product,
     });
 
@@ -100,7 +100,7 @@ describe('CM API - Basic', () => {
   test('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::product.product/${data.products[0].id}`,
+      url: `/content-manager/collection-types/application::product.product/${data.products[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -118,7 +118,7 @@ describe('CM API - Basic', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product.product',
+        url: '/content-manager/collection-types/application::product.product',
         body: product,
       });
 
@@ -134,12 +134,12 @@ describe('CM API - Basic', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product.product',
+        url: '/content-manager/collection-types/application::product.product',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.0.errors.name.0')).toBe('name must be defined.');
+      expect(_.get(res, 'body.data.errors.name.0')).toBe('name must be defined.');
     });
 
     test('Cannot create a product - maxLength', async () => {
@@ -149,7 +149,7 @@ describe('CM API - Basic', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product.product',
+        url: '/content-manager/collection-types/application::product.product',
         body: product,
       });
 

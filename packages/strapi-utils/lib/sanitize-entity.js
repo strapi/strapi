@@ -28,7 +28,7 @@ const sanitizeEntity = (dataSource, options) => {
   }
 
   if (_.isNil(model)) {
-    return null;
+    return data;
   }
 
   const { attributes } = model;

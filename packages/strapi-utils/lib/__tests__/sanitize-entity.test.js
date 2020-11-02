@@ -290,9 +290,9 @@ describe('Sanitize Entity', () => {
   });
 
   describe('Edge cases', () => {
-    test('It returns null if the model is nil', () => {
-      expect(sanitizeEntity(input, { model: null })).toBeNull();
-      expect(sanitizeEntity(input, { model: undefined })).toBeNull();
+    test('It returns data if the model is nil', () => {
+      expect(sanitizeEntity(input, { model: null })).toEqual(input);
+      expect(sanitizeEntity(input, { model: undefined })).toEqual(input);
     });
 
     test(`It returns the input data as-is if it's not an object or an array`, () => {
