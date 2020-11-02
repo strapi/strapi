@@ -354,40 +354,55 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         }
         case 'belongsToMorph':
         case 'belongsToManyMorph': {
-          const association = definition.associations.find(
-            association => association.alias === name
-          );
+          const association = _.find(definition.associations, { alias: name });
 
-          const morphValues = association.related.map(id => {
-            let models = Object.values(strapi.models).filter(model => model.globalId === id);
+          const morphModelsAndFields = association.related.map(id => {
+            let modelFound = _.find(strapi.models, { globalId: id });
 
-            if (models.length === 0) {
-              models = Object.values(strapi.components).filter(model => model.globalId === id);
+            if (!modelFound) {
+              modelFound = _.find(strapi.components, { globalId: id });
             }
 
-            if (models.length === 0) {
-              models = Object.keys(strapi.plugins).reduce((acc, current) => {
-                const models = Object.values(strapi.plugins[current].models).filter(
-                  model => model.globalId === id
-                );
-
-                if (acc.length === 0 && models.length > 0) {
-                  acc = models;
-                }
-
-                return acc;
-              }, []);
+            if (!modelFound) {
+              _.forIn(strapi.plugins, plugin => {
+                modelFound = _.find(plugin.models, { globalId: id });
+                return !modelFound; // break
+              });
             }
 
-            if (models.length === 0) {
+            if (!modelFound) {
               strapi.log.error(`Impossible to register the '${model}' model.`);
               strapi.log.error('The collection name cannot be found for the morphTo method.');
               strapi.stop();
             }
 
-            return models[0].collectionName;
+            const relatedFields = _.reduce(
+              modelFound.attributes,
+              (fields, attr, attrName) => {
+                const samePlugin =
+                  definition.plugin === attr.plugin ||
+                  (_.isNil(definition.plugin) && _.isNil(attr.plugin));
+                const sameModel = [attr.model, attr.collection].includes(definition.modelName);
+                const isMorph = attr.via === 'related';
+
+                return isMorph && sameModel && samePlugin ? fields.concat(attrName) : fields;
+              },
+              []
+            );
+
+            if (relatedFields.length === 0) {
+              strapi.log.error(`Impossible to register the '${model}' model.`);
+              strapi.log.error('The field name cannot be found for the morphTo method.');
+              strapi.stop();
+            }
+
+            return {
+              collectionName: modelFound.collectionName,
+              relatedFields,
+            };
           });
 
+          const morphValues = morphModelsAndFields.map(val => val.collectionName);
           // Define new model.
           const options = {
             requireFetch: false,
@@ -413,12 +428,29 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
 
           // Hack Bookshelf to create a many-to-many polymorphic association.
           // Upload has many Upload_morph that morph to different model.
+          const populateFn = qb => {
+            qb.where(qb => {
+              for (const modelAndFields of morphModelsAndFields) {
+                qb.where({ related_type: modelAndFields.collectionName }).whereIn(
+                  'field',
+                  modelAndFields.relatedFields
+                );
+              }
+            }).orderBy('order');
+          };
+
           loadedModel[name] = function() {
             if (verbose === 'belongsToMorph') {
-              return this.hasOne(GLOBALS[options.tableName], `${definition.collectionName}_id`);
+              return this.hasOne(
+                GLOBALS[options.tableName],
+                `${definition.collectionName}_id`
+              ).query(populateFn);
             }
 
-            return this.hasMany(GLOBALS[options.tableName], `${definition.collectionName}_id`);
+            return this.hasMany(
+              GLOBALS[options.tableName],
+              `${definition.collectionName}_id`
+            ).query(populateFn);
           };
           break;
         }
@@ -632,28 +664,33 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
       target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
 
       return async () => {
-        await buildDatabaseSchema({
-          ORM,
-          definition,
-          loadedModel,
-          connection,
-          model: target[model],
-        });
+        try {
+          await buildDatabaseSchema({
+            ORM,
+            definition,
+            loadedModel,
+            connection,
+            model: target[model],
+          });
 
-        await createComponentJoinTables({ definition, ORM });
+          await createComponentJoinTables({ definition, ORM });
+        } catch (err) {
+          if (['ER_TOO_LONG_IDENT'].includes(err.code)) {
+            strapi.stopWithError(
+              err,
+              `A table name is too long. If it is the name of a join table automatically generated by Strapi, you can customise it by adding \`collectionName: "customName"\` in the corresponding model's attribute.
+    When this happens on a manyToMany relation, make sure to set this parameter on the dominant side of the relation (e.g: where \`dominant: true\` is set)`
+            );
+          }
+
+          strapi.stopWithError(err);
+        }
       };
     } catch (err) {
       if (err instanceof TypeError || err instanceof ReferenceError) {
         strapi.stopWithError(err, `Impossible to register the '${model}' model.`);
       }
 
-      if (['ER_TOO_LONG_IDENT'].includes(err.code)) {
-        strapi.stopWithError(
-          err,
-          `A table name is too long. If it is the name of a join table automatically generated by Strapi, you can customise it by adding \`collectionName: "customName"\` in the corresponding model's attribute.
-When this happens on a manyToMany relation, make sure to set this parameter on the dominant side of the relation (e.g: where \`dominant: true\` is set)`
-        );
-      }
       strapi.stopWithError(err);
     }
   };
