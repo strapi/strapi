@@ -17,6 +17,26 @@ let data;
 let modelsUtils;
 let rq;
 
+const deleteFixtures = async () => {
+  for (const [name, modelName] of [
+    ['references', 'reference'],
+    ['tags', 'tag'],
+    ['categories', 'category'],
+    ['articles', 'article'],
+    ['articlesWithTag', 'articlewithtag'],
+  ]) {
+    const uid = `application::${modelName}.${modelName}`;
+
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${uid}/actions/bulkDelete`,
+      body: {
+        ids: (data[name] || []).map(({ id }) => id),
+      },
+    });
+  }
+};
+
 describe('Content Manager End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -75,6 +95,10 @@ describe('Content Manager End to End', () => {
         articles: [],
         tags: [],
       };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
     });
 
     test('Create tag1', async () => {
@@ -353,9 +377,30 @@ describe('Content Manager End to End', () => {
   });
 
   describe('Test manyWay articlesWithTags and tags', () => {
+    beforeAll(() => {
+      data = {
+        tags: [],
+        articlesWithTag: [],
+      };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
+    });
+
     test('Creating an article with some many way tags', async () => {
+      const { body: createdTag } = await rq({
+        url: '/content-manager/collection-types/application::tag.tag',
+        method: 'POST',
+        body: {
+          name: 'tag11',
+        },
+      });
+
+      data.tags.push(createdTag);
+
       const entry = {
-        tags: [data.tags[0]],
+        tags: [createdTag.id],
       };
 
       let { body } = await rq({
@@ -363,6 +408,8 @@ describe('Content Manager End to End', () => {
         method: 'POST',
         body: entry,
       });
+
+      data.articlesWithTag.push(body);
 
       expect(body.id);
       expect(Array.isArray(body.tags)).toBeTruthy();
@@ -379,6 +426,10 @@ describe('Content Manager End to End', () => {
         articles: [],
         categories: [],
       };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
     });
 
     test('Create cat1', async () => {
@@ -626,6 +677,10 @@ describe('Content Manager End to End', () => {
         articles: [],
         references: [],
       };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
     });
 
     test('Create ref1', async () => {

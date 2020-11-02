@@ -82,8 +82,6 @@ module.exports = {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    // const publishData = omitPublishedAtField(data);
-
     return strapi.entityService.create({ data: publishData, files }, { model });
   },
 

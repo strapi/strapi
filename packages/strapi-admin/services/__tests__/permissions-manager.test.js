@@ -8,14 +8,22 @@ describe('Permissions Manager', () => {
   describe('get Query', () => {
     test('It should returns an empty query when no conditions are defined', async () => {
       const ability = defineAbility(can => can('read', 'foo'));
-      const pm = createPermissionsManager(ability, 'read', 'foo');
+      const pm = createPermissionsManager({
+        ability,
+        action: 'read',
+        model: 'foo',
+      });
 
       expect(pm.query).toStrictEqual({});
     });
 
     test('It should returns a valid query from the ability', () => {
       const ability = defineAbility(can => can('read', 'foo', ['bar'], { john: 'doe' }));
-      const pm = createPermissionsManager(ability, 'read', 'foo');
+      const pm = createPermissionsManager({
+        ability,
+        action: 'read',
+        model: 'foo',
+      });
 
       const expected = { _or: [{ john: 'doe' }] };
 
@@ -27,13 +35,21 @@ describe('Permissions Manager', () => {
     const ability = defineAbility(can => can('read', 'foo'));
 
     test('It should grants access', () => {
-      const pm = createPermissionsManager(ability, 'read', 'foo');
+      const pm = createPermissionsManager({
+        ability,
+        action: 'read',
+        model: 'foo',
+      });
 
       expect(pm.isAllowed).toBeTruthy();
     });
 
     test('It should deny access', () => {
-      const pm = createPermissionsManager(ability, 'read', 'bar');
+      const pm = createPermissionsManager({
+        ability,
+        action: 'read',
+        model: 'bar',
+      });
 
       expect(pm.isAllowed).toBeFalsy();
     });
@@ -42,7 +58,11 @@ describe('Permissions Manager', () => {
   describe('toSubject', () => {
     const attr = '__caslSubjectType__';
     const ability = defineAbility(can => can('read', 'foo'));
-    const pm = createPermissionsManager(ability, 'read', 'foo');
+    const pm = createPermissionsManager({
+      ability,
+      action: 'read',
+      model: 'foo',
+    });
 
     test('It should transform an object to a subject using default model', () => {
       const input = { foo: 'bar' };
@@ -69,7 +89,11 @@ describe('Permissions Manager', () => {
       can('read', 'article', ['title'], { title: 'foo' });
       can('edit', 'article', ['title'], { title: { $in: ['john', 'doe'] } });
     });
-    const pm = createPermissionsManager(ability, 'read', 'article');
+    const pm = createPermissionsManager({
+      ability,
+      action: 'read',
+      model: 'article',
+    });
 
     global.strapi = {
       getModel() {
@@ -116,7 +140,12 @@ describe('Permissions Manager', () => {
 
   describe('queryFrom', () => {
     const ability = defineAbility(can => can('read', 'article', ['title'], { title: 'foo' }));
-    const pm = createPermissionsManager(ability, 'read', 'article');
+    const pm = createPermissionsManager({
+      ability,
+      action: 'read',
+      model: 'article',
+    });
+
     const pmQuery = { _or: [{ title: 'foo' }] };
 
     test('Create query from simple object', () => {

@@ -180,7 +180,7 @@ describe('Deep Filtering API', () => {
       test('panini_cards.name + empty search', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/explorer/application::collector.collector',
+          url: '/content-manager/collection-types/application::collector.collector',
           qs: {
             'panini_cards.name': data.paniniCards[0].name,
             _q: '',
@@ -195,7 +195,7 @@ describe('Deep Filtering API', () => {
       test('panini_cards.name + _q=25', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/explorer/application::collector.collector',
+          url: '/content-manager/collection-types/application::collector.collector',
           qs: {
             'panini_cards.name': data.paniniCards[0].name,
             _q: 25,
@@ -212,7 +212,7 @@ describe('Deep Filtering API', () => {
       test('collector_friends.name + empty search', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/explorer/application::collector.collector',
+          url: '/content-manager/collection-types/application::collector.collector',
           qs: {
             'collector_friends.name': data.collectors[0].name,
             _q: '',
@@ -226,7 +226,7 @@ describe('Deep Filtering API', () => {
       test('collector_friends.name + search isa', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/explorer/application::collector.collector',
+          url: '/content-manager/collection-types/application::collector.collector',
           qs: {
             'collector_friends.name': data.collectors[0].name,
             _q: 'isa',

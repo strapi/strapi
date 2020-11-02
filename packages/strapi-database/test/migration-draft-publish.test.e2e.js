@@ -40,29 +40,34 @@ describe('Migration - draft and publish', () => {
     rq = createAuthRequest(token);
     modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createContentTypes([dogModel]);
+
     for (const dog of dogs) {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         body: dog,
       });
+
       data.dogs.push(res.body);
     }
   }, 60000);
 
   afterAll(async () => {
-    const queryString = data.dogs.map((p, i) => `${i}=${p.id}`).join('&');
     await rq({
-      method: 'DELETE',
-      url: `/content-manager/explorer/deleteAll/application::dog.dog?${queryString}`,
+      method: 'POST',
+      url: `/content-manager/collection-types/application::dog.dog/actions/bulkDelete`,
+      body: {
+        ids: data.dogs.map(({ id }) => id),
+      },
     });
+
     await modelsUtils.deleteContentTypes(['dog']);
   }, 60000);
 
   describe('Enabling D&P on a content-type', () => {
     test('No published_at before enabling the feature', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         method: 'GET',
       });
       expect(body.length).toBe(2);
@@ -80,7 +85,7 @@ describe('Migration - draft and publish', () => {
       });
 
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         method: 'GET',
       });
       expect(body.length).toBe(2);
@@ -97,7 +102,7 @@ describe('Migration - draft and publish', () => {
   describe('Disabling D&P on a content-type', () => {
     test('No published_at after disabling the feature + draft removed', async () => {
       const res = await rq({
-        url: `/content-manager/explorer/application::dog.dog/unpublish/${data.dogs[1].id}`,
+        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
         method: 'POST',
       });
       data.dogs[1] = res.body;
@@ -111,7 +116,7 @@ describe('Migration - draft and publish', () => {
       data.dogs = data.dogs.filter(dog => !_.isNil(dog.published_at));
 
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         method: 'GET',
       });
       expect(body.length).toBe(1);

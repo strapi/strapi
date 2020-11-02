@@ -39,10 +39,11 @@ describe('Migration - required attribute', () => {
     rq = createAuthRequest(token);
     modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createContentTypes([dogModel]);
+
     for (const dog of dogs) {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         body: dog,
       });
       data.dogs.push(res.body);
@@ -50,18 +51,21 @@ describe('Migration - required attribute', () => {
   }, 60000);
 
   afterAll(async () => {
-    const queryString = data.dogs.map((p, i) => `${i}=${p.id}`).join('&');
     await rq({
-      method: 'DELETE',
-      url: `/content-manager/explorer/deleteAll/application::dog.dog?${queryString}`,
+      method: 'POST',
+      url: `/content-manager/collection-types/application::dog.dog/actions/bulkDelete`,
+      body: {
+        ids: data.dogs.map(({ id }) => id),
+      },
     });
+
     await modelsUtils.deleteContentTypes(['dog']);
   }, 60000);
 
   describe('Required: false -> true', () => {
     test('Can be null before migration', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         method: 'GET',
       });
       expect(body.length).toBe(2);
@@ -72,7 +76,7 @@ describe('Migration - required attribute', () => {
     test('Cannot create an entry with null after migration', async () => {
       // remove null values otherwise the migration would fail
       await rq({
-        url: `/content-manager/explorer/application::dog.dog/${data.dogs[0].id}`,
+        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
         method: 'PUT',
         body: { name: 'Nelson' },
       });
@@ -85,7 +89,7 @@ describe('Migration - required attribute', () => {
       // Try to create an entry with null
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         body: { name: null },
       });
       expect(res.body.message).toBe('ValidationError');
@@ -101,7 +105,7 @@ describe('Migration - required attribute', () => {
 
       // Try to create an entry with null
       const res = await rq({
-        url: `/content-manager/explorer/application::dog.dog`,
+        url: `/content-manager/collection-types/application::dog.dog`,
         method: 'POST',
         body: { name: null },
       });

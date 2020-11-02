@@ -145,11 +145,13 @@ const transformRawToBody = (name, raw) =>
   }[name](raw));
 
 const createFixtures = async () => {
-  for (const [name, singular] of [
+  for (const [name, modelName] of [
     ['countries', 'country'],
     ['categories', 'category'],
     ['products', 'product'],
   ]) {
+    const uid = `application::${modelName}.${modelName}`;
+
     for (const rawItem of data.raw[name]) {
       const body = transformRawToBody(name, rawItem);
       let res = await rq({ method: 'POST', url: `/${name}`, body });
@@ -157,12 +159,30 @@ const createFixtures = async () => {
       if (!rawItem.published) {
         await rq({
           method: 'POST',
-          url: `/content-manager/explorer/application::${singular}.${singular}/unpublish/${res.body.id}`,
+          url: `/content-manager/collection-types/${uid}/${res.body.id}/actions/unpublish`,
         });
       }
 
       data.api[name].push(res.body);
     }
+  }
+};
+
+const deleteFixtures = async () => {
+  for (const [name, modelName] of [
+    ['countries', 'country'],
+    ['categories', 'category'],
+    ['products', 'product'],
+  ]) {
+    const uid = `application::${modelName}.${modelName}`;
+
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${uid}/actions/bulkDelete`,
+      body: {
+        ids: data.api[name].map(({ id }) => id),
+      },
+    });
   }
 };
 
@@ -181,6 +201,8 @@ describe('Publication State', () => {
   }, 60000);
 
   afterAll(async () => {
+    await deleteFixtures();
+
     await modelsUtils.cleanupContentTypes(['product', 'category', 'country']);
     await modelsUtils.deleteComponent('comp');
     await modelsUtils.deleteContentTypes(['product', 'category', 'country']);

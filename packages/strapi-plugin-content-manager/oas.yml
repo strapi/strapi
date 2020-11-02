@@ -317,7 +317,7 @@ paths:
                       type: date
 
   # Collection type
-  /content-manager/collection-type/{model}:
+  /content-manager/collection-types/{model}:
     get:
       tags:
         - Collection Types content management
@@ -326,12 +326,42 @@ paths:
       tags:
         - Collection Types content management
       description: Create an entry
-  /content-manager/collection-type/{model}/actions/bulkDelete:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/entityInput'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity'
+  /content-manager/collection-types/{model}/actions/bulkDelete:
     post:
       tags:
         - Collection Types content management
       description: Bulk delete entries
-  /content-manager/collection-type/{model}/{id}:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/id'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/entity'
+
+  /content-manager/collection-types/{model}/{id}:
     get:
       tags:
         - Collection Types content management
@@ -362,7 +392,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/entity'
-  /content-manager/collection-type/{model}/{id}/actions/publish:
+  /content-manager/collection-types/{model}/{id}/actions/publish:
     post:
       tags:
         - Collection Types content management
@@ -373,7 +403,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/entity'
-  /content-manager/collection-type/{model}/{id}/actions/unpublish:
+  /content-manager/collection-types/{model}/{id}/actions/unpublish:
     post:
       tags:
         - Collection Types content management
@@ -456,6 +486,11 @@ components:
           $ref: '#/components/schemas/user'
         updated_by:
           $ref: '#/components/schemas/user'
+      additionalProperties:
+        type: any
+
+    entityInput:
+      type: object
       additionalProperties:
         type: any
 

@@ -18,6 +18,26 @@ let data;
 let rq;
 let modelsUtils;
 
+const deleteFixtures = async () => {
+  for (const [name, modelName] of [
+    ['references', 'reference'],
+    ['tags', 'tag'],
+    ['products', 'product'],
+    ['categories', 'category'],
+    ['articles', 'article'],
+  ]) {
+    const uid = `application::${modelName}.${modelName}`;
+
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${uid}/actions/bulkDelete`,
+      body: {
+        ids: (data[name] || []).map(({ id }) => id),
+      },
+    });
+  }
+};
+
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -44,6 +64,10 @@ describe('Create Strapi API End to End', () => {
         articles: [],
         tags: [],
       };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
     });
 
     test('Create tag1', async () => {
@@ -233,6 +257,10 @@ describe('Create Strapi API End to End', () => {
         articles: [],
         categories: [],
       };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
     });
 
     test('Create cat1', async () => {
@@ -454,6 +482,10 @@ describe('Create Strapi API End to End', () => {
       };
     });
 
+    afterAll(async () => {
+      await deleteFixtures();
+    });
+
     test('Create ref1', async () => {
       const { body } = await rq({
         url: '/references',
@@ -532,6 +564,17 @@ describe('Create Strapi API End to End', () => {
   });
 
   describe('Test oneWay relation (reference - tag) with Content Manager', () => {
+    beforeAll(() => {
+      data = {
+        tags: [],
+        references: [],
+      };
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
+    });
+
     test('Attach Tag to a Reference', async () => {
       await rq({
         url: '/tags',
@@ -540,6 +583,8 @@ describe('Create Strapi API End to End', () => {
           name: 'tag111',
         },
       }).then(({ body: tagToCreate }) => {
+        data.tags.push(tagToCreate);
+
         return rq({
           url: '/references',
           method: 'POST',
@@ -548,6 +593,7 @@ describe('Create Strapi API End to End', () => {
             tag: tagToCreate,
           },
         }).then(({ body }) => {
+          data.references.push(body);
           expect(body.tag.id).toBe(tagToCreate.id);
         });
       });
@@ -562,6 +608,8 @@ describe('Create Strapi API End to End', () => {
         },
       });
 
+      data.tags.push(tagToCreate);
+
       const { body: referenceToCreate } = await rq({
         url: '/references',
         method: 'POST',
@@ -570,6 +618,8 @@ describe('Create Strapi API End to End', () => {
           tag: tagToCreate,
         },
       });
+
+      data.references.push(referenceToCreate);
 
       expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
@@ -593,6 +643,8 @@ describe('Create Strapi API End to End', () => {
         },
       });
 
+      data.tags.push(tagToCreate);
+
       const { body: referenceToCreate } = await rq({
         url: '/references',
         method: 'POST',
@@ -601,6 +653,8 @@ describe('Create Strapi API End to End', () => {
           tag: tagToCreate,
         },
       });
+
+      data.references.push(referenceToCreate);
 
       await rq({
         url: `/tags/${tagToCreate.id}`,
