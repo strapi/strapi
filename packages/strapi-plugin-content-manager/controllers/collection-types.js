@@ -26,7 +26,7 @@ module.exports = {
 
     const permissionQuery = permissionChecker.buildPermissionQuery(query);
 
-    const results = await getService('entity')[method](permissionQuery, model);
+    const results = await getService('entity-manager')[method](permissionQuery, model);
 
     ctx.body = results.map(entity => permissionChecker.sanitizeOutput(entity));
   },
@@ -41,7 +41,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity').findOneWithCreatorRoles(id, model);
+    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -72,7 +72,10 @@ module.exports = {
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
     await wrapBadRequest(async () => {
-      const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
+      const entity = await getService('entity-manager').create(
+        { data: sanitizeFn(data), files },
+        model
+      );
       ctx.body = permissionChecker.sanitizeOutput(entity);
 
       await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
@@ -90,7 +93,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity').findOneWithCreatorRoles(id, model);
+    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -107,7 +110,7 @@ module.exports = {
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
     await wrapBadRequest(async () => {
-      const updatedEntity = await getService('entity').update(
+      const updatedEntity = await getService('entity-manager').update(
         entity,
         { data: sanitizeFn(data), files },
         model
@@ -127,7 +130,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity').findOneWithCreatorRoles(id, model);
+    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -137,7 +140,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await getService('entity').delete(entity, model);
+    const result = await getService('entity-manager').delete(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },
@@ -152,7 +155,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity').findOneWithCreatorRoles(id, model);
+    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -162,7 +165,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await getService('entity').publish(entity, model);
+    const result = await getService('entity-manager').publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },
@@ -177,7 +180,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity').findOneWithCreatorRoles(id, model);
+    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -187,7 +190,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await getService('entity').unpublish(entity, model);
+    const result = await getService('entity-manager').unpublish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },

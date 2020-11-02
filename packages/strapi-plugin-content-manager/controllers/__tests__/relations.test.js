@@ -124,7 +124,7 @@ describe('Relations', () => {
                   };
                 },
               },
-              entity: {
+              'entity-manager': {
                 find() {
                   return [
                     {

@@ -35,7 +35,7 @@ describe('Single Types', () => {
       plugins: {
         'content-manager': {
           services: {
-            entity: {
+            'entity-manager': {
               find() {
                 return Promise.resolve();
               },

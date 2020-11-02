@@ -31,14 +31,14 @@ module.exports = {
       return ctx.notFound('target.notFound');
     }
 
-    const entityService = getService('entity');
+    const entityManager = getService('entity-manager');
 
     let entities = [];
 
     if (has('_q', ctx.request.query)) {
-      entities = await entityService.search(query, target.uid);
+      entities = await entityManager.search(query, target.uid);
     } else {
-      entities = await entityService.find(query, target.uid);
+      entities = await entityManager.find(query, target.uid);
     }
 
     if (!entities) {

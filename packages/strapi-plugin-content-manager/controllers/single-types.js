@@ -10,10 +10,10 @@ const {
 } = require('../utils');
 
 const findEntity = async model => {
-  const service = getService('entity');
+  const entityManager = getService('entity-manager');
 
-  const entity = service.find({}, model);
-  return service.assocCreatorRoles(entity);
+  const entity = entityManager.find({}, model);
+  return entityManager.assocCreatorRoles(entity);
 };
 
 module.exports = {
@@ -73,7 +73,10 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       if (!entity) {
-        const entity = await getService('entity').create({ data: sanitizeFn(data), files }, model);
+        const entity = await getService('entity-manager').create(
+          { data: sanitizeFn(data), files },
+          model
+        );
 
         ctx.body = permissionChecker.sanitizeOutput(entity);
 
@@ -85,7 +88,7 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      const updatedEntity = await getService('entity').update(
+      const updatedEntity = await getService('entity-manager').update(
         entity,
         { data: sanitizeFn(data), files },
         model
@@ -115,7 +118,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const deletedEntity = await getService('entity').delete(entity, model);
+    const deletedEntity = await getService('entity-manager').delete(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(deletedEntity);
   },
@@ -140,7 +143,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const publishedEntity = await getService('entity').publish(entity, model);
+    const publishedEntity = await getService('entity-manager').publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(publishedEntity);
   },
@@ -165,7 +168,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await getService('entity').unpublish(entity, model);
+    const unpublishedEntity = await getService('entity-manager').unpublish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(unpublishedEntity);
   },
