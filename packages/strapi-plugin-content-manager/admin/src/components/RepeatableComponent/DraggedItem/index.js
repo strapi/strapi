@@ -153,7 +153,6 @@ const DraggedItem = ({
         onClickRemove={() => {
           removeRepeatableField(componentFieldName);
           toggleCollapses();
-          // removeCollapse();
         }}
         ref={refs}
       />

@@ -14,7 +14,7 @@ const removeKeyInObject = (obj, keyToRemove) => {
       return { ...acc, [current]: removeKeyInObject(value, keyToRemove) };
     }
 
-    if (current === '__temp_key__') {
+    if (current === keyToRemove) {
       delete acc[current];
     }
 
