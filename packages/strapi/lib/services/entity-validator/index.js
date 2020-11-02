@@ -4,18 +4,12 @@
  */
 'use strict';
 
-const _ = require('lodash');
-const fp = require('lodash/fp');
-const { yup, formatYupErrors, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { has, assoc, prop } = require('lodash/fp');
+const strapiUtils = require('strapi-utils');
 const validators = require('./validators');
 
-const mapValuesWithKey = fp.mapValues.convert({ cap: false });
-const pickByWithKey = fp.pickBy.convert({ cap: false });
-
-const isMedia = attr => (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
-
-const isSimpleAttribute = attr =>
-  !attr.collection && !attr.model && attr.type !== 'component' && attr.type !== 'dynamiczone';
+const { yup, formatYupErrors } = strapiUtils;
+const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
 
 const addMinMax = (attr, validator, data) => {
   if (Number.isInteger(attr.min) && (attr.required || (Array.isArray(data) && data.length > 0))) {
@@ -67,7 +61,7 @@ const createComponentValidator = createOrUpdate => (attr, data, { isDraft }) => 
     throw new Error('Validation failed: Model not found');
   }
 
-  if (_.get(attr, 'repeatable', false) === true) {
+  if (prop('repeatable', attr) === true) {
     validator = yup
       .array()
       .of(
@@ -88,14 +82,14 @@ const createDzValidator = createOrUpdate => (attr, data, { isDraft }) => {
 
   validator = yup.array().of(
     yup.lazy(item => {
-      const model = strapi.getModel(_.get(item, '__component'));
+      const model = strapi.getModel(prop('__component', item));
       const schema = yup
         .object()
         .shape({
           __component: yup
             .string()
             .required()
-            .oneOf(_.keys(strapi.components)),
+            .oneOf(Object.keys(strapi.components)),
         })
         .notNull();
 
@@ -123,10 +117,10 @@ const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
   return validator;
 };
 
-const createSimpleAttributeValidator = createOrUpdate => (attr, { isDraft }) => {
+const createScalarAttributeValidator = createOrUpdate => (attr, { isDraft }) => {
   let validator;
 
-  if (attr.type in validators) {
+  if (has(attr.type, validators)) {
     validator = validators[attr.type](attr, { isDraft });
   } else {
     // No validators specified - fall back to mixed
@@ -140,10 +134,10 @@ const createSimpleAttributeValidator = createOrUpdate => (attr, { isDraft }) => 
 
 const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => {
   let validator;
-  if (isMedia(attr)) {
+  if (isMediaAttribute(attr)) {
     validator = yup.mixed();
-  } else if (isSimpleAttribute(attr)) {
-    validator = createSimpleAttributeValidator(createOrUpdate)(attr, { isDraft });
+  } else if (isScalarAttribute(attr)) {
+    validator = createScalarAttributeValidator(createOrUpdate)(attr, { isDraft });
   } else {
     if (attr.type === 'component') {
       validator = createComponentValidator(createOrUpdate)(attr, data, { isDraft });
@@ -162,17 +156,19 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
 };
 
 const createModelValidator = createOrUpdate => (model, data, { isDraft }) => {
-  const nonWritableAttributes = model ? contentTypesUtils.getNonWritableAttributes(model) : [];
+  const writableAttributes = model ? getWritableAttributes(model) : [];
 
-  return yup.object().shape(
-    _.flow(
-      fp.getOr({}, 'attributes'),
-      pickByWithKey((attr, attrName) => !nonWritableAttributes.includes(attrName)),
-      mapValuesWithKey((attr, attrName) =>
-        createAttributeValidator(createOrUpdate)(attr, _.get(data, attrName), { isDraft })
-      )
-    )(model)
-  );
+  const schema = writableAttributes.reduce((validators, attributeName) => {
+    const validator = createAttributeValidator(createOrUpdate)(
+      model.attributes[attributeName],
+      data[attributeName],
+      { isDraft }
+    );
+
+    return assoc(attributeName, validator)(validators);
+  }, {});
+
+  return yup.object().shape(schema);
 };
 
 const createValidateEntity = createOrUpdate => async (model, data, { isDraft = false } = {}) => {

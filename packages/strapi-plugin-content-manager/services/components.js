@@ -19,7 +19,7 @@ const configurationService = createConfigurationService({
   },
 });
 
-const service = {
+module.exports = {
   findAllComponents() {
     const { toContentManagerModel } = getService('data-mapper');
 
@@ -90,5 +90,3 @@ const service = {
     return configurationService.syncConfigurations();
   },
 };
-
-module.exports = service;

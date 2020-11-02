@@ -8,7 +8,6 @@ const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
 
-// we omit the published_at so it gets it's default null value and cannot be set via the CM api
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
 const emitEvent = (event, fn) => async (entity, model) => {
@@ -61,7 +60,6 @@ module.exports = {
     return strapi.entityService.findOne({ params: { id } }, { model });
   },
 
-  // TODO: should be replace with an option to populate a path in addition to the default populate
   async findOneWithCreatorRoles(id, model) {
     const entity = await this.findOne(id, model);
 
@@ -97,7 +95,14 @@ module.exports = {
     return strapi.entityService.delete({ params }, { model });
   },
 
-  publish: emitEvent(ENTRY_PUBLISH, (entity, model) => {
+  publish: emitEvent(ENTRY_PUBLISH, async (entity, model) => {
+    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
+      throw strapi.errors.badRequest('already.published');
+    }
+
+    // validate the entity is valid for publication
+    await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), entity);
+
     const params = { id: entity.id };
     const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 
@@ -105,6 +110,10 @@ module.exports = {
   }),
 
   unpublish: emitEvent(ENTRY_UNPUBLISH, (entity, model) => {
+    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
+      throw strapi.errors.badRequest('already.draft');
+    }
+
     const params = { id: entity.id };
     const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
 

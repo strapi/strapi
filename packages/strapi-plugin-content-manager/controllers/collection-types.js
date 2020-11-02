@@ -1,30 +1,14 @@
 'use strict';
 
-const { assign, assoc, has, omit, pipe } = require('lodash/fp');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
-
-const { getService, wrapBadRequest, parseBody } = require('../utils');
+const { has, pipe } = require('lodash/fp');
 
 const {
-  CREATED_BY_ATTRIBUTE,
-  UPDATED_BY_ATTRIBUTE,
-  PUBLISHED_AT_ATTRIBUTE,
-} = contentTypesUtils.constants;
-
-const pickWritableFields = ({ model }) => {
-  return omit(contentTypesUtils.getNonWritableAttributes(strapi.getModel(model)));
-};
-
-const setCreatorFields = ({ user, isEdition = false }) => data => {
-  if (isEdition) {
-    return assoc(UPDATED_BY_ATTRIBUTE, user.id, data);
-  }
-
-  return assign(data, {
-    [CREATED_BY_ATTRIBUTE]: user.id,
-    [UPDATED_BY_ATTRIBUTE]: user.id,
-  });
-};
+  getService,
+  wrapBadRequest,
+  parseBody,
+  setCreatorFields,
+  pickWritableAttributes,
+} = require('../utils');
 
 module.exports = {
   async find(ctx) {
@@ -81,7 +65,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableFields({ model });
+    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeInput.create;
     const setCreator = setCreatorFields({ user });
 
@@ -116,7 +100,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableFields({ model });
+    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = data => permissionChecker.sanitizeInput.update(data, entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
 
@@ -178,12 +162,6 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
-      return ctx.badRequest('already.published');
-    }
-
-    await strapi.entityValidator.validateEntityCreation(strapi.getModel(model), entity);
-
     const result = await getService('entity').publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
@@ -207,10 +185,6 @@ module.exports = {
 
     if (permissionChecker.cannot.unpublish(entity)) {
       return ctx.forbidden();
-    }
-
-    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
-      return ctx.badRequest('already.draft');
     }
 
     const result = await getService('entity').unpublish(entity, model);

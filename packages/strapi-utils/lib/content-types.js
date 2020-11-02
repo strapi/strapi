@@ -62,6 +62,10 @@ const getNonWritableAttributes = (model = {}) => {
   );
 };
 
+const getWritableAttributes = (model = {}) => {
+  return _.difference(Object.keys(model.attributes), getNonWritableAttributes(model));
+};
+
 const getNonVisibleAttributes = model => {
   return _.uniq([model.primaryKey, ...getTimestamps(model), ...NON_VISIBLE_ATTRIBUTES]);
 };
@@ -75,6 +79,10 @@ const hasDraftAndPublish = model => _.get(model, 'options.draftAndPublish', fals
 const isDraft = (data, model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
+const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
+const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
+const isKind = kind => model => model.kind === kind;
+
 const getPrivateAttributes = (model = {}) => {
   return _.union(
     strapi.config.get('api.responses.privateAttributes', []),
@@ -87,16 +95,28 @@ const isPrivateAttribute = (model = {}, attributeName) => {
   return model.privateAttributes.includes(attributeName);
 };
 
-const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
-const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
-const isKind = kind => model => model.kind === kind;
+const isScalarAttribute = attribute => {
+  return (
+    !attribute.collection &&
+    !attribute.model &&
+    attribute.type !== 'component' &&
+    attribute.type !== 'dynamiczone'
+  );
+};
+
+const isMediaAttribute = attr => {
+  return (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
+};
 
 module.exports = {
+  isScalarAttribute,
+  isMediaAttribute,
   getPrivateAttributes,
   getTimestampsAttributes,
   isPrivateAttribute,
   constants,
   getNonWritableAttributes,
+  getWritableAttributes,
   getNonVisibleAttributes,
   getVisibleAttributes,
   hasDraftAndPublish,
