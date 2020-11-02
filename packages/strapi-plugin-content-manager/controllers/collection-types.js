@@ -22,13 +22,19 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const method = has('_q', query) ? 'search' : 'find';
+    const method = has('_q', query) ? 'searchPage' : 'findPage';
 
     const permissionQuery = permissionChecker.buildPermissionQuery(query);
 
-    const results = await getService('entity-manager')[method](permissionQuery, model);
+    const { results, pagination } = await getService('entity-manager')[method](
+      permissionQuery,
+      model
+    );
 
-    ctx.body = results.map(entity => permissionChecker.sanitizeOutput(entity));
+    ctx.body = {
+      results: results.map(entity => permissionChecker.sanitizeOutput(entity)),
+      pagination,
+    };
   },
 
   async findOne(ctx) {

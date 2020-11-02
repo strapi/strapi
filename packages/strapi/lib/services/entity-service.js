@@ -33,6 +33,10 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     return db.query(model).find(params, populate);
   },
 
+  findPage({ params, populate }, { model }) {
+    return db.query(model).findPage(params, populate);
+  },
+
   /**
    * Promise to fetch record
    *
@@ -146,6 +150,10 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
   search({ params }, { model }) {
     return db.query(model).search(params);
+  },
+
+  searchPage({ params }, { model }) {
+    return db.query(model).searchPage(params);
   },
 
   /**

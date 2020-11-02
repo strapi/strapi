@@ -48,8 +48,16 @@ module.exports = {
     return strapi.entityService.find({ params }, { model });
   },
 
+  findPage(params, model) {
+    return strapi.entityService.findPage({ params }, { model });
+  },
+
   search(params, model) {
     return strapi.entityService.search({ params }, { model });
+  },
+
+  searchPage(params, model) {
+    return strapi.entityService.searchPage({ params }, { model });
   },
 
   count(params, model) {

@@ -322,6 +322,19 @@ paths:
       tags:
         - Collection Types content management
       description: Get a list of entries
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/entity'
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
     post:
       tags:
         - Collection Types content management
@@ -472,6 +485,18 @@ components:
       oneOf:
         - type: string
         - type: integer
+
+    pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        pageCount:
+          type: integer
+        total:
+          type: integer
 
     entity:
       type: object
