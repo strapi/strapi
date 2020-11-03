@@ -36,7 +36,11 @@ const service = {
     return this.findAllContentTypes().filter(({ isDisplayed }) => isDisplayed === true);
   },
 
-  findContentTypesByKind(kind = contentTypesUtils.constants.COLLECTION_TYPE) {
+  findContentTypesByKind(kind) {
+    if (!kind) {
+      return this.findAllContentTypes();
+    }
+
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
