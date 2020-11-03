@@ -93,10 +93,10 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompo[0]);
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results).toHaveLength(1);
+    expect(res.body.results[0]).toMatchObject(data.productsWithCompo[0]);
+    res.body.results.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
   test('Update product with compo', async () => {

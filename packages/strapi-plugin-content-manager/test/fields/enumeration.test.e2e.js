@@ -39,30 +39,15 @@ describe('Test type enumeration', () => {
     });
   });
 
-  test('Create entry value enumeration input Formdata', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withenumeration.withenumeration',
-      {
-        formData: {
-          data: JSON.stringify({ field: 'two' }),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200); // should return 201
-    expect(res.body).toMatchObject({
-      field: 'two',
-    });
-  });
-
   test('Reading entry, returns correct value', async () => {
     const res = await rq.get(
       '/content-manager/collection-types/application::withenumeration.withenumeration'
     );
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(['one', 'two'].includes(entry.field)).toBe(true);
     });
   });

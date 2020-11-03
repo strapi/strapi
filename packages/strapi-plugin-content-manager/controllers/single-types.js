@@ -11,7 +11,7 @@ const {
 const findEntity = async model => {
   const entityManager = getService('entity-manager');
 
-  const entity = entityManager.find({}, model);
+  const entity = await entityManager.find({}, model);
   return entityManager.assocCreatorRoles(entity);
 };
 
@@ -72,8 +72,8 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       if (!entity) {
-        const entity = await entityManager.create(sanitizeFn(body), model);
-        ctx.body = permissionChecker.sanitizeOutput(entity);
+        const newEntity = await entityManager.create(sanitizeFn(body), model);
+        ctx.body = permissionChecker.sanitizeOutput(newEntity);
 
         await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
         return;

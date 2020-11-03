@@ -101,7 +101,7 @@ module.exports = {
     return strapi.entityService.delete({ params }, { model });
   },
 
-  findAnddelete(params, model) {
+  findAndDelete(params, model) {
     return strapi.entityService.delete({ params }, { model });
   },
 

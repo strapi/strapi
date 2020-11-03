@@ -70,8 +70,8 @@ describe('Test type time', () => {
     const res = await rq.get('/content-manager/collection-types/application::withtime.withtime');
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(entry.field).toMatch(/^2[0-3]|[01][0-9]:[0-5][0-9]:[0-5][0-9](.[0-9]{1,3})?$/);
     });
   });

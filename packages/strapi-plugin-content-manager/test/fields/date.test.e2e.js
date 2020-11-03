@@ -34,21 +34,6 @@ describe('Test type date', () => {
     });
   });
 
-  test('Create entry with valid value FormData', async () => {
-    const now = new Date(2019, 0, 12);
-
-    const res = await rq.post('/content-manager/collection-types/application::withdate.withdate', {
-      formData: {
-        data: JSON.stringify({ field: now }),
-      },
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: '2019-01-12',
-    });
-  });
-
   test.each([
     '2019-08-08',
     '2019-08-08 12:11:12',
@@ -91,8 +76,9 @@ describe('Test type date', () => {
     const res = await rq.get('/content-manager/collection-types/application::withdate.withdate');
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(entry.field).toMatch(/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/);
     });
   });

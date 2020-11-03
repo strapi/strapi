@@ -37,24 +37,6 @@ describe('Test type date', () => {
     });
   });
 
-  test('Create entry with valid value FormData', async () => {
-    const now = new Date(2019, 0, 12);
-
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withdatetime.withdatetime',
-      {
-        formData: {
-          data: JSON.stringify({ field: now }),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: now.toISOString(),
-    });
-  });
-
   test('Create entry with timestamp value should be converted to ISO', async () => {
     const now = new Date(2016, 4, 8);
 
@@ -110,8 +92,9 @@ describe('Test type date', () => {
     );
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(new Date(entry.field).toISOString()).toBe(entry.field);
     });
   });

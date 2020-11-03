@@ -43,6 +43,8 @@ describe.each([
   ],
   ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
+  const hasPagination = path.includes('/content-manager');
+
   beforeAll(async () => {
     const token = await registerAndLogin();
     const authRq = createAuthRequest(token);
@@ -201,6 +203,25 @@ describe.each([
       const res = await rq.get('/');
 
       expect(res.statusCode).toBe(200);
+
+      if (hasPagination) {
+        expect(res.body.pagination).toBeDefined();
+        expect(Array.isArray(res.body.results)).toBe(true);
+        expect(res.body.results).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              field: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.anything(),
+                  __component: expect.any(String),
+                }),
+              ]),
+            }),
+          ])
+        );
+        return;
+      }
+
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body).toEqual(
         expect.arrayContaining([

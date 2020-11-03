@@ -11,6 +11,8 @@ describe.each([
   ['CONTENT MANAGER', '/content-manager/collection-types/application::withcomponent.withcomponent'],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and Not required component', (_, path) => {
+  const hasPagination = path.includes('/content-manager');
+
   beforeAll(async () => {
     const token = await registerAndLogin();
     const authRq = createAuthRequest(token);
@@ -66,34 +68,6 @@ describe.each([
           expect.objectContaining({
             id: expect.anything(),
             name: 'someString',
-          }),
-        ])
-      );
-    });
-
-    test('Creating entry with formdata works', async () => {
-      const res = await rq.post('/', {
-        formData: {
-          data: JSON.stringify({
-            field: [
-              {
-                name: 'someValue',
-              },
-              {
-                name: 'someString',
-              },
-            ],
-          }),
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body.field).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.anything(),
-            name: 'someValue',
           }),
         ])
       );
@@ -206,6 +180,26 @@ describe.each([
       const res = await rq.get('/');
 
       expect(res.statusCode).toBe(200);
+
+      if (hasPagination) {
+        expect(res.body.pagination).toBeDefined();
+        expect(Array.isArray(res.body.results)).toBe(true);
+        res.body.results.forEach(entry => {
+          expect(Array.isArray(entry.field)).toBe(true);
+
+          if (entry.field.length === 0) return;
+
+          expect(entry.field).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                name: expect.any(String),
+              }),
+            ])
+          );
+        });
+        return;
+      }
+
       expect(Array.isArray(res.body)).toBe(true);
       res.body.forEach(entry => {
         expect(Array.isArray(entry.field)).toBe(true);

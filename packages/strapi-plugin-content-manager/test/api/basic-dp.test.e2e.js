@@ -112,9 +112,9 @@ describe('CM API - Basic + draftAndPublish', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(2);
-    expect(res.body).toEqual(
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results).toHaveLength(2);
+    expect(res.body.results).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           name: 'Product 1',
@@ -122,7 +122,7 @@ describe('CM API - Basic + draftAndPublish', () => {
         }),
       ])
     );
-    res.body.forEach(p => {
+    res.body.results.forEach(p => {
       expect(p.published_at).toBeNull();
     });
   });

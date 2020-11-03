@@ -66,9 +66,9 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body).toEqual(
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results).toHaveLength(1);
+    expect(res.body.results).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           name: 'Product 1',
@@ -76,7 +76,7 @@ describe('CM API - Basic', () => {
         }),
       ])
     );
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+    res.body.results.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
   test('Update product', async () => {

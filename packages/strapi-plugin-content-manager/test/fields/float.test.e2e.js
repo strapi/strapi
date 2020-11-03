@@ -38,23 +38,6 @@ describe('Test type float', () => {
     });
   });
 
-  test('Create entry with value input Formdata', async () => {
-    const inputValue = 23.1;
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withfloat.withfloat',
-      {
-        formData: {
-          data: JSON.stringify({ field: inputValue }),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: inputValue,
-    });
-  });
-
   test('Create entry with integer should convert to float', async () => {
     const inputValue = 1821;
     const res = await rq.post(
@@ -76,8 +59,9 @@ describe('Test type float', () => {
     const res = await rq.get('/content-manager/collection-types/application::withfloat.withfloat');
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(entry.field).toEqual(expect.any(Number));
     });
   });

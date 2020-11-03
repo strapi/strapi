@@ -161,7 +161,7 @@ const createModelValidator = createOrUpdate => (model, data, { isDraft }) => {
   const schema = writableAttributes.reduce((validators, attributeName) => {
     const validator = createAttributeValidator(createOrUpdate)(
       model.attributes[attributeName],
-      data[attributeName],
+      prop(attributeName, data),
       { isDraft }
     );
 

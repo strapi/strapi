@@ -37,22 +37,6 @@ describe('Test type boolean', () => {
     });
   });
 
-  test('Create entry with value input FromData', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withboolean.withboolean',
-      {
-        formData: {
-          data: JSON.stringify({ field: true }),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: true,
-    });
-  });
-
   test('Throws on invalid boolean value', async () => {
     let res = await rq.post(
       '/content-manager/collection-types/application::withboolean.withboolean',
@@ -93,14 +77,11 @@ describe('Test type boolean', () => {
     );
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          field: expect.any(Boolean),
-        }),
-      ])
-    );
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
+      expect(entry.field).toEqual(expect.any(Boolean));
+    });
   });
 
   test('Updating entry sets the right value and format', async () => {

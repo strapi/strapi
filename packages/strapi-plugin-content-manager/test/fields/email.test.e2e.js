@@ -70,8 +70,8 @@ describe('Test type email', () => {
     const res = await rq.get('/content-manager/collection-types/application::withemail.withemail');
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toEqual(
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           field: expect.any(String),

@@ -37,22 +37,6 @@ describe('Test type integer', () => {
     });
   });
 
-  test('Create entry with value input Fromdata', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withinteger.withinteger',
-      {
-        formData: {
-          data: JSON.stringify({ field: 123456 }),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: 123456,
-    });
-  });
-
   // I don't think it will work everywhere ...
   test('Create entry with a string should cast the value', async () => {
     const res = await rq.post(
@@ -76,8 +60,9 @@ describe('Test type integer', () => {
     );
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(Number.isInteger(entry.field)).toBe(true);
     });
   });

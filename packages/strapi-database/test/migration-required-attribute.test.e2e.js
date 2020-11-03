@@ -65,19 +65,19 @@ describe('Migration - required attribute', () => {
   describe('Required: false -> true', () => {
     test('Can be null before migration', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::dog.dog',
         method: 'GET',
+        url: '/content-manager/collection-types/application::dog.dog',
       });
-      expect(body.length).toBe(2);
-      const dogWithNameNull = body.find(dog => dog.name === null);
+      expect(body.results.length).toBe(2);
+      const dogWithNameNull = body.results.find(dog => dog.name === null);
       expect(dogWithNameNull).toBeTruthy();
     });
 
     test('Cannot create an entry with null after migration', async () => {
       // remove null values otherwise the migration would fail
       await rq({
-        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
         method: 'PUT',
+        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
         body: { name: 'Nelson' },
       });
 

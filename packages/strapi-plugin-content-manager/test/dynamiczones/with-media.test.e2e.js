@@ -10,6 +10,7 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let modelsUtils;
 let rq;
 let authRq;
+
 const uploadImg = () => {
   return authRq.post('/upload', {
     formData: {

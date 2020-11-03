@@ -164,9 +164,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[2]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results[0]).toMatchObject(data.beds[2]);
     });
 
     test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
@@ -178,9 +178,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[0]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results[0]).toMatchObject(data.beds[0]);
     });
 
     test('search with an empty query', async () => {
@@ -192,9 +192,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(5);
-      expect(res.body).toEqual(expect.arrayContaining(data.beds));
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(5);
+      expect(res.body.results).toEqual(expect.arrayContaining(data.beds));
     });
 
     test('search with special characters', async () => {
@@ -206,9 +206,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[3]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results[0]).toMatchObject(data.beds[3]);
     });
   });
 
@@ -223,9 +223,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(3);
-      expect(res.body).toMatchObject([data.beds[0], data.beds[1], data.beds[4]]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(3);
+      expect(res.body.results).toMatchObject([data.beds[0], data.beds[1], data.beds[4]]);
     });
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
@@ -237,9 +237,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject([data.beds[0], data.beds[4]]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(2);
+      expect(res.body.results).toMatchObject([data.beds[0], data.beds[4]]);
     });
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
@@ -248,9 +248,9 @@ describe('Search query', () => {
           '/content-manager/collection-types/application::bed.bed?peopleNumber=1&peopleNumber=6&_q=',
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject(data.beds.slice(0, 2));
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(2);
+      expect(res.body.results).toMatchObject(data.beds.slice(0, 2));
     });
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
@@ -262,9 +262,9 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body).toMatchObject([data.beds[0]]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results).toMatchObject([data.beds[0]]);
     });
   });
 });
