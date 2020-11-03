@@ -148,12 +148,12 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    * @return {Promise}
    */
 
-  search({ params }, { model }) {
-    return db.query(model).search(params);
+  search({ params, populate }, { model }) {
+    return db.query(model).search(params, populate);
   },
 
-  searchPage({ params }, { model }) {
-    return db.query(model).searchPage(params);
+  searchPage({ params, populate }, { model }) {
+    return db.query(model).searchPage(params, populate);
   },
 
   /**
