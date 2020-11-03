@@ -8,17 +8,17 @@ const EditSettingsView = lazy(() => import('../EditSettingsView'));
 const ListView = lazy(() => import('../ListView'));
 const ListSettingsView = lazy(() => import('../ListSettingsView'));
 
-const CollectionTypeRecursivePath = props => {
+const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
 
   const renderRoute = (routeProps, Component) => {
-    return <Component {...props} {...routeProps} slug={slug} />;
+    return <Component {...routeProps} slug={slug} />;
   };
   const renderPermissionsRoute = (routeProps, Component) => {
     return (
       <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-        <Component {...props} {...routeProps} slug={slug} />
+        <Component {...routeProps} slug={slug} />
       </CheckPagePermissions>
     );
   };

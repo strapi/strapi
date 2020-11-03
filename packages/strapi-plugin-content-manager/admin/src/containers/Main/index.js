@@ -1,186 +1,105 @@
-import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
-import {
-  LoadingIndicatorPage,
-  useGlobalContext,
-  request,
-  CheckPagePermissions,
-} from 'strapi-helper-plugin';
+import { Switch, Route } from 'react-router-dom';
+import { LoadingIndicatorPage, request, CheckPagePermissions } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import DragLayer from '../../components/DragLayer';
 import getRequestUrl from '../../utils/getRequestUrl';
-import createPossibleMainFieldsForModelsAndComponents from './utils/createPossibleMainFieldsForModelsAndComponents';
-import {
-  deleteLayout,
-  deleteLayouts,
-  getDataSucceeded,
-  getLayoutSucceeded,
-  resetProps,
-} from './actions';
+import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
+import EditSettingsView from '../EditSettingsView';
+import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
+// import createPossibleMainFieldsForModelsAndComponents from './utils/createPossibleMainFieldsForModelsAndComponents';
+import { getData, getDataSucceeded, resetProps } from './actions';
 import makeSelectMain from './selectors';
 
-const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const CollectionTypeRecursivePath = lazy(() => import('../CollectionTypeRecursivePath'));
-const SingleTypeRecursivePath = lazy(() => import('../SingleTypeRecursivePath'));
+// const EditSettingsView = lazy(() => import('../EditSettingsView'));
+// const CollectionTypeRecursivePath = lazy(() => import('../CollectionTypeRecursivePath'));
+// const SingleTypeRecursivePath = lazy(() => import('../SingleTypeRecursivePath'));
 
-function Main({
-  deleteLayout,
-  deleteLayouts,
-  getDataSucceeded,
-  getLayoutSucceeded,
-  components,
-  componentsAndModelsMainPossibleMainFields,
-  isLoading,
-  layouts,
-  location: { pathname },
-  global: { currentEnvironment, plugins },
-  models,
-  resetProps,
-}) {
-  const { emitEvent } = useGlobalContext();
-  const {
-    params: { slug },
-  } = useRouteMatch('/plugins/content-manager/:contentType/:slug');
-  const getDataRef = useRef();
-  const getLayoutRef = useRef();
-  const resetPropsRef = useRef();
-
-  getDataRef.current = async () => {
-    try {
-      const [{ data: components }, { data: models }] = await Promise.all(
-        ['components', 'content-types'].map(endPoint =>
-          request(getRequestUrl(endPoint), { method: 'GET' })
-        )
-      );
-
-      getDataSucceeded(components, models, {
-        ...createPossibleMainFieldsForModelsAndComponents(components),
-        ...createPossibleMainFieldsForModelsAndComponents(models),
-      });
-    } catch (err) {
-      strapi.notification.error('notification.error');
-    }
-  };
-
-  getLayoutRef.current = async uid => {
-    try {
-      const { data: layout } = await request(getRequestUrl(`content-types/${uid}`), {
-        method: 'GET',
-      });
-
-      getLayoutSucceeded(layout, uid);
-    } catch (err) {
-      strapi.notification.error('notification.error');
-    }
-  };
-  resetPropsRef.current = resetProps;
-
-  // TODO change the layouts logic
-  const shouldShowLoader = !pathname.includes('ctm-configurations/') && layouts[slug] === undefined;
-
+function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
   useEffect(() => {
-    getDataRef.current();
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    const fetchData = async signal => {
+      getData();
+      console.log('up');
+
+      try {
+        const [{ data: components }, { data: models }] = await Promise.all(
+          ['components', 'content-types'].map(endPoint =>
+            request(getRequestUrl(endPoint), { method: 'GET', signal })
+          )
+        );
+
+        getDataSucceeded(models, components);
+      } catch (err) {
+        console.error('CM/main', err);
+        // TODO: new notif API
+        strapi.notification.error('notification.error');
+      }
+    };
+
+    fetchData(signal);
 
     return () => {
-      resetPropsRef.current();
+      abortController.abort();
+      resetProps();
     };
-  }, [getDataRef]);
+  }, [getData, getDataSucceeded, resetProps]);
 
-  // This effect is fetching the layout of each content type, however the logic of fetching a specific
-  // ct has been re introduced in the EditView with the useFetchContentType hook this causes, sometimes, the layout to be fetched twice
-  // I am leaving this legacy for now and will redo the logic when the back-end when the endpoints for the single types and the collection types will be split
-  useEffect(() => {
-    if (shouldShowLoader) {
-      getLayoutRef.current(slug);
-    }
-  }, [getLayoutRef, shouldShowLoader, slug]);
-
-  if (isLoading || shouldShowLoader) {
+  if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
-  const renderRoute = (props, Component) => (
-    <Component
-      currentEnvironment={currentEnvironment}
-      deleteLayout={deleteLayout}
-      deleteLayouts={deleteLayouts}
-      emitEvent={emitEvent}
-      components={components}
-      componentsAndModelsMainPossibleMainFields={componentsAndModelsMainPossibleMainFields}
-      layouts={layouts}
-      models={models}
-      plugins={plugins}
-      {...props}
-    />
-  );
   const routes = [
     { path: 'singleType/:slug', comp: SingleTypeRecursivePath },
     { path: 'collectionType/:slug', comp: CollectionTypeRecursivePath },
   ].map(({ path, comp }) => (
-    <Route
-      key={path}
-      path={`/plugins/${pluginId}/${path}`}
-      render={props => renderRoute(props, comp)}
-    />
+    <Route key={path} path={`/plugins/${pluginId}/${path}`} component={comp} />
   ));
 
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
-      <Suspense fallback={<LoadingIndicatorPage />}>
-        <Switch>
-          <Route
-            path={`/plugins/${pluginId}/ctm-configurations/edit-settings/:type/:componentSlug`}
-            render={routeProps => (
-              <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
-                <EditSettingsView
-                  currentEnvironment={currentEnvironment}
-                  deleteLayout={deleteLayout}
-                  deleteLayouts={deleteLayouts}
-                  emitEvent={emitEvent}
-                  components={components}
-                  componentsAndModelsMainPossibleMainFields={
-                    componentsAndModelsMainPossibleMainFields
-                  }
-                  layouts={layouts}
-                  models={models}
-                  plugins={plugins}
-                  {...routeProps}
-                />
-              </CheckPagePermissions>
-            )}
-          />
-          {routes}
-        </Switch>
-      </Suspense>
+
+      <Switch>
+        <Route
+          path={`/plugins/${pluginId}/ctm-configurations/edit-settings/:type/:componentSlug`}
+          render={routeProps => (
+            <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
+              <EditSettingsView
+                // currentEnvironment={currentEnvironment}
+                // deleteLayout={deleteLayout}
+                // deleteLayouts={deleteLayouts}
+                // emitEvent={emitEvent}
+                // components={components}
+                // componentsAndModelsMainPossibleMainFields={
+                //   componentsAndModelsMainPossibleMainFields
+                // }
+                // layouts={layouts}
+                // models={models}
+                // plugins={plugins}
+                {...routeProps}
+              />
+            </CheckPagePermissions>
+          )}
+        />
+        {routes}
+      </Switch>
     </DndProvider>
   );
 }
 
 Main.propTypes = {
-  deleteLayout: PropTypes.func.isRequired,
-  deleteLayouts: PropTypes.func.isRequired,
+  getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
-  getLayoutSucceeded: PropTypes.func.isRequired,
-  global: PropTypes.shape({
-    currentEnvironment: PropTypes.string.isRequired,
-    plugins: PropTypes.object,
-  }).isRequired,
-  components: PropTypes.array.isRequired,
-  componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  layouts: PropTypes.object.isRequired,
-  location: PropTypes.shape({
-    pathname: PropTypes.string.isRequired,
-    search: PropTypes.string,
-  }).isRequired,
-  models: PropTypes.array.isRequired,
   resetProps: PropTypes.func.isRequired,
 };
 
@@ -189,10 +108,8 @@ const mapStateToProps = makeSelectMain();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      deleteLayout,
-      deleteLayouts,
+      getData,
       getDataSucceeded,
-      getLayoutSucceeded,
       resetProps,
     },
     dispatch

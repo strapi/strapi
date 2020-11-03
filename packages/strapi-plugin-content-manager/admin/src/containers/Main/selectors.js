@@ -2,29 +2,20 @@ import { createSelector } from 'reselect';
 import pluginId from '../../pluginId';
 import { initialState } from './reducer';
 
-/**
- * Direct selector to the main state domain
- */
-const selectMainDomain = () => state => state.get(`${pluginId}_main`) || initialState;
-
-/**
- * Other specific selectors
- */
-
-/**
- * Default selector used by Main
- */
+const selectMainDomain = () => state => {
+  return state.get(`${pluginId}_main`) || initialState;
+};
 
 const makeSelectMain = () =>
   createSelector(selectMainDomain(), substate => {
-    return substate.toJS();
+    return substate;
   });
 
 const makeSelectModels = () =>
   createSelector(selectMainDomain(), substate => {
-    const allModels = substate.get('models').toJS();
+    const { models } = substate;
 
-    return allModels.filter(model => model.isDisplayed === true).map(({ uid }) => uid);
+    return models.filter(model => model.isDisplayed === true).map(({ uid }) => uid);
   });
 
 export default makeSelectMain;

@@ -11,6 +11,7 @@ import {
   generateFiltersFromSearch,
   request,
   CheckPermissions,
+  useGlobalContext,
   useUserPermissions,
   useQuery,
 } from 'strapi-helper-plugin';
@@ -26,11 +27,12 @@ import {
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
-import FilterPicker from '../../components/FilterPicker';
+
+// import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
 import State from '../../components/State';
 import ListViewProvider from '../ListViewProvider';
-import { onChangeListLabels, resetListLabels } from '../Main/actions';
+// import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import Filter from './Filter';
 import Footer from './Footer';
@@ -52,11 +54,15 @@ import makeSelectListView from './selectors';
 
 /* eslint-disable react/no-array-index-key */
 
+const FilterPicker = () => <div>FILTER</div>;
+const onChangeListLabels = () => console.log('todo');
+const resetListLabels = () => console.log('todo');
+
 function ListView({
   count,
   data,
   didDeleteData,
-  emitEvent,
+  // emitEvent,
   entriesToDelete,
   isLoading,
   location: { pathname },
@@ -80,6 +86,7 @@ function ListView({
   toggleModalDelete,
   toggleModalDeleteAll,
 }) {
+  const { emitEvent } = useGlobalContext();
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const {
     isLoading: isLoadingForPermissions,
@@ -656,7 +663,7 @@ ListView.propTypes = {
   count: PropTypes.number.isRequired,
   data: PropTypes.array.isRequired,
   didDeleteData: PropTypes.bool.isRequired,
-  emitEvent: PropTypes.func.isRequired,
+  // emitEvent: PropTypes.func.isRequired,
   entriesToDelete: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
   layouts: PropTypes.object,
@@ -664,7 +671,7 @@ ListView.propTypes = {
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
   }).isRequired,
-  models: PropTypes.array.isRequired,
+  // models: PropTypes.array.isRequired,
   getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
   history: PropTypes.shape({
