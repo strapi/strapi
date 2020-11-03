@@ -347,8 +347,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(filter, name)
-              .orderBy('order');
+              qb.where(filter, name).orderBy('order');
             });
           };
           break;
