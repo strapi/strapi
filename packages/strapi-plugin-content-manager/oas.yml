@@ -1,17 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.0.0
   title: Strapi Content Manager API
-  description: |
-    ## REST API Reference
-
-    This doc contains all the available routes in the content manager REST API.
-
-    ### Requirements
-
-    - An authenticated admin token that you can get using the login route
-    ---
-
 servers:
   - url: http://localhost:1337
     description: Local server
@@ -19,41 +8,6 @@ externalDocs:
   url: https://strapi.io/documentation
   description: Strapi documentation
 paths:
-  /admin/login:
-    post:
-      summary: Login admin
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-
-      responses:
-        200:
-          description: Logged in
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      user:
-                        type: object
-                      token:
-                        type: string
-
   /content-manager/content-types:
     get:
       tags:
@@ -73,13 +27,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/contentType'
-              examples:
-                one:
-                  value:
-                    data:
-                      - $ref: '#/components/examples/restaurant'
-                      - $ref: '#/components/examples/category'
-
   /content-manager/content-types/{uid}/configuration:
     get:
       tags:
@@ -130,7 +77,6 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/configuration'
-
   /content-manager/components:
     get:
       tags:
@@ -148,7 +94,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/component'
-
   /content-manager/components/{uid}/configuration:
     get:
       tags:
@@ -199,7 +144,6 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/component-configuration'
-
   # UID
   /content-manager/uid/generate:
     post:
@@ -236,7 +180,6 @@ paths:
                 properties:
                   data:
                     type: string
-
   /content-manager/uid/check-availability:
     post:
       tags:
@@ -274,7 +217,6 @@ paths:
                   suggestion:
                     type: string
                     description: Suggestion if request value is not available
-
   # Relationships
   /content-manager/relations/{model}/{targetField}:
     get:
@@ -315,7 +257,6 @@ paths:
                       description: value of the mainField of the entry
                     published_at:
                       type: date
-
   # Collection type
   /content-manager/collection-types/{model}:
     get:
@@ -373,7 +314,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/entity'
-
   /content-manager/collection-types/{model}/{id}:
     get:
       tags:
@@ -456,7 +396,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/entity'
-
   /content-manager/single-types/{model}/actions/publish:
     post:
       tags:
@@ -467,7 +406,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/entity'
-
   /content-manager/single-types/{model}/actions/unpublish:
     post:
       tags:
@@ -674,34 +612,6 @@ components:
           type: string
         email:
           type: string
-
-  examples:
-    restaurant:
-      uid: application::restaurant.restaurant
-      apiID: restaurant
-      kind: collectionType
-      isDisplayed: true
-      info:
-        name: Restaurant
-        label: Restaurants
-        description: My restaurant Model
-      options:
-        hasDraftAndPublish: false
-        timestamps: ['created_at', 'updated_at']
-      attributes:
-        title:
-          type: string
-          required: true
-        slug:
-          type: uid
-          required: true
-          targetField: title
-        categories:
-          type: relation
-          relationTarget: application::category.category
-          relationType: manyWay
-    category:
-      uid: application::category.category
 
   parameters:
     kind:
