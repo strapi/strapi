@@ -68,8 +68,7 @@ class Strapi {
 
     this.requireProjectBootstrap();
 
-    const updateNotifier = createNotifyUpdater(this);
-    updateNotifier.notify();
+    createNotifyUpdater(this).notify();
   }
 
   get EE() {

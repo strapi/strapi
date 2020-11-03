@@ -4,6 +4,7 @@ const Configstore = require('configstore');
 const semver = require('semver');
 const boxen = require('boxen');
 const chalk = require('chalk');
+const path = require('path');
 const pkg = require('../../../package');
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
 const NOTIF_INTERVAL = 1000 * 60 * 60 * 24 * 7; // 1 week
@@ -22,7 +23,7 @@ const geUpdatetMessage = (newVersion, currentVersion) => {
 
   return `
 A new version of Strapi is available ${currentVersionLog} → ${newVersionLog}
-Check out new the releases at: ${releaseLink}
+Check out the new the releases at: ${releaseLink}
 `.trim();
 };
 
@@ -30,7 +31,7 @@ const createNotifyUpdater = strapi => {
   const config = new Configstore(
     pkg.name,
     {},
-    { configPath: `${strapi.dir}/.strapi-updater.json` }
+    { configPath: path.join(strapi.dir, '.strapi-updater.json') }
   );
 
   const checkUpdate = async checkInterval => {
