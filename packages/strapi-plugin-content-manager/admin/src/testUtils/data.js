@@ -167,6 +167,58 @@ const testData = {
     ],
     updated_at: '2020-04-28T13:22:13.033Z',
   },
+  expectedNoFieldsModifiedData: {
+    dz: [
+      { __component: 'compos.sub-compo', name: 'name', password: 'password' },
+      {
+        name: 'name',
+        password: 'password',
+        subcomponotrepeatable: null,
+        subrepeatable: [],
+        __component: 'compos.test-compo',
+      },
+      {
+        name: 'name',
+        password: 'password',
+        subcomponotrepeatable: { name: 'name', password: 'password' },
+        subrepeatable: [{ name: 'name', password: 'password' }],
+        __component: 'compos.test-compo',
+      },
+      {
+        name: null,
+        password: null,
+        subcomponotrepeatable: null,
+        subrepeatable: [],
+        __component: 'compos.test-compo',
+      },
+    ],
+    name: 'name',
+    notrepeatable: {
+      name: 'name',
+      password: 'password',
+      subcomponotrepeatable: { name: 'name', password: 'password' },
+      subrepeatable: [
+        { name: 'name', password: 'password' },
+        { name: 'name', password: 'password' },
+        { name: 'name', password: 'password' },
+      ],
+    },
+    password: 'password',
+    repeatable: [
+      {
+        name: 'name',
+        password: 'password',
+        subrepeatable: [{ name: 'name', password: 'password' }],
+        subcomponotrepeatable: { name: 'name', password: 'password' },
+      },
+      {
+        name: 'name',
+        password: 'password',
+        subrepeatable: [],
+        subcomponotrepeatable: null,
+      },
+    ],
+  },
 };
 
 const permissions = [

@@ -66,7 +66,7 @@ const getDisplayedValue = (type, value, name) => {
   }
 };
 
-function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
+function Row({ canDelete, canUpdate, isBulkable, row, headers, goTo }) {
   const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
@@ -90,6 +90,14 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
   const links = [
     {
       icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
+    },
+    {
+      icon: canUpdate ? <FontAwesomeIcon icon="clone" /> : null,
+      onClick: e => {
+        e.stopPropagation();
+        emitEvent('willCloneEntryFromList');
+        goTo(`create/clone/${row.id}`);
+      },
     },
     {
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
@@ -139,6 +147,7 @@ Row.propTypes = {
   headers: PropTypes.array.isRequired,
   isBulkable: PropTypes.bool.isRequired,
   row: PropTypes.object.isRequired,
+  goTo: PropTypes.func.isRequired,
 };
 
 export default memo(Row);

@@ -8,6 +8,7 @@ import {
   formatComponentData,
   getTrad,
   removePasswordFieldsFromData,
+  removeFieldsFromClonedData,
 } from '../../utils';
 import pluginId from '../../pluginId';
 import { crudInitialState, crudReducer } from '../../sharedReducers';
@@ -18,7 +19,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
 
-  const { id } = useParams();
+  const { id, origin } = useParams();
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
@@ -28,24 +29,41 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const isCreatingEntry = id === 'create';
 
   const fetchURL = useMemo(() => {
-    if (isCreatingEntry) {
+    if (isCreatingEntry && !origin) {
       return null;
     }
 
-    return getRequestUrl(`${slug}/${id}`);
-  }, [slug, id, isCreatingEntry]);
+    return getRequestUrl(`${slug}/${origin || id}`);
+  }, [slug, id, isCreatingEntry, origin]);
+
+  const cleanClonedData = useCallback(
+    data => {
+      if (!origin) {
+        return data;
+      }
+      const cleaned = removeFieldsFromClonedData(
+        data,
+        allLayoutData.contentType,
+        allLayoutData.components
+      );
+
+      return cleaned;
+    },
+    [allLayoutData, origin]
+  );
 
   const cleanReceivedData = useCallback(
     data => {
+      console.log(cleanClonedData(data));
       const cleaned = removePasswordFieldsFromData(
-        data,
+        cleanClonedData(data),
         allLayoutData.contentType,
         allLayoutData.components
       );
 
       return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
-    [allLayoutData]
+    [allLayoutData, cleanClonedData]
   );
 
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
