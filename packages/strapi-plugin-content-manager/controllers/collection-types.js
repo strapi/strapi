@@ -5,7 +5,6 @@ const { has, pipe } = require('lodash/fp');
 const {
   getService,
   wrapBadRequest,
-  parseBody,
   setCreatorFields,
   pickWritableAttributes,
 } = require('../utils');
@@ -16,6 +15,7 @@ module.exports = {
     const { model } = ctx.params;
     const { query } = ctx.request;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -26,10 +26,7 @@ module.exports = {
 
     const permissionQuery = permissionChecker.buildPermissionQuery(query);
 
-    const { results, pagination } = await getService('entity-manager')[method](
-      permissionQuery,
-      model
-    );
+    const { results, pagination } = await entityManager[method](permissionQuery, model);
 
     ctx.body = {
       results: results.map(entity => permissionChecker.sanitizeOutput(entity)),
@@ -41,13 +38,14 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -63,8 +61,9 @@ module.exports = {
   async create(ctx) {
     const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
-    const { files, data } = parseBody(ctx);
+    const { body } = ctx.request;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create()) {
@@ -78,10 +77,7 @@ module.exports = {
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
     await wrapBadRequest(async () => {
-      const entity = await getService('entity-manager').create(
-        { data: sanitizeFn(data), files },
-        model
-      );
+      const entity = await entityManager.create(sanitizeFn(body), model);
       ctx.body = permissionChecker.sanitizeOutput(entity);
 
       await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
@@ -91,15 +87,16 @@ module.exports = {
   async update(ctx) {
     const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
-    const { files, data } = parseBody(ctx);
+    const { body } = ctx.request;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.update()) {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -116,11 +113,7 @@ module.exports = {
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
     await wrapBadRequest(async () => {
-      const updatedEntity = await getService('entity-manager').update(
-        entity,
-        { data: sanitizeFn(data), files },
-        model
-      );
+      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
 
       ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
     })();
@@ -130,13 +123,14 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -146,7 +140,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await getService('entity-manager').delete(entity, model);
+    const result = await entityManager.delete(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },
@@ -155,13 +149,14 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -171,7 +166,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await getService('entity-manager').publish(entity, model);
+    const result = await entityManager.publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },
@@ -180,13 +175,14 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
       return ctx.forbidden();
     }
 
-    const entity = await getService('entity-manager').findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -196,7 +192,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await getService('entity-manager').unpublish(entity, model);
+    const result = await entityManager.unpublish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(result);
   },
@@ -207,6 +203,7 @@ module.exports = {
     const { query, body } = ctx.request;
     const { ids } = body;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -222,7 +219,7 @@ module.exports = {
       _where: [idsWhereClause].concat(permissionQuery._where || {}),
     };
 
-    const results = await strapi.entityService.delete({ params }, { model });
+    const results = await entityManager.findAndDelete(params, model);
 
     ctx.body = results.map(result => permissionChecker.sanitizeOutput(result));
   },

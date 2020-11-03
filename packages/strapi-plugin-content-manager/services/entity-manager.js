@@ -79,27 +79,29 @@ module.exports = {
   },
 
   async create(body, model) {
-    const { data, files } = body;
-
     const modelDef = strapi.getModel(model);
-    const publishData = { ...data };
+    const publishData = { ...body };
 
     if (hasDraftAndPublish(modelDef)) {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    return strapi.entityService.create({ data: publishData, files }, { model });
+    return strapi.entityService.create({ data: publishData }, { model });
   },
 
-  update(entity, { data, files }, model) {
+  update(entity, body, model) {
     const params = { id: entity.id };
-    const publishData = omitPublishedAtField(data);
+    const publishData = omitPublishedAtField(body);
 
-    return strapi.entityService.update({ params, data: publishData, files }, { model });
+    return strapi.entityService.update({ params, data: publishData }, { model });
   },
 
   delete(entity, model) {
     const params = { id: entity.id };
+    return strapi.entityService.delete({ params }, { model });
+  },
+
+  findAnddelete(params, model) {
     return strapi.entityService.delete({ params }, { model });
   },
 

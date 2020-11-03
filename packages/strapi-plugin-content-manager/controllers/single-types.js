@@ -4,7 +4,6 @@ const { pipe } = require('lodash/fp');
 const {
   getService,
   wrapBadRequest,
-  parseBody,
   setCreatorFields,
   pickWritableAttributes,
 } = require('../utils');
@@ -48,9 +47,9 @@ module.exports = {
   async createOrUpdate(ctx) {
     const { user, userAbility } = ctx.state;
     const { model } = ctx.params;
+    const { body } = ctx.request;
 
-    const { data, files } = parseBody(ctx);
-
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create() && permissionChecker.cannot.update()) {
@@ -73,11 +72,7 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       if (!entity) {
-        const entity = await getService('entity-manager').create(
-          { data: sanitizeFn(data), files },
-          model
-        );
-
+        const entity = await entityManager.create(sanitizeFn(body), model);
         ctx.body = permissionChecker.sanitizeOutput(entity);
 
         await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
@@ -88,12 +83,7 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      const updatedEntity = await getService('entity-manager').update(
-        entity,
-        { data: sanitizeFn(data), files },
-        model
-      );
-
+      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
       ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
     })();
   },
@@ -102,6 +92,7 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -118,7 +109,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const deletedEntity = await getService('entity-manager').delete(entity, model);
+    const deletedEntity = await entityManager.delete(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(deletedEntity);
   },
@@ -127,6 +118,7 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -143,7 +135,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const publishedEntity = await getService('entity-manager').publish(entity, model);
+    const publishedEntity = await entityManager.publish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(publishedEntity);
   },
@@ -152,6 +144,7 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
+    const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -168,7 +161,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await getService('entity-manager').unpublish(entity, model);
+    const unpublishedEntity = await entityManager.unpublish(entity, model);
 
     ctx.body = permissionChecker.sanitizeOutput(unpublishedEntity);
   },
