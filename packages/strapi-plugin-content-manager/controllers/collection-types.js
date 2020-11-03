@@ -71,7 +71,7 @@ module.exports = {
     }
 
     const pickWritables = pickWritableAttributes({ model });
-    const pickPermittedFields = permissionChecker.sanitizeInput.create;
+    const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
 
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
@@ -107,7 +107,7 @@ module.exports = {
     }
 
     const pickWritables = pickWritableAttributes({ model });
-    const pickPermittedFields = data => permissionChecker.sanitizeInput.update(data, entity);
+    const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
 
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);

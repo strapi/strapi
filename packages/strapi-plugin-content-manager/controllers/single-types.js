@@ -61,8 +61,8 @@ module.exports = {
     const pickWritables = pickWritableAttributes({ model });
 
     const pickPermittedFields = entity
-      ? data => permissionChecker.sanitizeInput.update(data, entity)
-      : permissionChecker.sanitizeInput.create;
+      ? permissionChecker.sanitizeUpdateInput(entity)
+      : permissionChecker.sanitizeCreateInput;
 
     const setCreator = entity
       ? setCreatorFields({ user, isEdition: true })
