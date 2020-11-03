@@ -43,7 +43,7 @@ const createPermissionChecker = ({ userAbility, model }) => {
   const sanitizeCreateInput = data => sanitizeInput(ACTIONS.create, data);
   const sanitizeUpdateInput = entity => data => sanitizeInput(ACTIONS.update, data, entity);
 
-  const buildPermissionQuery = permissionsManager.queryFrom;
+  const buildPermissionQuery = query => permissionsManager.queryFrom(query);
 
   Object.keys(ACTIONS).forEach(action => {
     can[action] = (...args) => can(ACTIONS[action], ...args);

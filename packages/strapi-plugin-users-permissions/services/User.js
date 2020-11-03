@@ -91,7 +91,7 @@ module.exports = {
       } else {
         bcrypt.hash(`${user.password}`, 10, (err, hash) => {
           if (err) {
-            reject(err);
+            return reject(err);
           }
           resolve(hash);
         });
