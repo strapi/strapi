@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import { getMaxTempKey } from '../../utils';
 
 const initialState = fromJS({
   componentsDataStructure: {},
@@ -21,10 +22,9 @@ const reducer = (state, action) => {
     case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
       return state
         .updateIn(['modifiedData', ...action.keys], list => {
-          const defaultDataStructure = state.getIn([
-            'componentsDataStructure',
-            action.componentUid,
-          ]);
+          const defaultDataStructure = state
+            .getIn(['componentsDataStructure', action.componentUid])
+            .set('__temp_key__', getMaxTempKey(list.toJS()) + 1);
 
           if (list) {
             return list.push(defaultDataStructure);

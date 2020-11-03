@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import { Prompt, Redirect } from 'react-router-dom';
 import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import { getTrad } from '../../utils';
+import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema, getFilesToUpload, getYupInnerErrors } from './utils';
+import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -253,26 +253,13 @@ const EditViewDataManagerProvider = ({
 
   const createFormData = useCallback(
     data => {
-      // Set the loading state in the plugin header
-      const filesToUpload = getFilesToUpload(data);
-      // Remove keys that are not needed
-      // Clean relations
-      const cleanedData = cleanData(data, currentContentTypeLayout, allLayoutData.components);
-
+      const cleanedData = removeKeyInObject(
+        cleanData(data, currentContentTypeLayout, allLayoutData.components),
+        '__temp_key__'
+      );
       const formData = new FormData();
 
       formData.append('data', JSON.stringify(cleanedData));
-
-      // We don't do upload anymore since we are using the ML in the CM
-      // however, I am leaving the code here just in case we need it sometime and it also a great
-      // example on how to do upload upon entry creation/edition.
-      Object.keys(filesToUpload).forEach(key => {
-        const files = filesToUpload[key];
-
-        files.forEach(file => {
-          formData.append(`files.${key}`, file);
-        });
-      });
 
       return formData;
     },

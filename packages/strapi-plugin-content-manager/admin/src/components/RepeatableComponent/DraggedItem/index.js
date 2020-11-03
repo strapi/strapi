@@ -25,12 +25,9 @@ const DraggedItem = ({
   isFirst,
   isReadOnly,
   isOpen,
-  moveCollapse,
   onClickToggle,
-  removeCollapse,
   schema,
   toggleCollapses,
-
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
@@ -105,12 +102,7 @@ const DraggedItem = ({
       }
       // Time to actually perform the action in the data
       moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
-      // Time to actually perform the action in the synchronized collapses
-      moveCollapse(dragIndex, hoverIndex);
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
+
       item.originalPath = hoverPath;
     },
   });
@@ -160,7 +152,7 @@ const DraggedItem = ({
         onClickToggle={onClickToggle}
         onClickRemove={() => {
           removeRepeatableField(componentFieldName);
-          removeCollapse();
+          toggleCollapses();
         }}
         ref={refs}
       />
@@ -225,7 +217,6 @@ DraggedItem.defaultProps = {
   hasMinError: false,
   isFirst: false,
   isOpen: false,
-  moveCollapse: () => {},
   toggleCollapses: () => {},
 };
 
@@ -237,9 +228,7 @@ DraggedItem.propTypes = {
   isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
-  moveCollapse: PropTypes.func,
   onClickToggle: PropTypes.func.isRequired,
-  removeCollapse: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   toggleCollapses: PropTypes.func,
   moveComponentField: PropTypes.func.isRequired,

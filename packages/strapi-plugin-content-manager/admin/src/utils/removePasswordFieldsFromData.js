@@ -1,7 +1,5 @@
 import { get } from 'lodash';
-
-const getType = (schema, attrName) => get(schema, ['attributes', attrName, 'type'], '');
-const getOtherInfos = (schema, arr) => get(schema, ['attributes', ...arr], '');
+import { getType, getOtherInfos } from './getAttributeInfos';
 
 const removePasswordFieldsFromData = (data, contentTypeSchema, componentSchema) => {
   const recursiveCleanData = (data, schema) => {
@@ -54,4 +52,3 @@ const removePasswordFieldsFromData = (data, contentTypeSchema, componentSchema) 
 };
 
 export default removePasswordFieldsFromData;
-export { getType, getOtherInfos };
