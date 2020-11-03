@@ -6,9 +6,9 @@ const generateLinks = links => {
     .map(link => {
       return {
         icon: 'circle',
-        destination: `/plugins/content-manager/${link.schema.kind}/${link.uid}`,
+        destination: `/plugins/content-manager/${link.kind}/${link.uid}`,
         isDisplayed: false,
-        label: link.label,
+        label: link.info.label,
         permissions: [
           { action: 'plugins::content-manager.explorer.create', subject: link.uid },
           { action: 'plugins::content-manager.explorer.read', subject: link.uid },
@@ -20,7 +20,7 @@ const generateLinks = links => {
 
 const generateModelsLinks = models => {
   const [collectionTypes, singleTypes] = chain(models)
-    .groupBy('schema.kind')
+    .groupBy('kind')
     .map((value, key) => ({ name: key, links: value }))
     .sortBy('name')
     .value();
