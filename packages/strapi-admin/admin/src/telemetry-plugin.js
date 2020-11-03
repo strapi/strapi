@@ -13,22 +13,23 @@ export default class extends PluginBase {
   }
 
   track(_, event) {
-    console.log('Itly tracking ', event);
     const uuid = this.store
       .getState()
       .get('app')
       .get('uuid');
 
+    const payload = {
+      event: event.name,
+      properties: event.properties,
+      id: event.id,
+      version: event.version,
+      uuid,
+    };
+
     if (uuid) {
-      axios
-        .post('https://analytics.strapi.io/track', {
-          event: event.name,
-          properties: event.properties,
-          uuid,
-        })
-        .catch(() => {
-          /* Silent */
-        });
+      axios.post('https://analytics.strapi.io/track', payload).catch(() => {
+        /* Silent */
+      });
     }
   }
 }
