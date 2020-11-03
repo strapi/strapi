@@ -1,12 +1,13 @@
-/* eslint-disable */
 'use strict';
 
-const getPort = require('get-port');
-
+const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');
-const koa = require('koa');
-const koaStatic = require('koa-static');
+const getPort = require('get-port');
+
+const config = {
+  port: parseInt(process.env.PORT, 10) || 1339,
+};
 
 const args = process.argv.slice(2);
 
@@ -16,25 +17,24 @@ if (!args[0]) {
 }
 
 async function run() {
-  const app = new koa();
-
   const openAPISpecPath = path.join(__dirname, '../../packages', args[0], 'oas.yml');
+  const indexPagePath = path.join(__dirname, 'public', 'index.html');
 
   if (!(await fse.pathExists(openAPISpecPath))) {
     throw new Error(`No OAS configuration found at ${openAPISpecPath}`);
   }
 
-  app.use(koaStatic(path.join(__dirname, 'public')));
-
-  app.use(ctx => {
-    if (ctx.path === '/spec.yml') {
-      ctx.body = fse.createReadStream(openAPISpecPath);
+  const server = http.createServer((req, res) => {
+    if (req.url == '/spec.yml') {
+      return fse.createReadStream(openAPISpecPath).pipe(res);
     }
+
+    return fse.createReadStream(indexPagePath).pipe(res);
   });
 
-  const port = await getPort({ port: 1339 });
+  const port = await getPort({ port: config.port });
 
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Server available at http://localhost:${port}`);
   });
 }
