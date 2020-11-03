@@ -302,7 +302,7 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
     columnName => !(definition.options.timestamps || []).includes(columnName)
   );
 
-  const columnsToAlter = getColumnsWhereDefinitionChanged(
+  const columnsToAlter = await getColumnsWhereDefinitionChanged(
     attrsNameWithoutTimestamps,
     definition,
     ORM
