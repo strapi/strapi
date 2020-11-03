@@ -355,29 +355,9 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         case 'belongsToMorph':
         case 'belongsToManyMorph': {
           const association = _.find(definition.associations, { alias: name });
-
-          const morphModelsAndFields = association.related.map(id => {
-            let modelFound = _.find(strapi.models, { globalId: id });
-
-            if (!modelFound) {
-              modelFound = _.find(strapi.components, { globalId: id });
-            }
-
-            if (!modelFound) {
-              _.forIn(strapi.plugins, plugin => {
-                modelFound = _.find(plugin.models, { globalId: id });
-                return !modelFound; // break
-              });
-            }
-
-            if (!modelFound) {
-              strapi.log.error(`Impossible to register the '${model}' model.`);
-              strapi.log.error('The collection name cannot be found for the morphTo method.');
-              strapi.stop();
-            }
-
+          const morphModelsAndFields = association.related.map(morphModel => {
             const relatedFields = _.reduce(
-              modelFound.attributes,
+              morphModel.attributes,
               (fields, attr, attrName) => {
                 const samePlugin =
                   definition.plugin === attr.plugin ||
@@ -392,17 +372,18 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
 
             if (relatedFields.length === 0) {
               strapi.log.error(`Impossible to register the '${model}' model.`);
-              strapi.log.error('The field name cannot be found for the morphTo method.');
+              strapi.log.error(
+                'The collection and field name cannot be found for the morphTo method.'
+              );
               strapi.stop();
             }
 
             return {
-              collectionName: modelFound.collectionName,
+              collectionName: morphModel.collectionName,
               relatedFields,
             };
           });
 
-          const morphValues = morphModelsAndFields.map(val => val.collectionName);
           // Define new model.
           const options = {
             requireFetch: false,
@@ -416,7 +397,10 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
             related: function() {
               return this.morphTo(
                 name,
-                ...association.related.map((id, index) => [GLOBALS[id], morphValues[index]])
+                ...association.related.map(morphModel => [
+                  GLOBALS[morphModel.globalId],
+                  morphModel.collectionName,
+                ])
               );
             },
           };
@@ -431,12 +415,14 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
           const populateFn = qb => {
             qb.where(qb => {
               for (const modelAndFields of morphModelsAndFields) {
-                qb.where({ related_type: modelAndFields.collectionName }).whereIn(
-                  'field',
-                  modelAndFields.relatedFields
-                );
+                qb.orWhere(qb => {
+                  qb.where({ related_type: modelAndFields.collectionName }).whereIn(
+                    'field',
+                    modelAndFields.relatedFields
+                  );
+                });
               }
-            }).orderBy('order');
+            });
           };
 
           loadedModel[name] = function() {
