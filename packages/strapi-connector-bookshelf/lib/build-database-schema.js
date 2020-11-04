@@ -3,15 +3,18 @@ const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
-const { migrateDraftAndPublish } = require('./database-migration');
+const { runMigrationBeforeDBUpdates, runMigrationAfterDBUpdates } = require('./migrations');
 const { getManyRelations } = require('./utils/associations');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
+  // before migrations
+  await runMigrationBeforeDBUpdates({ ORM, loadedModel, definition, connection, model });
+
   // Update/create the tables in database
   await createOrUpdateTables({ ORM, loadedModel, definition, connection, model });
 
-  // migrations
-  await migrateDraftAndPublish({ definition, ORM });
+  // after migrations
+  await runMigrationAfterDBUpdates({ ORM, loadedModel, definition, connection, model });
 
   // store new definitions
   await storeDefinition(definition, ORM);
