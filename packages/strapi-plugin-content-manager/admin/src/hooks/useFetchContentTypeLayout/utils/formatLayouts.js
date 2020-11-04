@@ -94,7 +94,7 @@ const formatListLayoutWithMetas = obj => {
     const fieldSchema = get(obj, ['attributes', current], {});
     const metadatas = get(obj, ['metadatas', current, 'list'], {});
 
-    acc.push({ name: current, fieldSchema, metadatas });
+    acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas });
 
     return acc;
   }, []);

@@ -15,6 +15,11 @@ import {
   ON_DELETE_SEVERAL_DATA_SUCCEEDED,
   TOGGLE_MODAL_DELETE,
   TOGGLE_MODAL_DELETE_ALL,
+  //
+  ON_CHANGE_LIST_HEADERS,
+  ON_RESET_LIST_HEADERS,
+  SET_LIST_LAYOUT,
+  //
   SET_MODAL_LOADING_STATE,
 } from './constants';
 
@@ -27,6 +32,11 @@ export const initialState = {
   showModalConfirmButtonLoading: false,
   showWarningDelete: false,
   showWarningDeleteAll: false,
+  //
+
+  contentType: {},
+  initialDisplayedHeaders: [],
+  displayedHeaders: [],
 };
 
 const listViewReducer = (state = initialState, action) =>
@@ -66,6 +76,27 @@ const listViewReducer = (state = initialState, action) =>
         break;
       }
 
+      case ON_CHANGE_LIST_HEADERS: {
+        const {
+          target: { name, value },
+        } = action;
+
+        if (!value) {
+          const { metadatas, attributes } = state.contentType;
+          drafState.displayedHeaders.push({
+            name,
+            fieldSchema: attributes[name],
+            metadatas: metadatas[name].list,
+            key: `__${name}_key__`,
+          });
+        } else {
+          drafState.displayedHeaders = state.displayedHeaders.filter(
+            header => header.name !== name
+          );
+        }
+
+        break;
+      }
       case ON_DELETE_DATA_SUCCEEDED: {
         drafState.didDeleteData = true;
         drafState.showWarningDelete = false;
@@ -79,6 +110,10 @@ const listViewReducer = (state = initialState, action) =>
       case ON_DELETE_SEVERAL_DATA_SUCCEEDED: {
         drafState.didDeleteData = true;
         drafState.showWarningDeleteAll = false;
+        break;
+      }
+      case ON_RESET_LIST_HEADERS: {
+        drafState.displayedHeaders = state.initialDisplayedHeaders;
         break;
       }
       case RESET_PROPS: {
@@ -110,6 +145,15 @@ const listViewReducer = (state = initialState, action) =>
         }
 
         drafState.showWarningDeleteAll = !state.showWarningDeleteAll;
+
+        break;
+      }
+      case SET_LIST_LAYOUT: {
+        const { contentType } = action.layout;
+
+        drafState.contentType = contentType;
+        drafState.displayedHeaders = contentType.layouts.list;
+        drafState.initialDisplayedHeaders = contentType.layouts.list;
 
         break;
       }

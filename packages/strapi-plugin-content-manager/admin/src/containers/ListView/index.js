@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, isEmpty, sortBy } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
@@ -17,12 +17,7 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import {
-  checkIfAttributeIsDisplayable,
-  generatePermissionsObject,
-  getRequestUrl,
-  getTrad,
-} from '../../utils';
+import { generatePermissionsObject, getRequestUrl, getTrad } from '../../utils';
 
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
@@ -30,9 +25,7 @@ import CustomTable from '../../components/CustomTable';
 
 // import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
-import State from '../../components/State';
 import ListViewProvider from '../ListViewProvider';
-// import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import Filter from './Filter';
 import Footer from './Footer';
@@ -48,35 +41,36 @@ import {
   setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
+  //
+  setLayout,
+  onChangeListHeaders,
+  onResetListHeaders,
 } from './actions';
-
 import makeSelectListView from './selectors';
+
+import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
 
 /* eslint-disable react/no-array-index-key */
 
 const FilterPicker = () => <div>FILTER</div>;
-const onChangeListLabels = () => console.log('todo');
-const resetListLabels = () => console.log('todo');
 
 function ListView({
   count,
   data,
   didDeleteData,
-  // emitEvent,
+
   entriesToDelete,
   isLoading,
   // location: { pathname },
   getData,
   getDataSucceeded,
-  layouts,
-  // history: { push },
+
   onChangeBulk,
   onChangeBulkSelectall,
-  onChangeListLabels,
   onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
-  resetListLabels,
+
   resetProps,
   setModalLoadingState,
   showWarningDelete,
@@ -87,7 +81,12 @@ function ListView({
   toggleModalDeleteAll,
 
   // NEW
+  // allAllowedHeaders,
+  displayedHeaders,
   layout,
+  onChangeListHeaders,
+  onResetListHeaders,
+  setLayout,
 }) {
   const { emitEvent } = useGlobalContext();
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
@@ -101,36 +100,29 @@ function ListView({
 
   const isFirstRender = useRef(true);
   const { formatMessage } = useIntl();
-  const [isLabelPickerOpen, setLabelPickerState] = useState(false);
+
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
 
-  console.log({ layout });
-
   const contentType = layout.contentType;
   const {
-    defaultSortBy,
-    defaultSortOrder,
-    bulkable: isBulkable,
-    filterable: isFilterable,
-    searchable: isSearchable,
-    pageSize,
-    // mainField,
-  } = contentType.settings;
+    contentType: {
+      attributes,
+      settings: {
+        defaultSortBy,
+        defaultSortOrder,
+        bulkable: isBulkable,
+        filterable: isFilterable,
+        searchable: isSearchable,
+        pageSize,
+        // mainField,
+      },
+    },
+  } = layout;
+
   const hasDraftAndPublish = contentType.options.draftAndPublish;
   const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
-  const listLayout = contentType.layouts.list;
-
-  console.log({ isBulkable });
-
-  const contentTypePath = useMemo(() => {
-    return [slug, 'contentType'];
-  }, [slug]);
-
-  // Related to the search
-  // const defaultSort = useMemo(() => {
-  //   return `${getLayoutSetting('defaultSortBy')}:${getLayoutSetting('defaultSortOrder')}`;
-  // }, [getLayoutSetting]);
+  const allAllowedHeaders = getAllAllowedHeaders(attributes);
 
   const filters = useMemo(() => {
     const currentSearch = new URLSearchParams(search);
@@ -157,6 +149,7 @@ function ListView({
 
   // TODO
   const _sort = query.get('_sort') || defaultSort;
+  const label = contentType.info.label;
 
   const _start = useMemo(() => {
     return (_page - 1) * parseInt(_limit, 10);
@@ -182,94 +175,70 @@ function ListView({
 
   const fetchData = async (search = searchToSendForRequest) => {
     try {
-      getDataActionRef.current();
-      const [{ count }, data] = await Promise.all([
-        request(getRequestUrl(`explorer/${slug}/count?${search}`), {
-          method: 'GET',
-        }),
-        request(getRequestUrl(`explorer/${slug}?${search}`), {
-          method: 'GET',
-        }),
-      ]);
+      // getDataActionRef.current();
+      // const [{ count }, data] = await Promise.all([
+      //   request(getRequestUrl(`explorer/${slug}/count?${search}`), {
+      //     method: 'GET',
+      //   }),
+      //   request(getRequestUrl(`explorer/${slug}?${search}`), {
+      //     method: 'GET',
+      //   }),
+      // ]);
 
-      getDataSucceededRef.current(count, data);
+      // const c = await request(getRequestUrl(`collection-types/${slug}?${search}`));
+      // console.log({ c });
+      const data = [
+        {
+          id: 16,
+          postal_coder: 'kkkk',
+          city: 'kljkojihv',
+          created_by: {
+            id: 1,
+            firstname: 'cyril',
+            lastname: 'lopez',
+            username: null,
+            email: 'cyril@strapi.io',
+            resetPasswordToken: null,
+            registrationToken: null,
+            isActive: true,
+            blocked: null,
+          },
+          updated_by: {
+            id: 1,
+            firstname: 'cyril',
+            lastname: 'lopez',
+            username: null,
+            email: 'cyril@strapi.io',
+            resetPasswordToken: null,
+            registrationToken: null,
+            isActive: true,
+            blocked: null,
+          },
+          created_at: '2020-10-28T09:03:20.905Z',
+          updated_at: '2020-10-28T13:51:35.381Z',
+          published_at: '2020-10-28T13:51:35.351Z',
+          cover: null,
+          images: [],
+          categories: [],
+          likes: [],
+        },
+      ];
+
+      getDataSucceededRef.current(1, data);
     } catch (err) {
       strapi.notification.error(`${pluginId}.error.model.fetch`);
     }
   };
 
-  const getMetaDatas = useCallback(
-    (path = []) => {
-      return get(layouts, [...contentTypePath, 'metadatas', ...path], {});
-    },
-    [contentTypePath, layouts]
-  );
+  useEffect(() => {
+    // TODO
+    console.log('up');
+    setLayout(layout);
+  }, [layout, setLayout]);
 
-  // const listLayout = useMemo(() => {
-  //   return get(layouts, [...contentTypePath, 'layouts', 'list'], []);
-  // }, [contentTypePath, layouts]);
-
-  const listSchema = useMemo(() => {
-    return get(layouts, [...contentTypePath, 'schema'], {});
-  }, [layouts, contentTypePath]);
-
-  const label = useMemo(() => {
-    return get(listSchema, ['info', 'name'], '');
-  }, [listSchema]);
-
-  // TODO
-  const tableHeaders = useMemo(() => {
-    return listLayout;
-    // let headers = listLayout.map(label => {
-    //   return { ...getMetaDatas([label, 'list']), name: label };
-    // });
-
-    // if (hasDraftAndPublish) {
-    //   headers.push({
-    //     label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
-    //     searchable: false,
-    //     sortable: true,
-    //     name: 'published_at',
-    //     key: '__published_at__',
-    //     cellFormatter: cellData => {
-    //       const isPublished = !isEmpty(cellData.published_at);
-
-    //       return <State isPublished={isPublished} />;
-    //     },
-    //   });
-    // }
-
-    // return headers;
-  }, [formatMessage, getMetaDatas, hasDraftAndPublish, listLayout]);
-
-  const getFirstSortableElement = useCallback(
-    (name = '') => {
-      return get(
-        listLayout.filter(h => {
-          return h !== name && getMetaDatas([h, 'list', 'sortable']) === true;
-        }),
-        ['0'],
-        'id'
-      );
-    },
-    [getMetaDatas, listLayout]
-  );
-
-  const allLabels = useMemo(() => {
-    const filteredMetadatas = getMetaDatas();
-
-    return sortBy(
-      Object.keys(filteredMetadatas)
-        .filter(key => {
-          return checkIfAttributeIsDisplayable(get(listSchema, ['attributes', key], {}));
-        })
-        .map(label => ({
-          name: label,
-          value: listLayout.includes(label),
-        })),
-      ['label', 'name']
-    );
-  }, [getMetaDatas, listLayout, listSchema]);
+  const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
+    displayedHeaders,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -358,36 +327,32 @@ function ListView({
     }
   }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
 
-  const handleChangeListLabels = ({ name, value }) => {
-    const currentSort = _sort;
+  const handleChangeListLabels = useCallback(
+    ({ name, value }) => {
+      //   const currentSort = _sort;
+      // // Display a notification if trying to remove the last displayed field
+      if (value && displayedHeaders.length === 1) {
+        strapi.notification.error('content-manager.notification.error.displayedFields');
 
-    // Display a notification if trying to remove the last displayed field
-    if (value && listLayout.length === 1) {
-      strapi.notification.error('content-manager.notification.error.displayedFields');
+        return false;
+      }
 
-      return;
-    }
+      // TODO
+      // // Update the sort when removing the displayed one
+      // if (currentSort.split(':')[0] === name && value) {
+      //   emitEvent('didChangeDisplayedFields');
+      //   handleChangeSearch({
+      //     target: {
+      //       name: '_sort',
+      //       value: `${firstSortableHeader}:ASC`,
+      //     },
+      //   });
+      // }
 
-    // Update the sort when removing the displayed one
-    if (currentSort.split(':')[0] === name && value) {
-      emitEvent('didChangeDisplayedFields');
-      handleChangeSearch({
-        target: {
-          name: '_sort',
-          value: `${getFirstSortableElement(name)}:ASC`,
-        },
-      });
-    }
-
-    // Update the Main reducer
-    onChangeListLabels({
-      target: {
-        name,
-        slug,
-        value: !value,
-      },
-    });
-  };
+      onChangeListHeaders({ name, value });
+    },
+    [displayedHeaders, onChangeListHeaders]
+  );
 
   const handleChangeFilters = ({ target: { value } }) => {
     const newSearch = new URLSearchParams();
@@ -447,14 +412,6 @@ function ListView({
     }
 
     setFilterPickerState(prevState => !prevState);
-  };
-
-  const toggleLabelPickerState = () => {
-    if (!isLabelPickerOpen) {
-      emitEvent('willChangeListFieldsSettings');
-    }
-
-    setLabelPickerState(prevState => !prevState);
   };
 
   const filterPickerActions = [
@@ -533,7 +490,6 @@ function ListView({
       actions: headerAction,
     };
     /* eslint-enable indent */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, headerAction, label, canRead, formatMessage]);
 
   return (
@@ -543,13 +499,13 @@ function ListView({
         count={count}
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
-        firstSortableElement={getFirstSortableElement()}
         label={label}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeSearch={handleChangeSearch}
         onClickDelete={handleClickDelete}
-        schema={listSchema}
+        // schema={listSchema}
+        schema={{}}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
         _limit={_limit}
@@ -557,6 +513,8 @@ function ListView({
         filters={filters}
         _q={_q}
         _sort={_sort}
+        // to keep
+        firstSortableHeader={firstSortableHeader}
       >
         <FilterPicker
           actions={filterPickerActions}
@@ -587,7 +545,7 @@ function ListView({
                             changeParams={handleChangeFilters}
                             filters={filters}
                             index={key}
-                            schema={listSchema}
+                            schema={{}}
                             key={key}
                             toggleFilterPickerState={toggleFilterPickerState}
                             isFilterPickerOpen={isFilterPickerOpen}
@@ -600,14 +558,12 @@ function ListView({
                 <div className="col-2">
                   <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
                     <DisplayedFieldsDropdown
-                      isOpen={isLabelPickerOpen}
-                      items={allLabels}
+                      displayedHeaders={displayedHeaders}
+                      items={allAllowedHeaders}
+                      // items={allAllowedHeaders}
                       onChange={handleChangeListLabels}
-                      onClickReset={() => {
-                        resetListLabels(slug);
-                      }}
+                      onClickReset={onResetListHeaders}
                       slug={slug}
-                      toggle={toggleLabelPickerState}
                     />
                   </CheckPermissions>
                 </div>
@@ -618,7 +574,8 @@ function ListView({
                     data={data}
                     canDelete={canDelete}
                     canUpdate={canUpdate}
-                    headers={tableHeaders}
+                    displayedHeaders={displayedHeaders}
+                    hasDraftAndPublish={hasDraftAndPublish}
                     isBulkable={isBulkable}
                     onChangeParams={handleChangeSearch}
                     showLoader={isLoading}
@@ -664,9 +621,16 @@ ListView.defaultProps = {
 };
 
 ListView.propTypes = {
+  // allAllowedHeaders: PropTypes.array.isRequired,
+  displayedHeaders: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
+      attributes: PropTypes.object.isRequired,
+      info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
+      layouts: PropTypes.shape({
+        list: PropTypes.array.isRequired,
+      }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,
     }).isRequired,
@@ -690,11 +654,11 @@ ListView.propTypes = {
   // }).isRequired,
   // onChangeBulk: PropTypes.func.isRequired,
   // onChangeBulkSelectall: PropTypes.func.isRequired,
-  // onChangeListLabels: PropTypes.func.isRequired,
+  onChangeListHeaders: PropTypes.func.isRequired,
   // onDeleteDataError: PropTypes.func.isRequired,
   // onDeleteDataSucceeded: PropTypes.func.isRequired,
   // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
-  // resetListLabels: PropTypes.func.isRequired,
+  onResetListHeaders: PropTypes.func.isRequired,
   // resetProps: PropTypes.func.isRequired,
   // setModalLoadingState: PropTypes.func.isRequired,
   // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
@@ -703,6 +667,7 @@ ListView.propTypes = {
   // slug: PropTypes.string.isRequired,
   // toggleModalDelete: PropTypes.func.isRequired,
   // toggleModalDeleteAll: PropTypes.func.isRequired,
+  setLayout: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectListView();
@@ -714,15 +679,16 @@ export function mapDispatchToProps(dispatch) {
       getDataSucceeded,
       onChangeBulk,
       onChangeBulkSelectall,
-      onChangeListLabels,
+      onChangeListHeaders,
       onDeleteDataError,
       onDeleteDataSucceeded,
       onDeleteSeveralDataSucceeded,
-      resetListLabels,
+      onResetListHeaders,
       resetProps,
       setModalLoadingState,
       toggleModalDelete,
       toggleModalDeleteAll,
+      setLayout,
     },
     dispatch
   );

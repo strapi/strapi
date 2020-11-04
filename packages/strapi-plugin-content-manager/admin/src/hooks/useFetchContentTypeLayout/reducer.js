@@ -20,9 +20,9 @@ const reducer = (state, action) =>
       case 'GET_DATA_SUCCEEDED': {
         const contentTypeUid = action.data.contentType.uid;
 
-        draftState.isLoading = false;
         draftState.layout = action.data;
         draftState.layouts[contentTypeUid] = action.data;
+        draftState.isLoading = false;
         break;
       }
       case 'GET_DATA_ERROR': {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ButtonDropdown } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
@@ -13,15 +13,23 @@ import LayoutWrapper from './LayoutWrapper';
 import MenuDropdown from './MenuDropdown';
 import Toggle from './Toggle';
 
-const DisplayedFieldsDropdown = ({
-  isOpen,
-  items,
-  onChange,
-  onClickReset,
-  slug,
-  toggle,
-}) => {
+const DisplayedFieldsDropdown = ({ displayedHeaders, items, onChange, onClickReset, slug }) => {
   const { emitEvent } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggle = useCallback(
+    () =>
+      setIsOpen(prev => {
+        if (prev === false) {
+          emitEventRef.current('willChangeListFieldsSettings');
+        }
+
+        return !prev;
+      }),
+    []
+  );
 
   return (
     <DropdownWrapper>
@@ -38,9 +46,7 @@ const DisplayedFieldsDropdown = ({
               <FormattedMessage id="app.links.configure-view" />
             </LayoutWrapper>
           </DropdownItemLink>
-          <FormattedMessage
-            id={`${pluginId}.containers.ListPage.displayedFields`}
-          >
+          <FormattedMessage id={`${pluginId}.containers.ListPage.displayedFields`}>
             {msg => (
               <ItemDropdownReset onClick={onClickReset}>
                 <div
@@ -55,21 +61,18 @@ const DisplayedFieldsDropdown = ({
               </ItemDropdownReset>
             )}
           </FormattedMessage>
-          {items.map(item => (
-            <ItemDropdown
-              key={item.name}
-              toggle={false}
-              onClick={() => onChange(item)}
-            >
-              <div>
-                <InputCheckbox
-                  onChange={() => onChange(item)}
-                  name={item.name}
-                  value={item.value}
-                />
-              </div>
-            </ItemDropdown>
-          ))}
+          {items.map(headerName => {
+            const value = displayedHeaders.findIndex(({ name }) => name === headerName) !== -1;
+            const handleChange = () => onChange({ name: headerName, value });
+
+            return (
+              <ItemDropdown key={headerName} toggle={false} onClick={handleChange}>
+                <div>
+                  <InputCheckbox onChange={handleChange} name={headerName} value={value} />
+                </div>
+              </ItemDropdown>
+            );
+          })}
         </MenuDropdown>
       </ButtonDropdown>
     </DropdownWrapper>
@@ -77,12 +80,11 @@ const DisplayedFieldsDropdown = ({
 };
 
 DisplayedFieldsDropdown.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
+  displayedHeaders: PropTypes.array.isRequired,
   items: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   onClickReset: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
-  toggle: PropTypes.func.isRequired,
 };
 
-export default DisplayedFieldsDropdown;
+export default memo(DisplayedFieldsDropdown);

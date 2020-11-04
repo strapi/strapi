@@ -1,19 +1,55 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation, useHistory } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
-import { upperFirst } from 'lodash';
-import { LoadingIndicator } from 'strapi-helper-plugin';
+import { FormattedMessage, useIntl } from 'react-intl';
+import { upperFirst, isEmpty } from 'lodash';
+import { LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
+import { getTrad } from '../../utils';
+import State from '../State';
 import TableHeader from './TableHeader';
 import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoader }) => {
-  const { emitEvent, entriesToDelete, label, filters, _q } = useListView();
+const CustomTable = ({
+  canUpdate,
+  canDelete,
+  data,
+  displayedHeaders,
+  hasDraftAndPublish,
+  isBulkable,
+  showLoader,
+}) => {
+  const { formatMessage } = useIntl();
+  const { entriesToDelete, label, filters, _q } = useListView();
+  const { emitEvent } = useGlobalContext();
   const { pathname } = useLocation();
   const { push } = useHistory();
+  const headers = useMemo(() => {
+    if (hasDraftAndPublish) {
+      return [
+        ...displayedHeaders,
+        {
+          key: '__published_at_temp_key__',
+          name: 'published_at',
+          fieldSchema: {},
+          metadatas: {
+            label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
+            searchable: false,
+            sortable: true,
+          },
+          cellFormatter: cellData => {
+            const isPublished = !isEmpty(cellData.published_at);
+
+            return <State isPublished={isPublished} />;
+          },
+        },
+      ];
+    }
+
+    return displayedHeaders;
+  }, [formatMessage, hasDraftAndPublish, displayedHeaders]);
 
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
@@ -93,22 +129,14 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
   );
 };
 
-CustomTable.defaultProps = {
-  canDelete: false,
-  canUpdate: false,
-  data: [],
-  headers: [],
-  isBulkable: true,
-  showLoader: false,
-};
-
 CustomTable.propTypes = {
-  canDelete: PropTypes.bool,
-  canUpdate: PropTypes.bool,
-  data: PropTypes.array,
-  headers: PropTypes.array,
-  isBulkable: PropTypes.bool,
-  showLoader: PropTypes.bool,
+  canDelete: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
+  data: PropTypes.array.isRequired,
+  displayedHeaders: PropTypes.array.isRequired,
+  hasDraftAndPublish: PropTypes.bool.isRequired,
+  isBulkable: PropTypes.bool.isRequired,
+  showLoader: PropTypes.bool.isRequired,
 };
 
 export default memo(CustomTable);

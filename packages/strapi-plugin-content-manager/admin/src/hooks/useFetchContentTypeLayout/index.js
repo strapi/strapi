@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { request } from 'strapi-helper-plugin';
 import formatLayouts from './utils/formatLayouts';
@@ -9,6 +9,7 @@ const useFetchContentTypeLayout = contentTypeUID => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector(state => schemasSelector(state), []);
+  const isMounted = useRef(true);
 
   const getData = useCallback(
     async (uid, abortSignal = false) => {
@@ -33,12 +34,19 @@ const useFetchContentTypeLayout = contentTypeUID => {
           data: formatLayouts(data, schemas),
         });
       } catch (error) {
-        console.error(error);
-        dispatch({ type: 'GET_DATA_ERROR', error });
+        if (isMounted.current && error.name !== 'AbortError') {
+          dispatch({ type: 'GET_DATA_ERROR', error });
+        }
       }
     },
     [schemas, layouts]
   );
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const abortController = new AbortController();

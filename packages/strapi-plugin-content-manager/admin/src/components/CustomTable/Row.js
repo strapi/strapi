@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
@@ -67,25 +67,16 @@ const getDisplayedValue = (type, value, name) => {
 };
 
 function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
-  const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
+  const { entriesToDelete, onChangeBulk, onClickDelete } = useListView();
+  const { emitEvent } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
 
   const memoizedDisplayedValue = useCallback(
-    name => {
-      const type = get(schema, ['attributes', name, 'type'], 'string');
-
+    (name, type) => {
       return getDisplayedValue(type, row[name], name);
     },
-    [row, schema]
+    [row]
   );
-
-  const isMedia = useCallback(
-    header => {
-      return get(schema, ['attributes', header.name, 'type']) === 'media';
-    },
-    [schema]
-  );
-
-  const { emitEvent } = useGlobalContext();
 
   const links = [
     {
@@ -95,7 +86,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
       onClick: e => {
         e.stopPropagation();
-        emitEvent('willDeleteEntryFromList');
+        emitEventRef.current('willDeleteEntryFromList');
         onClickDelete(row.id);
       },
     },
@@ -113,14 +104,16 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
           />
         </td>
       )}
-      {headers.map(header => {
+      {headers.map(({ key, name, fieldSchema: { type }, cellFormatter }) => {
+        const isMedia = type === 'media';
+
         return (
-          <td key={header.key || header.name}>
-            {isMedia(header) && <MediaPreviewList files={memoizedDisplayedValue(header.name)} />}
-            {header.cellFormatter && header.cellFormatter(row)}
-            {!isMedia(header) && !header.cellFormatter && (
+          <td key={key}>
+            {isMedia && <MediaPreviewList files={memoizedDisplayedValue(name, type)} />}
+            {cellFormatter && cellFormatter(row)}
+            {!isMedia && !cellFormatter && (
               <Truncate>
-                <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
+                <Truncated>{memoizedDisplayedValue(name, type)}</Truncated>
               </Truncate>
             )}
           </td>
