@@ -27,7 +27,7 @@ Check out the new the releases at: ${releaseLink}
 `.trim();
 };
 
-const createNotifyUpdater = strapi => {
+const createUpdateNotifier = strapi => {
   const config = new Configstore(
     pkg.name,
     {},
@@ -79,4 +79,4 @@ const createNotifyUpdater = strapi => {
   };
 };
 
-module.exports = createNotifyUpdater;
+module.exports = createUpdateNotifier;
