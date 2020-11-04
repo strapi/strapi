@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty, sortBy } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
   PopUpWarning,
@@ -65,11 +65,11 @@ function ListView({
   // emitEvent,
   entriesToDelete,
   isLoading,
-  location: { pathname },
+  // location: { pathname },
   getData,
   getDataSucceeded,
   layouts,
-  history: { push },
+  // history: { push },
   onChangeBulk,
   onChangeBulkSelectall,
   onChangeListLabels,
@@ -85,6 +85,9 @@ function ListView({
   slug,
   toggleModalDelete,
   toggleModalDeleteAll,
+
+  // NEW
+  layout,
 }) {
   const { emitEvent } = useGlobalContext();
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
@@ -93,31 +96,41 @@ function ListView({
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions);
   const query = useQuery();
-  const { search } = useLocation();
+  const { pathname, search } = useLocation();
+  const { push } = useHistory;
+
   const isFirstRender = useRef(true);
   const { formatMessage } = useIntl();
-
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
+
+  console.log({ layout });
+
+  const contentType = layout.contentType;
+  const {
+    defaultSortBy,
+    defaultSortOrder,
+    bulkable: isBulkable,
+    filterable: isFilterable,
+    searchable: isSearchable,
+    pageSize,
+    // mainField,
+  } = contentType.settings;
+  const hasDraftAndPublish = contentType.options.draftAndPublish;
+  const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
+  const listLayout = contentType.layouts.list;
+
+  console.log({ isBulkable });
+
   const contentTypePath = useMemo(() => {
     return [slug, 'contentType'];
   }, [slug]);
-  const hasDraftAndPublish = useMemo(() => {
-    return get(layouts, [...contentTypePath, 'schema', 'options', 'draftAndPublish'], false);
-  }, [contentTypePath, layouts]);
-
-  const getLayoutSetting = useCallback(
-    settingName => {
-      return get(layouts, [...contentTypePath, 'settings', settingName], '');
-    },
-    [contentTypePath, layouts]
-  );
 
   // Related to the search
-  const defaultSort = useMemo(() => {
-    return `${getLayoutSetting('defaultSortBy')}:${getLayoutSetting('defaultSortOrder')}`;
-  }, [getLayoutSetting]);
+  // const defaultSort = useMemo(() => {
+  //   return `${getLayoutSetting('defaultSortBy')}:${getLayoutSetting('defaultSortOrder')}`;
+  // }, [getLayoutSetting]);
 
   const filters = useMemo(() => {
     const currentSearch = new URLSearchParams(search);
@@ -131,25 +144,24 @@ function ListView({
 
     return generateFiltersFromSearch(currentSearch.toString());
   }, [search]);
-  const _limit = useMemo(() => {
-    return parseInt(query.get('_limit') || getLayoutSetting('pageSize'), 10);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getLayoutSetting, query.get('_limit')]);
-  const _q = useMemo(() => {
-    return query.get('_q') || '';
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.get('_q')]);
-  const _page = useMemo(() => {
-    return parseInt(query.get('_page') || 1, 10);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.get('_page')]);
-  const _sort = useMemo(() => {
-    return query.get('_sort') || defaultSort;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultSort, query.get('_sort')]);
+
+  // TODO
+  const _limit = pageSize;
+  // const _limit = useMemo(() => {
+  //   return parseInt(query.get('_limit') || pageSize, 10);
+  // }, [pageSize, query]);
+  // TODO
+  const _q = query.get('_q') || '';
+  // TODO
+  const _page = parseInt(query.get('_page') || 1, 10);
+
+  // TODO
+  const _sort = query.get('_sort') || defaultSort;
+
   const _start = useMemo(() => {
     return (_page - 1) * parseInt(_limit, 10);
   }, [_limit, _page]);
+
   const searchToSendForRequest = useMemo(() => {
     const currentSearch = new URLSearchParams(search);
 
@@ -164,16 +176,6 @@ function ListView({
   const getDataActionRef = useRef(getData);
   const getDataSucceededRef = useRef(getDataSucceeded);
 
-  // Settings
-  const isBulkable = useMemo(() => {
-    return getLayoutSetting('bulkable');
-  }, [getLayoutSetting]);
-  const isFilterable = useMemo(() => {
-    return getLayoutSetting('filterable');
-  }, [getLayoutSetting]);
-  const isSearchable = useMemo(() => {
-    return getLayoutSetting('searchable');
-  }, [getLayoutSetting]);
   const shouldSendRequest = useMemo(() => {
     return !isLoadingForPermissions && canRead;
   }, [canRead, isLoadingForPermissions]);
@@ -203,9 +205,9 @@ function ListView({
     [contentTypePath, layouts]
   );
 
-  const listLayout = useMemo(() => {
-    return get(layouts, [...contentTypePath, 'layouts', 'list'], []);
-  }, [contentTypePath, layouts]);
+  // const listLayout = useMemo(() => {
+  //   return get(layouts, [...contentTypePath, 'layouts', 'list'], []);
+  // }, [contentTypePath, layouts]);
 
   const listSchema = useMemo(() => {
     return get(layouts, [...contentTypePath, 'schema'], {});
@@ -215,27 +217,29 @@ function ListView({
     return get(listSchema, ['info', 'name'], '');
   }, [listSchema]);
 
+  // TODO
   const tableHeaders = useMemo(() => {
-    let headers = listLayout.map(label => {
-      return { ...getMetaDatas([label, 'list']), name: label };
-    });
+    return listLayout;
+    // let headers = listLayout.map(label => {
+    //   return { ...getMetaDatas([label, 'list']), name: label };
+    // });
 
-    if (hasDraftAndPublish) {
-      headers.push({
-        label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
-        searchable: false,
-        sortable: true,
-        name: 'published_at',
-        key: '__published_at__',
-        cellFormatter: cellData => {
-          const isPublished = !isEmpty(cellData.published_at);
+    // if (hasDraftAndPublish) {
+    //   headers.push({
+    //     label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
+    //     searchable: false,
+    //     sortable: true,
+    //     name: 'published_at',
+    //     key: '__published_at__',
+    //     cellFormatter: cellData => {
+    //       const isPublished = !isEmpty(cellData.published_at);
 
-          return <State isPublished={isPublished} />;
-        },
-      });
-    }
+    //       return <State isPublished={isPublished} />;
+    //     },
+    //   });
+    // }
 
-    return headers;
+    // return headers;
   }, [formatMessage, getMetaDatas, hasDraftAndPublish, listLayout]);
 
   const getFirstSortableElement = useCallback(
@@ -656,42 +660,49 @@ function ListView({
   );
 }
 ListView.defaultProps = {
-  layouts: {},
+  // layouts: {},
 };
 
 ListView.propTypes = {
-  count: PropTypes.number.isRequired,
-  data: PropTypes.array.isRequired,
-  didDeleteData: PropTypes.bool.isRequired,
-  // emitEvent: PropTypes.func.isRequired,
-  entriesToDelete: PropTypes.array.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  layouts: PropTypes.object,
-  location: PropTypes.shape({
-    pathname: PropTypes.string.isRequired,
-    search: PropTypes.string.isRequired,
+  layout: PropTypes.exact({
+    components: PropTypes.object.isRequired,
+    contentType: PropTypes.shape({
+      options: PropTypes.object.isRequired,
+      settings: PropTypes.object.isRequired,
+    }).isRequired,
   }).isRequired,
-  // models: PropTypes.array.isRequired,
-  getData: PropTypes.func.isRequired,
-  getDataSucceeded: PropTypes.func.isRequired,
-  history: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-  }).isRequired,
-  onChangeBulk: PropTypes.func.isRequired,
-  onChangeBulkSelectall: PropTypes.func.isRequired,
-  onChangeListLabels: PropTypes.func.isRequired,
-  onDeleteDataError: PropTypes.func.isRequired,
-  onDeleteDataSucceeded: PropTypes.func.isRequired,
-  onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
-  resetListLabels: PropTypes.func.isRequired,
-  resetProps: PropTypes.func.isRequired,
-  setModalLoadingState: PropTypes.func.isRequired,
-  showModalConfirmButtonLoading: PropTypes.bool.isRequired,
-  showWarningDelete: PropTypes.bool.isRequired,
-  showWarningDeleteAll: PropTypes.bool.isRequired,
-  slug: PropTypes.string.isRequired,
-  toggleModalDelete: PropTypes.func.isRequired,
-  toggleModalDeleteAll: PropTypes.func.isRequired,
+  // count: PropTypes.number.isRequired,
+  // data: PropTypes.array.isRequired,
+  // didDeleteData: PropTypes.bool.isRequired,
+  // // emitEvent: PropTypes.func.isRequired,
+  // entriesToDelete: PropTypes.array.isRequired,
+  // isLoading: PropTypes.bool.isRequired,
+  // layouts: PropTypes.object,
+  // location: PropTypes.shape({
+  //   pathname: PropTypes.string.isRequired,
+  //   search: PropTypes.string.isRequired,
+  // }).isRequired,
+  // // models: PropTypes.array.isRequired,
+  // getData: PropTypes.func.isRequired,
+  // getDataSucceeded: PropTypes.func.isRequired,
+  // history: PropTypes.shape({
+  //   push: PropTypes.func.isRequired,
+  // }).isRequired,
+  // onChangeBulk: PropTypes.func.isRequired,
+  // onChangeBulkSelectall: PropTypes.func.isRequired,
+  // onChangeListLabels: PropTypes.func.isRequired,
+  // onDeleteDataError: PropTypes.func.isRequired,
+  // onDeleteDataSucceeded: PropTypes.func.isRequired,
+  // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
+  // resetListLabels: PropTypes.func.isRequired,
+  // resetProps: PropTypes.func.isRequired,
+  // setModalLoadingState: PropTypes.func.isRequired,
+  // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
+  // showWarningDelete: PropTypes.bool.isRequired,
+  // showWarningDeleteAll: PropTypes.bool.isRequired,
+  // slug: PropTypes.string.isRequired,
+  // toggleModalDelete: PropTypes.func.isRequired,
+  // toggleModalDeleteAll: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectListView();

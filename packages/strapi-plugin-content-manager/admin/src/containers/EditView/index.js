@@ -98,7 +98,7 @@ const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
   }
 
   // TODO: create a hook to handle/provide the permissions this should be done for the i18n feature
-
+  // TODO: Remove layout provider!
   return (
     <ContentTypeLayoutContext.Provider value={layout}>
       <DataManagementWrapper allLayoutData={layout} from={from} slug={slug}>

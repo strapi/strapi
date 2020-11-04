@@ -2,6 +2,7 @@ import React, { memo, Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
+import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import EditView from '../EditView';
 import ListView from '../ListView';
@@ -17,7 +18,8 @@ const CollectionTypeRecursivePath = () => {
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
 
   const renderRoute = (routeProps, Component) => {
-    return <Component {...routeProps} slug={slug} layout={layout} />;
+    // return <Component {...routeProps} slug={slug} layout={layout} />;
+    return <Component slug={slug} layout={layout} />;
   };
   const renderPermissionsRoute = (routeProps, Component) => {
     return (
@@ -56,10 +58,12 @@ const CollectionTypeRecursivePath = () => {
   }
 
   return (
-    <Switch>
-      {settingsRoutes}
-      {routes}
-    </Switch>
+    <ContentTypeLayoutContext.Provider value={layout}>
+      <Switch>
+        {settingsRoutes}
+        {routes}
+      </Switch>
+    </ContentTypeLayoutContext.Provider>
   );
 };
 
