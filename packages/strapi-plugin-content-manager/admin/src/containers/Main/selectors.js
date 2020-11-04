@@ -15,8 +15,13 @@ const makeSelectModels = () =>
   createSelector(selectMainDomain(), substate => {
     const { models } = substate;
 
-    return models.filter(model => model.isDisplayed === true).map(({ uid }) => uid);
+    return { models: models.filter(model => model.isDisplayed === true).map(({ uid }) => uid) };
   });
 
+const makeSelectModelAndComponentSchemas = () =>
+  createSelector(selectMainDomain(), ({ components, models }) => ({
+    schemas: [...components, ...models],
+  }));
+
 export default makeSelectMain;
-export { makeSelectModels, selectMainDomain };
+export { makeSelectModels, makeSelectModelAndComponentSchemas, selectMainDomain };

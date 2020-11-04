@@ -1,19 +1,23 @@
-import React, { Suspense, lazy } from 'react';
+import React, { memo, Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
+import { useFetchContentTypeLayout } from '../../hooks';
+import EditView from '../EditView';
+import ListView from '../ListView';
 
-const EditView = lazy(() => import('../EditView'));
-const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const ListView = lazy(() => import('../ListView'));
-const ListSettingsView = lazy(() => import('../ListSettingsView'));
+// const EditView = lazy(() => import('../EditView'));
+// const EditSettingsView = lazy(() => import('../EditSettingsView'));
+// const ListView = lazy(() => import('../ListView'));
+// const ListSettingsView = lazy(() => import('../ListSettingsView'));
 
 const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
+  const { isLoading, layout } = useFetchContentTypeLayout(slug);
 
   const renderRoute = (routeProps, Component) => {
-    return <Component {...routeProps} slug={slug} />;
+    return <Component {...routeProps} slug={slug} layout={layout} />;
   };
   const renderPermissionsRoute = (routeProps, Component) => {
     return (
@@ -24,14 +28,14 @@ const CollectionTypeRecursivePath = () => {
   };
 
   const settingsRoutes = [
-    {
-      path: 'ctm-configurations/list-settings',
-      comp: ListSettingsView,
-    },
-    {
-      path: 'ctm-configurations/edit-settings/:type',
-      comp: EditSettingsView,
-    },
+    // {
+    //   path: 'ctm-configurations/list-settings',
+    //   comp: ListSettingsView,
+    // },
+    // {
+    //   path: 'ctm-configurations/edit-settings/:type',
+    //   comp: EditSettingsView,
+    // },
   ].map(({ path, comp }) => (
     <Route
       key={path}
@@ -41,20 +45,22 @@ const CollectionTypeRecursivePath = () => {
   ));
 
   const routes = [
-    { path: ':id', comp: EditView },
-    { path: '', comp: ListView },
-  ].map(({ path, comp }) => (
-    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
+    { path: ':id', Comp: EditView },
+    { path: '', Comp: ListView },
+  ].map(({ path, Comp }) => (
+    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, Comp)} />
   ));
 
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
-    <Suspense fallback={<LoadingIndicatorPage />}>
-      <Switch>
-        {settingsRoutes}
-        {routes}
-      </Switch>
-    </Suspense>
+    <Switch>
+      {settingsRoutes}
+      {routes}
+    </Switch>
   );
 };
 
-export default CollectionTypeRecursivePath;
+export default memo(CollectionTypeRecursivePath);

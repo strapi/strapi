@@ -28,7 +28,6 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
 
     const fetchData = async signal => {
       getData();
-      console.log('up');
 
       try {
         const [{ data: components }, { data: models }] = await Promise.all(

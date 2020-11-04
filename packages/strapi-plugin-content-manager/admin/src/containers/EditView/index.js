@@ -32,6 +32,7 @@ import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
+  // TODO
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
   const { goBack } = useHistory();
   const { pathname, state } = useLocation();
