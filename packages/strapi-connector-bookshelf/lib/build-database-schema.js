@@ -3,7 +3,7 @@ const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
-const { migrateDraftAndPublish } = require('./migrations/draft-and-publish');
+const { migrateDraftAndPublish } = require('./database-migration');
 const { getManyRelations } = require('./utils/associations');
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {

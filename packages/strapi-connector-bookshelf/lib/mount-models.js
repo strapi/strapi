@@ -354,35 +354,29 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         }
         case 'belongsToMorph':
         case 'belongsToManyMorph': {
-          const association = _.find(definition.associations, { alias: name });
-          const morphModelsAndFields = association.related.map(morphModel => {
+          const isARelatedField = attr => {
+            const samePlugin =
+              definition.plugin === attr.plugin ||
+              (_.isNil(definition.plugin) && _.isNil(attr.plugin));
+            const sameModel = [attr.model, attr.collection].includes(definition.modelName);
+            const isMorph = attr.via === name;
+
+            return isMorph && sameModel && samePlugin;
+          };
+          const getMorphModelAndFields = morphModel => {
             const relatedFields = _.reduce(
               morphModel.attributes,
-              (fields, attr, attrName) => {
-                const samePlugin =
-                  definition.plugin === attr.plugin ||
-                  (_.isNil(definition.plugin) && _.isNil(attr.plugin));
-                const sameModel = [attr.model, attr.collection].includes(definition.modelName);
-                const isMorph = attr.via === 'related';
-
-                return isMorph && sameModel && samePlugin ? fields.concat(attrName) : fields;
-              },
+              (fields, attr, attrName) =>
+                isARelatedField(attr) ? fields.concat(attrName) : fields,
               []
             );
 
-            if (relatedFields.length === 0) {
-              strapi.log.error(`Impossible to register the '${model}' model.`);
-              strapi.log.error(
-                'The collection and field name cannot be found for the morphTo method.'
-              );
-              strapi.stop();
-            }
+            return { collectionName: morphModel.collectionName, relatedFields };
+          };
 
-            return {
-              collectionName: morphModel.collectionName,
-              relatedFields,
-            };
-          });
+          const association = _.find(definition.associations, { alias: name });
+          const morphModelsAndFields = association.related.map(getMorphModelAndFields);
+          const uniqMorphModelsAndFields = _.uniqWith(morphModelsAndFields, _.isEqual);
 
           // Define new model.
           const options = {
@@ -414,7 +408,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
           // Upload has many Upload_morph that morph to different model.
           const populateFn = qb => {
             qb.where(qb => {
-              for (const modelAndFields of morphModelsAndFields) {
+              for (const modelAndFields of uniqMorphModelsAndFields) {
                 qb.orWhere(qb => {
                   qb.where({ related_type: modelAndFields.collectionName }).whereIn(
                     'field',
