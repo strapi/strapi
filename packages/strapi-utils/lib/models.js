@@ -456,7 +456,7 @@ module.exports = {
         return acc;
       }, []);
 
-      const models = [].concat(appModels, pluginsModels, componentModels);
+      const models = _.uniqWith(appModels.concat(pluginsModels, componentModels), _.isEqual);
 
       definition.associations.push({
         alias: key,
