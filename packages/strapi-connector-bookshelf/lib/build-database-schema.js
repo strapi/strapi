@@ -3,24 +3,11 @@ const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
-const { runMigrationBeforeDBUpdates, runMigrationAfterDBUpdates } = require('./migrations');
 const { getManyRelations } = require('./utils/associations');
+const createMigrationRunner = require('./migrations/create-migration-runner');
+const draftPublishMigration = require('./migrations/draft-publish-migration');
 
-module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
-  // before migrations
-  await runMigrationBeforeDBUpdates({ ORM, loadedModel, definition, connection, model });
-
-  // Update/create the tables in database
-  await createOrUpdateTables({ ORM, loadedModel, definition, connection, model });
-
-  // after migrations
-  await runMigrationAfterDBUpdates({ ORM, loadedModel, definition, connection, model });
-
-  // store new definitions
-  await storeDefinition(definition, ORM);
-};
-
-const createOrUpdateTables = async ({ ORM, loadedModel, definition, connection, model }) => {
+const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model }) => {
   // Add created_at and updated_at field if timestamp option is true
   if (loadedModel.hasTimestamps) {
     definition.attributes[loadedModel.hasTimestamps[0]] = { type: 'currentTimestamp' };
@@ -392,4 +379,16 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
       }
     }
   }
+};
+
+const migrationRunner = createMigrationRunner(migrateSchemas, {
+  migrations: [draftPublishMigration],
+});
+
+module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
+  // run migrations
+  await migrationRunner.run({ ORM, loadedModel, definition, connection, model });
+
+  // store new definitions
+  await storeDefinition(definition, ORM);
 };
