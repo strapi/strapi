@@ -68,7 +68,7 @@ module.exports = ({ model, strapi }) => {
     }
   };
 
-  const isValidPrimaryKey = params => {
+  const hasValidPrimaryKey = params => {
     if (_.has(params, model.primaryKey)) {
       return utils.isMongoId(params[model.primaryKey]);
     }
@@ -444,7 +444,7 @@ module.exports = ({ model, strapi }) => {
   }
 
   async function findOne(params, populate, { session = null } = {}) {
-    if (!isValidPrimaryKey(params)) {
+    if (!hasValidPrimaryKey(params)) {
       return null;
     }
 
@@ -490,7 +490,7 @@ module.exports = ({ model, strapi }) => {
   }
 
   async function update(params, values, { session = null } = {}) {
-    if (!isValidPrimaryKey(params)) {
+    if (!hasValidPrimaryKey(params)) {
       return null;
     }
 
@@ -528,23 +528,15 @@ module.exports = ({ model, strapi }) => {
       return null;
     }
 
-    const { _where = [] } = params;
-
-    for (let i = 0; i < _where.length; i++) {
-      if (_.has(_where[i], `${model.primaryKey}_in`)) {
-        params._where[i][`${model.primaryKey}_in`] = params._where[i][
-          `${model.primaryKey}_in`
-        ].filter(id => utils.isMongoId(id));
-
-        break;
-      }
-    }
-
-    const entries = await find(params, null, { session });
-    return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey], { session })));
+  const entries = await find(params, null, { session });
+  return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey], { session })));
   }
 
   async function deleteOne(id, { session = null } = {}) {
+    if (!utils.isMongoId(id)) {
+      return null;
+    }
+
     const entry = await model
       .findOneAndRemove({ [model.primaryKey]: id }, { session })
       .populate(defaultPopulate());
