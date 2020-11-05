@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { capitalize, get } from 'lodash';
@@ -9,9 +9,11 @@ import {
   getFilterType,
   useUser,
   findMatchingPermissions,
+  useGlobalContext,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import { formatFiltersToQuery, getTrad } from '../../utils';
 import useListView from '../../hooks/useListView';
 import Container from '../Container';
 import FilterPickerOption from '../FilterPickerOption';
@@ -21,8 +23,9 @@ import reducer, { initialState } from './reducer';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
 
-function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState }) {
-  const { schema, filters, slug } = useListView();
+function FilterPicker({ contentType, isOpen, name, toggleFilterPickerState, setQuery, slug }) {
+  const { emitEvent } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
   const userPermissions = useUser();
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
@@ -34,15 +37,32 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
 
     return get(matchingPermissions, ['0', 'fields'], []);
   }, [userPermissions, slug]);
-  let timestamps = get(schema, ['options', 'timestamps']);
+
+  let timestamps = get(contentType, ['options', 'timestamps']);
 
   if (!Array.isArray(timestamps)) {
     timestamps = [];
   }
 
-  const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
+  const actions = [
+    {
+      label: getTrad('components.FiltersPickWrapper.PluginHeader.actions.clearAll'),
+      kind: 'secondary',
+      onClick: () => {
+        toggleFilterPickerState();
+        setQuery({ _where: [] }, 'remove');
+      },
+    },
+    {
+      label: getTrad('components.FiltersPickWrapper.PluginHeader.actions.apply'),
+      kind: 'primary',
+      type: 'submit',
+    },
+  ];
+
+  const allowedAttributes = Object.keys(get(contentType, ['attributes']), {})
     .filter(attr => {
-      const current = get(schema, ['attributes', attr], {});
+      const current = get(contentType, ['attributes', attr], {});
 
       if (!readActionAllowedFields.includes(attr) && attr !== 'id' && !timestamps.includes(attr)) {
         return false;
@@ -52,7 +72,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
     })
     .sort()
     .map(attr => {
-      const current = get(schema, ['attributes', attr], {});
+      const current = get(contentType, ['attributes', attr], {});
 
       return { name: attr, type: current.type, options: current.enum || null };
     });
@@ -81,8 +101,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
     </FormattedMessage>
   );
 
-  // Generate the first filter for adding a new one or at initial state
-  const getInitialFilter = () => {
+  const initialFilter = useMemo(() => {
     const type = get(allowedAttributes, [0, 'type'], '');
     const [filter] = getFilterType(type);
 
@@ -103,36 +122,44 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
     };
 
     return initFilter;
-  };
+  }, [allowedAttributes]);
+
   // Set the filters when the collapse is opening
   const handleEntering = () => {
     const currentFilters = filters;
-    const initialFilters = currentFilters.length > 0 ? currentFilters : [getInitialFilter()];
+    /* eslint-disable indent */
+    const initialFilters = currentFilters.length ? currentFilters : [initialFilter];
 
     dispatch({
       type: 'SET_FILTERS',
       initialFilters,
-      attributes: get(schema, 'attributes', {}),
+      attributes: get(contentType, 'attributes', {}),
     });
   };
 
   const addFilter = () => {
     dispatch({
       type: 'ADD_FILTER',
-      filter: getInitialFilter(),
+      filter: initialFilter,
     });
   };
+
+  const handleSubmit = useCallback(
+    e => {
+      e.preventDefault();
+      const nextFilters = formatFiltersToQuery(modifiedData);
+
+      emitEventRef.current('didFilterEntries');
+      setQuery(nextFilters);
+      toggleFilterPickerState();
+    },
+    [modifiedData, setQuery, toggleFilterPickerState]
+  );
 
   return (
     <Collapse isOpen={isOpen} onEntering={handleEntering}>
       <Container style={{ backgroundColor: 'white', paddingBottom: 0 }}>
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-
-            onSubmit(modifiedData);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <PluginHeader
             actions={actions}
             title={renderTitle}
@@ -161,7 +188,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
                     index,
                   });
                 }}
-                type={get(schema, ['attributes', filter.name, 'type'], '')}
+                type={get(contentType, ['attributes', filter.name, 'type'], '')}
                 showAddButton={key === modifiedData.length - 1}
                 // eslint-disable-next-line react/no-array-index-key
                 key={key}
@@ -181,19 +208,15 @@ function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState
 }
 
 FilterPicker.defaultProps = {
-  actions: [],
-  isOpen: false,
   name: '',
 };
 
 FilterPicker.propTypes = {
-  actions: PropTypes.array,
-  isOpen: PropTypes.bool,
-  location: PropTypes.shape({
-    search: PropTypes.string.isRequired,
-  }).isRequired,
+  contentType: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   name: PropTypes.string,
-  onSubmit: PropTypes.func.isRequired,
+  setQuery: PropTypes.func.isRequired,
+  slug: PropTypes.string.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,
 };
 

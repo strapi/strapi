@@ -2,6 +2,8 @@ export { default as checkIfAttributeIsDisplayable } from './checkIfAttributeIsDi
 export { default as createDefaultForm } from './createDefaultForm';
 export { default as dateFormats } from './dateFormats';
 export { default as formatComponentData } from './formatComponentData';
+export { default as formatFiltersFromQuery } from './formatFiltersFromQuery';
+export { default as formatFiltersToQuery } from './formatFiltersToQuery';
 export { default as generatePermissionsObject } from './generatePermissionsObject';
 export { default as getInjectedComponents } from './getComponents';
 export { default as getMaxTempKey } from './getMaxTempKey';

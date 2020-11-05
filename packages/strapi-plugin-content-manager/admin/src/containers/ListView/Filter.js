@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get, toString } from 'lodash';
 import moment from 'moment';
 import { FilterButton } from 'strapi-helper-plugin';
-import dateFormats from '../../utils/dateFormats';
+import { dateFormats, formatFiltersToQuery } from '../../utils';
 
 function Filter({
-  changeParams,
-  filter,
+  contentType,
+  filterName,
   filters,
   index,
   name,
-  schema,
   value,
   toggleFilterPickerState,
   isFilterPickerOpen,
+  setQuery,
 }) {
-  const type = get(schema, ['attributes', name, 'type'], 'string');
+  const type = get(contentType, ['attributes', name, 'type'], 'string');
   let displayedValue = toString(value);
 
   if (type.includes('date') || type.includes('timestamp')) {
@@ -36,26 +36,24 @@ function Filter({
       .format(format);
   }
 
+  console.log({ name });
   const label = {
     name,
-    filter,
+    filter: filterName,
     value: displayedValue,
   };
 
-  return (
-    <FilterButton
-      onClick={() => {
-        const updatedFilters = filters.slice().filter((_, i) => i !== index);
+  const handleClick = useCallback(() => {
+    const updatedFilters = filters.slice().filter((_, i) => i !== index);
 
-        if (isFilterPickerOpen) {
-          toggleFilterPickerState();
-        }
-        changeParams({ target: { name: 'filters', value: updatedFilters } });
-      }}
-      label={label}
-      type={type}
-    />
-  );
+    if (isFilterPickerOpen) {
+      toggleFilterPickerState();
+    }
+
+    setQuery(formatFiltersToQuery(updatedFilters));
+  }, [filters, index, isFilterPickerOpen, setQuery, toggleFilterPickerState]);
+
+  return <FilterButton onClick={handleClick} label={label} type={type} />;
 }
 
 Filter.defaultProps = {
@@ -64,15 +62,15 @@ Filter.defaultProps = {
 };
 
 Filter.propTypes = {
-  changeParams: PropTypes.func.isRequired,
-  filter: PropTypes.string.isRequired,
+  contentType: PropTypes.shape({ attributes: PropTypes.object.isRequired }).isRequired,
+  filterName: PropTypes.string.isRequired,
   filters: PropTypes.array.isRequired,
   index: PropTypes.number.isRequired,
   isFilterPickerOpen: PropTypes.bool.isRequired,
   name: PropTypes.string,
-  schema: PropTypes.object.isRequired,
+  setQuery: PropTypes.func.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,
   value: PropTypes.any,
 };
 
-export default Filter;
+export default memo(Filter);

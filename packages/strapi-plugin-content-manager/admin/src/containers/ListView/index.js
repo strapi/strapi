@@ -18,13 +18,18 @@ import {
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { useQueryParams } from '../../hooks';
-import { generatePermissionsObject, getRequestUrl, getTrad } from '../../utils';
+import {
+  formatFiltersFromQuery,
+  generatePermissionsObject,
+  getRequestUrl,
+  getTrad,
+} from '../../utils';
 
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 
-// import FilterPicker from '../../components/FilterPicker';
+import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
 import ListViewProvider from '../ListViewProvider';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
@@ -53,7 +58,7 @@ import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
 
 /* eslint-disable react/no-array-index-key */
 
-const FilterPicker = () => <div>FILTER</div>;
+// const FilterPicker = () => <div>FILTER</div>;
 
 function ListView({
   count,
@@ -105,12 +110,12 @@ function ListView({
   } = layout;
 
   const { emitEvent } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions);
-  // const query = useQuery();
   const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
   const [{ query, rawQuery }, setQuery] = useQueryParams({
     page: 1,
@@ -132,7 +137,9 @@ function ListView({
 
   const allAllowedHeaders = getAllAllowedHeaders(attributes);
 
-  const filters = query._where || [];
+  const filters = useMemo(() => {
+    return formatFiltersFromQuery(query);
+  }, [query]);
 
   const _limit = parseInt(query.pageSize, 10);
   const _page = parseInt(query.page, 10);
@@ -142,18 +149,6 @@ function ListView({
   const label = contentType.info.label;
 
   const searchToSendForRequest = rawQuery;
-  // const searchToSendForRequest = useMemo(() => {
-  //   const currentSearch = new URLSearchParams(search);
-
-  //   currentSearch.set('_limit', _limit);
-  //   currentSearch.set('_sort', _sort);
-  //   currentSearch.set('_start', _start);
-  //   currentSearch.delete('_page');
-
-  //   return currentSearch.toString();
-  // }, [_limit, _sort, _start, search]);
-
-  // const getDataActionRef = useRef(getData);
   const getDataSucceededRef = useRef(getDataSucceeded);
 
   const shouldSendRequest = useMemo(() => {
@@ -327,24 +322,6 @@ function ListView({
     [displayedHeaders, onChangeListHeaders]
   );
 
-  // const handleChangeFilters = ({ target: { value } }) => {
-  //   const newSearch = new URLSearchParams();
-
-  //   // Set the default params
-  //   newSearch.set('_limit', _limit);
-  //   newSearch.set('_sort', _sort);
-  //   newSearch.set('_page', 1);
-
-  //   value.forEach(({ filter, name, value: filterValue }) => {
-  //     const filterType = filter === '=' ? '' : filter;
-  //     const filterName = `${name}${filterType}`;
-
-  //     newSearch.append(filterName, filterValue);
-  //   });
-
-  //   push({ search: newSearch.toString() });
-  // };
-
   const handleChangeSearch = async ({ target: { name, value } }) => {
     const currentSearch = new URLSearchParams(searchToSendForRequest);
 
@@ -373,36 +350,15 @@ function ListView({
     }
   };
 
-  const handleSubmit = (filters = []) => {
-    emitEvent('didFilterEntries');
-    toggleFilterPickerState();
-    // handleChangeFilters({ target: { name: 'filters', value: filters } });
-  };
+  const toggleFilterPickerState = useCallback(() => {
+    setFilterPickerState(prevState => {
+      if (!prevState) {
+        emitEventRef.current('willFilterEntries');
+      }
 
-  const toggleFilterPickerState = () => {
-    if (!isFilterPickerOpen) {
-      emitEvent('willFilterEntries');
-    }
-
-    setFilterPickerState(prevState => !prevState);
-  };
-
-  const filterPickerActions = [
-    {
-      label: `${pluginId}.components.FiltersPickWrapper.PluginHeader.actions.clearAll`,
-      kind: 'secondary',
-      onClick: () => {
-        toggleFilterPickerState();
-        // Delete all filters
-        // handleChangeFilters({ target: { name: 'filters', value: [] } });
-      },
-    },
-    {
-      label: `${pluginId}.components.FiltersPickWrapper.PluginHeader.actions.apply`,
-      kind: 'primary',
-      type: 'submit',
-    },
-  ];
+      return !prevState;
+    });
+  }, []);
 
   const headerAction = useMemo(
     () => {
@@ -494,11 +450,13 @@ function ListView({
         firstSortableHeader={firstSortableHeader}
       >
         <FilterPicker
-          actions={filterPickerActions}
+          contentType={contentType}
           isOpen={isFilterPickerOpen}
           name={label}
           toggleFilterPickerState={toggleFilterPickerState}
-          onSubmit={handleSubmit}
+          setQuery={setQuery}
+          filters={filters}
+          slug={slug}
         />
         <Container className="container-fluid">
           {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading && canRead} />}
@@ -516,16 +474,17 @@ function ListView({
                           <FilterIcon />
                           <FormattedMessage id="app.utils.filters" />
                         </AddFilterCta>
-                        {filters.map((filter, key) => (
+                        {filters.map(({ filter: filterName, name }, key) => (
                           <Filter
-                            {...filter}
-                            // changeParams={handleChangeFilters}
+                            contentType={contentType}
+                            filterName={filterName}
                             filters={filters}
                             index={key}
-                            schema={{}}
                             key={key}
+                            name={name}
                             toggleFilterPickerState={toggleFilterPickerState}
                             isFilterPickerOpen={isFilterPickerOpen}
+                            setQuery={setQuery}
                           />
                         ))}
                       </>
