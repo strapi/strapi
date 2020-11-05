@@ -33,12 +33,7 @@ paths:
         - ContentTypes
       description: Get content type configuration
       parameters:
-        - in: path
-          name: uid
-          schema:
-            type: string
-          required: true
-          description: Content Type uid
+        - $ref: '#/components/parameters/uid'
       responses:
         200:
           description: A content type configuration with its components configuration
@@ -61,12 +56,7 @@ paths:
         - ContentTypes
       description: Edit content type configuration
       parameters:
-        - in: path
-          name: uid
-          schema:
-            type: string
-          required: true
-          description: Content Type uid
+        - $ref: '#/components/parameters/uid'
       responses:
         200:
           description: A content type configuration
@@ -100,12 +90,7 @@ paths:
         - Components
       description: Get content type configuration
       parameters:
-        - in: path
-          name: uid
-          schema:
-            type: string
-          required: true
-          description: Component uid
+        - $ref: '#/components/parameters/uid'
       responses:
         200:
           description: A component configuration with its components configuration
@@ -128,12 +113,7 @@ paths:
         - Components
       description: Edit component configuration
       parameters:
-        - in: path
-          name: uid
-          schema:
-            type: string
-          required: true
-          description: Component uid
+        - $ref: '#/components/parameters/uid'
       responses:
         200:
           description: A component configuration with its components configuration
@@ -263,6 +243,8 @@ paths:
       tags:
         - Collection Types content management
       description: Get a list of entries
+      parameters:
+        - $ref: '#/components/parameters/model'
       responses:
         200:
           content:
@@ -280,6 +262,8 @@ paths:
       tags:
         - Collection Types content management
       description: Create an entry
+      parameters:
+        - $ref: '#/components/parameters/model'
       requestBody:
         content:
           application/json:
@@ -296,6 +280,8 @@ paths:
       tags:
         - Collection Types content management
       description: Bulk delete entries
+      parameters:
+        - $ref: '#/components/parameters/model'
       requestBody:
         content:
           application/json:
@@ -319,6 +305,9 @@ paths:
       tags:
         - Collection Types content management
       description: Get one entry
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
       responses:
         200:
           content:
@@ -329,6 +318,9 @@ paths:
       tags:
         - Collection Types content management
       description: Update one entry
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
       responses:
         200:
           content:
@@ -339,6 +331,9 @@ paths:
       tags:
         - Collection Types content management
       description: Delete one entry
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
       responses:
         200:
           content:
@@ -350,6 +345,9 @@ paths:
       tags:
         - Collection Types content management
       description: Publish one entry
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
       responses:
         200:
           content:
@@ -361,6 +359,9 @@ paths:
       tags:
         - Collection Types content management
       description: Unpublish one entry
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
       responses:
         200:
           content:
@@ -372,6 +373,9 @@ paths:
     get:
       tags:
         - Single Types content management
+      description: Find Single type content
+      parameters:
+        - $ref: '#/components/parameters/model'
       responses:
         200:
           content:
@@ -381,6 +385,9 @@ paths:
     put:
       tags:
         - Single Types content management
+      description: Update Single type content
+      parameters:
+        - $ref: '#/components/parameters/model'
       responses:
         200:
           content:
@@ -390,6 +397,9 @@ paths:
     delete:
       tags:
         - Single Types content management
+      description: Delete Single type content
+      parameters:
+        - $ref: '#/components/parameters/model'
       responses:
         200:
           content:
@@ -400,6 +410,9 @@ paths:
     post:
       tags:
         - Single Types content management
+      description: Publish Single type content
+      parameters:
+        - $ref: '#/components/parameters/model'
       responses:
         200:
           content:
@@ -410,6 +423,9 @@ paths:
     post:
       tags:
         - Single Types content management
+      description: Unpublish Single type content
+      parameters:
+        - $ref: '#/components/parameters/model'
       responses:
         200:
           content:
@@ -628,6 +644,22 @@ components:
         type: string
       required: true
       description: Model uid
+
+    uid:
+      in: path
+      name: uid
+      schema:
+        type: string
+      required: true
+      description: Model uid
+
+    entity-id:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: true
+      description: Entity id
 
   securitySchemes:
     bearerAuth:
