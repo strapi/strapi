@@ -382,7 +382,7 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
 };
 
 const migrationRunner = createMigrationRunner(migrateSchemas, {
-  migrations: [draftPublishMigration],
+  hooks: [draftPublishMigration],
 });
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
