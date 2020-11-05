@@ -17,6 +17,7 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
+import { useQueryParams } from '../../hooks';
 import { generatePermissionsObject, getRequestUrl, getTrad } from '../../utils';
 
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
@@ -88,13 +89,34 @@ function ListView({
   onResetListHeaders,
   setLayout,
 }) {
+  const {
+    contentType: {
+      attributes,
+      settings: {
+        defaultSortBy,
+        defaultSortOrder,
+        bulkable: isBulkable,
+        filterable: isFilterable,
+        searchable: isSearchable,
+        pageSize: defaultPageSize,
+        // mainField,
+      },
+    },
+  } = layout;
+
   const { emitEvent } = useGlobalContext();
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions);
-  const query = useQuery();
+  // const query = useQuery();
+  const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
+  const [{ query, rawQuery }, setQuery] = useQueryParams({
+    page: 1,
+    pageSize: defaultPageSize,
+    _sort: defaultSort,
+  });
   const { pathname, search } = useLocation();
   const { push } = useHistory;
 
@@ -105,88 +127,41 @@ function ListView({
   const [idToDelete, setIdToDelete] = useState(null);
 
   const contentType = layout.contentType;
-  const {
-    contentType: {
-      attributes,
-      settings: {
-        defaultSortBy,
-        defaultSortOrder,
-        bulkable: isBulkable,
-        filterable: isFilterable,
-        searchable: isSearchable,
-        pageSize,
-        // mainField,
-      },
-    },
-  } = layout;
 
   const hasDraftAndPublish = contentType.options.draftAndPublish;
-  const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
+
   const allAllowedHeaders = getAllAllowedHeaders(attributes);
 
-  const filters = useMemo(() => {
-    const currentSearch = new URLSearchParams(search);
+  const filters = query._where || [];
 
-    // Delete all params that are not related to the filters
-    const paramsToDelete = ['_limit', '_page', '_sort', '_q'];
+  const _limit = parseInt(query.pageSize, 10);
+  const _page = parseInt(query.page, 10);
+  const _sort = query._sort;
+  const _q = query._q || '';
 
-    for (let i = 0; i < paramsToDelete.length; i++) {
-      currentSearch.delete(paramsToDelete[i]);
-    }
-
-    return generateFiltersFromSearch(currentSearch.toString());
-  }, [search]);
-
-  // TODO
-  const _limit = pageSize;
-  // const _limit = useMemo(() => {
-  //   return parseInt(query.get('_limit') || pageSize, 10);
-  // }, [pageSize, query]);
-  // TODO
-  const _q = query.get('_q') || '';
-  // TODO
-  const _page = parseInt(query.get('_page') || 1, 10);
-
-  // TODO
-  const _sort = query.get('_sort') || defaultSort;
   const label = contentType.info.label;
 
-  const _start = useMemo(() => {
-    return (_page - 1) * parseInt(_limit, 10);
-  }, [_limit, _page]);
+  const searchToSendForRequest = rawQuery;
+  // const searchToSendForRequest = useMemo(() => {
+  //   const currentSearch = new URLSearchParams(search);
 
-  const searchToSendForRequest = useMemo(() => {
-    const currentSearch = new URLSearchParams(search);
+  //   currentSearch.set('_limit', _limit);
+  //   currentSearch.set('_sort', _sort);
+  //   currentSearch.set('_start', _start);
+  //   currentSearch.delete('_page');
 
-    currentSearch.set('_limit', _limit);
-    currentSearch.set('_sort', _sort);
-    currentSearch.set('_start', _start);
-    currentSearch.delete('_page');
+  //   return currentSearch.toString();
+  // }, [_limit, _sort, _start, search]);
 
-    return currentSearch.toString();
-  }, [_limit, _sort, _start, search]);
-
-  const getDataActionRef = useRef(getData);
+  // const getDataActionRef = useRef(getData);
   const getDataSucceededRef = useRef(getDataSucceeded);
 
   const shouldSendRequest = useMemo(() => {
     return !isLoadingForPermissions && canRead;
   }, [canRead, isLoadingForPermissions]);
 
-  const fetchData = async (search = searchToSendForRequest) => {
+  const fetchData = async () => {
     try {
-      // getDataActionRef.current();
-      // const [{ count }, data] = await Promise.all([
-      //   request(getRequestUrl(`explorer/${slug}/count?${search}`), {
-      //     method: 'GET',
-      //   }),
-      //   request(getRequestUrl(`explorer/${slug}?${search}`), {
-      //     method: 'GET',
-      //   }),
-      // ]);
-
-      // const c = await request(getRequestUrl(`collection-types/${slug}?${search}`));
-      // console.log({ c });
       const data = [
         {
           id: 16,
@@ -231,8 +206,6 @@ function ListView({
   };
 
   useEffect(() => {
-    // TODO
-    console.log('up');
     setLayout(layout);
   }, [layout, setLayout]);
 
@@ -354,23 +327,23 @@ function ListView({
     [displayedHeaders, onChangeListHeaders]
   );
 
-  const handleChangeFilters = ({ target: { value } }) => {
-    const newSearch = new URLSearchParams();
+  // const handleChangeFilters = ({ target: { value } }) => {
+  //   const newSearch = new URLSearchParams();
 
-    // Set the default params
-    newSearch.set('_limit', _limit);
-    newSearch.set('_sort', _sort);
-    newSearch.set('_page', 1);
+  //   // Set the default params
+  //   newSearch.set('_limit', _limit);
+  //   newSearch.set('_sort', _sort);
+  //   newSearch.set('_page', 1);
 
-    value.forEach(({ filter, name, value: filterValue }) => {
-      const filterType = filter === '=' ? '' : filter;
-      const filterName = `${name}${filterType}`;
+  //   value.forEach(({ filter, name, value: filterValue }) => {
+  //     const filterType = filter === '=' ? '' : filter;
+  //     const filterName = `${name}${filterType}`;
 
-      newSearch.append(filterName, filterValue);
-    });
+  //     newSearch.append(filterName, filterValue);
+  //   });
 
-    push({ search: newSearch.toString() });
-  };
+  //   push({ search: newSearch.toString() });
+  // };
 
   const handleChangeSearch = async ({ target: { name, value } }) => {
     const currentSearch = new URLSearchParams(searchToSendForRequest);
@@ -403,7 +376,7 @@ function ListView({
   const handleSubmit = (filters = []) => {
     emitEvent('didFilterEntries');
     toggleFilterPickerState();
-    handleChangeFilters({ target: { name: 'filters', value: filters } });
+    // handleChangeFilters({ target: { name: 'filters', value: filters } });
   };
 
   const toggleFilterPickerState = () => {
@@ -421,7 +394,7 @@ function ListView({
       onClick: () => {
         toggleFilterPickerState();
         // Delete all filters
-        handleChangeFilters({ target: { name: 'filters', value: [] } });
+        // handleChangeFilters({ target: { name: 'filters', value: [] } });
       },
     },
     {
@@ -496,7 +469,9 @@ function ListView({
     <>
       <ListViewProvider
         data={data}
+        // TO remove
         count={count}
+        //
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
         label={label}
@@ -508,8 +483,10 @@ function ListView({
         schema={{}}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
+        // TODO TO REMOVE ?
         _limit={_limit}
         _page={_page}
+        //
         filters={filters}
         _q={_q}
         _sort={_sort}
@@ -526,7 +503,7 @@ function ListView({
         <Container className="container-fluid">
           {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading && canRead} />}
           {isSearchable && canRead && (
-            <Search changeParams={handleChangeSearch} initValue={_q} model={label} value={_q} />
+            <Search changeParams={setQuery} initValue={_q} model={label} value={_q} />
           )}
           {canRead && (
             <Wrapper>
@@ -542,7 +519,7 @@ function ListView({
                         {filters.map((filter, key) => (
                           <Filter
                             {...filter}
-                            changeParams={handleChangeFilters}
+                            // changeParams={handleChangeFilters}
                             filters={filters}
                             index={key}
                             schema={{}}
@@ -580,7 +557,7 @@ function ListView({
                     onChangeParams={handleChangeSearch}
                     showLoader={isLoading}
                   />
-                  <Footer />
+                  <Footer count={count} params={query} onChange={setQuery} />
                 </div>
               </div>
             </Wrapper>

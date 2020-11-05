@@ -18,6 +18,7 @@ const alias = [
   'immutable',
   'invariant',
   'moment',
+  'qs',
   'react',
   'react-copy-to-clipboard',
   'react-dnd',
