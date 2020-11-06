@@ -6,6 +6,7 @@ const boxen = require('boxen');
 const chalk = require('chalk');
 const path = require('path');
 const pkg = require('../../../package');
+const { env } = require('strapi-utils');
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
 const NOTIF_INTERVAL = 1000 * 60 * 60 * 24 * 7; // 1 week
 const boxenOptions = {
@@ -73,6 +74,9 @@ const createUpdateNotifier = strapi => {
 
   return {
     notify({ checkInterval = CHECK_INTERVAL, notifInterval = NOTIF_INTERVAL } = {}) {
+      if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false)) {
+        return;
+      }
       display(notifInterval);
       checkUpdate(checkInterval); // doesn't need to await
     },
