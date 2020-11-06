@@ -14,7 +14,6 @@ import {
 
 import pluginId from '../../pluginId';
 import { formatFiltersToQuery, getTrad } from '../../utils';
-import useListView from '../../hooks/useListView';
 import Container from '../Container';
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
@@ -221,6 +220,7 @@ FilterPicker.defaultProps = {
 
 FilterPicker.propTypes = {
   contentType: PropTypes.object.isRequired,
+  filters: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
   name: PropTypes.string,
   setQuery: PropTypes.func.isRequired,

@@ -24,11 +24,9 @@ import {
   getRequestUrl,
   getTrad,
 } from '../../utils';
-
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
-
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
 import ListViewProvider from '../ListViewProvider';
@@ -47,7 +45,6 @@ import {
   setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
-  //
   setLayout,
   onChangeListHeaders,
   onResetListHeaders,
@@ -60,24 +57,18 @@ import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
 
 function ListView({
   didDeleteData,
-
   entriesToDelete,
-
   onChangeBulk,
   onChangeBulkSelectall,
   onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
-
   setModalLoadingState,
   showWarningDelete,
   showModalConfirmButtonLoading,
   showWarningDeleteAll,
   toggleModalDelete,
   toggleModalDeleteAll,
-
-  // NEW
-  // allAllowedHeaders,
   data,
   displayedHeaders,
   getData,
@@ -101,7 +92,6 @@ function ListView({
         filterable: isFilterable,
         searchable: isSearchable,
         pageSize: defaultPageSize,
-        // mainField,
       },
     },
   } = layout;
@@ -121,7 +111,7 @@ function ListView({
   const [{ query, rawQuery }, setQuery] = useQueryParams(initParams);
 
   const { pathname } = useLocation();
-  const { push } = useHistory;
+  const { push } = useHistory();
   const { formatMessage } = useIntl();
 
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
@@ -134,8 +124,6 @@ function ListView({
     return formatFiltersFromQuery(query);
   }, [query]);
 
-  const _limit = parseInt(query.pageSize, 10);
-  const _page = parseInt(query.page, 10);
   const _sort = query._sort;
   const _q = query._q || '';
 
@@ -144,6 +132,10 @@ function ListView({
   const params = useMemo(() => {
     return rawQuery || `?${stringify(initParams, { encode: false })}`;
   }, [initParams, rawQuery]);
+
+  const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
+    displayedHeaders,
+  ]);
 
   useEffect(() => {
     setLayout(layout);
@@ -157,6 +149,7 @@ function ListView({
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run when the before the permissions are checked
   const requestUrlRef = useRef('');
+
   const fetchData = useCallback(
     async (endPoint, abortSignal = false) => {
       getData();
@@ -176,6 +169,81 @@ function ListView({
     [getData, getDataSucceeded]
   );
 
+  const handleChangeListLabels = useCallback(
+    ({ name, value }) => {
+      // Display a notification if trying to remove the last displayed field
+      if (value && displayedHeaders.length === 1) {
+        strapi.notification.error('content-manager.notification.error.displayedFields');
+      } else {
+        emitEventRef.current('didChangeDisplayedFields');
+
+        onChangeListHeaders({ name, value });
+      }
+    },
+    [displayedHeaders, onChangeListHeaders]
+  );
+
+  const handleConfirmDeleteAllData = useCallback(async () => {
+    try {
+      setModalLoadingState();
+
+      await request(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        method: 'POST',
+        body: { ids: entriesToDelete },
+      });
+
+      onDeleteSeveralDataSucceeded();
+    } catch (err) {
+      strapi.notification.error(`${pluginId}.error.record.delete`);
+    }
+  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
+
+  const handleConfirmDeleteData = useCallback(async () => {
+    try {
+      let trackerProperty = {};
+
+      if (hasDraftAndPublish) {
+        const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
+        const isDraftEntry = isEmpty(dataToDelete.published_at);
+        const status = isDraftEntry ? 'draft' : 'published';
+
+        trackerProperty = { status };
+      }
+
+      emitEventRef.current('willDeleteEntry', trackerProperty);
+      setModalLoadingState();
+
+      await request(getRequestUrl(`collection-types/${slug}/${idToDelete}`), {
+        method: 'DELETE',
+      });
+
+      strapi.notification.success(`${pluginId}.success.record.delete`);
+
+      // Close the modal and refetch data
+      onDeleteDataSucceeded();
+      emitEventRef.current('didDeleteEntry', trackerProperty);
+    } catch (err) {
+      const errorMessage = get(
+        err,
+        'response.payload.message',
+        formatMessage({ id: `${pluginId}.error.record.delete` })
+      );
+
+      strapi.notification.error(errorMessage);
+      // Close the modal
+      onDeleteDataError();
+    }
+  }, [
+    hasDraftAndPublish,
+    setModalLoadingState,
+    slug,
+    idToDelete,
+    onDeleteDataSucceeded,
+    data,
+    formatMessage,
+    onDeleteDataError,
+  ]);
+
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -193,81 +261,6 @@ function ListView({
     };
   }, [isLoadingForPermissions, canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
-  const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
-    displayedHeaders,
-  ]);
-
-  const handleConfirmDeleteData = useCallback(async () => {
-    try {
-      let trackerProperty = {};
-
-      if (hasDraftAndPublish) {
-        const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
-        const isDraftEntry = isEmpty(dataToDelete.published_at);
-        const status = isDraftEntry ? 'draft' : 'published';
-
-        trackerProperty = { status };
-      }
-
-      emitEvent('willDeleteEntry', trackerProperty);
-      setModalLoadingState();
-
-      await request(getRequestUrl(`explorer/${slug}/${idToDelete}`), {
-        method: 'DELETE',
-      });
-
-      strapi.notification.success(`${pluginId}.success.record.delete`);
-
-      // Close the modal and refetch data
-      onDeleteDataSucceeded();
-      emitEvent('didDeleteEntry', trackerProperty);
-    } catch (err) {
-      const errorMessage = get(
-        err,
-        'response.payload.message',
-        formatMessage({ id: `${pluginId}.error.record.delete` })
-      );
-
-      strapi.notification.error(errorMessage);
-      // Close the modal
-      onDeleteDataError();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setModalLoadingState, slug, idToDelete, onDeleteDataSucceeded, hasDraftAndPublish, data]);
-
-  const handleConfirmDeleteAllData = useCallback(async () => {
-    const params = Object.assign(entriesToDelete);
-
-    try {
-      setModalLoadingState();
-
-      await request(getRequestUrl(`explorer/deleteAll/${slug}`), {
-        method: 'DELETE',
-        params,
-      });
-
-      onDeleteSeveralDataSucceeded();
-    } catch (err) {
-      strapi.notification.error(`${pluginId}.error.record.delete`);
-    }
-  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
-
-  const handleChangeListLabels = useCallback(
-    ({ name, value }) => {
-      // Display a notification if trying to remove the last displayed field
-      if (value && displayedHeaders.length === 1) {
-        strapi.notification.error('content-manager.notification.error.displayedFields');
-
-        return false;
-      }
-
-      emitEventRef.current('didChangeDisplayedFields');
-
-      onChangeListHeaders({ name, value });
-    },
-    [displayedHeaders, onChangeListHeaders]
-  );
-
   const handleClickDelete = id => {
     setIdToDelete(id);
     toggleModalDelete();
@@ -275,9 +268,11 @@ function ListView({
 
   const handleModalClose = useCallback(() => {
     if (didDeleteData) {
-      fetchData();
+      const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
+
+      fetchData(requestUrl);
     }
-  }, [fetchData, didDeleteData]);
+  }, [fetchData, didDeleteData, slug, params]);
 
   const toggleFilterPickerState = useCallback(() => {
     setFilterPickerState(prevState => {
@@ -348,29 +343,18 @@ function ListView({
   return (
     <>
       <ListViewProvider
+        _q={_q}
+        _sort={_sort}
         data={data}
-        // TO remove
-        count={total}
-        //
         entriesToDelete={entriesToDelete}
-        emitEvent={emitEvent}
+        filters={filters}
+        firstSortableHeader={firstSortableHeader}
         label={label}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onClickDelete={handleClickDelete}
-        // schema={listSchema}
-        schema={{}}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
-        // TODO TO REMOVE ?
-        _limit={_limit}
-        _page={_page}
-        //
-        filters={filters}
-        _q={_q}
-        _sort={_sort}
-        // to keep
-        firstSortableHeader={firstSortableHeader}
         setQuery={setQuery}
       >
         <FilterPicker
@@ -420,7 +404,6 @@ function ListView({
                     <DisplayedFieldsDropdown
                       displayedHeaders={displayedHeaders}
                       items={allAllowedHeaders}
-                      // items={allAllowedHeaders}
                       onChange={handleChangeListLabels}
                       onClickReset={onResetListHeaders}
                       slug={slug}
@@ -437,7 +420,6 @@ function ListView({
                     displayedHeaders={displayedHeaders}
                     hasDraftAndPublish={hasDraftAndPublish}
                     isBulkable={isBulkable}
-                    // onChangeParams={handleChangeSearch}
                     setQuery={setQuery}
                     showLoader={isLoading}
                   />
@@ -477,13 +459,12 @@ function ListView({
     </>
   );
 }
-ListView.defaultProps = {
-  // layouts: {},
-};
 
 ListView.propTypes = {
-  // allAllowedHeaders: PropTypes.array.isRequired,
   displayedHeaders: PropTypes.array.isRequired,
+  data: PropTypes.array.isRequired,
+  didDeleteData: PropTypes.bool.isRequired,
+  entriesToDelete: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
@@ -496,39 +477,25 @@ ListView.propTypes = {
       settings: PropTypes.object.isRequired,
     }).isRequired,
   }).isRequired,
-  // count: PropTypes.number.isRequired,
-  data: PropTypes.array.isRequired,
-  // didDeleteData: PropTypes.bool.isRequired,
-  // // emitEvent: PropTypes.func.isRequired,
-  // entriesToDelete: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  // layouts: PropTypes.object,
-  // location: PropTypes.shape({
-  //   pathname: PropTypes.string.isRequired,
-  //   search: PropTypes.string.isRequired,
-  // }).isRequired,
-  // // models: PropTypes.array.isRequired,
   getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
-  // history: PropTypes.shape({
-  //   push: PropTypes.func.isRequired,
-  // }).isRequired,
-  // onChangeBulk: PropTypes.func.isRequired,
-  // onChangeBulkSelectall: PropTypes.func.isRequired,
+  onChangeBulk: PropTypes.func.isRequired,
+  onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListHeaders: PropTypes.func.isRequired,
-  // onDeleteDataError: PropTypes.func.isRequired,
-  // onDeleteDataSucceeded: PropTypes.func.isRequired,
-  // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
+  onDeleteDataError: PropTypes.func.isRequired,
+  onDeleteDataSucceeded: PropTypes.func.isRequired,
+  onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
   resetProps: PropTypes.func.isRequired,
-  // setModalLoadingState: PropTypes.func.isRequired,
-  // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
-  // showWarningDelete: PropTypes.bool.isRequired,
-  // showWarningDeleteAll: PropTypes.bool.isRequired,
+  setModalLoadingState: PropTypes.func.isRequired,
+  showModalConfirmButtonLoading: PropTypes.bool.isRequired,
+  showWarningDelete: PropTypes.bool.isRequired,
+  showWarningDeleteAll: PropTypes.bool.isRequired,
   slug: PropTypes.string.isRequired,
-  // toggleModalDelete: PropTypes.func.isRequired,
-  // toggleModalDeleteAll: PropTypes.func.isRequired,
+  toggleModalDelete: PropTypes.func.isRequired,
+  toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
 };
 

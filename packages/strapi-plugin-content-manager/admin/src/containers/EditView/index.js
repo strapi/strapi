@@ -19,7 +19,6 @@ import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
 import { ContentTypeLayoutContext } from '../../contexts';
-import { useFetchContentTypeLayout } from '../../hooks';
 import { generatePermissionsObject, getInjectedComponents } from '../../utils';
 import CollectionTypeWrapper from '../CollectionTypeWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
@@ -31,9 +30,8 @@ import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
-  // TODO
-  const { isLoading, layout } = useFetchContentTypeLayout(slug);
+const EditView = ({ currentEnvironment, isSingleType, layout, plugins, slug }) => {
+  console.log({ layout });
   const { goBack } = useHistory();
   const { pathname, state } = useLocation();
   // Permissions
@@ -85,13 +83,9 @@ const EditView = ({ currentEnvironment, isSingleType, plugins, slug }) => {
 
     return createAttributesLayout(
       currentContentTypeLayoutData.layouts.edit,
-      currentContentTypeLayoutData.schema.attributes
+      currentContentTypeLayoutData.attributes
     );
   }, [currentContentTypeLayoutData]);
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
 
   if (isLoadingForPermissions) {
     return <LoadingIndicatorPage />;
@@ -288,6 +282,16 @@ EditView.defaultProps = {
 
 EditView.propTypes = {
   currentEnvironment: PropTypes.string,
+  layout: PropTypes.shape({
+    components: PropTypes.object.isRequired,
+    contentType: PropTypes.shape({
+      uid: PropTypes.string.isRequired,
+      settings: PropTypes.object.isRequired,
+      metadatas: PropTypes.object.isRequired,
+      options: PropTypes.object.isRequired,
+      attributes: PropTypes.object.isRequired,
+    }).isRequired,
+  }).isRequired,
   isSingleType: PropTypes.bool,
   plugins: PropTypes.object,
   slug: PropTypes.string.isRequired,

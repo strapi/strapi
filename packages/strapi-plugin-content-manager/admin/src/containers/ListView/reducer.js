@@ -46,13 +46,12 @@ const listViewReducer = (state = initialState, action) =>
   produce(state, drafState => {
     switch (action.type) {
       case GET_DATA: {
-        drafState = {
+        return {
           ...initialState,
           contentType: state.contentType,
           initialDisplayedHeaders: state.initialDisplayedHeaders,
           displayedHeaders: state.displayedHeaders,
         };
-        break;
       }
 
       case GET_DATA_SUCCEEDED: {
