@@ -1,7 +1,4 @@
 'use strict';
-
-// required first because it loads env files.
-
 const { green } = require('chalk');
 
 // eslint-disable-next-line node/no-extraneous-require

@@ -250,8 +250,6 @@ describe('Core API - Basic + dz', () => {
         body: product,
       });
 
-      console.log(res.body.data);
-
       expect(res.statusCode).toBe(400);
       expect(_.get(res.body.data, ['errors', 'dz[0].__component', '0'])).toBe(
         'dz[0].__component is a required field'

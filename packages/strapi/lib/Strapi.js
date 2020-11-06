@@ -1,7 +1,5 @@
 'use strict';
 
-// required first because it loads env files.
-
 const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');

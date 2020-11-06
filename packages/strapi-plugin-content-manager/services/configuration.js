@@ -60,7 +60,7 @@ module.exports = ({ isComponent, prefix, storeUtils, getModels }) => {
     const contentTypesToAdd = difference(currentUIDS, DBUIDs);
     const contentTypesToDelete = difference(DBUIDs, currentUIDS);
 
-    // delette old schemas
+    // delete old schemas
     await Promise.all(contentTypesToDelete.map(uid => deleteConfiguration(uid)));
 
     // create new schemas

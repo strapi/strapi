@@ -168,24 +168,6 @@ const createFixtures = async () => {
   }
 };
 
-const deleteFixtures = async () => {
-  for (const [name, modelName] of [
-    ['countries', 'country'],
-    ['categories', 'category'],
-    ['products', 'product'],
-  ]) {
-    const uid = `application::${modelName}.${modelName}`;
-
-    await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/${uid}/actions/bulkDelete`,
-      body: {
-        ids: data.api[name].map(({ id }) => id),
-      },
-    });
-  }
-};
-
 describe('Publication State', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -201,8 +183,6 @@ describe('Publication State', () => {
   }, 60000);
 
   afterAll(async () => {
-    await deleteFixtures();
-
     await modelsUtils.cleanupContentTypes(['product', 'category', 'country']);
     await modelsUtils.deleteComponent('comp');
     await modelsUtils.deleteContentTypes(['product', 'category', 'country']);

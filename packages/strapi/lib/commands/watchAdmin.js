@@ -1,7 +1,5 @@
 'use strict';
 
-// required first because it loads env files.
-
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
 const { getConfigUrls, getAbsoluteServerUrl } = require('strapi-utils');

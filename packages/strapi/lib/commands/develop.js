@@ -1,7 +1,5 @@
 'use strict';
 
-// required first because it loads env files.
-
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');

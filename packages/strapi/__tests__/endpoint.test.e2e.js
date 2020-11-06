@@ -18,26 +18,6 @@ let data;
 let rq;
 let modelsUtils;
 
-const deleteFixtures = async () => {
-  for (const [name, modelName] of [
-    ['references', 'reference'],
-    ['tags', 'tag'],
-    ['products', 'product'],
-    ['categories', 'category'],
-    ['articles', 'article'],
-  ]) {
-    const uid = `application::${modelName}.${modelName}`;
-
-    await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/${uid}/actions/bulkDelete`,
-      body: {
-        ids: (data[name] || []).map(({ id }) => id),
-      },
-    });
-  }
-};
-
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -52,9 +32,12 @@ describe('Create Strapi API End to End', () => {
       form.reference,
       form.product,
     ]);
+
+    await modelsUtils.cleanupContentTypes(['article', 'tag', 'category', 'reference', 'product']);
   }, 60000);
 
   afterAll(async () => {
+    await modelsUtils.cleanupContentTypes(['article', 'tag', 'category', 'reference', 'product']);
     await modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'product']);
   }, 60000);
 
@@ -67,7 +50,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await deleteFixtures();
+      await modelsUtils.cleanupContentTypes(['article', 'tag']);
     });
 
     test('Create tag1', async () => {
@@ -260,7 +243,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await deleteFixtures();
+      await modelsUtils.cleanupContentTypes(['article', 'category']);
     });
 
     test('Create cat1', async () => {
@@ -483,7 +466,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await deleteFixtures();
+      await modelsUtils.cleanupContentTypes(['article', 'reference']);
     });
 
     test('Create ref1', async () => {
@@ -572,7 +555,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await deleteFixtures();
+      await modelsUtils.cleanupContentTypes(['reference', 'tag']);
     });
 
     test('Attach Tag to a Reference', async () => {

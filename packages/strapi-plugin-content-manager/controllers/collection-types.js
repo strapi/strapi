@@ -8,6 +8,7 @@ const {
   setCreatorFields,
   pickWritableAttributes,
 } = require('../utils');
+const { validateBulkDeleteInput } = require('./validation');
 
 module.exports = {
   async find(ctx) {
@@ -203,6 +204,8 @@ module.exports = {
     const { query, body } = ctx.request;
     const { ids } = body;
 
+    await validateBulkDeleteInput(body);
+
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -214,7 +217,6 @@ module.exports = {
 
     const idsWhereClause = { [`id_in`]: ids };
     const params = {
-      _limit: 100,
       ...permissionQuery,
       _where: [idsWhereClause].concat(permissionQuery._where || {}),
     };

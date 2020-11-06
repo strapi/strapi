@@ -122,16 +122,21 @@ module.exports = ({ rq }) => {
 
   async function cleanupContentType(model) {
     const { body } = await rq({
-      url: `/content-manager/collections-types/application::${model}.${model}`,
+      url: `/content-manager/collection-types/application::${model}.${model}`,
+      qs: {
+        pageSize: 1000,
+      },
       method: 'GET',
     });
 
-    if (Array.isArray(body) && body.length > 0) {
+    console.log(body);
+
+    if (Array.isArray(body.results) && body.results.length > 0) {
       await rq({
         url: `/content-manager/collection-types/application::${model}.${model}/actions/bulkDelete`,
         method: 'POST',
         body: {
-          ids: body.map(({ id }) => id),
+          ids: body.results.map(({ id }) => id),
         },
       });
     }

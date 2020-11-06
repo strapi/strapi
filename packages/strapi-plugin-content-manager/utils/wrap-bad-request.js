@@ -1,8 +1,8 @@
 'use strict';
 
-module.exports = fn => async () => {
+module.exports = fn => async (...args) => {
   try {
-    await fn();
+    await fn(...args);
   } catch (error) {
     if (strapi.errors.isBoom(error)) {
       throw error;
