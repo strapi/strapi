@@ -40,8 +40,6 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
 
-  console.log({ reducerState: reducerState.toJS() });
-
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
   const hasDraftAndPublish = useMemo(() => {

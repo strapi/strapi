@@ -36,7 +36,6 @@ function Filter({
       .format(format);
   }
 
-  console.log({ name });
   const label = {
     name,
     filter: filterName,

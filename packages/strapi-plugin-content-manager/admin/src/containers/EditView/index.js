@@ -31,7 +31,6 @@ import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({ currentEnvironment, isSingleType, layout, plugins, slug }) => {
-  console.log({ layout });
   const { goBack } = useHistory();
   const { pathname, state } = useLocation();
   // Permissions

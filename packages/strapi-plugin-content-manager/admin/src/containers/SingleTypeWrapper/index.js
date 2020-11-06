@@ -183,7 +183,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/publish/${id}`);
+      const endPoint = getRequestUrl(`${slug}/actions/publish`);
 
       dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
 
@@ -198,11 +198,11 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       displayErrors(err);
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
     }
-  }, [cleanReceivedData, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, slug]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}/${id}`);
+      const endPoint = getRequestUrl(`${slug}`);
 
       try {
         emitEventRef.current('willEditEntry', trackerProperty);
@@ -222,12 +222,12 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [cleanReceivedData, id, displayErrors, slug]
+    [cleanReceivedData, displayErrors, slug]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
+    const endPoint = getRequestUrl(`${slug}/actions/unpublish`);
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
 
     try {
@@ -244,7 +244,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, slug]);
 
   return children({
     componentsDataStructure,

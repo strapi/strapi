@@ -201,7 +201,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/publish/${id}`);
+      const endPoint = getRequestUrl(`${slug}/${id}/actions/publish`);
 
       dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
 
@@ -244,7 +244,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   );
 
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
+    const endPoint = getRequestUrl(`${slug}/${id}/actions/unpublish`);
 
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
 
