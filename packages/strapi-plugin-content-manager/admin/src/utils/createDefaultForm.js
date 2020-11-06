@@ -18,11 +18,7 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
     }
 
     if (type === 'component') {
-      const currentComponentSchema = get(
-        allComponentsSchema,
-        [component, 'schema', 'attributes'],
-        {}
-      );
+      const currentComponentSchema = get(allComponentsSchema, [component, 'attributes'], {});
       const currentComponentDefaultForm = createDefaultForm(
         currentComponentSchema,
         allComponentsSchema

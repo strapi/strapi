@@ -1,53 +1,47 @@
 const testData = {
   contentType: {
     apiID: 'test',
-    schema: {
-      attributes: {
-        created_at: { type: 'timestamp' },
-        dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
-        id: { type: 'integer' },
-        name: { type: 'string' },
-        notrepeatable: {
-          type: 'component',
-          repeatable: false,
-          component: 'compos.test-compo',
-        },
-        password: { type: 'password' },
-        repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
-        updated_at: { type: 'timestamp' },
+    attributes: {
+      created_at: { type: 'timestamp' },
+      dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
+      id: { type: 'integer' },
+      name: { type: 'string' },
+      notrepeatable: {
+        type: 'component',
+        repeatable: false,
+        component: 'compos.test-compo',
       },
+      password: { type: 'password' },
+      repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
+      updated_at: { type: 'timestamp' },
     },
   },
   components: {
     'compos.sub-compo': {
       uid: 'compos.sub-compo',
       category: 'compos',
-      schema: {
-        attributes: {
-          id: { type: 'integer' },
-          name: { type: 'string' },
-          password: { type: 'password' },
-        },
+      attributes: {
+        id: { type: 'integer' },
+        name: { type: 'string' },
+        password: { type: 'password' },
       },
     },
     'compos.test-compo': {
       uid: 'compos.test-compo',
       category: 'compos',
-      schema: {
-        attributes: {
-          id: { type: 'integer' },
-          name: { type: 'string' },
-          password: { type: 'password' },
-          subcomponotrepeatable: {
-            type: 'component',
-            repeatable: false,
-            component: 'compos.sub-compo',
-          },
-          subrepeatable: {
-            type: 'component',
-            repeatable: true,
-            component: 'compos.sub-compo',
-          },
+      attributes: {
+        id: { type: 'integer' },
+        name: { type: 'string' },
+        password: { type: 'password' },
+        subcomponotrepeatable: {
+          type: 'component',
+          repeatable: false,
+          component: 'compos.sub-compo',
+        },
+        subrepeatable: {
+          type: 'component',
+          repeatable: true,
+          component: 'compos.sub-compo',
         },
       },
     },

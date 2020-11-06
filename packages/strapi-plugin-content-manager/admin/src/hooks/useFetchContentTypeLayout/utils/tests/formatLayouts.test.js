@@ -3,27 +3,57 @@ import formatLayouts, { formatLayoutWithMetas } from '../formatLayouts';
 describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLayoutWithMetas', () => {
   describe('formatLayouts', () => {
     it('should format the content type and components layouts', () => {
+      const models = [
+        {
+          uid: 'compo',
+
+          attributes: {
+            full_name: {
+              type: 'string',
+              required: true,
+            },
+
+            city: {
+              type: 'string',
+              maxLength: 100,
+            },
+
+            compo: {
+              type: 'component',
+              repeatable: true,
+            },
+          },
+
+          settings: { test: 'test' },
+          options: { timestamps: false },
+        },
+        {
+          attributes: {
+            full_name: {
+              type: 'string',
+              required: true,
+            },
+
+            city: {
+              type: 'string',
+              maxLength: 100,
+            },
+            dz: {
+              type: 'dynamiczone',
+            },
+            compo: {
+              type: 'component',
+              repeatable: true,
+            },
+          },
+          uid: 'contentType',
+        },
+      ];
       const data = {
         components: {
           compo: {
-            schema: {
-              attributes: {
-                full_name: {
-                  type: 'string',
-                  required: true,
-                },
+            uid: 'compo',
 
-                city: {
-                  type: 'string',
-                  maxLength: 100,
-                },
-
-                compo: {
-                  type: 'component',
-                  repeatable: true,
-                },
-              },
-            },
             layouts: {
               edit: [
                 [
@@ -52,15 +82,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
                   visible: true,
                 },
               },
-              dz: {
-                edit: {
-                  description: '',
-                  editable: true,
-                  label: 'Dz',
-                  placeholder: '',
-                  visible: true,
-                },
-              },
               compo: {
                 edit: {
                   description: '',
@@ -74,27 +95,9 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
           },
         },
         contentType: {
-          schema: {
-            attributes: {
-              full_name: {
-                type: 'string',
-                required: true,
-              },
-
-              city: {
-                type: 'string',
-                maxLength: 100,
-              },
-              dz: {
-                type: 'dynamiczone',
-              },
-              compo: {
-                type: 'component',
-                repeatable: true,
-              },
-            },
-          },
+          uid: 'contentType',
           layouts: {
+            list: [],
             editRelations: [],
             edit: [
               [{ name: 'dz', size: 12 }],
@@ -146,12 +149,12 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
         },
       };
 
-      const result = formatLayouts(data);
+      const result = formatLayouts(data, models);
 
-      expect(result.components.compo).toHaveProperty('schema');
+      expect(result.components.compo).toHaveProperty('attributes');
       expect(result.components.compo).toHaveProperty('layouts');
       expect(result.components.compo).toHaveProperty('metadatas');
-      expect(result.contentType).toHaveProperty('schema');
+      expect(result.contentType).toHaveProperty('attributes');
       expect(result.contentType).toHaveProperty('layouts');
       expect(result.contentType).toHaveProperty('metadatas');
 
@@ -279,24 +282,22 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
   describe('formatLayoutWithMetas', () => {
     it('should return a layout with the metadas for each input', () => {
       const data = {
-        schema: {
-          attributes: {
-            full_name: {
-              type: 'string',
-              required: true,
-            },
+        attributes: {
+          full_name: {
+            type: 'string',
+            required: true,
+          },
 
-            city: {
-              type: 'string',
-              maxLength: 100,
-            },
-            dz: {
-              type: 'dynamiczone',
-            },
-            compo: {
-              type: 'component',
-              repeatable: true,
-            },
+          city: {
+            type: 'string',
+            maxLength: 100,
+          },
+          dz: {
+            type: 'dynamiczone',
+          },
+          compo: {
+            type: 'component',
+            repeatable: true,
           },
         },
         layouts: {

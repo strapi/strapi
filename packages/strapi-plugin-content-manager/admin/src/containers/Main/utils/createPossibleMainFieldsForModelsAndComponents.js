@@ -4,7 +4,7 @@ import { get } from 'lodash';
 
 const createPossibleMainFieldsForModelsAndComponents = array => {
   return array.reduce((acc, current) => {
-    const attributes = get(current, ['schema', 'attributes'], {});
+    const attributes = get(current, ['attributes'], {});
     const possibleMainFields = Object.keys(attributes).filter(attr => {
       return ![
         'boolean',

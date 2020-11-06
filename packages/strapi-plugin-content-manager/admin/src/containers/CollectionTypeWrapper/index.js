@@ -81,6 +81,14 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     });
   }, [allLayoutData]);
 
+  const shouldFetch = useRef(true);
+
+  // useEffect(() => {
+  //   return () => {
+
+  //   };
+  // }, [slug]);
+
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -114,7 +122,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       }
     };
 
-    if (fetchURL) {
+    if (fetchURL && shouldFetch.current) {
       getData(signal);
     } else {
       dispatch({ type: 'INIT_FORM' });
@@ -122,6 +130,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
     return () => {
       abortController.abort();
+      shouldFetch.current = false;
     };
   }, [fetchURL, push, from, cleanReceivedData]);
 
@@ -169,19 +178,14 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, [from, replace]);
 
   const onPost = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(slug);
 
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'POST', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'POST', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
@@ -222,7 +226,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, [cleanReceivedData, displayErrors, id, slug]);
 
   const onPut = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(`${slug}/${id}`);
 
       try {
@@ -230,12 +234,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'PUT', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
 

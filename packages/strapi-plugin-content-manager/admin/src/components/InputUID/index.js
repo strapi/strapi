@@ -58,7 +58,7 @@ const InputUID = ({
   const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
-  const createdAtName = get(layout, ['schema', 'options', 'timestamps', 0]);
+  const createdAtName = get(layout, ['options', 'timestamps', 0]);
   const isCreation = !initialData[createdAtName];
 
   generateUid.current = async (shouldSetInitialValue = false) => {

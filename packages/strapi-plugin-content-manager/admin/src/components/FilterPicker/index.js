@@ -134,7 +134,6 @@ function FilterPicker({
   // Set the filters when the collapse is opening
   const handleEntering = () => {
     const currentFilters = filters;
-    /* eslint-disable indent */
     const initialFilters = currentFilters.length ? currentFilters : [initialFilter];
 
     dispatch({

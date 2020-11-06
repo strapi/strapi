@@ -31,12 +31,15 @@ const formatLayoutWithMetas = (obj, ctUid, models) => {
   return formatted;
 };
 
+const getDisplayedModels = models =>
+  models.filter(model => model.isDisplayed).map(({ uid }) => uid);
+
 const generateRelationQueryInfos = (obj, fieldName, models) => {
   const uid = obj.uid;
-  const endPoint = `/${pluginId}/explorer/${uid}/relation-list/${fieldName}`;
+  const endPoint = `/${pluginId}/relations/${uid}/${fieldName}`;
   const mainField = get(obj, ['metadatas', fieldName, 'edit', 'mainField'], '');
   const targetModel = get(obj, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = models.indexOf(targetModel) !== -1;
+  const shouldDisplayRelationLink = getDisplayedModels(models).indexOf(targetModel) !== -1;
 
   const queryInfos = {
     endPoint,
@@ -49,10 +52,10 @@ const generateRelationQueryInfos = (obj, fieldName, models) => {
 };
 
 const generateRelationQueryInfosForComponents = (obj, fieldName, ctUid, models) => {
-  const endPoint = `/${pluginId}/explorer/${ctUid}/relation-list/${fieldName}`;
+  const endPoint = `/${pluginId}/relations/${ctUid}/${fieldName}`;
   const mainField = get(obj, ['metadatas', fieldName, 'edit', 'mainField'], '');
   const targetModel = get(obj, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = models.indexOf(targetModel) !== -1;
+  const shouldDisplayRelationLink = getDisplayedModels(models).indexOf(targetModel) !== -1;
 
   const queryInfos = {
     endPoint,

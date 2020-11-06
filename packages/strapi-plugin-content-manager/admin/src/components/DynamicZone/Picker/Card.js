@@ -8,9 +8,7 @@ const Card = ({ componentUid, onClick }) => {
   const { getComponentLayout } = useContentTypeLayout();
   const { name, icon } = useMemo(() => {
     const {
-      schema: {
-        info: { icon, name },
-      },
+      info: { icon, name },
     } = getComponentLayout(componentUid);
 
     return { icon, name };

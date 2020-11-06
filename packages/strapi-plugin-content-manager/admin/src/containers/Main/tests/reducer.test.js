@@ -1,10 +1,5 @@
-import { fromJS } from 'immutable';
-import {
-  deleteLayout,
-  deleteLayouts,
-  resetListLabels,
-  onChangeListLabels,
-} from '../actions';
+import produce from 'immer';
+import { getData, getDataSucceeded, resetProps } from '../actions';
 import mainReducer from '../reducer';
 
 describe('Content Manager | Main | reducer', () => {
@@ -12,161 +7,44 @@ describe('Content Manager | Main | reducer', () => {
 
   beforeEach(() => {
     state = {
-      componentsAndModelsMainPossibleMainFields: {},
+      // componentsAndModelsMainPossibleMainFields: {},
       components: [],
-      initialLayouts: {
-        test: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['test'],
-            },
-          },
-        },
-        otherTest: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['otherTest'],
-            },
-          },
-        },
-      },
       isLoading: true,
-      layouts: {
-        test: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['test'],
-            },
-          },
-        },
-        otherTest: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['otherTest'],
-            },
-          },
-        },
-      },
       models: [],
     };
   });
 
-  it('should handle the deleteLayout action correctly', () => {
-    const expected = {
-      ...state,
-      layouts: {
-        test: {
-          contentType: {
-            layouts: { edit: [], editRelations: [], list: ['test'] },
-          },
-        },
-      },
-    };
-
-    expect(
-      mainReducer(fromJS(state), deleteLayout('otherTest')).toJS()
-    ).toEqual(expected);
+  it('should handle the default action correctly', () => {
+    expect(mainReducer(state, {})).toEqual(state);
   });
 
-  it('should handle the deleteLayouts action correctly', () => {
-    const expected = { ...state, layouts: {} };
-    expect(mainReducer(fromJS(state), deleteLayouts()).toJS()).toEqual(
-      expected
-    );
+  it('should handle the getData action correctly', () => {
+    state.isLoading = false;
+
+    const expected = produce(state, draft => {
+      draft.isLoading = true;
+    });
+
+    expect(mainReducer(state, getData())).toEqual(expected);
   });
 
-  it('should handle the resetListLabels action correctly', () => {
-    state.layouts.test.contentType.layouts.list.push('label');
+  it('should handle the getData action correctly', () => {
+    const expected = produce(state, draft => {
+      draft.isLoading = false;
+      draft.components = ['test'];
+      draft.models = ['test'];
+    });
 
-    const expected = {
-      ...state,
-      layouts: {
-        test: {
-          contentType: {
-            layouts: { edit: [], editRelations: [], list: ['test'] },
-          },
-        },
-        otherTest: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['otherTest'],
-            },
-          },
-        },
-      },
-    };
-
-    expect(mainReducer(fromJS(state), resetListLabels('test')).toJS()).toEqual(
-      expected
-    );
+    expect(mainReducer(state, getDataSucceeded(['test'], ['test']))).toEqual(expected);
   });
 
-  it('should handle the onChangeListLabels action correctly when adding a new label', () => {
-    const expected = {
-      ...state,
-      layouts: {
-        ...state.layouts,
-        otherTest: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['otherTest', 'foo'],
-            },
-          },
-        },
-      },
-    };
+  it('should handle the resetProps action correctly', () => {
+    state = 'test';
 
-    expect(
-      mainReducer(
-        fromJS(state),
-        onChangeListLabels({
-          target: { name: 'foo', slug: 'otherTest', value: true },
-        })
-      ).toJS()
-    ).toEqual(expected);
-  });
-
-  it('should handle the onChangeListLabels action correctly when removing a label', () => {
-    state.layouts.otherTest.contentType.layouts.list = ['otherTest', 'foo'];
-    const expected = {
-      ...state,
-      layouts: {
-        ...state.layouts,
-        otherTest: {
-          contentType: {
-            layouts: {
-              edit: [],
-              editRelations: [],
-              list: ['foo'],
-            },
-          },
-        },
-      },
-    };
-
-    expect(
-      mainReducer(
-        fromJS(state),
-        onChangeListLabels({
-          target: {
-            name: 'otherTest',
-            slug: 'otherTest',
-            value: false,
-          },
-        })
-      ).toJS()
-    ).toEqual(expected);
+    expect(mainReducer(state, resetProps())).toEqual({
+      components: [],
+      models: [],
+      isLoading: true,
+    });
   });
 });

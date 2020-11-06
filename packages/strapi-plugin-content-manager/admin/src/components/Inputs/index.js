@@ -79,7 +79,7 @@ function Inputs({
   const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
 
   const isChildOfDynamicZone = useMemo(() => {
-    const attributes = get(currentContentTypeLayout, ['schema', 'attributes'], {});
+    const attributes = get(currentContentTypeLayout, ['attributes'], {});
     const foundAttributeType = get(attributes, [fieldName[0], 'type'], null);
 
     return foundAttributeType === 'dynamiczone';

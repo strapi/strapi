@@ -43,7 +43,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       const defaultComponentForm = createDefaultForm(
-        get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
+        get(allLayoutData, ['components', current, 'attributes'], {}),
         allLayoutData.components
       );
 
@@ -57,7 +57,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     }, {});
 
     const contentTypeDataStructure = createDefaultForm(
-      allLayoutData.contentType.schema.attributes,
+      allLayoutData.contentType.attributes,
       allLayoutData.components
     );
 

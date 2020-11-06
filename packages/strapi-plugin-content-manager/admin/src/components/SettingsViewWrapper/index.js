@@ -36,7 +36,7 @@ const SettingsViewWrapper = ({
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
   const attributes = useMemo(() => {
-    return get(modifiedData, ['schema', 'attributes'], {});
+    return get(modifiedData, ['attributes'], {});
   }, [modifiedData]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);

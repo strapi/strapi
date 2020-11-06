@@ -29,8 +29,7 @@ const mainReducer = (state = initialState, action) =>
         break;
       }
       case RESET_PROPS: {
-        draftState = initialState;
-        break;
+        return initialState;
       }
       default:
         return draftState;
