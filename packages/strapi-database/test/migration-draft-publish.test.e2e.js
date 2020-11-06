@@ -34,24 +34,29 @@ const dogs = [
   },
 ];
 
+const sortDogs = dogs => _.sortBy(dogs, 'name');
+
 describe('Migration - draft and publish', () => {
   describe.each([
     ['without table modifications', {}, {}],
     ['with table modifications', { town: { type: 'string' } }, { color: { type: 'string' } }],
   ])('%p', (testName, tableModification1, tableModification2) => {
     beforeAll(async () => {
+      data.dogs = [];
       const token = await registerAndLogin();
       rq = createAuthRequest(token);
       modelsUtils = createModelsUtils({ rq });
       await modelsUtils.createContentTypes([dogModel]);
+      const createdDogs = [];
       for (const dog of dogs) {
         const res = await rq({
           method: 'POST',
           url: '/content-manager/explorer/application::dog.dog',
           body: dog,
         });
-        data.dogs.push(res.body);
+        createdDogs.push(res.body);
       }
+      data.dogs = sortDogs(createdDogs);
     }, 60000);
 
     afterAll(async () => {
@@ -70,10 +75,11 @@ describe('Migration - draft and publish', () => {
           method: 'GET',
         });
         expect(body.length).toBe(2);
-        const expectDog = expectDog => dog =>
-          dog.name === expectDog.name && _.isUndefined(dog.published_at);
-        expect(body.find(expectDog(data.dogs[0])));
-        expect(body.find(expectDog(data.dogs[1])));
+        const sortedBody = sortDogs(body);
+        sortedBody.forEach((dog, index) => {
+          expect(dog).toMatchObject(data.dogs[index]);
+          expect(dog.published_at).toBeUndefined();
+        });
       });
 
       test('Published_at is equal to created_at after enabling the feature', async () => {
@@ -88,14 +94,15 @@ describe('Migration - draft and publish', () => {
           url: '/content-manager/explorer/application::dog.dog',
           method: 'GET',
         });
+
         expect(body.length).toBe(2);
-        const expectDog = expectDog => dog =>
-          dog.name === expectDog.name &&
-          dog.published_at === (dog.createdAt || dog.created_at) &&
-          !isNaN(new Date(dog.published_at).valueOf());
-        expect(body.find(expectDog(data.dogs[0])));
-        expect(body.find(expectDog(data.dogs[1])));
-        data.dogs = body;
+        const sortedBody = sortDogs(body);
+        sortedBody.forEach((dog, index) => {
+          expect(dog).toMatchObject(data.dogs[index]);
+          expect(dog.published_at).toBe(dog.createdAt || dog.created_at);
+          expect(!isNaN(new Date(dog.published_at).valueOf())).toBe(true);
+        });
+        data.dogs = sortedBody;
       });
     });
 
@@ -113,7 +120,7 @@ describe('Migration - draft and publish', () => {
           draftAndPublish: false,
           attributes: _.merge(schema.attributes, tableModification2),
         });
-        // drafts should have been deleted with the migration, so we removed
+        // drafts should have been deleted with the migration, so we remove them
         data.dogs = data.dogs.filter(dog => !_.isNil(dog.published_at));
 
         let { body } = await rq({
