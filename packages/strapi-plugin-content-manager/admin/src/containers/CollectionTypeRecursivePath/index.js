@@ -1,4 +1,4 @@
-import React, { memo, useEffect, Suspense, lazy } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
@@ -6,11 +6,6 @@ import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import EditView from '../EditView';
 import ListView from '../ListView';
-
-// const EditView = lazy(() => import('../EditView'));
-// const EditSettingsView = lazy(() => import('../EditSettingsView'));
-// const ListView = lazy(() => import('../ListView'));
-// const ListSettingsView = lazy(() => import('../ListSettingsView'));
 
 const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();

@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
+import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';

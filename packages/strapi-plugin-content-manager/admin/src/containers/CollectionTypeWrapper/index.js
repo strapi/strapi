@@ -15,9 +15,9 @@ import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
+  console.log({ allLayoutData });
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
-
   const { id } = useParams();
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
@@ -285,9 +285,20 @@ CollectionTypeWrapper.defaultProps = {
 };
 
 CollectionTypeWrapper.propTypes = {
-  allLayoutData: PropTypes.shape({
+  allLayoutData: PropTypes.exact({
     components: PropTypes.object.isRequired,
-    contentType: PropTypes.object.isRequired,
+    contentType: PropTypes.exact({
+      apiID: PropTypes.string.isRequired,
+      attributes: PropTypes.object.isRequired,
+      info: PropTypes.object.isRequired,
+      isDisplayed: PropTypes.bool.isRequired,
+      kind: PropTypes.string.isRequired,
+      layouts: PropTypes.object.isRequired,
+      metadatas: PropTypes.object.isRequired,
+      options: PropTypes.object.isRequired,
+      settings: PropTypes.object.isRequired,
+      uid: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
   from: PropTypes.string,
