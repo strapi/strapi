@@ -9,6 +9,7 @@ describe('CONTENT MANAGER | hooks | useFetchContentTypeLayout | reducer', () => 
       error: null,
       isLoading: true,
       layout: {},
+      layouts: {},
     };
   });
 
@@ -33,12 +34,13 @@ describe('CONTENT MANAGER | hooks | useFetchContentTypeLayout | reducer', () => 
   it('should handle the GET_DATA_SUCCEEDED action correctly', () => {
     const action = {
       type: 'GET_DATA_SUCCEEDED',
-      data: 'test',
+      data: { contentType: { uid: 'test' } },
     };
 
     const expected = produce(state, draft => {
       draft.isLoading = false;
-      draft.layout = 'test';
+      draft.layout = { contentType: { uid: 'test' } };
+      draft.layouts = { test: { contentType: { uid: 'test' } } };
     });
 
     expect(reducer(state, action)).toEqual(expected);
