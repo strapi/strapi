@@ -1,17 +1,23 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
-
-const EditView = lazy(() => import('../EditView'));
-const EditSettingsView = lazy(() => import('../EditSettingsView'));
+import { ContentTypeLayoutContext } from '../../contexts';
+import { useFetchContentTypeLayout } from '../../hooks';
+import EditView from '../EditView';
+import EditSettingsView from '../EditSettingsView';
 
 const SingleTypeRecursivePath = props => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
+  const { isLoading, layout } = useFetchContentTypeLayout(slug);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
-    <Suspense fallback={<LoadingIndicatorPage />}>
+    <ContentTypeLayoutContext.Provider value={layout}>
       <Switch>
         <Route
           path={`${url}/ctm-configurations/edit-settings/:type`}
@@ -23,10 +29,10 @@ const SingleTypeRecursivePath = props => {
         />
         <Route
           path={`${url}`}
-          render={routeProps => <EditView {...props} {...routeProps} slug={slug} isSingleType />}
+          render={() => <EditView layout={layout} slug={slug} isSingleType />}
         />
       </Switch>
-    </Suspense>
+    </ContentTypeLayoutContext.Provider>
   );
 };
 

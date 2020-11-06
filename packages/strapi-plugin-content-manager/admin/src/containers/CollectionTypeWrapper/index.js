@@ -83,12 +83,6 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
   const shouldFetch = useRef(true);
 
-  // useEffect(() => {
-  //   return () => {
-
-  //   };
-  // }, [slug]);
-
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;

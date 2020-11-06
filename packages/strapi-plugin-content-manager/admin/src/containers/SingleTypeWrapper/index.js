@@ -157,18 +157,13 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, []);
 
   const onPost = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(slug);
 
       try {
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'POST', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
@@ -206,7 +201,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, [cleanReceivedData, displayErrors, id, slug]);
 
   const onPut = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(`${slug}/${id}`);
 
       try {
@@ -214,12 +209,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'PUT', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
 
