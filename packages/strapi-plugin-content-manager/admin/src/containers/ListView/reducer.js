@@ -24,7 +24,6 @@ import {
 } from './constants';
 
 export const initialState = {
-  count: 0,
   data: [],
   didDeleteData: false,
   entriesToDelete: [],
@@ -37,16 +36,27 @@ export const initialState = {
   contentType: {},
   initialDisplayedHeaders: [],
   displayedHeaders: [],
+  pagination: {
+    total: 0,
+  },
 };
 
 const listViewReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, drafState => {
     switch (action.type) {
-      case GET_DATA:
-        return initialState;
+      case GET_DATA: {
+        drafState = {
+          ...initialState,
+          contentType: state.contentType,
+          initialDisplayedHeaders: state.initialDisplayedHeaders,
+          displayedHeaders: state.displayedHeaders,
+        };
+        break;
+      }
+
       case GET_DATA_SUCCEEDED: {
-        drafState.count = action.count;
+        drafState.pagination = action.pagination;
         drafState.data = action.data;
         drafState.isLoading = false;
         break;

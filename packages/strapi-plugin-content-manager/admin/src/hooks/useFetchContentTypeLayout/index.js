@@ -13,14 +13,13 @@ const useFetchContentTypeLayout = contentTypeUID => {
 
   const getData = useCallback(
     async (uid, abortSignal = false) => {
+      let signal = abortSignal || new AbortController().signal;
+
       if (layouts[uid]) {
         dispatch({ type: 'SET_LAYOUT_FROM_STATE', uid });
 
         return;
       }
-
-      let signal = abortSignal || new AbortController().signal;
-
       dispatch({ type: 'GET_DATA' });
 
       try {
@@ -39,7 +38,7 @@ const useFetchContentTypeLayout = contentTypeUID => {
         }
       }
     },
-    [schemas, layouts]
+    [layouts, schemas]
   );
 
   useEffect(() => {
@@ -54,7 +53,9 @@ const useFetchContentTypeLayout = contentTypeUID => {
 
     getData(contentTypeUID, signal);
 
-    return () => abortController.abort();
+    return () => {
+      abortController.abort();
+    };
   }, [contentTypeUID, getData]);
 
   return {

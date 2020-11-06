@@ -19,19 +19,13 @@ import {
   TOGGLE_MODAL_DELETE_ALL,
 } from './constants';
 
-export function getData() {
-  return {
-    type: GET_DATA,
-  };
-}
+export const getData = () => ({ type: GET_DATA });
 
-export function getDataSucceeded(count, data) {
-  return {
-    type: GET_DATA_SUCCEEDED,
-    count,
-    data,
-  };
-}
+export const getDataSucceeded = (pagination, data) => ({
+  type: GET_DATA_SUCCEEDED,
+  pagination,
+  data,
+});
 
 export function onChangeBulk({ target: { name } }) {
   return {

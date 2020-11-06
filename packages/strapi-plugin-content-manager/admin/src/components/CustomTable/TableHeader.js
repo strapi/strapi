@@ -13,10 +13,9 @@ function TableHeader({ headers, isBulkable }) {
     data,
     entriesToDelete,
     onChangeBulkSelectall,
-    onChangeSearch,
     _sort,
-    // to keep
     firstSortableHeader,
+    setQuery,
   } = useListView();
   const { emitEvent } = useGlobalContext();
   const [sortBy, sortOrder] = _sort.split(':');
@@ -50,11 +49,8 @@ function TableHeader({ headers, isBulkable }) {
                     value = `${firstSortableHeader}:ASC`;
                   }
 
-                  onChangeSearch({
-                    target: {
-                      name: '_sort',
-                      value,
-                    },
+                  setQuery({
+                    _sort: value,
                   });
                 }
               }}

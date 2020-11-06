@@ -1,4 +1,4 @@
-import React, { memo, Suspense, lazy } from 'react';
+import React, { memo, useEffect, Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
@@ -16,10 +16,19 @@ const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
   const { isLoading, layout } = useFetchContentTypeLayout(slug);
+  const slugRef = React.useRef(slug);
+
+  useEffect(() => {
+    slugRef.current = slug;
+  }, [slug]);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   const renderRoute = (routeProps, Component) => {
     // return <Component {...routeProps} slug={slug} layout={layout} />;
-    return <Component slug={slug} layout={layout} />;
+    return <Component slug={slugRef.current} layout={layout} />;
   };
   const renderPermissionsRoute = (routeProps, Component) => {
     return (
@@ -52,10 +61,6 @@ const CollectionTypeRecursivePath = () => {
   ].map(({ path, Comp }) => (
     <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, Comp)} />
   ));
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
 
   return (
     <ContentTypeLayoutContext.Provider value={layout}>

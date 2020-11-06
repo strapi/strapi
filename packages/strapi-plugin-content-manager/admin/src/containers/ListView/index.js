@@ -6,14 +6,14 @@ import { get, isEmpty } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
+import isEqual from 'react-fast-compare';
+import { stringify } from 'qs';
 import {
   PopUpWarning,
-  generateFiltersFromSearch,
   request,
   CheckPermissions,
   useGlobalContext,
   useUserPermissions,
-  useQuery,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
@@ -58,18 +58,10 @@ import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
 
 /* eslint-disable react/no-array-index-key */
 
-// const FilterPicker = () => <div>FILTER</div>;
-
 function ListView({
-  count,
-  data,
   didDeleteData,
 
   entriesToDelete,
-  isLoading,
-  // location: { pathname },
-  getData,
-  getDataSucceeded,
 
   onChangeBulk,
   onChangeBulkSelectall,
@@ -77,22 +69,27 @@ function ListView({
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
 
-  resetProps,
   setModalLoadingState,
   showWarningDelete,
   showModalConfirmButtonLoading,
   showWarningDeleteAll,
-  slug,
   toggleModalDelete,
   toggleModalDeleteAll,
 
   // NEW
   // allAllowedHeaders,
+  data,
   displayedHeaders,
+  getData,
+  getDataSucceeded,
+  isLoading,
   layout,
   onChangeListHeaders,
   onResetListHeaders,
+  pagination: { total },
+  resetProps,
   setLayout,
+  slug,
 }) {
   const {
     contentType: {
@@ -117,24 +114,20 @@ function ListView({
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions);
   const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
-  const [{ query, rawQuery }, setQuery] = useQueryParams({
-    page: 1,
-    pageSize: defaultPageSize,
-    _sort: defaultSort,
-  });
-  const { pathname, search } = useLocation();
-  const { push } = useHistory;
+  const initParams = useMemo(() => ({ page: 1, pageSize: defaultPageSize, _sort: defaultSort }), [
+    defaultPageSize,
+    defaultSort,
+  ]);
+  const [{ query, rawQuery }, setQuery] = useQueryParams(initParams);
 
-  const isFirstRender = useRef(true);
+  const { pathname } = useLocation();
+  const { push } = useHistory;
   const { formatMessage } = useIntl();
 
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
-
   const contentType = layout.contentType;
-
   const hasDraftAndPublish = contentType.options.draftAndPublish;
-
   const allAllowedHeaders = getAllAllowedHeaders(attributes);
 
   const filters = useMemo(() => {
@@ -148,97 +141,61 @@ function ListView({
 
   const label = contentType.info.label;
 
-  const searchToSendForRequest = rawQuery;
-  const getDataSucceededRef = useRef(getDataSucceeded);
-
-  const shouldSendRequest = useMemo(() => {
-    return !isLoadingForPermissions && canRead;
-  }, [canRead, isLoadingForPermissions]);
-
-  const fetchData = async () => {
-    try {
-      const data = [
-        {
-          id: 16,
-          postal_coder: 'kkkk',
-          city: 'kljkojihv',
-          created_by: {
-            id: 1,
-            firstname: 'cyril',
-            lastname: 'lopez',
-            username: null,
-            email: 'cyril@strapi.io',
-            resetPasswordToken: null,
-            registrationToken: null,
-            isActive: true,
-            blocked: null,
-          },
-          updated_by: {
-            id: 1,
-            firstname: 'cyril',
-            lastname: 'lopez',
-            username: null,
-            email: 'cyril@strapi.io',
-            resetPasswordToken: null,
-            registrationToken: null,
-            isActive: true,
-            blocked: null,
-          },
-          created_at: '2020-10-28T09:03:20.905Z',
-          updated_at: '2020-10-28T13:51:35.381Z',
-          published_at: '2020-10-28T13:51:35.351Z',
-          cover: null,
-          images: [],
-          categories: [],
-          likes: [],
-        },
-      ];
-
-      getDataSucceededRef.current(1, data);
-    } catch (err) {
-      strapi.notification.error(`${pluginId}.error.model.fetch`);
-    }
-  };
+  const params = useMemo(() => {
+    return rawQuery || `?${stringify(initParams, { encode: false })}`;
+  }, [initParams, rawQuery]);
 
   useEffect(() => {
     setLayout(layout);
-  }, [layout, setLayout]);
+    setFilterPickerState(false);
+
+    return () => {
+      resetProps();
+    };
+  }, [layout, setLayout, resetProps]);
+
+  // Using a ref to avoid requests being fired multiple times on slug on change
+  // We need it because the hook as mulitple dependencies so it may run when the before the permissions are checked
+  const requestUrlRef = useRef('');
+  const fetchData = useCallback(
+    async (endPoint, abortSignal = false) => {
+      getData();
+      const signal = abortSignal || new AbortController().signal;
+
+      try {
+        const { results, pagination } = await request(endPoint, { method: 'GET', signal });
+
+        getDataSucceeded(pagination, results);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err);
+          strapi.notification.error(getTrad('error.model.fetch'));
+        }
+      }
+    },
+    [getData, getDataSucceeded]
+  );
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    const shouldSendRequest = !isLoadingForPermissions && canRead;
+    const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
+
+    if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
+      fetchData(requestUrl, signal);
+    }
+
+    return () => {
+      requestUrlRef.current = slug;
+      abortController.abort();
+    };
+  }, [isLoadingForPermissions, canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
     displayedHeaders,
   ]);
-
-  useEffect(() => {
-    return () => {
-      isFirstRender.current = true;
-    };
-  }, [slug]);
-
-  useEffect(() => {
-    if (!isFirstRender.current) {
-      fetchData(searchToSendForRequest);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchToSendForRequest]);
-
-  useEffect(() => {
-    return () => {
-      resetProps();
-      setFilterPickerState(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
-
-  useEffect(() => {
-    if (shouldSendRequest) {
-      fetchData();
-    }
-
-    return () => {
-      isFirstRender.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldSendRequest]);
 
   const handleConfirmDeleteData = useCallback(async () => {
     try {
@@ -297,58 +254,30 @@ function ListView({
 
   const handleChangeListLabels = useCallback(
     ({ name, value }) => {
-      //   const currentSort = _sort;
-      // // Display a notification if trying to remove the last displayed field
+      // Display a notification if trying to remove the last displayed field
       if (value && displayedHeaders.length === 1) {
         strapi.notification.error('content-manager.notification.error.displayedFields');
 
         return false;
       }
 
-      // TODO
-      // // Update the sort when removing the displayed one
-      // if (currentSort.split(':')[0] === name && value) {
-      //   emitEvent('didChangeDisplayedFields');
-      //   handleChangeSearch({
-      //     target: {
-      //       name: '_sort',
-      //       value: `${firstSortableHeader}:ASC`,
-      //     },
-      //   });
-      // }
+      emitEventRef.current('didChangeDisplayedFields');
 
       onChangeListHeaders({ name, value });
     },
     [displayedHeaders, onChangeListHeaders]
   );
 
-  const handleChangeSearch = async ({ target: { name, value } }) => {
-    const currentSearch = new URLSearchParams(searchToSendForRequest);
-
-    // Pagination
-    currentSearch.delete('_start');
-
-    if (value === '') {
-      currentSearch.delete(name);
-    } else {
-      currentSearch.set(name, value);
-    }
-
-    const searchToString = currentSearch.toString();
-
-    push({ search: searchToString });
-  };
-
   const handleClickDelete = id => {
     setIdToDelete(id);
     toggleModalDelete();
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     if (didDeleteData) {
       fetchData();
     }
-  };
+  }, [fetchData, didDeleteData]);
 
   const toggleFilterPickerState = useCallback(() => {
     setFilterPickerState(prevState => {
@@ -360,44 +289,40 @@ function ListView({
     });
   }, []);
 
-  const headerAction = useMemo(
-    () => {
-      if (!canCreate) {
-        return [];
-      }
+  const headerAction = useMemo(() => {
+    if (!canCreate) {
+      return [];
+    }
 
-      return [
-        {
-          label: formatMessage(
-            {
-              id: 'content-manager.containers.List.addAnEntry',
-            },
-            {
-              entity: label || 'Content Manager',
-            }
-          ),
-          onClick: () => {
-            const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
+    return [
+      {
+        label: formatMessage(
+          {
+            id: 'content-manager.containers.List.addAnEntry',
+          },
+          {
+            entity: label || 'Content Manager',
+          }
+        ),
+        onClick: () => {
+          const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
-            emitEvent('willCreateEntry', trackerProperty);
-            push({
-              pathname: `${pathname}/create`,
-            });
-          },
-          color: 'primary',
-          type: 'button',
-          icon: true,
-          style: {
-            paddingLeft: 15,
-            paddingRight: 15,
-            fontWeight: 600,
-          },
+          emitEventRef.current('willCreateEntry', trackerProperty);
+          push({
+            pathname: `${pathname}/create`,
+          });
         },
-      ];
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [label, pathname, search, canCreate, formatMessage, hasDraftAndPublish]
-  );
+        color: 'primary',
+        type: 'button',
+        icon: true,
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
+      },
+    ];
+  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push]);
 
   const headerProps = useMemo(() => {
     /* eslint-disable indent */
@@ -409,31 +334,29 @@ function ListView({
         ? formatMessage(
             {
               id:
-                count > 1
+                total > 1
                   ? `${pluginId}.containers.List.pluginHeaderDescription`
                   : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
             },
-            { label: count }
+            { label: total }
           )
         : null,
       actions: headerAction,
     };
-    /* eslint-enable indent */
-  }, [count, headerAction, label, canRead, formatMessage]);
+  }, [total, headerAction, label, canRead, formatMessage]);
 
   return (
     <>
       <ListViewProvider
         data={data}
         // TO remove
-        count={count}
+        count={total}
         //
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
         label={label}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
-        onChangeSearch={handleChangeSearch}
         onClickDelete={handleClickDelete}
         // schema={listSchema}
         schema={{}}
@@ -448,14 +371,15 @@ function ListView({
         _sort={_sort}
         // to keep
         firstSortableHeader={firstSortableHeader}
+        setQuery={setQuery}
       >
         <FilterPicker
           contentType={contentType}
+          filters={filters}
           isOpen={isFilterPickerOpen}
           name={label}
           toggleFilterPickerState={toggleFilterPickerState}
           setQuery={setQuery}
-          filters={filters}
           slug={slug}
         />
         <Container className="container-fluid">
@@ -513,10 +437,11 @@ function ListView({
                     displayedHeaders={displayedHeaders}
                     hasDraftAndPublish={hasDraftAndPublish}
                     isBulkable={isBulkable}
-                    onChangeParams={handleChangeSearch}
+                    // onChangeParams={handleChangeSearch}
+                    setQuery={setQuery}
                     showLoader={isLoading}
                   />
-                  <Footer count={count} params={query} onChange={setQuery} />
+                  <Footer count={total} params={query} onChange={setQuery} />
                 </div>
               </div>
             </Wrapper>
@@ -572,19 +497,19 @@ ListView.propTypes = {
     }).isRequired,
   }).isRequired,
   // count: PropTypes.number.isRequired,
-  // data: PropTypes.array.isRequired,
+  data: PropTypes.array.isRequired,
   // didDeleteData: PropTypes.bool.isRequired,
   // // emitEvent: PropTypes.func.isRequired,
   // entriesToDelete: PropTypes.array.isRequired,
-  // isLoading: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   // layouts: PropTypes.object,
   // location: PropTypes.shape({
   //   pathname: PropTypes.string.isRequired,
   //   search: PropTypes.string.isRequired,
   // }).isRequired,
   // // models: PropTypes.array.isRequired,
-  // getData: PropTypes.func.isRequired,
-  // getDataSucceeded: PropTypes.func.isRequired,
+  getData: PropTypes.func.isRequired,
+  getDataSucceeded: PropTypes.func.isRequired,
   // history: PropTypes.shape({
   //   push: PropTypes.func.isRequired,
   // }).isRequired,
@@ -595,12 +520,13 @@ ListView.propTypes = {
   // onDeleteDataSucceeded: PropTypes.func.isRequired,
   // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   onResetListHeaders: PropTypes.func.isRequired,
-  // resetProps: PropTypes.func.isRequired,
+  pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
+  resetProps: PropTypes.func.isRequired,
   // setModalLoadingState: PropTypes.func.isRequired,
   // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
   // showWarningDelete: PropTypes.bool.isRequired,
   // showWarningDeleteAll: PropTypes.bool.isRequired,
-  // slug: PropTypes.string.isRequired,
+  slug: PropTypes.string.isRequired,
   // toggleModalDelete: PropTypes.func.isRequired,
   // toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
@@ -631,4 +557,11 @@ export function mapDispatchToProps(dispatch) {
 }
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(withConnect, memo)(ListView);
+export default compose(withConnect)(
+  // memo(ListView, (prev, next) => {
+  //   console.log(difference(prev, next));
+
+  //   return true;
+  // })
+  memo(ListView, isEqual)
+);

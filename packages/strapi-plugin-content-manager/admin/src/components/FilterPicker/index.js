@@ -23,7 +23,15 @@ import reducer, { initialState } from './reducer';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
 
-function FilterPicker({ contentType, isOpen, name, toggleFilterPickerState, setQuery, slug }) {
+function FilterPicker({
+  contentType,
+  filters,
+  isOpen,
+  name,
+  toggleFilterPickerState,
+  setQuery,
+  slug,
+}) {
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
   const userPermissions = useUser();
