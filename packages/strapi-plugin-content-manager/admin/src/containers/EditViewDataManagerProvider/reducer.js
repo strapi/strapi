@@ -24,7 +24,7 @@ const reducer = (state, action) => {
         .updateIn(['modifiedData', ...action.keys], list => {
           const defaultDataStructure = state
             .getIn(['componentsDataStructure', action.componentUid])
-            .set('__temp_key__', getMaxTempKey(list.toJS()) + 1);
+            .set('__temp_key__', getMaxTempKey(list ? list.toJS() : []) + 1);
 
           if (list) {
             return list.push(defaultDataStructure);
