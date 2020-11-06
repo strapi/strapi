@@ -15,7 +15,7 @@ const dogModel = {
   attributes: {
     name: {
       type: 'string',
-      required: false,
+      unique: false,
     },
   },
   connection: 'default',
@@ -26,14 +26,14 @@ const dogModel = {
 
 const dogs = [
   {
-    name: null,
+    name: 'Atos',
   },
   {
     name: 'Atos',
   },
 ];
 
-describe('Migration - required attribute', () => {
+describe('Migration - unique attribute', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
@@ -58,19 +58,18 @@ describe('Migration - required attribute', () => {
     await modelsUtils.deleteContentTypes(['dog']);
   }, 60000);
 
-  describe('Required: false -> true', () => {
-    test('Can be null before migration', async () => {
+  describe('Unique: false -> true', () => {
+    test('Can have duplicates before migration', async () => {
       let { body } = await rq({
         url: '/content-manager/explorer/application::dog.dog',
         method: 'GET',
       });
       expect(body.length).toBe(2);
-      const dogWithNameNull = body.find(dog => dog.name === null);
-      expect(dogWithNameNull).toBeTruthy();
+      expect(body[0].name).toEqual(body[1].name);
     });
 
-    test('Cannot create an entry with null after migration', async () => {
-      // remove null values otherwise the migration would fail
+    test('Cannot create a duplicated entry after migration', async () => {
+      // remove duplicated values otherwise the migration would fail
       const { body } = await rq({
         url: `/content-manager/explorer/application::dog.dog/${data.dogs[0].id}`,
         method: 'PUT',
@@ -80,34 +79,34 @@ describe('Migration - required attribute', () => {
 
       // migration
       const schema = await modelsUtils.getContentTypeSchema('dog');
-      schema.attributes.name.required = true;
+      schema.attributes.name.unique = true;
       await modelsUtils.modifyContentType(schema);
 
-      // Try to create an entry with null
+      // Try to create a duplicated entry
       const res = await rq({
         method: 'POST',
         url: '/content-manager/explorer/application::dog.dog',
-        body: { name: null },
+        body: { name: data.dogs[0].name },
       });
-      expect(res.body.message).toBe('ValidationError');
+      expect(res.statusCode).toBe(400);
     });
   });
 
-  describe('Required: true -> false', () => {
-    test('Can create an entry with null after migration', async () => {
+  describe('Unique: true -> false', () => {
+    test('Can create a duplicated entry after migration', async () => {
       // migration
       const schema = await modelsUtils.getContentTypeSchema('dog');
-      schema.attributes.name.required = false;
+      schema.attributes.name.unique = false;
       await modelsUtils.modifyContentType(schema);
 
-      // Try to create an entry with null
+      // Try to create a duplicated entry
       const res = await rq({
         url: `/content-manager/explorer/application::dog.dog`,
         method: 'POST',
-        body: { name: null },
+        body: { name: data.dogs[0].name },
       });
 
-      expect(res.body).toMatchObject({ name: null });
+      expect(res.body).toMatchObject({ name: data.dogs[0].name });
       data.dogs.push(res.body);
     });
   });
