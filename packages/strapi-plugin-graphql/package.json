@@ -19,7 +19,7 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
     "graphql-playground-middleware-koa": "^1.6.20",
-    "graphql-tools": "4.0.6",
+    "graphql-tools": "4.0.8",
     "graphql-type-json": "0.3.2",
     "graphql-type-long": "^0.1.1",
     "graphql-upload": "11.0.0",
