@@ -374,6 +374,7 @@ Please note that if you are using the draft system, Strapi nullyfies all the Dra
 const knex = strapi.connections.default;
 const result = await knex('restaurants')
   .where('cities', 'berlin')
+  .whereNot('cities.published_at', null)
   .join('chefs', 'restaurants.id', 'chefs.restaurant_id')
   .select('*')
   .fetch();
