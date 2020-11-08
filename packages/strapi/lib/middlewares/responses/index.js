@@ -1,32 +1,18 @@
 'use strict';
 
-/**
- * Custom responses hook
- */
-
 const _ = require('lodash');
 
-module.exports = () => {
+module.exports = strapi => {
   return {
-    /**
-     * Initialize the hook
-     */
-
-    initialize: function(cb) {
+    initialize() {
       strapi.app.use(async (ctx, next) => {
         await next();
 
-        // Call custom responses.
-        if (_.isFunction(_.get(strapi.config, `functions.responses.${ctx.status}`))) {
-          await strapi.config.functions.responses[ctx.status].call(this, ctx);
-        }
-
-        // Set X-Powered-By header.
-        if (_.get(strapi.config, 'X-Powered-By.enabled', true)) {
-          ctx.set('X-Powered-By', 'Strapi <strapi.io>');
+        const responseFn = strapi.config.get(['functions', 'responses', ctx.status]);
+        if (_.isFunction(responseFn)) {
+          await responseFn(ctx);
         }
       });
-      cb();
-    }
+    },
   };
 };

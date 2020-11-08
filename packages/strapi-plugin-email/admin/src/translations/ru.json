@@ -1,5 +1,4 @@
 {
-    "plugin.description.short": "Отсылка почты.",
-    "plugin.description.long": "Отсылка почты."
-  }
-  
+  "plugin.description.long": "Отправка почты.",
+  "plugin.description.short": "Отправка почты."
+}

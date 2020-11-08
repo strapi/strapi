@@ -1,76 +1,61 @@
-/**
-*
-* Policies
-*
-*/
-
-import React from 'react';
-import cn from 'classnames';
-import PropTypes from 'prop-types';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
+import { Col } from 'reactstrap';
+import { get, isEmpty, takeRight, toLower, without } from 'lodash';
+import { getTrad } from '../../utils';
+import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
+import BoundRoute from '../BoundRoute';
+import SizedInput from '../SizedInput';
+import { Header, Wrapper } from './Components';
 
-import BoundRoute from 'components/BoundRoute';
-import Input from 'components/InputsIndex';
+const Policies = () => {
+  const { modifiedData, selectedAction, routes, policies, onChange } = useUsersPermissions();
+  const baseTitle = 'users-permissions.Policies.header';
+  const title = !selectedAction ? 'hint' : 'title';
+  const path = without(selectedAction.split('.'), 'controllers');
+  const controllerRoutes = get(routes, path[0]);
+  const displayedRoutes = isEmpty(controllerRoutes)
+    ? []
+    : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
 
-import styles from './styles.scss';
+  const inputName = `${selectedAction}.policy`;
 
-class Policies extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  handleChange = (e) => this.context.onChange(e);
+  const value = useMemo(() => {
+    return get(modifiedData, inputName, '');
+  }, [inputName, modifiedData]);
 
-  render() {
-    const baseTitle = 'users-permissions.Policies.header';
-    const title = this.props.shouldDisplayPoliciesHint ? 'hint' : 'title';
-    const value = get(this.props.values, this.props.inputSelectName);
-    const path = without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy');
-    const controllerRoutes = get(this.props.routes, without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy')[0]);
-    const routes = isEmpty(controllerRoutes) ? [] : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
-
-    return (
-      <div className={cn('col-md-5',styles.policies)}>
-        <div className="container-fluid">
-          <div className={cn('row', styles.inputWrapper)}>
-            <div className={cn('col-md-12', styles.header)}>
-              <FormattedMessage id={`${baseTitle}.${title}`} />
-            </div>
-            {!this.props.shouldDisplayPoliciesHint ? (
-              <Input
-                customBootstrapClass="col-md-12"
-                label={{ id: 'users-permissions.Policies.InputSelect.label' }}
-                name={this.props.inputSelectName}
-                onChange={this.handleChange}
-                selectOptions={this.props.selectOptions}
+  return (
+    <Wrapper className="col-md-5">
+      <div className="container-fluid">
+        <div className="row">
+          <Header className="col-md-12">
+            <FormattedMessage id={`${baseTitle}.${title}`} />
+          </Header>
+          {selectedAction && (
+            <>
+              <SizedInput
                 type="select"
-                validations={{}}
+                name={inputName}
+                onChange={onChange}
+                label={getTrad('Policies.InputSelect.label')}
+                options={policies}
                 value={value}
               />
-            ) : ''}
-          </div>
-          <div className="row">
-            {!this.props.shouldDisplayPoliciesHint ? (
-              map(routes, (route, key) => <BoundRoute key={key} route={route} />)
-            ) : ''}
-          </div>
+
+              <div className="row">
+                <Col size={{ xs: 12 }}>
+                  {displayedRoutes.map((route, key) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <BoundRoute key={key} route={route} />
+                  ))}
+                </Col>
+              </div>
+            </>
+          )}
         </div>
       </div>
-    );
-  }
-}
-
-Policies.contextTypes = {
-  onChange: PropTypes.func.isRequired,
-};
-
-Policies.defaultProps = {
-  routes: {},
-};
-
-Policies.propTypes = {
-  inputSelectName: PropTypes.string.isRequired,
-  routes: PropTypes.object,
-  selectOptions: PropTypes.array.isRequired,
-  shouldDisplayPoliciesHint: PropTypes.bool.isRequired,
-  values: PropTypes.object.isRequired,
+    </Wrapper>
+  );
 };
 
 export default Policies;

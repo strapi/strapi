@@ -1,20 +1,26 @@
 /**
-*
-* BlockerComponent
-*
-*/
+ *
+ * BlockerComponent
+ *
+ */
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
-
-import styles from './styles.scss';
+import ButtonWrapper from './ButtonWrapper';
+import Ide from './Ide';
+import Wrapper from './Wrapper';
 
 /* eslint-disable react/require-default-props */
-function BlockerComponent({ blockerComponentTitle, blockerComponentDescription, blockerComponentIcon, blockerComponentContent = '' }) {
+function BlockerComponent({
+  blockerComponentTitle,
+  blockerComponentDescription,
+  blockerComponentIcon,
+  blockerComponentContent = '',
+}) {
   let content;
-
   switch (blockerComponentContent) {
     case 'renderIde':
       content = renderIde();
@@ -27,10 +33,10 @@ function BlockerComponent({ blockerComponentTitle, blockerComponentDescription, 
   }
 
   return (
-    <div className={styles.blockerComponent}>
-      <div className={styles.header}>
-        <div className={styles.icoContainer}>
-          <i className={cn('fa', blockerComponentIcon)} />
+    <Wrapper>
+      <div className="header">
+        <div className="icoContainer">
+          <FontAwesomeIcon icon={blockerComponentIcon} />
         </div>
         <div>
           <h4>
@@ -42,55 +48,47 @@ function BlockerComponent({ blockerComponentTitle, blockerComponentDescription, 
           {content}
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 
 const renderIde = () => (
-  <div className={styles.ide}>
-    <p>./config/environments/development/server.json</p>
+  <Ide>
     <div>
-      <pre style={{ whiteSpace: 'pre-wrap'}}>
-        <code>
-          &#123;
-          <br />
-          &nbsp;"host": "localhost",
-          <br />
-          &nbsp;"port": 1337,
-          <br />
-          <span style={{ color: '#006EE7'}}>
-            &nbsp;"autoReload": true,
-          </span>
-          <br />
-          &nbsp;"proxi": &#123;
-          <br />
-          &nbsp;&nbsp;"enabled": true
-          <br />
-          &nbsp;&#125;,
-          <br />
-          &nbsp;"cron": &#123;
-          <br />
-          &nbsp;&nbsp;"enabled": false
-          <br />
-          &nbsp;&#125;
-          <br />
-          &#125;
-        </code>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>
+        <code>strapi develop</code>
+      </pre>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>
+        <code>npm run develop</code>
       </pre>
     </div>
-  </div>
+  </Ide>
 );
 
 const renderButton = () => (
-  <div className={styles.buttonContainer}>
-    <a className={cn(styles.primary, 'btn')} href="http://strapi.io" target="_blank">Read the documentation</a>
-  </div>
+  <ButtonWrapper>
+    <a
+      className={cn('primary', 'btn')}
+      href="http://strapi.io"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Read the documentation
+    </a>
+  </ButtonWrapper>
 );
 
+BlockerComponent.defaultProps = {
+  blockerComponentContent: '',
+  blockerComponentDescription: 'app.utils.defaultMessage',
+  blockerComponentIcon: 'lock',
+  blockerComponentTitle: 'app.utils.defaultMessage',
+};
+
 BlockerComponent.propTypes = {
-  blockerComponentContent: PropTypes.string.isRequired,
+  blockerComponentContent: PropTypes.string,
   blockerComponentDescription: PropTypes.string.isRequired,
-  blockerComponentIcon: PropTypes.string.isRequired,
+  blockerComponentIcon: PropTypes.string,
   blockerComponentTitle: PropTypes.string.isRequired,
 };
 

@@ -1,41 +1,44 @@
 'use strict';
 
-/**
- * Email.js service
- *
- * @description: A set of functions similar to controller's actions to avoid code duplication.
- */
-
 const _ = require('lodash');
-const sendmail = require('sendmail')({
-  silent: true
-});
+
+const getProviderConfig = () => {
+  return strapi.plugins.email.config;
+};
+
+const send = async options => {
+  return strapi.plugins.email.provider.send(options);
+};
+
+/**
+ * fill subject, text and html using lodash template
+ * @param {object} emailOptions - to, from and replyto...
+ * @param {object} emailTemplate - object containing attributes to fill
+ * @param {object} data - data used to fill the template
+ * @returns {{ subject, text, subject }}
+ */
+const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) => {
+  const attributes = ['subject', 'text', 'html'];
+  const missingAttributes = _.difference(attributes, Object.keys(emailTemplate));
+  if (missingAttributes.length > 0) {
+    throw new Error(
+      `Following attributes are missing from your email template : ${missingAttributes.join(', ')}`
+    );
+  }
+
+  const templatedAttributes = attributes.reduce(
+    (compiled, attribute) =>
+      emailTemplate[attribute]
+        ? Object.assign(compiled, { [attribute]: _.template(emailTemplate[attribute])(data) })
+        : compiled,
+    {}
+  );
+
+  return strapi.plugins.email.provider.send({ ...emailOptions, ...templatedAttributes });
+};
 
 module.exports = {
-  send: (options, cb) => { // eslint-disable-line no-unused-vars
-    return new Promise((resolve, reject) => {
-      // Default values.
-      options = _.isObject(options) ? options : {};
-      options.from = options.from || '"Administration Panel" <no-reply@strapi.io>';
-      options.replyTo = options.replyTo || '"Administration Panel" <no-reply@strapi.io>';
-      options.text = options.text || options.html;
-      options.html = options.html || options.text;
-
-      // Send the email.
-      sendmail({
-        from: options.from,
-        to: options.to,
-        replyTo: options.replyTo,
-        subject: options.subject,
-        text: options.text,
-        html: options.html
-      }, function (err) {
-        if (err) {
-          reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
+  getProviderConfig,
+  send,
+  sendTemplatedEmail,
 };

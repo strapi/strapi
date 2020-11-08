@@ -9,10 +9,9 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import cn from 'classnames';
+import Input from '../Input';
+import EyeWrapper from './EyeWrapper';
 
-import styles from './styles.scss';
-
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputPassword extends React.Component {
   state = { showPassword: false };
 
@@ -34,21 +33,26 @@ class InputPassword extends React.Component {
       tabIndex,
       value,
     } = this.props;
-
-    const eyeColor = this.state.showPassword ? { color: 'black' }  : { color: '#9EA7B8' };
+    const formattedPlaceholder =
+      placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
+    const eyeColor = this.state.showPassword
+      ? { color: 'black' }
+      : { color: '#9EA7B8' };
 
     return (
-      <Fragment>
-        <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-          {(message) => (
-            <input
+      <>
+        <FormattedMessage
+          id={formattedPlaceholder}
+          defaultMessage={formattedPlaceholder}
+        >
+          {message => (
+            <Input
               autoComplete="new-password"
               autoFocus={autoFocus}
               className={cn(
-                styles.inputPassword,
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !isEmpty(className)&& className,
+                !isEmpty(className) && className
               )}
               disabled={disabled}
               id={name}
@@ -59,17 +63,21 @@ class InputPassword extends React.Component {
               placeholder={message}
               style={style}
               tabIndex={tabIndex}
-              type={!this.state.showPassword && 'password' || 'text'}
+              type={(!this.state.showPassword && 'password') || 'text'}
               value={value}
             />
           )}
         </FormattedMessage>
-        <div className={styles.iconEyeWrapper}>
-          <div className={styles.iconEyeSubWrapper} onClick={this.handleClick} style={eyeColor}>
+        <EyeWrapper>
+          <div
+            className="iconEyeSubWrapper"
+            onClick={this.handleClick}
+            style={eyeColor}
+          >
             <i className="fa fa-eye" />
           </div>
-        </div>
-      </Fragment>
+        </EyeWrapper>
+      </>
     );
   }
 }

@@ -2,6 +2,7 @@
   "public": {
     "enabled": true,
     "maxAge": 60000,
-    "path": "./public"
+    "path": "./public",
+    "defaultIndex": true
   }
 }

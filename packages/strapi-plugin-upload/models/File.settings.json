@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "info": {
     "name": "file",
     "description": ""
@@ -12,6 +11,26 @@
       "type": "string",
       "configurable": false,
       "required": true
+    },
+    "alternativeText": {
+      "type": "string",
+      "configurable": false
+    },
+    "caption": {
+      "type": "string",
+      "configurable": false
+    },
+    "width": {
+      "type": "integer",
+      "configurable": false
+    },
+    "height": {
+      "type": "integer",
+      "configurable": false
+    },
+    "formats": {
+      "type": "json",
+      "configurable": false
     },
     "hash": {
       "type": "string",
@@ -28,7 +47,7 @@
       "required": true
     },
     "size": {
-      "type": "string",
+      "type": "decimal",
       "configurable": false,
       "required": true
     },
@@ -37,10 +56,18 @@
       "configurable": false,
       "required": true
     },
+    "previewUrl": {
+      "type": "string",
+      "configurable": false
+    },
     "provider": {
       "type": "string",
       "configurable": false,
       "required": true
+    },
+    "provider_metadata": {
+      "type": "json",
+      "configurable": false
     },
     "related": {
       "collection": "*",

@@ -1,17 +1,24 @@
-<!-- ⚠️ Your PR title will appear in the changelogs please make it short detailed and understandable for all. -->
+<!--
+Hello 👋 Thank you for submitting a pull request.
 
-<!-- Uncomment the correct contribution type. !-->
+To help us merge your PR, make sure to follow the instructions below:
 
-My PR is a:
-<!-- 💥 Breaking change -->
-<!-- 🐛 Bug fix -->
-<!-- 💅 Enhancement -->
-<!-- 🚀 New feature -->
+- Create or update the documentation. (Should be made against the documentation branch)
+- Create or update the tests.
+- Refer to the issue you are closing in the PR description - fix #issue
+- Specify if the PR is in WIP (work in progress) state or ready to be merged
 
-Main update on the:
-<!-- Admin -->
-<!-- Documentation -->
-<!-- Framework -->
-<!-- Plugin -->
+Please ensure you read through the Contributing Guide: https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md
+-->
 
-<!-- Write a short description of what your PR does and link the concerned issues of your update. -->
+### What does it do?
+
+Describe the technical changes you did.
+
+### Why is it needed?
+
+Describe the issue you are solving.
+
+### Related issue(s)/PR(s)
+
+Let us know if this is related to any issue/pull request

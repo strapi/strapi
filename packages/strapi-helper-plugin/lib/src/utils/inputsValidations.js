@@ -3,7 +3,7 @@ import { includes, mapKeys, reject } from 'lodash';
  * [validateInput description]
  * @param  {String || Number} value  Input's value
  * @param  {Object} inputValidations
- * @param  {String} [type='text']    Optionnal: the input's type only for email
+ * @param  {String} [type='text']    Optional: the input's type only for email
  * @return {Array}                  Array of errors to be displayed
  */
 
@@ -11,7 +11,9 @@ import { includes, mapKeys, reject } from 'lodash';
 const validateInput = (value, inputValidations = {}, type = 'text') => {
   let errors = [];
 
-  const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+  const emailRegex = new RegExp(
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  );
   // handle i18n
   const requiredError = { id: 'components.Input.error.validation.required' };
 
@@ -23,7 +25,7 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
         }
         break;
       case 'maxLength':
-        if (value.length > validationValue) {
+        if (value && value.length > validationValue) {
           errors.push({ id: 'components.Input.error.validation.maxLength' });
         }
         break;
@@ -33,18 +35,27 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
         }
         break;
       case 'minLength':
-        if (value.length < validationValue) {
+        if (!value || value.length < validationValue) {
           errors.push({ id: 'components.Input.error.validation.minLength' });
         }
         break;
       case 'required':
-        if (value.length === 0) {
+        if (value == null || value.length === 0) {
           errors.push({ id: 'components.Input.error.validation.required' });
         }
         break;
       case 'regex':
         if (!new RegExp(validationValue).test(value)) {
           errors.push({ id: 'components.Input.error.validation.regex' });
+        }
+        break;
+      case 'type':
+        if (validationValue === 'json') {
+          try {
+            value = JSON.parse(value);
+          } catch (err) {
+            errors.push({ id: 'components.Input.error.validation.json' });
+          }
         }
         break;
       default:
@@ -57,7 +68,7 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
   }
 
   if (includes(errors, requiredError)) {
-    errors = reject(errors, (error) => error !== requiredError);
+    errors = reject(errors, error => error !== requiredError);
   }
 
   return errors;

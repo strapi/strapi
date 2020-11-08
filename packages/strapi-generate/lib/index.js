@@ -12,6 +12,7 @@ const logger = require('strapi-utils').logger;
 
 // Local dependencies.
 const generate = require('./generate');
+const generateTarget = require('./target');
 
 /* eslint-disable prefer-template */
 /**
@@ -31,7 +32,7 @@ module.exports = (scope, cb) => {
     notStrapiApp: () => {},
     alreadyExists: () => {
       return cb.error();
-    }
+    },
   });
 
   // Use configured module name for this `generatorType` if applicable.
@@ -39,7 +40,10 @@ module.exports = (scope, cb) => {
   let generator;
 
   function throwIfModuleNotFoundError(error, module) {
-    const isModuleNotFoundError = error && error.code === 'MODULE_NOT_FOUND' && error.message.match(new RegExp(module));
+    const isModuleNotFoundError =
+      error &&
+      error.code === 'MODULE_NOT_FOUND' &&
+      error.message.match(new RegExp(module));
     if (!isModuleNotFoundError) {
       logger.error('Invalid `' + scope.generatorType + '` generator.');
       throw error;
@@ -56,8 +60,12 @@ module.exports = (scope, cb) => {
   }
 
   if (!generator) {
-    return logger.error('No generator called `' + scope.generatorType + '` found.');
+    return logger.error(
+      'No generator called `' + scope.generatorType + '` found.'
+    );
   }
 
   generate(generator, scope, cb);
 };
+
+module.exports.generateTarget = generateTarget;

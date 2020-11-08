@@ -1,70 +1,140 @@
 'use strict';
 
-/**
- * An asynchronous bootstrap function that runs before
- * your application gets started.
- *
- * This gives you an opportunity to set up your data model,
- * run jobs, or perform some special logic.
- */
+const { convertToStrapiError } = require('../../errors');
 
-const path = require('path');
-const fs = require('fs');
-const _ = require('lodash');
-
-module.exports = async cb => {
+module.exports = async () => {
   // set plugin store
-  const pluginStore = strapi.store({
-    environment: strapi.config.environment,
+  const configurator = strapi.store({
     type: 'plugin',
-    name: 'upload'
+    name: 'upload',
+    key: 'settings',
   });
 
-  strapi.plugins.upload.config.providers = [];
+  strapi.plugins.upload.provider = createProvider(strapi.plugins.upload.config || {});
 
-  const loadProviders = (basePath, cb) => {
-    fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
-      // get all upload provider
-      const uploads = _.filter(node_modules, (node_module) => {
-        return _.startsWith(node_module, ('strapi-upload'));
-      });
+  // if provider config does not exist set one by default
+  const config = await configurator.get();
 
-      // mount all providers to get configs
-      _.forEach(uploads, (node_module) => {
-        strapi.plugins.upload.config.providers.push(
-          require(path.join(`${basePath}/node_modules/${node_module}`))
-        );
-      });
-
-      try {
-        // if provider config not exit set one by default
-        const config = await pluginStore.get({key: 'provider'});
-
-        if (!config) {
-          const provider = _.find(strapi.plugins.upload.config.providers, {provider: 'local'});
-
-          const value = _.assign({}, provider, {
-            enabled: true,
-            // by default limit size to 1 GB
-            sizeLimit: 1000000
-          });
-
-          await pluginStore.set({key: 'provider', value});
-        }
-      } catch (err) {
-        strapi.log.error(`Can't load ${config.provider} upload provider.`);
-        strapi.log.warn(`Please install strapi-upload-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'upload')} folder.`);
-        strapi.stop();
-      }
-
-      cb();
+  if (!config) {
+    await configurator.set({
+      value: {
+        sizeOptimization: true,
+        responsiveDimensions: true,
+      },
     });
-  };
+  }
 
-  // Load providers from the plugins' node_modules.
-  loadProviders(path.join(strapi.config.appPath, 'plugins', 'upload'), () => {
-    // Load providers from the root node_modules.
-    loadProviders(path.join(strapi.config.appPath), cb);
-  });
+  await pruneObsoleteRelations();
+  registerPermissionActions();
+};
 
+const wrapFunctionForErrors = fn => async (...args) => {
+  try {
+    return await fn(...args);
+  } catch (err) {
+    throw convertToStrapiError(err);
+  }
+};
+
+const createProvider = ({ provider, providerOptions }) => {
+  try {
+    const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
+
+    return Object.assign(Object.create(baseProvider), {
+      ...providerInstance,
+      upload: wrapFunctionForErrors(providerInstance.upload.bind(providerInstance)),
+      delete: wrapFunctionForErrors(providerInstance.delete.bind(providerInstance)),
+    });
+  } catch (err) {
+    strapi.log.error(err);
+    throw new Error(
+      `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${provider}\``
+    );
+  }
+};
+
+const baseProvider = {
+  extend(obj) {
+    Object.assign(this, obj);
+  },
+  upload() {
+    throw new Error('Provider upload method is not implemented');
+  },
+  delete() {
+    throw new Error('Provider delete method is not implemented');
+  },
+};
+
+const pruneObsoleteRelations = async () => {
+  const { upload: plugin } = strapi.plugins;
+  const modelIsNotDefined = !plugin || !plugin.models || !plugin.models.file;
+
+  if (modelIsNotDefined) {
+    return Promise.resolve();
+  }
+
+  await strapi.query('file', 'upload').custom(pruneObsoleteRelationsQuery)();
+};
+
+const pruneObsoleteRelationsQuery = ({ model }) => {
+  if (model.orm !== 'mongoose') {
+    return Promise.resolve();
+  }
+
+  const models = Array.from(strapi.db.models.values());
+  const modelsId = models.map(model => model.globalId);
+
+  return model.updateMany(
+    { related: { $elemMatch: { kind: { $nin: modelsId } } } },
+    { $pull: { related: { kind: { $nin: modelsId } } } }
+  );
+};
+
+const registerPermissionActions = () => {
+  const actions = [
+    {
+      section: 'plugins',
+      displayName: 'Access the Media Library',
+      uid: 'read',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Create (upload)',
+      uid: 'assets.create',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Update (crop, details, replace) + delete',
+      uid: 'assets.update',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Download',
+      uid: 'assets.download',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Copy link',
+      uid: 'assets.copy-link',
+      subCategory: 'assets',
+      pluginName: 'upload',
+    },
+    {
+      section: 'settings',
+      displayName: 'Access the Media Library settings page',
+      uid: 'settings.read',
+      category: 'media library',
+      pluginName: 'upload',
+    },
+  ];
+
+  const { actionProvider } = strapi.admin.services.permission;
+  actionProvider.register(actions);
 };

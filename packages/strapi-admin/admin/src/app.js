@@ -1,232 +1,218 @@
 /**
+ *
  * app.js
  *
- * This is the entry file for the application, only setup and boilerplate
- * code.
+ * Entry point of the application
  */
+
+// NOTE TO PLUGINS DEVELOPERS:
+// If you modify this file by adding new options to a plugin entry point
+// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
+// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
+// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
+// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 /* eslint-disable */
-import './public-path';
-import 'babel-polyfill';
-/* eslint-disable no-console */
-// Import all the third party stuff
-import { Provider } from 'react-redux';
+
+import '@babel/polyfill';
+import 'sanitize.css/sanitize.css';
+
+// Third party css library needed
+import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/css/font-awesome.min.css';
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.min.js';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ConnectedRouter } from 'react-router-redux';
-import createHistory from 'history/createBrowserHistory';
-import { merge, isFunction } from 'lodash';
-import 'sanitize.css/sanitize.css';
-import 'whatwg-fetch';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+// Strapi provider with the internal APIs
+import { StrapiProvider } from 'strapi-helper-plugin';
+import { merge } from 'lodash';
+import Fonts from './components/Fonts';
+import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
+import { showNotification } from './containers/NotificationProvider/actions';
 
-import LanguageProvider from 'containers/LanguageProvider';
+import basename from './utils/basename';
+import getInjectors from './utils/reducerInjectors';
+import injectReducer from './utils/injectReducer';
+import injectSaga from './utils/injectSaga';
+import Strapi from './utils/Strapi';
 
-import App from 'containers/App';
-import { showNotification } from 'containers/NotificationProvider/actions';
-import {
-  freezeApp,
-  pluginLoaded,
-  unfreezeApp,
-  unsetHasUserPlugin,
-  updatePlugin,
-} from 'containers/App/actions';
+// Import root component
+import App from './containers/App';
+// Import Language provider
+import LanguageProvider from './containers/LanguageProvider';
 
-import auth from 'utils/auth';
-import configureStore from './store';
+import configureStore from './configureStore';
+import { SETTINGS_BASE_URL } from './config';
+
+// Import i18n messages
 import { translationMessages, languages } from './i18n';
-import { findIndex } from 'lodash';
-
-const plugins = (() => {
-  try {
-    return require('./config/plugins.json');
-  } catch (e) {
-    return [];
-  }
-})();
-/* eslint-enable */
 
 // Create redux store with history
-const basename = strapi.remoteURL.replace(window.location.origin, '');
-const history = createHistory({
-  basename,
-});
-const store = configureStore({}, history);
+import history from './utils/history';
 
-const render = (translatedMessages) => {
-  ReactDOM.render(
-    <Provider store={store}>
-      <LanguageProvider messages={translatedMessages}>
-        <ConnectedRouter history={history}>
-          <App />
-        </ConnectedRouter>
-      </LanguageProvider>
-    </Provider>,
-    document.getElementById('app')
-  );
-};
+import plugins from './plugins';
 
-// Hot reloadable translation json files
-if (module.hot) {
-  // modules.hot.accept does not accept dynamic dependencies,
-  // have to be constants at compile-time
-  module.hot.accept('./i18n', () => {
-    render(translationMessages);
+const strapi = Strapi();
+
+const initialState = {};
+const store = configureStore(initialState, history);
+const { dispatch } = store;
+const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
+
+Object.keys(plugins).forEach(current => {
+  const registerPlugin = plugin => {
+    return plugin;
+  };
+  const currentPluginFn = plugins[current];
+
+  // By updating this by adding required methods
+  // to load a plugin you need to update this file
+  // strapi-generate-plugins/files/admin/src/index.js needs to be updated
+  const plugin = currentPluginFn({
+    registerComponent: strapi.componentApi.registerComponent,
+    registerField: strapi.fieldApi.registerField,
+    registerPlugin,
+    settingsBaseURL: SETTINGS_BASE_URL || '/settings',
   });
-}
 
-// Chunked polyfill for browsers without Intl support
-window.onload = function onLoad() {
-  if (!window.Intl) {
-    Promise.all([
-      System.import('intl'),
-      System.import('intl/locale-data/jsonp/en.js'),
-      System.import('intl/locale-data/jsonp/fr.js'),
-    ]).then(() => render(translationMessages));
-  } else {
-    render(translationMessages);
+  const pluginTradsPrefixed = languages.reduce((acc, lang) => {
+    const currentLocale = plugin.trads[lang];
+
+    if (currentLocale) {
+      const localeprefixedWithPluginId = Object.keys(currentLocale).reduce((acc2, current) => {
+        acc2[`${plugin.id}.${current}`] = currentLocale[current];
+
+        return acc2;
+      }, {});
+
+      acc[lang] = localeprefixedWithPluginId;
+    }
+
+    return acc;
+  }, {});
+
+  // Inject plugins reducers
+  const pluginReducers = plugin.reducers || {};
+
+  Object.keys(pluginReducers).forEach(reducerName => {
+    getInjectors(store).injectReducer(reducerName, pluginReducers[reducerName]);
+  });
+
+  try {
+    merge(translationMessages, pluginTradsPrefixed);
+    dispatch(pluginLoaded(plugin));
+  } catch (err) {
+    console.log({ err });
   }
-};
+});
 
-// Don't inject plugins in development mode.
-if (window.location.port !== '4000') {
-  fetch(`${strapi.remoteURL}/config/plugins.json`)
-    .then(response => {
-      return response.json();
-    })
-    .then(plugins => {
-      if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-        store.dispatch(unsetHasUserPlugin());
-      }
-
-      const $body = document.getElementsByTagName('body')[0];
-
-      (plugins || []).forEach(plugin => {
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.onerror = function (oError) {
-          const source = new URL(oError.target.src);
-          const url = new URL(`${strapi.remoteURL}`);
-
-          if (!source || !url) {
-            throw new Error(`Impossible to load: ${oError.target.src}`);
-          }
-
-          // Remove tag.
-          $body.removeChild(script);
-
-          // New attempt with new src.
-          const newScript = document.createElement('script');
-          newScript.type = 'text/javascript';
-          newScript.src = `${url.origin}${source.pathname}`;
-          $body.appendChild(newScript);
-        };
-
-        script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
-          `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
-          plugin.source[process.env.NODE_ENV]; // absolute
-
-        $body.appendChild(script);
-      });
-    })
-    .catch(err => {
-      console.log(err);
-    });
-} else if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-  store.dispatch(unsetHasUserPlugin());
-}
-
-// const isPluginAllowedToRegister = (plugin) => true;
-const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken();
-
-/**
- * Register a plugin
- *
- * @param params
- */
-const registerPlugin = (plugin) => {
-  // Merge admin translation messages
-  merge(translationMessages, plugin.translationMessages);
-
-  plugin.leftMenuSections = plugin.leftMenuSections || [];
-  const shouldAllowRegister = isPluginAllowedToRegister(plugin) !== null;
-
-  switch (true) {
-    // Execute bootstrap function and check if plugin can be rendered
-    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements) && shouldAllowRegister:
-      plugin.pluginRequirements(plugin)
-        .then(plugin => {
-          return plugin.bootstrap(plugin);
-        })
-        .then(plugin => {
-          store.dispatch(pluginLoaded(plugin));
-        });
-      break;
-    // Check if plugin can be rendered
-    case isFunction(plugin.pluginRequirements):
-      plugin.pluginRequirements(plugin).then(plugin => {
-        store.dispatch(pluginLoaded(plugin));
-      });
-      break;
-    // Execute bootstrap function
-    case isFunction(plugin.bootstrap) && shouldAllowRegister:
-      plugin.bootstrap(plugin).then(plugin => {
-        store.dispatch(pluginLoaded(plugin));
-      });
-      break;
-    default:
-      store.dispatch(pluginLoaded(plugin));
+// TODO
+const remoteURL = (() => {
+  // Relative URL (ex: /dashboard)
+  if (REMOTE_URL[0] === '/') {
+    return (window.location.origin + REMOTE_URL).replace(/\/$/, '');
   }
-};
+
+  return REMOTE_URL.replace(/\/$/, '');
+})();
 
 const displayNotification = (message, status) => {
-  store.dispatch(showNotification(message, status));
+  dispatch(showNotification(message, status));
 };
-
-const lockApp = () => {
-  store.dispatch(freezeApp());
+const lockApp = data => {
+  dispatch(freezeApp(data));
 };
-
 const unlockApp = () => {
-  store.dispatch(unfreezeApp());
+  dispatch(unfreezeApp());
 };
 
-/**
- * Public Strapi object exposed to the `window` object
- */
+const lockAppWithOverlay = () => {
+  const overlayblockerParams = {
+    children: <div />,
+    noGradient: true,
+  };
+
+  lockApp(overlayblockerParams);
+};
 
 window.strapi = Object.assign(window.strapi || {}, {
-  mode: process.env.MODE || 'host',
-  registerPlugin,
+  node: MODE || 'host',
+  env: NODE_ENV,
+  remoteURL,
+  backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
-    success: (message) => {
+    success: message => {
       displayNotification(message, 'success');
     },
-    warning: (message) => {
+    warning: message => {
       displayNotification(message, 'warning');
     },
-    error: (message) => {
+    error: message => {
       displayNotification(message, 'error');
     },
-    info: (message) => {
+    info: message => {
       displayNotification(message, 'info');
     },
   },
-  refresh: (pluginId) => ({
-    translationMessages: (translationMessagesUpdated) => {
+  refresh: pluginId => ({
+    translationMessages: translationMessagesUpdated => {
       render(merge({}, translationMessages, translationMessagesUpdated));
     },
-    leftMenuSections: (leftMenuSectionsUpdated) => {
+    leftMenuSections: leftMenuSectionsUpdated => {
       store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
   router: history,
   languages,
-  currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
+  currentLanguage:
+    window.localStorage.getItem('strapi-admin-language') ||
+    window.navigator.language ||
+    window.navigator.userLanguage ||
+    'en',
   lockApp,
+  lockAppWithOverlay,
   unlockApp,
+  injectReducer,
+  injectSaga,
+  store,
 });
 
-const dispatch = store.dispatch;
-export {
-  dispatch,
+const render = messages => {
+  ReactDOM.render(
+    <Provider store={store}>
+      <StrapiProvider strapi={strapi}>
+        <Fonts />
+        <LanguageProvider messages={messages}>
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </LanguageProvider>
+      </StrapiProvider>
+    </Provider>,
+    MOUNT_NODE
+  );
 };
+
+if (module.hot) {
+  module.hot.accept(['./i18n', './containers/App'], () => {
+    ReactDOM.unmountComponentAtNode(MOUNT_NODE);
+
+    render(translationMessages);
+  });
+}
+
+if (NODE_ENV !== 'test') {
+  render(translationMessages);
+}
+
+// @Pierre Burgy exporting dispatch for the notifications...
+export { dispatch };
+
+// TODO remove this for the new Cypress tests
+if (window.Cypress) {
+  window.__store__ = Object.assign(window.__store__ || {}, { store });
+}

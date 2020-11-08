@@ -7,78 +7,78 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
-import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
+import makeSelectLocale from '../LanguageProvider/selectors';
+import { changeLocale } from '../LanguageProvider/actions';
+import { languages, languageNativeNames } from '../../i18n';
+import Wrapper from './Wrapper';
 
-import { selectLocale } from 'containers/LanguageProvider/selectors';
-import { changeLocale } from 'containers/LanguageProvider/actions';
-import { languages } from 'i18n';
-
-import styles from './styles.scss';
-
-export class LocaleToggle extends React.Component { // eslint-disable-line
+export class LocaleToggle extends React.Component {
+  // eslint-disable-line
   state = { isOpen: false };
-
-  getFlagUrl = (locale) => {
-    switch (locale) {
-      case 'en':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/us.svg';
-      case 'zh':
-      case 'zh-Hans':
-        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg';
-      default:
-        return `https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/${locale}.svg`;
-    }
-  }
 
   toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
 
   render() {
-    const { locale } = this.props;
+    const {
+      currentLocale: { locale },
+      className,
+    } = this.props;
+    const style = cn('localeDropdownMenu', className);
 
     return (
-      <div className={styles.localeToggle}>
+      <Wrapper>
         <ButtonDropdown isOpen={this.state.isOpen} toggle={this.toggle}>
-          <DropdownToggle className={styles.localeDropdownContent}>
-            <span>{locale}</span>
-            <img src={this.getFlagUrl(locale)} alt={locale} />
+          <DropdownToggle className="localeDropdownContent">
+            <span>{languageNativeNames[locale]}</span>
           </DropdownToggle>
-          <DropdownMenu className={cn(styles.localeDropdownMenu, this.props.isLogged ? '' : styles.localeDropdownMenuNotLogged)}>
+
+          <DropdownMenu className={style}>
             {languages.map(language => (
-              <DropdownItem key={language} onClick={() => this.props.changeLocale(language)} className={cn(styles.localeToggleItem, locale === language ? styles.localeToggleItemActive : '')}>
-                {language.toUpperCase()}
+              <DropdownItem
+                key={language}
+                onClick={() => this.props.changeLocale(language)}
+                className={cn(
+                  'localeToggleItem',
+                  locale === language ? 'localeToggleItemActive' : ''
+                )}
+              >
+                {languageNativeNames[language]}
               </DropdownItem>
             ))}
           </DropdownMenu>
         </ButtonDropdown>
-      </div>
+      </Wrapper>
     );
   }
 }
 
-
-
-LocaleToggle.propTypes = {
-  changeLocale: PropTypes.func.isRequired,
-  isLogged: PropTypes.string.isRequired,
-  locale: PropTypes.string.isRequired,
+LocaleToggle.defaultProps = {
+  className: null,
 };
 
-const mapStateToProps = createSelector(
-  selectLocale(),
-  (locale) => ({ locale })
-);
+LocaleToggle.propTypes = {
+  className: PropTypes.string,
+  changeLocale: PropTypes.func.isRequired,
+  currentLocale: PropTypes.object.isRequired,
+};
 
-function mapDispatchToProps(dispatch) {
+const mapStateToProps = createStructuredSelector({
+  currentLocale: makeSelectLocale(),
+});
+
+export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       changeLocale,
     },
-    dispatch,
+    dispatch
   );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(LocaleToggle);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+export default compose(withConnect)(LocaleToggle);

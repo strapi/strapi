@@ -11,39 +11,114 @@
  * the linting exception.
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { bindActionCreators, compose } from 'redux';
+import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
+import GlobalStyle from '../../components/GlobalStyle';
+import Admin from '../Admin';
+import AuthPage from '../AuthPage';
+import NotFoundPage from '../NotFoundPage';
+// eslint-disable-next-line import/no-cycle
+import NotificationProvider from '../NotificationProvider';
+import PrivateRoute from '../PrivateRoute';
+import Theme from '../Theme';
+import { Content, Wrapper } from './components';
+import { getDataSucceeded } from './actions';
 
-import AdminPage from 'containers/AdminPage';
-import NotFoundPage from 'containers/NotFoundPage';
+function App(props) {
+  const getDataRef = useRef();
+  const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
+  getDataRef.current = props.getDataSucceeded;
 
-import NotificationProvider from 'containers/NotificationProvider';
+  useEffect(() => {
+    const getData = async () => {
+      const currentToken = auth.getToken();
 
-import '../../styles/main.scss';
+      if (currentToken) {
+        try {
+          const {
+            data: { token },
+          } = await request('/admin/renew-token', {
+            method: 'POST',
+            body: { token: currentToken },
+          });
+          auth.updateToken(token);
+        } catch (err) {
+          // Refresh app
+          auth.clearAppStorage();
+          window.location.reload();
+        }
+      }
 
-import styles from './styles.scss';
+      try {
+        const { data } = await request('/admin/init', { method: 'GET' });
 
-export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  render() {
-    return (
-      <div>
+        const { uuid } = data;
+
+        if (uuid) {
+          try {
+            fetch('https://analytics.strapi.io/track', {
+              method: 'POST',
+              body: JSON.stringify({
+                event: 'didInitializeAdministration',
+                uuid,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          } catch (e) {
+            // Silent.
+          }
+        }
+
+        getDataRef.current(data);
+        setState({ isLoading: false, hasAdmin: data.hasAdmin });
+      } catch (err) {
+        strapi.notification.error('app.containers.App.notification.error.init');
+      }
+    };
+
+    getData();
+  }, [getDataRef]);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  return (
+    <Theme>
+      <Wrapper>
+        <GlobalStyle />
         <NotificationProvider />
-        <div className={styles.container}>
+        <Content>
           <Switch>
-            <Route path="/" component={AdminPage} />
+            <Route
+              path="/auth/:authType"
+              render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
+              exact
+            />
+            <PrivateRoute path="/" component={Admin} />
             <Route path="" component={NotFoundPage} />
           </Switch>
-        </div>
-      </div>
-    );
-  }
+        </Content>
+      </Wrapper>
+    </Theme>
+  );
 }
 
-App.contextTypes = {
-  router: PropTypes.object.isRequired,
+App.propTypes = {
+  getDataSucceeded: PropTypes.func.isRequired,
 };
 
-App.propTypes = {};
+export function mapDispatchToProps(dispatch) {
+  return bindActionCreators({ getDataSucceeded }, dispatch);
+}
 
-export default App;
+const withConnect = connect(null, mapDispatchToProps);
+
+export default compose(withConnect)(App);
+export { App };

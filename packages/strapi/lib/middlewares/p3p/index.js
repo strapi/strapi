@@ -3,7 +3,8 @@
 /**
  * Module dependencies
  */
-
+const convert = require('koa-convert');
+const { p3p } = require('koa-lusca');
 /**
  * P3P hook
  */
@@ -14,20 +15,15 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
-      strapi.app.use(
-        async (ctx, next) => {
-          if (ctx.request.admin) return next();
+    initialize() {
+      strapi.app.use(async (ctx, next) => {
+        if (ctx.request.admin) return next();
 
-          return await strapi.koaMiddlewares.convert(
-            strapi.koaMiddlewares.lusca.p3p({
-              value: strapi.config.middleware.settings.p3p.value
-            })
-          )(ctx, next);
-        }
-      );
-
-      cb();
-    }
+        return await convert(p3p(strapi.config.middleware.settings.p3p))(
+          ctx,
+          next
+        );
+      });
+    },
   };
 };

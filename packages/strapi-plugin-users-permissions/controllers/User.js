@@ -7,153 +7,119 @@
  */
 
 const _ = require('lodash');
+const adminUserController = require('./user/admin');
+const apiUserController = require('./user/api');
+const { sanitizeEntity } = require('strapi-utils');
+
+const sanitizeUser = user =>
+  sanitizeEntity(user, {
+    model: strapi.query('user', 'users-permissions').model,
+  });
+
+const resolveController = ctx => {
+  const {
+    state: { isAuthenticatedAdmin },
+  } = ctx;
+
+  return isAuthenticatedAdmin ? adminUserController : apiUserController;
+};
+
+const resolveControllerMethod = method => ctx => {
+  const controller = resolveController(ctx);
+  const callbackFn = controller[method];
+
+  if (!_.isFunction(callbackFn)) {
+    return ctx.notFound();
+  }
+
+  return callbackFn(ctx);
+};
 
 module.exports = {
+  create: resolveControllerMethod('create'),
+  update: resolveControllerMethod('update'),
 
   /**
    * Retrieve user records.
-   *
    * @return {Object|Array}
    */
+  async find(ctx, next, { populate } = {}) {
+    let users;
 
-  find: async (ctx) => {
-    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
-    data.reduce((acc, user) => {
-      acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
-      return acc;
-    }, []);
+    if (_.has(ctx.query, '_q')) {
+      // use core strapi query to search for users
+      users = await strapi.query('user', 'users-permissions').search(ctx.query, populate);
+    } else {
+      users = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
+    }
+
+    ctx.body = users.map(sanitizeUser);
+  },
+
+  /**
+   * Retrieve a user record.
+   * @return {Object}
+   */
+  async findOne(ctx) {
+    const { id } = ctx.params;
+    let data = await strapi.plugins['users-permissions'].services.user.fetch({
+      id,
+    });
+
+    if (data) {
+      data = sanitizeUser(data);
+    }
 
     // Send 200 `ok`
+    ctx.body = data;
+  },
+
+  /**
+   * Retrieve user count.
+   * @return {Number}
+   */
+  async count(ctx) {
+    if (_.has(ctx.query, '_q')) {
+      return await strapi.plugins['users-permissions'].services.user.countSearch(ctx.query);
+    }
+    ctx.body = await strapi.plugins['users-permissions'].services.user.count(ctx.query);
+  },
+
+  /**
+   * Destroy a/an user record.
+   * @return {Object}
+   */
+  async destroy(ctx) {
+    const { id } = ctx.params;
+    const data = await strapi.plugins['users-permissions'].services.user.remove({ id });
+    ctx.send(sanitizeUser(data));
+  },
+
+  async destroyAll(ctx) {
+    const {
+      request: { query },
+    } = ctx;
+
+    const toRemove = Object.values(_.omit(query, 'source'));
+    const { primaryKey } = strapi.query('user', 'users-permissions');
+    const finalQuery = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
+
+    const data = await strapi.plugins['users-permissions'].services.user.removeAll(finalQuery);
+
     ctx.send(data);
   },
 
   /**
    * Retrieve authenticated user.
-   *
    * @return {Object|Array}
    */
-
-  me: async (ctx) => {
+  async me(ctx) {
     const user = ctx.state.user;
 
     if (!user) {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
     }
 
-    const data = _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']);
-
-    // Send 200 `ok`
-    ctx.send(data);
+    ctx.body = sanitizeUser(user);
   },
-
-  /**
-   * Retrieve a user record.
-   *
-   * @return {Object}
-   */
-
-  findOne: async (ctx) => {
-    let data = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
-
-    if (data) {
-      data = _.omit(data.toJSON ? data.toJSON() : data, ['password', 'resetPasswordToken']);
-    }
-
-    // Send 200 `ok`
-    ctx.send(data);
-  },
-
-  /**
-   * Create a/an user record.
-   *
-   * @return {Object}
-   */
-
-  create: async (ctx) => {
-    if ((await strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-      key: 'advanced'
-    }).get()).unique_email && ctx.request.body.email) {
-      const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
-
-      if (user) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
-      }
-    }
-
-    try {
-      const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
-      // Send 201 `created`
-      ctx.created(data);
-    } catch(error) {
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
-    }
-  },
-
-  /**
-   * Update a/an user record.
-   *
-   * @return {Object}
-   */
-
-  update: async (ctx) => {
-    try {
-      const advancedConfigs = await strapi.store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced'
-      }).get();
-
-      if (advancedConfigs.unique_email && ctx.request.body.email) {
-        const users = await strapi.plugins['users-permissions'].services.user.fetchAll({ email: ctx.request.body.email });
-
-        if (users && _.find(users, user => (user.id || user._id).toString() !== ctx.params.id)) {
-          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
-        }
-      }
-
-      const user = await strapi.plugins['users-permissions'].services.user.fetch(ctx.params);
-
-      if (_.get(ctx.request, 'body.password') === user.password) {
-        delete ctx.request.body.password;
-      }
-
-      if (_.get(ctx.request, 'body.role', '').toString() === '0' && (!_.get(ctx.state, 'user.role') || _.get(ctx.state, 'user.role', '').toString() !== '0')) {
-        delete ctx.request.body.role;
-      }
-
-      if (ctx.request.body.email && advancedConfigs.unique_email) {
-        const user = await strapi.query('user', 'users-permissions').findOne({
-          email: ctx.request.body.email
-        });
-
-        if (user !== null && (user.id || user._id).toString() !== ctx.params.id) {
-          return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
-        }
-      }
-
-      const data = await strapi.plugins['users-permissions'].services.user.edit(ctx.params, ctx.request.body) ;
-
-      // Send 200 `ok`
-      ctx.send(data);
-    } catch(error) {
-      ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
-    }
-  },
-
-  /**
-   * Destroy a/an user record.
-   *
-   * @return {Object}
-   */
-
-  destroy: async (ctx) => {
-    const data = await strapi.plugins['users-permissions'].services.user.remove(ctx.params);
-
-    // Send 200 `ok`
-    ctx.send(data);
-  }
 };

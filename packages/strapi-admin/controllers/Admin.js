@@ -1,100 +1,95 @@
 'use strict';
 
-const path = require('path');
-const exec = require('child_process').execSync;
+const execa = require('execa');
 const _ = require('lodash');
+
+const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
+
+/**
+ * Validates a plugin name format
+ */
+const isValidPluginName = plugin => {
+  return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
+};
 
 /**
  * A set of functions called "actions" for `Admin`
  */
 
 module.exports = {
-  getCurrentEnvironment: async ctx => {
-    try {
-      ctx.send({ currentEnvironment: strapi.app.env });
-    } catch(err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
+  async init(ctx) {
+    const currentEnvironment = strapi.app.env;
+    const uuid = strapi.config.get('uuid', false);
+    const autoReload = strapi.config.get('autoReload', false);
+    const strapiVersion = strapi.config.get('info.strapi', null);
+
+    const hasAdmin = await strapi.admin.services.user.exists();
+
+    return ctx.send({
+      data: { uuid, currentEnvironment, autoReload, strapiVersion, hasAdmin },
+    });
   },
 
-  getStrapiVersion: async ctx => {
+  async installPlugin(ctx) {
     try {
-      const strapiVersion = _.get(strapi.config, 'info.strapi', null);
-      return ctx.send({ strapiVersion });
-    } catch(err) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'The version is not available' }] }]);
-    }
-  },
+      const { plugin } = ctx.request.body;
 
-  getGaConfig: async ctx => {
-    try {
-      const allowGa = _.get(strapi.config, 'info.customs.allowGa', true);
-      ctx.send({ allowGa });
-    } catch(err) {
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
-  },
-
-  getLayout: async ctx => {
-    try {
-      const layout = require('../config/layout.js');
-
-      return ctx.send({ layout });
-    } catch(err) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
-  },
-
-  installPlugin: async ctx => {
-    try {
-      const { plugin, port } = ctx.request.body;
-      const strapiBin = path.join(process.cwd(), 'node_modules', 'strapi', 'bin', 'strapi');
+      if (!isValidPluginName(plugin)) {
+        return ctx.badRequest('Invalid plugin name');
+      }
 
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
-
-      exec(`node "${strapiBin}" install ${plugin} ${port === '4000' ? '--dev' : ''}`);
+      await execa('npm', ['run', 'strapi', '--', 'install', plugin]);
 
       ctx.send({ ok: true });
 
       strapi.reload();
-    } catch(err) {
+    } catch (err) {
+      strapi.log.error(err);
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
-  plugins: async ctx => {
+  async plugins(ctx) {
     try {
       const plugins = Object.keys(strapi.plugins).reduce((acc, key) => {
-        acc[key] = strapi.plugins[key].package.strapi;
+        acc[key] = _.get(strapi.plugins, [key, 'package', 'strapi'], {
+          name: key,
+        });
 
         return acc;
       }, {});
 
       ctx.send({ plugins });
-    } catch(err) {
+    } catch (err) {
+      strapi.log.error(err);
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
-  uninstallPlugin: async ctx => {
+  async uninstallPlugin(ctx) {
     try {
       const { plugin } = ctx.params;
-      const strapiBin = path.join(process.cwd(), 'node_modules', 'strapi', 'bin', 'strapi');
+
+      if (!isValidPluginName(plugin)) {
+        return ctx.badRequest('Invalid plugin name');
+      }
 
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      exec(`node "${strapiBin}" uninstall ${plugin}`);
+      await execa('npm', ['run', 'strapi', '--', 'uninstall', plugin, '-d']);
 
       ctx.send({ ok: true });
 
       strapi.reload();
-    } catch(err) {
+    } catch (err) {
+      strapi.log.error(err);
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
-  }
+  },
 };

@@ -4,9 +4,9 @@
  *
  */
 
-import {
-  CHANGE_LOCALE,
-} from './constants';
+/* eslint-disable */
+
+import { CHANGE_LOCALE } from './constants';
 
 export function changeLocale(languageLocale) {
   return {

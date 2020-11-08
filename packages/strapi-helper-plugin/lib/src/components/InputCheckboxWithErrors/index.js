@@ -11,12 +11,11 @@ import { isEmpty, isObject, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputCheckbox from 'components/InputCheckbox';
-import InputSpacer from 'components/InputSpacer';
-
-import styles from './styles.scss';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputCheckbox from '../InputCheckbox';
+import InputSpacer from '../InputSpacer';
+import Container from './Container';
 
 class InputCheckboxWithErrors extends React.Component {
   state = { errors: [] };
@@ -24,12 +23,13 @@ class InputCheckboxWithErrors extends React.Component {
   componentDidMount() {
     // Display input error if it already has some
     const { errors } = this.props;
+
     if (!isEmpty(errors)) {
       this.setState({ errors });
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Check if errors have been updated during validations
     if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
       // Remove from the state the errors that have already been set
@@ -38,7 +38,7 @@ class InputCheckboxWithErrors extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const {
       autoFocus,
       className,
@@ -64,7 +64,7 @@ class InputCheckboxWithErrors extends React.Component {
       value,
     } = this.props;
 
-    const handleBlur = onBlur ? onBlur : () => {};
+    const handleBlur = onBlur || (() => {});
     let inputTitle = '';
 
     let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
@@ -75,8 +75,12 @@ class InputCheckboxWithErrors extends React.Component {
 
     if (isObject(title) && title.id) {
       inputTitle = (
-        <div className={styles.inputTitle}>
-          <FormattedMessage id={title.id} defaultMessage={title.id} values={title.params} />
+        <div className="inputTitle">
+          <FormattedMessage
+            id={title.id}
+            defaultMessage={title.id}
+            values={title.params}
+          />
         </div>
       );
     }
@@ -86,12 +90,8 @@ class InputCheckboxWithErrors extends React.Component {
     }
 
     return (
-      <div
-        className={cn(
-          styles.container,
-          customBootstrapClass,
-          !isEmpty(className) && className,
-        )}
+      <Container
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         {inputTitle}
@@ -110,17 +110,21 @@ class InputCheckboxWithErrors extends React.Component {
           value={value}
         />
         <InputDescription
-          className={cn(styles.inputCheckboxDescriptionContainer, inputDescriptionClassName)}
+          className={cn(
+            'inputCheckboxDescriptionContainer',
+            inputDescriptionClassName
+          )}
           message={this.props.inputDescription}
           style={inputDescriptionStyle}
         />
         <InputErrors
           className={errorsClassName}
           errors={this.state.errors}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </Container>
     );
   }
 }
@@ -180,10 +184,7 @@ InputCheckboxWithErrors.propTypes = {
   ]),
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
@@ -197,7 +198,7 @@ InputCheckboxWithErrors.propTypes = {
       params: PropTypes.object,
     }),
   ]),
-  value: PropTypes.bool,
+  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };
 
 export default InputCheckboxWithErrors;

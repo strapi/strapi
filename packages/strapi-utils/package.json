@@ -1,10 +1,9 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-alpha.12.2",
+  "version": "3.2.5",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
-    "knex",
     "strapi",
     "utilities",
     "utils",
@@ -14,15 +13,13 @@
     "lib": "./lib"
   },
   "main": "./lib",
-  "scripts": {
-    "test": "echo \"Error: no test specified yet!\""
-  },
   "dependencies": {
-    "commander": "^2.11.0",
-    "joi-json": "^2.0.1",
-    "knex": "^0.13.0",
-    "lodash": "^4.17.4",
-    "pino": "^4.7.1"
+    "@sindresorhus/slugify": "1.1.0",
+    "date-fns": "^2.8.1",
+    "lodash": "4.17.19",
+    "pino": "^4.7.1",
+    "pluralize": "^8.0.0",
+    "yup": "0.29.3"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -44,8 +41,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">=10.16.0 <=14.x.x",
+    "npm": ">=6.0.0"
   },
-  "license": "MIT"
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

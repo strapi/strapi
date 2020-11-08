@@ -1,81 +1,94 @@
 /**
-*
-* PopUpWarning
-*
-*/
+ *
+ * PopUpWarning
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-
-// modal
-import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { Button, Padded, Text } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
-import IcoDanger from '../../assets/icons/icon_danger.svg';
-import IcoNotFound from '../../assets/icons/icon_flag_not_found.svg';
-import IcoInfo from '../../assets/icons/icon_info.svg';
-import IcoSuccess from '../../assets/icons/icon_success.svg';
-import IcoWarning from '../../assets/icons/icon_warning.svg';
-import styles from './styles.scss';
+import Body from './Body';
+import ContentText from './Content';
+import Header from './Header';
+import Icon from './Icon';
+import StyledModal from './StyledModal';
+import StyledFooter from './StyledFooter';
 
-const icons = {
-  'danger': IcoDanger,
-  'info': IcoInfo,
-  'notFound': IcoNotFound,
-  'success': IcoSuccess,
-  'warning': IcoWarning,
-};
+function PopUpWarning({
+  content,
+  isOpen,
+  isConfirmButtonLoading,
+  onConfirm,
+  onlyConfirmButton,
+  popUpWarningType,
+  toggleModal,
+  ...rest
+}) {
+  const handleToggle = e => {
+    // Prevent user interactions while requests are being submitted
+    if (isConfirmButtonLoading) {
+      return;
+    }
 
-function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarningType, toggleModal }) {
+    toggleModal(e);
+  };
+
   const buttons = [
     {
-      className: styles.secondary,
-      id: content.cancel || 'components.popUpWarning.button.cancel',
-      handleClick: toggleModal,
-      style: {},
+      color: 'cancel',
+      onClick: handleToggle,
+      message: content.cancel || 'components.popUpWarning.button.cancel',
     },
     {
-      className: styles.primary,
-      id: content.confirm || 'components.popUpWarning.button.confirm',
-      handleClick: onConfirm,
-      style: {},
+      color: 'delete',
+      onClick: onConfirm,
+      isLoading: isConfirmButtonLoading,
+      message: content.confirm || 'components.popUpWarning.button.confirm',
     },
   ];
+
   const singleButton = [
     {
-      className: styles.primary,
-      id: content.confirm || 'components.popUpWarning.button.confirm',
-      handleClick: onConfirm,
+      color: 'delete',
+      onClick: onConfirm,
+      message: content.confirm || 'components.popUpWarning.button.confirm',
       style: { width: '100%' },
     },
   ];
   const footerButtons = onlyConfirmButton ? singleButton : buttons;
 
   return (
-    <div className={styles.popUpWarningHelper}>
-      <Modal isOpen={isOpen} toggle={toggleModal} className={styles.modalPosition}>
-        <ModalHeader toggle={toggleModal} className={styles.popUpWarningHeader}>
-          <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
-        </ModalHeader>
-        <ModalBody className={styles.modalBodyHelper}>
-          <div className={styles.modalBodyContainerHelper}>
-            <img src={icons[popUpWarningType]} alt="icon" />
-            <FormattedMessage id={content.message || 'components.popUpWarning.message'}>
-              {(message) => (
-                <p>{message}</p>
-              )}
-            </FormattedMessage>
-          </div>
-          <div className={styles.popUpWarningButtonContainer}>
-            {map(footerButtons, (button) => (
-              <FormattedMessage id={button.id} key={button.id}>
-                {(message) => <Button onClick={button.handleClick} className={button.className} style={button.style}>{message}</Button>}
-              </FormattedMessage>
-            ))}
-          </div>
-        </ModalBody>
-      </Modal>
-    </div>
+    <StyledModal isOpen={isOpen} toggle={handleToggle} {...rest}>
+      <Header onClick={handleToggle} title={content.title} />
+      <Body>
+        <Icon type={popUpWarningType} />
+        <ContentText small={content.secondMessage}>
+          <FormattedMessage
+            id={content.message || 'components.popUpWarning.message'}
+            values={content.messageValues}
+          />
+        </ContentText>
+        {content.secondMessage && (
+          <Padded top size="smd">
+            <Text color="lightOrange">
+              <FormattedMessage id={content.secondMessage} />
+            </Text>
+          </Padded>
+        )}
+      </Body>
+      <StyledFooter>
+        {map(footerButtons, button => {
+          const { message, onClick, ...rest } = button;
+          return (
+            <Button key={message} onClick={onClick} {...rest}>
+              <FormattedMessage id={message} />
+            </Button>
+          );
+        })}
+      </StyledFooter>
+    </StyledModal>
   );
 }
 
@@ -84,8 +97,10 @@ PopUpWarning.propTypes = {
     cancel: PropTypes.string,
     confirm: PropTypes.string,
     message: PropTypes.string,
+    secondMessage: PropTypes.string,
     title: PropTypes.string,
   }),
+  isConfirmButtonLoading: PropTypes.bool,
   isOpen: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onlyConfirmButton: PropTypes.bool,
@@ -98,8 +113,11 @@ PopUpWarning.defaultProps = {
     cancel: 'components.popUpWarning.button.cancel',
     confirm: 'components.popUpWarning.button.confirm',
     message: 'components.popUpWarning.message',
+    messageValues: {},
+    secondMessage: null,
     title: 'components.popUpWarning.title',
   },
+  isConfirmButtonLoading: false,
   onlyConfirmButton: false,
   popUpWarningType: 'danger',
 };

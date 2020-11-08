@@ -1,54 +1,111 @@
-/**
- *
- * List
- *
- */
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import cn from 'classnames';
+import { Checkbox } from '@buffetjs/core';
+import { get } from 'lodash';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { getTrad, getType } from '../../utils';
+import Card from '../Card';
+import CardControlsWrapper from '../CardControlsWrapper';
+import ListWrapper from '../ListWrapper';
+import IntlText from '../IntlText';
+import ListCell from './ListCell';
+import ListRow from './ListRow';
 
-import Li from 'components/Li';
-import ListHeader from 'components/ListHeader';
+const List = ({
+  allowedTypes,
+  data,
+  onChange,
+  onCardClick,
+  selectedItems,
+  smallCards,
+  canSelect,
+  renderCardControl,
+  showCheckbox,
+}) => {
+  const selectedAssets = selectedItems.length;
 
-import styles from './styles.scss';
+  const handleCheckboxClick = e => {
+    e.stopPropagation();
+  };
 
-const EmptyLi = () => (
-  <li className={styles.emptyLiWrapper}>
-    <div>
-      <FormattedMessage id="upload.EmptyLi.message" />
-    </div>
-  </li>
-);
-
-function List(props) {
   return (
-    <div className={cn('container-fluid', styles.listWrapper)}>
-      <div className="row">
-        <ul className={styles.ulList}>
-          <ListHeader changeSort={props.changeSort} sort={props.sort} />
-          {props.data.map((item, key) => (
-            <Li
-              key={item.hash || key}
-              item={item}
-            />
-          ))}
-          {props.data.length === 0 && <EmptyLi />}
-        </ul>
-      </div>
-    </div>
+    <ListWrapper>
+      {!smallCards && selectedAssets > 0 && (
+        <IntlText
+          id={getTrad(`list.assets.selected.${selectedAssets > 1 ? 'plural' : 'singular'}`)}
+          values={{ number: selectedAssets }}
+          lineHeight="18px"
+        />
+      )}
+      <ListRow>
+        {data.map(item => {
+          const { id } = item;
+          const url = get(item, ['formats', 'small', 'url'], item.url);
+          const isAllowed =
+            allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
+          const checked = selectedItems.findIndex(file => file.id === id) !== -1;
+          const fileUrl = prefixFileUrlWithBackendUrl(url);
+
+          return (
+            <ListCell key={id}>
+              <Card
+                isDisabled={!isAllowed}
+                checked={checked}
+                {...item}
+                url={fileUrl}
+                onClick={onCardClick}
+                small={smallCards}
+              >
+                {(checked || canSelect) && (
+                  <>
+                    {(checked || isAllowed) && showCheckbox && (
+                      <CardControlsWrapper leftAlign className="card-control-wrapper">
+                        <Checkbox
+                          name={`${id}`}
+                          onChange={onChange}
+                          onClick={handleCheckboxClick}
+                          value={checked}
+                        />
+                      </CardControlsWrapper>
+                    )}
+                    {renderCardControl && (
+                      <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
+                        {renderCardControl(id)}
+                      </CardControlsWrapper>
+                    )}
+                  </>
+                )}
+              </Card>
+            </ListCell>
+          );
+        })}
+      </ListRow>
+    </ListWrapper>
   );
-}
+};
 
 List.defaultProps = {
-  sort: 'id',
+  allowedTypes: [],
+  canSelect: true,
+  data: [],
+  onChange: () => {},
+  onCardClick: () => {},
+  renderCardControl: null,
+  selectedItems: [],
+  smallCards: false,
+  showCheckbox: true,
 };
 
 List.propTypes = {
-  changeSort: PropTypes.func.isRequired,
-  data: PropTypes.arrayOf(PropTypes.object).isRequired,
-  sort: PropTypes.string,
+  allowedTypes: PropTypes.array,
+  canSelect: PropTypes.bool,
+  data: PropTypes.array,
+  onChange: PropTypes.func,
+  onCardClick: PropTypes.func,
+  renderCardControl: PropTypes.func,
+  selectedItems: PropTypes.array,
+  smallCards: PropTypes.bool,
+  showCheckbox: PropTypes.bool,
 };
 
 export default List;

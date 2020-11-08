@@ -3,23 +3,22 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-/* eslint-disable jsx-a11y/no-autofocus */
-import styles from './styles.scss';
+import Input from '../Input';
 
 function InputText(props) {
-  const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  const placeholder = isEmpty(props.placeholder)
+    ? 'app.utils.placeholder.defaultMessage'
+    : props.placeholder;
 
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-      {(message) => (
-        <input
+      {message => (
+        <Input
           autoFocus={props.autoFocus}
           className={cn(
-            styles.textInput,
             'form-control',
             !props.deactivateErrorHighlight && props.error && 'is-invalid',
-            !isEmpty(props.className) && props.className,
+            !isEmpty(props.className) && props.className
           )}
           disabled={props.disabled}
           id={props.name}
@@ -28,6 +27,7 @@ function InputText(props) {
           onChange={props.onChange}
           onFocus={props.onFocus}
           placeholder={message}
+          ref={props.inputRef}
           style={props.style}
           tabIndex={props.tabIndex}
           type="text"
@@ -44,6 +44,7 @@ InputText.defaultProps = {
   deactivateErrorHighlight: false,
   disabled: false,
   error: false,
+  inputRef: () => {},
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -57,6 +58,7 @@ InputText.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  inputRef: PropTypes.func,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

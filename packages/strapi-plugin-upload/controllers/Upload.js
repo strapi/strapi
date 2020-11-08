@@ -3,160 +3,98 @@
 /**
  * Upload.js controller
  *
- * @description: A set of functions called "actions" of the `upload` plugin.
  */
 
 const _ = require('lodash');
+const apiUploadController = require('./upload/api');
+const adminUploadController = require('./upload/admin');
+
+const resolveController = ctx => {
+  const {
+    state: { isAuthenticatedAdmin },
+  } = ctx;
+
+  return isAuthenticatedAdmin ? adminUploadController : apiUploadController;
+};
+
+const resolveControllerMethod = method => ctx => {
+  const controller = resolveController(ctx);
+  const callbackFn = controller[method];
+
+  if (!_.isFunction(callbackFn)) {
+    return ctx.notFound();
+  }
+
+  return callbackFn(ctx);
+};
 
 module.exports = {
-  upload: async (ctx) => {
-    // Retrieve provider configuration.
-    const config = await strapi.store({
-      environment: strapi.config.environment,
-      type: 'plugin',
-      name: 'upload'
-    }).get({ key: 'provider' });
+  find: resolveControllerMethod('find'),
+  findOne: resolveControllerMethod('findOne'),
+  count: resolveControllerMethod('count'),
+  destroy: resolveControllerMethod('destroy'),
+  updateSettings: resolveControllerMethod('updateSettings'),
+  getSettings: resolveControllerMethod('getSettings'),
 
-    // Verify if the file upload is enable.
-    if (config.enabled === false) {
-      strapi.log.error('File upload is disabled');
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'File upload is disabled');
+  async upload(ctx) {
+    const isUploadDisabled = _.get(strapi.plugins, 'upload.config.enabled', true) === false;
+
+    if (isUploadDisabled) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
+      });
     }
 
-    // Extract optional relational data.
-    const { refId, ref, source, field } = ctx.request.body.fields;
-    const { files = {} } = ctx.request.body.files;
+    const {
+      query: { id },
+      request: { files: { files } = {} },
+    } = ctx;
+    const controller = resolveController(ctx);
 
-    if (_.isEmpty(files)) {
-      return ctx.send(true);
+    if (id && (_.isEmpty(files) || files.size === 0)) {
+      return controller.updateFileInfo(ctx);
     }
 
-    // Transform stream files to buffer
-    const buffers = await strapi.plugins.upload.services.upload.bufferize(ctx.request.body.files.files);
-    const enhancedFiles = buffers.map(file => {
-      if (file.size > config.sizeLimit) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.sizeLimit', values: {file: file.name} }] }] : `${file.name} file is bigger than limit size!`);
-      }
-
-      // Add details to the file to be able to create the relationships.
-      if (refId && ref && field) {
-        Object.assign(file, {
-          related: [{
-            refId,
-            ref,
-            source,
-            field
-          }]
-        });
-      }
-
-      return file;
-    });
-
-    // Something is wrong (size limit)...
-    if (ctx.status === 400) {
-      return;
+    if (_.isEmpty(files) || files.size === 0) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+      });
     }
 
-    const uploadedFiles = await strapi.plugins.upload.services.upload.upload(enhancedFiles, config);
-
-    // Send 200 `ok`
-    ctx.send(uploadedFiles.map((file) => {
-      // If is local server upload, add backend host as prefix
-      if (file.url && file.url[0] === '/') {
-        file.url = strapi.config.url + file.url;
-      }
-
-      if (_.isArray(file.related)) {
-        file.related = file.related.map(obj => obj.ref || obj);
-      }
-
-      return file;
-    }));
+    await (id ? controller.replaceFile : controller.uploadFiles)(ctx);
   },
 
-  getEnvironments: async (ctx) => {
-    const environments =  _.map(_.keys(strapi.config.environments), environment => {
-      return {
-        name: environment,
-        active: (strapi.config.environment === environment)
-      };
-    });
+  async search(ctx) {
+    const { id } = ctx.params;
 
-    ctx.send({ environments });
-  },
-
-  getSettings: async (ctx) => {
-    const config = await strapi.store({
-      environment: ctx.params.environment,
-      type: 'plugin',
-      name: 'upload'
-    }).get({key: 'provider'});
-
-    ctx.send({
-      providers: strapi.plugins.upload.config.providers,
-      config
+    ctx.body = await strapi.query('file', 'upload').custom(searchQueries)({
+      id,
     });
   },
+};
 
-  updateSettings: async (ctx) => {
-    await strapi.store({
-      environment: ctx.params.environment,
-      type: 'plugin',
-      name: 'upload'
-    }).set({key: 'provider', value: ctx.request.body});
-
-    ctx.send({ok: true});
+const searchQueries = {
+  bookshelf({ model }) {
+    return ({ id }) => {
+      return model
+        .query(qb => {
+          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw('LOWER(name) LIKE ?', [
+            `%${id}%`,
+          ]);
+        })
+        .fetchAll()
+        .then(results => results.toJSON());
+    };
   },
+  mongoose({ model }) {
+    return ({ id }) => {
+      const re = new RegExp(id, 'i');
 
-  find: async (ctx) => {
-    const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
-
-    // Send 200 `ok`
-    ctx.send(data.map((file) => {
-      // if is local server upload, add backend host as prefix
-      if (file.url[0] === '/') {
-        file.url = strapi.config.url + file.url;
-      }
-
-      return file;
-    }));
-  },
-
-  findOne: async (ctx) => {
-    const data = await strapi.plugins['upload'].services.upload.fetch(ctx.params);
-
-    data.url = strapi.config.url + data.url;
-
-    // Send 200 `ok`
-    ctx.send(data);
-  },
-
-  count: async (ctx) => {
-    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
-
-    // Send 200 `ok`
-    ctx.send({
-      count: data
-    });
-  },
-
-  destroy: async (ctx) => {
-    const config = await strapi.store({
-      environment: strapi.config.environment,
-      type: 'plugin',
-      name: 'upload'
-    }).get({key: 'provider'});
-
-    const data = await strapi.plugins['upload'].services.upload.remove(ctx.params, config);
-
-    // Send 200 `ok`
-    ctx.send(data);
-  },
-
-  search: async (ctx) => {
-    const data = await strapi.query('file', 'upload').search(ctx.params);
-
-    ctx.send(data);
+      return model
+        .find({
+          $or: [{ hash: re }, { name: re }],
+        })
+        .lean();
+    };
   },
 };

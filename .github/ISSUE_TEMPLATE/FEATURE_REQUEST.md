@@ -1,12 +1,35 @@
 ---
 name: 🚀 Feature Request
-about: Suggest an idea for this project 💡!
+about: Suggest an idea to help make Strapi even better!
 ---
 
-<!-- ⚠️ If you do not respect this template your issue will be closed. -->
+<!--
+Hello 👋 Thank you for submitting a feature request.
 
-**What is the expected behavior?**
+We are using ProductBoard to manage our roadmap and feature requests.
 
+Can you please submit your feature request here: https://portal.productboard.com/strapi
+-->
 
+## Feature request
 
-<!-- ⚠️ Make sure to browse the opened and closed issues before submit your issue. -->
+### Please describe your feature request
+
+- [ ] **I have created my request on the Product Board before I submitted this issue**
+- [ ] **I have looked at all the other requests on the Product Board before I submitted this issue**
+
+### Summary
+
+Quick summary what's this feature request about.
+
+### Why is it needed?
+
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+
+### Suggested solution(s)
+
+A clear and concise description of what you want to happen.
+
+### Related issue(s)/PR(s)
+
+Let us know if this is related to any issue/pull request.

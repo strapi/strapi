@@ -3,19 +3,19 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputTextArea from 'components/InputTextArea';
-import InputSpacer from 'components/InputSpacer';
-
 // Utils
-import validateInput from 'utils/inputsValidations';
+import validateInput from '../../utils/inputsValidations';
 
-import styles from './styles.scss';
+// Design
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputTextArea from '../InputTextArea';
+import InputSpacer from '../InputSpacer';
+import Container from './Container';
 
-class InputTextAreaWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputTextAreaWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -32,7 +32,7 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -56,7 +56,7 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -94,12 +94,8 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
     }
 
     return (
-      <div
-        className={cn(
-          styles.containerTextArea,
-          customBootstrapClass,
-          !isEmpty(className) && className,
-        )}
+      <Container
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         <Label
@@ -130,11 +126,12 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </Container>
     );
   }
 }
@@ -200,10 +197,7 @@ InputTextAreaWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,

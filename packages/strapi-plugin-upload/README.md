@@ -1,1 +1,1 @@
-# Strapi plugin
+# strapi-plugin-upload

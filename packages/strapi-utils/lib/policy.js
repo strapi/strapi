@@ -1,109 +1,168 @@
+/**
+ * Policies util
+ */
+'use strict';
 
-// Public dependencies.
 const _ = require('lodash');
-/* eslint-disable prefer-template */
-module.exports = {
-  get: function (policy, plugin, policies = [], endpoint, currentApiName) {
-    // Define global policy prefix.
-    const globalPolicyPrefix = 'global.';
-    const pluginPolicyPrefix = 'plugins.';
-    const policySplited = policy.split('.');
 
-    // Looking for global policy or namespaced.
-    if (
-      _.startsWith(policy, globalPolicyPrefix, 0) &&
-      !_.isEmpty(
-        strapi.config.policies,
-        policy.replace(globalPolicyPrefix, '')
-      )
-    ) {
-      // Global policy.
-      return policies.push(
-        this.parsePolicy(strapi.config.policies[
-          policy.replace(globalPolicyPrefix, '').toLowerCase()
-        ])
-      );
-    } else if (
-      _.startsWith(policy, pluginPolicyPrefix, 0) &&
-      strapi.plugins[policySplited[1]] &&
-      !_.isUndefined(
-        _.get(
-          strapi.plugins,
-          policySplited[1] +
-            '.config.policies.' +
-            policySplited[2].toLowerCase()
-        )
-      )
-    ) {
-      // Plugin's policies can be used from app APIs with a specific syntax (`plugins.pluginName.policyName`).
-      return policies.push(
-        this.parsePolicy(_.get(
-          strapi.plugins,
-          policySplited[1] +
-            '.config.policies.' +
-            policySplited[2].toLowerCase()
-        ))
-      );
-    } else if (
-      !_.startsWith(policy, globalPolicyPrefix, 0) &&
-      plugin &&
-      !_.isUndefined(
-        _.get(
-          strapi.plugins,
-          plugin + '.config.policies.' + policy.toLowerCase()
-        )
-      )
-    ) {
-      // Plugin policy used in the plugin itself.
-      return policies.push(
-        this.parsePolicy(_.get(
-          strapi.plugins,
-          plugin + '.config.policies.' + policy.toLowerCase()
-        ))
-      );
-    } else if (
-      !_.startsWith(policy, globalPolicyPrefix, 0) &&
-      !_.isUndefined(
-        _.get(
-          strapi.api,
-          currentApiName + '.config.policies.' + policy.toLowerCase()
-        )
-      )
-    ) {
-      // API policy used in the API itself.
-      return policies.push(
-        this.parsePolicy(_.get(
-          strapi.api,
-          currentApiName + '.config.policies.' + policy.toLowerCase()
-        ))
-      );
-    }
+const GLOBAL_PREFIX = 'global::';
+const PLUGIN_PREFIX = 'plugins::';
+const ADMIN_PREFIX = 'admin::';
+const APPLICATION_PREFIX = 'application::';
 
-    strapi.log.error(`Ignored attempt to bind to ${endpoint} with unknown policy "${policy}"`);
-  },
+const isPolicyFactory = _.isArray;
 
-  parsePolicy: (policy) => {
-    if (_.isFunction(policy)) {
-      return policy;
-    }
+const getPolicyIn = (container, policy) =>
+  _.get(container, ['config', 'policies', _.toLower(policy)]);
 
-    return policy.handler;
-  },
+const policyExistsIn = (container, policy) => !_.isUndefined(getPolicyIn(container, policy));
 
-  // Middleware used for every routes.
-  // Expose the endpoint in `this`.
-  globalPolicy: (endpoint, value, route = {}, plugin) => {
-    return async (ctx, next) => {
-      ctx.request.route = {
-        endpoint: _.trim(endpoint),
-        controller: value.handler.split('.')[0].toLowerCase(),
-        action: value.handler.split('.')[1].toLowerCase(),
-        splittedEndpoint: _.trim(route.endpoint),
-        verb: route.verb && _.trim(route.verb.toLowerCase()),
-        plugin
-      };
+const stripPolicy = (policy, prefix) => policy.replace(prefix, '');
 
-      await next();
-    };
+const createPolicy = (policyName, ...args) => ({ policyName, args });
+
+const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
+
+const parsePolicy = policy =>
+  isPolicyFactory(policy) ? createPolicy(...policy) : createPolicy(policy);
+
+const resolvePolicy = policyName => {
+  const resolver = policyResolvers.find(resolver => resolver.exists(policyName));
+
+  return resolver ? resolveHandler(resolver.get)(policyName) : undefined;
+};
+
+const searchLocalPolicy = (policy, plugin, apiName) => {
+  let [absoluteApiName, policyName] = policy.split('.');
+  let absoluteApi = _.get(strapi.api, absoluteApiName);
+  const resolver = policyResolvers.find(({ name }) => name === 'plugin');
+
+  if (policyExistsIn(absoluteApi, policyName)) {
+    return resolveHandler(getPolicyIn(absoluteApi, policyName));
   }
+
+  const pluginPolicy = `${PLUGIN_PREFIX}${plugin}.${policy}`;
+
+  if (plugin && resolver.exists(pluginPolicy)) {
+    return resolveHandler(resolver.get(pluginPolicy));
+  }
+
+  const api = _.get(strapi.api, apiName);
+  if (api && policyExistsIn(api, policy)) {
+    return resolveHandler(getPolicyIn(api, policy));
+  }
+
+  return undefined;
+};
+
+const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
+  return async (ctx, next) => {
+    ctx.request.route = {
+      endpoint: `${method} ${endpoint}`,
+      controller: _.toLower(controller),
+      action: _.toLower(action),
+      verb: _.toLower(method),
+      plugin,
+    };
+
+    await next();
+  };
+};
+
+const policyResolvers = [
+  {
+    name: 'api',
+    is(policy) {
+      return _.startsWith(policy, APPLICATION_PREFIX);
+    },
+    exists(policy) {
+      return this.is(policy) && !_.isUndefined(this.get(policy));
+    },
+    get: policy => {
+      const [, policyWithoutPrefix] = policy.split('::');
+      const [api = '', policyName = ''] = policyWithoutPrefix.split('.');
+      return getPolicyIn(_.get(strapi, ['api', api]), policyName);
+    },
+  },
+  {
+    name: 'admin',
+    is(policy) {
+      return _.startsWith(policy, ADMIN_PREFIX);
+    },
+    exists(policy) {
+      return this.is(policy) && !_.isUndefined(this.get(policy));
+    },
+    get: policy => {
+      return getPolicyIn(_.get(strapi, 'admin'), stripPolicy(policy, ADMIN_PREFIX));
+    },
+  },
+  {
+    name: 'plugin',
+    is(policy) {
+      return _.startsWith(policy, PLUGIN_PREFIX);
+    },
+    exists(policy) {
+      return this.is(policy) && !_.isUndefined(this.get(policy));
+    },
+    get(policy) {
+      const [plugin = '', policyName = ''] = stripPolicy(policy, PLUGIN_PREFIX).split('.');
+      return getPolicyIn(_.get(strapi, ['plugins', plugin]), policyName);
+    },
+  },
+  {
+    name: 'global',
+    is(policy) {
+      return _.startsWith(policy, GLOBAL_PREFIX);
+    },
+    exists(policy) {
+      return this.is(policy) && !_.isUndefined(this.get(policy));
+    },
+    get(policy) {
+      return getPolicyIn(strapi, stripPolicy(policy, GLOBAL_PREFIX));
+    },
+  },
+];
+
+const get = (policy, plugin, apiName) => {
+  const { policyName, args } = parsePolicy(policy);
+
+  const resolvedPolicy = resolvePolicy(policyName);
+
+  if (resolvedPolicy !== undefined) {
+    return isPolicyFactory(policy) ? resolvedPolicy(...args) : resolvedPolicy;
+  }
+
+  const localPolicy = searchLocalPolicy(policy, plugin, apiName);
+
+  if (localPolicy !== undefined) {
+    return localPolicy;
+  }
+
+  throw new Error(`Could not find policy "${policy}"`);
+};
+
+const createPolicyFactory = (factoryCallback, options) => {
+  const { validator, name = 'unnamed' } = options;
+
+  const validate = (...args) => {
+    try {
+      validator(...args);
+    } catch (e) {
+      throw new Error(`Invalid objects submitted to "${name}" policy.`);
+    }
+  };
+
+  return (...args) => {
+    if (validator) {
+      validate(...args);
+    }
+
+    return factoryCallback(...args);
+  };
+};
+
+module.exports = {
+  get,
+  globalPolicy,
+  createPolicyFactory,
 };

@@ -9,11 +9,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isFunction, isObject } from 'lodash';
 import cn from 'classnames';
+import Wrapper from './Wrapper';
 
-import styles from './styles.scss';
-
-/* eslint-disable jsx-a11y/no-autofocus */
-/* eslint-disable jsx-a11y/label-has-for */
 class InputCheckbox extends React.Component {
   handleChange = () => {
     const target = {
@@ -23,7 +20,7 @@ class InputCheckbox extends React.Component {
     };
 
     this.props.onChange({ target });
-  }
+  };
 
   render() {
     const {
@@ -55,9 +52,12 @@ class InputCheckbox extends React.Component {
 
     let content = <div />;
 
-    if (typeof(label) === 'string') {
+    if (typeof label === 'string') {
       content = (
-        <label className={cn('form-check-label', disabled && styles.disabled)} htmlFor={name}>
+        <label
+          className={cn('form-check-label', disabled && 'disabled')}
+          htmlFor={name}
+        >
           {checkbox}
           <p>{label}</p>
         </label>
@@ -66,7 +66,10 @@ class InputCheckbox extends React.Component {
 
     if (isFunction(label)) {
       content = (
-        <label className={cn('form-check-label', disabled && styles.disabled)} htmlFor={name}>
+        <label
+          className={cn('form-check-label', disabled && 'disabled')}
+          htmlFor={name}
+        >
           {checkbox}
           <p>{label()}</p>
         </label>
@@ -75,9 +78,16 @@ class InputCheckbox extends React.Component {
 
     if (isObject(label) && label.id) {
       content = (
-        <FormattedMessage id={label.id} defaultMessage={label.id} values={label.params}>
-          {(message) => (
-            <label className={cn('form-check-label', disabled && styles.disabled)} htmlFor={name}>
+        <FormattedMessage
+          id={label.id}
+          defaultMessage={label.id}
+          values={label.params}
+        >
+          {message => (
+            <label
+              className={cn('form-check-label', disabled && 'disabled')}
+              htmlFor={name}
+            >
               {checkbox}
               <p>{message}</p>
             </label>
@@ -85,17 +95,14 @@ class InputCheckbox extends React.Component {
         </FormattedMessage>
       );
     }
+
     return (
-      <div
-        className={cn(
-          'form-check',
-          styles.inputCheckbox,
-          !isEmpty(className) && className,
-        )}
+      <Wrapper
+        className={cn('form-check', !isEmpty(className) && className)}
         style={style}
       >
         {content}
-      </div>
+      </Wrapper>
     );
   }
 }
@@ -130,7 +137,7 @@ InputCheckbox.propTypes = {
   onFocus: PropTypes.func,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  value: PropTypes.bool,
+  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };
 
 export default InputCheckbox;

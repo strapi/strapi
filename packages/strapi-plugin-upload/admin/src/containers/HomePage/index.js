@@ -1,231 +1,365 @@
-/*
- *
- * HomePage
- *
- */
-
-import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-// import { createStructuredSelector } from 'reselect';
-import { injectIntl } from 'react-intl';
-import { bindActionCreators, compose } from 'redux';
-import { isEmpty } from 'lodash';
-
-// You can find these components in either
-// ./node_modules/strapi-helper-plugin/lib/src
-// or strapi/packages/strapi-helper-plugin/lib/src
-import ContainerFluid from 'components/ContainerFluid';
-import InputSearch from 'components/InputSearch';
-// import InputSelect from 'components/InputSelect';
-import PageFooter from 'components/PageFooter';
-import PluginHeader from 'components/PluginHeader';
-
-// Plugin's component
-import EntriesNumber from 'components/EntriesNumber';
-import List from 'components/List';
-import PluginInputFile from 'components/PluginInputFile';
-
-// Utils
-import getQueryParameters from 'utils/getQueryParameters';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
-
-// Actions
+import React, { useCallback, useReducer, useRef, useState, useEffect } from 'react';
+import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
+import { useHistory, useLocation } from 'react-router-dom';
+import { Header } from '@buffetjs/custom';
+import { Button } from '@buffetjs/core';
 import {
-  changeParams,
-  deleteData,
-  getData,
-  onDrop,
-  onSearch,
-  setParams,
-} from './actions';
+  PopUpWarning,
+  useGlobalContext,
+  generateFiltersFromSearch,
+  generateSearchFromFilters,
+  request,
+  useQuery,
+} from 'strapi-helper-plugin';
+import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
+import Container from '../../components/Container';
+import HomePageContent from './HomePageContent';
+import Padded from '../../components/Padded';
+import { useAppContext } from '../../hooks';
+import ModalStepper from '../ModalStepper';
+import { generateStringFromParams, getHeaderLabel } from './utils';
+import init from './init';
+import reducer, { initialState } from './reducer';
 
-// Selectors
-import selectHomePage from './selectors';
-
-// Styles
-import styles from './styles.scss';
-
-import reducer from './reducer';
-import saga from './saga';
-
-export class HomePage extends React.Component {
-  getChildContext = () => (
-    {
-      deleteData: this.props.deleteData,
-    }
+const HomePage = () => {
+  const { allowedActions } = useAppContext();
+  const { canRead } = allowedActions;
+  const { formatMessage, plugins } = useGlobalContext();
+  const [, updated_at] = getFileModelTimestamps(plugins);
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, allowedActions)
   );
+  const query = useQuery();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [fileToEdit, setFileToEdit] = useState(null);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  const [modalInitialStep, setModalInitialStep] = useState('browse');
+  const { push } = useHistory();
+  const { search } = useLocation();
+  const isMounted = useRef(true);
+  const {
+    data,
+    dataCount,
+    dataToDelete,
+    isLoading,
+    shouldRefetchData,
+    showModalConfirmButtonLoading,
+  } = reducerState.toJS();
+  const pluginName = formatMessage({ id: getTrad('plugin.name') });
+  const paramsKeys = ['_limit', '_start', '_q', '_sort'];
 
-  componentWillMount() {
-    if (!isEmpty(this.props.location.search)) {
-      const page = parseInt(this.getURLParams('page'), 10);
-      const limit = parseInt(this.getURLParams('limit'), 10);
-      const sort = this.getURLParams('sort');
+  useEffect(() => {
+    return () => (isMounted.current = false);
+  }, []);
 
-      this.props.setParams({ limit, page, sort });
+  useEffect(() => {
+    fetchListData();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  const deleteMedia = async id => {
+    const requestURL = getRequestUrl(`files/${id}`);
+
+    try {
+      await request(requestURL, {
+        method: 'DELETE',
+      });
+
+      return Promise.resolve();
+    } catch (err) {
+      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+
+      return Promise.reject(errorMessage);
     }
-  }
-  componentDidMount() {
-    this.props.getData();
-  }
+  };
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
-      this.props.getData();
+  const fetchData = async () => {
+    const dataRequestURL = getRequestUrl('files');
+    const params = generateStringFromParams(query);
+
+    const paramsToSend = params.includes('_sort')
+      ? params
+      : params.concat(`&_sort=${updated_at}:DESC`);
+
+    try {
+      const data = await request(`${dataRequestURL}?${paramsToSend}`, {
+        method: 'GET',
+      });
+
+      return Promise.resolve(data);
+    } catch (err) {
+      if (isMounted.current) {
+        dispatch({ type: 'GET_DATA_ERROR' });
+        strapi.notification.error('notification.error');
+      }
     }
-    if (nextProps.location.search !== this.props.location.search) {
-      this.props.getData();
+
+    return [];
+  };
+
+  const fetchDataCount = async () => {
+    const params = generateStringFromParams(query, ['_limit', '_sort', '_start']);
+    const requestURL = getRequestUrl('files/count');
+
+    try {
+      const { count } = await request(`${requestURL}?${params}`, {
+        method: 'GET',
+      });
+
+      return Promise.resolve(count);
+    } catch (err) {
+      if (isMounted.current) {
+        dispatch({ type: 'GET_DATA_ERROR' });
+        strapi.notification.error('notification.error');
+      }
     }
-  }
 
-  getURLParams = (type) => getQueryParameters(this.props.location.search, type);
+    return null;
+  };
 
-  changeSort = (name) => {
-    const { params: { limit, page } } = this.props;
-    const target = {
-      name: 'params.sort',
-      value: name,
+  const fetchListData = async () => {
+    if (canRead) {
+      dispatch({ type: 'GET_DATA' });
+
+      const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+
+      if (isMounted.current) {
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data,
+          count,
+        });
+      }
+    }
+  };
+
+  const generateNewSearch = (updatedParams = {}) => {
+    return {
+      ...getSearchParams(),
+      filters: generateFiltersFromSearch(search),
+      ...updatedParams,
     };
-    const search = `page=${page}&limit=${limit}&sort=${name}`;
+  };
 
-    this.props.changeParams({ target });
-    this.props.history.push({
-      pathname: this.props.history.pathname,
-      search,
-    });
-  }
+  const getSearchParams = () => {
+    const params = {};
 
-  handleChangeParams = (e) => {
-    const { history, params } = this.props;
-    const search = e.target.name === 'params.limit' ?
-      `page=${params.page}&limit=${e.target.value}&sort=${params.sort}`
-      : `page=${e.target.value}&limit=${params.limit}&sort=${params.sort}`;
-    this.props.history.push({
-      pathname: history.pathname,
-      search,
+    query.forEach((value, key) => {
+      if (includes(paramsKeys, key)) {
+        params[key] = value;
+      }
     });
 
-    this.props.changeParams(e);
-  }
+    return params;
+  };
 
-  renderInputSearch = () => (
-    <InputSearch
-      autoFocus
-      name="search"
-      onChange={this.props.onSearch}
-      placeholder="upload.HomePage.InputSearch.placeholder"
-      style={{ marginTop: '-10px' }}
-      value={this.props.search}
-    />
-  )
+  const handleChangeCheck = ({ target: { name } }) => {
+    dispatch({
+      type: 'ON_CHANGE_DATA_TO_DELETE',
+      id: name,
+    });
+  };
 
-  render() {
-    return (
-      <ContainerFluid>
-        <div className={styles.homePageUpload}>
-          <PluginHeader
-            title={{
-              id: 'upload.HomePage.title',
-            }}
-            description={{
-              id: 'upload.HomePage.description',
-            }}
-            overrideRendering={this.renderInputSearch}
-          />
-        </div>
-        <PluginInputFile
-          name="files"
-          onDrop={this.props.onDrop}
-          showLoader={this.props.uploadFilesLoading}
-        />
-        <div className={styles.entriesWrapper}>
-          <div>
-            {/* NOTE: Prepare for bulk actions}
-            <InputSelect
-              name="bulkAction"
-              onChange={() => console.log('change')}
-              selectOptions={[{ value: 'select all'}]}
-              style={{ minWidth: '200px', height: '32px', marginTop: '-8px' }}
-            />
-            */}
-          </div>
-          <EntriesNumber number={this.props.entriesNumber} />
-        </div>
-        <List
-          data={this.props.uploadedFiles}
-          changeSort={this.changeSort}
-          sort={this.props.params.sort}
-        />
-        <div className="col-md-12">
-          <PageFooter
-            count={this.props.entriesNumber}
-            onChangeParams={this.handleChangeParams}
-            params={this.props.params}
-          />
-        </div>
-      </ContainerFluid>
+  const handleChangeParams = ({ target: { name, value } }) => {
+    let updatedQueryParams = generateNewSearch({ [name]: value });
+
+    if (name === 'filters') {
+      const existingFilters = generateFiltersFromSearch(search);
+      const canAddFilter = intersectionWith(existingFilters, [value], isEqual).length === 0;
+      updatedQueryParams = generateNewSearch({ [name]: existingFilters });
+
+      if (canAddFilter) {
+        const filters = [...existingFilters, value];
+
+        updatedQueryParams = generateNewSearch({ [name]: filters });
+      }
+    }
+
+    if (name === '_limit') {
+      updatedQueryParams = generateNewSearch({ [name]: value, _start: 0 });
+    }
+
+    const newSearch = generateSearchFromFilters(updatedQueryParams);
+
+    push({ search: newSearch });
+  };
+
+  const handleClickEditFile = id => {
+    if (allowedActions.canUpdate) {
+      const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+
+      setFileToEdit(file);
+      setModalInitialStep('edit');
+      handleClickToggleModal();
+    }
+  };
+
+  const handleClickToggleModal = (refetch = false) => {
+    setIsModalOpen(prev => !prev);
+    setShouldRefetch(refetch);
+  };
+
+  const handleClickTogglePopup = () => {
+    setIsPopupOpen(prev => !prev);
+  };
+
+  const handleDeleteFilter = index => {
+    const filters = generateFiltersFromSearch(search).filter(
+      (filter, filterIndex) => filterIndex !== index
     );
-  }
-}
 
-HomePage.childContextTypes = {
-  deleteData: PropTypes.func.isRequired,
-};
+    const updatedQueryParams = generateNewSearch({ filters });
 
-HomePage.contextTypes = {
-  router: PropTypes.object,
-};
+    const newSearch = generateSearchFromFilters(updatedQueryParams);
 
-HomePage.defaultProps = {
-  params: {
-    limit: 10,
-    page: 1,
-    sort: 'updatedAt',
-  },
-  uploadedFiles: [],
-};
+    push({ search: newSearch });
+  };
 
-HomePage.propTypes = {
-  changeParams: PropTypes.func.isRequired,
-  deleteData: PropTypes.func.isRequired,
-  deleteSuccess: PropTypes.bool.isRequired,
-  entriesNumber: PropTypes.number.isRequired,
-  getData: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
-  onDrop: PropTypes.func.isRequired,
-  onSearch: PropTypes.func.isRequired,
-  params: PropTypes.object,
-  search: PropTypes.string.isRequired,
-  setParams: PropTypes.func.isRequired,
-  uploadedFiles: PropTypes.arrayOf(PropTypes.object),
-  uploadFilesLoading: PropTypes.bool.isRequired,
-};
+  const handleConfirmDeleteMedias = useCallback(async () => {
+    dispatch({ type: 'ON_DELETE_MEDIAS' });
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      changeParams,
-      deleteData,
-      getData,
-      onDrop,
-      onSearch,
-      setParams,
+    try {
+      await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
+
+      dispatch({
+        type: 'ON_DELETE_MEDIAS_SUCCEEDED',
+      });
+    } catch (err) {
+      strapi.notification.error(err);
+
+      dispatch({
+        type: 'ON_DELETE_MEDIAS_ERROR',
+      });
+    } finally {
+      setIsPopupOpen(false);
+    }
+  }, [dataToDelete]);
+
+  const handleClosedModalDeleteAll = useCallback(() => {
+    if (shouldRefetchData) {
+      fetchListData();
+    } else {
+      dispatch({ type: 'RESET_DATA_TO_DELETE' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldRefetchData]);
+
+  const handleModalClose = () => {
+    resetModalState();
+
+    if (shouldRefetch) {
+      fetchListData();
+      setShouldRefetch(false);
+    }
+  };
+
+  const handleSelectAll = () => {
+    dispatch({
+      type: 'TOGGLE_SELECT_ALL',
+    });
+  };
+
+  const resetModalState = () => {
+    setModalInitialStep('browse');
+    setFileToEdit(null);
+  };
+
+  const headerProps = {
+    title: {
+      label: pluginName,
     },
-    dispatch,
+    /* eslint-disable indent */
+    content: canRead
+      ? formatMessage(
+          {
+            id: getTrad(getHeaderLabel(dataCount)),
+          },
+          { number: dataCount }
+        )
+      : null,
+    /* eslint-enable indent */
+    actions: [
+      {
+        disabled: dataToDelete.length === 0,
+        color: 'delete',
+        // TradId from the strapi-admin package
+        label: formatMessage({ id: 'app.utils.delete' }),
+        onClick: () => setIsPopupOpen(true),
+        type: 'button',
+        Component: buttonProps => {
+          if (!allowedActions.canUpdate) {
+            return null;
+          }
+
+          return <Button {...buttonProps} />;
+        },
+      },
+      {
+        disabled: false,
+        color: 'primary',
+        label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
+        onClick: () => handleClickToggleModal(),
+        type: 'button',
+        Component: buttonProps => {
+          if (!allowedActions.canCreate) {
+            return null;
+          }
+
+          return <Button {...buttonProps} />;
+        },
+      },
+    ],
+  };
+
+  const handleRemoveFileFromDataToDelete = useCallback(id => {
+    dispatch({
+      type: 'ON_CHANGE_DATA_TO_DELETE',
+      id,
+    });
+  }, []);
+
+  const content = canRead ? (
+    <HomePageContent
+      data={data}
+      dataCount={dataCount}
+      dataToDelete={dataToDelete}
+      isLoading={isLoading}
+      onCardCheck={handleChangeCheck}
+      onCardClick={handleClickEditFile}
+      onClick={handleClickToggleModal}
+      onFilterDelete={handleDeleteFilter}
+      onParamsChange={handleChangeParams}
+      onSelectAll={handleSelectAll}
+    />
+  ) : null;
+
+  return (
+    <Container>
+      <Header {...headerProps} isLoading={isLoading} />
+      {content}
+      <ModalStepper
+        initialFileToEdit={fileToEdit}
+        initialStep={modalInitialStep}
+        isOpen={isModalOpen}
+        onClosed={handleModalClose}
+        onRemoveFileFromDataToDelete={handleRemoveFileFromDataToDelete}
+        onToggle={handleClickToggleModal}
+        refetchData={fetchListData}
+      />
+      <PopUpWarning
+        isOpen={isPopupOpen}
+        isConfirmButtonLoading={showModalConfirmButtonLoading}
+        onConfirm={handleConfirmDeleteMedias}
+        onClosed={handleClosedModalDeleteAll}
+        toggleModal={handleClickTogglePopup}
+        popUpWarningType="danger"
+      />
+      <Padded bottom size="md" />
+      <Padded bottom size="md" />
+    </Container>
   );
-}
+};
 
-const mapStateToProps = selectHomePage();
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(injectIntl(HomePage));
+export default HomePage;

@@ -8,85 +8,85 @@
 const _ = require('lodash');
 
 // Strapi utilities.
-const finder = require('strapi-utils').finder;
-const regex = require('strapi-utils').regex;
-const joijson = require('strapi-utils').joijson;
-const policyUtils = require('strapi-utils').policy;
-/* eslint-disable prefer-template */
-module.exports = strapi => function routerChecker(value, endpoint, plugin) {
-  const Joi = strapi.koaMiddlewares.routerJoi.Joi;
-  const builder = joijson.builder(Joi);
-  const route = regex.detectRoute(endpoint);
+const { finder, policy: policyUtils } = require('strapi-utils');
 
-  // Define controller and action names.
-  const handler = _.trim(value.handler).split('.');
-  const controller = plugin
-    ? strapi.plugins[plugin].controllers[handler[0].toLowerCase()]
-    : strapi.controllers[handler[0].toLowerCase()] ||
-        strapi.admin.controllers[handler[0].toLowerCase()];
+const getMethod = route => _.trim(_.toLower(route.method));
+const getEndpoint = route => _.trim(route.path);
 
-  const action = controller[handler[1]];
+module.exports = strapi =>
+  function routerChecker(value, plugin) {
+    const method = getMethod(value);
+    const endpoint = getEndpoint(value);
 
-  // Retrieve the API's name where the controller is located
-  // to access to the right validators
-  const currentApiName = finder(strapi.plugins[plugin] || strapi.api || strapi.admin, controller);
+    // Define controller and action names.
+    const [controllerName, actionName] = _.trim(value.handler).split('.');
+    const controllerKey = _.toLower(controllerName);
 
-  // Init policies array.
-  const policies = [];
+    let controller;
 
-  // Add the `globalPolicy`.
-  policies.push(policyUtils.globalPolicy(endpoint, value, route, plugin));
-
-  // Allow string instead of array of policies.
-  if (
-    !_.isArray(_.get(value, 'config.policies')) &&
-    !_.isEmpty(_.get(value, 'config.policies'))
-  ) {
-    value.config.policies = [value.config.policies];
-  }
-
-  if (
-    _.isArray(_.get(value, 'config.policies')) &&
-    !_.isEmpty(_.get(value, 'config.policies'))
-  ) {
-    _.forEach(value.config.policies, policy => {
-      policyUtils.get(policy, plugin, policies, endpoint, currentApiName);
-    });
-  }
-
-  policies.push(async (ctx, next) => {
-    // Set body.
-    const values = await next();
-
-    if (!ctx.body) {
-      ctx.body = values;
+    if (plugin) {
+      controller =
+        plugin === 'admin'
+          ? strapi.admin.controllers[controllerKey]
+          : strapi.plugins[plugin].controllers[controllerKey];
+    } else {
+      controller = strapi.controllers[controllerKey];
     }
-  });
 
-  // Init validate.
-  const validate = {};
+    if (!_.isFunction(controller[actionName])) {
+      strapi.stopWithError(
+        `Error creating endpoint ${method} ${endpoint}: handler not found "${controllerKey}.${actionName}"`
+      );
+    }
 
-  if (
-    _.isString(_.get(value, 'config.validate')) &&
-    !_.isEmpty(_.get(value, 'config.validate'))
-  ) {
-    const validator = _.get(
-      strapi.api,
-      currentApiName + '.validators.' + value.config.validate
-    );
+    const action = controller[actionName].bind(controller);
 
-    _.merge(
-      validate,
-      _.mapValues(validator, value => {
-        return builder.build(value);
-      })
-    );
-  }
+    // Retrieve the API's name where the controller is located
+    // to access to the right validators
+    const currentApiName = finder(strapi.plugins[plugin] || strapi.api || strapi.admin, controller);
 
-  return {
-    route,
-    policies,
-    action,
-    validate
+    // Add the `globalPolicy`.
+    const globalPolicy = policyUtils.globalPolicy({
+      controller: controllerKey,
+      action: actionName,
+      method,
+      endpoint,
+      plugin,
+    });
+
+    // Init policies array.
+    const policies = [globalPolicy];
+
+    let policyOption = _.get(value, 'config.policies');
+
+    // Allow string instead of array of policies.
+    if (_.isString(policyOption) && !_.isEmpty(policyOption)) {
+      policyOption = [policyOption];
+    }
+
+    if (_.isArray(policyOption)) {
+      policyOption.forEach(policyName => {
+        try {
+          policies.push(policyUtils.get(policyName, plugin, currentApiName));
+        } catch (error) {
+          strapi.stopWithError(`Error creating endpoint ${method} ${endpoint}: ${error.message}`);
+        }
+      });
+    }
+
+    policies.push(async (ctx, next) => {
+      // Set body.
+      const values = await next();
+
+      if (_.isNil(ctx.body) && !_.isNil(values)) {
+        ctx.body = values;
+      }
+    });
+
+    return {
+      method,
+      endpoint,
+      policies,
+      action,
+    };
   };
-};

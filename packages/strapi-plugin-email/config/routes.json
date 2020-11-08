@@ -1,3 +1,17 @@
 {
-  "routes": []
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "handler": "Email.send",
+      "config": {
+        "policies": [],
+        "description": "Send an email",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
+      }
+    }
+  ]
 }

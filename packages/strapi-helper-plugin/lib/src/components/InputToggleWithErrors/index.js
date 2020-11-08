@@ -9,16 +9,16 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { isEmpty } from 'lodash';
 // Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputToggle from 'components/InputToggle';
-import InputSpacer from 'components/InputSpacer';
-
-import styles from './styles.scss';
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputToggle from '../InputToggle';
+import InputSpacer from '../InputSpacer';
+import Container from './Container';
 
 class InputToggleWithErrors extends React.Component {
-  state = { errors: [] }
+  state = { errors: [] };
+
   componentDidMount() {
     const { errors } = this.props;
 
@@ -28,7 +28,7 @@ class InputToggleWithErrors extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Check if errors have been updated during validations
     if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
       // Remove from the state the errors that have already been set
@@ -69,15 +69,11 @@ class InputToggleWithErrors extends React.Component {
     }
 
     return (
-      <div
-        className={cn(
-          styles.containerToggleErrors,
-          customBootstrapClass,
-          !isEmpty(className) && className,
-        )}
+      <Container
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
-        <div className={styles.toggleLabel}>
+        <div className="toggleLabel">
           <Label
             className={cn(!isEmpty(labelClassName) && labelClassName)}
             htmlFor={name}
@@ -104,11 +100,12 @@ class InputToggleWithErrors extends React.Component {
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </Container>
     );
   }
 }
@@ -116,7 +113,7 @@ class InputToggleWithErrors extends React.Component {
 InputToggleWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-6',
+  customBootstrapClass: 'col-md-4',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,

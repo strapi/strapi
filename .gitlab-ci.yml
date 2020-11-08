@@ -1,0 +1,10 @@
+trigger_deploy:
+  stage: deploy
+  script:
+    - curl -X POST
+      --form "token=$TRIGGER_TOKEN"
+      --form "ref=master"
+      --form "variables[UPSTREAM_COMMIT_SHA]=$CI_COMMIT_SHA"
+      https://gitlab.com/api/v4/projects/12825884/trigger/pipeline
+  only:
+    - develop

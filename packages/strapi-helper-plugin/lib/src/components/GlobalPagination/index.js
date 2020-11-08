@@ -7,64 +7,63 @@
 import React from 'react';
 import { map } from 'lodash';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
+import Wrapper from './Wrapper';
 
-import styles from './styles.scss';
-
-/* eslint-disable jsx-a11y/anchor-is-valid */
 class GlobalPagination extends React.Component {
-  getLastPageNumber = () => Math.ceil(this.props.count / this.props.params.limit);
+  getLastPageNumber = () => Math.ceil(this.props.count / this.props.params._limit) || 1;
 
-  handleDotsClick = (e) => e.preventDefault();
+  handleDotsClick = e => e.preventDefault();
 
-  handlePreviousPageClick = (e) => {
+  handlePreviousPageClick = e => {
     e.preventDefault();
 
     if (!this.isFirstPage()) {
       const target = {
-        name: 'params.page',
-        value: this.props.params.page - 1,
+        name: 'params._page',
+        value: this.props.params._page - 1,
       };
       this.props.onChangeParams({ target });
     }
-  }
+  };
 
-  handleNextPageClick = (e) => {
+  handleNextPageClick = e => {
     e.preventDefault();
 
     if (!this.isLastPage()) {
       const target = {
-        name: 'params.page',
-        value: this.props.params.page + 1,
+        name: 'params._page',
+        value: this.props.params._page + 1,
       };
       this.props.onChangeParams({ target });
     }
-  }
+  };
 
-  handleFirstPageClick = (e) => {
+  handleFirstPageClick = e => {
     e.preventDefault();
     const target = {
-      name: 'params.page',
+      name: 'params._page',
       value: 1,
     };
     this.props.onChangeParams({ target });
-  }
+  };
 
-  handleLastPageClick = (e) => {
+  handleLastPageClick = e => {
     e.preventDefault();
     const target = {
-      name: 'params.page',
+      name: 'params._page',
       value: this.getLastPageNumber(),
     };
     this.props.onChangeParams({ target });
-  }
+  };
 
-  isFirstPage = () => this.props.params.page === 1;
+  isFirstPage = () => this.props.params._page === 1;
 
-  isLastPage = () => this.props.params.page === this.getLastPageNumber();
+  isLastPage = () => this.props.params._page === this.getLastPageNumber();
 
-  needAfterLinksDots = () => this.props.params.page < this.getLastPageNumber() - 1;
+  needAfterLinksDots = () => this.props.params._page < this.getLastPageNumber() - 1;
 
-  needPreviousLinksDots = () => this.props.params.page > 3;
+  needPreviousLinksDots = () => this.props.params._page > 3;
 
   renderLinks = () => {
     // Init variables
@@ -72,7 +71,7 @@ class GlobalPagination extends React.Component {
 
     // Add active page link
     linksOptions.push({
-      value: this.props.params.page,
+      value: this.props.params._page,
       isActive: true,
       handleClick: e => e.preventDefault(),
     });
@@ -80,16 +79,16 @@ class GlobalPagination extends React.Component {
     // Add previous page link
     if (!this.isFirstPage()) {
       linksOptions.unshift({
-        value: this.props.params.page - 1,
+        value: this.props.params._page - 1,
         isActive: false,
         handleClick: this.handlePreviousPageClick,
       });
     }
 
     // Add next page link
-    if (!this.isLastPage() && this.props.count > this.props.params.limit) {
+    if (!this.isLastPage() && this.props.count > this.props.params._limit) {
       linksOptions.push({
-        value: this.props.params.page + 1,
+        value: this.props.params._page + 1,
         isActive: false,
         handleClick: this.handleNextPageClick,
       });
@@ -112,53 +111,40 @@ class GlobalPagination extends React.Component {
     }
 
     // Generate links
-    return (
-      map(linksOptions, (linksOption, key) => (
-        <li
-          className={`${linksOption.isActive && styles.navLiActive}`}
-          key={key}
-        >
-          <a href="" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
-            {linksOption.value}
-          </a>
-        </li>
-      ))
-    );
-  }
+    return map(linksOptions, (linksOption, key) => (
+      <li className={cn(linksOption.isActive && 'navLiActive')} key={key}>
+        <a href="" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
+          {linksOption.value}
+        </a>
+      </li>
+    ));
+  };
 
   render() {
     return (
-      <div className={styles.pagination}>
+      <Wrapper>
         <div>
           <a
             href=""
-            className={`
-               ${styles.paginationNavigator}
-               ${this.isFirstPage() && styles.paginationNavigatorDisabled}
-             `}
+            className="paginationNavigator"
             onClick={this.handlePreviousPageClick}
             disabled={this.isFirstPage()}
           >
-            <i className="fa fa-angle-left" aria-hidden="true"></i>
+            <i className="fa fa-chevron-left" aria-hidden="true" />
           </a>
-          <nav className={styles.nav}>
-            <ul className={styles.navUl}>
-              {this.renderLinks()}
-            </ul>
+          <nav className="navWrapper">
+            <ul className="navUl">{this.renderLinks()}</ul>
           </nav>
           <a
             href=""
-            className={`
-               ${styles.paginationNavigator}
-               ${this.isLastPage() && styles.paginationNavigatorDisabled}
-             `}
+            className="paginationNavigator"
             onClick={this.handleNextPageClick}
             disabled={this.isLastPage()}
           >
-            <i className="fa fa-angle-right" aria-hidden="true"></i>
+            <i className="fa fa-chevron-right" aria-hidden="true" />
           </a>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }
@@ -167,23 +153,17 @@ GlobalPagination.defaultProps = {
   count: 0,
   onChangeParams: () => {},
   params: {
-    page: 1,
-    limit: 10,
+    _page: 1,
+    _limit: 10,
   },
 };
 
 GlobalPagination.propTypes = {
-  count: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.bool,
-  ]),
+  count: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
   onChangeParams: PropTypes.func,
   params: PropTypes.shape({
-    page: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-    ]),
-    limit: PropTypes.number,
+    _page: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    _limit: PropTypes.number,
   }),
 };
 

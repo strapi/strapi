@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "info": {
     "name": "role",
     "description": ""
@@ -20,16 +19,19 @@
       "unique": true,
       "configurable": false
     },
-    "users": {
-      "collection": "user",
-      "via": "role",
-      "plugin": "users-permissions"
-    },
     "permissions": {
       "collection": "permission",
       "via": "role",
       "plugin": "users-permissions",
-      "configurable": false
+      "configurable": false,
+      "isVirtual": true
+    },
+    "users": {
+      "collection": "user",
+      "via": "role",
+      "configurable": false,
+      "plugin": "users-permissions"
     }
-  }
+  },
+  "collectionName": "users-permissions_role"
 }

@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "info": {
     "name": "permission",
     "description": ""
@@ -26,8 +25,7 @@
       "configurable": false
     },
     "policy": {
-      "type": "json",
-      "required": true,
+      "type": "string",
       "configurable": false
     },
     "role": {

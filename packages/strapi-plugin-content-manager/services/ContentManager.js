@@ -1,154 +1,122 @@
 'use strict';
 
 const _ = require('lodash');
-
+const {
+  contentTypes: contentTypesUtils,
+  sanitizeEntity,
+  webhook: webhookUtils,
+} = require('strapi-utils');
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = webhookUtils.webhookEvents;
 /**
  * A set of functions called "actions" for `ContentManager`
  */
-
 module.exports = {
-  fetchAll: async (params, query) => {
-    const { limit, skip = 0, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
+  fetchAll(model, query) {
+    const { query: request, populate, ...filters } = query;
 
-    // Find entries using `queries` system
-    return await strapi.query(params.model, source).find({
-      limit,
-      skip,
-      sort,
-      where: request,
-      queryAttribute,
-    }, populate);
-  },
-
-  count: async (params, source) => {
-    return await strapi.query(params.model, source).count();
-  },
-
-  fetch: async (params, source, populate, raw = true) => {
-    return await strapi.query(params.model, source).findOne({
-      id: params.id
-    }, populate, raw);
-  },
-
-  add: async (params, values, source) => {
-    // Multipart/form-data.
-    if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
-      // Silent recursive parser.
-      const parser = (value) => {
-        try {
-          value = JSON.parse(value);
-        } catch (e) {
-          // Silent.
+    const queryFilter = !_.isEmpty(request)
+      ? {
+          ...filters, // Filters is an object containing the limit/sort and start
+          ...request,
         }
+      : filters;
 
-        return _.isArray(value) ? value.map(obj => parser(obj)) : value;
-      };
-
-      const files = values.files;
-
-      // Parse stringify JSON data.
-      values = Object.keys(values.fields).reduce((acc, current) => {
-        acc[current] = parser(values.fields[current]);
-
-        return acc;
-      }, {});
-
-      // Update JSON fields.
-      const entry = await strapi.query(params.model, source).create({
-        values
-      });
-
-      // Then, request plugin upload.
-      if (strapi.plugins.upload && Object.keys(files).length > 0) {
-        // Upload new files and attach them to this entity.
-        await strapi.plugins.upload.services.upload.uploadToEntity({
-          id: entry.id || entry._id,
-          model: params.model
-        }, files, source);
-      }
-
-      return strapi.query(params.model, source).findOne({
-        id: entry.id || entry._id
-      });
-    }
-
-    // Create an entry using `queries` system
-    return await strapi.query(params.model, source).create({
-      values
-    });
+    return strapi.entityService.find(
+      {
+        params: queryFilter,
+        populate,
+      },
+      { model }
+    );
   },
 
-  edit: async (params, values, source) => {
-    // Multipart/form-data.
-    if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
-      // Silent recursive parser.
-      const parser = (value) => {
-        try {
-          value = JSON.parse(value);
-        } catch (e) {
-          // Silent.
-        }
+  fetch(model, id, config = {}) {
+    const { query = {}, populate } = config;
 
-        return _.isArray(value) ? value.map(obj => parser(obj)) : value;
-      };
-
-      const files = values.files;
-
-      // Parse stringify JSON data.
-      values = Object.keys(values.fields).reduce((acc, current) => {
-        acc[current] = parser(values.fields[current]);
-
-        return acc;
-      }, {});
-
-      // Update JSON fields.
-      await strapi.query(params.model, source).update({
-        id: params.id,
-        values
-      });
-
-      // Then, request plugin upload.
-      if (strapi.plugins.upload) {
-        // Upload new files and attach them to this entity.
-        await strapi.plugins.upload.services.upload.uploadToEntity(params, files, source);
-      }
-
-      return strapi.query(params.model, source).findOne({
-        id: params.id
-      });
-    }
-
-    // Raw JSON.
-    return strapi.query(params.model, source).update({
-      id: params.id,
-      values
-    });
+    return strapi.entityService.findOne(
+      {
+        params: { ...query, id },
+        populate,
+      },
+      { model }
+    );
   },
 
-  delete: async (params, { source }) => {
-    const response = await strapi.query(params.model, source).findOne({
-      id: params.id
-    });
+  count(model, query) {
+    return strapi.entityService.count({ params: query }, { model });
+  },
 
-    params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
-      const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
-
-      // Remove relationships.
-      if (association) {
-        acc[current] = _.isArray(response[current]) ? [] : null;
-      }
-
-      return acc;
-    }, {});
-
-    if (!_.isEmpty(params.values)) {
-      // Run update to remove all relationships.
-      await strapi.query(params.model, source).update(params);
+  create({ data, files }, { model } = {}) {
+    const modelDef = strapi.getModel(model);
+    const publishData = { ...data };
+    if (contentTypesUtils.hasDraftAndPublish(modelDef)) {
+      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    // Delete an entry using `queries` system
-    return await strapi.query(params.model, source).delete({
-      id: params.id
+    return strapi.entityService.create({ data: publishData, files }, { model });
+  },
+
+  edit(params, { data, files }, { model } = {}) {
+    const publishData = _.omit(data, PUBLISHED_AT_ATTRIBUTE);
+    return strapi.entityService.update({ params, data: publishData, files }, { model });
+  },
+
+  delete(model, query) {
+    return strapi.entityService.delete({ params: query }, { model });
+  },
+
+  deleteMany(model, ids, query) {
+    const { primaryKey } = strapi.query(model);
+
+    return strapi.entityService.delete(
+      {
+        params: {
+          _limit: 100,
+          ...query,
+          _where: _.concat({ [`${primaryKey}_in`]: ids }, query._where || {}),
+        },
+      },
+      { model }
+    );
+  },
+
+  search(model, query, params) {
+    return strapi.entityService.search({ params: { ...query, ...params } }, { model });
+  },
+
+  countSearch(model, query) {
+    return strapi.entityService.countSearch({ params: query }, { model });
+  },
+
+  async publish(params, model) {
+    const modelDef = strapi.getModel(model);
+
+    const publishedEntry = await strapi.entityService.update(
+      { params, data: { [PUBLISHED_AT_ATTRIBUTE]: new Date() } },
+      { model }
+    );
+
+    strapi.eventHub.emit(ENTRY_PUBLISH, {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(publishedEntry, { model: modelDef }),
     });
+
+    return publishedEntry;
+  },
+
+  async unpublish(params, model) {
+    const modelDef = strapi.getModel(model);
+
+    const unpublishedEntry = await strapi.entityService.update(
+      { params, data: { [PUBLISHED_AT_ATTRIBUTE]: null } },
+      { model }
+    );
+    strapi.eventHub.emit(ENTRY_UNPUBLISH, {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(unpublishedEntry, { model: modelDef }),
+    });
+
+    return unpublishedEntry;
   },
 };

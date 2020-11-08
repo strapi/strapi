@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-model",
-  "version": "3.0.0-alpha.12.2",
+  "version": "3.2.5",
   "description": "Generate a model for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -14,10 +14,12 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "^4.17.4"
+    "lodash": "4.17.19",
+    "pluralize": "^8.0.0",
+    "strapi-utils": "3.2.5"
   },
   "scripts": {
-    "prepublish": "npm prune"
+    "test": "echo \"no tests yet\""
   },
   "author": {
     "email": "hi@strapi.io",
@@ -39,8 +41,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">=10.16.0 <=14.x.x",
+    "npm": ">=6.0.0"
   },
-  "license": "MIT"
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

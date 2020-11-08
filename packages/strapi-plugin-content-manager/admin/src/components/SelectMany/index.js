@@ -1,174 +1,146 @@
-/**
- *
- * SelectMany
- *
- */
-
-import React from 'react';
-import Select from 'react-select';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import 'react-select/dist/react-select.css';
-import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, includes } from 'lodash';
+import { isEmpty } from 'lodash';
+import { useDrop } from 'react-dnd';
+import Select, { createFilter } from 'react-select';
+import ItemTypes from '../../utils/ItemTypes';
+import { ListShadow, ListWrapper } from './components';
+import ListItem from './ListItem';
 
-import request from 'utils/request';
-import templateObject from 'utils/templateObject';
+function SelectMany({
+  addRelation,
+  components,
+  displayNavigationLink,
+  mainField,
+  name,
+  isDisabled,
+  isLoading,
+  move,
+  onInputChange,
+  onMenuClose,
+  onMenuScrollToBottom,
+  onRemove,
+  options,
+  placeholder,
+  styles,
+  targetModel,
+  value,
+}) {
+  const [, drop] = useDrop({ accept: ItemTypes.RELATION });
+  const findRelation = id => {
+    const relation = value.filter(c => {
+      return `${c.id}` === `${id}`;
+    })[0];
 
-import styles from './styles.scss';
-
-class SelectMany extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isLoading: true,
-      options: [],
-      toSkip: 0,
+    return {
+      relation,
+      index: value.indexOf(relation),
     };
-  }
-
-  componentDidMount() {
-    this.getOptions('');
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.toSkip !== this.state.toSkip) {
-      this.getOptions('');
-    }
-  }
-
-  getOptions = query => {
-    const params = {
-      limit: 20,
-      skip: this.state.toSkip,
-      source: this.props.relation.plugin || 'content-manager',
-    };
-
-    // Set `query` parameter if necessary
-    if (query) {
-      delete params.limit,
-      delete params.skip,
-      params[`${this.props.relation.displayedAttribute}_contains`] = query;
-    }
-    // Request URL
-    const requestUrl = `/content-manager/explorer/${this.props.relation.model ||
-      this.props.relation.collection}`;
-
-    // Call our request helper (see 'utils/request')
-    return request(requestUrl, {
-      method: 'GET',
-      params,
-    })
-      .then(response => {
-        const options = isArray(response)
-          ? response.map(item => ({
-            value: item,
-            label: templateObject({ mainField: this.props.relation.displayedAttribute }, item)
-              .mainField,
-          }))
-          : [
-            {
-              value: response,
-              label: response[this.props.relation.displayedAttribute],
-            },
-          ];
-
-        const newOptions = cloneDeep(this.state.options);
-        options.map(option => {
-          // Don't add the values when searching
-          if (findIndex(newOptions, o => o.value.id === option.value.id) === -1) {
-            return newOptions.push(option);
-          }
-        });
-
-        return this.setState({
-          options: newOptions,
-          isLoading: false,
-        });
-      })
-      .catch(() => {
-        strapi.notification.error('content-manager.notification.error.relationship.fetch');
-      });
   };
 
-  handleChange = value => {
-    const filteredValue = value.filter(
-      (data, index) => findIndex(value, o => o.value.id === data.value.id) === index
-    );
-    const target = {
-      name: `record.${this.props.relation.alias}`,
-      type: 'select',
-      value: filteredValue,
-    };
+  const moveRelation = useCallback(
+    (id, atIndex) => {
+      const { index } = findRelation(id);
 
-    this.props.setRecordAttribute({ target });
+      move(index, atIndex, name);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [value]
+  );
+
+  const filterConfig = {
+    ignoreCase: true,
+    ignoreAccents: true,
+    trim: false,
+    matchFrom: 'any',
   };
 
-  handleBottomScroll = () => {
-    this.setState(prevState => {
-      return {
-        toSkip: prevState.toSkip + 20,
-      };
-    });
-  }
+  return (
+    <>
+      <Select
+        components={components}
+        isDisabled={isDisabled}
+        id={name}
+        filterOption={(candidate, input) => {
+          if (!isEmpty(value)) {
+            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
 
-  handleInputChange = (value) => {
-    const clonedOptions = this.state.options;
-    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
-
-    if (filteredValues.length === 0) {
-      return this.getOptions(value);
-    }
-  }
-
-  render() {
-    const description = this.props.relation.description ? (
-      <p>{this.props.relation.description}</p>
-    ) : (
-      ''
-    );
-
-    const value = get(this.props.record, this.props.relation.alias);
-    /* eslint-disable jsx-a11y/label-has-for */
-    return (
-      <div className={`form-group ${styles.selectMany}`}>
-        <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
-        {description}
-        <Select
-          onChange={this.handleChange}
-          options={this.state.options}
-          id={this.props.relation.alias}
-          isLoading={this.state.isLoading}
-          onMenuScrollToBottom={this.handleBottomScroll}
-          onInputChange={this.handleInputChange}
-          multi
-          value={
-            isNull(value) || isUndefined(value) || value.size === 0
-              ? null
-              : value.map(item => {
-                if (item) {
-                  return {
-                    value: get(item, 'value') || item,
-                    label:
-                        get(item, 'label') ||
-                        templateObject({ mainField: this.props.relation.displayedAttribute }, item)
-                          .mainField ||
-                        item.value.id,
-                  };
-                }
-              })
+            if (isSelected) {
+              return false;
+            }
           }
-        />
-      </div>
-    );
-    /* eslint-disable jsx-a11y/label-has-for */
-  }
+
+          if (input) {
+            return createFilter(filterConfig)(candidate, input);
+          }
+
+          return true;
+        }}
+        isLoading={isLoading}
+        isMulti
+        isSearchable
+        options={options}
+        onChange={addRelation}
+        onInputChange={onInputChange}
+        onMenuClose={onMenuClose}
+        onMenuScrollToBottom={onMenuScrollToBottom}
+        placeholder={placeholder}
+        styles={styles}
+        value={[]}
+      />
+
+      <ListWrapper ref={drop}>
+        {!isEmpty(value) && (
+          <ul>
+            {value.map((data, index) => (
+              <ListItem
+                key={data.id}
+                data={data}
+                displayNavigationLink={displayNavigationLink}
+                isDisabled={isDisabled}
+                findRelation={findRelation}
+                mainField={mainField}
+                moveRelation={moveRelation}
+                onRemove={() => {
+                  if (!isDisabled) {
+                    onRemove(`${name}.${index}`);
+                  }
+                }}
+                targetModel={targetModel}
+              />
+            ))}
+          </ul>
+        )}
+        {!isEmpty(value) && value.length > 4 && <ListShadow />}
+      </ListWrapper>
+    </>
+  );
 }
 
-SelectMany.propTypes = {
-  record: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
-  relation: PropTypes.object.isRequired,
-  setRecordAttribute: PropTypes.func.isRequired,
+SelectMany.defaultProps = {
+  components: {},
+  move: () => {},
+  value: null,
 };
 
-export default SelectMany;
+SelectMany.propTypes = {
+  addRelation: PropTypes.func.isRequired,
+  components: PropTypes.object,
+  displayNavigationLink: PropTypes.bool.isRequired,
+  isDisabled: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  mainField: PropTypes.string.isRequired,
+  move: PropTypes.func,
+  name: PropTypes.string.isRequired,
+  onInputChange: PropTypes.func.isRequired,
+  onMenuClose: PropTypes.func.isRequired,
+  onMenuScrollToBottom: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
+  options: PropTypes.array.isRequired,
+  placeholder: PropTypes.node.isRequired,
+  styles: PropTypes.object.isRequired,
+  targetModel: PropTypes.string.isRequired,
+  value: PropTypes.array,
+};
+
+export default memo(SelectMany);

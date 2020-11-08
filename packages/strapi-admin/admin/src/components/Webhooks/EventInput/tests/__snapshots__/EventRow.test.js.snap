@@ -1,0 +1,264 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<EventRow /> should match the snapshot 1`] = `
+.c1 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+}
+
+.c1:focus,
+.c1:active {
+  outline: 0;
+}
+
+.c1:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c1:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c1:checked:after {
+  display: block;
+}
+
+.c1:after {
+  content: '\\f068';
+  display: block;
+  top: 50%;
+  font-size: 10px;
+}
+
+.c1:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c1:disabled:after {
+  color: #9ea7b8;
+}
+
+.c1 + label {
+  display: inline-block;
+  font-weight: 500;
+  font-size: 1.3rem;
+}
+
+.c3 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+}
+
+.c3:focus,
+.c3:active {
+  outline: 0;
+}
+
+.c3:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c3:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c3:checked:after {
+  display: block;
+}
+
+.c3:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c3:disabled:after {
+  color: #9ea7b8;
+}
+
+.c3 + label {
+  display: inline-block;
+  font-weight: 500;
+  font-size: 1.3rem;
+}
+
+.c0 input,
+.c0 label {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.c0 input {
+  margin-top: 4px;
+  width: 14px;
+  height: 12px;
+}
+
+.c0 input + label {
+  display: inline-block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: calc(100% - 14px);
+  margin-left: 10px;
+  margin-bottom: 0;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.c2 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
+<tr>
+  <td>
+    <div
+      className="c0"
+      disabled={false}
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={false}
+        className="c1"
+        disabled={false}
+        id="events"
+        name="events"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="c2"
+        htmlFor="events"
+      >
+        events
+      </label>
+    </div>
+  </td>
+  <td>
+    <div
+      className="c0"
+      disabled={false}
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={true}
+        className="c3"
+        disabled={false}
+        id="entry.create"
+        name="entry.create"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="c2"
+        htmlFor="entry.create"
+      />
+    </div>
+  </td>
+  <td>
+    <div
+      className="c0"
+      disabled={false}
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={false}
+        className="c3"
+        disabled={false}
+        id="entry.update"
+        name="entry.update"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="c2"
+        htmlFor="entry.update"
+      />
+    </div>
+  </td>
+  <td>
+    <div
+      className="c0"
+      disabled={false}
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={false}
+        className="c3"
+        disabled={false}
+        id="entry.delete"
+        name="entry.delete"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="c2"
+        htmlFor="entry.delete"
+      />
+    </div>
+  </td>
+</tr>
+`;

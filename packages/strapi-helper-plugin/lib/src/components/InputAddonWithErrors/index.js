@@ -9,19 +9,19 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputAddon from 'components/InputAddon';
-import InputSpacer from 'components/InputSpacer';
-
 // Utils
-import validateInput from 'utils/inputsValidations';
+import validateInput from '../../utils/inputsValidations';
 
-import styles from './styles.scss';
+// Design
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputAddon from '../InputAddon';
+import InputSpacer from '../InputSpacer';
+import InputWrapper from '../InputWrapper';
 
-class InputAddonWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputAddonWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -38,7 +38,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -62,7 +62,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -101,12 +101,8 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
     }
 
     return (
-      <div
-        className={cn(
-          styles.containerAddon,
-          customBootstrapClass,
-          !isEmpty(className) && className,
-        )}
+      <InputWrapper
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         <Label
@@ -138,11 +134,12 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </InputWrapper>
     );
   }
 }
@@ -210,10 +207,7 @@ InputAddonWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,

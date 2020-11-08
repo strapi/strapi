@@ -9,19 +9,19 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputSearch from 'components/InputSearch';
-import InputSpacer from 'components/InputSpacer';
-
 // Utils
-import validateInput from 'utils/inputsValidations';
+import validateInput from '../../utils/inputsValidations';
 
-import styles from './styles.scss';
+// Design
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputSearch from '../InputSearch';
+import InputSpacer from '../InputSpacer';
+import InputWrapper from '../InputWrapper';
 
-class InputSearchWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputSearchWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -38,7 +38,7 @@ class InputSearchWithErrors extends React.Component { // eslint-disable-line rea
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -62,7 +62,7 @@ class InputSearchWithErrors extends React.Component { // eslint-disable-line rea
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -98,11 +98,10 @@ class InputSearchWithErrors extends React.Component { // eslint-disable-line rea
     }
 
     return (
-      <div
+      <InputWrapper
         className={cn(
-          styles.containerSearch,
           this.props.customBootstrapClass,
-          !isEmpty(this.props.className) && this.props.className,
+          !isEmpty(this.props.className) && this.props.className
         )}
         style={style}
       >
@@ -134,11 +133,12 @@ class InputSearchWithErrors extends React.Component { // eslint-disable-line rea
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </InputWrapper>
     );
   }
 }
@@ -204,10 +204,7 @@ InputSearchWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,

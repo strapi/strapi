@@ -1,0 +1,3 @@
+[mysqld]
+collation-server=utf8_unicode_ci
+character-set-server=utf8

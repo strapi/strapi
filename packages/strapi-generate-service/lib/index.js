@@ -16,7 +16,10 @@ module.exports = {
   templatesDirectory: scope => {
     try {
       // Try to reach the path. If it fail, throw an error.
-      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args.tpl), fs.constants.R_OK | fs.constants.W_OK);
+      fs.accessSync(
+        path.resolve(__dirname, '..', 'templates', scope.args.tpl),
+        fs.constants.R_OK | fs.constants.W_OK
+      );
 
       return path.resolve(__dirname, '..', 'templates', scope.args.tpl);
     } catch (e) {
@@ -26,8 +29,8 @@ module.exports = {
   },
   before: require('./before'),
   targets: {
-    'api/:api/services/:filename': {
-      template: 'service.template'
-    }
-  }
+    ':filePath/:filename': {
+      template: 'service.template',
+    },
+  },
 };

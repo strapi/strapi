@@ -1,6 +1,7 @@
+/* eslint-disable */
 import React from 'react';
-import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
+import { ReactReduxContext } from 'react-redux';
 
 import getInjectors from './sagaInjectors';
 
@@ -15,24 +16,33 @@ import getInjectors from './sagaInjectors';
  *   - constants.ONCE_TILL_UNMOUNT—behaves like 'RESTART_ON_REMOUNT' but never runs it again.
  *
  */
-export default ({ key, saga, mode }) => (WrappedComponent) => {
+export default ({ key, saga, mode, pluginId }) => WrappedComponent => {
   class InjectSaga extends React.Component {
     static WrappedComponent = WrappedComponent;
-    static contextTypes = {
-      store: PropTypes.object.isRequired,
-    };
-    static displayName = `withSaga(${(WrappedComponent.displayName || WrappedComponent.name || 'Component')})`;
+    static displayName = `withSaga(${WrappedComponent.displayName ||
+      WrappedComponent.name ||
+      'Component'})`;
 
-    componentWillMount() {
-      const { injectSaga } = this.injectors;
+    static contextType = ReactReduxContext;
 
-      injectSaga(key, { saga, mode }, this.props);
+    constructor(props, context) {
+      super(props, context);
+
+      this.injectors = getInjectors(context.store);
+      const sagaName = pluginId ? `${pluginId}_${key}` : key;
+
+      console.warn(
+        'Warning: strapi.injectSaga will be removed in the next major release. \n Please update your code.'
+      );
+
+      this.injectors.injectSaga(sagaName, { saga, mode }, this.props);
     }
 
     componentWillUnmount() {
       const { ejectSaga } = this.injectors;
+      const sagaName = pluginId ? `${pluginId}_${key}` : key;
 
-      ejectSaga(key);
+      ejectSaga(sagaName);
     }
 
     injectors = getInjectors(this.context.store);
@@ -44,3 +54,23 @@ export default ({ key, saga, mode }) => (WrappedComponent) => {
 
   return hoistNonReactStatics(InjectSaga, WrappedComponent);
 };
+
+const useInjectSaga = ({ key, saga, mode, pluginId }) => {
+  const context = React.useContext(ReactReduxContext);
+  const sagaName = pluginId ? `${pluginId}_${key}` : key;
+
+  React.useEffect(() => {
+    const injectors = getInjectors(context.store);
+    injectors.injectSaga(sagaName, { saga, mode });
+
+    console.warn(
+      'Warning: strapi.useInjectSaga will be removed in the next major release. \n Please update your code.'
+    );
+
+    return () => {
+      injectors.ejectSaga(sagaName);
+    };
+  }, []);
+};
+
+export { useInjectSaga };

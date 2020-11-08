@@ -2,66 +2,142 @@
   "routes": [
     {
       "method": "GET",
+      "path": "/reserved-names",
+      "handler": "Builder.getReservedNames",
+      "config": {
+        "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/connections",
-      "handler": "ContentTypeBuilder.getConnections",
+      "handler": "Connections.getConnections",
       "config": {
-        "policies": []
+        "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "GET",
-      "path": "/models",
-      "handler": "ContentTypeBuilder.getModels",
+      "path": "/content-types",
+      "handler": "ContentTypes.getContentTypes",
       "config": {
-        "policies": []
+        "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "GET",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.getModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.getContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "POST",
-      "path": "/models",
-      "handler": "ContentTypeBuilder.createModel",
+      "path": "/content-types",
+      "handler": "ContentTypes.createContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "PUT",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.updateModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.updateContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "DELETE",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.deleteModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.deleteContentType",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "GET",
-      "path": "/autoReload",
-      "handler": "ContentTypeBuilder.autoReload",
+      "path": "/components",
+      "handler": "Components.getComponents",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     },
     {
       "method": "GET",
-      "path": "/checkTableExists/:connection/:model",
-      "handler": "ContentTypeBuilder.checkTableExists",
+      "path": "/components/:uid",
+      "handler": "Components.getComponent",
       "config": {
-        "policies": []
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/components",
+      "handler": "Components.createComponent",
+      "config": {
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/components/:uid",
+      "handler": "Components.updateComponent",
+      "config": {
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/components/:uid",
+      "handler": "Components.deleteComponent",
+      "config": {
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/component-categories/:name",
+      "handler": "ComponentCategories.editCategory",
+      "config": {
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/component-categories/:name",
+      "handler": "ComponentCategories.deleteCategory",
+      "config": {
+      "policies": [
+          ["admin::hasPermissions", ["plugins::content-type-builder.read"]]
+        ]
       }
     }
   ]

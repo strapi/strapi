@@ -9,10 +9,8 @@
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-const defaultJwtOptions = { expiresIn: '30d' };
-
 module.exports = {
-  getToken: function (ctx) {
+  getToken(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.request.query);
 
     let token = '';
@@ -27,7 +25,9 @@ module.exports = {
           token = credentials;
         }
       } else {
-        throw new Error('Invalid authorization header format. Format is Authorization: Bearer [token]');
+        throw new Error(
+          'Invalid authorization header format. Format is Authorization: Bearer [token]'
+        );
       }
     } else if (params.token) {
       token = params.token;
@@ -38,22 +38,22 @@ module.exports = {
     return this.verify(token);
   },
 
-  issue: (payload, jwtOptions = {}) => {
-    _.defaults(jwtOptions, defaultJwtOptions);
+  issue(payload, jwtOptions = {}) {
+    _.defaults(jwtOptions, strapi.plugins['users-permissions'].config.jwt);
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
-      jwtOptions,
+      _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
+      jwtOptions
     );
   },
 
-  verify: (token) => {
-    return new Promise(function (resolve, reject) {
+  verify(token) {
+    return new Promise(function(resolve, reject) {
       jwt.verify(
         token,
-        process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
+        _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
         {},
-        function (err, tokenPayload = {}) {
+        function(err, tokenPayload = {}) {
           if (err) {
             return reject(new Error('Invalid token.'));
           }
@@ -61,5 +61,5 @@ module.exports = {
         }
       );
     });
-  }
+  },
 };

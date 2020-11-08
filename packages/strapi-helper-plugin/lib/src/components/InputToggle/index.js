@@ -6,20 +6,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { isEmpty } from 'lodash';
+import Wrapper from './Wrapper';
 
-import styles from './styles.scss';
-
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputToggle extends React.Component {
-  handleClick = (e) => {
+  handleClick = e => {
     const target = {
       name: this.props.name,
       type: 'toggle',
-      value: e.target.id === 'on',
+      value: e.target.id.includes('__ON__'),
     };
 
     this.props.onChange({ target });
-  }
+  };
 
   render() {
     const {
@@ -28,26 +26,26 @@ class InputToggle extends React.Component {
       disabled,
       deactivateErrorHighlight,
       error,
+      name,
       style,
       tabIndex,
       value,
     } = this.props;
 
     return (
-      <div
+      <Wrapper
         className={cn(
           'btn-group',
-          styles.inputToggleContainer,
           !isEmpty(className) && className,
-          !deactivateErrorHighlight && error && styles.error,
+          !deactivateErrorHighlight && error && 'error'
         )}
         style={style}
       >
         <button
           autoFocus={autoFocus}
           disabled={disabled}
-          className={cn('btn', !value && styles.gradientOff)}
-          id="off"
+          className={cn('btn', !value && 'gradientOff')}
+          id={`__OFF__${name}`}
           onClick={this.handleClick}
           tabIndex={tabIndex}
           type="button"
@@ -56,14 +54,14 @@ class InputToggle extends React.Component {
         </button>
         <button
           disabled={disabled}
-          className={cn('btn', value && styles.gradientOn)}
-          id="on"
+          className={cn('btn', value && 'gradientOn')}
+          id={`__ON__${name}`}
           onClick={this.handleClick}
           type="button"
         >
           ON
         </button>
-      </div>
+      </Wrapper>
     );
   }
 }
