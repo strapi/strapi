@@ -56,10 +56,13 @@ const EditView = ({ currentEnvironment, isSingleType, layout, plugins, slug }) =
       ? pluginPermissions.singleTypesConfigurations
       : pluginPermissions.collectionTypesConfigurations;
   }, [isSingleType]);
-  // TODO check why the routing needs to be different... (not prio)
+
+  // The configuration url is different between the ST and the CT because the ST don't have an id in the pathname..
   const configurationsURL = isSingleType
-    ? `${pathname}/ctm-configurations/edit-settings/content-types`
-    : 'ctm-configurations/edit-settings/content-types';
+    ? `${pathname}/configurations/edit`
+    : 'configurations/edit';
+
+  console.log({ configurationsURL });
 
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);
 

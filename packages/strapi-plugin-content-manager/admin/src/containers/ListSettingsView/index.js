@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useState } from 'react';
+import React, { memo, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
@@ -273,17 +273,14 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
 
 ListSettingsView.propTypes = {
   layout: PropTypes.shape({
-    components: PropTypes.object.isRequired,
-    contentType: PropTypes.shape({
-      uid: PropTypes.string.isRequired,
-      settings: PropTypes.object.isRequired,
-      metadatas: PropTypes.object.isRequired,
-      options: PropTypes.object.isRequired,
-      attributes: PropTypes.object.isRequired,
-    }).isRequired,
+    uid: PropTypes.string.isRequired,
+    settings: PropTypes.object.isRequired,
+    metadatas: PropTypes.object.isRequired,
+    options: PropTypes.object.isRequired,
+    attributes: PropTypes.object.isRequired,
   }).isRequired,
   slug: PropTypes.string.isRequired,
   updateLayout: PropTypes.func.isRequired,
 };
 
-export default ListSettingsView;
+export default memo(ListSettingsView);

@@ -524,11 +524,4 @@ export function mapDispatchToProps(dispatch) {
 }
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(withConnect)(
-  // memo(ListView, (prev, next) => {
-  //   console.log(difference(prev, next));
-
-  //   return true;
-  // })
-  memo(ListView, isEqual)
-);
+export default compose(withConnect)(memo(ListView, isEqual));

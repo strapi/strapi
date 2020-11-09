@@ -94,12 +94,11 @@ const SettingsViewWrapper = ({
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
-        ...displayedFields.filter(
-          name =>
-            get(attributes, [name, 'type'], '') !== 'media' &&
-            name !== 'id' &&
-            get(attributes, [name, 'type'], '') !== 'richtext'
-        ),
+        ...displayedFields.filter(name => {
+          const type = get(attributes, [name, 'type']);
+
+          return !['media', 'richtext', 'dynamiczone', 'relation'].includes(type) && name !== 'id';
+        }),
       ];
     }
 
@@ -109,6 +108,7 @@ const SettingsViewWrapper = ({
 
         return (
           ![
+            'dynamiczone',
             'json',
             'text',
             'relation',

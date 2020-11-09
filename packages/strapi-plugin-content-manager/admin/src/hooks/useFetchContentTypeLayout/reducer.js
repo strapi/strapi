@@ -36,15 +36,16 @@ const reducer = (state, action) =>
         break;
       }
       case 'UPDATE_LAYOUT': {
-        const oldLayout = state.layout.contentType;
+        // TODO
+        const oldLayout = state.layout;
 
-        draftState.layout.contentType = {
+        draftState.layout = {
           ...oldLayout,
-          ...action.newLayout,
+          contentType: { uid: oldLayout.contentType.uid, ...action.newLayout.contentType },
         };
-        draftState.layouts[oldLayout.uid] = {
+        draftState.layouts[oldLayout.contentType.uid] = {
           ...oldLayout,
-          ...action.newLayout,
+          contentType: { uid: oldLayout.contentType.uid, ...action.newLayout.contentType },
         };
         break;
       }
