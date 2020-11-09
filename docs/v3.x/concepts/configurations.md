@@ -54,19 +54,19 @@ module.exports = ({ env }) => {
 
 Some settings can only be modified through environment variables. Here is a list of those settings are associated environment variable names:
 
-| name                                 | description                                                                        | type    | default                   |
-| ------------------------------------ | ---------------------------------------------------------------------------------- | ------- | ------------------------- |
-| `NODE_ENV`                           | Type of environment where the app is running                                       | string  | `'development'`           |
-| `STRAPI_DISABLE_UPDATE_NOTIFICATION` | Don't show the notification message about updating strapi in the terminal          | boolean | `false`                   |
-| `STRAPI_HIDE_STARTUP_MESSAGE`        | Don't show the startup message in the terminal                                     | boolean | `false`                   |
-| `STRAPI_TELEMETRY_DISABLED`          | Don't send telemetry usage data to Strapi                                          | boolean | `false`                   |
-| `BROWSER`                            | Open the admin panel in the browser after startup                                  | boolean | `true`                    |
-| `STRAPI_LICENSE`                     | The license key to activate the Enterprise Edition                                 | string  | `undefined`               |
-| `ENV_PATH`                           | Path to the file that contains your environment variables                          | string  | `'./.env'`                |
-| `STRAPI_LOG_TIMESTAMP`               | Add the timestamp info in logs                                                     | boolean | `false`                   |
-| `STRAPI_LOG_LEVEL`                   | Select the level of logs among `fatal`, `error`, `warn`, `info`, `debug`, `trace`. | string  | `'info'`                  |
-| `HOST`                               | Host on which the app runs                                                         | string  | `'0.0.0.0' | 'localhost'` |
-| `PORT`                               | Port on which the app runs                                                         | number  | `1337`                    |
+| name                                 | description                                                                                                           | type    | default         |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------- | --------------- |
+| `STRAPI_DISABLE_UPDATE_NOTIFICATION` | Don't show the notification message about updating strapi in the terminal                                             | boolean | `false`         |
+| `STRAPI_HIDE_STARTUP_MESSAGE`        | Don't show the startup message in the terminal                                                                        | boolean | `false`         |
+| `STRAPI_TELEMETRY_DISABLED`          | Don't send telemetry usage data to Strapi                                                                             | boolean | `false`         |
+| `STRAPI_LOG_TIMESTAMP`               | Add the timestamp info in logs                                                                                        | boolean | `false`         |
+| `STRAPI_LOG_LEVEL`                   | Select the level of logs among `fatal`, `error`, `warn`, `info`, `debug`, `trace`                                     | string  | `'info'`        |
+| `STRAPI_LOG_FORCE_COLOR`             | Force colors to be displayed even in environments that are not supposed to have colors enabled (ex: outside of a TTY) | boolean | `true`          |
+| `STRAPI_LOG_PRETTY_PRINT`            | Log lines are displayed as text instead of as object                                                                  | boolean | `true`          |
+| `STRAPI_LICENSE`                     | The license key to activate the Enterprise Edition                                                                    | string  | `undefined`     |
+| `NODE_ENV`                           | Type of environment where the app is running                                                                          | string  | `'development'` |
+| `BROWSER`                            | Open the admin panel in the browser after startup                                                                     | boolean | `true`          |
+| `ENV_PATH`                           | Path to the file that contains your environment variables                                                             | string  | `'./.env'`      |
 
 ### Configuration using environment variables
 
