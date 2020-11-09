@@ -365,7 +365,7 @@ const knex = strapi.connections.default;
 
 You can then use Knex to build your own custom queries to the DB. You will lose all the functionalities of the model, 
 but this could come handy if you are building a more custom schema.
-Please note that if you are using the draft system, Strapi nullyfies all the Draft columns util they are published.
+Please note that if you are using the [draft system](draft-and-publish.md), Strapi nullyfies all the Draft columns util they are published.
 
 **Example**
 
