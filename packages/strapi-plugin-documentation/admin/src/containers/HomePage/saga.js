@@ -1,18 +1,10 @@
 import { cloneDeep, isArray } from 'lodash';
 import { all, takeLatest, put, fork, call, select } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
-import {
-  GET_DOC_INFOS,
-  ON_CONFIRM_DELETE_DOC,
-  ON_UPDATE_DOC,
-  ON_SUBMIT,
-} from './constants';
+import { GET_DOC_INFOS, ON_CONFIRM_DELETE_DOC, ON_UPDATE_DOC, ON_SUBMIT } from './constants';
 import { getDocInfosSucceeded, setFormErrors } from './actions';
-import {
-  makeSelectVersionToDelete,
-  makeSelectPrefix,
-  makeSelectForm,
-} from './selectors';
+import { makeSelectVersionToDelete, makeSelectPrefix, makeSelectForm } from './selectors';
+import getTrad from '../../utils/getTrad';
 
 /* eslint-disable consistent-return */
 
@@ -23,7 +15,10 @@ function* getData() {
     });
     yield put(getDocInfosSucceeded(response));
   } catch (err) {
-    strapi.notification.error('An error occurred');
+    strapi.notification.toggle({
+      type: 'warning',
+      message: { id: 'notification.error' },
+    });
   }
 }
 
@@ -36,10 +31,16 @@ function* deleteDoc() {
 
     if (response.ok) {
       yield call(getData);
-      strapi.notification.info('Doc deleted');
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('notification.delete.success') },
+      });
     }
   } catch (err) {
-    strapi.notification.error(err.response.payload.message);
+    strapi.notification.toggle({
+      type: 'warning',
+      message: err.response.payload.message,
+    });
   }
 }
 
@@ -71,9 +72,15 @@ function* submit() {
     yield call(request, `${prefix}/updateSettings`, { method: 'PUT', body });
     yield put(setFormErrors({}));
 
-    strapi.notification.success('documentation.notification.update.success');
+    strapi.notification.toggle({
+      type: 'success',
+      message: { id: getTrad('notification.update.success') },
+    });
   } catch (err) {
-    strapi.notification.error(err.response.payload.message);
+    strapi.notification.toggle({
+      type: 'warning',
+      message: err.response.payload.message,
+    });
   }
 }
 
@@ -88,10 +95,16 @@ function* updateDoc(action) {
 
     if (response.ok) {
       yield call(getData);
-      strapi.notification.info('Doc generated');
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('notification.generate.success') },
+      });
     }
   } catch (err) {
-    strapi.notification.error(err.response.payload.message);
+    strapi.notification.toggle({
+      type: 'warning',
+      message: err.response.payload.message,
+    });
   }
 }
 

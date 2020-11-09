@@ -150,14 +150,20 @@ const ProvidersPage = () => {
 
           emitEventRef.current('didEditAuthenticationProvider');
 
-          strapi.notification.success(getTrad('notification.success.submit'));
+          strapi.notification.toggle({
+            type: 'success',
+            message: { id: getTrad('notification.success.submit') },
+          });
 
           dispatchSubmitSucceeded();
 
           handleToggle();
         } catch (err) {
           console.error(err);
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       } catch (err) {
         console.error(err);
@@ -176,7 +182,7 @@ const ProvidersPage = () => {
       formToRender,
       handleToggle,
       modifiedData,
-      providerToEditName
+      providerToEditName,
     ]
   );
 
@@ -235,13 +241,13 @@ const ProvidersPage = () => {
             <Row>
               {formToRender.form.map(input => {
                 const label = input.label.params
-                    ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                    : input.label;
+                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
+                  : input.label;
 
                 const value =
-                    input.name === 'noName'
-                      ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                      : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
+                  input.name === 'noName'
+                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
+                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
 
                 return (
                   <SizedInput
