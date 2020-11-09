@@ -2,6 +2,13 @@
   "name": "strapi-provider-email-nodemailer",
   "version": "3.2.5",
   "description": "Nodemailer provider for Strapi 3",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "strapi",
+    "email",
+    "provider",
+    "nodemailer"
+  ],
   "main": "./lib",
   "directories": {
     "lib": "./lib"
@@ -14,14 +21,11 @@
     "type": "git",
     "url": "https://github.com/strapi/strapi.git"
   },
-  "keywords": [
-    "Strapi",
-    "Email",
-    "Provider",
-    "Strapi 3"
-  ],
   "author": {
     "name": "Yurii Tykhomyrov"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\""
   },
   "contributors": [
     {
@@ -44,9 +48,8 @@
       "url": "http://strapi.io"
     }
   ],
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
-  },
-  "homepage": "https://github.com/strapi/strapi/tree/master/packages/strapi-provider-email-nodemailer"
+  }
 }
