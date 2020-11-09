@@ -383,7 +383,7 @@ return result;
 ```
 
 **We strongly suggest to sanitize any strings before making queries to the DB**
-Never attempt to make a raw query with data coming straigh from the front-end.
+Never attempt to make a raw query with data coming straight from the front-end.
 
 :::
 
