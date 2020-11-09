@@ -29,13 +29,15 @@ module.exports = {
     return {
       send: options => {
         // Default values.
-        options = _.isObject(options) ? options : {};
-        options.from = options.from || settings.defaultFrom;
-        options.replyTo = options.replyTo || settings.defaultReplyTo;
-        options.text = options.text || options.html;
-        options.html = options.html || options.text;
+        const emailOptions = {
+          ..._.pick(options, emailFields),
+          from: options.from || settings.defaultFrom,
+          replyTo: options.replyTo || settings.defaultReplyTo,
+          text: options.text || options.html,
+          html: options.html || options.text,
+        };
 
-        return transporter.sendMail(_.pick(options, emailFields));
+        return transporter.sendMail(emailOptions);
       },
     };
   },
