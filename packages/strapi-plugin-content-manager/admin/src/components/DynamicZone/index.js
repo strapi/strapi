@@ -169,9 +169,10 @@ const DynamicZone = ({
               if (dynamicDisplayedComponentsLength < max) {
                 setIsOpen(prev => !prev);
               } else {
-                strapi.notification.info(
-                  `${pluginId}.components.notification.info.maximum-requirement`
-                );
+                strapi.notification.toggle({
+                  type: 'info',
+                  message: { id: `${pluginId}.components.notification.info.maximum-requirement` },
+                });
               }
             }}
           />

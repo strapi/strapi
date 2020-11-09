@@ -869,7 +869,10 @@ const forms = {
             type: 'booleanBox',
             size: 12,
             onChangeCallback: () =>
-              strapi.notification.info(getTrad('contentType.kind.change.warning')),
+              strapi.notification.toggle({
+                type: 'info',
+                message: { id: getTrad('contentType.kind.change.warning') },
+              }),
             options: [
               {
                 headerId: getTrad('menu.section.models.name.singular'),

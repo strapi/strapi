@@ -111,7 +111,10 @@ const EmailTemplatesPage = () => {
 
           emitEventRef.current('didEditEmailTemplates');
 
-          strapi.notification.success(getTrad('notification.success.submit'));
+          strapi.notification.toggle({
+            type: 'success',
+            message: { id: getTrad('notification.success.submit') },
+          });
 
           dispatchSubmitSucceeded();
 
@@ -119,7 +122,10 @@ const EmailTemplatesPage = () => {
         } catch (err) {
           console.error(err);
 
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       } catch (err) {
         errors = getYupInnerErrors(err);

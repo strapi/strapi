@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.2.4",
+  "version": "3.3.0",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -19,14 +19,14 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
     "graphql-playground-middleware-koa": "^1.6.20",
-    "graphql-tools": "4.0.6",
+    "graphql-tools": "4.0.8",
     "graphql-type-json": "0.3.2",
     "graphql-type-long": "^0.1.1",
     "graphql-upload": "11.0.0",
     "koa-compose": "^4.1.0",
     "lodash": "4.17.20",
     "pluralize": "^8.0.0",
-    "strapi-utils": "3.2.4"
+    "strapi-utils": "3.3.0"
   },
   "devDependencies": {
     "cross-env": "^5.2.1",

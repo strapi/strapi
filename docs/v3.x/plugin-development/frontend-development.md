@@ -58,7 +58,25 @@ Remove the loader so the user can interact with the application
 
 #### `strapi.notification`
 
-Display a notification (works with i18n message id). Use this command anywhere in your code.
+Use this command anywhere in your code.
+
+```js
+strapi.notification.toggle(config);
+```
+
+The properties of the config object are as follows:
+
+| key             | type          | default                  | Description                                                                                                                  |
+| --------------- | ------------- | ------------------------ | :--------------------------------------------------------------------------------------------------------------------------- |
+| type            | string        | success                  | `success`, `warning` or `info`                                                                                               |
+| message         | object/string | app.notification.success | The main message to display (works with i18n message object, `{ id: 'app.notification.success', defaultMessage: 'Saved!' }`) |
+| title           | object/string | null                     | Add a title to the notification                                                                                              |
+| link            | object        | null                     | Add a link to the notification message `{ url: String, label: String|Object }`                                               |
+| timeout         | number        | 2500                     | Time in ms before the notification is closed                                                                                 |
+| blockTransition | boolean       | false                    | Block the notification transitions to remove the timeout                                                                     |
+| uid             | string        | null                     | Custom the notification uid                                                                                                  |
+
+The previous notification API is still working but will display a warning message in the console
 
 ```js
 strapi.notification.error('app.notification.error');
