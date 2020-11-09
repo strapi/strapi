@@ -398,7 +398,10 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
             related: function() {
               return this.morphTo(
                 name,
-                ...association.related.map(morphModel => [morphModel, morphModel.collectionName])
+                ...association.related.map(morphModel => [
+                  GLOBALS[morphModel.globalId],
+                  morphModel.collectionName,
+                ])
               );
             },
           };
