@@ -26,7 +26,7 @@ yarn run strapi generate:plugin wysiwyg
 
 ```bash
 cd my-app/plugins/wysiwyg
-yarn add @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic
+yarn add @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic styled-components
 ```
 
 4. Start your application with the front-end development mode:
