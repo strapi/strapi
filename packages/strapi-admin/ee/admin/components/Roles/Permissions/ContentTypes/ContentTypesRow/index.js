@@ -44,7 +44,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     );
 
     return Object.keys(contentTypesActionObject).filter(
-      action => !!contentTypesActionObject[action]
+      action => !!contentTypesActionObject[action] && !staticAttributeActions.includes(action)
     );
   }, [contentType, contentTypesPermissions]);
 
@@ -93,7 +93,9 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   }, [attributes, contentTypesActions]);
 
   const hasContentTypeAction = useCallback(
-    action => get(contentTypesPermissions, [contentType.uid, 'contentTypeActions', action], false),
+    action =>
+      get(contentTypesPermissions, [contentType.uid, 'contentTypeActions', action], false) &&
+      !staticAttributeActions.includes(action),
     [contentTypesPermissions, contentType]
   );
 
@@ -132,9 +134,13 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
   const checkConditions = useCallback(
     action => {
+      if (!staticAttributeActions.includes(action)) {
+        return get(conditions, [action], []).length > 0 && hasContentTypeAction(action);
+      }
+
       return get(conditions, [action], []).length > 0 && getAttributesPermissions(action) > 0;
     },
-    [conditions, getAttributesPermissions]
+    [conditions, getAttributesPermissions, hasContentTypeAction]
   );
 
   const subjectHasConditions = useMemo(() => {
@@ -242,8 +248,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
             </CollapseLabel>
           </PermissionName>
           <PermissionWrapper disabled={isSuperAdmin}>
-            {permissionsToDisplay.map(permissionLayout => {
-              const { action } = permissionLayout;
+            {permissionsToDisplay.map(({ action }) => {
               /* eslint-disable */
               const checkboxProps = isAttributeAction(action)
                 ? {
@@ -258,7 +263,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
               return (
                 <PermissionCheckbox
-                  key={action}
+                  key={`${contentType.name}-${action}`}
                   hasConditions={checkConditions(action)}
                   disabled={isSuperAdmin}
                   value={hasAllAttributeByAction(action) || hasContentTypeAction(action)}

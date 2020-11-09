@@ -201,7 +201,7 @@ const ComponentAttributeRow = ({
                 key={`${attribute.attributeName}-${action}`}
                 onChange={() => handleCheck(action)}
                 someChecked={someChecked(action)}
-                value={isChecked(action)}
+                value={isCreateAndRequired(attribute, action) || isChecked(action)}
                 name={`${attribute.attributeName}-${action}`}
               />
             ))}
