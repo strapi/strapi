@@ -58,10 +58,21 @@ const useFetchContentTypeLayout = contentTypeUID => {
     };
   }, [contentTypeUID, getData]);
 
+  const updateLayout = useCallback(
+    newLayout => {
+      dispatch({
+        type: 'UPDATE_LAYOUT',
+        newLayout: formatLayouts({ contentType: newLayout, components: {} }, schemas),
+      });
+    },
+    [schemas]
+  );
+
   return {
     error,
     isLoading,
     layout,
+    updateLayout,
   };
 };
 

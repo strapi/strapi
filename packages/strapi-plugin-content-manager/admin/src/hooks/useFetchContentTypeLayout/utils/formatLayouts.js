@@ -1,4 +1,4 @@
-import { get, set } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 import pluginId from '../../../pluginId';
 
 const formatLayoutWithMetas = (obj, ctUid, models) => {
@@ -107,7 +107,7 @@ const formatListLayoutWithMetas = obj => {
 
 const mergeMetasWithSchema = (data, schemas) => {
   const findSchema = refUid => schemas.find(obj => obj.uid === refUid);
-  const merged = Object.assign(data, {});
+  const merged = Object.assign({}, data);
   const contentTypeUid = data.contentType.uid;
   const contentTypeSchema = findSchema(contentTypeUid);
 
@@ -123,7 +123,7 @@ const mergeMetasWithSchema = (data, schemas) => {
 };
 
 const formatLayouts = (initialData, models) => {
-  const data = mergeMetasWithSchema(initialData, models);
+  const data = mergeMetasWithSchema(cloneDeep(initialData), models);
   const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, models);
   const ctUid = data.contentType.uid;
   const formattedEditRelationsLayout = formatEditRelationsLayoutWithMetas(data.contentType, models);

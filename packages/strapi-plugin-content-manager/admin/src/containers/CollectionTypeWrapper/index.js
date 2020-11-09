@@ -15,7 +15,6 @@ import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
-  console.log({ allLayoutData });
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
   const { id } = useParams();

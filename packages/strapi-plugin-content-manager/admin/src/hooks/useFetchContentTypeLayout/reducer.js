@@ -35,6 +35,19 @@ const reducer = (state, action) =>
         draftState.layout = state.layouts[action.uid];
         break;
       }
+      case 'UPDATE_LAYOUT': {
+        const oldLayout = state.layout.contentType;
+
+        draftState.layout.contentType = {
+          ...oldLayout,
+          ...action.newLayout,
+        };
+        draftState.layouts[oldLayout.uid] = {
+          ...oldLayout,
+          ...action.newLayout,
+        };
+        break;
+      }
       default:
         return draftState;
     }

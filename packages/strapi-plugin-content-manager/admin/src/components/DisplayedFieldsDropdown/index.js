@@ -39,7 +39,7 @@ const DisplayedFieldsDropdown = ({ displayedHeaders, items, onChange, onClickRes
         <MenuDropdown isopen={isOpen.toString()}>
           <DropdownItemLink>
             <LayoutWrapper
-              to={`${slug}/ctm-configurations/list-settings`}
+              to={`${slug}/configurations/list`}
               onClick={() => emitEvent('willEditListLayout')}
             >
               <LayoutIcon />

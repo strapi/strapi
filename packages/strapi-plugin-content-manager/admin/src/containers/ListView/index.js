@@ -147,7 +147,7 @@ function ListView({
   }, [layout, setLayout, resetProps]);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
-  // We need it because the hook as mulitple dependencies so it may run when the before the permissions are checked
+  // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
   const requestUrlRef = useRef('');
 
   const fetchData = useCallback(

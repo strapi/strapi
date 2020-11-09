@@ -6,11 +6,12 @@ import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import EditView from '../EditView';
 import ListView from '../ListView';
+import ListSettingsView from '../ListSettingsView';
 
 const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
-  const { isLoading, layout } = useFetchContentTypeLayout(slug);
+  const { isLoading, layout, updateLayout } = useFetchContentTypeLayout(slug);
   const slugRef = React.useRef(slug);
 
   useEffect(() => {
@@ -25,19 +26,19 @@ const CollectionTypeRecursivePath = () => {
     // return <Component {...routeProps} slug={slug} layout={layout} />;
     return <Component slug={slugRef.current} layout={layout} />;
   };
-  const renderPermissionsRoute = (routeProps, Component) => {
+  const renderPermissionsRoute = (_, Component) => {
     return (
       <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-        <Component {...routeProps} slug={slug} />
+        <Component layout={layout} slug={slugRef.current} updateLayout={updateLayout} />
       </CheckPagePermissions>
     );
   };
 
   const settingsRoutes = [
-    // {
-    //   path: 'ctm-configurations/list-settings',
-    //   comp: ListSettingsView,
-    // },
+    {
+      path: 'configurations/list',
+      comp: ListSettingsView,
+    },
     // {
     //   path: 'ctm-configurations/edit-settings/:type',
     //   comp: EditSettingsView,
