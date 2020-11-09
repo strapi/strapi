@@ -24,6 +24,9 @@
   "author": {
     "name": "Yurii Tykhomyrov"
   },
+  "strapi": {
+    "isProvider": true
+  },
   "scripts": {
     "test": "echo \"no tests yet\""
   },
