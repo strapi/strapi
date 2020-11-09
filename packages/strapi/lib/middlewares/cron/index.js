@@ -22,22 +22,19 @@ module.exports = strapi => {
       if (strapi.config.get('server.cron.enabled', false) === true) {
         _.forEach(_.keys(strapi.config.get('functions.cron', {})), taskExpression => {
           const taskValue = strapi.config.functions.cron[taskExpression];
-          const isFunctionValue = _.isFunction(taskValue);
 
-          if (isFunctionValue) {
-            cron.scheduleJob(taskExpression, strapi.config.functions.cron[taskExpression]);
-
-            return;
+          if (_.isFunction(taskValue)) {
+            return cron.scheduleJob(taskExpression, taskValue);
           }
 
-          const options = _.get(strapi.config.functions.cron[taskExpression], 'options', {});
+          const options = _.get(taskValue, 'options', {});
 
           cron.scheduleJob(
             {
               rule: taskExpression,
               ...options,
             },
-            strapi.config.functions.cron[taskExpression]['task']
+            taskValue.task
           );
         });
       }
