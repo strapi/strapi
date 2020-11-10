@@ -129,8 +129,6 @@ module.exports = ({ rq }) => {
       method: 'GET',
     });
 
-    console.log(body);
-
     if (Array.isArray(body.results) && body.results.length > 0) {
       await rq({
         url: `/content-manager/collection-types/application::${model}.${model}/actions/bulkDelete`,
