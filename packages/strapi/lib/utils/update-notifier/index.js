@@ -1,12 +1,15 @@
 'use strict';
+
+const path = require('path');
 const packageJson = require('package-json');
 const Configstore = require('configstore');
 const semver = require('semver');
 const boxen = require('boxen');
 const chalk = require('chalk');
-const path = require('path');
-const pkg = require('../../../package');
 const { env } = require('strapi-utils');
+
+const pkg = require('../../../package');
+
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
 const NOTIF_INTERVAL = 1000 * 60 * 60 * 24 * 7; // 1 week
 const boxenOptions = {
@@ -29,11 +32,18 @@ Check out the new the releases at: ${releaseLink}
 };
 
 const createUpdateNotifier = strapi => {
-  const config = new Configstore(
-    pkg.name,
-    {},
-    { configPath: path.join(strapi.dir, '.strapi-updater.json') }
-  );
+  let config = null;
+
+  try {
+    config = new Configstore(
+      pkg.name,
+      {},
+      { configPath: path.join(strapi.dir, '.strapi-updater.json') }
+    );
+  } catch {
+    // we don't have write access to the file system
+    // we silence the error
+  }
 
   const checkUpdate = async checkInterval => {
     const now = Date.now();
@@ -74,7 +84,7 @@ const createUpdateNotifier = strapi => {
 
   return {
     notify({ checkInterval = CHECK_INTERVAL, notifInterval = NOTIF_INTERVAL } = {}) {
-      if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false)) {
+      if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false) || !config) {
         return;
       }
       display(notifInterval);
