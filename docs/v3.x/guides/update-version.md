@@ -1,6 +1,15 @@
 # Update Strapi version
 
-With this guide you will know how to upgrade your application to the latest version of Strapi.<br>
+With this guide you will know how to upgrade your application to the latest version of Strapi.
+
+::: tip NOTE
+When a new version of Strapi is available, you will be notified both in your terminal, and in the admin panel. <br>
+Note also that you can check the **Settings > Application** section of the admin panel to have more information on:
+
+- the versions of Strapi and Node you are currently using,
+- (if relevant) the versions we recommend you to upgrade to.
+  :::
+
 Before you start make sure **your server is not running until the end** of the guide.
 
 ## Upgrade your dependencies
