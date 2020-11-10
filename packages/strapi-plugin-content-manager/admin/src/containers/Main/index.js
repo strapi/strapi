@@ -21,10 +21,6 @@ import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import { getData, getDataSucceeded, resetProps } from './actions';
 import makeSelectMain from './selectors';
 
-// const EditSettingsView = lazy(() => import('../EditSettingsView'));
-// const CollectionTypeRecursivePath = lazy(() => import('../CollectionTypeRecursivePath'));
-// const SingleTypeRecursivePath = lazy(() => import('../SingleTypeRecursivePath'));
-
 function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
   useEffect(() => {
     const abortController = new AbortController();
@@ -43,7 +39,6 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
         getDataSucceeded(models, components);
       } catch (err) {
         console.error('CM/main', err);
-        // TODO: new notif API
         strapi.notification.error('notification.error');
       }
     };
@@ -75,7 +70,6 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
           component={CollectionTypeRecursivePath}
         />
         <Route path={`/plugins/${pluginId}/singleType/:slug`} component={SingleTypeRecursivePath} />
-
         <Route path="" component={NotFound} />
       </Switch>
     </DndProvider>

@@ -95,8 +95,4 @@ const getInputSize = type => {
   }
 };
 
-// TODO not sure this one is still needed
-const getFieldType = (state, name) =>
-  state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
-
-export { createLayout, formatLayout, getFieldType, getInputSize, getRowSize, unformatLayout };
+export { createLayout, formatLayout, getInputSize, getRowSize, unformatLayout };

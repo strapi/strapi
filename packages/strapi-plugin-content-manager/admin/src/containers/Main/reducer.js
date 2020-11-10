@@ -7,14 +7,12 @@ import produce from 'immer';
 import { GET_DATA, GET_DATA_SUCCEEDED, RESET_PROPS } from './constants';
 
 const initialState = {
-  // TODO!
-  // componentsAndModelsMainPossibleMainFields: {},
-  // TODO!
   components: [],
   isLoading: true,
   models: [],
 };
 
+// TODO use crudReducer
 const mainReducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {

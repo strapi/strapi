@@ -95,7 +95,6 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
         body,
       });
 
-      console.log({ response });
       updateLayout(response.data);
 
       dispatch({

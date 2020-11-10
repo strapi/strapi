@@ -22,7 +22,6 @@ const reducer = (state, action) =>
       }
       case 'SET_IS_LOADING': {
         draftState.isLoading = true;
-
         break;
       }
       default:
