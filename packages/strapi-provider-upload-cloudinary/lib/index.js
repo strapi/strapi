@@ -57,7 +57,7 @@ module.exports = {
             ...customConfig,
           });
 
-          if (response.result !== 'ok') {
+          if (response.result !== 'ok' && response.result !== 'not found') {
             throw errors.unknownError(`Error deleting on cloudinary: ${response.result}`);
           }
         } catch (error) {

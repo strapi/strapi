@@ -34,6 +34,7 @@
   "components.TableEmpty.withSearch": "There is no {contentType} corresponding to the search ({search})...",
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
   "components.empty-repeatable": "No entry yet. Click on the button below to add one.",
+  "components.repeatable.reorder.error": "An error occurred while reordering your component's field, please try again",
   "components.notification.info.maximum-requirement": "You have already reached the maximum number of fields",
   "components.notification.info.minimum-requirement": "A field has been added to match the minimum requirement",
   "components.reset-entry": "Reset entry",
