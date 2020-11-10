@@ -70,7 +70,9 @@ module.exports = {
       }
     },
     beforeUpdate: async (params, data) => {
-      data.slug = slugify(data.title);
+      if (data.title) {
+        data.slug = slugify(data.title);
+      }
     },
   },
 };
