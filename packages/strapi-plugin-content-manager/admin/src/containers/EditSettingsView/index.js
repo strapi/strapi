@@ -1,12 +1,6 @@
-import React, {
-  useCallback,
-  // useEffect,
-  useMemo,
-  useReducer,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { cloneDeep, flatMap, get, set, pick } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
@@ -29,7 +23,6 @@ import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '.
 
 const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, updateLayout }) => {
   const { push } = useHistory();
-  const { componentSlug } = useParams();
   const { currentEnvironment, emitEvent, plugins } = useGlobalContext();
 
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
@@ -116,7 +109,6 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
     });
   };
 
-  // TODO
   const handleConfirm = async () => {
     try {
       const body = pick(cloneDeep(modifiedData), ['layouts', 'metadatas', 'settings']);
@@ -129,13 +121,6 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
         : getRequestUrl(`components/${slug}/configuration`);
 
       const response = await request(requestURL, { method: 'PUT', body });
-      console.log({ response });
-
-      // await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
-      //   method: 'PUT',
-      //   body,
-      //   signal,
-      // });
 
       if (updateLayout) {
         updateLayout(response.data);
@@ -144,15 +129,6 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-
-      // if (slug) {
-      //   // TODO
-      //   // deleteLayout(slug);
-      // }
-
-      // if (componentSlug) {
-      //   // deleteLayouts();
-      // }
 
       emitEvent('didEditEditSettings');
     } catch (err) {
@@ -311,7 +287,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
           });
         }}
         onConfirmSubmit={handleConfirm}
-        slug={slug || componentSlug}
+        slug={slug}
         isEditSettings
       >
         <div className="row">
@@ -341,7 +317,8 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
                   slug,
                   push,
                   {
-                    componentSlug,
+                    // TODO
+                    componentSlug: 'TODO',
                     type: isContentTypeView ? 'content-types' : 'components',
                     modifiedData,
                   }
@@ -405,6 +382,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
 };
 
 EditSettingsView.defaultProps = {
+  isContentTypeView: false,
   updateLayout: null,
 };
 
@@ -421,8 +399,8 @@ EditSettingsView.propTypes = {
     metadatas: PropTypes.object.isRequired,
     options: PropTypes.object.isRequired,
   }).isRequired,
-  isContentTypeView: PropTypes.bool.isRequired,
-  // TODO check if still needed
+  isContentTypeView: PropTypes.bool,
+
   slug: PropTypes.string.isRequired,
   updateLayout: PropTypes.func,
 };

@@ -30,7 +30,11 @@ const Button = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }
       return false;
     }
 
-    push(`/plugins/${pluginId}/collectionType/${targetUid}/configurations/edit`);
+    if (isInContentTypeView) {
+      push(`/plugins/${pluginId}/collectionType/${targetUid}/configurations/edit`);
+    } else {
+      push(`/plugins/${pluginId}/components/${targetUid}/configurations/edit`);
+    }
 
     return false;
   };
@@ -61,13 +65,14 @@ Button.defaultProps = {
   contentTypeKind: 'collectionType',
   isInContentTypeView: true,
   isTemporary: false,
+  targetUid: '',
 };
 
 Button.propTypes = {
   contentTypeKind: PropTypes.string,
   isInContentTypeView: PropTypes.bool,
   isTemporary: PropTypes.bool,
-  targetUid: PropTypes.string.isRequired,
+  targetUid: PropTypes.string,
 };
 
 export default memo(Button);

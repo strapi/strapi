@@ -1,4 +1,5 @@
 import { cloneDeep, get, set } from 'lodash';
+import { mergeMetasWithSchema } from '../../../utils';
 import pluginId from '../../../pluginId';
 
 const formatLayoutWithMetas = (obj, ctUid, models) => {
@@ -105,25 +106,25 @@ const formatListLayoutWithMetas = obj => {
   return formatted;
 };
 
-const mergeMetasWithSchema = (data, schemas) => {
-  const findSchema = refUid => schemas.find(obj => obj.uid === refUid);
-  const merged = Object.assign({}, data);
-  const contentTypeUid = data.contentType.uid;
-  const contentTypeSchema = findSchema(contentTypeUid);
+// const mergeMetasWithSchema = (data, schemas) => {
+//   const findSchema = refUid => schemas.find(obj => obj.uid === refUid);
+//   const merged = Object.assign({}, data);
+//   const contentTypeUid = data.contentType ? data.contentType.uid : data.component.uid;
+//   const contentTypeSchema = findSchema(contentTypeUid);
 
-  set(merged, ['contentType'], { ...data.contentType, ...contentTypeSchema });
+//   set(merged, ['contentType'], { ...data.contentType, ...contentTypeSchema });
 
-  Object.keys(data.components).forEach(compoUID => {
-    const compoSchema = findSchema(compoUID);
+//   Object.keys(data.components).forEach(compoUID => {
+//     const compoSchema = findSchema(compoUID);
 
-    set(merged, ['components', compoUID], { ...data.components[compoUID], ...compoSchema });
-  });
+//     set(merged, ['components', compoUID], { ...data.components[compoUID], ...compoSchema });
+//   });
 
-  return merged;
-};
+//   return merged;
+// };
 
 const formatLayouts = (initialData, models) => {
-  const data = mergeMetasWithSchema(cloneDeep(initialData), models);
+  const data = mergeMetasWithSchema(cloneDeep(initialData), models, 'contentType');
   const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, models);
   const ctUid = data.contentType.uid;
   const formattedEditRelationsLayout = formatEditRelationsLayoutWithMetas(data.contentType, models);
@@ -147,4 +148,4 @@ const formatLayouts = (initialData, models) => {
 };
 
 export default formatLayouts;
-export { formatEditRelationsLayoutWithMetas, formatLayoutWithMetas, mergeMetasWithSchema };
+export { formatEditRelationsLayoutWithMetas, formatLayoutWithMetas };
