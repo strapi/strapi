@@ -5,11 +5,11 @@ import { useSelector } from 'react-redux';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
 import pluginPermissions from '../../permissions';
+import { crudInitialState, crudReducer } from '../../sharedReducers';
 import EditSettingsView from '../EditSettingsView';
-import reducer, { initialState } from './reducer';
 
 const ComponentSettingsView = () => {
-  const [{ isLoading, layout }, dispatch] = useReducer(reducer, initialState);
+  const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector(state => schemasSelector(state), []);
   const { uid } = useParams();

@@ -31,9 +31,7 @@ const reducer = (state, action) => {
           .insert(action.hoverRowIndex, state.getIn([...layoutPathEdit, action.dragRowIndex]));
       });
     case 'ON_ADD_DATA': {
-      const size = getInputSize(
-        state.getIn(['modifiedData', 'schema', 'attributes', action.name, 'type'])
-      );
+      const size = getInputSize(state.getIn(['modifiedData', 'attributes', action.name, 'type']));
 
       const listSize = state.getIn(layoutPathEdit).size;
       const newList = state.getIn(layoutPathEdit).updateIn([listSize - 1, 'rowContent'], list => {
