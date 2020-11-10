@@ -1,5 +1,3 @@
-// TODO
-
 import { get } from 'lodash';
 
 const createPossibleMainFieldsForModelsAndComponents = array => {

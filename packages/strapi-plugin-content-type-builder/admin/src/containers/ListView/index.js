@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
@@ -255,24 +255,15 @@ const ListView = () => {
       handleClickAddField(forTarget, targetUid, headerDisplayObject);
     },
   };
-  const goToCMSettingsPage = useCallback(() => {
-    const endPoint = isInContentTypeView
-      ? `/plugins/content-manager/${contentTypeKind}/${targetUid}/ctm-configurations/edit-settings/content-types`
-      : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
-
-    if (!isTemporary) {
-      push(endPoint);
-    }
-  }, [contentTypeKind, isInContentTypeView, isTemporary, push, targetUid]);
 
   const listInjectedComponents = useMemo(() => {
     return getComponents('listView', 'list.link', plugins, {
-      onClick: goToCMSettingsPage,
+      targetUid,
       isTemporary,
       isInContentTypeView,
       contentTypeKind,
     });
-  }, [plugins, goToCMSettingsPage, isTemporary, isInContentTypeView, contentTypeKind]);
+  }, [plugins, isTemporary, targetUid, isInContentTypeView, contentTypeKind]);
 
   const listActions = isInDevelopmentMode
     ? [...listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]

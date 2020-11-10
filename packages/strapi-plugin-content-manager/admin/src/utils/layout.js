@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 const getRowSize = arr => arr.reduce((sum, value) => sum + value.size, 0);
 
 const createLayout = arr => {
@@ -28,7 +29,12 @@ const formatLayout = arr => {
         return acc2;
       }, []);
       const rowId =
-        acc.length === 0 ? 0 : Math.max.apply(Math, acc.map(o => o.rowId)) + 1;
+        acc.length === 0
+          ? 0
+          : Math.max.apply(
+              Math,
+              acc.map(o => o.rowId)
+            ) + 1;
 
       const currentRowSize = getRowSize(currentRow);
 
@@ -63,9 +69,7 @@ const formatLayout = arr => {
 
 const unformatLayout = arr => {
   return arr.reduce((acc, current) => {
-    const currentRow = current.rowContent.filter(
-      content => content.name !== '_TEMP_'
-    );
+    const currentRow = current.rowContent.filter(content => content.name !== '_TEMP_');
 
     return acc.concat([currentRow]);
   }, []);
@@ -91,14 +95,8 @@ const getInputSize = type => {
   }
 };
 
+// TODO not sure this one is still needed
 const getFieldType = (state, name) =>
   state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
 
-export {
-  createLayout,
-  formatLayout,
-  getFieldType,
-  getInputSize,
-  getRowSize,
-  unformatLayout,
-};
+export { createLayout, formatLayout, getFieldType, getInputSize, getRowSize, unformatLayout };

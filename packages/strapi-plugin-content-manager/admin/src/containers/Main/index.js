@@ -3,17 +3,21 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
-import { LoadingIndicatorPage, request, CheckPagePermissions } from 'strapi-helper-plugin';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  NotFound,
+  request,
+} from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
+import { getRequestUrl } from '../../utils';
 import DragLayer from '../../components/DragLayer';
-import getRequestUrl from '../../utils/getRequestUrl';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
-import EditSettingsView from '../EditSettingsView';
+import ComponentSettingsView from '../ComponentSetttingsView';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
-// import createPossibleMainFieldsForModelsAndComponents from './utils/createPossibleMainFieldsForModelsAndComponents';
 import { getData, getDataSucceeded, resetProps } from './actions';
 import makeSelectMain from './selectors';
 
@@ -56,40 +60,23 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
     return <LoadingIndicatorPage />;
   }
 
-  const routes = [
-    { path: 'singleType/:slug', comp: SingleTypeRecursivePath },
-    { path: 'collectionType/:slug', comp: CollectionTypeRecursivePath },
-  ].map(({ path, comp }) => (
-    <Route key={path} path={`/plugins/${pluginId}/${path}`} component={comp} />
-  ));
-
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
 
       <Switch>
+        <Route path={`/plugins/${pluginId}/components/:uid/configurations/edit`}>
+          <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
+            <ComponentSettingsView />
+          </CheckPagePermissions>
+        </Route>
         <Route
-          path={`/plugins/${pluginId}/ctm-configurations/edit-settings/:type/:componentSlug`}
-          render={routeProps => (
-            <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
-              <EditSettingsView
-                // currentEnvironment={currentEnvironment}
-                // deleteLayout={deleteLayout}
-                // deleteLayouts={deleteLayouts}
-                // emitEvent={emitEvent}
-                // components={components}
-                // componentsAndModelsMainPossibleMainFields={
-                //   componentsAndModelsMainPossibleMainFields
-                // }
-                // layouts={layouts}
-                // models={models}
-                // plugins={plugins}
-                {...routeProps}
-              />
-            </CheckPagePermissions>
-          )}
+          path={`/plugins/${pluginId}/collectionType/:slug`}
+          component={CollectionTypeRecursivePath}
         />
-        {routes}
+        <Route path={`/plugins/${pluginId}/singleType/:slug`} component={SingleTypeRecursivePath} />
+
+        <Route path="" component={NotFound} />
       </Switch>
     </DndProvider>
   );

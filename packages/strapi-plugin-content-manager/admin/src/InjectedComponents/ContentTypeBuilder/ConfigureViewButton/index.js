@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { LayoutIcon, CheckPermissions } from 'strapi-helper-plugin';
 import { Button as Base } from '@buffetjs/core';
+import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import pluginPermissions from '../../../permissions';
+import pluginId from '../../../pluginId';
 
 const StyledButton = styled(Base)`
   padding-left: 15px;
   padding-right: 15px;
 `;
 
-const Button = ({ onClick, isTemporary, isInContentTypeView, contentTypeKind }) => {
+const Button = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }) => {
   const { formatMessage } = useIntl();
+  const { push } = useHistory();
   const {
     collectionTypesConfigurations,
     componentsConfigurations,
@@ -21,6 +24,16 @@ const Button = ({ onClick, isTemporary, isInContentTypeView, contentTypeKind }) 
   const icon = <LayoutIcon className="colored" fill={isTemporary ? '#B4B6BA' : '#007eff'} />;
   const label = formatMessage({ id: 'content-type-builder.form.button.configure-view' });
   let permissionsToApply = collectionTypesConfigurations;
+
+  const handleClick = () => {
+    if (isTemporary) {
+      return false;
+    }
+
+    push(`/plugins/${pluginId}/collectionType/${targetUid}/configurations/edit`);
+
+    return false;
+  };
 
   if (isInContentTypeView && contentTypeKind === 'singleType') {
     permissionsToApply = singleTypesConfigurations;
@@ -36,7 +49,7 @@ const Button = ({ onClick, isTemporary, isInContentTypeView, contentTypeKind }) 
         icon={icon}
         label={label}
         color="secondary"
-        onClick={onClick}
+        onClick={handleClick}
         style={{ marginTop: '2px' }}
         disabled={isTemporary}
       />
@@ -48,14 +61,13 @@ Button.defaultProps = {
   contentTypeKind: 'collectionType',
   isInContentTypeView: true,
   isTemporary: false,
-  onClick: () => {},
 };
 
 Button.propTypes = {
   contentTypeKind: PropTypes.string,
   isInContentTypeView: PropTypes.bool,
   isTemporary: PropTypes.bool,
-  onClick: PropTypes.func,
+  targetUid: PropTypes.string.isRequired,
 };
 
-export default Button;
+export default memo(Button);

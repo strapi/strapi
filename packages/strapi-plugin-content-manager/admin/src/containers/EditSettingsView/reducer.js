@@ -1,13 +1,11 @@
 import { fromJS } from 'immutable';
-import { cloneDeep, set } from 'lodash';
-import { createLayout, formatLayout, getInputSize } from '../../utils/layout';
+import { formatLayout, getInputSize } from '../../utils/layout';
 
 const initialState = fromJS({
   fieldForm: {},
   componentLayouts: {},
   metaToEdit: '',
   initialData: {},
-  // isLoading: true,
   metaForm: {},
   modifiedData: {},
 });
@@ -19,22 +17,6 @@ const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_RELATION':
       return state.updateIn(layoutPathRelations, list => list.push(action.name));
-
-    // case 'GET_DATA_SUCCEEDED': {
-    //   const data = cloneDeep(action.data);
-
-    //   set(
-    //     data,
-    //     ['layouts', 'edit'],
-    //     formatLayout(createLayout(data.layouts.edit))
-    //   );
-
-    //   return state
-    //     .update('componentLayouts', () => fromJS(action.componentLayouts))
-    //     .update('initialData', () => fromJS(data || {}))
-    //     .update('isLoading', () => false)
-    //     .update('modifiedData', () => fromJS(data || {}));
-    // }
     case 'MOVE_RELATION': {
       return state.updateIn(layoutPathRelations, list => {
         return list
