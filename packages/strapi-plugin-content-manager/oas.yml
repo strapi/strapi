@@ -1,6 +1,7 @@
 openapi: 3.0.2
 info:
   title: Strapi Content Manager API
+  version: 1.0.0
 servers:
   - url: http://localhost:1337
     description: Local server
@@ -46,7 +47,7 @@ paths:
                     type: object
                     properties:
                       contentType:
-                        $ref: '#/components/schemas/configuration'
+                        $ref: '#/components/schemas/content-type-configuration'
                       components:
                         type: object
                         additionalProperties:
@@ -57,6 +58,11 @@ paths:
       description: Edit content type configuration
       parameters:
         - $ref: '#/components/parameters/uid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/configuration'
       responses:
         200:
           description: A content type configuration
@@ -66,7 +72,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/configuration'
+                    $ref: '#/components/schemas/content-type-configuration'
   /content-manager/components:
     get:
       tags:
@@ -114,6 +120,11 @@ paths:
       description: Edit component configuration
       parameters:
         - $ref: '#/components/parameters/uid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/configuration'
       responses:
         200:
           description: A component configuration with its components configuration
@@ -174,7 +185,7 @@ paths:
               required:
                 - contentTypeUID
                 - field
-                - data
+                - value
               properties:
                 contentTypeUID:
                   type: string
@@ -321,6 +332,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/model'
         - $ref: '#/components/parameters/entity-id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/entityInput'
       responses:
         200:
           content:
@@ -353,7 +369,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity'
+                allOf:
+                  - $ref: '#/components/schemas/entity'
+                  - type: object
+                    properties:
+                      published_at:
+                        type: datetime
   /content-manager/collection-types/{model}/{id}/actions/unpublish:
     post:
       tags:
@@ -367,7 +388,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity'
+                allOf:
+                  - $ref: '#/components/schemas/entity'
+                  - type: object
+                    properties:
+                      published_at:
+                        type: datetime
   # Single type
   /content-manager/single-types/{model}:
     get:
@@ -388,6 +414,11 @@ paths:
       description: Update Single type content
       parameters:
         - $ref: '#/components/parameters/model'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/entityInput'
       responses:
         200:
           content:
@@ -418,7 +449,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity'
+                allOf:
+                  - $ref: '#/components/schemas/entity'
+                  - type: object
+                    properties:
+                      published_at:
+                        type: datetime
   /content-manager/single-types/{model}/actions/unpublish:
     post:
       tags:
@@ -431,7 +467,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity'
+                allOf:
+                  - $ref: '#/components/schemas/entity'
+                  - type: object
+                    properties:
+                      published_at:
+                        type: datetime
+                        nullable: true
 
 components:
   schemas:
@@ -559,8 +601,6 @@ components:
     configuration:
       type: object
       properties:
-        uid:
-          type: string
         settings:
           type: object
           properties:
@@ -601,13 +641,21 @@ components:
                     name: string
                     size: integer
 
+    content-type-configuration:
+      allOf:
+        - type: object
+          properties:
+            uid:
+              type: string
+        - $ref: '#/components/schemas/configuration'
+
     component-configuration:
       allOf:
         - type: object
           properties:
             isComponent:
               type: boolean
-        - $ref: '#/components/schemas/configuration'
+        - $ref: '#/components/schemas/content-type-configuration'
 
     kind:
       type: string
@@ -635,7 +683,7 @@ components:
       name: kind
       schema:
         $ref: '#/components/schemas/kind'
-      description: The number of items to skip before starting to collect the result set
+      description: A content type kind (singleType or collection)
 
     model:
       in: path
