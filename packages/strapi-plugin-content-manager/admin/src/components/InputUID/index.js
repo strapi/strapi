@@ -63,7 +63,7 @@ const InputUID = ({
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
-    const requestURL = getRequestUrl('explorer/uid/generate');
+    const requestURL = getRequestUrl('uid/generate');
     try {
       const { data } = await request(requestURL, {
         method: 'POST',
@@ -85,7 +85,7 @@ const InputUID = ({
   const checkAvailability = async () => {
     setIsLoading(true);
 
-    const requestURL = getRequestUrl('explorer/uid/check-availability');
+    const requestURL = getRequestUrl('uid/check-availability');
 
     if (!value) {
       return;

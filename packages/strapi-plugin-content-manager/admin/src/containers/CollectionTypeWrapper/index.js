@@ -97,7 +97,12 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
           data: cleanReceivedData(data),
         });
       } catch (err) {
+        if (err.name === 'AbortError') {
+          return;
+        }
+
         console.error(err);
+
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
@@ -123,7 +128,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
     return () => {
       abortController.abort();
-      shouldFetch.current = false;
+      shouldFetch.current = fetchURL === null;
     };
   }, [fetchURL, push, from, cleanReceivedData]);
 

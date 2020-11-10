@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
@@ -14,11 +14,6 @@ const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
   const { isLoading, layout, updateLayout } = useFetchContentTypeLayout(slug);
-  const slugRef = React.useRef(slug);
-
-  useEffect(() => {
-    slugRef.current = slug;
-  }, [slug]);
 
   const { rawContentTypeLayout, rawComponentsLayouts } = useMemo(() => {
     let rawContentTypeLayout = {};
@@ -44,7 +39,7 @@ const CollectionTypeRecursivePath = () => {
   }
 
   const renderRoute = (_, Component) => {
-    return <Component slug={slugRef.current} layout={layout} />;
+    return <Component slug={slug} layout={layout} />;
   };
 
   const routes = [
@@ -61,7 +56,7 @@ const CollectionTypeRecursivePath = () => {
           <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
             <ListSettingsView
               layout={rawContentTypeLayout}
-              slug={slugRef.current}
+              slug={slug}
               updateLayout={updateLayout}
             />
           </CheckPagePermissions>
@@ -72,7 +67,7 @@ const CollectionTypeRecursivePath = () => {
               components={rawComponentsLayouts}
               isContentTypeView
               mainLayout={rawContentTypeLayout}
-              slug={slugRef.current}
+              slug={slug}
               updateLayout={updateLayout}
             />
           </CheckPagePermissions>

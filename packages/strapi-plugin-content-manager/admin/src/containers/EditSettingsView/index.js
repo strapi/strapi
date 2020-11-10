@@ -8,18 +8,12 @@ import React, {
 import PropTypes from 'prop-types';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { cloneDeep, flatMap, get, set } from 'lodash';
-import {
-  // request,
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { cloneDeep, flatMap, get, set, pick } from 'lodash';
+import { request, useGlobalContext } from 'strapi-helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
-import {
-  getInjectedComponents,
-  // getRequestUrl
-} from '../../utils';
+import { getInjectedComponents, getRequestUrl } from '../../utils';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import LayoutTitle from '../../components/LayoutTitle';
@@ -33,7 +27,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from './utils';
 
-const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug }) => {
+const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, updateLayout }) => {
   const { push } = useHistory();
   const { componentSlug } = useParams();
   const { currentEnvironment, emitEvent, plugins } = useGlobalContext();
@@ -125,16 +119,17 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug }) =
   // TODO
   const handleConfirm = async () => {
     try {
-      const body = cloneDeep(modifiedData);
+      const body = pick(cloneDeep(modifiedData), ['layouts', 'metadatas', 'settings']);
 
       // We need to send the unformated edit layout
       set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
 
-      delete body.schema;
-      delete body.uid;
-      delete body.isComponent;
-      delete body.category;
-      delete body.apiID;
+      const requestURL = isContentTypeView
+        ? getRequestUrl(`content-types/${slug}/configuration`)
+        : getRequestUrl(`components/${slug}/configuration`);
+
+      const response = await request(requestURL, { method: 'PUT', body });
+      console.log({ response });
 
       // await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
       //   method: 'PUT',
@@ -142,18 +137,22 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug }) =
       //   signal,
       // });
 
+      if (updateLayout) {
+        updateLayout(response.data);
+      }
+
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
 
-      if (slug) {
-        // TODO
-        // deleteLayout(slug);
-      }
+      // if (slug) {
+      //   // TODO
+      //   // deleteLayout(slug);
+      // }
 
-      if (componentSlug) {
-        // deleteLayouts();
-      }
+      // if (componentSlug) {
+      //   // deleteLayouts();
+      // }
 
       emitEvent('didEditEditSettings');
     } catch (err) {
@@ -406,7 +405,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug }) =
 };
 
 EditSettingsView.defaultProps = {
-  // slug: null,
+  updateLayout: null,
 };
 
 EditSettingsView.propTypes = {
@@ -425,6 +424,7 @@ EditSettingsView.propTypes = {
   isContentTypeView: PropTypes.bool.isRequired,
   // TODO check if still needed
   slug: PropTypes.string.isRequired,
+  updateLayout: PropTypes.func,
 };
 
 export default EditSettingsView;
