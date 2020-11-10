@@ -8,7 +8,8 @@ Note also that you can check the **Settings > Application** section of the admin
 
 - the versions of Strapi and Node you are currently using,
 - (if relevant) the versions we recommand you to upgrade to.
-  :::
+
+:::
 
 ::: warning CAUTION
 Before you start, make sure your server is not running until the end of the guide!
