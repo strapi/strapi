@@ -1,6 +1,6 @@
 {
   "name": "strapi-database",
-  "version": "3.3.0",
+  "version": "3.3.2",
   "description": "Strapi's database layer",
   "homepage": "http://strapi.io",
   "main": "./lib/index.js",
@@ -30,7 +30,7 @@
   "dependencies": {
     "lodash": "4.17.19",
     "p-map": "4.0.0",
-    "strapi-utils": "3.3.0",
+    "strapi-utils": "3.3.2",
     "verror": "^1.10.0"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
