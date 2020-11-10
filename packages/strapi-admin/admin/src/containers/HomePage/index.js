@@ -61,7 +61,7 @@ const SOCIAL_LINKS = [
   },
 ];
 
-const HomePage = ({ global: { plugins }, history: { push } }) => {
+const HomePage = ({ history: { push } }) => {
   const { error, isLoading, posts } = useFetch();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();

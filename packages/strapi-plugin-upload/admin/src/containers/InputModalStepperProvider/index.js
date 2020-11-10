@@ -338,7 +338,10 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
       return 0;
     }
@@ -365,7 +368,10 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
       return [];
     }
