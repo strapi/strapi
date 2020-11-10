@@ -7,10 +7,12 @@ When a new version of Strapi is available, you will be notified both in your ter
 Note also that you can check the **Settings > Application** section of the admin panel to have more information on:
 
 - the versions of Strapi and Node you are currently using,
-- (if relevant) the versions we recommend you to upgrade to.
+- (if relevant) the versions we recommand you to upgrade to.
   :::
 
-Before you start make sure **your server is not running until the end** of the guide.
+::: warning CAUTION
+Before you start, make sure your server is not running until the end of the guide!
+:::
 
 ## Upgrade your dependencies
 
