@@ -1,6 +1,6 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createRequest, createAuthRequest } = require('../../../test/helpers/request');
 
@@ -8,8 +8,9 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 if (edition === 'EE') {
   describe('Admin Permissions - Conditions', () => {
+    let strapi;
     let requests = {
-      public: createRequest(),
+      public: null,
       admin: null,
     };
 
@@ -66,8 +67,8 @@ if (edition === 'EE') {
 
     const createFixtures = async () => {
       // Login with admin and init admin tools
-      const adminToken = await registerAndLogin();
-      requests.admin = createAuthRequest(adminToken);
+      requests.admin = await createAuthRequest({ strapi });
+      requests.public = await createRequest({ strapi });
 
       modelsUtils = createModelsUtils({ rq: requests.admin });
 
@@ -111,7 +112,7 @@ if (edition === 'EE') {
         const { firstname, lastname } = localTestData.users[i];
         const {
           body: {
-            data: { token, user: registeredUser },
+            data: { user: registeredUser },
           },
         } = await requests.public({
           method: 'POST',
@@ -122,7 +123,7 @@ if (edition === 'EE') {
           },
         });
         localTestData.users[i] = registeredUser;
-        requests[registeredUser.id] = createAuthRequest(token);
+        requests[registeredUser.id] = await createAuthRequest({ strapi, userInfo: createdUser });
       }
     };
 
@@ -151,11 +152,13 @@ if (edition === 'EE') {
     };
 
     beforeAll(async () => {
+      strapi = await createStrapiInstance({ ensureSuperAdmin: true });
       await createFixtures();
     });
 
     afterAll(async () => {
       await deleteFixtures();
+      await strapi.destroy();
     });
 
     test('User A can create an entry', async () => {

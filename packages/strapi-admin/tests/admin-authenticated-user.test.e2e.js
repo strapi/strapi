@@ -1,17 +1,21 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../test/helpers/request');
 
-let rq;
-
 describe('Authenticated User', () => {
-  beforeAll(async () => {
-    const token = await registerAndLogin();
+  let rq;
+  let strapi;
 
-    rq = createAuthRequest(token);
+  beforeAll(async () => {
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
+
+  afterAll(async () => {
+    await strapi.destroy();
+  });
 
   describe('GET /users/me', () => {
     test('Returns sanitized user info', async () => {
@@ -33,7 +37,7 @@ describe('Authenticated User', () => {
     });
 
     test('Returns forbidden on unauthenticated query', async () => {
-      const req = createRequest();
+      const req = await createRequest({ strapi });
       const res = await req({
         url: '/admin/users/me',
         method: 'GET',
@@ -46,7 +50,7 @@ describe('Authenticated User', () => {
 
   describe('PUT /users/me', () => {
     test('Returns forbidden on unauthenticated query', async () => {
-      const req = createRequest();
+      const req = await createRequest({ strapi });
       const res = await req({
         url: '/admin/users/me',
         method: 'PUT',

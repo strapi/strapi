@@ -1,11 +1,11 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const modelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   products: [],
 };
@@ -42,17 +42,18 @@ const compo = {
 
 describe('Core API - Basic', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createComponent(compo);
     await modelsUtils.createContentTypes([product]);
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteContentTypes(['product']);
-    await modelsUtils.deleteComponent('default.compo');
+    await strapi.destroy();
+    await modelsUtils.cleanupModel(product.name);
+    await modelsUtils.deleteContentType(product.name);
+    await modelsUtils.deleteComponent(`default.${compo.name}`);
   }, 60000);
 
   test('Create product', async () => {

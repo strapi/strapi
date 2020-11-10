@@ -40,6 +40,10 @@ class DatabaseManager {
     return this;
   }
 
+  async destroy() {
+    await Promise.all(this.connectors.getAll().map(conn => conn.destroy()));
+  }
+
   initializeModelsMap() {
     Object.keys(this.strapi.models).forEach(modelKey => {
       const model = this.strapi.models[modelKey];

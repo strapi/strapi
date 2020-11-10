@@ -1,76 +1,42 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const { createStrapiInstance, superAdmin } = require('../../../test/helpers/strapi');
+const { createUtils } = require('../../../test/helpers/utils');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-let rq;
-
-const createAuthRole = async () => {
-  const res = await rq({
-    url: '/admin/roles',
-    method: 'POST',
-    body: {
-      name: 'auth_test_role',
-      description: 'Only used for auth crud test (e2e)',
-    },
-  });
-
-  return res && res.body && res.body.data;
-};
-
 let internals = {
-  users: [],
   role: null,
 };
 
 describe('Admin Auth End to End', () => {
-  const createUser = async data => {
-    const res = await rq({
-      url: '/admin/users',
-      method: 'POST',
-      body: {
-        roles: [internals.role.id],
-        ...data,
-      },
-    });
-
-    internals.users.push(res.body.data);
-    return res;
-  };
+  let rq;
+  let strapi;
+  let utils;
 
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+    utils = createUtils(strapi);
 
     if (edition === 'EE') {
-      internals.role = await createAuthRole();
+      internals.role = await utils.createRole({
+        name: 'auth_test_role',
+        description: 'Only used for auth crud test (e2e)',
+      });
     } else {
-      internals.role = (
-        await rq({
-          url: '/admin/roles',
-          method: 'GET',
-        })
-      ).body.data[0];
+      internals.role = await utils.getSuperAdminRole();
     }
   }, 60000);
 
   afterAll(async () => {
-    await Promise.all(
-      internals.users.map(u =>
-        rq({
-          url: `/admin/users/${u.id}`,
-          method: 'DELETE',
-        })
-      )
-    );
+    if (edition === 'EE') {
+      await utils.deleteRolesById([internals.role.id]);
+    }
 
-    await rq({
-      url: `/admin/roles/${internals.role.id}`,
-      method: 'DELETE',
-    });
+    await strapi.destroy();
   }, 60000);
 
   describe('Login', () => {
@@ -78,10 +44,7 @@ describe('Admin Auth End to End', () => {
       const res = await rq({
         url: '/admin/login',
         method: 'POST',
-        body: {
-          email: 'admin@strapi.io',
-          password: 'Password123',
-        },
+        body: superAdmin.loginInfo,
       });
 
       expect(res.statusCode).toBe(200);
@@ -102,7 +65,7 @@ describe('Admin Auth End to End', () => {
         url: '/admin/login',
         method: 'POST',
         body: {
-          email: 'admin@strapi.io',
+          ...superAdmin.loginInfo,
           password: 'wrongPassword',
         },
       });
@@ -156,10 +119,7 @@ describe('Admin Auth End to End', () => {
       const authRes = await rq({
         url: '/admin/login',
         method: 'POST',
-        body: {
-          email: 'admin@strapi.io',
-          password: 'Password123',
-        },
+        body: superAdmin.loginInfo,
       });
 
       expect(authRes.statusCode).toBe(200);
@@ -213,18 +173,29 @@ describe('Admin Auth End to End', () => {
   });
 
   describe('GET /registration-info', () => {
-    test('Returns registration info', async () => {
-      const user = {
+    const registrationToken = 'foobar';
+    let user;
+
+    beforeAll(async () => {
+      const userInfo = {
         email: 'test@strapi.io',
         firstname: 'test',
         lastname: 'strapi',
+        roles: [internals.role.id],
+        registrationToken,
+        isActive: false,
       };
-      const createRes = await createUser(user);
 
-      const token = createRes.body.data.registrationToken;
+      user = await utils.createUser(userInfo);
+    });
 
+    afterAll(async () => {
+      await utils.deleteUserById(user.id);
+    });
+
+    test('Returns registration info', async () => {
       const res = await rq({
-        url: `/admin/registration-info?registrationToken=${token}`,
+        url: `/admin/registration-info?registrationToken=${registrationToken}`,
         method: 'GET',
         body: {},
       });
@@ -274,6 +245,23 @@ describe('Admin Auth End to End', () => {
   });
 
   describe('GET /register', () => {
+    let user;
+
+    beforeEach(async () => {
+      const userInfo = {
+        email: 'test@strapi.io',
+        firstname: 'test',
+        lastname: 'strapi',
+        registrationToken: 'foobar',
+      };
+
+      user = await utils.createUser(userInfo);
+    });
+
+    afterEach(async () => {
+      await utils.deleteUserById(user.id);
+    });
+
     test('Fails on missing payload', async () => {
       const res = await rq({
         url: '/admin/register',
@@ -299,20 +287,11 @@ describe('Admin Auth End to End', () => {
     });
 
     test('Fails on invalid password', async () => {
-      const user = {
-        email: 'test1@strapi.io', // FIXME: Have to increment emails until we can delete the users after each test
-        firstname: 'test',
-        lastname: 'strapi',
-      };
-      const createRes = await createUser(user);
-
-      const registrationToken = createRes.body.data.registrationToken;
-
       const res = await rq({
         url: '/admin/register',
         method: 'POST',
         body: {
-          registrationToken,
+          registrationToken: user.registrationToken,
           userInfo: {
             firstname: 'test',
             lastname: 'Strapi',
@@ -333,16 +312,7 @@ describe('Admin Auth End to End', () => {
     });
 
     test('Registers user correctly', async () => {
-      const user = {
-        email: 'test2@strapi.io', // FIXME: Have to increment emails until we can delete the users after each test
-        firstname: 'test',
-        lastname: 'strapi',
-      };
-      const createRes = await createUser(user);
-
-      const registrationToken = createRes.body.data.registrationToken;
-
-      const userInfo = {
+      const userRegistrationInfo = {
         firstname: 'test',
         lastname: 'Strapi',
         password: '1Test2azda3',
@@ -352,8 +322,8 @@ describe('Admin Auth End to End', () => {
         url: '/admin/register',
         method: 'POST',
         body: {
-          registrationToken,
-          userInfo,
+          registrationToken: user.registrationToken,
+          userInfo: userRegistrationInfo,
         },
       });
 
@@ -367,7 +337,7 @@ describe('Admin Auth End to End', () => {
         },
       });
 
-      expect(res.body.data.user.password === userInfo.password).toBe(false);
+      expect(res.body.data.user.password === userRegistrationInfo.password).toBe(false);
     });
   });
 
@@ -450,7 +420,7 @@ describe('Admin Auth End to End', () => {
       });
 
       expect(res.statusCode).toBe(204);
-      expect(res.body).toEqual();
+      expect(res.body).toStrictEqual({});
 
       const nonExistentRes = await rq({
         url: '/admin/forgot-password',
@@ -461,7 +431,7 @@ describe('Admin Auth End to End', () => {
       });
 
       expect(nonExistentRes.statusCode).toBe(204);
-      expect(nonExistentRes.body).toEqual();
+      expect(nonExistentRes.body).toStrictEqual({});
     });
   });
 });

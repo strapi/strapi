@@ -35,14 +35,15 @@ const defaults = {
 const isBookshelfConnection = ({ connector }) => connector === 'bookshelf';
 
 module.exports = function(strapi) {
+  const { connections } = strapi.config;
+  const bookshelfConnections = Object.keys(connections)
+    .filter(key => isBookshelfConnection(connections[key]));
   function initialize() {
     initKnex(strapi);
 
-    const { connections } = strapi.config;
     const GLOBALS = {};
 
-    const connectionsPromises = Object.keys(connections)
-      .filter(key => isBookshelfConnection(connections[key]))
+    const connectionsPromises = bookshelfConnections
       .map(connectionName => {
         const connection = connections[connectionName];
 
@@ -149,12 +150,17 @@ module.exports = function(strapi) {
     );
   }
 
+  async function destroy() {
+    await Promise.all(bookshelfConnections.map(connName => strapi.connections[connName].destroy()));
+  }
+
   return {
     defaults,
     initialize,
     getQueryParams,
     buildQuery,
     queries,
+    destroy,
     ...relations,
     get defaultTimestamps() {
       return ['created_at', 'updated_at'];

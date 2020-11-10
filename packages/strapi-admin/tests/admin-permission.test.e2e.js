@@ -2,16 +2,21 @@
 
 const _ = require('lodash');
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
-
-let rq;
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 
 describe('Role CRUD End to End', () => {
+  let rq;
+  let strapi;
+
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
+
+  afterAll(async () => {
+    await strapi.destroy();
+  });
 
   test('Can get the existing permissions', async () => {
     let res = await rq({

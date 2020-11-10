@@ -31,6 +31,10 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
       }
     },
 
+    getAll() {
+      return Array.from(_connectors.values());
+    },
+
     get(key) {
       return _connectors.get(key);
     },

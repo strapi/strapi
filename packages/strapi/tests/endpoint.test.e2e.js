@@ -1,11 +1,11 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
-const form = require('../../../test/helpers/generators');
-
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+
+const form = require('../../../test/helpers/generators');
 
 const cleanDate = entry => {
   delete entry.updatedAt;
@@ -16,29 +16,28 @@ const cleanDate = entry => {
 
 let data;
 let rq;
-let modelsUtils;
+let strapi;
+const builder = createTestBuilder();
 
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addContentTypes([
+        form.article,
+        form.tag,
+        form.category,
+        form.reference,
+        form.product
+      ], { batch: true })
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentTypes([
-      form.article,
-      form.tag,
-      form.category,
-      form.reference,
-      form.product,
-    ]);
-
-    await modelsUtils.cleanupContentTypes(['article', 'tag', 'category', 'reference', 'product']);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.cleanupContentTypes(['article', 'tag', 'category', 'reference', 'product']);
-    await modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'product']);
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
@@ -47,10 +46,6 @@ describe('Create Strapi API End to End', () => {
         articles: [],
         tags: [],
       };
-    });
-
-    afterAll(async () => {
-      await modelsUtils.cleanupContentTypes(['article', 'tag']);
     });
 
     test('Create tag1', async () => {

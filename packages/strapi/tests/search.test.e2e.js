@@ -1,12 +1,12 @@
 'use strict';
 
-// Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+// Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
-let modelsUtils;
+let strapi;
 let data = {
   beds: [],
 };
@@ -118,40 +118,21 @@ const bedFixtures = [
   },
 ];
 
-async function createFixtures() {
-  for (let bedFixture of bedFixtures) {
-    const res = await rq({
-      method: 'POST',
-      url: '/beds',
-      body: bedFixture,
-    });
-
-    data.beds.push(res.body);
-  }
-}
-
-async function deleteFixtures() {
-  for (let bed of data.beds) {
-    await rq({
-      method: 'DELETE',
-      url: `/beds/${bed.id}`,
-    });
-  }
-}
-
 describe('Search query', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createContentTypes([bedModel]);
-    await createFixtures();
+    await modelsUtils.createFixtures({ [bedModel.name]: bedFixtures });
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+
+    data.beds = (await rq({ method: 'GET', url: '/beds' })).body;
   }, 60000);
 
   afterAll(async () => {
-    await deleteFixtures();
-    await modelsUtils.deleteContentTypes(['bed']);
+    await strapi.destroy();
+    await modelsUtils.cleanupModel(bedModel.name);
+    await modelsUtils.deleteContentType(bedModel.name);
   }, 60000);
 
   describe('Without filters', () => {

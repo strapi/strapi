@@ -1,34 +1,38 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-let modelsUtils;
+let strapi;
 let rq;
 let uid = 'single-type';
 let data = {};
 
+const model = {
+  kind: 'singleType',
+  name: 'single-type',
+  attributes: {
+    title: {
+      type: 'string',
+    },
+  },
+};
+
 describe('Content Manager single types', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await modelsUtils.createContentType(model);
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentType({
-      kind: 'singleType',
-      name: 'single-type',
-      attributes: {
-        title: {
-          type: 'string',
-        },
-      },
-    });
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteContentType('single-type'), 60000);
+  afterAll(async () => {
+    await strapi.destroy();
+    await modelsUtils.cleanupModel(model.name);
+    await modelsUtils.deleteContentType(model.name);
+  }, 60000);
 
   test('find single type content returns 404 when not created', async () => {
     const res = await rq({

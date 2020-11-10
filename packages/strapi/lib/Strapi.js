@@ -200,6 +200,11 @@ class Strapi {
     }
   }
 
+  async destroy() {
+    this.server.destroy();
+    await this.db.destroy();
+  }
+
   /**
    * Add behaviors to the server
    */
@@ -397,6 +402,7 @@ class Strapi {
     // plugins bootstrap
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
+        console.log(err);
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
         strapi.log.error(err);
         strapi.stop();

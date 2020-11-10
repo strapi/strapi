@@ -2,14 +2,14 @@
 
 const _ = require('lodash');
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const modelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
-  productsWithCompo: [],
+  productsWithCompoAndDP: [],
 };
 
 const compo = {
@@ -27,7 +27,7 @@ const compo = {
   },
 };
 
-const productWithCompo = {
+const productWithCompoAndDP = {
   attributes: {
     name: {
       type: 'string',
@@ -36,30 +36,32 @@ const productWithCompo = {
       type: 'text',
     },
     compo: {
-      component: 'default.compo',
       type: 'component',
+      component: 'default.compo',
       required: true,
     },
   },
   connection: 'default',
-  name: 'product with compo',
+  draftAndPublish: true,
+  name: 'product-with-compo-and-dp',
   description: '',
   collectionName: '',
 };
 
-describe('Core API - Basic + compo', () => {
+describe('Core API - Basic + compo + draftAndPublish', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createComponent(compo);
-    await modelsUtils.createContentTypes([productWithCompo]);
+    await modelsUtils.createContentTypes([productWithCompoAndDP]);
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteComponent('default.compo');
-    await modelsUtils.deleteContentTypes(['product-with-compo']);
+    await strapi.destroy();
+    await modelsUtils.cleanupModel(productWithCompoAndDP.name);
+    await modelsUtils.deleteContentType(productWithCompoAndDP.name);
+    await modelsUtils.deleteComponent(`default.${compo.name}`);
   }, 60000);
 
   test('Create product with compo', async () => {
@@ -73,27 +75,29 @@ describe('Core API - Basic + compo', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/product-with-compos',
+      url: '/product-with-compo-and-dps',
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeUndefined();
-    data.productsWithCompo.push(res.body);
+    expect(res.body.published_at).toBeISODate();
+    data.productsWithCompoAndDP.push(res.body);
   });
 
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/product-with-compos',
+      url: '/product-with-compo-and-dps',
     });
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompo[0]);
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+    expect(res.body[0]).toMatchObject(data.productsWithCompoAndDP[0]);
+    res.body.forEach(p => {
+      expect(p.published_at).toBeISODate();
+    });
   });
 
   test('Update product with compo', async () => {
@@ -107,28 +111,28 @@ describe('Core API - Basic + compo', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/product-with-compos/${data.productsWithCompo[0].id}`,
+      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.published_at).toBeUndefined();
-    data.productsWithCompo[0] = res.body;
+    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
+    expect(res.body.published_at).toBeISODate();
+    data.productsWithCompoAndDP[0] = res.body;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/product-with-compos/${data.productsWithCompo[0].id}`,
+      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.published_at).toBeUndefined();
-    data.productsWithCompo.shift();
+    expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
+    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
+    expect(res.body.published_at).toBeISODate();
+    data.productsWithCompoAndDP.shift();
   });
 
   describe('validation', () => {
@@ -139,7 +143,7 @@ describe('Core API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/product-with-compo-and-dps',
         body: product,
       });
 
@@ -158,7 +162,7 @@ describe('Core API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/product-with-compo-and-dps',
         body: product,
       });
 
@@ -179,7 +183,7 @@ describe('Core API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/product-with-compo-and-dps',
         body: product,
       });
 
@@ -199,7 +203,7 @@ describe('Core API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compos',
+        url: '/product-with-compo-and-dps',
         body: product,
       });
 

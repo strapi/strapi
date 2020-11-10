@@ -1,11 +1,11 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   raw: {
     products: [
@@ -145,45 +145,41 @@ const transformRawToBody = (name, raw) =>
   }[name](raw));
 
 const createFixtures = async () => {
-  for (const [name, modelName] of [
-    ['countries', 'country'],
-    ['categories', 'category'],
-    ['products', 'product'],
-  ]) {
-    const uid = `application::${modelName}.${modelName}`;
-
-    for (const rawItem of data.raw[name]) {
-      const body = transformRawToBody(name, rawItem);
-      let res = await rq({ method: 'POST', url: `/${name}`, body });
+  const createEntriesFor = async (singular, plural) => {
+    for (const rawItem of data.raw[plural]) {
+      const item = transformRawToBody(plural, rawItem);
+      const createdItem = await strapi.query(singular).create(item);
 
       if (!rawItem.published) {
-        await rq({
-          method: 'POST',
-          url: `/content-manager/collection-types/${uid}/${res.body.id}/actions/unpublish`,
-        });
+        await strapi.plugins['content-manager'].services.contentmanager.unpublish({ id: createdItem.id }, singular);
       }
-
-      data.api[name].push(res.body);
     }
+
+    data.api[plural] = (await rq({ method: 'GET', url: `/${plural}?_publicationState=preview` })).body;
+  };
+
+  for (const [singular, plural] of [['country', 'countries'], ['category', 'categories'], ['product', 'products']]) {
+    await createEntriesFor(singular, plural);
   }
 };
 
 describe('Publication State', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-    modelsUtils = createModelsUtils({ rq });
-
     await modelsUtils.createContentType(country);
     await modelsUtils.createComponent(comp);
-    await modelsUtils.createContentTypes([category, product]);
-    await modelsUtils.cleanupContentTypes(['product', 'category', 'country']);
+    await modelsUtils.createContentType(category);
+    await modelsUtils.createContentType(product);
+    await modelsUtils.cleanupModels([product.name, category.name, country.name]);
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
 
     await createFixtures();
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.cleanupContentTypes(['product', 'category', 'country']);
+    await strapi.destroy();
+    await modelsUtils.cleanupModels(['product', 'category', 'country']);
     await modelsUtils.deleteComponent('comp');
     await modelsUtils.deleteContentTypes(['product', 'category', 'country']);
   }, 60000);

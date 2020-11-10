@@ -2,14 +2,14 @@
 
 const _ = require('lodash');
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const modelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
-  productsWithCompoAndDP: [],
+  productsWithDz: [],
 };
 
 const compo = {
@@ -27,7 +27,7 @@ const compo = {
   },
 };
 
-const productWithCompoAndDP = {
+const productWithDz = {
   attributes: {
     name: {
       type: 'string',
@@ -35,41 +35,41 @@ const productWithCompoAndDP = {
     description: {
       type: 'text',
     },
-    compo: {
-      type: 'component',
-      component: 'default.compo',
+    dz: {
+      components: ['default.compo'],
+      type: 'dynamiczone',
       required: true,
-      repeatable: true,
     },
   },
   connection: 'default',
-  draftAndPublish: true,
-  name: 'product with compo and DP',
+  name: 'product-with-dz',
   description: '',
   collectionName: '',
 };
 
-describe('Core API - Basic + compo + draftAndPublish', () => {
+describe('Core API - Basic + dz', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createComponent(compo);
-    await modelsUtils.createContentTypes([productWithCompoAndDP]);
+    await modelsUtils.createContentTypes([productWithDz]);
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteComponent('default.compo');
-    await modelsUtils.deleteContentTypes(['product-with-compo-and-dp']);
+    await strapi.destroy();
+    await modelsUtils.cleanupModel(productWithDz.name)
+    await modelsUtils.deleteComponent(`default.${compo.name}`);
+    await modelsUtils.deleteContentType(productWithDz.name);
   }, 60000);
 
   test('Create product with compo', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
-      compo: [
+      dz: [
         {
+          __component: 'default.compo',
           name: 'compo name',
           description: 'short',
         },
@@ -77,37 +77,36 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/product-with-compo-and-dps',
+      url: '/product-with-dzs',
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeISODate();
-    data.productsWithCompoAndDP.push(res.body);
+    expect(res.body.published_at).toBeUndefined();
+    data.productsWithDz.push(res.body);
   });
 
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/product-with-compo-and-dps',
+      url: '/product-with-dzs',
     });
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompoAndDP[0]);
-    res.body.forEach(p => {
-      expect(p.published_at).toBeISODate();
-    });
+    expect(res.body[0]).toMatchObject(data.productsWithDz[0]);
+    res.body.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
   test('Update product with compo', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      compo: [
+      dz: [
         {
+          __component: 'default.compo',
           name: 'compo name updated',
           description: 'update',
         },
@@ -115,28 +114,28 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
+      url: `/product-with-dzs/${data.productsWithDz[0].id}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-    expect(res.body.published_at).toBeISODate();
-    data.productsWithCompoAndDP[0] = res.body;
+    expect(res.body.id).toEqual(data.productsWithDz[0].id);
+    expect(res.body.published_at).toBeUndefined();
+    data.productsWithDz[0] = res.body;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
+      url: `/product-with-dzs/${data.productsWithDz[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
-    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-    expect(res.body.published_at).toBeISODate();
-    data.productsWithCompoAndDP.shift();
+    expect(res.body).toMatchObject(data.productsWithDz[0]);
+    expect(res.body.id).toEqual(data.productsWithDz[0].id);
+    expect(res.body.published_at).toBeUndefined();
+    data.productsWithDz.shift();
   });
 
   describe('validation', () => {
@@ -147,20 +146,21 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compo-and-dps',
+        url: '/product-with-dzs',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo', '0'])).toBe('compo must be defined.');
+      expect(_.get(res.body.data, ['errors', 'dz', '0'])).toBe('dz must be defined.');
     });
 
     test('Cannot create product with compo - minLength', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: [
+        dz: [
           {
+            __component: 'default.compo',
             name: 'compo name',
             description: '',
           },
@@ -168,13 +168,13 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compo-and-dps',
+        url: '/product-with-dzs',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo[0].description', '0'])).toBe(
-        'compo[0].description must be at least 3 characters'
+      expect(_.get(res.body.data, ['errors', 'dz[0].description', '0'])).toBe(
+        'dz[0].description must be at least 3 characters'
       );
     });
 
@@ -182,8 +182,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: [
+        dz: [
           {
+            __component: 'default.compo',
             name: 'compo name',
             description: 'A very long description that exceed the min length.',
           },
@@ -191,13 +192,13 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compo-and-dps',
+        url: '/product-with-dzs',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo[0].description', '0'])).toBe(
-        'compo[0].description must be at most 10 characters'
+      expect(_.get(res.body.data, ['errors', 'dz[0].description', '0'])).toBe(
+        'dz[0].description must be at most 10 characters'
       );
     });
 
@@ -205,21 +206,45 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
-        compo: [
+        dz: [
           {
+            __component: 'default.compo',
             description: 'short',
           },
         ],
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-compo-and-dps',
+        url: '/product-with-dzs',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo[0].name', '0'])).toBe(
-        'compo[0].name must be defined.'
+      expect(_.get(res.body.data, ['errors', 'dz[0].name', '0'])).toBe(
+        'dz[0].name must be defined.'
+      );
+    });
+
+    test('Cannot create product with compo - missing __component', async () => {
+      const product = {
+        name: 'Product 1',
+        description: 'Product description',
+        dz: [
+          {
+            name: 'Product 1',
+            description: 'short',
+          },
+        ],
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/product-with-dzs',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res.body.data, ['errors', 'dz[0].__component', '0'])).toBe(
+        'dz[0].__component is a required field'
       );
     });
   });

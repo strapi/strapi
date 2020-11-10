@@ -1,54 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { login, registerAndLogin, getUser } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const { SUPER_ADMIN_CODE } = require('../services/constants');
+const { createUtils } = require('../../../test/helpers/utils');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
-
-const getAuthToken = async () => {
-  let token = await login();
-
-  if (!token) {
-    token = await registerAndLogin();
-  }
-
-  return token;
-};
-
-const createUserRole = async () => {
-  const res = await rq({
-    url: '/admin/roles',
-    method: 'POST',
-    body: {
-      name: 'user_test_role',
-      description: 'Only used for user crud test (e2e)',
-    },
-  });
-
-  return res && res.body && res.body.data;
-};
-
-const deleteUserRole = async id => {
-  await rq({
-    url: `/admin/roles/${id}`,
-    method: 'DELETE',
-  });
-};
-
-const getSuperAdminRole = async () => {
-  const res = await rq({
-    url: '/admin/roles',
-    method: 'GET',
-  });
-
-  return res.body.data.find(r => r.code === SUPER_ADMIN_CODE);
-};
-
-let rq;
 
 /**
  * == Test Suite Overview ==
@@ -74,6 +33,10 @@ let rq;
  */
 
 describe('Admin User CRUD (e2e)', () => {
+  let rq;
+  let utils;
+  let strapi;
+
   // Local test data used across the test suite
   let testData = {
     firstSuperAdminUser: undefined,
@@ -83,29 +46,31 @@ describe('Admin User CRUD (e2e)', () => {
     superAdminRole: undefined,
   };
 
+  const createUserRole = async () => utils.createRole({
+    name: 'user_test_role',
+    description: 'Only used for user crud test (e2e)',
+  });
+
   // Initialization Actions
   beforeAll(async () => {
-    const token = await getAuthToken();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+    utils = createUtils(strapi);
 
     if (edition === 'EE') {
       testData.role = await createUserRole();
     } else {
-      testData.role = (
-        await rq({
-          url: '/admin/roles',
-          method: 'GET',
-        })
-      ).body.data[0];
+      testData.role = await utils.getSuperAdminRole();
     }
 
-    testData.firstSuperAdminUser = await getUser();
-    testData.superAdminRole = await getSuperAdminRole();
-  });
+    testData.firstSuperAdminUser = await rq.loggedUser;
+    testData.superAdminRole = await utils.getSuperAdminRole();
+  }, 60000);
 
   // Cleanup actions
   afterAll(async () => {
-    await deleteUserRole(testData.role.id);
+    await utils.deleteRolesById([testData.role.id]);
+    await strapi.destroy();
   });
 
   test('1. Creates a user (wrong body)', async () => {

@@ -2,13 +2,11 @@
 
 const _ = require('lodash');
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const sortPermissionArray = arr => _.sortBy(arr, ['action', 'subject']);
-
-let rq;
 
 const data = {
   rolesWithUsers: [],
@@ -23,10 +21,17 @@ const data = {
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
 
 describe('Role CRUD End to End', () => {
+  let rq;
+  let strapi;
+
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
+
+  afterAll(async () => {
+    await strapi.destroy();
+  });
 
   describe('Default roles', () => {
     test('Default roles are created', async () => {

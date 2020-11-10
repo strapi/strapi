@@ -1,13 +1,13 @@
 'use strict';
 
-// Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
+// Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   products: [],
 };
@@ -83,32 +83,23 @@ const productFixtures = [
   },
 ];
 
-async function createFixtures() {
-  for (let product of productFixtures) {
-    const res = await rq({
-      method: 'POST',
-      url: '/products',
-      body: product,
-    });
-
-    data.products.push(res.body);
-  }
-}
 
 describe('Filtering API', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await modelsUtils.createContentType(product);
+    await modelsUtils.cleanupModel(product.name);
+    await modelsUtils.createFixtures({ [product.name]: productFixtures });
 
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([product]);
-    await modelsUtils.cleanupContentTypes(['product']);
-    await createFixtures();
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+
+    data.products = (await rq({ method: 'GET', url: '/products' })).body;
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.cleanupContentTypes(['product']);
-    await modelsUtils.deleteContentTypes(['product']);
+    await strapi.destroy();
+    await modelsUtils.cleanupModel(product.name);
+    await modelsUtils.deleteContentType(product.name);
   }, 60000);
 
   describe('Basic filters', () => {

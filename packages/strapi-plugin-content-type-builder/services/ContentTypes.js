@@ -60,15 +60,29 @@ const formatContentType = contentType => {
   };
 };
 
+const createContentTypes = async contentTypes => {
+  const builder = createBuilder();
+  const createdContentTypes = [];
+
+  for (const ct of contentTypes) {
+    createdContentTypes.push(await createContentType(ct, { defaultBuilder: builder }));
+  }
+
+  await builder.writeFiles();
+
+  return createdContentTypes;
+};
+
 /**
  * Creates a content type and handle the nested components sent with it
  * @param {Object} params params object
  * @param {Object} params.contentType Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
+ * @param {Object} options
+ * @param {Builder} options.defaultBuilder
  */
-const createContentType = async ({ contentType, components = [] }) => {
-  const builder = createBuilder();
-
+const createContentType = async ({ contentType, components = [] }, options = {}) => {
+  const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components);
 
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
@@ -97,13 +111,16 @@ const createContentType = async ({ contentType, components = [] }) => {
     return builder.editComponent(options);
   });
 
-  // generate api squeleton
+  // generate api skeleton
   await generateAPI({
     name: contentType.name,
     kind: contentType.kind,
   });
 
-  await builder.writeFiles();
+  if (!options.defaultBuilder)  {
+    await builder.writeFiles();
+  }
+
   return newContentType;
 };
 
@@ -193,26 +210,47 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   return updatedContentType;
 };
 
+const deleteContentTypes = async uids => {
+  const builder = createBuilder();
+
+  for (const uid of uids) {
+    await deleteContentType(uid, builder);
+  }
+
+  await builder.writeFiles();
+  for (const uid of uids) {
+    try {
+      // await builder.writeFiles();
+      await apiHandler.clear(uid);
+    } catch (error) {
+      console.log(error);
+      await apiHandler.rollback(uid);
+    }
+  }
+};
+
 /**
  * Deletes a content type and the api files related to it
  * @param {string} uid content type uid
+ * @param defaultBuilder
  */
-const deleteContentType = async uid => {
-  const builder = createBuilder();
-
+const deleteContentType = async (uid, defaultBuilder = undefined) => {
+  const builder = defaultBuilder || createBuilder();
   // make a backup
   await apiHandler.backup(uid);
 
-  const component = builder.deleteContentType(uid);
+  const contentType = builder.deleteContentType(uid);
 
-  try {
-    await builder.writeFiles();
-    await apiHandler.clear(uid);
-  } catch (error) {
-    await apiHandler.rollback(uid);
+  if (!defaultBuilder) {
+    try {
+      await builder.writeFiles();
+      await apiHandler.clear(uid);
+    } catch (error) {
+      await apiHandler.rollback(uid);
+    }
   }
 
-  return component;
+  return contentType;
 };
 
 module.exports = {
@@ -220,4 +258,6 @@ module.exports = {
   editContentType,
   deleteContentType,
   formatContentType,
+  createContentTypes,
+  deleteContentTypes,
 };

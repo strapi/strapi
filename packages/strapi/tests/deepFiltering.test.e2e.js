@@ -2,12 +2,12 @@
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
-let modelsUtils;
+let strapi;
 let data = {
   paniniCards: [],
   collectors: [],
@@ -97,34 +97,21 @@ async function createFixtures() {
   });
 }
 
-async function deleteFixtures() {
-  for (let paniniCard of data.paniniCards) {
-    await rq({
-      method: 'DELETE',
-      url: `/panini-cards/${paniniCard.id}`,
-    });
-  }
-  for (let collector of data.collectors) {
-    await rq({
-      method: 'DELETE',
-      url: `/collectors/${collector.id}`,
-    });
-  }
-}
-
 describe('Deep Filtering API', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createContentTypes([paniniCard, collector]);
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+
     await createFixtures();
   }, 60000);
 
   afterAll(async () => {
-    await deleteFixtures();
-    await modelsUtils.deleteContentTypes(['collector', 'panini-card']);
+    await strapi.destroy();
+
+    await modelsUtils.cleanupModels([collector.name, paniniCard.name]);
+    await modelsUtils.deleteContentTypes([collector.name, paniniCard.name]);
   }, 60000);
 
   describe('Without search', () => {
