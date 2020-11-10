@@ -104,6 +104,17 @@ const hasDeepFilters = (whereClauses = [], { minDepth = 1 } = {}) => {
 
 const normalizeClauses = (whereClauses, { model }) => {
   return whereClauses.map(({ field, operator, value }) => {
+    if (_.isNil(value)) {
+      const err = new Error(
+        `The field '${field}' in your where filter has ${
+          _.isNull(value) ? 'null' : 'undefined'
+        } as value.`
+      );
+
+      err.status = 400;
+      throw err;
+    }
+
     if (BOOLEAN_OPERATORS.includes(operator)) {
       return {
         field,
@@ -116,15 +127,6 @@ const normalizeClauses = (whereClauses, { model }) => {
       model,
       field,
     });
-
-    if (_.isNil(value)) {
-      const err = new Error(
-        `Your filter contains the field '${field}' that has an undefined value.`
-      );
-
-      err.status = 400;
-      throw err;
-    }
 
     const { type } = _.get(assocModel, ['allAttributes', attribute], {});
 
