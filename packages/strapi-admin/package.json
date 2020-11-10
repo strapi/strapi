@@ -39,7 +39,7 @@
     "axios": "^0.20.0",
     "babel-loader": "^8.1.0",
     "bcryptjs": "^2.4.3",
-    "bootstrap": "^4.5.2",
+    "bootstrap": "^4.5.3",
     "chalk": "^2.4.2",
     "chokidar": "^3.2.1",
     "classnames": "^2.2.6",
