@@ -14,8 +14,6 @@ const {
   constants: { DP_PUB_STATE_LIVE },
 } = contentTypes;
 
-const OPTIONS = Symbol();
-
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const { formatModelConnectionsGQL } = require('./build-aggregation');
@@ -25,6 +23,11 @@ const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 const { actionExists } = require('./utils');
+
+const OPTIONS = Symbol();
+
+const FIND_QUERY_ARGUMENTS = `(sort: String, limit: Int, start: Int, where: JSON, publicationState: PublicationState)`;
+const FIND_ONE_QUERY_ARGUMENTS = `(id: ID!, publicationState: PublicationState)`;
 
 const assignOptions = (element, parent) => {
   if (Array.isArray(element)) {
@@ -45,6 +48,13 @@ const isMutationEnabled = (schema, name) => {
 const isNotPrivate = _.curry((model, attributeName) => {
   return !contentTypes.isPrivateAttribute(model, attributeName);
 });
+
+const wrapPublicationStateResolver = query => async (parent, args, ctx, ast) => {
+  const results = await query(parent, args, ctx, ast);
+
+  const queryOptions = _.pick(args, 'publicationState');
+  return assignOptions(results, { [OPTIONS]: queryOptions });
+};
 
 const buildTypeDefObj = model => {
   const { associations = [], attributes, primaryKey, globalId } = model;
@@ -177,7 +187,7 @@ const buildAssocResolvers = model => {
         case 'manyWay': {
           resolver[association.alias] = async obj => {
             if (obj[association.alias]) {
-              return obj[association.alias];
+              return assignOptions(obj[association.alias], obj);
             }
 
             const queryOpts = initQueryOptions(targetModel, obj);
@@ -336,17 +346,18 @@ const buildSingleType = model => {
   }
 
   if (isQueryEnabled(_schema, singularName)) {
+    const resolver = buildQuery(singularName, {
+      resolver: `${uid}.find`,
+      ..._.get(_schema, `resolver.Query.${singularName}`, {}),
+    });
+
     _.merge(localSchema, {
       query: {
-        // TODO: support all the unique fields
-        [singularName]: model.globalId,
+        [`${singularName}(publicationState: PublicationState)`]: model.globalId,
       },
       resolvers: {
         Query: {
-          [singularName]: buildQuery(singularName, {
-            resolver: `${uid}.find`,
-            ..._.get(_schema, `resolver.Query.${singularName}`, {}),
-          }),
+          [singularName]: wrapPublicationStateResolver(resolver),
         },
       },
     });
@@ -412,13 +423,15 @@ const buildCollectionType = model => {
       ..._.get(_schema, `resolver.Query.${singularName}`, {}),
     };
     if (actionExists(resolverOpts)) {
+      const resolver = buildQuery(singularName, resolverOpts);
       _.merge(localSchema, {
         query: {
-          [`${singularName}(id: ID!)`]: model.globalId,
+          // TODO: support all the unique fields
+          [`${singularName}${FIND_ONE_QUERY_ARGUMENTS}`]: model.globalId,
         },
         resolvers: {
           Query: {
-            [singularName]: buildQuery(singularName, resolverOpts),
+            [singularName]: wrapPublicationStateResolver(resolver),
           },
         },
       });
@@ -431,22 +444,14 @@ const buildCollectionType = model => {
       ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
     };
     if (actionExists(resolverOpts)) {
-      const draftAndPublishArgument = contentTypes.hasDraftAndPublish(model)
-        ? 'publicationState: PublicationState'
-        : '';
-      const queryArguments = `(sort: String, limit: Int, start: Int, where: JSON ${draftAndPublishArgument})`;
+      const resolver = buildQuery(pluralName, resolverOpts);
       _.merge(localSchema, {
         query: {
-          [`${pluralName}${queryArguments}`]: `[${model.globalId}]`,
+          [`${pluralName}${FIND_QUERY_ARGUMENTS}`]: `[${model.globalId}]`,
         },
         resolvers: {
           Query: {
-            [pluralName]: async (parent, args, ctx, ast) => {
-              const results = await buildQuery(pluralName, resolverOpts)(parent, args, ctx, ast);
-
-              const queryOptions = _.pick(args, 'publicationState');
-              return assignOptions(results, { [OPTIONS]: queryOptions });
-            },
+            [pluralName]: wrapPublicationStateResolver(resolver),
           },
         },
       });

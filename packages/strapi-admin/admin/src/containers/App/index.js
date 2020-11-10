@@ -27,6 +27,7 @@ import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
+import NewNotification from '../NewNotification';
 
 function App(props) {
   const getDataRef = useRef();
@@ -34,25 +35,31 @@ function App(props) {
   getDataRef.current = props.getDataSucceeded;
 
   useEffect(() => {
-    const getData = async () => {
-      const currentToken = auth.getToken();
+    const currentToken = auth.getToken();
 
-      if (currentToken) {
-        try {
-          const {
-            data: { token },
-          } = await request('/admin/renew-token', {
-            method: 'POST',
-            body: { token: currentToken },
-          });
-          auth.updateToken(token);
-        } catch (err) {
-          // Refresh app
-          auth.clearAppStorage();
-          window.location.reload();
-        }
+    const renewToken = async () => {
+      try {
+        const {
+          data: { token },
+        } = await request('/admin/renew-token', {
+          method: 'POST',
+          body: { token: currentToken },
+        });
+        auth.updateToken(token);
+      } catch (err) {
+        // Refresh app
+        auth.clearAppStorage();
+        window.location.reload();
       }
+    };
 
+    if (currentToken) {
+      renewToken();
+    }
+  }, []);
+
+  useEffect(() => {
+    const getData = async () => {
       try {
         const { data } = await request('/admin/init', { method: 'GET' });
 
@@ -78,12 +85,15 @@ function App(props) {
         getDataRef.current(data);
         setState({ isLoading: false, hasAdmin: data.hasAdmin });
       } catch (err) {
-        strapi.notification.error('app.containers.App.notification.error.init');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'app.containers.App.notification.error.init' },
+        });
       }
     };
 
     getData();
-  }, [getDataRef]);
+  }, []);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -94,6 +104,7 @@ function App(props) {
       <Wrapper>
         <GlobalStyle />
         <NotificationProvider />
+        <NewNotification />
         <Content>
           <Switch>
             <Route

@@ -323,21 +323,39 @@ module.exports = ({ env }) => ({
 });
 ```
 
-#### 3. Install the **Strapi Provider Upload AWS S3 Plugin**:
+#### 3. Install the **Strapi AWS S3 Upload Provider**:
 
-`Path: ./my-project/`.
-
-This plugin will allow configurations for each active environment.
+Path: `./my-project/`.
 
 ```bash
 npm install strapi-provider-upload-aws-s3
 ```
 
+To enable and configure the provider, create or edit the file at `./config/plugins.js`.
+
+```js
+module.exports = ({ env }) => ({
+  upload: {
+    provider: 'aws-s3',
+    providerOptions: {
+      accessKeyId: env('AWS_ACCESS_KEY_ID'),
+      secretAccessKey: env('AWS_ACCESS_SECRET'),
+      region: env('AWS_REGION'),
+      params: {
+        Bucket: env('AWS_BUCKET_NAME'),
+      },
+    },
+  },
+});
+```
+
+Checkout the documentation about using an upload provider [here](https://strapi.io/documentation/v3.x/plugins/upload.html#using-a-provider).
+
 #### 4. Push your local changes to your project's GitHub repository.
 
 ```bash
 git add .
-git commit -m 'installed pg, aws-S3 provider plugin and updated the production/database.json file'
+git commit -m 'Installed pg, aws-S3 upload provider and updated the config files'
 git push
 ```
 
@@ -401,6 +419,10 @@ module.exports = {
         DATABASE_NAME: 'strapi', // DB name under 'Configuration' tab
         DATABASE_USERNAME: 'postgres', // default username
         DATABASE_PASSWORD: 'Password',
+        AWS_ACCESS_KEY_ID: 'aws-access-key-id',
+        AWS_ACCESS_SECRET: 'aws-access-secret', // Find it in Amazon S3 Dashboard
+        AWS_REGION: 'aws-region',
+        AWS_BUCKET_NAME: 'my-project-bucket-name',
       },
     },
   ],
@@ -415,6 +437,10 @@ DATABASE_PORT=5432
 DATABASE_NAME=strapi
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=Password
+AWS_ACCESS_KEY_ID=aws-access-key-id
+AWS_ACCESS_SECRET=aws-access-secret
+AWS_REGION=aws-region
+AWS_BUCKET_NAME=my-project-bucket-name
 ```
 
 We recommend you continue setting the `NODE_ENV` variable in the `ecosystem.config.js` file.
@@ -483,9 +509,9 @@ pm2 save
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-ubuntu` to verify everything is working.
 
-### Configure Strapi Provider AWS S3 plugin
+### Create you first Administrator user
 
-The next steps involve configuring Strapi to connect to the AWS S3 bucket.
+The next steps will create an Administrator user on the strapi AWS instance.
 
 #### 1. Locate your `IPv4 Public IP`:
 
@@ -498,22 +524,6 @@ The next steps involve configuring Strapi to connect to the AWS S3 bucket.
 - Go to `http://your-ip-address:1337/`
 - Complete the registration form.
 - Click `Ready to Start`
-
-#### 3. Configure the plugin with your bucket credentials:
-
-- From the left-hand menu, click `Plugins` and then the `cog` wheel located to the right of `Files Upload`.
-- From the dropdown, under **Providers**, select `Amazon Web Service S3` and enter the configuration details:
-  You can find the **Access API Token** and **Secret Access Token** in the **configuration.csv** file you downloaded earlier or if you saved them to your password manager.
-  - **Access API Token**: This is your _Access Key ID_
-  - **Secret Access Token**: This is your _Secret Access Key_
-    Navigate back to your **Amazon S3 Dashboard**:
-  - **Region**: Is your selected region, eg. `EU (Paris)`
-  - **Bucket**: Is your bucket name, eg. `my-project-name-images`
-  - Set your **Maximum size allowed(in MB)** to a value: eg. _10mb_
-  - Select `ON`, for **Enable File Upload**
-  - Click the `Save` button.
-
-You may now test the image upload, and you will find your images being uploaded to **Amazon AWS S3**.
 
 ### Set up a webhook
 

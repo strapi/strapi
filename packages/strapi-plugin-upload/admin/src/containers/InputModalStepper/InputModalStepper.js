@@ -51,6 +51,7 @@ const InputModalStepper = ({
     isWarningDeleteOpen,
     multiple,
     selectedFiles,
+    submitEditNewFile,
     submitEditExistingFile,
     toggleModalWarning,
   } = useModalContext();
@@ -175,6 +176,7 @@ const InputModalStepper = ({
 
   const handleSubmitEditNewFile = e => {
     e.preventDefault();
+    submitEditNewFile();
     goNext();
   };
 
@@ -208,7 +210,10 @@ const InputModalStepper = ({
           ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
           get(err, ['response', 'payload', 'message'], statusText)
         );
-        strapi.notification.error(errorMessage);
+        strapi.notification.toggle({
+          type: 'warning',
+          message: errorMessage,
+        });
 
         if (status) {
           handleSetFileToEditError(errorMessage);

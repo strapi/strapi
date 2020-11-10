@@ -1,12 +1,12 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.2.1",
+  "version": "3.3.1",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=10.16.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "author": {
@@ -32,19 +32,19 @@
     "test": "echo \"no tests yet\""
   },
   "devDependencies": {
-    "@babel/core": "^7.11.6",
+    "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.8.0",
-    "rimraf": "3.0.0",
+    "rimraf": "3.0.2",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-filesize": "^6.0.1",
     "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-postcss": "^3.1.8",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-svg": "^1.0.1",
     "rollup-plugin-terser": "^4.0.4"

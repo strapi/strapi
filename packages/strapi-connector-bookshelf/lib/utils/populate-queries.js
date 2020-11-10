@@ -11,9 +11,9 @@ const {
 const optionsMap = {
   publicationState: {
     queries: {
-      [DP_PUB_STATE_LIVE]: ({ model }) => qb => {
+      [DP_PUB_STATE_LIVE]: ({ model, alias }) => qb => {
         const { collectionName } = model;
-        qb.whereNotNull(`${collectionName}.${PUBLISHED_AT_ATTRIBUTE}`);
+        qb.whereNotNull(`${alias || collectionName}.${PUBLISHED_AT_ATTRIBUTE}`);
       },
       [DP_PUB_STATE_PREVIEW]: () => null,
     },
