@@ -54,7 +54,6 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
   const cleanReceivedData = useCallback(
     data => {
-      console.log(cleanClonedData(data));
       const cleaned = removePasswordFieldsFromData(
         cleanClonedData(data),
         allLayoutData.contentType,

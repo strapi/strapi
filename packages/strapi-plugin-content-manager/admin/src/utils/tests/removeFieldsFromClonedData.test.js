@@ -27,7 +27,7 @@ describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
       expect(removeFieldsFromClonedData(data, contentType, components, ['_id'])).toEqual(expected);
     });
 
-    it('should remove all password fields', () => {
+    it('should remove all the default fields', () => {
       const { components, contentType, modifiedData, expectedNoFieldsModifiedData } = testData;
       const fields = ['id', 'created_at', 'updated_at'];
 

@@ -33,6 +33,10 @@ const removeFieldsFromClonedData = (
         return acc;
       }
 
+      if (!value) {
+        return acc;
+      }
+
       if (attrType === 'dynamiczone') {
         acc[current] = value.map(componentValue => {
           const subCleanedData = recursiveCleanData(
@@ -48,25 +52,19 @@ const removeFieldsFromClonedData = (
 
       if (attrType === 'component') {
         if (isRepeatable) {
-          /* eslint-disable indent */
-          acc[current] = value
-            ? value.map(compoData => {
-                const subCleanedData = recursiveCleanData(compoData, componentSchema[component]);
+          acc[current] = value.map(compoData => {
+            const subCleanedData = recursiveCleanData(compoData, componentSchema[component]);
 
-                return subCleanedData;
-              })
-            : value;
-          /* eslint-enable indent */
+            return subCleanedData;
+          });
         } else {
-          acc[current] = value ? recursiveCleanData(value, componentSchema[component]) : value;
+          acc[current] = recursiveCleanData(value, componentSchema[component]);
         }
 
         return acc;
       }
 
-      acc[current] = value;
-
-      return acc;
+      return Object.keys(data).reduce(acc => acc, data);
     }, {});
   };
 
