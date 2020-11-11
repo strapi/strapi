@@ -23,6 +23,7 @@ const Banner = forwardRef(
       isOpen,
       onClickToggle,
       onClickRemove,
+      onClickDuplicate,
       style,
     },
     refs
@@ -67,6 +68,17 @@ const Banner = forwardRef(
                 >
                   <FontAwesomeIcon icon="trash-alt" />
                 </div>
+                <div
+                  className="trash-icon"
+                  style={{ marginRight: 10, padding: '0 5px' }}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClickDuplicate();
+                  }}
+                >
+                  <FontAwesomeIcon icon="copy" />
+                </div>
                 <div className="grab" ref={refs ? refs.dragRef : null}>
                   <Grab />
                 </div>
@@ -103,6 +115,7 @@ Banner.propTypes = {
   isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func,
   onClickRemove: PropTypes.func,
+  onClickDuplicate: PropTypes.func.isRequired,
   style: PropTypes.object,
 };
 

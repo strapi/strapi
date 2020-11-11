@@ -742,6 +742,15 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  const duplicateRepeatableFieldData = useCallback((componentName, keys, componentUid) => {
+    dispatch({
+      type: 'DUPlICATE_REPEATABLE_FIELD',
+      keys: keys.split('.'),
+      componentUid,
+      componentName: componentName.split(','),
+    });
+  }, []);
+
   const deleteSuccess = () => {
     dispatch({
       type: 'DELETE_SUCCEEDED',
@@ -824,6 +833,7 @@ const EditViewDataManagerProvider = ({
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
+        duplicateRepeatableFieldData,
         resetData,
         slug,
         triggerFormValidation,

@@ -8,6 +8,7 @@ function useSelect({ schema, componentFieldName }) {
     modifiedData,
     moveComponentField,
     removeRepeatableField,
+    duplicateRepeatableFieldData,
     triggerFormValidation,
   } = useDataManager();
 
@@ -23,6 +24,7 @@ function useSelect({ schema, componentFieldName }) {
     moveComponentField,
     removeRepeatableField,
     triggerFormValidation,
+    duplicateRepeatableFieldData,
   };
 }
 
