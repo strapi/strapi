@@ -102,6 +102,11 @@ const RepeatableComponent = ({
                     index,
                   });
                 }}
+                addItem={() => {
+                  dispatch({
+                    type: 'ADD_NEW_FIELD',
+                  });
+                }}
                 moveCollapse={(dragIndex, hoverIndex) => {
                   dispatch({
                     type: 'MOVE_COLLAPSE',

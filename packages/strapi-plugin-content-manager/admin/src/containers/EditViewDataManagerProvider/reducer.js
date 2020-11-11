@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import { cleanMongoReferenceId } from './utils/cleanData';
 
 const initialState = fromJS({
   componentsDataStructure: {},
@@ -186,7 +187,26 @@ const reducer = (state, action) => {
         })
         .deleteIn(componentPathToRemove);
     }
+    case 'DUPlICATE_REPEATABLE_FIELD': {
+      const item = state.getIn(['modifiedData', ...action.keys]);
+      const normalizedItem = cleanMongoReferenceId(item.toJS());
 
+      return state
+        .updateIn(['modifiedData', ...action.componentName.join('').split('.')], list => {
+          if (list) {
+            return list.push(fromJS(normalizedItem));
+          }
+          
+return fromJS([normalizedItem]);
+        })
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors === true) {
+            return !v;
+          }
+
+          return v;
+        });
+    }
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
     case 'RESET_DATA':

@@ -1,4 +1,5 @@
 /* eslint-disable import/no-cycle */
+/* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
@@ -34,10 +35,13 @@ const DraggedItem = ({
   removeCollapse,
   schema,
   toggleCollapses,
+  parentName,
+  addItem,
 
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
+  duplicateRepeatableFieldData,
   triggerFormValidation,
   checkFormErrors,
   displayedValue,
@@ -172,6 +176,11 @@ const DraggedItem = ({
           removeRepeatableField(componentFieldName);
           removeCollapse();
         }}
+        onClickDuplicate={() => {
+          duplicateRepeatableFieldData(parentName, componentFieldName, componentUid);
+          addItem();
+        }}
+        addItem={addItem}
         ref={refs}
       />
       <Collapse
@@ -259,9 +268,12 @@ DraggedItem.propTypes = {
   toggleCollapses: PropTypes.func,
   moveComponentField: PropTypes.func.isRequired,
   removeRepeatableField: PropTypes.func.isRequired,
+  duplicateRepeatableFieldData: PropTypes.func.isRequired,
+  addItem: PropTypes.func.isRequired,
   triggerFormValidation: PropTypes.func.isRequired,
   checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
+  parentName: PropTypes.string.isRequired,
 };
 
 const Memoized = memo(DraggedItem);
