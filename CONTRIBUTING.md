@@ -52,8 +52,7 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Contribution Prerequisites
 
-- You have [Node](https://nodejs.org/en/) at v10.16.0+ only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
-  - Node v14/v13 **are not supported yet**
+- You have [Node](https://nodejs.org/en/) at >= v10 and <= v14 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
 - You are familiar with Git.
 
 ## Development Workflow
