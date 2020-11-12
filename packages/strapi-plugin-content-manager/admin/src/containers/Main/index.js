@@ -64,7 +64,10 @@ function Main({
         ...createPossibleMainFieldsForModelsAndComponents(models),
       });
     } catch (err) {
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -76,7 +79,10 @@ function Main({
 
       getLayoutSucceeded(layout, uid);
     } catch (err) {
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
   resetPropsRef.current = resetProps;
