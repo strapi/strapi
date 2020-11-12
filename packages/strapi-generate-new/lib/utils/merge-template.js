@@ -171,18 +171,23 @@ async function checkTemplateContentsStructure(templateContentsPath) {
 
 function getRepoInfo(template) {
   try {
-    const { type, user, project } = gitInfo.fromUrl(template);
-    // Make sure it's a github url
-    if (type !== 'github') {
-      throw Error('A Strapi template can only be a GitHub URL');
+    const { user, project, default: urlStrategy } = gitInfo.fromUrl(template);
+    if (urlStrategy === 'https' || urlStrategy === 'http') {
+      // A full GitHub URL was provided, return username and project directly
+      return { user, project };
     }
-    return { user, project };
+    if (urlStrategy === 'shortcut') {
+      // A shorthand was provided, so prefix the project name with "strapi-template-"
+      return {
+        user,
+        project: `strapi-template-${project}`,
+      };
+    }
   } catch (error) {
     // If it's not a GitHub URL, then assume it's a shorthand for an official template
     return {
       user: 'strapi',
       project: `strapi-template-${template}`,
-      type: 'github',
     };
   }
 }
