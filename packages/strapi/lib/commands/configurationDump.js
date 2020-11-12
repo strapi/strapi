@@ -38,7 +38,9 @@ module.exports = async function({ file: filePath }) {
       });
   }
 
-  output.write(JSON.stringify(exportData));
+  output.write(
+    JSON.stringify(exportData, null, app.config.get('commands.configDump.prettyIndent'))
+  );
   output.write('\n');
   output.end();
 
