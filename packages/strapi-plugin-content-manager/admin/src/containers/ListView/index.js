@@ -180,7 +180,10 @@ function ListView({
 
       getDataSucceededRef.current(count, data);
     } catch (err) {
-      strapi.notification.error(`${pluginId}.error.model.fetch`);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: `${pluginId}.error.model.fetch` },
+      });
     }
   };
 
@@ -309,7 +312,10 @@ function ListView({
         method: 'DELETE',
       });
 
-      strapi.notification.success(`${pluginId}.success.record.delete`);
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: `${pluginId}.success.record.delete` },
+      });
 
       // Close the modal and refetch data
       onDeleteDataSucceeded();
@@ -321,7 +327,10 @@ function ListView({
         formatMessage({ id: `${pluginId}.error.record.delete` })
       );
 
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: errorMessage,
+      });
       // Close the modal
       onDeleteDataError();
     }
@@ -341,7 +350,10 @@ function ListView({
 
       onDeleteSeveralDataSucceeded();
     } catch (err) {
-      strapi.notification.error(`${pluginId}.error.record.delete`);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: `${pluginId}.error.record.delete` },
+      });
     }
   }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
 
@@ -350,7 +362,10 @@ function ListView({
 
     // Display a notification if trying to remove the last displayed field
     if (value && listLayout.length === 1) {
-      strapi.notification.error('content-manager.notification.error.displayedFields');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'content-manager.notification.error.displayedFields' },
+      });
 
       return;
     }

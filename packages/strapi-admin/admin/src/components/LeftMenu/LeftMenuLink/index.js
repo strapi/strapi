@@ -9,13 +9,14 @@ import PropTypes from 'prop-types';
 
 import LeftMenuLinkContent from './LeftMenuLinkContent';
 
-const LeftMenuLink = ({ destination, iconName, label, location }) => {
+const LeftMenuLink = ({ destination, iconName, label, location, notificationsCount }) => {
   return (
     <LeftMenuLinkContent
       destination={destination}
       iconName={iconName}
       label={label}
       location={location}
+      notificationsCount={notificationsCount}
     />
   );
 };
@@ -27,6 +28,7 @@ LeftMenuLink.propTypes = {
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
+  notificationsCount: PropTypes.number.isRequired,
 };
 
 LeftMenuLink.defaultProps = {

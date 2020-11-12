@@ -6,7 +6,7 @@
     "@swc-node/jest": "^0.3.4",
     "@testing-library/jest-dom": "^5.8.0",
     "@testing-library/react": "^11.0.2",
-    "@testing-library/react-hooks": "^3.2.1",
+    "@testing-library/react-hooks": "^3.4.2",
     "axios-mock-adapter": "^1.18.2",
     "babel-eslint": "^10.0.0",
     "chokidar": "3.3.1",

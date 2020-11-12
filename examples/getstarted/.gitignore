@@ -98,7 +98,7 @@ node_modules
 
 
 ############################
-# Tests
+# Strapi
 ############################
 
 testApp
@@ -110,3 +110,5 @@ exports
 
 documentation
 exports
+
+.strapi-updater.json

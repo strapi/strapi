@@ -50,6 +50,26 @@ module.exports = ({ env }) => {
 
 ## Environment variables
 
+### List of Strapi's environment variables
+
+Some settings can only be modified through environment variables. Here is a list of those settings are associated environment variable names:
+
+| name                                 | description                                                                                                           | type    | default         |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------- | --------------- |
+| `STRAPI_DISABLE_UPDATE_NOTIFICATION` | Don't show the notification message about updating strapi in the terminal                                             | boolean | `false`         |
+| `STRAPI_HIDE_STARTUP_MESSAGE`        | Don't show the startup message in the terminal                                                                        | boolean | `false`         |
+| `STRAPI_TELEMETRY_DISABLED`          | Don't send telemetry usage data to Strapi                                                                             | boolean | `false`         |
+| `STRAPI_LOG_TIMESTAMP`               | Add the timestamp info in logs                                                                                        | boolean | `false`         |
+| `STRAPI_LOG_LEVEL`                   | Select the level of logs among `fatal`, `error`, `warn`, `info`, `debug`, `trace`                                     | string  | `'info'`        |
+| `STRAPI_LOG_FORCE_COLOR`             | Force colors to be displayed even in environments that are not supposed to have colors enabled (ex: outside of a TTY) | boolean | `true`          |
+| `STRAPI_LOG_PRETTY_PRINT`            | Log lines are displayed as text instead of as object                                                                  | boolean | `true`          |
+| `STRAPI_LICENSE`                     | The license key to activate the Enterprise Edition                                                                    | string  | `undefined`     |
+| `NODE_ENV`                           | Type of environment where the app is running                                                                          | string  | `'development'` |
+| `BROWSER`                            | Open the admin panel in the browser after startup                                                                     | boolean | `true`          |
+| `ENV_PATH`                           | Path to the file that contains your environment variables                                                             | string  | `'./.env'`      |
+
+### Configuration using environment variables
+
 In most use cases you will have different configurations between your environments. For example: your database credentials.
 
 Instead of writing those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
@@ -86,7 +106,7 @@ module.exports = ({ env }) => ({
 });
 ```
 
-### Casting environment variables
+#### Casting environment variables
 
 ```js
 // Returns the env if defined without casting it
@@ -293,6 +313,27 @@ module.exports = {
 
   '0 0 1 * * 1': () => {
     // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
+  },
+};
+```
+
+If your CRON task is required to run based on a specific timezone then you can configure the task like below:
+
+```js
+module.exports = {
+  /**
+   * CRON task with timezone example.
+   * Every monday at 1am for Asia/Dhaka timezone.
+   * List of valid timezones: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+   */
+
+  '0 0 1 * * 1': {
+    task: () => {
+      // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
+    },
+    options: {
+      tz: 'Asia/Dhaka',
+    },
   },
 };
 ```
