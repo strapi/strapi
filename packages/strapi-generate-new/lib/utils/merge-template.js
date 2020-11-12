@@ -32,8 +32,7 @@ const allowedTemplateContents = {
  */
 module.exports = async function mergeTemplate(scope, rootPath) {
   // Parse template info
-  const templateUrl = scope.template;
-  const repoInfo = getRepoInfo(templateUrl);
+  const repoInfo = getRepoInfo(scope.template);
   const { user, project } = repoInfo;
   console.log(`Installing ${chalk.yellow(`${user}/${project}`)} template.`);
 
@@ -51,7 +50,8 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
-  await mergePackageJSON(rootPath, templateConfig, templateUrl);
+  const fullTemplateUrl = `https://github.com/${user}/${project}`;
+  await mergePackageJSON(rootPath, templateConfig, fullTemplateUrl);
   await mergeFilesAndDirectories(rootPath, templatePath);
 
   // Delete the downloaded template repo
@@ -169,14 +169,22 @@ async function checkTemplateContentsStructure(templateContentsPath) {
   checkPathContents(templateContentsPath, []);
 }
 
-function getRepoInfo(githubURL) {
-  const { type, user, project } = gitInfo.fromUrl(githubURL);
-  // Make sure it's a github url
-  if (type !== 'github') {
-    throw Error('A Strapi template can only be a GitHub URL');
+function getRepoInfo(template) {
+  try {
+    const { type, user, project } = gitInfo.fromUrl(template);
+    // Make sure it's a github url
+    if (type !== 'github') {
+      throw Error('A Strapi template can only be a GitHub URL');
+    }
+    return { user, project };
+  } catch (error) {
+    // If it's not a GitHub URL, then assume it's a shorthand for an official template
+    return {
+      user: 'strapi',
+      project: `strapi-template-${template}`,
+      type: 'github',
+    };
   }
-
-  return { user, project };
 }
 
 async function downloadGithubRepo(repoInfo, templatePath) {
