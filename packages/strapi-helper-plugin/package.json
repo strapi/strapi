@@ -56,7 +56,7 @@
     "@buffetjs/icons": "3.3.1",
     "@buffetjs/styles": "3.3.1",
     "@buffetjs/utils": "3.3.1",
-    "bootstrap": "^4.5.2",
+    "bootstrap": "^4.5.3",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
