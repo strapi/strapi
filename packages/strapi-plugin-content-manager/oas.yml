@@ -553,7 +553,7 @@ components:
               maxItems: 2
               items:
                 type: string
-            hasDraftAndPublish:
+            draftAndPublish:
               type: boolean
         attributes:
           type: object
@@ -683,7 +683,7 @@ components:
       name: kind
       schema:
         $ref: '#/components/schemas/kind'
-      description: A content type kind (singleType or collection)
+      description: A content type kind (singleType or collectionType)
 
     model:
       in: path
