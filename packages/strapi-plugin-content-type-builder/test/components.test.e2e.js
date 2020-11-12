@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const waitRestart = require('../../../test/helpers/waitRestart');

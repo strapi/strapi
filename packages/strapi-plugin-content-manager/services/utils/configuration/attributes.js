@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const NON_SORTABLES = ['component', 'json', 'relation', 'media', 'richtext', 'dynamiczone'];
@@ -136,6 +137,15 @@ const hasEditableAttribute = (schema, name) => {
   return true;
 };
 
+const findFirstStringAttribute = schema => {
+  return Object.keys(schema.attributes || {}).find(key => {
+    const { type } = schema.attributes[key];
+    return type === 'string' && key !== 'id';
+  });
+};
+
+const getDefaultMainField = schema => findFirstStringAttribute(schema) || 'id';
+
 module.exports = {
   isSortable,
   isVisible,
@@ -144,4 +154,5 @@ module.exports = {
   isListable,
   hasEditableAttribute,
   hasRelationAttribute,
+  getDefaultMainField,
 };

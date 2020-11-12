@@ -1,3 +1,5 @@
+'use strict';
+
 const bootstrap = require('../../config/functions/bootstrap');
 
 describe('Upload plugin bootstrap function', () => {

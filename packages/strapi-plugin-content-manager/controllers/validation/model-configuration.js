@@ -9,23 +9,23 @@ const {
 /**
  * Creates the validation schema for content-type configurations
  */
-module.exports = (model, schema, opts = {}) =>
+module.exports = (schema, opts = {}) =>
   yup
     .object()
     .shape({
-      settings: createSettingsSchema(model, schema)
+      settings: createSettingsSchema(schema)
         .default(null)
         .nullable(),
-      metadatas: createMetadasSchema(model, schema)
+      metadatas: createMetadasSchema(schema)
         .default(null)
         .nullable(),
-      layouts: createLayoutsSchema(model, schema, opts)
+      layouts: createLayoutsSchema(schema, opts)
         .default(null)
         .nullable(),
     })
     .noUnknown();
 
-const createSettingsSchema = (model, schema) => {
+const createSettingsSchema = schema => {
   const validAttributes = Object.keys(schema.attributes).filter(key => isListable(schema, key));
 
   return yup
@@ -58,7 +58,7 @@ const createSettingsSchema = (model, schema) => {
     .noUnknown();
 };
 
-const createMetadasSchema = (model, schema) => {
+const createMetadasSchema = schema => {
   return yup.object().shape(
     Object.keys(schema.attributes).reduce((acc, key) => {
       acc[key] = yup
@@ -99,7 +99,7 @@ const createArrayTest = ({ allowUndefined = false } = {}) => ({
   test: val => (allowUndefined === true && val === undefined ? true : Array.isArray(val)),
 });
 
-const createLayoutsSchema = (model, schema, opts = {}) => {
+const createLayoutsSchema = (schema, opts = {}) => {
   const validAttributes = Object.keys(schema.attributes).filter(key => isListable(schema, key));
 
   const editAttributes = Object.keys(schema.attributes).filter(key =>

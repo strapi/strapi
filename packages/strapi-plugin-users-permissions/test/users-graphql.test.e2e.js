@@ -1,3 +1,5 @@
+'use strict';
+
 // Test a simple default API with no relations
 
 const { registerAndLogin } = require('../../../test/helpers/auth');

@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 
 const { registerAndLogin } = require('../../../../test/helpers/auth');
@@ -71,7 +73,7 @@ describe('CM API - Basic + compo', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
+      url: '/content-manager/collection-types/application::product-with-compo.product-with-compo',
       body: product,
     });
 
@@ -84,14 +86,14 @@ describe('CM API - Basic + compo', () => {
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
+      url: '/content-manager/collection-types/application::product-with-compo.product-with-compo',
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompo[0]);
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results).toHaveLength(1);
+    expect(res.body.results[0]).toMatchObject(data.productsWithCompo[0]);
+    res.body.results.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
   test('Update product with compo', async () => {
@@ -105,7 +107,7 @@ describe('CM API - Basic + compo', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/explorer/application::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
       body: product,
     });
 
@@ -119,7 +121,7 @@ describe('CM API - Basic + compo', () => {
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -137,12 +139,12 @@ describe('CM API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
+        url: '/content-manager/collection-types/application::product-with-compo.product-with-compo',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.0.errors.compo.0')).toBe('compo must be defined.');
+      expect(_.get(res, 'body.data.errors.compo.0')).toBe('compo must be defined.');
     });
 
     test('Cannot create product with compo - minLength', async () => {
@@ -156,7 +158,7 @@ describe('CM API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
+        url: '/content-manager/collection-types/application::product-with-compo.product-with-compo',
         body: product,
       });
 
@@ -177,7 +179,7 @@ describe('CM API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
+        url: '/content-manager/collection-types/application::product-with-compo.product-with-compo',
         body: product,
       });
 
@@ -197,12 +199,12 @@ describe('CM API - Basic + compo', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::product-with-compo.product-with-compo',
+        url: '/content-manager/collection-types/application::product-with-compo.product-with-compo',
         body: product,
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['0', 'errors', 'compo.name', '0'])).toBe(
+      expect(_.get(res.body.data, ['errors', 'compo.name', '0'])).toBe(
         'compo.name must be defined.'
       );
     });

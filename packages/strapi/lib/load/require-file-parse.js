@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const { templateConfiguration } = require('strapi-utils');
 

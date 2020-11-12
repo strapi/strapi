@@ -163,7 +163,7 @@ if (edition === 'EE') {
       const modelName = getModelName();
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/explorer/application::${modelName}.${modelName}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}`,
         body: localTestData.entry,
       });
 
@@ -177,7 +177,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(0);
       const res = await rq({
         method: 'GET',
-        url: `/content-manager/explorer/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -190,7 +190,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(1);
       const res = await rq({
         method: 'GET',
-        url: `/content-manager/explorer/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -203,7 +203,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(1);
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/explorer/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(403);
@@ -215,7 +215,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(0);
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/explorer/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);

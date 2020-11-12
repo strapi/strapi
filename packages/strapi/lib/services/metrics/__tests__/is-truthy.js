@@ -1,3 +1,5 @@
+'use strict';
+
 const isTruthyEnvVar = require('../is-truthy');
 
 describe('isTruthyEnvVar', () => {

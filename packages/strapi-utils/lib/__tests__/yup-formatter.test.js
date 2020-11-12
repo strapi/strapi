@@ -1,3 +1,5 @@
+'use strict';
+
 const yup = require('yup');
 const { formatYupErrors } = require('../validators');
 

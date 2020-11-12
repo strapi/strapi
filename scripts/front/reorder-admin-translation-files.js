@@ -1,6 +1,8 @@
+'use strict';
+
 const { join } = require('path');
-const fs = require('fs-extra');
 const { promisify } = require('util');
+const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
 
 async function orderTrads({ mainTranslationFile, translationFiles }) {

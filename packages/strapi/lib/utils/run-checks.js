@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
@@ -12,20 +14,13 @@ const checkFoldersExist = ({ appPath }) => {
   }
 
   if (missingPaths.length > 0) {
-    throw new Error(
-      `Missing required folders:\n${missingPaths
-        .map(p => `- ./${p}`)
-        .join('\n')}`
-    );
+    throw new Error(`Missing required folders:\n${missingPaths.map(p => `- ./${p}`).join('\n')}`);
   }
 };
 
 const checkPluginsConflicts = ({ appPath, installedPlugins }) => {
   const localPluginNames = fs.readdirSync(path.resolve(appPath, 'plugins'));
-  const pluginsIntersection = _.intersection(
-    localPluginNames,
-    installedPlugins
-  );
+  const pluginsIntersection = _.intersection(localPluginNames, installedPlugins);
 
   if (pluginsIntersection.length > 0) {
     throw new Error(

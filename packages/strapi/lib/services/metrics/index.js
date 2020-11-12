@@ -4,16 +4,16 @@
  * You can learn more at https://strapi.io/documentation/v3.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
  */
 
-const { scheduleJob } = require('node-schedule');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { scheduleJob } = require('node-schedule');
 
+const ee = require('../../utils/ee');
 const wrapWithRateLimit = require('./rate-limiter');
 const createSender = require('./sender');
 const createMiddleware = require('./middleware');
 const isTruthy = require('./is-truthy');
-const ee = require('../../utils/ee');
 
 const LIMITED_EVENTS = [
   'didSaveMediaWithAlternativeText',

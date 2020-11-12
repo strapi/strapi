@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -20,11 +22,14 @@ describe('Test type string', () => {
   }, 60000);
 
   test('Creates an entry with JSON', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withstring.withstring', {
-      body: {
-        field: 'Some string',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withstring.withstring',
+      {
+        body: {
+          field: 'Some string',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -32,64 +37,31 @@ describe('Test type string', () => {
     });
   });
 
-  test('Creates an entry with formData', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withstring.withstring', {
-      formData: {
-        data: JSON.stringify({ field: '"Some string"' }),
-      },
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: '"Some string"',
-    });
-  });
-
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get('/content-manager/explorer/application::withstring.withstring');
+    const res = await rq.get(
+      '/content-manager/collection-types/application::withstring.withstring'
+    );
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          field: expect.any(String),
-        }),
-      ])
-    );
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
+      expect(entry.field).toEqual(expect.any(String));
+    });
   });
 
   test('Updating entry with JSON sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withstring.withstring', {
-      body: { field: 'Some string' },
-    });
-
-    const updateRes = await rq.put(
-      `/content-manager/explorer/application::withstring.withstring/${res.body.id}`,
+    const res = await rq.post(
+      '/content-manager/collection-types/application::withstring.withstring',
       {
-        body: { field: 'Updated string' },
+        body: { field: 'Some string' },
       }
     );
-    expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
-      field: 'Updated string',
-    });
-  });
-
-  test('Updating entry with Formdata sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/application::withstring.withstring', {
-      formData: {
-        data: JSON.stringify({ field: 'Some string' }),
-      },
-    });
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/application::withstring.withstring/${res.body.id}`,
+      `/content-manager/collection-types/application::withstring.withstring/${res.body.id}`,
       {
-        formData: {
-          data: JSON.stringify({ field: 'Updated string' }),
-        },
+        body: { field: 'Updated string' },
       }
     );
     expect(updateRes.statusCode).toBe(200);

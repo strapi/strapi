@@ -9,7 +9,7 @@ const {
 } = require('strapi-utils');
 const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
 
-module.exports = (ability, action, model) => ({
+module.exports = ({ ability, action, model }) => ({
   ability,
   action,
   model,
