@@ -75,7 +75,7 @@ Second, a template must follow the following file structure.
 
 ### File structure
 
-You can add as many files as you want to the root of your template repository. But it must at least have `template` directory, and either a `template.json` or a `template.js`.
+You can add as many files as you want to the root of your template repository. But it must at least have `template` directory, and either a `template.json` or a `template.js` file.
 
 The `template.json` is used to extend the Strapi app's default `package.json`. You can put all the properties that should overwrite the default `package.json` in a root `package` property. For example, a `template.json` might look like this:
 
@@ -92,7 +92,19 @@ The `template.json` is used to extend the Strapi app's default `package.json`. Y
 }
 ```
 
-You can also export a function in a `template.js` file that returns
+You can also use a `template.js` file instead of the `template.json` file. It should export a function that returns an object with the same properties. It's useful when our properties need to have dynamic values. For example, we can use it to make sure that a template requires the latest version of a Strapi plugin:
+
+```js
+module.exports = function(scope) {
+  return {
+    package: {
+      dependencies: {
+        "strapi-plugin-graphql": scope.strapiVersion,
+      }
+    }
+  }
+}
+```
 
 The `template` directory is where you can extend the file contents of a Strapi project. All the children are optional, you should only include the files that will overwrite the default Strapi app.
 
