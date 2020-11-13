@@ -120,11 +120,38 @@ const AttributeRow = ({ attribute, contentType }) => {
     [attributeActions]
   );
 
-  const allRecursiveChecked = action => {
-    return (
-      isCollapsable && getRecursiveAttributesPermissions(action) === recursiveAttributes.length
-    );
-  };
+  const allRecursiveChecked = useCallback(
+    action => {
+      return (
+        isCollapsable && getRecursiveAttributesPermissions(action) === recursiveAttributes.length
+      );
+    },
+    [getRecursiveAttributesPermissions, isCollapsable, recursiveAttributes]
+  );
+
+  const handleCheckCollapsable = useCallback(
+    action => {
+      const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
+      const shouldEnable = !allRecursiveChecked(action);
+
+      if (shouldSetRequiredFields) {
+        fillRequiredPermissions();
+      }
+
+      dispatch({
+        type: 'SELECT_MULTIPLE_ATTRIBUTE',
+        subject: contentType.uid,
+        shouldEnable,
+        attributes:
+          action === `${contentManagerPermissionPrefix}.create`
+            ? recursiveAttributes.filter(attribute => !attribute.required)
+            : recursiveAttributes,
+        action,
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allRecursiveChecked, contentType.uid, dispatch, fillRequiredPermissions, recursiveAttributes]
+  );
 
   const handleCheck = useCallback(
     action => {
@@ -134,25 +161,12 @@ const AttributeRow = ({ attribute, contentType }) => {
         fillRequiredPermissions();
       }
 
-      if (isCollapsable) {
-        dispatch({
-          type: 'SELECT_MULTIPLE_ATTRIBUTE',
-          subject: contentType.uid,
-          shouldEnable: !allRecursiveChecked(action),
-          attributes:
-            action === `${contentManagerPermissionPrefix}.create`
-              ? recursiveAttributes.filter(attribute => !attribute.required)
-              : recursiveAttributes,
-          action,
-        });
-      } else {
-        dispatch({
-          type: 'SELECT_ACTION',
-          subject: contentType.uid,
-          attribute: attribute.attributeName,
-          action,
-        });
-      }
+      dispatch({
+        type: 'SELECT_ACTION',
+        subject: contentType.uid,
+        attribute: attribute.attributeName,
+        action,
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -182,6 +196,14 @@ const AttributeRow = ({ attribute, contentType }) => {
       getRecursiveAttributesPermissions(action) > 0 &&
       getRecursiveAttributesPermissions(action) < recursiveAttributes.length
     );
+  };
+
+  const handleChange = action => {
+    if (isCollapsable) {
+      handleCheckCollapsable(action);
+    } else {
+      handleCheck(action);
+    }
   };
 
   return (
@@ -225,12 +247,12 @@ const AttributeRow = ({ attribute, contentType }) => {
                   isSuperAdmin || (isCreateAndRequired(attribute, action) && !isCollapsable)
                 }
                 value={
-                  isCreateAndRequired(attribute, action) ||
+                  (isCreateAndRequired(attribute, action) && !isCollapsable) ||
                   allRecursiveChecked(action) ||
                   checkPermission(action)
                 }
                 name={`${attribute.attributeName}-${action}`}
-                onChange={() => handleCheck(action)}
+                onChange={() => handleChange(action)}
                 someChecked={someChecked(action)}
               />
             ))}

@@ -114,7 +114,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     action => {
       const attributesPermissionsCount = getAttributesPermissions(action);
 
-      return attributesPermissionsCount > 0 && attributesPermissionsCount === attributes.length;
+      return attributesPermissionsCount === attributes.length;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [contentTypesPermissions, contentType, attributes]
@@ -134,13 +134,9 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
   const checkConditions = useCallback(
     action => {
-      if (!staticAttributeActions.includes(action)) {
-        return get(conditions, [action], []).length > 0 && hasContentTypeAction(action);
-      }
-
-      return get(conditions, [action], []).length > 0 && getAttributesPermissions(action) > 0;
+      return get(conditions, [action], []).length > 0;
     },
-    [conditions, getAttributesPermissions, hasContentTypeAction]
+    [conditions]
   );
 
   const subjectHasConditions = useMemo(() => {

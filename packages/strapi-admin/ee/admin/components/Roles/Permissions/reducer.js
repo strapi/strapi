@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable consistent-return */
-import produce from 'immer';
+import produce, { current } from 'immer';
 import { get, set, differenceWith } from 'lodash';
 
 import {
@@ -34,6 +34,12 @@ const reducer = (state, action) =>
       case 'SELECT_MULTIPLE_ATTRIBUTE': {
         const { attributes, subject, shouldEnable, action: permissionAction } = action;
 
+        const hasCondition = get(
+          draftState,
+          ['contentTypesPermissions', subject, 'conditions', permissionAction],
+          false
+        );
+
         attributes.forEach(attribute => {
           const existingActions = get(
             state,
@@ -51,6 +57,18 @@ const reducer = (state, action) =>
           );
         });
 
+        const shouldRemoveCondition =
+          hasCondition &&
+          !shouldEnable &&
+          getAttributePermissionsSizeByContentTypeAction(
+            current(draftState.contentTypesPermissions),
+            subject,
+            permissionAction
+          ) === 0;
+
+        if (shouldRemoveCondition) {
+          delete draftState.contentTypesPermissions[subject].conditions[permissionAction];
+        }
         break;
       }
       case 'SELECT_ACTION': {
@@ -71,6 +89,24 @@ const reducer = (state, action) =>
           ['contentTypesPermissions', subject, 'attributes', attribute, 'actions'],
           actionsToSet
         );
+
+        const hasCondition = get(
+          current(draftState),
+          ['contentTypesPermissions', subject, 'conditions', permissionAction],
+          false
+        );
+        const shouldRemoveCondition =
+          hasCondition &&
+          !shouldEnable &&
+          getAttributePermissionsSizeByContentTypeAction(
+            current(draftState.contentTypesPermissions),
+            subject,
+            permissionAction
+          ) === 0;
+
+        if (shouldRemoveCondition) {
+          delete draftState.contentTypesPermissions[subject].conditions[permissionAction];
+        }
         break;
       }
       // This reducer action is used to enable/disable all actions for the payload attributes
@@ -105,6 +141,22 @@ const reducer = (state, action) =>
           );
         });
 
+        if (!shouldEnable) {
+          Object.keys(state.contentTypesPermissions).forEach(contentTypeUid => {
+            const hasCondition = get(
+              state,
+              ['contentTypesPermissions', contentTypeUid, 'conditions', permissionAction],
+              false
+            );
+
+            if (hasCondition) {
+              delete draftState.contentTypesPermissions[contentTypeUid].conditions[
+                permissionAction
+              ];
+            }
+          });
+        }
+
         break;
       }
       // This reducer action is used to enable/disable a single attribute action
@@ -123,6 +175,26 @@ const reducer = (state, action) =>
             ['contentTypesPermissions', subject, 'attributes', attribute.attributeName, 'actions'],
             attribute.required ? [`${contentManagerPermissionPrefix}.create`] : []
           );
+          const existingConditions = staticAttributeActions.filter(
+            action =>
+              getAttributePermissionsSizeByContentTypeAction(
+                current(draftState.contentTypesPermissions),
+                subject,
+                action
+              ) === 0
+          );
+
+          existingConditions.forEach(condition => {
+            const hasCondition = get(
+              current(draftState),
+              ['contentTypesPermissions', subject, 'conditions', condition],
+              false
+            );
+
+            if (hasCondition) {
+              delete draftState.contentTypesPermissions[subject].conditions[condition];
+            }
+          });
         }
         break;
       }
@@ -194,6 +266,11 @@ const reducer = (state, action) =>
       case 'CONTENT_TYPE_ACTION_SELECT': {
         const { subject, action: permissionAction } = action;
 
+        const hasCondition = get(
+          state.contentTypesPermissions,
+          [subject, 'conditions', permissionAction],
+          false
+        );
         const contentTypeActions = get(
           state.contentTypesPermissions,
           [subject, 'contentTypeActions'],
@@ -206,6 +283,10 @@ const reducer = (state, action) =>
             ['contentTypesPermissions', subject, 'contentTypeActions', permissionAction],
             false
           );
+
+          if (hasCondition) {
+            delete draftState.contentTypesPermissions[subject].conditions[permissionAction];
+          }
         } else {
           set(
             draftState,
@@ -239,8 +320,8 @@ const reducer = (state, action) =>
           });
         }
 
-        attributes.forEach(attribute => {
-          if (shouldEnable) {
+        if (shouldEnable) {
+          attributes.forEach(attribute => {
             set(
               draftState,
               [
@@ -252,7 +333,9 @@ const reducer = (state, action) =>
               ],
               staticAttributeActions
             );
-          } else {
+          });
+        } else {
+          attributes.forEach(attribute => {
             set(
               draftState,
               [
@@ -264,31 +347,59 @@ const reducer = (state, action) =>
               ],
               []
             );
-          }
-        });
+          });
+
+          const existingConditions = staticAttributeActions.filter(
+            action =>
+              getAttributePermissionsSizeByContentTypeAction(
+                current(draftState.contentTypesPermissions),
+                subject,
+                action
+              ) === 0
+          );
+
+          const allConditions = state.permissionsLayout.sections.contentTypes.map(
+            section => section.action
+          );
+          const conditionsToRemove = shouldSetAllContentTypes ? allConditions : existingConditions;
+
+          conditionsToRemove.forEach(condition => {
+            const hasCondition = get(
+              current(draftState),
+              ['contentTypesPermissions', subject, 'conditions', condition],
+              false
+            );
+
+            if (hasCondition) {
+              delete draftState.contentTypesPermissions[subject].conditions[condition];
+            }
+          });
+        }
+
         break;
       }
       // This reducer action is used to handle the global permissions header actions
       case 'GLOBAL_PERMISSIONS_SELECT': {
         const { action: permissionAction, contentTypes, shouldEnable } = action;
-        const permissions = contentTypes.reduce((acc, current) => {
-          return {
-            ...acc,
-            [current.uid]: {
-              ...state.contentTypesPermissions[current.uid],
-              contentTypeActions: {
-                ...get(state.contentTypesPermissions, [current.uid, 'contentTypeActions'], {}),
-                [permissionAction]: shouldEnable,
-              },
-            },
-          };
-        }, {});
-        /* eslint-enable indent */
 
-        draftState.contentTypesPermissions = {
-          ...state.contentTypesPermissions,
-          ...permissions,
-        };
+        contentTypes.forEach(contentType => {
+          const hasCondition = get(
+            draftState,
+            ['contentTypesPermissions', contentType.uid, 'conditions', permissionAction],
+            false
+          );
+
+          if (hasCondition && !shouldEnable) {
+            delete draftState.contentTypesPermissions[contentType.uid].conditions[permissionAction];
+          }
+
+          set(
+            draftState,
+            ['contentTypesPermissions', contentType.uid, 'contentTypeActions', permissionAction],
+            shouldEnable
+          );
+        });
+
         break;
       }
       // This reducer action is used to handle an action of a plugin/setting permission
