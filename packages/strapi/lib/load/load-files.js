@@ -3,6 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const glob = require('./glob');
+const fse = require('fs-extra');
 const filePathToPath = require('./filepath-to-prop-path');
 
 /**
@@ -28,7 +29,13 @@ const loadFiles = async (
 
     // load module
     delete require.cache[absolutePath];
-    const mod = requireFn(absolutePath);
+    let mod;
+
+    if (path.extname(absolutePath) === '.json') {
+      mod = fse.readJsonSync(absolutePath);
+    } else {
+      mod = requireFn(absolutePath);
+    }
 
     Object.defineProperty(mod, '__filename__', {
       enumerable: true,

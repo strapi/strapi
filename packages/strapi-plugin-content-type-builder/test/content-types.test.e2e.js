@@ -1,32 +1,41 @@
 /**
- * Integration test for the content-type-buidler content types managment apis
+ * Integration test for the content-type-builder content types management apis
  */
 'use strict';
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const waitRestart = require('../../../test/helpers/waitRestart');
-const createModelsUtils = require('../../../test/helpers/models');
+const modelsUtils = require('../../../test/helpers/models');
 
+let strapi;
 let rq;
-let modelsUtils;
+
+const restart = async () => {
+  await strapi.destroy();
+  strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+  rq = await createAuthRequest({ strapi });
+};
 
 describe('Content Type Builder - Content types', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-    modelsUtils = createModelsUtils({ rq });
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
-  afterEach(() => waitRestart());
+  afterEach(async () => {
+    await restart();
+  });
 
   afterAll(async () => {
-    await modelsUtils.deleteContentTypes([
+    const modelsName = [
       'test-collection-type',
       'test-collection',
       'test-single-type',
       'ct-with-dp',
-    ]);
+    ];
+
+    await modelsUtils.cleanupModels(modelsName);
+    await modelsUtils.deleteContentTypes(modelsName);
   }, 60000);
 
   describe('Collection Types', () => {
@@ -189,7 +198,7 @@ describe('Content Type Builder - Content types', () => {
 
       expect(createRes.statusCode).toBe(201);
 
-      await waitRestart();
+      await restart();
 
       const { uid } = createRes.body.data;
 
