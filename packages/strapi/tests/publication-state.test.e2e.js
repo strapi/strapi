@@ -1,116 +1,120 @@
 'use strict';
 
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 
+const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
-  raw: {
-    products: [
-      {
-        name: 'Bamboo Desk',
-        categories: ['Home'],
-        comp: { countries: ['France'] },
-        published: false,
+
+const fixtures = {
+  product: [
+    {
+      name: 'Bamboo Desk',
+      categories: ['Home'],
+      comp: { countries: ['France'] },
+      published_at: null,
+    },
+    {
+      name: 'Computer',
+      categories: ['Home', 'Tech'],
+      comp: { countries: ['France', 'Italy', 'Spain'] },
+      published_at: new Date(),
+    },
+    {
+      name: 'Burger Drone',
+      categories: ['Tech', 'Food'],
+      comp: { countries: ['Italy', 'Spain'] },
+      published_at: new Date(),
+    },
+  ],
+  category: [
+    { name: 'Home', published_at: null },
+    { name: 'Food', published_at: new Date() },
+    { name: 'Tech', published_at: new Date() },
+  ],
+  country: [
+    { name: 'France', published_at: new Date() },
+    { name: 'Italy', published_at: null },
+    { name: 'Spain', published_at: new Date() },
+  ],
+};
+
+const data = { product: [], category: [], country: [] };
+
+const pluralizedModels = {
+  product: 'products',
+  country: 'countries',
+  category: 'categories',
+};
+
+const contentTypes = {
+  product: {
+    attributes: {
+      name: {
+        type: 'string',
       },
-      {
-        name: 'Computer',
-        categories: ['Home', 'Tech'],
-        comp: { countries: ['France', 'Italy', 'Spain'] },
-        published: true,
+      categories: {
+        nature: 'manyWay',
+        target: 'application::category.category',
+        unique: false,
       },
-      {
-        name: 'Burger Drone',
-        categories: ['Tech', 'Food'],
-        comp: { countries: ['Italy', 'Spain'] },
-        published: true,
+      comp: {
+        component: 'default.comp',
+        type: 'component',
+        required: true,
       },
-    ],
-    categories: [
-      { name: 'Home', published: false },
-      { name: 'Food', published: true },
-      { name: 'Tech', published: true },
-    ],
-    countries: [
-      { name: 'France', published: true },
-      { name: 'Italy', published: false },
-      { name: 'Spain', published: true },
-    ],
+    },
+    draftAndPublish: true,
+    connection: 'default',
+    name: 'product',
+    description: '',
+    collectionName: '',
   },
-  api: {
-    products: [],
-    categories: [],
-    countries: [],
+  country: {
+    attributes: {
+      name: {
+        type: 'string',
+      },
+    },
+    draftAndPublish: true,
+    connection: 'default',
+    name: 'country',
+    description: '',
+    collectionName: '',
+  },
+  category: {
+    attributes: {
+      name: {
+        type: 'string',
+      },
+    },
+    draftAndPublish: true,
+    connection: 'default',
+    name: 'category',
+    description: '',
+    collectionName: '',
   },
 };
 
-const product = {
-  attributes: {
-    name: {
-      type: 'string',
-    },
-    categories: {
-      nature: 'manyWay',
-      target: 'application::category.category',
-      unique: false,
-    },
-    comp: {
-      component: 'default.comp',
-      type: 'component',
-      required: true,
-    },
-  },
-  draftAndPublish: true,
-  connection: 'default',
-  name: 'product',
-  description: '',
-  collectionName: '',
-};
-
-const category = {
-  attributes: {
-    name: {
-      type: 'string',
-    },
-  },
-  draftAndPublish: true,
-  connection: 'default',
-  name: 'category',
-  description: '',
-  collectionName: '',
-};
-
-const country = {
-  attributes: {
-    name: {
-      type: 'string',
-    },
-  },
-  draftAndPublish: true,
-  connection: 'default',
-  name: 'country',
-  description: '',
-  collectionName: '',
-};
-
-const comp = {
-  name: 'comp',
-  attributes: {
-    countries: {
-      nature: 'manyWay',
-      target: 'application::country.country',
+const components = {
+  comp: {
+    name: 'comp',
+    attributes: {
+      countries: {
+        nature: 'manyWay',
+        target: 'application::country.country',
+      },
     },
   },
 };
 
 const filterBy = (name, { mode = 'live' } = {}) => {
-  return data.raw[name].filter(item => {
+  return fixtures[name].filter(item => {
     if (['live', 'default'].includes(mode)) {
-      return item.published;
+      return item.published_at instanceof Date;
     }
-
     return true;
   });
 };
@@ -127,85 +131,65 @@ const getQueryFromMode = mode => {
   return '';
 };
 
-const transformRawToBody = (name, raw) =>
-  ({
-    countries: country => ({ name: country.name }),
-    categories: category => ({ name: category.name }),
-    products: product => ({
-      name: product.name,
-      categories: product.categories.map(
-        name => data.api.categories.find(cat => cat.name === name).id
-      ),
-      comp: {
-        countries: product.comp.countries.map(
-          name => data.api.countries.find(country => country.name === name).id
-        ),
-      },
-    }),
-  }[name](raw));
-
-const createFixtures = async () => {
-  const createEntriesFor = async (singular, plural) => {
-    for (const rawItem of data.raw[plural]) {
-      const item = transformRawToBody(plural, rawItem);
-      const createdItem = await strapi.query(singular).create(item);
-
-      if (!rawItem.published) {
-        await strapi.plugins['content-manager'].services.contentmanager.unpublish({ id: createdItem.id }, singular);
-      }
-    }
-
-    data.api[plural] = (await rq({ method: 'GET', url: `/${plural}?_publicationState=preview` })).body;
-  };
-
-  for (const [singular, plural] of [['country', 'countries'], ['category', 'categories'], ['product', 'products']]) {
-    await createEntriesFor(singular, plural);
-  }
-};
-
 describe('Publication State', () => {
   beforeAll(async () => {
-    await modelsUtils.createContentType(country);
-    await modelsUtils.createComponent(comp);
-    await modelsUtils.createContentType(category);
-    await modelsUtils.createContentType(product);
-    await modelsUtils.cleanupModels([product.name, category.name, country.name]);
+    await builder
+      .addContentType(contentTypes.country)
+      .addComponent(components.comp)
+      .addContentTypes([contentTypes.category, contentTypes.product])
+      .addFixtures(contentTypes.country.name, fixtures.country)
+      .addFixtures(contentTypes.category.name, fixtures.category)
+      .addFixtures(contentTypes.product.name, f =>
+        fixtures.product.map(product => ({
+          name: product.name,
+          categories: product.categories.map(name => f.category.find(cat => cat.name === name).id),
+          comp: {
+            countries: product.comp.countries.map(
+              name => f.country.find(country => country.name === name).id
+            ),
+          },
+          published_at: product.published_at,
+        }))
+      )
+      .build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
     rq = await createAuthRequest({ strapi });
 
-    await createFixtures();
+    Object.assign(data, builder.sanitizedFixtures(strapi));
   }, 60000);
 
   afterAll(async () => {
     await strapi.destroy();
-    await modelsUtils.cleanupModels(['product', 'category', 'country']);
-    await modelsUtils.deleteComponent('comp');
-    await modelsUtils.deleteContentTypes(['product', 'category', 'country']);
+    await builder.cleanup();
   }, 60000);
 
   describe.each(['default', 'live', 'preview'])('Mode: "%s"', mode => {
-    test.each(['countries', 'categories', 'products'])('For %s', async name => {
-      const url = `/${name}${getQueryFromMode(mode)}`;
+    test.each(['country', 'category', 'product'])('For %s', async modelName => {
+      const url = `/${pluralizedModels[modelName]}${getQueryFromMode(mode)}`;
       const res = await rq({ method: 'GET', url });
 
-      expect(res.body).toHaveLength(lengthFor(name, { mode }));
+      expect(res.body).toHaveLength(lengthFor(modelName, { mode }));
     });
   });
 
   describe('Advanced checks', () => {
     describe('Nested level of relations (live mode)', () => {
       let products;
+      const pluralizedModelName = pluralizedModels[contentTypes.product.name];
 
       beforeEach(async () => {
-        const res = await rq({ method: 'GET', url: '/products?_publicationState=live' });
+        const res = await rq({
+          method: 'GET',
+          url: `/${pluralizedModelName}?_publicationState=live`,
+        });
         products = res.body;
       });
 
-      const getApiRef = id => data.api.products.find(product => product.id === id);
+      const getApiRef = id => data.product.find(product => product.id === id);
 
       test('Payload integrity', () => {
-        expect(products).toHaveLength(lengthFor('products'));
+        expect(products).toHaveLength(lengthFor(contentTypes.product.name));
       });
 
       test('Root level', () => {

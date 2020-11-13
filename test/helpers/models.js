@@ -1,22 +1,19 @@
 'use strict';
 
+// eslint-disable-next-line node/no-extraneous-require
+const { isFunction } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 
 const createHelpers = async options => {
-  try {
-    console.log(`We're here`)
-    const strapi = await createStrapiInstance(options);
-    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
-    const componentsService = strapi.plugins['content-type-builder'].services.components;
+  const strapi = await createStrapiInstance(options);
+  const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+  const componentsService = strapi.plugins['content-type-builder'].services.components;
 
-    return {
-      strapi,
-      contentTypeService,
-      componentsService,
-    };
-  } catch (e) {
-    console.log(e);
-  }
+  return {
+    strapi,
+    contentTypeService,
+    componentsService,
+  };
 };
 
 const createContentType = async model => {
@@ -26,7 +23,7 @@ const createContentType = async model => {
     contentType: {
       connection: 'default',
       ...model,
-    }
+    },
   });
 
   await strapi.destroy();
@@ -37,12 +34,14 @@ const createContentType = async model => {
 const createContentTypes = async models => {
   const { contentTypeService, strapi } = await createHelpers();
 
-  const contentTypes = await contentTypeService.createContentTypes(models.map(model => ({
-    contentType: {
-      connection: 'default',
-      ...model,
-    }
-  })));
+  const contentTypes = await contentTypeService.createContentTypes(
+    models.map(model => ({
+      contentType: {
+        connection: 'default',
+        ...model,
+      },
+    }))
+  );
 
   await strapi.destroy();
 
@@ -58,7 +57,7 @@ const createComponent = async component => {
       icon: 'default',
       connection: 'default',
       ...component,
-    }
+    },
   });
 
   await strapi.destroy();
@@ -111,7 +110,6 @@ const deleteContentTypes = async modelsName => {
   const { contentTypeService, strapi } = await createHelpers();
   const toUID = name => `application::${name}.${name}`;
 
-  console.log('before', Object.keys(strapi.contentTypes));
   const contentTypes = await contentTypeService.deleteContentTypes(modelsName.map(toUID));
 
   await strapi.destroy();
@@ -157,7 +155,8 @@ async function createFixturesFor(model, entries) {
   const results = [];
 
   for (const entry of entries) {
-    results.push(await strapi.query(model).create(entry));
+    const dataToCreate = isFunction(entry) ? entry(results) : entry;
+    results.push(await strapi.query(model).create(dataToCreate));
   }
 
   await strapi.destroy();

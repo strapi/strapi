@@ -14,21 +14,17 @@ const cleanDate = entry => {
   delete entry.updated_at;
 };
 
+const builder = createTestBuilder();
 let data;
 let rq;
 let strapi;
-const builder = createTestBuilder();
 
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
     await builder
-      .addContentTypes([
-        form.article,
-        form.tag,
-        form.category,
-        form.reference,
-        form.product
-      ], { batch: true })
+      .addContentTypes([form.article, form.tag, form.category, form.reference, form.product], {
+        batch: true,
+      })
       .build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
@@ -238,7 +234,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await modelsUtils.cleanupContentTypes(['article', 'category']);
+      // FIXME await modelsUtils.cleanupContentTypes(['article', 'category']);
     });
 
     test('Create cat1', async () => {
@@ -461,7 +457,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await modelsUtils.cleanupContentTypes(['article', 'reference']);
+      // FIXME await modelsUtils.cleanupContentTypes(['article', 'reference']);
     });
 
     test('Create ref1', async () => {
@@ -550,7 +546,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await modelsUtils.cleanupContentTypes(['reference', 'tag']);
+      // FIXME await modelsUtils.cleanupContentTypes(['reference', 'tag']);
     });
 
     test('Attach Tag to a Reference', async () => {

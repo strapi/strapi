@@ -2,13 +2,14 @@
 
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const modelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+const builder = createTestBuilder();
 let rq;
 let strapi;
 let data = {
-  beds: [],
+  bed: [],
 };
 
 const bedModel = {
@@ -120,19 +121,20 @@ const bedFixtures = [
 
 describe('Search query', () => {
   beforeAll(async () => {
-    await modelsUtils.createContentTypes([bedModel]);
-    await modelsUtils.createFixtures({ [bedModel.name]: bedFixtures });
+    await builder
+      .addContentType(bedModel)
+      .addFixtures(bedModel.name, bedFixtures)
+      .build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
     rq = await createAuthRequest({ strapi });
 
-    data.beds = (await rq({ method: 'GET', url: '/beds' })).body;
+    data.bed = builder.sanitizedFixturesFor(bedModel.name, strapi);
   }, 60000);
 
   afterAll(async () => {
     await strapi.destroy();
-    await modelsUtils.cleanupModel(bedModel.name);
-    await modelsUtils.deleteContentType(bedModel.name);
+    await builder.cleanup();
   }, 60000);
 
   describe('Without filters', () => {
@@ -141,13 +143,13 @@ describe('Search query', () => {
         method: 'GET',
         url: '/beds',
         qs: {
-          _q: data.beds[2].id,
+          _q: data.bed[2].id,
         },
       });
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[2]);
+      expect(res.body[0]).toMatchObject(data.bed[2]);
     });
 
     test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
@@ -161,7 +163,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[0]);
+      expect(res.body[0]).toMatchObject(data.bed[0]);
     });
 
     test('search with an empty query', async () => {
@@ -175,7 +177,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(5);
-      expect(res.body).toEqual(expect.arrayContaining(data.beds));
+      expect(res.body).toEqual(expect.arrayContaining(data.bed));
     });
 
     test('search with special characters', async () => {
@@ -183,13 +185,13 @@ describe('Search query', () => {
         method: 'GET',
         url: '/beds',
         qs: {
-          _q: data.beds[3].name,
+          _q: data.bed[3].name,
         },
       });
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[3]);
+      expect(res.body[0]).toMatchObject(data.bed[3]);
     });
   });
 
@@ -206,7 +208,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(3);
-      expect(res.body).toMatchObject([data.beds[0], data.beds[1], data.beds[4]]);
+      expect(res.body).toMatchObject([data.bed[0], data.bed[1], data.bed[4]]);
     });
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
@@ -220,7 +222,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject([data.beds[0], data.beds[4]]);
+      expect(res.body).toMatchObject([data.bed[0], data.bed[4]]);
     });
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
@@ -230,7 +232,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject(data.beds.slice(0, 2));
+      expect(res.body).toMatchObject(data.bed.slice(0, 2));
     });
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
@@ -244,7 +246,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
-      expect(res.body).toMatchObject([data.beds[0]]);
+      expect(res.body).toMatchObject([data.bed[0]]);
     });
   });
 });

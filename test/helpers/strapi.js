@@ -16,32 +16,27 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
-const createStrapiInstance = async (params = {}) => {
-  try {
-    jest.resetModules();
-    const strapi = require('../../packages/strapi/lib');
-    const { ensureSuperAdmin = false } = params;
-    const options = { dir: TEST_APP_URL };
-    const instance = strapi(options);
+const createStrapiInstance = async ({ ensureSuperAdmin = false } = {}) => {
+  jest.resetModules();
+  const strapi = require('../../packages/strapi/lib');
+  const options = { dir: TEST_APP_URL };
+  const instance = strapi(options);
 
-    await instance.load();
+  await instance.load();
 
-    await instance.app
-      // Populate Koa routes
-      .use(instance.router.routes())
-      // Populate Koa methods
-      .use(instance.router.allowedMethods());
+  await instance.app
+    // Populate Koa routes
+    .use(instance.router.routes())
+    // Populate Koa methods
+    .use(instance.router.allowedMethods());
 
-    const utils = createUtils(instance);
+  const utils = createUtils(instance);
 
-    if (ensureSuperAdmin) {
-      await utils.createUserIfNotExists(superAdminCredentials);
-    }
-
-    return instance;
-  } catch (e) {
-    console.log(e);
+  if (ensureSuperAdmin) {
+    await utils.createUserIfNotExists(superAdminCredentials);
   }
+
+  return instance;
 };
 
 module.exports = {
@@ -49,5 +44,5 @@ module.exports = {
   superAdmin: {
     loginInfo: superAdminLoginInfo,
     credentials: superAdminCredentials,
-  }
+  },
 };

@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const { prop, isArray, curry, isNil, has } = require('lodash/fp');
+const { prop, isArray, curry, isNil, has, isFunction } = require('lodash/fp');
 const modelsUtils = require('../models');
 
 const bindEvent = ({ event, fn, batch = false, metadata = {} } = {}) => {
@@ -14,32 +14,53 @@ const bindEvent = ({ event, fn, batch = false, metadata = {} } = {}) => {
   });
 
   return fn;
-}
-
+};
 
 const registry = {
   ct: {
-    create: bindEvent({ event: 'model.created', metadata: { type: 'ct' }, fn: modelsUtils.createContentType }),
-    createBatch: bindEvent({ event: 'model.created', metadata: { type: 'ct' }, fn: modelsUtils.createContentTypes, batch: true }),
-    createMany: bindEvent({ event: 'model.created', metadata: { type: 'ct' }, fn: async cts => {
-      const createdModels = [];
+    create: bindEvent({
+      event: 'model.created',
+      metadata: { type: 'ct' },
+      fn: modelsUtils.createContentType,
+    }),
+    createBatch: bindEvent({
+      event: 'model.created',
+      metadata: { type: 'ct' },
+      fn: modelsUtils.createContentTypes,
+      batch: true,
+    }),
+    createMany: bindEvent({
+      event: 'model.created',
+      metadata: { type: 'ct' },
+      fn: async cts => {
+        const createdModels = [];
 
-      for (const ct of cts) {
-        createdModels.push(await modelsUtils.createContentType(ct));
-      }
+        for (const ct of cts) {
+          createdModels.push(await modelsUtils.createContentType(ct));
+        }
 
-      return createdModels;
-    }}),
+        return createdModels;
+      },
+    }),
   },
   comp: {
-    create: bindEvent({ event: 'model.created', metadata: { type: 'comp' }, fn: modelsUtils.createComponent }),
+    create: bindEvent({
+      event: 'model.created',
+      metadata: { type: 'comp' },
+      fn: modelsUtils.createComponent,
+    }),
   },
   fixture: {
-    create: bindEvent({ event: 'fixture.created', batch: true, fn: async (model, entries) => {
-      const result = await modelsUtils.createFixturesFor(model, entries);
-      return { entries: result, model };
-    }}),
-  }
+    create: bindEvent({
+      event: 'fixture.created',
+      batch: true,
+      fn: async (model, entries, getFixtures) => {
+        const entriesToCreate = isFunction(entries) ? entries(getFixtures()) : entries;
+        const result = await modelsUtils.createFixturesFor(model, entriesToCreate);
+        return { entries: result, model };
+      },
+    }),
+  },
 };
 
 const getActionByCode = code => prop(code, registry);
@@ -85,7 +106,7 @@ const createAction = (code, ...params) => {
       const bindMetadata = result => ({ result, metadata });
 
       if (isArray(res) && !batch) {
-        res.map(bindMetadata).forEach(emitEvent)
+        res.map(bindMetadata).forEach(emitEvent);
       } else {
         emitEvent(bindMetadata(res));
       }
@@ -97,4 +118,4 @@ const createAction = (code, ...params) => {
 
 module.exports = {
   createAction,
-}
+};

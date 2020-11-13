@@ -3,9 +3,10 @@
 const _ = require('lodash');
 
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const modelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+const builder = createTestBuilder();
 let strapi;
 let rq;
 let data = {
@@ -48,8 +49,10 @@ const productWithDP = {
 
 describe('Core API - Basic + draftAndPublish', () => {
   beforeAll(async () => {
-    await modelsUtils.createComponent(compo);
-    await modelsUtils.createContentType(productWithDP);
+    await builder
+      .addComponent(compo)
+      .addContentType(productWithDP)
+      .build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
     rq = await createAuthRequest({ strapi });
@@ -57,9 +60,7 @@ describe('Core API - Basic + draftAndPublish', () => {
 
   afterAll(async () => {
     await strapi.destroy();
-    await modelsUtils.cleanupModel(productWithDP.name);
-    await modelsUtils.deleteComponent(`default.${compo.name}`);
-    await modelsUtils.deleteContentTypes([productWithDP.name]);
+    await builder.cleanup();
   }, 60000);
 
   test('Create a product', async () => {

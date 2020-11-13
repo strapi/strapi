@@ -2,9 +2,10 @@
 
 // Helpers.
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const modelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 
+const builder = createTestBuilder();
 let strapi;
 let rq;
 let uid = 'single-type';
@@ -22,7 +23,7 @@ const model = {
 
 describe('Content Manager single types', () => {
   beforeAll(async () => {
-    await modelsUtils.createContentType(model);
+    await builder.addContentType(model).build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
     rq = await createAuthRequest({ strapi });
@@ -30,8 +31,7 @@ describe('Content Manager single types', () => {
 
   afterAll(async () => {
     await strapi.destroy();
-    await modelsUtils.cleanupModel(model.name);
-    await modelsUtils.deleteContentType(model.name);
+    await builder.cleanup();
   }, 60000);
 
   test('find single type content returns 404 when not created', async () => {

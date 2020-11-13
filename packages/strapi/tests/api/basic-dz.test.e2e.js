@@ -3,13 +3,14 @@
 const _ = require('lodash');
 
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const modelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
-  productsWithDz: [],
+const data = {
+  productWithDz: [],
 };
 
 const compo = {
@@ -49,8 +50,10 @@ const productWithDz = {
 
 describe('Core API - Basic + dz', () => {
   beforeAll(async () => {
-    await modelsUtils.createComponent(compo);
-    await modelsUtils.createContentTypes([productWithDz]);
+    await builder
+      .addComponent(compo)
+      .addContentType(productWithDz)
+      .build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
     rq = await createAuthRequest({ strapi });
@@ -58,9 +61,7 @@ describe('Core API - Basic + dz', () => {
 
   afterAll(async () => {
     await strapi.destroy();
-    await modelsUtils.cleanupModel(productWithDz.name)
-    await modelsUtils.deleteComponent(`default.${compo.name}`);
-    await modelsUtils.deleteContentType(productWithDz.name);
+    await builder.cleanup();
   }, 60000);
 
   test('Create product with compo', async () => {
@@ -84,7 +85,7 @@ describe('Core API - Basic + dz', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
     expect(res.body.published_at).toBeUndefined();
-    data.productsWithDz.push(res.body);
+    data.productWithDz.push(res.body);
   });
 
   test('Read product with compo', async () => {
@@ -96,7 +97,7 @@ describe('Core API - Basic + dz', () => {
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithDz[0]);
+    expect(res.body[0]).toMatchObject(data.productWithDz[0]);
     res.body.forEach(p => expect(p.published_at).toBeUndefined());
   });
 
@@ -114,28 +115,28 @@ describe('Core API - Basic + dz', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/product-with-dzs/${data.productsWithDz[0].id}`,
+      url: `/product-with-dzs/${data.productWithDz[0].id}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithDz[0].id);
+    expect(res.body.id).toEqual(data.productWithDz[0].id);
     expect(res.body.published_at).toBeUndefined();
-    data.productsWithDz[0] = res.body;
+    data.productWithDz[0] = res.body;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/product-with-dzs/${data.productsWithDz[0].id}`,
+      url: `/product-with-dzs/${data.productWithDz[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithDz[0]);
-    expect(res.body.id).toEqual(data.productsWithDz[0].id);
+    expect(res.body).toMatchObject(data.productWithDz[0]);
+    expect(res.body.id).toEqual(data.productWithDz[0].id);
     expect(res.body.published_at).toBeUndefined();
-    data.productsWithDz.shift();
+    data.productWithDz.shift();
   });
 
   describe('validation', () => {

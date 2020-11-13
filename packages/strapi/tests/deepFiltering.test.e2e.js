@@ -3,18 +3,19 @@
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const modelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+const builder = createTestBuilder();
+const data = {
+  card: [],
+  collector: [],
+};
 let rq;
 let strapi;
-let data = {
-  paniniCards: [],
-  collectors: [],
-};
 
-const paniniCard = {
-  name: 'paniniCard',
+const card = {
+  name: 'card',
   kind: 'collectionType',
   attributes: {
     name: {
@@ -33,9 +34,9 @@ const collector = {
     age: {
       type: 'integer',
     },
-    panini_cards: {
+    cards: {
       nature: 'manyWay',
-      target: 'application::panini-card.panini-card',
+      target: 'application::card.card',
       unique: false,
     },
     collector_friends: {
@@ -46,72 +47,56 @@ const collector = {
   },
 };
 
-const paniniCardFixtures = [
-  {
-    name: 'Hugo LLORIS',
-  },
-  {
-    name: 'Samuel UMTITI',
-  },
-  {
-    name: 'Samuel UMTITI',
-  },
-];
-
-async function createFixtures() {
-  for (let paniniCard of paniniCardFixtures) {
-    const res = await rq({
-      method: 'POST',
-      url: '/panini-cards',
-      body: paniniCard,
-    });
-
-    data.paniniCards.push(res.body);
-  }
-
-  const createCollector = async collector => {
-    const res = await rq({
-      method: 'POST',
-      url: '/collectors',
-      body: collector,
-    });
-    data.collectors.push(res.body);
-  };
-
-  await createCollector({
-    name: 'Bernard',
-    age: 25,
-    panini_cards: [data.paniniCards[0].id, data.paniniCards[1].id],
-  });
-  await createCollector({
-    name: 'Isabelle',
-    age: 55,
-    panini_cards: [data.paniniCards[0].id],
-    collector_friends: [data.collectors[0].id],
-  });
-  await createCollector({
-    name: 'Kenza',
-    age: 25,
-    panini_cards: [],
-    collector_friends: [data.collectors[0].id],
-  });
-}
+const fixtures = {
+  card: [
+    {
+      name: 'Hugo LLORIS',
+    },
+    {
+      name: 'Samuel UMTITI',
+    },
+    {
+      name: 'Lucas HERNANDEZ',
+    },
+  ],
+  collector: ({ card }) => [
+    {
+      name: 'Bernard',
+      age: 25,
+      cards: [card[0].id, card[1].id],
+    },
+    self => ({
+      name: 'Isabelle',
+      age: 55,
+      cards: [card[0].id],
+      collector_friends: [self[0].id],
+    }),
+    self => ({
+      name: 'Kenza',
+      age: 25,
+      cards: [],
+      collector_friends: [self[0].id],
+    }),
+  ],
+};
 
 describe('Deep Filtering API', () => {
   beforeAll(async () => {
-    await modelsUtils.createContentTypes([paniniCard, collector]);
+    await builder
+      .addContentTypes([card, collector])
+      .addFixtures(card.name, fixtures.card)
+      .addFixtures(collector.name, fixtures.collector)
+      .build();
 
     strapi = await createStrapiInstance({ ensureSuperAdmin: true });
     rq = await createAuthRequest({ strapi });
 
-    await createFixtures();
+    Object.assign(data, builder.sanitizedFixtures(strapi));
   }, 60000);
 
   afterAll(async () => {
     await strapi.destroy();
-
-    await modelsUtils.cleanupModels([collector.name, paniniCard.name]);
-    await modelsUtils.deleteContentTypes([collector.name, paniniCard.name]);
+    await builder.cleanup();
   }, 60000);
 
   describe('Without search', () => {
@@ -121,14 +106,14 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'panini_cards.name': data.paniniCards[0].name,
+            'cards.name': data.card[0].name,
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body[0]).toMatchObject(data.collectors[0]);
-        expect(res.body[1]).toMatchObject(data.collectors[1]);
+        expect(res.body[0]).toMatchObject(data.collector[0]);
+        expect(res.body[1]).toMatchObject(data.collector[1]);
       });
 
       test('Should return 1 result', async () => {
@@ -136,13 +121,13 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'panini_cards.name': data.paniniCards[1].name,
+            'cards.name': data.card[1].name,
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(1);
-        expect(res.body[0]).toMatchObject(data.collectors[0]);
+        expect(res.body[0]).toMatchObject(data.collector[0]);
       });
     });
 
@@ -152,47 +137,47 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collectors[0].name,
+            'collector_friends.name': data.collector[0].name,
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body).toMatchObject(data.collectors.slice(1, 3));
+        expect(res.body).toMatchObject(data.collector.slice(1, 3));
       });
     });
   });
 
   describe('With search', () => {
     describe('Filter on a manyWay relation', () => {
-      test('panini_cards.name + empty search', async () => {
+      test('cards.name + empty search', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
           qs: {
-            'panini_cards.name': data.paniniCards[0].name,
+            'cards.name': data.card[0].name,
             _q: '',
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body).toMatchObject(data.collectors.slice(0, 2));
+        expect(res.body).toMatchObject(data.collector.slice(0, 2));
       });
 
-      test('panini_cards.name + _q=25', async () => {
+      test('cards.name + _q=25', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
           qs: {
-            'panini_cards.name': data.paniniCards[0].name,
+            'cards.name': data.card[0].name,
             _q: 25,
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(1);
-        expect(res.body).toMatchObject([data.collectors[0]]);
+        expect(res.body).toMatchObject([data.collector[0]]);
       });
     });
 
@@ -202,28 +187,28 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collectors[0].name,
+            'collector_friends.name': data.collector[0].name,
             _q: '',
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body).toMatchObject(data.collectors.slice(1, 3));
+        expect(res.body).toMatchObject(data.collector.slice(1, 3));
       });
       test('collector_friends.name + search isa', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collectors[0].name,
+            'collector_friends.name': data.collector[0].name,
             _q: 'isa',
           },
         });
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(1);
-        expect(res.body).toMatchObject([data.collectors[1]]);
+        expect(res.body).toMatchObject([data.collector[1]]);
       });
     });
   });
