@@ -23,6 +23,7 @@ const loadFile = file => {
   const ext = path.extname(file);
 
   switch (ext) {
+    case '.ts':
     case '.js':
       return loadJsFile(file);
     case '.json':
