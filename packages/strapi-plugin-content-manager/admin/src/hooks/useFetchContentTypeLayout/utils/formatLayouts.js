@@ -106,23 +106,6 @@ const formatListLayoutWithMetas = obj => {
   return formatted;
 };
 
-// const mergeMetasWithSchema = (data, schemas) => {
-//   const findSchema = refUid => schemas.find(obj => obj.uid === refUid);
-//   const merged = Object.assign({}, data);
-//   const contentTypeUid = data.contentType ? data.contentType.uid : data.component.uid;
-//   const contentTypeSchema = findSchema(contentTypeUid);
-
-//   set(merged, ['contentType'], { ...data.contentType, ...contentTypeSchema });
-
-//   Object.keys(data.components).forEach(compoUID => {
-//     const compoSchema = findSchema(compoUID);
-
-//     set(merged, ['components', compoUID], { ...data.components[compoUID], ...compoSchema });
-//   });
-
-//   return merged;
-// };
-
 const formatLayouts = (initialData, models) => {
   const data = mergeMetasWithSchema(cloneDeep(initialData), models, 'contentType');
   const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, models);
