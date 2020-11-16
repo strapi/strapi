@@ -181,6 +181,7 @@
   "components.popUpWarning.message": "Etes-vous sure de vouloir le supprimer ?",
   "components.popUpWarning.title": "Merci de confirmer",
   "form.button.done": "Terminer",
+  "form.button.finish": "Terminer",
   "notification.error": "Une erreur est survenue",
   "notification.error.layout": "Impossible de récupérer le layout de l'admin",
   "notification.form.error.fields": "Le formulaire contient des erreurs",
