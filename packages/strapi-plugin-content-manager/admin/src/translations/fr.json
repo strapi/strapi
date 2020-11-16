@@ -75,7 +75,7 @@
   "containers.SettingPage.attributes.description": "Organisez les attributs du modèle",
   "containers.SettingPage.editSettings.description": "Glissez & déposez les champs pour construire le layout",
   "containers.SettingPage.editSettings.entry.title": "Nom de l'entrée",
-  "containers.SettingPage.editSettings.entry.title.description": "Définissez quelle champ sera affiché",
+  "containers.SettingPage.editSettings.entry.title.description": "Définissez quel champ sera affiché",
   "containers.SettingPage.editSettings.title": "Vue edit (paramètres)",
   "containers.SettingPage.layout": "Layout",
   "containers.SettingPage.listSettings.description": "Configurez les options de ce modèle",
