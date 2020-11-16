@@ -1,30 +1,34 @@
-import { fromJS } from 'immutable';
-import {
-  createLayout,
-  formatLayout,
-  getFieldType,
-  getInputSize,
-  getRowSize,
-  unformatLayout,
-} from '../layout';
+import { createLayout, formatLayout, getInputSize, getRowSize, unformatLayout } from '../layout';
 
-describe('Content Manager | utils | layout', () => {
+describe('Content Manager | containers | EditSettingsView | utils | layout', () => {
   describe('createLayout', () => {
     it('should return an array of object with keys rowId and rowContent', () => {
       const data = [
-        [{ name: 'test', size: 4 }, { name: 'test1', size: 4 }],
+        [
+          { name: 'test', size: 4 },
+          { name: 'test1', size: 4 },
+        ],
         [{ name: 'test2', size: 12 }],
-        [{ name: 'test3', size: 6 }, { name: 'test4', size: 1 }],
+        [
+          { name: 'test3', size: 6 },
+          { name: 'test4', size: 1 },
+        ],
       ];
       const expected = [
         {
           rowId: 0,
-          rowContent: [{ name: 'test', size: 4 }, { name: 'test1', size: 4 }],
+          rowContent: [
+            { name: 'test', size: 4 },
+            { name: 'test1', size: 4 },
+          ],
         },
         { rowId: 1, rowContent: [{ name: 'test2', size: 12 }] },
         {
           rowId: 2,
-          rowContent: [{ name: 'test3', size: 6 }, { name: 'test4', size: 1 }],
+          rowContent: [
+            { name: 'test3', size: 6 },
+            { name: 'test4', size: 1 },
+          ],
         },
       ];
 
@@ -37,12 +41,18 @@ describe('Content Manager | utils | layout', () => {
       const data = [
         {
           rowId: 0,
-          rowContent: [{ name: 'test', size: 4 }, { name: 'test1', size: 4 }],
+          rowContent: [
+            { name: 'test', size: 4 },
+            { name: 'test1', size: 4 },
+          ],
         },
         { rowId: 1, rowContent: [{ name: 'test2', size: 12 }] },
         {
           rowId: 2,
-          rowContent: [{ name: 'test3', size: 6 }, { name: 'test4', size: 1 }],
+          rowContent: [
+            { name: 'test3', size: 6 },
+            { name: 'test4', size: 1 },
+          ],
         },
       ];
       const expected = [
@@ -89,46 +99,14 @@ describe('Content Manager | utils | layout', () => {
         },
         {
           rowId: 3,
-          rowContent: [{ name: 'test5', size: 6 }, { name: 'test6', size: 6 }],
+          rowContent: [
+            { name: 'test5', size: 6 },
+            { name: 'test6', size: 6 },
+          ],
         },
       ];
 
       expect(formatLayout(expected)).toEqual(expected);
-    });
-  });
-
-  describe('getFieldType', () => {
-    it('Should return the type of a field', () => {
-      const state = fromJS({
-        mData: {},
-        modifiedData: {
-          schema: {
-            uid: 'test',
-            attributes: {
-              bool: { type: 'boolean' },
-              ingredients: {
-                type: 'component',
-                component: 'ingredients',
-                repeatable: true,
-                min: 1,
-                max: 10,
-              },
-              linkedTags: {
-                attribute: 'tag',
-                collection: 'tag',
-                column: 'id',
-                isVirtual: true,
-                relationType: 'manyWay',
-                targetModel: 'tag',
-                type: 'relation',
-              },
-              updated_at: { type: 'timestampUpdate' },
-            },
-          },
-        },
-      });
-
-      expect(getFieldType(state, 'linkedTags')).toBe('relation');
     });
   });
 
@@ -200,7 +178,10 @@ describe('Content Manager | utils | layout', () => {
         },
       ];
       const expected = [
-        [{ name: 'name', size: 6 }, { name: 'test', size: 4 }],
+        [
+          { name: 'name', size: 6 },
+          { name: 'test', size: 4 },
+        ],
         [{ name: 'name1', size: 4 }],
       ];
 

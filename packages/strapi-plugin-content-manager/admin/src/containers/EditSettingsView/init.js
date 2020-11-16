@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import { cloneDeep, set } from 'lodash';
-import { createLayout, formatLayout } from '../../utils/layout';
+import { createLayout, formatLayout } from './utils/layout';
 
 const init = (initialState, mainLayout, components) => {
   const initialData = cloneDeep(mainLayout);

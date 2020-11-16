@@ -123,7 +123,6 @@ const EditView = ({ isSingleType, layout, slug }) => {
             onPut={onPut}
             onUnpublish={onUnpublish}
             readActionAllowedFields={readActionAllowedFields}
-            // TODO check if needed
             redirectToPreviousPage={goBack}
             slug={slug}
             status={status}

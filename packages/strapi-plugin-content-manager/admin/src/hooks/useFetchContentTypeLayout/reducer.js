@@ -36,7 +36,6 @@ const reducer = (state, action) =>
         break;
       }
       case 'UPDATE_LAYOUT': {
-        // TODO
         const oldLayout = state.layout;
 
         draftState.layout = {

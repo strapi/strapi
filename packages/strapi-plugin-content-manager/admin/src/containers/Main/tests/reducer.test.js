@@ -7,7 +7,6 @@ describe('Content Manager | Main | reducer', () => {
 
   beforeEach(() => {
     state = {
-      // componentsAndModelsMainPossibleMainFields: {},
       components: [],
       isLoading: true,
       models: [],

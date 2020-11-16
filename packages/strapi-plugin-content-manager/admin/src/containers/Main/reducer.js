@@ -12,7 +12,6 @@ const initialState = {
   models: [],
 };
 
-// TODO use crudReducer
 const mainReducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {

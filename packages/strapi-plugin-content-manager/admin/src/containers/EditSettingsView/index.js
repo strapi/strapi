@@ -14,12 +14,12 @@ import LayoutTitle from '../../components/LayoutTitle';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
-import { unformatLayout } from '../../utils/layout';
 import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
 import LayoutDndProvider from '../LayoutDndProvider';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from './utils';
+import { unformatLayout } from './utils/layout';
 
 const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, updateLayout }) => {
   const { push } = useHistory();
@@ -317,8 +317,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
                   slug,
                   push,
                   {
-                    // TODO
-                    componentSlug: 'TODO',
+                    componentSlug: slug,
                     type: isContentTypeView ? 'content-types' : 'components',
                     modifiedData,
                   }

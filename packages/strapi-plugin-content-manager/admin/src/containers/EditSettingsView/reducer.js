@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import { formatLayout, getInputSize } from '../../utils/layout';
+import { formatLayout, getInputSize } from './utils/layout';
 
 const initialState = fromJS({
   fieldForm: {},
