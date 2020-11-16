@@ -153,19 +153,23 @@ const EditForm = forwardRef(
         try {
           const canvas = cropper.current.getCroppedCanvas();
 
-          canvas.toBlob(async blob => {
-            const {
-              file: { lastModifiedDate, lastModified, name },
-            } = fileToEdit;
+          canvas.toBlob(
+            async blob => {
+              const {
+                file: { lastModifiedDate, lastModified, name },
+              } = fileToEdit;
 
-            resolve(
-              new File([blob], name, {
-                type: mimeType,
-                lastModified,
-                lastModifiedDate,
-              })
-            );
-          });
+              resolve(
+                new File([blob], name, {
+                  type: mimeType,
+                  lastModified,
+                  lastModifiedDate,
+                })
+              );
+            },
+            mimeType,
+            1
+          );
         } catch (err) {
           reject();
         }
@@ -189,7 +193,10 @@ const EditForm = forwardRef(
     };
 
     const handleCopy = () => {
-      strapi.notification.info('notification.link-copied');
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: 'notification.link-copied' },
+      });
     };
 
     const handleClickDownload = () => {

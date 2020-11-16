@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-cloudinary",
-  "version": "3.1.5",
+  "version": "3.3.2",
   "description": "Cloudinary provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -13,8 +13,11 @@
   },
   "main": "./lib",
   "dependencies": {
-    "cloudinary": "^1.14.0",
+    "cloudinary": "^1.23.0",
     "into-stream": "^5.1.0"
+  },
+  "peerDependencies": {
+    "strapi-plugin-upload": "^3.1.6"
   },
   "strapi": {
     "isProvider": true
@@ -39,7 +42,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.10.0 <13",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

@@ -211,6 +211,7 @@ const InputUID = ({
             <InputContainer>
               <Input
                 {...inputProps}
+                containsEndAdornment={editable}
                 editable={editable}
                 error={hasError}
                 onFocus={handleFocus}

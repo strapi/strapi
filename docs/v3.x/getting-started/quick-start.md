@@ -40,8 +40,7 @@ npx create-strapi-app my-project --quickstart
 
 Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
-- Complete the form to create the first **Administrator** user.
-- Click **Ready to start**.
+Complete the form to create the first **Administrator** user.
 
 ## 3. Create a Restaurant Content Type
 
@@ -115,7 +114,18 @@ Navigate to [**SETTINGS** - **User's roles**](http://localhost:1337/admin/settin
 - Repeat and find **Category**. Click the checkbox next to **find** and **findone**.
 - Click **Save**.
 
-## 8. Consume the Content Type's API
+## 8. Publish the content
+
+By default, any content you create is saved as a draft. To publish your conent:
+
+Navigate back to [**COLLECTION TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/collectionType/application::category.category)
+
+- Click the **Draft** button on the **Brunch** category.
+- Click **Publish** button.
+- In the **Please confirm** dialog, click **Yes, publish** button.
+- Repeat for the **French food** category and **Biscotte Restaurant**.
+
+## 9. Consume the Content Type's API
 
 Here we are! The list of **restaurants** is accessible at [`http://localhost:1337/restaurants`](http://localhost:1337/restaurants).
 
@@ -125,7 +135,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 - Consume your API with your favorite frameworks, frontend or backend programming languages just below.
 - Learn how to use Strapi with React ([Gatsby](https://strapi.io/blog/build-a-static-blog-with-gatsby-and-strapi) or [Next.js](https://strapi.io/blog/nextjs-react-hooks-strapi-food-app-1)) or Vue.js ([Nuxt.js](https://strapi.io/blog/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
-- Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
+- Get help on [our community forum](https://forum.strapi.io).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
 - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.

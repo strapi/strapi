@@ -3,7 +3,7 @@
     {
       "method": "GET",
       "path": "/plugins",
-      "handler": "Admin.plugins",
+      "handler": "admin.plugins",
       "config": {
         "policies": [
           "admin::isAuthenticatedAdmin",
@@ -14,25 +14,39 @@
     {
       "method": "GET",
       "path": "/init",
-      "handler": "Admin.init"
+      "handler": "admin.init"
+    },
+    {
+      "method": "GET",
+      "path": "/information",
+      "handler": "admin.information",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin"
+        ]
+      }
     },
     {
       "method": "POST",
       "path": "/plugins/install",
-      "handler": "Admin.installPlugin",
-      "policies": [
-        "admin::isAuthenticatedAdmin",
-        ["admin::hasPermissions", ["admin::marketplace.plugins.install"]]
-      ]
+      "handler": "admin.installPlugin",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::marketplace.plugins.install"]]
+        ]
+      }
     },
     {
       "method": "DELETE",
       "path": "/plugins/uninstall/:plugin",
-      "handler": "Admin.uninstallPlugin",
-      "policies": [
-        "admin::isAuthenticatedAdmin",
-        ["admin::hasPermissions", ["admin::marketplace.plugins.uninstall"]]
-      ]
+      "handler": "admin.uninstallPlugin",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::marketplace.plugins.uninstall"]]
+        ]
+      }
     },
     {
       "method": "POST",

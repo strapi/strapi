@@ -46,6 +46,8 @@
   "PopUpForm.Providers.secret.label": "클라이언트 시크릿(Client Secret)",
   "PopUpForm.Providers.secret.placeholder": "텍스트",
   "PopUpForm.header.edit.email-templates": "이메일 템플릿 수정",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "설정을 업데이트했습니다.",
   "plugin.description.long": "JWT 기반의 인증 프로세스로 API를 보호하세요. 이 플러그인에서 사용자 그룹간 권한을 관리할 수 있는 ACL 전략도 설정할 수 있습니다.",
   "plugin.description.short": "JWT 기반의 인증 프로세스로 API를 보호하세요.",

@@ -4,6 +4,8 @@ import de from './de.json';
 import en from './en.json';
 import es from './es.json';
 import fr from './fr.json';
+import he from './he.json';
+import id from './id.json';
 import it from './it.json';
 import ja from './ja.json';
 import ko from './ko.json';
@@ -13,6 +15,7 @@ import pl from './pl.json';
 import ptBR from './pt-BR.json';
 import pt from './pt.json';
 import ru from './ru.json';
+import th from './th.json';
 import tr from './tr.json';
 import vi from './vi.json';
 import zhHans from './zh-Hans.json';
@@ -27,6 +30,8 @@ const trads = {
   en,
   es,
   fr,
+  he,
+  id,
   it,
   ja,
   ko,
@@ -37,6 +42,7 @@ const trads = {
   pt,
   ru,
   sk,
+  th,
   tr,
   uk,
   vi,
@@ -51,6 +57,8 @@ export const languageNativeNames = {
   en: 'English',
   es: 'Español',
   fr: 'Français',
+  he: 'עברית',
+  id: 'Indonesian',
   it: 'Italiano',
   ja: '日本語',
   ko: '한국어',
@@ -61,6 +69,7 @@ export const languageNativeNames = {
   pt: 'Português (Portugal)',
   ru: 'Русский',
   sk: 'Slovenčina',
+  th: 'ไทย',
   tr: 'Türkçe',
   uk: 'Українська',
   vi: 'Tiếng Việt',

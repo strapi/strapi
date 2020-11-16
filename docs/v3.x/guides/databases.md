@@ -41,6 +41,13 @@ This will create a new project and launch it in the browser.
 The [Quick Start Guide](../getting-started/quick-start.md) is a complete step-by-step tutorial
 :::
 
+## Other SQL Databases (PostgreSQL, MySQL)
+Refer to the [configuration section](../concepts/configurations.md#database) for all supported options to setup Strapi with your SQL database.
+
+::: tip
+Most cloud service providers offer a managed SQL database service, which is a hassle-free way to get your database up and running. To get up and running locally, you might want to try using a Docker container.
+:::
+
 ## MongoDB Installation
 
 ### Install MongoDB locally

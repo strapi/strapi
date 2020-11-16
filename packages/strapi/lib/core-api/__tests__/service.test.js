@@ -62,7 +62,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined },
+          { populate: undefined, params: { _publicationState: 'live' } },
           {
             model: 'testModel',
           }
@@ -95,7 +95,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined },
+          { populate: undefined, params: { _publicationState: 'live' } },
           {
             model: 'testModel',
           }
@@ -130,7 +130,7 @@ describe('Default Service', () => {
         await service.delete();
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined },
+          { populate: undefined, params: { _publicationState: 'live' } },
           {
             model: 'testModel',
           }

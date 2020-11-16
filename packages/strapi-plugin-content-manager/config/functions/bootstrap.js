@@ -1,6 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
+const {
+  contentTypes: { hasDraftAndPublish },
+} = require('strapi-utils');
 const storeUtils = require('../../services/utils/store');
 const {
   createDefaultConfiguration,
@@ -79,7 +82,7 @@ const syncComponentsSchemas = async () => {
   const componentsToAdd = _.difference(realUIDs, DBUIDs);
   const componentsToDelete = _.difference(DBUIDs, realUIDs);
 
-  // delette old schemas
+  // delete old schemas
   await Promise.all(componentsToDelete.map(uid => componentService.deleteConfiguration(uid)));
 
   // create new schemas
@@ -93,6 +96,8 @@ const registerPermissions = () => {
   const contentTypesUids = strapi.plugins[
     'content-manager'
   ].services.contenttypes.getDisplayedContentTypesUids();
+
+  const hasDraftAndPublishFilter = _.flow(uid => strapi.contentTypes[uid], hasDraftAndPublish);
 
   const actions = [
     {
@@ -122,6 +127,19 @@ const registerPermissions = () => {
       uid: 'explorer.delete',
       pluginName: 'content-manager',
       subjects: contentTypesUids,
+      options: {
+        fieldsRestriction: false,
+      },
+    },
+    {
+      section: 'contentTypes',
+      displayName: 'Publish',
+      uid: 'explorer.publish',
+      pluginName: 'content-manager',
+      subjects: contentTypesUids.filter(hasDraftAndPublishFilter),
+      options: {
+        fieldsRestriction: false,
+      },
     },
     {
       section: 'plugins',

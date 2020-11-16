@@ -7,6 +7,7 @@ describe('ADMIN | COMPONENTS | ROLE | init', () => {
       contentTypesPermissions: {},
       pluginsAndSettingsPermissions: [],
       permissionsLayout: {},
+      initialData: {},
       isSuperAdmin: false,
     };
 
@@ -38,6 +39,11 @@ describe('ADMIN | COMPONENTS | ROLE | init', () => {
         },
       },
       isSuperAdmin: true,
+      initialData: {
+        contentTypesPermissions: {
+          firstPermission: true,
+        },
+      },
     };
 
     expect(init(initialState, permissionsLayout, permissions, role)).toEqual(expected);

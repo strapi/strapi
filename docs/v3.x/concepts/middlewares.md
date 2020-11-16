@@ -182,11 +182,16 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
   - `enabled` (boolean): Enable or not GZIP response compression.
+  - `options` (Object): Allow passing of options from [koa-compress](https://github.com/koajs/compress#options).
 - `responseTime`
   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
 - `poweredBy`
   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
+
+::: tip
+`gzip` compression via `koa-compress` uses [Brotli](https://en.wikipedia.org/wiki/Brotli) by default, but is not configured with sensible defaults for most cases. If you experience slow response times with `gzip` enabled, consider disabling Brotli by passing `{br: false}` as an option. You may also pass more sensible params with `{br: { params: { // YOUR PARAMS HERE } }}`
+:::
 
 ### Security middlewares
 

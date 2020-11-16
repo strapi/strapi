@@ -112,6 +112,7 @@ describe('ADMIN | LeftMenu | init', () => {
             title: 'Settings.webhooks.title',
             to: '/settings/webhooks',
             name: 'webhooks',
+
             permissions: [
               { action: 'admin::webhook.create', subject: null },
               { action: 'admin::webhook.read', subject: null },
@@ -223,6 +224,7 @@ describe('ADMIN | LeftMenu | init', () => {
           label: 'app.components.LeftMenuLinkContainer.settings',
           isDisplayed: false,
           destination: SETTINGS_BASE_URL,
+          notificationsCount: 0,
           permissions: [
             // webhooks
             { action: 'admin::webhook.create', subject: null },

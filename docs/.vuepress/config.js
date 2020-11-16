@@ -53,7 +53,7 @@ module.exports = {
       'meta',
       {
         property: 'og:image',
-        content: 'https://strapi.io/documentation/meta.png',
+        content: 'https://strapi.io/documentation/assets/meta.png',
       },
     ],
     [
@@ -108,7 +108,7 @@ module.exports = {
     ],
   ],
   themeConfig: {
-    logo: '/logo.png',
+    logo: '/assets/logo.png',
     nav: [
       {
         text: 'Versions',
@@ -126,6 +126,10 @@ module.exports = {
       {
         text: 'Website',
         link: 'https://strapi.io',
+      },
+      {
+        text: 'Forum',
+        link: 'https://forum.strapi.io',
       },
       {
         text: 'Slack',
@@ -182,6 +186,7 @@ module.exports = {
             '/v3.x/concepts/configurations',
             '/v3.x/concepts/controllers',
             '/v3.x/concepts/customization',
+            '/v3.x/concepts/draft-and-publish',
             '/v3.x/concepts/file-structure',
             '/v3.x/concepts/hooks',
             '/v3.x/concepts/middlewares',
@@ -193,6 +198,7 @@ module.exports = {
             '/v3.x/concepts/requests-responses',
             '/v3.x/concepts/routing',
             '/v3.x/concepts/services',
+            '/v3.x/concepts/templates',
             '/v3.x/concepts/webhooks',
           ],
         },

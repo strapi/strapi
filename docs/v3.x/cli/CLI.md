@@ -32,7 +32,9 @@ options: [--no-run|--use-npm|--debug|--quickstart|--dbclient=<dbclient> --dbhost
   - **&#60;dbssl&#62;** and **&#60;dbauth&#62;** are available only for `mongo` and are optional.
   - **--dbforce** Allows you to overwrite content if the provided database is not empty. Only available for `postgres`, `mysql`, and is optional.
 
-## strapi develop|dev
+## strapi develop
+
+**Alias**: `dev`
 
 Start a Strapi application with autoReload enabled.
 
@@ -40,7 +42,7 @@ Strapi modifies/creates files at runtime and needs to restart when new files are
 
 ```
 strapi develop
-options: [--no-build |--watch-admin ]
+options: [--no-build |--watch-admin |--browser ]
 ```
 
 - **strapi develop**<br/>
@@ -49,6 +51,8 @@ options: [--no-build |--watch-admin ]
   Starts your application with the autoReload enabled and skip the administration panel build process
 - **strapi develop --watch-admin**<br/>
   Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
+- **strapi develop --watch-admin --browser 'google chrome'**<br/>
+  Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel. Provide a browser name to use instead of the default one, `false` means stop opening the browser.
 
 ::: tip
 You should never use this command to run a Strapi application in production.
@@ -87,7 +91,9 @@ options: [--no-optimization]
 - **strapi build --no-optimization**<br/>
   Builds the administration panel without minimizing the assets. The build duration is faster.
 
-## strapi configuration:dump|config:dump
+## strapi configuration:dump
+
+**Alias**: `config:dump`
 
 Dumps configurations to a file or stdout to help you migrate to production.
 
@@ -118,7 +124,9 @@ In case of doubt, you should avoid committing the dump file into a versioning sy
 
 :::
 
-## strapi configuration:restore|config:restore
+## strapi configuration:restore
+
+**Alias**: `config:restore`
 
 Restores a configuration dump into your application.
 
@@ -149,6 +157,27 @@ When running the restore command, you can choose from three different strategies
 - **merge**: Will create missing keys and merge existing keys with their new value.
 - **keep**: Will create missing keys and keep existing keys as is.
 
+## strapi admin:reset-user-password
+
+**Alias** `admin:reset-password`
+
+Reset an admin user's password.
+You can pass the email and new password as options or set them interactivly if you call the command without passing the options.
+
+**Example**
+
+```bash
+strapi admin:reset-user-password --email=chef@strapi.io --password=Gourmet1234
+```
+
+**Options**
+
+| Option         | Type   | Description               |
+| -------------- | ------ | ------------------------- |
+| -e, --email    | string | The user email            |
+| -p, --password | string | New password for the user |
+| -h, --help     |        | display help for command  |
+
 ## strapi generate:api
 
 Scaffold a complete API with its configurations, controller, model and service.
@@ -161,6 +190,9 @@ options: [--plugin <name>]
 
 - **strapi generate:api &#60;name&#62;**<br/>
   Generates an API called **&#60;name&#62;** in the `./api` folder at the root of your project.
+
+- **strapi generate:api --draft-and-publish=true**<br/>
+  Generates an API called **&#60;name&#62;** in the `./api` folder at the root of your project and enabled the draft/publish feature.
 
 - **strapi generate:api &#60;name&#62; &#60;attribute:type&#62;**<br/>
   Generates an API called **&#60;name&#62;** in the `./api` folder at the root of your project. The model will already contain an attribute called **&#60;attribute&#62;** with the type property set to **&#60;type&#62;**.
@@ -210,7 +242,7 @@ Create a new model.
 ```bash
 strapi generate:model <name> [<attribute:type>]
 
-options: [--api <name>|--plugin <name>]
+options: [--api <name>|--plugin <name>|--draft-and-publish <boolean>]
 ```
 
 - **strapi generate:model &#60;name&#62;**<br/>
@@ -234,6 +266,9 @@ options: [--api <name>|--plugin <name>]
 
 * **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
+
+* **strapi generate:model &#60;name&#62; --draft-and-publish=true**<br/>
+  Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder with the draft/publish feature enabled
 
 ::: tip
 The first letter of the filename will be uppercase.

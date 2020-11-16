@@ -15,6 +15,7 @@ const loadConfigFiles = (dir, pattern = 'config/**/*.+(js|json)') =>
     globArgs: {
       // used to load .init.json at first startup
       dot: true,
+      ignore: ['config/**/*.test.js'],
     },
   });
 

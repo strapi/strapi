@@ -26,7 +26,10 @@ const CheckPagePermissions = ({ permissions, children }) => {
         if (isMounted.current) {
           console.error(err);
 
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
 
           setState({ isLoading: false });
         }
