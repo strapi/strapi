@@ -1,6 +1,8 @@
 import { get } from 'lodash';
 import getExistingActions from './getExistingActions';
 
+import { staticAttributeActions } from '../components/Roles/Permissions/utils';
+
 const formatPermissionsToApi = permissions => {
   const existingActions = getExistingActions(permissions.contentTypesPermissions);
 
@@ -47,7 +49,13 @@ const formatPermissionsToApi = permissions => {
     []
   );
 
-  return [...formattedPermissions, ...(permissions.pluginsAndSettingsPermissions || [])];
+  const contentTypesPermissionsToSend = formattedPermissions.filter(
+    permission =>
+      (staticAttributeActions.includes(permission.action) && permission.fields !== null) ||
+      !staticAttributeActions.includes(permission.action)
+  );
+
+  return [...contentTypesPermissionsToSend, ...(permissions.pluginsAndSettingsPermissions || [])];
 };
 
 export default formatPermissionsToApi;
