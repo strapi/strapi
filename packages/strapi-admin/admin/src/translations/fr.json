@@ -165,6 +165,7 @@
   "app.utils.filters": "Filtres",
   "app.utils.placeholder.defaultMessage": " ",
   "app.utils.publish": "Publier",
+  "app.utils.select-all": "Tout sélectionner",
   "app.utils.unpublish": "Annuler la publication",
   "components.AutoReloadBlocker.description": "Démarrez Strapi avec l'une des commandes suivantes:",
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
