@@ -31,6 +31,7 @@ Please note that it may take anywhere from 30 seconds to a few minutes for the d
 
 ::: warning
 After the droplet has started, it will take a few more minutes to finish the Strapi installation.
+You *must* create an initial administrator as soon as possible, otherwise anyone who knows the IP of your machine can set themselves up as the initial admin. 
 :::
 
 From here you will see the public ipv4 address that you can use to visit your Strapi application, just open that in a browser and it should ask you to create your first administrator!
