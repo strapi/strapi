@@ -188,7 +188,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
+        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
@@ -199,7 +199,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [displayErrors, replace, slug]
+    [cleanReceivedData, displayErrors, replace, slug]
   );
 
   const onPublish = useCallback(async () => {

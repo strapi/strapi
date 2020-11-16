@@ -118,7 +118,7 @@ function ListView({
   const [idToDelete, setIdToDelete] = useState(null);
   const contentType = layout.contentType;
   const hasDraftAndPublish = contentType.options.draftAndPublish;
-  const allAllowedHeaders = getAllAllowedHeaders(attributes);
+  const allAllowedHeaders = useMemo(() => getAllAllowedHeaders(attributes), [attributes]);
 
   const filters = useMemo(() => {
     return formatFiltersFromQuery(query);

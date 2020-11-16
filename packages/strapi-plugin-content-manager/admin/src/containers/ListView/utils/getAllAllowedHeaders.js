@@ -1,4 +1,3 @@
-import { sortBy } from 'lodash';
 import { checkIfAttributeIsDisplayable } from '../../../utils';
 
 const getAllAllowedHeaders = attributes => {
@@ -12,7 +11,7 @@ const getAllAllowedHeaders = attributes => {
     return acc;
   }, []);
 
-  return sortBy(allowedAttributes, ['name']);
+  return allowedAttributes.sort();
 };
 
 export default getAllAllowedHeaders;
