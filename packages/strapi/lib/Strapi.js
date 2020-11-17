@@ -155,12 +155,12 @@ class Strapi {
     console.log();
   }
 
-  destroyServer (cb, connections = {}) {
-      this.server.close(cb);
+  destroyServer (cb) {
+    if (typeof this.server.destroy === 'function') {
+      return this.server.destroy();
+    }
 
-      for (let key in connections) {
-        connections[key].destroy();
-      }
+    this.server.close(cb);
   }
 
   initServer() {
@@ -186,7 +186,13 @@ class Strapi {
       });
     });
 
-    this.server.destroy = cb => this.destroyServer(cb, connections);
+    this.server.destroy = cb => {
+      this.server.close(cb);
+
+      for (let key in connections) {
+        connections[key].destroy();
+      }
+    };
   }
 
   async start(cb) {
