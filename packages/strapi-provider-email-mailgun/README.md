@@ -46,6 +46,7 @@ module.exports = ({ env }) => ({
     providerOptions: {
       apiKey: env('MAILGUN_API_KEY'),
       domain: env('MAILGUN_DOMAIN'), //Required if you have an account with multiple domains
+      host: env('MAILGUN_HOST') // If you are using EU servers, you need to specify the host. api.eu.mailgun.net for EU Servers (or api.mailgun.net for US servers)
     },
     settings: {
       defaultFrom: 'myemail@protonmail.com',
