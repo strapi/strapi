@@ -155,6 +155,14 @@ class Strapi {
     console.log();
   }
 
+  destroyServer (cb, connections = {}) {
+      this.server.close(cb);
+
+      for (let key in connections) {
+        connections[key].destroy();
+      }
+  }
+
   initServer() {
     this.server = http.createServer(this.handleRequest.bind(this));
     // handle port in use cleanly
@@ -178,13 +186,7 @@ class Strapi {
       });
     });
 
-    this.server.destroy = cb => {
-      this.server.close(cb);
-
-      for (let key in connections) {
-        connections[key].destroy();
-      }
-    };
+    this.server.destroy = cb => this.destroyServer(cb, connections);
   }
 
   async start(cb) {
