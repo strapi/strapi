@@ -37,7 +37,7 @@
     "@fortawesome/react-fontawesome": "^0.1.7",
     "autoprefixer": "^9.8.6",
     "axios": "^0.20.0",
-    "babel-loader": "^8.1.0",
+    "babel-loader": "^8.2.1",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.5.3",
     "chalk": "^2.4.2",
