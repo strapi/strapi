@@ -1,30 +1,37 @@
-const findAppliedFilter = str => {
-  let filter = '=';
-  let name = str;
+// List of all the possible filters
+const VALID_REST_OPERATORS = [
+  'eq',
+  'ne',
+  'in',
+  'nin',
+  'contains',
+  'ncontains',
+  'containss',
+  'ncontainss',
+  'lt',
+  'lte',
+  'gt',
+  'gte',
+  'null',
+];
 
-  const filters = [
-    '_ne',
-    '_lt',
-    '_lte',
-    '_gt',
-    '_gte',
-    '_contains',
-    '_containss',
-    '_ncontains',
-    '_in',
-    '_nin',
-  ];
+// from strapi-utims/convert-rest-query-params
+const findAppliedFilter = whereClause => {
+  const separatorIndex = whereClause.lastIndexOf('_');
 
-  filters.forEach(filterName => {
-    const split = str.split(filterName);
+  if (separatorIndex === -1) {
+    return { operator: '=', field: whereClause };
+  }
 
-    if (split[1] === '') {
-      filter = filterName;
-      name = split[0];
-    }
-  });
+  const fieldName = whereClause.substring(0, separatorIndex);
+  const operator = whereClause.slice(separatorIndex + 1);
 
-  return { filter, name };
+  // the field as underscores
+  if (!VALID_REST_OPERATORS.includes(operator)) {
+    return { operator: '=', field: whereClause };
+  }
+
+  return { operator: `_${operator}`, field: fieldName };
 };
 
 const formatFiltersFromQuery = ({ _where }) => {
@@ -34,11 +41,11 @@ const formatFiltersFromQuery = ({ _where }) => {
 
   return _where.map(obj => {
     const [key] = Object.keys(obj);
-    const { filter, name } = findAppliedFilter(key);
+    const { field, operator } = findAppliedFilter(key);
 
     const value = obj[key];
 
-    return { name, filter, value };
+    return { name: field, filter: operator, value };
   });
 };
 

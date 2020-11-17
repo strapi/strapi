@@ -1,12 +1,70 @@
-import formatLayouts, { formatLayoutWithMetas } from '../formatLayouts';
+import formatLayouts, {
+  formatEditRelationsLayoutWithMetas,
+  formatLayoutWithMetas,
+  formatListLayoutWithMetas,
+  generateRelationQueryInfos,
+  generateRelationQueryInfosForComponents,
+  getDisplayedModels,
+} from '../formatLayouts';
 
-describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLayoutWithMetas', () => {
+const addressSchema = {
+  uid: 'application::address.address',
+  attributes: {
+    categories: {
+      targetModel: 'application::category.category',
+    },
+  },
+  layouts: {
+    editRelations: ['categories'],
+  },
+  metadatas: {
+    categories: {
+      edit: {
+        mainField: 'name',
+      },
+    },
+  },
+};
+const simpleModels = [
+  {
+    uid: 'application::category.category',
+    isDisplayed: true,
+  },
+];
+
+describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
+  describe('formatEditRelationsLayoutWithMetas', () => {
+    it('should format editRelations layout correctly', () => {
+      const expectedLayout = [
+        {
+          name: 'categories',
+          size: 6,
+          fieldSchema: {
+            targetModel: 'application::category.category',
+          },
+          metadatas: {
+            mainField: 'name',
+          },
+          queryInfos: {
+            endPoint: '/content-manager/relations/application::address.address/categories',
+            containsKey: 'name_contains',
+            defaultParams: {},
+            shouldDisplayRelationLink: true,
+          },
+        },
+      ];
+
+      expect(formatEditRelationsLayoutWithMetas(addressSchema, simpleModels)).toEqual(
+        expectedLayout
+      );
+    });
+  });
+
   describe('formatLayouts', () => {
     it('should format the content type and components layouts', () => {
       const models = [
         {
           uid: 'compo',
-
           attributes: {
             full_name: {
               type: 'string',
@@ -33,7 +91,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
               type: 'string',
               required: true,
             },
-
             city: {
               type: 'string',
               maxLength: 100,
@@ -53,7 +110,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
         components: {
           compo: {
             uid: 'compo',
-
             layouts: {
               edit: [
                 [
@@ -157,7 +213,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
       expect(result.contentType).toHaveProperty('attributes');
       expect(result.contentType).toHaveProperty('layouts');
       expect(result.contentType).toHaveProperty('metadatas');
-
       expect(result.contentType.layouts.edit).toEqual([
         [
           {
@@ -419,6 +474,78 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils | formatLa
       ];
 
       expect(formatLayoutWithMetas(data)).toEqual(expected);
+    });
+  });
+
+  describe('formatListLayoutWithMetas', () => {
+    it('should format the list layout correctly', () => {
+      const data = {
+        layouts: {
+          list: ['test'],
+        },
+        metadatas: {
+          test: {
+            list: { ok: true },
+          },
+        },
+        attributes: {
+          test: { type: 'string' },
+        },
+      };
+      const expected = [
+        {
+          name: 'test',
+          key: '__test_key__',
+          metadatas: { ok: true },
+          fieldSchema: { type: 'string' },
+        },
+      ];
+
+      expect(formatListLayoutWithMetas(data)).toEqual(expected);
+    });
+  });
+
+  describe('generateRelationQueryInfos', () => {
+    it('should return an object with the correct keys', () => {
+      expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
+        endPoint: '/content-manager/relations/application::address.address/categories',
+        containsKey: 'name_contains',
+        defaultParams: {},
+        shouldDisplayRelationLink: true,
+      });
+    });
+  });
+
+  describe('generateRelationQueryInfosForComponents', () => {
+    it('should return an object with the correct keys', () => {
+      expect(
+        generateRelationQueryInfosForComponents(
+          addressSchema,
+          'categories',
+          'application::address.address',
+          simpleModels
+        )
+      ).toEqual({
+        endPoint: '/content-manager/relations/application::address.address/categories',
+        containsKey: 'name_contains',
+        defaultParams: {
+          _component: 'application::address.address',
+        },
+        shouldDisplayRelationLink: true,
+      });
+    });
+  });
+
+  describe('getDisplayedModels', () => {
+    it('should return an array containing only the displayable models', () => {
+      const models = [
+        { uid: 'test', isDisplayed: false },
+        { uid: 'testtest', isDisplayed: true },
+      ];
+
+      expect(getDisplayedModels([])).toHaveLength(0);
+      expect(getDisplayedModels(models)).toHaveLength(1);
+      expect(getDisplayedModels(models)[0]).toEqual('testtest');
     });
   });
 });

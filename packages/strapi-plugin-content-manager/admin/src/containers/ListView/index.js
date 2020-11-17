@@ -382,7 +382,7 @@ function ListView({
                           <FilterIcon />
                           <FormattedMessage id="app.utils.filters" />
                         </AddFilterCta>
-                        {filters.map(({ filter: filterName, name }, key) => (
+                        {filters.map(({ filter: filterName, name, value }, key) => (
                           <Filter
                             contentType={contentType}
                             filterName={filterName}
@@ -393,6 +393,7 @@ function ListView({
                             toggleFilterPickerState={toggleFilterPickerState}
                             isFilterPickerOpen={isFilterPickerOpen}
                             setQuery={setQuery}
+                            value={value}
                           />
                         ))}
                       </>
