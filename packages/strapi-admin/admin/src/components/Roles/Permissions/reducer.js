@@ -448,7 +448,7 @@ const reducer = (state, action) =>
       }
       case 'ON_GLOBAL_PUBLISH_ACTION_SELECT': {
         const contentTypesWithPublishAction = action.contentTypes
-          .filter(contentType => contentType.schema.options.draftAndPublish === true)
+          .filter(contentType => contentType.options.draftAndPublish === true)
           .map(contentType => contentType.uid);
 
         contentTypesWithPublishAction.forEach(contentTypeUID => {

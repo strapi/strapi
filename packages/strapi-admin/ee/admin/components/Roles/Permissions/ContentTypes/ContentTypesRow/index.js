@@ -210,7 +210,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           <PermissionName disabled={isSuperAdmin}>
             <Checkbox
               onChange={handleAllContentTypeActions}
-              name={contentType.name}
+              name={contentType.info.name}
               disabled={isSuperAdmin}
               someChecked={
                 contentTypeActions.length > 0 &&
@@ -220,7 +220,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
               value={allCurrentActionsSize === allActionsSize}
             />
             <CollapseLabel
-              title={contentType.name}
+              title={contentType.info.name}
               alignItems="center"
               isCollapsable
               onClick={handleToggleAttributes}
@@ -233,7 +233,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                 lineHeight="20px"
                 textTransform="uppercase"
               >
-                {contentType.name}
+                {contentType.info.name}
               </Text>
               <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
             </CollapseLabel>
@@ -246,7 +246,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                   hasConditions={checkConditions(permissionLayout.action)}
                   disabled={isSuperAdmin}
                   value={hasContentTypeAction(permissionLayout.action)}
-                  name={`${contentType.name}-${permissionLayout.action}`}
+                  name={`${contentType.info.name}-${permissionLayout.action}`}
                   onChange={() => handleContentTypeActionSelect(permissionLayout.action)}
                 />
               ) : (
@@ -256,7 +256,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                   disabled={isSuperAdmin}
                   value={hasContentTypeAction(permissionLayout.action)}
                   someChecked={hasSomeAttributeByAction(permissionLayout.action)}
-                  name={`${contentType.name}-${permissionLayout.action}`}
+                  name={`${contentType.info.name}-${permissionLayout.action}`}
                   onChange={() => handleActionSelect(permissionLayout.action)}
                 />
               )
