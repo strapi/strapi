@@ -1,13 +1,13 @@
 'use strict';
 
-const path = require('path');
-const fse = require('fs-extra');
-const fs = require('../fs');
-
 jest.mock('fs-extra', () => ({
   ensureFile: jest.fn(() => Promise.resolve()),
   writeFile: jest.fn(() => Promise.resolve()),
 }));
+
+const path = require('path');
+const fse = require('fs-extra');
+const fs = require('../fs');
 
 describe('Strapi fs utils', () => {
   const strapi = {

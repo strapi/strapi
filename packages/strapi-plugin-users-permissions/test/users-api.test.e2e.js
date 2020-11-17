@@ -2,17 +2,22 @@
 
 // Test a simple default API with no relations
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
 let data = {};
 
 describe('Users API', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
+
+  afterAll(async () => {
+    await strapi.destroy();
+  });
 
   test('Create User', async () => {
     const user = {

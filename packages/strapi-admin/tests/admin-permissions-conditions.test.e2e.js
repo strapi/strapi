@@ -1,23 +1,25 @@
 'use strict';
 
+const { prop } = require('lodash/fp');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const createModelsUtils = require('../../../test/helpers/models');
 const { createRequest, createAuthRequest } = require('../../../test/helpers/request');
+const { createUtils } = require('../../../test/helpers/utils');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 if (edition === 'EE') {
   describe('Admin Permissions - Conditions', () => {
     let strapi;
+    let utils;
+    const builder = createTestBuilder();
     let requests = {
       public: null,
       admin: null,
     };
 
-    let modelsUtils;
-
     const localTestData = {
-      model: {
+      models: {
         article: {
           name: 'article',
           attributes: {
@@ -68,98 +70,63 @@ if (edition === 'EE') {
     const createFixtures = async () => {
       // Login with admin and init admin tools
       requests.admin = await createAuthRequest({ strapi });
-      requests.public = await createRequest({ strapi });
-
-      modelsUtils = createModelsUtils({ rq: requests.admin });
-
-      // Create the Article content-type
-      await modelsUtils.createContentType(localTestData.model.article);
+      requests.public = createRequest({ strapi });
 
       // Create the foobar role
-      const {
-        body: { data: role },
-      } = await requests.admin({
-        method: 'POST',
-        url: '/admin/roles',
-        body: localTestData.role,
-      });
-      localTestData.role = role;
+      const role = await utils.createRole(localTestData.role);
 
       // Assign permissions to the foobar role
-      const {
-        body: { data: permissions },
-      } = await requests.admin({
-        method: 'put',
-        url: `/admin/roles/${localTestData.role.id}/permissions`,
-        body: { permissions: localTestData.permissions },
-      });
-      localTestData.permissions = permissions;
+      const permissions = await utils.assignPermissionsToRole(role.id, localTestData.permissions);
+      Object.assign(role, { permissions });
 
-      // Create users with the created role & create associated auth requests
-      for (let i = 0; i < localTestData.users.length; i++) {
-        const {
-          body: { data: createdUser },
-        } = await requests.admin({
-          method: 'POST',
-          url: '/admin/users',
-          body: {
-            ...localTestData.users[i],
-            roles: [localTestData.role.id],
-          },
-        });
-        localTestData.users[i] = createdUser;
+      // Create users with the new role & create associated auth requests
+      const users = [];
 
-        const { firstname, lastname } = localTestData.users[i];
-        const {
-          body: {
-            data: { user: registeredUser },
-          },
-        } = await requests.public({
-          method: 'POST',
-          url: 'admin/register',
-          body: {
-            registrationToken: localTestData.users[i].registrationToken,
-            userInfo: { firstname, lastname, password: localTestData.userPassword },
-          },
-        });
-        localTestData.users[i] = registeredUser;
-        requests[registeredUser.id] = await createAuthRequest({ strapi, userInfo: createdUser });
+      for (let i = 0; i < localTestData.users.length; ++i) {
+        const userFixture = localTestData.users[i];
+        const userAttributes = {
+          ...userFixture,
+          password: localTestData.userPassword,
+          roles: [role.id],
+        };
+
+        const createdUser = await utils.createUser(userAttributes);
+
+        requests[createdUser.id] = await createAuthRequest({ strapi, userInfo: createdUser });
+
+        users.push(createdUser);
       }
+
+      // Update the local data store
+      Object.assign(localTestData, { role, permissions, users });
     };
 
     const getUserRequest = idx => requests[localTestData.users[idx].id];
-    const getModelName = () => localTestData.model.article.name;
+    const getModelName = () => localTestData.models.article.name;
 
     const deleteFixtures = async () => {
       // Delete users
-      for (const user of localTestData.users) {
-        await requests.admin({
-          method: 'DELETE',
-          url: `/admin/users/${user.id}`,
-        });
-      }
+      const usersId = localTestData.users.map(prop('id'));
+      await utils.deleteUsersById(usersId);
 
       // Delete the foobar role
-      await requests.admin({
-        method: 'DELETE',
-        url: `/admin/roles/${localTestData.role.id}`,
-      });
-
-      // Cleanup and delete content-type
-      const { name: modelName } = localTestData.model.article;
-      await modelsUtils.cleanupContentType(modelName);
-      await modelsUtils.deleteContentType(modelName);
+      await utils.deleteRolesById([localTestData.role.id]);
     };
 
     beforeAll(async () => {
+      await builder.addContentType(localTestData.models.article).build();
+
       strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+      utils = createUtils(strapi);
+
       await createFixtures();
-    });
+    }, 60000);
 
     afterAll(async () => {
       await deleteFixtures();
       await strapi.destroy();
-    });
+      await builder.cleanup();
+    }, 60000);
 
     test('User A can create an entry', async () => {
       const rq = getUserRequest(0);

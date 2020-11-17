@@ -4,20 +4,25 @@ const fs = require('fs');
 const path = require('path');
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
 
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
+
+  afterAll(async () => {
+    await strapi.destroy();
+  });
 
   describe('GET /upload/settings => Get settings for an environment', () => {
     test('Returns the settings', async () => {
-      const res = await rq.get('/upload/settings');
+      const res = await rq({ method: 'GET', url: '/upload/settings' });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
@@ -31,7 +36,9 @@ describe('Upload plugin end to end tests', () => {
 
   describe('PUT /upload/settings/:environment', () => {
     test('Updates an environment config correctly', async () => {
-      const updateRes = await rq.put('/upload/settings', {
+      const updateRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
         body: {
           sizeOptimization: true,
           responsiveDimensions: true,
@@ -46,7 +53,7 @@ describe('Upload plugin end to end tests', () => {
         },
       });
 
-      const getRes = await rq.get('/upload/settings');
+      const getRes = await rq({ method: 'GET', url: '/upload/settings' });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toEqual({
@@ -60,7 +67,9 @@ describe('Upload plugin end to end tests', () => {
 
   describe('POST /upload => Upload a file', () => {
     test('Simple image upload', async () => {
-      const res = await rq.post('/upload', {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
         formData: {
           files: fs.createReadStream(path.join(__dirname, 'rec.jpg')),
         },
@@ -86,15 +95,14 @@ describe('Upload plugin end to end tests', () => {
     });
 
     test('Rejects when no files are provided', async () => {
-      const res = await rq.post('/upload', {
-        formData: {},
-      });
-
+      const res = await rq({ method: 'POST', url: '/upload', formData: {} });
       expect(res.statusCode).toBe(400);
     });
 
     test('Generates a thumbnail on large enough files', async () => {
-      const res = await rq.post('/upload', {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
         formData: {
           files: fs.createReadStream(path.join(__dirname, 'thumbnail_target.png')),
         },

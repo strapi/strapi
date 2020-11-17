@@ -1,12 +1,17 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+const { omit } = require('lodash/fp');
+
+const CREATOR_FIELDS = ['updated_by', 'created_by'];
+
+const builder = createTestBuilder();
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   beds: [],
 };
@@ -51,7 +56,6 @@ const bedModel = {
 
 const bedFixtures = [
   {
-    // will have id=1
     name: 'Sleepy Bed',
     weight: 12.4,
     shortDescription: 'Is a good bed to sleep in.',
@@ -64,7 +68,6 @@ const bedFixtures = [
     fabricThickness: 1.14157,
   },
   {
-    // will have id=2
     name: 'Tired Bed',
     weight: 11.1,
     shortDescription: 'You will never wake up again.',
@@ -77,8 +80,6 @@ const bedFixtures = [
     fabricThickness: 1.0001,
   },
   {
-    // will have id=3
-    // other beds don't contain any 3 in order to find only Zombie Bed when searching 3
     name: 'Zombie Bed',
     weight: null,
     shortDescription: null,
@@ -91,7 +92,6 @@ const bedFixtures = [
     fabricThickness: null,
   },
   {
-    // will have id=4
     name: 'a*b_c%d\\e+f',
     weight: null,
     shortDescription: null,
@@ -104,7 +104,6 @@ const bedFixtures = [
     fabricThickness: null,
   },
   {
-    // will have id=5
     name: 'Tired Bed',
     weight: null,
     shortDescription: null,
@@ -118,40 +117,22 @@ const bedFixtures = [
   },
 ];
 
-async function createFixtures() {
-  for (let bedFixture of bedFixtures) {
-    const res = await rq({
-      method: 'POST',
-      url: '/content-manager/collection-types/application::bed.bed',
-      body: bedFixture,
-    });
-
-    data.beds.push(res.body);
-  }
-}
-
-async function deleteFixtures() {
-  for (let bed of data.beds) {
-    await rq({
-      method: 'DELETE',
-      url: `/content-manager/collection-types/application::bed.bed/${bed.id}`,
-    });
-  }
-}
-
 describe('Search query', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addContentType(bedModel)
+      .addFixtures(bedModel.name, bedFixtures)
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([bedModel]);
-    await createFixtures();
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+
+    data.beds = builder.sanitizedFixturesFor(bedModel.name, strapi);
   }, 60000);
 
   afterAll(async () => {
-    await deleteFixtures();
-    await modelsUtils.deleteContentTypes(['bed']);
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   describe('Without filters', () => {
@@ -193,8 +174,8 @@ describe('Search query', () => {
       });
 
       expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results.length).toBe(5);
-      expect(res.body.results).toEqual(expect.arrayContaining(data.beds));
+      expect(res.body.results.length).toBe(data.beds.length);
+      expect(res.body.results.map(omit(CREATOR_FIELDS))).toEqual(expect.arrayContaining(data.beds));
     });
 
     test('search with special characters', async () => {

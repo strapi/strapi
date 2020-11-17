@@ -1,40 +1,44 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
-let modelsUtils;
+const builder = createTestBuilder();
+let strapi;
 let rq;
 let uid = 'application::uid-model.uid-model';
 
+const model = {
+  kind: 'collectionType',
+  name: 'uid-model',
+  attributes: {
+    title: {
+      type: 'string',
+    },
+    slug: {
+      type: 'uid',
+      targetField: 'title',
+    },
+    otherField: {
+      type: 'integer',
+    },
+  },
+};
+
 describe('Content Manager single types', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder.addContentType(model).build();
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentType({
-      kind: 'collectionType',
-      name: 'uid-model',
-      attributes: {
-        title: {
-          type: 'string',
-        },
-        slug: {
-          type: 'uid',
-          targetField: 'title',
-        },
-        otherField: {
-          type: 'integer',
-        },
-      },
-    });
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteContentType('uid-model'), 60000);
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  }, 60000);
 
   describe('Generate UID', () => {
     test('Throws if input is not provided', async () => {

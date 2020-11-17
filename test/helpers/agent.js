@@ -12,14 +12,16 @@ const createAgent = (strapi, initialState = {}) => {
   const _utils = createUtils(strapi);
 
   const _agent = options => {
-    const { method, url, body, qs: queryString } = options;
+    const { method, url, body, formData, qs: queryString } = options;
     const agent = request.agent(strapi.server);
 
     if (_.has(_state, 'token')) {
       agent.auth(_state.token, { type: 'bearer' });
     }
 
-    const rq = agent[method.toLowerCase()](url);
+    const fullUrl = _.concat(_state.urlPrefix, url).join('');
+
+    const rq = agent[method.toLowerCase()](fullUrl);
 
     if (queryString) {
       rq.query(qs.stringify(queryString));
@@ -29,26 +31,41 @@ const createAgent = (strapi, initialState = {}) => {
       rq.send(body);
     }
 
-    rq.set('Content-Type', 'application/json');
+    if (formData) {
+      const attachFieldToRequest = field => rq.field(field, formData[field]);
+      Object.keys(formData).forEach(attachFieldToRequest);
+    }
+
+    if (_.isNil(formData)) {
+      rq.type('application/json');
+    }
 
     return rq;
   };
 
+  const createShorthandMethod = method => (url, options = {}) => {
+    return _agent({ ...options, url, method });
+  };
+
   Object.assign(_agent, {
-    setState(state) {
+    assignState(state) {
       Object.assign(_state, state);
-      return this;
+      return _agent;
+    },
+
+    setURLPrefix(path) {
+      return this.assignState({ urlPrefix: path });
     },
 
     setToken(token) {
-      return this.setState({ token });
+      return this.assignState({ token });
     },
 
     setLoggedUser(loggedUser) {
-      return this.setState({ loggedUser });
+      return this.assignState({ loggedUser });
     },
 
-    get loggedUser() {
+    getLoggedUser() {
       return _state.loggedUser;
     },
 
@@ -57,7 +74,7 @@ const createAgent = (strapi, initialState = {}) => {
 
       this.setToken(token).setLoggedUser(user);
 
-      return this;
+      return _agent;
     },
 
     async registerOrLogin(userCredentials) {
@@ -65,8 +82,13 @@ const createAgent = (strapi, initialState = {}) => {
 
       this.setToken(token).setLoggedUser(user);
 
-      return this;
+      return _agent;
     },
+
+    get: createShorthandMethod('GET'),
+    post: createShorthandMethod('POST'),
+    put: createShorthandMethod('PUT'),
+    delete: createShorthandMethod('DELETE'),
   });
 
   return _agent;
@@ -75,4 +97,3 @@ const createAgent = (strapi, initialState = {}) => {
 module.exports = {
   createAgent,
 };
-

@@ -1,33 +1,37 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-let modelsUtils;
+const builder = createTestBuilder();
+let strapi;
 let rq;
 let uid = 'application::single-type-model.single-type-model';
 
+const ct = {
+  kind: 'singleType',
+  name: 'single-type-model',
+  attributes: {
+    title: {
+      type: 'string',
+    },
+  },
+};
+
 describe('Content Manager single types', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder.addContentType(ct).build();
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentType({
-      kind: 'singleType',
-      name: 'single-type-model',
-      attributes: {
-        title: {
-          type: 'string',
-        },
-      },
-    });
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteContentType('single-type-model'), 60000);
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  }, 60000);
 
   test('Label is not pluralized', async () => {
     const res = await rq({

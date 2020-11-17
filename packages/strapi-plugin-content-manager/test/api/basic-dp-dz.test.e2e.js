@@ -4,12 +4,13 @@
 
 const _ = require('lodash');
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+const builder = createTestBuilder();
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   productsWithDzAndDP: [],
 };
@@ -52,27 +53,18 @@ const productWithCompoAndDP = {
 
 describe('CM API - Basic + dz + draftAndPublish', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addComponent(compo)
+      .addContentType(productWithCompoAndDP)
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createComponent(compo);
-    await modelsUtils.createContentTypes([productWithCompoAndDP]);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    // clean database
-
-    await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/actions/bulkDelete`,
-      body: {
-        ids: data.productsWithDzAndDP.map(({ id }) => id),
-      },
-    });
-
-    await modelsUtils.deleteContentTypes(['product-with-dz-and-dp']);
-    await modelsUtils.deleteComponent('default.compo');
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   test('Create product with compo', async () => {

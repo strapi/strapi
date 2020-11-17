@@ -2,9 +2,10 @@
 
 // Test a simple default API with no relations
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
 let data = {};
 let internals = {
@@ -40,14 +41,17 @@ const deleteTestUser = () =>
  *****************************/
 describe('Roles API', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
 
     const res = await createTestUser();
     data.user = res.body.user;
   }, 60000);
 
-  afterAll(() => deleteTestUser());
+  afterAll(async () => {
+    await deleteTestUser();
+    await strapi.destroy();
+  });
 
   test('Create Role', async () => {
     const res = await rq({

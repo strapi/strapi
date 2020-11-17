@@ -2,14 +2,14 @@
 
 // Test a simple default API with no relations
 
-const _ = require('lodash');
+const { omit, pick } = require('lodash/fp');
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   products: [],
   shops: [],
@@ -62,80 +62,50 @@ const shops = [
   },
 ];
 
-const products = [
-  {
-    name: 'tomato',
-  },
-  {
-    name: 'apple',
-  },
-];
+const products = ({ withPublished = false }) => ({ shop }) => {
+  const shops = [shop[0].id];
 
-async function createFixtures({ publishAProduct = false } = {}) {
-  data.shops = [];
-  data.products = [];
-  for (const shop of shops) {
-    const res = await rq({
-      method: 'POST',
-      url: 'content-manager/collection-types/application::shop.shop',
-      body: shop,
-    });
-    data.shops.push(res.body);
-  }
+  const entries = [
+    {
+      name: 'tomato',
+      shops,
+      published_at: new Date(),
+    },
+    {
+      name: 'apple',
+      shops,
+      published_at: null,
+    },
+  ];
 
-  for (const product of products) {
-    const res = await rq({
-      method: 'POST',
-      url: 'content-manager/collection-types/application::product.product',
-      body: {
-        ...product,
-        shops: [data.shops[0].id],
-      },
-    });
-    data.products.push(res.body);
+  if (withPublished) {
+    return entries;
   }
 
-  if (publishAProduct) {
-    const res = await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/application::product.product/${data.products[0].id}/actions/publish`,
-    });
-    data.products[0] = res.body;
-  }
-}
-
-async function deleteFixtures() {
-  for (let shop of data.shops) {
-    await rq({
-      method: 'DELETE',
-      url: `/content-manager/collection-types/application::shop.shop/${shop.id}`,
-    });
-  }
-  for (let product of data.products) {
-    await rq({
-      method: 'DELETE',
-      url: `/content-manager/collection-types/application::product.product/${product.id}`,
-    });
-  }
-}
+  return entries.map(omit('published_at'));
+};
 
 describe('Relation-list route', () => {
-  beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
-  }, 60000);
-
   describe('without draftAndPublish', () => {
+    const builder = createTestBuilder();
+
     beforeAll(async () => {
-      await modelsUtils.createContentTypes([productModel, shopModel]);
-      await createFixtures();
+      await builder
+        .addContentTypes([productModel, shopModel])
+        .addFixtures(shopModel.name, shops)
+        .addFixtures(productModel.name, products({ withPublished: false }))
+        .build();
+
+      strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+      rq = await createAuthRequest({ strapi });
+
+      data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
+      data.products = builder.sanitizedFixturesFor(productModel.name, strapi);
     }, 60000);
 
     afterAll(async () => {
-      await deleteFixtures();
-      await modelsUtils.deleteContentTypes(['product', 'shop']);
+      await strapi.destroy();
+      await builder.cleanup();
     }, 60000);
 
     test('Can get relation-list for products of a shop', async () => {
@@ -146,20 +116,31 @@ describe('Relation-list route', () => {
 
       expect(res.body).toHaveLength(data.products.length);
       data.products.forEach((product, index) => {
-        expect(res.body[index]).toStrictEqual(_.pick(product, ['_id', 'id', 'name']));
+        expect(res.body[index]).toStrictEqual(pick(['_id', 'id', 'name'], product));
       });
     });
   });
 
   describe('with draftAndPublish', () => {
+    const builder = createTestBuilder();
+
     beforeAll(async () => {
-      await modelsUtils.createContentTypes([productWithDPModel, shopModel]);
-      await createFixtures({ publishAProduct: true });
+      await builder
+        .addContentTypes([productWithDPModel, shopModel])
+        .addFixtures(shopModel.name, shops)
+        .addFixtures(productWithDPModel.name, products({ withPublished: true }))
+        .build();
+
+      strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+      rq = await createAuthRequest({ strapi });
+
+      data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
+      data.products = builder.sanitizedFixturesFor(productWithDPModel.name, strapi);
     }, 60000);
 
     afterAll(async () => {
-      await deleteFixtures();
-      await modelsUtils.deleteContentTypes(['product', 'shop']);
+      await strapi.destroy();
+      await builder.cleanup();
     }, 60000);
 
     test('Can get relation-list for products of a shop', async () => {
@@ -173,10 +154,10 @@ describe('Relation-list route', () => {
       const tomatoProductRes = res.body.find(p => p.name === 'tomato');
       const appleProductRes = res.body.find(p => p.name === 'apple');
 
-      expect(tomatoProductRes).toMatchObject(_.pick(data.products[0], ['_id', 'id', 'name']));
+      expect(tomatoProductRes).toMatchObject(pick(['_id', 'id', 'name'], data.products[0]));
       expect(tomatoProductRes.published_at).toBeISODate();
       expect(appleProductRes).toStrictEqual({
-        ..._.pick(data.products[1], ['_id', 'id', 'name']),
+        ...pick(['_id', 'id', 'name'], data.products[1]),
         published_at: null,
       });
     });

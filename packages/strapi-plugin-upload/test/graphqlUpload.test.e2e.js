@@ -3,25 +3,27 @@
 const fs = require('fs');
 const path = require('path');
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
 
 const data = {};
 
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
+  afterAll(async () => {
+    await strapi.destroy();
+  });
+
   test('Upload a single file', async () => {
-    const req = rq.post('/graphql');
-    const form = req.form();
-    form.append(
-      'operations',
-      JSON.stringify({
+    const formData = {
+      operations: JSON.stringify({
         query: /* GraphQL */ `
           mutation uploadFiles($file: Upload!) {
             upload(file: $file) {
@@ -35,19 +37,14 @@ describe('Upload plugin end to end tests', () => {
         variables: {
           file: null,
         },
-      })
-    );
+      }),
+      map: JSON.stringify({
+        nFile1: ['variables.file'],
+      }),
+      nFile1: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+    };
 
-    form.append(
-      'map',
-      JSON.stringify({
-        0: ['variables.file'],
-      })
-    );
-
-    form.append('0', fs.createReadStream(path.join(__dirname, 'rec.jpg')));
-
-    const res = await req;
+    const res = await rq({ method: 'POST', url: '/graphql', formData });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -63,11 +60,8 @@ describe('Upload plugin end to end tests', () => {
   });
 
   test('Upload multiple files', async () => {
-    const req = rq.post('/graphql');
-    const form = req.form();
-    form.append(
-      'operations',
-      JSON.stringify({
+    const formData = {
+      operations: JSON.stringify({
         query: /* GraphQL */ `
           mutation uploadFiles($files: [Upload]!) {
             multipleUpload(files: $files) {
@@ -81,21 +75,16 @@ describe('Upload plugin end to end tests', () => {
         variables: {
           files: [null, null],
         },
-      })
-    );
+      }),
+      map: JSON.stringify({
+        nFile0: ['variables.files.0'],
+        nFile1: ['variables.files.1'],
+      }),
+      nFile0: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+      nFile1: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+    };
 
-    form.append(
-      'map',
-      JSON.stringify({
-        0: ['variables.files.0'],
-        1: ['variables.files.1'],
-      })
-    );
-
-    form.append('0', fs.createReadStream(path.join(__dirname, 'rec.jpg')));
-    form.append('1', fs.createReadStream(path.join(__dirname, 'rec.jpg')));
-
-    const res = await req;
+    const res = await rq({ method: 'POST', url: '/graphql', formData });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({

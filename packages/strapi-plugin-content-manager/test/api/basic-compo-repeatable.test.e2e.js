@@ -2,12 +2,13 @@
 
 const _ = require('lodash');
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+const builder = createTestBuilder();
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   productsWithCompo: [],
 };
@@ -50,17 +51,18 @@ const productWithCompo = {
 
 describe('CM API - Basic + compo', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addComponent(compo)
+      .addContentType(productWithCompo)
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createComponent(compo);
-    await modelsUtils.createContentTypes([productWithCompo]);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteContentTypes(['product-with-compo']);
-    await modelsUtils.deleteComponent('default.compo');
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   test('Create product with compo', async () => {

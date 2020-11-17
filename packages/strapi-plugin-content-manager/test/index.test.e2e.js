@@ -1,8 +1,8 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const form = require('../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
@@ -13,8 +13,9 @@ const cleanDate = entry => {
   delete entry.updated_at;
 };
 
+const builder = createTestBuilder();
+let strapi;
 let data;
-let modelsUtils;
 let rq;
 
 const deleteFixtures = async () => {
@@ -39,25 +40,21 @@ const deleteFixtures = async () => {
 
 describe('Content Manager End to End', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addContentTypes(
+        [form.article, form.tag, form.category, form.reference, form.articlewithtag],
+        { batch: true }
+      )
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentTypes([
-      form.article,
-      form.tag,
-      form.category,
-      form.reference,
-      form.articlewithtag,
-    ]);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
-  afterAll(
-    () =>
-      modelsUtils.deleteContentTypes(['article', 'tag', 'category', 'reference', 'articlewithtag']),
-    60000
-  );
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  }, 60000);
 
   describe('Content Types api', () => {
     test('Label is pluralized', async () => {
@@ -850,7 +847,7 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length === 0) return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

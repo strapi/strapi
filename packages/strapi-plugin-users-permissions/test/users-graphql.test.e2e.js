@@ -2,17 +2,18 @@
 
 // Test a simple default API with no relations
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+let strapi;
 let rq;
 let graphqlQuery;
 let data = {};
 
 describe('Test Graphql Users API End to End', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
 
     graphqlQuery = body => {
       return rq({
@@ -22,6 +23,10 @@ describe('Test Graphql Users API End to End', () => {
       });
     };
   }, 60000);
+
+  afterAll(async () => {
+    await strapi.destroy();
+  });
 
   describe('Test register and login', () => {
     const user = {

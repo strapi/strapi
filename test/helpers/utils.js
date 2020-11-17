@@ -5,7 +5,6 @@ const _ = require('lodash');
 
 const createUtils = strapi => {
   const login = async userInfo => {
-
     const sanitizedUserInfo = _.pick(userInfo, ['email', 'id']);
     const user = await strapi.admin.services.user.findOne(sanitizedUserInfo);
     if (!user) {
@@ -14,10 +13,8 @@ const createUtils = strapi => {
     const token = strapi.admin.services.token.createJwtToken(user);
 
     return { token, user };
-
   };
   const registerOrLogin = async userCredentials => {
-
     await createUserIfNotExists(userCredentials);
     return login(userCredentials);
   };
@@ -28,7 +25,8 @@ const createUtils = strapi => {
     const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
 
     if (superAdminRole.usersCount === 0) {
-      Object.assign(userInfo, { roles: _.uniq((userInfo.roles || []).concat(superAdminRole.id)) });
+      const userRoles = _.uniq((userInfo.roles || []).concat(superAdminRole.id));
+      Object.assign(userInfo, { roles: userRoles });
     }
 
     return strapi.admin.services.user.create({
@@ -50,7 +48,7 @@ const createUtils = strapi => {
   const getRole = strapi.admin.services.role.find;
   const deleteRolesById = strapi.admin.services.role.deleteByIds;
   const getSuperAdminRole = strapi.admin.services.role.getSuperAdmin;
-
+  const assignPermissionsToRole = strapi.admin.services.role.assignPermissions;
 
   return {
     // Auth
@@ -68,8 +66,8 @@ const createUtils = strapi => {
     getSuperAdminRole,
     createRole,
     deleteRolesById,
-  }
+    assignPermissionsToRole,
+  };
 };
 
 module.exports = { createUtils };
-

@@ -46,10 +46,11 @@ describe('Admin User CRUD (e2e)', () => {
     superAdminRole: undefined,
   };
 
-  const createUserRole = async () => utils.createRole({
-    name: 'user_test_role',
-    description: 'Only used for user crud test (e2e)',
-  });
+  const createUserRole = async () =>
+    utils.createRole({
+      name: 'user_test_role',
+      description: 'Only used for user crud test (e2e)',
+    });
 
   // Initialization Actions
   beforeAll(async () => {
@@ -63,7 +64,7 @@ describe('Admin User CRUD (e2e)', () => {
       testData.role = await utils.getSuperAdminRole();
     }
 
-    testData.firstSuperAdminUser = await rq.loggedUser;
+    testData.firstSuperAdminUser = rq.getLoggedUser();
     testData.superAdminRole = await utils.getSuperAdminRole();
   }, 60000);
 

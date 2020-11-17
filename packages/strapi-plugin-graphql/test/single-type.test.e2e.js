@@ -1,14 +1,25 @@
 'use strict';
 
 // Helpers.
-const { registerAndLogin } = require('../../../test/helpers/auth');
-const createModelsUtils = require('../../../test/helpers/models');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
+const builder = createTestBuilder();
+let strapi;
 let rq;
 let graphqlQuery;
-let modelsUtils;
 const data = {};
+
+const homePageModel = {
+  name: 'home-page',
+  kind: 'singleType',
+  attributes: {
+    title: {
+      type: 'string',
+    },
+  },
+};
 
 const updateContent = data => {
   return graphqlQuery({
@@ -31,8 +42,10 @@ const updateContent = data => {
 
 describe('Single type Graphql support', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder.addContentType(homePageModel).build();
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
 
     graphqlQuery = body => {
       return rq({
@@ -41,21 +54,12 @@ describe('Single type Graphql support', () => {
         body,
       });
     };
-
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentType({
-      name: 'home-page',
-      kind: 'singleType',
-      attributes: {
-        title: {
-          type: 'string',
-        },
-      },
-    });
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteContentType('home-page'), 60000);
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  }, 60000);
 
   describe('Queries', () => {
     test('No list available', async () => {

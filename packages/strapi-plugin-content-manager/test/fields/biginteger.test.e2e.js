@@ -1,24 +1,33 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
-let modelsUtils;
+const builder = createTestBuilder();
+let strapi;
 let rq;
+
+const ct = {
+  name: 'withbiginteger',
+  attributes: {
+    field: {
+      type: 'biginteger',
+    },
+  },
+};
 
 describe('Test type biginteger', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder.addContentType(ct).build();
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentTypeWithType('withbiginteger', 'biginteger');
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteContentType('withbiginteger');
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   test('Create entry with value input JSON', async () => {

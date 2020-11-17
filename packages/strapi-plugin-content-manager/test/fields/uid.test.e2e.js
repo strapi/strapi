@@ -1,34 +1,35 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
-let modelsUtils;
+let strapi;
 let rq;
 
 describe('Test type UID', () => {
-  beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-
-    modelsUtils = createModelsUtils({ rq });
-  });
-
   describe('No targetField, required=false, not length limits', () => {
-    beforeAll(async () => {
-      await modelsUtils.createContentType({
-        name: 'withuid',
-        attributes: {
-          slug: {
-            type: 'uid',
-          },
+    const model = {
+      name: 'withuid',
+      attributes: {
+        slug: {
+          type: 'uid',
         },
-      });
+      },
+    };
+
+    const builder = createTestBuilder();
+
+    beforeAll(async () => {
+      await builder.addContentType(model).build();
+
+      strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+      rq = await createAuthRequest({ strapi });
     }, 60000);
 
     afterAll(async () => {
-      await modelsUtils.deleteContentType('withuid');
+      await strapi.destroy();
+      await builder.cleanup();
     }, 60000);
 
     test('Creates an entry successfully', async () => {
@@ -83,20 +84,28 @@ describe('Test type UID', () => {
   });
 
   describe('No targetField, required, no length limits', () => {
-    beforeAll(async () => {
-      await modelsUtils.createContentType({
-        name: 'withrequireduid',
-        attributes: {
-          slug: {
-            type: 'uid',
-            required: true,
-          },
+    const model = {
+      name: 'withrequireduid',
+      attributes: {
+        slug: {
+          type: 'uid',
+          required: true,
         },
-      });
+      },
+    };
+
+    const builder = createTestBuilder();
+
+    beforeAll(async () => {
+      await builder.addContentType(model).build();
+
+      strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+      rq = await createAuthRequest({ strapi });
     }, 60000);
 
     afterAll(async () => {
-      await modelsUtils.deleteContentType('withrequireduid');
+      await strapi.destroy();
+      await builder.cleanup();
     }, 60000);
 
     test('Creates an entry successfully', async () => {

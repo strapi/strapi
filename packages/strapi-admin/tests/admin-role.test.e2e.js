@@ -15,7 +15,7 @@ const data = {
   deleteRolesIds: [],
   superAdminRole: undefined,
   authorRole: undefined,
-  aditorRole: undefined,
+  editorRole: undefined,
 };
 
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);

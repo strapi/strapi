@@ -1,11 +1,13 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const createModelsUtils = require('../../../test/helpers/models');
+const modelsUtils = require('../../../test/helpers/models');
 
+const builder = createTestBuilder();
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   dogs: [],
 };
@@ -33,34 +35,29 @@ const dogs = [
   },
 ];
 
+const restart = async () => {
+  await strapi.destroy();
+  strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+  rq = await createAuthRequest({ strapi });
+};
+
 describe('Migration - required attribute', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([dogModel]);
+    await builder
+      .addContentType(dogModel)
+      .addFixtures(dogModel.name, dogs)
+      .build();
 
-    for (const dog of dogs) {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-manager/collection-types/application::dog.dog',
-        body: dog,
-      });
-      data.dogs.push(res.body);
-    }
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+
+    data.dogs = builder.sanitizedFixturesFor(dogModel.name, strapi);
   }, 60000);
 
   afterAll(async () => {
-    await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/application::dog.dog/actions/bulkDelete`,
-      body: {
-        ids: data.dogs.map(({ id }) => id),
-      },
-    });
-
-    await modelsUtils.deleteContentTypes(['dog']);
-  }, 60000);
+    await strapi.destroy();
+    await builder.cleanup();
+  });
 
   describe('Required: false -> true', () => {
     test('Can be null before migration', async () => {
@@ -84,9 +81,11 @@ describe('Migration - required attribute', () => {
       data.dogs[0] = body;
 
       // migration
-      const schema = await modelsUtils.getContentTypeSchema('dog');
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
       schema.attributes.name.required = true;
-      await modelsUtils.modifyContentType(schema);
+
+      await modelsUtils.modifyContentType(schema, { strapi });
+      await restart();
 
       // Try to create an entry with null
       const res = await rq({
@@ -101,9 +100,11 @@ describe('Migration - required attribute', () => {
   describe('Required: true -> false', () => {
     test('Can create an entry with null after migration', async () => {
       // migration
-      const schema = await modelsUtils.getContentTypeSchema('dog');
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
       schema.attributes.name.required = false;
-      await modelsUtils.modifyContentType(schema);
+
+      await modelsUtils.modifyContentType(schema, { strapi });
+      await restart();
 
       // Try to create an entry with null
       const res = await rq({

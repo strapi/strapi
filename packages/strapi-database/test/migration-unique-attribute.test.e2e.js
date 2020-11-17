@@ -1,11 +1,13 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createTestBuilder } = require('../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const createModelsUtils = require('../../../test/helpers/models');
+const modelsUtils = require('../../../test/helpers/models');
 
+const builder = createTestBuilder();
+let strapi;
 let rq;
-let modelsUtils;
 let data = {
   dogs: [],
 };
@@ -33,29 +35,28 @@ const dogs = [
   },
 ];
 
+const restart = async () => {
+  await strapi.destroy();
+  strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+  rq = await createAuthRequest({ strapi });
+};
+
 describe('Migration - unique attribute', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([dogModel]);
-    for (const dog of dogs) {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-manager/collection-types/application::dog.dog',
-        body: dog,
-      });
-      data.dogs.push(res.body);
-    }
+    await builder
+      .addContentType(dogModel)
+      .addFixtures(dogModel.name, dogs)
+      .build();
+
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
+
+    data.dogs = builder.sanitizedFixturesFor(dogModel.name, strapi);
   }, 60000);
 
   afterAll(async () => {
-    await rq({
-      method: 'POST',
-      url: '/content-manager/collection-types/application::dog.dog/actions/bulkDelete',
-      body: { ids: data.dogs.map(dog => dog.id) },
-    });
-    await modelsUtils.deleteContentTypes(['dog']);
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   describe('Unique: false -> true', () => {
@@ -78,9 +79,11 @@ describe('Migration - unique attribute', () => {
       data.dogs[0] = body;
 
       // migration
-      const schema = await modelsUtils.getContentTypeSchema('dog');
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
       schema.attributes.name.unique = true;
-      await modelsUtils.modifyContentType(schema);
+      await modelsUtils.modifyContentType(schema, { strapi });
+
+      await restart();
 
       // Try to create a duplicated entry
       const res = await rq({
@@ -95,9 +98,11 @@ describe('Migration - unique attribute', () => {
   describe('Unique: true -> false', () => {
     test('Can create a duplicated entry after migration', async () => {
       // migration
-      const schema = await modelsUtils.getContentTypeSchema('dog');
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
       schema.attributes.name.unique = false;
-      await modelsUtils.modifyContentType(schema);
+      await modelsUtils.modifyContentType(schema, { strapi });
+
+      await restart();
 
       // Try to create a duplicated entry
       const res = await rq({

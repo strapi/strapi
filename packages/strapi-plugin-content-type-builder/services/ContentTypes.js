@@ -117,7 +117,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
     kind: contentType.kind,
   });
 
-  if (!options.defaultBuilder)  {
+  if (!options.defaultBuilder) {
     await builder.writeFiles();
   }
 
@@ -150,6 +150,7 @@ const generateAPI = ({ name, kind = 'collectionType' }) => {
 
 /**
  * Edits a contentType and handle the nested contentTypes sent with it
+ * @param {String} uid Content-type's uid
  * @param {Object} params params object
  * @param {Object} params.contentType Main contentType to create
  * @param {Array<Object>} params.components List of nested components to created or edit

@@ -1,26 +1,34 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
-let modelsUtils;
+const builder = createTestBuilder();
+let strapi;
 let rq;
+
+const ct = {
+  name: 'withenumeration',
+  attributes: {
+    field: {
+      type: 'enumeration',
+      enum: ['one', 'two'],
+    },
+  },
+};
 
 describe('Test type enumeration', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder.addContentType(ct).build();
 
-    modelsUtils = createModelsUtils({ rq });
-
-    await modelsUtils.createContentTypeWithType('withenumeration', 'enumeration', {
-      enum: ['one', 'two'],
-    });
+    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    rq = await createAuthRequest({ strapi });
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteContentType('withenumeration');
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   test('Create entry value enumeration input JSON', async () => {
