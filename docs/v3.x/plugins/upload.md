@@ -10,15 +10,19 @@ The library we use is [`koa-body`](https://github.com/dlau/koa-body), and itself
 
 You can pass configuration to the middleware directly by setting it in the `parser` middleware configuration:
 
-```json
-{
-  "parser": {
-    "enabled": true,
-    "multipart": true,
-    "formidable": {
-      "maxFileSize": 20000000 // defaults to 200mb
+```js
+module.exports = {
+  //...
+  settings: {
+    parser: {
+      enabled: true,
+      multipart: true,
+      formidable: {
+        maxFileSize: 20000000 // defaults to 200mb
+      }
     }
   }
+  //...
 }
 ```
 
@@ -78,7 +82,7 @@ To upload files into your application.
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', e => {
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();
@@ -139,7 +143,7 @@ Code
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', e => {
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();
@@ -189,7 +193,7 @@ Code
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', e => {
+  formElement.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();
