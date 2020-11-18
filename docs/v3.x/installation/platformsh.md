@@ -35,7 +35,7 @@ Search for the Strapi template using the search bar.
 After few second a Strapi application will be setup with a PostgreSQL database.
 :::
 
-## Step 4: Visit your app
+## Step 3: Visit your app
 
 Now to visit your application.
 
