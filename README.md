@@ -12,18 +12,21 @@
     <img src="https://assets.strapi.io/uploads/deploy_button_platform_sh_d032f646a7.png"  />
   </a>
 
-<a href="https://marketplace.digitalocean.com/apps/strapi">
-<img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
-</a>
+  <a href="https://marketplace.digitalocean.com/apps/strapi">
+    <img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
+  </a>
 
-<a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
-<img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
-</a>
+  <a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
+    <img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
+  </a>
 
-<a href="https://fastandcomfy.io/strapi/">
-<img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
-</a>
-
+  <a href="https://fastandcomfy.io/strapi/">
+    <img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
+  </a>
+  
+  <a href="https://render.com/docs/deploy-strapi">
+    <img src="https://assets.strapi.io/uploads/deploy_render_e076b6f23a.png" height="44" />
+  </a>
 </p>
 
 <p align="center">
