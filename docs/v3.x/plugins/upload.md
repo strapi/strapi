@@ -19,6 +19,7 @@ module.exports = {
       multipart: true,
       formidable: {
         maxFileSize: 20000000 // defaults to 200mb
+      }
     }
   }
   //...
