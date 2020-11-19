@@ -4,6 +4,7 @@ import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';
+import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useListView from '../../hooks/useListView';
 import dateFormats from '../../utils/dateFormats';
@@ -66,7 +67,7 @@ const getDisplayedValue = (type, value, name) => {
   }
 };
 
-function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
+function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }) {
   const { entriesToDelete, onChangeBulk, onClickDelete } = useListView();
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
@@ -80,6 +81,14 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
 
   const links = [
     {
+      icon: canCreate ? <Duplicate fill="black" /> : null,
+      onClick: e => {
+        e.stopPropagation();
+
+        goTo(`create/clone/${row.id}`);
+      },
+    },
+    {
       icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
     },
     {
@@ -90,7 +99,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
         onClickDelete(row.id);
       },
     },
-  ];
+  ].filter(icon => icon);
 
   return (
     <>
@@ -127,11 +136,13 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
 }
 
 Row.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   headers: PropTypes.array.isRequired,
   isBulkable: PropTypes.bool.isRequired,
   row: PropTypes.object.isRequired,
+  goTo: PropTypes.func.isRequired,
 };
 
 export default memo(Row);

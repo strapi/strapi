@@ -139,7 +139,7 @@ const ActionContainer = styled.td`
   svg {
     margin-left: 15px;
     font-size: 1rem;
-    height: 1rem;
+
     color: #333740;
 
     &:first-of-type {

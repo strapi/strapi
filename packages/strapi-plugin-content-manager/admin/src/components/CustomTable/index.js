@@ -13,6 +13,7 @@ import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
 const CustomTable = ({
+  canCreate,
   canUpdate,
   canDelete,
   data,
@@ -24,6 +25,7 @@ const CustomTable = ({
   const { formatMessage } = useIntl();
   const { entriesToDelete, label, filters, _q } = useListView();
   const { emitEvent } = useGlobalContext();
+
   const { pathname } = useLocation();
   const { push } = useHistory();
   const headers = useMemo(() => {
@@ -91,6 +93,7 @@ const CustomTable = ({
             }}
           >
             <Row
+              canCreate={canCreate}
               canDelete={canDelete}
               canUpdate={canUpdate}
               isBulkable={isBulkable && canDelete}
@@ -130,6 +133,7 @@ const CustomTable = ({
 };
 
 CustomTable.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   data: PropTypes.array.isRequired,

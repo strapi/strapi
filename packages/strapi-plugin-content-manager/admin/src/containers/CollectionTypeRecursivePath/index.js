@@ -43,10 +43,11 @@ const CollectionTypeRecursivePath = () => {
   };
 
   const routes = [
-    { path: ':id', Comp: EditView },
-    { path: '', Comp: ListView },
-  ].map(({ path, Comp }) => (
-    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, Comp)} />
+    { path: ':id/clone/:origin', comp: EditView },
+    { path: ':id', comp: EditView },
+    { path: '', comp: ListView },
+  ].map(({ path, comp }) => (
+    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
   ));
 
   return (

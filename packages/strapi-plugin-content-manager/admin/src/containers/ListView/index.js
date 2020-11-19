@@ -416,6 +416,7 @@ function ListView({
                 <div className="col-12">
                   <CustomTable
                     data={data}
+                    canCreate={canCreate}
                     canDelete={canDelete}
                     canUpdate={canUpdate}
                     displayedHeaders={displayedHeaders}
