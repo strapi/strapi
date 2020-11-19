@@ -28,10 +28,31 @@ describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
     });
 
     it('should remove all the default fields', () => {
-      const { components, contentType, modifiedData, expectedNoFieldsModifiedData } = testData;
-      const fields = ['id', 'created_at', 'updated_at'];
+      const { components, modifiedData, expectedNoFieldsModifiedData } = testData;
+      const contentType = {
+        apiID: 'test',
+        schema: {
+          options: {
+            timestamps: ['created_at', 'updated_at'],
+          },
+          attributes: {
+            created_at: { type: 'timestamp' },
+            dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
+            id: { type: 'integer' },
+            name: { type: 'string' },
+            notrepeatable: {
+              type: 'component',
+              repeatable: false,
+              component: 'compos.test-compo',
+            },
+            password: { type: 'password' },
+            repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
+            updated_at: { type: 'timestamp' },
+          },
+        },
+      };
 
-      expect(removeFieldsFromClonedData(modifiedData, contentType, components, fields)).toEqual(
+      expect(removeFieldsFromClonedData(modifiedData, contentType, components)).toEqual(
         expectedNoFieldsModifiedData
       );
     });

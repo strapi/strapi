@@ -1,19 +1,7 @@
 import { get } from 'lodash';
 import { getType, getOtherInfos } from './getAttributeInfos';
 
-const defaultFields = [
-  'created_at',
-  'createdAt',
-  'created_by',
-  'createdBy',
-  'updated_at',
-  'updatedAt',
-  'updated_by',
-  'updatedBy',
-  'published_at',
-  'id',
-  '_id',
-];
+const defaultFields = ['created_by', 'updated_by', 'published_at', 'id', '_id'];
 
 const removeFieldsFromClonedData = (
   data,
@@ -27,8 +15,13 @@ const removeFieldsFromClonedData = (
       const value = get(data, current);
       const component = getOtherInfos(schema.schema, [current, 'component']);
       const isRepeatable = getOtherInfos(schema.schema, [current, 'repeatable']);
+      let timestamps = get(schema.schema, ['options', 'timestamps']);
 
-      if (fields.indexOf(current) !== -1) {
+      if (!Array.isArray(timestamps)) {
+        timestamps = [];
+      }
+
+      if ([...fields, ...timestamps].indexOf(current) !== -1) {
         delete acc[current];
 
         return acc;
