@@ -340,6 +340,21 @@
       }
     },
     {
+      "method": "PUT",
+      "path": "/users/me",
+      "handler": "User.updateMe",
+      "config": {
+        "policies": [],
+        "prefix": "",
+        "description": "Update the logged in user information",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User",
+          "actionType": "update"
+        }
+      }
+    },
+    {
       "method": "GET",
       "path": "/users/:id",
       "handler": "User.findOne",

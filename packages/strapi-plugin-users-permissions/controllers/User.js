@@ -10,6 +10,7 @@ const _ = require('lodash');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
 const { sanitizeEntity } = require('strapi-utils');
+const { validateProfileUpdateInput } = require('./validation/authenticated-user');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
@@ -129,16 +130,12 @@ module.exports = {
    */
   async updateMe(ctx) {
     const input = ctx.request.body;
-    
-    if (input.role) {
-      delete input.role
-    }
 
-    // try {
-    //   await validateProfileUpdateInput(input);
-    // } catch (err) {
-    //   return ctx.badRequest('ValidationError', err);
-    // }
+    try {
+      await validateProfileUpdateInput(input);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
 
     const updatedUser = await strapi.plugins['users-permissions'].services.user.edit(ctx.state.user.id, input);
 
