@@ -10,7 +10,15 @@ import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from '.
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoader }) => {
+const CustomTable = ({
+  canCreate,
+  canUpdate,
+  canDelete,
+  data,
+  headers,
+  isBulkable,
+  showLoader,
+}) => {
   const { emitEvent, entriesToDelete, label, filters, _q } = useListView();
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -55,6 +63,7 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
             }}
           >
             <Row
+              canCreate={canCreate}
               canDelete={canDelete}
               canUpdate={canUpdate}
               isBulkable={isBulkable && canDelete}
@@ -94,6 +103,7 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
 };
 
 CustomTable.defaultProps = {
+  canCreate: false,
   canDelete: false,
   canUpdate: false,
   data: [],
@@ -103,6 +113,7 @@ CustomTable.defaultProps = {
 };
 
 CustomTable.propTypes = {
+  canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
   canUpdate: PropTypes.bool,
   data: PropTypes.array,

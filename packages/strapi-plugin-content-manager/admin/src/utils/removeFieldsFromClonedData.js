@@ -10,6 +10,7 @@ const defaultFields = [
   'updatedAt',
   'updated_by',
   'updatedBy',
+  'published_at',
   'id',
   '_id',
 ];
@@ -64,8 +65,8 @@ const removeFieldsFromClonedData = (
         return acc;
       }
 
-      return Object.keys(data).reduce(acc => acc, data);
-    }, {});
+      return acc;
+    }, Object.assign({}, data));
   };
 
   return recursiveCleanData(data, contentTypeSchema);

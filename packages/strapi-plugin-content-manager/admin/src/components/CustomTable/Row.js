@@ -4,6 +4,7 @@ import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';
+import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useListView from '../../hooks/useListView';
 import dateFormats from '../../utils/dateFormats';
@@ -66,7 +67,7 @@ const getDisplayedValue = (type, value, name) => {
   }
 };
 
-function Row({ canDelete, canUpdate, isBulkable, row, headers, goTo }) {
+function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }) {
   const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
@@ -89,15 +90,15 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers, goTo }) {
 
   const links = [
     {
-      icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
-    },
-    {
-      icon: canUpdate ? <FontAwesomeIcon icon="clone" /> : null,
+      icon: canCreate ? <Duplicate fill="black" /> : null,
       onClick: e => {
         e.stopPropagation();
-        emitEvent('willCloneEntryFromList');
+
         goTo(`create/clone/${row.id}`);
       },
+    },
+    {
+      icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
     },
     {
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
@@ -107,7 +108,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers, goTo }) {
         onClickDelete(row.id);
       },
     },
-  ];
+  ].filter(icon => icon);
 
   return (
     <>
@@ -142,6 +143,7 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers, goTo }) {
 }
 
 Row.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   headers: PropTypes.array.isRequired,

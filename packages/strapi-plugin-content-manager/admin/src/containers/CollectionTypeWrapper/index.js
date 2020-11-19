@@ -41,6 +41,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       if (!origin) {
         return data;
       }
+
       const cleaned = removeFieldsFromClonedData(
         data,
         allLayoutData.contentType,
@@ -55,14 +56,14 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const cleanReceivedData = useCallback(
     data => {
       const cleaned = removePasswordFieldsFromData(
-        cleanClonedData(data),
+        data,
         allLayoutData.contentType,
         allLayoutData.components
       );
 
       return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
-    [allLayoutData, cleanClonedData]
+    [allLayoutData]
   );
 
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
@@ -110,7 +111,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data: cleanReceivedData(data),
+          data: cleanReceivedData(cleanClonedData(data)),
         });
       } catch (err) {
         console.error(err);
@@ -140,7 +141,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     return () => {
       abortController.abort();
     };
-  }, [fetchURL, push, from, cleanReceivedData]);
+  }, [fetchURL, push, from, cleanReceivedData, cleanClonedData]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
