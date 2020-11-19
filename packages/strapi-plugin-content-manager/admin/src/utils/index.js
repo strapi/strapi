@@ -11,3 +11,4 @@ export { default as getTrad } from './getTrad';
 export { default as ItemTypes } from './ItemTypes';
 export { default as removeKeyInObject } from './removeKeyInObject';
 export { default as removePasswordFieldsFromData } from './removePasswordFieldsFromData';
+export { default as removeFieldsFromClonedData } from './removeFieldsFromClonedData';

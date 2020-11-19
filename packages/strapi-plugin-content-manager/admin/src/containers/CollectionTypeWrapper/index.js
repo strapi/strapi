@@ -8,6 +8,7 @@ import {
   formatComponentData,
   getTrad,
   removePasswordFieldsFromData,
+  removeFieldsFromClonedData,
 } from '../../utils';
 import pluginId from '../../pluginId';
 import { crudInitialState, crudReducer } from '../../sharedReducers';
@@ -18,7 +19,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
 
-  const { id } = useParams();
+  const { id, origin } = useParams();
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
@@ -28,12 +29,29 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const isCreatingEntry = id === 'create';
 
   const fetchURL = useMemo(() => {
-    if (isCreatingEntry) {
+    if (isCreatingEntry && !origin) {
       return null;
     }
 
-    return getRequestUrl(`${slug}/${id}`);
-  }, [slug, id, isCreatingEntry]);
+    return getRequestUrl(`${slug}/${origin || id}`);
+  }, [slug, id, isCreatingEntry, origin]);
+
+  const cleanClonedData = useCallback(
+    data => {
+      if (!origin) {
+        return data;
+      }
+
+      const cleaned = removeFieldsFromClonedData(
+        data,
+        allLayoutData.contentType,
+        allLayoutData.components
+      );
+
+      return cleaned;
+    },
+    [allLayoutData, origin]
+  );
 
   const cleanReceivedData = useCallback(
     data => {
@@ -93,7 +111,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data: cleanReceivedData(data),
+          data: cleanReceivedData(cleanClonedData(data)),
         });
       } catch (err) {
         console.error(err);
@@ -123,7 +141,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     return () => {
       abortController.abort();
     };
-  }, [fetchURL, push, from, cleanReceivedData]);
+  }, [fetchURL, push, from, cleanReceivedData, cleanClonedData]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
