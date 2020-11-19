@@ -1,6 +1,6 @@
 # Installation
 
-Strapi gives you many possible installation options for your project or application. Strapi can be installed on your computer or services such as DigitalOcean, Amazon AWS, or Platform.sh. The following documentation covers many different options to install Strapi and getting started on using it.
+Strapi gives you many possible installation options for your project or application. Strapi can be installed on your computer or services such as Render, DigitalOcean, Amazon AWS, or Platform.sh. The following documentation covers many different options to install Strapi and getting started on using it.
 
 ::: tip
 For a more detailed overview of deployment please see the [related documentation](./deployment.md).
@@ -52,6 +52,18 @@ For a more detailed overview of deployment please see the [related documentation
 		<template #title>Platform.sh One-Click</template>
 		<template #description>
 			Your project setup in one click with Platform.sh
+		</template>
+	</InstallLink>
+</div>
+
+<div>
+	<InstallLink link="../installation/render.html">
+		<template #icon>
+			<svg viewBox="21.7 21.7 181 181" xmlns="http://www.w3.org/2000/svg"><g><polygon class="st0" points="145 31.7 143 31.7 143 33.7 143 52.2 143 54.2 145 54.2 163.6 54.2 165.6 54.2 165.6 52.2 165.6 33.7 165.6 31.7 163.6 31.7" fill="#fff"/><path class="st0" d="M 85.2 31.7 C 78 31.7 71 33.1 64.4 35.9 C 58 38.6 52.3 42.5 47.4 47.4 C 42.5 52.3 38.6 58 35.9 64.4 C 33.1 71 31.7 78 31.7 85.2 L 31.7 163.6 L 31.7 165.6 L 33.7 165.6 L 52.3 165.6 L 54.3 165.6 L 54.3 163.6 L 54.3 84.9 C 54.7 76.8 58.1 69.2 63.8 63.6 C 69.6 57.9 77.2 54.6 85.3 54.3 L 126.5 54.3 L 128.5 54.3 L 128.5 52.3 L 128.5 33.7 L 128.5 31.7 L 126.5 31.7 L 85.2 31.7 Z" fill="#fff"/><polygon class="st0" points="182.1 105.9 180.1 105.9 180.1 107.9 180.1 126.5 180.1 128.5 182.1 128.5 200.7 128.5 202.7 128.5 202.7 126.5 202.7 107.9 202.7 105.9 200.7 105.9" fill="#fff"/><polygon class="st0" points="182.1 68.8 180.1 68.8 180.1 70.8 180.1 89.4 180.1 91.4 182.1 91.4 200.7 91.4 202.7 91.4 202.7 89.4 202.7 70.8 202.7 68.8 200.7 68.8" fill="#fff"/><polygon class="st0" points="200.7 31.7 182.1 31.7 180.1 31.7 180.1 33.7 180.1 52.2 180.1 54.2 182.1 54.2 200.7 54.2 202.7 54.2 202.7 52.2 202.7 33.7 202.7 31.7" fill="#fff"/><polygon class="st0" points="182.1 143 180.1 143 180.1 145 180.1 163.6 180.1 165.6 182.1 165.6 200.7 165.6 202.7 165.6 202.7 163.6 202.7 145 202.7 143 200.7 143" fill="#fff"/><polygon class="st0" points="182.1 180.1 180.1 180.1 180.1 182.1 180.1 200.7 180.1 202.7 182.1 202.7 200.7 202.7 202.7 202.7 202.7 200.7 202.7 182.1 202.7 180.1 200.7 180.1" fill="#fff"/><polygon class="st0" points="145 180.1 143 180.1 143 182.1 143 200.7 143 202.7 145 202.7 163.6 202.7 165.6 202.7 165.6 200.7 165.6 182.1 165.6 180.1 163.6 180.1" fill="#fff"/><polygon class="st0" points="107.9 180.3 105.9 180.3 105.9 182.3 105.9 200.9 105.9 202.9 107.9 202.9 126.5 202.9 128.5 202.9 128.5 200.9 128.5 182.3 128.5 180.3 126.5 180.3" fill="#fff"/><polygon class="st0" points="70.8 180.1 68.8 180.1 68.8 182.1 68.8 200.7 68.8 202.7 70.8 202.7 89.4 202.7 91.4 202.7 91.4 200.7 91.4 182.1 91.4 180.1 89.4 180.1" fill="#fff"/><polygon class="st0" points="33.7 180.1 31.7 180.1 31.7 182.1 31.7 200.7 31.7 202.7 33.7 202.7 52.2 202.7 54.2 202.7 54.2 200.7 54.2 182.1 54.2 180.1 52.2 180.1" fill="#fff"/></g></svg>
+		</template>
+		<template #title>Render One-Click</template>
+		<template #description>
+			Deploy your project on Render in one click
 		</template>
 	</InstallLink>
 </div>
