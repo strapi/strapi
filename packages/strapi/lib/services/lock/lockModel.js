@@ -11,7 +11,7 @@ const lockModel = config => ({
     description: '',
   },
   options: {
-    timestamps: true,
+    timestamps: ['createdAt', 'updatedAt'],
   },
   attributes: {
     uid: {
