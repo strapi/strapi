@@ -74,30 +74,28 @@ const AttributeRow = ({ attribute, contentType }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attribute]);
 
-  const handleCheckAllAction = useCallback(() => {
-    fillRequiredPermissions();
+  const handleCheckAllAction = useCallback(
+    ({ target: { name, value } }) => {
+      fillRequiredPermissions();
 
-    if (isCollapsable) {
-      const attributes = recursiveAttributes;
-      const allActionsSize = attributes.length * staticAttributeActions.length;
-      const shouldEnable = recursivePermissions >= 0 && recursivePermissions < allActionsSize;
-
-      dispatch({
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: contentType.uid,
-        attributes,
-        shouldEnable,
-      });
-    } else {
-      dispatch({
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: contentType.uid,
-        attribute,
-        shouldEnable: !hasAllActions,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attribute, contentType.uid, isCollapsable, recursiveAttributes, recursivePermissions]);
+      if (isCollapsable) {
+        dispatch({
+          type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
+          subject: name,
+          attributes: recursiveAttributes,
+          shouldEnable: value,
+        });
+      } else {
+        dispatch({
+          type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
+          subject: name,
+          attribute,
+          shouldEnable: value,
+        });
+      }
+    },
+    [attribute, dispatch, fillRequiredPermissions, isCollapsable, recursiveAttributes]
+  );
 
   const getRecursiveAttributesPermissions = useCallback(
     action => {
@@ -130,9 +128,8 @@ const AttributeRow = ({ attribute, contentType }) => {
   );
 
   const handleCheckCollapsable = useCallback(
-    action => {
+    ({ target: { value, name } }, action) => {
       const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
-      const shouldEnable = !allRecursiveChecked(action);
 
       if (shouldSetRequiredFields) {
         fillRequiredPermissions();
@@ -140,8 +137,8 @@ const AttributeRow = ({ attribute, contentType }) => {
 
       dispatch({
         type: 'SELECT_MULTIPLE_ATTRIBUTE',
-        subject: contentType.uid,
-        shouldEnable,
+        subject: name,
+        shouldEnable: value,
         attributes:
           action === `${contentManagerPermissionPrefix}.create`
             ? recursiveAttributes.filter(attribute => !attribute.required)
@@ -149,8 +146,7 @@ const AttributeRow = ({ attribute, contentType }) => {
         action,
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allRecursiveChecked, contentType.uid, dispatch, fillRequiredPermissions, recursiveAttributes]
+    [dispatch, fillRequiredPermissions, recursiveAttributes]
   );
 
   const handleCheck = useCallback(
@@ -168,16 +164,7 @@ const AttributeRow = ({ attribute, contentType }) => {
         action,
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      contentType,
-      contentTypesPermissions,
-      isCollapsable,
-      components,
-      allRecursiveChecked,
-      recursiveAttributes,
-      attribute,
-    ]
+    [dispatch, contentType.uid, attribute.attributeName, fillRequiredPermissions]
   );
 
   const handleToggleAttributes = () => {
@@ -198,9 +185,9 @@ const AttributeRow = ({ attribute, contentType }) => {
     );
   };
 
-  const handleChange = action => {
+  const handleChange = (e, action) => {
     if (isCollapsable) {
-      handleCheckCollapsable(action);
+      handleCheckCollapsable(e, action);
     } else {
       handleCheck(action);
     }
@@ -214,7 +201,7 @@ const AttributeRow = ({ attribute, contentType }) => {
           <PermissionName disabled={isSuperAdmin} width="15rem">
             <Checkbox
               disabled={isSuperAdmin}
-              name={attribute.attributeName}
+              name={contentType.uid}
               value={hasAllActions}
               someChecked={hasSomeActions}
               onChange={handleCheckAllAction}
@@ -251,8 +238,8 @@ const AttributeRow = ({ attribute, contentType }) => {
                   allRecursiveChecked(action) ||
                   checkPermission(action)
                 }
-                name={`${attribute.attributeName}-${action}`}
-                onChange={() => handleChange(action)}
+                name={contentType.uid}
+                onChange={e => handleChange(e, action)}
                 someChecked={someChecked(action)}
               />
             ))}

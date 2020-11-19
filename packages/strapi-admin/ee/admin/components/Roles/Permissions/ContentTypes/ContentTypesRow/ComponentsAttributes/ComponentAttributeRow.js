@@ -92,7 +92,7 @@ const ComponentAttributeRow = ({
   );
 
   const handleCheck = useCallback(
-    action => {
+    ({ target: { name, value } }, action) => {
       const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
 
       if (shouldSetRequiredFields) {
@@ -102,15 +102,15 @@ const ComponentAttributeRow = ({
       if (isCollapsable) {
         dispatch({
           type: 'SELECT_MULTIPLE_ATTRIBUTE',
-          subject: contentTypeUid,
-          shouldEnable: !allRecursiveChecked(action),
+          subject: name,
+          shouldEnable: value,
           attributes: recursiveAttributes,
           action,
         });
       } else {
         dispatch({
           type: 'SELECT_ACTION',
-          subject: contentTypeUid,
+          subject: name,
           attribute: attributePermissionName,
           action,
         });
@@ -199,10 +199,10 @@ const ComponentAttributeRow = ({
                   isSuperAdmin || (isCreateAndRequired(attribute, action) && !isCollapsable)
                 }
                 key={`${attribute.attributeName}-${action}`}
-                onChange={() => handleCheck(action)}
+                onChange={e => handleCheck(e, action)}
                 someChecked={someChecked(action)}
                 value={isCreateAndRequired(attribute, action) || isChecked(action)}
-                name={`${attribute.attributeName}-${action}`}
+                name={contentTypeUid}
               />
             ))}
           </PermissionWrapper>

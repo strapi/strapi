@@ -33,6 +33,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     isSuperAdmin,
   } = usePermissionsContext();
   const isActive = collapsePath[0] === contentType.uid;
+  const existingActions = useMemo(
+    () => getAllAttributesActions(contentType.uid, contentTypesPermissions),
+    [contentType.uid, contentTypesPermissions]
+  );
 
   const contentTypeActions = useMemo(() => {
     const contentTypesActionObject = get(
@@ -51,21 +55,16 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   }, [contentType, contentTypesPermissions]);
 
   const actionsForConditions = useMemo(() => {
-    const existingActions = getAllAttributesActions(contentType.uid, contentTypesPermissions);
-
     return Array.from(new Set([...contentTypeActions, ...existingActions])).map(action => ({
       id: action,
       displayName: action.split('.')[action.split('.').length - 1],
     }));
-  }, [contentTypeActions, contentTypesPermissions, contentType]);
+  }, [contentTypeActions, existingActions]);
 
   // Number of all actions in the current content type.
   const allCurrentActionsSize = useMemo(() => {
-    return (
-      getAllAttributesActions(contentType.uid, contentTypesPermissions).length +
-      contentTypeActions.length
-    );
-  }, [contentType, contentTypeActions.length, contentTypesPermissions]);
+    return existingActions.length + contentTypeActions.length;
+  }, [contentTypeActions.length, existingActions.length]);
 
   // Attributes to display : Liste of attributes of in the content type without timestamps and id
   // Used to display the first level of attributes.
@@ -141,12 +140,12 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
   // Check/Uncheck all the actions for all
   // attributes of the current content type
-  const handleAllContentTypeActions = () => {
+  const handleAllContentTypeActions = ({ target }) => {
     dispatch({
       type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
       subject: contentType.uid,
       attributes: getAttributesByModel(contentType, components),
-      shouldEnable: allCurrentActionsSize < allActionsSize,
+      shouldEnable: target.value,
       shouldSetAllContentTypes: true,
     });
   };
@@ -220,17 +219,9 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           <PermissionWrapper disabled>
             {permissionsToDisplay.map(permissionLayout => {
               const { action } = permissionLayout;
-              /* eslint-disable */
-              const checkboxProps = isAttributeAction(action)
-                ? {
-                    someChecked: hasSomeAttributeByAction(action),
-                    onChange: () => handleActionSelect(action),
-                  }
-                : {
-                    someChecked: null,
-                    onChange: () => handleContentTypeActionSelect(action),
-                  };
-              /* eslint-enable */
+              const someChecked = isAttributeAction(action)
+                ? hasSomeAttributeByAction(action)
+                : null;
 
               return (
                 <PermissionCheckbox
@@ -239,7 +230,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                   disabled
                   value={hasContentTypeAction(action)}
                   name={`${contentType.name}-${action}`}
-                  {...checkboxProps}
+                  someChecked={someChecked}
                 />
               );
             })}

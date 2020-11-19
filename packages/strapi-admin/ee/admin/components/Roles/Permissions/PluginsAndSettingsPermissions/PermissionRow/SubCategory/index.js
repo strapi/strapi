@@ -69,11 +69,11 @@ const SubCategory = ({ subCategory }) => {
     return Object.values(categoryConditions).flat().length > 0;
   }, [categoryConditions]);
 
-  const handleSubCategoryPermissions = () => {
+  const handleSubCategoryPermissions = ({ target: { value } }) => {
     dispatch({
       type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
       actions: subCategory.actions,
-      shouldEnable: !hasAllCategoryActions,
+      shouldEnable: value,
     });
   };
 

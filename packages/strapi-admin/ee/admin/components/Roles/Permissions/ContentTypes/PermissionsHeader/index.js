@@ -28,6 +28,7 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
     // If the action is present in the actions of the attributes
     // Then we set all the attributes contentTypesPermissions otherwise,
     // we only set the global content type actions
+    // Create Read or Update
     if (isAttributeAction(action)) {
       dispatch({
         type: 'SET_ATTRIBUTES_PERMISSIONS',
@@ -42,6 +43,7 @@ const PermissionsHeader = ({ allAttributes, contentTypes }) => {
         contentTypes,
         value: !value,
       });
+      // Delete action
     } else {
       dispatch({
         type: 'GLOBAL_PERMISSIONS_SELECT',
