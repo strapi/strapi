@@ -38,7 +38,7 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
 
         getDataSucceeded(models, components);
       } catch (err) {
-        console.error('CM/main', err);
+        console.error(err);
         strapi.notification.error('notification.error');
       }
     };

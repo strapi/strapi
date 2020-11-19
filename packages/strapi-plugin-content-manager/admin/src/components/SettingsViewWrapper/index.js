@@ -117,6 +117,7 @@ const SettingsViewWrapper = ({
             'date',
             'media',
             'richtext',
+            'timestamp',
           ].includes(type) && !!type
         );
       });

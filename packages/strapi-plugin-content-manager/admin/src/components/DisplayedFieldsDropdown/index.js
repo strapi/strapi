@@ -19,6 +19,14 @@ const DisplayedFieldsDropdown = ({ displayedHeaders, items, onChange, onClickRes
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleChange = ({ target: { name, checked } }) => {
+    onChange({ name, value: !checked });
+  };
+
+  const getCheckboxValue = checkboxName => {
+    return displayedHeaders.findIndex(({ name }) => name === checkboxName) !== -1;
+  };
+
   const toggle = useCallback(
     () =>
       setIsOpen(prev => {
@@ -62,13 +70,14 @@ const DisplayedFieldsDropdown = ({ displayedHeaders, items, onChange, onClickRes
             )}
           </FormattedMessage>
           {items.map(headerName => {
-            const value = displayedHeaders.findIndex(({ name }) => name === headerName) !== -1;
-            const handleChange = () => onChange({ name: headerName, value });
-
             return (
               <ItemDropdown key={headerName} toggle={false} onClick={handleChange}>
                 <div>
-                  <InputCheckbox onChange={handleChange} name={headerName} value={value} />
+                  <InputCheckbox
+                    onChange={handleChange}
+                    name={headerName}
+                    value={getCheckboxValue(headerName)}
+                  />
                 </div>
               </ItemDropdown>
             );

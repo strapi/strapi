@@ -3,7 +3,7 @@ import { cloneDeep, set } from 'lodash';
 import { createLayout, formatLayout } from './utils/layout';
 
 const init = (initialState, mainLayout, components) => {
-  const initialData = cloneDeep(mainLayout);
+  let initialData = cloneDeep(mainLayout);
 
   set(initialData, ['layouts', 'edit'], formatLayout(createLayout(mainLayout.layouts.edit)));
 

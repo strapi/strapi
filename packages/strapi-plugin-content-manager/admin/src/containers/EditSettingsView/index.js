@@ -36,7 +36,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
 
   const { componentLayouts, initialData, metaToEdit, modifiedData, metaForm } = reducerState.toJS();
 
-  const componentsAndModelsMainPossibleMainFields = useMemo(() => {
+  const componentsAndModelsPossibleMainFields = useMemo(() => {
     return createPossibleMainFieldsForModelsAndComponents(schemas);
   }, [schemas]);
 
@@ -87,10 +87,10 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
       const targetKey = formType === 'component' ? 'component' : 'targetModel';
       const key = get(modifiedData, ['attributes', metaToEdit, targetKey], '');
 
-      return get(componentsAndModelsMainPossibleMainFields, [key], []);
+      return get(componentsAndModelsPossibleMainFields, [key], []);
     },
 
-    [metaToEdit, componentsAndModelsMainPossibleMainFields, modifiedData]
+    [metaToEdit, componentsAndModelsPossibleMainFields, modifiedData]
   );
 
   const handleChange = ({ target: { name, value } }) => {
