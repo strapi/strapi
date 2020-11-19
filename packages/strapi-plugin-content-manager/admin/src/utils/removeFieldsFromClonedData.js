@@ -11,11 +11,11 @@ const removeFieldsFromClonedData = (
 ) => {
   const recursiveCleanData = (data, schema) => {
     return Object.keys(data).reduce((acc, current) => {
-      const attrType = getType(schema.schema, current);
+      const attrType = getType(schema, current);
       const value = get(data, current);
-      const component = getOtherInfos(schema.schema, [current, 'component']);
-      const isRepeatable = getOtherInfos(schema.schema, [current, 'repeatable']);
-      let timestamps = get(schema.schema, ['options', 'timestamps']);
+      const component = getOtherInfos(schema, [current, 'component']);
+      const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
+      let timestamps = get(schema, ['options', 'timestamps']);
 
       if (!Array.isArray(timestamps)) {
         timestamps = [];

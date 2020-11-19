@@ -7,10 +7,10 @@ import { getType, getOtherInfos } from './getAttributeInfos';
 const formatComponentData = (data, ct, composSchema) => {
   const recursiveFormatData = (data, schema) => {
     return Object.keys(data).reduce((acc, current) => {
-      const type = getType(schema.schema, current);
+      const type = getType(schema, current);
       const value = get(data, current);
-      const compoUid = getOtherInfos(schema.schema, [current, 'component']);
-      const isRepeatable = getOtherInfos(schema.schema, [current, 'repeatable']);
+      const compoUid = getOtherInfos(schema, [current, 'component']);
+      const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
 
       if (!value) {
         acc[current] = value;

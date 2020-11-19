@@ -6,21 +6,13 @@
     "apiID": "closingperiod",
     "label": "Closingperiods",
     "isDisplayed": true,
-    "schema": {
-      "modelType": "component",
-      "connection": "default",
-      "collectionName": "components_closingperiods",
-      "info": { "name": "closingperiod", "description": "", "icon": "angry" },
-      "options": { "timestamps": false },
-      "attributes": {
-        "id": { "type": "integer" },
-        "label": { "type": "string" },
-        "start_date": { "type": "date", "required": true },
-        "end_date": { "type": "date", "required": true },
-        "media": { "type": "media", "multiple": false, "required": false },
-        "dish": { "component": "default.dish", "type": "component" }
-      },
-      "kind": "collectionType"
+    "attributes": {
+      "id": { "type": "integer" },
+      "label": { "type": "string" },
+      "start_date": { "type": "date", "required": true },
+      "end_date": { "type": "date", "required": true },
+      "media": { "type": "media", "multiple": false, "required": false },
+      "dish": { "component": "default.dish", "type": "component" }
     }
   },
   "default.dish": {
@@ -30,30 +22,22 @@
     "apiID": "dish",
     "label": "Dishes",
     "isDisplayed": true,
-    "schema": {
-      "modelType": "component",
-      "connection": "default",
-      "collectionName": "components_dishes",
-      "info": { "name": "dish", "description": "", "icon": "address-book" },
-      "options": { "timestamps": false },
-      "attributes": {
-        "id": { "type": "integer" },
-        "name": { "type": "string", "required": false, "default": "My super dish" },
-        "description": { "type": "text" },
-        "price": { "type": "float" },
-        "picture": { "type": "media", "multiple": false, "required": false },
-        "very_long_description": { "type": "richtext" },
-        "categories": {
-          "collection": "category",
-          "attribute": "category",
-          "column": "id",
-          "isVirtual": true,
-          "type": "relation",
-          "targetModel": "application::category.category",
-          "relationType": "manyWay"
-        }
-      },
-      "kind": "collectionType"
+    "attributes": {
+      "id": { "type": "integer" },
+      "name": { "type": "string", "required": false, "default": "My super dish" },
+      "description": { "type": "text" },
+      "price": { "type": "float" },
+      "picture": { "type": "media", "multiple": false, "required": false },
+      "very_long_description": { "type": "richtext" },
+      "categories": {
+        "collection": "category",
+        "attribute": "category",
+        "column": "id",
+        "isVirtual": true,
+        "type": "relation",
+        "targetModel": "application::category.category",
+        "relationType": "manyWay"
+      }
     }
   },
   "default.openingtimes": {
@@ -63,19 +47,11 @@
     "apiID": "openingtimes",
     "label": "Openingtimes",
     "isDisplayed": true,
-    "schema": {
-      "modelType": "component",
-      "connection": "default",
-      "collectionName": "components_openingtimes",
-      "info": { "name": "openingtimes", "description": "", "icon": "calendar" },
-      "options": { "timestamps": false },
-      "attributes": {
-        "id": { "type": "integer" },
-        "label": { "type": "string", "required": true, "default": "something" },
-        "time": { "type": "string" },
-        "dishrep": { "type": "component", "repeatable": true, "component": "default.dish" }
-      },
-      "kind": "collectionType"
+    "attributes": {
+      "id": { "type": "integer" },
+      "label": { "type": "string", "required": true, "default": "something" },
+      "time": { "type": "string" },
+      "dishrep": { "type": "component", "repeatable": true, "component": "default.dish" }
     }
   },
   "default.restaurantservice": {
@@ -85,19 +61,11 @@
     "apiID": "restaurantservice",
     "label": "Restaurantservices",
     "isDisplayed": true,
-    "schema": {
-      "modelType": "component",
-      "connection": "default",
-      "collectionName": "components_restaurantservices",
-      "info": { "name": "restaurantservice", "description": "", "icon": "cannabis" },
-      "options": { "timestamps": false },
-      "attributes": {
-        "id": { "type": "integer" },
-        "name": { "type": "string", "required": true, "default": "something" },
-        "media": { "type": "media", "multiple": false, "required": false },
-        "is_available": { "type": "boolean", "required": true, "default": true }
-      },
-      "kind": "collectionType"
+    "attributes": {
+      "id": { "type": "integer" },
+      "name": { "type": "string", "required": true, "default": "something" },
+      "media": { "type": "media", "multiple": false, "required": false },
+      "is_available": { "type": "boolean", "required": true, "default": true }
     }
   }
 }

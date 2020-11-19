@@ -43,7 +43,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       const defaultComponentForm = createDefaultForm(
-        get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
+        get(allLayoutData, ['components', current, 'attributes'], {}),
         allLayoutData.components
       );
 
@@ -57,7 +57,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     }, {});
 
     const contentTypeDataStructure = createDefaultForm(
-      allLayoutData.contentType.schema.attributes,
+      allLayoutData.contentType.attributes,
       allLayoutData.components
     );
 
@@ -157,18 +157,13 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, []);
 
   const onPost = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(slug);
 
       try {
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'POST', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
@@ -188,7 +183,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/publish/${id}`);
+      const endPoint = getRequestUrl(`${slug}/actions/publish`);
 
       dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
 
@@ -203,23 +198,18 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       displayErrors(err);
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
     }
-  }, [cleanReceivedData, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, slug]);
 
   const onPut = useCallback(
-    async (formData, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}/${id}`);
+    async (body, trackerProperty) => {
+      const endPoint = getRequestUrl(`${slug}`);
 
       try {
         emitEventRef.current('willEditEntry', trackerProperty);
 
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'PUT', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
 
@@ -232,12 +222,12 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [cleanReceivedData, id, displayErrors, slug]
+    [cleanReceivedData, displayErrors, slug]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
+    const endPoint = getRequestUrl(`${slug}/actions/unpublish`);
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
 
     try {
@@ -254,7 +244,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, slug]);
 
   return children({
     componentsDataStructure,

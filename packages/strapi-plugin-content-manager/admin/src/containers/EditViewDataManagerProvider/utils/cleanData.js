@@ -8,10 +8,10 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
 
   const recursiveCleanData = (data, schema) => {
     return Object.keys(data).reduce((acc, current) => {
-      const attrType = getType(schema.schema, current);
+      const attrType = getType(schema, current);
       const value = get(data, current);
-      const component = getOtherInfos(schema.schema, [current, 'component']);
-      const isRepeatable = getOtherInfos(schema.schema, [current, 'repeatable']);
+      const component = getOtherInfos(schema, [current, 'component']);
+      const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
       let cleanedData;
 
       switch (attrType) {
@@ -28,7 +28,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           cleanedData = value && value._isAMomentObject === true ? value.toISOString() : value;
           break;
         case 'media':
-          if (getOtherInfos(schema.schema, [current, 'multiple']) === true) {
+          if (getOtherInfos(schema, [current, 'multiple']) === true) {
             cleanedData = value ? value.filter(file => !(file instanceof File)) : null;
           } else {
             cleanedData = get(value, 0) instanceof File ? null : get(value, 'id', null);

@@ -70,7 +70,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       const defaultComponentForm = createDefaultForm(
-        get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
+        get(allLayoutData, ['components', current, 'attributes'], {}),
         allLayoutData.components
       );
 
@@ -84,7 +84,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     }, {});
 
     const contentTypeDataStructure = createDefaultForm(
-      allLayoutData.contentType.schema.attributes,
+      allLayoutData.contentType.attributes,
       allLayoutData.components
     );
 
@@ -98,6 +98,8 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       ),
     });
   }, [allLayoutData]);
+
+  const shouldFetch = useRef(true);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -114,7 +116,12 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
           data: cleanReceivedData(cleanClonedData(data)),
         });
       } catch (err) {
+        if (err.name === 'AbortError') {
+          return;
+        }
+
         console.error(err);
+
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
@@ -132,7 +139,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       }
     };
 
-    if (fetchURL) {
+    if (fetchURL && shouldFetch.current) {
       getData(signal);
     } else {
       dispatch({ type: 'INIT_FORM' });
@@ -140,6 +147,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
     return () => {
       abortController.abort();
+      shouldFetch.current = fetchURL === null;
     };
   }, [fetchURL, push, from, cleanReceivedData, cleanClonedData]);
 
@@ -187,24 +195,19 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, [from, replace]);
 
   const onPost = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(slug);
 
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'POST', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'POST', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: response });
+        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
@@ -215,13 +218,13 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [displayErrors, replace, slug]
+    [cleanReceivedData, displayErrors, replace, slug]
   );
 
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/publish/${id}`);
+      const endPoint = getRequestUrl(`${slug}/${id}/actions/publish`);
 
       dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
 
@@ -240,7 +243,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   }, [cleanReceivedData, displayErrors, id, slug]);
 
   const onPut = useCallback(
-    async (formData, trackerProperty) => {
+    async (body, trackerProperty) => {
       const endPoint = getRequestUrl(`${slug}/${id}`);
 
       try {
@@ -248,12 +251,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
 
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(
-          endPoint,
-          { method: 'PUT', headers: {}, body: formData },
-          false,
-          false
-        );
+        const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
 
@@ -269,7 +267,7 @@ const CollectionTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   );
 
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/unpublish/${id}`);
+    const endPoint = getRequestUrl(`${slug}/${id}/actions/unpublish`);
 
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
 
@@ -310,9 +308,20 @@ CollectionTypeWrapper.defaultProps = {
 };
 
 CollectionTypeWrapper.propTypes = {
-  allLayoutData: PropTypes.shape({
+  allLayoutData: PropTypes.exact({
     components: PropTypes.object.isRequired,
-    contentType: PropTypes.object.isRequired,
+    contentType: PropTypes.exact({
+      apiID: PropTypes.string.isRequired,
+      attributes: PropTypes.object.isRequired,
+      info: PropTypes.object.isRequired,
+      isDisplayed: PropTypes.bool.isRequired,
+      kind: PropTypes.string.isRequired,
+      layouts: PropTypes.object.isRequired,
+      metadatas: PropTypes.object.isRequired,
+      options: PropTypes.object.isRequired,
+      settings: PropTypes.object.isRequired,
+      uid: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
   from: PropTypes.string,

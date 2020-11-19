@@ -1,4 +1,8 @@
 const removeKeyInObject = (obj, keyToRemove) => {
+  if (!obj) {
+    return obj;
+  }
+
   return Object.keys(obj).reduce((acc, current) => {
     const value = acc[current];
 

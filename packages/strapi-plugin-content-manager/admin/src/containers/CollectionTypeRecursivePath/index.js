@@ -1,44 +1,46 @@
-import React, { Suspense, lazy } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
+import { ContentTypeLayoutContext } from '../../contexts';
+import { useFetchContentTypeLayout } from '../../hooks';
+import { formatLayoutToApi } from '../../utils';
+import EditView from '../EditView';
+import EditSettingsView from '../EditSettingsView';
+import ListView from '../ListView';
+import ListSettingsView from '../ListSettingsView';
 
-const EditView = lazy(() => import('../EditView'));
-const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const ListView = lazy(() => import('../ListView'));
-const ListSettingsView = lazy(() => import('../ListSettingsView'));
-
-const CollectionTypeRecursivePath = props => {
+const CollectionTypeRecursivePath = () => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
+  const { isLoading, layout, updateLayout } = useFetchContentTypeLayout(slug);
 
-  const renderRoute = (routeProps, Component) => {
-    return <Component {...props} {...routeProps} slug={slug} />;
-  };
-  const renderPermissionsRoute = (routeProps, Component) => {
-    return (
-      <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-        <Component {...props} {...routeProps} slug={slug} />
-      </CheckPagePermissions>
-    );
-  };
+  const { rawContentTypeLayout, rawComponentsLayouts } = useMemo(() => {
+    let rawContentTypeLayout = {};
+    let rawComponentsLayouts = {};
 
-  const settingsRoutes = [
-    {
-      path: 'ctm-configurations/list-settings',
-      comp: ListSettingsView,
-    },
-    {
-      path: 'ctm-configurations/edit-settings/:type',
-      comp: EditSettingsView,
-    },
-  ].map(({ path, comp }) => (
-    <Route
-      key={path}
-      path={`${url}/${path}`}
-      render={props => renderPermissionsRoute(props, comp)}
-    />
-  ));
+    if (layout.contentType) {
+      rawContentTypeLayout = formatLayoutToApi(layout.contentType);
+    }
+
+    if (layout.components) {
+      rawComponentsLayouts = Object.keys(layout.components).reduce((acc, current) => {
+        acc[current] = formatLayoutToApi(layout.components[current]);
+
+        return acc;
+      }, {});
+    }
+
+    return { rawContentTypeLayout, rawComponentsLayouts };
+  }, [layout]);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  const renderRoute = (_, Component) => {
+    return <Component slug={slug} layout={layout} />;
+  };
 
   const routes = [
     { path: ':id/clone/:origin', comp: EditView },
@@ -49,13 +51,32 @@ const CollectionTypeRecursivePath = props => {
   ));
 
   return (
-    <Suspense fallback={<LoadingIndicatorPage />}>
+    <ContentTypeLayoutContext.Provider value={layout}>
       <Switch>
-        {settingsRoutes}
+        <Route path={`${url}/configurations/list`}>
+          <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+            <ListSettingsView
+              layout={rawContentTypeLayout}
+              slug={slug}
+              updateLayout={updateLayout}
+            />
+          </CheckPagePermissions>
+        </Route>
+        <Route path={`${url}/configurations/edit`}>
+          <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+            <EditSettingsView
+              components={rawComponentsLayouts}
+              isContentTypeView
+              mainLayout={rawContentTypeLayout}
+              slug={slug}
+              updateLayout={updateLayout}
+            />
+          </CheckPagePermissions>
+        </Route>
         {routes}
       </Switch>
-    </Suspense>
+    </ContentTypeLayoutContext.Provider>
   );
 };
 
-export default CollectionTypeRecursivePath;
+export default memo(CollectionTypeRecursivePath);

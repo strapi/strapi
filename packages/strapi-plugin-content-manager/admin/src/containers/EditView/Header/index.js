@@ -42,7 +42,8 @@ const Header = ({
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
     layout,
   ]);
-  const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
+
+  const currentContentTypeName = useMemo(() => get(layout, ['info', 'name']), [layout]);
 
   const didChangeData = useMemo(() => {
     return !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));

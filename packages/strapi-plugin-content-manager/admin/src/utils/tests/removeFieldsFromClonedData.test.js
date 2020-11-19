@@ -31,24 +31,22 @@ describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
       const { components, modifiedData, expectedNoFieldsModifiedData } = testData;
       const contentType = {
         apiID: 'test',
-        schema: {
-          options: {
-            timestamps: ['created_at', 'updated_at'],
+        options: {
+          timestamps: ['created_at', 'updated_at'],
+        },
+        attributes: {
+          created_at: { type: 'timestamp' },
+          dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
+          id: { type: 'integer' },
+          name: { type: 'string' },
+          notrepeatable: {
+            type: 'component',
+            repeatable: false,
+            component: 'compos.test-compo',
           },
-          attributes: {
-            created_at: { type: 'timestamp' },
-            dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
-            id: { type: 'integer' },
-            name: { type: 'string' },
-            notrepeatable: {
-              type: 'component',
-              repeatable: false,
-              component: 'compos.test-compo',
-            },
-            password: { type: 'password' },
-            repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
-            updated_at: { type: 'timestamp' },
-          },
+          password: { type: 'password' },
+          repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
+          updated_at: { type: 'timestamp' },
         },
       };
 

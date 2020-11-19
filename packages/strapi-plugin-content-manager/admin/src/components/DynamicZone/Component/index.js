@@ -21,9 +21,7 @@ const Component = ({
   const { getComponentLayout } = useContentTypeLayout();
   const { icon, friendlyName } = useMemo(() => {
     const {
-      schema: {
-        info: { icon, name },
-      },
+      info: { icon, name },
     } = getComponentLayout(componentUid);
 
     return { friendlyName: name, icon };

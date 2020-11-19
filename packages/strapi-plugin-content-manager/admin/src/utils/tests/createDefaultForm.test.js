@@ -58,27 +58,23 @@ describe('CONTENT MANAGER | utils | createDefaultForm', () => {
     };
     const components = {
       'default.test': {
-        schema: {
-          attributes: {
-            text: {
-              type: 'text',
-            },
-            email: {
-              type: 'email',
-            },
+        attributes: {
+          text: {
+            type: 'text',
+          },
+          email: {
+            type: 'email',
           },
         },
       },
       'test.test': {
-        schema: {
-          attributes: {
-            text: {
-              type: 'text',
-              default: 'test',
-            },
-            email: {
-              type: 'email',
-            },
+        attributes: {
+          text: {
+            type: 'text',
+            default: 'test',
+          },
+          email: {
+            type: 'email',
           },
         },
       },

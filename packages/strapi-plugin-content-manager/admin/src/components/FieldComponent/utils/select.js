@@ -17,7 +17,7 @@ function useSelect({ isFromDynamicZone, name }) {
 
   // This is used for the readonly mode when updating an entry
   const allDynamicZoneFields = useMemo(() => {
-    const attributes = get(contentType, ['schema', 'attributes'], {});
+    const attributes = get(contentType, ['attributes'], {});
 
     const dynamicZoneFields = Object.keys(attributes).filter(attrName => {
       return get(attributes, [attrName, 'type'], '') === 'dynamiczone';

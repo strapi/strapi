@@ -43,7 +43,7 @@ const EditViewDataManagerProvider = ({
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
   const hasDraftAndPublish = useMemo(() => {
-    return get(currentContentTypeLayout, ['schema', 'options', 'draftAndPublish'], false);
+    return get(currentContentTypeLayout, ['options', 'draftAndPublish'], false);
   }, [currentContentTypeLayout]);
 
   const shouldNotRunValidations = useMemo(() => {
@@ -257,11 +257,8 @@ const EditViewDataManagerProvider = ({
         cleanData(data, currentContentTypeLayout, allLayoutData.components),
         '__temp_key__'
       );
-      const formData = new FormData();
 
-      formData.append('data', JSON.stringify(cleanedData));
-
-      return formData;
+      return cleanedData;
     },
     [allLayoutData.components, currentContentTypeLayout]
   );

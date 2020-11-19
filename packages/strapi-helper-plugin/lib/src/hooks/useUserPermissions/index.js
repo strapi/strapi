@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import hasPermissions from '../../utils/hasPermissions';
 import useUser from '../useUser';
 
@@ -70,11 +70,11 @@ const useUserPermissions = pluginPermissions => {
   }, [permissionNames]);
 
   // This function is used to synchronise the hook when used in dynamic components
-  const setIsLoading = () => {
+  const setIsLoading = useCallback(() => {
     dispatch({
       type: 'SET_IS_LOADING',
     });
-  };
+  }, []);
 
   return { ...state, setIsLoading };
 };
