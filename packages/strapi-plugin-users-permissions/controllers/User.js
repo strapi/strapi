@@ -139,8 +139,6 @@ module.exports = {
 
     const updatedUser = await strapi.plugins['users-permissions'].services.user.edit(ctx.state.user.id, input);
 
-    ctx.body = {
-      data: sanitizeUser(updatedUser),
-    };
+    ctx.body = sanitizeUser(updatedUser);
   },
 };
