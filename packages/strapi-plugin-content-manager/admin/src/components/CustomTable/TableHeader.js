@@ -1,7 +1,8 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import useListView from '../../hooks/useListView';
+import { useListView } from '../../hooks';
+
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import { Arrow, Thead } from './styledComponents';
 
@@ -11,10 +12,10 @@ function TableHeader({ headers, isBulkable }) {
   const {
     data,
     entriesToDelete,
-    firstSortableElement,
     onChangeBulkSelectall,
-    onChangeSearch,
     _sort,
+    firstSortableHeader,
+    setQuery,
   } = useListView();
   const { emitEvent } = useGlobalContext();
   const [sortBy, sortOrder] = _sort.split(':');
@@ -33,36 +34,31 @@ function TableHeader({ headers, isBulkable }) {
             />
           </th>
         )}
-        {headers.map(header => {
+        {headers.map(({ key, name, metadatas: { label, sortable } }) => {
           return (
             <th
-              key={header.key || header.name}
+              key={key}
               onClick={() => {
-                if (header.sortable) {
+                if (sortable) {
                   emitEvent('didSortEntries');
-                  const isCurrentSort = header.name === sortBy;
+                  const isCurrentSort = name === sortBy;
                   const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
-                  let value = `${header.name}:${nextOrder}`;
+                  let value = `${name}:${nextOrder}`;
 
                   if (isCurrentSort && sortOrder === 'DESC') {
-                    value = `${firstSortableElement}:ASC`;
+                    value = `${firstSortableHeader}:ASC`;
                   }
 
-                  onChangeSearch({
-                    target: {
-                      name: '_sort',
-                      value,
-                    },
+                  setQuery({
+                    _sort: value,
                   });
                 }
               }}
             >
-              <span className={header.sortable ? 'sortable' : ''}>
-                {header.label}
+              <span className={sortable ? 'sortable' : ''}>
+                {label}
 
-                {sortBy === header.name && (
-                  <Arrow fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />
-                )}
+                {sortBy === name && <Arrow fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />}
               </span>
             </th>
           );

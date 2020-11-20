@@ -56,39 +56,33 @@ export const permissions = {
 export const contentTypes = [
   {
     uid: 'application::address.address',
-    schema: {
-      options: {
-        timestamps: ['updated_at', 'created_at'],
+    options: {
+      timestamps: ['updated_at', 'created_at'],
+    },
+    attributes: {
+      id: { type: 'integer' },
+      city: { type: 'string', required: false },
+      cover: { type: 'media', multiple: false, required: false },
+      closing_period: {
+        component: 'default.closingperiod',
+        type: 'component',
       },
-      modelType: 'contentType',
-      attributes: {
-        id: { type: 'integer' },
-        city: { type: 'string', required: false },
-        cover: { type: 'media', multiple: false, required: false },
-        closing_period: {
-          component: 'default.closingperiod',
-          type: 'component',
-        },
-        label: { type: 'string' },
-        updated_at: { type: 'timestamp' },
-      },
+      label: { type: 'string' },
+      updated_at: { type: 'timestamp' },
     },
   },
   {
     uid: 'application::places.places',
-    schema: {
-      options: {
-        timestamps: ['updated_at', 'created_at'],
-      },
-      modelType: 'contentType',
-      attributes: {
-        id: { type: 'integer' },
-        like: { type: 'string', required: false },
-        country: { type: 'string', required: false },
-        image: { type: 'media', multiple: false, required: false },
-        custom_label: { type: 'string' },
-        updated_at: { type: 'timestamp' },
-      },
+    options: {
+      timestamps: ['updated_at', 'created_at'],
+    },
+    attributes: {
+      id: { type: 'integer' },
+      like: { type: 'string', required: false },
+      country: { type: 'string', required: false },
+      image: { type: 'media', multiple: false, required: false },
+      custom_label: { type: 'string' },
+      updated_at: { type: 'timestamp' },
     },
   },
 ];
@@ -96,36 +90,30 @@ export const contentTypes = [
 export const components = [
   {
     uid: 'default.closingperiod',
-    schema: {
-      attributes: {
-        id: { type: 'integer' },
-        start_date: { type: 'date', required: true },
-        dish: {
-          component: 'default.dish',
-          type: 'component',
-        },
-        media: { type: 'media', multiple: false, required: false },
+    attributes: {
+      id: { type: 'integer' },
+      start_date: { type: 'date', required: true },
+      dish: {
+        component: 'default.dish',
+        type: 'component',
       },
+      media: { type: 'media', multiple: false, required: false },
     },
   },
   {
     uid: 'default.dish',
-    schema: {
-      attributes: {
-        description: { type: 'text' },
-        id: { type: 'integer' },
-        name: { type: 'string', required: true, default: 'My super dish' },
-      },
+    attributes: {
+      description: { type: 'text' },
+      id: { type: 'integer' },
+      name: { type: 'string', required: true, default: 'My super dish' },
     },
   },
   {
     uid: 'default.restaurantservice',
-    schema: {
-      attributes: {
-        is_available: { type: 'boolean', required: true, default: true },
-        id: { type: 'integer' },
-        name: { type: 'string', required: true, default: 'something' },
-      },
+    attributes: {
+      is_available: { type: 'boolean', required: true, default: true },
+      id: { type: 'integer' },
+      name: { type: 'string', required: true, default: 'something' },
     },
   },
 ];

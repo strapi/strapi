@@ -68,6 +68,7 @@ const CustomDragLayer = () => {
           <Li>
             <RelationItem
               data={item.data}
+              displayNavigationLink={false}
               mainField={item.mainField}
               isDisabled={false}
               isDragging

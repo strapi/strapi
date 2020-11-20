@@ -1,20 +1,8 @@
 import { isEmpty } from 'lodash';
 import useDataManager from '../../../../hooks/useDataManager';
-import useEditView from '../../../../hooks/useEditView';
 
 function useSelect() {
-  const {
-    initialData,
-    isCreatingEntry,
-    isSingleType,
-    slug,
-    clearData,
-    hasDraftAndPublish,
-    modifiedData,
-  } = useDataManager();
-  const {
-    allowedActions: { canDelete },
-  } = useEditView();
+  const { hasDraftAndPublish, modifiedData } = useDataManager();
 
   let trackerProperty = {};
 
@@ -25,14 +13,8 @@ function useSelect() {
   }
 
   return {
-    canDelete,
-    clearData,
-    dataId: initialData.id,
     hasDraftAndPublish,
-    isCreatingEntry,
-    isSingleType,
     trackerProperty,
-    slug,
   };
 }
 

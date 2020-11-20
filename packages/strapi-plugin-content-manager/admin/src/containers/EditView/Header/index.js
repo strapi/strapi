@@ -19,9 +19,7 @@ const primaryButtonObject = {
 };
 
 const Header = ({
-  canUpdate,
-  canCreate,
-  canPublish,
+  allowedActions: { canUpdate, canCreate, canPublish },
   componentLayouts,
   initialData,
   isCreatingEntry,
@@ -44,7 +42,8 @@ const Header = ({
   const currentContentTypeMainField = useMemo(() => get(layout, ['settings', 'mainField'], 'id'), [
     layout,
   ]);
-  const currentContentTypeName = useMemo(() => get(layout, ['schema', 'info', 'name']), [layout]);
+
+  const currentContentTypeName = useMemo(() => get(layout, ['info', 'name']), [layout]);
 
   const didChangeData = useMemo(() => {
     return !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));
@@ -237,9 +236,11 @@ const Header = ({
 };
 
 Header.propTypes = {
-  canUpdate: PropTypes.bool.isRequired,
-  canCreate: PropTypes.bool.isRequired,
-  canPublish: PropTypes.bool.isRequired,
+  allowedActions: PropTypes.shape({
+    canUpdate: PropTypes.bool.isRequired,
+    canCreate: PropTypes.bool.isRequired,
+    canPublish: PropTypes.bool.isRequired,
+  }).isRequired,
   componentLayouts: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,

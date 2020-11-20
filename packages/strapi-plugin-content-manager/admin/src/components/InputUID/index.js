@@ -58,12 +58,12 @@ const InputUID = ({
   const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
-  const createdAtName = get(layout, ['schema', 'options', 'timestamps', 0]);
+  const createdAtName = get(layout, ['options', 'timestamps', 0]);
   const isCreation = !initialData[createdAtName];
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
-    const requestURL = getRequestUrl('explorer/uid/generate');
+    const requestURL = getRequestUrl('uid/generate');
     try {
       const { data } = await request(requestURL, {
         method: 'POST',
@@ -84,14 +84,20 @@ const InputUID = ({
 
   const checkAvailability = async () => {
     setIsLoading(true);
-    const requestURL = getRequestUrl('explorer/uid/check-availability');
+
+    const requestURL = getRequestUrl('uid/check-availability');
+
+    if (!value) {
+      return;
+    }
+
     try {
       const data = await request(requestURL, {
         method: 'POST',
         body: {
           contentTypeUID,
           field: name,
-          value: value ? value.trim() : null,
+          value: value ? value.trim() : '',
         },
       });
       setAvailability(data);
