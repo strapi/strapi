@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useRef, useReducer, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
@@ -8,23 +8,50 @@ import {
   formatComponentData,
   getTrad,
   removePasswordFieldsFromData,
+  removeFieldsFromClonedData,
 } from '../../utils';
+import pluginId from '../../pluginId';
 import { crudInitialState, crudReducer } from '../../sharedReducers';
 import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
-const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
+const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
   const { emitEvent } = useGlobalContext();
-  const { push } = useHistory();
-  const emitEventRef = useRef(emitEvent);
-  const [isCreatingEntry, setIsCreatingEntry] = useState(true);
+  const { push, replace } = useHistory();
 
+  const { id, origin } = useParams();
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
   ] = useReducer(crudReducer, crudInitialState);
+  const emitEventRef = useRef(emitEvent);
 
-  const id = get(data, 'id', '');
+  const isCreatingEntry = id === 'create';
+
+  const requestURL = useMemo(() => {
+    if (isCreatingEntry && !origin) {
+      return null;
+    }
+
+    return getRequestUrl(`${slug}/${origin || id}`);
+  }, [slug, id, isCreatingEntry, origin]);
+
+  const cleanClonedData = useCallback(
+    data => {
+      if (!origin) {
+        return data;
+      }
+
+      const cleaned = removeFieldsFromClonedData(
+        data,
+        allLayoutData.contentType,
+        allLayoutData.components
+      );
+
+      return cleaned;
+    },
+    [allLayoutData, origin]
+  );
 
   const cleanReceivedData = useCallback(
     data => {
@@ -34,12 +61,12 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         allLayoutData.components
       );
 
-      // This is needed in order to add a unique id for the repeatable components, in order to make the reorder easier
       return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
     [allLayoutData]
   );
 
+  // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       const defaultComponentForm = createDefaultForm(
@@ -72,33 +99,39 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
     });
   }, [allLayoutData]);
 
-  // Check if creation mode or editing mode
+  const shouldFetch = useRef(true);
+
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const fetchData = async signal => {
+    const getData = async signal => {
       dispatch({ type: 'GET_DATA' });
 
-      setIsCreatingEntry(true);
-
       try {
-        const data = await request(getRequestUrl(slug), { method: 'GET', signal });
+        const data = await request(requestURL, { method: 'GET', signal });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data: cleanReceivedData(data),
+          data: cleanReceivedData(cleanClonedData(data)),
         });
-        setIsCreatingEntry(false);
       } catch (err) {
-        const responseStatus = get(err, 'response.status', null);
-
-        // Creating a single type
-        if (responseStatus === 404) {
-          dispatch({ type: 'INIT_FORM' });
+        if (err.name === 'AbortError') {
+          return;
         }
 
-        if (responseStatus === 403) {
+        console.error(err);
+
+        const resStatus = get(err, 'response.status', null);
+
+        if (resStatus === 404) {
+          push(from);
+
+          return;
+        }
+
+        // Not allowed to read a document
+        if (resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
           push(from);
@@ -106,10 +139,17 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       }
     };
 
-    fetchData(signal);
+    if (requestURL && shouldFetch.current) {
+      getData(signal);
+    } else {
+      dispatch({ type: 'INIT_FORM' });
+    }
 
-    return () => abortController.abort();
-  }, [cleanReceivedData, from, push, slug]);
+    return () => {
+      abortController.abort();
+      shouldFetch.current = requestURL === null;
+    };
+  }, [requestURL, push, from, cleanReceivedData, cleanClonedData]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -151,58 +191,60 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   );
 
   const onDeleteSucceeded = useCallback(() => {
-    setIsCreatingEntry(true);
-
-    dispatch({ type: 'INIT_FORM' });
-  }, []);
+    replace(from);
+  }, [from, replace]);
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
       const endPoint = getRequestUrl(slug);
 
       try {
+        // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(endPoint, { method: 'PUT', body });
+        const response = await request(endPoint, { method: 'POST', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
         strapi.notification.success(getTrad('success.record.save'));
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
-        setIsCreatingEntry(false);
+        // Enable navigation and remove loaders
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
+
+        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
       } catch (err) {
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
-
         displayErrors(err);
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [cleanReceivedData, displayErrors, slug]
+    [cleanReceivedData, displayErrors, replace, slug]
   );
+
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/actions/publish`);
+      const endPoint = getRequestUrl(`${slug}/${id}/actions/publish`);
 
       dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
 
       const data = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didPublishEntry');
-      strapi.notification.success(getTrad('success.record.publish'));
 
       dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(data) });
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
+
+      strapi.notification.success(getTrad('success.record.publish'));
     } catch (err) {
       displayErrors(err);
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
     }
-  }, [cleanReceivedData, displayErrors, slug]);
+  }, [cleanReceivedData, displayErrors, id, slug]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}`);
+      const endPoint = getRequestUrl(`${slug}/${id}`);
 
       try {
         emitEventRef.current('willEditEntry', trackerProperty);
@@ -216,18 +258,17 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       } catch (err) {
-        displayErrors(err);
-
         emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
+        displayErrors(err);
         dispatch({ type: 'SET_STATUS', status: 'resolved' });
       }
     },
-    [cleanReceivedData, displayErrors, slug]
+    [cleanReceivedData, displayErrors, slug, id]
   );
 
-  // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/actions/unpublish`);
+    const endPoint = getRequestUrl(`${slug}/${id}/actions/unpublish`);
+
     dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
 
     try {
@@ -244,7 +285,7 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, slug]);
+  }, [cleanReceivedData, displayErrors, id, slug]);
 
   return children({
     componentsDataStructure,
@@ -262,18 +303,29 @@ const SingleTypeWrapper = ({ allLayoutData, children, from, slug }) => {
   });
 };
 
-SingleTypeWrapper.defaultProps = {
+CollectionTypeFormWrapper.defaultProps = {
   from: '/',
 };
 
-SingleTypeWrapper.propTypes = {
-  allLayoutData: PropTypes.shape({
+CollectionTypeFormWrapper.propTypes = {
+  allLayoutData: PropTypes.exact({
     components: PropTypes.object.isRequired,
-    contentType: PropTypes.object.isRequired,
+    contentType: PropTypes.exact({
+      apiID: PropTypes.string.isRequired,
+      attributes: PropTypes.object.isRequired,
+      info: PropTypes.object.isRequired,
+      isDisplayed: PropTypes.bool.isRequired,
+      kind: PropTypes.string.isRequired,
+      layouts: PropTypes.object.isRequired,
+      metadatas: PropTypes.object.isRequired,
+      options: PropTypes.object.isRequired,
+      settings: PropTypes.object.isRequired,
+      uid: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
   from: PropTypes.string,
   slug: PropTypes.string.isRequired,
 };
 
-export default memo(SingleTypeWrapper);
+export default memo(CollectionTypeFormWrapper);

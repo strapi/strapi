@@ -21,9 +21,9 @@ import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
 import { generatePermissionsObject, getInjectedComponents } from '../../utils';
-import CollectionTypeWrapper from '../CollectionTypeWrapper';
+import CollectionTypeFormWrapper from '../CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
-import SingleTypeWrapper from '../SingleTypeWrapper';
+import SingleTypeFormWrapper from '../SingleTypeFormWrapper';
 import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
 import { LinkWrapper, SubWrapper } from './components';
@@ -63,7 +63,7 @@ const EditView = ({ isSingleType, layout, slug }) => {
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);
 
   const DataManagementWrapper = useMemo(
-    () => (isSingleType ? SingleTypeWrapper : CollectionTypeWrapper),
+    () => (isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper),
     [isSingleType]
   );
 

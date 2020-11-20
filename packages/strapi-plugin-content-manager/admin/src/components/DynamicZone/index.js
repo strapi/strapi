@@ -67,6 +67,14 @@ const DynamicZone = ({
     [addComponentToDynamicZone, hasError, name]
   );
 
+  const handleClickOpenPicker = () => {
+    if (dynamicDisplayedComponentsLength < max) {
+      setIsOpen(prev => !prev);
+    } else {
+      strapi.notification.info(`${pluginId}.components.notification.info.maximum-requirement`);
+    }
+  };
+
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <BaselineAlignement>
@@ -123,15 +131,7 @@ const DynamicZone = ({
             type="button"
             hasError={hasError}
             className={isOpen && 'isOpen'}
-            onClick={() => {
-              if (dynamicDisplayedComponentsLength < max) {
-                setIsOpen(prev => !prev);
-              } else {
-                strapi.notification.info(
-                  `${pluginId}.components.notification.info.maximum-requirement`
-                );
-              }
-            }}
+            onClick={handleClickOpenPicker}
           />
           {hasRequiredError && !isOpen && !hasMaxError && (
             <div className="error-label">

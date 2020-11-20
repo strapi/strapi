@@ -62,9 +62,7 @@ function SelectWrapper({
     });
   }, [options, value]);
 
-  const endPoint = useMemo(() => queryInfos.endPoint, [queryInfos]);
-  const containsKey = useMemo(() => queryInfos.containsKey, [queryInfos]);
-  const defaultParams = useMemo(() => queryInfos.defaultParams, [queryInfos]);
+  const { endPoint, containsKey, defaultParams, shouldDisplayRelationLink } = queryInfos;
 
   const getData = useCallback(
     async signal => {
@@ -162,7 +160,7 @@ function SelectWrapper({
       return null;
     }
 
-    if (!queryInfos.shouldDisplayRelationLink) {
+    if (!shouldDisplayRelationLink) {
       return null;
     }
 
@@ -173,7 +171,7 @@ function SelectWrapper({
         </FormattedMessage>
       </Link>
     );
-  }, [queryInfos.shouldDisplayRelationLink, pathname, to, value]);
+  }, [shouldDisplayRelationLink, pathname, to, value]);
 
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
@@ -224,7 +222,7 @@ function SelectWrapper({
             addRelation({ target: { name, value } });
           }}
           components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
-          displayNavigationLink={queryInfos.shouldDisplayRelationLink}
+          displayNavigationLink={shouldDisplayRelationLink}
           id={name}
           isDisabled={isDisabled}
           isLoading={isLoading}
