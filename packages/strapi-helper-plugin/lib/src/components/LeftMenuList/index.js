@@ -54,12 +54,13 @@ function LeftMenuList({ customLink, links, title, searchable }) {
       return links.map(link => {
         return {
           ...link,
-          links: matchSorter(link.links, search, { keys: ['title'] }),
+          links: matchSorter(link.links, search.toLowerCase(), {
+            keys: [item => item.title.toLowerCase()],
+          }),
         };
       });
     }
-
-    return matchSorter(links, search, { keys: ['title'] });
+    return matchSorter(links, search.toLowerCase(), { keys: [item => item.title.toLowerCase()] });
   };
 
   const renderCompo = (link, i) => {
