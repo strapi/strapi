@@ -39,6 +39,7 @@ const HomePage = () => {
   const { search } = useLocation();
   const isMounted = useRef(true);
   const {
+    config,
     data,
     dataCount,
     dataToDelete,
@@ -125,17 +126,39 @@ const HomePage = () => {
     return null;
   };
 
+  const fetchConfig = async () => {
+    const requestURL = getRequestUrl('config');
+    try {
+      return await request(requestURL, {
+        method: 'GET',
+      });
+    } catch (err) {
+      console.error(err);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+
+      return { input: { types: ['*/*'] } };
+    }
+  };
+
   const fetchListData = async () => {
     if (canRead) {
       dispatch({ type: 'GET_DATA' });
 
-      const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+      const [config, data, count] = await Promise.all([
+        fetchConfig(),
+        fetchData(),
+        fetchDataCount(),
+      ]);
 
       if (isMounted.current) {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
           count,
+          config,
         });
       }
     }
@@ -349,6 +372,7 @@ const HomePage = () => {
       <Header {...headerProps} isLoading={isLoading} />
       {content}
       <ModalStepper
+        inputConfig={config.input}
         initialFileToEdit={fileToEdit}
         initialStep={modalInitialStep}
         isOpen={isModalOpen}

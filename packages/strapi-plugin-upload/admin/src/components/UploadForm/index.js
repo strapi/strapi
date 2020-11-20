@@ -11,6 +11,7 @@ const UploadForm = ({
   formErrors,
   onChange,
   setShouldDisplayNextButton,
+  inputConfig,
 }) => {
   useEffect(() => {
     return () => {
@@ -32,7 +33,9 @@ const UploadForm = ({
     <ModalNavWrapper links={links}>
       {to => (
         <ModalSection>
-          {to === 'computer' && <InputFileModal onChange={addFilesToUpload} />}
+          {to === 'computer' && (
+            <InputFileModal onChange={addFilesToUpload} inputConfig={inputConfig} />
+          )}
           {to === 'url' && (
             <InputUploadURL errors={formErrors} onChange={onChange} value={filesToDownload} />
           )}
@@ -56,6 +59,9 @@ UploadForm.propTypes = {
   formErrors: PropTypes.object,
   onChange: PropTypes.func,
   setShouldDisplayNextButton: PropTypes.func,
+  inputConfig: PropTypes.shape({
+    accept: PropTypes.arrayOf(PropTypes.string).isRequired,
+  }).isRequired,
 };
 
 export default UploadForm;

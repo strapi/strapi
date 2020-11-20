@@ -1,15 +1,57 @@
 import React, { useEffect, useReducer, useRef } from 'react';
+import CreatableSelect from 'react-select/creatable';
 import { Header, Inputs } from '@buffetjs/custom';
 import { isEqual } from 'lodash';
 import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 
 import { getRequestUrl, getTrad } from '../../utils';
 import Text from '../../components/Text';
-// import Divider from './Divider';
+import Divider from './Divider';
 import SectionTitleWrapper from './SectionTitleWrapper';
 import Wrapper from './Wrapper';
 import init from './init';
 import reducer, { initialState } from './reducer';
+
+// copy from packages/strapi-admin/admin/src/components/Webhooks/HeadersInput/index.js:28
+const getBorderColor = ({ isFocused = false }) => (isFocused ? '#78caff' : '#E3E9F3');
+const customStyles = {
+  control: (base, state) => ({
+    ...base,
+    border: `1px solid ${getBorderColor({ isFocused: state.isFocused })} !important`,
+    borderRadius: '2px !important',
+  }),
+  menu: base => {
+    return {
+      ...base,
+      padding: '0',
+      border: '1px solid #e3e9f3',
+      borderTop: '1px solid #78caff',
+      borderTopRightRadius: '0',
+      borderTopLeftRadius: '0',
+      borderBottomRightRadius: '3px',
+      borderBottomLeftRadius: '3px',
+      boxShadow: 'none',
+      marginTop: '-1px;',
+    };
+  },
+  menuList: base => ({
+    ...base,
+    maxHeight: '224px',
+    paddingTop: '0',
+  }),
+  option: (base, state) => {
+    return {
+      ...base,
+      backgroundColor: state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
+      color: '#000000',
+      fontSize: '13px',
+      fontWeight: state.isSelected ? '600' : '400',
+      cursor: state.isFocused ? 'pointer' : 'initial',
+      height: '32px',
+      lineHeight: '16px',
+    };
+  },
+};
 
 const SettingsPage = () => {
   const { formatMessage } = useGlobalContext();
@@ -27,7 +69,13 @@ const SettingsPage = () => {
       if (isMounted.current) {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data,
+          data: {
+            ...data,
+            supportFormat: (data.supportFormat || []).map(label => ({ label, value: label })),
+            supportFormatOptions: (data.supportFormatOptions || [])
+              .concat()
+              .map(label => ({ label, value: label })),
+          },
         });
       }
     } catch (err) {
@@ -46,10 +94,19 @@ const SettingsPage = () => {
   }, []);
 
   const handleSubmit = async () => {
+    const supportFormat = modifiedData.supportFormat || [];
+    const supportFormatOptions = modifiedData.supportFormatOptions || [];
+    const payload = {
+      ...modifiedData,
+      supportFormat: supportFormat.map(({ value }) => value),
+      supportFormatOptions: [
+        ...new Set(supportFormatOptions.concat(supportFormat).map(({ value }) => value)),
+      ],
+    };
     try {
       await request(getRequestUrl('settings'), {
         method: 'PUT',
-        body: modifiedData,
+        body: payload,
       });
 
       if (isMounted.current) {
@@ -105,6 +162,13 @@ const SettingsPage = () => {
       value,
     });
   };
+  const onChangeSupportFormat = value => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: 'supportFormat',
+      value,
+    });
+  };
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -115,6 +179,31 @@ const SettingsPage = () => {
       <Header {...headerProps} />
       <Wrapper>
         <div className="container-fluid">
+          <div className="row">
+            <SectionTitleWrapper className="col-12">
+              <Text fontSize="xs" fontWeight="semiBold" color="#787E8F">
+                {formatMessage({ id: getTrad('settings.section.common.label') })}
+              </Text>
+            </SectionTitleWrapper>
+            <div className="col-6">
+              <label htmlFor="support-formats">
+                {formatMessage({ id: getTrad('settings.form.supportFormats.label') })}
+              </label>
+              <section>
+                <CreatableSelect
+                  isMulti
+                  isClearable
+                  id="support-formats"
+                  onChange={onChangeSupportFormat}
+                  options={modifiedData.supportFormatOptions}
+                  styles={customStyles}
+                  value={modifiedData.supportFormat}
+                />
+              </section>
+              <p>{formatMessage({ id: getTrad('settings.form.supportFormats.description') })}</p>
+            </div>
+          </div>
+          <Divider />
           <div className="row">
             <SectionTitleWrapper className="col-12">
               <Text fontSize="xs" fontWeight="semiBold" color="#787E8F">

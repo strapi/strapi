@@ -19,6 +19,7 @@ const ModalStepper = ({
   onClosed,
   onRemoveFileFromDataToDelete,
   onToggle,
+  inputConfig,
 }) => {
   const { allowedActions } = useAppContext();
   const { emitEvent, formatMessage } = useGlobalContext();
@@ -506,6 +507,7 @@ const ModalStepper = ({
         {Component && (
           <Component
             {...allowedActions}
+            inputConfig={inputConfig}
             onAbortUpload={handleAbortUpload}
             addFilesToUpload={addFilesToUpload}
             fileToEdit={fileToEdit}
@@ -624,6 +626,9 @@ ModalStepper.propTypes = {
   onClosed: PropTypes.func,
   onRemoveFileFromDataToDelete: PropTypes.func,
   onToggle: PropTypes.func,
+  inputConfig: PropTypes.shape({
+    accept: PropTypes.arrayOf(PropTypes.string).isRequired,
+  }).isRequired,
 };
 
 export default ModalStepper;

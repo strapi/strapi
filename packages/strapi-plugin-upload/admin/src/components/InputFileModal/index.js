@@ -8,7 +8,7 @@ import Label from './Label';
 import Input from '../Input';
 import P from './P';
 
-const InputFileModal = ({ name, onChange }) => {
+const InputFileModal = ({ name, onChange, inputConfig }) => {
   const [isDragging, setIsDragging] = useState(false);
   const { formatMessage } = useGlobalContext();
   const ref = createRef();
@@ -54,7 +54,14 @@ const InputFileModal = ({ name, onChange }) => {
       <Button type="button" id="button" name="button" color="primary" onClick={handleClick}>
         {formatMessage({ id: getTrad('input.button.label') })}
       </Button>
-      <Input ref={ref} type="file" multiple name={name} onChange={handleChange} />
+      <Input
+        ref={ref}
+        type="file"
+        accept={inputConfig.accept.join(',')}
+        multiple
+        name={name}
+        onChange={handleChange}
+      />
       {isDragging && <div className="dragzone" onDragLeave={handleDragLeave} />}
     </Label>
   );
@@ -68,6 +75,9 @@ InputFileModal.defaultProps = {
 InputFileModal.propTypes = {
   name: PropTypes.string,
   onChange: PropTypes.func,
+  inputConfig: PropTypes.shape({
+    accept: PropTypes.arrayOf(PropTypes.string).isRequired,
+  }).isRequired,
 };
 
 export default InputFileModal;

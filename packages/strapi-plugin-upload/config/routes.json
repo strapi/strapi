@@ -17,6 +17,14 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/config",
+      "handler": "Upload.getUploadConfig",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "POST",
       "path": "/",
       "handler": "Upload.upload",

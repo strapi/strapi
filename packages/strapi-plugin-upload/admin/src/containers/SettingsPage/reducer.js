@@ -7,12 +7,16 @@ const initialState = fromJS({
     sizeOptimization: true,
     autoOrientation: false,
     videoPreview: false,
+    supportFormat: [],
+    supportFormatOptions: [],
   },
   modifiedData: {
     responsiveDimensions: true,
     sizeOptimization: true,
     autoOrientation: false,
     videoPreview: false,
+    supportFormat: [],
+    supportFormatOptions: [],
   },
 });
 

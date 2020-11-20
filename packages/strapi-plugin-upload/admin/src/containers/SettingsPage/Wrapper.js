@@ -12,6 +12,19 @@ const Wrapper = styled.div`
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.darkGrey};
   background: ${({ theme }) => theme.main.colors.white};
+  section {
+    + p {
+      color: #9ea7b8;
+      width: 100%;
+      padding-top: 9px;
+      font-size: 13px;
+      line-height: normal;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: -8px;
+    }
+  }
 `;
 
 export default Wrapper;
