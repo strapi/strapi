@@ -118,7 +118,7 @@ describe('Migration - draft and publish', () => {
         });
 
         data.dogs = sortedBody;
-      });
+      }, 60000);
     });
 
     describe('Disabling D&P on a content-type', () => {
@@ -154,16 +154,20 @@ describe('Migration - draft and publish', () => {
         expect(body.results.length).toBe(1);
         expect(body.results[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
         expect(body.results[0].published_at).toBeUndefined();
-      });
+      }, 60000);
+
       test('Unique constraint is kept after disabling the feature', async () => {
         const dogToCreate = { code: 'sameCode' };
+
         let res = await rq({
           method: 'POST',
           url: `/content-manager/collection-types/application::dog.dog/`,
           body: dogToCreate,
         });
+
         expect(res.statusCode).toBe(200);
         expect(res.body).toMatchObject(dogToCreate);
+
         data.dogs.push(res.body);
 
         res = await rq({
@@ -171,6 +175,7 @@ describe('Migration - draft and publish', () => {
           url: `/content-manager/collection-types/application::dog.dog/`,
           body: dogToCreate,
         });
+
         expect(res.statusCode).toBe(400);
       });
     });

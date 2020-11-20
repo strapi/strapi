@@ -18,6 +18,7 @@ const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
 const createStrapiInstance = async ({ ensureSuperAdmin = false } = {}) => {
   jest.resetModules();
+  delete global.strapi;
   const strapi = require('../../packages/strapi/lib');
   const options = { dir: TEST_APP_URL };
   const instance = strapi(options);

@@ -72,7 +72,7 @@ describe('Content Type Builder - Components', () => {
       });
 
       await restart();
-    }, 10000);
+    }, 60000);
 
     test('Errors on already existing components', async () => {
       const res = await rq({
@@ -239,7 +239,7 @@ describe('Content Type Builder - Components', () => {
           },
         },
       });
-    }, 10000);
+    }, 60000);
   });
 
   describe('DELETE /components/:uid', () => {
@@ -279,6 +279,6 @@ describe('Content Type Builder - Components', () => {
       expect(tryGet.body).toEqual({
         error: 'component.notFound',
       });
-    }, 10000);
+    }, 60000);
   });
 });

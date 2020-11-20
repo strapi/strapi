@@ -92,7 +92,7 @@ describe('Migration - unique attribute', () => {
         body: { name: data.dogs[0].name },
       });
       expect(res.statusCode).toBe(400);
-    });
+    }, 60000);
   });
 
   describe('Unique: true -> false', () => {
@@ -113,6 +113,6 @@ describe('Migration - unique attribute', () => {
 
       expect(res.body).toMatchObject({ name: data.dogs[0].name });
       data.dogs.push(res.body);
-    });
+    }, 60000);
   });
 });

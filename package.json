@@ -72,7 +72,7 @@
     "test:front:update:ce": "cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --u",
     "test:snyk": "snyk test",
     "test:unit": "jest --verbose",
-    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --forceExit --detectOpenHandles",
+    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --forceExit --detectOpenHandles --logHeapUsage",
     "test:generate-app": "node test/createTestApp.js",
     "test:start-app": "node test/startTestApp.js",
     "doc:api": "node scripts/open-api/serve.js"

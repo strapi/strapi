@@ -24,7 +24,7 @@ describe('Content Type Builder - Content types', () => {
 
   afterEach(async () => {
     await restart();
-  });
+  }, 60000);
 
   afterAll(async () => {
     const modelsName = [
@@ -233,7 +233,7 @@ describe('Content Type Builder - Content types', () => {
 
       expect(updateRes.statusCode).toBe(400);
       expect(updateRes.body.error).toMatch('multiple entries in DB');
-    });
+    }, 60000);
   });
 
   describe('Private relation field', () => {
