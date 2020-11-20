@@ -7,9 +7,9 @@
  */
 
 const _ = require('lodash');
+const { sanitizeEntity } = require('strapi-utils');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
-const { sanitizeEntity } = require('strapi-utils');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {

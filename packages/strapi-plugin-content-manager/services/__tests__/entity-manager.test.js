@@ -1,6 +1,6 @@
 'use strict';
 
-const contentManagerService = require('../ContentManager');
+const entityManager = require('../entity-manager');
 
 describe('Content-Manager', () => {
   const fakeModel = {
@@ -13,6 +13,9 @@ describe('Content-Manager', () => {
         entityService: {
           update: jest.fn(),
         },
+        entityValidator: {
+          validateEntityCreation() {},
+        },
         eventHub: { emit: jest.fn() },
         getModel: jest.fn(() => fakeModel),
       };
@@ -24,11 +27,11 @@ describe('Content-Manager', () => {
 
     test('Publish a content-type', async () => {
       const model = 'application::test.test';
-      const params = { id: 1 };
-      await contentManagerService.publish(params, model);
+      const entity = { id: 1, published_at: null };
+      await entityManager.publish(entity, model);
 
       expect(strapi.entityService.update).toBeCalledWith(
-        { params, data: { published_at: expect.any(Date) } },
+        { params: { id: entity.id }, data: { published_at: expect.any(Date) } },
         { model }
       );
     });
@@ -51,11 +54,11 @@ describe('Content-Manager', () => {
 
     test('Unpublish a content-type', async () => {
       const model = 'application::test.test';
-      const params = { id: 1 };
-      await contentManagerService.unpublish(params, model);
+      const entity = { id: 1, published_at: new Date() };
+      await entityManager.unpublish(entity, model);
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(
-        { params, data: { published_at: null } },
+        { params: { id: entity.id }, data: { published_at: null } },
         { model }
       );
     });

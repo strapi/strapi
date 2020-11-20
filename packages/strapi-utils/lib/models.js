@@ -77,9 +77,9 @@ module.exports = {
     } else if (_.has(attribute, 'via') && _.has(attribute, 'collection')) {
       if (!_.has(models, attribute.collection)) {
         throw new Error(
-          `The collection \`${_.upperFirst(
-            attribute.collection
-          )}\` is missing from the ${attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''} models`
+          `The collection \`${_.upperFirst(attribute.collection)}\` is missing from the ${
+            attribute.plugin ? '(plugin - ' + attribute.plugin + ')' : ''
+          } models`
         );
       }
       const relatedAttribute = models[attribute.collection].attributes[attribute.via];
@@ -321,7 +321,12 @@ module.exports = {
 
       // Get relation nature
       let details;
+
       const targetName = association.model || association.collection || '';
+
+      const targetModel =
+        targetName !== '*' ? strapi.db.getModel(targetName, association.plugin) : null;
+
       const infos = this.getNature({
         attribute: association,
         attributeName: key,
@@ -338,6 +343,7 @@ module.exports = {
         const ast = {
           alias: key,
           type: 'collection',
+          targetUid: targetModel.uid,
           collection: association.collection,
           via: association.via || undefined,
           nature: infos.nature,
@@ -364,6 +370,7 @@ module.exports = {
         definition.associations.push({
           alias: key,
           type: 'model',
+          targetUid: targetModel.uid,
           model: association.model,
           via: association.via || undefined,
           nature: infos.nature,
@@ -417,6 +424,7 @@ module.exports = {
 
       definition.associations.push({
         alias: key,
+        targetUid: '*',
         type: association.model ? 'model' : 'collection',
         related: models,
         nature: infos.nature,

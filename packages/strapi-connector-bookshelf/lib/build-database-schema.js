@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');

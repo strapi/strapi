@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');

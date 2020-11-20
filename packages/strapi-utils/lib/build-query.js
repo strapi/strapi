@@ -1,3 +1,5 @@
+'use strict';
+
 //TODO: move to dbal
 
 const _ = require('lodash');

@@ -5,6 +5,7 @@ const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
 const { Command } = require('commander');
+
 const program = new Command();
 
 const packageJSON = require('../package.json');

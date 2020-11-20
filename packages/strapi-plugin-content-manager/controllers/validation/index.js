@@ -7,6 +7,10 @@ const createModelConfigurationSchema = require('./model-configuration');
 
 const TYPES = ['singleType', 'collectionType'];
 
+const handleError = error => {
+  throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
+};
+
 /**
  * Validates type kind
  */
@@ -17,6 +21,23 @@ const validateKind = kind => {
     .nullable()
     .validate(kind)
     .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
+const validateBulkDeleteInput = (data = {}) => {
+  return yup
+    .object({
+      ids: yup
+        .array()
+        .of(yup.strapiID())
+        .min(1)
+        .required(),
+    })
+    .required()
+    .validate(data, {
+      strict: true,
+      abortEarly: false,
+    })
+    .catch(handleError);
 };
 
 const validateGenerateUIDInput = data => {
@@ -30,9 +51,7 @@ const validateGenerateUIDInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => {
-      throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
-    });
+    .catch(handleError);
 };
 
 const validateCheckUIDAvailabilityInput = data => {
@@ -49,9 +68,7 @@ const validateCheckUIDAvailabilityInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => {
-      throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
-    });
+    .catch(handleError);
 };
 
 const validateUIDField = (contentTypeUID, field) => {
@@ -74,6 +91,7 @@ const validateUIDField = (contentTypeUID, field) => {
 module.exports = {
   createModelConfigurationSchema,
   validateKind,
+  validateBulkDeleteInput,
   validateGenerateUIDInput,
   validateCheckUIDAvailabilityInput,
   validateUIDField,

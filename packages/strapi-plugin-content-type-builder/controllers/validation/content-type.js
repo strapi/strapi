@@ -5,10 +5,10 @@ const yup = require('yup');
 const { formatYupErrors, nameToSlug } = require('strapi-utils');
 const pluralize = require('pluralize');
 
+const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
-const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 
 /**
  * Allowed relation per type kind

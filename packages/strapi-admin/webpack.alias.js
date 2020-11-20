@@ -1,4 +1,7 @@
+'use strict';
+
 const path = require('path');
+
 const alias = [
   'object-assign',
   'whatwg-fetch',

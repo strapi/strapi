@@ -4,10 +4,10 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const generator = require('strapi-generate');
 
+const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
-const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
 const { coreUids, pluginsUids } = require('./constants');
 
 const isContentTypeEditable = (contentType = {}) => {

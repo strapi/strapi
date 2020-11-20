@@ -1,5 +1,7 @@
-const parseType = require('../parse-type');
+'use strict';
+
 const format = require('date-fns/format');
+const parseType = require('../parse-type');
 
 describe('parseType', () => {
   describe('boolean', () => {

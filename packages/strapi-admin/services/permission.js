@@ -3,13 +3,13 @@
 const _ = require('lodash');
 const { flatMap, filter } = require('lodash/fp');
 const pmap = require('p-map');
+const { getBoundActionsBySubject, BOUND_ACTIONS_FOR_FIELDS } = require('../domain/role');
+const { createPermission } = require('../domain/permission');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
 const actionProvider = require('./permission/action-provider');
 const { EDITOR_CODE } = require('./constants');
-const { getBoundActionsBySubject, BOUND_ACTIONS_FOR_FIELDS } = require('../domain/role');
-const { createPermission } = require('../domain/permission');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
@@ -182,6 +182,7 @@ const ensureBoundPermissionsInDatabase = async () => {
           fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
         })
       );
+
       await createMany(permissions);
     }
   }

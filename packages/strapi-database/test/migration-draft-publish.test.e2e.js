@@ -40,36 +40,44 @@ describe('Migration - draft and publish', () => {
     rq = createAuthRequest(token);
     modelsUtils = createModelsUtils({ rq });
     await modelsUtils.createContentTypes([dogModel]);
+
     for (const dog of dogs) {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::dog.dog',
+        url: '/content-manager/collection-types/application::dog.dog',
         body: dog,
       });
+
       data.dogs.push(res.body);
     }
   }, 60000);
 
   afterAll(async () => {
-    const queryString = data.dogs.map((p, i) => `${i}=${p.id}`).join('&');
     await rq({
-      method: 'DELETE',
-      url: `/content-manager/explorer/deleteAll/application::dog.dog?${queryString}`,
+      method: 'POST',
+      url: `/content-manager/collection-types/application::dog.dog/actions/bulkDelete`,
+      body: {
+        ids: data.dogs.map(({ id }) => id),
+      },
     });
+
     await modelsUtils.deleteContentTypes(['dog']);
   }, 60000);
 
   describe('Enabling D&P on a content-type', () => {
     test('No published_at before enabling the feature', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
         method: 'GET',
+        url: '/content-manager/collection-types/application::dog.dog',
       });
-      expect(body.length).toBe(2);
-      const expectDog = expectDog => dog =>
-        dog.name === expectDog.name && _.isUndefined(dog.published_at);
-      expect(body.find(expectDog(data.dogs[0])));
-      expect(body.find(expectDog(data.dogs[1])));
+
+      expect(body.results.length).toBe(2);
+      const expectDog = expectDog => dog => {
+        return dog.name === expectDog.name && _.isUndefined(dog.published_at);
+      };
+
+      expect(body.results.find(expectDog(data.dogs[0])));
+      expect(body.results.find(expectDog(data.dogs[1])));
     });
 
     test('Published_at is equal to created_at after enabling the feature', async () => {
@@ -80,25 +88,31 @@ describe('Migration - draft and publish', () => {
       });
 
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
         method: 'GET',
+        url: '/content-manager/collection-types/application::dog.dog',
       });
-      expect(body.length).toBe(2);
-      const expectDog = expectDog => dog =>
-        dog.name === expectDog.name &&
-        dog.published_at === (dog.createdAt || dog.created_at) &&
-        !isNaN(new Date(dog.published_at).valueOf());
-      expect(body.find(expectDog(data.dogs[0])));
-      expect(body.find(expectDog(data.dogs[1])));
-      data.dogs = body;
+
+      expect(body.results.length).toBe(2);
+
+      const expectDog = expectDog => dog => {
+        return (
+          dog.name === expectDog.name &&
+          dog.published_at === (dog.createdAt || dog.created_at) &&
+          !isNaN(new Date(dog.published_at).valueOf())
+        );
+      };
+
+      expect(body.results.find(expectDog(data.dogs[0])));
+      expect(body.results.find(expectDog(data.dogs[1])));
+      data.dogs = body.results;
     });
   });
 
   describe('Disabling D&P on a content-type', () => {
     test('No published_at after disabling the feature + draft removed', async () => {
       const res = await rq({
-        url: `/content-manager/explorer/application::dog.dog/unpublish/${data.dogs[1].id}`,
         method: 'POST',
+        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
       });
       data.dogs[1] = res.body;
 
@@ -111,12 +125,12 @@ describe('Migration - draft and publish', () => {
       data.dogs = data.dogs.filter(dog => !_.isNil(dog.published_at));
 
       let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
         method: 'GET',
+        url: '/content-manager/collection-types/application::dog.dog',
       });
-      expect(body.length).toBe(1);
-      expect(body[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
-      expect(body[0].published_at).toBeUndefined();
+      expect(body.results.length).toBe(1);
+      expect(body.results[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
+      expect(body.results[0].published_at).toBeUndefined();
     });
   });
 });

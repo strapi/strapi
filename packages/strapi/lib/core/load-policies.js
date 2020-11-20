@@ -1,8 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-const _ = require('lodash');
 const path = require('path');
+const _ = require('lodash');
 const fse = require('fs-extra');
 
 module.exports = dir => {
