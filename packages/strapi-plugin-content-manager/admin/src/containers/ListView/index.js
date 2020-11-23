@@ -193,6 +193,7 @@ function ListView({
       });
 
       onDeleteSeveralDataSucceeded();
+      emitEventRef.current('didBulkDeleteEntries');
     } catch (err) {
       strapi.notification.error(`${pluginId}.error.record.delete`);
     }
@@ -346,6 +347,11 @@ function ListView({
     };
   }, [total, headerAction, label, canRead, formatMessage]);
 
+  const handleToggleModalDeleteAll = e => {
+    emitEventRef.current('willBulkDeleteEntries');
+    toggleModalDeleteAll(e);
+  };
+
   return (
     <>
       <ListViewProvider
@@ -360,7 +366,7 @@ function ListView({
         onChangeBulkSelectall={onChangeBulkSelectall}
         onClickDelete={handleClickDelete}
         slug={slug}
-        toggleModalDeleteAll={toggleModalDeleteAll}
+        toggleModalDeleteAll={handleToggleModalDeleteAll}
         setQuery={setQuery}
       >
         <FilterPicker

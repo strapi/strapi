@@ -6,10 +6,11 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import useListView from '../../hooks/useListView';
+import { useListView } from '../../hooks';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
+import RelationPreviewList from '../RelationPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
@@ -62,6 +63,9 @@ const getDisplayedValue = (type, value, name) => {
 
       return date.format(dateFormats.time);
     }
+    case 'relation': {
+      return value;
+    }
     default:
       return '-';
   }
@@ -84,12 +88,16 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
       icon: canCreate ? <Duplicate fill="black" /> : null,
       onClick: e => {
         e.stopPropagation();
-
         goTo(`create/clone/${row.id}`);
       },
     },
     {
       icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
+      onClick: e => {
+        e.stopPropagation();
+        emitEventRef.current('willDeleteEntryFromList');
+        goTo(row.id);
+      },
     },
     {
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
@@ -115,15 +123,21 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
       )}
       {headers.map(({ key, name, fieldSchema: { type }, cellFormatter }) => {
         const isMedia = type === 'media';
+        const isRelation = type === 'relation';
 
         return (
           <td key={key}>
             {isMedia && <MediaPreviewList files={memoizedDisplayedValue(name, type)} />}
             {cellFormatter && cellFormatter(row)}
-            {!isMedia && !cellFormatter && (
+            {!isMedia && !isRelation && !cellFormatter && (
               <Truncate>
-                <Truncated>{memoizedDisplayedValue(name, type)}</Truncated>
+                <Truncated title={memoizedDisplayedValue(name, type)}>
+                  {memoizedDisplayedValue(name, type)}
+                </Truncated>
               </Truncate>
+            )}
+            {isRelation && (
+              <RelationPreviewList name={name} value={memoizedDisplayedValue(name, type)} />
             )}
           </td>
         );

@@ -77,6 +77,8 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "containers.List.published": "Published",
   "containers.ListPage.displayedFields": "Displayed Fields",
+  "containers.ListPage.items.plural": "items",
+  "containers.ListPage.items.singular": "item",
   "containers.ListPage.table-headers.published_at": "State",
   "containers.ListSettingsView.modal-form.edit-label": "Edit the label",
   "containers.SettingPage.add.field": "Insert another field",
