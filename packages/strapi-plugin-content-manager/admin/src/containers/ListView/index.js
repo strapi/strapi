@@ -217,7 +217,10 @@ function ListView({
         method: 'DELETE',
       });
 
-      strapi.notification.success(`${pluginId}.success.record.delete`);
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: `${pluginId}.success.record.delete` },
+      });
 
       // Close the modal and refetch data
       onDeleteDataSucceeded();
@@ -229,7 +232,10 @@ function ListView({
         formatMessage({ id: `${pluginId}.error.record.delete` })
       );
 
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: errorMessage,
+      });
       // Close the modal
       onDeleteDataError();
     }

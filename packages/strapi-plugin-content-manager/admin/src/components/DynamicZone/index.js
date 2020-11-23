@@ -34,10 +34,8 @@ const DynamicZone = ({
   metadatas,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = fieldSchema;
-
   const dynamicZoneErrors = useMemo(() => {
     return Object.keys(formErrors)
       .filter(key => {
@@ -47,7 +45,6 @@ const DynamicZone = ({
   }, [formErrors, name]);
 
   const dynamicZoneAvailableComponents = useMemo(() => fieldSchema.components || [], [fieldSchema]);
-
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
   const missingComponentNumber = min - dynamicDisplayedComponentsLength;
   const hasError = dynamicZoneErrors.length > 0;

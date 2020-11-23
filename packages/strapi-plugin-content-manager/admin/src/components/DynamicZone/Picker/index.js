@@ -1,26 +1,75 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { groupBy } from 'lodash';
 import PropTypes from 'prop-types';
+import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
-import Card from './Card';
+import { useContentTypeLayout } from '../../../hooks';
+import Category from './Category';
 import Wrapper from './Wrapper';
 
 const Picker = ({ components, isOpen, onClickAddComponent }) => {
+  const { getComponentLayout } = useContentTypeLayout();
+  const [categoryToOpen, setCategoryToOpen] = useState('');
+
+  const handleAddComponentToDz = useCallback(
+    componentUid => {
+      onClickAddComponent(componentUid);
+      setCategoryToOpen('');
+    },
+    [onClickAddComponent]
+  );
+
+  const handleClickToggle = useCallback(
+    categoryName => {
+      const nextCategoryToOpen = categoryToOpen === categoryName ? '' : categoryName;
+
+      setCategoryToOpen(nextCategoryToOpen);
+    },
+    [categoryToOpen]
+  );
+
+  const dynamicComponentCategories = useMemo(() => {
+    const componentsWithInfo = components.map(componentUid => {
+      const { category, info } = getComponentLayout(componentUid);
+
+      return { componentUid, category, info };
+    });
+
+    const categories = groupBy(componentsWithInfo, 'category');
+
+    return Object.keys(categories).reduce((acc, current) => {
+      acc.push({ category: current, components: categories[current] });
+
+      return acc;
+    }, []);
+  }, [components, getComponentLayout]);
+
   return (
-    <Wrapper isOpen={isOpen}>
-      <div>
-        <p className="componentPickerTitle">
-          <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
-        </p>
-        <div className="componentsList">
-          {components.map(componentUid => {
-            return (
-              <Card key={componentUid} componentUid={componentUid} onClick={onClickAddComponent} />
-            );
-          })}
+    <Collapse isOpen={isOpen}>
+      <Wrapper>
+        <div>
+          <p className="componentPickerTitle">
+            <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
+          </p>
+          <div className="categoriesList">
+            {dynamicComponentCategories.map(({ category, components }, index) => {
+              return (
+                <Category
+                  key={category}
+                  category={category}
+                  components={components}
+                  isOpen={category === categoryToOpen}
+                  isFirst={index === 0}
+                  onAddComponent={handleAddComponentToDz}
+                  onToggle={handleClickToggle}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </Wrapper>
+      </Wrapper>
+    </Collapse>
   );
 };
 

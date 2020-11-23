@@ -84,7 +84,13 @@ cd strapi && yarn setup
 
 #### 4. Start the example application
 
-Read the `getstarted` application README [here](./examples/getstarted/README.md).
+To start a test example application to test your changes quickly and also for the next step.
+
+```bash
+cd strapi/examples/getstarted && yarn develop
+```
+
+Read the `getstarted` application README [here](./examples/getstarted/README.md) for more details.
 
 #### 5. Running the administration panel in development mode
 

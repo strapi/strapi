@@ -69,7 +69,10 @@ function EditView() {
           dispatch({ type: 'UNSET_LOADER' });
 
           if (err.code !== 20) {
-            strapi.notification.error('notification.error');
+            strapi.notification.toggle({
+              type: 'warning',
+              message: { id: 'notification.error' },
+            });
           }
         }
       }
@@ -176,7 +179,10 @@ function EditView() {
         setErrors(getYupInnerErrors(err));
 
         if (submit) {
-          strapi.notification.error('notification.form.error.fields');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.form.error.fields' },
+          });
         }
       }
     }
@@ -194,11 +200,17 @@ function EditView() {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      strapi.notification.success('Settings.webhooks.created');
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: 'Settings.webhooks.created' },
+      });
       replace(`/settings/webhooks/${data.id}`);
     } catch (err) {
       setIsSubmitting(false);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -260,7 +272,10 @@ function EditView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
         dispatch({
           type: 'SET_IS_TRIGGERING',
@@ -353,10 +368,16 @@ function EditView() {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      strapi.notification.success('notification.form.success.fields');
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: 'notification.form.success.fields' },
+      });
     } catch (err) {
       setIsSubmitting(false);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }

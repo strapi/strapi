@@ -6,6 +6,7 @@
  */
 
 const _ = require('lodash');
+const { sanitizeEntity } = require('strapi-utils');
 const apiUploadController = require('./upload/api');
 const adminUploadController = require('./upload/admin');
 
@@ -66,10 +67,12 @@ module.exports = {
 
   async search(ctx) {
     const { id } = ctx.params;
-
-    ctx.body = await strapi.query('file', 'upload').custom(searchQueries)({
+    const model = strapi.getModel('file', 'upload');
+    const entries = await strapi.query('file', 'upload').custom(searchQueries)({
       id,
     });
+
+    ctx.body = sanitizeEntity(entries, { model });
   },
 };
 

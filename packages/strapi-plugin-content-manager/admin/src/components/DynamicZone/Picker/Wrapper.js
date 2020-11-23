@@ -1,10 +1,7 @@
 import styled from 'styled-components';
 
-/* eslint-disable indent */
 const Wrapper = styled.div`
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.2s ease-out;
 
   > div {
     margin-top: 15px;
@@ -12,14 +9,8 @@ const Wrapper = styled.div`
     background-color: #f2f3f4;
   }
 
-  ${({ isOpen }) =>
-    isOpen &&
-    `
-    max-height: 260px;
-  `}
-
   .componentPickerTitle {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: #919bae;
     font-weight: 600;
     font-size: 13px;
@@ -27,7 +18,14 @@ const Wrapper = styled.div`
   }
   .componentsList {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .categoriesList {
+    padding-bottom: 4px;
   }
 `;
 

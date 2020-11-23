@@ -102,7 +102,10 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
       });
       emitEvent('didEditListSettings');
     } catch (err) {
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -201,7 +204,10 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
                         e.stopPropagation();
 
                         if (displayedFields.length === 1) {
-                          strapi.notification.info(`${pluginId}.notification.info.minimumFields`);
+                          strapi.notification.toggle({
+                            type: 'info',
+                            message: { id: `${pluginId}.notification.info.minimumFields` },
+                          });
                         } else {
                           dispatch({
                             type: 'REMOVE_FIELD',

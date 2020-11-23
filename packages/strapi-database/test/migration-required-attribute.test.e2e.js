@@ -75,11 +75,13 @@ describe('Migration - required attribute', () => {
 
     test('Cannot create an entry with null after migration', async () => {
       // remove null values otherwise the migration would fail
-      await rq({
+
+      const { body } = await rq({
         method: 'PUT',
         url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
         body: { name: 'Nelson' },
       });
+      data.dogs[0] = body;
 
       // migration
       const schema = await modelsUtils.getContentTypeSchema('dog');
@@ -111,6 +113,7 @@ describe('Migration - required attribute', () => {
       });
 
       expect(res.body).toMatchObject({ name: null });
+      data.dogs.push(res.body);
     });
   });
 });

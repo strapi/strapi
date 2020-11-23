@@ -110,7 +110,7 @@ yarn develop --watch-admin
 ```
 # Go back to to strapi root folder
 cd ../..
-npm run develop --watch-admin
+npm run develop -- --watch-admin
 ```
 
 :::
@@ -322,7 +322,7 @@ export default Wysiwyg;
 ```js
 import React from 'react';
 import PropTypes from 'prop-types';
-import CKEditor from '@ckeditor/ckeditor5-react';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import styled from 'styled-components';
 
