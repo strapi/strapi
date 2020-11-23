@@ -388,7 +388,7 @@ heroku open
 
 If you see the Strapi Welcome page, you have correctly set-up, configured and deployed your Strapi project on Heroku. You will now need to set-up your `admin user` as the production database is brand-new (and empty).
 
-You can now continue with the [Tutorial - Creating an Admin User](../getting-started/quick-start-tutorial.md#_3-create-an-admin-user), if you have any questions on how to proceed.
+You can now continue with the [Tutorial - Creating an Admin User](../getting-started/quick-start.md#_2-create-an-administrator-user), if you have any questions on how to proceed.
 
 ::: warning
 For security reasons, the Content Type Builder plugin is disabled in production. To update content structure, please make your changes locally and deploy again.
