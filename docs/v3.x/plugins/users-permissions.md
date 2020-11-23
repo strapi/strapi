@@ -712,7 +712,7 @@ create: async ctx => {
 
 ## Adding a new provider (to your project)
 
-**Only providers handled by [grant](https://github.com/simov/grant) are supported**. <br> You can check the 180+ supported providers list there: [https://github.com/simov/grant#180-supported-providers--oauth-playground](https://github.com/simov/grant#180-supported-providers--oauth-playground).
+**[grant](https://github.com/simov/grant) supplies configuration for a number of commonly used OAuth providers. [Custom](https://github.com/simov/grant#misc-custom-providers) providers are also supported**. <br> You can view and try out the 200+ supported providers here: [OAuth Playground](https://grant.outofindex.com/).
 
 ### Prepare your files
 
