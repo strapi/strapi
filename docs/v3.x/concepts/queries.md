@@ -355,35 +355,44 @@ const fields = result.toJSON();
 
 ### Knex
 
+Knex.js can be used to build and make custom queries directly to the database.
+
 Documentation: [http://knexjs.org/#Builder](http://knexjs.org/#Builder)
 
-You can access the Knex instance with 
+You can access the Knex instance with:
 
 ```js
 const knex = strapi.connections.default;
 ```
 
-You can then use Knex to build your own custom queries to the DB. You will lose all the functionalities of the model, 
+You can then use Knex to build your own custom queries. You will lose all the functionalities of the model, 
 but this could come handy if you are building a more custom schema.
 Please note that if you are using the [draft system](draft-and-publish.md), Strapi nullyfies all the Draft columns util they are published.
 
 **Example**
 
 ```js
+const _ = require('loadsh');
 
 const knex = strapi.connections.default;
 const result = await knex('restaurants')
   .where('cities', 'berlin')
   .whereNot('cities.published_at', null)
   .join('chefs', 'restaurants.id', 'chefs.restaurant_id')
-  .select('*')
-  .fetch();
+  .select('restaurants.name as restaurant')
+  .select('chef.name as chef')
 
-return result;
+// Loadsh's groupBy method can be used to 
+// return a grouped key-value object generated from 
+// the response
+
+return (_.groupBy(result, 'chef');
 ```
 
 **We strongly suggest to sanitize any strings before making queries to the DB**
-Never attempt to make a raw query with data coming straight from the front-end.
+Never attempt to make a raw query with data coming straight from the front-end; if you
+were looking for raw queries, please refer to [this section](http://knexjs.org/#Raw-Bindings)
+of the documentation.
 
 :::
 
