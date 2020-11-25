@@ -24,8 +24,6 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
     dispatch,
   ] = useReducer(crudReducer, crudInitialState);
 
-  const id = get(data, 'id', '');
-
   const cleanReceivedData = useCallback(
     data => {
       const cleaned = removePasswordFieldsFromData(
@@ -136,7 +134,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
       try {
         emitEventRef.current('willDeleteEntry', trackerProperty);
 
-        const response = await request(getRequestUrl(`${slug}/${id}`), {
+        const response = await request(getRequestUrl(`${slug}`), {
           method: 'DELETE',
         });
 
@@ -151,7 +149,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         return Promise.reject(err);
       }
     },
-    [id, slug]
+    [slug]
   );
 
   const onDeleteSucceeded = useCallback(() => {
@@ -170,7 +168,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
-        strapi.notification.success(getTrad('success.record.save'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('success.record.save') },
+        });
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         setIsCreatingEntry(false);
@@ -194,7 +195,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
       const data = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didPublishEntry');
-      strapi.notification.success(getTrad('success.record.publish'));
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: getTrad('success.record.publish') },
+      });
 
       dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(data) });
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
@@ -214,6 +218,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
         const response = await request(endPoint, { method: 'PUT', body });
+
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('success.record.save') },
+        });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
 
