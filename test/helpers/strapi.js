@@ -4,6 +4,7 @@
 const _ = require('lodash');
 const path = require('path');
 const { createUtils } = require('./utils');
+const strapi = require('../../packages/strapi/lib');
 
 const superAdminCredentials = {
   email: 'admin@strapi.io',
@@ -16,14 +17,13 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
-const createStrapiInstance = async ({ ensureSuperAdmin = false } = {}) => {
-  jest.resetModules();
-  delete global.strapi;
-  const strapi = require('../../packages/strapi/lib');
+const createStrapiInstance = async ({ ensureSuperAdmin = false, logLevel = 'fatal' } = {}) => {
   const options = { dir: TEST_APP_URL };
   const instance = strapi(options);
 
   await instance.load();
+
+  instance.log.level = logLevel;
 
   await instance.app
     // Populate Koa routes

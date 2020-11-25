@@ -19,10 +19,6 @@ module.exports = () => {
         throw new Error(`You can't register new conditions outside of the bootstrap function.`);
       }
 
-      if (this.has(condition.name, condition.plugin)) {
-        throw new Error(`Duplicated condition id: ${getConditionId(condition)}.`);
-      }
-
       registry.set(conditionId, createCondition(condition));
       return this;
     },

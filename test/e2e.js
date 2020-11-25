@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
 const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
@@ -38,11 +37,11 @@ const databases = {
   },
 };
 
-const test = async args => {
-  return execa('yarn', ['-s', 'test:e2e', ...args.split(' ')], {
+const runAllTests = async args => {
+  return execa('yarn', ['-s', 'test:e2e', 'test/all.test.e2e.js'], {
     stdio: 'inherit',
-    cwd: path.resolve(__dirname, '..'),
     env: {
+      STRAPI_TEST_PATHS: args,
       FORCE_COLOR: 1,
     },
   });
@@ -53,7 +52,7 @@ const main = async (database, args) => {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
 
-    await test(args).catch(() => {
+    await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
