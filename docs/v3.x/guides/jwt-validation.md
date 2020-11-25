@@ -93,8 +93,6 @@ module.exports = async (ctx, next) => {
       } catch (error) {
         return handleErrors(ctx, new Error('Invalid token: Token did not match with Strapi and Auth0'), 'unauthorized');
       }
-
-      return handleErrors(ctx, err, 'unauthorized');
     }
 ```
 
