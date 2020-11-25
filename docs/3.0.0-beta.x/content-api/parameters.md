@@ -35,11 +35,11 @@ Filters are used as a suffix of a field name:
 
 ### Examples
 
-#### Find users having `John` as first name.
+#### Find users having `Kai` as first name.
 
-`GET /users?firstName=John`
+`GET /users?firstName=Kai`
 or
-`GET /users?firstName_eq=John`
+`GET /users?firstName_eq=Kai`
 
 #### Find restaurants having a price equal or greater than `3`.
 

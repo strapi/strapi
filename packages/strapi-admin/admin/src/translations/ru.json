@@ -9,7 +9,7 @@
   "Auth.form.button.reset-password": "Сменить пароль",
   "Auth.form.confirmPassword.label": "Подтверждение пароля",
   "Auth.form.email.label": "Email",
-  "Auth.form.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.email.placeholder": "kai@doe.com",
   "Auth.form.error.blocked": "Ваш аккаунт был заблокирован администратором.",
   "Auth.form.error.code.provide": "Указан неверный код.",
   "Auth.form.error.confirmed": "Ваш e-mail не подтвержден.",

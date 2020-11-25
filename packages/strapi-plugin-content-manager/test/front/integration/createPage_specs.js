@@ -22,19 +22,13 @@ describe('Testing Content Manager createPages', function() {
       .wait(1000);
 
     Cypress.Commands.add('ctmTagLink', () => {
-      return cy.get(
-        'a[href="/admin/plugins/content-manager/tag?source=content-manager"]'
-      );
+      return cy.get('a[href="/admin/plugins/content-manager/tag?source=content-manager"]');
     });
     Cypress.Commands.add('ctmProductLink', () => {
-      return cy.get(
-        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
-      );
+      return cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"]');
     });
     Cypress.Commands.add('ctmCategoryLink', () => {
-      return cy.get(
-        'a[href="/admin/plugins/content-manager/category?source=content-manager"]'
-      );
+      return cy.get('a[href="/admin/plugins/content-manager/category?source=content-manager"]');
     });
     Cypress.Commands.add('ctmAddButton', () => {
       return cy.get('button#addEntry');
@@ -338,9 +332,7 @@ describe('Testing Content Manager createPages', function() {
         .get('tbody > tr:nth-child(2)')
         .click()
         .wait(1000)
-        .get(
-          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img'
-        )
+        .get('ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img')
         .click()
         .submitForm()
         .ctmProductLink()
@@ -369,7 +361,7 @@ describe('Testing Content Manager createPages', function() {
         name: 'MacBook',
         description: 'A laptop',
         price: 2000,
-        email: 'john@strapi.io',
+        email: 'kai@strapi.io',
       };
       const product2 = {
         name: 'Dell',
@@ -403,9 +395,7 @@ describe('Testing Content Manager createPages', function() {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         })
-        .get(
-          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img'
-        )
+        .get('ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img')
         .click()
         .get('input#products')
         .type('mac', { force: true })

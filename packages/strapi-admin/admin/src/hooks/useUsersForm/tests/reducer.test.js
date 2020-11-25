@@ -63,11 +63,11 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
           ok: true,
         },
         initialData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           firstname: '',
         },
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           firstname: 'test',
         },
       };
@@ -78,11 +78,11 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
         fieldsToPick: ['email', 'firstname', 'username', 'lastname'],
         formErrors: {},
         initialData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           firstname: '',
         },
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           firstname: '',
         },
       };
@@ -95,7 +95,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
     it('should change the data correctly if the inputType is not password', () => {
       const initialState = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           firstname: null,
         },
       };
@@ -118,7 +118,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
     it('should change the data correctly if the inputType is password', () => {
       const initialState = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: 'pwd123',
         },
       };
@@ -130,7 +130,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
       };
       const expected = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: 'pwd1234',
         },
       };
@@ -141,7 +141,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
     it('should change the data correctly if the inputType is password and the value is empty', () => {
       const initialState = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: 'pwd123',
         },
       };
@@ -153,7 +153,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
       };
       const expected = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
         },
       };
 
@@ -163,7 +163,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
     it('should set the username value to null if the value is empty', () => {
       const initialState = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: 'pwd123',
           username: 'test',
         },
@@ -176,7 +176,7 @@ describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
       };
       const expected = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: 'pwd123',
           username: null,
         },
