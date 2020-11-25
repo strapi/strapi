@@ -211,6 +211,10 @@ class Strapi {
       await this.plugins.graphql.destroy();
     }
 
+    if (_.has(this, 'admin')) {
+      await this.admin.destroy();
+    }
+
     this.eventHub.removeAllListeners();
 
     delete global.strapi;

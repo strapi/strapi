@@ -23,4 +23,8 @@ module.exports = async () => {
   await strapi.admin.services.role.resetSuperAdminPermissions();
   await strapi.admin.services.role.displayWarningIfNoSuperAdmin();
   await strapi.admin.services.user.displayWarningIfUsersDontHaveRole();
+
+  strapi.admin.destroy = async () => {
+    strapi.admin.services.permission.actionProvider.clear();
+  };
 };
