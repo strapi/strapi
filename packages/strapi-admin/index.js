@@ -1,5 +1,4 @@
 'use strict';
-
 /* eslint-disable no-useless-escape */
 const path = require('path');
 const _ = require('lodash');
@@ -253,7 +252,6 @@ async function watchAdmin({ dir, host, port, browser, options }) {
 
   const opts = {
     clientLogLevel: 'silent',
-    hot: true,
     quiet: true,
     open: browser === 'true' ? true : browser,
     publicPath: options.publicPath,

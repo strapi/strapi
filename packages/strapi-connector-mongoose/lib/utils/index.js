@@ -22,6 +22,10 @@ module.exports = (mongoose = Mongoose) => {
   };
 
   const convertType = (name, attr) => {
+    if (_.has(attr, 'columnType')) {
+      return { type: attr.columnType };
+    }
+
     switch (attr.type.toLowerCase()) {
       case 'array':
         return { type: Array };
