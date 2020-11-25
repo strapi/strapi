@@ -64,7 +64,7 @@ program.helpOption('-h, --help', 'Display help for command');
 program.addHelpCommand('help [command]', 'Display help for command');
 
 // `$ strapi version` (--version synonym)
-program.option('-v, --version', 'Output the version number');
+program.version(packageJSON.version, '-v, --version', 'Output the version number');
 program
   .command('version')
   .description('Output your version of Strapi')
