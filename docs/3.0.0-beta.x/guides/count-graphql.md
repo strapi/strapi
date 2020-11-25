@@ -70,7 +70,7 @@ And tada, you can now request the `count` of your Content Type.
 
 - Count all restaurants that have `_3rd` as district value.
 
-Based on the [FoodAdvisor](https://github.com/strapi/foodadvisor) restraurant model.
+Based on the [FoodAdvisor](https://github.com/strapi/foodadvisor) restaurant model.
 
 ```
 {

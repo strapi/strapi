@@ -3,8 +3,6 @@ import styled from 'styled-components';
 /* eslint-disable indent */
 const ComponentsPicker = styled.div`
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.2s ease-out;
 
   > div {
     margin-top: 15px;
@@ -12,14 +10,8 @@ const ComponentsPicker = styled.div`
     background-color: #f2f3f4;
   }
 
-  ${({ isOpen }) =>
-    isOpen &&
-    `
-    max-height: 260px;
-  `}
-
   .componentPickerTitle {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: #919bae;
     font-weight: 600;
     font-size: 13px;
@@ -27,7 +19,11 @@ const ComponentsPicker = styled.div`
   }
   .componentsList {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
+  }
+
+  .categoriesList {
+    padding-bottom: 4px;
   }
 `;
 

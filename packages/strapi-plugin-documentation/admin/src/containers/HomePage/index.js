@@ -93,7 +93,10 @@ export class HomePage extends React.Component {
   };
 
   handleCopy = () => {
-    strapi.notification.info(getTrad('containers.HomePage.copied'));
+    strapi.notification.toggle({
+      type: 'info',
+      message: { id: getTrad('containers.HomePage.copied') },
+    });
   };
 
   openCurrentDocumentation = () => {
