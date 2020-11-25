@@ -9,9 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useListView } from '../../hooks';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
-import MediaPreviewList from '../MediaPreviewList';
-import RelationPreviewList from '../RelationPreviewList';
-import { ActionContainer, Truncate, Truncated } from './styledComponents';
+import { ActionContainer } from './styledComponents';
+import RowCell from './RowCell';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
@@ -121,27 +120,15 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
           />
         </td>
       )}
-      {headers.map(({ key, name, fieldSchema: { type }, cellFormatter }) => {
-        const isMedia = type === 'media';
-        const isRelation = type === 'relation';
-
-        return (
-          <td key={key}>
-            {isMedia && <MediaPreviewList files={memoizedDisplayedValue(name, type)} />}
-            {cellFormatter && cellFormatter(row)}
-            {!isMedia && !isRelation && !cellFormatter && (
-              <Truncate>
-                <Truncated title={memoizedDisplayedValue(name, type)}>
-                  {memoizedDisplayedValue(name, type)}
-                </Truncated>
-              </Truncate>
-            )}
-            {isRelation && (
-              <RelationPreviewList name={name} value={memoizedDisplayedValue(name, type)} />
-            )}
-          </td>
-        );
-      })}
+      {headers.map(({ key, name, fieldSchema: { type }, cellFormatter, metadatas }) => (
+        <td key={key}>
+          {cellFormatter ? (
+            cellFormatter(row)
+          ) : (
+            <RowCell type={type} metadatas={metadatas} value={memoizedDisplayedValue(name, type)} />
+          )}
+        </td>
+      ))}
       <ActionContainer>
         <IconLinks links={links} />
       </ActionContainer>

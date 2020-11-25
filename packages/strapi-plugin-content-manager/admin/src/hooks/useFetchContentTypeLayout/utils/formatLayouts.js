@@ -82,7 +82,16 @@ const formatLayoutWithMetas = (obj, ctUid, models) => {
 const formatListLayoutWithMetas = obj => {
   const formatted = obj.layouts.list.reduce((acc, current) => {
     const fieldSchema = get(obj, ['attributes', current], {});
-    const metadatas = get(obj, ['metadatas', current, 'list'], {});
+    let metadatas = get(obj, ['metadatas', current, 'list'], {});
+
+    const type = fieldSchema.type;
+
+    if (type === 'relation') {
+      metadatas = {
+        ...metadatas,
+        mainField: get(obj, ['metadatas', current, 'edit', 'mainField'], 'id'),
+      };
+    }
 
     acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas });
 

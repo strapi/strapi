@@ -1,40 +1,41 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 import { Flex, Padded, Count } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
-import { useContentTypeLayout } from '../../hooks';
 import { Truncate, Truncated } from '../CustomTable/styledComponents';
 import CountWrapper from './CountWrapper';
 
-const RelationPreviewList = ({ name, value }) => {
+const RelationPreviewList = ({ metadatas: { mainField, relationType }, value }) => {
   const { formatMessage } = useIntl();
-  const { contentType } = useContentTypeLayout();
-  const mainField = get(contentType, ['metadatas', name, 'edit', 'mainField'], '');
+  const isSingle = ['oneWay', 'oneToOne', 'manyToOne'].includes(relationType);
 
-  return Array.isArray(value) ? (
+  if (isSingle) {
+    return (
+      <Truncate>
+        <Truncated>{value ? value[mainField] : '-'}</Truncated>
+      </Truncate>
+    );
+  }
+
+  const size = value ? value.length : 0;
+
+  return (
     <Truncate>
       <Flex>
         <CountWrapper>
-          <Count count={value.length} />
+          <Count count={size} />
         </CountWrapper>
         <Padded left size="xs" />
         <Truncated>
           {formatMessage({
             id: getTrad(
-              value.length > 1
-                ? 'containers.ListPage.items.plural'
-                : 'containers.ListPage.items.singular'
+              size > 1 ? 'containers.ListPage.items.plural' : 'containers.ListPage.items.singular'
             ),
           })}
         </Truncated>
       </Flex>
-    </Truncate>
-  ) : (
-    <Truncate>
-      <Truncated>{value[mainField] || '-'}</Truncated>
     </Truncate>
   );
 };
@@ -44,7 +45,7 @@ RelationPreviewList.defaultProps = {
 };
 
 RelationPreviewList.propTypes = {
-  name: PropTypes.string.isRequired,
+  metadatas: PropTypes.object.isRequired,
   value: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 };
 

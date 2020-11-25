@@ -88,10 +88,18 @@ const listViewReducer = (state = initialState, action) =>
 
         if (!value) {
           const { metadatas, attributes } = state.contentType;
+          let metas = metadatas[name].list;
+
+          if (attributes[name].type === 'relation') {
+            const mainField = metadatas[name].edit.mainField;
+            const { relationType } = attributes[name];
+            metas = { ...metas, mainField, relationType };
+          }
+
           drafState.displayedHeaders.push({
             name,
             fieldSchema: attributes[name],
-            metadatas: metadatas[name].list,
+            metadatas: metas,
             key: `__${name}_key__`,
           });
         } else {
