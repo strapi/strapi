@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "lodash": "4.17.19",
-    "nodemailer": "6.3.0"
+    "nodemailer": "6.4.16"
   },
   "repository": {
     "type": "git",
