@@ -85,6 +85,7 @@ function ListView({
   const {
     contentType: {
       attributes,
+      metadatas,
       settings: {
         defaultSortBy,
         defaultSortOrder,
@@ -377,6 +378,7 @@ function ListView({
           contentType={contentType}
           filters={filters}
           isOpen={isFilterPickerOpen}
+          metadatas={metadatas}
           name={label}
           toggleFilterPickerState={toggleFilterPickerState}
           setQuery={setQuery}
@@ -487,6 +489,7 @@ ListView.propTypes = {
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
       attributes: PropTypes.object.isRequired,
+      metadatas: PropTypes.object.isRequired,
       info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,

@@ -35,9 +35,10 @@ function Filter({
       .utc()
       .format(format);
   }
+  const displayedName = name.split('.')[0];
 
   const label = {
-    name,
+    name: displayedName,
     filter: filterName,
     value: displayedValue,
   };

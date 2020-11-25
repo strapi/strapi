@@ -20,12 +20,13 @@ import { Flex, Span, Wrapper } from './components';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
+const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone'];
 
 function FilterPicker({
   contentType,
   filters,
   isOpen,
+  metadatas,
   name,
   toggleFilterPickerState,
   setQuery,
@@ -114,12 +115,22 @@ function FilterPicker({
 
     let value = '';
 
-    if (type === 'boolean') {
-      value = 'true';
-    } else if (type === 'number') {
-      value = 0;
-    } else if (type === 'enumeration') {
-      value = get(allowedAttributes, [0, 'options', 0], '');
+    switch (type) {
+      case 'boolean': {
+        value = 'true';
+        break;
+      }
+      case 'number': {
+        value = 0;
+        break;
+      }
+      case 'enumeration': {
+        value = get(allowedAttributes, [0, 'options', 0], '');
+        break;
+      }
+      default: {
+        value = '';
+      }
     }
 
     const initFilter = {
@@ -153,14 +164,27 @@ function FilterPicker({
   const handleSubmit = useCallback(
     e => {
       e.preventDefault();
-      const nextFilters = formatFiltersToQuery(modifiedData);
+      const nextFilters = formatFiltersToQuery(modifiedData, metadatas);
 
       emitEventRef.current('didFilterEntries');
       setQuery(nextFilters);
       toggleFilterPickerState();
     },
-    [modifiedData, setQuery, toggleFilterPickerState]
+    [modifiedData, setQuery, toggleFilterPickerState, metadatas]
   );
+
+  const handleRemoveFilter = index => {
+    if (index === 0 && modifiedData.length === 1) {
+      toggleFilterPickerState();
+
+      return;
+    }
+
+    dispatch({
+      type: 'REMOVE_FILTER',
+      index,
+    });
+  };
 
   return (
     <Collapse isOpen={isOpen} onEntering={handleEntering}>
@@ -182,18 +206,7 @@ function FilterPicker({
                 modifiedData={modifiedData}
                 onChange={handleChange}
                 onClickAddFilter={addFilter}
-                onRemoveFilter={index => {
-                  if (index === 0 && modifiedData.length === 1) {
-                    toggleFilterPickerState();
-
-                    return;
-                  }
-
-                  dispatch({
-                    type: 'REMOVE_FILTER',
-                    index,
-                  });
-                }}
+                onRemoveFilter={handleRemoveFilter}
                 type={get(contentType, ['attributes', filter.name, 'type'], '')}
                 showAddButton={key === modifiedData.length - 1}
                 // eslint-disable-next-line react/no-array-index-key
@@ -221,6 +234,7 @@ FilterPicker.propTypes = {
   contentType: PropTypes.object.isRequired,
   filters: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  metadatas: PropTypes.object.isRequired,
   name: PropTypes.string,
   setQuery: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
