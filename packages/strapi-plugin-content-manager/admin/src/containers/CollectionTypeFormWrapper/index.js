@@ -205,7 +205,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         const response = await request(endPoint, { method: 'POST', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
-        strapi.notification.success(getTrad('success.record.save'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('success.record.save') },
+        });
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         // Enable navigation and remove loaders
@@ -235,7 +238,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
       dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(data) });
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
 
-      strapi.notification.success(getTrad('success.record.publish'));
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: getTrad('success.record.publish') },
+      });
     } catch (err) {
       displayErrors(err);
       dispatch({ type: 'SET_STATUS', status: 'resolved' });
@@ -254,6 +260,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('success.record.save') },
+        });
 
         dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
         dispatch({ type: 'SET_STATUS', status: 'resolved' });

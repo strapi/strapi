@@ -44,7 +44,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       isOver={isOver}
       onClick={() => {
         if (!isLoading && canAccess) {
-          push(`/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`);
+          push(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
         }
       }}
       onMouseEvent={handleMouseEvent}
