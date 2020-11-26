@@ -8,6 +8,8 @@ module.exports = {
     delete: 'plugins::content-manager.explorer.delete',
     publish: 'plugins::content-manager.explorer.publish',
   },
-  TTL: 30000, // lock Time To Live : 30 sec
-  LOCK_PREFIX: 'content-manager',
+  lock: {
+    TTL: 30000, // lock Time To Live : 30 sec
+    LOCK_PREFIX: 'content-manager',
+  },
 };

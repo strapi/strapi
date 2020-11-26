@@ -4,11 +4,9 @@ const _ = require('lodash');
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const createModelsUtils = require('../../../test/helpers/models');
-const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
-let lockUtils;
 let data = {
   dogs: [],
 };
@@ -46,7 +44,6 @@ describe('Migration - draft and publish', () => {
       const token = await registerAndLogin();
       rq = createAuthRequest(token);
       modelsUtils = createModelsUtils({ rq });
-      lockUtils = createLockUtils({ rq });
       await modelsUtils.createContentTypes([dogModel]);
       const createdDogs = [];
       for (const dog of dogs) {
@@ -111,11 +108,9 @@ describe('Migration - draft and publish', () => {
 
     describe('Disabling D&P on a content-type', () => {
       test('No published_at after disabling the feature + draft removed', async () => {
-        const lockUid = await lockUtils.getLockUid('application::dog.dog', data.dogs[1].id);
         const res = await rq({
           url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
           method: 'POST',
-          qs: { uid: lockUid },
         });
         data.dogs[1] = res.body;
 

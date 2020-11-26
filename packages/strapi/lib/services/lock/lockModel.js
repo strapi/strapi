@@ -11,7 +11,7 @@ const lockModel = config => ({
     description: '',
   },
   options: {
-    timestamps: ['createdAt', 'updatedAt'],
+    timestamps: true,
   },
   attributes: {
     uid: {
@@ -31,7 +31,7 @@ const lockModel = config => ({
       required: true,
     },
     expiresAt: {
-      type: 'datetime',
+      type: 'timestamp',
     },
   },
 });

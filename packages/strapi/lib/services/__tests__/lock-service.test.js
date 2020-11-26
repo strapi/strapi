@@ -80,7 +80,7 @@ describe('Lock service', () => {
           expiresAt: expect.anything(),
         })
       );
-      expect(deleteFn).toHaveBeenCalledWith(_.pick(existingLock, ['uid', 'key']));
+      expect(deleteFn).toHaveBeenCalledWith(_.pick(existingLock, 'key'));
       expect(lockResult).toBeDefined();
       expect(lockResult.success).toBe(true);
       expect(lockResult.lock).toMatchObject({
@@ -172,7 +172,7 @@ describe('Lock service', () => {
             expiresAt: expect.anything(),
           })
         );
-        expect(deleteFn).toHaveBeenCalledWith(_.pick(existingLock, ['uid', 'key']));
+        expect(deleteFn).toHaveBeenCalledWith(_.pick(existingLock, 'key'));
         expect(lockResult).toBeDefined();
         expect(lockResult.success).toBe(true);
         expect(lockResult.lock).toMatchObject({

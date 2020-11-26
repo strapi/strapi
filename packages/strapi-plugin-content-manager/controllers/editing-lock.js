@@ -1,9 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
-const {
-  getService,
-} = require('../utils');
+const _ = require('lodash/fp');
+const { getService } = require('../utils');
 const { validateLockInput, validateExtendLockInput } = require('./validation');
 
 const sanitizeLock = (lock, { withUid = false } = {}) => {
@@ -16,7 +14,45 @@ const sanitizeLock = (lock, { withUid = false } = {}) => {
     omittedAttributes.push('uid');
   }
 
-  return _.omit(lock, omittedAttributes);
+  return _.omit(omittedAttributes, lock);
+};
+
+const isAllowedToUpdateTheLock = permissionChecker => (entity, kind, checkEntity = false) => {
+  const entityToCheck = checkEntity ? entity : undefined;
+  if (kind !== 'singleType') {
+    return permissionChecker.can.update(entityToCheck);
+  } else {
+    return (
+      permissionChecker.can.update(entityToCheck) || permissionChecker.can.create(entityToCheck)
+    );
+  }
+};
+
+const checkPermissions = async ({ model, id, userAbility }) => {
+  const { kind } = strapi.getModel(model);
+  const isSingleType = kind === 'singleType';
+  const entityManager = getService('entity-manager');
+  const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+  if (!isAllowedToUpdateTheLock(permissionChecker)(null, kind, false)) {
+    throw strapi.errors.forbidden();
+  }
+
+  let entity;
+  if (isSingleType) {
+    const entityWithoutAssoc = await entityManager.find({}, model);
+    entity = entityManager.assocCreatorRoles(entityWithoutAssoc);
+  } else {
+    entity = await entityManager.findOneWithCreatorRoles(id, model);
+  }
+
+  if (!isSingleType && !entity) {
+    throw strapi.errors.notFound();
+  }
+
+  if (!isAllowedToUpdateTheLock(permissionChecker)(entity, kind, true)) {
+    throw strapi.errors.forbidden();
+  }
 };
 
 const getLock = async ctx => {
@@ -25,22 +61,9 @@ const getLock = async ctx => {
     params: { id, model },
   } = ctx;
 
-  const { kind } = strapi.getModel(model);
+  await checkPermissions({ model, id, userAbility });
 
-  const entityManager = getService('entity-manager');
-  const permissionChecker = getService('permission-checker').create({ userAbility, model });
   const editingLockService = getService('editing-lock');
-
-  if (permissionChecker.cannot.update()) {
-    return ctx.forbidden();
-  }
-
-  const entity = await entityManager.findOne(id, model);
-
-  if (!entity && kind !== 'singleType') {
-    return ctx.notFound();
-  }
-
   const lockResult = await editingLockService.getLock({ model, entityId: id });
 
   return {
@@ -62,24 +85,11 @@ const lock = async ctx => {
     return ctx.badRequest('ValidationError', err);
   }
 
-  const metadata = _.get(body, 'metadata', {});
-  const force = _.get(body, 'force', false) === true;
-  const { kind } = strapi.getModel(model);
+  await checkPermissions({ model, id, userAbility });
 
-  const entityManager = getService('entity-manager');
-  const permissionChecker = getService('permission-checker').create({ userAbility, model });
+  const metadata = _.getOr({}, 'metadata', body);
+  const force = _.getOr(false, 'force', body) === true;
   const editingLockService = getService('editing-lock');
-
-  if (permissionChecker.cannot.update()) {
-    return ctx.forbidden();
-  }
-
-  const entity = await entityManager.findOne(id, model);
-
-  if (!entity && kind !== 'singleType') {
-    return ctx.notFound();
-  }
-
   const lockResult = await editingLockService.setLock(
     { model, entityId: id, metadata, user },
     { force }
@@ -104,23 +114,10 @@ const extendLock = async ctx => {
     return ctx.badRequest('ValidationError', err);
   }
 
-  const metadata = _.get(body, 'metadata', undefined);
-  const { kind } = strapi.getModel(model);
+  await checkPermissions({ model, id, userAbility });
 
-  const entityManager = getService('entity-manager');
-  const permissionChecker = getService('permission-checker').create({ userAbility, model });
+  const metadata = _.getOr(undefined, 'metadata', body);
   const editingLockService = getService('editing-lock');
-
-  if (permissionChecker.cannot.update()) {
-    return ctx.forbidden();
-  }
-
-  const entity = await entityManager.findOne(id, model);
-
-  if (!entity && kind !== 'singleType') {
-    return ctx.notFound();
-  }
-
   const lockResult = await editingLockService.extendLock({
     model,
     entityId: id,
@@ -147,22 +144,9 @@ const unlock = async ctx => {
     return ctx.badRequest('ValidationError', err);
   }
 
-  const { kind } = strapi.getModel(model);
+  await checkPermissions({ model, id, userAbility });
 
-  const entityManager = getService('entity-manager');
-  const permissionChecker = getService('permission-checker').create({ userAbility, model });
   const editingLockService = getService('editing-lock');
-
-  if (permissionChecker.cannot.update()) {
-    return ctx.forbidden();
-  }
-
-  const entity = await entityManager.findOne(id, model);
-
-  if (!entity && kind !== 'singleType') {
-    return ctx.notFound();
-  }
-
   const lockResult = await editingLockService.unlock({ model, entityId: id, uid: body.uid });
 
   return {

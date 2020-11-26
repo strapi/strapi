@@ -7,11 +7,9 @@ const _ = require('lodash');
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
-const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
-let lockUtils;
 let data = {
   productsWithDzAndDP: [],
 };
@@ -60,7 +58,6 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createComponent(compo);
     await modelsUtils.createContentTypes([productWithCompoAndDP]);
@@ -130,12 +127,10 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         },
       ],
     };
-    const lockUid = await lockUtils.getLockUid(modelUid, data.productsWithDzAndDP[0].id);
     const res = await rq({
       method: 'PUT',
       url: `${baseUrl}/${data.productsWithDzAndDP[0].id}`,
       body: product,
-      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);
@@ -146,11 +141,9 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
   });
 
   test('Delete product with compo', async () => {
-    const lockUid = await lockUtils.getLockUid(modelUid, data.productsWithDzAndDP[0].id);
     const res = await rq({
       method: 'DELETE',
       url: `${baseUrl}/${data.productsWithDzAndDP[0].id}`,
-      qs: { uid: lockUid },
     });
 
     expect(res.statusCode).toBe(200);
@@ -170,12 +163,10 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
             body: product,
           });
         } else {
-          const lockUid = await lockUtils.getLockUid(modelUid, data.productsWithDzAndDP[0].id);
           return rq({
             method: 'PUT',
             url: `${baseUrl}/${data.productsWithDzAndDP[0].id}`,
             body: product,
-            qs: { uid: lockUid },
           });
         }
       };

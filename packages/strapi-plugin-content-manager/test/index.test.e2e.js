@@ -5,7 +5,6 @@ const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const form = require('../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const createLockUtils = require('../../../test/helpers/editing-lock');
 
 const cleanDate = entry => {
   delete entry.updatedAt;
@@ -16,7 +15,6 @@ const cleanDate = entry => {
 
 let data;
 let modelsUtils;
-let lockUtils;
 let rq;
 
 const deleteFixtures = async () => {
@@ -45,7 +43,6 @@ describe('Content Manager End to End', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypes([
       form.article,
@@ -219,12 +216,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[0] = body;
@@ -247,12 +242,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[0] = body;
@@ -273,12 +266,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[0] = body;
@@ -300,12 +291,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[0] = body;
@@ -512,12 +501,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[0] = body;
@@ -560,12 +547,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[1] = body;
@@ -585,12 +570,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::category.category', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::category.category/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.categories[0] = body;
@@ -746,12 +729,10 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      const lockUid = await lockUtils.getLockUid('application::article.article', entry.id);
       let { body } = await rq({
         url: `/content-manager/collection-types/application::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
-        qs: { uid: lockUid },
       });
 
       data.articles[0] = body;
@@ -830,17 +811,12 @@ describe('Content Manager End to End', () => {
 
       expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
-      const lockUid = await lockUtils.getLockUid(
-        'application::reference.reference',
-        referenceToCreate.id
-      );
       const { body: referenceToUpdate } = await rq({
         url: `/content-manager/collection-types/application::reference.reference/${referenceToCreate.id}`,
         method: 'PUT',
         body: {
           tag: null,
         },
-        qs: { uid: lockUid },
       });
 
       expect(referenceToUpdate.tag).toBe(null);
@@ -864,11 +840,9 @@ describe('Content Manager End to End', () => {
         },
       });
 
-      const lockUid = await lockUtils.getLockUid('application::tag.tag', tagToCreate.id);
       await rq({
         url: `/content-manager/collection-types/application::tag.tag/${tagToCreate.id}`,
         method: 'DELETE',
-        qs: { uid: lockUid },
       });
 
       const { body: referenceToGet } = await rq({

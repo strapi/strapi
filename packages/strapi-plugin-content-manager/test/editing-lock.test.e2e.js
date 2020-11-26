@@ -13,8 +13,6 @@ let baseUrl;
 let isSingleType;
 let data;
 
-const getExpiresAtTime = lock => new Date(lock.expiresAt).getTime();
-const getLastUpdatedAtTime = lock => new Date(lock.metadata.lastUpdatedAt).getTime();
 const wait = time =>
   new Promise(resolve => {
     setTimeout(resolve, time);
@@ -39,9 +37,26 @@ const productModel = {
   collectionName: '',
 };
 
+const createProduct = rq => async url => {
+  // create product
+  const product = {
+    name: 'Product 1',
+    description: 'Product description',
+  };
+  const res = await rq({
+    method: isSingleType ? 'PUT' : 'POST',
+    url,
+    body: product,
+  });
+
+  data.products.push(res.body);
+
+  crudUrl = isSingleType ? url : `${url}/${data.products[0].id}`;
+};
+
 describe('Editing Lock', () => {
   describe.each([
-    ['Collection-Type', 'product-ct'],
+    // ['Collection-Type', 'product-ct'],
     ['Single-Type', 'product-st'],
   ])('%p', (kind, modelName) => {
     beforeAll(async () => {
@@ -62,19 +77,7 @@ describe('Editing Lock', () => {
         ? `/content-manager/single-types/application::${modelName}.${modelName}`
         : `/content-manager/collection-types/application::${modelName}.${modelName}`;
 
-      // create product
-      const product = {
-        name: 'Product 1',
-        description: 'Product description',
-      };
-      const res = await rq({
-        method: 'POST',
-        url: baseUrl,
-        body: product,
-      });
-      data.products.push(res.body);
-
-      crudUrl = isSingleType ? baseUrl : `${baseUrl}/${data.products[0].id}`;
+      await createProduct(rq)(baseUrl);
     }, 60000);
 
     afterAll(async () => {
@@ -93,7 +96,7 @@ describe('Editing Lock', () => {
           lockInfo: expect.objectContaining({
             uid: expect.any(String),
             metadata: {
-              lastUpdatedAt: expect.any(String),
+              lastUpdatedAt: expect.any(Number),
               lockedBy: {
                 id: expect.anything(),
                 firstname: expect.any(String),
@@ -101,7 +104,9 @@ describe('Editing Lock', () => {
                 username: null,
               },
             },
-            expiresAt: expect.any(String),
+            expiresAt: expect.any(Number),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
           }),
         });
         data.locks.push(res.body.lockInfo);
@@ -149,9 +154,9 @@ describe('Editing Lock', () => {
             uid: expect.any(String),
             metadata: {
               ...data.locks[0].metadata,
-              lastUpdatedAt: expect.any(String),
+              lastUpdatedAt: expect.any(Number),
             },
-            expiresAt: expect.any(String),
+            expiresAt: expect.any(Number),
           }),
         });
         data.locks[0] = res.body.lockInfo;
@@ -167,7 +172,7 @@ describe('Editing Lock', () => {
           url: crudUrl,
           body: product,
           qs: {
-            uid: data.locks[0].uid,
+            lockUid: data.locks[0].uid,
           },
         });
         await wait(1000); // let the time for the lock to be automatically updated
@@ -177,7 +182,7 @@ describe('Editing Lock', () => {
           url: `${crudUrl}/actions/lock`,
         });
 
-        expect(getLastUpdatedAtTime(body.lockInfo) > getLastUpdatedAtTime(data.locks[0])).toBe(
+        expect(body.lockInfo.metadata.lastUpdatedAt > data.locks[0].metadata.lastUpdatedAt).toBe(
           true
         );
         data.locks[0].metadata.lastUpdatedAt = body.lockInfo.metadata.lastUpdatedAt;
@@ -190,7 +195,7 @@ describe('Editing Lock', () => {
             method: 'POST',
             url: `${crudUrl}/actions/${action}`,
             qs: {
-              uid: data.locks[0].uid,
+              lockUid: data.locks[0].uid,
             },
           });
 
@@ -201,7 +206,7 @@ describe('Editing Lock', () => {
             url: `${crudUrl}/actions/lock`,
           });
 
-          expect(getLastUpdatedAtTime(body.lockInfo) > getLastUpdatedAtTime(data.locks[0])).toBe(
+          expect(body.lockInfo.metadata.lastUpdatedAt > data.locks[0].metadata.lastUpdatedAt).toBe(
             true
           );
           data.locks[0].metadata.lastUpdatedAt = body.lockInfo.metadata.lastUpdatedAt;
@@ -219,10 +224,10 @@ describe('Editing Lock', () => {
           success: true,
           lockInfo: expect.objectContaining({
             metadata: data.locks[0].metadata,
-            expiresAt: expect.any(String),
+            expiresAt: expect.any(Number),
           }),
         });
-        expect(getExpiresAtTime(res.body.lockInfo) > getExpiresAtTime(data.locks[0])).toBe(true);
+        expect(res.body.lockInfo.expiresAt > data.locks[0].expiresAt).toBe(true);
         data.locks[0] = { ...data.locks[0], ...res.body.lockInfo };
       });
 
@@ -255,10 +260,10 @@ describe('Editing Lock', () => {
           success: true,
           lockInfo: expect.objectContaining({
             metadata: data.locks[0].metadata,
-            expiresAt: expect.any(String),
+            expiresAt: expect.any(Number),
           }),
         });
-        expect(getExpiresAtTime(res.body.lockInfo) < Date.now()).toBe(true);
+        expect(res.body.lockInfo.expiresAt < Date.now()).toBe(true);
         data.locks[0].expiresAt = res.body.lockInfo.expiresAt;
       });
 
@@ -272,6 +277,8 @@ describe('Editing Lock', () => {
           lockInfo: expect.objectContaining({
             metadata: data.locks[0].metadata,
             expiresAt: data.locks[0].expiresAt,
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
           }),
         });
       });
@@ -295,16 +302,15 @@ describe('Editing Lock', () => {
       });
     });
 
-    describe('Actions with lock required ', () => {
-      describe('Should fail if no lock', () => {
+    describe('Actions with lock behavior', () => {
+      describe('Should succeed if no lock', () => {
         test('update', async () => {
           const res = await rq({
             method: 'PUT',
             url: crudUrl,
           });
 
-          expect(res.statusCode).toBe(400);
-          expect(res.body.message).toBe('uid query param is invalid');
+          expect(res.statusCode).toBe(200);
         });
 
         test('publish', async () => {
@@ -313,8 +319,7 @@ describe('Editing Lock', () => {
             url: `${crudUrl}/actions/publish`,
           });
 
-          expect(res.statusCode).toBe(400);
-          expect(res.body.message).toBe('uid query param is invalid');
+          expect(res.statusCode).toBe(200);
         });
 
         test('unpublish', async () => {
@@ -323,8 +328,7 @@ describe('Editing Lock', () => {
             url: `${crudUrl}/actions/unpublish`,
           });
 
-          expect(res.statusCode).toBe(400);
-          expect(res.body.message).toBe('uid query param is invalid');
+          expect(res.statusCode).toBe(200);
         });
 
         test('delete', async () => {
@@ -333,8 +337,57 @@ describe('Editing Lock', () => {
             url: crudUrl,
           });
 
+          expect(res.statusCode).toBe(200);
+          data.products.shift();
+
+          // recreate product for following tests
+          await createProduct(rq)(baseUrl);
+        });
+      });
+
+      describe('Should fail if invalid lock', () => {
+        test('update', async () => {
+          const res = await rq({
+            method: 'PUT',
+            url: crudUrl,
+            qs: { lockUid: 'invalid-lock' },
+          });
+
           expect(res.statusCode).toBe(400);
-          expect(res.body.message).toBe('uid query param is invalid');
+          expect(res.body.message).toBe('Someone took over the edition of this entry');
+        });
+
+        test('publish', async () => {
+          const res = await rq({
+            method: 'POST',
+            url: `${crudUrl}/actions/publish`,
+            qs: { lockUid: 'invalid-lock' },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.message).toBe('Someone took over the edition of this entry');
+        });
+
+        test('unpublish', async () => {
+          const res = await rq({
+            method: 'POST',
+            url: `${crudUrl}/actions/unpublish`,
+            qs: { lockUid: 'invalid-lock' },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.message).toBe('Someone took over the edition of this entry');
+        });
+
+        test('delete', async () => {
+          const res = await rq({
+            method: 'delete',
+            url: crudUrl,
+            qs: { lockUid: 'invalid-lock' },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.message).toBe('Someone took over the edition of this entry');
         });
       });
 
@@ -354,7 +407,7 @@ describe('Editing Lock', () => {
             method: 'PUT',
             url: crudUrl,
             body: { name: 'product 1 updated' },
-            qs: { uid },
+            qs: { lockUid: uid },
           });
 
           expect(res.statusCode).toBe(200);
@@ -365,7 +418,7 @@ describe('Editing Lock', () => {
           const res = await rq({
             method: 'POST',
             url: `${crudUrl}/actions/publish`,
-            qs: { uid },
+            qs: { lockUid: uid },
           });
 
           expect(res.statusCode).toBe(200);
@@ -376,7 +429,7 @@ describe('Editing Lock', () => {
           const res = await rq({
             method: 'POST',
             url: `${crudUrl}/actions/unpublish`,
-            qs: { uid },
+            qs: { lockUid: uid },
           });
 
           expect(res.statusCode).toBe(200);
@@ -387,10 +440,14 @@ describe('Editing Lock', () => {
           const res = await rq({
             method: 'delete',
             url: crudUrl,
-            qs: { uid },
+            qs: { lockUid: uid },
           });
 
           expect(res.statusCode).toBe(200);
+          data.products.shift();
+
+          // recreate product for following tests
+          await createProduct(rq)(baseUrl);
         });
       });
 

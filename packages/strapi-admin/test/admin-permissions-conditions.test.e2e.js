@@ -3,9 +3,6 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createRequest, createAuthRequest } = require('../../../test/helpers/request');
-const createLockUtils = require('../../../test/helpers/editing-lock');
-
-let lockUtils;
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -73,7 +70,6 @@ if (edition === 'EE') {
       requests.admin = createAuthRequest(adminToken);
 
       modelsUtils = createModelsUtils({ rq: requests.admin });
-      lockUtils = createLockUtils({ rq: requests.admin });
 
       // Create the Article content-type
       await modelsUtils.createContentType(localTestData.model.article);
@@ -207,11 +203,9 @@ if (edition === 'EE') {
       const modelUid = `application::${modelName}.${modelName}`;
       const rq = getUserRequest(1);
 
-      const lockUid = await lockUtils.getLockUid(modelUid, id);
       const res = await rq({
         method: 'DELETE',
         url: `/content-manager/collection-types/${modelUid}/${id}`,
-        qs: { uid: lockUid },
       });
 
       expect(res.statusCode).toBe(403);
@@ -222,11 +216,9 @@ if (edition === 'EE') {
       const modelName = getModelName();
       const modelUid = `application::${modelName}.${modelName}`;
       const rq = getUserRequest(0);
-      const lockUid = await lockUtils.getLockUid(modelUid, id);
       const res = await rq({
         method: 'DELETE',
         url: `/content-manager/collection-types/${modelUid}/${id}`,
-        qs: { uid: lockUid },
       });
 
       expect(res.statusCode).toBe(200);

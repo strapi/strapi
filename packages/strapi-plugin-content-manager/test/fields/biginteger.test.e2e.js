@@ -3,10 +3,8 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
-const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
-let lockUtils;
 let rq;
 
 describe('Test type biginteger', () => {
@@ -15,7 +13,6 @@ describe('Test type biginteger', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withbiginteger', 'biginteger');
   }, 60000);
@@ -83,17 +80,12 @@ describe('Test type biginteger', () => {
     );
 
     const newVal = '9882823782712112';
-    const lockUid = await lockUtils.getLockUid(
-      'application::withbiginteger.withbiginteger',
-      res.body.id
-    );
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withbiginteger.withbiginteger/${res.body.id}`,
       {
         body: {
           field: newVal,
         },
-        qs: { uid: lockUid },
       }
     );
 

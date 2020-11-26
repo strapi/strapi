@@ -133,7 +133,7 @@ describe('Core API - Basic + dz', () => {
       method: 'PUT',
       url: `/content-manager/collection-types/application::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
       body: product,
-      qs: { uid: lockUid },
+      qs: { lockUid },
     });
 
     expect(res.statusCode).toBe(200);
@@ -151,7 +151,7 @@ describe('Core API - Basic + dz', () => {
     const res = await rq({
       method: 'DELETE',
       url: `/content-manager/collection-types/application::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
-      qs: { uid: lockUid },
+      qs: { lockUid },
     });
 
     expect(res.statusCode).toBe(200);

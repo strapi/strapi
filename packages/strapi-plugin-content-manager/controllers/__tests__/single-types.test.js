@@ -39,8 +39,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve();
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
             },
             'permission-checker': {
@@ -102,7 +102,8 @@ describe('Single Types', () => {
 
     const createFn = jest.fn(() => ({}));
     const sendTelemetry = jest.fn(() => ({}));
-    const validateAndExtendLock = jest.fn();
+    const setLock = jest.fn(() => ({ lock: { uid: '123' } }));
+    const unlock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -137,7 +138,7 @@ describe('Single Types', () => {
             'permission-checker': {
               create: () => permissionChecker,
             },
-            'editing-lock': { validateAndExtendLock },
+            'editing-lock': { setLock, unlock },
           },
         },
       },
@@ -209,7 +210,8 @@ describe('Single Types', () => {
     };
 
     const deleteFn = jest.fn(() => ({}));
-    const validateAndExtendLock = jest.fn();
+    const setLock = jest.fn(() => ({ lock: { uid: '123' } }));
+    const unlock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -238,8 +240,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               delete: deleteFn,
             },
@@ -248,7 +250,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'editing-lock': { validateAndExtendLock },
+            'editing-lock': { setLock, unlock },
           },
         },
       },
@@ -304,7 +306,8 @@ describe('Single Types', () => {
     };
 
     const publishFn = jest.fn(() => ({}));
-    const validateAndExtendLock = jest.fn();
+    const setLock = jest.fn(() => ({ lock: { uid: '123' } }));
+    const unlock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -333,8 +336,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               publish: publishFn,
             },
@@ -343,7 +346,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'editing-lock': { validateAndExtendLock },
+            'editing-lock': { setLock, unlock },
           },
         },
       },
@@ -399,7 +402,8 @@ describe('Single Types', () => {
     };
 
     const unpublishFn = jest.fn(() => ({}));
-    const validateAndExtendLock = jest.fn();
+    const setLock = jest.fn(() => ({ lock: { uid: '123' } }));
+    const unlock = jest.fn();
 
     global.strapi = {
       admin: {
@@ -428,8 +432,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               unpublish: unpublishFn,
             },
@@ -438,7 +442,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'editing-lock': { validateAndExtendLock },
+            'editing-lock': { setLock, unlock },
           },
         },
       },

@@ -3,11 +3,9 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const createModelsUtils = require('../../../test/helpers/models');
-const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
-let lockUtils;
 let data = {
   dogs: [],
 };
@@ -40,7 +38,6 @@ describe('Migration - unique attribute', () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
     await modelsUtils.createContentTypes([dogModel]);
     for (const dog of dogs) {
       const res = await rq({
@@ -73,14 +70,11 @@ describe('Migration - unique attribute', () => {
 
     test('Cannot create a duplicated entry after migration', async () => {
       // remove duplicated values otherwise the migration would fail
-      const lockUid = await lockUtils.getLockUid('application::dog.dog', data.dogs[0].id);
       const { body } = await rq({
         url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
         method: 'PUT',
         body: { name: 'Nelson' },
-        qs: { uid: lockUid },
       });
-      console.log('body', body);
       data.dogs[0] = body;
 
       // migration

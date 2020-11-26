@@ -1,8 +1,10 @@
 'use strict';
 
-const _ = require('lodash');
+const _ = require('lodash/fp');
 const { webhook: webhookUtils } = require('strapi-utils');
-const { TTL, LOCK_PREFIX } = require('./constants');
+const { TTL, LOCK_PREFIX } = require('./constants').lock;
+
+const acceptedMetadata = ['lastActivityDate'];
 
 const { ENTRY_UPDATE, ENTRY_CREATE } = webhookUtils.webhookEvents;
 
@@ -10,8 +12,6 @@ const getLockKey = (model, entryId) => {
   const { kind } = strapi.getModel(model);
   return kind === 'singleType' ? `edit:${model}` : `edit:${model}:${entryId}`;
 };
-
-const acceptedMetadata = ['lastActivityDate'];
 
 const getLock = async ({ model, entityId }) => {
   const lockService = strapi.lockService({ prefix: LOCK_PREFIX });
@@ -27,8 +27,8 @@ const setLock = async ({ model, entityId, metadata = {}, user }, { force = false
   const lockService = strapi.lockService({ prefix: LOCK_PREFIX });
   const key = getLockKey(model, entityId);
   const fullMetadata = {
-    ..._.pick(metadata, acceptedMetadata),
-    lastUpdatedAt: new Date(),
+    ..._.pick(acceptedMetadata, metadata),
+    lastUpdatedAt: Date.now(),
     lockedBy: {
       id: user.id,
       firstname: user.firstname,
@@ -49,7 +49,7 @@ const extendLock = async ({ model, entityId, uid, metadata }) => {
   const key = getLockKey(model, entityId);
   let fullMetadata = undefined;
   if (!_.isUndefined(metadata)) {
-    fullMetadata = _.pick(metadata, acceptedMetadata);
+    fullMetadata = _.pick(acceptedMetadata, metadata);
   }
 
   const lockResult = await lockService.extend(
@@ -88,7 +88,7 @@ const updateLastUpdatedAtMetadata = async ({ model, entityId }) => {
       model,
       entityId,
       metadata: {
-        lastUpdatedAt: new Date(),
+        lastUpdatedAt: Date.now(),
       },
     });
   }
@@ -112,15 +112,15 @@ const registerLockHook = () => {
   strapi.eventHub.on(ENTRY_CREATE, updateLastUpdatedAtHook(ENTRY_CREATE));
 };
 
-const validateAndExtendLock = async ({ model, id, lockUID }) => {
-  if (!_.isString(lockUID) || _.isEmpty(lockUID)) {
+const validateAndExtendLock = async ({ model, entityId, uid }) => {
+  if (!_.isString(uid) || _.isEmpty(uid)) {
     throw strapi.errors.badRequest('uid query param is invalid');
   }
 
   const lockResult = await extendLock({
     model,
-    entityId: id,
-    uid: lockUID,
+    entityId,
+    uid,
   });
 
   if (!lockResult.success) {

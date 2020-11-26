@@ -6,10 +6,8 @@ const path = require('path');
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
-const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
-let lockUtils;
 let rq;
 let authRq;
 
@@ -28,14 +26,11 @@ describe.each([
   ],
   ['GENERATED API', '/withdynamiczonemedias'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
-  const hasLock = path.includes('/content-manager');
-
   beforeAll(async () => {
     const token = await registerAndLogin();
     authRq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq: authRq });
-    lockUtils = createLockUtils({ rq: authRq });
 
     await modelsUtils.createComponent({
       name: 'single-media',
@@ -162,13 +157,7 @@ describe.each([
 
       expect(newImgRes.statusCode).toBe(200);
       const newMediaId = newImgRes.body[0].id;
-      const qs = {};
-      if (hasLock) {
-        qs.uid = await lockUtils.getLockUid(
-          'application::withdynamiczonemedia.withdynamiczonemedia',
-          res.body.id
-        );
-      }
+
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
           field: [
@@ -182,7 +171,6 @@ describe.each([
             },
           ],
         },
-        qs,
       });
 
       expect(updateRes.body).toMatchObject({

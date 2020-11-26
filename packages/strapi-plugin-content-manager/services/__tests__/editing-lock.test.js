@@ -59,7 +59,7 @@ describe('EditingLock', () => {
           ttl: 30000,
           metadata: {
             lastActivityDate: metadata.lastActivityDate,
-            lastUpdatedAt: expect.any(Date),
+            lastUpdatedAt: expect.any(Number),
             lockedBy: user,
           },
         },
@@ -129,7 +129,7 @@ describe('EditingLock', () => {
         const extend = jest.fn(() => Promise.resolve(result));
         global.strapi.lockService = () => ({ extend });
 
-        await editingLockService.validateAndExtendLock({ model, lockUID: uid, id: entityId });
+        await editingLockService.validateAndExtendLock({ model, uid, entityId });
         expect(extend).toHaveBeenCalledWith(
           {
             key: `edit:${model}:${entityId}`,
@@ -151,7 +151,7 @@ describe('EditingLock', () => {
         global.strapi.errors = { badRequest };
 
         try {
-          await editingLockService.validateAndExtendLock({ model, lockUID: uid, id: entityId });
+          await editingLockService.validateAndExtendLock({ model, uid, entityId });
         } catch {
           // silence
         }
@@ -171,7 +171,7 @@ describe('EditingLock', () => {
         global.strapi.errors = { badRequest };
 
         try {
-          await editingLockService.validateAndExtendLock({ model, lockUID: uid, id: entityId });
+          await editingLockService.validateAndExtendLock({ model, uid, entityId });
         } catch {
           // silence
         }
@@ -195,7 +195,7 @@ describe('EditingLock', () => {
         global.strapi.errors = { badRequest };
 
         try {
-          await editingLockService.validateAndExtendLock({ model, lockUID: uid, id: entityId });
+          await editingLockService.validateAndExtendLock({ model, uid, entityId });
         } catch {
           // silence
         }
@@ -262,7 +262,7 @@ describe('Single type', () => {
         ttl: 30000,
         metadata: {
           lastActivityDate: metadata.lastActivityDate,
-          lastUpdatedAt: expect.any(Date),
+          lastUpdatedAt: expect.any(Number),
           lockedBy: user,
         },
       },
@@ -340,7 +340,7 @@ describe('Single type', () => {
       const extend = jest.fn(() => Promise.resolve(result));
       global.strapi.lockService = () => ({ extend });
 
-      await editingLockService.validateAndExtendLock({ model, lockUID: uid });
+      await editingLockService.validateAndExtendLock({ model, uid });
       expect(extend).toHaveBeenCalledWith(
         {
           key: `edit:${model}`,
@@ -361,7 +361,7 @@ describe('Single type', () => {
       global.strapi.errors = { badRequest };
 
       try {
-        await editingLockService.validateAndExtendLock({ model, lockUID: uid });
+        await editingLockService.validateAndExtendLock({ model, uid });
       } catch {
         // silence
       }
@@ -380,7 +380,7 @@ describe('Single type', () => {
       global.strapi.errors = { badRequest };
 
       try {
-        await editingLockService.validateAndExtendLock({ model, lockUID: uid });
+        await editingLockService.validateAndExtendLock({ model, uid });
       } catch {
         // silence
       }
@@ -403,7 +403,7 @@ describe('Single type', () => {
       global.strapi.errors = { badRequest };
 
       try {
-        await editingLockService.validateAndExtendLock({ model, lockUID: uid });
+        await editingLockService.validateAndExtendLock({ model, uid });
       } catch {
         // silence
       }

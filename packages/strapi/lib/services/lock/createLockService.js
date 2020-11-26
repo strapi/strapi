@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const _ = require('lodash/fp');
 const { v4: uuid } = require('uuid');
 
 const toDBObject = ({ key, metadata, ttl }, { now }) => {
@@ -8,23 +8,28 @@ const toDBObject = ({ key, metadata, ttl }, { now }) => {
     uid: uuid(),
     key,
     metadata,
-    expiresAt: now + ttl,
+    expiresAt: _.isNil(ttl) ? null : now + ttl,
   };
 };
 
 const fromDBObject = (lock, prefix) => {
-  if (!_.isPlainObject(lock)) {
+  if (_.isNil(lock)) {
     return null;
   }
 
-  return {
+  const formattedLock = _.omit(['created_at', 'updated_at'], {
     ...lock,
+    createdAt: lock.createdAt || lock.created_at,
+    updatedAt: lock.updatedAt || lock.updated_at,
+    expiresAt: _.isNil(lock.expiresAt) ? null : Number(lock.expiresAt),
     key: lock.key.replace(new RegExp(`^${prefix}::`), ''),
-  };
+  });
+
+  return formattedLock;
 };
 
 const isLockFree = (lock, now) => {
-  return !lock || (lock.expiresAt !== null && new Date(lock.expiresAt).getTime() <= now);
+  return !lock || (!_.isNull(lock.expiresAt) && lock.expiresAt <= now);
 };
 
 const validateKey = key => {
@@ -33,7 +38,7 @@ const validateKey = key => {
   }
 };
 const validateUid = uid => {
-  if (!_.isString(uid) || _.isNil(uid)) {
+  if (!_.isString(uid) || _.isEmpty(uid)) {
     throw new Error('lockservice: uid param has to be a non-empty string');
   }
 };
@@ -51,8 +56,7 @@ const validateMetadata = metadata => {
 };
 
 const getNow = now => {
-  const isValid = !_.isNaN(new Date(now).getTime());
-  return isValid ? new Date(now).getTime() : Date.now();
+  return _.isInteger(now) ? now : Date.now();
 };
 
 const createLockService = ({ db }) => ({ prefix }) => {
@@ -150,35 +154,22 @@ const createLockService = ({ db }) => ({ prefix }) => {
       validateTTL(ttl);
       validateMetadata(metadata);
       const prefixedKey = getPrefixedKey(key);
-      let lock;
       const now = Date.now();
       const newLock = toDBObject({ key: prefixedKey, metadata, ttl }, { now });
       const { isLockFree: isExistingLockFree, lock: existingLock } = await this.get(key, now);
 
-      // lock doesn't exist in DB, so just need to create it
       if (!existingLock) {
-        lock = await lockQueries.create(newLock);
+        const lock = await lockQueries.create(newLock);
         return { success: true, lock: fromDBObject(lock, prefix) };
       }
 
-      // lock exist and has expired or lock exist but we force the take
-      // need to delete the existing one and create the new one
-      if (isExistingLockFree || (existingLock && force)) {
-        const { lock: deletedLock } = await this.delete(existingLock.key, existingLock.uid);
-        if (!deletedLock) {
-          return { success: false, lock: null };
-        } else {
-          lock = await lockQueries.create(newLock);
-          return { success: true, lock: fromDBObject(lock, prefix) };
-        }
+      if (isExistingLockFree || force) {
+        await lockQueries.delete({ key: prefixedKey });
+        const lock = await lockQueries.create(newLock);
+        return { success: true, lock: fromDBObject(lock, prefix) };
       }
 
-      // lock exists in DB and is valid
-      if (!isExistingLockFree && !force) {
-        return { success: false, lock: existingLock };
-      }
-
-      return { success: false, lock: null }; // should never be reached
+      return { success: false, lock: existingLock };
     },
   };
 };

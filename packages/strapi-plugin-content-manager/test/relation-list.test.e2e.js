@@ -7,11 +7,9 @@ const _ = require('lodash');
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
-const createLockUtils = require('../../../test/helpers/editing-lock');
 
 let rq;
 let modelsUtils;
-let lockUtils;
 let data = {
   products: [],
   shops: [],
@@ -98,11 +96,9 @@ async function createFixtures({ publishAProduct = false } = {}) {
   }
 
   if (publishAProduct) {
-    const lockUid = await lockUtils.getLockUid('application::product.product', data.products[0].id);
     const res = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/application::product.product/${data.products[0].id}/actions/publish`,
-      qs: { uid: lockUid },
     });
     data.products[0] = res.body;
   }
@@ -131,7 +127,6 @@ describe('Relation-list route', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
   }, 60000);
 
   describe('without draftAndPublish', () => {

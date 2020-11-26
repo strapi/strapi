@@ -3,10 +3,8 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
-const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
-let lockUtils;
 let rq;
 
 describe('Test type json', () => {
@@ -15,7 +13,6 @@ describe('Test type json', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withjson', 'json');
   }, 60000);
@@ -85,7 +82,6 @@ describe('Test type json', () => {
       },
     });
 
-    const lockUid = await lockUtils.getLockUid('application::withjson.withjson', res.body.id);
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withjson.withjson/${res.body.id}`,
       {
@@ -94,7 +90,6 @@ describe('Test type json', () => {
             newKey: 'newVal',
           },
         },
-        qs: { uid: lockUid },
       }
     );
 

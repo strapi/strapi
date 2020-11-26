@@ -3,10 +3,8 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
-const createLockUtils = require('../../../../test/helpers/editing-lock');
 
 let modelsUtils;
-let lockUtils;
 let rq;
 
 describe('Test type date', () => {
@@ -15,7 +13,6 @@ describe('Test type date', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    lockUtils = createLockUtils({ rq });
 
     await modelsUtils.createContentTypeWithType('withdatetime', 'datetime');
   }, 60000);
@@ -115,17 +112,12 @@ describe('Test type date', () => {
     );
 
     const newDate = new Date(2017, 10, 23);
-    const lockUid = await lockUtils.getLockUid(
-      'application::withdatetime.withdatetime',
-      res.body.id
-    );
     const updateRes = await rq.put(
       `/content-manager/collection-types/application::withdatetime.withdatetime/${res.body.id}`,
       {
         body: {
           field: newDate,
         },
-        qs: { uid: lockUid },
       }
     );
 
