@@ -34,15 +34,17 @@ describe('Content Type Builder - Content types', () => {
       'ct-with-dp',
     ];
 
-    await modelsUtils.cleanupModels(modelsName);
-    await modelsUtils.deleteContentTypes(modelsName);
+    await modelsUtils.cleanupModels(modelsName, { strapi });
+    await modelsUtils.deleteContentTypes(modelsName, { strapi });
+
+    await strapi.destroy();
   }, 60000);
 
   describe('Collection Types', () => {
     const testCollectionTypeUID = 'application::test-collection-type.test-collection-type';
     const ctWithDpUID = 'application::ct-with-dp.ct-with-dp';
 
-    test('Successfull creation of a collection type', async () => {
+    test('Successful creation of a collection type', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
@@ -66,7 +68,7 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
-    test('Get collection type returns full schema and informations', async () => {
+    test('Get collection type returns full schema and information', async () => {
       const res = await rq({
         method: 'GET',
         url: `/content-type-builder/content-types/${testCollectionTypeUID}`,
@@ -115,7 +117,7 @@ describe('Content Type Builder - Content types', () => {
   describe('Single Types', () => {
     const singleTypeUID = 'application::test-single-type.test-single-type';
 
-    test('Successfull creation of a single type', async () => {
+    test('Successfusl creation of a single type', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',

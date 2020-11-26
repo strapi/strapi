@@ -70,9 +70,11 @@ describe('Admin User CRUD (e2e)', () => {
 
   // Cleanup actions
   afterAll(async () => {
-    await utils.deleteRolesById([testData.role.id]);
+    if (edition === 'EE') {
+      await utils.deleteRolesById([testData.role.id]);
+    }
     await strapi.destroy();
-  });
+  }, 60000);
 
   test('1. Creates a user (wrong body)', async () => {
     const body = {

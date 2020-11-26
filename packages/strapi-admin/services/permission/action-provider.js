@@ -1,5 +1,6 @@
 'use strict';
 
+const { yup } = require('strapi-utils');
 const { validateRegisterProviderAction } = require('../../validation/action-provider');
 const { getActionId, createAction } = require('../../domain/action');
 
@@ -54,6 +55,11 @@ const createActionProvider = () => {
       validateRegisterProviderAction(newActions);
       newActions.forEach(newAction => {
         const actionId = getActionId(newAction);
+        if (actions.has(actionId)) {
+          throw new yup.ValidationError(
+            `Duplicated action id: ${actionId}. You may want to change the actions name.`
+          );
+        }
 
         actions.set(actionId, createAction(newAction));
 
