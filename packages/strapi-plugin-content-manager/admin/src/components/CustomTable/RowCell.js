@@ -4,13 +4,13 @@ import MediaPreviewList from '../MediaPreviewList';
 import RelationPreviewList from '../RelationPreviewList';
 import { Truncate, Truncated } from './styledComponents';
 
-const RowCell = ({ metadatas, type, value }) => {
+const RowCell = ({ metadatas, type, value, relationType }) => {
   if (type === 'media') {
     return <MediaPreviewList files={value} />;
   }
 
   if (type === 'relation') {
-    return <RelationPreviewList metadatas={metadatas} value={value} />;
+    return <RelationPreviewList relationType={relationType} metadatas={metadatas} value={value} />;
   }
 
   return (
@@ -23,10 +23,12 @@ const RowCell = ({ metadatas, type, value }) => {
 RowCell.defaultProps = {
   type: null,
   value: null,
+  relationType: null,
 };
 
 RowCell.propTypes = {
   metadatas: PropTypes.object.isRequired,
+  relationType: PropTypes.string,
   type: PropTypes.string,
   value: PropTypes.any,
 };

@@ -7,7 +7,7 @@ import { getTrad } from '../../utils';
 import { Truncate, Truncated } from '../CustomTable/styledComponents';
 import CountWrapper from './CountWrapper';
 
-const RelationPreviewList = ({ metadatas: { mainField, relationType }, value }) => {
+const RelationPreviewList = ({ metadatas: { mainField }, relationType, value }) => {
   const { formatMessage } = useIntl();
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne'].includes(relationType);
 
@@ -45,7 +45,10 @@ RelationPreviewList.defaultProps = {
 };
 
 RelationPreviewList.propTypes = {
-  metadatas: PropTypes.object.isRequired,
+  metadatas: PropTypes.shape({
+    mainField: PropTypes.string.isRequired,
+  }).isRequired,
+  relationType: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 };
 

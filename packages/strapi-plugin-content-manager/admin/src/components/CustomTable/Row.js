@@ -120,15 +120,22 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
           />
         </td>
       )}
-      {headers.map(({ key, name, fieldSchema: { type }, cellFormatter, metadatas }) => (
-        <td key={key}>
-          {cellFormatter ? (
-            cellFormatter(row)
-          ) : (
-            <RowCell type={type} metadatas={metadatas} value={memoizedDisplayedValue(name, type)} />
-          )}
-        </td>
-      ))}
+      {headers.map(
+        ({ key, name, fieldSchema: { type, relationType }, cellFormatter, metadatas }) => (
+          <td key={key}>
+            {cellFormatter ? (
+              cellFormatter(row)
+            ) : (
+              <RowCell
+                type={type}
+                metadatas={metadatas}
+                relationType={relationType}
+                value={memoizedDisplayedValue(name, type)}
+              />
+            )}
+          </td>
+        )
+      )}
       <ActionContainer>
         <IconLinks links={links} />
       </ActionContainer>
