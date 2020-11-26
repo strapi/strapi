@@ -30,7 +30,7 @@ This project and everyone participating in it are governed by the [Strapi Code o
 
 ### Individual
 
-In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/cla-demo) or just submit a Pull Request and our CLA Bot will ask you to sign the CLA before merging your Pull Request.
+In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/strapi) or just submit a Pull Request and our CLA Bot will ask you to sign the CLA before merging your Pull Request.
 
 ### Company
 
