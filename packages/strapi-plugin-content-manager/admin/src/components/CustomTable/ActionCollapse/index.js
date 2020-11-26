@@ -1,9 +1,11 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import pluginId from '../../pluginId';
-import useListView from '../../hooks/useListView';
-import { DeletAllSpan, DeleteSpan, TableDelete } from './styledComponents';
+import pluginId from '../../../pluginId';
+import useListView from '../../../hooks/useListView';
+import DeleteAll from './DeleteAll';
+import Delete from './Delete';
+import Wrapper from './Wrapper';
 
 function ActionCollapse({ colSpan }) {
   const { data, entriesToDelete, toggleModalDeleteAll } = useListView();
@@ -13,25 +15,19 @@ function ActionCollapse({ colSpan }) {
   const deleteMessageId = number === data.length ? 'delete' : 'deleteSelected';
 
   return (
-    <TableDelete colSpan={colSpan}>
+    <Wrapper colSpan={colSpan}>
       <td colSpan={colSpan}>
         <FormattedMessage
           id={`${pluginId}.components.TableDelete.entries.${suffix}`}
           values={{ number }}
         >
-          {message => <DeleteSpan>{message}</DeleteSpan>}
+          {message => <Delete>{message}</Delete>}
         </FormattedMessage>
-        <FormattedMessage
-          id={`${pluginId}.components.TableDelete.${deleteMessageId}`}
-        >
-          {message => (
-            <DeletAllSpan onClick={toggleModalDeleteAll}>
-              {message}
-            </DeletAllSpan>
-          )}
+        <FormattedMessage id={`${pluginId}.components.TableDelete.${deleteMessageId}`}>
+          {message => <DeleteAll onClick={toggleModalDeleteAll}>{message}</DeleteAll>}
         </FormattedMessage>
       </td>
-    </TableDelete>
+    </Wrapper>
   );
 }
 

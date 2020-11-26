@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Count } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-
 import { getTrad } from '../../utils';
-import { Truncate, Truncated } from '../CustomTable/styledComponents';
+import Truncate from '../Truncate';
+import Truncated from '../Truncated';
 import CountWrapper from './CountWrapper';
 
 const RelationPreviewList = ({ metadatas: { mainField }, relationType, value }) => {

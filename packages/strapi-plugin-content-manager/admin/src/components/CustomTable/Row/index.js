@@ -1,74 +1,17 @@
 import React, { memo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
-import moment from 'moment';
+import { toString } from 'lodash';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useListView } from '../../hooks';
-import dateFormats from '../../utils/dateFormats';
-import CustomInputCheckbox from '../CustomInputCheckbox';
-import { ActionContainer } from './styledComponents';
-import RowCell from './RowCell';
+import { useListView } from '../../../hooks';
+import CustomInputCheckbox from '../../CustomInputCheckbox';
+import getDisplayedValue from './utils/getDisplayedValue';
+import ActionContainer from './ActionContainer';
+import Cell from './Cell';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-
-const getDisplayedValue = (type, value, name) => {
-  switch (toLower(type)) {
-    case 'string':
-    case 'text':
-    case 'email':
-    case 'enumeration':
-    case 'uid':
-      return (value && !isEmpty(toString(value))) || name === 'id' ? toString(value) : '-';
-    case 'float':
-    case 'integer':
-    case 'biginteger':
-    case 'decimal':
-      return !isNull(value) ? toString(value) : '-';
-    case 'boolean':
-      return value !== null ? toString(value) : '-';
-    case 'date':
-    case 'datetime':
-    case 'timestamp': {
-      if (value == null) {
-        return '-';
-      }
-
-      const date =
-        value && isObject(value) && value._isAMomentObject === true ? JSON.stringify(value) : value;
-
-      return moment(date).format(dateFormats[type]);
-    }
-    case 'password':
-      return '••••••••';
-    case 'media':
-    case 'file':
-    case 'files':
-      return value;
-    case 'time': {
-      if (!value) {
-        return '-';
-      }
-
-      const [hour, minute, second] = value.split(':');
-      const timeObj = {
-        hour,
-        minute,
-        second,
-      };
-      const date = moment().set(timeObj);
-
-      return date.format(dateFormats.time);
-    }
-    case 'relation': {
-      return value;
-    }
-    default:
-      return '-';
-  }
-};
 
 function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }) {
   const { entriesToDelete, onChangeBulk, onClickDelete } = useListView();
@@ -126,7 +69,7 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
             {cellFormatter ? (
               cellFormatter(row)
             ) : (
-              <RowCell
+              <Cell
                 type={type}
                 metadatas={metadatas}
                 relationType={relationType}
