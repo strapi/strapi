@@ -15,7 +15,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "ioredis": "^4.9.3",
+    "ioredis": "^4.19.2",
     "lodash": "4.17.19",
     "rimraf": "3.0.2",
     "stack-trace": "0.0.10",
