@@ -34,35 +34,46 @@ function TableHeader({ headers, isBulkable }) {
             />
           </th>
         )}
-        {headers.map(({ key, name, metadatas: { label, sortable } }) => {
-          return (
-            <th
-              key={key}
-              onClick={() => {
-                if (sortable) {
-                  emitEvent('didSortEntries');
-                  const isCurrentSort = name === sortBy;
-                  const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
-                  let value = `${name}:${nextOrder}`;
+        {headers.map(
+          ({ key, name, fieldSchema: { type }, metadatas: { label, sortable, mainField } }) => {
+            let sortField = name;
 
-                  if (isCurrentSort && sortOrder === 'DESC') {
-                    value = `${firstSortableHeader}:ASC`;
+            if (type === 'relation') {
+              sortField = `${name}.${mainField}`;
+            }
+
+            return (
+              <th
+                key={key}
+                onClick={() => {
+                  if (sortable) {
+                    emitEvent('didSortEntries');
+
+                    const isCurrentSort = sortField === sortBy;
+                    const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
+                    let value = `${sortField}:${nextOrder}`;
+
+                    if (isCurrentSort && sortOrder === 'DESC') {
+                      value = `${firstSortableHeader}:ASC`;
+                    }
+
+                    setQuery({
+                      _sort: value,
+                    });
                   }
+                }}
+              >
+                <span className={sortable ? 'sortable' : ''}>
+                  {label}
 
-                  setQuery({
-                    _sort: value,
-                  });
-                }
-              }}
-            >
-              <span className={sortable ? 'sortable' : ''}>
-                {label}
-
-                {sortBy === name && <Arrow fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />}
-              </span>
-            </th>
-          );
-        })}
+                  {sortBy === sortField && (
+                    <Arrow fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />
+                  )}
+                </span>
+              </th>
+            );
+          }
+        )}
         <th />
       </tr>
     </Thead>

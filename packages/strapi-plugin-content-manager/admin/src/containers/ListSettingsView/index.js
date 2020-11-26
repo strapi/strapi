@@ -121,9 +121,14 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
 
   const renderForm = () => {
     const type = get(attributes, [labelToEdit, 'type'], 'text');
-    const shouldDisplaySortToggle = !['media', 'relation'].includes(type);
+    const relationType = get(attributes, [labelToEdit, 'relationType']);
+    let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
     const label = formatMessage({ id: `${pluginId}.form.Input.label` });
     const description = formatMessage({ id: `${pluginId}.form.Input.label.inputDescription` });
+
+    if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
+      shouldDisplaySortToggle = true;
+    }
 
     return (
       <>

@@ -92,6 +92,7 @@ const listViewReducer = (state = initialState, action) =>
 
           if (attributes[name].type === 'relation') {
             const mainField = metadatas[name].edit.mainField;
+
             metas = { ...metas, mainField };
           }
 
