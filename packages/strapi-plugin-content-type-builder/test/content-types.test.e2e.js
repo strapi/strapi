@@ -117,7 +117,7 @@ describe('Content Type Builder - Content types', () => {
   describe('Single Types', () => {
     const singleTypeUID = 'application::test-single-type.test-single-type';
 
-    test('Successfusl creation of a single type', async () => {
+    test('Successful creation of a single type', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
@@ -142,7 +142,7 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
-    test('Get single type returns full schema and informations', async () => {
+    test('Get single type returns full schema and information', async () => {
       const res = await rq({
         method: 'GET',
         url: `/content-type-builder/content-types/${singleTypeUID}`,
