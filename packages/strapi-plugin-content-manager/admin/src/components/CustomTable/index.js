@@ -7,9 +7,9 @@ import { LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';
 import State from '../State';
-import TableHeader from './TableHeader';
 import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
+import Headers from './Headers';
 import Row from './Row';
 
 const CustomTable = ({
@@ -35,7 +35,9 @@ const CustomTable = ({
         {
           key: '__published_at_temp_key__',
           name: 'published_at',
-          fieldSchema: {},
+          fieldSchema: {
+            type: 'custom',
+          },
           metadatas: {
             label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
             searchable: false,
@@ -117,7 +119,7 @@ const CustomTable = ({
     return (
       <>
         <Table className="table">
-          <TableHeader headers={headers} isBulkable={isBulkable && canDelete} />
+          <Headers headers={headers} isBulkable={isBulkable && canDelete} />
         </Table>
         <LoadingWrapper>
           <LoadingContainer>
@@ -130,7 +132,7 @@ const CustomTable = ({
 
   return (
     <Table className="table">
-      <TableHeader headers={headers} isBulkable={isBulkable && canDelete} />
+      <Headers headers={headers} isBulkable={isBulkable && canDelete} />
       <tbody>
         {entriesToDelete.length > 0 && <ActionCollapse colSpan={colSpanLength} />}
         {content}

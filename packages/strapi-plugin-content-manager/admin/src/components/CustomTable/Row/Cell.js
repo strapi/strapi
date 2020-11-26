@@ -1,8 +1,9 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import MediaPreviewList from '../MediaPreviewList';
-import RelationPreviewList from '../RelationPreviewList';
-import { Truncate, Truncated } from './styledComponents';
+import MediaPreviewList from '../../MediaPreviewList';
+import RelationPreviewList from '../../RelationPreviewList';
+import Truncate from '../../Truncate';
+import Truncated from '../../Truncated';
 
 const RowCell = ({ metadatas, type, value, relationType }) => {
   if (type === 'media') {
