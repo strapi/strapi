@@ -4,24 +4,18 @@ import { ButtonDropdown } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import { LayoutIcon, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-import InputCheckbox from '../InputCheckbox';
 import DropdownItemLink from './DropdownItemLink';
 import DropdownWrapper from './DropdownWrapper';
-import ItemDropdown from './ItemDropdown';
 import ItemDropdownReset from './ItemDropdownReset';
 import LayoutWrapper from './LayoutWrapper';
 import MenuDropdown from './MenuDropdown';
 import Toggle from './Toggle';
+import DropdownItem from './DropdownItem';
 
 const DisplayedFieldsDropdown = ({ displayedHeaders, items, onChange, onClickReset, slug }) => {
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleChange = ({ target: { name, checked } }) => {
-    onChange({ name, value: !checked });
-  };
 
   const getCheckboxValue = checkboxName => {
     return displayedHeaders.findIndex(({ name }) => name === checkboxName) !== -1;
@@ -71,15 +65,12 @@ const DisplayedFieldsDropdown = ({ displayedHeaders, items, onChange, onClickRes
           </FormattedMessage>
           {items.map(headerName => {
             return (
-              <ItemDropdown key={headerName} toggle={false} onClick={handleChange}>
-                <div>
-                  <InputCheckbox
-                    onChange={handleChange}
-                    name={headerName}
-                    value={getCheckboxValue(headerName)}
-                  />
-                </div>
-              </ItemDropdown>
+              <DropdownItem
+                key={headerName}
+                name={headerName}
+                onChange={onChange}
+                value={getCheckboxValue(headerName)}
+              />
             );
           })}
         </MenuDropdown>

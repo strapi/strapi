@@ -172,8 +172,12 @@ function ListView({
   const handleChangeListLabels = useCallback(
     ({ name, value }) => {
       // Display a notification if trying to remove the last displayed field
+
       if (value && displayedHeaders.length === 1) {
-        strapi.notification.error('content-manager.notification.error.displayedFields');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'content-manager.notification.error.displayedFields' },
+        });
       } else {
         emitEventRef.current('didChangeDisplayedFields');
 
