@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
@@ -18,14 +18,15 @@ import { getRequestUrl } from './utils';
 const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
+  const isCreatingEntry = id === 'create';
+  const [isLoadingForLockRequest, setIsLoadingForLockRequest] = useState(false);
+  const [lock, setHasLock] = useState({ hasLock: false, lockInfo: null });
 
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
   ] = useReducer(crudReducer, crudInitialState);
   const emitEventRef = useRef(emitEvent);
-
-  const isCreatingEntry = id === 'create';
 
   const requestURL = useMemo(() => {
     if (isCreatingEntry && !origin) {
@@ -34,6 +35,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
     return getRequestUrl(`${slug}/${origin || id}`);
   }, [slug, id, isCreatingEntry, origin]);
+
+  const lockURL = useMemo(() => {
+    if (isCreatingEntry) {
+      return null;
+    }
+
+    return getRequestUrl(`${slug}/${id}/actions`);
+  }, [isCreatingEntry, slug, id]);
 
   const cleanClonedData = useCallback(
     data => {
@@ -97,6 +106,107 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       ),
     });
   }, [allLayoutData]);
+
+  const lockUIDRef = useRef(null);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    // eslint-disable-next-line consistent-return
+    const getLock = async signal => {
+      try {
+        const { success, lockInfo } = await request(`${lockURL}/lock`, { method: 'POST', signal });
+
+        setHasLock({ hasLock: success, lockInfo });
+        setIsLoadingForLockRequest(false);
+
+        if (success) {
+          return (lockUIDRef.current = lockInfo.uid);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (lockURL) {
+      setIsLoadingForLockRequest(true);
+      setHasLock({ hasLock: false, lockInfo: {} });
+
+      getLock(signal);
+    }
+
+    const removeLock = () => {
+      try {
+        request(`${lockURL}/unlock`, { method: 'POST', body: { uid: lockUIDRef.current } });
+      } catch (err) {
+        // Silent
+      }
+    };
+
+    return () => {
+      // Remove the lock when unmounting
+      if (lockUIDRef.current) {
+        // TODO remove lock when refreshing browser
+        removeLock();
+      }
+
+      // Abort request
+      if (lockURL) {
+        abortController.abort();
+      }
+
+      // Reset the ref when navigating from one entry to another
+      lockUIDRef.current = null;
+    };
+  }, [lockURL]);
+
+  // Effect to extend the lock
+  useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    let extended = null;
+
+    const wait = async () => {
+      return new Promise(resolve =>
+        setTimeout(() => {
+          resolve();
+        }, [10000])
+      );
+    };
+
+    const extendLock = async signal => {
+      try {
+        const { success, lockInfo } = await request(`${lockURL}/extend-lock`, {
+          method: 'POST',
+          body: { uid: lockUIDRef.current },
+          signal,
+        });
+
+        // Remove the lock in case of force locking from another user
+        if (!success) {
+          setHasLock({ hasLock: false, lockInfo });
+          clearInterval(extended);
+        }
+      } catch (err) {
+        // Silent
+      }
+    };
+
+    if (lock.hasLock) {
+      wait();
+      extended = setInterval(() => extendLock(signal), 10000);
+    }
+
+    return () => {
+      abortController.abort();
+
+      if (extended) {
+        clearInterval(extended);
+      }
+    };
+  }, [lock.hasLock, lockURL]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -253,7 +363,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
         dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
 
-        const response = await request(endPoint, { method: 'PUT', body });
+        const response = await request(endPoint, {
+          method: 'PUT',
+          body,
+          params: { uid: lockUIDRef.current },
+        });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
         strapi.notification.toggle({
@@ -293,12 +407,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     }
   }, [cleanReceivedData, displayErrors, id, slug]);
 
+  // TODO : modal + read only mode...
+
   return children({
     componentsDataStructure,
     contentTypeDataStructure,
     data,
     isCreatingEntry,
-    isLoadingForData: isLoading,
+    isLoadingForData: isLoadingForLockRequest || isLoading,
     onDelete,
     onDeleteSucceeded,
     onPost,
