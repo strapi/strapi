@@ -55,8 +55,15 @@ const CustomTable = ({
 
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
-  const handleGoTo = id => {
+  const handleRowGoTo = id => {
     emitEvent('willEditEntryFromList');
+    push({
+      pathname: `${pathname}/${id}`,
+      state: { from: pathname },
+    });
+  };
+  const handleEditGoTo = id => {
+    emitEvent('willEditEntryFromButton');
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
@@ -89,7 +96,7 @@ const CustomTable = ({
               e.preventDefault();
               e.stopPropagation();
 
-              handleGoTo(row.id);
+              handleRowGoTo(row.id);
             }}
           >
             <Row
@@ -99,7 +106,7 @@ const CustomTable = ({
               isBulkable={isBulkable && canDelete}
               headers={headers}
               row={row}
-              goTo={handleGoTo}
+              goTo={handleEditGoTo}
             />
           </TableRow>
         );

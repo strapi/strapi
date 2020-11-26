@@ -6,11 +6,11 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import useListView from '../../hooks/useListView';
+import { useListView } from '../../hooks';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
-import MediaPreviewList from '../MediaPreviewList';
-import { ActionContainer, Truncate, Truncated } from './styledComponents';
+import { ActionContainer } from './styledComponents';
+import RowCell from './RowCell';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
@@ -62,6 +62,9 @@ const getDisplayedValue = (type, value, name) => {
 
       return date.format(dateFormats.time);
     }
+    case 'relation': {
+      return value;
+    }
     default:
       return '-';
   }
@@ -84,12 +87,16 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
       icon: canCreate ? <Duplicate fill="black" /> : null,
       onClick: e => {
         e.stopPropagation();
-
         goTo(`create/clone/${row.id}`);
       },
     },
     {
       icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
+      onClick: e => {
+        e.stopPropagation();
+        emitEventRef.current('willDeleteEntryFromList');
+        goTo(row.id);
+      },
     },
     {
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
@@ -113,21 +120,22 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
           />
         </td>
       )}
-      {headers.map(({ key, name, fieldSchema: { type }, cellFormatter }) => {
-        const isMedia = type === 'media';
-
-        return (
+      {headers.map(
+        ({ key, name, fieldSchema: { type, relationType }, cellFormatter, metadatas }) => (
           <td key={key}>
-            {isMedia && <MediaPreviewList files={memoizedDisplayedValue(name, type)} />}
-            {cellFormatter && cellFormatter(row)}
-            {!isMedia && !cellFormatter && (
-              <Truncate>
-                <Truncated>{memoizedDisplayedValue(name, type)}</Truncated>
-              </Truncate>
+            {cellFormatter ? (
+              cellFormatter(row)
+            ) : (
+              <RowCell
+                type={type}
+                metadatas={metadatas}
+                relationType={relationType}
+                value={memoizedDisplayedValue(name, type)}
+              />
             )}
           </td>
-        );
-      })}
+        )
+      )}
       <ActionContainer>
         <IconLinks links={links} />
       </ActionContainer>
