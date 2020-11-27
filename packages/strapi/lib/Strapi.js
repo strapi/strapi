@@ -201,7 +201,9 @@ class Strapi {
   }
 
   async destroy() {
-    this.server.destroy();
+    if (_.has(this, 'server.destroy')) {
+      this.server.destroy();
+    }
 
     if (_.has(this, 'db')) {
       await this.db.destroy();
@@ -417,10 +419,9 @@ class Strapi {
     // plugins bootstrap
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
-        // console.log(err);
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
         strapi.log.error(err);
-        // strapi.stop();
+        strapi.stop();
       });
     });
     await Promise.all(pluginBoostraps);
@@ -433,7 +434,7 @@ class Strapi {
     return execBootstrap(adminBootstrap).catch(err => {
       strapi.log.error(`Bootstrap function in admin failed`);
       strapi.log.error(err);
-      // strapi.stop();
+      strapi.stop();
     });
   }
 
