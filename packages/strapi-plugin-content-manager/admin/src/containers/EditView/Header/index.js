@@ -205,6 +205,7 @@ const Header = ({
           >
             <Text>{formatMessage({ id: getTrad('popUpWarning.warning.unpublish-question') })}</Text>
           </ModalConfirm>
+
           <ModalConfirm
             confirmButtonLabel={{
               id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),

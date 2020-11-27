@@ -94,7 +94,7 @@ ModalConfirm.defaultProps = {
   },
   confirmButtonLabel: {
     id: 'components.popUpWarning.button.confirm',
-    defaultMessage: 'Yes,  confirm',
+    defaultMessage: 'Yes, confirm',
     values: {},
   },
   onConfirm: () => {},

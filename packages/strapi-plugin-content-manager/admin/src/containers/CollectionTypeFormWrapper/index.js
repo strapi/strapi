@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
@@ -12,6 +12,8 @@ import {
 } from '../../utils';
 import pluginId from '../../pluginId';
 import { crudInitialState, crudReducer } from '../../sharedReducers';
+import ConcurrentEditingModal from '../../components/ConcurrentEditingModal';
+import concurrentEditingReducer, { concurrentEditingState } from './concurrentEditingReducer';
 import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
@@ -19,14 +21,37 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
   const isCreatingEntry = id === 'create';
-  const [isLoadingForLockRequest, setIsLoadingForLockRequest] = useState(false);
-  const [lock, setHasLock] = useState({ hasLock: false, lockInfo: null });
+
+  const emitEventRef = useRef(emitEvent);
+  const lockUIDRef = useRef(null);
+  // This ref is used in order to make the user looses the focus of an input when someone take
+  // over the edition
+  const inputRef = useRef(null);
 
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
   ] = useReducer(crudReducer, crudInitialState);
-  const emitEventRef = useRef(emitEvent);
+  const [
+    {
+      lockFetchingStatus,
+      lockInfo,
+      showModalLoader,
+      hasLock,
+      shouldStartFetchingLock,
+      showModalForceLock,
+    },
+    concurrentEditingDispatch,
+  ] = useReducer(concurrentEditingReducer, concurrentEditingState);
+
+  // TODO read only
+  // const isReadOnlyModeBecauseOfConcurrentEditing = useMemo(() => {
+  //   if (!lockInfo) {
+  //     return false;
+  //   }
+
+  //   return !hasLock;
+  // }, [lockInfo, hasLock]);
 
   const requestURL = useMemo(() => {
     if (isCreatingEntry && !origin) {
@@ -107,8 +132,35 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     });
   }, [allLayoutData]);
 
-  const lockUIDRef = useRef(null);
+  // Free the lock on page refresh this is needed especially
+  // When developing
+  useEffect(() => {
+    const removeLock = async () => {
+      if (!lockURL) {
+        return null;
+      }
 
+      if (!lockUIDRef.current) {
+        return null;
+      }
+
+      try {
+        await request(`${lockURL}/unlock`, { method: 'POST', body: { uid: lockUIDRef.current } });
+      } catch (err) {
+        // Silent
+      }
+
+      return null;
+    };
+
+    window.addEventListener('beforeunload', removeLock);
+
+    return () => {
+      window.removeEventListener('beforeunload', removeLock);
+    };
+  }, [lockURL]);
+
+  // Effect to get the lock
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -118,27 +170,27 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       try {
         const { success, lockInfo } = await request(`${lockURL}/lock`, { method: 'POST', signal });
 
-        setHasLock({ hasLock: success, lockInfo });
-        setIsLoadingForLockRequest(false);
+        concurrentEditingDispatch({ type: 'FETCH_LOCK_SUCCEEDED', lockInfo, success });
 
         if (success) {
           return (lockUIDRef.current = lockInfo.uid);
         }
+
+        concurrentEditingDispatch({ type: 'TOGGLE_MODAL' });
       } catch (err) {
         console.log(err);
       }
     };
 
     if (lockURL) {
-      setIsLoadingForLockRequest(true);
-      setHasLock({ hasLock: false, lockInfo: {} });
+      concurrentEditingDispatch({ type: 'FETCH_LOCK' });
 
       getLock(signal);
     }
 
-    const removeLock = () => {
+    const removeLock = async () => {
       try {
-        request(`${lockURL}/unlock`, { method: 'POST', body: { uid: lockUIDRef.current } });
+        await request(`${lockURL}/unlock`, { method: 'POST', body: { uid: lockUIDRef.current } });
       } catch (err) {
         // Silent
       }
@@ -147,7 +199,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     return () => {
       // Remove the lock when unmounting
       if (lockUIDRef.current) {
-        // TODO remove lock when refreshing browser
         removeLock();
       }
 
@@ -161,7 +212,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     };
   }, [lockURL]);
 
-  // Effect to extend the lock
+  // Effect to extend the lock: keep the edition
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -176,6 +227,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       );
     };
 
+    // eslint-disable-next-line consistent-return
     const extendLock = async signal => {
       try {
         const { success, lockInfo } = await request(`${lockURL}/extend-lock`, {
@@ -186,15 +238,47 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
         // Remove the lock in case of force locking from another user
         if (!success) {
-          setHasLock({ hasLock: false, lockInfo });
+          const { firstname, lastname } = get(lockInfo, ['metadata', 'lockedBy'], {
+            firstname: 'Kai',
+            lastname: 'Doe',
+          });
+
+          concurrentEditingDispatch({ type: 'SET_HAS_LOCK', hasLock: false });
+          concurrentEditingDispatch({ type: 'START_FETCHING_LOCK' });
+
+          // Remove the focus of the user
+          inputRef.current.focus();
+
+          strapi.notification.toggle({
+            type: 'warning',
+            message: {
+              id: getTrad('notification.concurrent-editing.cannot-save.message'),
+            },
+          });
+          strapi.notification.toggle({
+            type: 'warning',
+            blockTransition: true,
+            message: {
+              id: getTrad('notification.concurrent-editing.read-only.message'),
+              values: {
+                name: `${firstname} ${lastname}`,
+              },
+            },
+            title: {
+              id: getTrad('notification.concurrent-editing.read-only.title'),
+            },
+          });
+
           clearInterval(extended);
+
+          return (lockUIDRef.current = null);
         }
       } catch (err) {
         // Silent
       }
     };
 
-    if (lock.hasLock) {
+    if (hasLock) {
       wait();
       extended = setInterval(() => extendLock(signal), 10000);
     }
@@ -206,7 +290,55 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         clearInterval(extended);
       }
     };
-  }, [lock.hasLock, lockURL]);
+  }, [hasLock, lockURL]);
+
+  // Effect to check if the document has been updated
+  useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    let getter = null;
+
+    const checkLock = async () => {
+      try {
+        const { lockInfo: newLockInfo } = await request(`${lockURL}/lock`, { method: 'GET' });
+
+        if (lockInfo.updatedAt !== newLockInfo.updatedAt) {
+          strapi.notification.toggle({
+            type: 'success',
+            blockTransition: true,
+            message: {
+              id: getTrad('notification.concurrent-editing.new-content.message'),
+            },
+
+            // TODO
+            link: {
+              url: window.location.href,
+              label: {
+                id: getTrad('notification.concurrent-editing.new-content.refresh-label'),
+              },
+            },
+          });
+
+          clearInterval(getter);
+        }
+      } catch (err) {
+        // Silent
+      }
+    };
+
+    if (shouldStartFetchingLock) {
+      getter = setInterval(() => checkLock(signal), 10000);
+    } else {
+      clearInterval(getter);
+    }
+
+    return () => {
+      abortController.abort();
+
+      clearInterval(getter);
+    };
+  }, [lockURL, shouldStartFetchingLock, lockInfo]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -272,6 +404,35 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       strapi.notification.error(errorMessage);
     }
   }, []);
+
+  // eslint-disable-next-line consistent-return
+  const handleConfirmTakeOverEdition = async () => {
+    // Lock the app and show a loader in the modal button
+    concurrentEditingDispatch({ type: 'TOGGLE_MODAL_LOADER' });
+
+    try {
+      const { success, lockInfo } = await request(`${lockURL}/lock`, {
+        method: 'POST',
+        body: { force: true },
+      });
+
+      concurrentEditingDispatch({ type: 'FETCH_LOCK_SUCCEEDED', lockInfo, success });
+
+      // Unlock the app the app and show a loader in the modal button
+      concurrentEditingDispatch({ type: 'TOGGLE_MODAL_LOADER' });
+
+      // Close the modal
+      handleToggle();
+
+      if (success) {
+        return (lockUIDRef.current = lockInfo.uid);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleToggle = useCallback(() => concurrentEditingDispatch({ type: 'TOGGLE_MODAL' }), []);
 
   const onDelete = useCallback(
     async trackerProperty => {
@@ -407,22 +568,49 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     }
   }, [cleanReceivedData, displayErrors, id, slug]);
 
-  // TODO : modal + read only mode...
+  // eslint-disable-next-line consistent-return
+  const waitForLock = useCallback(async () => {
+    try {
+      const { success, lockInfo } = await request(`${lockURL}/lock`, { method: 'POST' });
 
-  return children({
-    componentsDataStructure,
-    contentTypeDataStructure,
-    data,
-    isCreatingEntry,
-    isLoadingForData: isLoadingForLockRequest || isLoading,
-    onDelete,
-    onDeleteSucceeded,
-    onPost,
-    onPublish,
-    onPut,
-    onUnpublish,
-    status,
-  });
+      if (success) {
+        concurrentEditingDispatch({ type: 'FETCH_LOCK_SUCCEEDED', lockInfo, success });
+        handleToggle();
+
+        return (lockUIDRef.current = lockInfo.uid);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }, [handleToggle, lockURL]);
+
+  return (
+    <>
+      {children({
+        componentsDataStructure,
+        contentTypeDataStructure,
+        data,
+        isCreatingEntry,
+        isLoadingForData: lockFetchingStatus !== 'resolved' || isLoading,
+        onDelete,
+        onDeleteSucceeded,
+        onPost,
+        onPublish,
+        onPut,
+        onUnpublish,
+        status,
+      })}
+      <ConcurrentEditingModal
+        isOpen={showModalForceLock}
+        lockInfo={lockInfo}
+        onConfirm={handleConfirmTakeOverEdition}
+        showButtonLoader={showModalLoader}
+        toggle={handleToggle}
+        waitForLock={waitForLock}
+      />
+      <input style={{ zIndex: 0, position: 'absolute', top: 0 }} ref={inputRef} />
+    </>
+  );
 };
 
 CollectionTypeFormWrapper.defaultProps = {
@@ -434,15 +622,24 @@ CollectionTypeFormWrapper.propTypes = {
   allLayoutData: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.exact({
+      // eslint-disable-next-line react/no-unused-prop-types
       apiID: PropTypes.string.isRequired,
       attributes: PropTypes.object.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       info: PropTypes.object.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       isDisplayed: PropTypes.bool.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       kind: PropTypes.string.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       layouts: PropTypes.object.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       metadatas: PropTypes.object.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       options: PropTypes.object.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       settings: PropTypes.object.isRequired,
+      // eslint-disable-next-line react/no-unused-prop-types
       uid: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
