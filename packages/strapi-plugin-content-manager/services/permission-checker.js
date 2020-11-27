@@ -34,7 +34,7 @@ const createPermissionChecker = ({ userAbility, model }) => {
 
   const sanitizeInput = (action, data, entity) => {
     return permissionsManager.sanitize(data, {
-      subject: entity ? toSubject(entity) : toSubject(data),
+      subject: entity ? toSubject(entity) : model,
       action,
       isOutput: false,
     });
