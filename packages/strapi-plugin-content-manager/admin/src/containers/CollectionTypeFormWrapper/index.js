@@ -498,7 +498,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
       dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
 
-      const data = await request(endPoint, { method: 'POST' });
+      const data = await request(endPoint, {
+        method: 'POST',
+        params: { lockUid: lockUIDRef.current },
+      });
 
       emitEventRef.current('didPublishEntry');
 
@@ -527,7 +530,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         const response = await request(endPoint, {
           method: 'PUT',
           body,
-          params: { uid: lockUIDRef.current },
+          params: { lockUid: lockUIDRef.current },
         });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
@@ -555,7 +558,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     try {
       emitEventRef.current('willUnpublishEntry');
 
-      const response = await request(endPoint, { method: 'POST' });
+      const response = await request(endPoint, {
+        method: 'POST',
+        params: { lockUid: lockUIDRef.current },
+      });
 
       emitEventRef.current('didUnpublishEntry');
       strapi.notification.success(getTrad('success.record.unpublish'));
