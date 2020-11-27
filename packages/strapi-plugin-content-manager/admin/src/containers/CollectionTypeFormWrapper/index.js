@@ -13,6 +13,7 @@ import {
 import pluginId from '../../pluginId';
 import { crudInitialState, crudReducer } from '../../sharedReducers';
 import ConcurrentEditingModal from '../../components/ConcurrentEditingModal';
+import NotificationSyncIcon from './NotificationSyncIcon';
 import concurrentEditingReducer, { concurrentEditingState } from './concurrentEditingReducer';
 import { getRequestUrl } from './utils';
 
@@ -317,6 +318,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
               label: {
                 id: getTrad('notification.concurrent-editing.new-content.refresh-label'),
               },
+              icon: <NotificationSyncIcon />,
+              target: null,
             },
           });
 

@@ -80,7 +80,7 @@ const Notification = ({ notification }) => {
                 </Text>
               )}
               {link && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                <a href={link.url} target={link.target} rel="noopener noreferrer">
                   <Padded left size="xs">
                     <Flex alignItems="center">
                       <Text
@@ -93,7 +93,8 @@ const Notification = ({ notification }) => {
                         {formattedMessage(link.label)}
                       </Text>
                       <Padded left size="xs" />
-                      <LinkArrow />
+                      {/* <LinkArrow /> */}
+                      {link.icon}
                     </Flex>
                   </Padded>
                 </a>
@@ -152,6 +153,8 @@ Notification.propTypes = {
           values: PropTypes.object,
         }),
       ]).isRequired,
+      target: '_blank',
+      icon: <LinkArrow />,
     }),
     type: PropTypes.string,
     onClose: PropTypes.func,
