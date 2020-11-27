@@ -158,15 +158,20 @@ const createLockService = ({ db }) => ({ prefix }) => {
       const newLock = toDBObject({ key: prefixedKey, metadata, ttl }, { now });
       const { isLockFree: isExistingLockFree, lock: existingLock } = await this.get(key, now);
 
-      if (!existingLock) {
-        const lock = await lockQueries.create(newLock);
-        return { success: true, lock: fromDBObject(lock, prefix) };
-      }
+      try {
+        if (!existingLock) {
+          const lock = await lockQueries.create(newLock);
+          return { success: true, lock: fromDBObject(lock, prefix) };
+        }
 
-      if (isExistingLockFree || force) {
-        await lockQueries.delete({ key: prefixedKey });
-        const lock = await lockQueries.create(newLock);
-        return { success: true, lock: fromDBObject(lock, prefix) };
+        if (isExistingLockFree || force) {
+          await lockQueries.delete({ key: prefixedKey });
+          const lock = await lockQueries.create(newLock);
+          return { success: true, lock: fromDBObject(lock, prefix) };
+        }
+      } catch (e) {
+        const foudLock = await this.get(key, now);
+        return { success: false, lock: _.getOr(null, 'lock', foudLock) };
       }
 
       return { success: false, lock: existingLock };
