@@ -91,8 +91,8 @@ describe('Migration - draft and publish', () => {
         });
 
         let { body } = await rq({
-          url: '/content-manager/collection-types/application::dog.dog',
           method: 'GET',
+          url: '/content-manager/collection-types/application::dog.dog',
         });
 
         expect(body.results.length).toBe(2);
@@ -109,8 +109,8 @@ describe('Migration - draft and publish', () => {
     describe('Disabling D&P on a content-type', () => {
       test('No published_at after disabling the feature + draft removed', async () => {
         const res = await rq({
-          url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
           method: 'POST',
+          url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
         });
         data.dogs[1] = res.body;
 

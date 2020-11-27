@@ -200,12 +200,11 @@ if (edition === 'EE') {
     test('User B cannot delete the entry created by user A', async () => {
       const { id } = localTestData.entry;
       const modelName = getModelName();
-      const modelUid = `application::${modelName}.${modelName}`;
       const rq = getUserRequest(1);
 
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/collection-types/${modelUid}/${id}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(403);
@@ -214,11 +213,10 @@ if (edition === 'EE') {
     test('User A can delete its entry', async () => {
       const { id } = localTestData.entry;
       const modelName = getModelName();
-      const modelUid = `application::${modelName}.${modelName}`;
       const rq = getUserRequest(0);
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/collection-types/${modelUid}/${id}`,
+        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);

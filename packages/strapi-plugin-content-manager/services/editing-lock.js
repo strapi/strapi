@@ -26,9 +26,10 @@ const getLock = async ({ model, entityId }) => {
 const setLock = async ({ model, entityId, metadata = {}, user }, { force = false } = {}) => {
   const lockService = strapi.lockService({ prefix: LOCK_PREFIX });
   const key = getLockKey(model, entityId);
+  const previousLock = await lockService.get(key);
   const fullMetadata = {
     ..._.pick(acceptedMetadata, metadata),
-    lastUpdatedAt: Date.now(),
+    lastUpdatedAt: _.getOr(Date.now(), 'lock.metadata.lastUpdatedAt', previousLock),
     lockedBy: {
       id: user.id,
       firstname: user.firstname,
