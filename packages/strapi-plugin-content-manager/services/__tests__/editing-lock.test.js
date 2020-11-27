@@ -50,7 +50,8 @@ describe('EditingLock', () => {
       };
       const metadata = { lastActivityDate: new Date() };
       const set = jest.fn(() => Promise.resolve(result));
-      global.strapi.lockService = () => ({ set });
+      const get = jest.fn(() => Promise.resolve(result));
+      global.strapi.lockService = () => ({ set, get });
 
       const lockResult = await editingLockService.setLock({ model, entityId, metadata, user });
       expect(set).toHaveBeenCalledWith(
@@ -253,7 +254,8 @@ describe('Single type', () => {
     };
     const metadata = { lastActivityDate: new Date() };
     const set = jest.fn(() => Promise.resolve(result));
-    global.strapi.lockService = () => ({ set });
+    const get = jest.fn(() => Promise.resolve(result));
+    global.strapi.lockService = () => ({ set, get });
 
     const lockResult = await editingLockService.setLock({ model, metadata, user });
     expect(set).toHaveBeenCalledWith(
