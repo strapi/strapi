@@ -19,14 +19,14 @@ const VALID_REST_OPERATORS = [
 const findAppliedFilter = whereClause => {
   // Useful to remove the mainField of relation fields.
   const formattedWhereClause = whereClause.split('.')[0];
-  const separatorIndex = formattedWhereClause.lastIndexOf('_');
+  const separatorIndex = whereClause.lastIndexOf('_');
 
   if (separatorIndex === -1) {
     return { operator: '=', field: formattedWhereClause };
   }
 
   const fieldName = formattedWhereClause.substring(0, separatorIndex);
-  const operator = formattedWhereClause.slice(separatorIndex + 1);
+  const operator = whereClause.slice(separatorIndex + 1);
 
   // the field as underscores
   if (!VALID_REST_OPERATORS.includes(operator)) {

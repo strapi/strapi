@@ -24,6 +24,7 @@ const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamicz
 
 function FilterPicker({
   contentType,
+  editRelations,
   filters,
   isOpen,
   metadatas,
@@ -186,6 +187,23 @@ function FilterPicker({
     });
   };
 
+  const getAttributeType = useCallback(
+    filter => {
+      const attributeType = get(contentType, ['attributes', filter.name, 'type'], '');
+
+      if (attributeType === 'relation') {
+        const { mainFieldSchema } = editRelations.find(
+          relation => relation.name === filter.name
+        ).metadatas;
+
+        return mainFieldSchema.type;
+      }
+
+      return attributeType;
+    },
+    [contentType, editRelations]
+  );
+
   return (
     <Collapse isOpen={isOpen} onEntering={handleEntering}>
       <Container style={{ backgroundColor: 'white', paddingBottom: 0 }}>
@@ -207,7 +225,7 @@ function FilterPicker({
                 onChange={handleChange}
                 onClickAddFilter={addFilter}
                 onRemoveFilter={handleRemoveFilter}
-                type={get(contentType, ['attributes', filter.name, 'type'], '')}
+                type={getAttributeType(filter)}
                 showAddButton={key === modifiedData.length - 1}
                 // eslint-disable-next-line react/no-array-index-key
                 key={key}
@@ -227,11 +245,13 @@ function FilterPicker({
 }
 
 FilterPicker.defaultProps = {
+  editRelations: [],
   name: '',
 };
 
 FilterPicker.propTypes = {
   contentType: PropTypes.object.isRequired,
+  editRelations: PropTypes.array,
   filters: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
   metadatas: PropTypes.object.isRequired,

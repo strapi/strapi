@@ -29,6 +29,11 @@ const simpleModels = [
   {
     uid: 'application::category.category',
     isDisplayed: true,
+    attributes: {
+      name: {
+        type: 'string',
+      },
+    },
   },
 ];
 
@@ -44,6 +49,9 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           },
           metadatas: {
             mainField: 'name',
+            mainFieldSchema: {
+              type: 'string',
+            },
           },
           queryInfos: {
             endPoint: '/content-manager/relations/application::address.address/categories',
