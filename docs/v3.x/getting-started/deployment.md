@@ -1,6 +1,6 @@
 # Deployment
 
-Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Render, Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
+Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as 21YunBox, Render, Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
 
 ::: tip
 Deploying **databases** along with Strapi is covered in the [Databases Guide](../guides/databases.md).
@@ -9,6 +9,18 @@ Deploying **databases** along with Strapi is covered in the [Databases Guide](..
 ## Hosting Provider Guides
 
 Manual guides for deployment on various platforms, for One-click and docker please see the [installation](../getting-started/installation.md) guides.
+
+<div>
+	<InstallLink link="../deployment/21yunbox.html">
+    <template #icon>
+    <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg"><defs><filter id="a"><feColorMatrix in="SourceGraphic" values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"/></filter></defs><g fill="none" fill-rule="evenodd"><g fill-rule="nonzero"><path fill="#FA598D" d="M41.325 13.897h5.303v36.206h-5.303zM10.331 13.897h5.303V19.2h-5.303zM17.371 13.897h5.303V19.2h-5.303zM24.502 13.897h5.303V26.24h-5.303z"/><path fill="#00E5A2" d="M10.331 28.891h19.474v5.303H10.331z"/><path fill="#FA598D" d="M10.331 36.846h5.303v13.257h-5.303zM17.371 44.8h5.303v5.303h-5.303zM24.502 44.8h5.303v5.303h-5.303z"/><path fill="#FDC0A5" d="M34.194 13.897h5.303V19.2h-5.303z"/><path fill="#FA598D" d="M41.325 44.8h5.303v5.303h-5.303z"/><path fill="#31198C" d="M48.365 44.8h5.303v5.303h-5.303zM34.194 44.8h5.303v5.303h-5.303z"/></g><g filter="url(#a)" transform="translate(10.331 13.897)"><g fill="#FFF" fill-rule="nonzero"><path d="M30.994 0h5.303v36.206h-5.303zM0 0h5.303v5.303H0zM7.04 0h5.303v5.303H7.04zM14.171 0h5.303v12.343h-5.303zM0 14.994h19.474v5.303H0zM0 22.949h5.303v13.257H0zM7.04 30.903h5.303v5.303H7.04zM14.171 30.903h5.303v5.303h-5.303zM23.863 0h5.303v5.303h-5.303z"/><path d="M30.994 30.903h5.303v5.303h-5.303zM38.034 30.903h5.303v5.303h-5.303zM23.863 30.903h5.303v5.303h-5.303z"/></g></g></g></svg>
+    </template>
+		<template #title>21YunBox</template>
+		<template #description>
+			Step by step guide for deploying on 21YunBox
+		</template>
+	</InstallLink>
+</div>
 
 <div>
 	<InstallLink link="../deployment/amazon-aws.html">
