@@ -163,7 +163,7 @@ module.exports = {
 #### `update`
 
 ```js
-module.exports = {
+module.exports = {  
   /**
    * Promise to edit record
    *
@@ -343,7 +343,7 @@ module.exports = {
         model: 'restaurant',
         // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
       });
-      return this.findOne({ id: entry.id });
+      return this.find({ id: entry.id });
     }
 
     return entry;
