@@ -202,7 +202,7 @@ module.exports = function(strapi) {
     for (const connName of mongooseConnections) {
       const connection = strapi.connections[connName];
 
-      if (connection instanceof Mongoose) {
+      if (connection instanceof Mongoose && connection.connection.readyState === 1) {
         connection.disconnect();
       }
     }
