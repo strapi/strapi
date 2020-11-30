@@ -182,9 +182,8 @@ describe('CleanData utils', () => {
       const {
         rawData: { contentTypesToSort },
       } = rawData;
-      const actual = sortContentType(contentTypesToSort);
 
-      expect(actual.sort()).toEqual(sortedContentTypes.sort());
+      expect(sortContentType(contentTypesToSort)).toEqual(sortedContentTypes);
     });
 
     it('should return an empty array if no content types', () => {

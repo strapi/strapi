@@ -6,7 +6,7 @@ const pluralize = require('pluralize');
 
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('strapi-utils');
-const { typeKinds } = require('../../controllers/validation/constants');
+const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -77,11 +77,14 @@ module.exports = function createComponentBuilder() {
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
-        .set(['info', 'name'], infos.name)
-        .set(['info', 'description'], infos.description)
+        .set('info', {
+          name: infos.name,
+          description: infos.description,
+        })
         .set('options', {
           increments: true,
           timestamps: true,
+          draftAndPublish: infos.draftAndPublish || false,
         })
         .setAttributes(this.convertAttributes(infos.attributes));
 
@@ -184,6 +187,7 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
+        .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;

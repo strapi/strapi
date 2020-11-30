@@ -2250,4 +2250,69 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       expect(reducer(state, action)).toEqual(expected);
     });
   });
+
+  describe('ON_SUBMIT_EDIT_NEW_FILE', () => {
+    it('should update file info after edit', () => {
+      const action = {
+        type: 'ON_SUBMIT_EDIT_NEW_FILE',
+      };
+      const state = {
+        currentStep: 'edit-new',
+        fileToEdit: {
+          abortController: new AbortController(),
+          file: { name: 'test1', ok: true },
+          fileInfo: {
+            alternativeText: 'test1 alternativeText',
+            caption: 'test1 caption',
+            name: 'test1 name',
+          },
+          originalName: 'test1',
+          hasError: false,
+          errorMessage: null,
+          isUploading: false,
+          originalIndex: 0,
+          tempId: null,
+        },
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalName: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+        ],
+      };
+      const expected = {
+        currentStep: 'edit-new',
+        fileToEdit: null,
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: 'test1 alternativeText',
+              caption: 'test1 caption',
+              name: 'test1 name',
+            },
+            originalName: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+        ],
+      };
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 });

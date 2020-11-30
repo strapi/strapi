@@ -49,6 +49,10 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 - `config`
   - `policies` (array): Array of policy names or paths ([see more](./policies.md))
 
+::: tip
+You can exclude the entire `config` object if you do not want the route to be checked by the [Users & Permissions plugin](../plugins/users-permissions.md).
+:::
+
 ## Dynamic parameters
 
 The router used by Strapi allows you to create dynamic routes where you can use parameters and simple regular expressions. These parameters will be exposed in the `ctx.params` object. For more details, please refer to the [PathToRegex](https://github.com/pillarjs/path-to-regexp) documentation.

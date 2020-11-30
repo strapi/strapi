@@ -5,7 +5,6 @@ import isEqual from 'react-fast-compare';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
-import useEditView from '../../hooks/useEditView';
 import { getFieldName } from '../../utils';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import NotAllowedInput from '../NotAllowedInput';
@@ -70,6 +69,7 @@ function Inputs({
   allowedFields,
   autoFocus,
   componentUid,
+  currentContentTypeLayout,
   isCreatingEntry,
   keys,
   layout,
@@ -78,12 +78,12 @@ function Inputs({
   formErrors,
   onChange,
   readableFields,
+  shouldNotRunValidations,
   value,
 }) {
   const {
     strapi: { fieldApi },
   } = useStrapi();
-  const { layout: currentContentTypeLayout } = useEditView();
 
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
@@ -105,7 +105,12 @@ function Inputs({
 
     return foundAttributeType === 'dynamiczone';
   }, [currentContentTypeLayout, fieldName]);
-  const validations = useMemo(() => omit(attribute, validationsToOmit), [attribute]);
+  const validations = useMemo(() => {
+    return omit(
+      attribute,
+      shouldNotRunValidations ? [...validationsToOmit, 'required', 'minLength'] : validationsToOmit
+    );
+  }, [attribute, shouldNotRunValidations]);
   const isRequired = useMemo(() => get(validations, ['required'], false), [validations]);
   const inputType = useMemo(() => {
     return getInputType(type);
@@ -313,6 +318,7 @@ Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
   autoFocus: PropTypes.bool,
   componentUid: PropTypes.string,
+  currentContentTypeLayout: PropTypes.object.isRequired,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
@@ -321,6 +327,7 @@ Inputs.propTypes = {
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
+  shouldNotRunValidations: PropTypes.bool.isRequired,
   value: PropTypes.any,
 };
 

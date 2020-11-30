@@ -6,17 +6,40 @@ import formatValue from './utils/formatValue';
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
-const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
-  const headersName = [
-    'Settings.webhooks.events.create',
-    'Settings.webhooks.events.edit',
-    'app.utils.delete',
-  ];
+const displayedData = {
+  headers: {
+    default: [
+      'Settings.webhooks.events.create',
+      'Settings.webhooks.events.update',
+      'app.utils.delete',
+    ],
+    draftAndPublish: [
+      'Settings.webhooks.events.create',
+      'Settings.webhooks.events.update',
+      'app.utils.delete',
+      'app.utils.publish',
+      'app.utils.unpublish',
+    ],
+  },
+  events: {
+    default: {
+      entry: ['entry.create', 'entry.update', 'entry.delete'],
+      media: ['media.create', 'media.update', 'media.delete'],
+    },
+    draftAndPublish: {
+      entry: ['entry.create', 'entry.update', 'entry.delete', 'entry.publish', 'entry.unpublish'],
+      media: ['media.create', 'media.update', 'media.delete'],
+    },
+  },
+};
 
-  const events = {
-    entry: ['entry.create', 'entry.update', 'entry.delete'],
-    media: ['media.create', 'media.update', 'media.delete'],
-  };
+const EventInput = ({ onChange, name: inputName, value: inputValue, shouldShowDPEvents }) => {
+  const headersName = shouldShowDPEvents
+    ? displayedData.headers.draftAndPublish
+    : displayedData.headers.default;
+  const events = shouldShowDPEvents
+    ? displayedData.events.draftAndPublish
+    : displayedData.events.default;
 
   const disabledEvents = [];
 
@@ -55,6 +78,18 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
           <tr>
             <td />
             {headersName.map(header => {
+              if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
+                return (
+                  <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
+                    {msg => (
+                      <td title={msg}>
+                        <FormattedMessage id={header} />
+                      </td>
+                    )}
+                  </FormattedMessage>
+                );
+              }
+
               return (
                 <td key={header}>
                   <FormattedMessage id={header} />
@@ -86,6 +121,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 EventInput.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  shouldShowDPEvents: PropTypes.bool.isRequired,
   value: PropTypes.array.isRequired,
 };
 

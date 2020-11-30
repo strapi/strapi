@@ -23,6 +23,7 @@ function Inputs({
   type,
   validations,
   value,
+  ...rest
 }) {
   return (
     <Wrapper>
@@ -65,6 +66,7 @@ function Inputs({
             return (
               <>
                 <EventInput
+                  {...rest}
                   name={name}
                   onChange={e => {
                     handleChange(e);

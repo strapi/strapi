@@ -93,7 +93,7 @@ function createSchemaBuilder({ components, contentTypes }) {
               via,
               allowedTypes: attribute.allowedTypes,
               plugin: 'upload',
-              required: attribute.required ? true : false,
+              required: !!attribute.required,
               configurable: configurable === false ? false : undefined,
             };
           } else {

@@ -76,6 +76,7 @@ module.exports = (dir, initialConfig = {}) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
+    template: _.get(pkgJSON, 'strapi.template'),
     info: {
       ...pkgJSON,
       strapi: strapiVersion,

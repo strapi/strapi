@@ -61,6 +61,7 @@ const MenuList = ({ selectProps, ...rest }) => {
                   <Label htmlFor="overrideReactSelectBehavior">
                     <Flex>
                       <Checkbox
+                        disabled
                         id="checkCategory"
                         name={category[0]}
                         onChange={() => {}}

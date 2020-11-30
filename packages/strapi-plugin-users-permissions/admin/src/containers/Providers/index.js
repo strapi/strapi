@@ -10,7 +10,7 @@ import {
   getYupInnerErrors,
   request,
 } from 'strapi-helper-plugin';
-import { get, upperFirst } from 'lodash';
+import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { useForm } from '../../hooks';
@@ -47,13 +47,20 @@ const ProvidersPage = () => {
     modifiedData,
   } = useForm('providers', updatePermissions);
 
-  console.log({ canUpdate });
-
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
     () => providers.filter(provider => provider.enabled).length,
     [providers]
   );
+  const isProviderWithSubdomain = useMemo(() => {
+    if (!providerToEditName) {
+      return false;
+    }
+
+    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+
+    return has(providerToEdit, 'subdomain');
+  }, [providers, providerToEditName]);
   const disabledProvidersCount = useMemo(() => {
     return providers.length - enabledProvidersCount;
   }, [providers, enabledProvidersCount]);
@@ -82,8 +89,16 @@ const ProvidersPage = () => {
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
 
   const formToRender = useMemo(() => {
-    return providerToEditName === 'email' ? forms.email : forms.providers;
-  }, [providerToEditName]);
+    if (providerToEditName === 'email') {
+      return forms.email;
+    }
+
+    if (isProviderWithSubdomain) {
+      return forms.providersWithSubdomain;
+    }
+
+    return forms.providers;
+  }, [providerToEditName, isProviderWithSubdomain]);
 
   const handleClick = useCallback(() => {
     buttonSubmitRef.current.click();
@@ -135,14 +150,20 @@ const ProvidersPage = () => {
 
           emitEventRef.current('didEditAuthenticationProvider');
 
-          strapi.notification.success(getTrad('notification.success.submit'));
+          strapi.notification.toggle({
+            type: 'success',
+            message: { id: getTrad('notification.success.submit') },
+          });
 
           dispatchSubmitSucceeded();
 
           handleToggle();
         } catch (err) {
           console.error(err);
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       } catch (err) {
         console.error(err);

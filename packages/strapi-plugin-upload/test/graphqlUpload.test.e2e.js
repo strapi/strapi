@@ -147,4 +147,64 @@ describe('Upload plugin end to end tests', () => {
       },
     });
   });
+
+  test('Delete a file', async () => {
+    const res = await rq({
+      url: '/graphql',
+      method: 'POST',
+      body: {
+        query: /* GraphQL */ `
+          mutation removeFile($id: ID!) {
+            deleteFile(input: { where: { id: $id } }) {
+              file {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          id: data.file.id,
+        },
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      data: {
+        deleteFile: {
+          file: {
+            id: data.file.id,
+          },
+        },
+      },
+    });
+  });
+
+  test('Delete a file that dont exist', async () => {
+    const res = await rq({
+      url: '/graphql',
+      method: 'POST',
+      body: {
+        query: /* GraphQL */ `
+          mutation removeFile($id: ID!) {
+            deleteFile(input: { where: { id: $id } }) {
+              file {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          id: '404',
+        },
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      data: {
+        deleteFile: null,
+      },
+    });
+  });
 });

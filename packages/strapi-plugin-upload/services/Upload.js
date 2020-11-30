@@ -11,11 +11,20 @@ const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
-const { nameToSlug } = require('strapi-utils');
+const {
+  nameToSlug,
+  contentTypes: contentTypesUtils,
+  sanitizeEntity,
+  webhook: webhookUtils,
+} = require('strapi-utils');
+const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
 const { bytesToKbytes } = require('../utils/file');
 
+const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
+
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+
 const generateFileName = name => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
@@ -115,7 +124,7 @@ module.exports = {
     });
   },
 
-  async upload({ data, files }) {
+  async upload({ data, files }, { user } = {}) {
     const { fileInfo, ...metas } = data;
 
     const fileArray = Array.isArray(files) ? files : [files];
@@ -124,7 +133,7 @@ module.exports = {
     const doUpload = async (file, fileInfo) => {
       const fileData = await this.enhanceFile(file, fileInfo, metas);
 
-      return this.uploadFileAndPersist(fileData);
+      return this.uploadFileAndPersist(fileData, { user });
     };
 
     return await Promise.all(
@@ -132,7 +141,7 @@ module.exports = {
     );
   },
 
-  async uploadFileAndPersist(fileData) {
+  async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.plugins.upload.config;
 
     const {
@@ -174,10 +183,10 @@ module.exports = {
       height,
     });
 
-    return this.add(fileData);
+    return this.add(fileData, { user });
   },
 
-  async updateFileInfo(id, { name, alternativeText, caption }) {
+  async updateFileInfo(id, { name, alternativeText, caption }, { user } = {}) {
     const dbFile = await this.fetch({ id });
 
     if (!dbFile) {
@@ -190,10 +199,10 @@ module.exports = {
       caption: _.isNil(caption) ? dbFile.caption : caption,
     };
 
-    return this.update({ id }, newInfos);
+    return this.update({ id }, newInfos, { user });
   },
 
-  async replace(id, { data, file }) {
+  async replace(id, { data, file }, { user } = {}) {
     const config = strapi.plugins.upload.config;
 
     const {
@@ -265,22 +274,33 @@ module.exports = {
       height,
     });
 
-    return this.update({ id }, fileData);
+    return this.update({ id }, fileData, { user });
   },
 
-  async update(params, values) {
-    sendMediaMetrics(values);
+  async update(params, values, { user } = {}) {
+    const fileValues = { ...values };
+    if (user) {
+      fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
+    }
+    sendMediaMetrics(fileValues);
 
-    const res = await strapi.query('file', 'upload').update(params, values);
-    strapi.eventHub.emit('media.update', { media: res });
+    const res = await strapi.query('file', 'upload').update(params, fileValues);
+    const modelDef = strapi.getModel('file', 'upload');
+    strapi.eventHub.emit(MEDIA_UPDATE, { media: sanitizeEntity(res, { model: modelDef }) });
     return res;
   },
 
-  async add(values) {
-    sendMediaMetrics(values);
+  async add(values, { user } = {}) {
+    const fileValues = { ...values };
+    if (user) {
+      fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
+      fileValues[CREATED_BY_ATTRIBUTE] = user.id;
+    }
+    sendMediaMetrics(fileValues);
 
-    const res = await strapi.query('file', 'upload').create(values);
-    strapi.eventHub.emit('media.create', { media: res });
+    const res = await strapi.query('file', 'upload').create(fileValues);
+    const modelDef = strapi.getModel('file', 'upload');
+    strapi.eventHub.emit(MEDIA_CREATE, { media: sanitizeEntity(res, { model: modelDef }) });
     return res;
   },
 
@@ -326,7 +346,8 @@ module.exports = {
       id: file.id,
     });
 
-    strapi.eventHub.emit('media.delete', { media });
+    const modelDef = strapi.getModel('file', 'upload');
+    strapi.eventHub.emit(MEDIA_DELETE, { media: sanitizeEntity(media, { model: modelDef }) });
 
     return strapi.query('file', 'upload').delete({ id: file.id });
   },
@@ -377,22 +398,5 @@ module.exports = {
         key: 'settings',
       })
       .set({ value });
-  },
-
-  setCreatorInfo(userId, files, { edition = false } = {}) {
-    if (!Array.isArray(files)) files = [files];
-
-    const fields = { created_by: userId, updated_by: userId };
-
-    const creationFields = ['updated_by', 'created_by'];
-    const editionFields = ['updated_by'];
-
-    return Promise.all(
-      files.map(file => {
-        const params = _.pick(fields, edition ? editionFields : creationFields);
-
-        return strapi.query('file', 'upload').update({ id: file.id }, params);
-      })
-    );
   },
 };

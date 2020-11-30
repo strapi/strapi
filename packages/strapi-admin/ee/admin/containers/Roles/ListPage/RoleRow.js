@@ -31,7 +31,10 @@ const RoleRow = ({
     e.stopPropagation();
 
     if (role.usersCount) {
-      strapi.notification.info('Roles.ListPage.notification.delete-not-allowed');
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: 'Roles.ListPage.notification.delete-not-allowed' },
+      });
     } else {
       onRoleRemove(role.id);
     }

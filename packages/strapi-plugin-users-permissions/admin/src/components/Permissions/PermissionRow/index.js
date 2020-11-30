@@ -4,10 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { sortBy } from 'lodash';
+import { PermissionsWrapper, RowContainer } from 'strapi-helper-plugin';
+
 import getTrad from '../../../utils/getTrad';
 import SubCategory from './SubCategory';
 import RowStyle from './RowStyle';
-import PermissionsWrapper from './PermissionsWrapper';
 
 const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => {
   const { formatMessage } = useIntl();
@@ -49,7 +50,7 @@ const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => 
   }, [isOpen, name, permissions]);
 
   return (
-    <>
+    <RowContainer isWhite={isWhite}>
       <RowStyle isActive={isOpen} isWhite={isWhite} onClick={onOpenPlugin}>
         <Flex alignItems="center" justifyContent="space-between">
           <div>
@@ -70,13 +71,13 @@ const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => 
         </Flex>
       </RowStyle>
       {isOpen && (
-        <PermissionsWrapper>
+        <PermissionsWrapper isWhite={isWhite}>
           {subCategories.map(subCategory => (
             <SubCategory key={subCategory.name} subCategory={subCategory} />
           ))}
         </PermissionsWrapper>
       )}
-    </>
+    </RowContainer>
   );
 };
 

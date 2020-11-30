@@ -1,4 +1,5 @@
 import produce from 'immer';
+import packageJSON from '../../../../../package.json';
 import {
   setAppError,
   getUserPermissions,
@@ -14,6 +15,7 @@ describe('adminReducer', () => {
     state = {
       appError: false,
       isLoading: true,
+      latestStrapiReleaseTag: `v${packageJSON.version}`,
       userPermissions: [],
     };
   });

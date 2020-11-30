@@ -5,7 +5,6 @@ import moment from 'moment';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import useListView from '../../hooks/useListView';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
@@ -79,6 +78,13 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
     [row, schema]
   );
 
+  const isMedia = useCallback(
+    header => {
+      return get(schema, ['attributes', header.name, 'type']) === 'media';
+    },
+    [schema]
+  );
+
   const { emitEvent } = useGlobalContext();
 
   const links = [
@@ -109,13 +115,13 @@ function Row({ canDelete, canUpdate, isBulkable, row, headers }) {
       )}
       {headers.map(header => {
         return (
-          <td key={header.name}>
-            {get(schema, ['attributes', header.name, 'type']) !== 'media' ? (
+          <td key={header.key || header.name}>
+            {isMedia(header) && <MediaPreviewList files={memoizedDisplayedValue(header.name)} />}
+            {header.cellFormatter && header.cellFormatter(row)}
+            {!isMedia(header) && !header.cellFormatter && (
               <Truncate>
                 <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
               </Truncate>
-            ) : (
-              <MediaPreviewList files={memoizedDisplayedValue(header.name)} />
             )}
           </td>
         );

@@ -16,8 +16,16 @@ const createActionProvider = () => {
      */
     get(uid, pluginName) {
       const actionId = getActionId({ pluginName, uid });
-      const action = actions.get(actionId);
-      return action;
+      return actions.get(actionId);
+    },
+
+    /**
+     * Get an action by its actionId
+     * @param {string} actionId
+     * @returns {Action}
+     */
+    getByActionId(actionId) {
+      return actions.get(actionId);
     },
 
     /**
@@ -54,6 +62,8 @@ const createActionProvider = () => {
         }
 
         actions.set(actionId, createAction(newAction));
+
+        return this;
       });
     },
   };

@@ -20,7 +20,7 @@ const getExistingActions = permissions => {
         return [
           ...acc,
           ...getActionsPermission([
-            ...Object.values(current[1].attributes),
+            ...Object.values(current[1].attributes || {}),
             current[1].contentTypeActions,
           ]),
         ];

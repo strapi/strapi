@@ -46,6 +46,8 @@
   "PopUpForm.Providers.secret.label": "Klucz sekretny klienta",
   "PopUpForm.Providers.secret.placeholder": "TEKST",
   "PopUpForm.header.edit.email-templates": "Zmień szablony e-mail",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Ustawienia zostały zaktualizowane",
   "plugin.description.long": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT. Ta wtyczka zawiera również strategię ACL, która pozwala zarządzać uprawnieniami między grupami użytkowników.",
   "plugin.description.short": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT",

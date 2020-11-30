@@ -44,6 +44,8 @@
   "PopUpForm.Providers.secret.label": "Web istemcisi Secret",
   "PopUpForm.Providers.secret.placeholder": "METİN",
   "PopUpForm.header.edit.email-templates": "E-posta Şablonlarını Düzenle",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Ayarlar güncellendi",
   "plugin.description.long": "Servisinizi JWT'ye dayalı tam bir kimlik doğrulama işlemi ile koruyun. Bu eklenti, kullanıcı grupları arasındaki izinleri yönetmenize izin veren bir ACL stratejisiyle de gelir.",
   "plugin.description.short": "Servisinizi JWT'ye dayalı tam bir kimlik doğrulama işlemi ile koruyun",

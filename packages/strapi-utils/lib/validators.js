@@ -16,8 +16,8 @@ function isNotNull(msg = '${path} cannot be null.') {
   return this.test('defined', msg, isNotNullTest);
 }
 
-function arrayRequiredAllowEmpty(message) {
-  return this.test('field is required', message || '', value => _.isArray(value));
+function arrayRequiredAllowEmpty(message = '${path} is required') {
+  return this.test('field is required', message, value => _.isArray(value));
 }
 
 yup.addMethod(yup.mixed, 'notNil', isNotNill);

@@ -1,5 +1,13 @@
-import React, { useReducer, forwardRef, useMemo, useImperativeHandle } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useReducer,
+  forwardRef,
+  useMemo,
+  useImperativeHandle,
+} from 'react';
 import PropTypes from 'prop-types';
+import init from 'ee_else_ce/components/Roles/Permissions/init';
 
 import Tabs from '../Tabs';
 import ContentTypes from './ContentTypes';
@@ -8,7 +16,6 @@ import { roleTabsLabel } from '../../../utils';
 import { useModels } from '../../../hooks';
 import PermissionsProvider from './PermissionsProvider';
 import reducer, { initialState } from './reducer';
-import init from './init';
 import { getAllAttributes, formatPermissionsLayout } from './utils';
 
 const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, ref) => {
@@ -23,6 +30,12 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
         contentTypesPermissions: state.contentTypesPermissions,
         pluginsAndSettingsPermissions: state.pluginsAndSettingsPermissions,
       };
+    },
+    resetForm: () => {
+      dispatch({ type: 'ON_RESET' });
+    },
+    setFormAfterSubmit: () => {
+      dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
     },
   }));
 
@@ -164,6 +177,14 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     });
   };
 
+  const handleGlobalPublishActionSelect = useCallback(({ contentTypes, value }) => {
+    dispatch({
+      type: 'ON_GLOBAL_PUBLISH_ACTION_SELECT',
+      contentTypes,
+      value,
+    });
+  }, []);
+
   const providerValues = {
     ...state,
     components,
@@ -179,6 +200,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
     onContentTypeConditionsSelect: handleContentTypeConditionsSelect,
     onPluginSettingSubCategoryPermission: handlePluginSettingSubCategoryPermission,
     onPluginSettingConditionsSelect: handlePluginSettingConditionsSelect,
+    onGlobalPublishActionSelect: handleGlobalPublishActionSelect,
   };
 
   return (
@@ -211,4 +233,5 @@ Permissions.propTypes = {
   rolePermissions: PropTypes.object,
   role: PropTypes.object,
 };
-export default Permissions;
+
+export default memo(Permissions);

@@ -49,7 +49,9 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email: email.toLowerCase() });
+      const userWithSameEmail = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail) {
         return ctx.badRequest(
@@ -139,7 +141,9 @@ module.exports = {
     }
 
     if (_.has(ctx.request.body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email: email.toLowerCase() });
+      const userWithSameEmail = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
         return ctx.badRequest(
@@ -157,7 +161,6 @@ module.exports = {
     let updateData = {
       ...ctx.request.body,
     };
-
 
     if (_.has(ctx.request.body, 'password') && password === user.password) {
       delete updateData.password;

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { QUERY_OPERATORS } = require('strapi-utils');
 
 /**
  * Merges
@@ -58,7 +59,9 @@ const convertToQuery = params => {
   const result = {};
 
   _.forEach(params, (value, key) => {
-    if (_.isPlainObject(value)) {
+    if (QUERY_OPERATORS.includes(key)) {
+      result[key] = _.isArray(value) ? value.map(convertToQuery) : convertToQuery(value);
+    } else if (_.isPlainObject(value)) {
       const flatObject = convertToQuery(value);
       _.forEach(flatObject, (_value, _key) => {
         result[`${key}.${_key}`] = _value;

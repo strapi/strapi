@@ -96,7 +96,10 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    const permissions = await strapi.admin.services.permission.assign(role.id, input.permissions);
+    const permissions = await strapi.admin.services.role.assignPermissions(
+      role.id,
+      input.permissions
+    );
 
     ctx.body = {
       data: permissions,

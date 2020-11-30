@@ -78,18 +78,18 @@ async function createFixtures() {
 
   await createCollector({
     name: 'Bernard',
-    age: '25',
+    age: 25,
     panini_cards: [data.paniniCards[0].id, data.paniniCards[1].id],
   });
   await createCollector({
     name: 'Isabelle',
-    age: '55',
+    age: 55,
     panini_cards: [data.paniniCards[0].id],
     collector_friends: [data.collectors[0].id],
   });
   await createCollector({
     name: 'Kenza',
-    age: '25',
+    age: 25,
     panini_cards: [],
     collector_friends: [data.collectors[0].id],
   });

@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { auth, request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
+import { request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
 import { clone, get, isEmpty, set } from 'lodash';
 import { useIntl } from 'react-intl';
 import axios from 'axios';
@@ -85,8 +85,7 @@ const InputModalStepperProvider = ({
           const { source } = file;
 
           return axios
-            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
-              headers: { Authorization: `Bearer ${auth.getToken()}` },
+            .get(file.fileURL, {
               responseType: 'blob',
               cancelToken: source.token,
               timeout: 60000,
@@ -182,6 +181,12 @@ const InputModalStepperProvider = ({
   const toggleModalWarning = () => {
     dispatch({
       type: 'TOGGLE_MODAL_WARNING',
+    });
+  };
+
+  const submitEditNewFile = () => {
+    dispatch({
+      type: 'ON_SUBMIT_EDIT_NEW_FILE',
     });
   };
 
@@ -333,7 +338,10 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
       return 0;
     }
@@ -360,7 +368,10 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
       return [];
     }
@@ -498,6 +509,7 @@ const InputModalStepperProvider = ({
         onInputMediaChange,
         removeFilter,
         setParam,
+        submitEditNewFile,
         submitEditExistingFile,
         toggleModalWarning,
       }}

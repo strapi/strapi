@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const utils = require('strapi-utils');
 
 const toUID = (name, plugin) => {
   const modelUID = Object.keys(strapi.contentTypes).find(key => {
@@ -38,11 +39,9 @@ const isRelation = attribute =>
  * @param {Object} context.component - the associated component
  */
 const formatAttributes = model => {
-  return Object.keys(model.attributes).reduce((acc, key) => {
-    if (key === 'created_by' || key === 'updated_by') {
-      return acc;
-    }
+  const { getVisibleAttributes } = utils.contentTypes;
 
+  return getVisibleAttributes(model).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});
@@ -85,6 +84,7 @@ const formatAttribute = (key, attribute, { model }) => {
         ['attributes', attribute.via, 'columnName'],
         undefined
       ),
+      private: attribute.private ? true : false,
       unique: attribute.unique ? true : false,
       autoPopulate: attribute.autoPopulate,
     };
@@ -144,7 +144,6 @@ module.exports = {
   hasComponent,
   isRelation,
   isConfigurable,
-
   replaceTemporaryUIDs,
   formatAttributes,
   formatAttribute,

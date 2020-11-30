@@ -13,8 +13,11 @@ Object {
     "collectionName": "tests",
     "connection": "default",
     "description": "My description",
+    "draftAndPublish": false,
+    "editable": true,
     "kind": "singleType",
     "name": "My name",
+    "restrictRelationsTo": null,
   },
   "uid": "test-uid",
 }

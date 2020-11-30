@@ -107,7 +107,7 @@ export default WysiwygWithErrors;
 
 The AdminUI package source can be easily found in `./node_modules/strapi-admin/src/`.
 
-For example, to change the top-left displayed admin panel's color, copy the `./node_modules/strapi-admin/admin/src/components/LeftMenuHeader` folder to `./admin/src/components/LeftMenuHeader` and change the styles inside `./admin/src/components/LeftMenuHeader/Wrapper.js`.
+For example, to change the top-left displayed admin panel's color, copy the `./node_modules/strapi-admin/admin/src/components/LeftMenu/LeftMenuHeader` folder to `./admin/src/components/LeftMenu/LeftMenuHeader` and change the styles inside `./admin/src/components/LeftMenu/LeftMenuHeader/Wrapper.js`.
 
 Thus, you are replacing the files that would normally be in `node_modules/strapi-admin/admin/src` and directing them to `admin/src/some/file/path`.
 
@@ -137,6 +137,7 @@ Add the following configuration:
 export const LOGIN_LOGO = null;
 export const SHOW_TUTORIALS = false;
 export const SETTINGS_BASE_URL = '/settings';
+export const STRAPI_UPDATE_NOTIF = true;
 ```
 
 ### Changing the host and port

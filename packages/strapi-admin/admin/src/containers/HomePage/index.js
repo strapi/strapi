@@ -51,9 +51,17 @@ const SOCIAL_LINKS = [
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
   },
+  {
+    name: 'Forum',
+    link: 'https://forum.strapi.io',
+  },
+  {
+    name: 'Academy',
+    link: 'https://academy.strapi.io',
+  },
 ];
 
-const HomePage = ({ global: { plugins }, history: { push } }) => {
+const HomePage = ({ history: { push } }) => {
   const { error, isLoading, posts } = useFetch();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();

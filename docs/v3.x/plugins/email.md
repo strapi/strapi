@@ -96,10 +96,11 @@ The string after the last `@` represents your desired [semver](https://docs.npmj
 
 ### Configure your provider
 
-After installing your provider you will need to add some settings in `config/plugins.js`. 
-If this file doesn't exists, you'll need to create it. 
+After installing your provider you will need to add some settings in `config/plugins.js`.
+If this file doesn't exists, you'll need to create it.
+
 > ⚠️ Do note that filename has to come with correct spelling, plugin with 's' (plural). -> `plugins.js`
-Check the README of each provider to know what configuration settings the provider needs.
+> Check the README of each provider to know what configuration settings the provider needs.
 
 Here is an example of a configuration made for the provider [strapi-provider-email-sendgrid](https://www.npmjs.com/package/strapi-provider-email-sendgrid).
 
@@ -127,11 +128,11 @@ If you're using a different provider depending on your environment, you can spec
 :::
 
 ::: tip
-Only one email provider will be active at all time. If the email provider setting isn't picked up by strapi, verify you have put the file `plugins.js` in the correct folder, and with correct filename. The selection of email provider is done via configuration file only.               
+Only one email provider will be active at all time. If the email provider setting isn't picked up by strapi, verify you have put the file `plugins.js` in the correct folder, and with correct filename. The selection of email provider is done via configuration file only.  
 :::
 
 ::: tip
-When testing the new email provider with those two email templates created during strapi setup, the *shipper email* on the template, with default no-reply@strapi.io need to be updated in according to your email provider, otherwise it will fail the test.
+When testing the new email provider with those two email templates created during strapi setup, the _shipper email_ on the template, with default no-reply@strapi.io need to be updated in according to your email provider, otherwise it will fail the test.
 More info here: [Configure templates Locally](http://localhost:1337/admin/plugins/users-permissions/email-templates)
 :::
 
