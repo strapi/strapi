@@ -27,7 +27,7 @@ describe('Create Strapi API End to End', () => {
       })
       .build();
 
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   }, 60000);
 

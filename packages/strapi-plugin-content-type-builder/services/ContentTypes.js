@@ -221,7 +221,6 @@ const deleteContentTypes = async uids => {
   await builder.writeFiles();
   for (const uid of uids) {
     try {
-      // await builder.writeFiles();
       await apiHandler.clear(uid);
     } catch (error) {
       console.log(error);

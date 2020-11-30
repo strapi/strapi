@@ -54,7 +54,7 @@ describe('Admin User CRUD (e2e)', () => {
 
   // Initialization Actions
   beforeAll(async () => {
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
 

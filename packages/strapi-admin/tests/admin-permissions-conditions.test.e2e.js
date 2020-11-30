@@ -116,7 +116,7 @@ if (edition === 'EE') {
     beforeAll(async () => {
       await builder.addContentType(localTestData.models.article).build();
 
-      strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+      strapi = await createStrapiInstance();
       utils = createUtils(strapi);
 
       await createFixtures();

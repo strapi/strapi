@@ -153,7 +153,7 @@ describe('Publication State', () => {
       )
       .build();
 
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
     Object.assign(data, builder.sanitizedFixtures(strapi));

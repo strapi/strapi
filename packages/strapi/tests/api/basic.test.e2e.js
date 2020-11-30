@@ -48,7 +48,7 @@ describe('Core API - Basic', () => {
       .addContentType(product)
       .build();
 
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   }, 60000);
 

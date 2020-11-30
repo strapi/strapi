@@ -25,7 +25,7 @@ describe('Content Manager single types', () => {
   beforeAll(async () => {
     await builder.addContentType(model).build();
 
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   }, 60000);
 

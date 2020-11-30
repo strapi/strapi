@@ -126,7 +126,7 @@ describe('Search query', () => {
       .addFixtures(bedModel.name, bedFixtures)
       .build();
 
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
     data.bed = builder.sanitizedFixturesFor(bedModel.name, strapi);

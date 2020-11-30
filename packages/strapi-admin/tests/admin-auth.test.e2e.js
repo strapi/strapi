@@ -17,7 +17,7 @@ describe('Admin Auth End to End', () => {
   let utils;
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
 

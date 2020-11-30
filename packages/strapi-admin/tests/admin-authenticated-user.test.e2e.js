@@ -9,7 +9,7 @@ describe('Authenticated User', () => {
   let strapi;
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance({ ensureSuperAdmin: true });
+    strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   }, 60000);
 
@@ -37,7 +37,7 @@ describe('Authenticated User', () => {
     });
 
     test('Returns forbidden on unauthenticated query', async () => {
-      const req = await createRequest({ strapi });
+      const req = createRequest({ strapi });
       const res = await req({
         url: '/admin/users/me',
         method: 'GET',
@@ -50,7 +50,7 @@ describe('Authenticated User', () => {
 
   describe('PUT /users/me', () => {
     test('Returns forbidden on unauthenticated query', async () => {
-      const req = await createRequest({ strapi });
+      const req = createRequest({ strapi });
       const res = await req({
         url: '/admin/users/me',
         method: 'PUT',
