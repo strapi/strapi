@@ -13,7 +13,7 @@ import {
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { formatFiltersToQuery, getTrad } from '../../utils';
+import { formatFiltersToQuery, getTrad, getMainFieldType } from '../../utils';
 import Container from '../Container';
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
@@ -192,11 +192,7 @@ function FilterPicker({
       const attributeType = get(contentType, ['attributes', filter.name, 'type'], '');
 
       if (attributeType === 'relation') {
-        const { mainFieldSchema } = editRelations.find(
-          relation => relation.name === filter.name
-        ).metadatas;
-
-        return mainFieldSchema.type;
+        return getMainFieldType(editRelations, filter.name);
       }
 
       return attributeType;
