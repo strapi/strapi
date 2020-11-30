@@ -91,9 +91,9 @@ After reading the above rules, follow these steps to create your template:
 
 1. Create a standard Strapi app with `create-strapi-app`, using the `--quickstart` option.
 2. Customize your app to match the needs of your use case.
-3. Outside of Strapi, create a new directory for your template.
-4. Create a `template.json` file in your template directory.
-5. If you have modified your app's `package.json`, include these changes (and _only_ these changes) in `template.json` in a `package` property. Otherwise, leave it as an empty object.
-6. Create a `/template` subdirectory.
-7. Think of all the files you have modified in your app, and copy them to the `/template` directory
+3. Outside of your Strapi app's directory, create a new directory for your template.
+4. Create a `template.json` file in your template's directory.
+5. If you have modified your app's `package.json`, include these changes (and _only_ these changes) in `template.json`, in a `package` property. Otherwise, have the template file contain an empty object, i.e. `{}`.
+6. Create a `template/` subdirectory.
+7. Think of all the files you have modified in your app, and copy them to the `template` directory
 8. Publish the root template project on GitHub. Make sure that the repository is public, and that the code is on the `master` branch.
