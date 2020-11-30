@@ -32,9 +32,11 @@ const dogModel = {
 const dogs = [
   {
     name: 'Nelson',
+    code: '1',
   },
   {
     name: 'Atos',
+    code: '2',
   },
 ];
 
@@ -152,7 +154,6 @@ describe('Migration - draft and publish', () => {
           body: dogToCreate,
         });
         expect(res.statusCode).toBe(400);
-        console.log('res.body');
       });
     });
   });
