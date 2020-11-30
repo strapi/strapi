@@ -7,6 +7,7 @@ import useDataManager from '../../hooks/useDataManager';
 import Ul from '../SelectMenuUl';
 import Category from './Category';
 
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
@@ -34,7 +35,7 @@ const MenuList = ({
             return (
               <li key={categoryName}>
                 <Category categoryName={categoryName} />
-                <Ul style={{ marginTop: '-4px' }}>
+                <Ul style={{ marginTop: '-4px' }} maxHeight="100%">
                   {componentsGroupedByCategory[categoryName].map(component => {
                     if (
                       (isAddingAComponentToAnotherComponent &&

@@ -210,13 +210,21 @@ const reducer = (state, action) => {
         .update('modifiedDZName', () => null)
         .update('formErrors', () => fromJS(action.errors));
     case 'SUBMIT_ERRORS':
+    case 'PUBLISH_ERRORS':
       return state
         .update('formErrors', () => fromJS(action.errors))
         .update('shouldShowLoadingState', () => false);
+    case 'UNPUBLISH_SUCCESS':
+    case 'PUBLISH_SUCCESS':
+      return state
+        .update('isLoading', () => false)
+        .update('modifiedData', () => fromJS(action.data))
+        .update('initialData', () => fromJS(action.data));
     case 'SUBMIT_SUCCESS':
     case 'DELETE_SUCCEEDED':
       return state
         .update('isLoading', () => false)
+        .update('formErrors', () => fromJS({}))
         .update('initialData', () => state.get('modifiedData'));
     case 'TRIGGER_FORM_VALIDATION':
       return state.update('shouldCheckErrors', v => {

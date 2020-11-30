@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit, upperFirst, pick } from 'lodash';
+import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
@@ -22,7 +22,7 @@ const AuthPage = ({ hasAdmin }) => {
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
   const registrationToken = query.get('registrationToken');
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema } = get(
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
     forms,
     authType,
     {}
@@ -60,14 +60,19 @@ const AuthPage = ({ hasAdmin }) => {
             `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
           );
 
-          dispatch({
-            type: 'SET_DATA',
-            data: { registrationToken, userInfo: data },
-          });
+          if (data) {
+            dispatch({
+              type: 'SET_DATA',
+              data: { registrationToken, userInfo: data },
+            });
+          }
         } catch (err) {
           const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
 
-          strapi.notification.error(errorMessage);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: errorMessage,
+          });
 
           // Redirect to the oops page in case of an invalid token
           // @alexandrebodin @JAB I am not sure it is the wanted behavior
@@ -138,7 +143,10 @@ const AuthPage = ({ hasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -206,7 +214,10 @@ const AuthPage = ({ hasAdmin }) => {
         axios({
           method: 'POST',
           url: 'https://analytics.strapi.io/register',
-          data: pick(modifiedData, ['userInfo.email', 'userInfo.firstname']),
+          data: {
+            email: user.email,
+            username: user.firstname,
+          },
         });
       }
       // Redirect to the homePage
@@ -285,6 +296,7 @@ const AuthPage = ({ hasAdmin }) => {
         </NavTopRightWrapper>
         <BaselineAlignment top size="78px">
           <Component
+            {...rest}
             fieldsToDisable={fieldsToDisable}
             formErrors={formErrors}
             inputsPrefix={inputsPrefix}

@@ -13,6 +13,7 @@
     },
     "time": {
       "type": "string"
-    }
+    },
+    "dishrep": { "type": "component", "repeatable": true, "component": "default.dish" }
   }
 }

@@ -30,6 +30,9 @@ module.exports = {
         this.createLoader(model.uid);
       });
     });
+
+    // Add the loader for the AdminUser as well, so we can query `created_by` and `updated_by` AdminUsers
+    this.createLoader('strapi::user');
   },
 
   resetLoaders: function() {

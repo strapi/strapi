@@ -17,6 +17,7 @@ import hasSubArray from './utils/hasSubArray';
 import hasSomeSubArray from './utils/HasSomeSubArray';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 
 const MultipleMenuList = ({
   selectProps: { name, addComponentsToDynamicZone, inputValue, value },

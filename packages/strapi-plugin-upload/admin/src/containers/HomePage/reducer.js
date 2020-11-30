@@ -5,6 +5,8 @@ const initialState = fromJS({
   dataCount: 0,
   dataToDelete: [],
   isLoading: true,
+  showModalConfirmButtonLoading: false,
+  shouldRefetchData: false,
 });
 
 const reducer = (state, action) => {
@@ -40,12 +42,26 @@ const reducer = (state, action) => {
 
       return state.removeIn(['dataToDelete', index]);
     }
-    case 'ON_DELETE_MEDIA_SUCCEEDED':
+    case 'ON_DELETE_MEDIAS': {
+      return state.update('showModalConfirmButtonLoading', () => true);
+    }
+    case 'ON_DELETE_MEDIAS_SUCCEEDED': {
       return state
-        .update('data', list => list.filter(item => item.get('id') !== action.mediaId))
-        .update('dataCount', count => count - 1);
-    case 'ON_DELETE_MEDIA_ERROR':
-      return state.update('dataToDelete', () => fromJS([]));
+        .update('dataToDelete', () => fromJS([]))
+        .update('shouldRefetchData', () => true)
+        .update('showModalConfirmButtonLoading', () => false);
+    }
+    case 'ON_DELETE_MEDIAS_ERROR': {
+      return state
+        .update('dataToDelete', () => fromJS([]))
+        .update('showModalConfirmButtonLoading', () => false);
+    }
+    case 'RESET_DATA_TO_DELETE': {
+      return state
+        .update('dataToDelete', () => fromJS([]))
+        .update('shouldRefetchData', () => false)
+        .update('showModalConfirmButtonLoading', () => false);
+    }
     case 'TOGGLE_SELECT_ALL': {
       const isSelected = state.get('data').every(item => state.get('dataToDelete').includes(item));
 

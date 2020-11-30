@@ -328,7 +328,7 @@ To enable the provider, create or edit the file at `./extensions/upload/config/s
 
 Make sure to read the provider's `README` to know what are the possible parameters.
 
-### Configuration per envrionment
+### Configuration per environment
 
 When configuring your upload provider you might want to change the configuration based on the `NODE_ENV` environment variable or use environment specific credentials.
 

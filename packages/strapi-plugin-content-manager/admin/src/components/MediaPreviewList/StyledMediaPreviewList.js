@@ -143,8 +143,8 @@ const MediaPreviewImage = styled(MediaPreviewItem)`
     width: ${sizes.big};
     height: ${sizes.big};
     border-radius: calc(${sizes.big} / 2);
-    margin-top: calc(-${sizes.big} - ${sizes.small} - 5px);
-    margin-left: calc((-${sizes.big} + ${sizes.small}) / 2);
+    margin-top: calc(${`-${sizes.big}`} - ${sizes.small} - 5px);
+    margin-left: calc((${sizes.small} - ${sizes.big}) / 2);
     box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.05);
   }
 

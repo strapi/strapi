@@ -80,6 +80,7 @@ const forms = {
   'register-admin': {
     Component: Register,
     endPoint: 'register-admin',
+    noSignin: true,
     fieldsToDisable: [],
     fieldsToOmit: ['confirmPassword', 'news'],
     schema: yup.object().shape({

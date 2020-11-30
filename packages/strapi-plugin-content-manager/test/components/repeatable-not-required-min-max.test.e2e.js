@@ -6,10 +6,7 @@ let modelsUtils;
 let rq;
 
 describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/explorer/application::withcomponent.withcomponent',
-  ],
+  ['CONTENT MANAGER', '/content-manager/explorer/application::withcomponent.withcomponent'],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and Not required component', (_, path) => {
   beforeAll(async () => {
@@ -101,7 +98,7 @@ describe.each([
     });
 
     test.each(['someString', 128219, false, {}, null])(
-      'Throws if the field is not an object %p',
+      'Throws if the field is not an array %p',
       async value => {
         const res = await rq.post('/', {
           body: {
@@ -177,7 +174,7 @@ describe.each([
   });
 
   describe('GET entries', () => {
-    test('Data is orderd in the order sent', async () => {
+    test('Data is ordered in the order sent', async () => {
       const res = await rq.post('/', {
         body: {
           field: [

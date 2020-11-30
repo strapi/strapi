@@ -5,6 +5,7 @@
     "description": ""
   },
   "options": {
+    "draftAndPublish": false,
     "timestamps": false
   },
   "attributes": {

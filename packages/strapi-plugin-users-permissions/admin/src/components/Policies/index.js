@@ -1,49 +1,28 @@
-/**
- *
- * Policies
- *
- */
-
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { Col } from 'reactstrap';
+import { get, isEmpty, takeRight, toLower, without } from 'lodash';
+import { getTrad } from '../../utils';
+import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
-import { useEditPageContext } from '../../contexts/EditPage';
+import SizedInput from '../SizedInput';
 import { Header, Wrapper } from './Components';
 
-const Policies = ({
-  inputSelectName,
-  routes,
-  selectOptions,
-  shouldDisplayPoliciesHint,
-  values,
-}) => {
-  const { onChange } = useEditPageContext();
+const Policies = () => {
+  const { modifiedData, selectedAction, routes, policies, onChange } = useUsersPermissions();
   const baseTitle = 'users-permissions.Policies.header';
-  const title = shouldDisplayPoliciesHint ? 'hint' : 'title';
-  const value = get(values, inputSelectName);
-  const path = without(
-    inputSelectName.split('.'),
-    'permissions',
-    'controllers',
-    'policy'
-  );
-  const controllerRoutes = get(
-    routes,
-    without(
-      inputSelectName.split('.'),
-      'permissions',
-      'controllers',
-      'policy'
-    )[0]
-  );
+  const title = !selectedAction ? 'hint' : 'title';
+  const path = without(selectedAction.split('.'), 'controllers');
+  const controllerRoutes = get(routes, path[0]);
   const displayedRoutes = isEmpty(controllerRoutes)
     ? []
-    : controllerRoutes.filter(
-        o => toLower(o.handler) === toLower(takeRight(path, 2).join('.'))
-      );
+    : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
+
+  const inputName = `${selectedAction}.policy`;
+
+  const value = useMemo(() => {
+    return get(modifiedData, inputName, '');
+  }, [inputName, modifiedData]);
 
   return (
     <Wrapper className="col-md-5">
@@ -52,43 +31,31 @@ const Policies = ({
           <Header className="col-md-12">
             <FormattedMessage id={`${baseTitle}.${title}`} />
           </Header>
-          {!shouldDisplayPoliciesHint ? (
-            <Input
-              customBootstrapClass="col-md-12"
-              label={{ id: 'users-permissions.Policies.InputSelect.label' }}
-              name={inputSelectName}
-              onChange={onChange}
-              selectOptions={selectOptions}
-              type="select"
-              validations={{}}
-              value={value}
-            />
-          ) : (
-            ''
+          {selectedAction && (
+            <>
+              <SizedInput
+                type="select"
+                name={inputName}
+                onChange={onChange}
+                label={getTrad('Policies.InputSelect.label')}
+                options={policies}
+                value={value}
+              />
+
+              <div className="row">
+                <Col size={{ xs: 12 }}>
+                  {displayedRoutes.map((route, key) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <BoundRoute key={key} route={route} />
+                  ))}
+                </Col>
+              </div>
+            </>
           )}
-        </div>
-        <div className="row">
-          {!shouldDisplayPoliciesHint
-            ? map(displayedRoutes, (route, key) => (
-                <BoundRoute key={key} route={route} />
-              ))
-            : ''}
         </div>
       </div>
     </Wrapper>
   );
-};
-
-Policies.defaultProps = {
-  routes: {},
-};
-
-Policies.propTypes = {
-  inputSelectName: PropTypes.string.isRequired,
-  routes: PropTypes.object,
-  selectOptions: PropTypes.array.isRequired,
-  shouldDisplayPoliciesHint: PropTypes.bool.isRequired,
-  values: PropTypes.object.isRequired,
 };
 
 export default Policies;

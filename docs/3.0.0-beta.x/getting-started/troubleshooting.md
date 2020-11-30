@@ -1,6 +1,6 @@
 # 💬 Troubleshooting
 
-Below are solutions to some common issues that you may experience when working with Strapi. You can also post questions to [Github Discussions](https://github.com/strapi/strapi/discussions) or reach out to the members of our [Slack](https://slack.strapi.io) community!
+Below are solutions to some common issues that you may experience when working with Strapi. You can also post questions to [our community forum](https://forum.strapi.io) or reach out to the members of our [Slack](https://slack.strapi.io) community!
 
 [[toc]]
 
@@ -10,7 +10,7 @@ Strapi is offered as free and open-source for users who wish to self-host the so
 
 ### Community Support
 
-[Github Discussions](https://github.com/strapi/strapi/discussions) is great first place to reach out for help. Our community and Core developers often check this platform and answer posts.
+[Community Forum](https://forum.strapi.io) is great first place to reach out for help. Our community and Core developers often check this platform and answer posts.
 
 Another option to get help is our [Community Slack](https://slack.strapi.io). Please keep all questions on the `#help` channel, be considerate, and remember that _you are getting free help for a free product_.
 

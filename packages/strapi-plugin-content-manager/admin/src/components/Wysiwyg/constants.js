@@ -32,7 +32,7 @@ export const CONTROLS = [
       className: 'underline',
       hideLabel: true,
       handler: 'addContent',
-      text: '__textToReplace__',
+      text: '<u>textToReplace</u>',
     },
     {
       label: 'S',
@@ -82,7 +82,7 @@ export const CONTROLS = [
       className: 'link',
       hideLabel: true,
       handler: 'addContent',
-      text: '[text](textToReplace)',
+      text: '[textToReplace](link)',
     },
     {
       label: 'quotes',

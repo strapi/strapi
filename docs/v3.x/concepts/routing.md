@@ -24,9 +24,9 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
       }
     },
     {
-      "method": ["POST", "PUT"],
-      "path": "/restaurants/:id",
-      "handler": "Restaurant.createOrUpdate",
+      "method": "PUT",
+      "path": "/restaurants/bulkUpdate",
+      "handler": "Restaurant.bulkUpdate",
       "config": {
         "policies": []
       }
@@ -48,6 +48,10 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 - `handler` (string): Action to execute when the route is hit following this syntax `<Controller>.<action>`.
 - `config`
   - `policies` (array): Array of policy names or paths ([see more](./policies.md))
+
+::: tip
+You can exclude the entire `config` object if you do not want the route to be checked by the [Users & Permissions plugin](../plugins/users-permissions.md).
+:::
 
 ## Dynamic parameters
 

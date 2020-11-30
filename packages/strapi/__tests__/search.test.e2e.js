@@ -57,7 +57,7 @@ const bedFixtures = [
     sku: 'sleepybed_0152',
     savEmail: 'sav@bed.fr',
     type: 'foam',
-    serialNumber: 2908199401091998,
+    serialNumber: 999999999999999,
     peopleNumber: 6,
     fabricThickness: 1.14157,
   },
@@ -156,7 +156,7 @@ describe('Search query', () => {
     test('search for "id"', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: data.beds[2].id,
         },
@@ -170,7 +170,7 @@ describe('Search query', () => {
     test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: bedFixtures[0][columnName],
         },
@@ -184,7 +184,7 @@ describe('Search query', () => {
     test('search with an empty query', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: '',
         },
@@ -198,7 +198,7 @@ describe('Search query', () => {
     test('search with special characters', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: data.beds[3].name,
         },
@@ -214,7 +214,7 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber > 0', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: '',
           peopleNumber_gt: 0,
@@ -228,7 +228,7 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: '',
           peopleNumber_gt: 1,
@@ -242,7 +242,7 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed?peopleNumber=1&peopleNumber=6&_q=',
+        url: '/beds?peopleNumber=1&peopleNumber=6&_q=',
       });
 
       expect(Array.isArray(res.body)).toBe(true);
@@ -252,7 +252,7 @@ describe('Search query', () => {
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/beds',
         qs: {
           _q: 'Sleepy Bed',
           peopleNumber_lt: 7,

@@ -106,7 +106,7 @@ When you create a new API using the CLI (`strapi generate:api <name>`), a model 
 
 To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
 
-Or you can create your component manually by following the file path discribed previously and by following the file structure discribed bellow.
+Or you can create your component manually by following the file path discribed previously and by following the file structure discribed below.
 
 ## Model settings
 
@@ -116,7 +116,7 @@ Additional settings can be set on models:
 - `connection` (string) - Connection name which must be used. Default value: `default`.
 - `collectionName` (string) - Collection name (or table name) in which the data should be stored.
 - `globalId` (string) - Global variable name for this model (case-sensitive) - _only for Content Types_
-- `attributes` (object) - Define the data structure of your model. Find available options [bellow](#define-the-attributes).
+- `attributes` (object) - Define the data structure of your model. Find available options [below](#define-the-attributes).
 
 **Path —** `Restaurant.settings.json`.
 
@@ -218,7 +218,7 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Exceptions
 
-- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+- `uid` — This field type allows a `targetField` key. The value is the name of an attribute that has `string` of `text` type.
 
 ### Example
 

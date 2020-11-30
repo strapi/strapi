@@ -39,7 +39,7 @@ const GlobalStyle = createGlobalStyle`
     background: transparent;
     .modal-dialog {
       max-width: 74.5rem;
-      margin: 16rem auto 3rem calc(50% - #{$left-menu-width});
+      margin: 16rem auto 3rem calc(50% - #{$left - menu - width});
       position: relative;
       z-index: 999;
     }
@@ -113,8 +113,8 @@ const GlobalStyle = createGlobalStyle`
    */
 
   .notification-enter {
-    opacity: 0.01;
-    top: -60px;
+    opacity: 0;
+    top: -70px;
   }
 
   .notification-enter.notification-enter-active {
@@ -128,7 +128,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   .notification-exit.notification-exit-active {
-    opacity: 0.01;
+    opacity: 0;
     transition: all 400ms ease-in;
   }
 

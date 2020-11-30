@@ -9,11 +9,12 @@ import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import useWysiwyg from '../../hooks/useWysiwyg';
 import md from './utils/mdRenderer';
+import sanitizeHtml from './utils/satinizeHtml';
 import Wrapper from './Wrapper';
 
 const PreviewWysiwyg = ({ data }) => {
   const { isFullscreen } = useWysiwyg();
-  const html = useMemo(() => md.render(data || ''), [data]);
+  const html = useMemo(() => sanitizeHtml(md.render(data || '')), [data]);
 
   return (
     <Wrapper isFullscreen={isFullscreen}>

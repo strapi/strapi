@@ -6,7 +6,7 @@ sidebarDepth: 2
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Roles & Permissions** link in the left menu.
+To access the plugin admin panel, click on the **Settings** link in the left menu and then everything will be under the **USERS & PERMISSIONS PLUGIN** section.
 
 ## Concept
 
@@ -156,57 +156,99 @@ axios
 
 Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2 providers to enable authentication in your application.
 
-Before setting up a provider, you'll need to install the `ngrok` package globally to work with providers that don't allow `localhost` redirect URIs.
+For better understanding, you may find as follows the description of the login flow. To simplify the explanation, we used `github` as the provider but it works the same for the other providers.
 
-In the following examples, the client app will be the [react login examples app](https://github.com/strapi/strapi-examples/tree/master/login-react). It will be running on `http://localhost:3000`.
+#### Understanding the login flow
+
+Let's say that strapi's backend is located at: strapi.website.com.
+Let's say that your app frontend is located at: website.com.
+
+1. The user goes on your frontend app (`https://website.com`) and click on your button `connect with Github`.
+2. The frontend redirect the tab to the backend URL: `https://strapi.website.com/connect/github`.
+3. The backend redirects the tab to the GitHub login page where the user logs in.
+4. Once done, Github redirects the tab to the backend URL:`https://strapi.website.com/connect/github/callback?code=abcdef`.
+5. The backend uses the given `code` to get from Github an `access_token` that can be used for a period of time to make authorized requests to Github to get the user info (the email of the user of example).
+6. Then, the backend redirects the tab to the url of your choice with the param `access_token` (example: `http://website.com/connect/github/redirect?access_token=eyfvg`)
+7. The frontend (`http://website.com/connect/github/redirect`) calls the backend with `https://strapi.website.com/auth/github/callback?access_token=eyfvg` that returns the strapi user profile with its `jwt`. <br> (Under the hood, the backend asks Github for the user's profile and a match is done on Github user's email address and Strapi user's email address)
+8. The frontend now possesses the user's `jwt`, with means the user is connected and the frontend can make authenticated requests to the backend!
+
+An example of a frontend app that handles this flow can be found here: [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react).
+
+#### Setting up the server url
+
+Before setting up a provider, you need to specify the absolute url of your backend in `server.js`.
+
+**example -** `config/server.js`
+
+```js
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
+  url: env('', 'http://localhost:1337'),
+});
+```
+
+:::tip
+Later on you will give this url to your provider. <br> For development, some providers accept the use of localhost urls but many don't. In this case we recommand to use [ngrok](https://ngrok.com/docs) (`ngrok http 1337`) that will make a proxy tunnel from a url it created to your localhost url (ex: `url: env('', 'https://5299e8514242.ngrok.io'),`).
+:::
+
+#### Setting up the provider - examples
+
+Instead of a generic explanation, for better understanding, we decided to show an example for each provider.
+
+In the following examples, the frontend app will be the [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react). <br>
+It (the frontend app) will be running on `http://localhost:3000`. <br>
+Strapi (the backend) will be running on `http://localhost:1337`.
 
 :::: tabs
 
 ::: tab GitHub
 
-#### Setup the server
+#### Using ngrok
 
-Use `ngrok` to serve the frontend app.
+Github doesn't accept `localhost` urls. <br>
+Use `ngrok` to serve the backend app.
 
 ```
-ngrok http 3000
+ngrok http 1337
 ```
+
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
 
 #### Github configuration
 
-- Visit the OAuth Apps list page <br> [https://github.com/settings/developers](https://github.com/settings/developers)
+- Visit the OAuth Apps list page [https://github.com/settings/developers](https://github.com/settings/developers)
 - Click on **New OAuth App** button
-
-Then fill the informations:
-
-- **Application name**: Strapi GitHub auth
-- **Homepage URL**: `https://65e60559.ngrok.io`
-- **Application description**: Strapi provider auth description
-- **Authorization callback URL**: `https://65e60559.ngrok.io/connect/github`
+- Fill the information (replace with your own ngrok url):
+  - **Application name**: Strapi GitHub auth
+  - **Homepage URL**: `https://65e60559.ngrok.io`
+  - **Application description**: Strapi provider auth description
+  - **Authorization callback URL**: `https://65e60559.ngrok.io/connect/github/callback`
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **GitHub** provider
-
-Then fill the information:
-
-- **Enable**: `ON`
-- **Client ID**: 53de5258f8472c140917
-- **Client Secret**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
-- **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/github`
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: 53de5258f8472c140917
+  - **Client Secret**: fb9d0fe1d345d9ac7f83d7a1e646b37c554dae8b
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/github/redirect`
 
 :::
 
 ::: tab Facebook
 
-#### Setup the server
+#### Using ngrok
 
-Use `ngrok` to serve the server app.
+Facebook doesn't accept `localhost` urls. <br>
+Use `ngrok` to serve the backend app.
 
 ```
 ngrok http 1337
 ```
+
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
 
 #### Facebook configuration
 
@@ -215,31 +257,30 @@ ngrok http 1337
 - Fill the **Display Name** in the modal and create the app
 - Setup a **Facebook Login** product
 - Click on the **PRODUCTS > Facebook login > Settings** link in the left menu
-
-Then fill the informations:
-
-- **Valid OAuth Redirect URIs**: `https://559394cd.ngrok.io/connect/facebook/callback`
-
-To access the Application ID and secret:
-
-- Click on **Settings** in the left menu
+- Fill the information and save (replace with your own ngrok url):
+  - **Valid OAuth Redirect URIs**: `https://65e60559.ngrok.io/connect/facebook/callback`
+- Then, click on **Settings** in the left menu
 - Then on **Basic** link
+- You should see your Application ID and secret, save them for later
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **Facebook** provider
-
-Then fill the informations:
-
-- **Enable**: `ON`
-- **Client ID**: 2408954435875229
-- **Client Secret**: 4fe04b740b69f31ea410b9391ff3b5b0
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/facebook`
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: 2408954435875229
+  - **Client Secret**: 4fe04b740b69f31ea410b9391ff3b5b0
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/facebook/redirect`
 
 :::
 
 ::: tab Google
+
+#### Using ngrok
+
+Google accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
 
 #### Google configuration
 
@@ -251,79 +292,115 @@ Then fill the informations:
 Wait a few seconds while the application is created.
 
 - On the project dropdown, select your new project
-- Click on **Go to APIs overview** Under the **APIs** card
+- Click on **Go to APIs overview** under the **APIs** card
 - Then click on the **Credentials** link in the left menu
 - Click on **OAuth consent screen** button
-- Chose **External** and click on **create**
+- Choose **External** and click on **create**
 - Fill the **Application name** and save
 - Then click on **Create credentials** button
-- Chose **OAuth client ID** option
-
-Then fill the informations:
-
-- **Name**: `Strapi Auth`
-- **Authorized redirect URIs**: `http://localhost:1337/connect/google/callback`
-
-To access the Client ID and secret:
-
+- Choose **OAuth client ID** option
+- Fill the information:
+  - **Name**: `Strapi Auth`
+  - **Authorized redirect URIs**: `http://localhost:1337/connect/google/callback`
 - Click on **OAuth 2.0 Client IDs** name of the client you just created
+- You should see your Application ID and secret, save them for later
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **Google** provider
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: 226437944084-o2mojv5i4lfnng9q8kq3jkf5v03avemk.apps.googleusercontent.com
+  - **Client Secret**: aiTbMoiuJQflSBy6uQrfgsni
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/google/redirect`
 
-Then fill the informations:
+:::
 
-- **Enable**: `ON`
-- **Client ID**: 226437944084-o2mojv5i4lfnng9q8kq3jkf5v03avemk.apps.googleusercontent.com
-- **Client Secret**: aiTbMoiuJQflSBy6uQrfgsni
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/google`
+::: tab AWS Cognito
+
+#### Using ngrok
+
+AWS Cognito accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
+#### AWS Cognito configuration
+
+- Visit the AWS Management Console <br> [https://aws.amazon.com/console/](https://aws.amazon.com/console/)
+- If needed, select your **Region** in the top right corner next to the Support dropdown
+- Select the **Services** dropdown in the top left corner
+- Click on **Cognito** in the `Security, Identity & Compliance` section
+- Then click on the **Manage User Pools** button
+- If applicable either create or use an existing user pool. You will find hereafter a tutorial to create a User Pool <br> [https://docs.aws.amazon.com/cognito/latest/developerguide/tutorial-create-user-pool.html](https://docs.aws.amazon.com/cognito/latest/developerguide/tutorial-create-user-pool.html)
+- Go to the **App clients** section in your cognito user pool and create a new client with the name `Strapi Auth` and set all the parameters and then click on **Create app client**
+- You should now have an **App client id** and by clicking on the button **Show Details** you will be able to see the **App client secret**. Do copy those two values **App client id** and **App client secret** somewhere for later use when configuring the AWS Cognito provider in Strapi.
+- Go to the **App integration section** and click on **App client settings**
+- Look for your app client named `Strapi Auth` and enable Cognito User Pool by checking it in the **Enabled Identity Providers** section of your newly created App client
+- Fill in your callback URL and Sign out URL with the value `http://localhost:1337/connect/cognito/callback` or the one provided by your AWS Cognito provider in Strapi
+- In the **Oauth 2.0** section select `Authorization code grant` and `Implicit grant` for the **Allowed OAuth Flows** and select `email`, `openid` and `profile` for the **Allowed OAuth Scopes**
+- You can now click on **Save changes** and if you have already configured your domain name then you should be able to see a link to the **Launch Hosted UI**. You can click on it in order to display the AWS Cognito login page. In case you haven't yet configured your domain name, use the link **Choose domain name** at the bottom right of the page in order to configure your domain name. On that page you will have an `Amazon Cognito Domain` section where a `Domain prefix` is already setup. Type a domain prefix to use for the sign-up and sign-in pages that are hosted by Amazon Cognito, this domain prefix together with the `.auth.YOUR_REGION.amazoncognito.com` will be the **Host URI (Subdomain)** value for your strapi configuration later on.
+
+#### Strapi configuration
+
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/settings/users-permissions/providers](http://localhost:1337/admin/settings/users-permissions/providers)
+- Click on the **Cognito** provider
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: fill in the **App client id** (`5bd7a786qdupjmi0b3s10vegdt`)
+  - **Client Secret**: fill in the **App client secret** (`19c5c78dsfsdfssfsdfhpdb4nkpb145vesdfdsfsffgh7vwd6g45jlipbpb`)
+  - **Host URI (Subdomain)**: fill in the URL value that you copied earlier (`myapp67b50345-67b50b17-local.auth.eu-central-1.amazoncognito.com`)
+  - **The redirect URL to your front-end app**: if you are using strapi react-login [https://github.com/strapi/strapi-examples/tree/master/login-react/](https://github.com/strapi/strapi-examples/tree/master/login-react/) use `http://localhost:3000/connect/cognito/redirect` but if you do not yet have a front-end app to test your Cognito configuration you can then use the following URL `http://localhost:1337/auth/cognito/callback`
 
 :::
 
 ::: tab Twitter
 
-#### Setup the server
+#### Using ngrok
 
-Use `ngrok` to serve the frontend app.
+Twitter doesn't accept `localhost` urls. <br>
+Use `ngrok` to serve the backend app.
 
 ```
-ngrok http 3000
+ngrok http 1337
 ```
+
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
 
 #### Twitter configuration
 
 - Visit the Apps list page <br> [https://developer.twitter.com/en/apps](https://developer.twitter.com/en/apps)
 - Click on **Create an app** button
-
-Then fill the informations:
-
-- **App name**: Strapi Twitter auth
-- **Application description**: This is an demo app for Strapi auth
-- **Website URL**: `https://65e60559.ngrok.io`
-- **Callback URLs**: `https://65e60559.ngrok.io/connect/twitter`
-- **Tell us how this app will be used**: - here write a message enough long -
-
-To access the Consumer API keys:
-
-- Click on **Keys and tokens** tab
+- Fill the information (replace with your own ngrok url):
+  - **App name**: Strapi Twitter auth
+  - **Application description**: This is a demo app for Strapi auth
+  - **Tell us how this app will be used**: - here write a message enough long -
+- At the end of the process you should see your Application ID and secret, save them for later
+- Go to you app setting and click on edit **Authentication settings**
+- Enable **3rd party authentication** AND **Request email address from users**
+- Fill the information (replace with your own ngrok url):
+  - **Callback URLs**: `https://65e60559.ngrok.io/connect/twitter/callback`
+  - **Website URL**: `https://65e60559.ngrok.io`
+  - **Privacy policy**: `https://d73e70e88872.ngrok.io`
+  - **Terms of service**: `https://d73e70e88872.ngrok.io`
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **Twitter** provider
-
-Then fill the informations:
-
-- **Enable**: `ON`
-- **Client ID**: yfN4ycGGmKXiS1njtIYxuN5IH
-- **Client Secret**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
-- **The redirect URL to your front-end app**: `https://65e60559.ngrok.io/connect/twitter`
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: yfN4ycGGmKXiS1njtIYxuN5IH
+  - **Client Secret**: Nag1en8S4VwqurBvlW5OaFyKlzqrXFeyWhph6CZlpGA2V3VR3T
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitter/redirect`
 
 :::
 
 ::: tab Discord
+
+#### Using ngrok
+
+Discord accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
 
 #### Discord configuration
 
@@ -333,156 +410,183 @@ Then fill the informations:
 - Click on **OAuth2** in the left menu
 - And click on **Add redirect** button
 - Fill the **Redirect** input with `http://localhost:1337/connect/discord/callback` URL and save
-
-To access the Consumer API keys:
-
 - Click on **General information** in the left menu
+- You should see your Application ID and secret, save them for later
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **Discord** provider
-
-Then fill the informations:
-
-- **Enable**: `ON`
-- **Client ID**: 665118465148846081
-- **Client Secret**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/discord`
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: 665118465148846081
+  - **Client Secret**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/discord/redirect`
 
 :::
 
 ::: tab Twitch
 
+#### Using ngrok
+
+Discord accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
 #### Twitch configuration
 
 - Visit the Apps list page on the developer console <br> [https://dev.twitch.tv/console/apps](https://dev.twitch.tv/console/apps)
 - Click on **Register Your Application** button
-
-Then fill the informations:
-
-- **Name**: Strapi auth
-- **OAuth Redirect URLs**: `http://localhost:1337/connect/twitch/callback`
-- **Category**: Chose a category
-
-To access the Consumer API keys:
-
+- Fill the information:
+  - **Name**: Strapi auth
+  - **OAuth Redirect URLs**: `http://localhost:1337/connect/twitch/callback`
+  - **Category**: Choose a category
 - Click on **Manage** button of your new app
-- Then generate a new **Client Secret** with the **New Secret** button
+- Generate a new **Client Secret** with the **New Secret** button
+- You should see your Application ID and secret, save them for later
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **Twitch** provider
-
-Then fill the informations:
-
-- **Enable**: `ON`
-- **Client ID**: amuy279g8wt68qlht3u4gek4oykh5j
-- **Client Secret**: dapssh10uo97gg2l25qufr8wen3yr6
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitch`
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: amuy279g8wt68qlht3u4gek4oykh5j
+  - **Client Secret**: dapssh10uo97gg2l25qufr8wen3yr6
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitch/redirect`
 
 :::
 
 ::: tab Instagram
 
-#### Setup the server
+#### Using ngrok
 
-Use `ngrok` to serve the server app.
+Facebook doesn't accept `localhost` urls. <br>
+Use `ngrok` to serve the backend app.
 
 ```
 ngrok http 1337
 ```
 
-#### Facebook configuration
+Don't forget to update the server url in the backend config file `config/server.js` and the server url in your frontend app (environment variable `REACT_APP_BACKEND_URL` if you use [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react)) with the generated ngrok url.
+
+#### Instagram configuration
 
 - Visit the Developer Apps list page <br> [https://developers.facebook.com/apps/](https://developers.facebook.com/apps/)
 - Click on **Add a New App** button
 - Fill the **Display Name** in the modal and create the app
-- Setup a **Instagram** product
+- Setup an **Instagram** product
 - Click on the **PRODUCTS > Instagram > Basic Display** link in the left menu
 - Then click on the **Create new application** button (and valid the modal)
-
-Then fill the informations:
-
-- **Valid OAuth Redirect URIs**: `https://c6a8cc7c.ngrok.io/connect/instagram/callback`
-- **Deauthorize**: `https://c6a8cc7c.ngrok.io`
-- **Data Deletion Requests**: `https://c6a8cc7c.ngrok.io`
-
-On the **App Review for Instagram Basic Display** click on **Add to submission** for **instagram_graph_user_profile**.
-
-Make sure your Application information are well completed.
+- Fill the information (replace with your own ngrok url):
+  - **Valid OAuth Redirect URIs**: `https://65e60559.ngrok.io/connect/instagram/callback`
+  - **Deauthorize**: `https://65e60559.ngrok.io`
+  - **Data Deletion Requests**: `https://65e60559.ngrok.io`
+- On the **App Review for Instagram Basic Display** click on **Add to submission** for **instagram_graph_user_profile**.
+- You should see your Application ID and secret, save them for later
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **Instagram** provider
-
-Then fill the informations:
-
-- **Enable**: `ON`
-- **Client ID**: 563883201184965
-- **Client Secret**: f5ba10a7dd78c2410ab6b8a35ab28226
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/instagram`
+- Fill the information (replace with your own client ID and secret):
+  - **Enable**: `ON`
+  - **Client ID**: 563883201184965
+  - **Client Secret**: f5ba10a7dd78c2410ab6b8a35ab28226
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/instagram/redirect`
 
 :::
 
 ::: tab VK
 
+#### Using ngrok
+
+Discord accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
 #### VK configuration
 
 - Visit the Apps list page <br> [https://vk.com/apps?act=manage](https://vk.com/apps?act=manage)
 - Click on **Create app** button
-
-Then fill the informations:
-
-- **Title**: Strapi auth
-- **Platform**: Chose **Website** option
-- **Website address**: `http://localhost:1337`
-- **Base domain**: `localhost`
-
-Then setup OAuth seetings:
-
-- Click on **Settings** link in the left menu
-- Click on **Open API** link to enable this option
-
-Then fill the informations:
-
-- **Authorized redirect UR**: `http://localhost:1337/connect/vk/callback`
+- Fill the information:
+  - **Title**: Strapi auth
+  - **Platform**: Choose **Website** option
+  - **Website address**: `http://localhost:1337`
+  - **Base domain**: `localhost`
+- Click on the **Settings** link in the left menu
+- Click on the **Open API** link to enable this option
+- Fill the information:
+  - **Authorized redirect URL**: `http://localhost:1337/connect/vk/callback`
 
 #### Strapi configuration
 
 - Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
 - Click on the **VK** provider
+- Fill the information:
+  - **Enable**: `ON`
+  - **Client ID**: 7276416
+  - **Client Secret**: cFBUSghLXGuxqnCyw1N3
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/vk/redirect`
 
-Then fill the informations:
+:::
 
-- **Enable**: `ON`
-- **Client ID**: 7276416
-- **Client Secret**: cFBUSghLXGuxqnCyw1N3
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/vk`
+::: tab LinkedIn
+
+#### Using ngrok
+
+LinkedIn accepts the `localhost` urls. <br>
+The use of `ngrok` is not needed.
+
+#### LinkedIn configuration
+
+- Visit the Apps list page <br> [https://www.linkedin.com/developers/apps](https://www.linkedin.com/developers/apps)
+- Click on **Create app** button
+- Fill the information:
+  - **App name**: Strapi auth
+  - **LinkedIn Page**: Enter a LinkedIn page name to associate with the app or click **Create a new LinkedIn Page** to create a new one
+  - **App Logo**: Upload a square image that is at least 100x100 pixels.
+- Click on the **Create app** to create the app
+- On the app page click on **Auth** tab
+- Fill the information:
+  - **Authorized redirect URL**: `http://localhost:1337/connect/linkedin/callback`
+- On the app page click on **Products** tab.
+- Select `Sign In with LinkedIn` from the product list to enable it.
+
+#### Strapi configuration
+
+- Visit the User Permissions provider settings page <br> [http://localhost:1337/admin/plugins/users-permissions/providers](http://localhost:1337/admin/plugins/users-permissions/providers)
+- Click on the **LinkedIn** provider
+- Fill the information:
+  - **Enable**: `ON`
+  - **Client ID**: 84witsxk641rlv
+  - **Client Secret**: HdXO7a7mkrU5a6WN
+  - **The redirect URL to your front-end app**: `http://localhost:3000/connect/linkedin/redirect`
 
 :::
 
 ::::
 
-Set your providers credentials in the admin interface (Plugin > Roles & Permissions > Providers).
-Then update and enable the provider you want to use.
+Your configuration is done.
+Launch the backend and the [react login example app](https://github.com/strapi/strapi-examples/tree/master/login-react), go to `http://localhost:3000` and try to connect to the provider your configured. It should work 🎉
 
-To authenticate the user, use the GET method to request the url, `/connect/:provider`. eg: `GET /connect/facebook`.
+#### What you have to do in your frontend
 
-You can also pass a custom callback url instead of using the default registered provider callback, by passing `callback` in the query. eg: `GET /connect/facebook?callback=https://my-frontend.com/en/auth/facebook`.
+Once you have configured strapi and the provider, in your frontend app you have to :
 
-After authentication, create and customize your own redirect callback at `/auth/:provider/callback`. The `jwt` and `user` data will be available in a .json response.
+- Create a button that links to `GET STRAPI_BACKEND_URL/connect/${provider}` (ex: `https://strapi.mywebsite/connect/github`).
+- Create a frontend route like `FRONTEND_URL/connect/${provider}/redirect` that have to handle the `access_token` param and that have to request `STRAPI_BACKEND_URL/auth/${provider}/callback` with the `access_token` param. <br >
+  The JSON request response will be `{ "jwt": "...", "user": {...} }`.
 
-Response payload:
+Now you can make authenticated requests 🎉 More info here: [token usage](#token-usage).
 
-```json
-{
-  "user": {},
-  "jwt": ""
-}
-```
+:::warning Troubleshooting
+
+- **Error 429**: It's most likely because your login flow fell into a loop. To make new requests to the backend, you need to wait a few minutes or restart the backend.
+- **Grant: missing session or misconfigured provider**: It may be du to many things.
+  - **The redirect url can't be built**: Make sure you have set the backend url in `config/server.js`: [Setting up the server url](#setting-up-the-server-url)
+  - **A session/cookie/cache problem**: You can try again in a private tab.
+  - **The incorrect use of a domain with ngrok**: Check your urls and make sure that you use the ngrok url instead of `http://localhost:1337`. Don't forget to check the backend url set in the example app at `src/config.js`.
+- **You can't access your admin panel**: It's most likely because you built it with the backend url set with a ngrok url and you stopped/restarted ngrok. You need to replace the backend url with the new ngrok url and run `yarn build` or `npm run build` again.
+  :::
 
 ### Forgotten & reset password
 
@@ -507,7 +611,7 @@ In the following section we will detail steps 3. and 7..
 This action sends an email to a user with the link to your own reset password page.
 The link will be enriched with the url param `code` that is needed for the [reset password](#reset-password) at step 7..
 
-First, you must specify the url to your reset password page in the admin panel: **Roles & Permissions > Advanced Settings > Reset Password Page**.
+First, you must specify the url to your reset password page in the admin panel: **Settings > USERS & PERMISSIONS PLUGIN > Advanced Settings > Reset Password Page**.
 
 Then, your **forgotten password page** has to make the following request to your backend.
 
@@ -562,7 +666,7 @@ In production, make sure the `url` config property is set. Otherwise the validat
 
 After having registered, if you have set **Enable email confirmation** to **ON**, the user will receive a confirmation link by email. The user has to click on it to validate his/her registration.
 
-_Example of the confirmation link:_ `https://yourwebsite.fr/auth/email-confirmation?confirmation=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk0OTgxMTE3LCJleHAiOjE1OTc1NzMxMTd9.0WeB-mvuguMyr4eY8CypTZDkunR--vZYzZH6h6sChFg`
+_Example of the confirmation link:_ `https://yourwebsite.com/auth/email-confirmation?confirmation=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk0OTgxMTE3LCJleHAiOjE1OTc1NzMxMTd9.0WeB-mvuguMyr4eY8CypTZDkunR--vZYzZH6h6sChFg`
 
 If needed, you can re-send the confirmation email by making the following request.
 
@@ -608,6 +712,10 @@ create: async ctx => {
 
 ## Adding a new provider (to your project)
 
+**Only providers handled by [grant](https://github.com/simov/grant) are supported**. <br> You can check the 180+ supported providers list there: [https://github.com/simov/grant#180-supported-providers--oauth-playground](https://github.com/simov/grant#180-supported-providers--oauth-playground).
+
+### Prepare your files
+
 To add a new provider on Strapi, you will need to perform changes onto the following files:
 
 ```
@@ -617,7 +725,7 @@ extensions/users-permissions/admin/src/components/PopUpForm/index.js
 extensions/users-permissions/admin/src/translations/en.json
 ```
 
-If these files don't exist you will need to copy from your `node_modules` or the Strapi mono-repo. You can see the [plugin extensions](../concepts/customization.md#plugin-extensions) for more information as to how this works
+If these files don't exist you will need to copy from your `node_modules` or the Strapi mono-repo. You can see [plugin extensions](../concepts/customization.md#plugin-extensions) for more information on how it works.
 
 We will go step by step.
 

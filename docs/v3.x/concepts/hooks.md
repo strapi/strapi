@@ -55,15 +55,16 @@ A hook needs to follow the structure below:
 
 The `index.js` is the entry point to your hook. It should look like the example above.
 
-### Custom hooks
+### Custom local hooks
 
-The framework allows to load hooks from the project directly without having to install them from npm. It's a great way to take advantage of the features of the hooks system for code that doesn't need to be shared between apps. To achieve this, you have to create a `./hooks` folder at the root of your project and put the hooks into it.
+The framework allows loading hooks from the project directly without having to install them from npm. It's a great way to take advantage of the features of the hooks system for code that doesn't need to be shared between apps. To achieve this, you have to create a `./hooks` folder at the root of your project and put the hooks into it.
 
 ```
 /project
 └─── admin
 └─── api
 └─── config
+│    - hook.js
 └─── hooks
 │   └─── strapi-documentation
 │        - index.js
@@ -77,13 +78,15 @@ The framework allows to load hooks from the project directly without having to i
 
 ## Configuration and activation
 
-To activate and configure your hook with custom options, you need to edit your `./config/hook.js` file in your Strapi app.
+To activate and configure hooks with custom options, you need to add/edit your `./config/hook.js` file in your Strapi app. A hook specific timeout value will overwrite the global timeout value, the default `timeout` value is 1000 milliseconds.
 
 ```js
 module.exports = {
+  timeout: 2000,
   settings: {
     'hook-name': {
       enabled: true,
+      timeout: 3000,
     },
   },
 };

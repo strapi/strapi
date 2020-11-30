@@ -212,7 +212,7 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
  * Correctly format the data returned by the group by
  */
 const preProcessGroupByData = function({ result, fieldKey, filters }) {
-  const _result = _.toArray(result);
+  const _result = _.toArray(result).filter(value => Boolean(value._id));
   return _.map(_result, value => {
     return {
       key: value._id.toString(),

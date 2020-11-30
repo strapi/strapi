@@ -19,6 +19,7 @@ module.exports = ({ env }) => ({
       username: env('RACKSPACE_USERNAME'),
       apiKey: env('RACKSPACE_KEY'),
       region: env('RACKSPACE_REGION'),
+      container: env('RACKSPACE_CONTAINER'),
     },
   },
   // ...

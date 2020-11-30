@@ -2,6 +2,14 @@ import generateContentTypeActions from '../generateContentTypeActions';
 
 describe('ADMIN | COMPONENTS | ROLE | UTILS | getAttributesByModel', () => {
   it('should return all attributes of a contentType with nested attributes', () => {
+    const permissionsLayoutActions = {
+      sections: {
+        contentTypes: [
+          { action: 'plugins::content-manager.explorer.delete' },
+          { action: 'plugins::content-manager.explorer.publish' },
+        ],
+      },
+    };
     const subjectPermissions = {
       field1: {
         actions: [
@@ -27,8 +35,12 @@ describe('ADMIN | COMPONENTS | ROLE | UTILS | getAttributesByModel', () => {
       'plugins::content-manager.explorer.delete': true,
     };
 
-    expect(generateContentTypeActions(subjectPermissions, existingContentTypeActions)).toEqual(
-      expected
-    );
+    expect(
+      generateContentTypeActions(
+        subjectPermissions,
+        existingContentTypeActions,
+        permissionsLayoutActions.sections.contentTypes
+      )
+    ).toEqual(expected);
   });
 });

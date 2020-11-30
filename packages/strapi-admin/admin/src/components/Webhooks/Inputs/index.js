@@ -23,6 +23,7 @@ function Inputs({
   type,
   validations,
   value,
+  ...rest
 }) {
   return (
     <Wrapper>
@@ -46,7 +47,7 @@ function Inputs({
       ) : (
         <Error inputError={inputError} name={name} type="text" validations={validations}>
           {({ canCheck, error, dispatch }) => {
-            const hasError = error && error !== null;
+            const hasError = Boolean(error);
 
             const handleChange = e => {
               if (!canCheck) {
@@ -65,6 +66,7 @@ function Inputs({
             return (
               <>
                 <EventInput
+                  {...rest}
                   name={name}
                   onChange={e => {
                     handleChange(e);

@@ -203,7 +203,7 @@ const InputUID = ({
       validations={{ ...validations, regex: UID_REGEX }}
     >
       {({ canCheck, onBlur, error, dispatch }) => {
-        const hasError = error && error !== null;
+        const hasError = Boolean(error);
 
         return (
           <Wrapper ref={wrapperRef}>
@@ -211,6 +211,7 @@ const InputUID = ({
             <InputContainer>
               <Input
                 {...inputProps}
+                containsEndAdornment={editable}
                 editable={editable}
                 error={hasError}
                 onFocus={handleFocus}

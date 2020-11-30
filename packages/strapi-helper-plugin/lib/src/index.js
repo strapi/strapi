@@ -81,6 +81,18 @@ export { default as UserProvider } from './components/UserProvider';
 export { default as ViewContainer } from './components/ViewContainer';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
+export { default as SettingsPageTitle } from './components/SettingsPageTitle';
+export { default as FormBloc } from './components/FormBloc';
+export { default as IntlInput } from './components/IntlInput';
+export { default as SizedInput } from './components/SizedInput';
+export * from './components/Permissions';
+
+// PopUpWarning
+export { default as PopUpWarningBody } from './components/PopUpWarning/Body';
+export { default as PopUpWarningFooter } from './components/PopUpWarning/StyledFooter';
+export { default as PopUpWarningHeader } from './components/PopUpWarning/Header';
+export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
+export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';

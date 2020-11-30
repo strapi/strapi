@@ -26,6 +26,9 @@ describe('User', () => {
   });
 
   describe('create', () => {
+    const count = jest.fn(() => Promise.resolve(1));
+    const sendDidInviteUser = jest.fn();
+
     test('Creates a user by merging given and default attributes', async () => {
       const create = jest.fn(user => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
@@ -36,10 +39,12 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -63,10 +68,12 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -103,10 +110,12 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            role: { count },
+            metrics: { sendDidInviteUser },
           },
         },
         query() {
-          return { create };
+          return { create, count };
         },
       };
 
@@ -122,6 +131,33 @@ describe('User', () => {
       const result = await userService.create(input);
 
       expect(result).toMatchObject(expected);
+    });
+  });
+
+  describe('Count users', () => {
+    test('Count users without params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const amount = await userService.count();
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith({});
+    });
+
+    test('Count users with params', async () => {
+      const count = jest.fn(() => Promise.resolve(2));
+      global.strapi = {
+        query: () => ({ count }),
+      };
+
+      const params = { foo: 'bar' };
+      const amount = await userService.count(params);
+
+      expect(amount).toBe(2);
+      expect(count).toHaveBeenCalledWith(params);
     });
   });
 
@@ -707,5 +743,87 @@ describe('User', () => {
         { method: 'update', patch: true, require: false }
       );
     });
+  });
+
+  describe('resetPasswordByEmail', () => {
+    test('Throws on missing user', async () => {
+      const email = 'email@email.fr';
+      const password = 'invalidpass';
+
+      const findOne = jest.fn(() => {
+        return null;
+      });
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+          };
+        },
+      };
+
+      await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+        new Error(`User not found for email: ${email}`)
+      );
+
+      expect(findOne).toHaveBeenCalledWith({ email }, undefined);
+    });
+
+    test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
+      'Throws on invalid password',
+      async password => {
+        const email = 'email@email.fr';
+
+        const findOne = jest.fn(() => ({ id: 1 }));
+
+        global.strapi = {
+          query() {
+            return {
+              findOne,
+            };
+          },
+        };
+
+        await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+          new Error(
+            'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
+          )
+        );
+
+        expect(findOne).toHaveBeenCalledWith({ email }, undefined);
+      }
+    );
+  });
+
+  test('Call the update function with the expected params', async () => {
+    const email = 'email@email.fr';
+    const password = 'Testing1234';
+    const hash = 'hash';
+    const userId = 1;
+
+    const findOne = jest.fn(() => ({ id: userId }));
+    const update = jest.fn();
+    const hashPassword = jest.fn(() => hash);
+
+    global.strapi = {
+      query() {
+        return {
+          findOne,
+          update,
+        };
+      },
+      admin: {
+        services: {
+          auth: {
+            hashPassword,
+          },
+        },
+      },
+    };
+
+    await userService.resetPasswordByEmail(email, password);
+    expect(findOne).toHaveBeenCalledWith({ email }, undefined);
+    expect(update).toHaveBeenCalledWith({ id: userId }, { password: hash });
+    expect(hashPassword).toHaveBeenCalledWith(password);
   });
 });

@@ -17,9 +17,10 @@ module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
   await strapi.admin.services.permission.cleanPermissionInDatabase();
+  await strapi.admin.services.permission.ensureBoundPermissionsInDatabase();
   await strapi.admin.services.user.migrateUsers();
   await strapi.admin.services.role.createRolesIfNoneExist();
-  await strapi.admin.services.permission.resetSuperAdminPermissions();
+  await strapi.admin.services.role.resetSuperAdminPermissions();
   await strapi.admin.services.role.displayWarningIfNoSuperAdmin();
   await strapi.admin.services.user.displayWarningIfUsersDontHaveRole();
 };

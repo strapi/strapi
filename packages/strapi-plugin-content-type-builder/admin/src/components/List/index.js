@@ -19,6 +19,7 @@ import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import Wrapper from './List';
 
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 function List({
@@ -165,7 +166,9 @@ function List({
       ? formatMessage({
           id: !isSub
             ? `${pluginId}.form.button.add.field.to.${
-                modifiedData.contentType ? modifiedData.contentType.schema.kind : editTarget
+                modifiedData.contentType
+                  ? modifiedData.contentType.schema.kind
+                  : editTarget || 'collectionType'
               }`
             : `${pluginId}.form.button.add.field.to.component`,
           defaultMessage: 'Add another field',

@@ -107,7 +107,7 @@ module.exports = {
         const err = new yup.ValidationError("Super admin permissions can't be edited.");
         throw formatYupErrors(err);
       }
-      await validatedUpdatePermissionsInput(input);
+      await validatedUpdatePermissionsInput(input, role);
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
     }
@@ -129,7 +129,10 @@ module.exports = {
       permissionsToAssign = input.permissions;
     }
 
-    const permissions = await strapi.admin.services.permission.assign(role.id, permissionsToAssign);
+    const permissions = await strapi.admin.services.role.assignPermissions(
+      role.id,
+      permissionsToAssign
+    );
 
     ctx.body = {
       data: permissions,

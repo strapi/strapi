@@ -1,15 +1,8 @@
-import React, { useEffect, useState, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useReducer, useRef } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { isEqual, isEmpty, get, set } from 'lodash';
-import {
-  Modal,
-  ModalFooter,
-  PopUpWarning,
-  useGlobalContext,
-  auth,
-  request,
-} from 'strapi-helper-plugin';
+import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
@@ -24,13 +17,13 @@ const ModalStepper = ({
   initialStep,
   isOpen,
   onClosed,
-  onDeleteMedia,
+  onRemoveFileFromDataToDelete,
   onToggle,
 }) => {
   const { allowedActions } = useAppContext();
   const { emitEvent, formatMessage } = useGlobalContext();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
-  const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
+  const [showModalConfirmButtonLoading, setShowModalConfirmButtonLoading] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
   const [formErrors, setFormErrors] = useState(null);
   const [shouldRefetch, setShouldRefetch] = useState(false);
@@ -100,8 +93,7 @@ const ModalStepper = ({
           const { source } = file;
 
           return axios
-            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
-              headers: { Authorization: `Bearer ${auth.getToken()}` },
+            .get(file.fileURL, {
               responseType: 'blob',
               cancelToken: source.token,
               timeout: 60000,
@@ -182,10 +174,34 @@ const ModalStepper = ({
     });
   };
 
-  const handleConfirmDeleteFile = () => {
-    setShouldDeleteFile(true);
-    toggleModalWarning();
-  };
+  const handleConfirmDeleteFile = useCallback(async () => {
+    const { id } = fileToEdit;
+    // Remove the file from the selected data to delete
+    onRemoveFileFromDataToDelete(id);
+
+    // Show a loader in the popup warning
+    setShowModalConfirmButtonLoading(true);
+
+    try {
+      await request(`/${pluginId}/files/${id}`, {
+        method: 'DELETE',
+      });
+
+      setShouldRefetch(true);
+    } catch (err) {
+      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+
+      strapi.notification.toggle({
+        type: 'warning',
+        message: errorMessage,
+      });
+    } finally {
+      setShowModalConfirmButtonLoading(true);
+      toggleModalWarning();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileToEdit]);
 
   const handleClickNextButton = async () => {
     try {
@@ -239,11 +255,9 @@ const ModalStepper = ({
   };
 
   const handleCloseModalWarning = async () => {
-    if (shouldDeleteFile) {
-      const { id } = fileToEdit;
+    setShowModalConfirmButtonLoading(false);
 
-      onDeleteMedia(id);
-    }
+    onToggle(shouldRefetch);
   };
 
   const handleGoToEditNewFile = fileIndex => {
@@ -332,11 +346,16 @@ const ModalStepper = ({
       console.error(err);
       const status = get(err, 'response.status', get(err, 'status', null));
       const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
-      const errorMessage = get(
+      let errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
         get(err, ['response', 'payload', 'message'], statusText)
       );
+
+      // TODO fix errors globally when the back-end sends readable one
+      if (status === 413) {
+        errorMessage = formatMessage({ id: 'app.utils.errors.file-too-big.message' });
+      }
 
       if (status) {
         dispatch({
@@ -418,11 +437,16 @@ const ModalStepper = ({
           console.error(err);
           const status = get(err, 'response.status', get(err, 'status', null));
           const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
-          const errorMessage = get(
+          let errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
             get(err, ['response', 'payload', 'message'], statusText)
           );
+
+          // TODO fix errors globally when the back-end sends readable one
+          if (status === 413) {
+            errorMessage = formatMessage({ id: 'app.utils.errors.file-too-big.message' });
+          }
 
           if (status) {
             dispatch({
@@ -579,6 +603,7 @@ const ModalStepper = ({
         toggleModal={toggleModalWarning}
         popUpWarningType="danger"
         onConfirm={handleConfirmDeleteFile}
+        isConfirmButtonLoading={showModalConfirmButtonLoading}
       />
     </>
   );
@@ -588,7 +613,7 @@ ModalStepper.defaultProps = {
   initialFileToEdit: null,
   initialStep: 'browse',
   onClosed: () => {},
-  onDeleteMedia: () => {},
+  onRemoveFileFromDataToDelete: () => {},
   onToggle: () => {},
 };
 
@@ -597,7 +622,7 @@ ModalStepper.propTypes = {
   initialStep: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
   onClosed: PropTypes.func,
-  onDeleteMedia: PropTypes.func,
+  onRemoveFileFromDataToDelete: PropTypes.func,
   onToggle: PropTypes.func,
 };
 

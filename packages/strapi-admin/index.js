@@ -1,3 +1,4 @@
+'use strict';
 /* eslint-disable no-useless-escape */
 const path = require('path');
 const _ = require('lodash');
@@ -233,7 +234,7 @@ async function createCacheDir(dir) {
   );
 }
 
-async function watchAdmin({ dir, host, port, options }) {
+async function watchAdmin({ dir, host, port, browser, options }) {
   // Create the cache dir containing the front-end files.
   await createCacheDir(dir);
 
@@ -251,9 +252,8 @@ async function watchAdmin({ dir, host, port, options }) {
 
   const opts = {
     clientLogLevel: 'silent',
-    hot: true,
     quiet: true,
-    open: true,
+    open: browser === 'true' ? true : browser,
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,

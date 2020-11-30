@@ -61,6 +61,11 @@ const trads = {
   fr,
 };
 
+export const languageNativeNames = {
+  en: 'English',
+  fr: 'Français',
+};
+
 export default trads;
 ```
 
@@ -102,7 +107,7 @@ export default WysiwygWithErrors;
 
 The AdminUI package source can be easily found in `./node_modules/strapi-admin/src/`.
 
-For example, to change the top-left displayed admin panel's color, copy the `./node_modules/strapi-admin/admin/src/components/LeftMenuHeader` folder to `./admin/src/components/LeftMenuHeader` and change the styles inside `./admin/src/components/LeftMenuHeader/Wrapper.js`.
+For example, to change the top-left displayed admin panel's color, copy the `./node_modules/strapi-admin/admin/src/components/LeftMenu/LeftMenuHeader` folder to `./admin/src/components/LeftMenu/LeftMenuHeader` and change the styles inside `./admin/src/components/LeftMenu/LeftMenuHeader/Wrapper.js`.
 
 Thus, you are replacing the files that would normally be in `node_modules/strapi-admin/admin/src` and directing them to `admin/src/some/file/path`.
 
@@ -115,6 +120,8 @@ npm run build
 ### Logo
 
 To change the top-left displayed admin panel's logo, add your custom image at `./admin/src/assets/images/logo-strapi.png`.
+
+To change the login page's logo, add your custom image at `./admin/src/assets/images/logo_strapi.png`.
 
 ::: tip
 make sure the size of your image is the same as the existing one (434px x 120px).
@@ -130,6 +137,7 @@ Add the following configuration:
 export const LOGIN_LOGO = null;
 export const SHOW_TUTORIALS = false;
 export const SETTINGS_BASE_URL = '/settings';
+export const STRAPI_UPDATE_NOTIF = true;
 ```
 
 ### Changing the host and port

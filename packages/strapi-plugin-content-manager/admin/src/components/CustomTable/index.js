@@ -21,6 +21,7 @@ const CustomTable = ({ canUpdate, canDelete, data, headers, isBulkable, showLoad
     emitEvent('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
+      state: { from: pathname },
     });
   };
 

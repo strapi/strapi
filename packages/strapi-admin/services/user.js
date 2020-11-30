@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { stringIncludes } = require('strapi-utils');
 const { createUser, hasSuperAdminRole } = require('../domain/user');
 const { SUPER_ADMIN_CODE } = require('./constants');
+const { password: passwordValidator } = require('../validation/common-validators');
 
 const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
 
@@ -24,27 +25,26 @@ const sanitizeUser = user => {
  * @returns {Promise<user>}
  */
 const create = async attributes => {
-  const user = createUser({
+  const userInfo = {
     registrationToken: strapi.admin.services.token.createToken(),
     ...attributes,
-  });
+  };
 
-  // hash password if a new one is sent
-  if (_.has(user, 'password')) {
-    const hashedPassword = await strapi.admin.services.auth.hashPassword(user.password);
-
-    return strapi.query('user', 'admin').create({
-      ...user,
-      password: hashedPassword,
-    });
+  if (_.has(attributes, 'password')) {
+    userInfo.password = await strapi.admin.services.auth.hashPassword(attributes.password);
   }
 
-  return strapi.query('user', 'admin').create(user);
+  const user = createUser(userInfo);
+  const createdUser = await strapi.query('user', 'admin').create(user);
+
+  await strapi.admin.services.metrics.sendDidInviteUser();
+
+  return createdUser;
 };
 
 /**
  * Update a user in database
- * @param params query params to find the user to update
+ * @param id query params to find the user to update
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
@@ -88,6 +88,29 @@ const updateById = async (id, attributes) => {
   }
 
   return strapi.query('user', 'admin').update({ id }, attributes);
+};
+
+/**
+ * Reset a user password by email. (Used in admin:reset CLI)
+ * @param {string} email - user email
+ * @param {string} password - new password
+ */
+const resetPasswordByEmail = async (email, password) => {
+  const user = await findOne({ email });
+
+  if (!user) {
+    throw new Error(`User not found for email: ${email}`);
+  }
+
+  try {
+    await passwordValidator.validate(password);
+  } catch (error) {
+    throw new Error(
+      'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
+    );
+  }
+
+  await updateById(user.id, { password });
 };
 
 /**
@@ -237,6 +260,15 @@ const countUsersWithoutRole = async () => {
   return count;
 };
 
+/**
+ * Count the number of users based on search params
+ * @param params params used for the query
+ * @returns {Promise<number>}
+ */
+const count = async (params = {}) => {
+  return strapi.query('user', 'admin').count(params);
+};
+
 /** Assign some roles to several users
  * @returns {undefined}
  */
@@ -308,7 +340,9 @@ module.exports = {
   deleteById,
   deleteByIds,
   countUsersWithoutRole,
+  count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
   migrateUsers,
+  resetPasswordByEmail,
 };

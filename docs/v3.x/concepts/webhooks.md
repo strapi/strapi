@@ -54,15 +54,24 @@ You can delete a webhook by clicking on the `trash` icon.
 
 By default Strapi webhooks can be triggered by the following events:
 
-| Name           | Description                                     |
-| -------------- | ----------------------------------------------- |
-| `entry.create` | Triggered when a Content Type entry is created. |
-| `entry.update` | Triggered when a Content Type entry is updated. |
-| `entry.delete` | Triggered when a Content Type entry is deleted. |
-| `media.create` | Triggered when a media is created.              |
-| `media.delete` | Triggered when a media is deleted.              |
+| Name              | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| `entry.create`    | Triggered when a Content Type entry is created.       |
+| `entry.update`    | Triggered when a Content Type entry is updated.       |
+| `entry.delete`    | Triggered when a Content Type entry is deleted.       |
+| `entry.publish`   | Triggered when a Content Type entry is published.\*   |
+| `entry.unpublish` | Triggered when a Content Type entry is unpublished.\* |
+| `media.create`    | Triggered when a media is created.                    |
+| `media.update`    | Triggered when a media is updated.                    |
+| `media.delete`    | Triggered when a media is deleted.                    |
+
+\*only when `draftAndPublish` is enabled on this Content Type.
 
 ## Payloads
+
+:::tip NOTE
+Private fields and passwords are not sent in the payload.
+:::
 
 ### Headers
 
@@ -150,6 +159,60 @@ This event is triggered when an entry is deleted.
 }
 ```
 
+### `entry.publish`
+
+This event is triggered when an entry is published.
+
+**Example payload**
+
+```json
+{
+  "event": "entry.publish",
+  "created_at": "2020-01-10T08:59:35.796Z",
+  "model": "address",
+  "entry": {
+    "id": 1,
+    "geolocation": {},
+    "city": "Paris",
+    "postal_code": null,
+    "category": null,
+    "full_name": "Paris",
+    "created_at": "2020-01-10T08:47:36.264Z",
+    "updated_at": "2020-01-10T08:58:26.210Z",
+    "published_at": "2020-08-29T14:20:12.134Z",
+    "cover": null,
+    "images": []
+  }
+}
+```
+
+### `entry.unpublish`
+
+This event is triggered when an entry is unpublished.
+
+**Example payload**
+
+```json
+{
+  "event": "entry.unpublish",
+  "created_at": "2020-01-10T08:59:35.796Z",
+  "model": "address",
+  "entry": {
+    "id": 1,
+    "geolocation": {},
+    "city": "Paris",
+    "postal_code": null,
+    "category": null,
+    "full_name": "Paris",
+    "created_at": "2020-01-10T08:47:36.264Z",
+    "updated_at": "2020-01-10T08:58:26.210Z",
+    "published_at": null,
+    "cover": null,
+    "images": []
+  }
+}
+```
+
 ### `media.create`
 
 This event is triggered when you upload a file on entry creation or through the media interface.
@@ -159,6 +222,34 @@ This event is triggered when you upload a file on entry creation or through the 
 ```json
 {
   "event": "media.create",
+  "created_at": "2020-01-10T10:58:41.115Z",
+  "media": {
+    "id": 1,
+    "name": "image.png",
+    "hash": "353fc98a19e44da9acf61d71b11895f9",
+    "sha256": "huGUaFJhmcZRHLcxeQNKblh53vtSUXYaB16WSOe0Bdc",
+    "ext": ".png",
+    "mime": "image/png",
+    "size": 228.19,
+    "url": "/uploads/353fc98a19e44da9acf61d71b11895f9.png",
+    "provider": "local",
+    "provider_metadata": null,
+    "created_at": "2020-01-10T10:58:41.095Z",
+    "updated_at": "2020-01-10T10:58:41.095Z",
+    "related": []
+  }
+}
+```
+
+### `media.update`
+
+This event is triggered when you replace a media or update the metadata of a media through the media interface.
+
+**Example payload**
+
+```json
+{
+  "event": "media.update",
   "created_at": "2020-01-10T10:58:41.115Z",
   "media": {
     "id": 1,

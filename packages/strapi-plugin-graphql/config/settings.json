@@ -1,10 +1,12 @@
 {
   "endpoint": "/graphql",
-  "tracing": false,
   "shadowCRUD": true,
   "playgroundAlways": false,
   "depthLimit": 7,
   "amountLimit": 100,
   "shareEnabled": false,
-  "federation": false
+  "federation": false,
+  "apolloServer": {
+    "tracing": false
+  }
 }

@@ -49,7 +49,9 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email });
+      const userWithSameEmail = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail) {
         return ctx.badRequest(
@@ -68,6 +70,8 @@ module.exports = {
       ...ctx.request.body,
       provider: 'local',
     };
+
+    user.email = user.email.toLowerCase();
 
     if (!role) {
       const defaultRole = await strapi
@@ -137,7 +141,9 @@ module.exports = {
     }
 
     if (_.has(ctx.request.body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email });
+      const userWithSameEmail = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
         return ctx.badRequest(
@@ -149,6 +155,7 @@ module.exports = {
           })
         );
       }
+      ctx.request.body.email = ctx.request.body.email.toLowerCase();
     }
 
     let updateData = {

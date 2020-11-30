@@ -21,16 +21,7 @@ module.exports = {
     const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => {
-        if (uid.startsWith('strapi::')) return false;
-        if (uid === 'plugins::upload.file') return false; // TODO: add a flag in the content type instead
-
-        if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
-          return false;
-        }
-
-        return true;
-      })
+      .filter(uid => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
       .map(uid => contentTypeService.formatContentType(strapi.contentTypes[uid]));
 
     ctx.send({

@@ -2,6 +2,10 @@
 
 const _ = require('lodash');
 
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+
+const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
+
 const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
@@ -23,10 +27,10 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
-  const roles = _.has(entity, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: entity.created_by.id }, [])
+  const roles = _.has(entity, `${CREATED_BY_ATTRIBUTE}.id`)
+    ? await strapi.query('role', 'admin').find({ 'users.id': entity[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
-  const entityWithRoles = _.set(_.cloneDeep(entity), 'created_by.roles', roles);
+  const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(entityWithRoles))) {
     throw strapi.errors.forbidden();
@@ -88,7 +92,9 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email });
+      const userWithSameEmail = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail) {
         return ctx.badRequest(
@@ -106,9 +112,11 @@ module.exports = {
     const user = {
       ...sanitizedBody,
       provider: 'local',
-      created_by: admin.id,
-      updated_by: admin.id,
+      [CREATED_BY_ATTRIBUTE]: admin.id,
+      [UPDATED_BY_ATTRIBUTE]: admin.id,
     };
+
+    user.email = user.email.toLowerCase();
 
     if (!user.role) {
       const defaultRole = await strapi
@@ -185,7 +193,9 @@ module.exports = {
     }
 
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi.query('user', 'users-permissions').findOne({ email });
+      const userWithSameEmail = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ email: email.toLowerCase() });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
         return ctx.badRequest(
@@ -197,6 +207,7 @@ module.exports = {
           })
         );
       }
+      body.email = body.email.toLowerCase();
     }
 
     const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });

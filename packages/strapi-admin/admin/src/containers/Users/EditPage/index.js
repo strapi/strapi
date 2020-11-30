@@ -26,7 +26,7 @@ const EditPage = ({ canUpdate }) => {
   const cbSuccess = data => {
     const userInfos = auth.getUserInfo();
 
-    // The user is updating himself
+    // The user is updating themself
     if (data.id === userInfos.id) {
       auth.setUserInfo(data);
     }

@@ -14,9 +14,9 @@ In this example, we will use a **Restaurant** API.
 
 Make sure you have a **Content Type** with some entries.
 
-## Create schema.grahql file
+## Create schema.graphql file
 
-To be able to add a new custom query (or mutation), we will have to create a `schema.grahql.js` file in your **Restaurant** API.
+To be able to add a new custom query (or mutation), we will have to create a `schema.graphql.js` file in your **Restaurant** API.
 
 **Path** — `./api/restaurant/config/schema.graphql.js`
 
@@ -70,7 +70,7 @@ And tada, you can now request the `count` of your Content Type.
 
 - Count all restaurants that have `_3rd` as district value.
 
-Based on the [FoodAdvisor](https://github.com/strapi/foodadvisor) restraurant model.
+Based on the [FoodAdvisor](https://github.com/strapi/foodadvisor) restaurant model.
 
 ```
 {

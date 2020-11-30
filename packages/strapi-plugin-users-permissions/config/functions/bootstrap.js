@@ -94,6 +94,23 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/twitch/callback`,
       scope: ['user:read:email'],
     },
+    linkedin: {
+      enabled: false,
+      icon: 'linkedin',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/linkedin/callback`,
+      scope: ['r_liteprofile', 'r_emailaddress'],
+    },
+    cognito: {
+      enabled: false,
+      icon: 'aws',
+      key: '',
+      secret: '',
+      subdomain: 'my.subdomain.com',
+      callback: `${strapi.config.server.url}/auth/cognito/callback`,
+      scope: ['email', 'openid', 'profile'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db

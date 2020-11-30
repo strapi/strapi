@@ -50,14 +50,14 @@ export function getBlockContent(style) {
     case 'UNDERLINE':
       return {
         innerContent: 'underlined text',
-        endReplacer: '_',
-        startReplacer: '_',
+        endReplacer: '<u>',
+        startReplacer: '</u>',
       };
     case 'LINK':
       return {
-        innerContent: 'link',
-        endReplacer: ')',
-        startReplacer: '[text](',
+        innerContent: 'text',
+        endReplacer: ']',
+        startReplacer: '[',
       };
     default:
       return {
@@ -72,7 +72,7 @@ export const getDefaultSelectionOffsets = (
   content,
   startReplacer,
   endReplacer,
-  initPosition = 0,
+  initPosition = 0
 ) => ({
   anchorOffset: initPosition + content.length - trimStart(content, startReplacer).length,
   focusOffset: initPosition + trimEnd(content, endReplacer).length,
@@ -104,7 +104,7 @@ export function getKeyCommandData(command) {
       style = 'ITALIC';
       break;
     case 'underline':
-      content = '__textToReplace__';
+      content = '<u>textToReplace</u>';
       style = 'UNDERLINE';
       break;
     default:

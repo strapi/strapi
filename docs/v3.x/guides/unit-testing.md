@@ -11,20 +11,26 @@ In this example we will use [Jest](https://jestjs.io/) Testing Framework with a 
 [Supertest](https://github.com/visionmedia/supertest) Super-agent driven library for testing node.js HTTP servers using a fluent API
 :::
 
+::: warning
+Please note that this guide will not work if you are on Windows using the SQLite database due to how windows locks the SQLite file
+:::
+
 ## Install test tools
 
 `Jest` contains a set of guidelines or rules used for creating and designing test cases - a combination of practices and tools that are designed to help testers test more efficiently.
 
 `Supertest` allows you to test all the `api` routes as they were instances of [http.Server](https://nodejs.org/api/http.html#http_class_http_server)
 
+`sqlite3` is used to create an on-disk database that is created and deleted between tests.
+
 :::: tabs
 
 ::: tab yarn
-`yarn add jest supertest`
+`yarn add --dev jest supertest sqlite3`
 :::
 
 ::: tab npm
-`npm install jest supertest`
+`npm install jest supertest sqlite3 --save-dev`
 :::
 ::::
 
@@ -85,7 +91,7 @@ The whole file will look like this:
         "useNullAsDefault": true,
         "pool": {
           "min": 0,
-          "max": 15
+          "max": 1
         }
       }
     }
@@ -154,9 +160,8 @@ afterAll(async done => {
   done();
 });
 
-it('strapi is defined', async done => {
+it('strapi is defined', () => {
   expect(strapi).toBeDefined();
-  done();
 });
 ```
 
@@ -175,6 +180,8 @@ Time:        4.187 s
 Ran all test suites.
 ✨  Done in 5.73s.
 ```
+
+> Note: if you receive a timeout error for Jest, please add the following line right before the `beforeAll` method in the `app.test.js` file: `jest.setTimeout(15000)` and adjust the milliseconds value as you need.
 
 ### Testing basic endpoint controller.
 

@@ -23,9 +23,11 @@ module.exports = {
             message: html,
             ...rest,
           };
-
           client.sendEmail(removeUndefined(msg), function(err) {
             if (err) {
+              if (err.Message) {
+                reject(`${err.Message} ${err.Detail ? err.Detail : ''}`);
+              }
               reject(err);
             } else {
               resolve();

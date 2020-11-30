@@ -37,6 +37,7 @@ const defaultConfig = {
   server: {
     host: process.env.HOST || os.hostname() || 'localhost',
     port: process.env.PORT || 1337,
+    proxy: false,
     cron: { enabled: false },
     admin: { autoOpen: false },
   },
@@ -75,6 +76,7 @@ module.exports = (dir, initialConfig = {}) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
+    template: _.get(pkgJSON, 'strapi.template'),
     info: {
       ...pkgJSON,
       strapi: strapiVersion,

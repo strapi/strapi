@@ -598,7 +598,7 @@ toGlobalId = name => upperFirst(camelCase(`group_${name}`));
 ```js
 db.getCollection('contentTypeCollection').update(
   { 'componentField.kind': 'GroupsMyGroup' },
-  { $set: { 'componentField.$.kind': 'ComponentCategoryMyComponent' } },
+  { $set: { 'componentField.$[].kind': 'ComponentCategoryMyComponent' } },
   { multi: true }
 );
 ```

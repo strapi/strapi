@@ -109,7 +109,7 @@ git --version
 
 #### 2. **OPTIONAL:** Install Git.
 
-:::note
+::: tip NOTE
 Only do this step if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
 :::
 

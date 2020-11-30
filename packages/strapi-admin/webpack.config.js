@@ -185,6 +185,7 @@ module.exports = ({
         BACKEND_URL: JSON.stringify(options.backend),
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
         PUBLIC_PATH: JSON.stringify(options.publicPath),
+        PROJECT_TYPE: JSON.stringify(useEE ? 'Enterprise' : 'Community'),
       }),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
         // We might need to improve this if we want to make it work with components

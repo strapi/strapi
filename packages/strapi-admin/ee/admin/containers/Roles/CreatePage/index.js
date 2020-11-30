@@ -22,9 +22,9 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { goBack } = useHistory();
+  const { replace } = useHistory();
   const permissionsRef = useRef();
-  const { settingsBaseURL } = useGlobalContext();
+  const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
@@ -56,17 +56,29 @@ const CreatePage = () => {
     strapi.lockAppWithOverlay();
     setIsSubmiting(true);
 
+    if (id) {
+      emitEvent('willDuplicateRole');
+    } else {
+      emitEvent('willCreateNewRole');
+    }
+
     Promise.resolve(
       request('/admin/roles', {
         method: 'POST',
         body: data,
       })
     )
-      .then(res => {
+      .then(async res => {
         const permissionsToSend = permissionsRef.current.getPermissions();
 
+        if (id) {
+          emitEvent('didDuplicateRole');
+        } else {
+          emitEvent('didCreateNewRole');
+        }
+
         if (res.data.id && !isEmpty(permissionsToSend)) {
-          return request(`/admin/roles/${res.data.id}/permissions`, {
+          await request(`/admin/roles/${res.data.id}/permissions`, {
             method: 'PUT',
             body: { permissions: formatPermissionsToApi(permissionsToSend) },
           });
@@ -74,16 +86,23 @@ const CreatePage = () => {
 
         return res;
       })
-      .then(() => {
-        strapi.notification.success('Settings.roles.created');
-        goBack();
+      .then(res => {
+        setIsSubmiting(false);
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: 'Settings.roles.created' },
+        });
+        replace(`${settingsBaseURL}/roles/${res.data.id}`);
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.error('notification.error');
+        setIsSubmiting(false);
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       })
       .finally(() => {
-        setIsSubmiting(false);
         strapi.unlockApp();
       });
   };

@@ -70,7 +70,7 @@ const formatContentType = contentType => {
 
 const formatAttributes = model => {
   return Object.keys(model.attributes).reduce((acc, key) => {
-    if (key === 'created_by' || key === 'updated_by') {
+    if (['created_by', 'updated_by'].includes(key)) {
       return acc;
     }
 
