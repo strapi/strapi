@@ -1,6 +1,6 @@
 # Templates
 
-A template is a pre-made Strapi configuration designed for a specific use case. It allows you to quickly boostrap a custom Strapi app.
+A template is a pre-made Strapi configuration designed for a specific use case. It allows you to quickly bootstrap a custom Strapi app.
 
 Here are some things a template may configure for you:
 

@@ -17,17 +17,23 @@ const isValidPluginName = plugin => {
  */
 
 module.exports = {
-  async init(ctx) {
-    const currentEnvironment = strapi.app.env;
+  async init() {
     const uuid = strapi.config.get('uuid', false);
-    const autoReload = strapi.config.get('autoReload', false);
-    const strapiVersion = strapi.config.get('info.strapi', null);
-
     const hasAdmin = await strapi.admin.services.user.exists();
 
-    return ctx.send({
-      data: { uuid, currentEnvironment, autoReload, strapiVersion, hasAdmin },
-    });
+    return { data: { uuid, hasAdmin } };
+  },
+
+  async information() {
+    const currentEnvironment = strapi.app.env;
+    const autoReload = strapi.config.get('autoReload', false);
+    const strapiVersion = strapi.config.get('info.strapi', null);
+    const nodeVersion = process.version;
+    const communityEdition = !strapi.EE;
+
+    return {
+      data: { currentEnvironment, autoReload, strapiVersion, nodeVersion, communityEdition },
+    };
   },
 
   async installPlugin(ctx) {
