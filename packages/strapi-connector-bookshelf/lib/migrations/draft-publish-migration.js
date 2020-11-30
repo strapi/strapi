@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 const { getDefinitionFromStore } = require('../utils/store-definition');
 
@@ -23,6 +24,7 @@ const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
 };
 
 const before = async ({ definition, ORM }) => {
+  const migrationInfo = {};
   const way = await getDraftAndPublishMigrationWay({ definition, ORM });
 
   if (way === 'disable') {
@@ -36,11 +38,19 @@ const before = async ({ definition, ORM }) => {
         .delete()
         .where(PUBLISHED_AT_ATTRIBUTE, null);
 
-      await ORM.knex.schema.table(definition.collectionName, table => {
-        table.dropColumn(PUBLISHED_AT_ATTRIBUTE);
-      });
+      if (definition.client === 'sqlite3') {
+        // Bug when droping column with sqlite3 https://github.com/knex/knex/issues/631
+        // Need to recreate the table
+        migrationInfo.recreateSqliteTable = true;
+      } else {
+        await ORM.knex.schema.table(definition.collectionName, table => {
+          table.dropColumn(PUBLISHED_AT_ATTRIBUTE);
+        });
+      }
     }
   }
+
+  return migrationInfo;
 };
 
 const after = async ({ definition, ORM }) => {

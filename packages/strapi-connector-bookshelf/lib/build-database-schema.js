@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
@@ -7,7 +9,10 @@ const { getManyRelations } = require('./utils/associations');
 const createMigrationRunner = require('./migrations/create-migration-runner');
 const draftPublishMigration = require('./migrations/draft-publish-migration');
 
-const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model }) => {
+const migrateSchemas = async (
+  { ORM, loadedModel, definition, connection, model },
+  migrationInfos
+) => {
   // Add created_at and updated_at field if timestamp option is true
   if (loadedModel.hasTimestamps) {
     definition.attributes[loadedModel.hasTimestamps[0]] = { type: 'currentTimestamp' };
@@ -16,13 +21,16 @@ const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model 
 
   // Equilize tables
   if (connection.options && connection.options.autoMigration !== false) {
-    await createOrUpdateTable({
-      table: loadedModel.tableName,
-      attributes: definition.attributes,
-      definition,
-      ORM,
-      model,
-    });
+    await createOrUpdateTable(
+      {
+        table: loadedModel.tableName,
+        attributes: definition.attributes,
+        definition,
+        ORM,
+        model,
+      },
+      migrationInfos
+    );
   }
 
   // Equilize polymorphic relations
@@ -40,13 +48,16 @@ const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model 
     };
 
     if (connection.options && connection.options.autoMigration !== false) {
-      await createOrUpdateTable({
-        table: `${loadedModel.tableName}_morph`,
-        attributes,
-        definition,
-        ORM,
-        model,
-      });
+      await createOrUpdateTable(
+        {
+          table: `${loadedModel.tableName}_morph`,
+          attributes,
+          definition,
+          ORM,
+          model,
+        },
+        migrationInfos
+      );
     }
   }
 
@@ -83,7 +94,7 @@ const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model 
 
       const table = manyRelation.tableCollectionName;
       if (connection.options && connection.options.autoMigration !== false) {
-        await createOrUpdateTable({ table, attributes, definition, ORM, model });
+        await createOrUpdateTable({ table, attributes, definition, ORM, model }, migrationInfos);
       }
     }
   }
@@ -201,7 +212,10 @@ const buildColType = ({ name, attribute, table, tableExists = false, definition,
 };
 
 // Equilize database tables
-const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }) => {
+const createOrUpdateTable = async (
+  { table, attributes, definition, ORM, model },
+  migrationInfos
+) => {
   const tableExists = await ORM.knex.schema.hasTable(table);
 
   const createIdType = table => {
@@ -298,8 +312,8 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
     ORM
   );
 
-  if (columnsToAlter.length > 0) {
-    if (definition.client === 'sqlite3') {
+  if (definition.client === 'sqlite3') {
+    if (columnsToAlter.length > 0 || migrationInfos.find(i => i.recreateSqliteTable)) {
       const tmpTable = `tmp_${table}`;
 
       const rebuildTable = async trx => {
@@ -341,7 +355,10 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
 
         return false;
       }
-    } else {
+    }
+  } else {
+    // mysql, postgres...
+    if (columnsToAlter.length > 0) {
       const alterTable = async trx => {
         await Promise.all(
           columnsToAlter.map(col => {
