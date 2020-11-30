@@ -16,7 +16,14 @@ function Filter({
   isFilterPickerOpen,
   setQuery,
 }) {
-  const type = get(contentType, ['attributes', name, 'type'], 'string');
+  const attributeType = get(contentType, ['attributes', name, 'type'], 'string');
+  let type = attributeType;
+
+  if (attributeType === 'relation') {
+    const editRelations = get(contentType, ['layouts', 'editRelations'], []);
+    const relationSchema = editRelations.find(relation => relation.name === name);
+    type = get(relationSchema, ['metadatas', 'mainFieldSchema', 'type'], attributeType);
+  }
   let displayedValue = toString(value);
 
   if (type.includes('date') || type.includes('timestamp')) {
