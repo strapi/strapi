@@ -106,12 +106,18 @@ const EditPage = () => {
       permissionsRef.current.setFormAfterSubmit();
       onSubmitSucceeded({ name: data.name, description: data.description });
 
-      strapi.notification.success('notification.success.saved');
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: 'notification.success.saved' },
+      });
     } catch (err) {
       console.error(err.response);
       const message = get(err, 'response.payload.message', 'An error occured');
 
-      strapi.notification.error(message);
+      strapi.notification.toggle({
+        type: 'warning',
+        message,
+      });
     } finally {
       setIsSubmiting(false);
       strapi.unlockApp();

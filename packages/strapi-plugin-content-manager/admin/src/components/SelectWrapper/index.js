@@ -126,7 +126,10 @@ function SelectWrapper({
         setIsLoading(false);
       } catch (err) {
         if (err.code !== 20) {
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       }
     }

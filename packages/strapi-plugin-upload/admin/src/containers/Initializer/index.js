@@ -24,7 +24,10 @@ const Initializer = ({ updatePlugin }) => {
         ref.current(pluginId, 'fileModel', fileModel);
         ref.current(pluginId, 'isReady', true);
       } catch (err) {
-        strapi.notification.error('content-manager.error.model.fetch');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'content-manager.error.model.fetch' },
+        });
       }
     };
 
