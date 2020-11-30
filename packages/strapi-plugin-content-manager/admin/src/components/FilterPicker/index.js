@@ -13,19 +13,21 @@ import {
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { formatFiltersToQuery, getTrad } from '../../utils';
+import { formatFiltersToQuery, getTrad, getMainFieldType } from '../../utils';
 import Container from '../Container';
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext', 'dynamiczone'];
+const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone'];
 
 function FilterPicker({
   contentType,
+  editRelations,
   filters,
   isOpen,
+  metadatas,
   name,
   toggleFilterPickerState,
   setQuery,
@@ -114,12 +116,22 @@ function FilterPicker({
 
     let value = '';
 
-    if (type === 'boolean') {
-      value = 'true';
-    } else if (type === 'number') {
-      value = 0;
-    } else if (type === 'enumeration') {
-      value = get(allowedAttributes, [0, 'options', 0], '');
+    switch (type) {
+      case 'boolean': {
+        value = 'true';
+        break;
+      }
+      case 'number': {
+        value = 0;
+        break;
+      }
+      case 'enumeration': {
+        value = get(allowedAttributes, [0, 'options', 0], '');
+        break;
+      }
+      default: {
+        value = '';
+      }
     }
 
     const initFilter = {
@@ -153,13 +165,39 @@ function FilterPicker({
   const handleSubmit = useCallback(
     e => {
       e.preventDefault();
-      const nextFilters = formatFiltersToQuery(modifiedData);
+      const nextFilters = formatFiltersToQuery(modifiedData, metadatas);
 
       emitEventRef.current('didFilterEntries');
       setQuery(nextFilters);
       toggleFilterPickerState();
     },
-    [modifiedData, setQuery, toggleFilterPickerState]
+    [modifiedData, setQuery, toggleFilterPickerState, metadatas]
+  );
+
+  const handleRemoveFilter = index => {
+    if (index === 0 && modifiedData.length === 1) {
+      toggleFilterPickerState();
+
+      return;
+    }
+
+    dispatch({
+      type: 'REMOVE_FILTER',
+      index,
+    });
+  };
+
+  const getAttributeType = useCallback(
+    filter => {
+      const attributeType = get(contentType, ['attributes', filter.name, 'type'], '');
+
+      if (attributeType === 'relation') {
+        return getMainFieldType(editRelations, filter.name);
+      }
+
+      return attributeType;
+    },
+    [contentType, editRelations]
   );
 
   return (
@@ -182,19 +220,8 @@ function FilterPicker({
                 modifiedData={modifiedData}
                 onChange={handleChange}
                 onClickAddFilter={addFilter}
-                onRemoveFilter={index => {
-                  if (index === 0 && modifiedData.length === 1) {
-                    toggleFilterPickerState();
-
-                    return;
-                  }
-
-                  dispatch({
-                    type: 'REMOVE_FILTER',
-                    index,
-                  });
-                }}
-                type={get(contentType, ['attributes', filter.name, 'type'], '')}
+                onRemoveFilter={handleRemoveFilter}
+                type={getAttributeType(filter)}
                 showAddButton={key === modifiedData.length - 1}
                 // eslint-disable-next-line react/no-array-index-key
                 key={key}
@@ -214,13 +241,16 @@ function FilterPicker({
 }
 
 FilterPicker.defaultProps = {
+  editRelations: [],
   name: '',
 };
 
 FilterPicker.propTypes = {
   contentType: PropTypes.object.isRequired,
+  editRelations: PropTypes.array,
   filters: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  metadatas: PropTypes.object.isRequired,
   name: PropTypes.string,
   setQuery: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,

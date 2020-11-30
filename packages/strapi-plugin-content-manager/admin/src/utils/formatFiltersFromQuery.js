@@ -17,18 +17,20 @@ const VALID_REST_OPERATORS = [
 
 // from strapi-utims/convert-rest-query-params
 const findAppliedFilter = whereClause => {
+  // Useful to remove the mainField of relation fields.
+  const formattedWhereClause = whereClause.split('.')[0];
   const separatorIndex = whereClause.lastIndexOf('_');
 
   if (separatorIndex === -1) {
-    return { operator: '=', field: whereClause };
+    return { operator: '=', field: formattedWhereClause };
   }
 
-  const fieldName = whereClause.substring(0, separatorIndex);
+  const fieldName = formattedWhereClause.substring(0, separatorIndex);
   const operator = whereClause.slice(separatorIndex + 1);
 
   // the field as underscores
   if (!VALID_REST_OPERATORS.includes(operator)) {
-    return { operator: '=', field: whereClause };
+    return { operator: '=', field: formattedWhereClause };
   }
 
   return { operator: `_${operator}`, field: fieldName };

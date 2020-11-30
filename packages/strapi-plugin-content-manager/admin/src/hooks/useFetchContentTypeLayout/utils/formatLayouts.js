@@ -8,6 +8,10 @@ const formatEditRelationsLayoutWithMetas = (obj, models) => {
     const fieldSchema = get(obj, ['attributes', current], {});
     const metadatas = get(obj, ['metadatas', current, 'edit'], {});
     const size = 6;
+    const mainField = get(obj, ['metadatas', current, 'edit', 'mainField'], 'id');
+    const targetModelUid = get(obj, ['attributes', current, 'targetModel'], '');
+    const relationModel = models.find(model => model.uid === targetModelUid);
+    const mainFieldSchema = get(relationModel, ['attributes', mainField], {});
 
     const queryInfos = generateRelationQueryInfos(obj, current, models);
 
@@ -15,7 +19,7 @@ const formatEditRelationsLayoutWithMetas = (obj, models) => {
       name: current,
       size,
       fieldSchema,
-      metadatas,
+      metadatas: { ...metadatas, mainFieldSchema },
       queryInfos,
     });
 

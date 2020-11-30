@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get, toString } from 'lodash';
 import moment from 'moment';
 import { FilterButton } from 'strapi-helper-plugin';
-import { dateFormats, formatFiltersToQuery } from '../../utils';
+import { dateFormats, formatFiltersToQuery, getMainFieldType } from '../../utils';
 
 function Filter({
   contentType,
@@ -16,7 +16,13 @@ function Filter({
   isFilterPickerOpen,
   setQuery,
 }) {
-  const type = get(contentType, ['attributes', name, 'type'], 'string');
+  const attributeType = get(contentType, ['attributes', name, 'type'], 'string');
+  let type = attributeType;
+
+  if (attributeType === 'relation') {
+    const editRelations = get(contentType, ['layouts', 'editRelations'], []);
+    type = getMainFieldType(editRelations, name);
+  }
   let displayedValue = toString(value);
 
   if (type.includes('date') || type.includes('timestamp')) {
@@ -35,9 +41,10 @@ function Filter({
       .utc()
       .format(format);
   }
+  const displayedName = name.split('.')[0];
 
   const label = {
-    name,
+    name: displayedName,
     filter: filterName,
     value: displayedValue,
   };
