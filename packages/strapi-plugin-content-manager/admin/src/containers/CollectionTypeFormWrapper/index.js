@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
@@ -15,11 +15,10 @@ import { crudInitialState, crudReducer } from '../../sharedReducers';
 import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
-const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
+const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
 
-  const { id, origin } = useParams();
   const [
     { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
     dispatch,
@@ -99,8 +98,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
     });
   }, [allLayoutData]);
 
-  const shouldFetch = useRef(true);
-
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -139,7 +136,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
       }
     };
 
-    if (requestURL && shouldFetch.current) {
+    if (requestURL) {
       getData(signal);
     } else {
       dispatch({ type: 'INIT_FORM' });
@@ -147,7 +144,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
 
     return () => {
       abortController.abort();
-      shouldFetch.current = requestURL === null;
     };
   }, [requestURL, push, from, cleanReceivedData, cleanClonedData]);
 
@@ -315,6 +311,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
 
 CollectionTypeFormWrapper.defaultProps = {
   from: '/',
+  origin: null,
 };
 
 CollectionTypeFormWrapper.propTypes = {
@@ -335,6 +332,8 @@ CollectionTypeFormWrapper.propTypes = {
   }).isRequired,
   children: PropTypes.func.isRequired,
   from: PropTypes.string,
+  id: PropTypes.string.isRequired,
+  origin: PropTypes.string,
   slug: PropTypes.string.isRequired,
 };
 
