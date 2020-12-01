@@ -70,10 +70,15 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
               cellFormatter(row)
             ) : (
               <Cell
-                type={type}
-                metadatas={metadatas}
-                relationType={relationType}
-                value={memoizedDisplayedValue(name, type)}
+                options={{
+                  rowId: row.id,
+                  relationType,
+                  type,
+                  name,
+                  value: memoizedDisplayedValue(name, type),
+                  cellId: key,
+                  metadatas,
+                }}
               />
             )}
           </td>
