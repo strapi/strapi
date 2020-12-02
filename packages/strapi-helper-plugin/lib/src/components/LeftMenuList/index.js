@@ -1,6 +1,6 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, isObject } from 'lodash';
+import { get, isEmpty, isObject, toLower } from 'lodash';
 import { useGlobalContext } from '../../contexts/GlobalContext';
 import matchSorter from 'match-sorter';
 import LeftMenuLink from '../LeftMenuLink';
@@ -54,13 +54,13 @@ function LeftMenuList({ customLink, links, title, searchable }) {
       return links.map(link => {
         return {
           ...link,
-          links: matchSorter(link.links, search.toLowerCase(), {
-            keys: [item => item.title.toLowerCase()],
+          links: matchSorter(link.links, toLower(search), {
+            keys: [item => toLower(item.title)],
           }),
         };
       });
     }
-    return matchSorter(links, search.toLowerCase(), { keys: [item => item.title.toLowerCase()] });
+    return matchSorter(links, toLower(search), { keys: [item => toLower(item.title)] });
   };
 
   const renderCompo = (link, i) => {
