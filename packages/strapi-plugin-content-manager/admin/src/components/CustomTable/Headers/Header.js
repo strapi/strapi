@@ -12,7 +12,7 @@ const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField
   let sortField = name;
 
   if (type === 'relation') {
-    sortField = `${name}.${mainField}`;
+    sortField = `${name}.${mainField.name}`;
   }
 
   const handleClick = () => {
@@ -50,7 +50,7 @@ Header.propTypes = {
   metadatas: PropTypes.shape({
     label: PropTypes.string.isRequired,
     sortable: PropTypes.bool.isRequired,
-    mainField: PropTypes.string,
+    mainField: PropTypes.object,
   }).isRequired,
   name: PropTypes.string.isRequired,
 };

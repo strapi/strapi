@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 
 const formatFilterName = (name, metadatas) => {
-  const mainField = get(metadatas, [name, 'edit', 'mainField'], null);
+  const mainField = get(metadatas, [name, 'list', 'mainField', 'name'], null);
 
   if (mainField) {
-    return `${name}.${metadatas[name].edit.mainField}`;
+    return `${name}.${mainField}`;
   }
 
   return name;

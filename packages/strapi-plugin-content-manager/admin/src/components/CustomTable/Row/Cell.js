@@ -25,7 +25,7 @@ Cell.propTypes = {
   options: PropTypes.shape({
     cellId: PropTypes.string.isRequired,
     metadatas: PropTypes.shape({
-      mainField: PropTypes.string,
+      mainField: PropTypes.object,
     }).isRequired,
     name: PropTypes.string.isRequired,
     relationType: PropTypes.string,

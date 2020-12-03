@@ -91,7 +91,7 @@ const listViewReducer = (state = initialState, action) =>
           let metas = metadatas[name].list;
 
           if (attributes[name].type === 'relation') {
-            const mainField = metadatas[name].edit.mainField;
+            const { mainField } = metadatas[name].list;
 
             metas = { ...metas, mainField };
           }
@@ -107,6 +107,7 @@ const listViewReducer = (state = initialState, action) =>
             header => header.name !== name
           );
         }
+
         break;
       }
       case ON_DELETE_DATA_SUCCEEDED: {

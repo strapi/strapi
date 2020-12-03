@@ -13,7 +13,7 @@ import {
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { formatFiltersToQuery, getTrad, getMainFieldType } from '../../utils';
+import { formatFiltersToQuery, getTrad } from '../../utils';
 import Container from '../Container';
 import FilterPickerOption from '../FilterPickerOption';
 import { Flex, Span, Wrapper } from './components';
@@ -24,7 +24,6 @@ const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamicz
 
 function FilterPicker({
   contentType,
-  editRelations,
   filters,
   isOpen,
   metadatas,
@@ -192,12 +191,12 @@ function FilterPicker({
       const attributeType = get(contentType, ['attributes', filter.name, 'type'], '');
 
       if (attributeType === 'relation') {
-        return getMainFieldType(editRelations, filter.name);
+        return get(metadatas, [filter.name, 'list', 'mainField', 'schema', 'type'], 'string');
       }
 
       return attributeType;
     },
-    [contentType, editRelations]
+    [contentType, metadatas]
   );
 
   return (
@@ -241,13 +240,11 @@ function FilterPicker({
 }
 
 FilterPicker.defaultProps = {
-  editRelations: [],
   name: '',
 };
 
 FilterPicker.propTypes = {
   contentType: PropTypes.object.isRequired,
-  editRelations: PropTypes.array,
   filters: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
   metadatas: PropTypes.object.isRequired,

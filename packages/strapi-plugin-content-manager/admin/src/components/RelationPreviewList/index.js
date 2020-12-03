@@ -27,7 +27,7 @@ const RelationPreviewList = ({
   if (isSingle) {
     return (
       <Truncate>
-        <Truncated>{value ? value[mainField] : '-'}</Truncated>
+        <Truncated>{value ? value[mainField.name] : '-'}</Truncated>
       </Truncate>
     );
   }
@@ -77,7 +77,7 @@ RelationPreviewList.propTypes = {
   options: PropTypes.shape({
     cellId: PropTypes.string.isRequired,
     metadatas: PropTypes.shape({
-      mainField: PropTypes.string,
+      mainField: PropTypes.object.isRequired,
     }).isRequired,
     name: PropTypes.string.isRequired,
     relationType: PropTypes.string,
