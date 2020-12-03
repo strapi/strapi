@@ -69,7 +69,10 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
           permissionType="plugin"
           pluginsPermissionsLayout={pluginsPermissionsLayout}
         />
-        <PluginsAndSettingsPermissions pluginsPermissionsLayout={settingsPermissionsLayout} />
+        <PluginsAndSettingsPermissions
+          permissionType="settings"
+          pluginsPermissionsLayout={settingsPermissionsLayout}
+        />
       </Tabs>
     </PermissionsProvider>
   );

@@ -1,5 +1,5 @@
 import reducer from '../reducer';
-import { staticAttributeActions } from '../../../../../../admin/src/components/Roles/Permissions/utils';
+import { STATIC_ATTRIBUTE_ACTIONS } from '../../../../../../admin/src/components/Roles/Permissions/utils';
 
 describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -672,7 +672,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },
@@ -708,10 +708,10 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               video: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               name: {
                 actions: ['plugins::content-manager.explorer.create'],
@@ -743,7 +743,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
                 actions: [],
               },
               video: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               name: {
                 actions: ['plugins::content-manager.explorer.create'],
@@ -779,7 +779,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               video: {
                 actions: [],
@@ -853,7 +853,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               video: {
                 actions: [],
@@ -1344,22 +1344,22 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               address: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               city: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               postal_code: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.like': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.long_description': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },
@@ -1462,22 +1462,22 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               address: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               city: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               postal_code: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.like': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.long_description': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },
@@ -1527,22 +1527,22 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             attributes: {
               address: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               city: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               postal_code: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.like': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.long_description': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },

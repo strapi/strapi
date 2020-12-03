@@ -1,13 +1,12 @@
 /* eslint-disable indent */
 /* eslint-disable consistent-return */
-import produce from 'immer';
+import produce, { current } from 'immer';
 import { get, set } from 'lodash';
 
-import requiredActions from 'ee_else_ce/components/Roles/Permissions/requiredActions';
 import {
-  staticAttributeActions,
-  contentManagerPermissionPrefix,
-  generateContentTypeActions,
+  getRecursivePermissionsBySubject,
+  isAttributeAction,
+  STATIC_ATTRIBUTE_ACTIONS,
 } from './utils';
 
 export const initialState = {
@@ -35,112 +34,107 @@ const reducer = (state, action) =>
       }
       // This reducer action is used to enable/disable a single attribute action
       case 'ALL_ATTRIBUTE_ACTIONS_SELECT': {
-        const { subject, attribute, shouldAddDeleteAction } = action;
+        const { subject, attribute, shouldEnable } = action;
+        const attributePath = [
+          'contentTypesPermissions',
+          subject,
+          'attributes',
+          attribute.attributeName,
+          'actions',
+        ];
+        const contentTypeActionPath = ['contentTypesPermissions', subject, 'contentTypeActions'];
 
-        const isAll =
-          get(
-            state.contentTypesPermissions,
-            [subject, 'attributes', attribute.attributeName, 'actions'],
+        if (shouldEnable) {
+          const shouldSetContentTypeActions =
+            Object.values(get(state, contentTypeActionPath, {})).filter(Boolean).length === 0;
+          const contentTypeActionToSet = get(
+            state.permissionsLayout,
+            ['sections', 'contentTypes'],
             []
-          ).length === staticAttributeActions.length;
+          )
+            .filter(
+              ({ subjects, action }) => subjects.includes(subject) && !isAttributeAction(action)
+            )
+            .map(contentTypeAction => contentTypeAction.action);
 
-        let attributesToSet = {};
-
-        if (isAll) {
-          set(
-            attributesToSet,
-            [attribute.attributeName, 'actions'],
-            attribute.required ? [`${contentManagerPermissionPrefix}.create`] : []
-          );
+          if (shouldSetContentTypeActions) {
+            contentTypeActionToSet.forEach(action => {
+              set(draftState, [...contentTypeActionPath, action], true);
+            });
+          }
+          set(draftState, attributePath, STATIC_ATTRIBUTE_ACTIONS);
         } else {
-          set(attributesToSet, [attribute.attributeName, 'actions'], staticAttributeActions);
+          set(draftState, attributePath, []);
+          const permissionsCount = getRecursivePermissionsBySubject(
+            subject,
+            current(draftState).contentTypesPermissions
+          );
+
+          if (permissionsCount === 0) {
+            set(draftState, ['contentTypesPermissions', subject, 'contentTypeActions'], {});
+          }
         }
-
-        const subjectPermissions = {
-          ...get(state.contentTypesPermissions, [subject, 'attributes'], {}),
-          ...attributesToSet,
-        };
-
-        const existingContentTypeActions = get(
-          state.contentTypesPermissions,
-          [subject, 'contentTypeActions'],
-          {}
-        );
-
-        draftState.contentTypesPermissions[subject] = {
-          ...get(state.contentTypesPermissions, [subject], {}),
-          attributes: subjectPermissions,
-          contentTypeActions: generateContentTypeActions(
-            subjectPermissions,
-            existingContentTypeActions,
-            state.permissionsLayout.sections.contentTypes,
-            shouldAddDeleteAction
-          ),
-        };
 
         break;
       }
       // This reducer action is used to enable/disable all
       // content type attributes actions recursively
       case 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT': {
-        const {
-          subject,
-          attributes,
-          shouldEnable,
-          shouldSetAllContentTypes,
-          shouldAddDeleteAction,
-        } = action;
+        const { subject, attributes, shouldEnable, shouldSetAllContentTypes } = action;
+        const contentTypeActionPath = ['contentTypesPermissions', subject, 'contentTypeActions'];
+        const shouldSetContentTypeActions =
+          Object.values(get(state, contentTypeActionPath, {})).filter(Boolean).length === 0;
+
         const staticActionsName = get(state.permissionsLayout, ['sections', 'contentTypes'], [])
-          .filter(contentTypeAction => contentTypeAction.subjects.includes(subject))
+          .filter(
+            ({ subjects, action }) => subjects.includes(subject) && !isAttributeAction(action)
+          )
           .map(contentTypeAction => contentTypeAction.action);
 
-        let attributesActions = attributes.reduce((acc, attribute) => {
-          let actions = attribute.required ? requiredActions : [];
+        attributes.forEach(attribute => {
+          set(
+            draftState,
+            ['contentTypesPermissions', subject, 'attributes', attribute.attributeName, 'actions'],
+            shouldEnable ? STATIC_ATTRIBUTE_ACTIONS : []
+          );
+        });
 
-          if (shouldEnable) {
-            actions = staticAttributeActions;
-          }
+        if (shouldSetAllContentTypes || shouldSetContentTypeActions) {
+          staticActionsName.forEach(action => {
+            set(
+              draftState,
+              ['contentTypesPermissions', subject, 'contentTypeActions', action],
+              shouldEnable
+            );
+          });
+        }
 
-          return {
-            ...get(state.contentTypesPermissions, [subject, 'attributes'], {}),
-            ...acc,
-            [attribute.attributeName]: {
-              ...get(
-                state.contentTypesPermissions,
-                [subject, 'attributes', attribute.attributeName],
-                {}
-              ),
-              actions,
-            },
-          };
-        }, {});
-        const contentTypeLayoutAction = staticActionsName.reduce((acc, current) => {
-          return {
-            ...acc,
-            [current]: shouldEnable,
-          };
-        }, {});
-
-        const existingContentTypeActions = get(
-          state.contentTypesPermissions,
-          [subject, 'contentTypeActions'],
-          {}
+        const permissionsCount = getRecursivePermissionsBySubject(
+          subject,
+          current(draftState).contentTypesPermissions
         );
 
-        const contentTypeActions = shouldSetAllContentTypes
-          ? contentTypeLayoutAction
-          : generateContentTypeActions(
-              attributesActions,
-              existingContentTypeActions,
-              state.permissionsLayout.sections.contentTypes,
-              shouldAddDeleteAction
-            );
+        if (permissionsCount === 0) {
+          set(draftState, ['contentTypesPermissions', subject, 'contentTypeActions'], {});
+        }
 
-        draftState.contentTypesPermissions[subject] = {
-          ...get(state.contentTypesPermissions, [subject], {}),
-          attributes: attributesActions,
-          contentTypeActions,
-        };
+        break;
+      }
+
+      case 'SELECT_MULTIPLE_ATTRIBUTE': {
+        const { attributes, subject } = action;
+
+        attributes.forEach(attribute => {
+          const attributeActionPath = [
+            'contentTypesPermissions',
+            subject,
+            'attributes',
+            attribute.attributeName,
+            'actions',
+          ];
+
+          set(draftState, attributeActionPath, STATIC_ATTRIBUTE_ACTIONS);
+        });
         break;
       }
       default:

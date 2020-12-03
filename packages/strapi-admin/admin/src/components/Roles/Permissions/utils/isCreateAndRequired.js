@@ -1,6 +1,6 @@
-import { contentManagerPermissionPrefix } from './permissonsConstantsActions';
+import { CONTENT_MANAGER_PREFIX } from './permissonsConstantsActions';
 
 const isCreateAndRequired = (attribute, action) =>
-  action === `${contentManagerPermissionPrefix}.create` && attribute.required;
+  action === `${CONTENT_MANAGER_PREFIX}.create` && attribute.required;
 
 export default isCreateAndRequired;

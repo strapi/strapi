@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { contentManagerPermissionPrefix } from './permissonsConstantsActions';
+import { CONTENT_MANAGER_PREFIX } from './permissonsConstantsActions';
 
 const getCreateActionsSizeByContentType = (contentTypeUid, contentTypesPermissions) => {
   return Object.entries(get(contentTypesPermissions, [contentTypeUid, 'attributes'], {})).reduce(
@@ -7,7 +7,7 @@ const getCreateActionsSizeByContentType = (contentTypeUid, contentTypesPermissio
       return (
         acc +
         get(current[1], ['actions'], []).filter(
-          action => action === `${contentManagerPermissionPrefix}.create`
+          action => action === `${CONTENT_MANAGER_PREFIX}.create`
         ).length
       );
     },

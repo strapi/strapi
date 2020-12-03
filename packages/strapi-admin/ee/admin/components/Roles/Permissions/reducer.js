@@ -4,9 +4,10 @@ import produce, { current } from 'immer';
 import { get, set, differenceWith } from 'lodash';
 
 import {
-  staticAttributeActions,
+  STATIC_ATTRIBUTE_ACTIONS,
   getAttributePermissionsSizeByContentTypeAction,
-  contentManagerPermissionPrefix,
+  CONTENT_MANAGER_PREFIX,
+  isAttributeAction,
 } from '../../../../../admin/src/components/Roles/Permissions/utils';
 
 export const initialState = {
@@ -33,14 +34,14 @@ const reducer = (state, action) =>
         ];
 
         if (shouldEnable) {
-          set(draftState, attributePath, staticAttributeActions);
+          set(draftState, attributePath, STATIC_ATTRIBUTE_ACTIONS);
         } else {
           set(
             draftState,
             attributePath,
-            attribute.required ? [`${contentManagerPermissionPrefix}.create`] : []
+            attribute.required ? [`${CONTENT_MANAGER_PREFIX}.create`] : []
           );
-          const existingConditions = staticAttributeActions.filter(
+          const existingConditions = STATIC_ATTRIBUTE_ACTIONS.filter(
             action =>
               getAttributePermissionsSizeByContentTypeAction(
                 current(draftState.contentTypesPermissions),
@@ -73,7 +74,7 @@ const reducer = (state, action) =>
             .filter(
               contentTypeAction =>
                 contentTypeAction.subjects.includes(subject) &&
-                !staticAttributeActions.includes(contentTypeAction.action)
+                !isAttributeAction(contentTypeAction.action)
             )
             .map(contentTypeAction => contentTypeAction.action);
 
@@ -97,7 +98,7 @@ const reducer = (state, action) =>
                 attribute.attributeName,
                 'actions',
               ],
-              staticAttributeActions
+              STATIC_ATTRIBUTE_ACTIONS
             );
           });
         } else {
@@ -115,7 +116,7 @@ const reducer = (state, action) =>
             );
           });
 
-          const existingConditions = staticAttributeActions.filter(
+          const existingConditions = STATIC_ATTRIBUTE_ACTIONS.filter(
             action =>
               getAttributePermissionsSizeByContentTypeAction(
                 current(draftState.contentTypesPermissions),

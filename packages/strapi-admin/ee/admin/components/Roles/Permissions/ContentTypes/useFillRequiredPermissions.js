@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { usePermissionsContext } from '../../../../../../admin/src/hooks';
 import {
-  contentManagerPermissionPrefix,
+  CONTENT_MANAGER_PREFIX,
   getCreateActionsSizeByContentType,
   getAttributesByModel,
 } from '../../../../../../admin/src/components/Roles/Permissions/utils';
@@ -25,7 +25,7 @@ const useFillRequiredPermissions = contentType => {
         shouldEnable: true,
         subject: contentType.uid,
         attributes: requiredAttributes,
-        action: `${contentManagerPermissionPrefix}.create`,
+        action: `${CONTENT_MANAGER_PREFIX}.create`,
       });
     }
   }, [components, contentType, contentTypesPermissions]);

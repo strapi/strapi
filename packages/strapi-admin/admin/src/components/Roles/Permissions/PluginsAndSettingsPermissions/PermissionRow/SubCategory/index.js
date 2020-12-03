@@ -19,7 +19,7 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ subCategory }) => {
+const SubCategory = ({ categoryName, subCategory }) => {
   const { formatMessage } = useIntl();
   const [modal, setModal] = useState({ isOpen: false, isMounted: false });
   const { pluginsAndSettingsPermissions, dispatch } = usePermissionsContext();
@@ -172,6 +172,7 @@ const SubCategory = ({ subCategory }) => {
           onToggle={handleToggleModal}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
+          headerBreadCrumbs={[categoryName, subCategory.subCategory]}
         />
       )}
     </>
@@ -179,6 +180,7 @@ const SubCategory = ({ subCategory }) => {
 };
 
 SubCategory.propTypes = {
+  categoryName: PropTypes.string.isRequired,
   subCategory: PropTypes.object.isRequired,
 };
 

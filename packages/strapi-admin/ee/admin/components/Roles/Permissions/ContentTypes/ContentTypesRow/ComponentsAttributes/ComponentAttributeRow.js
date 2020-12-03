@@ -7,8 +7,8 @@ import styled from 'styled-components';
 import { usePermissionsContext } from '../../../../../../../../admin/src/hooks';
 import { getAttributesToDisplay } from '../../../../../../../../admin/src/utils';
 import {
-  contentManagerPermissionPrefix,
-  staticAttributeActions,
+  CONTENT_MANAGER_PREFIX,
+  STATIC_ATTRIBUTE_ACTIONS,
   getAttributesByModel,
   getNumberOfRecursivePermissionsByAction,
   isCreateAndRequired,
@@ -93,7 +93,7 @@ const ComponentAttributeRow = ({
 
   const handleCheck = useCallback(
     ({ target: { name, value } }, action) => {
-      const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
+      const shouldSetRequiredFields = action === `${CONTENT_MANAGER_PREFIX}.create`;
 
       if (shouldSetRequiredFields) {
         fillRequiredPermissions();
@@ -193,7 +193,7 @@ const ComponentAttributeRow = ({
             </CollapseLabel>
           </RowStyle>
           <PermissionWrapper disabled={isSuperAdmin || (attribute.required && !isCollapsable)}>
-            {staticAttributeActions.map(action => (
+            {STATIC_ATTRIBUTE_ACTIONS.map(action => (
               <PermissionCheckbox
                 disabled={
                   isSuperAdmin || (isCreateAndRequired(attribute, action) && !isCollapsable)

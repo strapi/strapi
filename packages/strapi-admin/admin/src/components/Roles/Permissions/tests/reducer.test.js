@@ -1,5 +1,5 @@
 import reducer from '../reducer';
-import { staticAttributeActions } from '../utils';
+import { STATIC_ATTRIBUTE_ACTIONS } from '../utils';
 
 describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -100,6 +100,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
         attribute: { attributeName: 'picture', required: false },
+        shouldEnable: true,
       };
       const initialState = {
         collapsePath: [],
@@ -108,11 +109,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             conditions: {
               read: ['admin::is-creator'],
             },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
+            contentTypeActions: {},
             attributes: {
               picture: {
                 actions: [],
@@ -123,8 +120,11 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
             ],
           },
         },
@@ -137,13 +137,12 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               read: ['admin::is-creator'],
             },
             contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
+              'plugins::content-manager.explorer.delete': true,
+              'plugins::content-manager.explorer.publish': true,
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },
@@ -151,69 +150,11 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should set all static actions to an attribute permissions and add content type actions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: { attributeName: 'picture', required: false },
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              picture: {
-                actions: staticAttributeActions,
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
             ],
           },
         },
@@ -227,6 +168,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
         attribute: { attributeName: 'picture', required: false },
+        shouldEnable: false,
       };
       const initialState = {
         collapsePath: [],
@@ -237,14 +179,13 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             },
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.create': true,
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               video: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               name: {
                 actions: ['plugins::content-manager.explorer.create'],
@@ -269,17 +210,14 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               read: ['admin::is-creator'],
             },
             contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
             },
             attributes: {
               picture: {
                 actions: [],
               },
               video: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               name: {
                 actions: ['plugins::content-manager.explorer.create'],
@@ -305,6 +243,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
         subject: 'place',
         attribute: { attributeName: 'picture', required: false },
+        shouldEnable: false,
       };
       const initialState = {
         collapsePath: [],
@@ -314,14 +253,11 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               read: ['admin::is-creator'],
             },
             contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
             },
             attributes: {
               picture: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               video: {
                 actions: [],
@@ -335,8 +271,8 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
             ],
           },
         },
@@ -348,9 +284,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
             conditions: {
               read: ['admin::is-creator'],
             },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-            },
+            contentTypeActions: {},
             attributes: {
               picture: {
                 actions: [],
@@ -367,8 +301,8 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
+              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
             ],
           },
         },
@@ -379,106 +313,6 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
   });
 
   describe('ALL_CONTENT_TYPE_PERMISSIONS_SELECT', () => {
-    it('should add all the content type permissions without content type actions', () => {
-      const action = {
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: 'place',
-        attributes: [
-          { attributeName: 'address', required: false },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: false },
-          { attributeName: 'media.vote', required: false },
-          { attributeName: 'media.vote.like', required: false },
-          { attributeName: 'media.vote.long_description', required: false },
-        ],
-        shouldEnable: true,
-        shouldSetAllContentTypes: false,
-      };
-
-      const initialState = {
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            attributes: {
-              address: {
-                actions: ['read'],
-              },
-              city: {
-                actions: ['read'],
-              },
-              postal_code: {
-                actions: ['read'],
-              },
-              'media.vote': {
-                actions: [],
-              },
-              'media.vote.like': {
-                actions: [],
-              },
-              'media.vote.long_description': {
-                actions: [],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-
-      const expected = {
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              address: {
-                actions: staticAttributeActions,
-              },
-              city: {
-                actions: staticAttributeActions,
-              },
-              postal_code: {
-                actions: staticAttributeActions,
-              },
-              'media.vote': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.like': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.long_description': {
-                actions: staticAttributeActions,
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
     it('should add all the content type permissions with content type actions', () => {
       const action = {
         type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
@@ -493,14 +327,6 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         ],
         shouldEnable: true,
         shouldSetAllContentTypes: true,
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
       };
 
       const initialState = {
@@ -511,6 +337,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
               { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
               { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
             ],
           },
         },
@@ -551,6 +378,7 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
               { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
               { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
+              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
             ],
           },
         },
@@ -560,29 +388,27 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               read: ['admin::is-creator'],
             },
             contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
               'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
+              'plugins::content-manager.explorer.publish': true,
             },
             attributes: {
               address: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               city: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               postal_code: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.like': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.long_description': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },
@@ -606,23 +432,12 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         ],
         shouldEnable: false,
         shouldSetAllContentTypes: true,
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
       };
 
       const initialState = {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
               { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
             ],
           },
@@ -631,28 +446,25 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
           place: {
             contentTypeActions: {
               'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.update': true,
             },
             attributes: {
               address: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               city: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               postal_code: {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.like': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
               'media.vote.long_description': {
-                actions: staticAttributeActions,
+                actions: STATIC_ATTRIBUTE_ACTIONS,
               },
             },
           },
@@ -663,21 +475,13 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
         permissionsLayout: {
           sections: {
             contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
               { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
             ],
           },
         },
         contentTypesPermissions: {
           place: {
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': false,
-              'plugins::content-manager.explorer.read': false,
-              'plugins::content-manager.explorer.update': false,
-              'plugins::content-manager.explorer.create': false,
-            },
+            contentTypeActions: {},
             attributes: {
               address: {
                 actions: [],
@@ -696,6 +500,66 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
               },
               'media.vote.long_description': {
                 actions: [],
+              },
+            },
+          },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('SELECT_MULTIPLE_ATTRIBUTE', () => {
+    it('should select an action of an array of attributes in a content type', () => {
+      const action = {
+        type: 'SELECT_MULTIPLE_ATTRIBUTE',
+        attributes: [
+          { attributeName: 'city.componentfield1' },
+          { attributeName: 'postal_code' },
+          { attributeName: 'city.componentfield2.field' },
+        ],
+        subject: 'test',
+      };
+      const initialState = {
+        contentTypesPermissions: {
+          test: {
+            attributes: {},
+          },
+          test2: {
+            attributes: {
+              postal_code: {
+                actions: [
+                  'plugins::content-manager.explorer.create',
+                  'plugins::content-manager.explorer.read',
+                ],
+              },
+            },
+          },
+        },
+      };
+      const expected = {
+        contentTypesPermissions: {
+          test: {
+            attributes: {
+              'city.componentfield1': {
+                actions: STATIC_ATTRIBUTE_ACTIONS,
+              },
+              'city.componentfield2.field': {
+                actions: STATIC_ATTRIBUTE_ACTIONS,
+              },
+              postal_code: {
+                actions: STATIC_ATTRIBUTE_ACTIONS,
+              },
+            },
+          },
+          test2: {
+            attributes: {
+              postal_code: {
+                actions: [
+                  'plugins::content-manager.explorer.create',
+                  'plugins::content-manager.explorer.read',
+                ],
               },
             },
           },

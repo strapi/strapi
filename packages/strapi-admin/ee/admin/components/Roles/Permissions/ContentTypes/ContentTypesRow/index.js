@@ -8,7 +8,6 @@ import { getAttributesToDisplay } from '../../../../../../../admin/src/utils';
 import { usePermissionsContext } from '../../../../../../../admin/src/hooks';
 import {
   ATTRIBUTES_PERMISSIONS_ACTIONS,
-  staticAttributeActions,
   isAttributeAction,
   getAttributePermissionsSizeByContentTypeAction,
   getAllAttributesActions,
@@ -44,7 +43,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
     );
 
     return Object.keys(contentTypesActionObject).filter(
-      action => !!contentTypesActionObject[action] && !staticAttributeActions.includes(action)
+      action => !!contentTypesActionObject[action] && !isAttributeAction(action)
     );
   }, [contentType, contentTypesPermissions]);
 
@@ -83,8 +82,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
   const contentTypesActions = useMemo(() => {
     return permissionsLayout.filter(
-      layout =>
-        layout.subjects.includes(contentType.uid) && !staticAttributeActions.includes(layout.action)
+      layout => layout.subjects.includes(contentType.uid) && !isAttributeAction(layout.action)
     );
   }, [contentType, permissionsLayout]);
 
@@ -95,7 +93,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
   const hasContentTypeAction = useCallback(
     action =>
       get(contentTypesPermissions, [contentType.uid, 'contentTypeActions', action], false) &&
-      !staticAttributeActions.includes(action),
+      !isAttributeAction(action),
     [contentTypesPermissions, contentType]
   );
 
@@ -292,6 +290,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onSubmit={handleModalSubmit}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
+          headerBreadCrumbs={[contentType.name, 'app.components.LeftMenuLinkContainer.settings']}
         />
       )}
     </RowWrapper>

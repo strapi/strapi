@@ -6,11 +6,11 @@ import { Flex, Text, Checkbox, Padded } from '@buffetjs/core';
 import { usePermissionsContext } from '../../../../../../../../admin/src/hooks';
 import { getAttributesToDisplay } from '../../../../../../../../admin/src/utils';
 import {
-  contentManagerPermissionPrefix,
+  CONTENT_MANAGER_PREFIX,
   getNumberOfRecursivePermissionsByAction,
   getAttributesByModel,
   getRecursivePermissions,
-  staticAttributeActions,
+  STATIC_ATTRIBUTE_ACTIONS,
   isCreateAndRequired,
 } from '../../../../../../../../admin/src/components/Roles/Permissions/utils';
 import PermissionCheckbox from '../../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
@@ -58,14 +58,14 @@ const AttributeRow = ({ attribute, contentType }) => {
   }, [isCollapsable, attribute, components]);
 
   const hasAllActions = useMemo(() => {
-    return recursivePermissions === staticAttributeActions.length * recursiveAttributes.length;
+    return recursivePermissions === STATIC_ATTRIBUTE_ACTIONS.length * recursiveAttributes.length;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentTypesPermissions]);
 
   const hasSomeActions = useMemo(() => {
     return (
       recursivePermissions > 0 &&
-      recursivePermissions < staticAttributeActions.length * recursiveAttributes.length
+      recursivePermissions < STATIC_ATTRIBUTE_ACTIONS.length * recursiveAttributes.length
     );
   }, [recursiveAttributes, recursivePermissions]);
 
@@ -129,7 +129,7 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const handleCheckCollapsable = useCallback(
     ({ target: { value, name } }, action) => {
-      const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
+      const shouldSetRequiredFields = action === `${CONTENT_MANAGER_PREFIX}.create`;
 
       if (shouldSetRequiredFields) {
         fillRequiredPermissions();
@@ -140,7 +140,7 @@ const AttributeRow = ({ attribute, contentType }) => {
         subject: name,
         shouldEnable: value,
         attributes:
-          action === `${contentManagerPermissionPrefix}.create`
+          action === `${CONTENT_MANAGER_PREFIX}.create`
             ? recursiveAttributes.filter(attribute => !attribute.required)
             : recursiveAttributes,
         action,
@@ -151,7 +151,7 @@ const AttributeRow = ({ attribute, contentType }) => {
 
   const handleCheck = useCallback(
     action => {
-      const shouldSetRequiredFields = action === `${contentManagerPermissionPrefix}.create`;
+      const shouldSetRequiredFields = action === `${CONTENT_MANAGER_PREFIX}.create`;
 
       if (shouldSetRequiredFields) {
         fillRequiredPermissions();
@@ -227,7 +227,7 @@ const AttributeRow = ({ attribute, contentType }) => {
             </CollapseLabel>
           </PermissionName>
           <PermissionWrapper>
-            {staticAttributeActions.map(action => (
+            {STATIC_ATTRIBUTE_ACTIONS.map(action => (
               <PermissionCheckbox
                 key={action}
                 disabled={
