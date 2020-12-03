@@ -155,7 +155,7 @@ describe('x-to-many RF Preview', () => {
     });
 
     test('Throws if the entity does not exist', async () => {
-      const { body, statusCode } = await rq.get(`${cmProductUrl}/0/categories`);
+      const { body, statusCode } = await rq.get(`${cmProductUrl}/${data.shop[1].id}/categories`);
 
       expect(statusCode).toBe(404);
       expect(body.error).toBe('Not Found');
