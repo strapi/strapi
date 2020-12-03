@@ -10,7 +10,6 @@ const path = require('path');
 const _ = require('lodash');
 const moment = require('moment');
 const pathToRegexp = require('path-to-regexp');
-const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');
 const defaultSettings = require('../config/settings.json');
 const parametersOptions = require('./utils/parametersOptions.json');
@@ -499,14 +498,9 @@ module.exports = {
 
       return acc.concat(tags);
     }, []);
-    const fullDoc = _.merge(
-      appDoc.reduce((acc, current) => {
-        return _.merge(acc, current);
-      }, defaultSettings),
-      defaultComponents
-      // { tags },
-    );
-
+    const fullDoc = appDoc.reduce((acc, current) => {
+      return _.merge(acc, current);
+    }, defaultSettings);
     fullDoc.tags = tags;
 
     return fullDoc;
