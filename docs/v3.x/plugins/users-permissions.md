@@ -719,8 +719,8 @@ create: async ctx => {
 To add a new provider on Strapi, you will need to perform changes onto the following files:
 
 ```
-extensions/users-permissions/services/Providers.js
-extensions/users-permissions/config/functions/bootstrap.js
+extensions/users-permissions/services/ProviderList.js
+extensions/users-permissions/config/functions/grant-config.js
 ```
 
 If these files don't exist you will need to copy from your `node_modules` or the Strapi mono-repo. You can see [plugin extensions](../concepts/customization.md#plugin-extensions) for more information on how it works.
@@ -729,11 +729,12 @@ We will go step by step.
 
 ### Configure your Provider Request
 
-Configure the new provider in the `Provider.js` file at the `getProfile` function.
+Configure the new provider in the `ProviderList.js` file.
 
-The `getProfile` takes three params:
+The provider takes four params:
 
-- **provider**: The name of the used provider as a string.
+- **grant**: The grant configuration.
+- **access_token**: The access token.
 - **query**: The query is the result of the provider callback.
 - **callback**: The callback function who will continue the internal Strapi login logic.
 
@@ -742,27 +743,33 @@ Here is an example that uses the `discord` provider.
 ### Configure your oauth generic information
 
 ```js
-case 'discord': {
-  const discord = new Purest({
-    provider: 'discord',
-    config: {
-      'discord': {
-        'https://discordapp.com/api/': {
-          '__domain': {
-            'auth': {
-              'auth': {'bearer': '[0]'}
-            }
+module.exports = {
+  // ...
+  discord: async (grant, access_token, query, callback) => {
+    const discord = purest({
+      provider: 'discord',
+      config: {
+        discord: {
+          'https://discordapp.com/api/': {
+            __domain: {
+              auth: {
+                auth: { bearer: '[0]' },
+              },
+            },
+            '{endpoint}': {
+              __path: {
+                alias: '__default',
+              },
+            },
           },
-          '{endpoint}': {
-            '__path': {
-              'alias': '__default'
-            }
-          }
-        }
-      }
-    }
-  });
-}
+        },
+      },
+    });
+
+    // ...
+  },
+  // ...
+};
 ```
 
 This code creates a `Purest` object that gives us a generic way to interact with the provider's REST API.
@@ -776,27 +783,28 @@ You may also want to take a look onto the numerous already made configurations [
 For our discord provider it will look like:
 
 ```js
-  discord.query().get('users/@me').auth(access_token).request((err, res, body) => {
+discord
+  .query()
+  .get('users/@me')
+  .auth(access_token)
+  .request((err, res, body) => {
     if (err) {
       callback(err);
     } else {
       // Combine username and discriminator because discord username is not unique
-      const username = `${body.username}#${body.discriminator}`;
+      var username = `${body.username}#${body.discriminator}`;
       callback(null, {
-        username,
-        email: body.email
+        username: username,
+        email: body.email,
       });
     }
   });
-  break;
-}
 ```
 
-Here is the next part of our switch. Now that we have properly configured our provider, we want to use it to retrieve
+Now that we have properly configured our provider, we want to use it to retrieve
 user information.
 
-Here you see the real power of `purest`, you can simply make a get request on the desired URL, using the `access_token`
-from the `query` parameter to authenticate.
+Here you see the real power of `purest`, you can simply make a get request on the desired URL, using the `access_token` to authenticate.
 
 That way, you should be able to retrieve the user info you need.
 
@@ -808,22 +816,24 @@ to retrieve your user from the database and log you in.
 Now, we need to configure our 'model' for our new provider. That way, our settings can be stored in the database, and
 managed from the admin panel.
 
-Open the file `packages/strapi-plugin-users-permissions/config/functions/bootstrap.js`
+Open the file `extensions/users-permissions/config/functions/grant-config.js`
 
-Add the fields your provider needs into the `grantConfig` object.
-For our discord provider it will look like:
+Add the fields your provider needs. For our discord provider it will look like:
 
 ```js
 discord: {
-  enabled: false,  // make this provider disabled by default
-  icon: 'comments', // The icon to use on the UI
-  key: '',  // our provider app id (leave it blank, you will fill it with the content manager)
-  secret: '', // our provider secret key (leave it blank, you will fill it with the content manager)
-  callback: '/auth/discord/callback', // the callback endpoint of our provider
-  scope: [  // the scope that we need from our user to retrieve information
-    'identify',
-    'email'
-  ]
+  // Make this provider disabled by default
+  enabled: false,
+  // The icon to use on the UI
+  icon: 'discord',
+  // Our provider app id (leave it blank, you will fill it with the content manager)
+  key: '',
+  // Our provider secret key (leave it blank, you will fill it with the content manager)
+  secret: '',
+  // The callback endpoint of our provider
+  callback: `${strapi.config.server.url}/auth/discord/callback`,
+  // The scope that we need from our user to retrieve information
+  scope: ['identify', 'email'],
 },
 ```
 
