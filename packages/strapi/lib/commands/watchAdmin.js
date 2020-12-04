@@ -9,7 +9,7 @@ const { getConfigUrls, getAbsoluteServerUrl } = require('strapi-utils');
 
 const addSlash = require('../utils/addSlash');
 
-module.exports = async function() {
+module.exports = async function({ browser }) {
   const dir = process.cwd();
 
   const config = loadConfiguration(dir);
@@ -24,6 +24,7 @@ module.exports = async function() {
     dir,
     port: adminPort,
     host: adminHost,
+    browser,
     options: {
       backend: getAbsoluteServerUrl(config, true),
       publicPath: addSlash(adminPath),

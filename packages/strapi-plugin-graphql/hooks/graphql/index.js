@@ -9,6 +9,7 @@ const _ = require('lodash');
 const { ApolloServer } = require('apollo-server-koa');
 const { buildFederatedSchema } = require('@apollo/federation');
 const depthLimit = require('graphql-depth-limit');
+const { graphqlUploadKoa } = require('graphql-upload');
 const loadConfigs = require('./load-config');
 
 const attachMetadataToResolvers = (schema, { api, plugin }) => {
@@ -114,6 +115,7 @@ module.exports = strapi => {
 
       const serverParams = {
         ...schemaDef,
+        uploads: false,
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
           // TODO: set loaders in the context not globally
@@ -148,6 +150,14 @@ module.exports = strapi => {
 
       const server = new ApolloServer(serverParams);
 
+      const uploadMiddleware = graphqlUploadKoa();
+      strapi.app.use((ctx, next) => {
+        if (ctx.path === config.endpoint) {
+          return uploadMiddleware(ctx, next);
+        }
+
+        return next();
+      });
       server.applyMiddleware({
         app: strapi.app,
         path: config.endpoint,

@@ -171,7 +171,10 @@ module.exports = {
    */
 
   async update(params, data, { files } = {}) {
-    const validData = await strapi.entityValidator.validateEntityUpdate(strapi.models.restaurant, data);
+    const validData = await strapi.entityValidator.validateEntityUpdate(
+      strapi.models.restaurant,
+      data
+    );
     const entry = await strapi.query('restaurant').update(params, validData);
 
     if (files) {
@@ -340,7 +343,7 @@ module.exports = {
         model: 'restaurant',
         // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
       });
-      return this.findOne({ id: entry.id });
+      return this.find();
     }
 
     return entry;

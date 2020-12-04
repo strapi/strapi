@@ -10,6 +10,7 @@ describe('ADMIN | utils | getAttributesToDisplay', () => {
           description: { type: 'string' },
           created_at: { type: 'timestamp' },
           updated_at: { type: 'timestamp' },
+          published_at: { type: 'timestamp' },
         },
         options: {
           timestamps: ['created_at', 'updated_at'],

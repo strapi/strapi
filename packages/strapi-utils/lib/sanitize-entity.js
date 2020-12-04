@@ -1,6 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
+const { constants, isPrivateAttribute } = require('./content-types');
+const {
+  ID_ATTRIBUTE,
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = constants;
 
 const sanitizeEntity = (dataSource, options) => {
   const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
@@ -90,9 +97,8 @@ const sanitizeEntity = (dataSource, options) => {
 
 const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
-const CREATOR_FIELDS = ['created_by', 'updated_by'];
 const COMPONENT_FIELDS = ['__component'];
-const STATIC_FIELDS = ['id', '__v'];
+const STATIC_FIELDS = [ID_ATTRIBUTE, '__v'];
 
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
   const { options, primaryKey } = model;
@@ -102,7 +108,15 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
   return _.concat(
     includeFields || [],
     ...(isOutput
-      ? [primaryKey, timestamps, STATIC_FIELDS, COMPONENT_FIELDS, CREATOR_FIELDS]
+      ? [
+          primaryKey,
+          timestamps,
+          STATIC_FIELDS,
+          COMPONENT_FIELDS,
+          CREATED_BY_ATTRIBUTE,
+          UPDATED_BY_ATTRIBUTE,
+          PUBLISHED_AT_ATTRIBUTE,
+        ]
       : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
   );
 };
@@ -120,20 +134,9 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const getPrivateAttributes = model => {
-  const allPrivatesAttributes = _.union(
-    strapi.config.get('api.responses.privateAttributes', []),
-    _.get(model, 'options.privateAttributes', [])
-  );
-
-  return allPrivatesAttributes;
-};
-
 const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
-  const privateAttributes = getPrivateAttributes(model);
-
   const isPassword = attribute.type === 'password';
-  const isPrivate = attribute.private === true || privateAttributes.includes(key);
+  const isPrivate = isPrivateAttribute(model, key);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
@@ -141,7 +144,4 @@ const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutp
   return !!((isPassword && shouldRemovePassword) || (isPrivate && shouldRemovePrivate));
 };
 
-module.exports = {
-  sanitizeEntity,
-  getPrivateAttributes,
-};
+module.exports = sanitizeEntity;

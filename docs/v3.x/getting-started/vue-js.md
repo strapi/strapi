@@ -4,21 +4,17 @@ This integration guide is following the [Getting started guide](../getting-start
 
 If you haven't gone through the getting started guide, the way you request a Strapi API with [Vue.js](https://vuejs.org/) remains the same except that you will not fetch the same content.
 
-
 ### Create a Vue.js app
 
 Create a basic Vue.js application using [Vue CLI](https://cli.vuejs.org).
-
 
 ```bash
 vue create vue-app
 ```
 
-
 ### Use an HTTP client
 
-Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
-
+Many HTTP clients are available but in this documentation we'll use [Axios](https://github.com/axios/axios) and [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
 
 :::: tabs
 
@@ -40,74 +36,77 @@ No installation needed
 
 ### GET Request your collection type
 
-Execute a GET request on the `restaurant` Collection Type in order to fetch all your restaurants.
+Execute a `GET` request on the `restaurant` Collection Type in order to fetch all your restaurants.
 
 Be sure that you activated the `find` permission for the `restaurant` Collection Type.
-
 
 :::: tabs
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.get('http://localhost:1337/restaurants')
-  .then(response => {
-    console.log(response);
-  })
+axios.get('http://localhost:1337/restaurants').then(response => {
+  console.log(response);
+});
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
-fetch("http://localhost:1337/restaurants", {
-  method: "GET",
+fetch('http://localhost:1337/restaurants', {
+  method: 'GET',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-}).then(response => response.json())
+})
+  .then(response => response.json())
   .then(data => console.log(data));
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
-[{
-  "id": 1,
-  "name": "Biscotte Restaurant",
-  "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
-  "created_by": {
+[
+  {
     "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "updated_by": {
-    "id": 1,
-    "firstname": "Paul",
-    "lastname": "Bocuse",
-    "username": null
-  },
-  "created_at": "2020-07-31T11:37:16.964Z",
-  "updated_at": "2020-07-31T11:37:16.975Z",
-  "categories": [{
-    "id": 2,
-    "name": "French Food",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-07-31T11:36:23.164Z",
-    "updated_at": "2020-07-31T11:36:23.172Z"
-  }]
-}]
+    "name": "Biscotte Restaurant",
+    "description": "Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.",
+    "created_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "updated_by": {
+      "id": 1,
+      "firstname": "Paul",
+      "lastname": "Bocuse",
+      "username": null
+    },
+    "created_at": "2020-07-31T11:37:16.964Z",
+    "updated_at": "2020-07-31T11:37:16.975Z",
+    "categories": [
+      {
+        "id": 1,
+        "name": "French Food",
+        "created_by": 1,
+        "updated_by": 1,
+        "created_at": "2020-07-31T11:36:23.164Z",
+        "updated_at": "2020-07-31T11:36:23.172Z"
+      }
+    ]
+  }
+]
 ```
 
 ::::
@@ -223,76 +222,77 @@ export default {
 
 ### POST Request your collection type
 
-Execute a POST request on the `restaurant` Collection Type in order to create a restaurant.
+Execute a `POST` request on the `restaurant` Collection Type in order to create a restaurant.
 
 Be sure that you activated the `create` permission for the `restaurant` Collection Type and the `find` permission for the `category` Collection type.
 
+In this example a `japanese` category has been created which has the id: 3.
 
 :::: tabs
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.post('http://localhost:1337/restaurants', {
+axios
+  .post('http://localhost:1337/restaurants', {
     name: 'Dolemon Sushi',
     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-    categories: [
-      3
-    ]
+    categories: [3],
   })
   .then(response => {
     console.log(response);
-  })
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants', {
-   method: 'POST',
-   headers: {
-      'Content-Type': 'application/json'
-   },
-   body: JSON.stringify({
-     name: 'Dolemon Sushi',
-     description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
-     categories: [
-       3
-     ]
-   })
- }).then(response => response.json())
-   .then(data => console.log(data));
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Dolemon Sushi',
+    description: 'Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious',
+    categories: [3],
+  }),
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
-    "id": 2,
-    "name": "Dolemon Sushi",
-    "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
-    "created_by": null,
-    "updated_by": null,
-    "created_at": "2020-08-04T09:57:11.669Z",
-    "updated_at": "2020-08-04T09:57:11.669Z",
-    "categories": [{
+  "id": 2,
+  "name": "Dolemon Sushi",
+  "description": "Unmissable Japanese Sushi restaurant. The cheese and salmon makis are delicious",
+  "created_by": null,
+  "updated_by": null,
+  "created_at": "2020-08-04T09:57:11.669Z",
+  "updated_at": "2020-08-04T09:57:11.669Z",
+  "categories": [
+    {
       "id": 3,
       "name": "Japanese",
       "created_by": 1,
       "updated_by": 1,
       "created_at": "2020-07-31T11:36:23.164Z",
       "updated_at": "2020-07-31T11:36:23.172Z"
-    }]
+    }
+  ]
 }
 ```
 
@@ -491,59 +491,56 @@ export default {
 
 ### PUT Request your collection type
 
-Execute a PUT request on the `restaurant` Collection Type in order to update the category of a restaurant.
+Execute a `PUT` request on the `restaurant` Collection Type in order to update the category of a restaurant.
 
 Be sure that you activated the `put` permission for the `restaurant` Collection Type.
 
 :::: tabs
 
-We consider that the id of your restaurant is `2`
-and the id of your category is `3`
+We consider that the id of your restaurant is `2`.
+and the id of your category is `2`.
 
 ::: tab axios
 
-*Request*
+_Request_
 
 ```js
-import axios from 'axios'
+import axios from 'axios';
 
-axios.put('http://localhost:1337/restaurants/2', {
-  categories: [
-    3
-  ]
-})
-.then(response => {
-  console.log(response);
-})
+axios
+  .put('http://localhost:1337/restaurants/2', {
+    categories: [2],
+  })
+  .then(response => {
+    console.log(response);
+  });
 ```
 
 :::
 
 ::: tab fetch
 
-*Request*
+_Request_
 
 ```js
 fetch('http://localhost:1337/restaurants/2', {
-  method: "PUT",
+  method: 'PUT',
   headers: {
-     'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    categories: [
-      3
-    ]
-  })
+    categories: [2],
+  }),
 })
-.then(response => response.json())
-.then(data => {
-  console.log(data);
-})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+  });
 ```
 
 :::
 
-*Response*
+_Response_
 
 ```json
 {
@@ -554,21 +551,27 @@ fetch('http://localhost:1337/restaurants/2', {
   "updated_by": null,
   "created_at": "2020-08-04T10:21:30.219Z",
   "updated_at": "2020-08-04T10:21:30.219Z",
-  "categories": [{
-    "id": 3,
-    "name": "Japanese",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-08-04T10:24:26.901Z",
-    "updated_at": "2020-08-04T10:24:26.911Z"
-  }]
+  "categories": [
+    {
+      "id": 2,
+      "name": "Brunch",
+      "created_by": 1,
+      "updated_by": 1,
+      "created_at": "2020-08-04T10:24:26.901Z",
+      "updated_at": "2020-08-04T10:24:26.911Z"
+    }
+  ]
 }
 ```
 
 ::::
 
+## Starter
+
+- [Vue.js Blog starter](https://github.com/strapi/strapi-starter-vue-blog)
+
 ## Conclusion
 
 Here is how to request your Collection Types in Strapi using Vue.js. When you create a Collection Type or a Single Type you will have a certain number of REST API endpoints available to interact with.
 
-We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints)
+We just used the GET, POST and PUT methods here but you can [get one entry](../content-api/api-endpoints.html#get-an-entry), [get how much entry you have](../content-api/api-endpoints.html#count-entries) and [delete](../content-api/api-endpoints.html#delete-an-entry) an entry too. Learn more about [API Endpoints](../content-api/api-endpoints.html#api-endpoints).

@@ -11,12 +11,13 @@ By default, the filters can only be used from `find` and `count` endpoints gener
 
 ## Available operators
 
-The available operators are separated in four different categories:
+The available operators are separated in five different categories:
 
 - [Filters](#filters)
 - [Sort](#sort)
 - [Limit](#limit)
 - [Start](#start)
+- [Publication State](#publication-state)
 
 ## Filters
 
@@ -254,3 +255,33 @@ Skip a specific number of entries (especially useful for pagination).
 #### Get the second page of results.
 
 `GET /users?_start=10&_limit=10`
+
+## Publication State
+
+::: tip NOTE
+This parameter can only be used on models with the **Draft & Publish** feature activated
+:::
+
+Only select entries matching the publication state provided.
+
+Handled states are:
+
+- `live`: Return only published entries (default)
+- `preview`: Return both draft entries & published entries
+
+### Example
+
+#### Get published articles
+
+`GET /articles`
+OR
+`GET /articles?_publicationState=live`
+
+#### Get both published and draft articles
+
+`GET /articles?_publicationState=preview`
+
+::: tip NOTE
+If you only want to retrieve your draft entries, you can combine the `preview` mode and the `published_at` field.
+`GET /articles?_publicationState=preview&published_at_null=true`
+:::

@@ -220,7 +220,7 @@ describe('Content-Type', () => {
   describe('getPermissionsWithNestedFields', () => {
     test('1 action (no nesting)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
-        { actionId: 'action-1', subjects: ['country'] },
+        { actionId: 'action-1', subjects: ['country'], options: { fieldsRestriction: true } },
       ]);
       expect(resultLevel1).toEqual([
         {
@@ -234,7 +234,13 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 1)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
-        [{ actionId: 'action-1', subjects: ['country', 'user'] }],
+        [
+          {
+            actionId: 'action-1',
+            subjects: ['country', 'user'],
+            options: { fieldsRestriction: true },
+          },
+        ],
         { nestingLevel: 1 }
       );
       expect(resultLevel1).toEqual([
@@ -255,7 +261,13 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 2)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
-        [{ actionId: 'action-1', subjects: ['country', 'user'] }],
+        [
+          {
+            actionId: 'action-1',
+            subjects: ['country', 'user'],
+            options: { fieldsRestriction: true },
+          },
+        ],
         { nestingLevel: 2 }
       );
       expect(resultLevel1).toEqual([
@@ -282,7 +294,11 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 100)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
-        { actionId: 'action-1', subjects: ['country', 'user'] },
+        {
+          actionId: 'action-1',
+          subjects: ['country', 'user'],
+          options: { fieldsRestriction: true },
+        },
       ]);
       expect(resultLevel1).toEqual([
         {
@@ -311,6 +327,21 @@ describe('Content-Type', () => {
   });
 
   describe('cleanPermissionFields', () => {
+    beforeAll(() => {
+      global.strapi = {
+        ...global.strapi,
+        admin: {
+          services: {
+            permission: {
+              actionProvider: {
+                getByActionId: () => ({ options: { fieldsRestriction: true } }),
+              },
+            },
+          },
+        },
+      };
+    });
+
     const tests = [
       [undefined, ['firstname', 'car']],
       [null, ['firstname', 'car']],
@@ -336,6 +367,7 @@ describe('Content-Type', () => {
           {
             subject: 'user',
             fields,
+            options: { fieldsRestriction: true },
           },
         ],
         {
@@ -346,6 +378,7 @@ describe('Content-Type', () => {
         {
           subject: 'user',
           fields: expectedFields,
+          options: { fieldsRestriction: true },
         },
       ]);
     });

@@ -6,6 +6,7 @@ const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+const sortPermissionArray = arr => _.sortBy(arr, ['action', 'subject']);
 
 let rq;
 
@@ -45,7 +46,7 @@ describe('Role CRUD End to End', () => {
         {
           name: 'Author',
           code: 'strapi-author',
-          description: 'Authors can manage and publish the content they created.',
+          description: 'Authors can manage the content they have created.',
           usersCount: 0,
         },
       ];
@@ -185,7 +186,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          fields: null,
           conditions: ['admin::is-creator'],
         },
         {
@@ -399,7 +400,7 @@ describe('Role CRUD End to End', () => {
         });
       });
 
-      test('Cannot super admin role', async () => {
+      test('Cannot update super admin role', async () => {
         const updates = {
           name: 'new name - Cannot update the name of a role',
           description: 'new description - Can update a role successfully',
@@ -661,8 +662,10 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data.length > 0).toBe(true);
-        expect(res.body.data).toMatchObject(
-          permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+        expect(sortPermissionArray(res.body.data)).toMatchObject(
+          sortPermissionArray(
+            permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+          )
         );
       });
 

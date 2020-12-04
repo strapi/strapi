@@ -5,10 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
-import {
-  SHOW_NOTIFICATION,
-  HIDE_NOTIFICATION,
-} from './constants';
+import { SHOW_NOTIFICATION, HIDE_NOTIFICATION } from './constants';
 
 const initialState = fromJS({
   notifications: [],
@@ -20,11 +17,14 @@ function notificationProviderReducer(state = initialState, action) {
 
   switch (action.type) {
     case SHOW_NOTIFICATION:
-      return state.set('notifications', state.get('notifications').push({
-        message: action.message || 'app.utils.defaultMessage',
-        status: action.status || 'success',
-        id: action.id,
-      }));
+      return state.set(
+        'notifications',
+        state.get('notifications').push({
+          message: action.message || 'app.utils.defaultMessage',
+          status: action.status || 'success',
+          id: action.id,
+        })
+      );
     case HIDE_NOTIFICATION:
       // Check that the index exists
       state.get('notifications').forEach((notification, i) => {

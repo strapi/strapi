@@ -7,9 +7,9 @@ const { yup } = require('strapi-utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => attr => {
+const composeValidators = (...fns) => (attr, { isDraft }) => {
   return fns.reduce((validator, fn) => {
-    return fn(attr, validator);
+    return fn(attr, validator, { isDraft });
   }, yup.mixed());
 };
 
@@ -20,8 +20,8 @@ const composeValidators = (...fns) => attr => {
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinLengthValidator = ({ minLength }, validator) =>
-  _.isInteger(minLength) ? validator.min(minLength) : validator;
+const addMinLengthValidator = ({ minLength }, validator, { isDraft }) =>
+  _.isInteger(minLength) && !isDraft ? validator.min(minLength) : validator;
 
 /**
  * Adds maxLength validator

@@ -7,20 +7,13 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
+const { errors } = require('strapi-plugin-upload');
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {
     const verifySize = file => {
       if (file.size > sizeLimit) {
-        throw strapi.errors.badRequest('FileTooBig', {
-          errors: [
-            {
-              id: 'Upload.status.sizeLimit',
-              message: `${file.name} file is bigger than limit size!`,
-              values: { file: file.name },
-            },
-          ],
-        });
+        throw errors.entityTooLarge();
       }
     };
     const configPublicPath = strapi.config.get(

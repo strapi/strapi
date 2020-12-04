@@ -32,14 +32,18 @@ module.exports = (mongoose = Mongoose) => {
       case 'time':
         return {
           type: String,
-          validate: value => parseType({ type: 'time', value }),
-          set: value => parseType({ type: 'time', value }),
+          validate: value =>
+            (!attr.required && _.isNil(value)) || parseType({ type: 'time', value }),
+          set: value =>
+            !attr.required && _.isNil(value) ? value : parseType({ type: 'time', value }),
         };
       case 'date':
         return {
           type: String,
-          validate: value => parseType({ type: 'date', value }),
-          set: value => parseType({ type: 'date', value }),
+          validate: value =>
+            (!attr.required && _.isNil(value)) || parseType({ type: 'date', value }),
+          set: value =>
+            !attr.required && _.isNil(value) ? value : parseType({ type: 'date', value }),
         };
       case 'datetime':
         return {

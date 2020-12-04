@@ -44,6 +44,8 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.header.edit.email-templates": "E-Mail-Templates bearbeiten",
+  "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",
+  "PopUpForm.Providers.subdomain.placeholder": "my.subdomain.com",
   "notification.success.submit": "Einstellungen aktualisiert",
   "plugin.description.long": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT. Zudem bietet dieses Plugin eine ACL-Strategie, die erlaubt, die Befugnisse zwischen Benutzergruppen festzulegen.",
   "plugin.description.short": "Beschütze deine API mit einem vollständigen Authentifikationsprozess basierend auf JWT.",

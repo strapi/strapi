@@ -86,7 +86,10 @@ const RoleListPage = () => {
       });
 
       if (selectedRoles.length !== filteredRoles.length) {
-        strapi.notification.info('Roles.ListPage.notification.delete-all-not-allowed');
+        strapi.notification.toggle({
+          type: 'info',
+          message: { id: 'Roles.ListPage.notification.delete-all-not-allowed' },
+        });
       }
 
       if (filteredRoles.length) {
@@ -106,7 +109,10 @@ const RoleListPage = () => {
     } catch (err) {
       console.error(err);
 
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       handleToggleModal();
     }

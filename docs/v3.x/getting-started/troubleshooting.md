@@ -45,12 +45,12 @@ With the release of the Strapi beta version a fundamental change occurred in tha
 
 Strapi has released the new Admin & Permissions (RBAC - Role based access control) that does allow for some degree of control over what users can access within the admin panel and includes some field level permissions. You can now also give roles specific permissions for things like content-types, single-types, plugins, and settings.
 
-When this new plugin release, there will be two versions:
+When this new plugin release, there is two versions:
 
 - Community Edition
 - Enterprise Edition
 
-By default, the Community Edition will include 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited number of roles. There will be certain other field level permission limitations based on the edition and we will be building a detailed guide as to what is included within the "Basic" vs "Advanced" RBAC features. To learn more about what is included as well as pricing please see our [pricing page](https://strapi.io/pricing).
+By default, the Community Edition includes 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited number of roles. There will be certain other field level permission limitations based on the edition and we will be building a detailed guide as to what is included within the "Basic" vs "Advanced" RBAC features. To learn more about what is included as well as pricing please see our [pricing page](https://strapi.io/pricing).
 
 ### Relations aren't maintaining their sort order
 
@@ -58,11 +58,11 @@ With the components there is a hidden field called `order` that allows entries t
 
 For the time being there is no recommended way to handle this automatically and instead it may be required for you to create custom controllers to handle this within your own project.
 
-### Why is my app's database and uploads resetting on Heroku
+### Why is my app's database and uploads resetting on PaaS
 
-If you used `--quickstart` to create your Strapi project, by default this uses the SQLite database. Heroku's file system is [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem) meaning that each time a dyno (container) is reset all filesystem changes are lost. And since both SQLite and local uploads are stored on the filesystem, any changes made to these since the last dyno reset will be deleted. Typically dynos are reset at least once a day, and in most cases multiple times per day or when new code is pushed to Heroku.
+If you used `--quickstart` to create your Strapi project, by default this uses the SQLite database. PaaS systems (Heroku, DigitalOcean Apps, Google App Engine, ect) file systems are typically [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem) or read-only meaning that each time a dyno (container) is reset all filesystem changes are lost. And since both SQLite and local uploads are stored on the filesystem, any changes made to these since the last dyno reset will be deleted. Typically dynos are reset at least once a day, and in most cases multiple times per day or when new code is pushed to these services.
 
-It is recommended you use the Heroku PostgreSQL plugin or use something like MongoDB's Atlas for your database. For file uploads, you will need to use one of the 3rd party providers such as Cloudinary or AWS S3.
+It is recommended you use a database add-on like Heroku's PostgreSQL or use something like MongoDB's Atlas for your database. For file uploads, you will need to use one of the 3rd party providers such as Cloudinary or AWS S3.
 
 ### Can I store my Content Manager layout configurations in the model settings
 
@@ -91,6 +91,10 @@ There is currently no ETA on this migration however.
 ### Does Strapi allow me to change the default ID type or name
 
 No, currently does not have the ability to allow for changing the default id name nor does it allow you to switch the data type (such as UUID on bookshelf and integer on mongoose), support for this is being looked at for Strapi v4.
+
+### Can you filter / deep filter on components, dynamic zones, and polymorphic relations
+
+Currently it is not possible to filter on components, dynamic zones, or polymorphic relations. This is something we are looking into, if you want see more information please take a look at the following [GitHub issue](https://github.com/strapi/strapi/issues/5124).
 
 ### How do I setup SSL with Strapi
 

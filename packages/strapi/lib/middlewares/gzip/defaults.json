@@ -1,5 +1,6 @@
 {
   "gzip": {
-    "enabled": false
+    "enabled": false,
+    "options": {}
   }
 }

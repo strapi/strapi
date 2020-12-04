@@ -150,6 +150,26 @@ describe('convertRestQueryParams', () => {
     });
   });
 
+  describe('Publication State param', () => {
+    test.each([
+      { _publicationState: 'foobar' },
+      { _publicationState: undefined },
+      { _publicationState: null },
+    ])('Throws on invalid params (%#)', params => {
+      expect(() => convertRestQueryParams(params)).toThrow();
+    });
+
+    test.each([
+      ['Live Mode', { _publicationState: 'live' }],
+      ['Preview Mode', { _publicationState: 'preview' }, []],
+    ])('%s', (name, params) => {
+      const result = convertRestQueryParams(params);
+
+      expect(result._publicationState).toBeUndefined();
+      expect(result.publicationState).toBe(params._publicationState);
+    });
+  });
+
   describe('Filters', () => {
     test('Can combine filters', () => {
       expect(convertRestQueryParams({ id: '1', test_ne: 'text', test_: 'content' })).toMatchObject({

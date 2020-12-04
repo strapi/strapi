@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { get } from 'lodash';
 import useDataManager from '../../../hooks/useDataManager';
+import useEditView from '../../../hooks/useEditView';
 
 function useSelect(keys) {
   const {
@@ -10,8 +11,10 @@ function useSelect(keys) {
     modifiedData,
     onChange,
     readActionAllowedFields,
+    shouldNotRunValidations,
     updateActionAllowedFields,
   } = useDataManager();
+  const { layout: currentContentTypeLayout } = useEditView();
 
   const allowedFields = useMemo(() => {
     return isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
@@ -25,10 +28,12 @@ function useSelect(keys) {
 
   return {
     allowedFields,
+    currentContentTypeLayout,
     formErrors,
     isCreatingEntry,
     onChange,
     readableFields,
+    shouldNotRunValidations,
     value,
   };
 }

@@ -169,8 +169,6 @@
   "components.WysiwygBottomControls.fullscreen": "전체화면",
   "components.WysiwygBottomControls.uploadFiles": "파일을 끌어 놓으세요. 혹은 클립보드에서 붙혀넣거나 {browse} 하세요.",
   "components.WysiwygBottomControls.uploadFiles.browse": "선택",
-  "components.popUpWarning.button.cancel": "취소",
-  "components.popUpWarning.button.confirm": "확인",
   "components.popUpWarning.message": "삭제하시겠습니까?",
   "components.popUpWarning.title": "확인",
   "form.button.done": "확인",
