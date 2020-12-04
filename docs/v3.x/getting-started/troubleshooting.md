@@ -64,7 +64,7 @@ If you don't need to deep filter on the relationships, and just want to keep the
 - Add a single field to the Component, which is a 1:1 relationship to the Content Type, i.e. the one you want to assign ordered relations from
 - Save the new content type (Strapi restarts)
 - Create a new item of the new content type
-- Fill the component collection with components, each with a the other content type’s item of your choosing, assigned as the only relation
+- Fill the component collection with components, each with one of the other content type’s items of your choosing, assigned as the only relation
 - Change the order in the component collection as you wish. Because these are components, their order in any REST or GraphQL response will resemble the order in which you want the relations to be represented.
 
 ### Why is my app's database and uploads resetting on PaaS
