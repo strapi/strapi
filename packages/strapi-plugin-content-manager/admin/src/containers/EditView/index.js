@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useHistory, useLocation } from 'react-router-dom';
 import {
   BackHeader,
   LiLink,
@@ -31,10 +30,8 @@ import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({ isSingleType, layout, slug }) => {
-  const { goBack } = useHistory();
+const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => {
   const { currentEnvironment, plugins } = useGlobalContext();
-  const { state } = useLocation();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
@@ -59,7 +56,9 @@ const EditView = ({ isSingleType, layout, slug }) => {
       : pluginPermissions.collectionTypesConfigurations;
   }, [isSingleType]);
 
-  const configurationsURL = `/plugins/${pluginId}/collectionType/${slug}/configurations/edit`;
+  const configurationsURL = `/plugins/${pluginId}/${
+    isSingleType ? 'singleType' : 'collectionType'
+  }/${slug}/configurations/edit`;
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);
 
   const DataManagementWrapper = useMemo(
@@ -91,7 +90,7 @@ const EditView = ({ isSingleType, layout, slug }) => {
 
   // TODO: create a hook to handle/provide the permissions this should be done for the i18n feature
   return (
-    <DataManagementWrapper allLayoutData={layout} from={from} slug={slug}>
+    <DataManagementWrapper allLayoutData={layout} from={from} slug={slug} id={id} origin={origin}>
       {({
         componentsDataStructure,
         contentTypeDataStructure,
@@ -264,7 +263,10 @@ const EditView = ({ isSingleType, layout, slug }) => {
 };
 
 EditView.defaultProps = {
+  id: null,
   isSingleType: false,
+  origin: null,
+  state: {},
 };
 
 EditView.propTypes = {
@@ -278,7 +280,11 @@ EditView.propTypes = {
       attributes: PropTypes.object.isRequired,
     }).isRequired,
   }).isRequired,
+  id: PropTypes.string,
   isSingleType: PropTypes.bool,
+  goBack: PropTypes.func.isRequired,
+  origin: PropTypes.string,
+  state: PropTypes.object,
   slug: PropTypes.string.isRequired,
 };
 
