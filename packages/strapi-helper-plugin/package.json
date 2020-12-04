@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.3.1",
+  "version": "3.3.4",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -56,12 +56,12 @@
     "@buffetjs/icons": "3.3.1",
     "@buffetjs/styles": "3.3.1",
     "@buffetjs/utils": "3.3.1",
-    "bootstrap": "^4.5.2",
+    "bootstrap": "^4.5.3",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
     "lodash": "4.17.19",
-    "moment": "^2.16.0",
+    "moment": "^2.29.1",
     "react": "^16.13.1",
     "react-dom": "^16.9.0",
     "react-helmet": "^6.1.0",
