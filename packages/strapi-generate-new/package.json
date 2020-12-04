@@ -15,7 +15,7 @@
   "dependencies": {
     "@sentry/node": "^5.27.3",
     "chalk": "^2.4.2",
-    "execa": "^1.0.0",
+    "execa": "^5.0.0",
     "fs-extra": "^9.0.1",
     "hosted-git-info": "3.0.5",
     "inquirer": "^6.3.1",
