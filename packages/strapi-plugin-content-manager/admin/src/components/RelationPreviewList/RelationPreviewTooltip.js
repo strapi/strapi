@@ -11,39 +11,41 @@ const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [relationData, setRelationData] = useState([]);
   const tooltipRef = useRef();
-  const abortController = new AbortController();
   const { endPoint } = mainField.queryInfos;
-  const { signal } = abortController;
 
-  const fetchRelationData = useCallback(async () => {
-    const requestURL = getRequestUrl(`${endPoint}/${rowId}/${name}`);
-    try {
-      // TODO : Wait for the API
-      const { data } = await request(requestURL, {
-        method: 'GET',
-        signal,
-      });
+  const fetchRelationData = useCallback(
+    async signal => {
+      const requestURL = getRequestUrl(`${endPoint}/${rowId}/${name}`);
+      try {
+        // TODO : Wait for the API
+        const { data } = await request(requestURL, {
+          method: 'GET',
+          signal,
+        });
 
-      console.log(data);
-      setRelationData(getMockData(mainField));
-      setIsLoading(false);
-    } catch (err) {
-      console.error({ err });
-      setIsLoading(false);
-    }
-  }, [endPoint, mainField, name, rowId, signal]);
+        console.log(data);
+        setRelationData(getMockData(mainField));
+        setIsLoading(false);
+      } catch (err) {
+        console.error({ err });
+        setIsLoading(false);
+      }
+    },
+    [endPoint, mainField, name, rowId]
+  );
 
   useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
     // temp : Should remove the setTimeout and fetch the data
     const timeout = setTimeout(() => {
-      fetchRelationData();
+      fetchRelationData(signal);
     }, 1000);
 
     return () => {
       clearTimeout(timeout);
       abortController.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchRelationData]);
 
   // Used to update the position after the loader
