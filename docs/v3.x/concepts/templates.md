@@ -25,7 +25,7 @@ You can use a template when creating a project with `create-strapi-app`.
 ::: tab yarn
 
 ```bash
-yarn create strapi-app my-project --template <template-github-url>
+yarn create strapi-app my-project --template <template-github-name>
 ```
 
 :::
@@ -33,12 +33,35 @@ yarn create strapi-app my-project --template <template-github-url>
 ::: tab npx
 
 ```bash
-npx create-strapi-app my-project --template <template-github-url>
+npx create-strapi-app my-project --template <template-github-name>
 ```
 
 :::
 
 ::::
+
+In these examples, the `template-github-name` argument can have different forms:
+
+- A shorthand. If a Github user named `paul` has a repository called `strapi-template-restaurant`, then the shorthand would be `paul/restaurant`. It only works if the repository's name starts with `strapi-template-`.
+- A URL. Just paste the URL of your GitHub repository. It works even if the repository is not prefixed by `strapi-template-`.
+
+::: tip
+When using a shorthand, if the username is omitted, the CLI assumes it's `strapi`.
+
+So the following commands are equivalent:
+
+```bash
+# Shorthand
+yarn create strapi-app my-project --template strapi/blog
+
+# Shorthand with username omitted since it defaults to strapi
+yarn create strapi-app my-project --template blog
+
+# Full GitHub URL
+yarn create strapi-app my-project --template https://github.com/strapi/strapi-template-blog
+```
+
+:::
 
 You can use the `--template` option in combination with all other `create-strapi-app` options, like `--quickstart` or `--no-run`.
 
@@ -52,7 +75,7 @@ Second, a template must follow the following file structure.
 
 ### File structure
 
-You can add as many files as you want to the root of your template repository. But it must at least have a `template.json` file and a `template` directory.
+You can add as many files as you want to the root of your template repository. But it must at least have `template` directory, and either a `template.json` or a `template.js` file.
 
 The `template.json` is used to extend the Strapi app's default `package.json`. You can put all the properties that should overwrite the default `package.json` in a root `package` property. For example, a `template.json` might look like this:
 
@@ -64,6 +87,20 @@ The `template.json` is used to extend the Strapi app's default `package.json`. Y
     },
     "scripts": {
       "custom": "node ./scripts/custom.js"
+    }
+  }
+}
+```
+
+You can also use a `template.js` file instead of the `template.json` file. It should export a function that returns an object with the same properties. It's useful when our properties need to have dynamic values. For example, we can use it to make sure that a template requires the latest version of a Strapi plugin:
+
+```js
+module.exports = function(scope) {
+  return {
+    package: {
+      dependencies: {
+        "strapi-plugin-graphql": scope.strapiVersion,
+      }
     }
   }
 }
