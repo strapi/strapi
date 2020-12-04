@@ -24,8 +24,6 @@ const RESERVED_ATTRIBUTE_NAMES = [
   'attributes',
   'relations',
   'changed',
-  'page',
-  'pageSize',
 
   // list found here https://mongoosejs.com/docs/api.html#schema_Schema.reserved
   '_posts',

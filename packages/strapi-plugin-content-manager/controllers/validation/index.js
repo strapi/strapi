@@ -88,6 +88,18 @@ const validateUIDField = (contentTypeUID, field) => {
   }
 };
 
+const validatePagination = ({ page, pageSize }) => {
+  const pageNumber = parseInt(page);
+  const pageSizeNumber = parseInt(pageSize);
+
+  if (isNaN(pageNumber) || pageNumber < 1) {
+    throw strapi.errors.badRequest('invalid pageNumber param');
+  }
+  if (isNaN(pageSizeNumber) || pageSizeNumber < 1) {
+    throw strapi.errors.badRequest('invalid pageSize param');
+  }
+};
+
 module.exports = {
   createModelConfigurationSchema,
   validateKind,
@@ -95,4 +107,5 @@ module.exports = {
   validateGenerateUIDInput,
   validateCheckUIDAvailabilityInput,
   validateUIDField,
+  validatePagination,
 };

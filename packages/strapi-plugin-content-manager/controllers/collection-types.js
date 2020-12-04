@@ -9,7 +9,7 @@ const {
   pickWritableAttributes,
 } = require('../utils');
 const { MANY_RELATIONS } = require('../services/constants');
-const { validateBulkDeleteInput } = require('./validation');
+const { validateBulkDeleteInput, validatePagination } = require('./validation');
 
 module.exports = {
   async find(ctx) {
@@ -232,6 +232,8 @@ module.exports = {
     const { model, id, targetField } = ctx.params;
     const { pageSize = 10, page = 1 } = ctx.request.query;
 
+    validatePagination({ page, pageSize });
+
     const contentTypeService = getService('content-types');
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -276,7 +278,7 @@ module.exports = {
 
     ctx.body = {
       pagination: relationList.pagination,
-      results: relationList.results.map(pick(['id', 'ids', settings.mainField])),
+      results: relationList.results.map(pick(['id', modelDef.primaryKey, settings.mainField])),
     };
   },
 };

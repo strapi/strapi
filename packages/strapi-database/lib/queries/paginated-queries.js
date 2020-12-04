@@ -35,8 +35,8 @@ const withDefaultPagination = params => {
   const { page = 1, pageSize = 100, ...rest } = params;
 
   return {
-    page: Math.max(1, parseInt(page)) || 1,
-    pageSize: Math.max(1, parseInt(pageSize)) || 100,
+    page: parseInt(page),
+    pageSize: parseInt(pageSize),
     ...rest,
   };
 };

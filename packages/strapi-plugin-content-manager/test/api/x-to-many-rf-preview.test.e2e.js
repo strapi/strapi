@@ -5,6 +5,9 @@ const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+const toIds = arr => uniq(map(prop('id'))(arr));
+const getFrom = model => (start, end) => fixtures[model].map(prop('name')).slice(start, end);
+
 let rq;
 let modelsUtils;
 const data = {
@@ -87,8 +90,6 @@ const fixtures = {
   ],
   product: () => {
     const { shop, category } = data;
-
-    const getFrom = model => (start, end) => fixtures[model].map(prop('name')).slice(start, end);
 
     const items = [
       { name: 'PD.A', categories: getFrom('category')(0, 5), shops: getFrom('shop')(0, 12) },
@@ -176,12 +177,11 @@ describe('x-to-many RF Preview', () => {
   });
 
   describe('Default Behavior', () => {
-    test.each(['shops', 'categories'])('Should returns a preview for the %s field', async field => {
+    test.each(['shops', 'categories'])('Should return a preview for the %s field', async field => {
       const product = data.product[0];
 
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${product.id}/${field}`);
 
-      const toIds = arr => uniq(map(prop('id'))(arr));
       const expected = product[field].slice(0, 10);
 
       expect(statusCode).toBe(200);
