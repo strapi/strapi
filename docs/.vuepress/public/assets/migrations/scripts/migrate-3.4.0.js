@@ -3,22 +3,24 @@ const fs = require('fs');
 
 const ONE_RELATIONS = ['oneToOne', 'manyToOne', 'oneWay'];
 
-const getStrapiIndexPath = projectPath => {
+const createStrapiApp = async projectPath => {
   if (!projectPath) {
     throw new Error(`
 -> Path to strapi project is missing.
 -> Usage: node migrate-3.4.0.js [path]`);
   }
 
-  const strapiIndexPath = path.resolve(projectPath, 'node_modules', 'strapi', 'lib', 'index.js');
-
-  if (!fs.existsSync(strapiIndexPath)) {
+  let app;
+  try {
+    const strapi = require(require.resolve('strapi', { paths: [projectPath] }));
+    app = await strapi({ dir: projectPath }).load();
+  } catch {
     throw new Error(`
--> Strapi lib couldn\'t be found. Are the node_modules installed?
--> Fix: yarn install or npm install`);
+      -> Strapi lib couldn\'t be found. Are the node_modules installed?
+      -> Fix: yarn install or npm install`);
   }
 
-  return strapiIndexPath;
+  return app;
 };
 
 const isSortableRFAssoc = a =>
@@ -26,9 +28,7 @@ const isSortableRFAssoc = a =>
 
 const run = async () => {
   const projectPath = process.argv[2];
-  const strapiIndexPath = getStrapiIndexPath(projectPath);
-  const strapi = require(strapiIndexPath);
-  const app = await strapi({ dir: projectPath }).load();
+  const app = await createStrapiApp(projectPath);
 
   const contentTypeService = app.plugins['content-manager'].services['content-types'];
 
@@ -38,7 +38,11 @@ const run = async () => {
     if (manyRelationFields.length) {
       const conf = await contentTypeService.findConfiguration({ uid });
       manyRelationFields.forEach(assoc => {
-        conf.metadatas[assoc.alias].list.sortable = true;
+        try {
+          conf.metadatas[assoc.alias].list.sortable = true;
+        } catch {
+          // silence
+        }
       });
       await contentTypeService.updateConfiguration({ uid }, conf);
     }
