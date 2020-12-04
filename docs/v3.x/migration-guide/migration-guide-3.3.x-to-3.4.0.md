@@ -13,5 +13,6 @@ Not updating your **extensions** can break your app in unexpected ways that we c
 1. First, update your app as usual by following the basic [version update guide](../guides/update-version.md) and then come back here
 2. Download this script: <a :href="$withBase('/assets/migrations/scripts/migrate-3.4.0.js')" download>migrate-3.4.0.js</a>
 3. Execute it with the following command: `node migrate-3.4.0.js [path-to-your-project]`
+4. Delete the script (optional)
 
 🎉 Congrats, your application has been migrated!
