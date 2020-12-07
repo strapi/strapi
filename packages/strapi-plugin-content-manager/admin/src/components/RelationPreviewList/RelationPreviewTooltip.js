@@ -4,8 +4,8 @@ import { LoadingIndicator, request } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 
 import getRequestUrl from '../../utils/getRequestUrl';
-import getMockData from './mockData';
 import Tooltip from '../Tooltip';
+import getDisplayedValue from '../CustomTable/Row/utils/getDisplayedValue';
 
 const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -17,36 +17,41 @@ const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
     async signal => {
       const requestURL = getRequestUrl(`${endPoint}/${rowId}/${name}`);
       try {
-        // TODO : Wait for the API
-        const { data } = await request(requestURL, {
+        const { results } = await request(requestURL, {
           method: 'GET',
           signal,
         });
 
-        console.log(data);
-        setRelationData(getMockData(mainField));
+        setRelationData(results);
         setIsLoading(false);
       } catch (err) {
         console.error({ err });
         setIsLoading(false);
       }
     },
-    [endPoint, mainField, name, rowId]
+    [endPoint, name, rowId]
   );
 
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
-    // temp : Should remove the setTimeout and fetch the data
+
     const timeout = setTimeout(() => {
       fetchRelationData(signal);
-    }, 1000);
+    }, 500);
 
     return () => {
       clearTimeout(timeout);
       abortController.abort();
     };
   }, [fetchRelationData]);
+
+  const getValueToDisplay = useCallback(
+    item => {
+      return getDisplayedValue(mainField.schema.type, item[mainField.name], mainField.name);
+    },
+    [mainField]
+  );
 
   // Used to update the position after the loader
   useLayoutEffect(() => {
@@ -67,7 +72,7 @@ const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
             {relationData.map(item => (
               <Padded key={item.id} top bottom size="xs">
                 <Text ellipsis color="white">
-                  {item[mainField.name]}
+                  {getValueToDisplay(item)}
                 </Text>
               </Padded>
             ))}

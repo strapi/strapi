@@ -487,16 +487,29 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('formatListLayoutWithMetas', () => {
     it('should format the list layout correctly', () => {
       const data = {
+        uid: 'address',
         layouts: {
-          list: ['test'],
+          list: ['test', 'categories'],
         },
         metadatas: {
           test: {
             list: { ok: true },
           },
+          categories: {
+            list: {
+              ok: true,
+            },
+            edit: {
+              mainField: 'name',
+            },
+          },
         },
         attributes: {
           test: { type: 'string' },
+          categories: {
+            type: 'relation',
+            targetModel: 'category',
+          },
         },
       };
       const expected = [
@@ -506,9 +519,34 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           metadatas: { ok: true },
           fieldSchema: { type: 'string' },
         },
+        {
+          name: 'categories',
+          key: '__categories_key__',
+          metadatas: {
+            ok: true,
+            mainField: {
+              name: 'name',
+              schema: {
+                type: 'string',
+              },
+              queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
+            },
+          },
+          fieldSchema: { type: 'relation', targetModel: 'category' },
+        },
+      ];
+      const models = [
+        {
+          uid: 'category',
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
       ];
 
-      expect(formatListLayoutWithMetas(data)).toEqual(expected);
+      expect(formatListLayoutWithMetas(data, models)).toEqual(expected);
     });
   });
 

@@ -108,7 +108,7 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
   return formatted;
 };
 
-const formatListLayoutWithMetas = contentTypeConfiguration => {
+const formatListLayoutWithMetas = (contentTypeConfiguration, models) => {
   const formatted = contentTypeConfiguration.layouts.list.reduce((acc, current) => {
     const fieldSchema = get(contentTypeConfiguration, ['attributes', current], {});
     let metadatas = get(contentTypeConfiguration, ['metadatas', current, 'list'], {});
@@ -118,7 +118,7 @@ const formatListLayoutWithMetas = contentTypeConfiguration => {
     if (type === 'relation') {
       metadatas = {
         ...metadatas,
-        mainField: get(contentTypeConfiguration, ['metadatas', current, 'edit', 'mainField'], 'id'),
+        mainField: getMainField(current, contentTypeConfiguration, models),
       };
     }
 
