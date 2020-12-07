@@ -17,12 +17,12 @@ const createPermissionChecker = ({ userAbility, model }) => {
 
   const toSubject = entity => (entity ? permissionsManager.toSubject(entity, model) : model);
 
-  const can = (action, entity) => {
-    return userAbility.can(action, toSubject(entity));
+  const can = (action, entity, field) => {
+    return userAbility.can(action, toSubject(entity), field);
   };
 
-  const cannot = (action, entity) => {
-    return userAbility.cannot(action, toSubject(entity));
+  const cannot = (action, entity, field) => {
+    return userAbility.cannot(action, toSubject(entity), field);
   };
 
   const sanitizeOutput = (data, { action = ACTIONS.read } = {}) => {
