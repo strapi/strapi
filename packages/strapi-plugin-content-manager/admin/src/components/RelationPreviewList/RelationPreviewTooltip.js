@@ -56,7 +56,13 @@ const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
   // Used to update the position after the loader
   useLayoutEffect(() => {
     if (!isLoading && tooltipRef.current) {
-      tooltipRef.current.updatePosition();
+      // A react-tooltip uncaught error is triggered when updatePosition is called in firefox.
+      // https://github.com/wwayne/react-tooltip/issues/619
+      try {
+        tooltipRef.current.updatePosition();
+      } catch (err) {
+        console.log(err);
+      }
     }
   }, [isLoading]);
 
