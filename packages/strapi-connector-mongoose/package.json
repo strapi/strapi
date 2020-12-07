@@ -20,7 +20,7 @@
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.3.2",
     "pluralize": "^8.0.0",
-    "semver": "^7.3.2",
+    "semver": "^7.3.4",
     "strapi-utils": "3.3.4"
   },
   "author": {
