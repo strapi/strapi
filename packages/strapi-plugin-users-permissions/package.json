@@ -18,7 +18,7 @@
     "@buffetjs/icons": "3.3.1",
     "@buffetjs/styles": "3.3.1",
     "@buffetjs/utils": "3.3.1",
-    "@purest/providers": "^1.0.1",
+    "@purest/providers": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "grant-koa": "5.2.0",
     "immutable": "^3.8.2",
