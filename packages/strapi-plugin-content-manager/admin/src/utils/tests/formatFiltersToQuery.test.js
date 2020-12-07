@@ -5,13 +5,13 @@ describe('CONTENT MANAGER | utils', () => {
     it('should return the filters query', () => {
       const metadatas = {
         categories: {
-          edit: {
-            mainField: 'name',
+          list: {
+            mainField: { name: 'name' },
           },
         },
         like: {
-          edit: {
-            mainField: 'numbers',
+          list: {
+            mainField: { name: 'numbers' },
           },
         },
       };

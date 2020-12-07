@@ -20,4 +20,29 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
 
     expect(formatLayoutToApi({ layouts }).layouts.list).toEqual(['test']);
   });
+
+  it('should remove the mainField in the metadatas relations list', () => {
+    const layouts = {
+      list: ['test'],
+      edit: [],
+      editRelations: [{ name: 'categories' }],
+    };
+    const metadatas = {
+      categories: {
+        list: {
+          mainField: {
+            name: 'name',
+            schema: {
+              type: 'string',
+            },
+          },
+          data: 1,
+        },
+      },
+    };
+
+    expect(
+      formatLayoutToApi({ layouts, metadatas }).metadatas.categories.list.mainField
+    ).toBeUndefined();
+  });
 });

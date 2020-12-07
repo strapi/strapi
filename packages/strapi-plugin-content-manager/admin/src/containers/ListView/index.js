@@ -86,7 +86,6 @@ function ListView({
     contentType: {
       attributes,
       metadatas,
-      layouts: { editRelations },
       settings: {
         defaultSortBy,
         defaultSortOrder,
@@ -380,7 +379,6 @@ function ListView({
           filters={filters}
           isOpen={isFilterPickerOpen}
           metadatas={metadatas}
-          editRelations={editRelations}
           name={label}
           toggleFilterPickerState={toggleFilterPickerState}
           setQuery={setQuery}

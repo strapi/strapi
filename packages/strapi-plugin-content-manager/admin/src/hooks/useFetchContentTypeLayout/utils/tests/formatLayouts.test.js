@@ -2,8 +2,10 @@ import formatLayouts, {
   formatEditRelationsLayoutWithMetas,
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
+  formatMetadatasRelations,
   generateRelationQueryInfos,
   generateRelationQueryInfosForComponents,
+  getMainField,
   getDisplayedModels,
 } from '../formatLayouts';
 
@@ -49,9 +51,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           },
           metadatas: {
             mainField: 'name',
-            mainFieldSchema: {
-              type: 'string',
-            },
           },
           queryInfos: {
             endPoint: '/content-manager/relations/application::address.address/categories',
@@ -488,16 +487,29 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('formatListLayoutWithMetas', () => {
     it('should format the list layout correctly', () => {
       const data = {
+        uid: 'address',
         layouts: {
-          list: ['test'],
+          list: ['test', 'categories'],
         },
         metadatas: {
           test: {
             list: { ok: true },
           },
+          categories: {
+            list: {
+              ok: true,
+            },
+            edit: {
+              mainField: 'name',
+            },
+          },
         },
         attributes: {
           test: { type: 'string' },
+          categories: {
+            type: 'relation',
+            targetModel: 'category',
+          },
         },
       };
       const expected = [
@@ -507,9 +519,92 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           metadatas: { ok: true },
           fieldSchema: { type: 'string' },
         },
+        {
+          name: 'categories',
+          key: '__categories_key__',
+          metadatas: {
+            ok: true,
+            mainField: {
+              name: 'name',
+              schema: {
+                type: 'string',
+              },
+              queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
+            },
+          },
+          fieldSchema: { type: 'relation', targetModel: 'category' },
+        },
+      ];
+      const models = [
+        {
+          uid: 'category',
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
       ];
 
-      expect(formatListLayoutWithMetas(data)).toEqual(expected);
+      expect(formatListLayoutWithMetas(data, models)).toEqual(expected);
+    });
+  });
+
+  describe('formatMetadatasRelations', () => {
+    it('should format metadatas correctly', () => {
+      const contentTypeConfiguration = {
+        uid: 'address',
+        metadatas: {
+          categories: {
+            list: {
+              ok: true,
+            },
+            edit: {
+              ok: false,
+              mainField: 'name',
+            },
+          },
+        },
+        attributes: {
+          categories: {
+            targetModel: 'category',
+          },
+        },
+        layouts: {
+          editRelations: ['categories'],
+        },
+      };
+      const models = [
+        {
+          uid: 'category',
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      ];
+      const actual = formatMetadatasRelations(contentTypeConfiguration, models);
+      const expected = {
+        categories: {
+          list: {
+            ok: true,
+            mainField: {
+              name: 'name',
+              schema: {
+                type: 'string',
+              },
+              queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
+            },
+          },
+          edit: {
+            ok: false,
+            mainField: 'name',
+          },
+        },
+      };
+
+      expect(actual).toEqual(expected);
     });
   });
 
@@ -554,6 +649,44 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
       expect(getDisplayedModels([])).toHaveLength(0);
       expect(getDisplayedModels(models)).toHaveLength(1);
       expect(getDisplayedModels(models)[0]).toEqual('testtest');
+    });
+  });
+
+  describe('getMainField', () => {
+    it('should return the main field object correctly', () => {
+      const relationField = 'categories';
+      const contentTypeConfiguration = {
+        uid: 'address',
+        metadatas: {
+          categories: {
+            edit: {
+              mainField: 'name',
+            },
+          },
+        },
+        attributes: {
+          categories: {
+            targetModel: 'category',
+          },
+        },
+      };
+      const models = [
+        {
+          uid: 'category',
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      ];
+      const actual = getMainField(relationField, contentTypeConfiguration, models);
+      const expected = {
+        name: 'name',
+        queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
+        schema: { type: 'string' },
+      };
+      expect(actual).toEqual(expected);
     });
   });
 });

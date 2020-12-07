@@ -6,7 +6,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true,
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": [
       "created_at",
@@ -19,8 +19,8 @@
       "type": "string"
     },
     "categories": {
-      "via": "addresses",
       "collection": "category",
+      "via": "addresses",
       "dominant": true
     },
     "cover": {

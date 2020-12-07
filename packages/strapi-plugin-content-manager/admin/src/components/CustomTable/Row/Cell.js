@@ -5,33 +5,34 @@ import RelationPreviewList from '../../RelationPreviewList';
 import Truncate from '../../Truncate';
 import Truncated from '../../Truncated';
 
-const RowCell = ({ metadatas, type, value, relationType }) => {
-  if (type === 'media') {
-    return <MediaPreviewList files={value} />;
+const Cell = ({ options }) => {
+  if (options.type === 'media') {
+    return <MediaPreviewList files={options.value} />;
   }
 
-  if (type === 'relation') {
-    return <RelationPreviewList relationType={relationType} metadatas={metadatas} value={value} />;
+  if (options.type === 'relation') {
+    return <RelationPreviewList options={options} />;
   }
 
   return (
     <Truncate>
-      <Truncated title={value}>{value}</Truncated>
+      <Truncated title={options.value}>{options.value}</Truncated>
     </Truncate>
   );
 };
 
-RowCell.defaultProps = {
-  type: null,
-  value: null,
-  relationType: null,
+Cell.propTypes = {
+  options: PropTypes.shape({
+    cellId: PropTypes.string.isRequired,
+    metadatas: PropTypes.shape({
+      mainField: PropTypes.object,
+    }).isRequired,
+    name: PropTypes.string.isRequired,
+    relationType: PropTypes.string,
+    rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    type: PropTypes.string,
+    value: PropTypes.any,
+  }).isRequired,
 };
 
-RowCell.propTypes = {
-  metadatas: PropTypes.object.isRequired,
-  relationType: PropTypes.string,
-  type: PropTypes.string,
-  value: PropTypes.any,
-};
-
-export default memo(RowCell);
+export default memo(Cell);

@@ -1,4 +1,6 @@
-const formatLayoutToApi = ({ layouts, ...rest }) => {
+import { omit, get } from 'lodash';
+
+const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
   const list = layouts.list.map(obj => {
     if (obj.name) {
       return obj.name;
@@ -7,6 +9,19 @@ const formatLayoutToApi = ({ layouts, ...rest }) => {
     return obj;
   });
   const editRelations = layouts.editRelations.map(({ name }) => name);
+
+  const formattedRelationsMetadatas = editRelations.reduce((acc, current) => {
+    const currentMetadatas = get(metadatas, [current], {});
+
+    return {
+      ...acc,
+      [current]: {
+        ...currentMetadatas,
+        list: omit(currentMetadatas.list, ['mainField']),
+      },
+    };
+  }, {});
+
   const edit = layouts.edit.map(row =>
     row.map(({ name, size }) => ({
       name,
@@ -14,7 +29,11 @@ const formatLayoutToApi = ({ layouts, ...rest }) => {
     }))
   );
 
-  return { ...rest, layouts: { edit, editRelations, list } };
+  return {
+    ...rest,
+    layouts: { edit, editRelations, list },
+    metadatas: { ...metadatas, ...formattedRelationsMetadatas },
+  };
 };
 
 export default formatLayoutToApi;
