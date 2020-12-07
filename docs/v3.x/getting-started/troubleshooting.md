@@ -56,16 +56,28 @@ By default, the Community Edition includes 3 pre-defined roles (Administrators, 
 
 With the components there is a hidden field called `order` that allows entries to maintain their sort, however with relations there is no such field. If you consider the typical count of of component entries vs relational based entries (in retrospect they function in the backend the same) there is generally a much higher number of relations. If relations were to have an `order` field applied to them as well it could cause significant performance degradation when trying to update the order, and likewise in the case where a relation could be attached to multiple entries it would be quite difficult to maintain the order.
 
-If you don't need to deep filter on the relationships, and just want to keep their order, the following workaround will allow you to manage the order of related items:
+If you don't need to deep filter on the relationships, the following workaround will give you a one-to-many relationship between to content types with managable ordering:
 
 - If you haven’t already, create your ‘parent’ entity type that will refer to the relations
-- Add a Component field to the content type, name it the plural of the other content type
-- Choose to create a new Component for this Component Collection
-- Add a single field to the Component, which is a 1:1 relationship to the Content Type, i.e. the one you want to assign ordered relations from
+- Add a Component field to the content type
+- Choose Create New Component
+- Name it the plural of the other content type
+- Put in a category name (can be the same as the name)
+- Choose Repeatable Component as the component type (so you can assign multiples)
+- Click "Add first field to the component"
+- Choose a Relationship type field
+- Pick a "Has one" type of relationship
+- For the counter part of the relationshipm select the other desired content type from the dropdown on the right (which has File selected by default)
+- Hit Finish (bottom)
+- Hit Save (top right)
 - Save the new content type (Strapi restarts)
+
+You now have established an orderable relationship between the two content types, via a component with a single field. To test the relationship and preservation of orders:
+
 - Create a new item of the new content type
-- Fill the component collection with components, each with one of the other content type’s items of your choosing, assigned as the only relation
-- Change the order in the component collection as you wish. Because these are components, their order in any REST or GraphQL response will resemble the order in which you want the relations to be represented.
+- Fill the component collection with components, each time with one of the other content type’s items of your choosing, assigned as the single relation
+- Change the order in the component collection as you wish.
+- Because these are components, their order in any REST or GraphQL response will resemble the order in which you want the relations to be represented.
 
 ### Why is my app's database and uploads resetting on PaaS
 
