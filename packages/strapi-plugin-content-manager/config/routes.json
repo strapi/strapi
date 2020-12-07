@@ -66,7 +66,6 @@
         "policies": []
       }
     },
-
     {
       "method": "GET",
       "path": "/relations/:model/:targetField",
@@ -85,7 +84,6 @@
         ]
       }
     },
-
     {
       "method": "GET",
       "path": "/single-types/:model",
@@ -155,7 +153,18 @@
         ]
       }
     },
-
+    {
+      "method": "GET",
+      "path": "/collection-types/:model/:id/:targetField",
+      "handler": "collection-types.previewManyRelations",
+      "config": {
+        "policies": [
+          "routing",
+          "admin::isAuthenticatedAdmin",
+          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+        ]
+      }
+    },
     {
       "method": "GET",
       "path": "/collection-types/:model",
@@ -245,7 +254,7 @@
     {
       "method": "POST",
       "path": "/collection-types/:model/actions/bulkDelete",
-      "handler": "collection-types.bulkdDelete",
+      "handler": "collection-types.bulkDelete",
       "config": {
         "policies": [
           "routing",

@@ -44,32 +44,32 @@ module.exports = {
     return assoc(`${CREATED_BY_ATTRIBUTE}.roles`, roles, entity);
   },
 
-  find(params, model) {
-    return strapi.entityService.find({ params }, { model });
+  find(params, model, populate) {
+    return strapi.entityService.find({ params, populate }, { model });
   },
 
-  findPage(params, model) {
-    return strapi.entityService.findPage({ params }, { model });
+  findPage(params, model, populate) {
+    return strapi.entityService.findPage({ params, populate }, { model });
   },
 
-  search(params, model) {
-    return strapi.entityService.search({ params }, { model });
+  search(params, model, populate) {
+    return strapi.entityService.search({ params, populate }, { model });
   },
 
-  searchPage(params, model) {
-    return strapi.entityService.searchPage({ params }, { model });
+  searchPage(params, model, populate) {
+    return strapi.entityService.searchPage({ params, populate }, { model });
   },
 
   count(params, model) {
     return strapi.entityService.count({ params }, { model });
   },
 
-  async findOne(id, model) {
-    return strapi.entityService.findOne({ params: { id } }, { model });
+  async findOne(id, model, populate) {
+    return strapi.entityService.findOne({ params: { id }, populate }, { model });
   },
 
-  async findOneWithCreatorRoles(id, model) {
-    const entity = await this.findOne(id, model);
+  async findOneWithCreatorRoles(id, model, populate) {
+    const entity = await this.findOne(id, model, populate);
 
     if (!entity) {
       return entity;
