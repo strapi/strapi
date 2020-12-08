@@ -6,6 +6,7 @@ export { default as formatFiltersFromQuery } from './formatFiltersFromQuery';
 export { default as formatFiltersToQuery } from './formatFiltersToQuery';
 export { default as formatLayoutToApi } from './formatLayoutToApi';
 export { default as generatePermissionsObject } from './generatePermissionsObject';
+export { default as getDisplayedValue } from './getDisplayedValue';
 export { default as getFieldName } from './getFieldName';
 export { default as getInjectedComponents } from './getComponents';
 export { default as getMaxTempKey } from './getMaxTempKey';

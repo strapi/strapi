@@ -55,8 +55,6 @@ const CustomTable = ({
     return displayedHeaders;
   }, [formatMessage, hasDraftAndPublish, displayedHeaders]);
 
-  console.log({ headers });
-
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
   const handleRowGoTo = id => {

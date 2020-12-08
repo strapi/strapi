@@ -6,8 +6,8 @@ import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useListView } from '../../../hooks';
+import { getDisplayedValue } from '../../../utils';
 import CustomInputCheckbox from '../../CustomInputCheckbox';
-import getDisplayedValue from './utils/getDisplayedValue';
 import ActionContainer from './ActionContainer';
 import Cell from './Cell';
 

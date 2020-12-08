@@ -76,6 +76,7 @@ function SelectMany({
 
           return true;
         }}
+        mainField={mainField}
         isLoading={isLoading}
         isMulti
         isSearchable
@@ -129,7 +130,12 @@ SelectMany.propTypes = {
   displayNavigationLink: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  mainField: PropTypes.string.isRequired,
+  mainField: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
   onInputChange: PropTypes.func.isRequired,

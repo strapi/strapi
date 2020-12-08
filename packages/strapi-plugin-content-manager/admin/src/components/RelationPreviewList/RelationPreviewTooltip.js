@@ -2,10 +2,8 @@ import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from
 import { Text, Padded } from '@buffetjs/core';
 import { LoadingIndicator, request } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
-
-import getRequestUrl from '../../utils/getRequestUrl';
+import { getDisplayedValue, getRequestUrl } from '../../utils';
 import Tooltip from '../Tooltip';
-import getDisplayedValue from '../CustomTable/Row/utils/getDisplayedValue';
 
 const RelationPreviewTooltip = ({
   tooltipId,
@@ -99,11 +97,15 @@ RelationPreviewTooltip.propTypes = {
   tooltipId: PropTypes.string.isRequired,
   mainField: PropTypes.exact({
     name: PropTypes.string.isRequired,
-    schema: PropTypes.object.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  queryInfos: PropTypes.object.isRequired,
+  queryInfos: PropTypes.shape({
+    endPoint: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default RelationPreviewTooltip;

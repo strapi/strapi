@@ -227,7 +227,7 @@ function SelectWrapper({
           isDisabled={isDisabled}
           isLoading={isLoading}
           isClearable
-          mainField={mainField.name}
+          mainField={mainField}
           move={moveRelation}
           name={name}
           options={filteredOptions}

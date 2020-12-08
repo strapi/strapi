@@ -1,6 +1,6 @@
 import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import dateFormats from '../../../../utils/dateFormats';
+import dateFormats from './dateFormats';
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
