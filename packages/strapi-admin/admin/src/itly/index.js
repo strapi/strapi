@@ -1,5 +1,5 @@
 /* eslint-disable */
-import itly$1 from '@itly/sdk';
+import itly from '@itly/sdk';
 import SchemaValidatorPlugin from '@itly/plugin-schema-validator';
 import IterativelyPlugin from '@itly/plugin-iteratively';
 
@@ -74,11 +74,9 @@ class Itly {
     }
 
 
-    const allDestinationsEnabled = !(destinations.all && destinations.all.disabled);
-    const itlyPlugins = [];
-
-    if (allDestinationsEnabled) {
-      itlyPlugins.push(
+    const destinationPlugins = destinations.all && destinations.all.disabled
+      ? []
+      : [
         new IterativelyPlugin(options.environment === 'production'
           ? 'UmeiW9Yw4SvS2F2n-olVcMStxeJykOeC'
           : 'flNLcUbi9EBp3683HnvZ0_ZqWx5yMXOw',
@@ -87,28 +85,26 @@ class Itly {
             environment: options.environment || 'development',
             ...destinations.iteratively,
           },
-        )
-      );
-    }
+        ),
+      ];
 
-    itlyPlugins.push(
-      new SchemaValidatorPlugin({
-        'context': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/context","$schema":"http://json-schema.org/draft-07/schema#","title":"Context","description":"","type":"object","properties":{"projectType":{"description":"","enum":["Enterprise","Community"]}},"additionalProperties":false,"required":["projectType"]},
-        'group': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/group","$schema":"http://json-schema.org/draft-07/schema#","title":"Group","description":"","type":"object","properties":{"tier":{"description":"The current plan of the account.","enum":["free","trial","premium"]},"plan":{"description":"The payment terms of the account.","enum":["monthly","annual"]},"createdAt":{"description":"The user's creation date (ISO-8601 date string).","type":"string"},"name":{"description":"The name of the account.","type":"string"}},"additionalProperties":false,"required":["tier","plan","createdAt","name"]},
-        'identify': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/identify","$schema":"http://json-schema.org/draft-07/schema#","title":"Identify","description":"","type":"object","properties":{"createdAt":{"description":"The user's creation date (ISO-8601 date string).","type":"string"}},"additionalProperties":false,"required":["createdAt"]},
-        'didCreateEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/713325c2-0c4e-4d38-b82f-63e06ded179b/version/1.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"didCreateEntry","description":"When the entry has been created with success","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
-        'didEditEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/a9187f23-0243-4cce-b717-5a145c7a5077/version/1.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"didEditEntry","description":"When the entry has been edited with success","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
-        'didInitializeAdministration': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/95070aa7-7b88-4987-b5df-47a9a6927a1f/version/1.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"didInitializeAdministration","description":"","type":"object","properties":{},"additionalProperties":false,"required":[]},
-        'willCreateEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/506f5d1d-6e76-43e3-8ffc-4cd6cfcd1572/version/2.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"willCreateEntry","description":"When a user starts to create a new entry after clicking on the \"Add New X\" button","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
-        'willEditEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/83f949a9-d1df-4a3b-a1ae-34edfbbf8fc3/version/2.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"willEditEntry","description":"When a user clicks on the Save button while editing an existing entry","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
-      })
-    );
-
-
-
-    itlyPlugins.push(...plugins);
-
-    itly$1.load({ ...baseOptions, plugins: itlyPlugins });
+    itly.load({
+      ...baseOptions,
+      plugins: [
+        new SchemaValidatorPlugin({
+          'context': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/context","$schema":"http://json-schema.org/draft-07/schema#","title":"Context","description":"","type":"object","properties":{"projectType":{"description":"","enum":["Enterprise","Community"]}},"additionalProperties":false,"required":["projectType"]},
+          'group': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/group","$schema":"http://json-schema.org/draft-07/schema#","title":"Group","description":"","type":"object","properties":{"tier":{"description":"The current plan of the account.","enum":["free","trial","premium"]},"plan":{"description":"The payment terms of the account.","enum":["monthly","annual"]},"createdAt":{"description":"The user's creation date (ISO-8601 date string).","type":"string"},"name":{"description":"The name of the account.","type":"string"}},"additionalProperties":false,"required":["tier","plan","createdAt","name"]},
+          'identify': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/identify","$schema":"http://json-schema.org/draft-07/schema#","title":"Identify","description":"","type":"object","properties":{"createdAt":{"description":"The user's creation date (ISO-8601 date string).","type":"string"}},"additionalProperties":false,"required":["createdAt"]},
+          'didCreateEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/didCreateEntry/version/1.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"didCreateEntry","description":"When the entry has been created with success","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
+          'didEditEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/didEditEntry/version/1.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"didEditEntry","description":"When the entry has been edited with success","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
+          'didInitializeAdministration': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/didInitializeAdministration/version/1.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"didInitializeAdministration","description":"","type":"object","properties":{},"additionalProperties":false,"required":[]},
+          'willCreateEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/willCreateEntry/version/2.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"willCreateEntry","description":"When a user starts to create a new entry after clicking on the \"Add New X\" button","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
+          'willEditEntry': {"$id":"https://iterative.ly/company/46f8e8fa-e6ce-4826-87cd-611bc6e0be53/event/willEditEntry/version/2.0.0","$schema":"http://json-schema.org/draft-07/schema#","title":"willEditEntry","description":"When a user clicks on the Save button while editing an existing entry","type":"object","properties":{"status":{"description":"status draft when entry is a draft (no property if the D&P is not activated on the content type)","enum":["draft"]}},"additionalProperties":false,"required":[]},
+        }),
+        ...destinationPlugins,
+        ...plugins,
+      ]
+    });
   }
 
   /**
@@ -117,7 +113,7 @@ class Itly {
    * @param {string} previousId The user's previous ID.
    */
   alias(userId, previousId) {
-    itly$1.alias(userId, previousId);
+    itly.alias(userId, previousId);
   }
 
   /**
@@ -135,7 +131,7 @@ class Itly {
     if (!properties) {
       throw new Error('Your tracking plan contains at least one user property but `properties` were not passed as an argument.');
     }
-    itly$1.identify(userId, properties);
+    itly.identify(userId, properties);
   }
 
   /**
@@ -151,7 +147,7 @@ class Itly {
     if (!properties) {
       throw new Error('Your tracking plan contains at least one group property but `properties` were not passed as an argument.');
     }
-    itly$1.group(groupId, properties);
+    itly.group(groupId, properties);
   }
 
   /**
@@ -160,7 +156,7 @@ class Itly {
    * @param {string} name The page's name.
    */
   page(category, name) {
-    itly$1.page(category, name);
+    itly.page(category, name);
   }
 
   /**
@@ -175,7 +171,7 @@ class Itly {
       throw new Error('There is at least one property defined on this event in your tracking plan but `properties` were not passed as an argument.');
     }
 
-    itly$1.track(new WillCreateEntry(properties));
+    itly.track(new WillCreateEntry(properties));
   }
 
   /**
@@ -190,7 +186,7 @@ class Itly {
       throw new Error('There is at least one property defined on this event in your tracking plan but `properties` were not passed as an argument.');
     }
 
-    itly$1.track(new DidCreateEntry(properties));
+    itly.track(new DidCreateEntry(properties));
   }
 
   /**
@@ -205,14 +201,14 @@ class Itly {
       throw new Error('There is at least one property defined on this event in your tracking plan but `properties` were not passed as an argument.');
     }
 
-    itly$1.track(new WillEditEntry(properties));
+    itly.track(new WillEditEntry(properties));
   }
 
   /**
    * Owner: Iteratively Support
    */
   didInitializeAdministration() {
-    itly$1.track(new DidInitializeAdministration());
+    itly.track(new DidInitializeAdministration());
   }
 
   /**
@@ -227,21 +223,21 @@ class Itly {
       throw new Error('There is at least one property defined on this event in your tracking plan but `properties` were not passed as an argument.');
     }
 
-    itly$1.track(new DidEditEntry(properties));
+    itly.track(new DidEditEntry(properties));
   }
 
   track(event) {
-    itly$1.track(event);
+    itly.track(event);
   }
 
   reset() {
-    itly$1.reset();
+    itly.reset();
   }
 }
 
-var itly = new Itly();
+const itlySdk = new Itly();
 
-export default itly;
+export default itlySdk;
 export {
   DidCreateEntry,
   DidEditEntry,
