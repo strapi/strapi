@@ -13225,10 +13225,10 @@ node-schedule@1.3.2:
     long-timeout "0.1.1"
     sorted-array-functions "^1.0.0"
 
-node-ses@^3.0.0:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/node-ses/-/node-ses-3.0.2.tgz#0fccc2f92164f5431b7f6c9a39b139b1bd359911"
-  integrity sha512-x2yxL/g7S3mKITJWj53zUfbMJO6u5nZxoptiZPhwEWf0+jjaRW66pdbIMpMq+6FgCOi9nH/0PmdZi/d08AEozA==
+node-ses@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/node-ses/-/node-ses-3.0.3.tgz#c7b7c60e94a0593691c10bf5fb4baa99f9a8abef"
+  integrity sha512-4NrcDlJp0fD5UJyi3tI8jJkJD+I2lBsQiSOJ7/gI0VFCWRJfv7WrUzydQ9sqDD7p2I9G0NGWBrRULkE+rNWQAg==
   dependencies:
     aws4 "1.9.1"
     debug "^2.6.9"
