@@ -1,7 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
-const { has } = require('lodash/fp');
+const { has, assoc, mapValues, prop } = require('lodash/fp');
 const { getService } = require('../utils');
 const { createModelConfigurationSchema, validateKind } = require('./validation');
 
@@ -34,20 +33,25 @@ module.exports = {
 
     const configuration = await contentTypeService.findConfiguration(contentType);
 
-    const resolveTarget = key => configuration.metadatas[key];
-    const hasMainField = has('edit.mainField');
-    const assocMainField = meta => _.set(meta, 'list.mainField', meta.edit.mainField);
+    const hasEditMainField = has('edit.mainField');
+    const getEditMainField = prop('edit.mainField');
+    const assocListMainField = assoc('list.mainField');
 
-    Object.keys(configuration.metadatas)
-      .map(resolveTarget)
-      .filter(hasMainField)
-      .forEach(assocMainField);
+    const assocMainField = metadata =>
+      hasEditMainField(metadata)
+        ? assocListMainField(getEditMainField(metadata), metadata)
+        : metadata;
+
+    const confWithUpdatedMetadata = {
+      ...configuration,
+      metadatas: mapValues(assocMainField, configuration.metadatas),
+    };
 
     const components = await contentTypeService.findComponentsConfigurations(contentType);
 
     ctx.body = {
       data: {
-        contentType: configuration,
+        contentType: confWithUpdatedMetadata,
         components,
       },
     };
