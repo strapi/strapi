@@ -14,7 +14,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "node-ses": "^3.0.0",
+    "node-ses": "^3.0.3",
     "strapi-utils": "3.3.4"
   },
   "author": {
