@@ -407,6 +407,7 @@ function ListView({
                             filters={filters}
                             index={key}
                             key={key}
+                            metadatas={metadatas}
                             name={name}
                             toggleFilterPickerState={toggleFilterPickerState}
                             isFilterPickerOpen={isFilterPickerOpen}

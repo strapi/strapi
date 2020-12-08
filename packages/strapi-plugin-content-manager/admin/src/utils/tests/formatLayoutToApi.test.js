@@ -8,7 +8,7 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
       editRelations: [],
     };
 
-    expect(formatLayoutToApi({ layouts }).layouts.list).toEqual(['test']);
+    expect(formatLayoutToApi({ layouts, metadatas: {} }).layouts.list).toEqual(['test']);
   });
 
   it('should format the list layout correctly if it is an array of strings', () => {
@@ -18,17 +18,26 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
       editRelations: [],
     };
 
-    expect(formatLayoutToApi({ layouts }).layouts.list).toEqual(['test']);
+    expect(formatLayoutToApi({ layouts, metadatas: {} }).layouts.list).toEqual(['test']);
   });
 
   it('should remove the mainField in the metadatas relations list', () => {
     const layouts = {
       list: ['test'],
       edit: [],
-      editRelations: [{ name: 'categories' }],
+      editRelations: [],
     };
     const metadatas = {
       categories: {
+        edit: {
+          mainField: {
+            name: 'name',
+            schema: {
+              type: 'string',
+            },
+          },
+          label: 'categories',
+        },
         list: {
           mainField: {
             name: 'name',
@@ -36,13 +45,24 @@ describe('CONTENT MANAGER | utils | formatLayoutToApi', () => {
               type: 'string',
             },
           },
-          data: 1,
+          label: 'categories',
+        },
+      },
+    };
+    const expectedMetadatas = {
+      categories: {
+        edit: {
+          mainField: 'name',
+          label: 'categories',
+        },
+        list: {
+          label: 'categories',
         },
       },
     };
 
-    expect(
-      formatLayoutToApi({ layouts, metadatas }).metadatas.categories.list.mainField
-    ).toBeUndefined();
+    const result = formatLayoutToApi({ layouts, metadatas }).metadatas;
+
+    expect(result).toEqual(expectedMetadatas);
   });
 });

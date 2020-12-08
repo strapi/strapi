@@ -31,6 +31,9 @@ Cell.propTypes = {
     relationType: PropTypes.string,
     rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     type: PropTypes.string,
+    queryInfos: PropTypes.shape({
+      endPoint: PropTypes.string.isRequired,
+    }),
     value: PropTypes.any,
   }).isRequired,
 };

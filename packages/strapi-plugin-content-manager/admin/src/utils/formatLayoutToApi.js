@@ -10,13 +10,18 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
   });
   const editRelations = layouts.editRelations.map(({ name }) => name);
 
-  const formattedRelationsMetadatas = editRelations.reduce((acc, current) => {
+  const formattedMetadatas = Object.keys(metadatas).reduce((acc, current) => {
     const currentMetadatas = get(metadatas, [current], {});
+    let editMetadatas = currentMetadatas.edit;
+
+    if (editMetadatas.mainField) {
+      editMetadatas = { ...editMetadatas, mainField: currentMetadatas.edit.mainField.name };
+    }
 
     return {
       ...acc,
       [current]: {
-        ...currentMetadatas,
+        edit: editMetadatas,
         list: omit(currentMetadatas.list, ['mainField']),
       },
     };
@@ -32,7 +37,7 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
   return {
     ...rest,
     layouts: { edit, editRelations, list },
-    metadatas: { ...metadatas, ...formattedRelationsMetadatas },
+    metadatas: formattedMetadatas,
   };
 };
 

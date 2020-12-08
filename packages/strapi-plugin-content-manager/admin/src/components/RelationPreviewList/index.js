@@ -17,6 +17,7 @@ const RelationPreviewList = ({
     rowId,
     cellId,
     name,
+    queryInfos,
   },
 }) => {
   const { formatMessage } = useIntl();
@@ -67,6 +68,7 @@ const RelationPreviewList = ({
           tooltipId={tooltipId}
           value={value}
           mainField={mainField}
+          queryInfos={queryInfos}
         />
       )}
     </Truncate>
@@ -83,6 +85,9 @@ RelationPreviewList.propTypes = {
     relationType: PropTypes.string,
     rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     type: PropTypes.string,
+    queryInfos: PropTypes.shape({
+      endPoint: PropTypes.string.isRequired,
+    }).isRequired,
     value: PropTypes.any,
   }).isRequired,
 };

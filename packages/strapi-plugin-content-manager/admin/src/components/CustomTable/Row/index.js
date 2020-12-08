@@ -6,8 +6,8 @@ import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useListView } from '../../../hooks';
+import { getDisplayedValue } from '../../../utils';
 import CustomInputCheckbox from '../../CustomInputCheckbox';
-import getDisplayedValue from './utils/getDisplayedValue';
 import ActionContainer from './ActionContainer';
 import Cell from './Cell';
 
@@ -64,7 +64,14 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
         </td>
       )}
       {headers.map(
-        ({ key, name, fieldSchema: { type, relationType }, cellFormatter, metadatas }) => (
+        ({
+          key,
+          name,
+          fieldSchema: { type, relationType },
+          cellFormatter,
+          metadatas,
+          queryInfos,
+        }) => (
           <td key={key}>
             {cellFormatter ? (
               cellFormatter(row)
@@ -78,6 +85,7 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
                   value: memoizedDisplayedValue(name, type),
                   cellId: key,
                   metadatas,
+                  queryInfos,
                 }}
               />
             )}

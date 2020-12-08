@@ -10,6 +10,7 @@ function Filter({
   filterName,
   filters,
   index,
+  metadatas,
   name,
   value,
   toggleFilterPickerState,
@@ -55,8 +56,8 @@ function Filter({
       toggleFilterPickerState();
     }
 
-    setQuery(formatFiltersToQuery(updatedFilters));
-  }, [filters, index, isFilterPickerOpen, setQuery, toggleFilterPickerState]);
+    setQuery(formatFiltersToQuery(updatedFilters, metadatas));
+  }, [filters, index, isFilterPickerOpen, metadatas, setQuery, toggleFilterPickerState]);
 
   return <FilterButton onClick={handleClick} label={label} type={type} />;
 }
@@ -72,6 +73,7 @@ Filter.propTypes = {
   filters: PropTypes.array.isRequired,
   index: PropTypes.number.isRequired,
   isFilterPickerOpen: PropTypes.bool.isRequired,
+  metadatas: PropTypes.object.isRequired,
   name: PropTypes.string,
   setQuery: PropTypes.func.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,

@@ -26,17 +26,16 @@ const formatEditRelationsLayoutWithMetas = (contentTypeConfiguration, models) =>
 };
 
 const formatLayouts = (initialData, models) => {
-  const data = mergeMetasWithSchema(cloneDeep(initialData), models, 'contentType');
+  const data = createMetasSchema(initialData, models);
+
   const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, null, models);
   const ctUid = data.contentType.uid;
   const formattedEditRelationsLayout = formatEditRelationsLayoutWithMetas(data.contentType, models);
   const formattedListLayout = formatListLayoutWithMetas(data.contentType, models);
-  const formattedMetadatasLayout = formatMetadatasRelations(data.contentType, models);
 
   set(data, ['contentType', 'layouts', 'edit'], formattedCTEditLayout);
   set(data, ['contentType', 'layouts', 'editRelations'], formattedEditRelationsLayout);
   set(data, ['contentType', 'layouts', 'list'], formattedListLayout);
-  set(data, ['contentType', 'metadatas'], formattedMetadatasLayout);
 
   Object.keys(data.components).forEach(compoUID => {
     const formattedCompoEditLayout = formatLayoutWithMetas(
@@ -51,26 +50,52 @@ const formatLayouts = (initialData, models) => {
   return data;
 };
 
-const formatMetadatasRelations = (contentTypeConfiguration, models) => {
-  const formattedRelationsMetadatas = contentTypeConfiguration.layouts.editRelations.reduce(
-    (acc, current) => {
-      const currentMetadatas = get(contentTypeConfiguration, ['metadatas', current], {});
+const createMetasSchema = (initialData, models) => {
+  const data = mergeMetasWithSchema(cloneDeep(initialData), models, 'contentType');
+  const { components, contentType } = data;
+  const getRelationModel = targetModel => models.find(model => model.uid === targetModel);
 
-      return {
-        ...acc,
-        [current]: {
-          ...currentMetadatas,
+  const formatMetadatas = targetSchema => {
+    return Object.keys(targetSchema.metadatas).reduce((acc, current) => {
+      const schema = get(targetSchema, ['attributes', current], {});
+      let metadatas = targetSchema.metadatas[current];
+
+      if (schema.type === 'relation') {
+        const relationModel = getRelationModel(schema.targetModel);
+        const mainFieldName = metadatas.edit.mainField;
+        const mainField = {
+          name: mainFieldName,
+          schema: get(relationModel, ['attributes', mainFieldName]),
+        };
+
+        metadatas = {
           list: {
-            ...currentMetadatas.list,
-            mainField: getMainField(current, contentTypeConfiguration, models),
+            ...metadatas.list,
+            mainField,
           },
-        },
-      };
-    },
-    {}
-  );
+          edit: {
+            ...metadatas.edit,
+            mainField,
+          },
+        };
+      }
 
-  return { ...contentTypeConfiguration.metadatas, ...formattedRelationsMetadatas };
+      acc[current] = metadatas;
+
+      return acc;
+    }, {});
+  };
+
+  set(data, ['contentType', 'metadatas'], formatMetadatas(contentType));
+
+  Object.keys(components).forEach(compoUID => {
+    const currentCompo = components[compoUID];
+    const updatedMetas = formatMetadatas(currentCompo);
+
+    set(data, ['components', compoUID, 'metadatas'], updatedMetas);
+  });
+
+  return data;
 };
 
 const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
@@ -108,18 +133,22 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
   return formatted;
 };
 
-const formatListLayoutWithMetas = (contentTypeConfiguration, models) => {
+const formatListLayoutWithMetas = contentTypeConfiguration => {
   const formatted = contentTypeConfiguration.layouts.list.reduce((acc, current) => {
     const fieldSchema = get(contentTypeConfiguration, ['attributes', current], {});
-    let metadatas = get(contentTypeConfiguration, ['metadatas', current, 'list'], {});
+    const metadatas = get(contentTypeConfiguration, ['metadatas', current, 'list'], {});
 
     const type = fieldSchema.type;
 
     if (type === 'relation') {
-      metadatas = {
-        ...metadatas,
-        mainField: getMainField(current, contentTypeConfiguration, models),
+      const queryInfos = {
+        endPoint: `collection-types/${contentTypeConfiguration.uid}`,
+        defaultParams: {},
       };
+
+      acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas, queryInfos });
+
+      return acc;
     }
 
     acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas });
@@ -135,7 +164,7 @@ const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models)
   const endPoint = `/${pluginId}/relations/${uid}/${fieldName}`;
   const mainField = get(
     contentTypeConfiguration,
-    ['metadatas', fieldName, 'edit', 'mainField'],
+    ['metadatas', fieldName, 'edit', 'mainField', 'name'],
     ''
   );
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
@@ -160,7 +189,7 @@ const generateRelationQueryInfosForComponents = (
   const endPoint = `/${pluginId}/relations/${ctUid}/${fieldName}`;
   const mainField = get(
     contentTypeConfiguration,
-    ['metadatas', fieldName, 'edit', 'mainField'],
+    ['metadatas', fieldName, 'edit', 'mainField', 'name'],
     ''
   );
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
@@ -181,38 +210,12 @@ const generateRelationQueryInfosForComponents = (
 const getDisplayedModels = models =>
   models.filter(model => model.isDisplayed).map(({ uid }) => uid);
 
-const getMainField = (relationField, contentTypeConfiguration, models) => {
-  const mainField = get(
-    contentTypeConfiguration,
-    ['metadatas', relationField, 'edit', 'mainField'],
-    'id'
-  );
-  const targetModelUid = get(
-    contentTypeConfiguration,
-    ['attributes', relationField, 'targetModel'],
-    ''
-  );
-  const relationModel = models.find(model => model.uid === targetModelUid);
-  const mainFieldSchema = get(relationModel, ['attributes', mainField], {});
-
-  return {
-    name: mainField,
-    schema: mainFieldSchema,
-    queryInfos: {
-      endPoint: `collection-types/${contentTypeConfiguration.uid}`,
-      defaultParams: {},
-    },
-  };
-};
-
 export default formatLayouts;
 export {
   formatEditRelationsLayoutWithMetas,
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  formatMetadatasRelations,
   generateRelationQueryInfos,
   generateRelationQueryInfosForComponents,
-  getMainField,
   getDisplayedModels,
 };
