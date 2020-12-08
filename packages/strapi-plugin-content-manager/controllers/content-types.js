@@ -1,7 +1,15 @@
 'use strict';
 
+const { has, assoc, mapValues, prop } = require('lodash/fp');
 const { getService } = require('../utils');
 const { createModelConfigurationSchema, validateKind } = require('./validation');
+
+const hasEditMainField = has('edit.mainField');
+const getEditMainField = prop('edit.mainField');
+const assocListMainField = assoc('list.mainField');
+
+const assocMainField = metadata =>
+  hasEditMainField(metadata) ? assocListMainField(getEditMainField(metadata), metadata) : metadata;
 
 module.exports = {
   async findContentTypes(ctx) {
@@ -31,11 +39,17 @@ module.exports = {
     }
 
     const configuration = await contentTypeService.findConfiguration(contentType);
+
+    const confWithUpdatedMetadata = {
+      ...configuration,
+      metadatas: mapValues(assocMainField, configuration.metadatas),
+    };
+
     const components = await contentTypeService.findComponentsConfigurations(contentType);
 
     ctx.body = {
       data: {
-        contentType: configuration,
+        contentType: confWithUpdatedMetadata,
         components,
       },
     };
