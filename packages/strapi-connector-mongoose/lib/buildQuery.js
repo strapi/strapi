@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { gt, isEmpty, reject, set } = require('lodash/fp');
+const { gt, isEmpty, reject, set, omit } = require('lodash/fp');
 const semver = require('semver');
 const {
   hasDeepFilters,
@@ -181,8 +181,11 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
           const stringIds = ids.map(id => id.toString());
           const getIndexInIds = obj => stringIds.indexOf(obj._id.toString());
 
+          // Remove sort filters since they've already been processed
+          const filtersNoSort = omit('sort', filters);
+
           return (
-            applyQueryParams({ model, query, filters })
+            applyQueryParams({ model, query, filters: filtersNoSort })
               // Reorder results using `ids`
               .then(results => results.sort((a, b) => (gt(...[a, b].map(getIndexInIds)) ? 1 : -1)))
           );
@@ -224,6 +227,16 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
  * @param {Object} options.filters - Filters object
  */
 const applyQueryParams = ({ model, query, filters }) => {
+  if (_.has(filters, 'sort')) {
+    const sortFilter = filters.sort.reduce((acc, sort) => {
+      const { field, order } = sort;
+      acc[field] = sortOrderMapper[order];
+      return acc;
+    }, {});
+
+    query = query.sort(sortFilter);
+  }
+
   // Apply start param
   if (_.has(filters, 'start')) {
     query = query.skip(filters.start);
@@ -350,23 +363,21 @@ const buildLookup = ({ model, key, paths, filters }) => {
   const assoc = model.associations.find(a => a.alias === key);
   const assocModel = strapi.db.getModelByAssoc(assoc);
 
-  if (!assocModel) return [];
+  if (!assocModel) return {};
 
-  return [
-    {
-      $lookup: {
-        from: assocModel.collectionName,
-        as: assoc.alias,
-        let: {
-          localId: '$_id',
-          localAlias: `$${assoc.alias}`,
-        },
-        pipeline: []
-          .concat(buildLookupMatch({ assoc, assocModel, filters }))
-          .concat(buildQueryAggregate(assocModel, filters, { paths })),
+  return {
+    $lookup: {
+      from: assocModel.collectionName,
+      as: assoc.alias,
+      let: {
+        localId: '$_id',
+        localAlias: `$${assoc.alias}`,
       },
+      pipeline: []
+        .concat(buildLookupMatch({ assoc, assocModel, filters }))
+        .concat(buildQueryAggregate(assocModel, filters, { paths })),
     },
-  ];
+  };
 };
 
 /**
