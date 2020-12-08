@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { each, prop } = require('lodash/fp');
+const { each, prop, reject, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
@@ -18,18 +18,12 @@ const buildQuery = ({ model, filters }) => qb => {
     qb.distinct();
   }
 
-  if (_.has(filters, 'sort')) {
-    qb.orderBy(
-      filters.sort
-        .filter(({ field }) => !field.includes('.'))
-        .map(({ field, order }) => ({
-          column: field,
-          order,
-        }))
-    );
-  }
+  const joinsTree = buildJoinsAndFilter(qb, model, filters);
 
-  buildJoinsAndFilter(qb, model, filters);
+  if (_.has(filters, 'sort')) {
+    const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree));
+    qb.orderBy(reject(isEmpty, clauses));
+  }
 
   if (_.has(filters, 'start')) {
     qb.offset(filters.start);
@@ -45,6 +39,25 @@ const buildQuery = ({ model, filters }) => qb => {
       qb
     );
   }
+};
+
+/**
+ * Build a bookshelf sort clause (simple or deep) based on a joins tree
+ * @param tree - The joins tree that contains the aliased associations
+ */
+const buildSortClauseFromTree = tree => ({ field, order }) => {
+  if (!field.includes('.')) {
+    return { column: field, order };
+  }
+
+  const [relation, attribute] = field.split('.');
+  for (const { alias, assoc } of Object.values(tree.joins)) {
+    if (relation === assoc.alias) {
+      return { column: `${alias}.${attribute}`, order };
+    }
+  }
+
+  return {};
 };
 
 /**
@@ -226,20 +239,7 @@ const buildJoinsAndFilter = (qb, model, filters) => {
    */
   const addFiltersQueriesToJoinTree = tree => {
     _.each(tree.joins, value => {
-      const { alias, model, assoc } = value;
-
-      // Sort
-      sortClauses
-        // Keep only nested clauses
-        .filter(({ field }) => field.includes('.'))
-        // If the sort is linked to the current join, then add an orderBy
-        .forEach(({ field, order }) => {
-          const [relation, attributeName] = field.split('.');
-
-          if (relation === assoc.alias) {
-            qb.orderBy(`${alias}.${attributeName}`, order);
-          }
-        });
+      const { alias, model } = value;
 
       // PublicationState
       runPopulateQueries(
@@ -256,10 +256,13 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
   aliasedWhereClauses.forEach(w => buildWhereClause({ qb, ...w }));
 
+  // Force needed joins for deep sort clauses
   generateNestedJoinsFromFields(sortClauses.map(prop('field')));
 
   buildJoinsFromTree(qb, tree);
   addFiltersQueriesToJoinTree(tree);
+
+  return tree;
 };
 
 /**

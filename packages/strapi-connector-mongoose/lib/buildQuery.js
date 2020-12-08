@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-var semver = require('semver');
+const { gt, isEmpty, reject, set } = require('lodash/fp');
+const semver = require('semver');
 const {
   hasDeepFilters,
   contentTypes: {
@@ -11,6 +12,11 @@ const {
 } = require('strapi-utils');
 const utils = require('./utils')();
 const populateQueries = require('./utils/populate-queries');
+
+const sortOrderMapper = {
+  asc: 1,
+  desc: -1,
+};
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -88,8 +94,9 @@ const buildQuery = ({
   aggregate = false,
 } = {}) => {
   const search = buildSearchOr(model, searchParam);
+  const { where, sort } = filters;
 
-  if (!hasDeepFilters(filters.where) && aggregate === false) {
+  if (!hasDeepFilters({ where, sort }) && aggregate === false) {
     return buildSimpleQuery({ model, filters, search, populate });
   }
 
@@ -171,7 +178,14 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
             )
             .populate(populate);
 
-          return applyQueryParams({ model, query, filters });
+          const stringIds = ids.map(id => id.toString());
+          const getIndexInIds = obj => stringIds.indexOf(obj._id.toString());
+
+          return (
+            applyQueryParams({ model, query, filters })
+              // Reorder results using `ids`
+              .then(results => results.sort((a, b) => (gt(...[a, b].map(getIndexInIds)) ? 1 : -1)))
+          );
         })
         .then(...args);
     },
@@ -210,17 +224,6 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
  * @param {Object} options.filters - Filters object
  */
 const applyQueryParams = ({ model, query, filters }) => {
-  // Apply sort param
-  if (_.has(filters, 'sort')) {
-    const sortFilter = filters.sort.reduce((acc, sort) => {
-      const { field, order } = sort;
-      acc[field] = order === 'asc' ? 1 : -1;
-      return acc;
-    }, {});
-
-    query = query.sort(sortFilter);
-  }
-
   // Apply start param
   if (_.has(filters, 'start')) {
     query = query.skip(filters.start);
@@ -315,9 +318,25 @@ const pathsToTree = paths => paths.reduce((acc, path) => _.merge(acc, _.set({}, 
  * @param {Object} options.paths - A tree of paths to aggregate e.g { article : { tags : { label: {}}}}
  */
 const buildQueryAggregate = (model, filters, { paths } = {}) => {
-  return Object.keys(paths).reduce((acc, key) => {
-    return acc.concat(buildLookup({ model, key, paths: paths[key], filters }));
-  }, []);
+  const aggregate = [];
+
+  // Build lookups
+  Object.keys(paths).map(key =>
+    aggregate.push(buildLookup({ key, paths: paths[key], model, filters }))
+  );
+
+  // Build the sort operation
+  if (Array.isArray(filters.sort) && !isEmpty(filters.sort)) {
+    aggregate.push({
+      $sort: filters.sort.reduce(
+        (acc, { field, order }) => set([field], sortOrderMapper[order], acc),
+        {}
+      ),
+    });
+  }
+
+  // Remove empty aggregate clauses & return
+  return reject(isEmpty, aggregate);
 };
 
 /**
@@ -657,7 +676,7 @@ const findModelByPath = ({ rootModel, path }) => {
  * Returns a model path from an attribute path and a root model
  * @param {Object} options - Options
  * @param {Object} options.rootModel - Mongoose model
- * @param {string} options.path - Attribute path
+ * @param {string|Object} options.path - Attribute path
  */
 const findModelPath = ({ rootModel, path }) => {
   const parts = (_.isObject(path) ? path.path : path).split('.');
