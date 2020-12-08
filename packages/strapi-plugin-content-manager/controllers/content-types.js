@@ -4,6 +4,13 @@ const { has, assoc, mapValues, prop } = require('lodash/fp');
 const { getService } = require('../utils');
 const { createModelConfigurationSchema, validateKind } = require('./validation');
 
+const hasEditMainField = has('edit.mainField');
+const getEditMainField = prop('edit.mainField');
+const assocListMainField = assoc('list.mainField');
+
+const assocMainField = metadata =>
+  hasEditMainField(metadata) ? assocListMainField(getEditMainField(metadata), metadata) : metadata;
+
 module.exports = {
   async findContentTypes(ctx) {
     const { kind } = ctx.query;
@@ -32,15 +39,6 @@ module.exports = {
     }
 
     const configuration = await contentTypeService.findConfiguration(contentType);
-
-    const hasEditMainField = has('edit.mainField');
-    const getEditMainField = prop('edit.mainField');
-    const assocListMainField = assoc('list.mainField');
-
-    const assocMainField = metadata =>
-      hasEditMainField(metadata)
-        ? assocListMainField(getEditMainField(metadata), metadata)
-        : metadata;
 
     const confWithUpdatedMetadata = {
       ...configuration,
