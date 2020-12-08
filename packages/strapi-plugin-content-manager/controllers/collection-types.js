@@ -28,7 +28,32 @@ module.exports = {
 
     const permissionQuery = permissionChecker.buildPermissionQuery(query);
 
-    const { results, pagination } = await entityManager[method](permissionQuery, model);
+    const modelDef = strapi.getModel(model);
+    const xManyAssocs = [];
+    const populate = [];
+    modelDef.associations.forEach(assoc => {
+      if (MANY_RELATIONS.includes(assoc.nature)) {
+        xManyAssocs.push(assoc);
+      } else {
+        populate.push(assoc.alias);
+      }
+    });
+
+    const { results, pagination } = await entityManager[method](permissionQuery, model, populate);
+    const resultsIds = results.map(prop('id'));
+
+    const counters = await Promise.all(
+      xManyAssocs.map(async assoc => ({
+        field: assoc.alias,
+        counts: await strapi.query(model).fetchRelationCounters(assoc.alias, resultsIds),
+      }))
+    );
+
+    results.forEach(entity => {
+      counters.forEach(counter => {
+        entity[counter.field] = { count: counter.counts[entity.id] || 0 };
+      });
+    });
 
     ctx.body = {
       results: results.map(entity => permissionChecker.sanitizeOutput(entity)),
