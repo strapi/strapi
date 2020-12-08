@@ -215,9 +215,7 @@ export {
   formatEditRelationsLayoutWithMetas,
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  // formatMetadatasRelations,
   generateRelationQueryInfos,
   generateRelationQueryInfosForComponents,
-  // getMainField,
   getDisplayedModels,
 };

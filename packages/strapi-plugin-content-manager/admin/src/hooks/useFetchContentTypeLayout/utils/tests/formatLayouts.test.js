@@ -20,7 +20,6 @@ const addressSchema = {
   metadatas: {
     categories: {
       edit: {
-        // mainField: 'name',
         mainField: {
           name: 'name',
           type: 'string',
