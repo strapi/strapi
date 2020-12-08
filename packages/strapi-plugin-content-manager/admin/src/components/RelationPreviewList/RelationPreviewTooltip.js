@@ -7,11 +7,16 @@ import getRequestUrl from '../../utils/getRequestUrl';
 import Tooltip from '../Tooltip';
 import getDisplayedValue from '../CustomTable/Row/utils/getDisplayedValue';
 
-const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
+const RelationPreviewTooltip = ({
+  tooltipId,
+  rowId,
+  mainField,
+  name,
+  queryInfos: { endPoint },
+}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [relationData, setRelationData] = useState([]);
   const tooltipRef = useRef();
-  const { endPoint } = mainField.queryInfos;
 
   const fetchRelationData = useCallback(
     async signal => {
@@ -92,13 +97,13 @@ const RelationPreviewTooltip = ({ tooltipId, rowId, mainField, name }) => {
 
 RelationPreviewTooltip.propTypes = {
   tooltipId: PropTypes.string.isRequired,
-  mainField: PropTypes.shape({
+  mainField: PropTypes.exact({
     name: PropTypes.string.isRequired,
     schema: PropTypes.object.isRequired,
-    queryInfos: PropTypes.object.isRequired,
   }).isRequired,
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  queryInfos: PropTypes.object.isRequired,
 };
 
 export default RelationPreviewTooltip;

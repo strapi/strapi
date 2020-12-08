@@ -89,7 +89,7 @@ function SelectWrapper({
         const data = await request(endPoint, { method: 'GET', params, signal });
 
         const formattedData = data.map(obj => {
-          return { value: obj, label: obj[mainField] };
+          return { value: obj, label: obj[mainField.name] };
         });
 
         setOptions(prevState =>
@@ -115,7 +115,7 @@ function SelectWrapper({
       endPoint,
       isFieldAllowed,
       isMorph,
-      mainField,
+      mainField.name,
       state._limit,
       state._start,
       state._contains,
@@ -227,7 +227,7 @@ function SelectWrapper({
           isDisabled={isDisabled}
           isLoading={isLoading}
           isClearable
-          mainField={mainField}
+          mainField={mainField.name}
           move={moveRelation}
           name={name}
           options={filteredOptions}
@@ -272,7 +272,12 @@ SelectWrapper.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
-  mainField: PropTypes.string.isRequired,
+  mainField: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,

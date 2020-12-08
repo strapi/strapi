@@ -64,7 +64,14 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
         </td>
       )}
       {headers.map(
-        ({ key, name, fieldSchema: { type, relationType }, cellFormatter, metadatas }) => (
+        ({
+          key,
+          name,
+          fieldSchema: { type, relationType },
+          cellFormatter,
+          metadatas,
+          queryInfos,
+        }) => (
           <td key={key}>
             {cellFormatter ? (
               cellFormatter(row)
@@ -78,6 +85,7 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
                   value: memoizedDisplayedValue(name, type),
                   cellId: key,
                   metadatas,
+                  queryInfos,
                 }}
               />
             )}

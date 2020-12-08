@@ -87,21 +87,26 @@ const listViewReducer = (state = initialState, action) =>
         } = action;
 
         if (!value) {
-          const { metadatas, attributes } = state.contentType;
-          let metas = metadatas[name].list;
-
-          if (attributes[name].type === 'relation') {
-            const { mainField } = metadatas[name].list;
-
-            metas = { ...metas, mainField };
-          }
-
-          drafState.displayedHeaders.push({
+          const { metadatas, attributes, uid } = state.contentType;
+          const metas = metadatas[name].list;
+          const header = {
             name,
             fieldSchema: attributes[name],
             metadatas: metas,
             key: `__${name}_key__`,
-          });
+          };
+
+          if (attributes[name].type === 'relation') {
+            drafState.displayedHeaders.push({
+              ...header,
+              queryInfos: {
+                defaultParams: {},
+                endPoint: `collection-types/${uid}`,
+              },
+            });
+          } else {
+            drafState.displayedHeaders.push(header);
+          }
         } else {
           drafState.displayedHeaders = state.displayedHeaders.filter(
             header => header.name !== name
