@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "restos",
+  "info": {
+    "name": "resto",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Name": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "richtext"
+    },
+    "categs": {
+      "collection": "categ",
+      "via": "restos",
+      "dominant": true
+    },
+    "country": {
+      "model": "country",
+      "via": "resto"
+    },
+    "longdescriptions": {
+      "via": "restos",
+      "collection": "longdescription",
+      "dominant": true
+    }
+  }
+}

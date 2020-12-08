@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/bbbbs",
+      "handler": "bbbb.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/bbbbs/count",
+      "handler": "bbbb.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/bbbbs/:id",
+      "handler": "bbbb.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/bbbbs",
+      "handler": "bbbb.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/bbbbs/:id",
+      "handler": "bbbb.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/bbbbs/:id",
+      "handler": "bbbb.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

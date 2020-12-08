@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "longdescriptions",
+  "info": {
+    "name": "longdescription",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "content": {
+      "type": "string"
+    },
+    "restos": {
+      "collection": "resto",
+      "via": "longdescriptions"
+    }
+  }
+}

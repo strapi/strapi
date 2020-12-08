@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "categs",
+  "info": {
+    "name": "Categ"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "Name": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "richtext"
+    },
+    "flag": {
+      "collection": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false
+    },
+    "restos": {
+      "via": "categs",
+      "collection": "resto"
+    }
+  }
+}

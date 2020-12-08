@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bbbbs",
+  "info": {
+    "name": "BBBB",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "boolean"
+    }
+  }
+}

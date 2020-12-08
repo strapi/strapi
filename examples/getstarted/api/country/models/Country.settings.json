@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "countries",
   "info": {
     "name": "country",
@@ -7,7 +8,10 @@
   "options": {
     "draftAndPublish": false,
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
@@ -21,6 +25,10 @@
       "maxLength": 3,
       "unique": true,
       "minLength": 2
+    },
+    "resto": {
+      "via": "country",
+      "model": "resto"
     }
   }
 }

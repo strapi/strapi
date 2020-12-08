@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/longdescriptions",
+      "handler": "longdescription.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/longdescriptions/count",
+      "handler": "longdescription.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/longdescriptions/:id",
+      "handler": "longdescription.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/longdescriptions",
+      "handler": "longdescription.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/longdescriptions/:id",
+      "handler": "longdescription.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/longdescriptions/:id",
+      "handler": "longdescription.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}
