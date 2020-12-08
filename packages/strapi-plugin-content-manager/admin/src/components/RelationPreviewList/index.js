@@ -33,7 +33,7 @@ const RelationPreviewList = ({
     );
   }
 
-  const size = value ? value.length : 0;
+  const size = value ? value.count : 0;
 
   const handleTooltipToggle = () => {
     setDisplayTooltip(prev => !prev);
@@ -69,6 +69,7 @@ const RelationPreviewList = ({
           value={value}
           mainField={mainField}
           queryInfos={queryInfos}
+          size={size}
         />
       )}
     </Truncate>

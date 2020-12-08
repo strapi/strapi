@@ -6,6 +6,8 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const mongoose = require('mongoose');
+
 const populateQueries = require('./utils/populate-queries');
 
 const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
@@ -521,6 +523,47 @@ module.exports = ({ model, strapi }) => {
     }).count();
   }
 
+  async function fetchRelationCounters(attribute, entitiesIds = []) {
+    const assoc = model.associations.find(assoc => assoc.alias === attribute);
+    const assocModel = strapi.db.getModelByAssoc(assoc);
+
+    switch (assoc.nature) {
+      case 'oneToMany': {
+        return assocModel
+          .aggregate()
+          .match({ [assoc.via]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+          .group({
+            _id: `$${assoc.via}`,
+            count: { $sum: 1 },
+          })
+          .project({ _id: 0, id: '$_id', count: 1 });
+      }
+      case 'manyWay': {
+        return model
+          .aggregate()
+          .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+          .project({ _id: 0, id: '$_id', count: { $size: `$${assoc.alias}` } });
+      }
+      case 'manyToMany': {
+        if (assoc.dominant) {
+          return model
+            .aggregate()
+            .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+            .project({ _id: 0, id: '$_id', count: { $size: `$${assoc.alias}` } });
+        }
+        return assocModel
+          .aggregate()
+          .match({ [assoc.via]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+          .unwind(assoc.via)
+          .group({ _id: `$${assoc.via}`, count: { $sum: 1 } })
+          .project({ _id: 0, id: '$_id', count: 1 });
+      }
+      default: {
+        return [];
+      }
+    }
+  }
+
   return {
     findOne,
     find,
@@ -530,5 +573,6 @@ module.exports = ({ model, strapi }) => {
     count,
     search,
     countSearch,
+    fetchRelationCounters,
   };
 };

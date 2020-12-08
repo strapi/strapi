@@ -11,6 +11,7 @@ const RelationPreviewTooltip = ({
   mainField,
   name,
   queryInfos: { endPoint },
+  size,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [relationData, setRelationData] = useState([]);
@@ -85,7 +86,7 @@ const RelationPreviewTooltip = ({
                 </Text>
               </Padded>
             ))}
-            {relationData.length > 10 && <Text color="white">[...]</Text>}
+            {size > 10 && <Text color="white">[...]</Text>}
           </>
         )}
       </div>
@@ -102,6 +103,7 @@ RelationPreviewTooltip.propTypes = {
     }).isRequired,
   }).isRequired,
   name: PropTypes.string.isRequired,
+  size: PropTypes.number.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   queryInfos: PropTypes.shape({
     endPoint: PropTypes.string.isRequired,
