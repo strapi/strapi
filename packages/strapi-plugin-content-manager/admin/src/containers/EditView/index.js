@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
   BackHeader,
+  BaselineAlignement,
   LiLink,
   LoadingIndicatorPage,
   CheckPermissions,
@@ -139,14 +140,18 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                           0: { name, fieldSchema, metadatas },
                         },
                       } = block;
+                      const baselineAlignementSize = blockIndex === 0 ? '3px' : '0';
 
                       return (
-                        <DynamicZone
-                          key={blockIndex}
-                          name={name}
-                          fieldSchema={fieldSchema}
-                          metadatas={metadatas}
-                        />
+                        <>
+                          <BaselineAlignement top size={baselineAlignementSize} />
+                          <DynamicZone
+                            key={blockIndex}
+                            name={name}
+                            fieldSchema={fieldSchema}
+                            metadatas={metadatas}
+                          />
+                        </>
                       );
                     }
 

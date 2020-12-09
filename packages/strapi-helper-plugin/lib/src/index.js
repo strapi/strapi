@@ -7,6 +7,7 @@ export { default as routerPropTypes } from './commonPropTypes/router';
 export { default as themePropTypes } from './commonPropTypes/themeShape';
 // Components
 export { default as BackHeader } from './components/BackHeader';
+export { default as BaselineAlignement } from './components/BaselineAlignement';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
