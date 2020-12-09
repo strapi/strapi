@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Carret } from '@buffetjs/icons';
+import { Picker } from '@buffetjs/core';
 import { getTrad, getFileModelTimestamps } from '../../utils';
 
 import SortList from '../SortList';
-import Picker from '../Picker';
 
 const SortPicker = ({ onChange, value }) => {
   const { plugins } = useGlobalContext();
