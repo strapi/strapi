@@ -3,6 +3,7 @@
  * InputCheckbox
  */
 
+// TODO delete this file
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Div, Label } from './components';
