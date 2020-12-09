@@ -5826,12 +5826,19 @@ console-control-strings@^1.0.0, console-control-strings@~1.1.0:
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha1-PXz0Rk22RG6mRL9LOVB/mFEAjo4=
 
-consolidate@0.15.1, consolidate@^0.15.1:
+consolidate@^0.15.1:
   version "0.15.1"
   resolved "https://registry.yarnpkg.com/consolidate/-/consolidate-0.15.1.tgz#21ab043235c71a07d45d9aad98593b0dba56bab7"
   integrity sha512-DW46nrsMJgy9kqAbPt5rKaCr7uFtpo4mSUvLHIUbJEjm0vo+aY5QLwBUq3FK4tRnJr/X0Psc0C4jf/h+HtXSMw==
   dependencies:
     bluebird "^3.1.1"
+
+consolidate@^0.16.0:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/consolidate/-/consolidate-0.16.0.tgz#a11864768930f2f19431660a65906668f5fbdc16"
+  integrity sha512-Nhl1wzCslqXYTJVDyJCu3ODohy9OfBMB5uD2BiBTzd7w+QY0lBzafkR8y8755yMYHAaMD4NuzbAw03/xzfw+eQ==
+  dependencies:
+    bluebird "^3.7.2"
 
 "consolidated-events@^1.1.1 || ^2.0.0":
   version "2.0.2"
@@ -11541,17 +11548,18 @@ koa-static@^5.0.0:
     debug "^3.1.0"
     koa-send "^5.0.0"
 
-koa-views@^6.3.0:
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/koa-views/-/koa-views-6.3.1.tgz#8d23fa2118c71e9119fb47a75a58053345e37356"
-  integrity sha512-weIaPs2cCHWT2qK8qHRmwlZ29xRCvUVy1v/z12AGavVV5j4QIU0W/Y7OVBBu1sTkcO9dDJ25ajGYHGZ/aY43IQ==
+koa-views@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/koa-views/-/koa-views-7.0.0.tgz#039a90620991f6668566010b3c1df31481f78c98"
+  integrity sha512-I9H2Dood5MhwzmWk7hkWuxEBObd3uv/4eEPJP2r43Ro+rK8ICKjrIKEzKrfT89JNX69vWOEU8JreJwRjb5HOFw==
   dependencies:
-    consolidate "0.15.1"
+    consolidate "^0.16.0"
     debug "^4.1.0"
     get-paths "0.0.7"
     koa-send "^5.0.0"
     mz "^2.4.0"
     pretty "^2.0.0"
+    resolve-path "^1.4.0"
 
 koa2-ratelimit@^0.9.0:
   version "0.9.0"
