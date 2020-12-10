@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { Fragment, memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
@@ -143,15 +143,14 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                       const baselineAlignementSize = blockIndex === 0 ? '3px' : '0';
 
                       return (
-                        <>
+                        <Fragment key={blockIndex}>
                           <BaselineAlignement top size={baselineAlignementSize} />
                           <DynamicZone
-                            key={blockIndex}
                             name={name}
                             fieldSchema={fieldSchema}
                             metadatas={metadatas}
                           />
-                        </>
+                        </Fragment>
                       );
                     }
 
