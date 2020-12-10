@@ -19,7 +19,7 @@
     "fs-extra": "^9.0.1",
     "hosted-git-info": "3.0.5",
     "inquirer": "^6.3.1",
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "node-fetch": "^2.6.1",
     "node-machine-id": "^1.1.10",
     "ora": "^3.4.0",

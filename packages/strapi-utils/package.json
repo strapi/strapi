@@ -16,7 +16,7 @@
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "^2.8.1",
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
     "yup": "0.29.3"
