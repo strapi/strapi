@@ -92,7 +92,7 @@ const normalizeFieldName = ({ model, field }) => {
 
 const BOOLEAN_OPERATORS = ['or'];
 
-const hasDeepFilters = ({ where = [], sort = [], minDepth = 1 } = {}) => {
+const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
   // A query uses deep filtering if some of the clauses contains a sort or a match expression on a field of a relation
 
   // We don't use minDepth here because deep sorting is limited to depth 1
@@ -167,7 +167,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
 
   // Validate query clauses
   if ([where, sort].some(Array.isArray)) {
-    if (hasDeepFilters({ where, sort, minDepth: 2 })) {
+    if (hasDeepFilters({ where, sort }, { minDepth: 2 })) {
       strapi.log.warn(
         'Deep filtering queries should be used carefully (e.g Can cause performance issues).\nWhen possible build custom routes which will in most case be more optimised.'
       );

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { isEmpty, set, omit, reduce } = require('lodash/fp');
+const { isEmpty, set, omit, assoc } = require('lodash/fp');
 const semver = require('semver');
 const {
   hasDeepFilters,
@@ -94,9 +94,8 @@ const buildQuery = ({
   aggregate = false,
 } = {}) => {
   const search = buildSearchOr(model, searchParam);
-  const { where, sort } = filters;
 
-  if (!hasDeepFilters({ where, sort }) && aggregate === false) {
+  if (!hasDeepFilters(filters) && aggregate === false) {
     return buildSimpleQuery({ model, filters, search, populate });
   }
 
@@ -117,9 +116,11 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
   const wheres = where.map(buildWhereClause);
 
   const findCriteria = combineSearchAndWhere(search, wheres);
+
   let query = model
     .find(findCriteria, null, { publicationState: filters.publicationState })
     .populate(populate);
+
   query = applyQueryParams({ model, query, filters });
 
   return Object.assign(query, {
@@ -145,13 +146,13 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
     where: filters.where,
   });
 
+  const aggregateOptions = {
+    paths: _.merge({}, populatePaths, wherePaths),
+  };
+
   // Init the query
   let query = model
-    .aggregate(
-      buildQueryAggregate(model, filters, {
-        paths: _.merge({}, populatePaths, wherePaths),
-      })
-    )
+    .aggregate(buildQueryAggregate(model, filters, aggregateOptions))
     .append(buildQueryMatches(model, filters, search))
     .append(buildQuerySort(model, filters));
 
@@ -161,39 +162,21 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
      */
     then(...args) {
       return query
-        .append({
-          $project: { _id: true },
-        })
+        .append({ $project: { _id: true } })
         .then(results => results.map(el => el._id))
         .then(ids => {
           if (ids.length === 0) return [];
 
-          const query = model
-            .find(
-              {
-                _id: {
-                  $in: ids,
-                },
-              },
-              null
-            )
-            .populate(populate);
+          const idsMap = ids.reduce((acc, id, idx) => assoc(id, idx, acc), {});
 
-          const idsMapper = ids.reduce((acc, id, idx) => ({ ...acc, [id]: idx }), {});
+          const mongooseQuery = model.find({ _id: { $in: ids } }, null).populate(populate);
+          const query = applyQueryParams({
+            model,
+            query: mongooseQuery,
+            filters: omit('sort', filters),
+          });
 
-          // Remove sort filters since they've already been processed
-          const filtersNoSort = omit('sort', filters);
-
-          return (
-            applyQueryParams({ model, query, filters: filtersNoSort })
-              // Reorder results using `ids` order
-              .then(
-                reduce((acc, entry) => {
-                  acc[idsMapper[entry._id]] = entry;
-                  return acc;
-                }, [])
-              )
-          );
+          return query.then(orderByIndexMap(idsMap));
         })
         .then(...args);
     },
@@ -717,6 +700,18 @@ const findModelPath = ({ rootModel, path }) => {
   }
 
   return tmpPath.length > 0 ? tmpPath.join('.') : null;
+};
+
+/**
+ * Order a list of entites based on an indexMap
+ * @param {Object[]} entities - A list of entities
+ * @param {Object} indexMap - index map of the form { [id]: index }
+ */
+const orderByIndexMap = indexMap => entities => {
+  return entities.reduce((acc, entry) => {
+    acc[indexMap[entry._id]] = entry;
+    return acc;
+  }, []);
 };
 
 module.exports = buildQuery;
