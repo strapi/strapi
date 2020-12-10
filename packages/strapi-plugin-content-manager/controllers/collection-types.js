@@ -293,8 +293,9 @@ module.exports = {
         assoc.targetUid
       );
     } else {
+      const assocModel = strapi.db.getModelByAssoc(assoc);
       relationList = await entityManager.findPage(
-        { page, pageSize, [assoc.via]: entity.id },
+        { page, pageSize, [`${assoc.via}.${assocModel.primaryKey}`]: entity.id },
         assoc.targetUid
       );
     }
