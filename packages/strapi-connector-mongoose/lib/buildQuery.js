@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { gt, isEmpty, reject, set, omit } = require('lodash/fp');
+const { isEmpty, set, omit, reduce } = require('lodash/fp');
 const semver = require('semver');
 const {
   hasDeepFilters,
@@ -152,7 +152,8 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
         paths: _.merge({}, populatePaths, wherePaths),
       })
     )
-    .append(buildQueryMatches(model, filters, search));
+    .append(buildQueryMatches(model, filters, search))
+    .append(buildQuerySort(model, filters));
 
   return {
     /**
@@ -178,16 +179,20 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
             )
             .populate(populate);
 
-          const stringIds = ids.map(id => id.toString());
-          const getIndexInIds = obj => stringIds.indexOf(obj._id.toString());
+          const idsMapper = ids.reduce((acc, id, idx) => ({ ...acc, [id]: idx }), {});
 
           // Remove sort filters since they've already been processed
           const filtersNoSort = omit('sort', filters);
 
           return (
             applyQueryParams({ model, query, filters: filtersNoSort })
-              // Reorder results using `ids`
-              .then(results => results.sort((a, b) => (gt(...[a, b].map(getIndexInIds)) ? 1 : -1)))
+              // Reorder results using `ids` order
+              .then(
+                reduce((acc, entry) => {
+                  acc[idsMapper[entry._id]] = entry;
+                  return acc;
+                }, [])
+              )
           );
         })
         .then(...args);
@@ -331,25 +336,9 @@ const pathsToTree = paths => paths.reduce((acc, path) => _.merge(acc, _.set({}, 
  * @param {Object} options.paths - A tree of paths to aggregate e.g { article : { tags : { label: {}}}}
  */
 const buildQueryAggregate = (model, filters, { paths } = {}) => {
-  const aggregate = [];
-
-  // Build lookups
-  Object.keys(paths).map(key =>
-    aggregate.push(buildLookup({ key, paths: paths[key], model, filters }))
-  );
-
-  // Build the sort operation
-  if (Array.isArray(filters.sort) && !isEmpty(filters.sort)) {
-    aggregate.push({
-      $sort: filters.sort.reduce(
-        (acc, { field, order }) => set([field], sortOrderMapper[order], acc),
-        {}
-      ),
-    });
-  }
-
-  // Remove empty aggregate clauses & return
-  return reject(isEmpty, aggregate);
+  return Object.keys(paths).reduce((acc, key) => {
+    return acc.concat(buildLookup({ model, key, paths: paths[key], filters }));
+  }, []);
 };
 
 /**
@@ -363,21 +352,23 @@ const buildLookup = ({ model, key, paths, filters }) => {
   const assoc = model.associations.find(a => a.alias === key);
   const assocModel = strapi.db.getModelByAssoc(assoc);
 
-  if (!assocModel) return {};
+  if (!assocModel) return [];
 
-  return {
-    $lookup: {
-      from: assocModel.collectionName,
-      as: assoc.alias,
-      let: {
-        localId: '$_id',
-        localAlias: `$${assoc.alias}`,
+  return [
+    {
+      $lookup: {
+        from: assocModel.collectionName,
+        as: assoc.alias,
+        let: {
+          localId: '$_id',
+          localAlias: `$${assoc.alias}`,
+        },
+        pipeline: []
+          .concat(buildLookupMatch({ assoc, assocModel, filters }))
+          .concat(buildQueryAggregate(assocModel, filters, { paths })),
       },
-      pipeline: []
-        .concat(buildLookupMatch({ assoc, assocModel, filters }))
-        .concat(buildQueryAggregate(assocModel, filters, { paths })),
     },
-  };
+  ];
 };
 
 /**
@@ -507,6 +498,28 @@ const buildQueryMatches = (model, filters, search = []) => {
     const criterias = combineSearchAndWhere(search, wheres);
 
     return [{ $match: criterias }];
+  }
+
+  return [];
+};
+
+/**
+ * Sort query for the aggregate
+ * @param {Object} model - Mongoose model
+ * @param {Object} filters - Filters object
+ */
+const buildQuerySort = (model, filters) => {
+  const { sort } = filters;
+
+  if (Array.isArray(sort) && !isEmpty(sort)) {
+    return [
+      {
+        $sort: sort.reduce(
+          (acc, { field, order }) => set([field], sortOrderMapper[order], acc),
+          {}
+        ),
+      },
+    ];
   }
 
   return [];

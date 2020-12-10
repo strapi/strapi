@@ -109,7 +109,7 @@ const hasDeepFilters = ({ where = [], sort = [], minDepth = 1 } = {}) => {
   return hasDeepSortClauses || hasDeepWhereClauses;
 };
 
-const normalizeClauses = (whereClauses, { model }) => {
+const normalizeWhereClauses = (whereClauses, { model }) => {
   return whereClauses
     .filter(({ value }) => !_.isNil(value))
     .map(({ field, operator, value }) => {
@@ -117,7 +117,7 @@ const normalizeClauses = (whereClauses, { model }) => {
         return {
           field,
           operator,
-          value: value.map(clauses => normalizeClauses(clauses, { model })),
+          value: value.map(clauses => normalizeWhereClauses(clauses, { model })),
         };
       }
 
@@ -139,6 +139,22 @@ const normalizeClauses = (whereClauses, { model }) => {
     });
 };
 
+const normalizeSortClauses = (clauses, { model }) => {
+  const normalizedClauses = clauses.map(({ field, order }) => ({
+    field: normalizeFieldName({ model, field }),
+    order,
+  }));
+
+  normalizedClauses.forEach(({ field }) => {
+    if (field.includes('.')) {
+      // Check if the relational field exists
+      getAssociationFromFieldKey({ model, field });
+    }
+  });
+
+  return normalizedClauses;
+};
+
 /**
  *
  * @param {Object} options - Options
@@ -158,13 +174,12 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
     }
 
     if (sort) {
-      // Check that every field from the sort clauses is valid, throw with error otherwise
-      sort.forEach(({ field }) => getAssociationFromFieldKey({ model, field }));
+      filters.sort = normalizeSortClauses(sort, { model });
     }
 
     if (where) {
       // Cast where clauses to match the inner types
-      filters.where = normalizeClauses(where, { model });
+      filters.where = normalizeWhereClauses(where, { model });
     }
   }
 
