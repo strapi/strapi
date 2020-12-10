@@ -24,7 +24,6 @@ import {
   getRequestUrl,
   getTrad,
 } from '../../utils';
-// import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';

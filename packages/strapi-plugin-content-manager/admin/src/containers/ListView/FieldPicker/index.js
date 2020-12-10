@@ -12,6 +12,7 @@ const FieldPicker = ({ displayedHeaders, items, onChange, onClickReset, slug }) 
   return (
     <Wrapper>
       <Picker
+        position="right"
         renderButtonContent={isOpen => (
           <Flex>
             <div>

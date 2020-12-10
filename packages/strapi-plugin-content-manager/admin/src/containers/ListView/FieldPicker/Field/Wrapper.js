@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.li`
-  padding: 0 14px;
+  padding: 0 16px;
   height: 36px;
   display: flex;
   flex-direction: column;

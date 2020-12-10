@@ -4,8 +4,6 @@ import Field from '../Field';
 import Wrapper from './Wrapper';
 
 const Fields = ({ displayedHeaders, items, onChange }) => {
-  console.log({ displayedHeaders, items });
-
   const getInputValue = useCallback(
     headerName => displayedHeaders.findIndex(({ name }) => name === headerName) !== -1,
     [displayedHeaders]
