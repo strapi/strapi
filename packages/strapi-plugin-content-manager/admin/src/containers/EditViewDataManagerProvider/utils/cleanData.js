@@ -58,6 +58,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           });
           break;
         default:
+          // The helper is mainly used for the relations in order to just send the id
           cleanedData = helperCleanData(value, 'id');
       }
 

@@ -53,7 +53,8 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
       })
       .filter(field => {
         return !displayedFields.includes(field);
-      });
+      })
+      .sort();
   }, [displayedFields, attributes, modifiedData]);
 
   const handleClickEditLabel = labelToEdit => {
