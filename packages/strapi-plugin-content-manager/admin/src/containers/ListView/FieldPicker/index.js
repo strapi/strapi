@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Picker } from '@buffetjs/core';
-import { Carret } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Carret } from 'strapi-helper-plugin';
 import Fields from './Fields';
 import Header from './Header';
 import Wrapper from './Wrapper';
@@ -19,7 +19,7 @@ const FieldPicker = ({ displayedHeaders, items, onChange, onClickReset, slug }) 
               <FontAwesomeIcon icon="cog" style={{ marginRighte: 10 }} />
             </div>
             <Padded left size="sm">
-              <Carret fill={isOpen ? '#007eff' : '#292b2c'} />
+              <Carret fill={isOpen ? '#007eff' : '#292b2c'} isUp={isOpen} />
             </Padded>
           </Flex>
         )}
