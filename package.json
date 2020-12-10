@@ -22,7 +22,7 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.1.2",
-    "eslint-plugin-redux-saga": "^1.1.0",
+    "eslint-plugin-redux-saga": "^1.2.1",
     "execa": "^1.0.0",
     "fs-extra": "9.0.1",
     "glob": "7.1.6",

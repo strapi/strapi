@@ -7615,10 +7615,10 @@ eslint-plugin-react@^7.21.5:
     resolve "^1.18.1"
     string.prototype.matchall "^4.0.2"
 
-eslint-plugin-redux-saga@^1.1.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-redux-saga/-/eslint-plugin-redux-saga-1.2.0.tgz#e0b0108fd3fab56ffac04d0bbe44f77a19bc9d6c"
-  integrity sha512-s4Ms1ExUGMxrrSi6QMH/YVJJMaPkelz7lkG1WocoDTOkKQ9pP5+p2PTxhGNL+EPKxp90/uhQuHBJ+T/SMBotpQ==
+eslint-plugin-redux-saga@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-redux-saga/-/eslint-plugin-redux-saga-1.2.1.tgz#fbfe7ca6bd3771a0e11639d9b7474b7b25ed5375"
+  integrity sha512-3ZifHQ3N07bopp7MlpID4JxnDwCazcaPMHFP9l2TDEfSUtvr0U41xtb/e0wWlgxPgrs5cmztHWhLXn8HEPkb5Q==
 
 eslint-scope@^4.0.3:
   version "4.0.3"
