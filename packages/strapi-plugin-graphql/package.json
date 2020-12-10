@@ -29,7 +29,7 @@
     "strapi-utils": "3.3.4"
   },
   "devDependencies": {
-    "cross-env": "^5.2.1",
+    "cross-env": "^7.0.3",
     "koa": "^2.13.0",
     "rimraf": "3.0.2"
   },
