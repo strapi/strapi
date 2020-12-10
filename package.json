@@ -10,7 +10,7 @@
     "axios-mock-adapter": "^1.18.2",
     "babel-eslint": "^10.0.0",
     "chokidar": "3.3.1",
-    "cross-env": "^5.2.0",
+    "cross-env": "^7.0.3",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "eslint": "^6.3.0",
