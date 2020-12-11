@@ -14,7 +14,7 @@ const createStrapiApp = async projectPath => {
   try {
     const strapi = require(require.resolve('strapi', { paths: [projectPath] }));
     app = await strapi({ dir: projectPath }).load();
-  } catch {
+  } catch (e) {
     throw new Error(`
       -> Strapi lib couldn\'t be found. Are the node_modules installed?
       -> Fix: yarn install or npm install`);
@@ -40,7 +40,7 @@ const run = async () => {
       manyRelationFields.forEach(assoc => {
         try {
           conf.metadatas[assoc.alias].list.sortable = true;
-        } catch {
+        } catch (e) {
           // silence
         }
       });
