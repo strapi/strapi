@@ -4,6 +4,7 @@
  */
 
 const _ = require('lodash');
+const { prop } = require('lodash/fp');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const mongoose = require('mongoose');
@@ -525,10 +526,10 @@ module.exports = ({ model, strapi }) => {
 
   async function fetchRelationCounters(attribute, entitiesIds = []) {
     const assoc = model.associations.find(assoc => assoc.alias === attribute);
-    const assocModel = strapi.db.getModelByAssoc(assoc);
 
-    switch (assoc.nature) {
+    switch (prop('nature', assoc)) {
       case 'oneToMany': {
+        const assocModel = strapi.db.getModelByAssoc(assoc);
         return assocModel
           .aggregate()
           .match({ [assoc.via]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
@@ -542,7 +543,7 @@ module.exports = ({ model, strapi }) => {
         return model
           .aggregate()
           .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
-          .project({ _id: 0, id: '$_id', count: { $size: `$${assoc.alias}` } });
+          .project({ _id: 0, id: '$_id', count: { $size: { $ifNull: [`$${assoc.alias}`, []] } } });
       }
       case 'manyToMany': {
         if (assoc.dominant) {
@@ -551,6 +552,7 @@ module.exports = ({ model, strapi }) => {
             .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
             .project({ _id: 0, id: '$_id', count: { $size: `$${assoc.alias}` } });
         }
+        const assocModel = strapi.db.getModelByAssoc(assoc);
         return assocModel
           .aggregate()
           .match({ [assoc.via]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
