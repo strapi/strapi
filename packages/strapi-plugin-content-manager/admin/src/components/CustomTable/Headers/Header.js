@@ -1,8 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { Carret, useGlobalContext } from 'strapi-helper-plugin';
 import { useListView } from '../../../hooks';
-import Arrow from './Arrow';
 
 const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField }, name }) => {
   const { _sort, firstSortableHeader, setQuery } = useListView();
@@ -37,7 +36,7 @@ const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField
     <th onClick={handleClick}>
       <span className={sortable ? 'sortable' : ''}>
         {label}
-        {sortBy === sortField && <Arrow fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />}
+        {sortBy === sortField && <Carret fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />}
       </span>
     </th>
   );

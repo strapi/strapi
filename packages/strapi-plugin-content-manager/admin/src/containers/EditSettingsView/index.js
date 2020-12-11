@@ -75,7 +75,8 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
       .filter(attr => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
       .filter(attr => {
         return displayedFields.findIndex(el => el.name === attr) === -1;
-      });
+      })
+      .sort();
   }, [isContentTypeView, modifiedData]);
 
   const getSelectedItemSelectOptions = useCallback(

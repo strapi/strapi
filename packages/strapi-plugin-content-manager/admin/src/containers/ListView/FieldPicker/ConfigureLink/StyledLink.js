@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-const LayoutWrapper = styled(Link)`
+const StyledLink = styled(Link)`
   display: block;
   width: 100%;
+
   text-decoration: none;
   color: #333740;
   font-size: 13px;
@@ -24,4 +25,4 @@ const LayoutWrapper = styled(Link)`
   }
 `;
 
-export default LayoutWrapper;
+export default StyledLink;

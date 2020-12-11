@@ -5,11 +5,15 @@ import moment from 'moment';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
-import { CheckPagePermissions, request, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  BaselineAlignment,
+  CheckPagePermissions,
+  request,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
-import BaselineAlignement from '../../../../../admin/src/components/BaselineAlignement';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormCard from '../../../../../admin/src/components/FormBloc';
@@ -146,7 +150,7 @@ const CreatePage = () => {
                 actions={headerActions(handleSubmit, handleReset)}
                 isLoading={isLayoutLoading}
               />
-              <BaselineAlignement top size="3px" />
+              <BaselineAlignment top size="3px" />
               <FormCard
                 actions={actions}
                 title={formatMessage({
