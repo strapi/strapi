@@ -4,19 +4,27 @@ import MediaPreviewList from '../../MediaPreviewList';
 import RelationPreviewList from '../../RelationPreviewList';
 import Truncate from '../../Truncate';
 import Truncated from '../../Truncated';
+import Tooltip from '../../Tooltip';
 
 const Cell = ({ options }) => {
-  if (options.type === 'media') {
-    return <MediaPreviewList files={options.value} />;
+  const { type, cellId, value } = options;
+
+  if (type === 'media') {
+    return <MediaPreviewList files={value} />;
   }
 
-  if (options.type === 'relation') {
+  if (type === 'relation') {
     return <RelationPreviewList options={options} />;
   }
 
   return (
     <Truncate>
-      <Truncated title={options.value}>{options.value}</Truncated>
+      <Truncated>
+        <span data-for={cellId} data-tip={value}>
+          {value}
+        </span>
+      </Truncated>
+      <Tooltip id={cellId} />
     </Truncate>
   );
 };
