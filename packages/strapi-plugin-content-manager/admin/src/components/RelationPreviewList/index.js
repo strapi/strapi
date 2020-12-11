@@ -8,6 +8,7 @@ import Truncate from '../Truncate';
 import Truncated from '../Truncated';
 import CountWrapper from './CountWrapper';
 import RelationPreviewTooltip from './RelationPreviewTooltip';
+import Tooltip from '../Tooltip';
 
 const RelationPreviewList = ({
   options: {
@@ -24,11 +25,17 @@ const RelationPreviewList = ({
   const [tooltipIsDisplayed, setDisplayTooltip] = useState(false);
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne'].includes(relationType);
   const tooltipId = useMemo(() => `${rowId}-${cellId}`, [rowId, cellId]);
+  const valueToDisplay = value ? value[mainField.name] : '-';
 
   if (isSingle) {
     return (
       <Truncate>
-        <Truncated>{value ? value[mainField.name] : '-'}</Truncated>
+        <Truncated>
+          <span data-for={tooltipId} data-tip={valueToDisplay}>
+            {valueToDisplay}
+          </span>
+        </Truncated>
+        <Tooltip id={tooltipId} />
       </Truncate>
     );
   }

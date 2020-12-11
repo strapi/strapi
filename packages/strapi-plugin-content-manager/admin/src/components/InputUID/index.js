@@ -237,7 +237,7 @@ const InputUID = ({
                     onClick={() => generateUid.current()}
                   >
                     {isLoading ? (
-                      <LoadingIndicator small />
+                      <LoadingIndicator size="small" />
                     ) : (
                       <Sync fill={label ? '#007EFF' : '#B5B7BB'} width="11px" height="11px" />
                     )}

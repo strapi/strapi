@@ -15,6 +15,8 @@ const Tooltip = styled(ReactTooltip).attrs(({ theme }) => ({
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius} !important;
   max-width: 400px;
   max-height: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export default Tooltip;

@@ -75,7 +75,7 @@ const RelationPreviewTooltip = ({
       <div>
         {isLoading ? (
           <Padded left right size="sm">
-            <LoadingIndicator small />
+            <LoadingIndicator size="medium" />
           </Padded>
         ) : (
           <>
@@ -86,7 +86,11 @@ const RelationPreviewTooltip = ({
                 </Text>
               </Padded>
             ))}
-            {size > 10 && <Text color="white">[...]</Text>}
+            {size > 10 && (
+              <Padded top size="xs">
+                <Text color="white">[...]</Text>
+              </Padded>
+            )}
           </>
         )}
       </div>
