@@ -10,14 +10,26 @@ const createStrapiApp = async projectPath => {
 -> Usage: node migrate-3.4.0.js [path]`);
   }
 
+  let strapi;
   let app;
   try {
-    const strapi = require(require.resolve('strapi', { paths: [projectPath] }));
+    strapi = require(require.resolve('strapi', { paths: [projectPath] }));
+    const pkgJSON = require(path.resolve(projectPath, 'package.json'));
+    if (!pkgJSON || !pkgJSON.dependencies || !pkgJSON.dependencies.strapi) {
+      throw new Error();
+    }
+  } catch (e) {
+    throw new Error(`
+-> Strapi lib couldn\'t be found. Are the node_modules installed?
+-> Fix: yarn install or npm install`);
+  }
+
+  try {
     app = await strapi({ dir: projectPath }).load();
   } catch (e) {
     throw new Error(`
-      -> Strapi lib couldn\'t be found. Are the node_modules installed?
-      -> Fix: yarn install or npm install`);
+-> The migration couldn't be procceed because Strapi app couldn't start.
+-> ${e.message}`);
   }
 
   return app;
