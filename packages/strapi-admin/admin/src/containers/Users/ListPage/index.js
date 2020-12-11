@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
+  BaselineAlignment,
   useQuery,
   request,
   useUserPermissions,
@@ -9,7 +10,6 @@ import {
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
-import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { useSettingsHeaderSearchContext } from '../../../hooks';
 import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
@@ -238,21 +238,21 @@ const ListPage = () => {
       />
       {canRead && (
         <>
-          <BaselineAlignement top size="1px">
+          <BaselineAlignment top size="1px">
             <Flex flexWrap="wrap">
               <SortPicker onChange={handleChangeSort} value={_sort} />
               <Padded right size="10px" />
-              <BaselineAlignement bottom size="6px">
+              <BaselineAlignment bottom size="6px">
                 <FilterPicker onChange={handleChangeFilter} />
-              </BaselineAlignement>
+              </BaselineAlignment>
               <Padded right size="10px" />
               {filters.map((filter, i) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
               ))}
             </Flex>
-          </BaselineAlignement>
-          <BaselineAlignement top size="8px" />
+          </BaselineAlignment>
+          <BaselineAlignment top size="8px" />
           <Padded top size="sm">
             <List
               canDelete={canDelete}

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Flex, Padded, Text } from '@buffetjs/core';
-import { BaselineAlignement, useGlobalContext } from 'strapi-helper-plugin';
+import { BaselineAlignment, useGlobalContext } from 'strapi-helper-plugin';
 import { getTrad } from '../../../../utils';
 import Reset from './Reset';
 
@@ -17,7 +17,7 @@ const Header = ({ onClick, onToggle }) => {
   };
 
   return (
-    <BaselineAlignement top size="19px">
+    <BaselineAlignment top size="19px">
       <Padded left right size="xs">
         <Padded left right size="sm">
           <Flex justifyContent="space-between">
@@ -30,7 +30,7 @@ const Header = ({ onClick, onToggle }) => {
           </Flex>
         </Padded>
       </Padded>
-    </BaselineAlignement>
+    </BaselineAlignment>
   );
 };
 

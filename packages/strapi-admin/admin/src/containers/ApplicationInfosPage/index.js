@@ -4,7 +4,7 @@ import { Flex, Padded, Text } from '@buffetjs/core';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { useIntl } from 'react-intl';
-import BaselineAlignement from '../../components/BaselineAlignement';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import Bloc from '../../components/Bloc';
 import PageTitle from '../../components/SettingsPageTitle';
 import makeSelectApp from '../App/selectors';
@@ -53,7 +53,7 @@ const ApplicationInfosPage = () => {
     <div>
       <PageTitle name="Infos" />
       <Header {...headerProps} />
-      <BaselineAlignement top size="3px" />
+      <BaselineAlignment top size="3px" />
       <Bloc>
         <Padded left right top size="smd">
           <Padded left right top size="xs">
@@ -77,7 +77,7 @@ const ApplicationInfosPage = () => {
             </Padded>
           </Padded>
         </Padded>
-        <BaselineAlignement top size="60px" />
+        <BaselineAlignment top size="60px" />
       </Bloc>
     </div>
   );

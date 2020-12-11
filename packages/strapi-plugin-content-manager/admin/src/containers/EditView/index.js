@@ -1,9 +1,9 @@
-import React, { Fragment, memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
   BackHeader,
-  BaselineAlignement,
+  BaselineAlignment,
   LiLink,
   LoadingIndicatorPage,
   CheckPermissions,
@@ -143,14 +143,13 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                       const baselineAlignementSize = blockIndex === 0 ? '3px' : '0';
 
                       return (
-                        <Fragment key={blockIndex}>
-                          <BaselineAlignement top size={baselineAlignementSize} />
+                        <BaselineAlignment key={blockIndex} top size={baselineAlignementSize}>
                           <DynamicZone
                             name={name}
                             fieldSchema={fieldSchema}
                             metadatas={metadatas}
                           />
-                        </Fragment>
+                        </BaselineAlignment>
                       );
                     }
 

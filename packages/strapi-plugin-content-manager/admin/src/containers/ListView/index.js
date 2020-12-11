@@ -428,13 +428,6 @@ function ListView({
                       onClickReset={onResetListHeaders}
                       slug={slug}
                     />
-                    {/* <DisplayedFieldsDropdown
-                      displayedHeaders={displayedHeaders}
-                      items={allAllowedHeaders}
-                      onChange={handleChangeListLabels}
-                      onClickReset={onResetListHeaders}
-                      slug={slug}
-                    /> */}
                   </CheckPermissions>
                 </div>
               </div>
