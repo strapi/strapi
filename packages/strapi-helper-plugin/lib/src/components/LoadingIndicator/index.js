@@ -21,51 +21,27 @@ const Loader = styled.div`
   justify-content: space-around;
   width: 100%;
   > div {
-    ${({ size }) => {
-      switch (size) {
-        case 'small': {
-          return `
-            border-top: 3px solid #555555 !important;
-            border: 3px solid #f3f3f3;
-            width: 11px;
-            height: 11px;
-          `;
-        }
-        case 'medium': {
-          return `
-            border-top: 3px solid #555555 !important;
-            border: 3px solid #f3f3f3;
-            width: 20px;
-            height: 20px;
-          `;
-        }
-        default: {
-          return `
-            border-top: 4px solid #555555 !important;
-            border: 4px solid #f3f3f3;
-            width: 26px;
-            height: 26px;
-          `;
-        }
-      }
-    }}
+    width: ${({ small }) => (small ? '11px' : '26px')};
+    height: ${({ small }) => (small ? '11px' : '26px')};
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #555555 !important;
     border-radius: 50%;
     animation: ${spin} 2s linear infinite;
   }
 `;
 
-const LoadingIndicator = ({ size }) => (
-  <Loader size={size}>
+const LoadingIndicator = ({ small }) => (
+  <Loader small={small}>
     <div />
   </Loader>
 );
 
 LoadingIndicator.propTypes = {
-  size: PropTypes.string,
+  small: PropTypes.bool,
 };
 
 LoadingIndicator.defaultProps = {
-  size: 'standard',
+  small: false,
 };
 
 export default LoadingIndicator;

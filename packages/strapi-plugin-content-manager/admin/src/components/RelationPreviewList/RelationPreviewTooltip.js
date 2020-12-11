@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { Text, Padded } from '@buffetjs/core';
-import { LoadingIndicator, request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin';
+import { LoadingIndicator } from '@buffetjs/styles';
 import PropTypes from 'prop-types';
 import { getDisplayedValue, getRequestUrl } from '../../utils';
 import Tooltip from '../Tooltip';
@@ -75,7 +76,7 @@ const RelationPreviewTooltip = ({
       <div>
         {isLoading ? (
           <Padded left right size="sm">
-            <LoadingIndicator size="medium" />
+            <LoadingIndicator borderWidth="3px" size="2rem" />
           </Padded>
         ) : (
           <>
