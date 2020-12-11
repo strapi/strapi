@@ -2916,10 +2916,10 @@
     lz-string "^1.4.4"
     pretty-format "^26.6.2"
 
-"@testing-library/jest-dom@^5.8.0":
-  version "5.11.4"
-  resolved "https://registry.yarnpkg.com/@testing-library/jest-dom/-/jest-dom-5.11.4.tgz#f325c600db352afb92995c2576022b35621ddc99"
-  integrity sha512-6RRn3epuweBODDIv3dAlWjOEHQLpGJHB2i912VS3JQtsD22+ENInhdDNl4ZZQiViLlIfFinkSET/J736ytV9sw==
+"@testing-library/jest-dom@^5.11.6":
+  version "5.11.6"
+  resolved "https://registry.yarnpkg.com/@testing-library/jest-dom/-/jest-dom-5.11.6.tgz#782940e82e5cd17bc0a36f15156ba16f3570ac81"
+  integrity sha512-cVZyUNRWwUKI0++yepYpYX7uhrP398I+tGz4zOlLVlUYnZS+Svuxv4fwLeCIy7TnBYKXUaOlQr3vopxL8ZfEnA==
   dependencies:
     "@babel/runtime" "^7.9.2"
     "@types/testing-library__jest-dom" "^5.9.1"
