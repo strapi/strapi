@@ -23,8 +23,7 @@ const getDraftAndPublishMigrationWay = async ({ definition, ORM }) => {
   }
 };
 
-const before = async ({ definition, ORM }) => {
-  const migrationInfo = {};
+const before = async ({ definition, ORM }, context) => {
   const way = await getDraftAndPublishMigrationWay({ definition, ORM });
 
   if (way === 'disable') {
@@ -41,7 +40,7 @@ const before = async ({ definition, ORM }) => {
       if (definition.client === 'sqlite3') {
         // Bug when droping column with sqlite3 https://github.com/knex/knex/issues/631
         // Need to recreate the table
-        migrationInfo.recreateSqliteTable = true;
+        context.recreateSqliteTable = true;
       } else {
         await ORM.knex.schema.table(definition.collectionName, table => {
           table.dropColumn(PUBLISHED_AT_ATTRIBUTE);
@@ -49,8 +48,6 @@ const before = async ({ definition, ORM }) => {
       }
     }
   }
-
-  return migrationInfo;
 };
 
 const after = async ({ definition, ORM }) => {

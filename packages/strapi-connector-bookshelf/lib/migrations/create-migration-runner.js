@@ -2,30 +2,27 @@
 
 const _ = require('lodash');
 
-const createMigrationRunner = (migrationFunction, { hooks = [] } = {}) => {
-  const beforeHook = async options => {
-    const migrationInfos = [];
+const createMigrationRunner = (migrationFunction, { hooks = [] } = {}, context = {}) => {
+  const beforeHook = async (options, context) => {
     for (const migration of hooks) {
       if (_.isFunction(migration.before)) {
-        const migrationInfo = await migration.before(options);
-        migrationInfos.push(migrationInfo);
+        await migration.before(options, context);
       }
     }
-    return migrationInfos;
   };
 
-  const afterHook = async options => {
+  const afterHook = async (options, context) => {
     for (const migration of hooks.slice(0).reverse()) {
       if (_.isFunction(migration.after)) {
-        await migration.after(options);
+        await migration.after(options, context);
       }
     }
   };
 
   const run = async options => {
-    const migrationInfos = await beforeHook(options);
-    await migrationFunction(options, migrationInfos);
-    await afterHook(options);
+    await beforeHook(options, context);
+    await migrationFunction(options, context);
+    await afterHook(options, context);
   };
 
   return {

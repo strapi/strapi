@@ -9,10 +9,7 @@ const { getManyRelations } = require('./utils/associations');
 const createMigrationRunner = require('./migrations/create-migration-runner');
 const draftPublishMigration = require('./migrations/draft-publish-migration');
 
-const migrateSchemas = async (
-  { ORM, loadedModel, definition, connection, model },
-  migrationInfos
-) => {
+const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model }, context) => {
   // Add created_at and updated_at field if timestamp option is true
   if (loadedModel.hasTimestamps) {
     definition.attributes[loadedModel.hasTimestamps[0]] = { type: 'currentTimestamp' };
@@ -29,7 +26,7 @@ const migrateSchemas = async (
         ORM,
         model,
       },
-      migrationInfos
+      context
     );
   }
 
@@ -56,7 +53,7 @@ const migrateSchemas = async (
           ORM,
           model,
         },
-        migrationInfos
+        context
       );
     }
   }
@@ -94,7 +91,7 @@ const migrateSchemas = async (
 
       const table = manyRelation.tableCollectionName;
       if (connection.options && connection.options.autoMigration !== false) {
-        await createOrUpdateTable({ table, attributes, definition, ORM, model }, migrationInfos);
+        await createOrUpdateTable({ table, attributes, definition, ORM, model }, context);
       }
     }
   }
@@ -212,10 +209,7 @@ const buildColType = ({ name, attribute, table, tableExists = false, definition,
 };
 
 // Equilize database tables
-const createOrUpdateTable = async (
-  { table, attributes, definition, ORM, model },
-  migrationInfos
-) => {
+const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }, context) => {
   const tableExists = await ORM.knex.schema.hasTable(table);
 
   const createIdType = table => {
@@ -313,7 +307,7 @@ const createOrUpdateTable = async (
   );
 
   if (definition.client === 'sqlite3') {
-    if (columnsToAlter.length > 0 || migrationInfos.find(i => i.recreateSqliteTable)) {
+    if (columnsToAlter.length > 0 || context.recreateSqliteTable) {
       const tmpTable = `tmp_${table}`;
 
       const rebuildTable = async trx => {
