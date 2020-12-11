@@ -61,7 +61,7 @@ const ModalCreateBody = forwardRef(
         } catch (err) {
           const message = get(err, ['response', 'payload', 'message'], 'An error occured');
 
-          strapi.notification.error(message);
+          strapi.notification.toggle({ type: 'warning', message });
         } finally {
           strapi.unlockApp();
           setIsSubmiting(false);

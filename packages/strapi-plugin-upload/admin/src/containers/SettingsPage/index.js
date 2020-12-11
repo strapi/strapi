@@ -58,7 +58,10 @@ const SettingsPage = () => {
         });
       }
 
-      strapi.notification.success('notification.form.success.fields');
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: 'notification.form.success.fields' },
+      });
     } catch (err) {
       console.error(err);
     }

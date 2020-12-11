@@ -193,7 +193,10 @@ const EditForm = forwardRef(
     };
 
     const handleCopy = () => {
-      strapi.notification.info('notification.link-copied');
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: 'notification.link-copied' },
+      });
     };
 
     const handleClickDownload = () => {
