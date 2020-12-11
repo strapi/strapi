@@ -1,10 +1,8 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-
 import { useListView } from '../../../hooks';
 import CustomInputCheckbox from '../../CustomInputCheckbox';
-
 import Thead from './Thead';
 import Header from './Header';
 

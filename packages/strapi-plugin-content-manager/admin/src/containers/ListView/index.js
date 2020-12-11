@@ -24,13 +24,13 @@ import {
   getRequestUrl,
   getTrad,
 } from '../../utils';
-import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
 import ListViewProvider from '../ListViewProvider';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
+import FieldPicker from './FieldPicker';
 import Filter from './Filter';
 import Footer from './Footer';
 import {
@@ -421,7 +421,7 @@ function ListView({
                 </div>
                 <div className="col-2">
                   <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-                    <DisplayedFieldsDropdown
+                    <FieldPicker
                       displayedHeaders={displayedHeaders}
                       items={allAllowedHeaders}
                       onChange={handleChangeListLabels}

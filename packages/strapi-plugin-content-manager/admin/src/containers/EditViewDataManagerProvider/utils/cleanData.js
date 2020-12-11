@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, isArray, isObject } from 'lodash';
 
 /* eslint-disable indent */
 
@@ -58,7 +58,8 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           });
           break;
         default:
-          cleanedData = value;
+          // The helper is mainly used for the relations in order to just send the id
+          cleanedData = helperCleanData(value, 'id');
       }
 
       acc[current] = cleanedData;
@@ -68,6 +69,17 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
   };
 
   return recursiveCleanData(retrievedData, currentSchema);
+};
+
+export const helperCleanData = (value, key) => {
+  if (isArray(value)) {
+    return value.map(obj => (obj[key] ? obj[key] : obj));
+  }
+  if (isObject(value)) {
+    return value[key];
+  }
+
+  return value;
 };
 
 export default cleanData;

@@ -1,15 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Carret } from '@buffetjs/icons';
+import { Carret as Base } from '@buffetjs/icons';
 
-const Arrow = styled(({ isUp, ...rest }) => <Carret {...rest} />)`
+const Carret = styled(({ isUp, ...rest }) => <Base {...rest} />)`
   margin-left: 5px;
   ${({ isUp }) =>
     isUp &&
     `
     transform: rotateZ(180deg);
-
   `}
 `;
 
-export default Arrow;
+export default Carret;
