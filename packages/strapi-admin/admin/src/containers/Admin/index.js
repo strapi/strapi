@@ -24,6 +24,7 @@ import {
   request,
 } from 'strapi-helper-plugin';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
+import { checkLatestStrapiVersion } from '../../utils';
 
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
@@ -143,8 +144,9 @@ export class Admin extends React.Component {
       if (!showUpdateNotif) {
         return;
       }
+      const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
-      if (`v${strapiVersion}` !== tag_name) {
+      if (shouldUpdateStrapi) {
         strapi.notification.toggle({
           type: 'info',
           message: { id: 'notification.version.update.message' },

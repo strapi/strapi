@@ -10,6 +10,7 @@ import PageTitle from '../../components/SettingsPageTitle';
 import makeSelectApp from '../App/selectors';
 import makeSelectAdmin from '../Admin/selectors';
 import { Detail, InfoText } from './components';
+import { checkLatestStrapiVersion } from '../../utils';
 
 const makeSelectAppInfos = () => createSelector(makeSelectApp(), appState => appState.appInfos);
 const makeSelectLatestRelease = () =>
@@ -38,10 +39,13 @@ const ApplicationInfosPage = () => {
   const nodeVersion = formatMessage({ id: 'Settings.application.node-version' });
   const editionTitle = formatMessage({ id: 'Settings.application.edition-title' });
 
-  const shouldShowUpgradeLink = `v${appInfos.strapiVersion}` !== latestStrapiReleaseTag;
+  const shouldUpdateStrapi = checkLatestStrapiVersion(
+    appInfos.strapiVersion,
+    latestStrapiReleaseTag
+  );
 
   /* eslint-disable indent */
-  const upgradeLink = shouldShowUpgradeLink
+  const upgradeLink = shouldUpdateStrapi
     ? {
         label: upgradeLabel,
         href: `https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`,

@@ -29,6 +29,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
+import { checkLatestStrapiVersion } from '../../utils';
 
 const LeftMenu = forwardRef(({ latestStrapiReleaseTag, version, plugins }, ref) => {
   const location = useLocation();
@@ -37,7 +38,9 @@ const LeftMenu = forwardRef(({ latestStrapiReleaseTag, version, plugins }, ref) 
 
   // TODO: this needs to be added to the settings API in the v4
   const settingsLinkNotificationCount = useMemo(() => {
-    if (`v${version}` !== latestStrapiReleaseTag) {
+    const shouldUpdateStrapi = checkLatestStrapiVersion(version, latestStrapiReleaseTag);
+
+    if (shouldUpdateStrapi) {
       return 1;
     }
 

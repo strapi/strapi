@@ -6,10 +6,11 @@ import Icon from './Icon';
 import Link from './Link';
 import Notif from './Notif';
 import Wrapper from './Wrapper';
+import { checkLatestStrapiVersion } from '../../../../utils';
 
 const ApplicationDetailLink = () => {
   const { latestStrapiReleaseTag, strapiVersion } = useGlobalContext();
-  const showNotif = `v${strapiVersion}` !== latestStrapiReleaseTag;
+  const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, latestStrapiReleaseTag);
 
   return (
     <Wrapper>
@@ -18,7 +19,7 @@ const ApplicationDetailLink = () => {
         <Text lineHeight="34px">
           <FormattedMessage id="Settings.application.title" />
         </Text>
-        {showNotif && <Notif />}
+        {shouldUpdateStrapi && <Notif />}
       </Link>
     </Wrapper>
   );
