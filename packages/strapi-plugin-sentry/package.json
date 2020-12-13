@@ -1,0 +1,30 @@
+{
+  "name": "strapi-plugin-sentry",
+  "version": "0.0.0",
+  "description": "This is the description of the plugin.",
+  "strapi": {
+    "name": "sentry",
+    "icon": "plug",
+    "description": "Description of sentry plugin."
+  },
+  "dependencies": {
+    "@sentry/node": "5.29.0"
+  },
+  "author": {
+    "name": "A Strapi developer",
+    "email": "",
+    "url": ""
+  },
+  "maintainers": [
+    {
+      "name": "A Strapi developer",
+      "email": "",
+      "url": ""
+    }
+  ],
+  "engines": {
+    "node": ">=10.16.0 <=14.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
