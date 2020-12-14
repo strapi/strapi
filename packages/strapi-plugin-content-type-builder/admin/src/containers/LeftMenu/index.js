@@ -20,7 +20,10 @@ import Wrapper from './Wrapper';
 /* eslint-disable indent */
 
 const displayNotificationCTNotSaved = () => {
-  strapi.notification.info(`${pluginId}.notification.info.creating.notSaved`);
+  strapi.notification.toggle({
+    type: 'info',
+    message: { id: `${pluginId}.notification.info.creating.notSaved` },
+  });
 };
 
 function LeftMenu({ wait }) {

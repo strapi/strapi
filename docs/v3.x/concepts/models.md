@@ -475,19 +475,6 @@ Let's stay with our `Image` model which might belong to **a single `Article` or 
 **NOTE**:
 In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
 
-**Path —** `./api/image/models/Image.settings.json`.
-
-```json
-{
-  "attributes": {
-    "related": {
-      "model": "*",
-      "filter": "field"
-    }
-  }
-}
-```
-
 Also our `Image` model might belong to **many `Article` or `Product` entries**.
 
 **NOTE**:
@@ -573,69 +560,6 @@ An `Image` model might belong to many `Article` models or `Product` models.
   }
 }
 ```
-
-#### Database implementation
-
-If you're using MongoDB for your database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
-
-**Path —** `./api/image/models/Image.settings.json`.
-
-```json
-{
-  "attributes": {
-    "name": {
-      "type": "string"
-    },
-    "url": {
-      "type": "string"
-    },
-    "related": {
-      "collection": "*",
-      "filter": "field"
-    }
-  }
-}
-```
-
-The first table to create is the table which has the same name as your model.
-
-```
-CREATE TABLE `image` (
-  `id` int(11) NOT NULL,
-  `name` text NOT NULL,
-  `text` text NOT NULL
-)
-```
-
-**NOTE**:
-If you've overridden the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
-
-The second table will allow us to associate one or many others entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
-
-```
-CREATE TABLE `image_morph` (
-  `id` int(11) NOT NULL,
-  `image_id` int(11) NOT NULL,
-  `related_id` int(11) NOT NULL,
-  `related_type` text NOT NULL,
-  `field` text NOT NULL
-)
-```
-
-- `image_id` is using the name of the first table with the suffix `_id`.
-  - **Attempted value:** It corresponds to the id of an `Image` entry.
-- `related_id` is using the attribute name where the relation happens with the suffix `_id`.
-  - **Attempted value:** It corresponds to the id of an `Article` or `Product` entry.
-- `related_type` is using the attribute name where the relation happens with the suffix `_type`.
-  - **Attempted value:** It corresponds to the table name where the `Article` or `Product` entry is stored.
-- `field` is using the filter property value defined in the model. If you change the filter value, you have to change the name of this column as well.
-  - **Attempted value:** It corresponds to the attribute of an `Article`, `Product` with which the `Image` entry is related.
-
-| id  | image_id | related_id | related_type | field  |
-| --- | -------- | ---------- | ------------ | ------ |
-| 1   | 1738     | 39         | product      | cover  |
-| 2   | 4738     | 58         | article      | avatar |
-| 3   | 1738     | 71         | article      | avatar |
 
 :::
 
