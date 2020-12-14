@@ -25,7 +25,7 @@ const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, re
       };
     },
     resetForm: () => {
-      dispatch({ type: 'ON_RESET' });
+      dispatch({ type: 'ON_RESET', initialPermissions: rolePermissions });
     },
     setFormAfterSubmit: () => {
       dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });

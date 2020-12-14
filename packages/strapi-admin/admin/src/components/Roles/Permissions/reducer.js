@@ -137,6 +137,12 @@ const reducer = (state, action) =>
         });
         break;
       }
+      case 'ON_RESET': {
+        const { initialPermissions } = action;
+        draftState.contentTypesPermissions = initialPermissions.contentTypesPermissions;
+        draftState.pluginsAndSettingsPermissions = initialPermissions.pluginsAndSettingsPermissions;
+        break;
+      }
       default:
         return draftState;
     }
