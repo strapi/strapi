@@ -129,7 +129,10 @@ module.exports = {
       permissionsToAssign = input.permissions;
     }
 
-    const permissions = await strapi.admin.services.permission.assign(role.id, permissionsToAssign);
+    const permissions = await strapi.admin.services.role.assignPermissions(
+      role.id,
+      permissionsToAssign
+    );
 
     ctx.body = {
       data: permissions,

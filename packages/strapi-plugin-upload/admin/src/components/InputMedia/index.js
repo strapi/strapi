@@ -94,7 +94,10 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
   };
 
   const handleCopy = () => {
-    strapi.notification.info('notification.link-copied');
+    strapi.notification.toggle({
+      type: 'info',
+      message: { id: 'notification.link-copied' },
+    });
   };
 
   const handleAllowDrop = e => e.preventDefault();

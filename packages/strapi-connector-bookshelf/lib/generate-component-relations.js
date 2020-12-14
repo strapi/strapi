@@ -41,9 +41,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
       component() {
         return this.morphTo(
           'component',
-          ...relatedComponents.map(component => {
-            return GLOBALS[component.globalId];
-          })
+          ...relatedComponents.map(component => GLOBALS[component.globalId])
         );
       },
     });

@@ -23,5 +23,7 @@
   "error.regenerateDoc": "An error occurred while regenerating the doc",
   "error.regenerateDoc.versionMissing": "The version you are trying to generate doesn't exist",
   "notification.update.success": "Settings updated successfully",
+  "notification.delete.success": "Doc deleted",
+  "notification.generate.success": "Doc generated",
   "plugin.name": "Documentation"
 }

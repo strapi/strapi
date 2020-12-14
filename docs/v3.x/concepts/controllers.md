@@ -316,7 +316,7 @@ Every action receives a `context` (`ctx`) object as first parameter containing t
 
 ### Example
 
-In this example, we are defining a specific route in `./api/hello/config/routes.json` that takes `Hello.index` as handler.
+In this example, we are defining a specific route in `./api/hello/config/routes.json` that takes `Hello.index` as handler. For more information on routing, please see the [Routing documentation](./routing.md)
 
 It means that every time a request `GET /hello` is sent to the server, Strapi will call the `index` action in the `Hello.js` controller.
 Our `index` action will return `Hello World!`. You can also return a JSON object.
@@ -329,7 +329,10 @@ Our `index` action will return `Hello World!`. You can also return a JSON object
     {
       "method": "GET",
       "path": "/hello",
-      "handler": "Hello.index"
+      "handler": "Hello.index",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

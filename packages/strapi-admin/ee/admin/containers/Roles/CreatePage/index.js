@@ -88,13 +88,19 @@ const CreatePage = () => {
       })
       .then(res => {
         setIsSubmiting(false);
-        strapi.notification.success('Settings.roles.created');
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: 'Settings.roles.created' },
+        });
         replace(`${settingsBaseURL}/roles/${res.data.id}`);
       })
       .catch(err => {
         console.error(err);
         setIsSubmiting(false);
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       })
       .finally(() => {
         strapi.unlockApp();
