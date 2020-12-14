@@ -19,6 +19,8 @@ module.exports = async () => {
             // Parse Koa context to add error metadata
             return sentryInstance.Handlers.parseRequest(event, ctx.request);
           });
+          // Manually add Strapi version
+          scope.setTag('strapi_version', strapi.config.info.strapi);
         });
       }
       throw error;

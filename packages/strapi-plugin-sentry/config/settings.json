@@ -1,6 +1,4 @@
 {
-  "disabled": false,
-  "config": {
-    "dsn": null
-  }
+  "dsn": null,
+  "sendMetadata": true
 }

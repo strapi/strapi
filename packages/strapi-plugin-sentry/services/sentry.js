@@ -6,6 +6,7 @@ const defaultSettings = require('../config/settings.json');
 module.exports = {
   isReady: false,
   _instance: null,
+  settings: {},
 
   /**
    * Initialize Sentry service
@@ -18,22 +19,23 @@ module.exports = {
     }
 
     // Retrieve user settings and merge them with the default ones
-    const settings = {
+    this.settings = {
       ...defaultSettings,
       ...strapi.plugins.sentry.config,
     };
 
-    // Try to initialize Sentry using the config's DSN
     try {
-      // Don't init Sentry if the user has disabled it
-      if (!settings.disabled) {
+      // Don't init Sentry if no DSN was provided
+      if (this.settings.dsn) {
         Sentry.init({
-          dsn: settings.config.dsn,
+          dsn: this.settings.dsn,
           environment: strapi.config.environment,
         });
         // Store the successfully initialized Sentry instance
         this._instance = Sentry;
         this.isReady = true;
+      } else {
+        strapi.log.info('strapi-plugin-sentry is disabled because no Sentry DSN was provided');
       }
     } catch (error) {
       strapi.log.warn('Could not set up Sentry, make sure you entered a valid DSN');
@@ -69,7 +71,9 @@ module.exports = {
 
     this._instance.withScope(scope => {
       // Configure the Sentry scope using the provided callback
-      configureScope(scope, this._instance);
+      if (this.settings.sendMetadata) {
+        configureScope(scope, this._instance);
+      }
       // Actually send the Error to Sentry
       this._instance.captureException(error);
     });
