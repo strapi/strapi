@@ -885,6 +885,7 @@ module.exports = {
   resolver: {
     Query: {
       restaurants: false, // The `restaurants` query will no longer be in the GraphQL schema.
+      restaurantsConnection: false, // You can also disable aggregation per API.
     },
     Mutation: {
       createRestaurant: false,
