@@ -63,7 +63,7 @@ Strapi is a free and open-source headless CMS delivering your content anywhere y
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/v3.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 ### ⏳ Installation
 
@@ -89,7 +89,7 @@ Enjoy 🎉
 
 ### 🖐 Requirements
 
-Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
+Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
 
 **Supported operating systems**:
 
@@ -147,7 +147,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
+Follow our [migration guides](https://strapi.io/documentation/developer-docs/latest/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 
