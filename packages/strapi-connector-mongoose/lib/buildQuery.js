@@ -412,7 +412,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         $match: {
           $and: defaultMatches.concat({
             $expr: {
-              $in: ['$_id', '$$localAlias'],
+              $in: ['$_id', { $ifNull: ['$$localAlias', []] }],
             },
           }),
         },
@@ -424,7 +424,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
           $match: {
             $and: defaultMatches.concat({
               $expr: {
-                $in: ['$_id', '$$localAlias'],
+                $in: ['$_id', { $ifNull: ['$$localAlias', []] }],
               },
             }),
           },
@@ -435,7 +435,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         $match: {
           $and: defaultMatches.concat({
             $expr: {
-              $in: ['$$localId', `$${assoc.via}`],
+              $in: ['$$localId', { $ifNull: [`$${assoc.via}`, []] }],
             },
           }),
         },

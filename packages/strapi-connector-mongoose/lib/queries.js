@@ -550,7 +550,11 @@ module.exports = ({ model, strapi }) => {
           return model
             .aggregate()
             .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
-            .project({ _id: 0, id: '$_id', count: { $size: `$${assoc.alias}` } });
+            .project({
+              _id: 0,
+              id: '$_id',
+              count: { $size: { $ifNull: [`$${assoc.alias}`, []] } },
+            });
         }
         const assocModel = strapi.db.getModelByAssoc(assoc);
         return assocModel
