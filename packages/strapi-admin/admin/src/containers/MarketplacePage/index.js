@@ -43,7 +43,10 @@ const MarketPlacePage = () => {
       }
     } catch (err) {
       strapi.unlockApp();
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
