@@ -59,7 +59,7 @@ try {
 }
 ```
 
-### `sendError(error, configureScope)`
+### `getInstance()`
 
 Use it if you need direct access to the Sentry instance, which should already already be initialized. It's useful if `sendError` doesn't suit your needs.
 
