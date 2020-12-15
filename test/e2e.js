@@ -60,7 +60,6 @@ const main = async (database, args) => {
 
     process.exit(0);
   } catch (error) {
-    console.log(error);
     process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });

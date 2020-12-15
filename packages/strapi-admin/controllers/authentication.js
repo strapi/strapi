@@ -147,7 +147,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    await strapi.admin.services.auth.forgotPassword(input);
+    strapi.admin.services.auth.forgotPassword(input);
 
     ctx.status = 204;
   },
