@@ -11,7 +11,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@apollo/federation": "^0.20.1",
+    "@apollo/federation": "^0.20.7",
     "apollo-server-koa": "2.18.2",
     "dataloader": "^1.4.0",
     "glob": "^7.1.6",
