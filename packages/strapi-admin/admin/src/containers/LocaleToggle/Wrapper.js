@@ -3,6 +3,8 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   -webkit-font-smoothing: antialiased;
 
+  padding-left: 20px;
+
   > div {
     height: 6rem;
     line-height: 5.8rem;
@@ -42,9 +44,9 @@ const Wrapper = styled.div`
     -webkit-font-smoothing: antialiased;
     span {
       color: #333740;
-      font-size: 11px;
+      font-size: 13px;
       font-family: Lato;
-      font-weight: 600;
+      font-weight: 500;
       letter-spacing: 0.5;
       vertical-align: baseline;
     }
@@ -77,7 +79,7 @@ const Wrapper = styled.div`
       padding: 0px 15px;
       line-height: 40px;
       color: #f75b1d;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 500;
       letter-spacing: 0.5;
       &:hover,
