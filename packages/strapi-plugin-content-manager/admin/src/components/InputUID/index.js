@@ -5,10 +5,11 @@ import { ErrorMessage, Description } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
 import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
-import { request, LoadingIndicator } from 'strapi-helper-plugin';
+import { request, LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 
+import getTrad from '../../utils/getTrad';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
 import useDataManager from '../../hooks/useDataManager';
@@ -20,6 +21,7 @@ import Input from './InputUID';
 import Wrapper from './Wrapper';
 import SubLabel from './SubLabel';
 import UID_REGEX from './regex';
+import RightContentLabel from './RightContentLabel';
 
 const InputContainer = styled.div`
   position: relative;
@@ -60,6 +62,7 @@ const InputUID = ({
   const initialValue = initialData[name];
   const createdAtName = get(layout, ['options', 'timestamps', 0]);
   const isCreation = !initialData[createdAtName];
+  const { formatMessage } = useGlobalContext();
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -229,7 +232,18 @@ const InputUID = ({
                 value={value || ''}
               />
               <RightContent>
-                <RightLabel availability={availability} label={label} />
+                {label && (
+                  <RightContentLabel color="blue">
+                    {formatMessage({
+                      id: getTrad('components.uid.regenerate'),
+                    })}
+                  </RightContentLabel>
+                )}
+                {!isLoading && !label && availability && (
+                  <RightLabel
+                    isAvailable={availability.isAvailable || value === availability.suggestion}
+                  />
+                )}
                 {editable && (
                   <RegenerateButton
                     onMouseEnter={handleGenerateMouseEnter}
