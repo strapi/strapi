@@ -1,6 +1,8 @@
 'use strict';
 
 const pmap = require('p-map');
+const { prop } = require('lodash/fp');
+const { MANY_RELATIONS } = require('strapi-utils').relations.constants;
 
 const { createQueryWithLifecycles, withLifecycles } = require('./helpers');
 const { createFindPageQuery, createSearchPageQuery } = require('./paginated-queries');
@@ -18,6 +20,42 @@ module.exports = function createQuery(opts) {
     model,
     connectorQuery,
   });
+
+  const findOrSearchWithRelationCounts = method =>
+    async function(params, populate) {
+      const xManyAssocs = [];
+      const xToOnePopulate = [];
+      model.associations
+        .filter(assoc => !populate || populate.includes(assoc.alias))
+        .forEach(assoc => {
+          if (MANY_RELATIONS.includes(assoc.nature)) {
+            xManyAssocs.push(assoc);
+          } else {
+            xToOnePopulate.push(assoc.alias);
+          }
+        });
+
+      const { results, pagination } = await this[method](params, model, xToOnePopulate);
+      const resultsIds = results.map(prop('id'));
+
+      const counters = await Promise.all(
+        xManyAssocs.map(async assoc => ({
+          field: assoc.alias,
+          counts: await this.fetchRelationCounters(assoc.alias, resultsIds),
+        }))
+      );
+
+      results.forEach(entity => {
+        counters.forEach(counter => {
+          entity[counter.field] = { count: counter.counts[entity.id] || 0 };
+        });
+      });
+
+      return {
+        results,
+        pagination,
+      };
+    };
 
   return {
     get model() {
@@ -79,5 +117,11 @@ module.exports = function createQuery(opts) {
       model,
       fn: createSearchPageQuery(connectorQuery),
     }),
+    searchWithRelationCounts(...args) {
+      return findOrSearchWithRelationCounts('searchPage').bind(this)(...args);
+    },
+    findWithRelationCounts(...args) {
+      return findOrSearchWithRelationCounts('findPage').bind(this)(...args);
+    },
   };
 };
