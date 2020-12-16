@@ -40,7 +40,10 @@ const CreatePage = () => {
         id: 'app.components.Button.reset',
         defaultMessage: 'Reset',
       }),
-      onClick: handleReset,
+      onClick: () => {
+        handleReset();
+        permissionsRef.current.resetForm();
+      },
       color: 'cancel',
       type: 'button',
     },

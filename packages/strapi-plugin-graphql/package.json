@@ -11,7 +11,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@apollo/federation": "^0.20.1",
+    "@apollo/federation": "^0.20.7",
     "apollo-server-koa": "2.18.2",
     "dataloader": "^1.4.0",
     "glob": "^7.1.6",
@@ -29,7 +29,7 @@
     "strapi-utils": "3.3.4"
   },
   "devDependencies": {
-    "cross-env": "^5.2.1",
+    "cross-env": "^7.0.3",
     "koa": "^2.13.0",
     "rimraf": "3.0.2"
   },
