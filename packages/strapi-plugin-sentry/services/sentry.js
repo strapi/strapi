@@ -72,7 +72,7 @@ const createSentryService = () => {
 
       instance.withScope(scope => {
         // Configure the Sentry scope using the provided callback
-        if (settings.sendMetadata) {
+        if (configureScope && settings.sendMetadata) {
           configureScope(scope, instance);
         }
         // Actually send the Error to Sentry

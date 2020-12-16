@@ -51,6 +51,10 @@ Use it to manually send errors to Sentry. The `configureScope` is optional, it a
 try {
   // Your code here
 } catch (error) {
+  // Either send a simple error
+  strapi.plugins.sentry.services.sentry.sendError(error);
+
+  // Or send an error with a customized Sentry scope
   strapi.plugins.sentry.services.sentry.sendError(error, (scope, sentryInstance) => {
     // Customize the scope here
     scope.setTag('my_custom_tag', 'Tag value');
