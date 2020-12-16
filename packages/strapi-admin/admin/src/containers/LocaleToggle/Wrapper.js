@@ -3,15 +3,13 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   -webkit-font-smoothing: antialiased;
 
-  padding-left: 20px;
-
   > div {
     height: 6rem;
     line-height: 5.8rem;
     z-index: 999;
     > button {
       width: 100%;
-      padding-right: 30px;
+      padding: 0 30px;
       background: transparent;
       border: none;
       border-radius: 0;

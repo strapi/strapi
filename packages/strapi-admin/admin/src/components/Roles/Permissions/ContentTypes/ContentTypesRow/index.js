@@ -268,7 +268,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onSubmit={handleModalSubmit}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
-          headerBreadCrumbs={[contentType.name, 'app.components.LeftMenuLinkContainer.settings']}
+          headerBreadCrumbs={[
+            contentType.info.name,
+            'app.components.LeftMenuLinkContainer.settings',
+          ]}
         />
       )}
     </RowWrapper>

@@ -27,6 +27,14 @@ const RelationPreviewList = ({
   const tooltipId = useMemo(() => `${rowId}-${cellId}`, [rowId, cellId]);
   const valueToDisplay = value ? value[mainField.name] : '-';
 
+  if (value === undefined) {
+    return (
+      <Truncate>
+        <Truncated>-</Truncated>
+      </Truncate>
+    );
+  }
+
   if (isSingle) {
     return (
       <Truncate>

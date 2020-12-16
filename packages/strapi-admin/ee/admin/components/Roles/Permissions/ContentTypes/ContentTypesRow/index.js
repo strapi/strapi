@@ -257,7 +257,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
               return (
                 <PermissionCheckbox
-                  key={`${contentType.name}-${action}`}
+                  key={`${contentType.info.name}-${action}`}
                   hasConditions={checkConditions(action)}
                   disabled={isSuperAdmin}
                   value={hasAllAttributeByAction(action) || hasContentTypeAction(action)}
@@ -290,7 +290,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onSubmit={handleModalSubmit}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
-          headerBreadCrumbs={[contentType.name, 'app.components.LeftMenuLinkContainer.settings']}
+          headerBreadCrumbs={[
+            contentType.info.name,
+            'app.components.LeftMenuLinkContainer.settings',
+          ]}
         />
       )}
     </RowWrapper>
