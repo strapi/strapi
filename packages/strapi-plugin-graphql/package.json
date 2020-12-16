@@ -15,7 +15,7 @@
     "apollo-server-koa": "2.18.2",
     "dataloader": "^1.4.0",
     "glob": "^7.1.6",
-    "graphql": "15.3.0",
+    "graphql": "15.4.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
     "graphql-playground-middleware-koa": "^1.6.20",
