@@ -10,18 +10,22 @@ import PageTitle from '../../components/SettingsPageTitle';
 import makeSelectApp from '../App/selectors';
 import makeSelectAdmin from '../Admin/selectors';
 import { Detail, InfoText } from './components';
-import { checkLatestStrapiVersion } from '../../utils';
 
 const makeSelectAppInfos = () => createSelector(makeSelectApp(), appState => appState.appInfos);
 const makeSelectLatestRelease = () =>
-  createSelector(makeSelectAdmin(), adminState => adminState.latestStrapiReleaseTag);
+  createSelector(makeSelectAdmin(), adminState => ({
+    latestStrapiReleaseTag: adminState.latestStrapiReleaseTag,
+    shouldUpdateStrapi: adminState.shouldUpdateStrapi,
+  }));
 
 const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const selectAppInfos = useMemo(makeSelectAppInfos, []);
   const selectLatestRealase = useMemo(makeSelectLatestRelease, []);
   const appInfos = useSelector(state => selectAppInfos(state));
-  const latestStrapiReleaseTag = useSelector(state => selectLatestRealase(state));
+  const { shouldUpdateStrapi, latestStrapiReleaseTag } = useSelector(state =>
+    selectLatestRealase(state)
+  );
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -38,11 +42,6 @@ const ApplicationInfosPage = () => {
   const strapiVersion = formatMessage({ id: 'Settings.application.strapi-version' });
   const nodeVersion = formatMessage({ id: 'Settings.application.node-version' });
   const editionTitle = formatMessage({ id: 'Settings.application.edition-title' });
-
-  const shouldUpdateStrapi = checkLatestStrapiVersion(
-    appInfos.strapiVersion,
-    latestStrapiReleaseTag
-  );
 
   /* eslint-disable indent */
   const upgradeLink = shouldUpdateStrapi

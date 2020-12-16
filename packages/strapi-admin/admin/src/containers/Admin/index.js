@@ -136,15 +136,15 @@ export class Admin extends React.Component {
       const {
         data: { tag_name },
       } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
+      const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
-      getStrapiLatestReleaseSucceeded(tag_name);
+      getStrapiLatestReleaseSucceeded(tag_name, shouldUpdateStrapi);
 
       const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
 
       if (!showUpdateNotif) {
         return;
       }
-      const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
       if (shouldUpdateStrapi) {
         strapi.notification.toggle({
@@ -233,7 +233,7 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: { isLoading, latestStrapiReleaseTag, userPermissions },
+      admin: { isLoading, shouldUpdateStrapi, userPermissions },
       global: {
         autoReload,
         blockApp,
@@ -274,7 +274,7 @@ export class Admin extends React.Component {
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
         fetchUserPermissions={this.fetchUserPermissions}
         formatMessage={formatMessage}
-        latestStrapiReleaseTag={latestStrapiReleaseTag}
+        shouldUpdateStrapi={shouldUpdateStrapi}
         menu={this.menuRef.current}
         plugins={plugins}
         settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
@@ -284,7 +284,7 @@ export class Admin extends React.Component {
         <UserProvider value={userPermissions}>
           <Wrapper>
             <LeftMenu
-              latestStrapiReleaseTag={latestStrapiReleaseTag}
+              shouldUpdateStrapi={shouldUpdateStrapi}
               version={strapiVersion}
               plugins={plugins}
               ref={this.menuRef}
@@ -345,7 +345,7 @@ Admin.propTypes = {
   admin: PropTypes.shape({
     appError: PropTypes.bool,
     isLoading: PropTypes.bool,
-    latestStrapiReleaseTag: PropTypes.string.isRequired,
+    shouldUpdateStrapi: PropTypes.bool.isRequired,
     userPermissions: PropTypes.array,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,

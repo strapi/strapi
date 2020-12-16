@@ -6,11 +6,9 @@ import Icon from './Icon';
 import Link from './Link';
 import Notif from './Notif';
 import Wrapper from './Wrapper';
-import { checkLatestStrapiVersion } from '../../../../utils';
 
 const ApplicationDetailLink = () => {
-  const { latestStrapiReleaseTag, strapiVersion } = useGlobalContext();
-  const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, latestStrapiReleaseTag);
+  const { shouldUpdateStrapi } = useGlobalContext();
 
   return (
     <Wrapper>
