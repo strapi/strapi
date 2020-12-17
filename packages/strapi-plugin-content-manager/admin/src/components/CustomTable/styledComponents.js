@@ -1,7 +1,4 @@
-/* eslint-disable */
-import React from 'react';
-import styled, { css } from 'styled-components';
-import { Carret } from '@buffetjs/icons';
+import styled from 'styled-components';
 import { themePropTypes } from 'strapi-helper-plugin';
 
 const Table = styled.table`
@@ -26,36 +23,6 @@ const Table = styled.table`
       display: inline;
     }
   }
-`;
-
-const Thead = styled.thead`
-  background: #f3f3f3;
-  height: 43px;
-  overflow: hidden;
-
-  th {
-    height: 43px;
-    border: none !important;
-    font-size: 1.3rem;
-    vertical-align: middle !important;
-    > span {
-      position: relative;
-      &.sortable {
-        cursor: pointer;
-      }
-    }
-  }
-  ${({ isBulkable }) => {
-    if (isBulkable) {
-      return css`
-        > tr {
-          th:first-child {
-            width: 50px;
-          }
-        }
-      `;
-    }
-  }}
 `;
 
 const TableEmpty = styled.tr`
@@ -96,84 +63,6 @@ const TableRow = styled.tr`
   }
 `;
 
-const Arrow = styled(({ isUp, ...rest }) => <Carret {...rest} />)`
-  margin-left: 5px;
-  ${({ isUp }) =>
-    isUp &&
-    `
-    transform: rotateZ(180deg);
-
-  `}
-`;
-
-const Truncate = styled.div``;
-
-const Truncated = styled.p`
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 0;
-`;
-
-const TableDelete = styled.tr`
-  width: 100%;
-  height: 36px;
-  background: #f7f8f8;
-
-  td {
-    height: 36px;
-    line-height: 36px;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: #333740;
-    text-align: left;
-    border-collapse: collapse;
-    border-top: 1px solid #f1f1f2 !important;
-  }
-`;
-
-const ActionContainer = styled.td`
-  text-align: right;
-
-  i,
-  svg {
-    margin-left: 15px;
-    font-size: 1rem;
-    height: 1rem;
-    color: #333740;
-
-    &:first-of-type {
-      margin-left: 0px;
-    }
-  }
-`;
-const DeleteSpan = styled.span`
-  font-weight: 600;
-  -webkit-font-smoothing: antialiased;
-  &:after {
-    content: '—';
-    margin: 0 7px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-`;
-
-const DeletAllSpan = styled.span`
-  position: absolute;
-  color: #f64d0a;
-  font-weight: 500;
-  cursor: pointer;
-  &:after {
-    position: relative;
-    top: -1px;
-    content: '\f2ed';
-    margin-left: 7px;
-    font-size: 10px;
-    font-family: FontAwesome;
-    -webkit-font-smoothing: antialiased;
-  }
-`;
-
 const LoadingContainer = styled.div`
   display: block;
   margin: auto;
@@ -192,18 +81,4 @@ LoadingWrapper.propTypes = {
   ...themePropTypes,
 };
 
-export {
-  ActionContainer,
-  Arrow,
-  DeletAllSpan,
-  DeleteSpan,
-  LoadingContainer,
-  LoadingWrapper,
-  Table,
-  TableDelete,
-  TableEmpty,
-  TableRow,
-  Thead,
-  Truncate,
-  Truncated,
-};
+export { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow };

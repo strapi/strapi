@@ -168,6 +168,10 @@ const FormModal = () => {
         headerId,
       });
 
+      const collectionTypesForRelation = sortedContentTypesList.filter(
+        ({ kind }) => kind === 'collectionType'
+      );
+
       // Reset all the modification when opening the edit category modal
       if (modalType === 'editCategory') {
         setModifiedData();
@@ -322,8 +326,8 @@ const FormModal = () => {
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
-          nameToSetForRelation: get(sortedContentTypesList, ['0', 'title'], 'error'),
-          targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
+          nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
+          targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
           step,

@@ -297,6 +297,42 @@ xhr.send(
 
 :::
 
+::: tab "Many-way" id="many-way"
+
+Many-way relationships are useful to link one entry to many other entries. However, only one of the models can be queried with its linked items.
+
+#### Example
+
+A `pet` can be owned by many people (multiple `users`).
+
+**Path —** `./api/pet/models/Pet.settings.json`.
+
+```json
+{
+  "attributes": {
+    "owners": {
+      "collection": "user"
+    }
+  }
+}
+```
+
+**Example**
+
+```js
+// Create a pet
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/pets', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    owners: ['5c151d9d5b1d55194d3209be', '5fc666a5bf16f48ed050ef5b'], // The id of the users you want to link
+  })
+);
+```
+
+:::
+
 ::: tab "One-to-One" id="one-to-one"
 
 One-to-One relationships are useful when you have one entity that could be linked to only one other entity. _**And vice versa**_.

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.3.4",
+  "version": "3.4.0",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -9,12 +9,12 @@
     "required": true
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.1",
-    "@buffetjs/custom": "3.3.1",
-    "@buffetjs/hooks": "3.3.1",
-    "@buffetjs/icons": "3.3.1",
-    "@buffetjs/styles": "3.3.1",
-    "@buffetjs/utils": "3.3.1",
+    "@buffetjs/core": "3.3.2-next.2",
+    "@buffetjs/custom": "3.3.2-next.2",
+    "@buffetjs/hooks": "3.3.2-next.2",
+    "@buffetjs/icons": "3.3.2-next.2",
+    "@buffetjs/styles": "3.3.2-next.2",
+    "@buffetjs/utils": "3.3.2-next.2",
     "@sindresorhus/slugify": "1.1.0",
     "classnames": "^2.2.6",
     "codemirror": "^5.46.0",
@@ -40,13 +40,14 @@
     "react-redux": "^7.0.2",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
+    "react-tooltip": "4.2.11",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "sanitize-html": "2.1.1",
-    "strapi-helper-plugin": "3.3.4",
-    "strapi-utils": "3.3.4",
+    "strapi-helper-plugin": "3.4.0",
+    "strapi-utils": "3.4.0",
     "yup": "^0.27.0"
   },
   "author": {
