@@ -9,15 +9,17 @@ const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
 const { errors } = require('strapi-plugin-upload');
 
+let upload_config = {};
 module.exports = {
   init(config) {
-    cloudinary.config(config);
+    cloudinary.config(config.account_config);
+    upload_config = config.upload_config;
 
     return {
-      upload(file, customConfig = {}) {
+      upload(file) {
         return new Promise((resolve, reject) => {
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto', public_id: file.hash, ...customConfig },
+            { resource_type: 'auto', public_id: file.hash, ...upload_config },
             (err, image) => {
               if (err) {
                 if (err.message.includes('File size too large')) {
