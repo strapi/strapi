@@ -358,42 +358,40 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
         break;
       }
       default: {
-        if (columnsToAlter.length > 0) {
-          const alterTable = async trx => {
-            await Promise.all(
-              columnsToAlter.map(col => {
-                return ORM.knex.schema
-                  .alterTable(table, tbl => {
-                    tbl.dropUnique(col, uniqueColName(table, col));
-                  })
-                  .catch(() => {});
-              })
-            );
-            await trx.schema.alterTable(table, tbl => {
-              alterColumns(tbl, _.pick(attributes, columnsToAlter), {
-                tableExists,
-              });
+        const alterTable = async trx => {
+          await Promise.all(
+            columnsToAlter.map(col => {
+              return ORM.knex.schema
+                .alterTable(table, tbl => {
+                  tbl.dropUnique(col, uniqueColName(table, col));
+                })
+                .catch(() => {});
+            })
+          );
+          await trx.schema.alterTable(table, tbl => {
+            alterColumns(tbl, _.pick(attributes, columnsToAlter), {
+              tableExists,
             });
-          };
+          });
+        };
 
-          try {
-            await ORM.knex.transaction(trx => alterTable(trx));
-          } catch (err) {
-            if (err.code === '23505' && definition.client === 'pg') {
-              strapi.log.error(
-                `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.message}\n\t- ${err.detail}`
-              );
-            } else if (definition.client === 'mysql' && err.errno === 1062) {
-              strapi.log.error(
-                `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
-              );
-            } else {
-              strapi.log.error(`Migration failed`);
-              strapi.log.error(err);
-            }
-
-            return false;
+        try {
+          await ORM.knex.transaction(trx => alterTable(trx));
+        } catch (err) {
+          if (err.code === '23505' && definition.client === 'pg') {
+            strapi.log.error(
+              `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.message}\n\t- ${err.detail}`
+            );
+          } else if (definition.client === 'mysql' && err.errno === 1062) {
+            strapi.log.error(
+              `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
+            );
+          } else {
+            strapi.log.error(`Migration failed`);
+            strapi.log.error(err);
           }
+
+          return false;
         }
       }
     }
