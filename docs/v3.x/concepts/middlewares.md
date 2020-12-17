@@ -71,7 +71,7 @@ To configure the middlewares of your application, you need to create or edit the
 
 By default this file doesn't exist, you will have to create it.
 
-**Availabe options**
+**Available options**
 
 - `timeout` (integer): Defines the maximum allowed milliseconds to load a middleware.
 - `load` (Object): Configuration middleware loading. See details [here](#load-order)
