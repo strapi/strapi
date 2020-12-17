@@ -61,7 +61,7 @@ const SOCIAL_LINKS = [
   },
 ];
 
-const HomePage = ({ global: { plugins }, history: { push } }) => {
+const HomePage = ({ history: { push } }) => {
   const { error, isLoading, posts } = useFetch();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
@@ -89,7 +89,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
   const headerId = hasAlreadyCreatedContentTypes
     ? 'HomePage.greetings'
     : 'app.components.HomePage.welcome';
-  const username = get(auth.getUserInfo(), 'username', '');
+  const username = get(auth.getUserInfo(), 'firstname', '');
   const linkProps = hasAlreadyCreatedContentTypes
     ? {
         id: 'app.components.HomePage.button.blog',

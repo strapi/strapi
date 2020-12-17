@@ -92,7 +92,10 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
     }
 
@@ -112,7 +115,10 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
     }
 
@@ -227,7 +233,10 @@ const HomePage = () => {
         type: 'ON_DELETE_MEDIAS_SUCCEEDED',
       });
     } catch (err) {
-      strapi.notification.error(err);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: err,
+      });
 
       dispatch({
         type: 'ON_DELETE_MEDIAS_ERROR',

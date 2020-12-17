@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 const { getDefinitionFromStore } = require('./utils/store-definition');
 
@@ -11,7 +12,7 @@ const getDraftAndPublishMigrationWay = async (definition, ORM) => {
   const previousDraftAndPublish = contentTypesUtils.hasDraftAndPublish(previousDef);
   const actualDraftAndPublish = contentTypesUtils.hasDraftAndPublish(definition);
 
-  if (previousDraftAndPublish === actualDraftAndPublish) {
+  if (!previousDefRow || previousDraftAndPublish === actualDraftAndPublish) {
     return 'none';
   }
   if (!previousDraftAndPublish && actualDraftAndPublish) {

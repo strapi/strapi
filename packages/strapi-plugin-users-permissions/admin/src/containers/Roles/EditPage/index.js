@@ -74,11 +74,17 @@ const EditPage = () => {
       .then(() => {
         onSubmitSucceeded({ name: data.name, description: data.description });
         permissionsRef.current.setFormAfterSubmit();
-        strapi.notification.success(getTrad('Settings.roles.edited'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('Settings.roles.edited') },
+        });
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       })
       .finally(() => {
         setIsSubmiting(false);

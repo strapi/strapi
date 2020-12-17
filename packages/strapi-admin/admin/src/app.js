@@ -33,6 +33,7 @@ import { merge } from 'lodash';
 import Fonts from './components/Fonts';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
+import { showNotification as showNewNotification } from './containers/NewNotification/actions';
 
 import basename from './utils/basename';
 import getInjectors from './utils/reducerInjectors';
@@ -121,7 +122,14 @@ const remoteURL = (() => {
 })();
 
 const displayNotification = (message, status) => {
+  console.warn(
+    // Validate the text
+    'Deprecated: Will be deleted.\nPlease use strapi.notification.toggle(config).\nDocs : https://strapi.io/documentation/v3.x/plugin-development/frontend-development.html#strapi-notification'
+  );
   dispatch(showNotification(message, status));
+};
+const displayNewNotification = config => {
+  dispatch(showNewNotification(config));
 };
 const lockApp = data => {
   dispatch(freezeApp(data));
@@ -145,6 +153,10 @@ window.strapi = Object.assign(window.strapi || {}, {
   remoteURL,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
+    // New notification api
+    toggle: config => {
+      displayNewNotification(config);
+    },
     success: message => {
       displayNotification(message, 'success');
     },

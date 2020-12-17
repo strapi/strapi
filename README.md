@@ -12,18 +12,21 @@
     <img src="https://assets.strapi.io/uploads/deploy_button_platform_sh_d032f646a7.png"  />
   </a>
 
-<a href="https://marketplace.digitalocean.com/apps/strapi">
-<img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
-</a>
+  <a href="https://marketplace.digitalocean.com/apps/strapi">
+    <img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
+  </a>
 
-<a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
-<img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
-</a>
+  <a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
+    <img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
+  </a>
 
-<a href="https://fastandcomfy.io/strapi/">
-<img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
-</a>
-
+  <a href="https://fastandcomfy.io/strapi/">
+    <img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
+  </a>
+  
+  <a href="https://render.com/docs/deploy-strapi">
+    <img src="https://assets.strapi.io/uploads/deploy_render_e076b6f23a.png" height="44" />
+  </a>
 </p>
 
 <p align="center">
@@ -54,7 +57,7 @@
 Strapi is a free and open-source headless CMS delivering your content anywhere you need.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
+- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
 - **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
 
@@ -100,9 +103,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-Please note at this time Node v14 **is not** supported
-
-- NodeJS >= 10.16 <13
+- NodeJS >= 10.16 <=14
 - NPM >= 6.x
 
 **Database:**
@@ -138,6 +139,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 - [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
 - [Community Forum](https://forum.strapi.io) (Questions and Discussions)
+- [Academy](https://academy.strapi.io) (Learn the fundamentals of Strapi)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)

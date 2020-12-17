@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -23,7 +25,7 @@ describe('Test type enumeration', () => {
 
   test('Create entry value enumeration input JSON', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withenumeration.withenumeration',
+      '/content-manager/collection-types/application::withenumeration.withenumeration',
       {
         body: {
           field: 'one',
@@ -37,37 +39,22 @@ describe('Test type enumeration', () => {
     });
   });
 
-  test('Create entry value enumeration input Formdata', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withenumeration.withenumeration',
-      {
-        formData: {
-          data: JSON.stringify({ field: 'two' }),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200); // should return 201
-    expect(res.body).toMatchObject({
-      field: 'two',
-    });
-  });
-
   test('Reading entry, returns correct value', async () => {
     const res = await rq.get(
-      '/content-manager/explorer/application::withenumeration.withenumeration'
+      '/content-manager/collection-types/application::withenumeration.withenumeration'
     );
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    res.body.forEach(entry => {
+    expect(res.body.pagination).toBeDefined();
+    expect(Array.isArray(res.body.results)).toBe(true);
+    res.body.results.forEach(entry => {
       expect(['one', 'two'].includes(entry.field)).toBe(true);
     });
   });
 
   test('Updating entry sets the right value and format', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withenumeration.withenumeration',
+      '/content-manager/collection-types/application::withenumeration.withenumeration',
       {
         body: {
           field: 'two',
@@ -76,7 +63,7 @@ describe('Test type enumeration', () => {
     );
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/application::withenumeration.withenumeration/${res.body.id}`,
+      `/content-manager/collection-types/application::withenumeration.withenumeration/${res.body.id}`,
       {
         body: {
           field: 'one',
@@ -93,7 +80,7 @@ describe('Test type enumeration', () => {
 
   test('Allows null value', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withenumeration.withenumeration',
+      '/content-manager/collection-types/application::withenumeration.withenumeration',
       {
         body: {
           field: null,
@@ -109,7 +96,7 @@ describe('Test type enumeration', () => {
 
   test('Throws an error when the enumeration value is not in the options', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withenumeration.withenumeration',
+      '/content-manager/collection-types/application::withenumeration.withenumeration',
       {
         body: {
           field: 'invalid-value',

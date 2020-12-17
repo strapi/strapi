@@ -2,9 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { templateConfiguration } = require('strapi-utils');
-
-const env = require('./env-helper');
+const { templateConfiguration, env } = require('strapi-utils');
 
 module.exports = dir => {
   if (!fs.existsSync(dir)) return {};

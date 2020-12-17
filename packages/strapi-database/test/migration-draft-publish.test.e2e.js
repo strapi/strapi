@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const createModelsUtils = require('../../../test/helpers/models');
@@ -11,12 +10,15 @@ let modelsUtils;
 let data = {
   dogs: [],
 };
-
 const dogModel = {
   draftAndPublish: false,
   attributes: {
     name: {
       type: 'string',
+    },
+    code: {
+      type: 'string',
+      unique: true,
     },
   },
   connection: 'default',
@@ -28,95 +30,143 @@ const dogModel = {
 const dogs = [
   {
     name: 'Nelson',
+    code: '1',
   },
   {
     name: 'Atos',
+    code: '2',
   },
 ];
 
+const sortDogs = dogs => _.sortBy(dogs, 'name');
+
 describe('Migration - draft and publish', () => {
-  beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([dogModel]);
-    for (const dog of dogs) {
-      const res = await rq({
+  describe.each([
+    ['without table modifications', {}, {}],
+    ['with table modifications', { town: { type: 'string' } }, { color: { type: 'string' } }],
+  ])('%p', (testName, tableModification1, tableModification2) => {
+    beforeAll(async () => {
+      data.dogs = [];
+      const token = await registerAndLogin();
+      rq = createAuthRequest(token);
+      modelsUtils = createModelsUtils({ rq });
+      await modelsUtils.createContentTypes([dogModel]);
+      const createdDogs = [];
+      for (const dog of dogs) {
+        const res = await rq({
+          method: 'POST',
+          url: '/content-manager/collection-types/application::dog.dog',
+          body: dog,
+        });
+        createdDogs.push(res.body);
+      }
+      data.dogs = sortDogs(createdDogs);
+    }, 60000);
+
+    afterAll(async () => {
+      await rq({
         method: 'POST',
-        url: '/content-manager/explorer/application::dog.dog',
-        body: dog,
+        url: `/content-manager/collection-types/application::dog.dog/actions/bulkDelete`,
+        body: {
+          ids: data.dogs.map(({ id }) => id),
+        },
       });
-      data.dogs.push(res.body);
-    }
-  }, 60000);
 
-  afterAll(async () => {
-    const queryString = data.dogs.map((p, i) => `${i}=${p.id}`).join('&');
-    await rq({
-      method: 'DELETE',
-      url: `/content-manager/explorer/deleteAll/application::dog.dog?${queryString}`,
+      await modelsUtils.deleteContentTypes(['dog']);
+    }, 60000);
+
+    describe('Enabling D&P on a content-type', () => {
+      test('No published_at before enabling the feature', async () => {
+        let { body } = await rq({
+          url: '/content-manager/collection-types/application::dog.dog',
+          method: 'GET',
+        });
+
+        expect(body.results.length).toBe(2);
+
+        const sortedBody = sortDogs(body.results);
+
+        sortedBody.forEach((dog, index) => {
+          expect(dog).toMatchObject(data.dogs[index]);
+          expect(dog.published_at).toBeUndefined();
+        });
+      });
+
+      test('Published_at is equal to created_at after enabling the feature', async () => {
+        const schema = await modelsUtils.getContentTypeSchema('dog');
+
+        await modelsUtils.modifyContentType({
+          ...schema,
+          attributes: _.merge(schema.attributes, tableModification1),
+          draftAndPublish: true,
+        });
+
+        let { body } = await rq({
+          method: 'GET',
+          url: '/content-manager/collection-types/application::dog.dog',
+        });
+
+        expect(body.results.length).toBe(2);
+
+        const sortedBody = sortDogs(body.results);
+
+        sortedBody.forEach((dog, index) => {
+          expect(dog).toMatchObject(data.dogs[index]);
+          expect(dog.published_at).toBe(dog.createdAt || dog.created_at);
+          expect(!isNaN(new Date(dog.published_at).valueOf())).toBe(true);
+        });
+
+        data.dogs = sortedBody;
+      });
     });
-    await modelsUtils.deleteContentTypes(['dog']);
-  }, 60000);
 
-  describe('Enabling D&P on a content-type', () => {
-    test('No published_at before enabling the feature', async () => {
-      let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
-        method: 'GET',
-      });
-      expect(body.length).toBe(2);
-      const expectDog = expectDog => dog =>
-        dog.name === expectDog.name && _.isUndefined(dog.published_at);
-      expect(body.find(expectDog(data.dogs[0])));
-      expect(body.find(expectDog(data.dogs[1])));
-    });
+    describe('Disabling D&P on a content-type', () => {
+      test('No published_at after disabling the feature + draft removed', async () => {
+        const res = await rq({
+          method: 'POST',
+          url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
+        });
 
-    test('Published_at is equal to created_at after enabling the feature', async () => {
-      const schema = await modelsUtils.getContentTypeSchema('dog');
-      await modelsUtils.modifyContentType({
-        ...schema,
-        draftAndPublish: true,
-      });
+        data.dogs[1] = res.body;
 
-      let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
-        method: 'GET',
-      });
-      expect(body.length).toBe(2);
-      const expectDog = expectDog => dog =>
-        dog.name === expectDog.name &&
-        dog.published_at === (dog.createdAt || dog.created_at) &&
-        !isNaN(new Date(dog.published_at).valueOf());
-      expect(body.find(expectDog(data.dogs[0])));
-      expect(body.find(expectDog(data.dogs[1])));
-      data.dogs = body;
-    });
-  });
+        const schema = await modelsUtils.getContentTypeSchema('dog');
 
-  describe('Disabling D&P on a content-type', () => {
-    test('No published_at after disabling the feature + draft removed', async () => {
-      const res = await rq({
-        url: `/content-manager/explorer/application::dog.dog/unpublish/${data.dogs[1].id}`,
-        method: 'POST',
-      });
-      data.dogs[1] = res.body;
+        await modelsUtils.modifyContentType({
+          ...schema,
+          draftAndPublish: false,
+          attributes: _.merge(schema.attributes, tableModification2),
+        });
 
-      const schema = await modelsUtils.getContentTypeSchema('dog');
-      await modelsUtils.modifyContentType({
-        ...schema,
-        draftAndPublish: false,
-      });
-      // drafts should have been deleted with the migration, so we removed
-      data.dogs = data.dogs.filter(dog => !_.isNil(dog.published_at));
+        // drafts should have been deleted with the migration, so we remove them
+        data.dogs = data.dogs.filter(dog => !_.isNil(dog.published_at));
 
-      let { body } = await rq({
-        url: '/content-manager/explorer/application::dog.dog',
-        method: 'GET',
+        let { body } = await rq({
+          url: '/content-manager/collection-types/application::dog.dog',
+          method: 'GET',
+        });
+
+        expect(body.results.length).toBe(1);
+        expect(body.results[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
+        expect(body.results[0].published_at).toBeUndefined();
       });
-      expect(body.length).toBe(1);
-      expect(body[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
-      expect(body[0].published_at).toBeUndefined();
+      test('Unique constraint is kept after disabling the feature', async () => {
+        const dogToCreate = { code: 'sameCode' };
+        let res = await rq({
+          method: 'POST',
+          url: `/content-manager/explorer/application::dog.dog/`,
+          body: dogToCreate,
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject(dogToCreate);
+        data.dogs.push(res.body);
+
+        res = await rq({
+          method: 'POST',
+          url: `/content-manager/explorer/application::dog.dog/`,
+          body: dogToCreate,
+        });
+        expect(res.statusCode).toBe(400);
+      });
     });
   });
 });

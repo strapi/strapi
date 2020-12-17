@@ -7,6 +7,8 @@ const {
   contentTypes: contentTypesUtils,
 } = require('strapi-utils');
 const uploadFiles = require('./utils/upload-files');
+
+// TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
 module.exports = ({ db, eventHub, entityValidator }) => ({
@@ -29,6 +31,14 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     }
 
     return db.query(model).find(params, populate);
+  },
+
+  findPage({ params, populate }, { model }) {
+    return db.query(model).findPage(params, populate);
+  },
+
+  findWithRelationCounts({ params, populate }, { model }) {
+    return db.query(model).findWithRelationCounts(params, populate);
   },
 
   /**
@@ -142,8 +152,16 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    * @return {Promise}
    */
 
-  search({ params }, { model }) {
-    return db.query(model).search(params);
+  search({ params, populate }, { model }) {
+    return db.query(model).search(params, populate);
+  },
+
+  searchWithRelationCounts({ params, populate }, { model }) {
+    return db.query(model).searchWithRelationCounts(params, populate);
+  },
+
+  searchPage({ params, populate }, { model }) {
+    return db.query(model).searchPage(params, populate);
   },
 
   /**

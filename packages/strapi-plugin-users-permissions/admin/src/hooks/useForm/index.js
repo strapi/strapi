@@ -35,7 +35,10 @@ const useUserForm = (endPoint, permissions) => {
             type: 'GET_DATA_ERROR',
           });
           console.error(err);
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       }
     };
