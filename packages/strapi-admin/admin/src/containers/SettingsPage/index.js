@@ -24,23 +24,28 @@ import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
 import { useSettingsMenu } from '../../hooks';
 import { retrieveGlobalLinks } from '../../utils';
+import ApplicationInfosPage from '../ApplicationInfosPage';
 import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import UsersEditPage from '../Users/ProtectedEditPage';
 import UsersListPage from '../Users/ProtectedListPage';
 import RolesEditPage from '../Roles/ProtectedEditPage';
+import WebhooksCreateView from '../Webhooks/ProtectedCreateView';
+import WebhooksEditView from '../Webhooks/ProtectedEditView';
+import WebhooksListView from '../Webhooks/ProtectedListView';
+import {
+  ApplicationDetailLink,
+  MenuWrapper,
+  SettingDispatcher,
+  StyledLeftMenu,
+  Wrapper,
+} from './components';
+
 import {
   createRoute,
-  findFirstAllowedEndpoint,
   createPluginsLinksRoutes,
   makeUniqueRoutes,
   getSectionsToDisplay,
 } from './utils';
-import WebhooksCreateView from '../Webhooks/ProtectedCreateView';
-import WebhooksEditView from '../Webhooks/ProtectedEditView';
-import WebhooksListView from '../Webhooks/ProtectedListView';
-import SettingDispatcher from './SettingDispatcher';
-import LeftMenu from './StyledLeftMenu';
-import Wrapper from './Wrapper';
 
 function SettingsPage() {
   const { settingId } = useParams();
@@ -50,14 +55,6 @@ function SettingsPage() {
   const { isLoading, menu } = useSettingsMenu();
   const { formatMessage } = useIntl();
   const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
-  const firstAvailableEndpoint = useMemo(() => {
-    // Don't need to compute while permissions are being checked
-    if (isLoading) {
-      return '';
-    }
-
-    return findFirstAllowedEndpoint(menu);
-  }, [menu, isLoading]);
 
   // Create all the <Route /> that needs to be created by the plugins
   // For instance the upload plugin needs to create a <Route />
@@ -95,8 +92,8 @@ function SettingsPage() {
     return <LoadingIndicatorPage />;
   }
 
-  if (!settingId && firstAvailableEndpoint) {
-    return <Redirect to={firstAvailableEndpoint} />;
+  if (!settingId) {
+    return <Redirect to={`${settingsBaseURL}/application-infos`} />;
   }
 
   const settingTitle = formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' });
@@ -109,14 +106,23 @@ function SettingsPage() {
 
         <div className="row">
           <div className="col-md-3">
-            <LeftMenu>
-              {filteredMenu.map(item => {
-                return <LeftMenuList {...item} key={item.id} />;
-              })}
-            </LeftMenu>
+            <MenuWrapper>
+              <ApplicationDetailLink />
+              <StyledLeftMenu>
+                {filteredMenu.map(item => {
+                  return <LeftMenuList {...item} key={item.id} />;
+                })}
+              </StyledLeftMenu>
+            </MenuWrapper>
           </div>
+
           <div className="col-md-9">
             <Switch>
+              <Route
+                exact
+                path={`${settingsBaseURL}/application-infos`}
+                component={ApplicationInfosPage}
+              />
               <Route exact path={`${settingsBaseURL}/roles`} component={ProtectedRolesListPage} />
               <Route
                 exact

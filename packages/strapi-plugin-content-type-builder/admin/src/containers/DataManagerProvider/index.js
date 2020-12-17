@@ -103,7 +103,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       });
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -122,11 +125,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   useEffect(() => {
     if (currentEnvironment === 'development' && !autoReload) {
-      strapi.notification.info(
-        formatMessageRef.current({
-          id: getTrad('notification.info.autoreaload-disable'),
-        })
-      );
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('notification.info.autoreaload-disable') },
+      });
     }
   }, [autoReload, currentEnvironment]);
 
@@ -235,7 +237,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -285,7 +290,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -312,7 +320,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -464,7 +475,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
 
       console.error({ err: err.response });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
