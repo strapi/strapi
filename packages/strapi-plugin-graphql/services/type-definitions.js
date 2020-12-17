@@ -456,16 +456,18 @@ const buildCollectionType = model => {
         },
       });
 
-      // Generate the aggregation for the given model
-      const aggregationSchema = formatModelConnectionsGQL({
-        fields: typeDefObj,
-        model,
-        name: modelName,
-        resolver: resolverOpts,
-        plugin,
-      });
+      if (isQueryEnabled(_schema, `${pluralName}Connection`)) {
+        // Generate the aggregation for the given model
+        const aggregationSchema = formatModelConnectionsGQL({
+          fields: typeDefObj,
+          model,
+          name: modelName,
+          resolver: resolverOpts,
+          plugin,
+        });
 
-      mergeSchemas(localSchema, aggregationSchema);
+        mergeSchemas(localSchema, aggregationSchema);
+      }
     }
   }
 

@@ -57,10 +57,7 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
             'plugins::content-manager.explorer.create': [],
             'plugins::content-manager.explorer.update': [],
           },
-          contentTypeActions: {
-            'plugins::content-manager.explorer.create': true,
-            'plugins::content-manager.explorer.update': true,
-          },
+          contentTypeActions: {},
           attributes: {
             email: {
               actions: [
@@ -91,7 +88,6 @@ describe('ADMIN | utils | formatPermissionsFromApi', () => {
             'plugins::content-manager.explorer.read': [],
           },
           contentTypeActions: {
-            'plugins::content-manager.explorer.read': true,
             'plugins::content-manager.explorer.delete': true,
           },
           attributes: {
