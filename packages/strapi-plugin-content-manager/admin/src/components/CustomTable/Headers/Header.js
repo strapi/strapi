@@ -9,14 +9,16 @@ const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField
   const [sortBy, sortOrder] = _sort.split(':');
 
   let sortField = name;
+  let useRelation = false;
 
   if (type === 'relation') {
+    useRelation = true;
     sortField = `${name}.${mainField.name}`;
   }
 
   const handleClick = () => {
     if (sortable) {
-      emitEvent('didSortEntries');
+      emitEvent('didSortEntries', { useRelation });
 
       const isCurrentSort = sortField === sortBy;
       const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
