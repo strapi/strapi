@@ -18,6 +18,10 @@ const dogModel = {
     name: {
       type: 'string',
     },
+    code: {
+      type: 'string',
+      unique: true,
+    },
   },
   connection: 'default',
   name: 'dog',
@@ -28,9 +32,11 @@ const dogModel = {
 const dogs = [
   {
     name: 'Nelson',
+    code: '1',
   },
   {
     name: 'Atos',
+    code: '2',
   },
 ];
 
@@ -130,6 +136,24 @@ describe('Migration - draft and publish', () => {
         expect(body.length).toBe(1);
         expect(body[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
         expect(body[0].published_at).toBeUndefined();
+      });
+      test('Unique constraint is kept after disabling the feature', async () => {
+        const dogToCreate = { code: 'sameCode' };
+        let res = await rq({
+          method: 'POST',
+          url: `/content-manager/explorer/application::dog.dog/`,
+          body: dogToCreate,
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject(dogToCreate);
+        data.dogs.push(res.body);
+
+        res = await rq({
+          method: 'POST',
+          url: `/content-manager/explorer/application::dog.dog/`,
+          body: dogToCreate,
+        });
+        expect(res.statusCode).toBe(400);
       });
     });
   });
