@@ -334,7 +334,7 @@ Then you can run any queries available on the model. You should refer to the spe
 
 :::: tabs
 
-::: tab Bookshelf
+::: tab SQL
 
 ### Bookshelf
 
@@ -353,9 +353,41 @@ const result = await strapi
 const fields = result.toJSON();
 ```
 
+### Knex
+
+Documentation: [http://knexjs.org/#Builder](http://knexjs.org/#Builder)
+
+You can access the Knex instance with 
+
+```js
+const knex = strapi.connections.default;
+```
+
+You can then use Knex to build your own custom queries to the DB. You will lose all the functionalities of the model, 
+but this could come handy if you are building a more custom schema.
+Please note that if you are using the [draft system](draft-and-publish.md), Strapi nullyfies all the Draft columns util they are published.
+
+**Example**
+
+```js
+
+const knex = strapi.connections.default;
+const result = await knex('restaurants')
+  .where('cities', 'berlin')
+  .whereNot('cities.published_at', null)
+  .join('chefs', 'restaurants.id', 'chefs.restaurant_id')
+  .select('*')
+  .fetch();
+
+return result;
+```
+
+**We strongly suggest to sanitize any strings before making queries to the DB**
+Never attempt to make a raw query with data coming straight from the front-end.
+
 :::
 
-::: tab Mongoose
+::: tab MongoDB
 
 ### Mongoose
 

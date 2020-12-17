@@ -278,6 +278,49 @@ describe('Test Graphql API End to End', () => {
         },
         [postsPayload[0]],
       ],
+      [
+        {
+          _or: [{ name_in: ['post 2'] }, { bigint_eq: 1316130638171 }],
+        },
+        [postsPayload[0], postsPayload[1]],
+      ],
+      [
+        {
+          _where: { nullable_null: false },
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
+          _where: { _or: { nullable_null: false } },
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
+          _where: [{ nullable_null: false }],
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
+          _where: [{ _or: [{ name_in: ['post 2'] }, { bigint_eq: 1316130638171 }] }],
+        },
+        [postsPayload[0], postsPayload[1]],
+      ],
+      [
+        {
+          _where: [
+            {
+              _or: [
+                { name_in: ['post 2'] },
+                { _or: [{ bigint_eq: 1316130638171 }, { nullable_null: false }] },
+              ],
+            },
+          ],
+        },
+        [postsPayload[0], postsPayload[1]],
+      ],
     ])('List posts with where clause %o', async (where, expected) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `

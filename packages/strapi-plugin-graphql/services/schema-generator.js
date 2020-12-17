@@ -92,7 +92,7 @@ const generateSchema = () => {
       ${scalarDef}
     `;
 
-  // // Build schema.
+  // Build schema.
   if (strapi.config.environment !== 'production') {
     // Write schema.
     const schema = makeExecutableSchema({
@@ -101,15 +101,6 @@ const generateSchema = () => {
     });
 
     writeGenerateSchema(graphql.printSchema(schema));
-  }
-
-  // Remove custom scalar (like Upload), if not using Federation
-  // Federation requires scalar Upload defined in typeDefs to use
-  // buildFederatedSchema()
-  // (https://www.apollographql.com/docs/apollo-server/federation/implementing-services/)
-  const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
-  if (!isFederated) {
-    typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
   }
 
   return {

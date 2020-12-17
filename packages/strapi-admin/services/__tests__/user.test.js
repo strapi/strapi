@@ -48,7 +48,7 @@ describe('User', () => {
         },
       };
 
-      const input = { firstname: 'John', lastname: 'Doe', email: 'johndoe@email.com' };
+      const input = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
       const expected = { ...input, isActive: false, roles: [], registrationToken: 'token' };
 
       const result = await userService.create(input);
@@ -78,9 +78,9 @@ describe('User', () => {
       };
 
       const input = {
-        firstname: 'John',
+        firstname: 'Kai',
         lastname: 'Doe',
-        email: 'johndoe@email.com',
+        email: 'kaidoe@email.com',
         password: 'Pcw123',
       };
       const expected = {
@@ -120,9 +120,9 @@ describe('User', () => {
       };
 
       const input = {
-        firstname: 'John',
+        firstname: 'Kai',
         lastname: 'Doe',
-        email: 'johndoe@email.com',
+        email: 'kaidoe@email.com',
         roles: [2],
         isActive: true,
         registrationToken: 'another-token',
@@ -387,7 +387,7 @@ describe('User', () => {
   });
 
   describe('Fetch user', () => {
-    const user = { firstname: 'John', lastname: 'Doe', email: 'johndoe@email.com' };
+    const user = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
 
     beforeEach(() => {
       const findOne = jest.fn(({ id }) =>
@@ -743,5 +743,87 @@ describe('User', () => {
         { method: 'update', patch: true, require: false }
       );
     });
+  });
+
+  describe('resetPasswordByEmail', () => {
+    test('Throws on missing user', async () => {
+      const email = 'email@email.fr';
+      const password = 'invalidpass';
+
+      const findOne = jest.fn(() => {
+        return null;
+      });
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+          };
+        },
+      };
+
+      await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+        new Error(`User not found for email: ${email}`)
+      );
+
+      expect(findOne).toHaveBeenCalledWith({ email }, undefined);
+    });
+
+    test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
+      'Throws on invalid password',
+      async password => {
+        const email = 'email@email.fr';
+
+        const findOne = jest.fn(() => ({ id: 1 }));
+
+        global.strapi = {
+          query() {
+            return {
+              findOne,
+            };
+          },
+        };
+
+        await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+          new Error(
+            'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
+          )
+        );
+
+        expect(findOne).toHaveBeenCalledWith({ email }, undefined);
+      }
+    );
+  });
+
+  test('Call the update function with the expected params', async () => {
+    const email = 'email@email.fr';
+    const password = 'Testing1234';
+    const hash = 'hash';
+    const userId = 1;
+
+    const findOne = jest.fn(() => ({ id: userId }));
+    const update = jest.fn();
+    const hashPassword = jest.fn(() => hash);
+
+    global.strapi = {
+      query() {
+        return {
+          findOne,
+          update,
+        };
+      },
+      admin: {
+        services: {
+          auth: {
+            hashPassword,
+          },
+        },
+      },
+    };
+
+    await userService.resetPasswordByEmail(email, password);
+    expect(findOne).toHaveBeenCalledWith({ email }, undefined);
+    expect(update).toHaveBeenCalledWith({ id: userId }, { password: hash });
+    expect(hashPassword).toHaveBeenCalledWith(password);
   });
 });

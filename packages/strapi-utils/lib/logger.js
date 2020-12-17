@@ -7,16 +7,25 @@
 const pino = require('pino');
 const _ = require('lodash');
 
-const logLevels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
+const logLevels = Object.keys(pino.levels.values);
 
 function getLogLevel() {
-  if (
-    _.isString(process.env.STRAPI_LOG_LEVEL) &&
-    _.includes(logLevels, process.env.STRAPI_LOG_LEVEL.toLowerCase())
-  ) {
-    return process.env.STRAPI_LOG_LEVEL;
+  if (!_.isString(process.env.STRAPI_LOG_LEVEL)) {
+    // Default value.
+    return 'debug';
   }
-  return 'debug';
+
+  const logLevel = process.env.STRAPI_LOG_LEVEL.toLowerCase();
+
+  if (!_.includes(logLevels, logLevel)) {
+    throw new Error(
+      "Invalid log level set in STRAPI_LOG_LEVEL environment variable. Accepted values are: '" +
+        logLevels.join("', '") +
+        "'."
+    );
+  }
+
+  return logLevel;
 }
 
 function getBool(envVar, defaultValue) {

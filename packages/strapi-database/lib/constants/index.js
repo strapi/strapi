@@ -46,6 +46,7 @@ const RESERVED_ATTRIBUTE_NAMES = [
   'schema',
   'toObject',
   'validate',
+  'format',
 ];
 
 module.exports = {

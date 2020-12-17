@@ -31,8 +31,9 @@ const createSingleTypeController = ({ model, service }) => {
      *
      * @return {Object|Array}
      */
-    async find() {
-      const entity = await service.find();
+    async find(ctx) {
+      const { query } = ctx;
+      const entity = await service.find(query);
       return sanitize(entity);
     },
 
@@ -90,7 +91,9 @@ const createCollectionTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async findOne(ctx) {
-      const entity = await service.findOne({ id: ctx.params.id });
+      const { query, params } = ctx;
+      const entity = await service.findOne({ ...query, id: params.id });
+
       return sanitize(entity);
     },
 
@@ -100,7 +103,7 @@ const createCollectionTypeController = ({ model, service }) => {
      * @return {Number}
      */
     count(ctx) {
-      if (ctx.query._q) {
+      if (_.has(ctx.query, '_q')) {
         return service.countSearch(ctx.query);
       }
       return service.count(ctx.query);

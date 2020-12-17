@@ -11,7 +11,7 @@ const getDraftAndPublishMigrationWay = async (definition, ORM) => {
   const previousDraftAndPublish = contentTypesUtils.hasDraftAndPublish(previousDef);
   const actualDraftAndPublish = contentTypesUtils.hasDraftAndPublish(definition);
 
-  if (previousDraftAndPublish === actualDraftAndPublish) {
+  if (!previousDefRow || previousDraftAndPublish === actualDraftAndPublish) {
     return 'none';
   }
   if (!previousDraftAndPublish && actualDraftAndPublish) {

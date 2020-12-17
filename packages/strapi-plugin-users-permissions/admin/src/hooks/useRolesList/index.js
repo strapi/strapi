@@ -47,7 +47,10 @@ const useRolesList = (shouldFetchData = true) => {
         });
 
         if (message !== 'Forbidden') {
-          strapi.notification.error(message);
+          strapi.notification.toggle({
+            type: 'warning',
+            message,
+          });
         }
       }
     }

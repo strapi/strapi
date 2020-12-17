@@ -33,9 +33,9 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   }
 
   const roles = _.has(entity, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ users: entity.created_by.id }, [])
+    ? await strapi.query('role', 'admin').find({ 'users.id': entity[CREATED_BY_ATTRIBUTE].id }, [])
     : [];
-  const entityWithRoles = _.set(_.cloneDeep(entity), 'created_by.roles', roles);
+  const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
 
   const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
 
@@ -43,7 +43,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     throw strapi.errors.forbidden();
   }
 
-  return { pm, entity };
+  return { pm, entity: entityWithRoles };
 };
 
 module.exports = {

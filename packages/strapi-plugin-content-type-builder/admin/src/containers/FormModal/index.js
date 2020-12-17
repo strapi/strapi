@@ -661,7 +661,10 @@ const FormModal = () => {
             push({ search: '' });
             submitData(modifiedData);
           } else {
-            strapi.notification.error('notification.contentType.relations.conflict');
+            strapi.notification.toggle({
+              type: 'warning',
+              message: { id: 'notification.contentType.relations.conflict' },
+            });
           }
 
           return;

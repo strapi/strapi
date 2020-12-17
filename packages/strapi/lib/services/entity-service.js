@@ -24,7 +24,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     // return first element and ignore filters
     if (kind === 'singleType') {
-      const results = await db.query(model).find({ _limit: 1 }, populate);
+      const results = await db.query(model).find({ _limit: 1, ...params }, populate);
       return _.first(results) || null;
     }
 

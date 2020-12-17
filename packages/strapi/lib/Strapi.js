@@ -27,6 +27,7 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
 
 /**
@@ -66,6 +67,8 @@ class Strapi {
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
+
+    createUpdateNotifier(this).notify();
   }
 
   get EE() {
@@ -277,7 +280,7 @@ class Strapi {
 
   async load() {
     this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
+      if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
         ctx.set('strapi', 'You are so French!');
         ctx.status = 204;
       } else {

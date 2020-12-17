@@ -32,7 +32,9 @@ options: [--no-run|--use-npm|--debug|--quickstart|--dbclient=<dbclient> --dbhost
   - **&#60;dbssl&#62;** and **&#60;dbauth&#62;** are available only for `mongo` and are optional.
   - **--dbforce** Allows you to overwrite content if the provided database is not empty. Only available for `postgres`, `mysql`, and is optional.
 
-## strapi develop|dev
+## strapi develop
+
+**Alias**: `dev`
 
 Start a Strapi application with autoReload enabled.
 
@@ -89,7 +91,9 @@ options: [--no-optimization]
 - **strapi build --no-optimization**<br/>
   Builds the administration panel without minimizing the assets. The build duration is faster.
 
-## strapi configuration:dump|config:dump
+## strapi configuration:dump
+
+**Alias**: `config:dump`
 
 Dumps configurations to a file or stdout to help you migrate to production.
 
@@ -120,7 +124,9 @@ In case of doubt, you should avoid committing the dump file into a versioning sy
 
 :::
 
-## strapi configuration:restore|config:restore
+## strapi configuration:restore
+
+**Alias**: `config:restore`
 
 Restores a configuration dump into your application.
 
@@ -150,6 +156,27 @@ When running the restore command, you can choose from three different strategies
 - **replace**: Will create missing keys and replace existing ones.
 - **merge**: Will create missing keys and merge existing keys with their new value.
 - **keep**: Will create missing keys and keep existing keys as is.
+
+## strapi admin:reset-user-password
+
+**Alias** `admin:reset-password`
+
+Reset an admin user's password.
+You can pass the email and new password as options or set them interactivly if you call the command without passing the options.
+
+**Example**
+
+```bash
+strapi admin:reset-user-password --email=chef@strapi.io --password=Gourmet1234
+```
+
+**Options**
+
+| Option         | Type   | Description               |
+| -------------- | ------ | ------------------------- |
+| -e, --email    | string | The user email            |
+| -p, --password | string | New password for the user |
+| -h, --help     |        | display help for command  |
 
 ## strapi generate:api
 

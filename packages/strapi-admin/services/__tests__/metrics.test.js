@@ -23,4 +23,15 @@ describe('Metrics', () => {
     expect(countUsers).toHaveBeenCalledWith();
     expect(countRoles).toHaveBeenCalledWith();
   });
+
+  test('sendDidUpdateRolePermissions', async () => {
+    const send = jest.fn(() => Promise.resolve());
+    global.strapi = {
+      telemetry: { send },
+    };
+
+    await metricsService.sendDidUpdateRolePermissions();
+
+    expect(send).toHaveBeenCalledWith('didUpdateRolePermissions');
+  });
 });

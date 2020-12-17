@@ -25,26 +25,33 @@ const storeDefinition = async (definition, ORM) => {
   const defToStore = formatDefinitionToStore(definition);
   const existingDef = await getDefinitionFromStore(definition, ORM);
 
-  await strapi.models['core_store']
-    .forge({
-      id: existingDef ? existingDef.id : undefined,
-      key: `model_def_${definition.uid}`,
-      type: 'object',
-      value: defToStore,
-    })
-    .save();
+  const defData = {
+    key: `model_def_${definition.uid}`,
+    type: 'object',
+    value: defToStore,
+  };
+
+  if (existingDef) {
+    return strapi.models['core_store'].forge({ id: existingDef.id }).save(defData);
+  }
+
+  return strapi.models['core_store'].forge(defData).save();
 };
 
-const didDefinitionChange = async (definition, ORM) => {
-  const previousDefRow = await getDefinitionFromStore(definition, ORM);
-  const previousDefJSON = _.get(previousDefRow, 'value', null);
-  const actualDefJSON = formatDefinitionToStore(definition);
+const getColumnsWhereDefinitionChanged = async (columnsName, definition, ORM) => {
+  const previousDefinitionRow = await getDefinitionFromStore(definition, ORM);
+  const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
 
-  return previousDefJSON !== actualDefJSON;
+  return columnsName.filter(columnName => {
+    const previousAttribute = _.get(previousDefinition, ['attributes', columnName], null);
+    const actualAttribute = _.get(definition, ['attributes', columnName], null);
+
+    return !_.isEqual(previousAttribute, actualAttribute);
+  });
 };
 
 module.exports = {
   storeDefinition,
-  didDefinitionChange,
   getDefinitionFromStore,
+  getColumnsWhereDefinitionChanged,
 };

@@ -9,14 +9,12 @@ const {
   },
 } = require('strapi-utils');
 
-const getFetchParams = (params, model) => {
+const getFetchParams = params => {
   const defaultParams = {};
 
-  if (hasDraftAndPublish(model)) {
-    Object.assign(defaultParams, {
-      _publicationState: DP_PUB_STATE_LIVE,
-    });
-  }
+  Object.assign(defaultParams, {
+    _publicationState: DP_PUB_STATE_LIVE,
+  });
 
   return { ...defaultParams, ...params };
 };
@@ -56,8 +54,11 @@ const createSingleTypeService = ({ model, strapi }) => {
      *
      * @return {Promise}
      */
-    find(populate) {
-      return strapi.entityService.find({ populate }, { model: modelName });
+    find(params, populate) {
+      return strapi.entityService.find(
+        { params: getFetchParams(params, model), populate },
+        { model: modelName }
+      );
     },
 
     /**

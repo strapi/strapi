@@ -68,6 +68,7 @@ const Ul = styled.ul`
       cursor: not-allowed !important;
     }
     input[type='checkbox'] {
+      cursor: not-allowed;
       &:after {
         cursor: not-allowed;
         color: ${theme.main.colors.grey};

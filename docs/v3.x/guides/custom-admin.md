@@ -29,7 +29,27 @@ Let's eject this file to be able to customize it.
 
 In this new file, paste the current [HomePage container](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin/src/containers/HomePage/index.js) code.
 
-To run your application, you will have to run the `yarn develop --watch-admin` command.
+To run your application, run the following command:
+
+:::: tabs
+
+::: tab yarn
+
+```bash
+yarn develop --watch-admin
+```
+
+:::
+
+::: tab npm
+
+```bash
+npm run develop -- --watch-admin
+```
+
+:::
+
+::::
 
 If you visit the admin, nothing will have changed in the home page. And it's normal!
 
@@ -87,7 +107,27 @@ Let's eject the file to be able to customize it.
 
 In this new file, paste the current [dateFormats](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/utils/dateFormats.js) code.
 
-To run your application, you will have to run the `yarn develop --watch-admin` command.
+To run your application, run the following command:
+
+:::: tabs
+
+::: tab yarn
+
+```bash
+yarn develop --watch-admin
+```
+
+:::
+
+::: tab npm
+
+```bash
+npm run develop -- --watch-admin
+```
+
+:::
+
+::::
 
 If you visit the entry list view of your content type, nothing will have changed. And it's normal!
 
@@ -114,7 +154,7 @@ And tada, the date will now display with the new format.
 
 ## Build the new admin
 
-Well now you have the admin panel you want. But during all the process, the admin panel was updated on the run time because of the command `yarn develop --watch-admin`.
+Well now you have the admin panel you want. But during all the process, the admin panel was updated on the run time because of the command `yarn develop --watch-admin` or `npm run develop -- --watch-admin`.
 
 If you start your application using `yarn start` or `yarn develop` the admin will be the old version. Your updates are not applied.
 

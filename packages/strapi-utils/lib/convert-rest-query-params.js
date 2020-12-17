@@ -8,6 +8,9 @@ const {
   constants: { DP_PUB_STATES },
 } = require('./content-types');
 
+const BOOLEAN_OPERATORS = ['or'];
+const QUERY_OPERATORS = ['_where', '_or'];
+
 /**
  * Global converter
  * @param {Object} params
@@ -154,8 +157,6 @@ const VALID_REST_OPERATORS = [
   'null',
 ];
 
-const BOOLEAN_OPERATORS = ['or'];
-
 /**
  * Parse where params
  */
@@ -216,4 +217,5 @@ const convertWhereClause = (whereClause, value) => {
 module.exports = {
   convertRestQueryParams,
   VALID_REST_OPERATORS,
+  QUERY_OPERATORS,
 };
