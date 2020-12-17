@@ -34,8 +34,7 @@ module.exports = function createQuery(opts) {
             xToOnePopulate.push(assoc.alias);
           }
         });
-
-      const { results, pagination } = await this[method](params, model, xToOnePopulate);
+      const { results, pagination } = await this[method](params, xToOnePopulate);
       const resultsIds = results.map(prop('id'));
 
       const counters = await Promise.all(
