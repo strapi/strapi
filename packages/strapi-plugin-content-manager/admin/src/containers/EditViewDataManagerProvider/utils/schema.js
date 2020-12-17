@@ -55,7 +55,7 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
   });
 });
 
-const getAttributes = data => get(data, ['schema', 'attributes'], {});
+const getAttributes = data => get(data, ['attributes'], {});
 
 const createYupSchema = (
   model,

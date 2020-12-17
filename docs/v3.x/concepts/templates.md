@@ -99,11 +99,11 @@ module.exports = function(scope) {
   return {
     package: {
       dependencies: {
-        "strapi-plugin-graphql": scope.strapiVersion,
-      }
-    }
-  }
-}
+        'strapi-plugin-graphql': scope.strapiVersion,
+      },
+    },
+  };
+};
 ```
 
 The `template` directory is where you can extend the file contents of a Strapi project. All the children are optional, you should only include the files that will overwrite the default Strapi app.

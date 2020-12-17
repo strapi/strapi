@@ -6,7 +6,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true,
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": [
       "created_at",

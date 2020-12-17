@@ -1,9 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const _ = require('lodash');
 
 const publicKey = fs.readFileSync(path.join(__dirname, '../utils/resources/key.pub'));
 

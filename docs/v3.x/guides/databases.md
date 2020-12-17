@@ -42,6 +42,7 @@ The [Quick Start Guide](../getting-started/quick-start.md) is a complete step-by
 :::
 
 ## Other SQL Databases (PostgreSQL, MySQL)
+
 Refer to the [configuration section](../concepts/configurations.md#database) for all supported options to setup Strapi with your SQL database.
 
 ::: tip

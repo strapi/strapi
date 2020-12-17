@@ -22,6 +22,7 @@ function useSelect({ schema, componentFieldName }) {
     checkFormErrors,
     moveComponentField,
     removeRepeatableField,
+    schema,
     triggerFormValidation,
   };
 }

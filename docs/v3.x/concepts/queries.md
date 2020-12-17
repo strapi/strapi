@@ -357,20 +357,19 @@ const fields = result.toJSON();
 
 Documentation: [http://knexjs.org/#Builder](http://knexjs.org/#Builder)
 
-You can access the Knex instance with 
+You can access the Knex instance with
 
 ```js
 const knex = strapi.connections.default;
 ```
 
-You can then use Knex to build your own custom queries to the DB. You will lose all the functionalities of the model, 
+You can then use Knex to build your own custom queries to the DB. You will lose all the functionalities of the model,
 but this could come handy if you are building a more custom schema.
 Please note that if you are using the [draft system](draft-and-publish.md), Strapi nullyfies all the Draft columns util they are published.
 
 **Example**
 
 ```js
-
 const knex = strapi.connections.default;
 const result = await knex('restaurants')
   .where('cities', 'berlin')

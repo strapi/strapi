@@ -200,13 +200,13 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           <PermissionName disabled>
             <Checkbox
               onChange={handleAllContentTypeActions}
-              name={contentType.name}
+              name={contentType.info.name}
               disabled={isSuperAdmin}
               someChecked={someChecked}
               value={allCurrentActionsSize === allActionsSize}
             />
             <CollapseLabel
-              title={contentType.name}
+              title={contentType.info.name}
               alignItems="center"
               isCollapsable
               onClick={handleToggleAttributes}
@@ -219,7 +219,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                 lineHeight="20px"
                 textTransform="uppercase"
               >
-                {contentType.name}
+                {contentType.info.name}
               </Text>
               <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
             </CollapseLabel>
@@ -240,7 +240,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                   hasConditions={checkConditions(action)}
                   disabled
                   value={value}
-                  name={`${contentType.name}-${action}`}
+                  name={`${contentType.info.name}-${action}`}
                   someChecked={someChecked}
                 />
               );
@@ -268,7 +268,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onSubmit={handleModalSubmit}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
-          headerBreadCrumbs={[contentType.name, 'app.components.LeftMenuLinkContainer.settings']}
+          headerBreadCrumbs={[
+            contentType.info.name,
+            'app.components.LeftMenuLinkContainer.settings',
+          ]}
         />
       )}
     </RowWrapper>
