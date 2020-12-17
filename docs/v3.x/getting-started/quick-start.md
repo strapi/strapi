@@ -110,7 +110,7 @@ You have now seen **two different ways** to use the **relation** field type to a
 Navigate to [**SETTINGS** - **User's roles**](http://localhost:1337/admin/settings/users-permissions/roles).
 
 - Click the **Public** Role.
-- Scroll down under **Permissions**, find **Restaurant**. Click the checkbox next to **find** and **findone**.
+- Scroll down under **Permissions**, open the **Application** tab and find **Restaurant**. Click the checkbox next to **find** and **findone**.
 - Repeat and find **Category**. Click the checkbox next to **find** and **findone**.
 - Click **Save**.
 

@@ -217,13 +217,13 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           <PermissionName disabled={isSuperAdmin}>
             <Checkbox
               onChange={handleAllContentTypeActions}
-              name={contentType.name}
+              name={contentType.info.name}
               disabled={isSuperAdmin}
               someChecked={allCurrentActionsSize > 0 && allCurrentActionsSize < allActionsSize}
               value={allCurrentActionsSize === allActionsSize}
             />
             <CollapseLabel
-              title={contentType.name}
+              title={contentType.info.name}
               alignItems="center"
               isCollapsable
               onClick={handleToggleAttributes}
@@ -236,7 +236,7 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
                 lineHeight="20px"
                 textTransform="uppercase"
               >
-                {contentType.name}
+                {contentType.info.name}
               </Text>
               <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
             </CollapseLabel>
@@ -257,11 +257,11 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
 
               return (
                 <PermissionCheckbox
-                  key={`${contentType.name}-${action}`}
+                  key={`${contentType.info.name}-${action}`}
                   hasConditions={checkConditions(action)}
                   disabled={isSuperAdmin}
                   value={hasAllAttributeByAction(action) || hasContentTypeAction(action)}
-                  name={`${contentType.name}-${action}`}
+                  name={`${contentType.info.name}-${action}`}
                   onChange={() => handleContentTypeActionSelect(action)}
                   {...checkboxProps}
                 />
@@ -290,7 +290,10 @@ const ContentTypeRow = ({ index, contentType, permissionsLayout }) => {
           onSubmit={handleModalSubmit}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
-          headerBreadCrumbs={[contentType.name, 'app.components.LeftMenuLinkContainer.settings']}
+          headerBreadCrumbs={[
+            contentType.info.name,
+            'app.components.LeftMenuLinkContainer.settings',
+          ]}
         />
       )}
     </RowWrapper>

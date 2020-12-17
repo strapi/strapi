@@ -721,8 +721,6 @@ To add a new provider on Strapi, you will need to perform changes onto the follo
 ```
 extensions/users-permissions/services/Providers.js
 extensions/users-permissions/config/functions/bootstrap.js
-extensions/users-permissions/admin/src/components/PopUpForm/index.js
-extensions/users-permissions/admin/src/translations/en.json
 ```
 
 If these files don't exist you will need to copy from your `node_modules` or the Strapi mono-repo. You can see [plugin extensions](../concepts/customization.md#plugin-extensions) for more information on how it works.
@@ -831,31 +829,6 @@ discord: {
 
 <!-- #### Tests -->
 <!-- TODO Add documentation about how to configure unit test for the new provider -->
-
-### Configure frontend for your new provider
-
-To make the new provider available on the front end of the application,
-edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
-Add the new provider info. For our discord provider it will look like:
-
-```js
-case 'discord':
-  return `${strapi.backendURL}/connect/discord/callback`;
-```
-
-### Add language translation
-
-Add the language translation in `packages/strapi-plugin-users-permissions/admin/src/translations/en.json`
-
-```js
-'PopUpForm.Providers.discord.providerConfig.redirectURL': 'The redirect URL to add in your Discord application configurations',
-```
-
-These two change will set up the popup message that appears in the UI. That's it, now you should be able to use your new provider.
-
-### Rebuild the Admin Panel
-
-Please see the following [documentation](../admin-panel/customization.md#build) on rebuilding the admin panel.
 
 ## Templating emails
 
