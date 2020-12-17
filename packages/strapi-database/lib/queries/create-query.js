@@ -3,6 +3,7 @@
 const pmap = require('p-map');
 
 const { createQueryWithLifecycles, withLifecycles } = require('./helpers');
+const { createRelationsCountsQuery } = require('./relations-counts-queries');
 const { createFindPageQuery, createSearchPageQuery } = require('./paginated-queries');
 
 /**
@@ -16,6 +17,37 @@ module.exports = function createQuery(opts) {
   const createFn = createQueryWithLifecycles({
     query: 'create',
     model,
+    connectorQuery,
+  });
+
+  const createMany = (entities, { concurrency = 100 } = {}, ...rest) => {
+    return pmap(entities, entity => createFn(entity, ...rest), {
+      concurrency,
+      stopOnError: true,
+    });
+  };
+
+  const findPage = withLifecycles({
+    query: 'findPage',
+    model,
+    fn: createFindPageQuery(connectorQuery),
+  });
+
+  const findWithRelationCounts = createRelationsCountsQuery({
+    model,
+    fn: findPage,
+    connectorQuery,
+  });
+
+  const searchPage = withLifecycles({
+    query: 'searchPage',
+    model,
+    fn: createSearchPageQuery(connectorQuery),
+  });
+
+  const searchWithRelationCounts = createRelationsCountsQuery({
+    model,
+    fn: searchPage,
     connectorQuery,
   });
 
@@ -56,12 +88,7 @@ module.exports = function createQuery(opts) {
     },
 
     create: createFn,
-    createMany: (entities, { concurrency = 100 } = {}, ...rest) => {
-      return pmap(entities, entity => createFn(entity, ...rest), {
-        concurrency,
-        stopOnError: true,
-      });
-    },
+    createMany,
     update: createQueryWithLifecycles({ query: 'update', model, connectorQuery }),
     delete: createQueryWithLifecycles({ query: 'delete', model, connectorQuery }),
     find: createQueryWithLifecycles({ query: 'find', model, connectorQuery }),
@@ -69,15 +96,12 @@ module.exports = function createQuery(opts) {
     count: createQueryWithLifecycles({ query: 'count', model, connectorQuery }),
     search: createQueryWithLifecycles({ query: 'search', model, connectorQuery }),
     countSearch: createQueryWithLifecycles({ query: 'countSearch', model, connectorQuery }),
-    fetchRelationCounters: async (...args) => {
-      const results = await connectorQuery.fetchRelationCounters(...args);
-      return results.reduce((map, { id, count }) => Object.assign(map, { [id]: count }), {});
-    },
-    findPage: withLifecycles({ query: 'findPage', model, fn: createFindPageQuery(connectorQuery) }),
-    searchPage: withLifecycles({
-      query: 'searchPage',
-      model,
-      fn: createSearchPageQuery(connectorQuery),
-    }),
+
+    // paginated queries
+    findPage,
+    searchPage,
+
+    searchWithRelationCounts,
+    findWithRelationCounts,
   };
 };

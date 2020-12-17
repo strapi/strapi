@@ -37,6 +37,10 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     return db.query(model).findPage(params, populate);
   },
 
+  findWithRelationCounts({ params, populate }, { model }) {
+    return db.query(model).findWithRelationCounts(params, populate);
+  },
+
   /**
    * Promise to fetch record
    *
@@ -150,6 +154,10 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
   search({ params, populate }, { model }) {
     return db.query(model).search(params, populate);
+  },
+
+  searchWithRelationCounts({ params, populate }, { model }) {
+    return db.query(model).searchWithRelationCounts(params, populate);
   },
 
   searchPage({ params, populate }, { model }) {

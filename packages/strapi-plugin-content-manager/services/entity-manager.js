@@ -52,12 +52,20 @@ module.exports = {
     return strapi.entityService.findPage({ params, populate }, { model });
   },
 
+  findWithRelationCounts(params, model, populate) {
+    return strapi.entityService.findWithRelationCounts({ params, populate }, { model });
+  },
+
   search(params, model, populate) {
     return strapi.entityService.search({ params, populate }, { model });
   },
 
   searchPage(params, model, populate) {
     return strapi.entityService.searchPage({ params, populate }, { model });
+  },
+
+  searchWithRelationCounts(params, model, populate) {
+    return strapi.entityService.searchWithRelationCounts({ params, populate }, { model });
   },
 
   count(params, model) {
