@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Converts the standard Strapi REST query params to a moe usable format for querying
  * You can read more here: https://strapi.io/documentation/3.0.0-beta.x/guides/filters.html

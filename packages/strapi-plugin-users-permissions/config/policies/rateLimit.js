@@ -1,3 +1,5 @@
+'use strict';
+
 const lazyRateLimit = {
   get RateLimit() {
     return require('koa2-ratelimit').RateLimit;

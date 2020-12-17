@@ -1,90 +1,86 @@
 <template>
   <header class="navbar">
-    <SidebarButton @toggle-sidebar="$emit('toggle-sidebar')"/>
+    <SidebarButton @toggle-sidebar="$emit('toggle-sidebar')" />
 
-    <router-link
-      :to="$localePath"
-      class="home-link"
-    >
+    <router-link :to="$localePath" class="home-link">
       <img
         class="logo"
         v-if="$site.themeConfig.logo"
         :src="$withBase($site.themeConfig.logo)"
         :alt="$siteTitle"
-      >
+      />
       <span
         ref="siteName"
         class="site-name"
         v-if="$siteTitle"
         :class="{ 'can-hide': $site.themeConfig.logo }"
-      >{{ $siteTitle }}</span>
+        >{{ $siteTitle }}</span
+      >
     </router-link>
 
-    <span
-      class="deprecated"
-      v-if="isBeta">
-      Beta docs -
-      <router-link
-        :to="$localePath"
-        class="home-link"
-      >
-        current version
-      </router-link>
+    <span class="deprecated" v-if="isBeta">
+      Beta docs (deprecated) - View the
+      <router-link :to="$localePath" class="home-link"> current version </router-link>
     </span>
 
     <div
       class="links"
-      :style="linksWrapMaxWidth ? {
-        'max-width': linksWrapMaxWidth + 'px'
-      } : {}"
+      :style="
+        linksWrapMaxWidth
+          ? {
+              'max-width': linksWrapMaxWidth + 'px',
+            }
+          : {}
+      "
     >
-      <AlgoliaSearchBox
-        :options="algolia"
-      />
-      <NavLinks class="can-hide"/>
+      <AlgoliaSearchBox :options="algolia" />
+      <NavLinks class="can-hide" />
     </div>
   </header>
 </template>
 
 <script>
-import AlgoliaSearchBox from '@theme/components/AlgoliaSearchBox'
-import SearchBox from '@SearchBox'
-import SidebarButton from '@parent-theme/components/SidebarButton.vue'
-import NavLinks from '@parent-theme/components/NavLinks.vue'
+import AlgoliaSearchBox from '@theme/components/AlgoliaSearchBox';
+import SearchBox from '@SearchBox';
+import SidebarButton from '@parent-theme/components/SidebarButton.vue';
+import NavLinks from '@parent-theme/components/NavLinks.vue';
 export default {
-  components: { SidebarButton, NavLinks, AlgoliaSearchBox, SearchBox},
-  data () {
+  components: { SidebarButton, NavLinks, AlgoliaSearchBox, SearchBox },
+  data() {
     return {
       linksWrapMaxWidth: null,
-      isBeta: false
-    }
+      isBeta: false,
+    };
   },
-  mounted () {
-    const MOBILE_DESKTOP_BREAKPOINT = 719 // refer to config.styl
-    const NAVBAR_VERTICAL_PADDING = parseInt(css(this.$el, 'paddingLeft')) + parseInt(css(this.$el, 'paddingRight'))
+  mounted() {
+    const MOBILE_DESKTOP_BREAKPOINT = 719; // refer to config.styl
+    const NAVBAR_VERTICAL_PADDING =
+      parseInt(css(this.$el, 'paddingLeft')) + parseInt(css(this.$el, 'paddingRight'));
     const handleLinksWrapWidth = () => {
       if (document.documentElement.clientWidth < MOBILE_DESKTOP_BREAKPOINT) {
-        this.linksWrapMaxWidth = null
+        this.linksWrapMaxWidth = null;
       } else {
-        this.linksWrapMaxWidth = this.$el.offsetWidth - NAVBAR_VERTICAL_PADDING
-          - (this.$refs.siteName && this.$refs.siteName.offsetWidth || 0)
+        this.linksWrapMaxWidth =
+          this.$el.offsetWidth -
+          NAVBAR_VERTICAL_PADDING -
+          ((this.$refs.siteName && this.$refs.siteName.offsetWidth) || 0);
       }
-    }
-    handleLinksWrapWidth()
-    window.addEventListener('resize', handleLinksWrapWidth, false)
-    this.isBeta = /documentation\/3.0.0-beta.x/.test(window.location.href)
+    };
+    handleLinksWrapWidth();
+    window.addEventListener('resize', handleLinksWrapWidth, false);
+    this.isBeta = /documentation\/3.0.0-beta.x/.test(window.location.href);
   },
   computed: {
-    algolia () {
-      return this.$themeLocaleConfig.algolia || this.$site.themeConfig.algolia || {}
-    }
-  }
-}
-function css (el, property) {
+    algolia() {
+      return this.$themeLocaleConfig.algolia || this.$site.themeConfig.algolia || {};
+    },
+  },
+};
+function css(el, property) {
   // NOTE: Known bug, will return 'auto' if style value is 'auto'
-  const win = el.ownerDocument.defaultView
+  const win = el.ownerDocument.defaultView;
   // null means not to return pseudo styles
-  return win.getComputedStyle(el, null)[property]
+  return win.getComputedStyle(el, null)[property];
 }
 </script>
 
