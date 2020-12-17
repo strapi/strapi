@@ -108,7 +108,10 @@ module.exports = function createQuery(opts) {
     countSearch: createQueryWithLifecycles({ query: 'countSearch', model, connectorQuery }),
     fetchRelationCounters: async (...args) => {
       const results = await connectorQuery.fetchRelationCounters(...args);
-      return results.reduce((map, { id, count }) => Object.assign(map, { [id]: count }), {});
+      return results.reduce(
+        (map, { id, count }) => Object.assign(map, { [id]: Number(count) }),
+        {}
+      );
     },
     findPage: withLifecycles({ query: 'findPage', model, fn: createFindPageQuery(connectorQuery) }),
     searchPage: withLifecycles({
