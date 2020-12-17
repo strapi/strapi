@@ -42,6 +42,7 @@ The [Quick Start Guide](../getting-started/quick-start.md) is a complete step-by
 :::
 
 ## Other SQL Databases (PostgreSQL, MySQL)
+
 Refer to the [configuration section](../concepts/configurations.md#database) for all supported options to setup Strapi with your SQL database.
 
 ::: tip
@@ -312,14 +313,9 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
 
 `mongodb://paulbocuse:<password>@strapi-heroku-shard-00-00-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-01-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-02-oxxxo.mongodb.net:27017/test?ssl=true&replicaSet=Strapi-Heroku-shard-0&authSource=admin&retryWrites=true&w=majority`
 
-
 You must use remove some string and it has to look like so:
 
 `mongodb://paulbocuse:<password>@strapi-heroku-shard-00-00-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-01-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-02-oxxxo.mongodb.net:27017/test?ssl=true`
-
-
-
-
 
 ::: warning
 Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.

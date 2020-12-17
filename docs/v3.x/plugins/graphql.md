@@ -134,7 +134,7 @@ query {
 
 ```graphql
 mutation {
-  createUser(input: { data: { username: "John", email: "john@doe.com" } }) {
+  createUser(input: { data: { username: "Kai", email: "kai@doe.com" } }) {
     user {
       username
       email
@@ -150,8 +150,8 @@ mutation {
   createUser(
     input: {
       data: {
-        username: "John"
-        email: "john@doe.com"
+        username: "Kai"
+        email: "kai@doe.com"
         restaurants: ["5b51e3949db573a586ad22de", "5b5b26619b0820c1c2fb79c9"]
       }
     }
@@ -180,7 +180,7 @@ mutation {
   updateUser(
     input: {
       where: { id: "5b28f1747c739e4afb48605c" }
-      data: { username: "John", email: "john@doe.com" }
+      data: { username: "Kai", email: "kai@doe.com" }
     }
   ) {
     user {
@@ -885,6 +885,7 @@ module.exports = {
   resolver: {
     Query: {
       restaurants: false, // The `restaurants` query will no longer be in the GraphQL schema.
+      restaurantsConnection: false, // You can also disable aggregation per API.
     },
     Mutation: {
       createRestaurant: false,

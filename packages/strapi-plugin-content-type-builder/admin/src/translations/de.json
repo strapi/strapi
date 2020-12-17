@@ -30,6 +30,7 @@
   "form.attribute.item.uniqueField.description": "Du wirst keinen Eintrag anlegen können, wenn es bereits einen Eintrag mit identischem Inhalt gibt",
   "form.attribute.settings.default": "Standardwert",
   "form.button.cancel": "Abbrechen",
+  "form.button.configure-view": "Ansicht konfigurieren",
   "form.button.continue": "Weiter",
   "form.button.save": "Speichern",
   "from": "aus",
