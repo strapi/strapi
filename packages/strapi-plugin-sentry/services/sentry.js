@@ -78,8 +78,6 @@ const createSentryService = () => {
         // Actually send the Error to Sentry
         instance.captureException(error);
       });
-
-      strapi.log.info('An error was sent to Sentry');
     },
   };
 };
