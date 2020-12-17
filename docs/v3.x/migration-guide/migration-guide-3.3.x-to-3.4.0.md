@@ -15,4 +15,4 @@ Not updating your **extensions** can break your app in unexpected ways that we c
 3. Execute it with the following command: `node migrate-3.4.0.js [path-to-your-project]`
 4. Delete the script (optional)
 
-🎉 Congrats, your application has been migrated!
+That's it, now you can follow the basic [version update guide](../guides/update-version.md).
