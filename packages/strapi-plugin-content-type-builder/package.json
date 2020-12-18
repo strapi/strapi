@@ -8,12 +8,12 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.2-next.2",
-    "@buffetjs/custom": "3.3.2-next.2",
-    "@buffetjs/hooks": "3.3.2-next.2",
-    "@buffetjs/icons": "3.3.2-next.2",
-    "@buffetjs/styles": "3.3.2-next.2",
-    "@buffetjs/utils": "3.3.2-next.2",
+    "@buffetjs/core": "3.3.3-next.0",
+    "@buffetjs/custom": "3.3.3-next.0",
+    "@buffetjs/hooks": "3.3.3-next.0",
+    "@buffetjs/icons": "3.3.3-next.0",
+    "@buffetjs/styles": "3.3.3-next.0",
+    "@buffetjs/utils": "3.3.3-next.0",
     "@sindresorhus/slugify": "1.1.0",
     "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",

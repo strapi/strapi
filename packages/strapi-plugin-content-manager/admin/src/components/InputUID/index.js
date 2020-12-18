@@ -116,13 +116,6 @@ const InputUID = ({
   };
 
   useEffect(() => {
-    if (!value && validations.required) {
-      generateUid.current(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (
       debouncedValue &&
       debouncedValue.trim().match(UID_REGEX) &&
