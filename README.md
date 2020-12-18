@@ -93,7 +93,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Supported operating systems**:
 
-- Ubuntu 18.04/Debian 9.x
+- Ubuntu LTS/Debian 9.x
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
@@ -152,6 +152,13 @@ Follow our [migration guides](https://strapi.io/documentation/developer-docs/lat
 ## Roadmap
 
 Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
+
+## Documentation
+
+See our dedicated [repository](https://github.com/strapi/documentation) for the Strapi documentation, or view our documentation live:
+
+- [Developer docs](https://strapi.io/documentation/developer-docs/latest)
+- [User docs](https://strapi.io/documentation/user-docs/latest)
 
 ## License
 
