@@ -61,6 +61,7 @@ module.exports = {
     const { body } = ctx.request;
 
     const contentTypeService = getService('content-types');
+    const metricsService = getService('metrics');
 
     const contentType = await contentTypeService.findContentType(uid);
 
@@ -87,6 +88,8 @@ module.exports = {
     }
 
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
+
+    await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
     ctx.body = { data: newConfiguration };
   },
