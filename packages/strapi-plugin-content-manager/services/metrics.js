@@ -6,16 +6,17 @@ const { getRelationalFields } = require('strapi-utils').relations;
 const sendDidConfigureListView = async (contentType, configuration) => {
   const displayedFields = prop('length', configuration.layouts.list);
   const relationalFields = getRelationalFields(contentType);
-  const displayedRF = intersection(relationalFields, configuration.layouts.list).length;
+  const displayedRelationalFields = intersection(relationalFields, configuration.layouts.list)
+    .length;
 
   const data = {
-    containsRF: !!displayedRF,
+    containsRelationalFields: !!displayedRelationalFields,
   };
 
-  if (data.containsRF) {
+  if (data.containsRelationalFields) {
     Object.assign(data, {
       displayedFields,
-      displayedRF,
+      displayedRelationalFields,
     });
   }
 
