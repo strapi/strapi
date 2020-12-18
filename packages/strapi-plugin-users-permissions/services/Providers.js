@@ -8,7 +8,7 @@
 const _ = require('lodash');
 
 const { getAbsoluteServerUrl } = require('strapi-utils');
-const providers = require('./ProviderList');
+const providers = require('./provider-list');
 
 /**
  * Connect thanks to a third-party provider.
@@ -120,7 +120,8 @@ const getProfile = async (provider, query, callback) => {
     .get();
 
   if (providers[provider]) {
-    await providers[provider](grant, access_token, query, callback);
+    const context = { grant, access_token, query };
+    await providers[provider](context, callback);
   } else {
     callback(new Error('Unknown provider.'));
   }

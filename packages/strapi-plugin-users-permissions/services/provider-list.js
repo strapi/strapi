@@ -6,7 +6,7 @@ const purestConfig = require('@purest/providers');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-  discord: async (grant, access_token, query, callback) => {
+  discord: async ({ access_token }, callback) => {
     const discord = purest({
       provider: 'discord',
       config: {
@@ -44,7 +44,7 @@ module.exports = {
         }
       });
   },
-  cognito: async (grant, access_token, query, callback) => {
+  cognito: async ({ query }, callback) => {
     // get the id_token
     const idToken = query.id_token;
     // decode the jwt token
@@ -58,7 +58,7 @@ module.exports = {
       });
     }
   },
-  facebook: async (grant, access_token, query, callback) => {
+  facebook: async ({ access_token }, callback) => {
     const facebook = purest({
       provider: 'facebook',
       config: purestConfig,
@@ -79,7 +79,7 @@ module.exports = {
         }
       });
   },
-  google: async (grant, access_token, query, callback) => {
+  google: async ({ access_token }, callback) => {
     const google = purest({ provider: 'google', config: purestConfig });
 
     google
@@ -97,7 +97,7 @@ module.exports = {
         }
       });
   },
-  github: async (grant, access_token, query, callback) => {
+  github: async ({ access_token }, callback) => {
     const github = purest({
       provider: 'github',
       config: purestConfig,
@@ -144,7 +144,7 @@ module.exports = {
           });
       });
   },
-  microsoft: async (grant, access_token, query, callback) => {
+  microsoft: async ({ access_token }, callback) => {
     const microsoft = purest({
       provider: 'microsoft',
       config: purestConfig,
@@ -165,7 +165,7 @@ module.exports = {
         }
       });
   },
-  twitter: async (grant, access_token, query, callback) => {
+  twitter: async ({ grant, access_token, query }, callback) => {
     const twitter = purest({
       provider: 'twitter',
       config: purestConfig,
@@ -189,7 +189,7 @@ module.exports = {
         }
       });
   },
-  instagram: async (grant, access_token, query, callback) => {
+  instagram: async ({ grant, access_token }, callback) => {
     const instagram = purest({
       config: purestConfig,
       provider: 'instagram',
@@ -212,7 +212,7 @@ module.exports = {
         }
       });
   },
-  vk: async (grant, access_token, query, callback) => {
+  vk: async ({ access_token, query }, callback) => {
     const vk = purest({
       provider: 'vk',
       config: purestConfig,
@@ -232,7 +232,7 @@ module.exports = {
         }
       });
   },
-  twitch: async (grant, access_token, query, callback) => {
+  twitch: async ({ grant, access_token }, callback) => {
     const twitch = purest({
       provider: 'twitch',
       config: {
@@ -275,7 +275,7 @@ module.exports = {
         }
       });
   },
-  linkedin: async (grant, access_token, query, callback) => {
+  linkedin: async ({ access_token }, callback) => {
     const linkedIn = purest({
       provider: 'linkedin',
       config: {
