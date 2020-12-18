@@ -1,7 +1,7 @@
 {
   "name": "strapi-plugin-email",
   "version": "3.4.0",
-  "description": "This is the description of the plugin.",
+  "description": "Easily configure your Strapi application to send emails.",
   "strapi": {
     "name": "Email",
     "icon": "paper-plane",
