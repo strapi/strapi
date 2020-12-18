@@ -153,7 +153,7 @@ describe('Migration - draft and publish', () => {
         const dogToCreate = { code: 'sameCode' };
         let res = await rq({
           method: 'POST',
-          url: `/content-manager/explorer/application::dog.dog/`,
+          url: `/content-manager/collection-types/application::dog.dog/`,
           body: dogToCreate,
         });
         expect(res.statusCode).toBe(200);
@@ -162,7 +162,7 @@ describe('Migration - draft and publish', () => {
 
         res = await rq({
           method: 'POST',
-          url: `/content-manager/explorer/application::dog.dog/`,
+          url: `/content-manager/collection-types/application::dog.dog/`,
           body: dogToCreate,
         });
         expect(res.statusCode).toBe(400);
