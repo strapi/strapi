@@ -1,7 +1,7 @@
 {
   "name": "strapi-plugin-documentation",
   "version": "3.4.0",
-  "description": "This is the description of the plugin.",
+  "description": "Automatically generates documentation for your api.",
   "strapi": {
     "name": "Documentation",
     "icon": "book",

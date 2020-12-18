@@ -1,7 +1,7 @@
 {
   "name": "strapi-plugin-upload",
   "version": "3.4.0",
-  "description": "This is the description of the plugin.",
+  "description": "Makes it easy to upload images and files to your Strapi Application.",
   "strapi": {
     "name": "Media Library",
     "icon": "cloud-upload-alt",
