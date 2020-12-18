@@ -20,7 +20,11 @@ const sendDidConfigureListView = async (contentType, configuration) => {
     });
   }
 
-  return strapi.telemetry.send('didConfigureListView', data);
+  try {
+    await strapi.telemetry.send('didConfigureListView', data);
+  } catch (e) {
+    // silence
+  }
 };
 
 module.exports = {
