@@ -5,7 +5,7 @@ const generateLinks = links => {
     .filter(link => link.isDisplayed)
     .map(link => {
       return {
-        icon: 'circle',
+        icon: link.info.icon || 'circle',
         destination: `/plugins/content-manager/${link.kind}/${link.uid}`,
         isDisplayed: false,
         label: link.info.label,
