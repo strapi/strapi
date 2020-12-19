@@ -164,5 +164,47 @@ describe('ADMIN | LeftMenu | utils', () => {
 
       expect(generateModelsLinks(data)).toEqual(expected);
     });
+    
+    it('should detect custom icons', () => {
+      const data = [
+        {
+          isDisplayed: true,
+          kind: 'collectionType',
+          uid: 'application::address.address',
+          info: {
+            label: 'Addresses',
+            icon: 'cog'
+          },
+        },
+      ];
+
+      const expected = {
+        collectionTypesSectionLinks: [
+          {
+            icon: 'cog',
+            destination: '/plugins/content-manager/collectionType/application::address.address',
+            isDisplayed: false,
+            label: 'Addresses',
+            permissions: [
+              {
+                action: 'plugins::content-manager.explorer.create',
+                subject: 'application::address.address',
+              },
+              {
+                action: 'plugins::content-manager.explorer.read',
+                subject: 'application::address.address',
+              },
+              {
+                action: 'plugins::content-manager.explorer.update',
+                subject: 'application::address.address',
+              },
+            ],
+          },
+        ],
+        singleTypesSectionLinks: [],
+      };
+
+      expect(generateModelsLinks(data)).toEqual(expected);
+    });
   });
 });
