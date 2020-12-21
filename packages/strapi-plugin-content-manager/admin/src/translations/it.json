@@ -141,7 +141,7 @@
   "form.Input.placeholder": "Segnaposto",
   "form.Input.placeholder.placeholder": "Il mio fantastico valore",
   "form.Input.search": "Abilita ricerca",
-  "form.Input.search.field": "Abilita la ricerca su questo campo",
+  "form.Input.search.field": "Abilita ricerca su questo campo",
   "form.Input.sort.field": "Abilita ordinamento su questo campo",
   "form.Input.wysiwyg": "Mostra come WYSIWYG",
   "global.displayedFields": "Campi visualizzati",
