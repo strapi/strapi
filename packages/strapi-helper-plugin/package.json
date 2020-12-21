@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
-    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "enzyme": "^3.8.0",
