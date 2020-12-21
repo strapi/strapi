@@ -428,7 +428,7 @@ describe('Role CRUD End to End', () => {
 
           expect(res.statusCode).toBe(400);
           expect(res.body.data).toMatchObject({
-            ids: ['Some roles are still assigned to some users.'],
+            ids: ['Some roles are still assigned to some users'],
           });
 
           for (let role of roles) {
@@ -511,7 +511,7 @@ describe('Role CRUD End to End', () => {
 
           expect(res.statusCode).toBe(400);
           expect(res.body.data).toMatchObject({
-            ids: ['Some roles are still assigned to some users.'],
+            id: ['Some roles are still assigned to some users'],
           });
 
           res = await rq({
