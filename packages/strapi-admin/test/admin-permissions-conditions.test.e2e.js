@@ -152,11 +152,11 @@ if (edition === 'EE') {
 
     beforeAll(async () => {
       await createFixtures();
-    });
+    }, 60000);
 
     afterAll(async () => {
       await deleteFixtures();
-    });
+    }, 60000);
 
     test('User A can create an entry', async () => {
       const rq = getUserRequest(0);
