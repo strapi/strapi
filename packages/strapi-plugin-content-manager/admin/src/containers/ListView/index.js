@@ -118,7 +118,7 @@ function ListView({
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
   const contentType = layout.contentType;
-  const hasDraftAndPublish = contentType.options.draftAndPublish || false;
+  const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
   const allAllowedHeaders = useMemo(() => getAllAllowedHeaders(attributes), [attributes]);
 
   const filters = useMemo(() => {
