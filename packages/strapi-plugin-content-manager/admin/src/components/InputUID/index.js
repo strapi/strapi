@@ -115,12 +115,13 @@ const InputUID = ({
     }
   };
 
-  useEffect(() => {
-    if (!value && validations.required) {
-      generateUid.current(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // FIXME: we need to find a better way to autofill the input when it is required.
+  // useEffect(() => {
+  //   if (!value && validations.required) {
+  //     generateUid.current(true);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     if (
