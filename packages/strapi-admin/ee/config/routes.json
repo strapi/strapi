@@ -23,6 +23,43 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "handler": "authentication.getProviders"
+    },
+    {
+      "method": "POST",
+      "path": "/connect/:provider",
+      "handler": "authentication.providerLogin"
+    },
+    {
+      "method": "GET",
+      "path": "/connect/:provider/callback",
+      "handler": "authentication.providerCallback"
+    },
+    {
+      "method": "GET",
+      "path": "/providers/options",
+      "handler": "authentication.getProviderLoginOptions",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::provider-login.read"]]
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/providers/options",
+      "handler": "authentication.updateProviderLoginOptions",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["admin::provider-login.update"]]
+        ]
+      }
     }
   ]
 }
