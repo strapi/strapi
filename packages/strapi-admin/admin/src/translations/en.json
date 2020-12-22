@@ -5,6 +5,8 @@
   "Auth.form.button.forgot-password": "Send Email",
   "Auth.form.button.go-home": "GO BACK HOME",
   "Auth.form.button.login": "Log in",
+  "Auth.form.button.login.strapi": "LOG IN VIA STRAPI",
+  "Auth.form.button.login.providers.see-more": "See more",
   "Auth.form.button.register": "LET'S START",
   "Auth.form.button.reset-password": "Change password",
   "Auth.form.confirmPassword.label": "Confirmation Password",
