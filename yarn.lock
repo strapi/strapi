@@ -16673,10 +16673,10 @@ sanitize-html@2.1.1:
     parse-srcset "^1.0.2"
     postcss "^8.0.2"
 
-sanitize.css@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/sanitize.css/-/sanitize.css-4.1.0.tgz#0bafc3c513699f2fe8c7980c6d37edf21d3f5448"
-  integrity sha1-C6/DxRNpny/ox5gMbTft8h0/VEg=
+sanitize.css@^12.0.1:
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/sanitize.css/-/sanitize.css-12.0.1.tgz#f20369357557ba2b41d7278eeb3ea691a3bee514"
+  integrity sha512-QbusSBnWHaRBZeTxsJyknwI0q+q6m1NtLBmB76JfW/rdVN7Ws6Zz70w65+430/ouVcdNVT3qwrDgrM6PaYyRtw==
 
 saslprep@^1.0.0:
   version "1.0.3"
