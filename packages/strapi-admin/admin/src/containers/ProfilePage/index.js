@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BackHeader, BaselineAlignment, auth } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
@@ -24,8 +24,16 @@ const ProfilePage = () => {
     'lastname',
     'username',
   ]);
-  const userInfos = auth.getUserInfo();
-  const headerLabel = userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
+
+  const headerLabel = useMemo(() => {
+    const userInfos = auth.getUserInfo();
+
+    if (modifiedData) {
+      return modifiedData.username || `${modifiedData.firstname} ${modifiedData.lastname}`;
+    }
+
+    return userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
+  }, [modifiedData]);
 
   return (
     <>

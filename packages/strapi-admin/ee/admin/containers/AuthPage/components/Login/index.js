@@ -56,7 +56,9 @@ const Login = loginProps => {
                       defaultMessage: 'See more',
                     })}
                   >
-                    <Text>...</Text>
+                    <Text fontWeight="bold" fontSize="lg">
+                      ...
+                    </Text>
                   </ProviderButtonWrapper>
                 </ProviderLink>
                 <Tooltip id="see-more-tooltip" />

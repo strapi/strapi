@@ -55,7 +55,7 @@ const Providers = () => {
             </Padded>
             <Button style={{ width: '100%' }} onClick={handleClick} type="submit" color="secondary">
               {formatMessage({
-                id: `Auth.form.button.login.strapi`,
+                id: 'Auth.form.button.login.strapi',
                 defaultMessage: 'LOG IN VIA STRAPI',
               })}
             </Button>

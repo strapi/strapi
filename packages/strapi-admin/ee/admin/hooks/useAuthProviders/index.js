@@ -1,5 +1,5 @@
 import { useReducer, useEffect } from 'react';
-// import { request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 
@@ -12,11 +12,12 @@ const useAuthProviders = () => {
 
   const fetchAuthProviders = async () => {
     try {
-      // const { data } = await request('/admin/providers', { method: 'GET' });
+      const data = await request('/admin/providers', { method: 'GET' });
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         data: [
+          ...data,
           {
             displayName: 'OKTA',
             uid: 'okta',

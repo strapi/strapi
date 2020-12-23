@@ -17,13 +17,13 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
+import PrivateRoute from 'ee_else_ce/containers/PrivateRoute';
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 // eslint-disable-next-line import/no-cycle
 import NotificationProvider from '../NotificationProvider';
-import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
