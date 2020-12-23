@@ -25,7 +25,9 @@ module.exports = {
     const adminStore = await utils.getAdminStore();
     const { providers: providersOptions } = await adminStore.get({ key: 'auth' });
 
-    ctx.body = toProviderLoginOptionsDTO(providersOptions);
+    ctx.body = {
+      data: toProviderLoginOptionsDTO(providersOptions),
+    };
   },
 
   async updateProviderLoginOptions(ctx) {
@@ -45,7 +47,9 @@ module.exports = {
 
     await adminStore.set({ key: 'auth', value: newAuthOptions });
 
-    ctx.body = newAuthOptions.providers;
+    ctx.body = {
+      data: toProviderLoginOptionsDTO(newAuthOptions.providers),
+    };
   },
 
   providerLogin: (ctx, next) => {
