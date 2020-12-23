@@ -30,14 +30,9 @@
       "handler": "authentication.getProviders"
     },
     {
-      "method": "POST",
+      "method": "GET",
       "path": "/connect/:provider",
       "handler": "authentication.providerLogin"
-    },
-    {
-      "method": "GET",
-      "path": "/connect/:provider/callback",
-      "handler": "authentication.providerCallback"
     },
     {
       "method": "GET",
