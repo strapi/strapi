@@ -16,32 +16,27 @@ const useAuthProviders = () => {
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
-        providers: [
+        data: [
           {
-            id: 1,
             displayName: 'OKTA',
             uid: 'okta',
             icon: 'https://www.okta.com/themes/custom/okta_www_theme/images/logo.svg',
           },
           {
-            id: 2,
             uid: 'azure',
             displayName: 'Microsoft Azure provider long name to handle ellipsis',
           },
           {
-            id: 4,
             uid: 'active-directory',
             displayName: 'Active Directory',
             icon:
               'https://www.4me.com/wp-content/uploads/2018/08/4me-icon-azure-active-directory.png',
           },
           {
-            id: 5,
             uid: 'ldap',
             displayName: 'LDAP',
           },
           {
-            id: 6,
             uid: 'bearer',
             displayName: 'Bearer',
             icon:

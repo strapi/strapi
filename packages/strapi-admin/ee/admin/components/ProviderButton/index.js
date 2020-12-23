@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Text } from '@buffetjs/core';
@@ -10,7 +9,7 @@ const ProviderButton = ({ provider }) => {
     <>
       <ProviderLink
         href={`${strapi.backendURL}/admin/connect/${provider.uid}`}
-        data-for={provider.id.toString()}
+        data-for={provider.uid}
         data-tip={provider.displayName}
       >
         <ProviderButtonWrapper justifyContent="center" alignItems="center">
@@ -27,14 +26,13 @@ const ProviderButton = ({ provider }) => {
           )}
         </ProviderButtonWrapper>
       </ProviderLink>
-      <Tooltip id={provider.id.toString()} />
+      <Tooltip id={provider.uid} />
     </>
   );
 };
 
 ProviderButton.propTypes = {
-  provider: PropTypes.shape({
-    id: PropTypes.number,
+  provider: PropTypes.exact({
     displayName: PropTypes.string,
     icon: PropTypes.string,
     uid: PropTypes.string,
