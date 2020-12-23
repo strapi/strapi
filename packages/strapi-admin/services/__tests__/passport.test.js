@@ -72,7 +72,7 @@ describe('Passport', () => {
   });
 
   describe('Get Provider Callback URL', () => {
-    const BASE_URL = '/admin/connect/{{provider}}/callback';
+    const BASE_URL = '/admin/connect/{{provider}}';
 
     test.each(['foo', 'bar', 'foobar'])('Get a correct callback url for %s', providerName => {
       expect(getProviderCallbackUrl(providerName)).toBe(

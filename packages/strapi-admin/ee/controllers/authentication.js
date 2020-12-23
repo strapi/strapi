@@ -60,6 +60,4 @@ module.exports = {
 
     return providerAuthenticationFlow(ctx, next);
   },
-
-  providerCallback: providerAuthenticationFlow,
 };

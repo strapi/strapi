@@ -7,7 +7,7 @@ const createLocalStrategy = require('./passport/local-strategy');
 
 const providerRegistry = createProviderRegistry();
 
-const getProviderCallbackUrl = providerName => `/admin/connect/${providerName}/callback`;
+const getProviderCallbackUrl = providerName => `/admin/connect/${providerName}`;
 
 const syncProviderRegistryWithConfig = () => {
   const { providers = [] } = strapi.config.get('server.admin.auth', {});
