@@ -190,11 +190,9 @@ module.exports = ({
         PROJECT_TYPE: JSON.stringify(useEE ? 'Enterprise' : 'Community'),
       }),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
-        // We might need to improve this if we want to make it work with components
-        const containerPathName = resource.context.split(`${path.sep}containers${path.sep}`);
-        const componentPathName = resource.context.split(`${path.sep}components${path.sep}`);
-        const wantedPath =
-          containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
+        const splitPath = resource.context.split(`${path.sep}src${path.sep}`);
+
+        let wantedPath = path.join(splitPath[0], 'src');
 
         if (useEE) {
           resource.request = resource.request.replace(
