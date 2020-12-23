@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import ContainerFluid from '../../components/ContainerFluid';
 import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
-import { Header } from '../../components/Users';
+import { Header } from '../../components/Settings';
 import { useUsersForm } from '../../hooks';
 import { form, schema } from './utils';
 
