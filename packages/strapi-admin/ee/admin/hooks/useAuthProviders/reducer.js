@@ -2,7 +2,7 @@
 import produce from 'immer';
 
 export const initialState = {
-  providers: [],
+  data: [],
   isLoading: true,
 };
 
@@ -10,7 +10,7 @@ const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
-        draftState.providers = action.providers;
+        draftState.data = action.data;
         draftState.isLoading = false;
         break;
       }

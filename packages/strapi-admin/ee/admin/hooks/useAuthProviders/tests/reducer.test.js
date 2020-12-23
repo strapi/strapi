@@ -17,11 +17,11 @@ describe('ADMIN | HOOKS | USEFETCHROLE | reducer', () => {
         type: 'GET_DATA_ERROR',
       };
       const initialState = {
-        providers: [],
+        data: [],
         isLoading: true,
       };
       const expected = {
-        providers: [],
+        data: [],
         isLoading: false,
       };
 
@@ -33,7 +33,7 @@ describe('ADMIN | HOOKS | USEFETCHROLE | reducer', () => {
     it('should return the state with the data', () => {
       const action = {
         type: 'GET_DATA_SUCCEEDED',
-        providers: [
+        data: [
           {
             uid: 'provider1',
             displayName: 'Provider 1',
@@ -47,11 +47,11 @@ describe('ADMIN | HOOKS | USEFETCHROLE | reducer', () => {
         ],
       };
       const initialState = {
-        providers: [],
+        data: [],
         isLoading: true,
       };
       const expected = {
-        providers: [
+        data: [
           {
             uid: 'provider1',
             displayName: 'Provider 1',

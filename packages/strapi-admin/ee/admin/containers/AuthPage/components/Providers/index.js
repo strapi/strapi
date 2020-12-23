@@ -4,8 +4,8 @@ import { LoadingIndicator } from '@buffetjs/styles';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 
-import BaselineAlignment from '../../../../../../admin/src/components/BaselineAlignement';
 import Box from '../../../../../../admin/src/containers/AuthPage/components/Box';
 import Logo from '../../../../../../admin/src/containers/AuthPage/components/Logo';
 import Section from '../../../../../../admin/src/containers/AuthPage/components/Section';
@@ -20,7 +20,7 @@ const ProviderWrapper = styled.div`
 const Providers = () => {
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const { isLoading, providers } = useAuthProviders();
+  const { isLoading, data: providers } = useAuthProviders();
 
   const handleClick = () => {
     push('/auth/login');
@@ -43,8 +43,8 @@ const Providers = () => {
             ) : (
               <Flex flexWrap="wrap">
                 {providers.map(provider => (
-                  <ProviderWrapper key={provider.id}>
-                    <ProviderButton key={provider.id} provider={provider} />
+                  <ProviderWrapper key={provider.uid}>
+                    <ProviderButton provider={provider} />
                   </ProviderWrapper>
                 ))}
               </Flex>

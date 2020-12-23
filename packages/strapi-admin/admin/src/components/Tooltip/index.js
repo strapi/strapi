@@ -1,8 +1,7 @@
 import ReactTooltip from 'react-tooltip';
 import styled from 'styled-components';
 
-// This tooltip will be used every time we need a tooltip in the admin.
-// TODO : Add the tooltip to BuffetJS.
+// TODO : replace by the buffet tooltip component when it will be released
 // Add !important to customize CSS is recommended by react-tooltip in the official readme
 const Tooltip = styled(ReactTooltip).attrs(({ delayShow = 500, theme }) => ({
   // Pre set the tooltip static props.
