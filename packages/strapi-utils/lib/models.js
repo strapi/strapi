@@ -364,7 +364,12 @@ module.exports = {
 
       // Get relation nature
       let details;
+
       const targetName = association.model || association.collection || '';
+
+      const targetModel =
+        targetName !== '*' ? strapi.db.getModel(targetName, association.plugin) : null;
+
       const infos = this.getNature({
         attribute: association,
         attributeName: key,
@@ -381,6 +386,7 @@ module.exports = {
         const ast = {
           alias: key,
           type: 'collection',
+          targetUid: targetModel.uid,
           collection: association.collection,
           via: association.via || undefined,
           nature: infos.nature,
@@ -407,6 +413,7 @@ module.exports = {
         definition.associations.push({
           alias: key,
           type: 'model',
+          targetUid: targetModel.uid,
           model: association.model,
           via: association.via || undefined,
           nature: infos.nature,
@@ -460,6 +467,7 @@ module.exports = {
 
       definition.associations.push({
         alias: key,
+        targetUid: '*',
         type: association.model ? 'model' : 'collection',
         related: models,
         nature: infos.nature,

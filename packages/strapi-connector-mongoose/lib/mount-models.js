@@ -241,12 +241,14 @@ module.exports = async ({ models, target }, ctx) => {
 
           if (type === 'dynamiczone') {
             if (returned[name]) {
-              returned[name] = returned[name].map(el => {
-                return {
-                  __component: findComponentByGlobalId(el.kind).uid,
-                  ...el.ref,
-                };
-              });
+              returned[name] = returned[name]
+                .filter(el => el && el.kind)
+                .map(el => {
+                  return {
+                    __component: findComponentByGlobalId(el.kind).uid,
+                    ...el.ref,
+                  };
+                });
             }
           }
         });

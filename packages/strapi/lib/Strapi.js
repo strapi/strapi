@@ -1,8 +1,5 @@
 'use strict';
 
-// required first because it loads env files.
-const loadConfiguration = require('./core/app-configuration');
-
 const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');
@@ -13,6 +10,7 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
+const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');

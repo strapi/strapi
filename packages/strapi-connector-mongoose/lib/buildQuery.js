@@ -1,9 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-var semver = require('semver');
-const utils = require('./utils')();
-const populateQueries = require('./utils/populate-queries');
+const { isEmpty, set, omit, assoc } = require('lodash/fp');
+const semver = require('semver');
 const {
   hasDeepFilters,
   contentTypes: {
@@ -11,6 +10,13 @@ const {
     hasDraftAndPublish,
   },
 } = require('strapi-utils');
+const utils = require('./utils')();
+const populateQueries = require('./utils/populate-queries');
+
+const sortOrderMapper = {
+  asc: 1,
+  desc: -1,
+};
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -90,7 +96,7 @@ const buildQuery = ({
 } = {}) => {
   const search = buildSearchOr(model, searchParam);
 
-  if (!hasDeepFilters(filters.where) && aggregate === false) {
+  if (!hasDeepFilters(filters) && aggregate === false) {
     return buildSimpleQuery({ model, filters, search, populate }, { session });
   }
 
@@ -111,10 +117,12 @@ const buildSimpleQuery = ({ model, filters, search, populate }, { session }) => 
   const wheres = where.map(buildWhereClause);
 
   const findCriteria = combineSearchAndWhere(search, wheres);
+
   let query = model
     .find(findCriteria, null, { publicationState: filters.publicationState })
     .session(session)
     .populate(populate);
+
   query = applyQueryParams({ model, query, filters });
 
   return Object.assign(query, {
@@ -140,15 +148,16 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
     where: filters.where,
   });
 
+  const aggregateOptions = {
+    paths: _.merge({}, populatePaths, wherePaths),
+  };
+
   // Init the query
   let query = model
-    .aggregate(
-      buildQueryAggregate(model, filters, {
-        paths: _.merge({}, populatePaths, wherePaths),
-      })
-    )
+    .aggregate(buildQueryAggregate(model, filters, aggregateOptions))
     .session(session)
-    .append(buildQueryMatches(model, filters, search));
+    .append(buildQueryMatches(model, filters, search))
+    .append(buildQuerySort(model, filters));
 
   return {
     /**
@@ -156,26 +165,21 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
      */
     then(...args) {
       return query
-        .append({
-          $project: { _id: true },
-        })
+        .append({ $project: { _id: true } })
         .then(results => results.map(el => el._id))
         .then(ids => {
           if (ids.length === 0) return [];
 
-          const query = model
-            .find(
-              {
-                _id: {
-                  $in: ids,
-                },
-              },
-              null
-            )
-            .session(session)
-            .populate(populate);
+          const idsMap = ids.reduce((acc, id, idx) => assoc(id, idx, acc), {});
 
-          return applyQueryParams({ model, query, filters });
+          const mongooseQuery = model.find({ _id: { $in: ids } }, null).session(session).populate(populate);
+          const query = applyQueryParams({
+            model,
+            query: mongooseQuery,
+            filters: omit('sort', filters),
+          });
+
+          return query.then(orderByIndexMap(idsMap));
         })
         .then(...args);
     },
@@ -214,11 +218,10 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
  * @param {Object} options.filters - Filters object
  */
 const applyQueryParams = ({ model, query, filters }) => {
-  // Apply sort param
   if (_.has(filters, 'sort')) {
     const sortFilter = filters.sort.reduce((acc, sort) => {
       const { field, order } = sort;
-      acc[field] = order === 'asc' ? 1 : -1;
+      acc[field] = sortOrderMapper[order];
       return acc;
     }, {});
 
@@ -412,7 +415,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         $match: {
           $and: defaultMatches.concat({
             $expr: {
-              $in: ['$_id', '$$localAlias'],
+              $in: ['$_id', { $ifNull: ['$$localAlias', []] }],
             },
           }),
         },
@@ -424,7 +427,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
           $match: {
             $and: defaultMatches.concat({
               $expr: {
-                $in: ['$_id', '$$localAlias'],
+                $in: ['$_id', { $ifNull: ['$$localAlias', []] }],
               },
             }),
           },
@@ -435,7 +438,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         $match: {
           $and: defaultMatches.concat({
             $expr: {
-              $in: ['$$localId', `$${assoc.via}`],
+              $in: ['$$localId', { $ifNull: [`$${assoc.via}`, []] }],
             },
           }),
         },
@@ -481,6 +484,28 @@ const buildQueryMatches = (model, filters, search = []) => {
     const criterias = combineSearchAndWhere(search, wheres);
 
     return [{ $match: criterias }];
+  }
+
+  return [];
+};
+
+/**
+ * Sort query for the aggregate
+ * @param {Object} model - Mongoose model
+ * @param {Object} filters - Filters object
+ */
+const buildQuerySort = (model, filters) => {
+  const { sort } = filters;
+
+  if (Array.isArray(sort) && !isEmpty(sort)) {
+    return [
+      {
+        $sort: sort.reduce(
+          (acc, { field, order }) => set([field], sortOrderMapper[order], acc),
+          {}
+        ),
+      },
+    ];
   }
 
   return [];
@@ -661,7 +686,7 @@ const findModelByPath = ({ rootModel, path }) => {
  * Returns a model path from an attribute path and a root model
  * @param {Object} options - Options
  * @param {Object} options.rootModel - Mongoose model
- * @param {string} options.path - Attribute path
+ * @param {string|Object} options.path - Attribute path
  */
 const findModelPath = ({ rootModel, path }) => {
   const parts = (_.isObject(path) ? path.path : path).split('.');
@@ -678,6 +703,18 @@ const findModelPath = ({ rootModel, path }) => {
   }
 
   return tmpPath.length > 0 ? tmpPath.join('.') : null;
+};
+
+/**
+ * Order a list of entites based on an indexMap
+ * @param {Object[]} entities - A list of entities
+ * @param {Object} indexMap - index map of the form { [id]: index }
+ */
+const orderByIndexMap = indexMap => entities => {
+  return entities.reduce((acc, entry) => {
+    acc[indexMap[entry._id]] = entry;
+    return acc;
+  }, []);
 };
 
 module.exports = buildQuery;
