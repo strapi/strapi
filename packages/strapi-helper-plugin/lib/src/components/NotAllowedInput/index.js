@@ -6,7 +6,7 @@ import EyeSlashed from '../../svgs/EyeSlashed';
 import BaselineAlignment from '../BaselineAlignment';
 import Field from './Field';
 
-const NotAllowedInput = ({ label, description, spacerHeight }) => {
+const NotAllowedInput = ({ label, description, error, spacerHeight }) => {
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
   const text = useMemo(
@@ -19,7 +19,7 @@ const NotAllowedInput = ({ label, description, spacerHeight }) => {
       <Text fontWeight="semiBold" lineHeight="18px">
         {label}
       </Text>
-      <Field>
+      <Field error={error}>
         <Padded left right size="sm">
           <Flex>
             <Padded right size="sm">
@@ -32,15 +32,21 @@ const NotAllowedInput = ({ label, description, spacerHeight }) => {
           </Flex>
         </Padded>
       </Field>
-      {description ? (
+      {!error && description && (
         <BaselineAlignment top size="9px">
           <Text fontSize="md" color="grey" lineHeight="18px" ellipsis>
             {description}
           </Text>
         </BaselineAlignment>
-      ) : (
-        <BaselineAlignment top size={spacerHeight} />
       )}
+      {error && (
+        <BaselineAlignment top size="9px">
+          <Text fontSize="md" color="lightOrange" lineHeight="18px" ellipsis>
+            {error}
+          </Text>
+        </BaselineAlignment>
+      )}
+      {!error && !description && <BaselineAlignment top size={spacerHeight} />}
     </BaselineAlignment>
   );
 };
