@@ -11,7 +11,7 @@ import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
 import { Header } from '../../../components/Settings';
 import { MagicLink, SelectRoles } from '../../../components/Users';
-import { useUsersForm } from '../../../hooks';
+import { useSettingsForm } from '../../../hooks';
 import { editValidation } from '../../../validations/users';
 import form from './utils/form';
 
@@ -35,7 +35,7 @@ const EditPage = ({ canUpdate }) => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useUsersForm(`/admin/users/${id}`, editValidation, cbSuccess, [
+  ] = useSettingsForm(`/admin/users/${id}`, editValidation, cbSuccess, [
     'email',
     'firstname',
     'lastname',
