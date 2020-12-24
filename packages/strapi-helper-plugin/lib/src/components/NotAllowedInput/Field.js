@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Field = styled.div`
   height: 34px;
@@ -10,6 +10,11 @@ const Field = styled.div`
   padding-top: 2px;
   border-radius: 2px;
   background-color: ${({ theme }) => theme.main.colors.mediumGrey};
+  ${({ error }) =>
+    error &&
+    css`
+      border: 1px solid ${({ theme }) => theme.main.colors.lightOrange};
+    `}
 `;
 
 export default Field;

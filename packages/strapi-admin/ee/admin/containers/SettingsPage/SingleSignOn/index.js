@@ -74,8 +74,9 @@ const SingleSignOn = () => {
           <BaselineAlignment top size="3px" />
           <FormBloc isLoading={showLoader}>
             {Object.keys(form).map(key => {
-              let type = key === 'defaultRole' && !canReadRoles ? 'notAllowed' : form[key].type;
-              let description =
+              // TODO: at some point it would be great to handle this in the upcoming input layout
+              const type = key === 'defaultRole' && !canReadRoles ? 'notAllowed' : form[key].type;
+              const description =
                 key === 'defaultRole' && !canReadRoles
                   ? form[key].notAllowedDescription
                   : form[key].description;
