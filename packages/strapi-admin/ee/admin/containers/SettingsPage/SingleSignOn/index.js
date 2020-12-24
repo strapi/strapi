@@ -11,7 +11,7 @@ import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormBloc from '../../../../../admin/src/components/FormBloc';
 import { Header } from '../../../../../admin/src/components/Settings';
-import { useRolesList, useUsersForm as useForm } from '../../../../../admin/src/hooks';
+import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
 import { form, schema } from './utils';
 
 const permissions = {
@@ -30,7 +30,7 @@ const SingleSignOn = () => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useForm(getRequestUrl('providers/options'), schema, () => {}, [
+  ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
     'autoRegister',
     'defaultRole',
   ]);

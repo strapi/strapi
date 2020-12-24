@@ -1,6 +1,6 @@
 import { reducer } from '../reducer';
 
-describe('ADMIN | HOOKS | useUsersForm | reducer', () => {
+describe('ADMIN | HOOKS | useSettingsForm | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const initialState = {
