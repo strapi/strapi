@@ -31,7 +31,6 @@ const Logout = ({ history: { push } }) => {
   const toggle = () => setIsOpen(prev => !prev);
 
   const userInfo = auth.getUserInfo();
-  // Ping @soupette 2 : I need you for this part of the code. I will probably need to get the user data from : /admin/users/me
   const displayName = userInfo
     ? `${userInfo.firstname} ${userInfo.lastname}`
     : get(userInfo, ['username'], '');
