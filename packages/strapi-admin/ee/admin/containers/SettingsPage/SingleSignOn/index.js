@@ -1,5 +1,10 @@
 import React, { memo, useMemo } from 'react';
-import { BaselineAlignment, SizedInput } from 'strapi-helper-plugin';
+import {
+  BaselineAlignment,
+  CheckPagePermissions,
+  SizedInput,
+  useUserPermissions,
+} from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import { getRequestUrl } from '../../../../../admin/src/utils';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
@@ -9,8 +14,17 @@ import { Header } from '../../../../../admin/src/components/Settings';
 import { useRolesList, useUsersForm as useForm } from '../../../../../admin/src/hooks';
 import { form, schema } from './utils';
 
+const permissions = {
+  read: [{ action: 'admin::provider-login.update', subject: null }],
+  update: [{ action: 'admin::provider-login.read', subject: null }],
+};
+
 const SingleSignOn = () => {
   const { formatMessage } = useIntl();
+  const {
+    allowedActions: { canUpdate },
+  } = useUserPermissions(permissions);
+
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
     // eslint-disable-next-line no-unused-vars
@@ -58,7 +72,7 @@ const SingleSignOn = () => {
                 <SizedInput
                   {...form[key]}
                   key={key}
-                  disabled={false}
+                  disabled={!canUpdate}
                   error={formErrors[key]}
                   name={key}
                   onChange={handleChange}
@@ -74,4 +88,10 @@ const SingleSignOn = () => {
   );
 };
 
-export default memo(SingleSignOn);
+const ProtectedSSO = () => (
+  <CheckPagePermissions permissions={permissions.read}>
+    <SingleSignOn />
+  </CheckPagePermissions>
+);
+
+export default memo(ProtectedSSO);
