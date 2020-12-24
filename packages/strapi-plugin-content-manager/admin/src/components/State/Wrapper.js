@@ -20,7 +20,7 @@ const Wrapper = styled.div`
     `
       : `
         border: 1px solid #A5D5FF;
-        background-color: #E4F0FC;
+        background-color: ${({ theme }) => theme.main.colors.lightestBlue};
         ${Text} {
             color: ${theme.main.colors.mediumBlue};
         }

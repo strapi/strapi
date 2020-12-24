@@ -15,6 +15,7 @@ const NotificationWrapper = styled.div`
   transition: all 0.15s ease;
   width: 400px;
   min-height: 60px;
+  margin-left: ${({ centered }) => (centered ? '0px' : '240px')};
 
   &:hover {
     box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.2);
