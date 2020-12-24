@@ -2,6 +2,7 @@ import React, { memo, useMemo } from 'react';
 import {
   BaselineAlignment,
   CheckPagePermissions,
+  NotAllowedInput,
   SizedInput,
   useUserPermissions,
 } from 'strapi-helper-plugin';
@@ -73,9 +74,17 @@ const SingleSignOn = () => {
           <BaselineAlignment top size="3px" />
           <FormBloc isLoading={showLoader}>
             {Object.keys(form).map(key => {
+              let type = key === 'defaultRole' && !canReadRoles ? 'notAllowed' : form[key].type;
+              let description =
+                key === 'defaultRole' && !canReadRoles
+                  ? form[key].notAllowedDescription
+                  : form[key].description;
+
               return (
                 <SizedInput
                   {...form[key]}
+                  customInputs={{ notAllowed: NotAllowedInput }}
+                  description={description}
                   key={key}
                   disabled={!canUpdate}
                   error={formErrors[key]}
@@ -83,6 +92,7 @@ const SingleSignOn = () => {
                   onChange={handleChange}
                   options={options}
                   value={modifiedData[key]}
+                  type={type}
                 />
               );
             })}

@@ -1,22 +1,21 @@
-import React, { useMemo, useRef } from 'react';
+import React, { memo, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { getTrad } from '../../utils';
-import EyeSlashed from '../../icons/EyeSlashed';
-import BaselineAlignement from './BaselineAlignement';
+import EyeSlashed from '../../svgs/EyeSlashed';
+import BaselineAlignment from '../BaselineAlignment';
 import Field from './Field';
 
-const NotAllowedInput = ({ label, spacerHeight }) => {
+const NotAllowedInput = ({ label, description, spacerHeight }) => {
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
   const text = useMemo(
-    () => formatMessageRef.current({ id: getTrad('components.NotAllowedInput.text') }),
+    () => formatMessageRef.current({ id: 'components.NotAllowedInput.text' }),
     []
   );
 
   return (
-    <Padded bottom size="smd">
+    <BaselineAlignment bottom size="18px">
       <Text fontWeight="semiBold" lineHeight="18px">
         {label}
       </Text>
@@ -33,19 +32,28 @@ const NotAllowedInput = ({ label, spacerHeight }) => {
           </Flex>
         </Padded>
       </Field>
-      <BaselineAlignement height={spacerHeight} />
-    </Padded>
+      {description ? (
+        <BaselineAlignment top size="9px">
+          <Text fontSize="md" color="grey" lineHeight="18px" ellipsis>
+            {description}
+          </Text>
+        </BaselineAlignment>
+      ) : (
+        <BaselineAlignment top size={spacerHeight} />
+      )}
+    </BaselineAlignment>
   );
 };
 
 NotAllowedInput.defaultProps = {
+  description: null,
   label: '',
-  spacerHeight: '7px',
+  spacerHeight: '9px',
 };
 
 NotAllowedInput.propTypes = {
+  description: PropTypes.string,
   label: PropTypes.string,
-  spacerHeight: PropTypes.string,
 };
 
-export default NotAllowedInput;
+export default memo(NotAllowedInput);
