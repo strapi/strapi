@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { Text, Padded } from '@buffetjs/core';
 import { request } from 'strapi-helper-plugin';
-import { LoadingIndicator } from '@buffetjs/styles';
+import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
 import PropTypes from 'prop-types';
 import { getDisplayedValue, getRequestUrl } from '../../utils';
-import Tooltip from '../Tooltip';
 
 const RelationPreviewTooltip = ({
   tooltipId,
