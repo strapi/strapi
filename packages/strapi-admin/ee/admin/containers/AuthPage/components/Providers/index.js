@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Flex, Padded } from '@buffetjs/core';
+import { Button, Flex, Padded, Separator } from '@buffetjs/core';
 import { LoadingIndicator } from '@buffetjs/styles';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -11,7 +11,6 @@ import Logo from '../../../../../../admin/src/containers/AuthPage/components/Log
 import Section from '../../../../../../admin/src/containers/AuthPage/components/Section';
 import ProviderButton from '../../../../components/ProviderButton';
 import { useAuthProviders } from '../../../../hooks';
-import Separator from '../Login/Separator';
 
 const ProviderWrapper = styled.div`
   padding: 5px 4px;
@@ -51,7 +50,12 @@ const Providers = () => {
             )}
             <Padded top size="sm" />
             <Padded top bottom size="smd">
-              <Separator />
+              <Separator
+                label={formatMessage({
+                  id: 'or',
+                  defaultMessage: 'OR',
+                })}
+              />
             </Padded>
             <Button style={{ width: '100%' }} onClick={handleClick} type="submit" color="secondary">
               {formatMessage({

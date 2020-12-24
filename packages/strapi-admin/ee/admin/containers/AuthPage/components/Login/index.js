@@ -2,13 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { Flex, Padded, Text } from '@buffetjs/core';
-import { LoadingIndicator } from '@buffetjs/styles';
+import { Flex, Padded, Text, Separator } from '@buffetjs/core';
+import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
 import { BaselineAlignment } from 'strapi-helper-plugin';
 
 import BaseLogin from '../../../../../../admin/src/containers/AuthPage/components/Login/BaseLogin';
-import Tooltip from '../../../../../../admin/src/components/Tooltip';
-import Separator from './Separator';
 import ProviderButton from '../../../../components/ProviderButton';
 import {
   ProviderButtonWrapper,
