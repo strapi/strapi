@@ -15,11 +15,17 @@ import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { form, schema } from './utils';
 
+const ssoPermissions = {
+  ...adminPermissions.settings.sso,
+  readRoles: adminPermissions.settings.roles.read,
+};
+
 const SingleSignOn = () => {
   const { formatMessage } = useIntl();
   const {
-    allowedActions: { canUpdate },
-  } = useUserPermissions(adminPermissions.sso.update);
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canUpdate, canReadRoles },
+  } = useUserPermissions(ssoPermissions);
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -30,9 +36,12 @@ const SingleSignOn = () => {
     'autoRegister',
     'defaultRole',
   ]);
-  const { roles, isLoading: isLoadingForRoles } = useRolesList();
+  const { roles } = useRolesList(canReadRoles);
 
-  const showLoader = useMemo(() => isLoadingForRoles || isLoading, [isLoading, isLoadingForRoles]);
+  const showLoader = useMemo(() => isLoadingForPermissions || isLoading, [
+    isLoading,
+    isLoadingForPermissions,
+  ]);
 
   const options = useMemo(() => {
     return [
@@ -85,7 +94,7 @@ const SingleSignOn = () => {
 };
 
 const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={adminPermissions.sso.main}>
+  <CheckPagePermissions permissions={ssoPermissions.main}>
     <SingleSignOn />
   </CheckPagePermissions>
 );
