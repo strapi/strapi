@@ -5,8 +5,8 @@ import { get } from 'lodash';
 import ContainerFluid from '../../components/ContainerFluid';
 import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
-import { Header } from '../../components/Users';
-import { useUsersForm } from '../../hooks';
+import { Header } from '../../components/Settings';
+import { useSettingsForm } from '../../hooks';
 import { form, schema } from './utils';
 
 const ProfilePage = () => {
@@ -18,7 +18,7 @@ const ProfilePage = () => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useUsersForm('/admin/users/me', schema, onSubmitSuccessCb, [
+  ] = useSettingsForm('/admin/users/me', schema, onSubmitSuccessCb, [
     'email',
     'firstname',
     'lastname',

@@ -5,7 +5,7 @@ import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
 import init from './init';
 
-const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
+const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     dispatch,
@@ -124,4 +124,4 @@ const useUsersForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   ];
 };
 
-export default useUsersForm;
+export default useSettingsForm;
