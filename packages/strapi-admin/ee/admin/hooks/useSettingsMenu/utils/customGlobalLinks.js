@@ -7,7 +7,7 @@ const customGlobalLinks = [
     to: `${SETTINGS_BASE_URL}/single-sign-on`,
     name: 'sso',
     isDisplayed: false,
-    permissions: adminPermissions.sso.main,
+    permissions: adminPermissions.settings.sso.main,
   },
 ];
 
