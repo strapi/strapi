@@ -10,10 +10,10 @@ const Field = styled.div`
   padding-top: 2px;
   border-radius: 2px;
   background-color: ${({ theme }) => theme.main.colors.mediumGrey};
-  ${({ error }) =>
+  ${({ error, theme }) =>
     error &&
-    css`
-      border: 1px solid ${({ theme }) => theme.main.colors.lightOrange};
+    `
+      border: 1px solid ${theme.main.colors.lightOrange};
     `}
 `;
 
