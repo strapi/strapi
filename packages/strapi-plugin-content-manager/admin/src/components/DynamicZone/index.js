@@ -3,8 +3,8 @@ import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { NotAllowedInput } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-import NotAllowedInput from '../NotAllowedInput';
 import connect from './utils/connect';
 import select from './utils/select';
 import BaselineAlignement from './BaselineAlignement';
@@ -75,7 +75,7 @@ const DynamicZone = ({
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <BaselineAlignement>
-        <NotAllowedInput label={metadatas.label} spacerHeight="3px" />
+        <NotAllowedInput label={metadatas.label} spacerHeight="5px" />
       </BaselineAlignement>
     );
   }
@@ -83,7 +83,7 @@ const DynamicZone = ({
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
       <BaselineAlignement>
-        <NotAllowedInput label={metadatas.label} spacerHeight="3px" />
+        <NotAllowedInput label={metadatas.label} spacerHeight="5px" />
       </BaselineAlignement>
     );
   }
