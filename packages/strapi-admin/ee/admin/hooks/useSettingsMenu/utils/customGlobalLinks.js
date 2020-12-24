@@ -1,4 +1,5 @@
 import { SETTINGS_BASE_URL } from '../../../../../admin/src/config';
+import adminPermissions from '../../../../../admin/src/permissions';
 
 const customGlobalLinks = [
   {
@@ -6,7 +7,7 @@ const customGlobalLinks = [
     to: `${SETTINGS_BASE_URL}/single-sign-on`,
     name: 'sso',
     isDisplayed: false,
-    permissions: [{ action: 'admin::provider-login.read', subject: null }],
+    permissions: adminPermissions.sso.main,
   },
 ];
 

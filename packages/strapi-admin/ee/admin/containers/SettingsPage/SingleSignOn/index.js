@@ -12,18 +12,14 @@ import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormBloc from '../../../../../admin/src/components/FormBloc';
 import { Header } from '../../../../../admin/src/components/Settings';
 import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
+import adminPermissions from '../../../../../admin/src/permissions';
 import { form, schema } from './utils';
-
-const permissions = {
-  read: [{ action: 'admin::provider-login.update', subject: null }],
-  update: [{ action: 'admin::provider-login.read', subject: null }],
-};
 
 const SingleSignOn = () => {
   const { formatMessage } = useIntl();
   const {
     allowedActions: { canUpdate },
-  } = useUserPermissions(permissions);
+  } = useUserPermissions(adminPermissions.sso.update);
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -89,7 +85,7 @@ const SingleSignOn = () => {
 };
 
 const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={permissions.read}>
+  <CheckPagePermissions permissions={adminPermissions.sso.main}>
     <SingleSignOn />
   </CheckPagePermissions>
 );
