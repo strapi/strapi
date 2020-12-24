@@ -11,13 +11,12 @@
  * the linting exception.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
-import PrivateRoute from 'ee_else_ce/containers/PrivateRoute';
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
@@ -28,11 +27,20 @@ import Theme from '../Theme';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
 import NewNotification from '../NewNotification';
+import PrivateRoute from '../PrivateRoute';
+import routes from './utils/routes';
+import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
 function App(props) {
   const getDataRef = useRef();
   const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
   getDataRef.current = props.getDataSucceeded;
+
+  const authRoutes = useMemo(() => {
+    return makeUniqueRoutes(
+      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
+    );
+  }, []);
 
   useEffect(() => {
     const currentToken = auth.getToken();
@@ -107,6 +115,7 @@ function App(props) {
         <NewNotification />
         <Content>
           <Switch>
+            {authRoutes}
             <Route
               path="/auth/:authType"
               render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
