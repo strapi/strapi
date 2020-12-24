@@ -14,6 +14,7 @@ const form = {
     autoFocus: false,
     label: 'Settings.sso.form.defaultRole.label',
     description: { id: 'Settings.sso.form.defaultRole.description' },
+    notAllowedDescription: { id: 'Settings.sso.form.defaultRole.description-not-allowed' },
     type: 'select',
     validations: {},
     options: [],

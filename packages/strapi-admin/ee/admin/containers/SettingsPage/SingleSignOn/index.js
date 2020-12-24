@@ -2,6 +2,7 @@ import React, { memo, useMemo } from 'react';
 import {
   BaselineAlignment,
   CheckPagePermissions,
+  NotAllowedInput,
   SizedInput,
   useUserPermissions,
 } from 'strapi-helper-plugin';
@@ -15,11 +16,17 @@ import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { form, schema } from './utils';
 
+const ssoPermissions = {
+  ...adminPermissions.settings.sso,
+  readRoles: adminPermissions.settings.roles.read,
+};
+
 const SingleSignOn = () => {
   const { formatMessage } = useIntl();
   const {
-    allowedActions: { canUpdate },
-  } = useUserPermissions(adminPermissions.sso.update);
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canUpdate, canReadRoles },
+  } = useUserPermissions(ssoPermissions);
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -30,9 +37,12 @@ const SingleSignOn = () => {
     'autoRegister',
     'defaultRole',
   ]);
-  const { roles, isLoading: isLoadingForRoles } = useRolesList();
+  const { roles } = useRolesList(canReadRoles);
 
-  const showLoader = useMemo(() => isLoadingForRoles || isLoading, [isLoading, isLoadingForRoles]);
+  const showLoader = useMemo(() => isLoadingForPermissions || isLoading, [
+    isLoading,
+    isLoadingForPermissions,
+  ]);
 
   const options = useMemo(() => {
     return [
@@ -64,9 +74,18 @@ const SingleSignOn = () => {
           <BaselineAlignment top size="3px" />
           <FormBloc isLoading={showLoader}>
             {Object.keys(form).map(key => {
+              // TODO: at some point it would be great to handle this in the upcoming input layout
+              const type = key === 'defaultRole' && !canReadRoles ? 'notAllowed' : form[key].type;
+              const description =
+                key === 'defaultRole' && !canReadRoles
+                  ? form[key].notAllowedDescription
+                  : form[key].description;
+
               return (
                 <SizedInput
                   {...form[key]}
+                  customInputs={{ notAllowed: NotAllowedInput }}
+                  description={description}
                   key={key}
                   disabled={!canUpdate}
                   error={formErrors[key]}
@@ -74,6 +93,7 @@ const SingleSignOn = () => {
                   onChange={handleChange}
                   options={options}
                   value={modifiedData[key]}
+                  type={type}
                 />
               );
             })}
@@ -85,7 +105,7 @@ const SingleSignOn = () => {
 };
 
 const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={adminPermissions.sso.main}>
+  <CheckPagePermissions permissions={ssoPermissions.main}>
     <SingleSignOn />
   </CheckPagePermissions>
 );
