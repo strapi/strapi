@@ -87,11 +87,16 @@ const optimize = async buffer => {
     .catch(() => ({ buffer }));
 };
 
-const BREAKPOINTS = {
+const DEFAULT_BREAKPOINTS = {
   large: 1000,
   medium: 750,
   small: 500,
 };
+
+const BREAKPOINTS = strapi.config.get(
+  "plugins.upload.breakpoints",
+  DEFAULT_BREAKPOINTS
+)
 
 const generateResponsiveFormats = async file => {
   const {
