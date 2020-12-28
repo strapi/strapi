@@ -15,7 +15,6 @@
     "knex": "^0.21.14",
     "lodash": "4.17.19",
     "mysql": "^2.17.1",
-    "passport-google-oauth2": "0.2.0",
     "pg": "8.4.0",
     "sqlite3": "^5.0.0",
     "strapi": "3.4.1",
