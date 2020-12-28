@@ -32,7 +32,7 @@ const Logout = ({ history: { push } }) => {
 
   const userInfo = auth.getUserInfo();
   const displayName =
-    userInfo.firstname && userInfo.lastname
+    userInfo && userInfo.firstname && userInfo.lastname
       ? `${userInfo.firstname} ${userInfo.lastname}`
       : get(userInfo, 'username', '');
 
