@@ -47,10 +47,30 @@ const generateSchema = () => {
     return {};
   }
 
+  // Type Definition: Query
   const queryFields = shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
+  const queryDef =
+    queryFields.trim().length || query.trim().length
+      ? `
+    type Query {
+      ${queryFields}
+      ${query}
+    }
+`
+      : '';
 
+  // Type Definition: Mutation
   const mutationFields =
     shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
+
+  const mutationDef =
+    mutationFields.trim().length || mutation.trim().length
+      ? `
+      type Mutation {
+        ${mutationFields}
+        ${mutation}
+      }`
+      : '';
 
   Object.assign(resolvers, PublicationState.resolver);
 
@@ -79,15 +99,9 @@ const generateSchema = () => {
         lastname: String!
       }
 
-      type Query {
-        ${queryFields}
-        ${query}
-      }
+      ${queryDef}
 
-      type Mutation {
-        ${mutationFields}
-        ${mutation}
-      }
+      ${mutationDef}
 
       ${scalarDef}
     `;
