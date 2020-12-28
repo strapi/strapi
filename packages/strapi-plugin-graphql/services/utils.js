@@ -169,6 +169,15 @@ const getActionDetails = resolver => {
 
 const isResolvablePath = path => _.isString(path) && !_.isEmpty(path);
 
+// omit functionality is removed from lodash >= v5.0
+const omit = (originalObject = {}, keysToOmit = []) => {
+  const clonedObject = { ...originalObject };
+  for (const path of keysToOmit) {
+    delete clonedObject[path];
+  }
+  return clonedObject;
+};
+
 module.exports = {
   diffResolvers,
   mergeSchemas,
@@ -182,4 +191,5 @@ module.exports = {
   getActionDetails,
   getActionFn,
   isResolvablePath,
+  omit,
 };

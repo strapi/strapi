@@ -11,6 +11,7 @@ const { buildFederatedSchema } = require('@apollo/federation');
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
 const loadConfigs = require('./load-config');
+const { omit } = require('./../../services/utils');
 
 const attachMetadataToResolvers = (schema, { api, plugin }) => {
   const { resolver = {} } = schema;
@@ -34,6 +35,8 @@ const attachMetadataToResolvers = (schema, { api, plugin }) => {
 
 module.exports = strapi => {
   const { appPath, installedPlugins } = strapi.config;
+  const disabledPlugins = strapi.plugins.graphql.config.disabledPlugins;
+  const disabledExtensions = strapi.plugins.graphql.config.disabledExtensions;
 
   return {
     async beforeInitialize() {
@@ -59,12 +62,18 @@ module.exports = strapi => {
         return attachMetadataToResolvers(schema, { api: key });
       });
 
-      const pluginsSchemas = Object.keys(strapi.plugins || {}).map(key => {
+      // Omits schemas from disabled plugins
+      const enabledPlugins = omit(plugins, disabledPlugins);
+
+      const pluginsSchemas = Object.keys(enabledPlugins || {}).map(key => {
         const schema = _.get(strapi.plugins[key], 'config.schema.graphql', {});
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const extensionsSchemas = Object.keys(extensions || {}).map(key => {
+      // Omits schemas from disabled extensions
+      const enabledExtensions = omit(extensions, disabledExtensions);
+
+      const extensionsSchemas = Object.keys(enabledExtensions || {}).map(key => {
         const schema = _.get(extensions[key], 'config.schema.graphql', {});
         return attachMetadataToResolvers(schema, { plugin: key });
       });

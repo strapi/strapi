@@ -8,5 +8,7 @@
   "federation": false,
   "apolloServer": {
     "tracing": false
-  }
+  },
+  "disabledPlugins": [],
+  "disabledExtensions": []
 }

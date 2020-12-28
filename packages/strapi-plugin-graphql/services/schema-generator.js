@@ -12,7 +12,7 @@ const graphql = require('graphql');
 const PublicationState = require('../types/publication-state');
 const Types = require('./type-builder');
 const { buildModels } = require('./type-definitions');
-const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
+const { mergeSchemas, createDefaultSchema, diffResolvers, omit } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 
@@ -134,9 +134,13 @@ const writeGenerateSchema = schema => {
 };
 
 const buildModelsShadowCRUD = () => {
+  const disabledPlugins = strapi.plugins.graphql.config.disabledPlugins;
   const models = Object.values(strapi.models).filter(model => model.internal !== true);
 
-  const pluginModels = Object.values(strapi.plugins)
+  // Omits models from disabled plugins
+  const enabledPlugins = omit(strapi.plugins, disabledPlugins);
+
+  const pluginModels = Object.values(enabledPlugins)
     .map(plugin => Object.values(plugin.models) || [])
     .reduce((acc, arr) => acc.concat(arr), []);
 
