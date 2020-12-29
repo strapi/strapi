@@ -1,11 +1,10 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
+const { omit } = require('lodash/fp');
 const { createTestBuilder } = require('../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
-
-const { omit } = require('lodash/fp');
 
 const CREATOR_FIELDS = ['updated_by', 'created_by'];
 

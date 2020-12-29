@@ -5,9 +5,9 @@ const _ = require('lodash');
 // eslint-disable-next-line node/no-extraneous-require
 const { map, prop } = require('lodash/fp');
 const modelsUtils = require('../models');
+const { sanitizeEntity } = require('../../../packages/strapi-utils');
 const { createAction } = require('./action');
 const { createEventsManager } = require('./event');
-const { sanitizeEntity } = require('../../../packages/strapi-utils');
 
 const events = {
   MODEL_CREATED: 'model.created',

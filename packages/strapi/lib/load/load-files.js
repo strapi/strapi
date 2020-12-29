@@ -2,8 +2,8 @@
 
 const path = require('path');
 const _ = require('lodash');
-const glob = require('./glob');
 const fse = require('fs-extra');
+const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 
 /**

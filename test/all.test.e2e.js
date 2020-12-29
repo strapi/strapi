@@ -1,9 +1,9 @@
 'use strict';
 
+const path = require('path');
 // eslint-disable-next-line node/no-extraneous-require
 const { flatMap, uniq, negate } = require('lodash/fp');
 const glob = require('glob');
-const path = require('path');
 const chalk = require('chalk');
 
 const fileExtension = '.test.e2e.js';

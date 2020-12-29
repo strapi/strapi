@@ -1,10 +1,10 @@
 'use strict';
 
+const path = require('path');
 // eslint-disable-next-line node/no-extraneous-require
 const _ = require('lodash');
-const path = require('path');
-const { createUtils } = require('./utils');
 const strapi = require('../../packages/strapi/lib');
+const { createUtils } = require('./utils');
 
 const superAdminCredentials = {
   email: 'admin@strapi.io',
