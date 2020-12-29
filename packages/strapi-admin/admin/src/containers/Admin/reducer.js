@@ -20,6 +20,7 @@ const initialState = {
   appError: false,
   isLoading: true,
   latestStrapiReleaseTag: `v${packageVersion}`,
+  shouldUpdateStrapi: false,
   userPermissions: [],
 };
 
@@ -29,6 +30,7 @@ const reducer = (state = initialState, action) =>
     switch (action.type) {
       case GET_STRAPI_LATEST_RELEASE_SUCCEEDED: {
         draftState.latestStrapiReleaseTag = action.latestStrapiReleaseTag;
+        draftState.shouldUpdateStrapi = action.shouldUpdateStrapi;
         break;
       }
       case GET_USER_PERMISSIONS: {

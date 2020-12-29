@@ -169,8 +169,6 @@ const initQueryOptions = (targetModel, parent) => {
 };
 
 const buildAssocResolvers = model => {
-  const contentManager = strapi.plugins['content-manager'].services['contentmanager'];
-
   const { primaryKey, associations = [] } = model;
 
   return associations
@@ -190,12 +188,16 @@ const buildAssocResolvers = model => {
               return assignOptions(obj[association.alias], obj);
             }
 
-            const queryOpts = initQueryOptions(targetModel, obj);
+            const params = {
+              ...initQueryOptions(targetModel, obj),
+              id: obj[primaryKey],
+            };
+            const populate = [association.alias];
 
-            const entry = await contentManager.fetch(model.uid, obj[primaryKey], {
-              query: queryOpts,
-              populate: [association.alias],
-            });
+            const entry = await strapi.entityService.findOne(
+              { params, populate },
+              { model: model.uid }
+            );
 
             return assignOptions(entry[association.alias], obj);
           };

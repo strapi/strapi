@@ -63,9 +63,9 @@ class InputJSON extends React.Component {
     const { value } = this.props;
 
     try {
-      this.setState({ hasInitValue: true });
-
       if (value === null) return this.codeMirror.setValue('');
+
+      this.setState({ hasInitValue: true });
 
       return this.codeMirror.setValue(stringify(value, null, 2));
     } catch (err) {

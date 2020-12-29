@@ -38,7 +38,7 @@ If you are making contributions to our repositories on behalf of your company, t
 
 ## Documentation
 
-Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation branch](https://github.com/strapi/strapi/tree/documentation) **not** towards the master branch. Any PRs made towards the master branch will not be released until the next Strapi version release.
+Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation repo](https://github.com/strapi/documentation). Please see the documentation [contributing guide](https://github.com/strapi/documentation/blob/main/CONTRIBUTING.md) for more information on how to make the documentation pull request.
 
 ## Bugs
 
@@ -69,7 +69,7 @@ The core team will review your pull request and will either merge it, request ch
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met)
 
 Then, please follow the instructions below:
 
