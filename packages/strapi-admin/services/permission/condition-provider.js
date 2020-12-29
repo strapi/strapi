@@ -86,7 +86,7 @@ module.exports = () => {
      * Clear the actions map
      */
     clear() {
-      registry.clear();
+      return registry.clear();
     },
   };
 };

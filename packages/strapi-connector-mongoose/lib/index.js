@@ -199,13 +199,18 @@ module.exports = function(strapi) {
   }
 
   async function destroy() {
-    for (const connName of mongooseConnections) {
-      const connection = strapi.connections[connName];
+    await Promise.all(
+      mongooseConnections.map(connName => {
+        const mongooseConnection = strapi.connections[connName];
 
-      if (connection instanceof Mongoose && connection.connection.readyState === 1) {
-        connection.disconnect();
-      }
-    }
+        if (
+          mongooseConnection instanceof Mongoose &&
+          mongooseConnection.connection.readyState === 1
+        ) {
+          mongooseConnection.disconnect();
+        }
+      })
+    );
   }
 
   return {

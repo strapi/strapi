@@ -41,7 +41,7 @@ class DatabaseManager {
   }
 
   async destroy() {
-    await Promise.all(this.connectors.getAll().map(conn => conn.destroy()));
+    await Promise.all(this.connectors.getAll().map(connector => connector.destroy()));
   }
 
   initializeModelsMap() {

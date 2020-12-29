@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-// eslint-disable-next-line node/no-extraneous-require
 const { flatMap, uniq, negate } = require('lodash/fp');
 const glob = require('glob');
 const chalk = require('chalk');

@@ -1,6 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const { prop, isArray, curry, isNil, has, isFunction } = require('lodash/fp');
 const modelsUtils = require('../models');
 

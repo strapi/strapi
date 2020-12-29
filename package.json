@@ -35,8 +35,10 @@
     "jest-styled-components": "^7.0.2",
     "lerna": "^3.13.1",
     "lint-staged": "^10.5.3",
+    "lodash": "4.17.20",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.18.2",
+    "qs": "6.9.4",
     "react-test-renderer": "^17.0.1",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.9",
@@ -74,7 +76,7 @@
     "test:snyk": "snyk test",
     "test:unit": "jest --verbose",
     "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --forceExit --detectOpenHandles --logHeapUsage --runInBand test/all.test.e2e.js",
-    "test:generate-app": "node test/createTestApp.js",
+    "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
   "author": {

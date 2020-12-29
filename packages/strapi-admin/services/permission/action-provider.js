@@ -71,7 +71,7 @@ const createActionProvider = () => {
      * Clear the actions map
      */
     clear() {
-      actions.clear();
+      return actions.clear();
     },
   };
 };

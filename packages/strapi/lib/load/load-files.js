@@ -8,7 +8,7 @@ const filePathToPath = require('./filepath-to-prop-path');
 
 /**
  * Returns an Object build from a list of files matching a glob pattern in a directory
- * It builds a tree structure ressembling the folder structure in dir
+ * It builds a tree structure resembling the folder structure in dir
  * @param {string} dir - Directory to load
  * @param {string} pattern - Glob pattern to search for
  * @param {Object} options - Options
@@ -32,7 +32,7 @@ const loadFiles = async (
     let mod;
 
     if (path.extname(absolutePath) === '.json') {
-      mod = fse.readJsonSync(absolutePath);
+      mod = await fse.readJson(absolutePath);
     } else {
       mod = requireFn(absolutePath);
     }

@@ -205,9 +205,13 @@ class Strapi {
       this.server.destroy();
     }
 
-    if (_.has(this, 'plugins.graphql')) {
-      await this.plugins.graphql.destroy();
-    }
+    await Promise.all(
+      Object.values(this.plugins).map(plugin => {
+        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
+          return plugin.destroy();
+        }
+      })
+    );
 
     if (_.has(this, 'admin')) {
       await this.admin.destroy();

@@ -1,27 +1,25 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
-const _ = require('lodash');
-// eslint-disable-next-line node/no-extraneous-require
+const { clone, has, concat, isNil } = require('lodash/fp');
 const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
 
 const createAgent = (strapi, initialState = {}) => {
-  const _state = initialState;
-  const _utils = createUtils(strapi);
+  const state = clone(initialState);
+  const utils = createUtils(strapi);
 
-  const _agent = options => {
+  const agent = options => {
     const { method, url, body, formData, qs: queryString } = options;
-    const agent = request.agent(strapi.server);
+    const supertestAgent = request.agent(strapi.server);
 
-    if (_.has(_state, 'token')) {
-      agent.auth(_state.token, { type: 'bearer' });
+    if (has('token', state)) {
+      supertestAgent.auth(state.token, { type: 'bearer' });
     }
 
-    const fullUrl = _.concat(_state.urlPrefix, url).join('');
+    const fullUrl = concat(state.urlPrefix, url).join('');
 
-    const rq = agent[method.toLowerCase()](fullUrl);
+    const rq = supertestAgent[method.toLowerCase()](fullUrl);
 
     if (queryString) {
       rq.query(qs.stringify(queryString));
@@ -36,7 +34,7 @@ const createAgent = (strapi, initialState = {}) => {
       Object.keys(formData).forEach(attachFieldToRequest);
     }
 
-    if (_.isNil(formData)) {
+    if (isNil(formData)) {
       rq.type('application/json');
     }
 
@@ -44,13 +42,13 @@ const createAgent = (strapi, initialState = {}) => {
   };
 
   const createShorthandMethod = method => (url, options = {}) => {
-    return _agent({ ...options, url, method });
+    return agent({ ...options, url, method });
   };
 
-  Object.assign(_agent, {
-    assignState(state) {
-      Object.assign(_state, state);
-      return _agent;
+  Object.assign(agent, {
+    assignState(newState) {
+      Object.assign(state, newState);
+      return agent;
     },
 
     setURLPrefix(path) {
@@ -66,23 +64,23 @@ const createAgent = (strapi, initialState = {}) => {
     },
 
     getLoggedUser() {
-      return _state.loggedUser;
+      return state.loggedUser;
     },
 
     async login(userInfo) {
-      const { token, user } = await _utils.login(userInfo);
+      const { token, user } = await utils.login(userInfo);
 
       this.setToken(token).setLoggedUser(user);
 
-      return _agent;
+      return agent;
     },
 
     async registerOrLogin(userCredentials) {
-      const { token, user } = await _utils.registerOrLogin(userCredentials);
+      const { token, user } = await utils.registerOrLogin(userCredentials);
 
       this.setToken(token).setLoggedUser(user);
 
-      return _agent;
+      return agent;
     },
 
     get: createShorthandMethod('GET'),
@@ -91,7 +89,7 @@ const createAgent = (strapi, initialState = {}) => {
     delete: createShorthandMethod('DELETE'),
   });
 
-  return _agent;
+  return agent;
 };
 
 module.exports = {

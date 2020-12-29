@@ -64,8 +64,8 @@ const createContentTypes = async contentTypes => {
   const builder = createBuilder();
   const createdContentTypes = [];
 
-  for (const ct of contentTypes) {
-    createdContentTypes.push(await createContentType(ct, { defaultBuilder: builder }));
+  for (const contentType of contentTypes) {
+    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
   }
 
   await builder.writeFiles();
@@ -223,7 +223,7 @@ const deleteContentTypes = async uids => {
     try {
       await apiHandler.clear(uid);
     } catch (error) {
-      console.log(error);
+      strapi.log.error(error);
       await apiHandler.rollback(uid);
     }
   }
