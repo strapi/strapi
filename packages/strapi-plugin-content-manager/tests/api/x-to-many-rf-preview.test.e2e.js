@@ -1,15 +1,16 @@
 'use strict';
 
 const { prop, difference, map, uniq } = require('lodash/fp');
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 
 const toIds = arr => uniq(map(prop('id'))(arr));
-const getFrom = model => (start, end) => fixtures[model].map(prop('name')).slice(start, end);
 
+let strapi;
 let rq;
-let modelsUtils;
+const builder = createTestBuilder();
+
 const data = {
   product: [],
   category: [],
@@ -88,61 +89,38 @@ const fixtures = {
     { name: 'CT.K' },
     { name: 'CT.L' },
   ],
-  product: () => {
-    const { shop, category } = data;
-
-    const items = [
-      { name: 'PD.A', categories: getFrom('category')(0, 5), shops: getFrom('shop')(0, 12) },
-    ];
-
-    return items.map(item => ({
-      ...item,
-      categories: item.categories.map(catName => category.find(cat => cat.name === catName).id),
-      shops: item.shops.map(shopName => shop.find(sh => sh.name === shopName).id),
-    }));
-  },
+  product: ({ shop, category }) => [
+    {
+      name: 'PD.A',
+      categories: category.slice(0, 5).map(prop('id')),
+      shops: shop.slice(0, 12).map(prop('id')),
+    },
+  ],
 };
 
 const getUID = modelName => `application::${modelName}.${modelName}`;
 const getCMPrefixUrl = modelName => `/content-manager/collection-types/${getUID(modelName)}`;
 
-const createFixtures = async () => {
-  let url = getCMPrefixUrl(shopModel.name);
-  for (const shop of fixtures.shop) {
-    const res = await rq.post(url, { body: shop });
-    data.shop.push(res.body);
-  }
-
-  url = getCMPrefixUrl(categoryModel.name);
-  for (const category of fixtures.category) {
-    const res = await rq.post(url, { body: category });
-    data.category.push(res.body);
-  }
-
-  url = getCMPrefixUrl(productModel.name);
-  for (const product of fixtures.product()) {
-    const res = await rq.post(url, { body: product });
-    data.product.push(res.body);
-  }
-};
-
 describe('x-to-many RF Preview', () => {
   const cmProductUrl = getCMPrefixUrl(productModel.name);
 
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addContentTypes([shopModel, categoryModel, productModel])
+      .addFixtures(shopModel.name, fixtures.shop)
+      .addFixtures(categoryModel.name, fixtures.category)
+      .addFixtures(productModel.name, fixtures.product)
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([shopModel, categoryModel, productModel]);
-    await modelsUtils.cleanupContentTypes(['shop', 'category', 'product']);
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
 
-    await createFixtures();
+    Object.assign(data, builder.sanitizedFixtures(strapi));
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.cleanupContentTypes(['shop', 'category', 'product']);
-    await modelsUtils.deleteContentTypes(['shop', 'category', 'product']);
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   describe('Entity Misc', () => {

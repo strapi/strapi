@@ -4,6 +4,7 @@
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 const { createTestBuilder } = require('../../../test/helpers/builder');
+const modelsUtils = require('../../../test/helpers/models');
 
 const form = require('../../../test/helpers/generators');
 
@@ -234,7 +235,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      // FIXME await modelsUtils.cleanupContentTypes(['article', 'category']);
+      await modelsUtils.cleanupModels(['article', 'category'], { strapi });
     });
 
     test('Create cat1', async () => {
@@ -457,7 +458,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      // FIXME await modelsUtils.cleanupContentTypes(['article', 'reference']);
+      await modelsUtils.cleanupModels(['article', 'reference'], { strapi });
     });
 
     test('Create ref1', async () => {
@@ -546,7 +547,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      // FIXME await modelsUtils.cleanupContentTypes(['reference', 'tag']);
+      await modelsUtils.cleanupModels(['reference', 'tag'], { strapi });
     });
 
     test('Attach Tag to a Reference', async () => {

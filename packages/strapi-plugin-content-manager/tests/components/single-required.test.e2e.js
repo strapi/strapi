@@ -33,6 +33,7 @@ describe.each([
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and required component', (_, path) => {
   const builder = createTestBuilder();
+  const hasPagination = path.includes('/content-manager');
 
   beforeAll(async () => {
     await builder

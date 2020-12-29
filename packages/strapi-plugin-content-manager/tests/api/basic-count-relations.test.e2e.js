@@ -1,11 +1,13 @@
 'use strict';
 
-const { registerAndLogin } = require('../../../../test/helpers/auth');
-const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 
+let strapi;
 let rq;
-let modelsUtils;
+const builder = createTestBuilder();
+
 let data = {
   stamps: [],
   collectors: [],
@@ -64,81 +66,51 @@ const stampFixtures = [
   },
 ];
 
-async function createFixtures() {
-  for (let stamp of stampFixtures) {
-    const res = await rq({
-      method: 'POST',
-      url: '/stamps',
-      body: stamp,
-    });
-
-    data.stamps.push(res.body);
-  }
-
-  const collectors = [
-    {
-      name: 'Bernard',
-      age: 25,
-      stamps: [data.stamps[0].id, data.stamps[1].id],
-      stamps_m2m: [data.stamps[0].id],
-      stamps_one_many: [],
-    },
-    {
-      name: 'Isabelle',
-      age: 55,
-      stamps: [data.stamps[0].id],
-      stamps_m2m: [],
-      stamps_one_many: [data.stamps[1].id, data.stamps[2].id],
-    },
-    {
-      name: 'Emma',
-      age: 23,
-      stamps: [],
-      stamps_m2m: [data.stamps[0].id, data.stamps[1].id],
-      stamps_one_many: [data.stamps[0].id],
-    },
-  ];
-  for (const collector of collectors) {
-    const res = await rq({
-      method: 'POST',
-      url: '/collectors',
-      body: collector,
-    });
-    data.collectors.push(res.body);
-  }
-}
-
-async function deleteFixtures() {
-  for (let stamp of data.stamps) {
-    await rq({
-      method: 'DELETE',
-      url: `/stamps/${stamp.id}`,
-    });
-  }
-  for (let collector of data.collectors) {
-    await rq({
-      method: 'DELETE',
-      url: `/collectors/${collector.id}`,
-    });
-  }
-}
+const collectorFixtures = ({ stamp }) => [
+  {
+    name: 'Bernard',
+    age: 25,
+    stamps: [stamp[0].id, stamp[1].id],
+    stamps_m2m: [stamp[0].id],
+    stamps_one_many: [],
+  },
+  {
+    name: 'Isabelle',
+    age: 55,
+    stamps: [stamp[0].id],
+    stamps_m2m: [],
+    stamps_one_many: [stamp[1].id, stamp[2].id],
+  },
+  {
+    name: 'Emma',
+    age: 23,
+    stamps: [],
+    stamps_m2m: [stamp[0].id, stamp[1].id],
+    stamps_one_many: [stamp[0].id],
+  },
+];
 
 const getCollectorByName = (collectors, name) => collectors.find(c => c.name === name);
 const getStampByName = (stamps, name) => stamps.find(s => s.name === name);
 
 describe('CM API - Count relations', () => {
   beforeAll(async () => {
-    const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    await builder
+      .addContentTypes([stamp, collector])
+      .addFixtures(stamp.name, stampFixtures)
+      .addFixtures(collector.name, collectorFixtures)
+      .build();
 
-    modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createContentTypes([stamp, collector]);
-    await createFixtures();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    data.collectors = builder.sanitizedFixturesFor(collector.name, strapi);
+    data.stamps = builder.sanitizedFixturesFor(stamp.name, strapi);
   }, 60000);
 
   afterAll(async () => {
-    await deleteFixtures();
-    await modelsUtils.deleteContentTypes(['collector', 'stamp']);
+    await strapi.destroy();
+    await builder.cleanup();
   }, 60000);
 
   test('many-way', async () => {
