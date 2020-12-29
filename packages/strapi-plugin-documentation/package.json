@@ -17,7 +17,7 @@
     "@buffetjs/icons": "3.3.3",
     "@buffetjs/styles": "3.3.3",
     "@buffetjs/utils": "3.3.3",
-    "cheerio": "^1.0.0-rc.3",
+    "cheerio": "^1.0.0-rc.5",
     "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",
     "koa-static": "^5.0.0",
