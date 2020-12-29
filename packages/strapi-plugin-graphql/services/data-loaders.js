@@ -140,6 +140,9 @@ module.exports = {
 
     const ref = strapi.getModel(modelUID);
     const ast = ref.associations.find(ast => ast.alias === query.alias);
+    const include = ref.associations
+      .filter(assoc => assoc.nature == 'manyWay')
+      .map(assoc => assoc.alias);
 
     const ids = _.chain(query.ids)
       .filter(id => !_.isEmpty(id) || _.isInteger(id)) // Only keep valid ids
@@ -156,7 +159,7 @@ module.exports = {
 
     // Run query and remove duplicated ID.
     return strapi.entityService.find(
-      { params, populate: ast ? [query.alias] : [] },
+      { params, populate: ast ? [query.alias, ...include] : [] },
       { model: modelUID }
     );
   },
