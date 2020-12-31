@@ -56,7 +56,7 @@ function Filter({
       toggleFilterPickerState();
     }
 
-    setQuery(formatFiltersToQuery(updatedFilters, metadatas));
+    setQuery({ page: 1, ...formatFiltersToQuery(updatedFilters, metadatas) });
   }, [filters, index, isFilterPickerOpen, metadatas, setQuery, toggleFilterPickerState]);
 
   return <FilterButton onClick={handleClick} label={label} type={type} />;
