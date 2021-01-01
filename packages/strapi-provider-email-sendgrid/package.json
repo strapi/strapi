@@ -13,7 +13,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@sendgrid/mail": "6.4.0",
+    "@sendgrid/mail": "7.4.0",
     "strapi-utils": "3.4.1"
   },
   "strapi": {
