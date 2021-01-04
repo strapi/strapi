@@ -15,7 +15,7 @@ import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/solarized.css';
 
-import { isEmpty, trimStart } from 'lodash';
+import { trimStart } from 'lodash';
 import jsonlint from './jsonlint';
 import Wrapper from './components';
 
@@ -29,7 +29,7 @@ class InputJSON extends React.Component {
   constructor(props) {
     super(props);
     this.editor = React.createRef();
-    this.state = { error: false, markedText: null };
+    this.state = { error: false, markedText: null, hasInitValue: false };
   }
 
   componentDidMount() {
@@ -54,7 +54,7 @@ class InputJSON extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (isEmpty(prevProps.value) && !isEmpty(this.props.value) && !this.state.hasInitValue) {
+    if (prevProps.value !== this.props.value && !this.state.hasInitValue) {
       this.setInitValue();
     }
   }
@@ -114,17 +114,15 @@ class InputJSON extends React.Component {
     }
   };
 
-  handleChange = () => {
-    const { hasInitValue } = this.state;
-    const { name, onChange } = this.props;
-    let value = this.codeMirror.getValue();
-
-    if (!hasInitValue) {
-      this.setState({ hasInitValue: true });
-
-      // Fix for the input firing on onChange event on mount
+  handleChange = (doc, change) => {
+    if (change.origin === 'setValue') {
       return;
     }
+
+    this.setState({ hasInitValue: true });
+
+    const { name, onChange } = this.props;
+    let value = doc.getValue();
 
     if (value === '') {
       value = null;
@@ -146,7 +144,7 @@ class InputJSON extends React.Component {
     }
 
     clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.testJSON(this.codeMirror.getValue()), WAIT);
+    this.timer = setTimeout(() => this.testJSON(doc.getValue()), WAIT);
   };
 
   testJSON = value => {
