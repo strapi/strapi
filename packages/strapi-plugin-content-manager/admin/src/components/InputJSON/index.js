@@ -75,9 +75,9 @@ class InputJSON extends React.Component {
 
   setSize = () => this.codeMirror.setSize('100%', 'auto');
 
-  getContentAtLine = line => this.codeMirror.getLine(line);
+  getContentAtLine = (line) => this.codeMirror.getLine(line);
 
-  getEditorOption = opt => this.codeMirror.getOption(opt);
+  getEditorOption = (opt) => this.codeMirror.getOption(opt);
 
   getValue = () => this.codeMirror.getValue();
 
@@ -121,9 +121,6 @@ class InputJSON extends React.Component {
 
     if (!hasInitValue) {
       this.setState({ hasInitValue: true });
-
-      // Fix for the input firing on onChange event on mount
-      return;
     }
 
     if (value === '') {
@@ -149,7 +146,7 @@ class InputJSON extends React.Component {
     this.timer = setTimeout(() => this.testJSON(this.codeMirror.getValue()), WAIT);
   };
 
-  testJSON = value => {
+  testJSON = (value) => {
     try {
       jsonlint.parse(value);
     } catch (err) {
