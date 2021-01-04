@@ -67,7 +67,12 @@ const getWritableAttributes = (model = {}) => {
 };
 
 const getNonVisibleAttributes = model => {
-  return _.uniq([model.primaryKey, ...getTimestamps(model), ...NON_VISIBLE_ATTRIBUTES]);
+  return _.uniq([
+    model.primaryKey,
+    ...NON_VISIBLE_ATTRIBUTES,
+    ...getTimestamps(model),
+    ...getNonWritableAttributes(model),
+  ]);
 };
 
 const getVisibleAttributes = model => {

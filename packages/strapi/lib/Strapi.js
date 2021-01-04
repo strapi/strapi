@@ -335,6 +335,8 @@ class Strapi {
     this.models['core_store'] = coreStoreModel(this.config);
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
+    await this.runRegisterFunctions();
+
     this.db = createDatabaseManager(this);
     await this.db.initialize();
 
@@ -443,6 +445,35 @@ class Strapi {
     });
   }
 
+  async runRegisterFunctions() {
+    const execRegister = async fn => {
+      if (!fn) return;
+
+      return fn();
+    };
+
+    // plugins bootstrap
+    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
+      return execRegister(_.get(this.plugins[plugin], 'config.functions.register')).catch(err => {
+        strapi.log.error(`Register function in plugin "${plugin}" failed`);
+        strapi.log.error(err);
+        strapi.stop();
+      });
+    });
+    await Promise.all(pluginBoostraps);
+
+    // // user bootstrap
+    // await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+
+    // // admin bootstrap : should always run after the others
+    // const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
+    // return execBootstrap(adminBootstrap).catch(err => {
+    //   strapi.log.error(`Bootstrap function in admin failed`);
+    //   strapi.log.error(err);
+    //   strapi.stop();
+    // });
+  }
+
   async freeze() {
     Object.freeze(this.config);
     Object.freeze(this.dir);
@@ -462,6 +493,14 @@ class Strapi {
    */
   query(entity, plugin) {
     return this.db.query(entity, plugin);
+  }
+
+  plugin(name) {
+    if (!_.has(this.plugins, name)) {
+      throw new Error(`Undefined plugin ${name}`);
+    }
+
+    return this.plugins[name];
   }
 }
 
