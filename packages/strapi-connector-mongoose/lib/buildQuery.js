@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { isEmpty, set, omit, assoc } = require('lodash/fp');
+const { isEmpty, set, omit, assoc, orderBy } = require('lodash/fp');
 const semver = require('semver');
 const {
   hasDeepFilters,
@@ -708,10 +708,7 @@ const findModelPath = ({ rootModel, path }) => {
  * @param {Object} indexMap - index map of the form { [id]: index }
  */
 const orderByIndexMap = indexMap => entities => {
-  return entities.reduce((acc, entry) => {
-    acc[indexMap[entry._id]] = entry;
-    return acc;
-  }, []);
+  return orderBy(entity => indexMap[entity._id], 'asc', entities);
 };
 
 module.exports = buildQuery;
