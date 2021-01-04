@@ -55,7 +55,9 @@ describe('Migration - draft and publish', () => {
     ['with table modifications', { town: { type: 'string' } }, { color: { type: 'string' } }],
   ])('%p', (testName, tableModification1, tableModification2) => {
     beforeAll(async () => {
-      builder = await createTestBuilder()
+      builder = createTestBuilder();
+
+      await builder
         .addContentType(dogModel)
         .addFixtures(dogModel.name, dogs)
         .build();

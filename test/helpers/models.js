@@ -1,7 +1,6 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
-const { isFunction, isNil } = require('lodash/fp');
+const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 
 const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {
@@ -172,6 +171,14 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   return results;
 }
 
+async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
+  const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
+
+  await strapi.query(model).delete({ id_in: entries.map(prop('id')) });
+
+  await cleanup();
+}
+
 async function modifyContentType(data, { strapi } = {}) {
   const { contentTypeService, cleanup } = await createHelpers({ strapi });
 
@@ -223,6 +230,7 @@ module.exports = {
   // Fixtures
   createFixtures,
   createFixturesFor,
+  deleteFixturesFor,
   // Update Content-Types
   modifyContentType,
   // Misc
