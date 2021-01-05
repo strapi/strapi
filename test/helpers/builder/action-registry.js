@@ -1,6 +1,6 @@
 'use strict';
 
-const { concat, merge, isFunction, map } = require('lodash/fp');
+const { isFunction, map } = require('lodash/fp');
 const modelsUtils = require('../models');
 
 const stringifyDates = object =>
@@ -16,14 +16,14 @@ const stringifyDates = object =>
 const formatFixtures = map(stringifyDates);
 
 module.exports = {
-  ct: {
+  contentType: {
     create: contentType => {
       let createdModel;
 
       return {
-        async build(state) {
+        async build(ctx) {
           createdModel = await modelsUtils.createContentType(contentType);
-          return { ...state, models: [...state.models, createdModel] };
+          ctx.addModel(createdModel);
         },
         cleanup: () => modelsUtils.deleteContentType(createdModel.modelName),
       };
@@ -33,9 +33,9 @@ module.exports = {
       let createdModels = [];
 
       return {
-        async build(state) {
+        async build(ctx) {
           createdModels = await modelsUtils.createContentTypes(contentTypes);
-          return { ...state, models: concat(state.models, createdModels) };
+          createdModels.forEach(ctx.addModel);
         },
         async cleanup() {
           for (const model of createdModels) {
@@ -49,12 +49,13 @@ module.exports = {
       const createdModels = [];
 
       return {
-        async build(state) {
+        async build(ctx) {
           for (const contentType of contentTypes) {
-            createdModels.push(await modelsUtils.createContentType(contentType));
-          }
+            const model = await modelsUtils.createContentType(contentType);
 
-          return { ...state, models: concat(state.models, createdModels) };
+            createdModels.push(model);
+            ctx.addModel(model);
+          }
         },
         async cleanup() {
           for (const model of createdModels) {
@@ -64,14 +65,14 @@ module.exports = {
       };
     },
   },
-  comp: {
+  component: {
     create: component => {
       let createdModel;
 
       return {
-        async build(state) {
+        async build(ctx) {
           createdModel = await modelsUtils.createComponent(component);
-          return { ...state, models: [...state.models, createdModel] };
+          ctx.addModel(createdModel);
         },
         cleanup: () => modelsUtils.deleteComponent(createdModel.uid),
       };
@@ -82,14 +83,15 @@ module.exports = {
       let createdEntries = [];
 
       return {
-        async build(state) {
+        async build(ctx) {
           createdEntries = formatFixtures(
             await modelsUtils.createFixturesFor(
               modelName,
               isFunction(entries) ? entries(getFixtures()) : entries
             )
           );
-          return { ...state, fixtures: merge(state.fixtures, { [modelName]: createdEntries }) };
+
+          ctx.addFixtures(modelName, createdEntries);
         },
         cleanup: () => modelsUtils.deleteFixturesFor(modelName, createdEntries),
       };

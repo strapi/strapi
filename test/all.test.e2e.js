@@ -10,6 +10,12 @@ const filePattern = `*${fileExtension}`;
 
 const defaultPaths = ['packages/'];
 
+/**
+ * `STRAPI_TEST_PATHS` is an env variable used internally to filter which test are going to be run.
+ * The expected format is a string containing a space separated list of file or directory.
+ * eg: STRAPI_TEST_PATHS="packages/strapi-foo/file.test.e2e.js packages/strapi-bar"
+ * If not initialized, default paths are used (see the `defaultPaths` variable declared above)
+ */
 const testPaths = process.env.STRAPI_TEST_PATHS;
 const paths = testPaths ? testPaths.split(' ') : defaultPaths;
 
