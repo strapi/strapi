@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { upperCase } from 'lodash';
 
-import Text from '../Text';
+import { Text } from '@buffetjs/core';
 
 const FileInfos = ({ extension, height, size, width }) => {
   return (
