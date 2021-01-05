@@ -1,6 +1,5 @@
-import { ATTRIBUTES_PERMISSIONS_ACTIONS } from './permissonsConstantsActions';
+import { STATIC_ATTRIBUTE_ACTIONS } from './permissonsConstantsActions';
 
-const isAttributeAction = action =>
-  ATTRIBUTES_PERMISSIONS_ACTIONS.includes(action.split('.')[action.split('.').length - 1]);
+const isAttributeAction = action => STATIC_ATTRIBUTE_ACTIONS.includes(action);
 
 export default isAttributeAction;

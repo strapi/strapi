@@ -137,7 +137,10 @@ function ListView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       }
     }
@@ -171,7 +174,10 @@ function ListView() {
       });
     } catch (err) {
       if (err.code !== 20) {
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
     }
     setShowModal(false);
@@ -196,7 +202,10 @@ function ListView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       }
     }
@@ -245,7 +254,10 @@ function ListView() {
         });
 
         if (err.code !== 20) {
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       }
     }

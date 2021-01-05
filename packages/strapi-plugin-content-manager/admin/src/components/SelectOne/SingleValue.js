@@ -3,13 +3,15 @@ import { components } from 'react-select';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex, Padded, Text } from '@buffetjs/core';
+import { getDisplayedValue } from '../../utils';
 import RelationDPState from '../RelationDPState';
 
 const SingleValue = props => {
   const Component = components.SingleValue;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'published_at');
   const isDraft = isEmpty(get(props, 'data.value.published_at'));
-  const value = props.data.label;
+  const mainField = get(props, ['selectProps', 'mainField'], {});
+  const value = getDisplayedValue(mainField.schema.type, props.data.label, mainField.name);
 
   if (hasDraftAndPublish) {
     return (
@@ -43,6 +45,14 @@ const SingleValue = props => {
 
 SingleValue.propTypes = {
   data: PropTypes.object.isRequired,
+  selectProps: PropTypes.shape({
+    mainField: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      schema: PropTypes.shape({
+        type: PropTypes.string.isRequired,
+      }).isRequired,
+    }).isRequired,
+  }).isRequired,
 };
 
 export default SingleValue;

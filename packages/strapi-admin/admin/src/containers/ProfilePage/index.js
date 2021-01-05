@@ -1,9 +1,7 @@
 import React from 'react';
-import { BackHeader, auth } from 'strapi-helper-plugin';
+import { BackHeader, BaselineAlignment, auth } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-
-import BaselineAlignement from '../../components/BaselineAlignement';
 import ContainerFluid from '../../components/ContainerFluid';
 import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
@@ -42,7 +40,7 @@ const ProfilePage = () => {
             onCancel={handleCancel}
             showHeaderButtonLoader={showHeaderButtonLoader}
           />
-          <BaselineAlignement top size="3px" />
+          <BaselineAlignment top size="3px" />
           <FormBloc isLoading={isLoading}>
             {Object.keys(form).map(key => {
               return (

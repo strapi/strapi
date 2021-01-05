@@ -1,3 +1,5 @@
+'use strict';
+
 const getTypeValidator = require('../types');
 
 describe('Type validators', () => {

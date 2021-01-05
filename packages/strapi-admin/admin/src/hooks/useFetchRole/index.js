@@ -40,7 +40,10 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_ERROR',
       });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 

@@ -125,7 +125,17 @@ class Wysiwyg extends React.Component {
     }
 
     // Update the content when used in a dynamiczone
+    // We cannot update the value of the component each time there is a onChange event
+    // fired otherwise the component gets very slow
     if (prevProps.value !== this.props.value && !this.state.isFocused) {
+      this.setInitialValue(this.props);
+    }
+
+    // Here we need to update the content of editorState for the edition case
+    // With the current architecture of the EditView we cannot rely on the componentDidMount lifecycle
+    // Since we need to perform some operations in the reducer the loading phase stops before all the operations
+    // are computed which in some case causes the inputs component to be initialised with a null value.
+    if (!prevProps.value && this.props.value) {
       this.setInitialValue(this.props);
     }
   }

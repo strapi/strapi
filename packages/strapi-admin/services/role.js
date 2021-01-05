@@ -3,9 +3,9 @@
 const _ = require('lodash');
 const { set } = require('lodash/fp');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
-const { SUPER_ADMIN_CODE } = require('./constants');
 const { createPermission } = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
+const { SUPER_ADMIN_CODE } = require('./constants');
 
 const ACTIONS = {
   publish: 'plugins::content-manager.explorer.publish',
