@@ -84,7 +84,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     let entry = await db.query(model).create(validData);
 
-    if (files) {
+    if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
@@ -115,7 +115,7 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     let entry = await db.query(model).update(params, validData);
 
-    if (files) {
+    if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
