@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { each, prop, reject, isEmpty } = require('lodash/fp');
+const { each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
@@ -21,8 +21,18 @@ const buildQuery = ({ model, filters }) => qb => {
   const joinsTree = buildJoinsAndFilter(qb, model, filters);
 
   if (_.has(filters, 'sort')) {
-    const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree));
-    qb.orderBy(reject(isEmpty, clauses));
+    const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
+    const aliasedClauses = clauses.map(c => ({
+      order: c.order,
+      column: c.column.includes('.') ? c.tmpColumnName : c.column,
+    }));
+    const joinColumnsToSelect = clauses
+      .filter(c => c.column.includes('.'))
+      .map(c => ({ [c.tmpColumnName]: c.column }));
+
+    qb.distinct()
+      .column([`${joinsTree.alias}.*`, ...joinColumnsToSelect])
+      .orderBy(aliasedClauses);
   }
 
   if (_.has(filters, 'start')) {
@@ -47,13 +57,21 @@ const buildQuery = ({ model, filters }) => qb => {
  */
 const buildSortClauseFromTree = tree => ({ field, order }) => {
   if (!field.includes('.')) {
-    return { column: field, order };
+    return {
+      column: `${tree.alias}.${field}`,
+      order,
+      tmpColumnName: `_strapi_tmp_${tree.alias}_${field}`,
+    };
   }
 
   const [relation, attribute] = field.split('.');
   for (const { alias, assoc } of Object.values(tree.joins)) {
     if (relation === assoc.alias) {
-      return { column: `${alias}.${attribute}`, order };
+      return {
+        column: `${alias}.${attribute}`,
+        order,
+        tmpColumnName: `_strapi_tmp_${alias}_${attribute}`,
+      };
     }
   }
 
