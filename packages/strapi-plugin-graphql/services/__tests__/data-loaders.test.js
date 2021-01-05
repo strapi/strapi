@@ -18,13 +18,12 @@ describe('dataloader', () => {
   describe('makeQuery', () => {
     test('makeQuery single calls findOne', async () => {
       const uid = 'uid';
-      const find = jest.fn(() => [{ id: 1 }]);
       const findOne = jest.fn(() => ({ id: 1 }));
       const filters = { _limit: 5 };
 
       global.strapi = {
         query() {
-          return { find, findOne };
+          return { findOne };
         },
       };
 

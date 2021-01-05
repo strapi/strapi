@@ -53,7 +53,7 @@ module.exports = {
   },
 
   serializeKey(key) {
-    return _.isObjectLike(key) ? JSON.stringify(_.cloneDeep(key)) : key;
+    return _.isObjectLike(key) ? JSON.stringify(key) : key;
   },
 
   async batchQuery(modelUID, queries) {

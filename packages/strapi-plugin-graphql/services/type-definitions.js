@@ -219,7 +219,7 @@ const buildAssocResolvers = model => {
                 return null;
               }
 
-              // check this is en entity and not a mongo ID
+              // check this is an entity and not a mongo ID
               if (_.has(obj[alias], targetPK)) {
                 return assignOptions(obj[alias], obj);
               }
