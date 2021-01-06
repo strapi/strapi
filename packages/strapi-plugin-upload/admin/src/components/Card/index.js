@@ -1,10 +1,9 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
+import { Flex } from '@buffetjs/core';
 import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin';
 import { formatBytes, getType, getTrad } from '../../utils';
 
-import Flex from '../Flex';
-import Text from '../Text';
 import Border from '../CardBorder';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
@@ -66,26 +65,15 @@ const Card = ({
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
-
-      {!withoutFileInfo ? (
+      {!withoutFileInfo && (
         <>
           <Flex>
             <Title>{name}</Title>
             <Tag label={getType(fileType)} />
           </Flex>
-          {!withoutFileInfo && (
-            <FileInfos
-              extension={generatedExtension}
-              size={fileSize}
-              width={width}
-              height={height}
-            />
-          )}
+          <FileInfos extension={generatedExtension} size={fileSize} width={width} height={height} />
         </>
-      ) : (
-        <Text lineHeight="13px" />
       )}
-
       {hasError && <ErrorMessage title={errorMessage}>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
