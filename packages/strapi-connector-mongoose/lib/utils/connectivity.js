@@ -4,7 +4,7 @@ module.exports = async ({ connection }) => {
   const Mongoose = require('mongoose');
 
   const { username, password, srv } = connection.settings;
-  const { authenticationDatabase, ssl } = connection.options;
+  const { authenticationDatabase, ssl, tlsInsecure } = connection.options;
 
   const connectOptions = {};
 
@@ -21,6 +21,7 @@ module.exports = async ({ connection }) => {
   }
 
   connectOptions.ssl = ssl ? true : false;
+  connectOptions.tlsInsecure = tlsInsecure ? false : true;
   connectOptions.useNewUrlParser = true;
   connectOptions.dbName = connection.settings.database;
 
@@ -33,7 +34,7 @@ module.exports = async ({ connection }) => {
     () => {
       Mongoose.connection.close();
     },
-    error => {
+    (error) => {
       Mongoose.connection.close();
       throw error;
     }
