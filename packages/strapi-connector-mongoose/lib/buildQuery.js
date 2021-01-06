@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { isEmpty, set, omit, assoc } = require('lodash/fp');
+const { isNil, isEmpty, set, omit, assoc } = require('lodash/fp');
 const semver = require('semver');
 const {
   hasDeepFilters,
@@ -157,7 +157,8 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
     .aggregate(buildQueryAggregate(model, filters, aggregateOptions))
     .session(session)
     .append(buildQueryMatches(model, filters, search))
-    .append(buildQuerySort(model, filters));
+    .append(buildQuerySort(model, filters))
+    .append(buildQueryPagination(model, filters));
 
   return {
     /**
@@ -176,7 +177,7 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
           const query = applyQueryParams({
             model,
             query: mongooseQuery,
-            filters: omit('sort', filters),
+            filters: omit(['sort', 'start', 'limit'], filters),
           });
 
           return query.then(orderByIndexMap(idsMap));
@@ -512,6 +513,26 @@ const buildQuerySort = (model, filters) => {
 };
 
 /**
+ * Add pagination operators for the aggregate
+ * @param {Object} model - Mongoose model
+ * @param {Object} filters - Filters object
+ */
+const buildQueryPagination = (model, filters) => {
+  const { limit, start } = filters;
+  const pagination = [];
+
+  if (start && start >= 0) {
+    pagination.push({ $skip: start });
+  }
+
+  if (limit && limit >= 0) {
+    pagination.push({ $limit: limit });
+  }
+
+  return pagination;
+};
+
+/**
  * Cast values
  * @param {*} value - Value to cast
  */
@@ -706,15 +727,16 @@ const findModelPath = ({ rootModel, path }) => {
 };
 
 /**
- * Order a list of entites based on an indexMap
- * @param {Object[]} entities - A list of entities
+ * Order a list of entities based on an indexMap
  * @param {Object} indexMap - index map of the form { [id]: index }
  */
 const orderByIndexMap = indexMap => entities => {
-  return entities.reduce((acc, entry) => {
-    acc[indexMap[entry._id]] = entry;
-    return acc;
-  }, []);
+  return entities
+    .reduce((acc, entry) => {
+      acc[indexMap[entry._id]] = entry;
+      return acc;
+    }, [])
+    .filter(entity => !isNil(entity));
 };
 
 module.exports = buildQuery;
