@@ -1,28 +1,25 @@
 'use strict';
 
+const _ = require('lodash');
+
 module.exports = async ({ connection }) => {
   const Mongoose = require('mongoose');
 
-  const { username, password, srv } = connection.settings;
-  const { authenticationDatabase, ssl } = connection.options;
+  const { srv } = connection.settings;
 
-  const connectOptions = {};
+  const connectOptions = {
+    user: _.get(connection.settings, 'username'),
+    pass: _.get(connection.settings, 'pass'),
+    authSource: _.get(connection.options, 'authenticationDatabase'),
+    dbName: _.get(connection.settings, 'database'),
+    ssl: _.get(connection.settings, 'ssl', false),
+    useNewUrlParser: true,
+    ...connection.options,
+  };
 
-  if (username) {
-    connectOptions.user = username;
-
-    if (password) {
-      connectOptions.pass = password;
-    }
+  if (connection.options.debug === true) {
+    Mongoose.set('debug', true);
   }
-
-  if (authenticationDatabase) {
-    connectOptions.authSource = authenticationDatabase;
-  }
-
-  connectOptions.ssl = ssl ? true : false;
-  connectOptions.useNewUrlParser = true;
-  connectOptions.dbName = connection.settings.database;
 
   return Mongoose.connect(
     `mongodb${srv ? '+srv' : ''}://${connection.settings.host}${
@@ -33,7 +30,7 @@ module.exports = async ({ connection }) => {
     () => {
       Mongoose.connection.close();
     },
-    error => {
+    (error) => {
       Mongoose.connection.close();
       throw error;
     }
