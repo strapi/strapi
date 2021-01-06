@@ -21,7 +21,7 @@ module.exports = async ({ connection }) => {
   }
 
   connectOptions.ssl = ssl ? true : false;
-  connectOptions.tlsInsecure = tlsInsecure ? false : true;
+  connectOptions.tlsInsecure = tlsInsecure ? true : false;
   connectOptions.useNewUrlParser = true;
   connectOptions.dbName = connection.settings.database;
 
