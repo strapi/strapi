@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-// eslint-disable-next-line node/no-extraneous-require
 const _ = require('lodash');
 const strapi = require('../../packages/strapi/lib');
 const { createUtils } = require('./utils');
