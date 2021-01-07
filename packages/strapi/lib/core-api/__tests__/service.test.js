@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const createService = require('../service');
 
+const maxLimit = 50;
+
 // init global strapi
 global.strapi = {
   config: {
@@ -12,7 +14,7 @@ global.strapi = {
     api: {
       rest: {
         defaultLimit: 20,
-        maxLimit: 50,
+        maxLimit,
       },
     },
   },
@@ -168,13 +170,19 @@ describe('Default Service', () => {
 
 describe('getFetchParams', () => {
   test.each([
-    ['1', 1],
-    ['0', 0],
-    ['500', 50], // returns max limit if exceeds max allowed limit
-    ['', 20], // returns default if not specified
-    ['-1', 50], // -1 should return all items but max limit is set, so return max allowed limit
+    [{ _limit: '1' }, 1],
+    [{ _limit: '0' }, 0],
+    [{ _limit: 0 }, 0],
+    [{ _limit: '' }, 0], // if _limit specified as ?_limit=, return 0
+    [{ _limit: '500' }, 50], // if _limit exceeds max allowed limit, return max allowed limit
+    [{ _limit: '-1' }, 50], // -1 should return all items but max limit is set, so return max allowed limit
+    [{}, 20], // if _limit not specified, return default limit
+    [{ _limit: 1000 }, 1000], // if max _limit is not specified, return requested _limit
   ])('Sets _limit parameter "%s" correctly', (input, expected) => {
-    expect(createService.getFetchParams({ _limit: input })).toMatchObject({
+    // for the last test case (_limit=1000) we want to simulate a situation with no max limit set
+    // we have to set it here before each test as it seems to run in asynchronously
+    strapi.config.api.rest.maxLimit = input._limit === 1000 ? undefined : maxLimit;
+    expect(createService.getFetchParams(input)).toMatchObject({
       _limit: expected,
     });
   });

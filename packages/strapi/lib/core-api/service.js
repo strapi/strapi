@@ -15,18 +15,18 @@ const {
  */
 const getLimitConfigDefaults = () => ({
   defaultLimit: _.toNumber(strapi.config.get('api.rest.defaultLimit', 100)),
-  maxLimit: _.toNumber(strapi.config.get('api.rest.maxLimit', -1)), // (-1) unlimited by default
+  maxLimit: _.toNumber(strapi.config.get('api.rest.maxLimit')) || null,
 });
 
 const getLimitParam = params => {
   const { defaultLimit, maxLimit } = getLimitConfigDefaults();
-  if (!params._limit) {
-    return _.toNumber(defaultLimit);
+  if (!_.has(params, '_limit')) {
+    return defaultLimit;
   }
 
   const limit = _.toNumber(params._limit);
   // if there is max limit set and params._limit exceeds this number, return configured max limit
-  if (maxLimit !== -1 && (limit === -1 || limit > maxLimit)) {
+  if (maxLimit && (limit === -1 || limit > maxLimit)) {
     return maxLimit;
   }
 
