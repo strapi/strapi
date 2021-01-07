@@ -14,25 +14,23 @@ const BOOLEAN_OPERATORS = ['or'];
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
 const buildQuery = ({ model, filters }) => qb => {
+  const joinsTree = buildJoinsAndFilter(qb, model, filters);
+
   if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
   }
 
-  const joinsTree = buildJoinsAndFilter(qb, model, filters);
-
   if (_.has(filters, 'sort')) {
     const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
-    const aliasedClauses = clauses.map(c => ({
-      order: c.order,
-      column: c.column.includes('.') ? c.tmpColumnName : c.column,
-    }));
-    const joinColumnsToSelect = clauses
-      .filter(c => c.column.includes('.'))
-      .map(c => ({ [c.tmpColumnName]: c.column }));
+    const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
+    const orderColumns = clauses
+      .filter(({ alias, column }) => alias !== column) // avoid renaming columns of the main table
+      .map(({ alias, column }) => ({ [alias]: column }));
+    const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
     qb.distinct()
-      .column([`${joinsTree.alias}.*`, ...joinColumnsToSelect])
-      .orderBy(aliasedClauses);
+      .column(columns)
+      .orderBy(orderBy);
   }
 
   if (_.has(filters, 'start')) {
@@ -57,10 +55,11 @@ const buildQuery = ({ model, filters }) => qb => {
  */
 const buildSortClauseFromTree = tree => ({ field, order }) => {
   if (!field.includes('.')) {
+    const column = `${tree.alias}.${field}`;
     return {
-      column: `${tree.alias}.${field}`,
+      column,
       order,
-      tmpColumnName: `_strapi_tmp_${tree.alias}_${field}`,
+      alias: column,
     };
   }
 
@@ -70,7 +69,7 @@ const buildSortClauseFromTree = tree => ({ field, order }) => {
       return {
         column: `${alias}.${attribute}`,
         order,
-        tmpColumnName: `_strapi_tmp_${alias}_${attribute}`,
+        alias: `_strapi_tmp_${alias}_${attribute}`,
       };
     }
   }
