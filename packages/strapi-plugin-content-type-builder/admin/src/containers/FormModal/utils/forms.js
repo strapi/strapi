@@ -80,8 +80,6 @@ yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
   });
 });
 
-const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = ['boolean', 'date', 'enumeration', 'media'];
-
 const forms = {
   attribute: {
     schema(
@@ -327,236 +325,293 @@ const forms = {
     },
     form: {
       advanced(data, type, step) {
-        const targetAttributeValue = get(data, 'targetAttribute', null);
-        const nameValue = get(data, 'name', null);
-        const relationItems = [
-          [fields.divider],
-          [fields.private],
-          [fields.unique],
-          [
-            {
-              autoFocus: false,
-              disabled: nameValue === null,
-              name: 'columnName',
-              type: 'addon',
-              addon: nameValue,
-              label: {
-                id: getTrad('form.attribute.item.customColumnName'),
-              },
-              inputDescription: {
-                id: getTrad('form.attribute.item.customColumnName.description'),
-              },
-              validations: {},
-            },
-            {
-              autoFocus: false,
-              disabled: targetAttributeValue === null || targetAttributeValue === '-',
-              name: 'targetColumnName',
-              label: '',
-              type: 'addon',
-              addon: targetAttributeValue,
-              validations: {},
-            },
-          ],
-        ];
+        if (type === 'boolean') {
+          return {
+            items: [
+              [fields.defaultBoolean],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+            ],
+          };
+        }
+
+        if (type === 'component' && step === '1') {
+          return {
+            items: componentForm.advanced('componentToCreate.'),
+          };
+        }
+
+        if (type === 'date') {
+          return {
+            items: [
+              [
+                {
+                  ...fields.default,
+                  type: data.type || 'date',
+                  value: null,
+                  withDefaultValue: false,
+                  disabled: !data.type,
+                  autoFocus: false,
+                },
+              ],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+            ],
+          };
+        }
+
+        if (type === 'enumeration') {
+          return {
+            items: [
+              [
+                {
+                  autoFocus: false,
+                  name: 'default',
+                  type: 'select',
+                  label: {
+                    id: getTrad('form.attribute.settings.default'),
+                  },
+                  validations: {},
+                  options: [
+                    <FormattedMessage
+                      key="hidden___value__placeholder"
+                      id="components.InputSelect.option.placeholder"
+                    >
+                      {msg => <option value="">{msg}</option>}
+                    </FormattedMessage>,
+                  ].concat(
+                    data.enum
+                      ? data.enum
+                          .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
+                          .map(val => (
+                            <option key={val} value={val}>
+                              {val}
+                            </option>
+                          ))
+                      : []
+                  ),
+                },
+              ],
+              [
+                {
+                  label: {
+                    id: getTrad('form.attribute.item.enumeration.graphql'),
+                  },
+                  name: 'enumName',
+                  type: 'text',
+                  validations: {},
+                  description: {
+                    id: getTrad('form.attribute.item.enumeration.graphql.description'),
+                  },
+                },
+              ],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+            ],
+          };
+        }
+
+        if (type === 'json') {
+          return {
+            items: [[fields.divider], [fields.private], [fields.required], [fields.unique]],
+          };
+        }
+
+        if (type === 'media') {
+          return {
+            items: [
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+              [
+                {
+                  label: {
+                    id: getTrad('form.attribute.media.allowed-types'),
+                  },
+                  name: 'allowedTypes',
+                  type: 'allowedTypesSelect',
+                  value: '',
+                  validations: {},
+                },
+              ],
+            ],
+          };
+        }
+
+        if (type === 'relation') {
+          const targetAttributeValue = get(data, 'targetAttribute', null);
+          const nameValue = get(data, 'name', null);
+
+          return {
+            items: [
+              [fields.divider],
+              [fields.private],
+              [fields.unique],
+              [
+                {
+                  autoFocus: false,
+                  disabled: nameValue === null,
+                  name: 'columnName',
+                  type: 'addon',
+                  addon: nameValue,
+                  label: {
+                    id: getTrad('form.attribute.item.customColumnName'),
+                  },
+                  inputDescription: {
+                    id: getTrad('form.attribute.item.customColumnName.description'),
+                  },
+                  validations: {},
+                },
+                {
+                  autoFocus: false,
+                  disabled: targetAttributeValue === null || targetAttributeValue === '-',
+                  name: 'targetColumnName',
+                  label: '',
+                  type: 'addon',
+                  addon: targetAttributeValue,
+                  validations: {},
+                },
+              ],
+            ],
+          };
+        }
+
+        if (type === 'component' && step === '2') {
+          if (data.repeatable) {
+            return {
+              items: [[fields.required], [fields.divider], [fields.max], [fields.min]],
+            };
+          }
+
+          return {
+            items: [[fields.required]],
+          };
+        }
+
+        if (type === 'dynamiczone') {
+          return {
+            items: [[fields.required], [fields.divider], [fields.max], [fields.min]],
+          };
+        }
+
+        if (type === 'email') {
+          return {
+            items: [
+              [
+                {
+                  ...fields.default,
+                  type: 'email',
+                },
+              ],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+              [fields.maxLength],
+              [fields.minLength],
+            ],
+          };
+        }
+
+        if (type === 'number') {
+          const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+
+          return {
+            items: [
+              [
+                {
+                  autoFocus: true,
+                  name: 'default',
+                  type: data.type === 'biginteger' ? 'text' : 'number',
+                  step: inputStep,
+                  label: {
+                    id: getTrad('form.attribute.settings.default'),
+                  },
+                  validations: {},
+                },
+              ],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+              [fields.max],
+              [fields.min],
+            ],
+          };
+        }
+
+        if (type === 'password') {
+          return {
+            items: [
+              [fields.default],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+              [fields.maxLength],
+              [fields.minLength],
+            ],
+          };
+        }
+
+        if (type === 'richtext') {
+          return {
+            items: [
+              [fields.default],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.maxLength],
+              [fields.minLength],
+            ],
+          };
+        }
+
+        if (type === 'text') {
+          return {
+            items: [
+              [fields.default],
+              [fields.regex],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.unique],
+              [fields.maxLength],
+              [fields.minLength],
+            ],
+          };
+        }
+
+        if (type === 'uid') {
+          return {
+            items: [
+              [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
+              [fields.divider],
+              [fields.private],
+              [fields.required],
+              [fields.maxLength],
+              [fields.minLength],
+            ],
+          };
+        }
+
         const defaultItems = [
-          [
-            {
-              ...fields.default,
-              type: type === 'email' ? 'email' : 'text',
-            },
-          ],
+          [fields.default],
           [fields.divider],
           [fields.private],
           [fields.required],
           [fields.unique],
         ];
-        const dynamiczoneItems = [[fields.required], [fields.divider], [fields.max], [fields.min]];
-
-        if (type === 'component') {
-          if (step === '1') {
-            return {
-              items: componentForm.advanced('componentToCreate.'),
-            };
-          }
-          const requiredItem = [[fields.required]];
-
-          return {
-            items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
-          };
-        }
-
-        let items = defaultItems.slice();
-
-        if (type === 'number' && data.type !== 'biginteger') {
-          const step = data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
-
-          items.splice(0, 1, [
-            {
-              autoFocus: true,
-              name: 'default',
-              type: 'number',
-              step,
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
-              validations: {},
-            },
-          ]);
-        }
-
-        if (type === 'text') {
-          items.splice(1, 0, [
-            {
-              autoFocus: false,
-              label: {
-                id: getTrad('form.attribute.item.text.regex'),
-              },
-              name: 'regex',
-              type: 'text',
-              validations: {},
-              description: {
-                id: getTrad('form.attribute.item.text.regex.description'),
-              },
-            },
-          ]);
-        } else if (type === 'media') {
-          items.splice(0, 1);
-          items.push([
-            {
-              label: {
-                id: getTrad('form.attribute.media.allowed-types'),
-              },
-              name: 'allowedTypes',
-              type: 'allowedTypesSelect',
-              value: '',
-              validations: {},
-            },
-          ]);
-        } else if (type === 'boolean') {
-          items.splice(0, 1, [
-            {
-              ...fields.default,
-              type: 'enum',
-              options: [
-                { value: 'true', label: 'TRUE' },
-                { value: '', label: 'NULL' },
-                { value: 'false', label: 'FALSE' },
-              ],
-              validations: {},
-            },
-          ]);
-        } else if (type === 'enumeration') {
-          items.splice(0, 1, [
-            {
-              autoFocus: false,
-              name: 'default',
-              type: 'select',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
-              validations: {},
-              options: [
-                <FormattedMessage
-                  key="hidden___value__placeholder"
-                  id="components.InputSelect.option.placeholder"
-                >
-                  {msg => <option value="">{msg}</option>}
-                </FormattedMessage>,
-              ].concat(
-                data.enum
-                  ? data.enum
-                      .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
-                      .map(val => (
-                        <option key={val} value={val}>
-                          {val}
-                        </option>
-                      ))
-                  : []
-              ),
-            },
-          ]);
-          items.splice(1, 0, [
-            {
-              label: {
-                id: getTrad('form.attribute.item.enumeration.graphql'),
-              },
-              name: 'enumName',
-              type: 'text',
-              validations: {},
-              description: {
-                id: getTrad('form.attribute.item.enumeration.graphql.description'),
-              },
-            },
-          ]);
-        } else if (type === 'date') {
-          items.splice(0, 1, [
-            {
-              ...fields.default,
-              type: data.type || 'date',
-              value: null,
-              withDefaultValue: false,
-              disabled: !data.type,
-              autoFocus: false,
-            },
-          ]);
-        } else if (type === 'richtext') {
-          items.splice(4, 1);
-        } else if (type === 'uid') {
-          const uidItems = [
-            [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
-            [fields.divider],
-            [fields.private],
-            [fields.required],
-          ];
-
-          items = uidItems;
-        } else if (type === 'json') {
-          items.splice(0, 1);
-        }
-
-        if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
-          items.push(
-            [
-              {
-                autoFocus: false,
-                name: type === 'number' ? 'max' : 'maxLength',
-                type: 'customCheckboxWithChildren',
-                label: {
-                  id: getTrad(`form.attribute.item.maximum${type === 'number' ? '' : 'Length'}`),
-                },
-
-                validations: {},
-              },
-            ],
-            [
-              {
-                autoFocus: false,
-                name: type === 'number' ? 'min' : 'minLength',
-                type: 'customCheckboxWithChildren',
-                label: {
-                  id: getTrad(`form.attribute.item.minimum${type === 'number' ? '' : 'Length'}`),
-                },
-                validations: {},
-              },
-            ]
-          );
-        }
-
-        if (type === 'dynamiczone') {
-          return {
-            items: dynamiczoneItems,
-          };
-        }
-
-        if (type === 'relation') {
-          return {
-            items: relationItems,
-          };
-        }
 
         return {
-          items,
+          items: defaultItems,
         };
       },
       base(data, type, step, actionType, attributes) {

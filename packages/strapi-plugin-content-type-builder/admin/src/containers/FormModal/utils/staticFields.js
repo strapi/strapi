@@ -11,16 +11,12 @@ const fields = {
     options: [
       {
         headerId: getTrad('form.attribute.component.option.create'),
-        descriptionId: getTrad(
-          'form.attribute.component.option.create.description'
-        ),
+        descriptionId: getTrad('form.attribute.component.option.create.description'),
         value: true,
       },
       {
         headerId: getTrad('form.attribute.component.option.reuse-existing'),
-        descriptionId: getTrad(
-          'form.attribute.component.option.reuse-existing.description'
-        ),
+        descriptionId: getTrad('form.attribute.component.option.reuse-existing.description'),
         value: false,
       },
     ],
@@ -35,6 +31,21 @@ const fields = {
     },
     validations: {},
   },
+  defaultBoolean: {
+    autoFocus: true,
+    type: 'enum',
+    label: {
+      id: getTrad('form.attribute.settings.default'),
+    },
+    name: 'default',
+    options: [
+      { value: 'true', label: 'TRUE' },
+      { value: '', label: 'NULL' },
+      { value: 'false', label: 'FALSE' },
+    ],
+    validations: {},
+  },
+
   divider: {
     type: 'divider',
   },
@@ -47,12 +58,30 @@ const fields = {
     },
     validations: {},
   },
+  maxLength: {
+    autoFocus: false,
+    name: 'maxLength',
+    type: 'customCheckboxWithChildren',
+    label: {
+      id: getTrad('form.attribute.item.maximumLength'),
+    },
+    validations: {},
+  },
   min: {
     autoFocus: false,
     name: 'min',
     type: 'customCheckboxWithChildren',
     label: {
       id: getTrad('form.attribute.item.minimum'),
+    },
+    validations: {},
+  },
+  minLength: {
+    autoFocus: false,
+    name: 'minLength',
+    type: 'customCheckboxWithChildren',
+    label: {
+      id: getTrad('form.attribute.item.minimumLength'),
     },
     validations: {},
   },
@@ -93,6 +122,18 @@ const fields = {
       id: getTrad('form.attribute.item.privateField.description'),
     },
     validations: {},
+  },
+  regex: {
+    autoFocus: false,
+    label: {
+      id: getTrad('form.attribute.item.text.regex'),
+    },
+    name: 'regex',
+    type: 'text',
+    validations: {},
+    description: {
+      id: getTrad('form.attribute.item.text.regex.description'),
+    },
   },
   unique: {
     autoFocus: false,
