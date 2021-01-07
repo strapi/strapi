@@ -3,12 +3,14 @@ import * as yup from 'yup';
 import { get, isEmpty, toLower, trim, toNumber } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
-import pluginId from '../../../pluginId';
-import getTrad from '../../../utils/getTrad';
-import { createComponentUid, createUid, nameToSlug } from './createUid';
+import getTrad from '../../../../utils/getTrad';
+import { nameToSlug } from '../createUid';
 import componentForm from './componentForm';
-import fields from './staticFields';
-import { NAME_REGEX, ENUM_REGEX, CATEGORY_NAME_REGEX } from './attributesRegexes';
+import fields from './fields';
+import { categoryForm, createCategorySchema } from '../category';
+import { contentTypeForm, createContentTypeSchema } from '../contentType';
+import { createComponentSchema } from '../component';
+import { NAME_REGEX, ENUM_REGEX } from './regexes';
 
 /* eslint-disable indent */
 /* eslint-disable prefer-arrow-callback */
@@ -919,118 +921,20 @@ const forms = {
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
 
-      return yup.object().shape({
-        name: yup
-          .string()
-          .unique(errorsTrads.unique, takenNames, createUid)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
-          .required(errorsTrads.required),
-        collectionName: yup.string(),
-        draftAndPublish: yup.boolean(),
-        kind: yup.string().oneOf(['singleType', 'collectionType']),
-      });
+      return createContentTypeSchema(takenNames, reservedNames.models);
     },
     form: {
       base(data = {}, type, step, actionType) {
-        const items = [
-          [
-            {
-              autoFocus: true,
-              name: 'name',
-              type: 'text',
-              label: {
-                id: `${pluginId}.contentType.displayName.label`,
-              },
-              validations: {
-                required: true,
-              },
-            },
-          ],
-        ];
-
         if (actionType === 'create') {
-          items[0].push({
-            description: {
-              id: `${pluginId}.contentType.UID.description`,
-            },
-            label: 'UID',
-            name: 'uid',
-            type: 'text',
-            readOnly: true,
-            disabled: true,
-            value: data.name ? nameToSlug(data.name) : '',
-          });
+          const value = data.name ? nameToSlug(data.name) : '';
+
+          return contentTypeForm.base.create(value);
         }
 
-        if (actionType === 'edit') {
-          items[0].push({
-            label: {
-              id: getTrad('modalForm.attribute.text.type-selection'),
-            },
-            name: 'kind',
-            type: 'booleanBox',
-            size: 12,
-            onChangeCallback: () =>
-              strapi.notification.toggle({
-                type: 'info',
-                message: { id: getTrad('contentType.kind.change.warning') },
-              }),
-            options: [
-              {
-                headerId: getTrad('menu.section.models.name.singular'),
-                descriptionId: getTrad('form.button.collection-type.description'),
-                value: 'collectionType',
-              },
-              {
-                headerId: getTrad('menu.section.single-types.name.singular'),
-                descriptionId: getTrad('form.button.single-type.description'),
-                value: 'singleType',
-              },
-            ],
-            validations: {},
-          });
-        }
-
-        return { items };
+        return contentTypeForm.base.edit();
       },
       advanced() {
-        return {
-          items: [
-            [
-              {
-                type: 'dividerDraftPublish',
-              },
-            ],
-            [
-              {
-                label: {
-                  id: `${pluginId}.contentType.draftAndPublish.label`,
-                },
-                description: {
-                  id: `${pluginId}.contentType.draftAndPublish.description`,
-                },
-                name: 'draftAndPublish',
-                type: 'bool',
-                validations: {},
-              },
-            ],
-            [fields.divider],
-            [
-              {
-                autoFocus: true,
-                label: {
-                  id: `${pluginId}.contentType.collectionName.label`,
-                },
-                description: {
-                  id: `${pluginId}.contentType.collectionName.description`,
-                },
-                name: 'collectionName',
-                type: 'text',
-                validations: {},
-              },
-            ],
-          ],
-        };
+        return contentTypeForm.advanced.default();
       },
     },
   },
@@ -1046,19 +950,7 @@ const forms = {
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;
 
-      return yup.object().shape({
-        name: yup
-          .string()
-          .unique(errorsTrads.unique, takenNames, createComponentUid, componentCategory)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'), reservedNames.models)
-          .required(errorsTrads.required),
-        category: yup
-          .string()
-          .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
-          .required(errorsTrads.required),
-        icon: yup.string().required(errorsTrads.required),
-        collectionName: yup.string().nullable(),
-      });
+      return createComponentSchema(takenNames, reservedNames.models, componentCategory);
     },
     form: {
       advanced() {
@@ -1112,28 +1004,11 @@ const forms = {
         .filter(cat => cat !== initialData.name)
         .map(cat => toLower(cat));
 
-      return yup.object().shape({
-        name: yup
-          .string()
-          .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
-          .unique(errorsTrads.unique, allowedCategories, toLower)
-          .required(errorsTrads.required),
-      });
+      return createCategorySchema(allowedCategories);
     },
     form: {
       base() {
-        return {
-          items: [
-            [
-              {
-                ...fields.name,
-                description: {
-                  id: getTrad('modalForm.editCategory.base.name.description'),
-                },
-              },
-            ],
-          ],
-        };
+        return categoryForm.base;
       },
     },
   },

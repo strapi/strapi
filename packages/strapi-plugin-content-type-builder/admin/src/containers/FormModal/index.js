@@ -14,7 +14,6 @@ import {
 } from 'strapi-helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
-
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
@@ -31,18 +30,20 @@ import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperSelect from '../../components/WrapperSelect';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-import getAttributes from './utils/attributes';
-import forms from './utils/forms';
-import createHeadersArray from './utils/createHeadersArray';
-import createHeadersObjectFromArray from './utils/createHeadersObjectFromArray';
+import {
+  canEditContentType,
+  createHeadersArray,
+  createHeadersObjectFromArray,
+  getAttributesToDisplay,
+  getModalTitleSubHeader,
+  forms,
+  getNextSearch,
+} from './utils';
 import { createComponentUid, createUid } from './utils/createUid';
-import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
-import getNextSearch from './utils/getNextSearch';
 import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
-import canEditContentType from './utils/canEditContentType';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -1001,6 +1002,7 @@ const FormModal = () => {
         type: 'RESET_PROPS',
       });
     } catch (err) {
+      console.log({ err });
       const errors = getYupInnerErrors(err);
 
       dispatch({
@@ -1061,7 +1063,7 @@ const FormModal = () => {
   };
 
   // Display data for the attributes picker modal
-  const displayedAttributes = getAttributes(
+  const displayedAttributes = getAttributesToDisplay(
     state.forTarget,
     state.targetUid,
     // We need the nested components so we know when to remove the component option
@@ -1070,16 +1072,6 @@ const FormModal = () => {
 
   // Styles
   const modalBodyStyle = isPickingAttribute ? { paddingTop: '0.5rem', paddingBottom: '3rem' } : {};
-
-  const formToRender = form(
-    modifiedData,
-    state.attributeType,
-    state.step,
-    state.actionType,
-    attributes
-  ).items;
-
-  console.log(formToRender);
 
   return (
     <>
