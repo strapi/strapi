@@ -9,9 +9,10 @@ import {
   SettingsPageTitle,
   SizedInput,
   getYupInnerErrors,
+  BaselineAlignment,
 } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
-import { AlignedButton, Text, BaselineAlignment } from './components';
+import { AlignedButton, Text } from './components';
 import schema from '../../utils/schema';
 
 const SettingsPage = () => {
@@ -105,7 +106,7 @@ const SettingsPage = () => {
             content={formatMessage({ id: getTrad('Settings.subTitle') })}
             isLoading={showLoader}
           />
-          <BaselineAlignment />
+          <BaselineAlignment top size="3px" />
           <FormBloc
             title={formatMessage({ id: getTrad('Settings.form.title.config') })}
             isLoading={showLoader}

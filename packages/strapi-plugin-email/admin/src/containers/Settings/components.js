@@ -10,9 +10,4 @@ const AlignedButton = styled(Button)`
   height: 34px;
 `;
 
-// TODO : Temporary baseline alignment
-const BaselineAlignment = styled.div`
-  padding-top: 3px;
-`;
-
-export { Text, AlignedButton, BaselineAlignment };
+export { Text, AlignedButton };
