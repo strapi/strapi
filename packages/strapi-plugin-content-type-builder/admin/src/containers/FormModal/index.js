@@ -340,6 +340,7 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
+
   const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
@@ -1069,6 +1070,16 @@ const FormModal = () => {
 
   // Styles
   const modalBodyStyle = isPickingAttribute ? { paddingTop: '0.5rem', paddingBottom: '3rem' } : {};
+
+  const formToRender = form(
+    modifiedData,
+    state.attributeType,
+    state.step,
+    state.actionType,
+    attributes
+  ).items;
+
+  console.log(formToRender);
 
   return (
     <>

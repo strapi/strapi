@@ -560,20 +560,6 @@ const forms = {
         };
       },
       base(data, type, step, actionType, attributes) {
-        if (type === 'relation') {
-          return {
-            items: [
-              [
-                {
-                  type: 'relation',
-                },
-              ],
-            ],
-          };
-        }
-
-        const items = [[fields.name]];
-
         if (type === 'component' && step === '1') {
           const itemsToConcat =
             data.createComponent === true
@@ -586,182 +572,243 @@ const forms = {
         }
 
         if (type === 'component' && step === '2') {
-          items[0].push({
-            name: 'component',
-            type: 'componentSelect',
-            label: {
-              id: getTrad('modalForm.attributes.select-component'),
-            },
-            isMultiple: false,
-          });
-          items.push([
-            {
-              label: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
-              },
-              name: 'repeatable',
-              type: 'booleanBox',
-              size: 12,
-              options: [
+          return {
+            items: [
+              [
+                fields.name,
                 {
-                  headerId: getTrad('form.attribute.component.option.repeatable'),
-                  descriptionId: getTrad('form.attribute.component.option.repeatable.description'),
-                  value: true,
-                },
-                {
-                  headerId: getTrad('form.attribute.component.option.single'),
-                  descriptionId: getTrad('form.attribute.component.option.single.description'),
-                  value: false,
+                  name: 'component',
+                  type: 'componentSelect',
+                  label: {
+                    id: getTrad('modalForm.attributes.select-component'),
+                  },
+                  isMultiple: false,
                 },
               ],
-              validations: {},
-            },
-          ]);
-          items.push([{ type: 'spacer' }]);
-        }
-
-        if (type === 'text' || type === 'media') {
-          items.push([
-            {
-              label: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
-              },
-              name: type === 'text' ? 'type' : 'multiple',
-              type: 'booleanBox',
-              size: 12,
-              options: [
+              [
                 {
-                  headerId: getTrad(
-                    `form.attribute.${type}.option.${type === 'text' ? 'short-text' : 'multiple'}`
-                  ),
-                  descriptionId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'short-text' : 'multiple'
-                    }.description`
-                  ),
-                  value: type === 'text' ? 'string' : true,
-                },
-                {
-                  headerId: getTrad(
-                    `form.attribute.${type}.option.${type === 'text' ? 'long-text' : 'single'}`
-                  ),
-                  descriptionId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'long-text' : 'single'
-                    }.description`
-                  ),
-                  value: type === 'text' ? 'text' : false,
+                  label: {
+                    id: getTrad('modalForm.attribute.text.type-selection'),
+                  },
+                  name: 'repeatable',
+                  type: 'booleanBox',
+                  size: 12,
+                  options: [
+                    {
+                      headerId: getTrad('form.attribute.component.option.repeatable'),
+                      descriptionId: getTrad(
+                        'form.attribute.component.option.repeatable.description'
+                      ),
+                      value: true,
+                    },
+                    {
+                      headerId: getTrad('form.attribute.component.option.single'),
+                      descriptionId: getTrad('form.attribute.component.option.single.description'),
+                      value: false,
+                    },
+                  ],
+                  validations: {},
                 },
               ],
-              validations: {},
-            },
-          ]);
-          items.push([{ type: 'spacer-medium' }]);
-        }
-
-        if (type === 'number') {
-          items[0].push({
-            label: {
-              id: getTrad('form.attribute.item.number.type'),
-            },
-            name: 'type',
-            type: 'select',
-            options: [
-              { id: 'components.InputSelect.option.placeholder', value: '' },
-              {
-                id: 'form.attribute.item.number.type.integer',
-                value: 'integer',
-              },
-              {
-                id: 'form.attribute.item.number.type.biginteger',
-                value: 'biginteger',
-              },
-              {
-                id: 'form.attribute.item.number.type.decimal',
-                value: 'decimal',
-              },
-              { id: 'form.attribute.item.number.type.float', value: 'float' },
-            ].map(({ id, value }, index) => {
-              const disabled = index === 0;
-              const tradId = index === 0 ? id : getTrad(id);
-
-              return (
-                <FormattedMessage id={tradId} key={id}>
-                  {msg => (
-                    <option disabled={disabled} hidden={disabled} value={value}>
-                      {msg}
-                    </option>
-                  )}
-                </FormattedMessage>
-              );
-            }),
-            validations: {
-              required: true,
-            },
-          });
+              [{ type: 'spacer' }],
+            ],
+          };
         }
 
         if (type === 'date') {
-          items[0].push({
-            label: {
-              id: getTrad('modalForm.attribute.text.type-selection'),
-            },
-            name: 'type',
-            type: 'select',
-            options: [
-              { id: 'components.InputSelect.option.placeholder', value: '' },
-              {
-                id: 'form.attribute.item.date.type.date',
-                value: 'date',
-              },
-              {
-                id: 'form.attribute.item.date.type.datetime',
-                value: 'datetime',
-              },
-              // Not sure the ctm supports that one
-              // {
-              //   id: 'form.attribute.item.date.type.timestamp',
-              //   value: 'timestamp',
-              // },
-              { id: 'form.attribute.item.date.type.time', value: 'time' },
-            ].map(({ id, value }, index) => {
-              const disabled = index === 0;
-              const tradId = index === 0 ? id : getTrad(id);
+          return {
+            items: [
+              [
+                fields.name,
+                {
+                  label: {
+                    id: getTrad('modalForm.attribute.text.type-selection'),
+                  },
+                  name: 'type',
+                  type: 'select',
+                  options: [
+                    { id: 'components.InputSelect.option.placeholder', value: '' },
+                    {
+                      id: 'form.attribute.item.date.type.date',
+                      value: 'date',
+                    },
+                    {
+                      id: 'form.attribute.item.date.type.datetime',
+                      value: 'datetime',
+                    },
+                    // Not sure the ctm supports that one
+                    // {
+                    //   id: 'form.attribute.item.date.type.timestamp',
+                    //   value: 'timestamp',
+                    // },
+                    { id: 'form.attribute.item.date.type.time', value: 'time' },
+                  ].map(({ id, value }, index) => {
+                    const disabled = index === 0;
+                    const tradId = index === 0 ? id : getTrad(id);
 
-              return (
-                <FormattedMessage id={tradId} key={id}>
-                  {msg => (
-                    <option disabled={disabled} hidden={disabled} value={value}>
-                      {msg}
-                    </option>
-                  )}
-                </FormattedMessage>
-              );
-            }),
-            validations: {
-              required: true,
-            },
-          });
+                    return (
+                      <FormattedMessage id={tradId} key={id}>
+                        {msg => (
+                          <option disabled={disabled} hidden={disabled} value={value}>
+                            {msg}
+                          </option>
+                        )}
+                      </FormattedMessage>
+                    );
+                  }),
+                  validations: {
+                    required: true,
+                  },
+                },
+              ],
+            ],
+          };
         }
 
         if (type === 'enumeration') {
-          items.push([
-            {
-              autoFocus: false,
-              name: 'enum',
-              type: 'textarea',
-              size: 8,
-              label: {
-                id: getTrad('form.attribute.item.enumeration.rules'),
-              },
-              placeholder: {
-                id: getTrad('form.attribute.item.enumeration.placeholder'),
-              },
-              validations: {
-                required: true,
-              },
-            },
-          ]);
+          return {
+            items: [
+              [fields.name],
+              [
+                {
+                  autoFocus: false,
+                  name: 'enum',
+                  type: 'textarea',
+                  size: 8,
+                  label: {
+                    id: getTrad('form.attribute.item.enumeration.rules'),
+                  },
+                  placeholder: {
+                    id: getTrad('form.attribute.item.enumeration.placeholder'),
+                  },
+                  validations: {
+                    required: true,
+                  },
+                },
+              ],
+            ],
+          };
+        }
+
+        if (type === 'number') {
+          return {
+            items: [
+              [
+                fields.name,
+                {
+                  label: {
+                    id: getTrad('form.attribute.item.number.type'),
+                  },
+                  name: 'type',
+                  type: 'select',
+                  options: [
+                    { id: 'components.InputSelect.option.placeholder', value: '' },
+                    {
+                      id: 'form.attribute.item.number.type.integer',
+                      value: 'integer',
+                    },
+                    {
+                      id: 'form.attribute.item.number.type.biginteger',
+                      value: 'biginteger',
+                    },
+                    {
+                      id: 'form.attribute.item.number.type.decimal',
+                      value: 'decimal',
+                    },
+                    { id: 'form.attribute.item.number.type.float', value: 'float' },
+                  ].map(({ id, value }, index) => {
+                    const disabled = index === 0;
+                    const tradId = index === 0 ? id : getTrad(id);
+
+                    return (
+                      <FormattedMessage id={tradId} key={id}>
+                        {msg => (
+                          <option disabled={disabled} hidden={disabled} value={value}>
+                            {msg}
+                          </option>
+                        )}
+                      </FormattedMessage>
+                    );
+                  }),
+                  validations: {
+                    required: true,
+                  },
+                },
+              ],
+            ],
+          };
+        }
+
+        if (type === 'media') {
+          return {
+            items: [
+              [fields.name],
+              [
+                {
+                  label: { id: getTrad('modalForm.attribute.text.type-selection') },
+                  name: 'multiple',
+                  size: 12,
+                  type: 'booleanBox',
+                  options: [
+                    {
+                      headerId: getTrad('form.attribute.media.option.multiple'),
+                      descriptionId: getTrad('form.attribute.media.option.multiple.description'),
+                      value: true,
+                    },
+                    {
+                      headerId: getTrad('form.attribute.media.option.single'),
+                      descriptionId: getTrad('form.attribute.media.option.single.description'),
+                      value: false,
+                    },
+                  ],
+                  validations: {},
+                },
+              ],
+              [{ type: 'spacer-medium' }],
+            ],
+          };
+        }
+
+        if (type === 'relation') {
+          return {
+            items: [
+              [
+                {
+                  type: 'relation',
+                },
+              ],
+            ],
+          };
+        }
+
+        if (type === 'text') {
+          return {
+            items: [
+              [fields.name],
+              [
+                {
+                  label: { id: getTrad('modalForm.attribute.text.type-selection') },
+                  name: 'type',
+                  size: 12,
+                  type: 'booleanBox',
+                  options: [
+                    {
+                      headerId: getTrad('form.attribute.text.option.short-text'),
+                      descriptionId: getTrad('form.attribute.text.option.short-text.description'),
+                      value: 'string',
+                    },
+                    {
+                      headerId: getTrad('form.attribute.text.option.long-text'),
+                      descriptionId: getTrad('form.attribute.text.option.long-text.description'),
+                      value: 'text',
+                    },
+                  ],
+                  validations: {},
+                },
+              ],
+              [{ type: 'spacer-medium' }],
+            ],
+          };
         }
 
         if (type === 'uid') {
@@ -806,7 +853,7 @@ const forms = {
         }
 
         return {
-          items,
+          items: [[fields.name]],
         };
       },
     },
