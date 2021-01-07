@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -6,12 +8,11 @@ let modelsUtils;
 let rq;
 
 describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/explorer/application::withcomponent.withcomponent',
-  ],
+  ['CONTENT MANAGER', '/content-manager/collection-types/application::withcomponent.withcomponent'],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and required component', (_, path) => {
+  const hasPagination = path.includes('/content-manager');
+
   beforeAll(async () => {
     const token = await registerAndLogin();
     const authRq = createAuthRequest(token);
@@ -62,14 +63,12 @@ describe.each([
       );
     });
 
-    test('Creating entry with formdata works', async () => {
+    test('Creating a second entry works', async () => {
       const res = await rq.post('/', {
-        formData: {
-          data: JSON.stringify({
-            field: {
-              name: 'someValue',
-            },
-          }),
+        body: {
+          field: {
+            name: 'someValue',
+          },
         },
       });
 
@@ -119,6 +118,21 @@ describe.each([
       const res = await rq.get('/');
 
       expect(res.statusCode).toBe(200);
+
+      if (hasPagination) {
+        expect(res.body.pagination).toBeDefined();
+        expect(Array.isArray(res.body.results)).toBe(true);
+        res.body.results.forEach(entry => {
+          if (entry.field === null) return;
+
+          expect(entry.field).toMatchObject({
+            name: expect.any(String),
+          });
+        });
+
+        return;
+      }
+
       expect(Array.isArray(res.body)).toBe(true);
       res.body.forEach(entry => {
         if (entry.field === null) return;

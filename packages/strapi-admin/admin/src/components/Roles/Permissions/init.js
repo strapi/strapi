@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-import { contentManagerPermissionPrefix } from './utils';
+import { CONTENT_MANAGER_PREFIX } from './utils';
 
 const init = (state, permissionsLayout, permissions, role) => {
   let customPermissionsLayout = permissionsLayout;
@@ -9,7 +9,7 @@ const init = (state, permissionsLayout, permissions, role) => {
   if (role.code === 'strapi-author') {
     // The publish action have to be hidden in CE for the author role.
     const contentTypesLayout = get(permissionsLayout, ['sections', 'contentTypes'], []).filter(
-      pLayout => pLayout.action !== `${contentManagerPermissionPrefix}.publish`
+      pLayout => pLayout.action !== `${CONTENT_MANAGER_PREFIX}.publish`
     );
 
     customPermissionsLayout = {

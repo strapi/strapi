@@ -84,7 +84,7 @@ const createSingleTypeService = ({ model, strapi }) => {
      */
     find(params, populate) {
       return strapi.entityService.find(
-        { params: getFetchParams(params, model), populate },
+        { params: getFetchParams(params), populate },
         { model: modelName }
       );
     },
@@ -145,7 +145,7 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
     find(params, populate) {
       return strapi.entityService.find(
-        { params: getFetchParams(params, model), populate },
+        { params: getFetchParams(params), populate },
         { model: modelName }
       );
     },
@@ -158,7 +158,7 @@ const createCollectionTypeService = ({ model, strapi }) => {
 
     findOne(params, populate) {
       return strapi.entityService.findOne(
-        { params: getFetchParams(params, model), populate },
+        { params: getFetchParams(params), populate },
         { model: modelName }
       );
     },
@@ -170,10 +170,7 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.entityService.count(
-        { params: getFetchParams(params, model) },
-        { model: modelName }
-      );
+      return strapi.entityService.count({ params: getFetchParams(params) }, { model: modelName });
     },
 
     /**
@@ -235,7 +232,7 @@ const createCollectionTypeService = ({ model, strapi }) => {
      */
     countSearch(params) {
       return strapi.entityService.countSearch(
-        { params: getFetchParams(params, model) },
+        { params: getFetchParams(params) },
         { model: modelName }
       );
     },

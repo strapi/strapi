@@ -1,3 +1,5 @@
+'use strict';
+
 const getPrefixedDeps = require('../get-prefixed-dependencies');
 
 describe('getPrefixedDeps', () => {
