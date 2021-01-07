@@ -19,15 +19,10 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ subCategory }) => {
+const SubCategory = ({ categoryName, subCategory }) => {
   const { formatMessage } = useIntl();
   const [modal, setModal] = useState({ isOpen: false, isMounted: false });
-  const {
-    pluginsAndSettingsPermissions,
-    onPluginSettingPermission,
-    onPluginSettingSubCategoryPermission,
-    onPluginSettingConditionsSelect,
-  } = usePermissionsContext();
+  const { pluginsAndSettingsPermissions, dispatch } = usePermissionsContext();
 
   const checkPermission = useCallback(
     action => {
@@ -39,7 +34,10 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const handlePermission = action => {
-    onPluginSettingPermission(action);
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_ACTION',
+      action,
+    });
   };
 
   const currentPermissions = useMemo(() => {
@@ -72,7 +70,8 @@ const SubCategory = ({ subCategory }) => {
   }, [categoryConditions]);
 
   const handleSubCategoryPermissions = () => {
-    onPluginSettingSubCategoryPermission({
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
       actions: subCategory.actions,
       shouldEnable: !hasAllCategoryActions,
     });
@@ -111,7 +110,10 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const handleConditionsSubmit = conditions => {
-    onPluginSettingConditionsSelect(conditions);
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
+      conditions,
+    });
   };
 
   return (
@@ -170,6 +172,7 @@ const SubCategory = ({ subCategory }) => {
           onToggle={handleToggleModal}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
+          headerBreadCrumbs={[categoryName, subCategory.subCategory]}
         />
       )}
     </>
@@ -177,6 +180,7 @@ const SubCategory = ({ subCategory }) => {
 };
 
 SubCategory.propTypes = {
+  categoryName: PropTypes.string.isRequired,
   subCategory: PropTypes.object.isRequired,
 };
 

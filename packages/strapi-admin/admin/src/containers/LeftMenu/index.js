@@ -30,10 +30,19 @@ import reducer, { initialState } from './reducer';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
 
-const LeftMenu = forwardRef(({ version, plugins }, ref) => {
+const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
   const location = useLocation();
   const permissions = useContext(UserContext);
   const { menu: settingsMenu } = useSettingsMenu(true);
+
+  // TODO: this needs to be added to the settings API in the v4
+  const settingsLinkNotificationCount = useMemo(() => {
+    if (shouldUpdateStrapi) {
+      return 1;
+    }
+
+    return 0;
+  }, [shouldUpdateStrapi]);
   const [
     {
       collectionTypesSectionLinks,
@@ -43,7 +52,9 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
       singleTypesSectionLinks,
     },
     dispatch,
-  ] = useReducer(reducer, initialState, () => init(initialState, plugins, settingsMenu));
+  ] = useReducer(reducer, initialState, () =>
+    init(initialState, plugins, settingsMenu, settingsLinkNotificationCount)
+  );
   const generalSectionLinksFiltered = useMemo(() => filterLinks(generalSectionLinks), [
     generalSectionLinks,
   ]);
@@ -106,7 +117,10 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -194,6 +208,7 @@ const LeftMenu = forwardRef(({ version, plugins }, ref) => {
 });
 
 LeftMenu.propTypes = {
+  shouldUpdateStrapi: PropTypes.bool.isRequired,
   version: PropTypes.string.isRequired,
   plugins: PropTypes.object.isRequired,
 };

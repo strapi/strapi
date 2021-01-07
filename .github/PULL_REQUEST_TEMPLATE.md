@@ -8,7 +8,7 @@ To help us merge your PR, make sure to follow the instructions below:
 - Refer to the issue you are closing in the PR description - fix #issue
 - Specify if the PR is in WIP (work in progress) state or ready to be merged
 
-Please ensure you read through the Contributing Guide: https://github.com/strapi/strapi/blob/docs/contribguide/CONTRIBUTING.md
+Please ensure you read through the Contributing Guide: https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md
 -->
 
 ### What does it do?

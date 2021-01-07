@@ -9,7 +9,7 @@
   "Auth.form.button.reset-password": "שינוי סיסמה",
   "Auth.form.confirmPassword.label": "אישור סיסמה",
   "Auth.form.email.label": "דוא\"ל",
-  "Auth.form.email.placeholder": "johndoe@gmail.com",
+  "Auth.form.email.placeholder": "kai@doe.com",
   "Auth.form.error.blocked": "החשבון נחסם על ידי מנהל המערכת.",
   "Auth.form.error.code.provide": "סופק קוד שגוי.",
   "Auth.form.error.confirmed": "הדוא\"ל של החשבון לא אושר.",

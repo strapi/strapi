@@ -55,11 +55,17 @@ const RoleListPage = () => {
     )
       .then(() => {
         setShouldRefetchData(true);
-        strapi.notification.success(getTrad('Settings.roles.deleted'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('Settings.roles.deleted') },
+        });
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       })
       .finally(() => {
         setModalDelete(null);

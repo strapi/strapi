@@ -1,3 +1,5 @@
+'use strict';
+
 // Test a simple default API with no relations
 
 const _ = require('lodash');
@@ -61,10 +63,12 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
 
   afterAll(async () => {
     // clean database
-    const queryString = data.productsWithCompoAndDP.map((p, i) => `${i}=${p.id}`).join('&');
     await rq({
-      method: 'DELETE',
-      url: `/content-manager/explorer/deleteAll/application::product-with-compo-and-dp.product-with-compo-and-dp?${queryString}`,
+      method: 'POST',
+      url: `/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkDelete`,
+      body: {
+        ids: data.productsWithCompoAndDP.map(({ id }) => id),
+      },
     });
 
     await modelsUtils.deleteContentTypes(['product-with-compo-and-dp']);
@@ -85,7 +89,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
     const res = await rq({
       method: 'POST',
       url:
-        '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+        '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
       body: product,
     });
 
@@ -99,14 +103,14 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
     const res = await rq({
       method: 'GET',
       url:
-        '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+        '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompoAndDP[0]);
-    res.body.forEach(p => {
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results).toHaveLength(1);
+    expect(res.body.results[0]).toMatchObject(data.productsWithCompoAndDP[0]);
+    res.body.results.forEach(p => {
       expect(p.published_at).toBeNull();
     });
   });
@@ -124,7 +128,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
       body: product,
     });
 
@@ -138,7 +142,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
+      url: `/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -158,7 +162,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url:
-          '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+          '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 
@@ -181,7 +185,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url:
-          '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+          '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 
@@ -204,7 +208,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url:
-          '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+          '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 
@@ -227,7 +231,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url:
-          '/content-manager/explorer/application::product-with-compo-and-dp.product-with-compo-and-dp',
+          '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 

@@ -1,3 +1,5 @@
+'use strict';
+
 const { isSortable, isVisible } = require('../attributes');
 
 const createMockSchema = (attrs, timestamps = true) => {

@@ -1,3 +1,5 @@
+'use strict';
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -37,10 +39,12 @@ const createEmpty = () => {
 describe.each([
   [
     'CONTENT MANAGER',
-    '/content-manager/explorer/application::withdynamiczone.withdynamiczone',
+    '/content-manager/collection-types/application::withdynamiczone.withdynamiczone',
   ],
   ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
+  const hasPagination = path.includes('/content-manager');
+
   beforeAll(async () => {
     const token = await registerAndLogin();
     const authRq = createAuthRequest(token);
@@ -66,16 +70,12 @@ describe.each([
       },
     });
 
-    await modelsUtils.createContentTypeWithType(
-      'withdynamiczone',
-      'dynamiczone',
-      {
-        components: ['default.compo-with-other-compo', 'default.simple-compo'],
-        required: false,
-        min: 2,
-        max: 5,
-      }
-    );
+    await modelsUtils.createContentTypeWithType('withdynamiczone', 'dynamiczone', {
+      components: ['default.compo-with-other-compo', 'default.simple-compo'],
+      required: false,
+      min: 2,
+      max: 5,
+    });
 
     rq = authRq.defaults({
       baseUrl: `http://localhost:1337${path}`,
@@ -203,6 +203,25 @@ describe.each([
       const res = await rq.get('/');
 
       expect(res.statusCode).toBe(200);
+
+      if (hasPagination) {
+        expect(res.body.pagination).toBeDefined();
+        expect(Array.isArray(res.body.results)).toBe(true);
+        expect(res.body.results).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              field: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.anything(),
+                  __component: expect.any(String),
+                }),
+              ]),
+            }),
+          ])
+        );
+        return;
+      }
+
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body).toEqual(
         expect.arrayContaining([

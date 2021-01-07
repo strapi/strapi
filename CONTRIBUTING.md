@@ -26,9 +26,19 @@ Before contributing, you will probably have to create a RFC on this [strapi/rfcs
 
 This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
+## Contributor License Agreement (CLA)
+
+### Individual
+
+In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/strapi) or just submit a Pull Request and our CLA Bot will ask you to sign the CLA before merging your Pull Request.
+
+### Company
+
+If you are making contributions to our repositories on behalf of your company, then we will need a Corporate Contributor License Agreement (CLA) signed. In order to do that, please contact us at [contributions@strapi.io](mailto:contributions@strapi.io).
+
 ## Documentation
 
-Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation branch](https://github.com/strapi/strapi/tree/documentation) **not** towards the master branch. Any PRs made towards the master branch will not be released until the next Strapi version release.
+Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation repo](https://github.com/strapi/documentation). Please see the documentation [contributing guide](https://github.com/strapi/documentation/blob/main/CONTRIBUTING.md) for more information on how to make the documentation pull request.
 
 ## Bugs
 
@@ -52,15 +62,14 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Contribution Prerequisites
 
-- You have [Node](https://nodejs.org/en/) at v10.16.0+ only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
-  - Node v14/v13 **are not supported yet**
+- You have [Node](https://nodejs.org/en/) at >= v10 and <= v14 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
 - You are familiar with Git.
 
 ## Development Workflow
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met)
 
 Then, please follow the instructions below:
 
@@ -84,7 +93,13 @@ cd strapi && yarn setup
 
 #### 4. Start the example application
 
-Read the `getstarted` application README [here](./examples/getstarted/README.md).
+To start a test example application to test your changes quickly and also for the next step.
+
+```bash
+cd strapi/examples/getstarted && yarn develop
+```
+
+Read the `getstarted` application README [here](./examples/getstarted/README.md) for more details.
 
 #### 5. Running the administration panel in development mode
 

@@ -1,3 +1,5 @@
+'use strict';
+
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
@@ -120,7 +122,7 @@ async function createFixtures() {
   for (let bedFixture of bedFixtures) {
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/explorer/application::bed.bed',
+      url: '/content-manager/collection-types/application::bed.bed',
       body: bedFixture,
     });
 
@@ -132,7 +134,7 @@ async function deleteFixtures() {
   for (let bed of data.beds) {
     await rq({
       method: 'DELETE',
-      url: `/content-manager/explorer/application::bed.bed/${bed.id}`,
+      url: `/content-manager/collection-types/application::bed.bed/${bed.id}`,
     });
   }
 }
@@ -156,57 +158,57 @@ describe('Search query', () => {
     test('search for "id"', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: data.beds[2].id,
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[2]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results[0]).toMatchObject(data.beds[2]);
     });
 
     test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: bedFixtures[0][columnName],
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[0]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results[0]).toMatchObject(data.beds[0]);
     });
 
     test('search with an empty query', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: '',
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(5);
-      expect(res.body).toEqual(expect.arrayContaining(data.beds));
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(5);
+      expect(res.body.results).toEqual(expect.arrayContaining(data.beds));
     });
 
     test('search with special characters', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: data.beds[3].name,
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.beds[3]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results[0]).toMatchObject(data.beds[3]);
     });
   });
 
@@ -214,54 +216,55 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber > 0', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: '',
           peopleNumber_gt: 0,
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(3);
-      expect(res.body).toMatchObject([data.beds[0], data.beds[1], data.beds[4]]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(3);
+      expect(res.body.results).toMatchObject([data.beds[0], data.beds[1], data.beds[4]]);
     });
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: '',
           peopleNumber_gt: 1,
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject([data.beds[0], data.beds[4]]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(2);
+      expect(res.body.results).toMatchObject([data.beds[0], data.beds[4]]);
     });
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed?peopleNumber=1&peopleNumber=6&_q=',
+        url:
+          '/content-manager/collection-types/application::bed.bed?peopleNumber=1&peopleNumber=6&_q=',
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject(data.beds.slice(0, 2));
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(2);
+      expect(res.body.results).toMatchObject(data.beds.slice(0, 2));
     });
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/explorer/application::bed.bed',
+        url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: 'Sleepy Bed',
           peopleNumber_lt: 7,
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body).toMatchObject([data.beds[0]]);
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(1);
+      expect(res.body.results).toMatchObject([data.beds[0]]);
     });
   });
 });

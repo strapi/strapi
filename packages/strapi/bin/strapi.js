@@ -5,6 +5,7 @@ const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
 const { Command } = require('commander');
+
 const program = new Command();
 
 const packageJSON = require('../package.json');
@@ -64,7 +65,7 @@ program.helpOption('-h, --help', 'Display help for command');
 program.addHelpCommand('help [command]', 'Display help for command');
 
 // `$ strapi version` (--version synonym)
-program.option('-v, --version', 'Output the version number');
+program.version(packageJSON.version, '-v, --version', 'Output the version number');
 program
   .command('version')
   .description('Output your version of Strapi')
@@ -208,6 +209,7 @@ program
   .alias('config:dump')
   .description('Dump configurations of your application')
   .option('-f, --file <file>', 'Output file, default output is stdout')
+  .option('-p, --pretty', 'Format the output JSON with indentation and line breaks', false)
   .action(getLocalScript('configurationDump'));
 
 program
