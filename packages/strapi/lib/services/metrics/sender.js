@@ -36,7 +36,6 @@ module.exports = strapi => {
     version: strapi.config.info.strapi,
     strapiVersion: strapi.config.info.strapi,
     projectType: isEE ? 'Enterprise' : 'Community',
-    database: _.get(strapi, 'config.connections.default.settings.client', null),
     template,
   };
 

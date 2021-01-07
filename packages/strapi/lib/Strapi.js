@@ -224,7 +224,9 @@ class Strapi {
       }
 
       // Emit started event.
-      await this.telemetry.send('didStartServer');
+      await this.telemetry.send('didStartServer', {
+        database: this.config.get('connections.default.settings.client', null),
+      });
 
       if (cb && typeof cb === 'function') {
         cb();
