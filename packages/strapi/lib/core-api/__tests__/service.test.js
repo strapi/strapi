@@ -4,6 +4,7 @@ const _ = require('lodash');
 const createService = require('../service');
 
 const maxLimit = 50;
+const defaultLimit = 20;
 
 // init global strapi
 global.strapi = {
@@ -13,7 +14,7 @@ global.strapi = {
     },
     api: {
       rest: {
-        defaultLimit: 20,
+        defaultLimit,
         maxLimit,
       },
     },
@@ -81,7 +82,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live', _limit: 20 } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
           {
             model: 'testModel',
           }
@@ -114,7 +115,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live', _limit: 20 } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
           {
             model: 'testModel',
           }
@@ -149,7 +150,7 @@ describe('Default Service', () => {
         await service.delete();
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live', _limit: 20 } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
           {
             model: 'testModel',
           }
@@ -170,19 +171,18 @@ describe('Default Service', () => {
 
 describe('getFetchParams', () => {
   test.each([
-    [{ _limit: '1' }, 1],
-    [{ _limit: '0' }, 0],
-    [{ _limit: 0 }, 0],
-    [{ _limit: '' }, 0], // if _limit specified as ?_limit=, return 0
-    [{ _limit: '500' }, 50], // if _limit exceeds max allowed limit, return max allowed limit
-    [{ _limit: '-1' }, 50], // -1 should return all items but max limit is set, so return max allowed limit
-    [{}, 20], // if _limit not specified, return default limit
-    [{ _limit: 1000 }, 1000], // if max _limit is not specified, return requested _limit
-  ])('Sets _limit parameter "%s" correctly', (input, expected) => {
-    // for the last test case (_limit=1000) we want to simulate a situation with no max limit set
-    // we have to set it here before each test as it seems to run in asynchronously
-    strapi.config.api.rest.maxLimit = input._limit === 1000 ? undefined : maxLimit;
-    expect(createService.getFetchParams(input)).toMatchObject({
+    [`0 if _limit is '0'`, { _limit: '0', maxLimit }, 0],
+    ['0 if _limit is 0', { _limit: 0, maxLimit }, 0],
+    [`0 if _limit is ''`, { _limit: '', maxLimit }, 0],
+    [`1 if _limit is '1'`, { _limit: '1', maxLimit }, 1],
+    [`${maxLimit} if _limit(500) exceeds max allowed limit (${maxLimit})`, { _limit: '500', maxLimit }, maxLimit],
+    [`${maxLimit} if _limit is set to -1 and max allowed limit is set (${maxLimit})`, { _limit: '-1', maxLimit }, maxLimit],
+    [`${defaultLimit} (default) if no _limit is provided`, { maxLimit }, defaultLimit],
+    [`${defaultLimit} (default) if _limit is undefined`, { _limit: undefined, maxLimit }, defaultLimit],
+    ['1000 if _limit=1000 and no max allowed limit is set', { _limit: 1000 }, 1000],
+  ])('Sets _limit parameter to %s', (description, input, expected) => {
+    strapi.config.api.rest.maxLimit = input.maxLimit;
+    expect(createService.getFetchParams({ _limit: input._limit })).toMatchObject({
       _limit: expected,
     });
   });

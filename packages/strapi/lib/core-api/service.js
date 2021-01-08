@@ -20,7 +20,7 @@ const getLimitConfigDefaults = () => ({
 
 const getLimitParam = params => {
   const { defaultLimit, maxLimit } = getLimitConfigDefaults();
-  if (!_.has(params, '_limit')) {
+  if (params._limit === undefined) {
     return defaultLimit;
   }
 
