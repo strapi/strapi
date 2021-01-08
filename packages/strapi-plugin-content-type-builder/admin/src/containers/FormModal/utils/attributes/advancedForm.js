@@ -33,12 +33,12 @@ const advancedForm = {
       ],
     };
   },
-  component: ({ isRepeatable }, step) => {
+  component: ({ repeatable }, step) => {
     if (step === '1') {
       return { items: componentForm.advanced('componentToCreate') };
     }
 
-    if (isRepeatable) {
+    if (repeatable) {
       return { items: [[options.required], [uiHelpers.divider], [options.max], [options.min]] };
     }
 
