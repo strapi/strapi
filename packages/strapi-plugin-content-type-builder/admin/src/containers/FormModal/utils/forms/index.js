@@ -5,11 +5,12 @@ import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import getTrad from '../../../../utils/getTrad';
 import { nameToSlug } from '../createUid';
-import componentForm from './componentForm';
 import fields from './fields';
+import { attributesForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
-import { createComponentSchema } from '../component';
+import { createComponentSchema, componentForm } from '../component';
+import { dynamiczoneForm } from '../dynamicZone';
 import { NAME_REGEX, ENUM_REGEX } from './regexes';
 
 /* eslint-disable indent */
@@ -327,294 +328,11 @@ const forms = {
     },
     form: {
       advanced(data, type, step) {
-        if (type === 'boolean') {
-          return {
-            items: [
-              [fields.defaultBoolean],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-            ],
-          };
+        try {
+          return attributesForm.advanced[type](data, step);
+        } catch (err) {
+          return { items: [] };
         }
-
-        if (type === 'component' && step === '1') {
-          return {
-            items: componentForm.advanced('componentToCreate.'),
-          };
-        }
-
-        if (type === 'date') {
-          return {
-            items: [
-              [
-                {
-                  ...fields.default,
-                  type: data.type || 'date',
-                  value: null,
-                  withDefaultValue: false,
-                  disabled: !data.type,
-                  autoFocus: false,
-                },
-              ],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-            ],
-          };
-        }
-
-        if (type === 'enumeration') {
-          return {
-            items: [
-              [
-                {
-                  autoFocus: false,
-                  name: 'default',
-                  type: 'select',
-                  label: {
-                    id: getTrad('form.attribute.settings.default'),
-                  },
-                  validations: {},
-                  options: [
-                    <FormattedMessage
-                      key="hidden___value__placeholder"
-                      id="components.InputSelect.option.placeholder"
-                    >
-                      {msg => <option value="">{msg}</option>}
-                    </FormattedMessage>,
-                  ].concat(
-                    data.enum
-                      ? data.enum
-                          .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
-                          .map(val => (
-                            <option key={val} value={val}>
-                              {val}
-                            </option>
-                          ))
-                      : []
-                  ),
-                },
-              ],
-              [
-                {
-                  label: {
-                    id: getTrad('form.attribute.item.enumeration.graphql'),
-                  },
-                  name: 'enumName',
-                  type: 'text',
-                  validations: {},
-                  description: {
-                    id: getTrad('form.attribute.item.enumeration.graphql.description'),
-                  },
-                },
-              ],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-            ],
-          };
-        }
-
-        if (type === 'json') {
-          return {
-            items: [[fields.divider], [fields.private], [fields.required], [fields.unique]],
-          };
-        }
-
-        if (type === 'media') {
-          return {
-            items: [
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-              [
-                {
-                  label: {
-                    id: getTrad('form.attribute.media.allowed-types'),
-                  },
-                  name: 'allowedTypes',
-                  type: 'allowedTypesSelect',
-                  value: '',
-                  validations: {},
-                },
-              ],
-            ],
-          };
-        }
-
-        if (type === 'relation') {
-          const targetAttributeValue = get(data, 'targetAttribute', null);
-          const nameValue = get(data, 'name', null);
-
-          return {
-            items: [
-              [fields.divider],
-              [fields.private],
-              [fields.unique],
-              [
-                {
-                  autoFocus: false,
-                  disabled: nameValue === null,
-                  name: 'columnName',
-                  type: 'addon',
-                  addon: nameValue,
-                  label: {
-                    id: getTrad('form.attribute.item.customColumnName'),
-                  },
-                  inputDescription: {
-                    id: getTrad('form.attribute.item.customColumnName.description'),
-                  },
-                  validations: {},
-                },
-                {
-                  autoFocus: false,
-                  disabled: targetAttributeValue === null || targetAttributeValue === '-',
-                  name: 'targetColumnName',
-                  label: '',
-                  type: 'addon',
-                  addon: targetAttributeValue,
-                  validations: {},
-                },
-              ],
-            ],
-          };
-        }
-
-        if (type === 'component' && step === '2') {
-          if (data.repeatable) {
-            return {
-              items: [[fields.required], [fields.divider], [fields.max], [fields.min]],
-            };
-          }
-
-          return {
-            items: [[fields.required]],
-          };
-        }
-
-        if (type === 'dynamiczone') {
-          return {
-            items: [[fields.required], [fields.divider], [fields.max], [fields.min]],
-          };
-        }
-
-        if (type === 'email') {
-          return {
-            items: [
-              [
-                {
-                  ...fields.default,
-                  type: 'email',
-                },
-              ],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-              [fields.maxLength],
-              [fields.minLength],
-            ],
-          };
-        }
-
-        if (type === 'number') {
-          const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
-
-          return {
-            items: [
-              [
-                {
-                  autoFocus: true,
-                  name: 'default',
-                  type: data.type === 'biginteger' ? 'text' : 'number',
-                  step: inputStep,
-                  label: {
-                    id: getTrad('form.attribute.settings.default'),
-                  },
-                  validations: {},
-                },
-              ],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-              [fields.max],
-              [fields.min],
-            ],
-          };
-        }
-
-        if (type === 'password') {
-          return {
-            items: [
-              [fields.default],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-              [fields.maxLength],
-              [fields.minLength],
-            ],
-          };
-        }
-
-        if (type === 'richtext') {
-          return {
-            items: [
-              [fields.default],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.maxLength],
-              [fields.minLength],
-            ],
-          };
-        }
-
-        if (type === 'text') {
-          return {
-            items: [
-              [fields.default],
-              [fields.regex],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.unique],
-              [fields.maxLength],
-              [fields.minLength],
-            ],
-          };
-        }
-
-        if (type === 'uid') {
-          return {
-            items: [
-              [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
-              [fields.divider],
-              [fields.private],
-              [fields.required],
-              [fields.maxLength],
-              [fields.minLength],
-            ],
-          };
-        }
-
-        const defaultItems = [
-          [fields.default],
-          [fields.divider],
-          [fields.private],
-          [fields.required],
-          [fields.unique],
-        ];
-
-        return {
-          items: defaultItems,
-        };
       },
       base(data, type, step, actionType, attributes) {
         if (type === 'component' && step === '1') {
@@ -967,34 +685,17 @@ const forms = {
   },
   addComponentToDynamicZone: {
     form: {
-      advanced(data, type, step) {
-        return forms.attribute.form.advanced(data, 'component', step);
+      advanced() {
+        return dynamiczoneForm.advanced.default();
       },
       base(data) {
         const isCreatingComponent = get(data, 'createComponent', false);
 
-        const itemsToConcat = isCreatingComponent
-          ? [[{ type: 'spacer' }]].concat(componentForm.base('componentToCreate.'))
-          : [
-              [{ type: 'spacer' }],
-              [
-                { type: 'pushRight', size: 6 },
+        if (isCreatingComponent) {
+          return dynamiczoneForm.base.createComponent();
+        }
 
-                {
-                  name: 'components',
-                  type: 'componentSelect',
-                  label: {
-                    id: getTrad('modalForm.attributes.select-components'),
-                  },
-                  isMultiple: true,
-                },
-              ],
-              [{ type: 'spacer-small' }],
-            ];
-
-        return {
-          items: [[fields.createComponent], ...itemsToConcat],
-        };
+        return dynamiczoneForm.base.default();
       },
     },
   },
