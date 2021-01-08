@@ -2,7 +2,7 @@ import React from 'react';
 import { Padded, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import BaselineAlignment from '../../../../components/BaselineAlignement';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import Button from '../../../../components/FullWidthButton';
 import Box from '../Box';
 import Logo from '../Logo';

@@ -5,10 +5,14 @@ import { useIntl } from 'react-intl';
 
 import { usePermissionsContext } from '../../../../../hooks';
 import PermissionCheckbox from '../PermissionCheckbox';
-import { getContentTypesActionsSize } from '../../utils';
+import {
+  getContentTypesActionsSize,
+  getPermissionsCountByAction,
+  isAttributeAction,
+} from '../../utils';
 import Wrapper from './Wrapper';
 
-const PermissionsHeader = ({ contentTypes }) => {
+const PermissionsHeader = ({ allAttributes, contentTypes }) => {
   const { formatMessage } = useIntl();
   const { permissionsLayout, contentTypesPermissions } = usePermissionsContext();
 
@@ -20,19 +24,38 @@ const PermissionsHeader = ({ contentTypes }) => {
     [contentTypes, contentTypesPermissions]
   );
 
+  const getNumberOfPermissionByAction = useCallback(
+    action => {
+      return getPermissionsCountByAction(contentTypes, contentTypesPermissions, action);
+    },
+    [contentTypes, contentTypesPermissions]
+  );
+
   const hasSomeActions = permission => {
-    return (
-      countContentTypesActionPermissions(permission.action) > 0 &&
-      countContentTypesActionPermissions(permission.action) <
-        filteredContentTypes(permission.subjects).length
-    );
+    if (!isAttributeAction(permission.action)) {
+      return (
+        countContentTypesActionPermissions(permission.action) > 0 &&
+        countContentTypesActionPermissions(permission.action) <
+          filteredContentTypes(permission.subjects).length
+      );
+    }
+
+    const numberOfPermission = getNumberOfPermissionByAction(permission.action);
+
+    return numberOfPermission > 0 && numberOfPermission < allAttributes.length;
   };
 
   const hasAllActions = permission => {
-    return (
-      countContentTypesActionPermissions(permission.action) ===
-      filteredContentTypes(permission.subjects).length
-    );
+    if (!isAttributeAction(permission.action)) {
+      return (
+        countContentTypesActionPermissions(permission.action) ===
+        filteredContentTypes(permission.subjects).length
+      );
+    }
+
+    const numberOfPermission = getNumberOfPermissionByAction(permission.action);
+
+    return numberOfPermission === allAttributes.length;
   };
 
   const filteredContentTypes = useCallback(
@@ -68,6 +91,7 @@ const PermissionsHeader = ({ contentTypes }) => {
 };
 
 PermissionsHeader.propTypes = {
+  allAttributes: PropTypes.array.isRequired,
   contentTypes: PropTypes.array.isRequired,
 };
 

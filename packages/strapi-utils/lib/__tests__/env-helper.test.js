@@ -1,3 +1,5 @@
+'use strict';
+
 const envHelper = require('../env-helper');
 
 describe('Env helper', () => {

@@ -1,8 +1,8 @@
 'use strict';
 
+const { EventEmitter } = require('events');
 const createEntityService = require('../entity-service');
 const entityValidator = require('../entity-validator');
-const { EventEmitter } = require('events');
 
 describe('Entity service', () => {
   global.strapi = {
