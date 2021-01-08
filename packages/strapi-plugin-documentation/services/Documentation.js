@@ -17,28 +17,22 @@ const parametersOptions = require('./utils/parametersOptions.json');
 
 // keys to pick from the extended config
 const defaultSettingsKeys = Object.keys(defaultSettings);
+const customIsEqual =  (obj1, obj2) => _.isEqualWith(obj1, obj2, customComparator);
+
+const customComparator = (value1, value2) => {
+  if (_.isArray(value1) && _.isArray(value2)) {
+    if (value1.length !== value2.length) { return false };
+    return value1.every(el1 => value2.findIndex(el2 => customIsEqual(el1, el2)) >= 0)
+  }
+};
 
 module.exports = {
-  areObjectsEquals: (obj1, obj2) => {
+  areObjectsEquals: function (obj1, obj2) {
     // stringify to remove nested empty objects
-    return _.isEqualWith(JSON.parse(JSON.stringify(obj1)), JSON.parse(JSON.stringify(obj2)), this.objectArrayComparator)
+    return customIsEqual(this.cleanObject(obj1), this.cleanObject(obj2));
   },
 
-  objectArrayComparator: (val1, val2) => {
-    if (_.isArray(val1) && _.isArray(val2) && !_.isEmpty(val1) && !_.isEmpty(val2)) {
-      if (_.isObject(val1[0])) {
-        const comparator = (a, b) => {
-          const key = Object.keys(a)[0]
-          if (a[key] > b[key])
-            return 1
-          else if (a[key] < b[key])
-            return -1
-          return 0
-        }
-        return _.isEqual(val1.sort(comparator), val2.sort(comparator))
-      }
-    }
-  },
+  cleanObject: (obj) => JSON.parse(JSON.stringify(obj)),
 
   arrayCustomizer: (objValue, srcValue) => {
     if (_.isArray(objValue)) return objValue.concat(srcValue);
