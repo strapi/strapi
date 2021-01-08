@@ -20,7 +20,7 @@ const ProviderButton = ({ provider }) => {
               style={{ maxWidth: 80, maxHeight: 40 }}
             />
           ) : (
-            <Text fontSize="xs" ellipsis>
+            <Text color="black" ellipsis>
               {provider.displayName}
             </Text>
           )}

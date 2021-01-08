@@ -48,14 +48,15 @@ const Providers = () => {
                 ))}
               </Flex>
             )}
-            <Padded top size="sm" />
             <Padded top bottom size="smd">
+              <BaselineAlignment top size="3px" />
               <Separator
                 label={formatMessage({
                   id: 'or',
                   defaultMessage: 'OR',
                 })}
               />
+              <BaselineAlignment top size="7px" />
             </Padded>
             <Button style={{ width: '100%' }} onClick={handleClick} type="submit" color="secondary">
               {formatMessage({
