@@ -599,6 +599,14 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         // Load bookshelf plugin arguments from model options
         this.constructor.__super__.initialize.apply(this, arguments);
 
+        this.on('fetching fetching:collection', (instance, attrs, options) => {
+          populateFetch(definition, options);
+        });
+
+        this.on('saving', (instance, attrs) => {
+          instance.attributes = _.assign(instance.attributes, mapper(attrs));
+        });
+
         const formatValue = createFormatter(definition.client);
         function formatEntry(entry) {
           Object.keys(entry.attributes).forEach(key => {
@@ -610,19 +618,6 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
             entry.attributes[key] = formatValue(attr, entry.attributes[key]);
           });
         }
-
-        this.on('fetching fetching:collection', (instance, attrs, options) => {
-          if (Array.isArray(instance.models)) {
-            instance.models.forEach(entry => formatEntry(entry));
-          } else {
-            formatEntry(instance);
-          }
-          populateFetch(definition, options);
-        });
-
-        this.on('saving', (instance, attrs) => {
-          instance.attributes = _.assign(instance.attributes, mapper(attrs));
-        });
 
         this.on('saved fetched fetched:collection', instance => {
           if (Array.isArray(instance.models)) {

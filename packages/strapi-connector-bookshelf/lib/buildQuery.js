@@ -23,9 +23,7 @@ const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'sort')) {
     const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
     const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
-    const orderColumns = clauses
-      .filter(({ alias, column }) => alias !== column) // avoid renaming columns of the main table
-      .map(({ alias, column }) => ({ [alias]: column }));
+    const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
     const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
     qb.distinct()
@@ -55,11 +53,10 @@ const buildQuery = ({ model, filters }) => qb => {
  */
 const buildSortClauseFromTree = tree => ({ field, order }) => {
   if (!field.includes('.')) {
-    const column = `${tree.alias}.${field}`;
     return {
-      column,
+      column: `${tree.alias}.${field}`,
       order,
-      alias: column,
+      alias: `_strapi_tmp_${tree.alias}_${field}`,
     };
   }
 
