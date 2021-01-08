@@ -12,7 +12,7 @@ const mergeRoutes = (a, b, key) =>
 module.exports = async strapi => {
   const adminPath = findPackagePath('strapi-admin');
   const [files, config] = await Promise.all([
-    loadFiles(adminPath, '!(config|node_modules|test|ee|scripts)/*.*(js|json)'),
+    loadFiles(adminPath, '!(config|node_modules|tests|ee|scripts)/*.*(js|json)'),
     loadConfig(adminPath),
   ]);
 

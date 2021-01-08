@@ -17,10 +17,25 @@ const parametersOptions = require('./utils/parametersOptions.json');
 
 // keys to pick from the extended config
 const defaultSettingsKeys = Object.keys(defaultSettings);
+const customIsEqual =  (obj1, obj2) => _.isEqualWith(obj1, obj2, customComparator);
+
+const customComparator = (value1, value2) => {
+  if (_.isArray(value1) && _.isArray(value2)) {
+    if (value1.length !== value2.length) { return false };
+    return value1.every(el1 => value2.findIndex(el2 => customIsEqual(el1, el2)) >= 0)
+  }
+};
 
 module.exports = {
-  areObjectsEquals: (obj1, obj2) => {
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
+  areObjectsEquals: function (obj1, obj2) {
+    // stringify to remove nested empty objects
+    return customIsEqual(this.cleanObject(obj1), this.cleanObject(obj2));
+  },
+
+  cleanObject: (obj) => JSON.parse(JSON.stringify(obj)),
+
+  arrayCustomizer: (objValue, srcValue) => {
+    if (_.isArray(objValue)) return objValue.concat(srcValue);
   },
 
   checkIfAPIDocNeedsUpdate: function(apiName) {
@@ -194,8 +209,9 @@ module.exports = {
     }, []);
   },
 
-  createDocObject: array => {
-    return array.reduce((acc, curr) => _.merge(acc, curr), {});
+  createDocObject: function(array) {
+    // use custom merge for arrays
+    return array.reduce((acc, curr) => _.mergeWith(acc, curr, this.arrayCustomizer), {});
   },
 
   deleteDocumentation: async function(version = this.getDocumentationVersion()) {
