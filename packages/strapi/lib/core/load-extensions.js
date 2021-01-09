@@ -28,7 +28,7 @@ module.exports = async function(config) {
     `*/{controllers,services}/*.+(${fileExtensions})`
   );
 
-  const overwrites = await loadOverwrites(extensionsDir);
+  const overwrites = await loadOverwrites(extensionsDir, config);
 
   return {
     overwrites,
