@@ -6,4 +6,10 @@ module.exports = ({ env }) => ({
       secret: env('ADMIN_JWT_SECRET', 'example-token'),
     },
   },
+  loader: {
+    extensions: ['js', 'json', 'ts'],
+    bootstrap() {
+      return require('ts-node').register();
+    },
+  },
 });
