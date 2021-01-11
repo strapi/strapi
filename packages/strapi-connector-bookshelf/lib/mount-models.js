@@ -610,6 +610,10 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         const formatValue = createFormatter(definition.client);
         function formatEntry(entry) {
           Object.keys(entry.attributes).forEach(key => {
+            if (key.startsWith('_strapi_tmp_')) {
+              delete entry.attributes[key];
+              return;
+            }
             const attr = definition.attributes[key] || {};
             entry.attributes[key] = formatValue(attr, entry.attributes[key]);
           });
