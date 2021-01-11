@@ -4,7 +4,7 @@
  */
 
 const _ = require('lodash');
-const { prop } = require('lodash/fp');
+const { prop, omit } = require('lodash/fp');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const mongoose = require('mongoose');
@@ -417,7 +417,8 @@ module.exports = ({ model, strapi }) => {
   }
 
   function count(params) {
-    const filters = convertRestQueryParams(params);
+    const countParams = omit(['_sort', '_limit', '_start'], params);
+    const filters = convertRestQueryParams(countParams);
 
     return buildQuery({ model, filters }).count();
   }
