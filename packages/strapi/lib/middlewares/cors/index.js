@@ -36,11 +36,7 @@ module.exports = strapi => {
             let originList;
 
             if (typeof origin === 'function') {
-              if (origin.constructor.name === 'AsyncFunction') {
-                originList = await origin(ctx);
-              } else {
-                originList = origin(ctx);
-              }
+              originList = await origin(ctx);
             } else {
               originList = origin;
             }
