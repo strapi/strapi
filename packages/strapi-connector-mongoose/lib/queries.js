@@ -419,10 +419,7 @@ module.exports = ({ model, strapi }) => {
   function count(params) {
     const filters = convertRestQueryParams(params);
 
-    return buildQuery({
-      model,
-      filters: { where: filters.where },
-    }).count();
+    return buildQuery({ model, filters }).count();
   }
 
   async function create(values) {
