@@ -513,11 +513,12 @@ module.exports = ({ model, strapi }) => {
   }
 
   function countSearch(params) {
-    const { where } = convertRestQueryParams(_.omit(params, '_q'));
+    const countParams = omit(['_sort', '_limit', '_start', '_q'], params);
+    const filters = convertRestQueryParams(countParams);
 
     return buildQuery({
       model,
-      filters: { where },
+      filters,
       searchParam: params._q,
     }).count();
   }
