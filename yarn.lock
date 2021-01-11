@@ -4481,10 +4481,10 @@ axios-mock-adapter@^1.19.0:
     fast-deep-equal "^3.1.3"
     is-buffer "^2.0.3"
 
-axios@^0.21.0:
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.0.tgz#26df088803a2350dff2c27f96fef99fe49442aca"
-  integrity sha512-fmkJBknJKoZwem3/IKSSLpkdNXZeBu5Q7GA/aRsr2btgrptmSCxi2oFjZHqGdK9DoTil9PIHlPIZw2EcRJXRvw==
+axios@^0.21.1:
+  version "0.21.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
+  integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
   dependencies:
     follow-redirects "^1.10.0"
 
