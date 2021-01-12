@@ -358,7 +358,7 @@ const FormModal = () => {
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
   const attributes = get(allDataSchema, [...state.pathToSchema, 'schema', 'attributes'], null);
-  // console.log({ attributeName: state.attributeName, initialData: initialData.name });
+
   const checkFormValidity = async () => {
     let schema;
     const dataToValidate =
@@ -1000,8 +1000,6 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ err });
-      console.log({ errors });
 
       dispatch({
         type: 'SET_ERRORS',
