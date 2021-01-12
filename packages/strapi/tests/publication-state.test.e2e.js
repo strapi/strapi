@@ -165,11 +165,21 @@ describe('Publication State', () => {
   }, 60000);
 
   describe.each(['default', 'live', 'preview'])('Mode: "%s"', mode => {
-    test.each(['country', 'category', 'product'])('For %s', async modelName => {
-      const url = `/${pluralizedModels[modelName]}${getQueryFromMode(mode)}`;
-      const res = await rq({ method: 'GET', url });
+    describe.each(['country', 'category', 'product'])('For %s', modelName => {
+      const baseUrl = `/${pluralizedModels[modelName]}`;
+      const query = getQueryFromMode(mode);
 
-      expect(res.body).toHaveLength(lengthFor(modelName, { mode }));
+      test('Can get entries', async () => {
+        const res = await rq({ method: 'GET', url: `${baseUrl}${query}` });
+
+        expect(res.body).toHaveLength(lengthFor(modelName, { mode }));
+      });
+
+      test('Can count entries', async () => {
+        const res = await rq({ method: 'GET', url: `${baseUrl}/count${query}` });
+
+        expect(res.body).toBe(lengthFor(modelName, { mode }));
+      });
     });
   });
 
