@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { pick } from 'lodash';
 
 import Card from '../Card';
 import CardControl from '../CardControl';
@@ -41,19 +42,21 @@ const RowItem = ({
   const shouldDisplayControls = !isUploading && !isDownloading && file !== null;
   const shouldDisplayTrashIcon = file === null && hasError;
 
+  const cardOptions = {
+    ...pick(fileInfo, ['ext', 'name', 'mime', 'height', 'width', 'previewUrl', 'id']),
+    small: true,
+    errorMessage,
+    hasError,
+    type: file ? file.type : null,
+    size: fileSize,
+    url,
+    withFileCaching: false,
+    withoutFileInfo: isDownloading || (file === null && hasError),
+  };
+
   return (
     <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
-      <Card
-        small
-        errorMessage={errorMessage}
-        hasError={hasError}
-        type={file ? file.type : null}
-        size={fileSize}
-        url={url}
-        {...fileInfo}
-        withFileCaching={false}
-        withoutFileInfo={isDownloading || (file === null && hasError)}
-      >
+      <Card options={cardOptions}>
         {(isUploading || isDownloading) && <InfiniteLoadingIndicator onClick={handleClick} />}
         {shouldDisplayTrashIcon && (
           <CardControlsWrapper className="card-control-wrapper">
