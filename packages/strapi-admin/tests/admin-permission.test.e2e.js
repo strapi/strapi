@@ -526,18 +526,6 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "marketplace",
               },
               Object {
-                "action": "admin::provider-login.read",
-                "category": "single sign on",
-                "displayName": "Read",
-                "subCategory": "options",
-              },
-              Object {
-                "action": "admin::provider-login.update",
-                "category": "single sign on",
-                "displayName": "Update",
-                "subCategory": "options",
-              },
-              Object {
                 "action": "admin::roles.create",
                 "category": "users and roles",
                 "displayName": "Create",
