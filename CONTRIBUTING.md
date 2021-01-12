@@ -67,9 +67,11 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Development Workflow
 
+_For users running on Apple Silicon M1, you may encounter errors thrown by `sharp`. You may need to re-install `libvps` or to build `sharp` manually following [this issue comment](https://github.com/lovell/sharp/issues/2460#issuecomment-751491241) in order to start the project._
+
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met).
 
 Then, please follow the instructions below:
 
@@ -114,7 +116,7 @@ The administration panel will be available at http://localhost:4000/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
-#### 5. Available commands
+#### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
 - `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
