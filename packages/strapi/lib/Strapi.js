@@ -224,11 +224,8 @@ class Strapi {
       }
 
       // Emit started event.
-      await this.telemetry.send('didStartServer', {
-        database: Object.values(this.config.get('connections', [])).map(
-          connection => connection.settings.client
-        ),
-      });
+      const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
+      await this.telemetry.send('didStartServer', { database: databaseClients });
 
       if (cb && typeof cb === 'function') {
         cb();
