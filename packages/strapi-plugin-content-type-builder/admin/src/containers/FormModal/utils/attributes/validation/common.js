@@ -83,13 +83,7 @@ const validators = {
         return schema;
       })
       .nullable(),
-  name: (contentTypeSchema, initialData, isEdition, reservedNames) => {
-    const usedNames = getUsedContentTypeAttributeNames(
-      contentTypeSchema,
-      isEdition,
-      initialData.name
-    );
-
+  name: (usedNames, reservedNames) => {
     return yup
       .string()
       .test(alreadyUsedAttributeNames(usedNames))
@@ -102,9 +96,9 @@ const validators = {
   unique: () => yup.boolean().nullable(),
 };
 
-const createTextShape = (contentTypeSchema, initialData, isEdition, reservedNames) => {
+const createTextShape = (usedAttributeNames, reservedNames) => {
   const shape = {
-    name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+    name: validators.name(usedAttributeNames, reservedNames),
     type: validators.type(),
     default: validators.default(),
     unique: validators.unique(),
@@ -129,22 +123,22 @@ const createTextShape = (contentTypeSchema, initialData, isEdition, reservedName
 const isMinSuperiorThanMax = {
   name: 'isMinSuperiorThanMax',
   message: getTrad('error.validation.minSupMax'),
-  test(value) {
-    if (!value) {
-      return false;
+  test(min) {
+    if (!min) {
+      return true;
     }
 
     const { max } = this.parent;
 
     if (!max) {
-      return false;
-    }
-
-    if (Number.isNaN(toNumber(value))) {
       return true;
     }
 
-    return toNumber(max) >= toNumber(value);
+    if (Number.isNaN(toNumber(min))) {
+      return true;
+    }
+
+    return toNumber(max) >= toNumber(min);
   },
 };
 

@@ -1,12 +1,9 @@
 import * as yup from 'yup';
-// import { get } from 'lodash';
-// import { isEmpty } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import getTrad from '../../../../utils/getTrad';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
-  getUsedContentTypeAttributeNames,
   isMinSuperiorThanMax,
   isNameAllowed,
   validators,
@@ -14,41 +11,41 @@ import {
 } from './validation/common';
 
 const types = {
-  date: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  date: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
     };
 
     return yup.object(shape);
   },
-  datetime: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  datetime: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
     };
 
     return yup.object(shape);
   },
-  time: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  time: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
     };
 
     return yup.object(shape);
   },
-  default: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  default: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
     };
 
     return yup.object(shape);
   },
-  biginteger: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  biginteger: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: yup
         .string()
@@ -56,7 +53,6 @@ const types = {
         .matches(/^\d*$/),
       unique: validators.unique(),
       required: validators.required(),
-
       max: yup
         .string()
         .nullable()
@@ -70,9 +66,9 @@ const types = {
 
     return yup.object(shape);
   },
-  boolean: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  boolean: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       default: yup.boolean().nullable(),
       required: validators.required(),
       unique: validators.unique(),
@@ -80,9 +76,9 @@ const types = {
 
     return yup.object(shape);
   },
-  component: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  component: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       required: validators.required(),
       max: validators.max(),
@@ -92,9 +88,9 @@ const types = {
 
     return yup.object(shape);
   },
-  decimal: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  decimal: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: yup.number(),
       required: validators.required(),
@@ -104,9 +100,9 @@ const types = {
 
     return yup.object(shape);
   },
-  dynamiczone: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  dynamiczone: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       required: validators.required(),
       max: validators.max(),
@@ -115,9 +111,9 @@ const types = {
 
     return yup.object(shape);
   },
-  email: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  email: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: yup
         .string()
@@ -131,19 +127,13 @@ const types = {
 
     return yup.object(shape);
   },
-  enumeration: (contentTypeSchema, initialData, isEdition, reservedNames) => {
-    const usedNames = getUsedContentTypeAttributeNames(
-      contentTypeSchema,
-      isEdition,
-      initialData.name
-    );
-
+  enumeration: (usedAttributeNames, reservedNames) => {
     const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
     const shape = {
       name: yup
         .string()
-        .test(alreadyUsedAttributeNames(usedNames))
+        .test(alreadyUsedAttributeNames(usedAttributeNames))
         .test(isNameAllowed(reservedNames))
         .matches(ENUM_REGEX, errorsTrads.regex)
         .required(errorsTrads.required),
@@ -181,9 +171,9 @@ const types = {
 
     return yup.object(shape);
   },
-  float: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  float: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       required: validators.required(),
       default: yup.number(),
@@ -193,9 +183,9 @@ const types = {
 
     return yup.object(shape);
   },
-  integer: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  integer: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: yup.number().integer(),
       unique: validators.unique(),
@@ -206,9 +196,9 @@ const types = {
 
     return yup.object(shape);
   },
-  json: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  json: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       required: validators.required(),
       unique: validators.unique(),
@@ -216,9 +206,9 @@ const types = {
 
     return yup.object(shape);
   },
-  media: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  media: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       multiple: yup.boolean(),
       required: validators.required(),
@@ -231,9 +221,9 @@ const types = {
 
     return yup.object(shape);
   },
-  password: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  password: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: validators.default(),
       unique: validators.unique(),
@@ -245,28 +235,26 @@ const types = {
     return yup.object(shape);
   },
   relation: (
-    contentTypeSchema,
-    initialData,
-    isEdition,
+    usedAttributeNames,
     reservedNames,
-    data,
-    alreadyTakenTargetAttributes
+    alreadyTakenTargetAttributes,
+    { initialData, modifiedData }
   ) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       target: yup.string().required(errorsTrads.required),
       nature: yup.string().required(),
       dominant: yup.boolean().nullable(),
       unique: yup.boolean().nullable(),
       targetAttribute: yup.lazy(() => {
         let schema = yup.string().test(isNameAllowed(reservedNames));
-        const initialForbiddenName = [...alreadyTakenTargetAttributes, data.name];
+        const initialForbiddenName = [...alreadyTakenTargetAttributes, modifiedData.name];
 
-        let forbiddenTargetAttributeName = isEdition
-          ? initialForbiddenName.filter(val => val !== initialData.targetAttribute)
-          : initialForbiddenName;
+        let forbiddenTargetAttributeName = initialForbiddenName.filter(
+          val => val !== initialData.targetAttribute
+        );
 
-        if (!['oneWay', 'manyWay'].includes(data.nature)) {
+        if (!['oneWay', 'manyWay'].includes(modifiedData.nature)) {
           schema = schema.matches(NAME_REGEX, errorsTrads.regex);
         }
 
@@ -288,9 +276,9 @@ const types = {
 
     return yup.object(shape);
   },
-  richtext: (contentTypeSchema, initialData, isEdition, reservedNames) => {
+  richtext: (usedAttributeNames, reservedNames) => {
     const shape = {
-      name: validators.name(contentTypeSchema, initialData, isEdition, reservedNames),
+      name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: validators.default(),
       unique: validators.unique(),
@@ -301,18 +289,18 @@ const types = {
 
     return yup.object(shape);
   },
-  string: (contentTypeSchema, initialData, isEdition, reservedNames) => {
-    const shape = createTextShape(contentTypeSchema, initialData, isEdition, reservedNames);
+  string: (usedAttributeNames, reservedNames) => {
+    const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },
-  text: (contentTypeSchema, initialData, isEdition, reservedNames) => {
-    const shape = createTextShape(contentTypeSchema, initialData, isEdition, reservedNames);
+  text: (usedAttributeNames, reservedNames) => {
+    const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },
-  uid: (contentTypeSchema, initialData, isEdition, reservedNames) => {
-    const shape = createTextShape(contentTypeSchema, initialData, isEdition, reservedNames);
+  uid: (usedAttributeNames, reservedNames) => {
+    const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },

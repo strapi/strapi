@@ -358,7 +358,7 @@ const FormModal = () => {
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
   const attributes = get(allDataSchema, [...state.pathToSchema, 'schema', 'attributes'], null);
-
+  // console.log({ attributeName: state.attributeName, initialData: initialData.name });
   const checkFormValidity = async () => {
     let schema;
     const dataToValidate =
@@ -428,15 +428,12 @@ const FormModal = () => {
           }
         );
       }
-      schema = forms[state.modalType].schema(
+      schema = forms.attribute.schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,
-        modifiedData,
-        state.actionType === 'edit',
-        state.attributeName,
-        initialData,
+        reservedNames,
         alreadyTakenTargetContentTypeAttributes,
-        reservedNames
+        { modifiedData, initialData }
       );
     } else if (isEditingCategory) {
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
@@ -630,8 +627,6 @@ const FormModal = () => {
 
     toggleConfirmModal();
   }, [toggleConfirmModal]);
-
-  console.log({ modifiedData });
 
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
@@ -1004,8 +999,9 @@ const FormModal = () => {
         type: 'RESET_PROPS',
       });
     } catch (err) {
-      console.log({ err });
       const errors = getYupInnerErrors(err);
+      console.log({ err });
+      console.log({ errors });
 
       dispatch({
         type: 'SET_ERRORS',

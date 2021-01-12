@@ -12,32 +12,25 @@ const forms = {
     schema(
       currentSchema,
       attributeType,
-      dataToValidate,
-      isEditing,
-      attributeToEditName,
-      initialData,
+      reservedNames,
       alreadyTakenTargetContentTypeAttributes,
-      reservedNames
+      options
     ) {
+      const attributes = get(currentSchema, ['schema', 'attributes'], {});
+
+      const usedAttributeNames = Object.keys(attributes).filter(attr => {
+        return attr !== options.initialData.name;
+      });
+
       try {
         return attributeTypes[attributeType](
-          currentSchema,
-          initialData,
-          isEditing,
+          usedAttributeNames,
           reservedNames.attributes,
-          dataToValidate,
-          alreadyTakenTargetContentTypeAttributes
+          alreadyTakenTargetContentTypeAttributes,
+          options
         );
       } catch (err) {
-        console.log(err);
-        console.log(attributeType);
-
-        return attributeTypes.default(
-          currentSchema,
-          initialData,
-          isEditing,
-          reservedNames.attributes
-        );
+        return attributeTypes.default(usedAttributeNames, reservedNames.attributes);
       }
     },
     form: {
