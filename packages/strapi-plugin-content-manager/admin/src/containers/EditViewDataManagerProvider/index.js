@@ -253,9 +253,13 @@ const EditViewDataManagerProvider = ({
 
   const createFormData = useCallback(
     data => {
-      const cleanedData = removeKeyInObject(
-        cleanData(data, currentContentTypeLayout, allLayoutData.components),
-        '__temp_key__'
+      // First we need to remove the added keys needed for the dnd
+      const preparedData = removeKeyInObject(cloneDeep(data), '__temp_key__');
+      // Then we need to apply our helper
+      const cleanedData = cleanData(
+        preparedData,
+        currentContentTypeLayout,
+        allLayoutData.components
       );
 
       return cleanedData;

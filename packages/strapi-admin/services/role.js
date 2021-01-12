@@ -184,7 +184,7 @@ const deleteByIds = async (ids = []) => {
 };
 
 /** Count the number of users for some roles
- * @returns {Promise<integer>}
+ * @returns {Promise<number>}
  * @param roleId
  */
 const getUsersCount = async roleId => {
