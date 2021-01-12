@@ -1,10 +1,8 @@
 'use strict';
 
-const path = require('path');
 const execa = require('execa');
-const waitOn = require('wait-on');
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
+const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
 const appName = 'testApp';
 
@@ -39,11 +37,11 @@ const databases = {
   },
 };
 
-const test = async args => {
-  return execa('yarn', ['-s', 'test:e2e', ...args.split(' ')], {
+const runAllTests = async args => {
+  return execa('yarn', ['-s', 'test:e2e', 'test/all.test.e2e.js'], {
     stdio: 'inherit',
-    cwd: path.resolve(__dirname, '..'),
     env: {
+      STRAPI_TEST_PATHS: args,
       FORCE_COLOR: 1,
     },
   });
@@ -53,21 +51,15 @@ const main = async (database, args) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
-    const testAppProcess = startTestApp({ appName });
 
-    await waitOn({ resources: ['http://localhost:1337'] });
-
-    await test(args).catch(() => {
-      testAppProcess.kill();
+    await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
     });
 
-    testAppProcess.kill();
     process.exit(0);
   } catch (error) {
-    console.log(error);
     process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });

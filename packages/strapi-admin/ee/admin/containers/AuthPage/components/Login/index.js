@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTheme } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { Flex, Padded, Text, Separator } from '@buffetjs/core';
+import { Flex, Padded, Separator } from '@buffetjs/core';
 import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
+import { Dots } from '@buffetjs/icons';
 import { BaselineAlignment } from 'strapi-helper-plugin';
 
 import BaseLogin from '../../../../../../admin/src/containers/AuthPage/components/Login/BaseLogin';
@@ -15,6 +17,7 @@ import {
 import { useAuthProviders } from '../../../../hooks';
 
 const Login = loginProps => {
+  const theme = useTheme();
   const { isLoading, data: providers } = useAuthProviders();
   const { formatMessage } = useIntl();
 
@@ -54,9 +57,7 @@ const Login = loginProps => {
                       defaultMessage: 'See more',
                     })}
                   >
-                    <Text fontWeight="bold" fontSize="lg">
-                      ...
-                    </Text>
+                    <Dots width="18" height="8" fill={theme.main.colors.black} />
                   </ProviderButtonWrapper>
                 </ProviderLink>
                 <Tooltip id="see-more-tooltip" />
