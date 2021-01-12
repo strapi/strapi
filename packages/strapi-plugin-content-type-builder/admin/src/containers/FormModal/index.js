@@ -631,6 +631,8 @@ const FormModal = () => {
     toggleConfirmModal();
   }, [toggleConfirmModal]);
 
+  console.log({ modifiedData });
+
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
 

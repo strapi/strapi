@@ -234,6 +234,35 @@ const baseForm = {
       ],
     };
   },
+  string: () => {
+    return {
+      items: [
+        [nameField],
+        [
+          {
+            label: { id: getTrad('modalForm.attribute.text.type-selection') },
+            name: 'type',
+            size: 12,
+            type: 'booleanBox',
+            options: [
+              {
+                headerId: getTrad('form.attribute.text.option.short-text'),
+                descriptionId: getTrad('form.attribute.text.option.short-text.description'),
+                value: 'string',
+              },
+              {
+                headerId: getTrad('form.attribute.text.option.long-text'),
+                descriptionId: getTrad('form.attribute.text.option.long-text.description'),
+                value: 'text',
+              },
+            ],
+            validations: {},
+          },
+        ],
+        [uiHelpers.spacerMedium],
+      ],
+    };
+  },
   text: () => {
     return {
       items: [
