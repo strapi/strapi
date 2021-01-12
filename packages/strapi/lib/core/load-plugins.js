@@ -52,7 +52,7 @@ const loadPlugins = async ({ installedPlugins, config }) => {
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)/*.*(js|json),package.json}'
+      '{!(config|node_modules|tests)/*.*(js|json),package.json}'
     );
 
     const { config: pluginConfig } = await loadConfig(pluginPath);

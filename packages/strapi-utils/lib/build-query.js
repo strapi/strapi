@@ -146,9 +146,17 @@ const normalizeSortClauses = (clauses, { model }) => {
   }));
 
   normalizedClauses.forEach(({ field }) => {
-    if (field.includes('.')) {
+    const fieldDepth = field.split('.').length - 1;
+    if (fieldDepth === 1) {
       // Check if the relational field exists
       getAssociationFromFieldKey({ model, field });
+    } else if (fieldDepth > 1) {
+      const err = new Error(
+        `Sorting on ${field} is not possible: you cannot sort at a depth greater than 1`
+      );
+
+      err.status = 400;
+      throw err;
     }
   });
 
