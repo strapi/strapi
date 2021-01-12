@@ -42,4 +42,9 @@ module.exports = async () => {
   await strapi.admin.services.user.displayWarningIfUsersDontHaveRole();
 
   await syncAuthSettings();
+
+  strapi.admin.destroy = () => {
+    strapi.admin.services.permission.conditionProvider.clear();
+    strapi.admin.services.permission.actionProvider.clear();
+  };
 };
