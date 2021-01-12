@@ -31,6 +31,8 @@ const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./
 const { generateTimestampCode } = require('./code-generator');
 const contentTypes = require('./content-types');
 const webhook = require('./webhook');
+const env = require('./env-helper');
+const relations = require('./relations');
 
 module.exports = {
   yup,
@@ -61,4 +63,6 @@ module.exports = {
   stringEquals,
   contentTypes,
   webhook,
+  env,
+  relations,
 };

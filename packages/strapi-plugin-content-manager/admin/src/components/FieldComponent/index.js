@@ -1,12 +1,11 @@
 /* eslint-disable  import/no-cycle */
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { get, size } from 'lodash';
+import { size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEqual from 'react-fast-compare';
 import pluginId from '../../pluginId';
-import useEditView from '../../hooks/useEditView';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import NotAllowedInput from '../NotAllowedInput';
@@ -37,15 +36,10 @@ const FieldComponent = ({
   componentValue,
   removeComponentFromField,
 }) => {
-  const { allLayoutData } = useEditView();
-
   const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
-  const currentComponentSchema = get(allLayoutData, ['components', componentUid], {});
-
-  const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
 
   if (!hasChildrenAllowedFields && isCreatingEntry) {
     return (
@@ -98,10 +92,8 @@ const FieldComponent = ({
       {!isRepeatable && isInitialized && (
         <NonRepeatableComponent
           componentUid={componentUid}
-          fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
           name={name}
-          schema={currentComponentSchema}
         />
       )}
       {isRepeatable && (
@@ -109,14 +101,11 @@ const FieldComponent = ({
           componentValue={componentValue}
           componentValueLength={componentValueLength}
           componentUid={componentUid}
-          fields={displayedFields}
-          isFromDynamicZone={isFromDynamicZone}
           isNested={isNested}
           isReadOnly={isReadOnly}
           max={max}
           min={min}
           name={name}
-          schema={currentComponentSchema}
         />
       )}
     </Wrapper>

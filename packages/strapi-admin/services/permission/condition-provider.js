@@ -81,5 +81,12 @@ module.exports = () => {
     getAllIds() {
       return Array.from(registry.keys());
     },
+
+    /**
+     * Clear the actions map
+     */
+    clear() {
+      return registry.clear();
+    },
   };
 };

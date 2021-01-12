@@ -2,10 +2,9 @@ import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery } from 'strapi-helper-plugin';
+import { BaselineAlignment, auth, useQuery } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../components/BaselineAlignement';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
@@ -60,14 +59,19 @@ const AuthPage = ({ hasAdmin }) => {
             `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
           );
 
-          dispatch({
-            type: 'SET_DATA',
-            data: { registrationToken, userInfo: data },
-          });
+          if (data) {
+            dispatch({
+              type: 'SET_DATA',
+              data: { registrationToken, userInfo: data },
+            });
+          }
         } catch (err) {
           const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
 
-          strapi.notification.error(errorMessage);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: errorMessage,
+          });
 
           // Redirect to the oops page in case of an invalid token
           // @alexandrebodin @JAB I am not sure it is the wanted behavior
@@ -138,7 +142,10 @@ const AuthPage = ({ hasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 

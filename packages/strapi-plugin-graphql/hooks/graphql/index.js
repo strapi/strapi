@@ -162,6 +162,10 @@ module.exports = strapi => {
         app: strapi.app,
         path: config.endpoint,
       });
+
+      strapi.plugins.graphql.destroy = async () => {
+        await server.stop();
+      };
     },
   };
 };

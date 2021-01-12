@@ -1,4 +1,7 @@
+'use strict';
+
 const _ = require('lodash');
+const { each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
@@ -11,18 +14,21 @@ const BOOLEAN_OPERATORS = ['or'];
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
 const buildQuery = ({ model, filters }) => qb => {
+  const joinsTree = buildJoinsAndFilter(qb, model, filters);
+
   if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
-    buildJoinsAndFilter(qb, model, filters);
   }
 
   if (_.has(filters, 'sort')) {
-    qb.orderBy(
-      filters.sort.map(({ field, order }) => ({
-        column: field,
-        order,
-      }))
-    );
+    const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
+    const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
+    const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
+    const columns = [`${joinsTree.alias}.*`, ...orderColumns];
+
+    qb.distinct()
+      .column(columns)
+      .orderBy(orderBy);
   }
 
   if (_.has(filters, 'start')) {
@@ -42,13 +48,40 @@ const buildQuery = ({ model, filters }) => qb => {
 };
 
 /**
+ * Build a bookshelf sort clause (simple or deep) based on a joins tree
+ * @param tree - The joins tree that contains the aliased associations
+ */
+const buildSortClauseFromTree = tree => ({ field, order }) => {
+  if (!field.includes('.')) {
+    return {
+      column: `${tree.alias}.${field}`,
+      order,
+      alias: `_strapi_tmp_${tree.alias}_${field}`,
+    };
+  }
+
+  const [relation, attribute] = field.split('.');
+  for (const { alias, assoc } of Object.values(tree.joins)) {
+    if (relation === assoc.alias) {
+      return {
+        column: `${alias}.${attribute}`,
+        order,
+        alias: `_strapi_tmp_${alias}_${attribute}`,
+      };
+    }
+  }
+
+  return {};
+};
+
+/**
  * Add joins and where filters
  * @param {Object} qb - knex query builder
  * @param {Object} model - Bookshelf model
  * @param {Object} filters - The query filters
  */
 const buildJoinsAndFilter = (qb, model, filters) => {
-  const { where: whereClauses } = filters;
+  const { where: whereClauses = [], sort: sortClauses = [] } = filters;
 
   /**
    * Returns an alias for a name (simple incremental alias name)
@@ -157,7 +190,7 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   };
 
   /**
-   * Returns the SQL path for a qery field.
+   * Returns the SQL path for a query field.
    * Adds table to the joins tree
    * @param {string} field a field used to filter
    * @param {Object} tree joins tree
@@ -187,6 +220,8 @@ const buildJoinsAndFilter = (qb, model, filters) => {
     return generateNestedJoins(parts.join('.'), tree.joins[key]);
   };
 
+  const generateNestedJoinsFromFields = each(field => generateNestedJoins(field, tree));
+
   /**
    * Format every where clauses whith the right table name aliases.
    * Add table joins to the joins list
@@ -213,19 +248,21 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   };
 
   /**
-   * Add queries on tree's joins (deep search) based on given filters
+   * Add queries on tree's joins (deep search, deep sort) based on given filters
    * @param tree - joins tree
    */
   const addFiltersQueriesToJoinTree = tree => {
     _.each(tree.joins, value => {
       const { alias, model } = value;
 
+      // PublicationState
       runPopulateQueries(
         toQueries({
           publicationState: { query: filters.publicationState, model, alias },
         }),
         qb
       );
+
       addFiltersQueriesToJoinTree(value);
     });
   };
@@ -233,8 +270,13 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
   aliasedWhereClauses.forEach(w => buildWhereClause({ qb, ...w }));
 
+  // Force needed joins for deep sort clauses
+  generateNestedJoinsFromFields(sortClauses.map(prop('field')));
+
   buildJoinsFromTree(qb, tree);
   addFiltersQueriesToJoinTree(tree);
+
+  return tree;
 };
 
 /**
