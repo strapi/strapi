@@ -318,24 +318,7 @@ const getProfile = async (provider, query, callback) => {
         provider: 'instagram',
         key: grant.instagram.key,
         secret: grant.instagram.secret,
-        // custom config while waiting for purest-providers to be updated
-        // https://github.com/simov/purest-providers/issues/3
-        config: {
-          instagram: {
-            'https://graph.instagram.com': {
-              __domain: {
-                auth: {
-                  qs: { access_token: '[0]' },
-                },
-              },
-              '{endpoint}': {
-                __path: {
-                  alias: '__default',
-                },
-              },
-            },
-          },
-        },
+        config: purestConfig,
       });
 
       instagram
