@@ -11,6 +11,7 @@ const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { singular } = require('pluralize');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -78,7 +79,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    * Count entries based on filters
    */
   function count(params = {}) {
-    const filters = omit(['sort', 'limit', 'start'], convertRestQueryParams(params));
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
     return model
       .query(buildQuery({ model, filters }))
@@ -192,7 +193,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
   function countSearch(params) {
     const countParams = omit(['_q'], params);
-    const filters = omit(['sort', 'limit', 'start'], convertRestQueryParams(countParams));
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))

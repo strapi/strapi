@@ -17,6 +17,7 @@ const { findComponentByGlobalId } = require('./utils/helpers');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = ({ model, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -430,7 +431,7 @@ module.exports = ({ model, strapi }) => {
   }
 
   function count(params, { session = null } = {}) {
-    const filters = omit(['sort', 'limit', 'start'], convertRestQueryParams(params));
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
     return buildQuery({ model, filters, session }).count();
   }
@@ -534,7 +535,7 @@ module.exports = ({ model, strapi }) => {
 
   function countSearch(params, { session = null } = {}) {
     const countParams = omit(['_q'], params);
-    const filters = omit(['sort', 'limit', 'start'], convertRestQueryParams(countParams));
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return buildQuery({
       model,
