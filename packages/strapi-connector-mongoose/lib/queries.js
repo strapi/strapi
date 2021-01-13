@@ -430,8 +430,7 @@ module.exports = ({ model, strapi }) => {
   }
 
   function count(params, { session = null } = {}) {
-    const countParams = omit(['_sort', '_limit', '_start'], params);
-    const filters = convertRestQueryParams(countParams);
+    const filters = omit(['sort', 'limit', 'start'], convertRestQueryParams(params));
 
     return buildQuery({ model, filters, session }).count();
   }
@@ -534,8 +533,8 @@ module.exports = ({ model, strapi }) => {
   }
 
   function countSearch(params, { session = null } = {}) {
-    const countParams = omit(['_sort', '_limit', '_start', '_q'], params);
-    const filters = convertRestQueryParams(countParams);
+    const countParams = omit(['_q'], params);
+    const filters = omit(['sort', 'limit', 'start'], convertRestQueryParams(countParams));
 
     return buildQuery({
       model,
