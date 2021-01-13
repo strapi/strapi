@@ -447,8 +447,12 @@ module.exports = ({ model, strapi }) => {
         : new Date();
     }
 
-    // Create entry with no-relational data.
-    // When specify options, data must be an array.
+    /*
+      Create entry with no-relational data.
+      Note that it is mongoose requirement that you **must** pass an array as
+      the first parameter to `create()` if you want to specify options.
+      https://mongoosejs.com/docs/api.html#model_Model.create
+    */
     const [entry] = await model.create([data], { session });
     const isDraft = contentTypesUtils.isDraft(entry, model);
     await createComponents(entry, values, { session, isDraft });
