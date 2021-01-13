@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
+import { Tooltip } from '@buffetjs/styles';
 import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin';
 import { formatBytes, getType, getTrad } from '../../utils';
 
@@ -14,27 +15,30 @@ import Tag from '../Tag';
 import Wrapper from '../CardWrapper';
 
 const Card = ({
-  id,
-  isDisabled,
-  checked,
   children,
-  errorMessage,
-  ext,
-  hasError,
-  height,
-  mime,
-  name,
-  onClick,
-  previewUrl,
-  small,
-  size,
-  type,
-  url,
-  width,
-  withFileCaching,
-  withoutFileInfo,
+  options: {
+    checked,
+    errorMessage,
+    ext,
+    hasError,
+    height,
+    id,
+    isDisabled,
+    mime,
+    name,
+    onClick,
+    previewUrl,
+    small,
+    size = 0,
+    type,
+    url,
+    width,
+    withFileCaching = true,
+    withoutFileInfo,
+  },
 }) => {
   const { formatMessage } = useGlobalContext();
+  const [tooltipIsDisplayed, setDisplayTooltip] = useState(false);
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
   const generatedExtension =
@@ -46,6 +50,10 @@ const Card = ({
     if (!isDisabled || checked) {
       onClick(id);
     }
+  };
+
+  const handleTooltipToggle = () => {
+    setDisplayTooltip(prev => !prev);
   };
 
   return (
@@ -68,7 +76,15 @@ const Card = ({
       {!withoutFileInfo && (
         <>
           <Flex>
-            <Title>{name}</Title>
+            <Title
+              onMouseEnter={handleTooltipToggle}
+              onMouseLeave={handleTooltipToggle}
+              data-for={`${id}`}
+              data-tip={name}
+            >
+              {name}
+            </Title>
+            {tooltipIsDisplayed && <Tooltip id={`${id}`} />}
             <Tag label={getType(fileType)} />
           </Flex>
           <FileInfos extension={generatedExtension} size={fileSize} width={width} height={height} />
@@ -80,47 +96,51 @@ const Card = ({
 };
 
 Card.defaultProps = {
-  checked: false,
   children: null,
-  errorMessage: null,
-  ext: null,
-  id: null,
-  isDisabled: false,
-  hasError: false,
-  height: null,
-  mime: null,
-  name: null,
-  onClick: () => {},
-  previewUrl: null,
-  size: 0,
-  small: false,
-  type: null,
-  url: null,
-  width: null,
-  withFileCaching: true,
-  withoutFileInfo: false,
+  options: {
+    checked: false,
+    errorMessage: null,
+    ext: null,
+    id: null,
+    isDisabled: false,
+    hasError: false,
+    height: null,
+    mime: null,
+    name: null,
+    onClick: () => {},
+    previewUrl: null,
+    size: 0,
+    small: false,
+    type: null,
+    url: null,
+    width: null,
+    withFileCaching: true,
+    withoutFileInfo: false,
+  },
 };
 
 Card.propTypes = {
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  isDisabled: PropTypes.bool,
-  checked: PropTypes.bool,
   children: PropTypes.node,
-  errorMessage: PropTypes.string,
-  ext: PropTypes.string,
-  hasError: PropTypes.bool,
-  height: PropTypes.number,
-  mime: PropTypes.string,
-  name: PropTypes.string,
-  onClick: PropTypes.func,
-  previewUrl: PropTypes.string,
-  size: PropTypes.number,
-  small: PropTypes.bool,
-  type: PropTypes.string,
-  url: PropTypes.string,
-  width: PropTypes.number,
-  withFileCaching: PropTypes.bool,
-  withoutFileInfo: PropTypes.bool,
+  options: PropTypes.exact({
+    errorMessage: PropTypes.string,
+    ext: PropTypes.string,
+    hasError: PropTypes.bool,
+    height: PropTypes.number,
+    mime: PropTypes.string,
+    name: PropTypes.string,
+    onClick: PropTypes.func,
+    previewUrl: PropTypes.string,
+    size: PropTypes.number,
+    small: PropTypes.bool,
+    type: PropTypes.string,
+    url: PropTypes.string,
+    width: PropTypes.number,
+    withFileCaching: PropTypes.bool,
+    withoutFileInfo: PropTypes.bool,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    isDisabled: PropTypes.bool,
+    checked: PropTypes.bool,
+  }),
 };
 
 export default memo(Card);
