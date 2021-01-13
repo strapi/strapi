@@ -14,7 +14,7 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "nodemailer": "6.4.17"
   },
   "repository": {
