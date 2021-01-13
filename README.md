@@ -23,7 +23,7 @@
   <a href="https://fastandcomfy.io/strapi/">
     <img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
   </a>
-  
+
   <a href="https://render.com/docs/deploy-strapi">
     <img src="https://assets.strapi.io/uploads/deploy_render_e076b6f23a.png" height="44" />
   </a>
@@ -159,6 +159,10 @@ See our dedicated [repository](https://github.com/strapi/documentation) for the 
 
 - [Developer docs](https://strapi.io/documentation/developer-docs/latest)
 - [User docs](https://strapi.io/documentation/user-docs/latest)
+
+## Try live demo
+
+See for yourself what's under the hood by getting access to a [hosted Strapi project](https://strapi.io/demo) with sample data.
 
 ## License
 
