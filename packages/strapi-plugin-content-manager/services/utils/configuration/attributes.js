@@ -5,7 +5,7 @@ const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
-const NON_SORTABLES = ['component', 'json', 'relation', 'media', 'richtext', 'dynamiczone'];
+const NON_SORTABLES = ['component', 'json', 'media', 'richtext', 'dynamiczone'];
 const SORTABLE_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
 
 const NON_LISTABLES = ['component', 'json', 'password', 'richtext', 'dynamiczone'];
