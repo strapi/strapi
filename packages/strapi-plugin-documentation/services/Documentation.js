@@ -17,22 +17,24 @@ const parametersOptions = require('./utils/parametersOptions.json');
 
 // keys to pick from the extended config
 const defaultSettingsKeys = Object.keys(defaultSettings);
-const customIsEqual =  (obj1, obj2) => _.isEqualWith(obj1, obj2, customComparator);
+const customIsEqual = (obj1, obj2) => _.isEqualWith(obj1, obj2, customComparator);
 
 const customComparator = (value1, value2) => {
   if (_.isArray(value1) && _.isArray(value2)) {
-    if (value1.length !== value2.length) { return false };
-    return value1.every(el1 => value2.findIndex(el2 => customIsEqual(el1, el2)) >= 0)
+    if (value1.length !== value2.length) {
+      return false;
+    }
+    return value1.every(el1 => value2.findIndex(el2 => customIsEqual(el1, el2)) >= 0);
   }
 };
 
 module.exports = {
-  areObjectsEquals: function (obj1, obj2) {
+  areObjectsEquals: function(obj1, obj2) {
     // stringify to remove nested empty objects
     return customIsEqual(this.cleanObject(obj1), this.cleanObject(obj2));
   },
 
-  cleanObject: (obj) => JSON.parse(JSON.stringify(obj)),
+  cleanObject: obj => JSON.parse(JSON.stringify(obj)),
 
   arrayCustomizer: (objValue, srcValue) => {
     if (_.isArray(objValue)) return objValue.concat(srcValue);

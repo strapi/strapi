@@ -82,7 +82,6 @@ const productFixtures = [
   },
 ];
 
-
 describe('Filtering API', () => {
   beforeAll(async () => {
     await builder
