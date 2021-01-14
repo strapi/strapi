@@ -1,36 +1,35 @@
 const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
   const defaultAttributes = [
-    [
-      'text',
-      'email',
-      'richtext',
-      'password',
-      'number',
-      'enumeration',
-      'date',
-      'media',
-      'boolean',
-      'json',
-      'relation',
-    ],
+    'text',
+    'email',
+    'richtext',
+    'password',
+    'number',
+    'enumeration',
+    'date',
+    'media',
+    'boolean',
+    'json',
+    'relation',
   ];
 
   const isPickingAttributeForAContentType = dataTarget === 'contentType';
   const isNestedInAnotherComponent = nestedComponents.includes(targetUid);
   const canAddComponentInAnotherComponent =
     !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
-  const items = defaultAttributes.slice();
 
   if (isPickingAttributeForAContentType) {
-    items[0].push('uid');
-    items.push(['component', 'dynamiczone']);
+    return [
+      [...defaultAttributes, 'uid'],
+      ['component', 'dynamiczone'],
+    ];
   }
 
   if (canAddComponentInAnotherComponent) {
-    items.push(['component']);
+    return [defaultAttributes, ['component']];
   }
 
-  return items;
+  return [defaultAttributes];
 };
 
 export default getAttributes;
