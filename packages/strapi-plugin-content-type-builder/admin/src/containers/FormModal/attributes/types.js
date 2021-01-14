@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
-import getTrad from '../../../../utils/getTrad';
+import getTrad from '../../../utils/getTrad';
 import {
   alreadyUsedAttributeNames,
   createTextShape,

@@ -1,4 +1,4 @@
-import { nameField } from './constants';
+import { nameField } from './nameField';
 
 const commonBaseForm = {
   items: [[nameField]],

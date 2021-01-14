@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import getTrad from '../../../../utils/getTrad';
+import getTrad from '../../../utils/getTrad';
 import { componentForm } from '../component';
 import options from './attributeOptions';
 import uiHelpers from './uiHelpers';

@@ -36,9 +36,9 @@ import {
   createHeadersObjectFromArray,
   getAttributesToDisplay,
   getModalTitleSubHeader,
-  forms,
   getNextSearch,
 } from './utils';
+import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
 import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';

@@ -1,8 +1,8 @@
 import * as yup from 'yup';
 import { toLower, trim } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
-import getTrad from '../../../../utils/getTrad';
-import { createComponentUid } from '../createUid';
+import getTrad from '../../../utils/getTrad';
+import { createComponentUid } from '../utils/createUid';
 import { CATEGORY_NAME_REGEX } from '../category';
 
 const createComponentSchema = (usedComponentNames, reservedNames, category) => {

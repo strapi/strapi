@@ -1,6 +1,5 @@
 import { get, toLower } from 'lodash';
-import { nameToSlug } from '../createUid';
-
+import { nameToSlug } from '../utils/createUid';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';

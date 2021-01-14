@@ -1,8 +1,8 @@
 import * as yup from 'yup';
 import { toLower, trim } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
-import getTrad from '../../../../utils/getTrad';
-import { createUid } from '../createUid';
+import getTrad from '../../../utils/getTrad';
+import { createUid } from '../utils/createUid';
 
 const createContentTypeSchema = (usedContentTypeNames, reservedNames) => {
   const shape = {

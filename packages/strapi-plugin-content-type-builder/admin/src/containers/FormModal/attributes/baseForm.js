@@ -1,24 +1,9 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from 'react-intl';
-import getTrad from '../../../../utils/getTrad';
+import getTrad from '../../../utils/getTrad';
 import { componentField, componentForm } from '../component';
-import { nameField } from './constants';
+import { nameField } from './nameField';
 import uiHelpers from './uiHelpers';
-
-// const nameField = {
-//   autoFocus: true,
-//   name: 'name',
-//   type: 'text',
-//   label: {
-//     id: getTrad('modalForm.attribute.form.base.name'),
-//   },
-//   description: {
-//     id: getTrad('modalForm.attribute.form.base.name.description'),
-//   },
-//   validations: {
-//     required: true,
-//   },
-// };
 
 const baseForm = {
   component: (data, step) => {

@@ -1,4 +1,4 @@
-import getTrad from '../../../../utils/getTrad';
+import getTrad from '../../../utils/getTrad';
 
 const form = {
   base: {
