@@ -58,14 +58,15 @@ const generateSchema = () => {
 
   const queryFields = shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
 
+  const queryResolvers = removeDisabledResolvers(query, disabledQueryResolvers);
   const queryDef =
-    queryFields.trim().length || query.trim().length
+    queryFields.trim().length || queryResolvers.trim().length
       ? `
-    type Query {
-      ${queryFields}
-      ${removeDisabledResolvers(query, disabledQueryResolvers)}
-    }
-`
+        type Query {
+          ${queryFields}
+          ${queryResolvers}
+        }
+      `
       : '';
 
   // Type Definition: Mutation
@@ -74,12 +75,14 @@ const generateSchema = () => {
   const mutationFields =
     shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
 
+  const mutationResolvers = removeDisabledResolvers(mutation, disabledMutationResolvers);
+
   const mutationDef =
-    mutationFields.trim().length || mutation.trim().length
+    mutationFields.trim().length || mutationResolvers.trim().length
       ? `
       type Mutation {
         ${mutationFields}
-        ${removeDisabledResolvers(mutation, disabledMutationResolvers)}
+        ${mutationResolvers}
       }`
       : '';
 
