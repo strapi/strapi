@@ -5,7 +5,6 @@ const {
   getDisabledResolverMethods,
   hasParameters,
   getMethodName,
-  shouldRemoveFromDefinitions,
   removeDisabledResolvers,
 } = require('../utils');
 
@@ -114,29 +113,6 @@ describe('Utils', () => {
     });
   });
 
-  describe('shouldRemoveFromDefinitions', () => {
-    it('should return false when resolverDef is empty', () => {
-      const resolverDef = '';
-      const disabledResolvers = ['resolverOne', 'resolverTwo', 'resolverThree'];
-      const result = shouldRemoveFromDefinitions(resolverDef, disabledResolvers);
-      expect(result).toEqual(false);
-    });
-
-    it('should return false when resolverDef is in disabledResolvers', () => {
-      const resolverDef = 'resolverOne(param)';
-      const disabledResolvers = ['resolverOne', 'resolverTwo', 'resolverThree'];
-      const result = shouldRemoveFromDefinitions(resolverDef, disabledResolvers);
-      expect(result).toEqual(false);
-    });
-
-    it('should return true when resolverDef is in disabledResolvers', () => {
-      const resolverDef = 'resolverFour:returnType';
-      const disabledResolvers = ['resolverOne', 'resolverTwo', 'resolverThree'];
-      const result = shouldRemoveFromDefinitions(resolverDef, disabledResolvers);
-      expect(result).toEqual(true);
-    });
-  });
-
   describe('removeDisabledResolvers', () => {
     it('should remove the disabled resolvers from the definitions', () => {
       const disabledResolvers = ['resolverOne', 'resolverTwo', 'resolverThree'];
@@ -149,7 +125,16 @@ describe('Utils', () => {
 
       const result = removeDisabledResolvers(definitions, disabledResolvers);
 
-      const definitionsWithoutResolverOne = `foo(bar): baz/ntest: baz/nresolverFour(foo): baz`;
+      //`
+      // foo(bar): baz
+      // test: baz
+      // resolverFour(foo): baz
+      //`
+      const definitionsWithoutResolverOne = [
+        'foo(bar): baz',
+        'test: baz',
+        'resolverFour(foo): baz',
+      ].join('\n');
 
       expect(result).toEqual(definitionsWithoutResolverOne);
     });

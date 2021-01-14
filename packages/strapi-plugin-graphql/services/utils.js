@@ -187,23 +187,21 @@ const getMethodName = methodString => {
   return methodString.match(regex)[0];
 };
 
-const shouldRemoveFromDefinitions = (resolverDef, disabledResolvers) => {
-  if (resolverDef === '') {
-    // ignore empty lines
-    return false;
-  }
-
-  const methodName = getMethodName(resolverDef);
-
-  return !disabledResolvers.includes(methodName);
-};
-
 const removeDisabledResolvers = (mutationOrQueryDef, disabledResolvers) => {
   const sanitizedDefinitions = mutationOrQueryDef
     .split('\n')
     .map(item => item.trim())
-    .filter(resolverDef => shouldRemoveFromDefinitions(resolverDef, disabledResolvers))
-    .join('/n');
+    .filter(resolverDef => {
+      if (resolverDef === '') {
+        // skip empty lines
+        return false;
+      }
+
+      const methodName = getMethodName(resolverDef);
+
+      return !disabledResolvers.includes(methodName);
+    })
+    .join('\n');
 
   return sanitizedDefinitions;
 };
@@ -225,5 +223,4 @@ module.exports = {
   getMethodName,
   getDisabledResolverMethods,
   removeDisabledResolvers,
-  shouldRemoveFromDefinitions,
 };
