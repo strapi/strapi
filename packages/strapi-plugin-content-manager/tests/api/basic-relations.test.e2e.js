@@ -77,10 +77,7 @@ const stampFixtures = [
   },
 ];
 
-
-
-
-const collectorFixtures = ({ stamp }) =>  [
+const collectorFixtures = ({ stamp }) => [
   {
     name: 'Bernard',
     age: 25,
@@ -110,7 +107,6 @@ const collectorFixtures = ({ stamp }) =>  [
   },
 ];
 
-
 const getCollectorByName = (collectors, name) => collectors.find(c => c.name === name);
 const getStampByName = (stamps, name) => stamps.find(s => s.name === name);
 
@@ -121,7 +117,6 @@ describe('CM API', () => {
       .addFixtures(stamp.name, stampFixtures)
       .addFixtures(collector.name, collectorFixtures)
       .build();
-
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
