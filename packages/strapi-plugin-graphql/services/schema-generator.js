@@ -12,7 +12,13 @@ const graphql = require('graphql');
 const PublicationState = require('../types/publication-state');
 const Types = require('./type-builder');
 const { buildModels } = require('./type-definitions');
-const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
+const {
+  mergeSchemas,
+  createDefaultSchema,
+  diffResolvers,
+  getDisabledResolverMethods,
+  removeDisabledResolvers,
+} = require('./utils');
 const { toSDL } = require('./schema-definitions');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 
@@ -47,10 +53,35 @@ const generateSchema = () => {
     return {};
   }
 
+  // Type Definition: Query
+  const disabledQueryResolvers = getDisabledResolverMethods(extraResolvers, 'Query');
+
   const queryFields = shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
+
+  const queryDef =
+    queryFields.trim().length || query.trim().length
+      ? `
+    type Query {
+      ${queryFields}
+      ${removeDisabledResolvers(query, disabledQueryResolvers)}
+    }
+`
+      : '';
+
+  // Type Definition: Mutation
+  const disabledMutationResolvers = getDisabledResolverMethods(extraResolvers, 'Mutation');
 
   const mutationFields =
     shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
+
+  const mutationDef =
+    mutationFields.trim().length || mutation.trim().length
+      ? `
+      type Mutation {
+        ${mutationFields}
+        ${removeDisabledResolvers(mutation, disabledMutationResolvers)}
+      }`
+      : '';
 
   Object.assign(resolvers, PublicationState.resolver);
 
@@ -79,15 +110,9 @@ const generateSchema = () => {
         lastname: String!
       }
 
-      type Query {
-        ${queryFields}
-        ${query}
-      }
+      ${queryDef}
 
-      type Mutation {
-        ${mutationFields}
-        ${mutation}
-      }
+      ${mutationDef}
 
       ${scalarDef}
     `;

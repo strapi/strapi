@@ -169,6 +169,45 @@ const getActionDetails = resolver => {
 
 const isResolvablePath = path => _.isString(path) && !_.isEmpty(path);
 
+const getDisabledResolverMethods = (resolvers, type) => {
+  const queriesOrMutationResolvers = resolvers[type];
+  const disabledResolverMethods = Object.keys(
+    _.pickBy(queriesOrMutationResolvers, resolver => !resolver)
+  );
+  return disabledResolverMethods;
+};
+
+const hasParameters = methodString => {
+  const hasParametersRegex = /\(([^)]+)\)/;
+  return hasParametersRegex.test(methodString);
+};
+
+const getMethodName = methodString => {
+  const regex = hasParameters(methodString) ? /[^(]*/g : /[^:]*/g;
+  return methodString.match(regex)[0];
+};
+
+const shouldRemoveFromDefinitions = (resolverDef, disabledResolvers) => {
+  if (resolverDef === '') {
+    // ignore empty lines
+    return false;
+  }
+
+  const methodName = getMethodName(resolverDef);
+
+  return !disabledResolvers.includes(methodName);
+};
+
+const removeDisabledResolvers = (mutationOrQueryDef, disabledResolvers) => {
+  const sanitizedDefinitions = mutationOrQueryDef
+    .split('\n')
+    .map(item => item.trim())
+    .filter(resolverDef => shouldRemoveFromDefinitions(resolverDef, disabledResolvers))
+    .join('/n');
+
+  return sanitizedDefinitions;
+};
+
 module.exports = {
   diffResolvers,
   mergeSchemas,
@@ -182,4 +221,9 @@ module.exports = {
   getActionDetails,
   getActionFn,
   isResolvablePath,
+  hasParameters,
+  getMethodName,
+  getDisabledResolverMethods,
+  removeDisabledResolvers,
+  shouldRemoveFromDefinitions,
 };
