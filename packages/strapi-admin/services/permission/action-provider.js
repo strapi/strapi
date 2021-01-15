@@ -66,6 +66,13 @@ const createActionProvider = () => {
         return this;
       });
     },
+
+    /**
+     * Clear the actions map
+     */
+    clear() {
+      return actions.clear();
+    },
   };
 };
 

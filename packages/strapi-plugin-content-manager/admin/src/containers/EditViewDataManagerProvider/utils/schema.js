@@ -55,7 +55,7 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
   });
 });
 
-const getAttributes = data => get(data, ['schema', 'attributes'], {});
+const getAttributes = data => get(data, ['attributes'], {});
 
 const createYupSchema = (
   model,
@@ -303,7 +303,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
                   }
 
                   if (type === 'boolean') {
-                    return value !== undefined;
+                    return value !== null;
                   }
 
                   return !isEmpty(value);

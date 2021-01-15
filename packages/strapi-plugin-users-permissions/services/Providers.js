@@ -466,9 +466,7 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     default:
-      callback({
-        message: 'Unknown provider.',
-      });
+      callback(new Error('Unknown provider.'));
       break;
   }
 };

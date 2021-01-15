@@ -4,11 +4,15 @@
  */
 
 const _ = require('lodash');
+const { omit } = require('lodash/fp');
 const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const { singular } = require('pluralize');
 const { handleDatabaseError } = require('./utils/errors');
+
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -84,7 +88,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    * Count entries based on filters
    */
   function count(params = {}) {
-    const filters = convertRestQueryParams(_.omit(params, ['_sort', '_limit', '_start']));
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
     return model
       .query(buildQuery({ model, filters }))
@@ -197,7 +201,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   }
 
   function countSearch(params) {
-    const filters = convertRestQueryParams(_.omit(params, ['_q', '_sort', '_limit', '_start']));
+    const countParams = omit(['_q'], params);
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))
@@ -629,6 +634,45 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
   }
 
+  async function fetchRelationCounters(attribute, entitiesIds = []) {
+    const assoc = model.associations.find(assoc => assoc.alias === attribute);
+    const assocModel = strapi.db.getModelByAssoc(assoc);
+    const knex = strapi.connections[model.connection];
+    const targetAttribute = assocModel.attributes[assoc.via];
+
+    switch (assoc.nature) {
+      case 'oneToMany': {
+        return knex
+          .select()
+          .column({ id: assoc.via, count: knex.raw('count(*)') })
+          .from(assocModel.collectionName)
+          .whereIn(assoc.via, entitiesIds)
+          .groupBy(assoc.via);
+      }
+      case 'manyWay': {
+        const column = `${singular(model.collectionName)}_${model.primaryKey}`;
+        return knex
+          .select()
+          .column({ id: column, count: knex.raw('count(*)') })
+          .from(assoc.tableCollectionName)
+          .whereIn(column, entitiesIds)
+          .groupBy(column);
+      }
+      case 'manyToMany': {
+        const column = `${targetAttribute.attribute}_${targetAttribute.column}`;
+        return knex
+          .select()
+          .column({ id: column, count: knex.raw('count(*)') })
+          .from(assoc.tableCollectionName)
+          .whereIn(column, entitiesIds)
+          .groupBy(column);
+      }
+      default: {
+        return [];
+      }
+    }
+  }
+
   return {
     findOne,
     find,
@@ -638,6 +682,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     count,
     search,
     countSearch,
+    fetchRelationCounters,
   };
 };
 

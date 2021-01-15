@@ -3,7 +3,7 @@ import { Checkbox } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../../../components/BaselineAlignement';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
 import Box from '../Box';

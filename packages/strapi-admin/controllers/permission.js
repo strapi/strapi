@@ -1,7 +1,7 @@
 'use strict';
 
-const { formatActionsBySections, formatConditions } = require('./formatters');
 const { validateCheckPermissionsInput } = require('../validation/permission');
+const { formatActionsBySections, formatConditions } = require('./formatters');
 
 module.exports = {
   /**
