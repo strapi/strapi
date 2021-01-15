@@ -47,6 +47,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return db.transaction(trx => fn(trx));
   };
 
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
+
   /**
    * Find one entry based on params
    */
@@ -95,19 +103,15 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
 
     const runCreate = async trx => {
-      try {
-        // Create entry with no-relational data.
-        const entry = await model.forge(data).save(null, { transacting: trx });
-        const isDraft = contentTypesUtils.isDraft(entry.toJSON(), model);
-        await createComponents(entry, attributes, { transacting: trx, isDraft });
+      // Create entry with no-relational data.
+      const entry = await model.forge(data).save(null, { transacting: trx });
+      const isDraft = contentTypesUtils.isDraft(entry.toJSON(), model);
+      await createComponents(entry, attributes, { transacting: trx, isDraft });
 
-        return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
-      } catch (err) {
-        handleDatabaseError(err);
-      }
+      return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
     };
 
-    return wrapTransaction(runCreate, { transacting });
+    return wrapErrors(wrapTransaction(runCreate, { transacting }));
   }
 
   async function update(params, attributes, { transacting } = {}) {
@@ -124,29 +128,25 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const data = selectAttributes(attributes);
 
     const runUpdate = async trx => {
-      try {
-        const updatedEntry =
-          Object.keys(data).length > 0
-            ? await entry.save(data, {
-                transacting: trx,
-                method: 'update',
-                patch: true,
-              })
-            : entry;
+      const updatedEntry =
+        Object.keys(data).length > 0
+          ? await entry.save(data, {
+              transacting: trx,
+              method: 'update',
+              patch: true,
+            })
+          : entry;
 
-        await updateComponents(updatedEntry, attributes, { transacting: trx });
+      await updateComponents(updatedEntry, attributes, { transacting: trx });
 
-        if (Object.keys(relations).length > 0) {
-          return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
-        }
-      } catch (err) {
-        handleDatabaseError(err);
+      if (Object.keys(relations).length > 0) {
+        return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
       }
 
       return this.findOne(params, null, { transacting: trx });
     };
 
-    return wrapTransaction(runUpdate, { transacting });
+    return wrapErrors(wrapTransaction(runUpdate, { transacting }));
   }
 
   async function deleteOne(id, { transacting } = {}) {

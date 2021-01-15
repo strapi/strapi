@@ -7,7 +7,7 @@ const isDuplicateEntryError = error => {
 const handleDatabaseError = error => {
   if (isDuplicateEntryError(error)) {
     strapi.log.warn('Duplicate entry', error.toString());
-    throw new Error('request.error.entry.duplicate');
+    throw new Error('Duplicate entry');
   }
   throw error;
 };

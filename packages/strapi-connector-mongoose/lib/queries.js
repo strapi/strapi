@@ -54,6 +54,13 @@ module.exports = ({ model, strapi }) => {
     return _.omit(values, excludedKeys);
   };
 
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
   async function createComponents(entry, values, { isDraft }) {
     if (componentKeys.length === 0) return;
 
@@ -432,21 +439,17 @@ module.exports = ({ model, strapi }) => {
         : new Date();
     }
 
-    try {
-      // Create entry with no-relational data.
-      const entry = await model.create(data);
+    // Create entry with no-relational data.
+    const entry = await model.create(data);
 
-      const isDraft = contentTypesUtils.isDraft(entry, model);
-      await createComponents(entry, values, { isDraft });
+    const isDraft = contentTypesUtils.isDraft(entry, model);
+    await createComponents(entry, values, { isDraft });
 
-      // Create relational data and return the entry.
-      return model.updateRelations({
-        [model.primaryKey]: getPK(entry, model),
-        values: relations,
-      });
-    } catch (err) {
-      handleDatabaseError(err);
-    }
+    // Create relational data and return the entry.
+    return model.updateRelations({
+      [model.primaryKey]: getPK(entry, model),
+      values: relations,
+    });
   }
 
   async function update(params, values) {
@@ -458,21 +461,17 @@ module.exports = ({ model, strapi }) => {
       throw err;
     }
 
-    try {
-      // Extract values related to relational data.
-      const relations = pickRelations(values);
-      const data = omitExernalValues(values);
+    // Extract values related to relational data.
+    const relations = pickRelations(values);
+    const data = omitExernalValues(values);
 
-      // update components first in case it fails don't update the entity
-      await updateComponents(entry, values);
-      // Update entry with no-relational data.
-      await entry.updateOne(data);
+    // update components first in case it fails don't update the entity
+    await updateComponents(entry, values);
+    // Update entry with no-relational data.
+    await entry.updateOne(data);
 
-      // Update relational data and return the entry.
-      return model.updateRelations(Object.assign(params, { values: relations }));
-    } catch (err) {
-      handleDatabaseError(err);
-    }
+    // Update relational data and return the entry.
+    return model.updateRelations(Object.assign(params, { values: relations }));
   }
 
   async function deleteMany(params) {
@@ -531,8 +530,8 @@ module.exports = ({ model, strapi }) => {
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,
