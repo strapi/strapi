@@ -204,6 +204,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or disable HSTS.
   - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
   - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
+  - `preload` (boolean): Browsers will never connect to your domain using an insecure connection. [Not official part of the specification.](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#preloading_strict_transport_security) Default value: `true`.
 - [`xframe`](https://en.wikipedia.org/wiki/Clickjacking)
   - `enabled` (boolean): Enable or disable `X-FRAME-OPTIONS` headers in response.
   - `value` (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: `SAMEORIGIN`.
