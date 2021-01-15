@@ -174,10 +174,10 @@
   "relation.attributeName.placeholder": "z.B.: Autor, Kategorie",
   "relation.manyToMany": "hat und gehört zu vielen",
   "relation.manyToOne": "hat viele",
-  "relation.manyWay": "has viele",
-  "relation.oneToMany": "gehört zu viel(-e-/en)",
-  "relation.oneToOne": "hat ein(-e-/en)",
-  "relation.oneWay": "hat ein(-e-/en)",
+  "relation.manyWay": "hat viele",
+  "relation.oneToMany": "gehört zu vielen",
+  "relation.oneToOne": "hat und gehört zu ein(-er/-em)",
+  "relation.oneWay": "hat ein(-e/-en)",
   "table.attributes.title.plural": "{number} Felder",
   "table.attributes.title.singular": "{number} Feld"
 }
