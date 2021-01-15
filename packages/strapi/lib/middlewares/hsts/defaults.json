@@ -2,6 +2,7 @@
   "hsts": {
     "enabled": true,
     "maxAge": 31536000,
-    "includeSubDomains": true
+    "includeSubDomains": true,
+    "preload": true
   }
 }
