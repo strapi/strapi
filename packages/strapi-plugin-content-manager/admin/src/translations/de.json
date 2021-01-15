@@ -87,7 +87,7 @@
   "containers.SettingPage.attributes.description": "Reihenfolge der Attribute festlegen",
   "containers.SettingPage.editSettings.description": "Ziehe die Felder via Drag & Drop, um das Layout zu erstellen",
   "containers.SettingPage.editSettings.entry.title": "Anzeigefeld",
-  "containers.SettingPage.editSettings.entry.title.description": "Wähle das Anzeigefeld dieses Eintrags",
+  "containers.SettingPage.editSettings.entry.title.description": "Anzeigefeld der Einträge wählen",
   "containers.SettingPage.editSettings.relation-field.description": "Setze das dargestellte Feld sowohl in der Bearbeiten-, als auch der Listenansicht",
   "containers.SettingPage.editSettings.title": "Bearbeiten (einstellungen)",
   "containers.SettingPage.layout": "Layout",
