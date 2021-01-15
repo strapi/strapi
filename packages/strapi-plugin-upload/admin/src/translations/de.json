@@ -1,5 +1,5 @@
 {
-  "button.next": "Nächste",
+  "button.next": "Weiter",
   "checkControl.crop-duplicate": "Duplizieren & zuschneiden",
   "checkControl.crop-original": "Orginal zuschneiden",
   "control-card.add": "Hinzufügen",
@@ -36,7 +36,7 @@
   "list.assets.selected.singular": "{number} Datei ausgewählt",
   "list.assets.type-not-allowed": "Dieser Dateityp ist nicht zulässig.",
   "modal.file-details.date": "Datum",
-  "modal.file-details.dimensions": "Dimensionen",
+  "modal.file-details.dimensions": "Abmessungen",
   "modal.file-details.extension": "Dateityp",
   "modal.file-details.size": "Größe",
   "modal.header.browse": "Dateien hochladen",
