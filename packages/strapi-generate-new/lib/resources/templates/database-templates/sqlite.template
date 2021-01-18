@@ -9,9 +9,6 @@ module.exports = ({ env }) => ({
       },
       options: {
         useNullAsDefault: true,
-        pool: {
-          min: 0,
-        },
       },
     },
   },

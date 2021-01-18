@@ -101,6 +101,7 @@ module.exports = strapi => {
           },
           ...connection.options,
           debug: _.get(connection.options, 'debug', false),
+          min: _.get(connection.options.pool, 'min', 0),
         },
         strapi.config.hook.settings.knex,
         defaultConfig
