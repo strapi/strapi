@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, prop, pick } = require('lodash/fp');
+const { has, prop, pick, concat, difference } = require('lodash/fp');
 const { PUBLISHED_AT_ATTRIBUTE } = require('strapi-utils').contentTypes.constants;
 
 const { getService } = require('../utils');
@@ -8,7 +8,7 @@ const { getService } = require('../utils');
 module.exports = {
   async find(ctx) {
     const { model, targetField } = ctx.params;
-    const { _component, ...query } = ctx.request.query;
+    const { _component, _entityId, _deletedRelations, ...query } = ctx.request.query;
 
     if (!targetField) {
       return ctx.badRequest();
@@ -32,6 +32,23 @@ module.exports = {
     }
 
     const entityManager = getService('entity-manager');
+
+    if (_entityId) {
+      const mainEntity = await entityManager.findOne(_entityId, modelDef.uid, [targetField]);
+      if (!mainEntity) {
+        return ctx.notFound('_entityId.notFound');
+      }
+      let existingRelations = Array.isArray(mainEntity[targetField])
+        ? mainEntity[targetField].map(prop('id')).map(String)
+        : [String(mainEntity[targetField].id)];
+
+      if (_deletedRelations) {
+        existingRelations = difference(existingRelations, _deletedRelations.map(String));
+      }
+
+      query._where = query._where || {};
+      query._where.id_nin = concat(query._where.id_nin || [], existingRelations);
+    }
 
     let entities = [];
 
