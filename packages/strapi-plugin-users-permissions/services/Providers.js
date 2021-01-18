@@ -315,23 +315,23 @@ const getProfile = async (provider, query, callback) => {
     }
     case 'instagram': {
       const instagram = purest({
-        config: purestConfig,
         provider: 'instagram',
         key: grant.instagram.key,
         secret: grant.instagram.secret,
+        config: purestConfig,
       });
 
       instagram
         .query()
-        .get('users/self')
-        .qs({ access_token })
+        .get('me')
+        .qs({ access_token, fields: 'id,username' })
         .request((err, res, body) => {
           if (err) {
             callback(err);
           } else {
             callback(null, {
-              username: body.data.username,
-              email: `${body.data.username}@strapi.io`, // dummy email as Instagram does not provide user email
+              username: body.username,
+              email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
             });
           }
         });

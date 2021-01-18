@@ -77,6 +77,7 @@ module.exports = async () => {
       key: '',
       secret: '',
       callback: `${strapi.config.server.url}/auth/instagram/callback`,
+      scope: ['user_profile'],
     },
     vk: {
       enabled: false,
