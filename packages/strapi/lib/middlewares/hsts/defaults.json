@@ -3,6 +3,6 @@
     "enabled": true,
     "maxAge": 31536000,
     "includeSubDomains": true,
-    "preload": true
+    "preload": false
   }
 }
