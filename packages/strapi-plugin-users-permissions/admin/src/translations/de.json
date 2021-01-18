@@ -36,7 +36,7 @@
   "PopUpForm.Email.options.from.email.label": "E-Mail-Adresse des Absenders",
   "PopUpForm.Email.options.from.email.placeholder": "kai@doe.com",
   "PopUpForm.Email.options.from.name.label": "Name des Absenders",
-  "PopUpForm.Email.options.from.name.placeholder": "Max Mustermann",
+  "PopUpForm.Email.options.from.name.placeholder": "Kai Doe",
   "PopUpForm.Email.options.message.label": "Nachricht",
   "PopUpForm.Email.options.object.label": "Betreff",
   "PopUpForm.Email.options.object.placeholder": "Bitte bestätige deine E-Mail-Adresse für %APP_NAME%",
