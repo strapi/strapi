@@ -12,7 +12,11 @@ module.exports = ({ env }) => ({
         password: env('DATABASE_PASSWORD', '<%= settings.password %>'),
         ssl: env.bool('DATABASE_SSL', <%= settings.ssl %>),
       },
-      options: {}
+      options: {
+        pool: {
+          min: 0,
+        },
+      }
     },
   },
 });
