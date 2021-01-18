@@ -39,11 +39,14 @@ module.exports = {
         return ctx.notFound('_entityId.notFound');
       }
       let existingRelations = Array.isArray(mainEntity[targetField])
-        ? mainEntity[targetField].map(prop('id')).map(String)
-        : [String(mainEntity[targetField].id)];
+        ? mainEntity[targetField].map(prop('id'))
+        : [mainEntity[targetField].id];
 
       if (_deletedRelations) {
-        existingRelations = difference(existingRelations, _deletedRelations.map(String));
+        existingRelations = difference(
+          existingRelations.map(String),
+          _deletedRelations.map(String)
+        );
       }
 
       query._where = query._where || {};
