@@ -159,7 +159,7 @@ describe('Relations', () => {
       ]);
     });
 
-    test('Find non-related entities only', async () => {
+    test('Omit somes ids', async () => {
       const result = [
         {
           id: 1,
@@ -181,11 +181,9 @@ describe('Relations', () => {
           },
         },
       };
-      const mainEntity = { target: [{ id: 3 }, { id: 4 }, { id: 5 }] };
       const assocModel = { uid: 'application::test.test', primaryKey: 'id', attributes: {} };
       const notFound = jest.fn();
       const find = jest.fn(() => Promise.resolve(result));
-      const findOne = jest.fn(() => Promise.resolve(mainEntity));
       const findConfiguration = jest.fn(() => Promise.resolve(configuration));
       const getModelByAssoc = jest.fn(() => assocModel);
       const getModel = jest.fn(() => ({ attributes: { target: { model: 'test' } } }));
@@ -199,7 +197,7 @@ describe('Relations', () => {
           'content-manager': {
             services: {
               'content-types': { findConfiguration },
-              'entity-manager': { find, findOne },
+              'entity-manager': { find },
             },
           },
         },
@@ -208,7 +206,7 @@ describe('Relations', () => {
       const ctx = createContext(
         {
           params: { model: 'test', targetField: 'target' },
-          query: { _entityId: 1, _deletedRelations: [3] },
+          body: { idsToOmit: [3, 4] },
         },
         {
           notFound,
@@ -217,6 +215,7 @@ describe('Relations', () => {
 
       await relations.find(ctx);
 
+      expect(find).toHaveBeenCalledWith({ _where: { id_nin: ['3', '4'] } }, assocModel.uid);
       expect(ctx.body).toEqual([
         {
           id: 1,
@@ -227,7 +226,6 @@ describe('Relations', () => {
           title: 'title2',
         },
       ]);
-      expect(find).toHaveBeenCalledWith({ _where: { id_nin: ['4', '5'] } }, assocModel.uid);
     });
   });
 });
