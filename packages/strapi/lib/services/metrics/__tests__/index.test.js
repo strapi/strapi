@@ -1,7 +1,9 @@
-jest.mock('node-fetch');
+'use strict';
 
-const metrics = require('../index');
+jest.mock('node-fetch', () => jest.fn(() => Promise.resolve()));
+
 const fetch = require('node-fetch');
+const metrics = require('../index');
 
 describe('metrics', () => {
   test('Initializes a middleware', () => {
