@@ -97,6 +97,7 @@ Object.keys(plugins).forEach(current => {
   }, {});
 
   // Inject plugins reducers
+  console.log(plugin.reducers);
   const pluginReducers = plugin.reducers || {};
 
   Object.keys(pluginReducers).forEach(reducerName => {

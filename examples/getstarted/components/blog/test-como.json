@@ -1,8 +1,9 @@
 {
   "collectionName": "components_blog_test_comos",
   "info": {
-    "name": "test como",
-    "icon": "ad"
+    "name": "test comp",
+    "icon": "ad",
+    "description": ""
   },
   "options": {},
   "attributes": {
