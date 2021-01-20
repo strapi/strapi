@@ -5,20 +5,14 @@
  *
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
-
+const { filterSchema } = require('@graphql-tools/utils');
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
 const PublicationState = require('../types/publication-state');
 const Types = require('./type-builder');
 const { buildModels } = require('./type-definitions');
-const {
-  mergeSchemas,
-  createDefaultSchema,
-  diffResolvers,
-  getDisabledResolverMethods,
-  removeDisabledResolvers,
-} = require('./utils');
+const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 
@@ -53,38 +47,10 @@ const generateSchema = () => {
     return {};
   }
 
-  // Type Definition: Query
-  const disabledQueryResolvers = getDisabledResolverMethods(extraResolvers, 'Query');
-
   const queryFields = shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
-
-  const queryResolvers = removeDisabledResolvers(query, disabledQueryResolvers);
-  const queryDef =
-    queryFields.trim().length || queryResolvers.trim().length
-      ? `
-        type Query {
-          ${queryFields}
-          ${queryResolvers}
-        }
-      `
-      : '';
-
-  // Type Definition: Mutation
-  const disabledMutationResolvers = getDisabledResolverMethods(extraResolvers, 'Mutation');
 
   const mutationFields =
     shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
-
-  const mutationResolvers = removeDisabledResolvers(mutation, disabledMutationResolvers);
-
-  const mutationDef =
-    mutationFields.trim().length || mutationResolvers.trim().length
-      ? `
-      type Mutation {
-        ${mutationFields}
-        ${mutationResolvers}
-      }`
-      : '';
 
   Object.assign(resolvers, PublicationState.resolver);
 
@@ -101,41 +67,58 @@ const generateSchema = () => {
       ${definition}
       ${shadowCRUD.definition}
       ${polymorphicSchema.definition}
-
       ${Types.addInput()}
       
       ${PublicationState.definition}
-
       type AdminUser {
         id: ID!
         username: String
         firstname: String!
         lastname: String!
       }
-
-      ${queryDef}
-
-      ${mutationDef}
-
+      type Query {
+        ${queryFields}
+        ${query}
+      }
+      type Mutation {
+        ${mutationFields}
+        ${mutation}
+      }
       ${scalarDef}
     `;
 
   // Build schema.
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  });
+
+  const filteredSchema = filterDisabledResolvers(schema, extraResolvers);
+
+  // Prints the schema in the Schema Language format.
+  const generatedSchema = graphql.printSchema(filteredSchema);
+
   if (strapi.config.environment !== 'production') {
     // Write schema.
-    const schema = makeExecutableSchema({
-      typeDefs,
-      resolvers,
-    });
-
-    writeGenerateSchema(graphql.printSchema(schema));
+    writeGenerateSchema(generatedSchema);
   }
 
   return {
-    typeDefs: gql(typeDefs),
+    typeDefs: gql(generatedSchema),
     resolvers,
   };
 };
+
+const filterDisabledResolvers = (schema, extraResolvers) =>
+  filterSchema({
+    schema,
+    rootFieldFilter: (operationName, fieldName) => {
+      if (extraResolvers[operationName][fieldName] === false) {
+        return false;
+      }
+      return true;
+    },
+  });
 
 /**
  * Save into a file the readable GraphQL schema.
