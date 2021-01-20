@@ -6,7 +6,7 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 const { filterSchema } = require('@graphql-tools/utils');
-const { gql, makeExecutableSchema } = require('apollo-server-koa');
+const { makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
 const PublicationState = require('../types/publication-state');
@@ -104,7 +104,7 @@ const generateSchema = () => {
   }
 
   return {
-    typeDefs: gql(generatedSchema),
+    typeDefs: generatedSchema,
     resolvers,
   };
 };
