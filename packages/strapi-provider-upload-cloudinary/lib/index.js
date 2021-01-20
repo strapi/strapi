@@ -19,8 +19,11 @@ module.exports = {
           const config = {
             resource_type: 'auto',
             public_id: file.hash,
-            filename: `${file.hash}${file.ext}`,
           };
+
+          if (file.ext) {
+            config.filename = `${file.hash}${file.ext}`;
+          }
 
           const upload_stream = cloudinary.uploader.upload_stream(
             { ...config, ...customConfig },
