@@ -199,11 +199,8 @@ describe('Upload plugin end to end tests', () => {
   });
 
   test('Upload a single file with info', async () => {
-    const req = rq.post('/graphql');
-    const form = req.form();
-    form.append(
-      'operations',
-      JSON.stringify({
+    const formData = {
+      operations: JSON.stringify({
         query: /* GraphQL */ `
           mutation uploadFilesWithInfo($file: Upload!, $info: FileInfoInput) {
             upload(file: $file, info: $info) {
@@ -221,19 +218,14 @@ describe('Upload plugin end to end tests', () => {
             caption: 'caption test',
           },
         },
-      })
-    );
+      }),
+      map: JSON.stringify({
+        nFile1: ['variables.file'],
+      }),
+      nFile1: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+    };
 
-    form.append(
-      'map',
-      JSON.stringify({
-        0: ['variables.file'],
-      })
-    );
-
-    form.append('0', fs.createReadStream(path.join(__dirname, '/rec.jpg')));
-
-    const res = await req;
+    const res = await rq({ method: 'POST', url: '/graphql', formData });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
