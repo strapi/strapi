@@ -249,6 +249,8 @@ export class Admin extends React.Component {
       updatePlugin,
     } = this.props;
 
+    console.log(plugins);
+
     // We need the admin data in order to make the initializers work
     if (this.showLoader()) {
       return (

@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useReducer, useState, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, size } from 'lodash';
 import {
@@ -8,13 +8,12 @@ import {
   PopUpWarning,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
-import init from './init';
-import reducer, { initialState } from './reducer';
 import createDataObject from './utils/createDataObject';
 import createModifiedDataSchema, {
   orderAllDataAttributesWithImmutable,
@@ -30,8 +29,29 @@ import {
   sortContentType,
 } from './utils/cleanData';
 
+import {
+  ADD_ATTRIBUTE,
+  ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
+  CANCEL_CHANGES,
+  CHANGE_DYNAMIC_ZONE_COMPONENTS,
+  CREATE_SCHEMA,
+  CREATE_COMPONENT_SCHEMA,
+  DELETE_NOT_SAVED_TYPE,
+  EDIT_ATTRIBUTE,
+  GET_DATA_SUCCEEDED,
+  RELOAD_PLUGIN,
+  REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
+  REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
+  REMOVE_FIELD,
+  SET_MODIFIED_DATA,
+  UPDATE_SCHEMA,
+} from './constants';
+import makeSelectDataManagerProvider from './selectors';
+
 const DataManagerProvider = ({ allIcons, children }) => {
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const dataManagerProviderSelector = useMemo(makeSelectDataManagerProvider, []);
+  const dispatch = useDispatch();
+  const reducerState = useSelector(state => dataManagerProviderSelector(state), []);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const {
     autoReload,
@@ -49,7 +69,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     initialData,
     modifiedData,
     reservedNames,
-  } = reducerState.toJS();
+  } = reducerState;
   const { pathname } = useLocation();
   const { push } = useHistory();
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);
@@ -96,7 +116,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       });
 
       dispatch({
-        type: 'GET_DATA_SUCCEEDED',
+        type: GET_DATA_SUCCEEDED,
         components: orderedComponents.get('components'),
         contentTypes: orderedContenTypes.get('components'),
         reservedNames,
@@ -143,7 +163,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     initialAttribute,
     shouldAddComponentToData = false
   ) => {
-    const actionType = isEditing ? 'EDIT_ATTRIBUTE' : 'ADD_ATTRIBUTE';
+    const actionType = isEditing ? EDIT_ATTRIBUTE : ADD_ATTRIBUTE;
 
     dispatch({
       type: actionType,
@@ -157,7 +177,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const addCreatedComponentToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
     dispatch({
-      type: 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE',
+      type: ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
       dynamicZoneTarget,
       componentsToAdd,
     });
@@ -165,7 +185,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const cancelChanges = () => {
     toggleModalCancel();
-    dispatch({ type: 'CANCEL_CHANGES' });
+    dispatch({ type: CANCEL_CHANGES });
   };
 
   const createSchema = (
@@ -175,7 +195,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     componentCategory,
     shouldAddComponentToData = false
   ) => {
-    const type = schemaType === 'contentType' ? 'CREATE_SCHEMA' : 'CREATE_COMPONENT_SCHEMA';
+    const type = schemaType === 'contentType' ? CREATE_SCHEMA : CREATE_COMPONENT_SCHEMA;
 
     dispatch({
       type,
@@ -189,7 +209,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const changeDynamicZoneComponents = (dynamicZoneTarget, newComponents) => {
     dispatch({
-      type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+      type: CHANGE_DYNAMIC_ZONE_COMPONENTS,
       dynamicZoneTarget,
       newComponents,
     });
@@ -197,7 +217,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const removeAttribute = (mainDataKey, attributeToRemoveName, componentUid = '') => {
     const type =
-      mainDataKey === 'components' ? 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT' : 'REMOVE_FIELD';
+      mainDataKey === 'components' ? REMOVE_FIELD_FROM_DISPLAYED_COMPONENT : REMOVE_FIELD;
 
     if (mainDataKey === 'contentType') {
       emitEvent('willDeleteFieldOfContentType');
@@ -231,7 +251,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         await updatePermissions();
 
         // Reload the plugin so the cycle is new again
-        dispatch({ type: 'RELOAD_PLUGIN' });
+        dispatch({ type: RELOAD_PLUGIN });
         // Refetch all the data
         getDataRef.current();
       }
@@ -268,7 +288,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
           // Here we just need to reset the components to the initial ones and also the content types
           // Doing so will trigging a url change since the type doesn't exist in either the contentTypes or the components
           // so the modified and the initial data will also be reset in the useEffect...
-          dispatch({ type: 'DELETE_NOT_SAVED_TYPE' });
+          dispatch({ type: DELETE_NOT_SAVED_TYPE });
 
           return;
         }
@@ -278,7 +298,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         await request(requestURL, { method: 'DELETE' }, true);
 
         // Reload the plugin so the cycle is new again
-        dispatch({ type: 'RELOAD_PLUGIN' });
+        dispatch({ type: RELOAD_PLUGIN });
 
         // Refetch the permissions
         await updatePermissions();
@@ -315,7 +335,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       await updatePermissions();
 
       // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
+      dispatch({ type: RELOAD_PLUGIN });
       // Refetch all the data
       getDataRef.current();
     } catch (err) {
@@ -356,7 +376,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
     dispatch({
-      type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+      type: REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
       dzName,
       componentToRemoveIndex,
     });
@@ -387,7 +407,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       size(get(schemaToSet, 'schema.attributes', {})) === 0;
 
     dispatch({
-      type: 'SET_MODIFIED_DATA',
+      type: SET_MODIFIED_DATA,
       schemaToSet: dataShape,
       hasJustCreatedSchema,
     });
@@ -466,7 +486,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
 
       // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
+      dispatch({ type: RELOAD_PLUGIN });
       // Refetch all the data
       getDataRef.current();
     } catch (err) {
@@ -502,7 +522,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const updateSchema = (data, schemaType, componentUID) => {
     dispatch({
-      type: 'UPDATE_SCHEMA',
+      type: UPDATE_SCHEMA,
       data,
       schemaType,
       uid: componentUID,

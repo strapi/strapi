@@ -10,7 +10,6 @@ import checkStore from './checkStore';
 
 export function injectReducerFactory(store, isValid) {
   return function injectReducer(key, reducer) {
-    // console.log(key, reducer);
     if (!isValid) checkStore(store);
 
     invariant(

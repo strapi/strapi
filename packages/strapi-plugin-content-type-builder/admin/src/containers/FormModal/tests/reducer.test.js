@@ -28,8 +28,6 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
 
-      console.log(expected.toJS());
-
       expect(reducer(state, action)).toEqual(expected);
     });
 
