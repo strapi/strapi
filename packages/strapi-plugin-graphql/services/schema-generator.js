@@ -111,7 +111,10 @@ const filterDisabledResolvers = (schema, extraResolvers) =>
   filterSchema({
     schema,
     rootFieldFilter: (operationName, fieldName) => {
-      if (extraResolvers[operationName][fieldName] === false) {
+      const resolver = _.get(extraResolvers[operationName], fieldName, true);
+
+      // resolvers set to false are filtered from the schema
+      if (resolver === false) {
         return false;
       }
       return true;
