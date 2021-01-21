@@ -231,7 +231,7 @@ describe('Upload plugin end to end tests', () => {
       })
     );
 
-    form.append('0', fs.createReadStream(__dirname + '/rec.jpg'));
+    form.append('0', fs.createReadStream(path.join(__dirname, '/rec.jpg')));
 
     const res = await req;
 
