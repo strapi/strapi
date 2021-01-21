@@ -207,4 +207,56 @@ describe('Upload plugin end to end tests', () => {
       },
     });
   });
+
+  test('Upload a single file with info', async () => {
+    const req = rq.post('/graphql');
+    const form = req.form();
+    form.append(
+      'operations',
+      JSON.stringify({
+        query: /* GraphQL */ `
+          mutation uploadFilesWithInfo($file: Upload!, $info: FileInfoInput) {
+            upload(file: $file, info: $info) {
+              id
+              name
+              alternativeText
+              caption
+            }
+          }
+        `,
+        variables: {
+          file: null,
+          info: {
+            alternativeText: 'alternative text test',
+            caption: 'caption test',
+          },
+        },
+      })
+    );
+
+    form.append(
+      'map',
+      JSON.stringify({
+        0: ['variables.file'],
+      })
+    );
+
+    form.append('0', fs.createReadStream(__dirname + '/rec.jpg'));
+
+    const res = await req;
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      data: {
+        upload: {
+          id: expect.anything(),
+          name: 'rec.jpg',
+          alternativeText: 'alternative text test',
+          caption: 'caption test',
+        },
+      },
+    });
+
+    data.file = res.body.data.upload;
+  });
 });
