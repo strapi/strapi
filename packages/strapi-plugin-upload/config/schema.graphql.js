@@ -88,7 +88,7 @@ const formatFile = async (upload, extraInfo, metas) => {
       type: mimetype,
       size: buffer.length,
     },
-    extraInfo,
+    extraInfo || {},
     metas
   );
 
