@@ -6,7 +6,8 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 const { filterSchema } = require('@graphql-tools/utils');
-const { makeExecutableSchema } = require('apollo-server-koa');
+const { buildFederatedSchema, printSchema } = require('@apollo/federation');
+const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
 const PublicationState = require('../types/publication-state');
@@ -23,6 +24,7 @@ const { buildQuery, buildMutation } = require('./resolvers-builder');
  */
 
 const generateSchema = () => {
+  const isFederated = _.get(strapi.plugins.graphql.config, 'isFederated', false);
   const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
 
   // Generate type definition and query/mutation for models.
@@ -93,21 +95,17 @@ const generateSchema = () => {
     resolvers,
   });
 
-  const filteredSchema = filterDisabledResolvers(schema, extraResolvers);
-
-  // Prints the schema in the Schema Language format.
-  const generatedSchema = graphql.printSchema(filteredSchema);
+  const generatedSchema = filterDisabledResolvers(schema, extraResolvers);
 
   if (strapi.config.environment !== 'production') {
-    // Write schema.
     writeGenerateSchema(generatedSchema);
   }
 
-  return {
-    typeDefs: generatedSchema,
-    resolvers,
-  };
+  return isFederated ? getFederatedSchema(generatedSchema, resolvers) : generatedSchema;
 };
+
+const getFederatedSchema = (schema, resolvers) =>
+  buildFederatedSchema([{ typeDefs: gql(printSchema(schema)), resolvers }]);
 
 const filterDisabledResolvers = (schema, extraResolvers) =>
   filterSchema({
@@ -125,9 +123,9 @@ const filterDisabledResolvers = (schema, extraResolvers) =>
  *
  * @return void
  */
-
 const writeGenerateSchema = schema => {
-  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
+  const printSchema = graphql.printSchema(schema);
+  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', printSchema);
 };
 
 const buildModelsShadowCRUD = () => {
