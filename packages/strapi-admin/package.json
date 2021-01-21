@@ -56,7 +56,7 @@
     "hoist-non-react-statics": "^3.3.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
-    "immer": "^7.0.14",
+    "immer": "^8.0.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.4",
     "is-wsl": "^2.0.0",
