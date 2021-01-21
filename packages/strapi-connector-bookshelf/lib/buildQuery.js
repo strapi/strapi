@@ -329,9 +329,9 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     case 'nin':
       return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
     case 'contains':
-      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [field, `%${value}%`]);
     case 'ncontains':
-      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [field, `%${value}%`]);
     case 'containss':
       return qb.where(field, 'like', `%${value}%`);
     case 'ncontainss':
@@ -343,6 +343,14 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     default:
       throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
   }
+};
+
+const fieldLowerFn = qb => {
+  // Postgres requires string to be passed
+  if (qb.client.config.client === 'pg') {
+    return 'LOWER(CAST(?? AS VARCHAR))';
+  }
+  return 'LOWER(??)';
 };
 
 const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);
