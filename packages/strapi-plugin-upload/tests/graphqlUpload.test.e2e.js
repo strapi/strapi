@@ -238,7 +238,5 @@ describe('Upload plugin end to end tests', () => {
         },
       },
     });
-
-    data.file = res.body.data.upload;
   });
 });
