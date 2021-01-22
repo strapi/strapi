@@ -13,7 +13,7 @@
     "chokidar": "3.3.1",
     "cross-env": "^7.0.3",
     "enzyme": "^3.9.0",
-    "enzyme-adapter-react-16": "^1.12.1",
+    "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^7.18.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-base": "^14.0.0",
