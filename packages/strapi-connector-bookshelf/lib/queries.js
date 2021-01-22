@@ -115,7 +115,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
     };
 
-    return wrapErrors(wrapTransaction(runCreate, { transacting }));
+    return wrapErrors(() => wrapTransaction(runCreate, { transacting }));
   }
 
   async function update(params, attributes, { transacting } = {}) {
@@ -150,7 +150,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return this.findOne(params, null, { transacting: trx });
     };
 
-    return wrapErrors(wrapTransaction(runUpdate, { transacting }));
+    return wrapErrors(() => wrapTransaction(runUpdate, { transacting }));
   }
 
   async function deleteOne(id, { transacting } = {}) {
