@@ -37,7 +37,7 @@
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.8.0",
+    "enzyme-adapter-react-16": "^1.15.6",
     "rimraf": "3.0.2",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
