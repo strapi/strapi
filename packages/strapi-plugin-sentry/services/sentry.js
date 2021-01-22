@@ -28,7 +28,6 @@ const createSentryService = () => {
       try {
         // Don't init Sentry if no DSN was provided
         if (settings.dsn) {
-          console.log('should call mock now');
           Sentry.init({
             dsn: settings.dsn,
             environment: strapi.config.environment,
@@ -37,7 +36,6 @@ const createSentryService = () => {
           instance = Sentry;
           isReady = true;
         } else {
-          console.log('no dsn');
           strapi.log.info('strapi-plugin-sentry is disabled because no Sentry DSN was provided');
         }
       } catch (error) {
