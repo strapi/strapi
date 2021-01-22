@@ -1,11 +1,11 @@
 {
   "name": "strapi-plugin-documentation",
   "version": "3.4.4",
-  "description": "Automatically generates documentation for your api.",
+  "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "strapi": {
     "name": "Documentation",
     "icon": "book",
-    "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI."
+    "description": "documentation.plugin.description"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
