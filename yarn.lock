@@ -3230,6 +3230,11 @@
   resolved "https://registry.yarnpkg.com/@types/http-errors/-/http-errors-1.8.0.tgz#682477dbbbd07cd032731cb3b0e7eaee3d026b69"
   integrity sha512-2aoSC4UUbHDj2uCsCxcG/vRMXey/m17bC7UwitVm5hn22nI8O8Y9iDpA76Orc+DWkQ4zZrOKEshCqR/jSuXAHA==
 
+"@types/immediate@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@types/immediate/-/immediate-3.2.0.tgz#497e830a92aa4990aeba93c66a0f90ee790cb3f6"
+  integrity sha512-CojBxLEgxjdIXgoxSYrxvaydin6MmA94rCHg2AKmC+7FePBXNfFxhZ/1RRkUwyBnCi3YoVyg8PiM5iUQFku5pw==
+
 "@types/invariant@^2.2.31":
   version "2.2.34"
   resolved "https://registry.yarnpkg.com/@types/invariant/-/invariant-2.2.34.tgz#05e4f79f465c2007884374d4795452f995720bbe"
@@ -9743,6 +9748,11 @@ ignore@^5.0.6, ignore@^5.1.1:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.8.tgz#f150a8b50a34289b33e22f5889abd4d8016f0e57"
   integrity sha512-BMpfD7PpiETpBl/A6S498BaIJ6Y/ABT93ETbby2fP00v4EbvPBXWEoaR1UBPKs3iR53pJY7EtZk5KACI57i1Uw==
 
+immediate@^3.2.3:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.3.0.tgz#1aef225517836bcdf7f2a2de2600c79ff0269266"
+  integrity sha512-HR7EVodfFUdQCTIeySw+WDRFJlPcLOJbXfwwZ7Oom6tjsvZ3bOkCDJHehQC3nxJrv7+f9XecwazynjU8e4Vw3Q==
+
 immediate@~3.0.5:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
@@ -14442,6 +14452,15 @@ pluralize@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-8.0.0.tgz#1a6fa16a38d12a1901e0320fa017051c539ce3b1"
   integrity sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==
+
+polygala@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/polygala/-/polygala-4.0.0.tgz#b408d4031c47d2b55b8c9dd0231c4b37ba24a775"
+  integrity sha512-NFCEozpfmK0wAymxrpdje2PP5laLfWJZsOHMwETbdooXc59LhfANZEqFtH5cokiMjd6sCpU0Vt0fnmHaF/Kn9A==
+  dependencies:
+    "@types/immediate" "^3.2.0"
+    immediate "^3.2.3"
+    tslib "^1.9.3"
 
 popper.js@^1.14.4:
   version "1.16.1"
