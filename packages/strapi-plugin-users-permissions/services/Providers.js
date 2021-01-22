@@ -465,6 +465,33 @@ const getProfile = async (provider, query, callback) => {
       }
       break;
     }
+    case 'reddit': {
+      const reddit = purest({
+        provider: 'reddit',
+        config: purestConfig,
+        defaults: {
+          headers: {
+            'user-agent': 'strapi',
+          },
+        },
+      });
+
+      reddit
+        .query('auth')
+        .get('me')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.name,
+              email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
+            });
+          }
+        });
+      break;
+    }
     default:
       callback(new Error('Unknown provider.'));
       break;

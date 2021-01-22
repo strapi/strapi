@@ -112,6 +112,15 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
     },
+    reddit: {
+      enabled: false,
+      icon: 'reddit',
+      key: '',
+      secret: '',
+      state: true,
+      callback: `${strapi.config.server.url}/auth/reddit/callback`,
+      scope: ['identity'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
