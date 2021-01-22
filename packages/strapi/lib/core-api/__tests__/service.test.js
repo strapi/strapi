@@ -175,10 +175,22 @@ describe('getFetchParams', () => {
     ['0 if _limit is 0', { _limit: 0, maxLimit }, 0],
     [`0 if _limit is ''`, { _limit: '', maxLimit }, 0],
     [`1 if _limit is '1'`, { _limit: '1', maxLimit }, 1],
-    [`${maxLimit} if _limit(500) exceeds max allowed limit (${maxLimit})`, { _limit: '500', maxLimit }, maxLimit],
-    [`${maxLimit} if _limit is set to -1 and max allowed limit is set (${maxLimit})`, { _limit: '-1', maxLimit }, maxLimit],
+    [
+      `${maxLimit} if _limit(500) exceeds max allowed limit (${maxLimit})`,
+      { _limit: '500', maxLimit },
+      maxLimit,
+    ],
+    [
+      `${maxLimit} if _limit is set to -1 and max allowed limit is set (${maxLimit})`,
+      { _limit: '-1', maxLimit },
+      maxLimit,
+    ],
     [`${defaultLimit} (default) if no _limit is provided`, { maxLimit }, defaultLimit],
-    [`${defaultLimit} (default) if _limit is undefined`, { _limit: undefined, maxLimit }, defaultLimit],
+    [
+      `${defaultLimit} (default) if _limit is undefined`,
+      { _limit: undefined, maxLimit },
+      defaultLimit,
+    ],
     ['1000 if _limit=1000 and no max allowed limit is set', { _limit: 1000 }, 1000],
   ])('Sets _limit parameter to %s', (description, input, expected) => {
     strapi.config.api.rest.maxLimit = input.maxLimit;
