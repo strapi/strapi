@@ -61,7 +61,7 @@ module.exports = ({ model, strapi }) => {
 
   const wrapErrors = fn => async (...args) => {
     try {
-      return fn(...args);
+      return await fn(...args);
     } catch (error) {
       return handleDatabaseError(error);
     }

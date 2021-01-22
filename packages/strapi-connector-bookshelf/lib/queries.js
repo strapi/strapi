@@ -53,7 +53,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
   const wrapErrors = fn => async (...args) => {
     try {
-      return fn(...args);
+      return await fn(...args);
     } catch (error) {
       return handleDatabaseError(error);
     }
@@ -115,7 +115,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
     };
 
-    return wrapErrors(() => wrapTransaction(runCreate, { transacting }));
+    return wrapTransaction(runCreate, { transacting });
   }
 
   async function update(params, attributes, { transacting } = {}) {
@@ -150,7 +150,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return this.findOne(params, null, { transacting: trx });
     };
 
-    return wrapErrors(() => wrapTransaction(runUpdate, { transacting }));
+    return wrapTransaction(runUpdate, { transacting });
   }
 
   async function deleteOne(id, { transacting } = {}) {
@@ -676,8 +676,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,
