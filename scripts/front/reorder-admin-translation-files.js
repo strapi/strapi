@@ -46,7 +46,9 @@ async function orderTrads({ mainTranslationFile, translationFiles }) {
 }
 
 async function run() {
-  const packageDirs = await glob('packages/*');
+  const packageDirs = await glob('{packages/*,packages/plugins/*}', {
+    ignore: ['packages/plugins'],
+  });
   const pathToTranslationsFolder = ['admin', 'src', 'translations'];
 
   const pluginsWithTranslationFiles = packageDirs

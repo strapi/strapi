@@ -6,14 +6,14 @@ const moduleNameMapper = {
     '<rootDir>/test/config/front/mocks/image.js',
   '^ee_else_ce(/.*)$': [
     '<rootDir>/packages/strapi-admin/admin/src$1',
-    '<rootDir>/packages/strapi-plugin-*/admin/src$1',
+    '<rootDir>/packages/plugins/strapi-plugin-*/admin/src$1',
   ],
 };
 
 if (IS_EE) {
   const rootDirEE = [
     '<rootDir>/packages/strapi-admin/ee/admin$1',
-    '<rootDir>/packages/strapi-plugin-*/ee/admin$1',
+    '<rootDir>/packages/plugins/strapi-plugin-*/ee/admin$1',
   ];
 
   Object.assign(moduleNameMapper, {
@@ -26,13 +26,13 @@ module.exports = {
     'packages/strapi-admin/admin/src/**/**/*.js',
     '!packages/strapi-admin/admin/src/*.js',
     '!packages/strapi-admin/admin/src/utils/*.js',
-    'packages/strapi-plugin-*/admin/src/**/**/*.js',
-    'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    'packages/strapi-plugin-*/admin/src/utils/*.js',
-    '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
-    '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
+    'packages/plugins/strapi-plugin-*/admin/src/**/**/*.js',
+    'packages/plugins/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
+    '!packages/plugins/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
+    '!packages/plugins/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
+    'packages/plugins/strapi-plugin-*/admin/src/utils/*.js',
+    '!packages/plugins/strapi-plugin-*/admin/src/lifecycles/*.js',
+    '!packages/plugins/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
   globals: {
     __webpack_public_path__: 'http://localhost:4000',

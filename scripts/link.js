@@ -7,7 +7,9 @@ const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
 
 async function run() {
-  const packageDirs = await glob('packages/*');
+  const packageDirs = await glob('{packages/*,packages/plugins/*}', {
+    ignore: ['packages/plugins'],
+  });
 
   console.log('Linking all packages');
 
