@@ -34,4 +34,5 @@ module.exports = {
   'strapi-plugin-email': require('../../../plugins/strapi-plugin-email/admin/src').default,
   'strapi-plugin-upload': require('../../../plugins/strapi-plugin-upload/admin/src').default,
   'strapi-plugin-graphql': require('../../../plugins/strapi-plugin-graphql/admin/src').default,
+  'strapi-plugin-i18n': require('../../../plugins/strapi-plugin-i18n/admin/src').default,
 };
