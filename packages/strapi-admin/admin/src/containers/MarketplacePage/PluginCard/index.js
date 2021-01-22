@@ -100,7 +100,7 @@ class PluginCard extends React.Component {
             <div
               onClick={e => {
                 window.open(
-                  `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
+                  `https://github.com/strapi/strapi/tree/master/packages/plugins/strapi-plugin-${this.props.plugin.id}`,
                   '_blank'
                 );
               }}

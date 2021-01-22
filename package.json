@@ -106,6 +106,7 @@
   "name": "strapi-monorepo",
   "workspaces": [
     "packages/*",
+    "packages/plugins/*",
     "examples/*"
   ],
   "husky": {
