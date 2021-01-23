@@ -11,10 +11,20 @@ const removeKeyInObject = (obj, keyToRemove) => {
     }
 
     if (Array.isArray(value)) {
+      if (Array.isArray(acc)) {
+        acc[current] = removeKeyInObject(value, keyToRemove);
+
+        return acc;
+      }
+
       return { ...acc, [current]: value.map(obj => removeKeyInObject(obj, keyToRemove)) };
     }
 
-    if (typeof acc[current] === 'object') {
+    if (typeof value === 'object') {
+      if (value._isAMomentObject === true) {
+        return { ...acc, [current]: value };
+      }
+
       return { ...acc, [current]: removeKeyInObject(value, keyToRemove) };
     }
 

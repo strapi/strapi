@@ -177,88 +177,100 @@ const buildAssocResolvers = model => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
 
-      switch (association.nature) {
+      const { nature, alias } = association;
+
+      switch (nature) {
         case 'oneToManyMorph':
         case 'manyMorphToOne':
         case 'manyMorphToMany':
-        case 'manyToManyMorph':
-        case 'manyWay': {
-          resolver[association.alias] = async obj => {
-            if (obj[association.alias]) {
-              return assignOptions(obj[association.alias], obj);
+        case 'manyToManyMorph': {
+          resolver[alias] = async obj => {
+            if (obj[alias]) {
+              return assignOptions(obj[alias], obj);
             }
 
             const params = {
               ...initQueryOptions(targetModel, obj),
               id: obj[primaryKey],
             };
-            const populate = [association.alias];
 
-            const entry = await strapi.entityService.findOne(
-              { params, populate },
-              { model: model.uid }
-            );
+            const entry = await strapi.query(model.uid).findOne(params, [alias]);
 
-            return assignOptions(entry[association.alias], obj);
+            return assignOptions(entry[alias], obj);
           };
           break;
         }
         default: {
-          resolver[association.alias] = async (obj, options) => {
-            // Construct parameters object to retrieve the correct related entries.
+          resolver[alias] = async (obj, options) => {
+            const loader = strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid];
+
+            const localId = obj[model.primaryKey];
+            const targetPK = targetModel.primaryKey;
+            const foreignId = _.get(obj[alias], targetModel.primaryKey, obj[alias]);
+
             const params = {
-              model: targetModel.uid,
+              ...initQueryOptions(targetModel, obj),
+              ...convertToParams(_.omit(amountLimiting(options), 'where')),
+              ...convertToQuery(options.where),
             };
 
-            let queryOpts = initQueryOptions(targetModel, obj);
+            if (['oneToOne', 'oneWay', 'manyToOne'].includes(nature)) {
+              if (!_.has(obj, alias) || _.isNil(foreignId)) {
+                return null;
+              }
 
-            if (association.type === 'model') {
-              params[targetModel.primaryKey] = _.get(
-                obj,
-                `${association.alias}.${targetModel.primaryKey}`,
-                obj[association.alias]
-              );
-            } else {
-              const queryParams = amountLimiting(options);
-              queryOpts = {
-                ...queryOpts,
-                ...convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip, publicationState)
-                ...convertToQuery(queryParams.where),
+              // check this is an entity and not a mongo ID
+              if (_.has(obj[alias], targetPK)) {
+                return assignOptions(obj[alias], obj);
+              }
+
+              const query = {
+                single: true,
+                filters: {
+                  ...params,
+                  [targetPK]: foreignId,
+                },
               };
 
-              if (
-                ((association.nature === 'manyToMany' && association.dominant) ||
-                  association.nature === 'manyWay') &&
-                _.has(obj, association.alias) // if populated
-              ) {
-                _.set(
-                  queryOpts,
-                  ['query', targetModel.primaryKey],
-                  obj[association.alias]
-                    ? obj[association.alias].map(val => val[targetModel.primaryKey] || val).sort()
-                    : []
-                );
-              } else {
-                _.set(queryOpts, ['query', association.via], obj[targetModel.primaryKey]);
-              }
+              return loader.load(query).then(r => assignOptions(r, obj));
             }
 
-            const results = association.model
-              ? await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
-                  {
-                    params,
-                    options: queryOpts,
-                    single: true,
-                  }
-                )
-              : await strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load(
-                  {
-                    options: queryOpts,
-                    association,
-                  }
-                );
+            if (['oneToMany', 'manyToMany'].includes(nature)) {
+              const { via } = association;
 
-            return assignOptions(results, obj);
+              const filters = {
+                ...params,
+                [`${via}.id`]: localId,
+              };
+
+              return loader.load({ filters }).then(r => assignOptions(r, obj));
+            }
+
+            if (nature === 'manyWay') {
+              let targetIds = [];
+
+              // find the related ids to query them and apply the filters
+              if (Array.isArray(obj[alias])) {
+                targetIds = obj[alias].map(value => value[targetPK] || value);
+              } else {
+                const entry = await strapi
+                  .query(model.uid)
+                  .findOne({ [primaryKey]: obj[primaryKey] }, [alias]);
+
+                if (_.isEmpty(entry[alias])) {
+                  return [];
+                }
+
+                targetIds = entry[alias].map(el => el[targetPK]);
+              }
+
+              const filters = {
+                ...params,
+                [`${targetPK}_in`]: targetIds.map(_.toString),
+              };
+
+              return loader.load({ filters }).then(r => assignOptions(r, obj));
+            }
           };
           break;
         }

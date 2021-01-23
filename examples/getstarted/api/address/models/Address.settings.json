@@ -45,7 +45,8 @@
     },
     "city": {
       "type": "string",
-      "required": true
+      "required": true,
+      "maxLength": 200
     },
     "likes": {
       "collection": "like",

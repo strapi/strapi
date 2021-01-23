@@ -7,7 +7,6 @@
 // Public node modules.
 const _ = require('lodash');
 const { ApolloServer } = require('apollo-server-koa');
-const { buildFederatedSchema } = require('@apollo/federation');
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
 const loadConfigs = require('./load-config');
@@ -76,27 +75,15 @@ module.exports = strapi => {
     },
 
     initialize() {
-      const { typeDefs, resolvers } = strapi.plugins.graphql.services[
-        'schema-generator'
-      ].generateSchema();
+      const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
 
-      if (_.isEmpty(typeDefs)) {
+      if (_.isEmpty(schema)) {
         strapi.log.warn('The GraphQL schema has not been generated because it is empty');
 
         return;
       }
 
       const config = _.get(strapi.plugins.graphql, 'config', {});
-
-      // Get federation config
-      const isFederated = _.get(config, 'federation', false);
-      const schemaDef = {};
-      if (isFederated) {
-        schemaDef.schema = buildFederatedSchema([{ typeDefs, resolvers }]);
-      } else {
-        schemaDef.typeDefs = typeDefs;
-        schemaDef.resolvers = resolvers;
-      }
 
       // TODO: Remove these deprecated options in favor of `apolloServer` in the next major version
       const deprecatedApolloServerConfig = {
@@ -114,7 +101,7 @@ module.exports = strapi => {
       const apolloServerConfig = _.get(config, 'apolloServer', {});
 
       const serverParams = {
-        ...schemaDef,
+        schema,
         uploads: false,
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
@@ -162,6 +149,10 @@ module.exports = strapi => {
         app: strapi.app,
         path: config.endpoint,
       });
+
+      strapi.plugins.graphql.destroy = async () => {
+        await server.stop();
+      };
     },
   };
 };
