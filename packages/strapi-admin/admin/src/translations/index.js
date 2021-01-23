@@ -56,6 +56,7 @@ export const languageNativeNames = {
   ar: 'العربية',
   cs: 'Čeština',
   de: 'Deutsch',
+  dk: 'Dansk',
   en: 'English',
   es: 'Español',
   fr: 'Français',
