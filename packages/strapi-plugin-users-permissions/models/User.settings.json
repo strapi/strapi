@@ -37,6 +37,11 @@
       "configurable": false,
       "private": true
     },
+    "confirmationToken": {
+      "type": "string",
+      "configurable": false,
+      "private": true
+    },
     "confirmed": {
       "type": "boolean",
       "default": false,

@@ -23,7 +23,10 @@ const ProtectedEditPage = () => {
   useEffect(() => {
     if (!isLoading) {
       if (!canRead && !canUpdate) {
-        strapi.notification.info('notification.permission.not-allowed-read');
+        strapi.notification.toggle({
+          type: 'info',
+          message: { id: 'notification.permission.not-allowed-read' },
+        });
       }
     }
   }, [isLoading, canRead, canUpdate]);

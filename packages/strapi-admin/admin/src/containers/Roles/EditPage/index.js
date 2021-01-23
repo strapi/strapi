@@ -1,12 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { get, has, isEmpty } from 'lodash';
-import { useGlobalContext, request, difference } from 'strapi-helper-plugin';
+import { BaselineAlignment, useGlobalContext, request, difference } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
@@ -106,12 +105,18 @@ const EditPage = () => {
       permissionsRef.current.setFormAfterSubmit();
       onSubmitSucceeded({ name: data.name, description: data.description });
 
-      strapi.notification.success('notification.success.saved');
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: 'notification.success.saved' },
+      });
     } catch (err) {
       console.error(err.response);
       const message = get(err, 'response.payload.message', 'An error occured');
 
-      strapi.notification.error(message);
+      strapi.notification.toggle({
+        type: 'warning',
+        message,
+      });
     } finally {
       setIsSubmiting(false);
       strapi.unlockApp();
@@ -148,7 +153,7 @@ const EditPage = () => {
                 actions={headerActions(handleSubmit, handleReset)}
                 isLoading={isLayoutLoading || isRoleLoading}
               />
-              <BaselineAlignement top size="3px" />
+              <BaselineAlignment top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
                 disabled={role.code === 'strapi-super-admin'}

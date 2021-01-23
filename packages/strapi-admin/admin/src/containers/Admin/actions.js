@@ -5,11 +5,20 @@
  */
 
 import {
+  GET_STRAPI_LATEST_RELEASE_SUCCEEDED,
   GET_USER_PERMISSIONS,
   GET_USER_PERMISSIONS_ERROR,
   GET_USER_PERMISSIONS_SUCCEEDED,
   SET_APP_ERROR,
 } from './constants';
+
+export function getStrapiLatestReleaseSucceeded(latestStrapiReleaseTag, shouldUpdateStrapi) {
+  return {
+    type: GET_STRAPI_LATEST_RELEASE_SUCCEEDED,
+    latestStrapiReleaseTag,
+    shouldUpdateStrapi,
+  };
+}
 
 export function getUserPermissions() {
   return {

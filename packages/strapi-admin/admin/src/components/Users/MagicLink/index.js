@@ -14,7 +14,7 @@ import Wrapper from './Wrapper';
 const MagicLink = ({ registrationToken }) => {
   const { formatMessage } = useIntl();
   const handleCopy = () => {
-    strapi.notification.info('notification.link-copied');
+    strapi.notification.toggle({ type: 'info', message: { id: 'notification.link-copied' } });
   };
 
   const link = `${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`;

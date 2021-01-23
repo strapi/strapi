@@ -16,8 +16,17 @@ module.exports = {
     return {
       upload(file, customConfig = {}) {
         return new Promise((resolve, reject) => {
+          const config = {
+            resource_type: 'auto',
+            public_id: file.hash,
+          };
+
+          if (file.ext) {
+            config.filename = `${file.hash}${file.ext}`;
+          }
+
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto', public_id: file.hash, ...customConfig },
+            { ...config, ...customConfig },
             (err, image) => {
               if (err) {
                 if (err.message.includes('File size too large')) {
@@ -57,7 +66,7 @@ module.exports = {
             ...customConfig,
           });
 
-          if (response.result !== 'ok') {
+          if (response.result !== 'ok' && response.result !== 'not found') {
             throw errors.unknownError(`Error deleting on cloudinary: ${response.result}`);
           }
         } catch (error) {

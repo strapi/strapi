@@ -3,8 +3,8 @@ import { get, has, isEmpty, isNil } from 'lodash';
 const getDraftRelations = (data, ctSchema, components) => {
   const getDraftRelationsCount = (data, schema) =>
     Object.keys(data).reduce((acc, current) => {
-      const type = get(schema, ['schema', 'attributes', current, 'type'], 'string');
-      const relationType = get(schema, ['schema', 'attributes', current, 'relationType'], '');
+      const type = get(schema, ['attributes', current, 'type'], 'string');
+      const relationType = get(schema, ['attributes', current, 'relationType'], '');
       const isMorph = relationType.toLowerCase().includes('morph');
       const oneWayTypes = ['oneWay', 'oneToOne', 'manyToOne'];
       const currentData = data[current];
@@ -22,8 +22,8 @@ const getDraftRelations = (data, ctSchema, components) => {
       }
 
       if (type === 'component') {
-        const isRepeatable = get(schema, ['schema', 'attributes', current, 'repeatable'], false);
-        const compoUID = get(schema, ['schema', 'attributes', current, 'component'], '');
+        const isRepeatable = get(schema, ['attributes', current, 'repeatable'], false);
+        const compoUID = get(schema, ['attributes', current, 'component'], '');
         const compoSchema = get(components, compoUID, {});
 
         if (isRepeatable) {

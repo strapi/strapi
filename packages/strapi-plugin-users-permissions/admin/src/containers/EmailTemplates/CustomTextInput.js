@@ -28,7 +28,7 @@ const CustomTextInput = ({
 
   const link = (
     <a
-      href="https://strapi.io/documentation/v3.x/plugins/users-permissions.html#templating-emails"
+      href="https://strapi.io/documentation/developer-docs/latest/plugins/users-permissions.html#templating-emails"
       target="_blank"
       rel="noopener noreferrer"
     >
