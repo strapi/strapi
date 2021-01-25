@@ -10,11 +10,15 @@ import createReducer from './reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}) {
+export default function configureStore(initialState = {}, reducers, strapi) {
   // Create the store with two middlewares
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
   const middlewares = [sagaMiddleware];
+
+  strapi.middlewares.middlewares.forEach(middleware => {
+    middlewares.push(middleware());
+  });
 
   const enhancers = [applyMiddleware(...middlewares)];
 
@@ -33,7 +37,11 @@ export default function configureStore(initialState = {}) {
       : compose;
   /* eslint-enable */
 
-  const store = createStore(createReducer(), fromJS(initialState), composeEnhancers(...enhancers));
+  const store = createStore(
+    createReducer(reducers),
+    fromJS(initialState),
+    composeEnhancers(...enhancers)
+  );
 
   // Extensions
   store.runSaga = sagaMiddleware.run;

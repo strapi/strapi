@@ -36,7 +36,6 @@ import { showNotification } from './containers/NotificationProvider/actions';
 import { showNotification as showNewNotification } from './containers/NewNotification/actions';
 
 import basename from './utils/basename';
-import getInjectors from './utils/reducerInjectors';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 import Strapi from './utils/Strapi';
@@ -52,17 +51,14 @@ import { SETTINGS_BASE_URL } from './config';
 // Import i18n messages
 import { translationMessages, languages } from './i18n';
 
-// Create redux store with history
 import history from './utils/history';
 
 import plugins from './plugins';
 
 const strapi = Strapi();
 
-const initialState = {};
-const store = configureStore(initialState);
-const { dispatch } = store;
-const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
+const pluginsReducers = {};
+const pluginsToLoad = [];
 
 Object.keys(plugins).forEach(current => {
   const registerPlugin = plugin => {
@@ -78,6 +74,7 @@ Object.keys(plugins).forEach(current => {
     registerField: strapi.fieldApi.registerField,
     registerPlugin,
     settingsBaseURL: SETTINGS_BASE_URL || '/settings',
+    middlewares: strapi.middlewares,
   });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
@@ -96,19 +93,29 @@ Object.keys(plugins).forEach(current => {
     return acc;
   }, {});
 
-  // Inject plugins reducers
+  // Retrieve all reducers
   const pluginReducers = plugin.reducers || {};
 
   Object.keys(pluginReducers).forEach(reducerName => {
-    getInjectors(store).injectReducer(reducerName, pluginReducers[reducerName]);
+    pluginsReducers[reducerName] = pluginReducers[reducerName];
   });
 
   try {
     merge(translationMessages, pluginTradsPrefixed);
-    dispatch(pluginLoaded(plugin));
+    pluginsToLoad.push(plugin);
   } catch (err) {
     console.log({ err });
   }
+});
+
+const initialState = {};
+const store = configureStore(initialState, pluginsReducers, strapi);
+const { dispatch } = store;
+
+// Load plugins, this will be removed in the v4, temporary fix until the plugin API
+// https://plugin-api-rfc.vercel.app/plugin-api/admin.html
+pluginsToLoad.forEach(plugin => {
+  dispatch(pluginLoaded(plugin));
 });
 
 // TODO
@@ -192,6 +199,8 @@ window.strapi = Object.assign(window.strapi || {}, {
   injectSaga,
   store,
 });
+
+const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
 
 const render = messages => {
   ReactDOM.render(
