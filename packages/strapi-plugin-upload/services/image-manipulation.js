@@ -70,23 +70,21 @@ const optimize = async buffer => {
 
   const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
 
-  const optimized = await sharpInstance
+  return sharpInstance
     .toBuffer({ resolveWithObject: true })
-    .then(({ data, info }) => ({
-      buffer: data,
-      info: {
-        width: info.width,
-        height: info.height,
-        size: bytesToKbytes(info.size),
-      },
-    }))
+    .then(({ data, info }) => {
+      const output = buffer.length < data.length ? buffer : data;
+
+      return {
+        buffer: output,
+        info: {
+          width: info.width,
+          height: info.height,
+          size: bytesToKbytes(output.length),
+        },
+      };
+    })
     .catch(() => ({ buffer }));
-
-  if (bytesToKbytes(buffer.length) < optimized.info.size) {
-    return { buffer };
-  }
-
-  return optimized;
 };
 
 const BREAKPOINTS = {
