@@ -69,7 +69,8 @@ const optimize = async buffer => {
   }
 
   const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
-  return sharpInstance
+
+  const optimized = await sharpInstance
     .toBuffer({ resolveWithObject: true })
     .then(({ data, info }) => ({
       buffer: data,
@@ -80,6 +81,12 @@ const optimize = async buffer => {
       },
     }))
     .catch(() => ({ buffer }));
+
+  if (bytesToKbytes(buffer.length) < optimized.info.size) {
+    return { buffer };
+  }
+
+  return optimized;
 };
 
 const BREAKPOINTS = {
