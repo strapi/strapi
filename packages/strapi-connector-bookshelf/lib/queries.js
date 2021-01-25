@@ -147,7 +147,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
       }
 
-      return this.findOne(params, null, { transacting: trx });
+      return findOne(params, null, { transacting: trx });
     };
 
     return wrapTransaction(runUpdate, { transacting });
@@ -470,7 +470,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         };
       });
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(({ id, component }) => {
       if (!allIds.find(el => el.id === id && el.component.uid === component.uid)) {
         const err = new Error(
@@ -532,7 +532,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       .fetchAll({ transacting })
       .map(el => el.get('component_id').toString());
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
       if (!allIds.includes(id)) {
         const err = new Error(
