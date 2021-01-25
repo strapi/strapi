@@ -17,6 +17,11 @@ import Option from './Option';
 import { A, BaselineAlignment } from './components';
 import { connect, select, styles } from './utils';
 
+const initialPaginationState = {
+  _contains: '',
+  _limit: 20,
+  _start: 0,
+};
 function SelectWrapper({
   description,
   editable,
@@ -37,11 +42,7 @@ function SelectWrapper({
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
-  const [state, setState] = useState({
-    _contains: '',
-    _limit: 20,
-    _start: 0,
-  });
+  const [state, setState] = useState(initialPaginationState);
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +64,22 @@ function SelectWrapper({
   }, [options, value]);
 
   const { endPoint, containsKey, defaultParams, shouldDisplayRelationLink } = queryInfos;
+
+  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
+    relationType
+  );
+
+  const idsToOmit = useMemo(() => {
+    if (!value) {
+      return [];
+    }
+
+    if (isSingle) {
+      return [value];
+    }
+
+    return value.map(val => val.id);
+  }, [isSingle, value]);
 
   const getData = useCallback(
     async signal => {
@@ -88,7 +105,6 @@ function SelectWrapper({
       }
 
       try {
-        const idsToOmit = value ? value.map(val => val.id) : [];
         const data = await request(endPoint, {
           method: 'POST',
           params,
@@ -124,8 +140,8 @@ function SelectWrapper({
       defaultParams,
       containsKey,
       endPoint,
+      idsToOmit,
       mainField.name,
-      value,
     ]
   );
 
@@ -159,7 +175,7 @@ function SelectWrapper({
   };
 
   const handleMenuClose = () => {
-    setState(prevState => ({ ...prevState, _contains: '' }));
+    setState(initialPaginationState);
     setIsOpen(false);
   };
 
@@ -174,10 +190,6 @@ function SelectWrapper({
   const handleMenuOpen = () => {
     setIsOpen(true);
   };
-
-  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
-    relationType
-  );
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
 
