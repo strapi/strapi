@@ -69,16 +69,21 @@ const optimize = async buffer => {
   }
 
   const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
+
   return sharpInstance
     .toBuffer({ resolveWithObject: true })
-    .then(({ data, info }) => ({
-      buffer: data,
-      info: {
-        width: info.width,
-        height: info.height,
-        size: bytesToKbytes(info.size),
-      },
-    }))
+    .then(({ data, info }) => {
+      const output = buffer.length < data.length ? buffer : data;
+
+      return {
+        buffer: output,
+        info: {
+          width: info.width,
+          height: info.height,
+          size: bytesToKbytes(output.length),
+        },
+      };
+    })
     .catch(() => ({ buffer }));
 };
 
