@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"no tests yet\"",
     "develop": "webpack-dev-server --config webpack.config.dev.js",
-    "develop:ce": "STRAPI_DISABLE_EE=true webpack-dev-server --config webpack.config.dev.js"
+    "develop:ce": "STRAPI_DISABLE_EE=true webpack-dev-server --config webpack.config.dev.js",
+    "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js"
   },
   "main": "index.js",
   "dependencies": {
@@ -125,5 +126,8 @@
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53",
+  "devDependencies": {
+    "webpack-bundle-analyzer": "4.4.0"
+  }
 }
