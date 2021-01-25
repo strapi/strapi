@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   HeaderModal,
   HeaderModalTitle,
@@ -17,6 +17,7 @@ import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
+import { useSelector, useDispatch } from 'react-redux';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
@@ -41,9 +42,21 @@ import {
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
 import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
-import init from './init';
-import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
+import makeSelectFormModal from './selectors';
+import {
+  SET_DATA_TO_EDIT,
+  SET_DYNAMIC_ZONE_DATA_SCHEMA,
+  SET_ATTRIBUTE_DATA_SCHEMA,
+  ADD_COMPONENTS_TO_DYNAMIC_ZONE,
+  ON_CHANGE_ALLOWED_TYPE,
+  SET_ERRORS,
+  ON_CHANGE,
+  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
+  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+  RESET_PROPS_AND_SAVE_CURRENT_DATA,
+  RESET_PROPS,
+} from './constants';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -51,7 +64,9 @@ import CustomButton from './CustomButton';
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const formModalSelector = useMemo(makeSelectFormModal, []);
+  const dispatch = useDispatch();
+  const reducerState = useSelector(state => formModalSelector(state), []);
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
@@ -206,7 +221,7 @@ const FormModal = () => {
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
           data: {
             name: query.get('categoryName'),
           },
@@ -220,7 +235,7 @@ const FormModal = () => {
         actionType === 'create'
       ) {
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
           data: {
             draftAndPublish: true,
           },
@@ -243,7 +258,7 @@ const FormModal = () => {
         );
 
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
           data: {
             name,
             collectionName,
@@ -258,7 +273,7 @@ const FormModal = () => {
         const data = get(allDataSchema, pathToSchema, {});
 
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
           data: {
             name: data.schema.name,
             category: data.category,
@@ -290,7 +305,7 @@ const FormModal = () => {
         };
 
         dispatch({
-          type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
+          type: SET_DYNAMIC_ZONE_DATA_SCHEMA,
           attributeToEdit,
         });
       }
@@ -325,7 +340,7 @@ const FormModal = () => {
         }
 
         dispatch({
-          type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+          type: SET_ATTRIBUTE_DATA_SCHEMA,
           attributeType,
           nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
           targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
@@ -520,7 +535,7 @@ const FormModal = () => {
     target: { name, components, shouldAddComponents },
   }) => {
     dispatch({
-      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      type: ADD_COMPONENTS_TO_DYNAMIC_ZONE,
       name,
       components,
       shouldAddComponents,
@@ -529,7 +544,7 @@ const FormModal = () => {
 
   const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
     dispatch({
-      type: 'ON_CHANGE_ALLOWED_TYPE',
+      type: ON_CHANGE_ALLOWED_TYPE,
       name,
       value,
     });
@@ -604,29 +619,29 @@ const FormModal = () => {
       delete clonedErrors[name];
 
       dispatch({
-        type: 'SET_ERRORS',
+        type: SET_ERRORS,
         errors: clonedErrors,
       });
 
       dispatch({
-        type: 'ON_CHANGE',
+        type: ON_CHANGE,
         keys: name.split('.'),
         value: val,
         ...rest,
       });
     },
-    [formErrors, state.actionType, toggleConfirmModal]
+    [dispatch, formErrors, state.actionType, toggleConfirmModal]
   );
 
   const handleConfirmDisableDraftAndPublish = useCallback(() => {
     dispatch({
-      type: 'ON_CHANGE',
+      type: ON_CHANGE,
       keys: ['draftAndPublish'],
       value: false,
     });
 
     toggleConfirmModal();
-  }, [toggleConfirmModal]);
+  }, [dispatch, toggleConfirmModal]);
 
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
@@ -771,7 +786,7 @@ const FormModal = () => {
           if (isDynamicZoneAttribute) {
             // Step 1 of adding a component to a DZ, the user has the option to create a component
             dispatch({
-              type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
+              type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
 
             push({ search: isCreating ? nextSearch : '' });
@@ -810,7 +825,7 @@ const FormModal = () => {
           // The first step is either needed to create a component or just to navigate
           // To the modal for adding a "common field"
           dispatch({
-            type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+            type: RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
           });
 
           // We don't want all the props to be reset
@@ -878,7 +893,7 @@ const FormModal = () => {
           // Here we clear the reducer state but we also keep the created component
           // If we were to create the component before
           dispatch({
-            type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA',
+            type: RESET_PROPS_AND_SAVE_CURRENT_DATA,
           });
 
           // Terminate because we don't want the reducer to be entirely reset
@@ -909,7 +924,7 @@ const FormModal = () => {
         // Add the field to the schema
         addAttribute(modifiedData, state.forTarget, state.targetUid, false);
 
-        dispatch({ type: 'RESET_PROPS' });
+        dispatch({ type: RESET_PROPS });
 
         // Open modal attribute for adding attr to component
 
@@ -996,13 +1011,13 @@ const FormModal = () => {
       }
 
       dispatch({
-        type: 'RESET_PROPS',
+        type: RESET_PROPS,
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
 
       dispatch({
-        type: 'SET_ERRORS',
+        type: SET_ERRORS,
         errors,
       });
     }
@@ -1014,7 +1029,7 @@ const FormModal = () => {
   const onClosed = () => {
     setState(INITIAL_STATE_DATA);
     dispatch({
-      type: 'RESET_PROPS',
+      type: RESET_PROPS,
     });
   };
   const onOpened = () => {
