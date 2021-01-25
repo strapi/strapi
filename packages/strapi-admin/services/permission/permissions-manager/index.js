@@ -35,10 +35,10 @@ module.exports = ({ ability, action, model }) => ({
   },
 
   queryFrom(query = {}, action) {
-    const caslQuery = this.getQuery(action);
+    const permissionQuery = this.getQuery(action);
     return {
       ...query,
-      _where: query._where ? _.concat(caslQuery, query._where) : [caslQuery],
+      _where: query._where ? _.concat(permissionQuery, query._where) : [permissionQuery],
     };
   },
 

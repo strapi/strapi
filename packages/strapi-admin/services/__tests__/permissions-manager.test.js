@@ -29,6 +29,16 @@ describe('Permissions Manager', () => {
 
       expect(pm.getQuery()).toStrictEqual(expected);
     });
+
+    test('It should throw if no action is defined', () => {
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
+      const pm = createPermissionsManager({
+        ability,
+        model: 'foo',
+      });
+
+      expect(() => pm.getQuery()).toThrowError();
+    });
   });
 
   describe('get isAllowed', () => {
