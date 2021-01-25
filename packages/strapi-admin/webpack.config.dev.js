@@ -27,7 +27,7 @@ module.exports = () => {
 
   const config = webpackConfig(args);
 
-  if (process.env.ANALYZE_BUNDLE) {
+  if (analyzeBundle) {
     config.plugins.push(new BundleAnalyzerPlugin());
   }
 
