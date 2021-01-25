@@ -5,7 +5,8 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the dataManagerProvider state domain
  */
-const dataManagerProviderDomain = () => state => state.get(`${pluginId}_dataManagerProvider`) || initialState;
+const dataManagerProviderDomain = () => state =>
+  state.get(`${pluginId}_dataManagerProvider`) || initialState;
 
 /**
  * Other specific selectors
@@ -17,7 +18,7 @@ const dataManagerProviderDomain = () => state => state.get(`${pluginId}_dataMana
 
 const makeSelectDataManagerProvider = () =>
   createSelector(dataManagerProviderDomain(), substate => {
-    return substate;
+    return substate.toJS();
   });
 
 export default makeSelectDataManagerProvider;

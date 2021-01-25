@@ -109,18 +109,18 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
         metadatas: get(contentTypeConfiguration, ['metadatas', attribute.name, 'edit'], {}),
       };
 
-      // if (fieldSchema.type === 'relation') {
-      //   const queryInfos = ctUid
-      //     ? generateRelationQueryInfosForComponents(
-      //         contentTypeConfiguration,
-      //         attribute.name,
-      //         ctUid,
-      //         models
-      //       )
-      //     : generateRelationQueryInfos(contentTypeConfiguration, attribute.name, models);
+      if (fieldSchema.type === 'relation') {
+        const queryInfos = ctUid
+          ? generateRelationQueryInfosForComponents(
+              contentTypeConfiguration,
+              attribute.name,
+              ctUid,
+              models
+            )
+          : generateRelationQueryInfos(contentTypeConfiguration, attribute.name, models);
 
-      //   set(data, 'queryInfos', queryInfos);
-      // }
+        set(data, 'queryInfos', queryInfos);
+      }
 
       return data;
     });

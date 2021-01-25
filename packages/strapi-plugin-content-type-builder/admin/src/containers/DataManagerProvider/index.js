@@ -8,7 +8,8 @@ import {
   PopUpWarning,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
@@ -48,10 +49,18 @@ import {
 } from './constants';
 import makeSelectDataManagerProvider from './selectors';
 
-const DataManagerProvider = ({ allIcons, children }) => {
-  const dataManagerProviderSelector = useMemo(makeSelectDataManagerProvider, []);
+const DataManagerProvider = ({
+  allIcons,
+  children,
+  components,
+  contentTypes,
+  isLoading,
+  isLoadingForDataToBeSet,
+  initialData,
+  modifiedData,
+  reservedNames,
+}) => {
   const dispatch = useDispatch();
-  const reducerState = useSelector(state => dataManagerProviderSelector(state), []);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const {
     autoReload,
@@ -61,15 +70,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
     formatMessage,
     menu,
   } = useGlobalContext();
-  const {
-    components,
-    contentTypes,
-    isLoading,
-    isLoadingForDataToBeSet,
-    initialData,
-    modifiedData,
-    reservedNames,
-  } = reducerState;
   const { pathname } = useLocation();
   const { push } = useHistory();
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);
@@ -595,9 +595,23 @@ const DataManagerProvider = ({ allIcons, children }) => {
   );
 };
 
+DataManagerProvider.defaultProps = {
+  components: {},
+};
+
 DataManagerProvider.propTypes = {
   allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
+  components: PropTypes.object,
+  contentTypes: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  isLoadingForDataToBeSet: PropTypes.bool.isRequired,
+  initialData: PropTypes.object.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  reservedNames: PropTypes.object.isRequired,
 };
 
-export default memo(DataManagerProvider);
+const mapStateToProps = makeSelectDataManagerProvider();
+const withConnect = connect(mapStateToProps, null);
+
+export default compose(withConnect)(memo(DataManagerProvider));

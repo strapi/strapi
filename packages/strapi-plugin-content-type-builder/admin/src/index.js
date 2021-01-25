@@ -74,16 +74,5 @@ export default strapi => {
     },
   };
 
-  const modalOnChangeMiddleware = () => {
-    return ({ dispatch, getState }) => next => action => {
-      if (action.type === 'ContentTypeBuilder/FormModal/ON_CHANGE') {
-        console.log(action);
-      }
-      return next(action);
-    };
-  };
-
-  strapi.middlewares.add(modalOnChangeMiddleware);
-
   return strapi.registerPlugin(plugin);
 };

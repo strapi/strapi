@@ -6,26 +6,17 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { fromJS } from 'immutable';
 // import { routerMiddleware } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
-import thunkMiddleware from 'redux-thunk';
 import createReducer from './reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}, strapi) {
+export default function configureStore(initialState = {}) {
   // Create the store with two middlewares
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
   const middlewares = [sagaMiddleware];
-  const thunkMiddlewares = [thunkMiddleware.withExtraArgument(initialState)];
 
-  // Add the plugins middlewares
-  console.log('loop')
-  for (let i in strapi.middlewares.middlewares) {
-    console.log(i);
-    // thunkMiddlewares.push(app.middlewares[i]());
-  }
-
-  const enhancers = [applyMiddleware(...middlewares, ...thunkMiddlewares)];
+  const enhancers = [applyMiddleware(...middlewares)];
 
   // If Redux DevTools Extension is installed use it, otherwise use Redux compose
   /* eslint-disable no-underscore-dangle */

@@ -60,10 +60,9 @@ import plugins from './plugins';
 const strapi = Strapi();
 
 const initialState = {};
-const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
-
-const store = configureStore(initialState, strapi);
+const store = configureStore(initialState);
 const { dispatch } = store;
+const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
 
 Object.keys(plugins).forEach(current => {
   const registerPlugin = plugin => {
@@ -79,7 +78,6 @@ Object.keys(plugins).forEach(current => {
     registerField: strapi.fieldApi.registerField,
     registerPlugin,
     settingsBaseURL: SETTINGS_BASE_URL || '/settings',
-    middlewares: strapi.middlewares,
   });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
@@ -107,7 +105,7 @@ Object.keys(plugins).forEach(current => {
 
   try {
     merge(translationMessages, pluginTradsPrefixed);
-    // dispatch(pluginLoaded(plugin));
+    dispatch(pluginLoaded(plugin));
   } catch (err) {
     console.log({ err });
   }

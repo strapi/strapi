@@ -98,7 +98,7 @@ const FormModal = () => {
     initialData,
     isCreatingComponentWhileAddingAField,
     modifiedData,
-  } = reducerState;
+  } = reducerState.toJS();
 
   useEffect(() => {
     if (!isEmpty(search)) {
