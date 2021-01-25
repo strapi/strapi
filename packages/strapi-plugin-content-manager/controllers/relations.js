@@ -34,7 +34,7 @@ module.exports = {
 
     if (idsToOmit && Array.isArray(idsToOmit)) {
       query._where = query._where || {};
-      query._where.id_nin = concat(query._where.id_nin || [], idsToOmit.map(String));
+      query._where.id_nin = concat(query._where.id_nin || [], idsToOmit);
     }
 
     const entityManager = getService('entity-manager');
