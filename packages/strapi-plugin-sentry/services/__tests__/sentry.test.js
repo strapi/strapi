@@ -36,6 +36,9 @@ describe('strapi-plugin-sentry service', () => {
         info: jest.fn(),
       },
     };
+  });
+
+  afterEach(() => {
     // Reset the plugin resource state
     jest.resetModules();
     sentryService = require('../sentry');
