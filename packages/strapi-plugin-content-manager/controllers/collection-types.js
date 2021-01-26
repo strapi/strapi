@@ -26,7 +26,7 @@ module.exports = {
 
     const method = has('_q', query) ? 'searchWithRelationCounts' : 'findWithRelationCounts';
 
-    const permissionQuery = permissionChecker.buildPermissionQuery(query);
+    const permissionQuery = permissionChecker.buildReadQuery(query);
 
     const { results, pagination } = await entityManager[method](permissionQuery, model);
 
@@ -214,7 +214,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildPermissionQuery(query);
+    const permissionQuery = permissionChecker.buildDeleteQuery(query);
 
     const idsWhereClause = { [`id_in`]: ids };
     const params = {
