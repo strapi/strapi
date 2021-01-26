@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { getTrad } from '../../utils';
+import { Flex } from '@buffetjs/core';
 
-import Flex from '../Flex';
+import { getTrad } from '../../utils';
 import IntlText from '../IntlText';
 import ListTitle from '../UploadList/ListTitle';
 import useModalContext from '../../hooks/useModalContext';

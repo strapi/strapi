@@ -36,6 +36,7 @@ const alias = [
   'react-router',
   'react-router-dom',
   'react-transition-group',
+  'react-tooltip',
   'react-virtualized',
   'reactstrap',
   'react-select',
