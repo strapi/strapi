@@ -426,12 +426,15 @@ class Wysiwyg extends React.Component {
 
     newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
 
-    // Update the parent reducer
-    this.sendData(newEditorState);
+    
 
     return this.setState({
       editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
-    });
+    }, () => {
+      this.focus();
+      // Update the parent reducer
+      this.sendData(newEditorState);
+    );
   };
 
   /**
