@@ -34,6 +34,6 @@ module.exports = ({ env }) => ({
 
 ## Links
 
-- [Strapi website](http://strapi.io/)
-- [Strapi community on Slack](http://slack.strapi.io)
+- [Strapi website](https://strapi.io/)
+- [Strapi community on Slack](https://slack.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)

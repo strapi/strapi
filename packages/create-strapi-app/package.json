@@ -3,7 +3,7 @@
   "version": "3.4.5",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "create-strapi-app",
     "create",
@@ -29,7 +29,7 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "repository": {
     "type": "git",
