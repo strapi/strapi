@@ -14,7 +14,7 @@ module.exports = {
     cloudinary.config(config);
 
     return {
-      upload(file, customConfig = config.options || {}) {
+      upload(file, customConfig = {}) {
         return new Promise((resolve, reject) => {
           const config = {
             resource_type: 'auto',
@@ -57,7 +57,7 @@ module.exports = {
           intoStream(file.buffer).pipe(upload_stream);
         });
       },
-      async delete(file, customConfig = config.options || {}) {
+      async delete(file, customConfig = {}) {
         try {
           const { resource_type, public_id } = file.provider_metadata;
           const response = await cloudinary.uploader.destroy(public_id, {
