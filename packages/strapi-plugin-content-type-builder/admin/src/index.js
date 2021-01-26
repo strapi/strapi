@@ -15,11 +15,13 @@ import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
+import reducers from './reducers';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const icon = pluginPkg.strapi.icon;
   const name = pluginPkg.strapi.name;
+
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
@@ -54,6 +56,7 @@ export default strapi => {
     name,
     pluginLogo,
     preventComponentRendering: false,
+    reducers,
     trads,
     menu: {
       pluginsSectionLinks: [

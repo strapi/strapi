@@ -4,6 +4,7 @@ import { snakeCase } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
+import * as actions from './constants';
 
 const initialState = fromJS({
   formErrors: {},
@@ -13,9 +14,9 @@ const initialState = fromJS({
   isCreatingComponentWhileAddingAField: false,
 });
 
-const reducer = (state, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+    case actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE: {
       const { name, components, shouldAddComponents } = action;
 
       return state.updateIn(['modifiedData', name], list => {
@@ -32,7 +33,7 @@ const reducer = (state, action) => {
         return List(makeUnique(updatedList.toJS()));
       });
     }
-    case 'ON_CHANGE':
+    case actions.ON_CHANGE:
       return state.update('modifiedData', obj => {
         const {
           selectedContentTypeFriendlyName,
@@ -137,7 +138,7 @@ const reducer = (state, action) => {
 
         return obj.updateIn(keys, () => value);
       });
-    case 'ON_CHANGE_ALLOWED_TYPE': {
+    case actions.ON_CHANGE_ALLOWED_TYPE: {
       if (action.name === 'all') {
         return state.updateIn(['modifiedData', 'allowedTypes'], () => {
           if (action.value) {
@@ -164,15 +165,15 @@ const reducer = (state, action) => {
         return list.push(action.name);
       });
     }
-    case 'RESET_PROPS':
+    case actions.RESET_PROPS:
       return initialState;
-    case 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO': {
+    case actions.RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO: {
       // This is run when the user doesn't want to create a new component
       return initialState.update('modifiedData', () =>
         fromJS({ type: 'component', repeatable: true })
       );
     }
-    case 'RESET_PROPS_AND_SAVE_CURRENT_DATA': {
+    case actions.RESET_PROPS_AND_SAVE_CURRENT_DATA: {
       // This is run when the user has created a new component
       const componentToCreate = state.getIn(['modifiedData', 'componentToCreate']);
       const modifiedData = fromJS({
@@ -192,7 +193,7 @@ const reducer = (state, action) => {
           state.getIn(['modifiedData', 'createComponent'])
         );
     }
-    case 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ': {
+    case actions.RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ: {
       const createdDZ = state.get('modifiedData');
       const dataToSet = createdDZ
         .set('createComponent', true)
@@ -200,12 +201,12 @@ const reducer = (state, action) => {
 
       return initialState.update('modifiedData', () => dataToSet);
     }
-    case 'SET_DATA_TO_EDIT': {
+    case actions.SET_DATA_TO_EDIT: {
       return state
         .updateIn(['modifiedData'], () => fromJS(action.data))
         .updateIn(['initialData'], () => fromJS(action.data));
     }
-    case 'SET_ATTRIBUTE_DATA_SCHEMA': {
+    case actions.SET_ATTRIBUTE_DATA_SCHEMA: {
       const {
         attributeType,
         isEditing,
@@ -270,13 +271,13 @@ const reducer = (state, action) => {
 
       return state.update('modifiedData', () => fromJS(dataToSet));
     }
-    case 'SET_DYNAMIC_ZONE_DATA_SCHEMA': {
+    case actions.SET_DYNAMIC_ZONE_DATA_SCHEMA: {
       return state
         .update('modifiedData', () => fromJS(action.attributeToEdit))
         .update('initialData', () => fromJS(action.attributeToEdit));
     }
 
-    case 'SET_ERRORS':
+    case actions.SET_ERRORS:
       return state.update('formErrors', () => fromJS(action.errors));
     default:
       return state;

@@ -1,4 +1,4 @@
-import fields from '../forms';
+import fields from '../index';
 
 describe('forms', () => {
   it('should contain private field in relation input type', () => {
