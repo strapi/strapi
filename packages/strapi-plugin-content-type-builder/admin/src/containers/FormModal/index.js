@@ -222,6 +222,8 @@ const FormModal = () => {
       if (modalType === 'editCategory' && actionType === 'edit') {
         dispatch({
           type: SET_DATA_TO_EDIT,
+          modalType,
+          actionType,
           data: {
             name: query.get('categoryName'),
           },
@@ -236,6 +238,8 @@ const FormModal = () => {
       ) {
         dispatch({
           type: SET_DATA_TO_EDIT,
+          modalType,
+          actionType,
           data: {
             draftAndPublish: true,
           },
@@ -259,6 +263,8 @@ const FormModal = () => {
 
         dispatch({
           type: SET_DATA_TO_EDIT,
+          actionType,
+          modalType,
           data: {
             name,
             collectionName,
@@ -274,6 +280,8 @@ const FormModal = () => {
 
         dispatch({
           type: SET_DATA_TO_EDIT,
+          actionType,
+          modalType,
           data: {
             name: data.schema.name,
             category: data.category,
@@ -356,6 +364,8 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
+
+  console.log({ modifiedData });
 
   const headers = createHeadersArray(state);
 
