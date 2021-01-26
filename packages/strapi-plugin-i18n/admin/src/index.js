@@ -1,5 +1,6 @@
 import React from 'react';
 import pluginPkg from '../../package.json';
+import middlewares from './middlewares';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
@@ -9,6 +10,10 @@ import pluginPermissions from './permissions';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+
+  middlewares.forEach(middleware => {
+    strapi.middlewares.add(middleware);
+  });
 
   const plugin = {
     blockerComponent: null,
