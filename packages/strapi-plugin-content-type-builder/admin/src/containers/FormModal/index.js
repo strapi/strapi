@@ -76,6 +76,7 @@ const FormModal = () => {
   } = useStrapi();
   const ctbPlugin = getPlugin(pluginId);
   const types = ctbPlugin.internals.forms.types;
+  const inputsFromPlugins = ctbPlugin.internals.forms.components.inputs;
 
   const query = useQuery();
   const attributeOptionRef = useRef();
@@ -1340,6 +1341,7 @@ const FormModal = () => {
                                     creatableSelect: WrapperSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
+                                    ...inputsFromPlugins,
                                   }}
                                   isCreating={isCreating}
                                   // Props for the componentSelect

@@ -108,8 +108,21 @@ const forms = {
 
         return contentTypeForm.base.edit();
       },
-      advanced() {
-        return contentTypeForm.advanced.default();
+      advanced(data, type, step, actionType, attributes, extensions) {
+        const baseForm = contentTypeForm.advanced.default().items;
+        const customForms = [];
+
+        extensions.contentType.forEach(({ form }) => {
+          if (form.advanced) {
+            const blocksToAdd = form.advanced(data, type, step, actionType, attributes);
+
+            blocksToAdd.forEach(block => {
+              customForms.push(block);
+            });
+          }
+        });
+
+        return { items: [...baseForm, ...customForms] };
       },
     },
   },
