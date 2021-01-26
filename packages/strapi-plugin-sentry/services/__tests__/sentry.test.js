@@ -36,12 +36,12 @@ describe('strapi-plugin-sentry service', () => {
         info: jest.fn(),
       },
     };
+    sentryService = require('../sentry');
   });
 
   afterEach(() => {
     // Reset the plugin resource state
     jest.resetModules();
-    sentryService = require('../sentry');
   });
 
   it('disables Sentry when no DSN is provided', () => {
