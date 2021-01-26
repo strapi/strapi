@@ -17,17 +17,11 @@ export default strapi => {
   });
 
   const plugin = {
-    blockerComponent: null,
-    blockerComponentProps: {},
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
     isReady: true,
-    initializer: () => null,
-    injectedComponents: [],
     isRequired: pluginPkg.strapi.required || false,
-    layout: null,
-    lifecycles: () => {},
     mainComponent: null,
     name: pluginPkg.strapi.name,
     pluginLogo,
@@ -51,20 +45,40 @@ export default strapi => {
     trads,
     boot(app) {
       const ctbPlugin = app.getPlugin('content-type-builder');
+      const ctbForms = ctbPlugin.internals.forms;
 
       if (ctbPlugin) {
-        ctbPlugin.internals.forms.extendFields(['text', 'string'], {
+        ctbForms.components.add({ id: 'localesPicker', component: () => 'locale picker' });
+
+        ctbForms.extendContentType({
           validator: {
-            i18n: yup.string().required(),
+            i18n: yup.bool().required(),
+          },
+          form: {
+            advanced() {
+              return [
+                [{ name: 'i18n', type: 'checkbox', label: { id: 'i18nTest' } }],
+                [
+                  {
+                    name: 'i18n-locales',
+                    type: 'localesPicker',
+                    label: { id: 'Select i18n locales' },
+                  },
+                ],
+              ];
+            },
+          },
+        });
+
+        ctbForms.extendFields(['text', 'string'], {
+          validator: {
+            localize: yup.bool(),
           },
           form: {
             advanced(args) {
               console.log('advanced', args);
 
-              return [[{ name: 'i18n', type: 'text', label: { id: 'i18nTest' } }]];
-            },
-            base(args) {
-              console.log('base', args);
+              return [[{ name: 'localized', type: 'checkbox', label: { id: 'i18nTest' } }]];
             },
           },
         });

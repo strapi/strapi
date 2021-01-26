@@ -6,7 +6,7 @@ const extendCTBInitialDataMiddleware = () => {
       action.actionType === 'create'
     ) {
       // TODO
-      const data = { ...action.data, 'i18n-enabled': false, locales: [] };
+      const data = { ...action.data, i18n: true, locales: [] };
 
       return next({ ...action, data });
     }
