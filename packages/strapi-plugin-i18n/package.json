@@ -8,7 +8,9 @@
     "description": "i18n.plugin.description",
     "required": false
   },
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "4.17.20"
+  },
   "author": {
     "name": "A Strapi developer",
     "email": "",
