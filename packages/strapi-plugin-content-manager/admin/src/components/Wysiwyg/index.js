@@ -434,7 +434,7 @@ class Wysiwyg extends React.Component {
       this.focus();
       // Update the parent reducer
       this.sendData(newEditorState);
-    );
+    });
   };
 
   /**
