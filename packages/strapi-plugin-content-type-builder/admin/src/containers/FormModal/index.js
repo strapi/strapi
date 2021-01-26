@@ -10,6 +10,7 @@ import {
   getYupInnerErrors,
   useGlobalContext,
   useQuery,
+  useStrapi,
   InputsIndex,
 } from 'strapi-helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
@@ -70,6 +71,12 @@ const FormModal = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
+  const {
+    strapi: { getPlugin },
+  } = useStrapi();
+  const ctbPlugin = getPlugin(pluginId);
+  const types = ctbPlugin.internals.forms.types;
+
   const query = useQuery();
   const attributeOptionRef = useRef();
 
@@ -365,8 +372,6 @@ const FormModal = () => {
     items: [],
   }));
 
-  console.log({ modifiedData });
-
   const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
@@ -458,7 +463,8 @@ const FormModal = () => {
         type,
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
-        { modifiedData, initialData }
+        { modifiedData, initialData },
+        types
       );
     } else if (isEditingCategory) {
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
@@ -1025,6 +1031,7 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.log({ err, errors });
 
       dispatch({
         type: SET_ERRORS,
@@ -1199,7 +1206,8 @@ const FormModal = () => {
                       state.attributeType,
                       state.step,
                       state.actionType,
-                      attributes
+                      attributes,
+                      types
                     ).items.map((row, index) => {
                       return (
                         <div className="row" key={index}>

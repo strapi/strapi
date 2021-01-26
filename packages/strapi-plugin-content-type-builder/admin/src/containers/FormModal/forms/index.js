@@ -13,7 +13,8 @@ const forms = {
       attributeType,
       reservedNames,
       alreadyTakenTargetContentTypeAttributes,
-      options
+      options,
+      extensions
     ) {
       const attributes = get(currentSchema, ['schema', 'attributes'], {});
 
@@ -21,22 +22,62 @@ const forms = {
         return attr !== options.initialData.name;
       });
 
+      const validators = [];
+      const attributeFormExtensions = extensions.attribute[attributeType];
+
+      if (attributeFormExtensions) {
+        attributeFormExtensions.forEach(({ validator }) => {
+          if (validator) {
+            validators.push(validator);
+          }
+        });
+      }
+
       try {
-        return attributeTypes[attributeType](
+        let shape = attributeTypes[attributeType](
           usedAttributeNames,
           reservedNames.attributes,
           alreadyTakenTargetContentTypeAttributes,
           options
         );
+
+        validators.forEach(validator => {
+          console.log({ validator });
+          shape = shape.shape(validator);
+        });
+
+        return shape;
       } catch (err) {
+        console.error('form', err);
+
         return attributeTypes.default(usedAttributeNames, reservedNames.attributes);
       }
     },
     form: {
-      advanced(data, type, step) {
+      advanced(data, type, step, actionType, attributes, extensions) {
+        const attributeFormExtensions = extensions.attribute[type];
+
+        let customForms = [];
+
+        if (attributeFormExtensions) {
+          attributeFormExtensions.forEach(({ form }) => {
+            if (form.advanced) {
+              const blocksToAdd = form.advanced(data, type, step, actionType, attributes);
+
+              blocksToAdd.forEach(block => {
+                customForms.push(block);
+              });
+            }
+          });
+        }
+
         try {
-          return attributesForm.advanced[type](data, step);
+          const baseForm = attributesForm.advanced[type](data, step).items;
+
+          return { items: [...baseForm, ...customForms] };
         } catch (err) {
+          console.error(err);
+
           return { items: [] };
         }
       },

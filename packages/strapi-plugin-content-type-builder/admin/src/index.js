@@ -72,6 +72,31 @@ export default strapi => {
         },
       ],
     },
+    // Internal APIs exposed by the CTB for the other plugins to use
+    internals: {
+      forms: {
+        types: {
+          attribute: {
+            test: [],
+          },
+          contentType: {},
+          component: {},
+        },
+        extendFields(fields, extension) {
+          const formType = this.types.attribute;
+
+          fields.forEach(field => {
+            let currentField = formType[field];
+
+            if (currentField) {
+              currentField.push(extension);
+            } else {
+              formType[field] = [extension];
+            }
+          });
+        },
+      },
+    },
   };
 
   return strapi.registerPlugin(plugin);
