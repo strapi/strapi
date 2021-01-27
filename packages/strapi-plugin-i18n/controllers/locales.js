@@ -5,13 +5,18 @@ const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
 const { formatLocale } = require('../domain/locale');
 
+const sanitizeLocale = locale => {
+  const model = strapi.getModel('locale', 'i18n');
+
+  return sanitizeEntity(locale, { model });
+};
+
 const listLocales = async ctx => {
   const localesService = getService('locales');
 
   const locales = await localesService.find();
 
-  const model = strapi.getModel('locale', 'i18n');
-  ctx.body = sanitizeEntity(locales, { model });
+  ctx.body = sanitizeLocale(locales);
 };
 
 const createLocale = async ctx => {
@@ -25,7 +30,6 @@ const createLocale = async ctx => {
   }
 
   const localesService = getService('locales');
-  const model = strapi.getModel('locale', 'i18n');
 
   const existingLocale = await localesService.findByCode(body.code);
   if (existingLocale) {
@@ -37,7 +41,7 @@ const createLocale = async ctx => {
 
   const locale = await localesService.create(localeToCreate);
 
-  ctx.body = sanitizeEntity(locale, { model });
+  ctx.body = sanitizeLocale(locale);
 };
 
 const updateLocale = async ctx => {
@@ -52,7 +56,6 @@ const updateLocale = async ctx => {
   }
 
   const localesService = getService('locales');
-  const model = strapi.getModel('locale', 'i18n');
 
   const existingLocale = await localesService.findById(id);
   if (!existingLocale) {
@@ -64,7 +67,7 @@ const updateLocale = async ctx => {
 
   const updatedLocale = await localesService.update({ id }, updates);
 
-  ctx.body = sanitizeEntity(updatedLocale, { model });
+  ctx.body = sanitizeLocale(updatedLocale);
 };
 
 module.exports = {

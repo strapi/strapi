@@ -1,11 +1,16 @@
 'use strict';
 
+const { omit } = require('lodash/fp');
+
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 const data = {
   locales: [],
 };
+
+const omitTimestamps = omit(['updatedAt', 'createdAt', 'updated_at', 'created_at']);
+const compareLocales = (a, b) => (a.code < b.code ? -1 : 1);
 
 describe('CRUD locales', () => {
   let rq;
@@ -97,11 +102,6 @@ describe('CRUD locales', () => {
       expect(res.body).toMatchObject({ message: 'This locale already exists' });
     });
 
-    // - Faire documentation
-    // - Finir tests
-    // - voir comment stocker la locale par defaut
-    // -
-
     test('Can create a locale even if name already exists', async () => {
       const locale = {
         name: 'French',
@@ -137,7 +137,7 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
-        ...data.locales[0],
+        ...omitTimestamps(data.locales[0]),
         ...localeUpdate,
       });
       data.locales[0] = res.body;
@@ -199,7 +199,7 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveLength(data.locales.length);
-      expect(res.body.sort()).toMatchObject(data.locales.sort());
+      expect(res.body.sort(compareLocales)).toMatchObject(data.locales.sort(compareLocales));
     });
   });
 });
