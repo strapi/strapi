@@ -42,12 +42,12 @@ const createProvider = ({ provider, providerOptions, actionOptions  }) => {
 
     return Object.assign(Object.create(baseProvider), {
       ...providerInstance,
-      upload(file, options = actionOptions.upload) {
+      upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
         return providerInstance.upload(file, options);
-      },
-      delete(file, options = actionOptions.delete) {
+      }),
+      delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
         return providerInstance.delete(file, options);
-      },
+      }),
     });
   } catch (err) {
     strapi.log.error(err);
