@@ -2,7 +2,7 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@swc-node/jest": "^1.0.3",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
@@ -13,15 +13,15 @@
     "chokidar": "3.3.1",
     "cross-env": "^7.0.3",
     "enzyme": "^3.9.0",
-    "enzyme-adapter-react-16": "^1.12.1",
-    "eslint": "^7.17.0",
+    "enzyme-adapter-react-16": "^1.15.6",
+    "eslint": "^7.18.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-redux-saga": "^1.2.1",
     "execa": "^1.0.0",
@@ -82,13 +82,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi Solutions",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi Solutions",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

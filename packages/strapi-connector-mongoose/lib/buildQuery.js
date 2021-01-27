@@ -92,14 +92,15 @@ const buildQuery = ({
   searchParam,
   populate = [],
   aggregate = false,
+  session = null,
 } = {}) => {
   const search = buildSearchOr(model, searchParam);
 
   if (!hasDeepFilters(filters) && aggregate === false) {
-    return buildSimpleQuery({ model, filters, search, populate });
+    return buildSimpleQuery({ model, filters, search, populate }, { session });
   }
 
-  return buildDeepQuery({ model, filters, populate, search });
+  return buildDeepQuery({ model, filters, populate, search }, { session });
 };
 
 /**
@@ -110,7 +111,7 @@ const buildQuery = ({
  * @param {Object} options.search - An object with the possible search params
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildSimpleQuery = ({ model, filters, search, populate }) => {
+const buildSimpleQuery = ({ model, filters, search, populate }, { session }) => {
   const { where = [] } = filters;
 
   const wheres = where.map(buildWhereClause);
@@ -119,6 +120,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
 
   let query = model
     .find(findCriteria, null, { publicationState: filters.publicationState })
+    .session(session)
     .populate(populate);
 
   query = applyQueryParams({ model, query, filters });
@@ -138,7 +140,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
  * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildDeepQuery = ({ model, filters, search, populate }) => {
+const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
   // Build a tree of paths to populate based on the filtering and the populate option
   const { populatePaths, wherePaths } = computePopulatedPaths({
     model,
@@ -153,6 +155,7 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
   // Init the query
   let query = model
     .aggregate(buildQueryAggregate(model, filters, aggregateOptions))
+    .session(session)
     .append(buildQueryMatches(model, filters, search))
     .append(buildQuerySort(model, filters))
     .append(buildQueryPagination(model, filters));
@@ -170,7 +173,10 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
 
           const idsMap = ids.reduce((acc, id, idx) => assoc(id, idx, acc), {});
 
-          const mongooseQuery = model.find({ _id: { $in: ids } }, null).populate(populate);
+          const mongooseQuery = model
+            .find({ _id: { $in: ids } }, null)
+            .session(session)
+            .populate(populate);
           const query = applyQueryParams({
             model,
             query: mongooseQuery,

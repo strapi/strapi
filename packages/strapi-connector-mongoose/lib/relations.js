@@ -26,7 +26,7 @@ const transformToArrayID = (array, pk) => {
 
 const removeUndefinedKeys = (obj = {}) => _.pickBy(obj, _.negate(_.isUndefined));
 
-const addRelationMorph = async (model, params) => {
+const addRelationMorph = async (model, params, { session = null } = {}) => {
   const { id, alias, refId, ref, field, filter } = params;
 
   await model.updateMany(
@@ -41,11 +41,12 @@ const addRelationMorph = async (model, params) => {
           [filter]: field,
         },
       },
-    }
+    },
+    { session }
   );
 };
 
-const removeRelationMorph = async (model, params) => {
+const removeRelationMorph = async (model, params, { session = null } = {}) => {
   const { alias } = params;
 
   let opts;
@@ -66,24 +67,29 @@ const removeRelationMorph = async (model, params) => {
     };
   }
 
-  await model.updateMany(opts, {
-    $pull: {
-      [alias]: {
-        ref: params.refId,
-        kind: params.ref,
-        [params.filter]: params.field,
+  await model.updateMany(
+    opts,
+    {
+      $pull: {
+        [alias]: {
+          ref: params.refId,
+          kind: params.ref,
+          [params.filter]: params.field,
+        },
       },
     },
-  });
+    { session }
+  );
 };
 
 module.exports = {
-  async update(params) {
+  async update(params, { session = null } = {}) {
     const relationUpdates = [];
     const populate = this.associations.map(x => x.alias);
     const primaryKeyValue = getValuePrimaryKey(params, this.primaryKey);
 
     const entry = await this.findOne({ [this.primaryKey]: primaryKeyValue })
+      .session(session)
       .populate(populate)
       .lean();
 
@@ -117,7 +123,8 @@ module.exports = {
               {
                 [assocModel.primaryKey]: getValuePrimaryKey(currentValue, assocModel.primaryKey),
               },
-              { [details.via]: null }
+              { [details.via]: null },
+              { session }
             );
 
             relationUpdates.push(updatePromise);
@@ -127,13 +134,15 @@ module.exports = {
           // set old relations to null
           const updateLink = this.updateOne(
             { [attribute]: new mongoose.Types.ObjectId(newValue) },
-            { [attribute]: null }
+            { [attribute]: null },
+            { session }
           ).then(() => {
             return assocModel.updateOne(
               {
                 [this.primaryKey]: new mongoose.Types.ObjectId(newValue),
               },
-              { [details.via]: primaryKeyValue }
+              { [details.via]: primaryKeyValue },
+              { session }
             );
           });
 
@@ -157,7 +166,8 @@ module.exports = {
                   ),
                 },
               },
-              { [details.via]: null }
+              { [details.via]: null },
+              { session }
             )
             .then(() => {
               return assocModel.updateMany(
@@ -168,7 +178,8 @@ module.exports = {
                     ),
                   },
                 },
-                { [details.via]: primaryKeyValue }
+                { [details.via]: primaryKeyValue },
+                { session }
               );
             });
 
@@ -201,7 +212,8 @@ module.exports = {
                 $pull: {
                   [association.via]: new mongoose.Types.ObjectId(primaryKeyValue),
                 },
-              }
+              },
+              { session }
             )
             .then(() => {
               return assocModel.updateMany(
@@ -216,7 +228,8 @@ module.exports = {
                 },
                 {
                   $addToSet: { [association.via]: [primaryKeyValue] },
-                }
+                },
+                { session }
               );
             });
 
@@ -230,27 +243,35 @@ module.exports = {
             const refModel = strapi.db.getModel(obj.ref, obj.source);
 
             const createRelation = () => {
-              return addRelationMorph(this, {
-                id: entry[this.primaryKey],
-                alias: association.alias,
-                ref: obj.kind || refModel.globalId,
-                refId: new mongoose.Types.ObjectId(obj.refId),
-                field: obj.field,
-                filter: association.filter,
-              });
+              return addRelationMorph(
+                this,
+                {
+                  id: entry[this.primaryKey],
+                  alias: association.alias,
+                  ref: obj.kind || refModel.globalId,
+                  refId: new mongoose.Types.ObjectId(obj.refId),
+                  field: obj.field,
+                  filter: association.filter,
+                },
+                { session }
+              );
             };
 
             // Clear relations to refModel
             const reverseAssoc = refModel.associations.find(assoc => assoc.alias === obj.field);
             if (reverseAssoc && reverseAssoc.nature === 'oneToManyMorph') {
               relationUpdates.push(
-                removeRelationMorph(this, {
-                  alias: association.alias,
-                  ref: obj.kind || refModel.globalId,
-                  refId: new mongoose.Types.ObjectId(obj.refId),
-                  field: obj.field,
-                  filter: association.filter,
-                })
+                removeRelationMorph(
+                  this,
+                  {
+                    alias: association.alias,
+                    ref: obj.kind || refModel.globalId,
+                    refId: new mongoose.Types.ObjectId(obj.refId),
+                    field: obj.field,
+                    filter: association.filter,
+                  },
+                  { session }
+                )
                   .then(createRelation)
                   .then(() => {
                     // set field inside refModel
@@ -260,7 +281,8 @@ module.exports = {
                       },
                       {
                         [obj.field]: new mongoose.Types.ObjectId(entry[this.primaryKey]),
-                      }
+                      },
+                      { session }
                     );
                   })
               );
@@ -274,7 +296,8 @@ module.exports = {
                     },
                     {
                       $push: { [obj.field]: new mongoose.Types.ObjectId(entry[this.primaryKey]) },
-                    }
+                    },
+                    { session }
                   );
                 })
               );
@@ -302,14 +325,18 @@ module.exports = {
 
           const addPromise = Promise.all(
             toAdd.map(id => {
-              return addRelationMorph(model, {
-                id,
-                alias: association.via,
-                ref: this.globalId,
-                refId: entry._id,
-                field: association.alias,
-                filter: association.filter,
-              });
+              return addRelationMorph(
+                model,
+                {
+                  id,
+                  alias: association.via,
+                  ref: this.globalId,
+                  refId: entry._id,
+                  field: association.alias,
+                  filter: association.filter,
+                },
+                { session }
+              );
             })
           );
 
@@ -317,14 +344,18 @@ module.exports = {
 
           toRemove.forEach(id => {
             relationUpdates.push(
-              removeRelationMorph(model, {
-                id,
-                alias: association.via,
-                ref: this.globalId,
-                refId: entry._id,
-                field: association.alias,
-                filter: association.filter,
-              })
+              removeRelationMorph(
+                model,
+                {
+                  id,
+                  alias: association.via,
+                  ref: this.globalId,
+                  refId: entry._id,
+                  field: association.alias,
+                  filter: association.filter,
+                },
+                { session }
+              )
             );
           });
           break;
@@ -342,17 +373,20 @@ module.exports = {
     await Promise.all(relationUpdates).then(() =>
       this.updateOne({ [this.primaryKey]: primaryKeyValue }, values, {
         strict: false,
+        session,
       })
     );
 
     const updatedEntity = await this.findOne({
       [this.primaryKey]: primaryKeyValue,
-    }).populate(populate);
+    })
+      .session(session)
+      .populate(populate);
 
     return updatedEntity && updatedEntity.toObject ? updatedEntity.toObject() : updatedEntity;
   },
 
-  deleteRelations(entry) {
+  deleteRelations(entry, { session = null } = {}) {
     const primaryKeyValue = entry[this.primaryKey];
 
     return Promise.all(
@@ -377,7 +411,7 @@ module.exports = {
               association.plugin
             );
 
-            return targetModel.updateMany({ [via]: primaryKeyValue }, { [via]: null });
+            return targetModel.updateMany({ [via]: primaryKeyValue }, { [via]: null }, { session });
           }
           case 'manyToMany':
           case 'manyToOne': {
@@ -392,7 +426,8 @@ module.exports = {
 
             return targetModel.updateMany(
               { [via]: primaryKeyValue },
-              { $pull: { [via]: primaryKeyValue } }
+              { $pull: { [via]: primaryKeyValue } },
+              { session }
             );
           }
           case 'oneToManyMorph':
@@ -415,7 +450,8 @@ module.exports = {
 
             return targetModel.updateMany(
               { [via]: { $elemMatch: element } },
-              { $pull: { [via]: element } }
+              { $pull: { [via]: element } },
+              { session }
             );
           }
           case 'manyMorphToMany':
@@ -443,7 +479,8 @@ module.exports = {
                       },
                       {
                         [field]: null,
-                      }
+                      },
+                      { session }
                     );
                   }
 
@@ -453,7 +490,8 @@ module.exports = {
                     },
                     {
                       $pull: { [field]: primaryKeyValue },
-                    }
+                    },
+                    { session }
                   );
                 })
               );

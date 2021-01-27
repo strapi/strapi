@@ -14,10 +14,6 @@ module.exports = ({ ability, action, model }) => ({
   action,
   model,
 
-  get query() {
-    return buildStrapiQuery(buildCaslQuery(ability, action, model));
-  },
-
   get isAllowed() {
     return this.ability.can(action, model);
   },
@@ -30,10 +26,19 @@ module.exports = ({ ability, action, model }) => ({
     return this.sanitize(data, { ...options, isOutput: false });
   },
 
-  queryFrom(query) {
+  getQuery(queryAction = action) {
+    if (_.isUndefined(queryAction)) {
+      throw new Error('Action must be defined to build a permission query');
+    }
+
+    return buildStrapiQuery(buildCaslQuery(ability, queryAction, model));
+  },
+
+  queryFrom(query = {}, action) {
+    const permissionQuery = this.getQuery(action);
     return {
       ...query,
-      _where: query._where ? _.concat(this.query, query._where) : [this.query],
+      _where: query._where ? _.concat(permissionQuery, query._where) : [permissionQuery],
     };
   },
 

@@ -12,6 +12,11 @@ const sqlClientModule = {
 module.exports = ({ scope, client }) => {
   switch (client) {
     case 'sqlite':
+      return {
+        'strapi-connector-bookshelf': scope.strapiVersion,
+        knex: '<0.20.0',
+        [sqlClientModule[client]]: '5.0.0',
+      };
     case 'postgres':
     case 'mysql':
       return {
