@@ -1,38 +1,22 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect } from 'react';
+import { useQuery } from 'react-query';
 import { request } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-import init from './init';
-import reducer, { initialState } from './reducer';
+
+const fetchRoles = async () => {
+  const { data } = await request('/admin/roles', { method: 'GET' });
+
+  return data;
+};
 
 const useRolesList = (shouldFetchData = true) => {
-  const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, shouldFetchData)
-  );
+  const { data, isLoading, error, isError, refetch } = useQuery('roleList', fetchRoles, {
+    enabled: shouldFetchData,
+  });
 
   useEffect(() => {
-    if (shouldFetchData) {
-      fetchRolesList();
-    }
-  }, [shouldFetchData]);
-
-  const fetchRolesList = async () => {
-    try {
-      dispatch({
-        type: 'GET_DATA',
-      });
-
-      const { data } = await request('/admin/roles', { method: 'GET' });
-
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-      });
-    } catch (err) {
-      const message = get(err, ['response', 'payload', 'message'], 'An error occured');
-
-      dispatch({
-        type: 'GET_DATA_ERROR',
-      });
+    if (error) {
+      const message = get(error, ['response', 'payload', 'message'], 'An error occured');
 
       if (message !== 'Forbidden') {
         strapi.notification.toggle({
@@ -41,9 +25,13 @@ const useRolesList = (shouldFetchData = true) => {
         });
       }
     }
-  };
+  }, [error]);
 
-  return { roles, isLoading, getData: fetchRolesList };
+  // In this scenario, event if enabled is false, we can call the refetch
+  // and it will act as a "lazy query" call
+  const lazyFetch = refetch;
+
+  return { roles: data || [], isLoading, getData: lazyFetch, error, isError };
 };
 
 export default useRolesList;
