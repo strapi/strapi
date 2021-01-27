@@ -5,13 +5,13 @@ class Plugin {
 
   injectedComponents = {};
 
-  internals = {};
+  apis = {};
 
   constructor(pluginConf) {
     this.pluginId = pluginConf.id;
     this.decorators = pluginConf.decorators || {};
     this.injectedComponents = pluginConf.injectedComponents || {};
-    this.internals = pluginConf.internals || {};
+    this.apis = pluginConf.apis || {};
   }
 
   decorate(compoName, compo) {

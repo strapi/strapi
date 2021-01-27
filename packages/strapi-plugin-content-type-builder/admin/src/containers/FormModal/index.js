@@ -75,8 +75,8 @@ const FormModal = () => {
     strapi: { getPlugin },
   } = useStrapi();
   const ctbPlugin = getPlugin(pluginId);
-  const types = ctbPlugin.internals.forms.types;
-  const inputsFromPlugins = ctbPlugin.internals.forms.components.inputs;
+  const ctbFormsAPI = ctbPlugin.apis.forms;
+  const inputsFromPlugins = ctbFormsAPI.components.inputs;
 
   const query = useQuery();
   const attributeOptionRef = useRef();
@@ -404,7 +404,8 @@ const FormModal = () => {
         state.actionType === 'edit',
         // currentUID
         get(allDataSchema, [...state.pathToSchema, 'uid'], null),
-        reservedNames
+        reservedNames,
+        ctbFormsAPI
       );
 
       // Check form validity for component
@@ -415,7 +416,8 @@ const FormModal = () => {
         modifiedData.category || '',
         reservedNames,
         state.actionType === 'edit',
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null)
+        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
+        ctbFormsAPI
       );
 
       // Check for validity for creating a component
@@ -426,7 +428,8 @@ const FormModal = () => {
       schema = forms.component.schema(
         Object.keys(components),
         get(modifiedData, 'componentToCreate.category', ''),
-        reservedNames
+        reservedNames,
+        ctbFormsAPI
       );
 
       // Check form validity for creating a 'common attribute'
@@ -465,10 +468,10 @@ const FormModal = () => {
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
         { modifiedData, initialData },
-        types
+        ctbFormsAPI
       );
     } else if (isEditingCategory) {
-      schema = forms.editCategory.schema(allComponentsCategories, initialData);
+      schema = forms.editCategory.schema(allComponentsCategories, initialData, ctbFormsAPI);
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
@@ -478,7 +481,8 @@ const FormModal = () => {
         schema = forms.component.schema(
           Object.keys(components),
           get(modifiedData, 'componentToCreate.category', ''),
-          reservedNames
+          reservedNames,
+          ctbFormsAPI
         );
       } else {
         // The form is valid
@@ -1208,7 +1212,7 @@ const FormModal = () => {
                       state.step,
                       state.actionType,
                       attributes,
-                      types
+                      ctbFormsAPI
                     ).items.map((row, index) => {
                       return (
                         <div className="row" key={index}>

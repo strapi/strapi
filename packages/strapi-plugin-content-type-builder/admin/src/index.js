@@ -16,6 +16,7 @@ import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import reducers from './reducers';
+import formsAPI from './utils/formAPI';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -73,41 +74,8 @@ export default strapi => {
       ],
     },
     // Internal APIs exposed by the CTB for the other plugins to use
-    internals: {
-      forms: {
-        components: {
-          inputs: {},
-          add({ id, component }) {
-            if (!this.inputs[id]) {
-              this.inputs[id] = component;
-            }
-          },
-        },
-
-        types: {
-          attribute: {
-            test: [],
-          },
-          contentType: [],
-          component: [],
-        },
-        extendContentType(extension) {
-          this.types.contentType.push(extension);
-        },
-        extendFields(fields, extension) {
-          const formType = this.types.attribute;
-
-          fields.forEach(field => {
-            let currentField = formType[field];
-
-            if (currentField) {
-              currentField.push(extension);
-            } else {
-              formType[field] = [extension];
-            }
-          });
-        },
-      },
+    apis: {
+      forms: formsAPI,
     },
   };
 

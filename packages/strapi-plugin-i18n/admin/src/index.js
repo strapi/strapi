@@ -45,15 +45,15 @@ export default strapi => {
     trads,
     boot(app) {
       const ctbPlugin = app.getPlugin('content-type-builder');
-      const ctbForms = ctbPlugin.internals.forms;
 
       if (ctbPlugin) {
-        ctbForms.components.add({ id: 'localesPicker', component: () => 'locale picker' });
+        const ctbFormsAPI = ctbPlugin.apis.forms;
+        ctbFormsAPI.components.add({ id: 'localesPicker', component: () => 'locale picker' });
 
-        ctbForms.extendContentType({
-          validator: {
-            i18n: yup.bool().required(),
-          },
+        ctbFormsAPI.extendContentType({
+          validator: () => ({
+            i18n: yup.bool(),
+          }),
           form: {
             advanced() {
               return [
@@ -70,10 +70,10 @@ export default strapi => {
           },
         });
 
-        ctbForms.extendFields(['text', 'string'], {
-          validator: {
+        ctbFormsAPI.extendFields(['text', 'string'], {
+          validator: () => ({
             localize: yup.bool(),
-          },
+          }),
           form: {
             advanced(args) {
               console.log('advanced', args);

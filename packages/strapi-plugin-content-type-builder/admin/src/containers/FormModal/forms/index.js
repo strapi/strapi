@@ -22,59 +22,34 @@ const forms = {
         return attr !== options.initialData.name;
       });
 
-      const validators = [];
-      const attributeFormExtensions = extensions.attribute[attributeType];
-
-      if (attributeFormExtensions) {
-        attributeFormExtensions.forEach(({ validator }) => {
-          if (validator) {
-            validators.push(validator);
-          }
-        });
-      }
-
       try {
-        let shape = attributeTypes[attributeType](
+        let attributeShape = attributeTypes[attributeType](
           usedAttributeNames,
           reservedNames.attributes,
           alreadyTakenTargetContentTypeAttributes,
           options
         );
 
-        validators.forEach(validator => {
-          console.log({ validator });
-          shape = shape.shape(validator);
-        });
-
-        return shape;
+        return extensions.makeValidator(
+          ['attribute', attributeType],
+          attributeShape,
+          usedAttributeNames,
+          reservedNames.attributes,
+          alreadyTakenTargetContentTypeAttributes,
+          options
+        );
       } catch (err) {
-        console.error('form', err);
+        console.error('Error yup build schema', err);
 
         return attributeTypes.default(usedAttributeNames, reservedNames.attributes);
       }
     },
     form: {
       advanced(data, type, step, actionType, attributes, extensions) {
-        const attributeFormExtensions = extensions.attribute[type];
-
-        let customForms = [];
-
-        if (attributeFormExtensions) {
-          attributeFormExtensions.forEach(({ form }) => {
-            if (form.advanced) {
-              const blocksToAdd = form.advanced(data, type, step, actionType, attributes);
-
-              blocksToAdd.forEach(block => {
-                customForms.push(block);
-              });
-            }
-          });
-        }
-
         try {
           const baseForm = attributesForm.advanced[type](data, step).items;
 
-          return { items: [...baseForm, ...customForms] };
+          return extensions.makeAdvancedForm(['attribute', type], baseForm, data, step);
         } catch (err) {
           console.error(err);
 
@@ -91,12 +66,19 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid, reservedNames) {
+    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions) {
       const takenNames = isEditing
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
 
-      return createContentTypeSchema(takenNames, reservedNames.models);
+      const contentTypeShape = createContentTypeSchema(takenNames, reservedNames.models);
+
+      return extensions.makeValidator(
+        ['contentType'],
+        contentTypeShape,
+        takenNames,
+        reservedNames.models
+      );
     },
     form: {
       base(data = {}, type, step, actionType) {
@@ -110,19 +92,8 @@ const forms = {
       },
       advanced(data, type, step, actionType, attributes, extensions) {
         const baseForm = contentTypeForm.advanced.default().items;
-        const customForms = [];
 
-        extensions.contentType.forEach(({ form }) => {
-          if (form.advanced) {
-            const blocksToAdd = form.advanced(data, type, step, actionType, attributes);
-
-            blocksToAdd.forEach(block => {
-              customForms.push(block);
-            });
-          }
-        });
-
-        return { items: [...baseForm, ...customForms] };
+        return extensions.makeAdvancedForm(['contentType'], baseForm);
       },
     },
   },
