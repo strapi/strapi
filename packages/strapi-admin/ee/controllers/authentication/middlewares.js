@@ -5,6 +5,7 @@ const passport = require('koa-passport');
 const utils = require('./utils');
 
 const isProduction = process.env.NODE_ENV === 'production';
+const defaultConnectionError = new Error('Invalid connection payload');
 
 const authenticate = async (ctx, next) => {
   const {
@@ -13,10 +14,15 @@ const authenticate = async (ctx, next) => {
   const redirectUrls = utils.getPrefixedRedirectUrls();
 
   return passport.authenticate(provider, null, async (error, profile) => {
-    if (error || !profile) {
+    if (error || !profile || !profile.email) {
       if (error) {
         strapi.log.error(error);
       }
+
+      strapi.eventHub.emit('admin.auth.error', {
+        error: error || defaultConnectionError,
+        provider,
+      });
 
       return ctx.redirect(redirectUrls.error);
     }
@@ -37,6 +43,7 @@ const authenticate = async (ctx, next) => {
     const isMissingRegisterFields = !username && (!firstname || !lastname);
 
     if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
+      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError, provider });
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -44,6 +51,7 @@ const authenticate = async (ctx, next) => {
 
     // If the default role has been misconfigured, redirect with an error
     if (!defaultRole) {
+      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError, provider });
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -58,15 +66,26 @@ const authenticate = async (ctx, next) => {
       registrationToken: null,
     });
 
+    strapi.eventHub.emit('admin.auth.autoRegistration', {
+      user: ctx.state.user,
+      provider,
+    });
+
     return next();
   })(ctx, next);
 };
 
 const redirectWithAuth = ctx => {
+  const {
+    params: { provider },
+  } = ctx;
+  const redirectUrls = utils.getPrefixedRedirectUrls();
   const { user } = ctx.state;
+
   const jwt = strapi.admin.services.token.createJwtToken(user);
   const cookiesOptions = { httpOnly: false, secure: isProduction, overwrite: true };
-  const redirectUrls = utils.getPrefixedRedirectUrls();
+
+  strapi.eventHub.emit('admin.auth.success', { user, provider });
 
   ctx.cookies.set('jwtToken', jwt, cookiesOptions);
   ctx.redirect(redirectUrls.success);

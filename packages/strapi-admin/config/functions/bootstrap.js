@@ -23,9 +23,17 @@ const registerAdminConditions = () => {
 
 const syncAuthSettings = async () => {
   const adminStore = await strapi.store({ type: 'core', environment: '', name: 'admin' });
-
   const adminAuthSettings = await adminStore.get({ key: 'auth' });
   const newAuthSettings = merge(defaultAdminAuthSettings, adminAuthSettings);
+
+  const roleExists = await strapi.admin.services.role.exists({
+    id: newAuthSettings.providers.defaultRole,
+  });
+
+  // Reset the default SSO role if it has been deleted manually
+  if (!roleExists) {
+    newAuthSettings.providers.defaultRole = null;
+  }
 
   await adminStore.set({ key: 'auth', value: newAuthSettings });
 };
