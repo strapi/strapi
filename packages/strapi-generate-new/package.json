@@ -1,8 +1,8 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "description": "Generate a new Strapi application.",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "generate",
     "generator",
@@ -32,13 +32,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

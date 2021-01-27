@@ -1,8 +1,8 @@
 {
   "name": "strapi-connector-bookshelf",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "description": "Bookshelf hook for the Strapi framework",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "bookshelf",
     "hook",
@@ -23,7 +23,7 @@
     "p-map": "4.0.0",
     "pluralize": "^8.0.0",
     "rimraf": "3.0.2",
-    "strapi-utils": "3.4.4"
+    "strapi-utils": "3.4.5"
   },
   "peerDependencies": {
     "knex": "^0.20.0"
@@ -39,13 +39,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {
