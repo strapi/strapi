@@ -2596,7 +2596,7 @@
   dependencies:
     extend "^3.0.0"
 
-"@purest/providers@1.0.4":
+"@purest/providers@^1.0.2":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@purest/providers/-/providers-1.0.4.tgz#e405971181d903b1c9b513c13d9e670666120396"
   integrity sha512-c+OxB8POBW00VG/exqYoh4/ryru48SZzN+uQkg+qK20iDeJ0Gr8nb1QNRuDmtLBJxOkRAze3zk04FctnE3joAw==

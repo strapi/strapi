@@ -104,6 +104,9 @@ Object.defineProperty(module.exports, 'features', {
       isEnabled(feature) {
         return features[licenseType].includes(feature);
       },
+      getEnabled() {
+        return features[licenseType];
+      },
     };
   },
   configurable: false,
