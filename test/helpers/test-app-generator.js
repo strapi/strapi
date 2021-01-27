@@ -54,6 +54,7 @@ const generateTestApp = async ({ appName, database }) => {
       'strapi-plugin-graphql',
       'strapi-plugin-i18n',
       'strapi-plugin-documentation',
+      'strapi-plugin-i18n',
     ],
     additionalsDependencies: {},
   };

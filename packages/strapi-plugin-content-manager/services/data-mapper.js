@@ -98,6 +98,7 @@ const HIDDEN_CONTENT_TYPES = [
   'plugins::upload.file',
   'plugins::users-permissions.permission',
   'plugins::users-permissions.role',
+  'plugins::i18n.locale',
 ];
 
 const isHidden = ({ uid }) => startsWith('strapi::', uid) || HIDDEN_CONTENT_TYPES.includes(uid);

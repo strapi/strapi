@@ -1,2002 +1,2002 @@
 [
   {
-    "value":"af",
+    "code":"af",
     "name":"Afrikaans (af)"
   },
   {
-    "value":"af-NA",
+    "code":"af-NA",
     "name":"Afrikaans (Namibia) (af-NA)"
   },
   {
-    "value":"af-ZA",
+    "code":"af-ZA",
     "name":"Afrikaans (South Africa) (af-ZA)"
   },
   {
-    "value":"agq",
+    "code":"agq",
     "name":"Aghem (agq)"
   },
   {
-    "value":"agq-CM",
+    "code":"agq-CM",
     "name":"Aghem (Cameroon) (agq-CM)"
   },
   {
-    "value":"ak",
+    "code":"ak",
     "name":"Akan (ak)"
   },
   {
-    "value":"ak-GH",
+    "code":"ak-GH",
     "name":"Akan (Ghana) (ak-GH)"
   },
   {
-    "value":"sq",
+    "code":"sq",
     "name":"Albanian (sq)"
   },
   {
-    "value":"sq-AL",
+    "code":"sq-AL",
     "name":"Albanian (Albania) (sq-AL)"
   },
   {
-    "value":"am",
+    "code":"am",
     "name":"Amharic (am)"
   },
   {
-    "value":"am-ET",
+    "code":"am-ET",
     "name":"Amharic (Ethiopia) (am-ET)"
   },
   {
-    "value":"ar",
+    "code":"ar",
     "name":"Arabic (ar)"
   },
   {
-    "value":"ar-DZ",
+    "code":"ar-DZ",
     "name":"Arabic (Algeria) (ar-DZ)"
   },
   {
-    "value":"ar-BH",
+    "code":"ar-BH",
     "name":"Arabic (Bahrain) (ar-BH)"
   },
   {
-    "value":"ar-EG",
+    "code":"ar-EG",
     "name":"Arabic (Egypt) (ar-EG)"
   },
   {
-    "value":"ar-IQ",
+    "code":"ar-IQ",
     "name":"Arabic (Iraq) (ar-IQ)"
   },
   {
-    "value":"ar-JO",
+    "code":"ar-JO",
     "name":"Arabic (Jordan) (ar-JO)"
   },
   {
-    "value":"ar-KW",
+    "code":"ar-KW",
     "name":"Arabic (Kuwait) (ar-KW)"
   },
   {
-    "value":"ar-LB",
+    "code":"ar-LB",
     "name":"Arabic (Lebanon) (ar-LB)"
   },
   {
-    "value":"ar-LY",
+    "code":"ar-LY",
     "name":"Arabic (Libya) (ar-LY)"
   },
   {
-    "value":"ar-MA",
+    "code":"ar-MA",
     "name":"Arabic (Morocco) (ar-MA)"
   },
   {
-    "value":"ar-OM",
+    "code":"ar-OM",
     "name":"Arabic (Oman) (ar-OM)"
   },
   {
-    "value":"ar-QA",
+    "code":"ar-QA",
     "name":"Arabic (Qatar) (ar-QA)"
   },
   {
-    "value":"ar-SA",
+    "code":"ar-SA",
     "name":"Arabic (Saudi Arabia) (ar-SA)"
   },
   {
-    "value":"ar-SD",
+    "code":"ar-SD",
     "name":"Arabic (Sudan) (ar-SD)"
   },
   {
-    "value":"ar-SY",
+    "code":"ar-SY",
     "name":"Arabic (Syria) (ar-SY)"
   },
   {
-    "value":"ar-TN",
+    "code":"ar-TN",
     "name":"Arabic (Tunisia) (ar-TN)"
   },
   {
-    "value":"ar-AE",
+    "code":"ar-AE",
     "name":"Arabic (United Arab Emirates) (ar-AE)"
   },
   {
-    "value":"ar-001",
+    "code":"ar-001",
     "name":"Arabic (World) (ar-001)"
   },
   {
-    "value":"ar-YE",
+    "code":"ar-YE",
     "name":"Arabic (Yemen) (ar-YE)"
   },
   {
-    "value":"hy",
+    "code":"hy",
     "name":"Armenian (hy)"
   },
   {
-    "value":"hy-AM",
+    "code":"hy-AM",
     "name":"Armenian (Armenia) (hy-AM)"
   },
   {
-    "value":"as",
+    "code":"as",
     "name":"Assamese (as)"
   },
   {
-    "value":"as-IN",
+    "code":"as-IN",
     "name":"Assamese (India) (as-IN)"
   },
   {
-    "value":"asa",
+    "code":"asa",
     "name":"Asu (asa)"
   },
   {
-    "value":"asa-TZ",
+    "code":"asa-TZ",
     "name":"Asu (Tanzania) (asa-TZ)"
   },
   {
-    "value":"az",
+    "code":"az",
     "name":"Azerbaijani (az)"
   },
   {
-    "value":"az-Cyrl",
+    "code":"az-Cyrl",
     "name":"Azerbaijani (Cyrillic) (az-Cyrl)"
   },
   {
-    "value":"az-Cyrl-AZ",
+    "code":"az-Cyrl-AZ",
     "name":"Azerbaijani (Cyrillic, Azerbaijan) (az-Cyrl-AZ)"
   },
   {
-    "value":"az-Latn",
+    "code":"az-Latn",
     "name":"Azerbaijani (Latin) (az-Latn)"
   },
   {
-    "value":"az-Latn-AZ",
+    "code":"az-Latn-AZ",
     "name":"Azerbaijani (Latin, Azerbaijan) (az-Latn-AZ)"
   },
   {
-    "value":"ksf",
+    "code":"ksf",
     "name":"Bafia (ksf)"
   },
   {
-    "value":"ksf-CM",
+    "code":"ksf-CM",
     "name":"Bafia (Cameroon) (ksf-CM)"
   },
   {
-    "value":"bm",
+    "code":"bm",
     "name":"Bambara (bm)"
   },
   {
-    "value":"bm-ML",
+    "code":"bm-ML",
     "name":"Bambara (Mali) (bm-ML)"
   },
   {
-    "value":"bas",
+    "code":"bas",
     "name":"Basaa (bas)"
   },
   {
-    "value":"bas-CM",
+    "code":"bas-CM",
     "name":"Basaa (Cameroon) (bas-CM)"
   },
   {
-    "value":"eu",
+    "code":"eu",
     "name":"Basque (eu)"
   },
   {
-    "value":"eu-ES",
+    "code":"eu-ES",
     "name":"Basque (Spain) (eu-ES)"
   },
   {
-    "value":"be",
+    "code":"be",
     "name":"Belarusian (be)"
   },
   {
-    "value":"be-BY",
+    "code":"be-BY",
     "name":"Belarusian (Belarus) (be-BY)"
   },
   {
-    "value":"bem",
+    "code":"bem",
     "name":"Bemba (bem)"
   },
   {
-    "value":"bem-ZM",
+    "code":"bem-ZM",
     "name":"Bemba (Zambia) (bem-ZM)"
   },
   {
-    "value":"bez",
+    "code":"bez",
     "name":"Bena (bez)"
   },
   {
-    "value":"bez-TZ",
+    "code":"bez-TZ",
     "name":"Bena (Tanzania) (bez-TZ)"
   },
   {
-    "value":"bn",
+    "code":"bn",
     "name":"Bengali (bn)"
   },
   {
-    "value":"bn-BD",
+    "code":"bn-BD",
     "name":"Bengali (Bangladesh) (bn-BD)"
   },
   {
-    "value":"bn-IN",
+    "code":"bn-IN",
     "name":"Bengali (India) (bn-IN)"
   },
   {
-    "value":"brx",
+    "code":"brx",
     "name":"Bodo (brx)"
   },
   {
-    "value":"brx-IN",
+    "code":"brx-IN",
     "name":"Bodo (India) (brx-IN)"
   },
   {
-    "value":"bs",
+    "code":"bs",
     "name":"Bosnian (bs)"
   },
   {
-    "value":"bs-BA",
+    "code":"bs-BA",
     "name":"Bosnian (Bosnia and Herzegovina) (bs-BA)"
   },
   {
-    "value":"br",
+    "code":"br",
     "name":"Breton (br)"
   },
   {
-    "value":"br-FR",
+    "code":"br-FR",
     "name":"Breton (France) (br-FR)"
   },
   {
-    "value":"bg",
+    "code":"bg",
     "name":"Bulgarian (bg)"
   },
   {
-    "value":"bg-BG",
+    "code":"bg-BG",
     "name":"Bulgarian (Bulgaria) (bg-BG)"
   },
   {
-    "value":"my",
+    "code":"my",
     "name":"Burmese (my)"
   },
   {
-    "value":"my-MM",
+    "code":"my-MM",
     "name":"Burmese (Myanmar [Burma]) (my-MM)"
   },
   {
-    "value":"ca",
+    "code":"ca",
     "name":"Catalan (ca)"
   },
   {
-    "value":"ca-ES",
+    "code":"ca-ES",
     "name":"Catalan (Spain) (ca-ES)"
   },
   {
-    "value":"ckb",
+    "code":"ckb",
     "name":"Central Kurdish (ckb)"
   },
   {
-    "value":"tzm",
+    "code":"tzm",
     "name":"Central Morocco Tamazight (tzm)"
   },
   {
-    "value":"tzm-Latn",
+    "code":"tzm-Latn",
     "name":"Central Morocco Tamazight (Latin) (tzm-Latn)"
   },
   {
-    "value":"tzm-Latn-MA",
+    "code":"tzm-Latn-MA",
     "name":"Central Morocco Tamazight (Latin, Morocco) (tzm-Latn-MA) "
   },
   {
-    "value":"chr",
+    "code":"chr",
     "name":"Cherokee (chr)"
   },
   {
-    "value":"chr-US",
+    "code":"chr-US",
     "name":"Cherokee (United States) (chr-US)"
   },
   {
-    "value":"cgg",
+    "code":"cgg",
     "name":"Chiga (cgg)"
   },
   {
-    "value":"cgg-UG",
+    "code":"cgg-UG",
     "name":"Chiga (Uganda) (cgg-UG)"
   },
   {
-    "value":"zh",
+    "code":"zh",
     "name":"Chinese (zh)"
   },
   {
-    "value":"zh-Hans",
+    "code":"zh-Hans",
     "name":"Chinese (Simplified) (zh-Hans)"
   },
   {
-    "value":"zh-CN",
+    "code":"zh-CN",
     "name":"Chinese (Simplified, China) (zh-CN)"
   },
   {
-    "value":"zh-Hans-CN",
+    "code":"zh-Hans-CN",
     "name":"Chinese (Simplified, China) (zh-Hans-CN)"
   },
   {
-    "value":"zh-Hans-HK",
+    "code":"zh-Hans-HK",
     "name":"Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK) "
   },
   {
-    "value":"zh-Hans-MO",
+    "code":"zh-Hans-MO",
     "name":"Chinese (Simplified, Macau SAR China) (zh-Hans-MO) "
   },
   {
-    "value":"zh-Hans-SG",
+    "code":"zh-Hans-SG",
     "name":"Chinese (Simplified, Singapore) (zh-Hans-SG)"
   },
   {
-    "value":"zh-Hant",
+    "code":"zh-Hant",
     "name":"Chinese (Traditional) (zh-Hant)"
   },
   {
-    "value":"zh-Hant-HK",
+    "code":"zh-Hant-HK",
     "name":"Chinese (Traditional, Hong Kong SAR China) (zh-Hant-HK) "
   },
   {
-    "value":"zh-Hant-MO",
+    "code":"zh-Hant-MO",
     "name":"Chinese (Traditional, Macau SAR China) (zh-Hant-MO) "
   },
   {
-    "value":"zh-Hant-TW",
+    "code":"zh-Hant-TW",
     "name":"Chinese (Traditional, Taiwan) (zh-Hant-TW)"
   },
   {
-    "value":"swc",
+    "code":"swc",
     "name":"Congo Swahili (swc)"
   },
   {
-    "value":"swc-CD",
+    "code":"swc-CD",
     "name":"Congo Swahili (Congo - Kinshasa) (swc-CD)"
   },
   {
-    "value":"kw",
+    "code":"kw",
     "name":"Cornish (kw)"
   },
   {
-    "value":"kw-GB",
+    "code":"kw-GB",
     "name":"Cornish (United Kingdom) (kw-GB)"
   },
   {
-    "value":"hr",
+    "code":"hr",
     "name":"Croatian (hr)"
   },
   {
-    "value":"hr-HR",
+    "code":"hr-HR",
     "name":"Croatian (Croatia) (hr-HR)"
   },
   {
-    "value":"cs",
+    "code":"cs",
     "name":"Czech (cs)"
   },
   {
-    "value":"cs-CZ",
+    "code":"cs-CZ",
     "name":"Czech (Czech Republic) (cs-CZ)"
   },
   {
-    "value":"da",
+    "code":"da",
     "name":"Danish (da)"
   },
   {
-    "value":"da-DK",
+    "code":"da-DK",
     "name":"Danish (Denmark) (da-DK)"
   },
   {
-    "value":"dua",
+    "code":"dua",
     "name":"Duala (dua)"
   },
   {
-    "value":"dua-CM",
+    "code":"dua-CM",
     "name":"Duala (Cameroon) (dua-CM)"
   },
   {
-    "value":"nl",
+    "code":"nl",
     "name":"Dutch (nl)"
   },
   {
-    "value":"nl-AW",
+    "code":"nl-AW",
     "name":"Dutch (Aruba) (nl-AW)"
   },
   {
-    "value":"nl-BE",
+    "code":"nl-BE",
     "name":"Dutch (Belgium) (nl-BE)"
   },
   {
-    "value":"nl-CW",
+    "code":"nl-CW",
     "name":"Dutch (Curaçao) (nl-CW)"
   },
   {
-    "value":"nl-NL",
+    "code":"nl-NL",
     "name":"Dutch (Netherlands) (nl-NL)"
   },
   {
-    "value":"nl-SX",
+    "code":"nl-SX",
     "name":"Dutch (Sint Maarten) (nl-SX)"
   },
   {
-    "value":"ebu",
+    "code":"ebu",
     "name":"Embu (ebu)"
   },
   {
-    "value":"ebu-KE",
+    "code":"ebu-KE",
     "name":"Embu (Kenya) (ebu-KE)"
   },
   {
-    "value":"en",
+    "code":"en",
     "name":"English (en)"
   },
   {
-    "value":"en-AS",
+    "code":"en-AS",
     "name":"English (American Samoa) (en-AS)"
   },
   {
-    "value":"en-AU",
+    "code":"en-AU",
     "name":"English (Australia) (en-AU)"
   },
   {
-    "value":"en-BB",
+    "code":"en-BB",
     "name":"English (Barbados) (en-BB)"
   },
   {
-    "value":"en-BE",
+    "code":"en-BE",
     "name":"English (Belgium) (en-BE)"
   },
   {
-    "value":"en-BZ",
+    "code":"en-BZ",
     "name":"English (Belize) (en-BZ)"
   },
   {
-    "value":"en-BM",
+    "code":"en-BM",
     "name":"English (Bermuda) (en-BM)"
   },
   {
-    "value":"en-BW",
+    "code":"en-BW",
     "name":"English (Botswana) (en-BW)"
   },
   {
-    "value":"en-CA",
+    "code":"en-CA",
     "name":"English (Canada) (en-CA)"
   },
   {
-    "value":"en-EG",
+    "code":"en-EG",
     "name":"English (Egypt) (en-EG)"
   },
   {
-    "value":"en-EU",
+    "code":"en-EU",
     "name":"English (Europe) (en-EU)"
   },
   {
-    "value":"en-GU",
+    "code":"en-GU",
     "name":"English (Guam) (en-GU)"
   },
   {
-    "value":"en-GY",
+    "code":"en-GY",
     "name":"English (Guyana) (en-GY)"
   },
   {
-    "value":"en-HK",
+    "code":"en-HK",
     "name":"English (Hong Kong SAR China) (en-HK)"
   },
   {
-    "value":"en-IN",
+    "code":"en-IN",
     "name":"English (India) (en-IN)"
   },
   {
-    "value":"en-IE",
+    "code":"en-IE",
     "name":"English (Ireland) (en-IE)"
   },
   {
-    "value":"en-JM",
+    "code":"en-JM",
     "name":"English (Jamaica) (en-JM)"
   },
   {
-    "value":"en-MT",
+    "code":"en-MT",
     "name":"English (Malta) (en-MT)"
   },
   {
-    "value":"en-MH",
+    "code":"en-MH",
     "name":"English (Marshall Islands) (en-MH)"
   },
   {
-    "value":"en-MU",
+    "code":"en-MU",
     "name":"English (Mauritius) (en-MU)"
   },
   {
-    "value":"en-NA",
+    "code":"en-NA",
     "name":"English (Namibia) (en-NA)"
   },
   {
-    "value":"en-NZ",
+    "code":"en-NZ",
     "name":"English (New Zealand) (en-NZ)"
   },
   {
-    "value":"en-MP",
+    "code":"en-MP",
     "name":"English (Northern Mariana Islands) (en-MP)"
   },
   {
-    "value":"en-PK",
+    "code":"en-PK",
     "name":"English (Pakistan) (en-PK)"
   },
   {
-    "value":"en-PH",
+    "code":"en-PH",
     "name":"English (Philippines) (en-PH)"
   },
   {
-    "value":"en-SA",
+    "code":"en-SA",
     "name":"English (Saudi Arabia) (en-SA)"
   },
   {
-    "value":"en-SG",
+    "code":"en-SG",
     "name":"English (Singapore) (en-SG)"
   },
   {
-    "value":"en-ZA",
+    "code":"en-ZA",
     "name":"English (South Africa) (en-ZA)"
   },
   {
-    "value":"en-TT",
+    "code":"en-TT",
     "name":"English (Trinidad and Tobago) (en-TT)"
   },
   {
-    "value":"en-AE",
+    "code":"en-AE",
     "name":"English (U.A.E.) (en-AE)"
   },
   {
-    "value":"en-UM",
+    "code":"en-UM",
     "name":"English (U.S. Minor Outlying Islands) (en-UM)"
   },
   {
-    "value":"en-VI",
+    "code":"en-VI",
     "name":"English (U.S. Virgin Islands) (en-VI)"
   },
   {
-    "value":"en-US-POSIX",
+    "code":"en-US-POSIX",
     "name":"English (U.S., Computer) (en-US-POSIX)"
   },
   {
-    "value":"en-GB",
+    "code":"en-GB",
     "name":"English (United Kingdom) (en-GB)"
   },
   {
-    "value":"en-US",
+    "code":"en-US",
     "name":"English (United States) (en-US)"
   },
   {
-    "value":"en-ZW",
+    "code":"en-ZW",
     "name":"English (Zimbabwe) (en-ZW)"
   },
   {
-    "value":"eo",
+    "code":"eo",
     "name":"Esperanto (eo)"
   },
   {
-    "value":"et",
+    "code":"et",
     "name":"Estonian (et)"
   },
   {
-    "value":"et-EE",
+    "code":"et-EE",
     "name":"Estonian (Estonia) (et-EE)"
   },
   {
-    "value":"ee",
+    "code":"ee",
     "name":"Ewe (ee)"
   },
   {
-    "value":"ee-GH",
+    "code":"ee-GH",
     "name":"Ewe (Ghana) (ee-GH)"
   },
   {
-    "value":"ee-TG",
+    "code":"ee-TG",
     "name":"Ewe (Togo) (ee-TG)"
   },
   {
-    "value":"ewo",
+    "code":"ewo",
     "name":"Ewondo (ewo)"
   },
   {
-    "value":"ewo-CM",
+    "code":"ewo-CM",
     "name":"Ewondo (Cameroon) (ewo-CM)"
   },
   {
-    "value":"fo",
+    "code":"fo",
     "name":"Faroese (fo)"
   },
   {
-    "value":"fo-FO",
+    "code":"fo-FO",
     "name":"Faroese (Faroe Islands) (fo-FO)"
   },
   {
-    "value":"fil",
+    "code":"fil",
     "name":"Filipino (fil)"
   },
   {
-    "value":"fil-PH",
+    "code":"fil-PH",
     "name":"Filipino (Philippines) (fil-PH)"
   },
   {
-    "value":"fi",
+    "code":"fi",
     "name":"Finnish (fi)"
   },
   {
-    "value":"fi-FI",
+    "code":"fi-FI",
     "name":"Finnish (Finland) (fi-FI)"
   },
   {
-    "value":"fr",
+    "code":"fr",
     "name":"French (fr)"
   },
   {
-    "value":"fr-BE",
+    "code":"fr-BE",
     "name":"French (Belgium) (fr-BE)"
   },
   {
-    "value":"fr-BJ",
+    "code":"fr-BJ",
     "name":"French (Benin) (fr-BJ)"
   },
   {
-    "value":"fr-BF",
+    "code":"fr-BF",
     "name":"French (Burkina Faso) (fr-BF)"
   },
   {
-    "value":"fr-BI",
+    "code":"fr-BI",
     "name":"French (Burundi) (fr-BI)"
   },
   {
-    "value":"fr-CM",
+    "code":"fr-CM",
     "name":"French (Cameroon) (fr-CM)"
   },
   {
-    "value":"fr-CA",
+    "code":"fr-CA",
     "name":"French (Canada) (fr-CA)"
   },
   {
-    "value":"fr-CF",
+    "code":"fr-CF",
     "name":"French (Central African Republic) (fr-CF)"
   },
   {
-    "value":"fr-TD",
+    "code":"fr-TD",
     "name":"French (Chad) (fr-TD)"
   },
   {
-    "value":"fr-KM",
+    "code":"fr-KM",
     "name":"French (Comoros) (fr-KM)"
   },
   {
-    "value":"fr-CG",
+    "code":"fr-CG",
     "name":"French (Congo - Brazzaville) (fr-CG)"
   },
   {
-    "value":"fr-CD",
+    "code":"fr-CD",
     "name":"French (Congo - Kinshasa) (fr-CD)"
   },
   {
-    "value":"fr-CI",
+    "code":"fr-CI",
     "name":"French (Côte d’Ivoire) (fr-CI)"
   },
   {
-    "value":"fr-DJ",
+    "code":"fr-DJ",
     "name":"French (Djibouti) (fr-DJ)"
   },
   {
-    "value":"fr-GQ",
+    "code":"fr-GQ",
     "name":"French (Equatorial Guinea) (fr-GQ)"
   },
   {
-    "value":"fr-FR",
+    "code":"fr-FR",
     "name":"French (France) (fr-FR)"
   },
   {
-    "value":"fr-GF",
+    "code":"fr-GF",
     "name":"French (French Guiana) (fr-GF)"
   },
   {
-    "value":"fr-GA",
+    "code":"fr-GA",
     "name":"French (Gabon) (fr-GA)"
   },
   {
-    "value":"fr-GP",
+    "code":"fr-GP",
     "name":"French (Guadeloupe) (fr-GP)"
   },
   {
-    "value":"fr-GN",
+    "code":"fr-GN",
     "name":"French (Guinea) (fr-GN)"
   },
   {
-    "value":"fr-LU",
+    "code":"fr-LU",
     "name":"French (Luxembourg) (fr-LU)"
   },
   {
-    "value":"fr-MG",
+    "code":"fr-MG",
     "name":"French (Madagascar) (fr-MG)"
   },
   {
-    "value":"fr-ML",
+    "code":"fr-ML",
     "name":"French (Mali) (fr-ML)"
   },
   {
-    "value":"fr-MQ",
+    "code":"fr-MQ",
     "name":"French (Martinique) (fr-MQ)"
   },
   {
-    "value":"fr-YT",
+    "code":"fr-YT",
     "name":"French (Mayotte) (fr-YT)"
   },
   {
-    "value":"fr-MC",
+    "code":"fr-MC",
     "name":"French (Monaco) (fr-MC)"
   },
   {
-    "value":"fr-NE",
+    "code":"fr-NE",
     "name":"French (Niger) (fr-NE)"
   },
   {
-    "value":"fr-RW",
+    "code":"fr-RW",
     "name":"French (Rwanda) (fr-RW)"
   },
   {
-    "value":"fr-RE",
+    "code":"fr-RE",
     "name":"French (Réunion) (fr-RE)"
   },
   {
-    "value":"fr-BL",
+    "code":"fr-BL",
     "name":"French (Saint Barthélemy) (fr-BL)"
   },
   {
-    "value":"fr-MF",
+    "code":"fr-MF",
     "name":"French (Saint Martin) (fr-MF)"
   },
   {
-    "value":"fr-SN",
+    "code":"fr-SN",
     "name":"French (Senegal) (fr-SN)"
   },
   {
-    "value":"fr-CH",
+    "code":"fr-CH",
     "name":"French (Switzerland) (fr-CH)"
   },
   {
-    "value":"fr-TG",
+    "code":"fr-TG",
     "name":"French (Togo) (fr-TG)"
   },
   {
-    "value":"ff",
+    "code":"ff",
     "name":"Fulah (ff)"
   },
   {
-    "value":"ff-SN",
+    "code":"ff-SN",
     "name":"Fulah (Senegal) (ff-SN)"
   },
   {
-    "value":"gl",
+    "code":"gl",
     "name":"Galician (gl)"
   },
   {
-    "value":"gl-ES",
+    "code":"gl-ES",
     "name":"Galician (Spain) (gl-ES)"
   },
   {
-    "value":"lg",
+    "code":"lg",
     "name":"Ganda (lg)"
   },
   {
-    "value":"lg-UG",
+    "code":"lg-UG",
     "name":"Ganda (Uganda) (lg-UG)"
   },
   {
-    "value":"ka",
+    "code":"ka",
     "name":"Georgian (ka)"
   },
   {
-    "value":"ka-GE",
+    "code":"ka-GE",
     "name":"Georgian (Georgia) (ka-GE)"
   },
   {
-    "value":"de",
+    "code":"de",
     "name":"German (de)"
   },
   {
-    "value":"de-AT",
+    "code":"de-AT",
     "name":"German (Austria) (de-AT)"
   },
   {
-    "value":"de-BE",
+    "code":"de-BE",
     "name":"German (Belgium) (de-BE)"
   },
   {
-    "value":"de-DE",
+    "code":"de-DE",
     "name":"German (Germany) (de-DE)"
   },
   {
-    "value":"de-LI",
+    "code":"de-LI",
     "name":"German (Liechtenstein) (de-LI)"
   },
   {
-    "value":"de-LU",
+    "code":"de-LU",
     "name":"German (Luxembourg) (de-LU)"
   },
   {
-    "value":"de-CH",
+    "code":"de-CH",
     "name":"German (Switzerland) (de-CH)"
   },
   {
-    "value":"el",
+    "code":"el",
     "name":"Greek (el)"
   },
   {
-    "value":"el-CY",
+    "code":"el-CY",
     "name":"Greek (Cyprus) (el-CY)"
   },
   {
-    "value":"el-GR",
+    "code":"el-GR",
     "name":"Greek (Greece) (el-GR)"
   },
   {
-    "value":"gu",
+    "code":"gu",
     "name":"Gujarati (gu)"
   },
   {
-    "value":"gu-IN",
+    "code":"gu-IN",
     "name":"Gujarati (India) (gu-IN)"
   },
   {
-    "value":"guz",
+    "code":"guz",
     "name":"Gusii (guz)"
   },
   {
-    "value":"guz-KE",
+    "code":"guz-KE",
     "name":"Gusii (Kenya) (guz-KE)"
   },
   {
-    "value":"ha",
+    "code":"ha",
     "name":"Hausa (ha)"
   },
   {
-    "value":"ha-Latn",
+    "code":"ha-Latn",
     "name":"Hausa (Latin) (ha-Latn)"
   },
   {
-    "value":"ha-Latn-GH",
+    "code":"ha-Latn-GH",
     "name":"Hausa (Latin, Ghana) (ha-Latn-GH)"
   },
   {
-    "value":"ha-Latn-NE",
+    "code":"ha-Latn-NE",
     "name":"Hausa (Latin, Niger) (ha-Latn-NE)"
   },
   {
-    "value":"ha-Latn-NG",
+    "code":"ha-Latn-NG",
     "name":"Hausa (Latin, Nigeria) (ha-Latn-NG)"
   },
   {
-    "value":"haw",
+    "code":"haw",
     "name":"Hawaiian (haw)"
   },
   {
-    "value":"haw-US",
+    "code":"haw-US",
     "name":"Hawaiian (United States) (haw-US)"
   },
   {
-    "value":"he",
+    "code":"he",
     "name":"Hebrew (he)"
   },
   {
-    "value":"he-IL",
+    "code":"he-IL",
     "name":"Hebrew (Israel) (he-IL)"
   },
   {
-    "value":"hi",
+    "code":"hi",
     "name":"Hindi (hi)"
   },
   {
-    "value":"hi-IN",
+    "code":"hi-IN",
     "name":"Hindi (India) (hi-IN)"
   },
   {
-    "value":"hu",
+    "code":"hu",
     "name":"Hungarian (hu)"
   },
   {
-    "value":"hu-HU",
+    "code":"hu-HU",
     "name":"Hungarian (Hungary) (hu-HU)"
   },
   {
-    "value":"is",
+    "code":"is",
     "name":"Icelandic (is)"
   },
   {
-    "value":"is-IS",
+    "code":"is-IS",
     "name":"Icelandic (Iceland) (is-IS)"
   },
   {
-    "value":"ig",
+    "code":"ig",
     "name":"Igbo (ig)"
   },
   {
-    "value":"ig-NG",
+    "code":"ig-NG",
     "name":"Igbo (Nigeria) (ig-NG)"
   },
   {
-    "value":"id",
+    "code":"id",
     "name":"Indonesian (id)"
   },
   {
-    "value":"id-ID",
+    "code":"id-ID",
     "name":"Indonesian (Indonesia) (id-ID)"
   },
   {
-    "value":"ga",
+    "code":"ga",
     "name":"Irish (ga)"
   },
   {
-    "value":"ga-IE",
+    "code":"ga-IE",
     "name":"Irish (Ireland) (ga-IE)"
   },
   {
-    "value":"it",
+    "code":"it",
     "name":"Italian (it)"
   },
   {
-    "value":"it-IT",
+    "code":"it-IT",
     "name":"Italian (Italy) (it-IT)"
   },
   {
-    "value":"it-CH",
+    "code":"it-CH",
     "name":"Italian (Switzerland) (it-CH)"
   },
   {
-    "value":"ja",
+    "code":"ja",
     "name":"Japanese (ja)"
   },
   {
-    "value":"ja-JP",
+    "code":"ja-JP",
     "name":"Japanese (Japan) (ja-JP)"
   },
   {
-    "value":"dyo",
+    "code":"dyo",
     "name":"Jola-Fonyi (dyo)"
   },
   {
-    "value":"dyo-SN",
+    "code":"dyo-SN",
     "name":"Jola-Fonyi (Senegal) (dyo-SN)"
   },
   {
-    "value":"kea",
+    "code":"kea",
     "name":"Kabuverdianu (kea)"
   },
   {
-    "value":"kea-CV",
+    "code":"kea-CV",
     "name":"Kabuverdianu (Cape Verde) (kea-CV)"
   },
   {
-    "value":"kab",
+    "code":"kab",
     "name":"Kabyle (kab)"
   },
   {
-    "value":"kab-DZ",
+    "code":"kab-DZ",
     "name":"Kabyle (Algeria) (kab-DZ)"
   },
   {
-    "value":"kl",
+    "code":"kl",
     "name":"Kalaallisut (kl)"
   },
   {
-    "value":"kl-GL",
+    "code":"kl-GL",
     "name":"Kalaallisut (Greenland) (kl-GL)"
   },
   {
-    "value":"kln",
+    "code":"kln",
     "name":"Kalenjin (kln)"
   },
   {
-    "value":"kln-KE",
+    "code":"kln-KE",
     "name":"Kalenjin (Kenya) (kln-KE)"
   },
   {
-    "value":"kam",
+    "code":"kam",
     "name":"Kamba (kam)"
   },
   {
-    "value":"kam-KE",
+    "code":"kam-KE",
     "name":"Kamba (Kenya) (kam-KE)"
   },
   {
-    "value":"kn",
+    "code":"kn",
     "name":"Kannada (kn)"
   },
   {
-    "value":"kn-IN",
+    "code":"kn-IN",
     "name":"Kannada (India) (kn-IN)"
   },
   {
-    "value":"kk",
+    "code":"kk",
     "name":"Kazakh (kk)"
   },
   {
-    "value":"kk-Cyrl",
+    "code":"kk-Cyrl",
     "name":"Kazakh (Cyrillic) (kk-Cyrl)"
   },
   {
-    "value":"kk-Cyrl-KZ",
+    "code":"kk-Cyrl-KZ",
     "name":"Kazakh (Cyrillic, Kazakhstan) (kk-Cyrl-KZ)"
   },
   {
-    "value":"km",
+    "code":"km",
     "name":"Khmer (km)"
   },
   {
-    "value":"km-KH",
+    "code":"km-KH",
     "name":"Khmer (Cambodia) (km-KH)"
   },
   {
-    "value":"ki",
+    "code":"ki",
     "name":"Kikuyu (ki)"
   },
   {
-    "value":"ki-KE",
+    "code":"ki-KE",
     "name":"Kikuyu (Kenya) (ki-KE)"
   },
   {
-    "value":"rw",
+    "code":"rw",
     "name":"Kinyarwanda (rw)"
   },
   {
-    "value":"rw-RW",
+    "code":"rw-RW",
     "name":"Kinyarwanda (Rwanda) (rw-RW)"
   },
   {
-    "value":"kok",
+    "code":"kok",
     "name":"Konkani (kok)"
   },
   {
-    "value":"kok-IN",
+    "code":"kok-IN",
     "name":"Konkani (India) (kok-IN)"
   },
   {
-    "value":"ko",
+    "code":"ko",
     "name":"Korean (ko)"
   },
   {
-    "value":"ko-KR",
+    "code":"ko-KR",
     "name":"Korean (South Korea) (ko-KR)"
   },
   {
-    "value":"khq",
+    "code":"khq",
     "name":"Koyra Chiini (khq)"
   },
   {
-    "value":"khq-ML",
+    "code":"khq-ML",
     "name":"Koyra Chiini (Mali) (khq-ML)"
   },
   {
-    "value":"ses",
+    "code":"ses",
     "name":"Koyraboro Senni (ses)"
   },
   {
-    "value":"ses-ML",
+    "code":"ses-ML",
     "name":"Koyraboro Senni (Mali) (ses-ML)"
   },
   {
-    "value":"nmg",
+    "code":"nmg",
     "name":"Kwasio (nmg)"
   },
   {
-    "value":"nmg-CM",
+    "code":"nmg-CM",
     "name":"Kwasio (Cameroon) (nmg-CM)"
   },
   {
-    "value":"lag",
+    "code":"lag",
     "name":"Langi (lag)"
   },
   {
-    "value":"lag-TZ",
+    "code":"lag-TZ",
     "name":"Langi (Tanzania) (lag-TZ)"
   },
   {
-    "value":"lv",
+    "code":"lv",
     "name":"Latvian (lv)"
   },
   {
-    "value":"lv-LV",
+    "code":"lv-LV",
     "name":"Latvian (Latvia) (lv-LV)"
   },
   {
-    "value":"ln",
+    "code":"ln",
     "name":"Lingala (ln)"
   },
   {
-    "value":"ln-CG",
+    "code":"ln-CG",
     "name":"Lingala (Congo - Brazzaville) (ln-CG)"
   },
   {
-    "value":"ln-CD",
+    "code":"ln-CD",
     "name":"Lingala (Congo - Kinshasa) (ln-CD)"
   },
   {
-    "value":"lt",
+    "code":"lt",
     "name":"Lithuanian (lt)"
   },
   {
-    "value":"lt-LT",
+    "code":"lt-LT",
     "name":"Lithuanian (Lithuania) (lt-LT)"
   },
   {
-    "value":"lu",
+    "code":"lu",
     "name":"Luba-Katanga (lu)"
   },
   {
-    "value":"lu-CD",
+    "code":"lu-CD",
     "name":"Luba-Katanga (Congo - Kinshasa) (lu-CD)"
   },
   {
-    "value":"luo",
+    "code":"luo",
     "name":"Luo (luo)"
   },
   {
-    "value":"luo-KE",
+    "code":"luo-KE",
     "name":"Luo (Kenya) (luo-KE)"
   },
   {
-    "value":"luy",
+    "code":"luy",
     "name":"Luyia (luy)"
   },
   {
-    "value":"luy-KE",
+    "code":"luy-KE",
     "name":"Luyia (Kenya) (luy-KE)"
   },
   {
-    "value":"mk",
+    "code":"mk",
     "name":"Macedonian (mk)"
   },
   {
-    "value":"mk-MK",
+    "code":"mk-MK",
     "name":"Macedonian (Macedonia) (mk-MK)"
   },
   {
-    "value":"jmc",
+    "code":"jmc",
     "name":"Machame (jmc)"
   },
   {
-    "value":"jmc-TZ",
+    "code":"jmc-TZ",
     "name":"Machame (Tanzania) (jmc-TZ)"
   },
   {
-    "value":"mgh",
+    "code":"mgh",
     "name":"Makhuwa-Meetto (mgh)"
   },
   {
-    "value":"mgh-MZ",
+    "code":"mgh-MZ",
     "name":"Makhuwa-Meetto (Mozambique) (mgh-MZ)"
   },
   {
-    "value":"kde",
+    "code":"kde",
     "name":"Makonde (kde)"
   },
   {
-    "value":"kde-TZ",
+    "code":"kde-TZ",
     "name":"Makonde (Tanzania) (kde-TZ)"
   },
   {
-    "value":"mg",
+    "code":"mg",
     "name":"Malagasy (mg)"
   },
   {
-    "value":"mg-MG",
+    "code":"mg-MG",
     "name":"Malagasy (Madagascar) (mg-MG)"
   },
   {
-    "value":"ms",
+    "code":"ms",
     "name":"Malay (ms)"
   },
   {
-    "value":"ms-BN",
+    "code":"ms-BN",
     "name":"Malay (Brunei) (ms-BN)"
   },
   {
-    "value":"ms-MY",
+    "code":"ms-MY",
     "name":"Malay (Malaysia) (ms-MY)"
   },
   {
-    "value":"ml",
+    "code":"ml",
     "name":"Malayalam (ml)"
   },
   {
-    "value":"ml-IN",
+    "code":"ml-IN",
     "name":"Malayalam (India) (ml-IN)"
   },
   {
-    "value":"mt",
+    "code":"mt",
     "name":"Maltese (mt)"
   },
   {
-    "value":"mt-MT",
+    "code":"mt-MT",
     "name":"Maltese (Malta) (mt-MT)"
   },
   {
-    "value":"gv",
+    "code":"gv",
     "name":"Manx (gv)"
   },
   {
-    "value":"gv-GB",
+    "code":"gv-GB",
     "name":"Manx (United Kingdom) (gv-GB)"
   },
   {
-    "value":"mr",
+    "code":"mr",
     "name":"Marathi (mr)"
   },
   {
-    "value":"mr-IN",
+    "code":"mr-IN",
     "name":"Marathi (India) (mr-IN)"
   },
   {
-    "value":"mas",
+    "code":"mas",
     "name":"Masai (mas)"
   },
   {
-    "value":"mas-KE",
+    "code":"mas-KE",
     "name":"Masai (Kenya) (mas-KE)"
   },
   {
-    "value":"mas-TZ",
+    "code":"mas-TZ",
     "name":"Masai (Tanzania) (mas-TZ)"
   },
   {
-    "value":"mer",
+    "code":"mer",
     "name":"Meru (mer)"
   },
   {
-    "value":"mer-KE",
+    "code":"mer-KE",
     "name":"Meru (Kenya) (mer-KE)"
   },
   {
-    "value":"mfe",
+    "code":"mfe",
     "name":"Morisyen (mfe)"
   },
   {
-    "value":"mfe-MU",
+    "code":"mfe-MU",
     "name":"Morisyen (Mauritius) (mfe-MU)"
   },
   {
-    "value":"mua",
+    "code":"mua",
     "name":"Mundang (mua)"
   },
   {
-    "value":"mua-CM",
+    "code":"mua-CM",
     "name":"Mundang (Cameroon) (mua-CM)"
   },
   {
-    "value":"naq",
+    "code":"naq",
     "name":"Nama (naq)"
   },
   {
-    "value":"naq-NA",
+    "code":"naq-NA",
     "name":"Nama (Namibia) (naq-NA)"
   },
   {
-    "value":"ne",
+    "code":"ne",
     "name":"Nepali (ne)"
   },
   {
-    "value":"ne-IN",
+    "code":"ne-IN",
     "name":"Nepali (India) (ne-IN)"
   },
   {
-    "value":"ne-NP",
+    "code":"ne-NP",
     "name":"Nepali (Nepal) (ne-NP)"
   },
   {
-    "value":"nd",
+    "code":"nd",
     "name":"North Ndebele (nd)"
   },
   {
-    "value":"nd-ZW",
+    "code":"nd-ZW",
     "name":"North Ndebele (Zimbabwe) (nd-ZW)"
   },
   {
-    "value":"nb",
+    "code":"nb",
     "name":"Norwegian Bokmål (nb)"
   },
   {
-    "value":"nb-NO",
+    "code":"nb-NO",
     "name":"Norwegian Bokmål (Norway) (nb-NO)"
   },
   {
-    "value":"nn",
+    "code":"nn",
     "name":"Norwegian Nynorsk (nn)"
   },
   {
-    "value":"nn-NO",
+    "code":"nn-NO",
     "name":"Norwegian Nynorsk (Norway) (nn-NO)"
   },
   {
-    "value":"nus",
+    "code":"nus",
     "name":"Nuer (nus)"
   },
   {
-    "value":"nus-SD",
+    "code":"nus-SD",
     "name":"Nuer (Sudan) (nus-SD)"
   },
   {
-    "value":"nyn",
+    "code":"nyn",
     "name":"Nyankole (nyn)"
   },
   {
-    "value":"nyn-UG",
+    "code":"nyn-UG",
     "name":"Nyankole (Uganda) (nyn-UG)"
   },
   {
-    "value":"or",
+    "code":"or",
     "name":"Oriya (or)"
   },
   {
-    "value":"or-IN",
+    "code":"or-IN",
     "name":"Oriya (India) (or-IN)"
   },
   {
-    "value":"om",
+    "code":"om",
     "name":"Oromo (om)"
   },
   {
-    "value":"om-ET",
+    "code":"om-ET",
     "name":"Oromo (Ethiopia) (om-ET)"
   },
   {
-    "value":"om-KE",
+    "code":"om-KE",
     "name":"Oromo (Kenya) (om-KE)"
   },
   {
-    "value":"ps",
+    "code":"ps",
     "name":"Pashto (ps)"
   },
   {
-    "value":"ps-AF",
+    "code":"ps-AF",
     "name":"Pashto (Afghanistan) (ps-AF)"
   },
   {
-    "value":"fa",
+    "code":"fa",
     "name":"Persian (fa)"
   },
   {
-    "value":"fa-AF",
+    "code":"fa-AF",
     "name":"Persian (Afghanistan) (fa-AF)"
   },
   {
-    "value":"fa-IR",
+    "code":"fa-IR",
     "name":"Persian (Iran) (fa-IR)"
   },
   {
-    "value":"pl",
+    "code":"pl",
     "name":"Polish (pl)"
   },
   {
-    "value":"pl-PL",
+    "code":"pl-PL",
     "name":"Polish (Poland) (pl-PL)"
   },
   {
-    "value":"pt",
+    "code":"pt",
     "name":"Portuguese (pt)"
   },
   {
-    "value":"pt-AO",
+    "code":"pt-AO",
     "name":"Portuguese (Angola) (pt-AO)"
   },
   {
-    "value":"pt-BR",
+    "code":"pt-BR",
     "name":"Portuguese (Brazil) (pt-BR)"
   },
   {
-    "value":"pt-GW",
+    "code":"pt-GW",
     "name":"Portuguese (Guinea-Bissau) (pt-GW)"
   },
   {
-    "value":"pt-MZ",
+    "code":"pt-MZ",
     "name":"Portuguese (Mozambique) (pt-MZ)"
   },
   {
-    "value":"pt-PT",
+    "code":"pt-PT",
     "name":"Portuguese (Portugal) (pt-PT)"
   },
   {
-    "value":"pt-ST",
+    "code":"pt-ST",
     "name":"Portuguese (São Tomé and Príncipe) (pt-ST)"
   },
   {
-    "value":"pa",
+    "code":"pa",
     "name":"Punjabi (pa)"
   },
   {
-    "value":"pa-Arab",
+    "code":"pa-Arab",
     "name":"Punjabi (Arabic) (pa-Arab)"
   },
   {
-    "value":"pa-Arab-PK",
+    "code":"pa-Arab-PK",
     "name":"Punjabi (Arabic, Pakistan) (pa-Arab-PK)"
   },
   {
-    "value":"pa-Guru",
+    "code":"pa-Guru",
     "name":"Punjabi (Gurmukhi) (pa-Guru)"
   },
   {
-    "value":"pa-Guru-IN",
+    "code":"pa-Guru-IN",
     "name":"Punjabi (Gurmukhi, India) (pa-Guru-IN)"
   },
   {
-    "value":"ro",
+    "code":"ro",
     "name":"Romanian (ro)"
   },
   {
-    "value":"ro-MD",
+    "code":"ro-MD",
     "name":"Romanian (Moldova) (ro-MD)"
   },
   {
-    "value":"ro-RO",
+    "code":"ro-RO",
     "name":"Romanian (Romania) (ro-RO)"
   },
   {
-    "value":"rm",
+    "code":"rm",
     "name":"Romansh (rm)"
   },
   {
-    "value":"rm-CH",
+    "code":"rm-CH",
     "name":"Romansh (Switzerland) (rm-CH)"
   },
   {
-    "value":"rof",
+    "code":"rof",
     "name":"Rombo (rof)"
   },
   {
-    "value":"rof-TZ",
+    "code":"rof-TZ",
     "name":"Rombo (Tanzania) (rof-TZ)"
   },
   {
-    "value":"rn",
+    "code":"rn",
     "name":"Rundi (rn)"
   },
   {
-    "value":"rn-BI",
+    "code":"rn-BI",
     "name":"Rundi (Burundi) (rn-BI)"
   },
   {
-    "value":"ru",
+    "code":"ru",
     "name":"Russian (ru)"
   },
   {
-    "value":"ru-MD",
+    "code":"ru-MD",
     "name":"Russian (Moldova) (ru-MD)"
   },
   {
-    "value":"ru-RU",
+    "code":"ru-RU",
     "name":"Russian (Russia) (ru-RU)"
   },
   {
-    "value":"ru-UA",
+    "code":"ru-UA",
     "name":"Russian (Ukraine) (ru-UA)"
   },
   {
-    "value":"rwk",
+    "code":"rwk",
     "name":"Rwa (rwk)"
   },
   {
-    "value":"rwk-TZ",
+    "code":"rwk-TZ",
     "name":"Rwa (Tanzania) (rwk-TZ)"
   },
   {
-    "value":"saq",
+    "code":"saq",
     "name":"Samburu (saq)"
   },
   {
-    "value":"saq-KE",
+    "code":"saq-KE",
     "name":"Samburu (Kenya) (saq-KE)"
   },
   {
-    "value":"sg",
+    "code":"sg",
     "name":"Sango (sg)"
   },
   {
-    "value":"sg-CF",
+    "code":"sg-CF",
     "name":"Sango (Central African Republic) (sg-CF)"
   },
   {
-    "value":"sbp",
+    "code":"sbp",
     "name":"Sangu (sbp)"
   },
   {
-    "value":"sbp-TZ",
+    "code":"sbp-TZ",
     "name":"Sangu (Tanzania) (sbp-TZ)"
   },
   {
-    "value":"seh",
+    "code":"seh",
     "name":"Sena (seh)"
   },
   {
-    "value":"seh-MZ",
+    "code":"seh-MZ",
     "name":"Sena (Mozambique) (seh-MZ)"
   },
   {
-    "value":"sr",
+    "code":"sr",
     "name":"Serbian (sr)"
   },
   {
-    "value":"sr-Cyrl",
+    "code":"sr-Cyrl",
     "name":"Serbian (Cyrillic) (sr-Cyrl)"
   },
   {
-    "value":"sr-Cyrl-BA",
+    "code":"sr-Cyrl-BA",
     "name":"Serbian (Cyrillic, Bosnia and Herzegovina)(sr-Cyrl-BA) "
   },
   {
-    "value":"sr-Cyrl-ME",
+    "code":"sr-Cyrl-ME",
     "name":"Serbian (Cyrillic, Montenegro) (sr-Cyrl-ME)"
   },
   {
-    "value":"sr-Cyrl-RS",
+    "code":"sr-Cyrl-RS",
     "name":"Serbian (Cyrillic, Serbia) (sr-Cyrl-RS)"
   },
   {
-    "value":"sr-Latn",
+    "code":"sr-Latn",
     "name":"Serbian (Latin) (sr-Latn)"
   },
   {
-    "value":"sr-Latn-BA",
+    "code":"sr-Latn-BA",
     "name":"Serbian (Latin, Bosnia and Herzegovina) (sr-Latn-BA) "
   },
   {
-    "value":"sr-Latn-ME",
+    "code":"sr-Latn-ME",
     "name":"Serbian (Latin, Montenegro) (sr-Latn-ME)"
   },
   {
-    "value":"sr-Latn-RS",
+    "code":"sr-Latn-RS",
     "name":"Serbian (Latin, Serbia) (sr-Latn-RS)"
   },
   {
-    "value":"ksb",
+    "code":"ksb",
     "name":"Shambala (ksb)"
   },
   {
-    "value":"ksb-TZ",
+    "code":"ksb-TZ",
     "name":"Shambala (Tanzania) (ksb-TZ)"
   },
   {
-    "value":"sn",
+    "code":"sn",
     "name":"Shona (sn)"
   },
   {
-    "value":"sn-ZW",
+    "code":"sn-ZW",
     "name":"Shona (Zimbabwe) (sn-ZW)"
   },
   {
-    "value":"ii",
+    "code":"ii",
     "name":"Sichuan Yi (ii)"
   },
   {
-    "value":"ii-CN",
+    "code":"ii-CN",
     "name":"Sichuan Yi (China) (ii-CN)"
   },
   {
-    "value":"si",
+    "code":"si",
     "name":"Sinhala (si)"
   },
   {
-    "value":"si-LK",
+    "code":"si-LK",
     "name":"Sinhala (Sri Lanka) (si-LK)"
   },
   {
-    "value":"sk",
+    "code":"sk",
     "name":"Slovak (sk)"
   },
   {
-    "value":"sk-SK",
+    "code":"sk-SK",
     "name":"Slovak (Slovakia) (sk-SK)"
   },
   {
-    "value":"sl",
+    "code":"sl",
     "name":"Slovenian (sl)"
   },
   {
-    "value":"sl-SI",
+    "code":"sl-SI",
     "name":"Slovenian (Slovenia) (sl-SI)"
   },
   {
-    "value":"xog",
+    "code":"xog",
     "name":"Soga (xog)"
   },
   {
-    "value":"xog-UG",
+    "code":"xog-UG",
     "name":"Soga (Uganda) (xog-UG)"
   },
   {
-    "value":"so",
+    "code":"so",
     "name":"Somali (so)"
   },
   {
-    "value":"so-DJ",
+    "code":"so-DJ",
     "name":"Somali (Djibouti) (so-DJ)"
   },
   {
-    "value":"so-ET",
+    "code":"so-ET",
     "name":"Somali (Ethiopia) (so-ET)"
   },
   {
-    "value":"so-KE",
+    "code":"so-KE",
     "name":"Somali (Kenya) (so-KE)"
   },
   {
-    "value":"so-SO",
+    "code":"so-SO",
     "name":"Somali (Somalia) (so-SO)"
   },
   {
-    "value":"es",
+    "code":"es",
     "name":"Spanish (es)"
   },
   {
-    "value":"es-AR",
+    "code":"es-AR",
     "name":"Spanish (Argentina) (es-AR)"
   },
   {
-    "value":"es-BO",
+    "code":"es-BO",
     "name":"Spanish (Bolivia) (es-BO)"
   },
   {
-    "value":"es-CL",
+    "code":"es-CL",
     "name":"Spanish (Chile) (es-CL)"
   },
   {
-    "value":"es-CO",
+    "code":"es-CO",
     "name":"Spanish (Colombia) (es-CO)"
   },
   {
-    "value":"es-CR",
+    "code":"es-CR",
     "name":"Spanish (Costa Rica) (es-CR)"
   },
   {
-    "value":"es-DO",
+    "code":"es-DO",
     "name":"Spanish (Dominican Republic) (es-DO)"
   },
   {
-    "value":"es-EC",
+    "code":"es-EC",
     "name":"Spanish (Ecuador) (es-EC)"
   },
   {
-    "value":"es-SV",
+    "code":"es-SV",
     "name":"Spanish (El Salvador) (es-SV)"
   },
   {
-    "value":"es-GQ",
+    "code":"es-GQ",
     "name":"Spanish (Equatorial Guinea) (es-GQ)"
   },
   {
-    "value":"es-GT",
+    "code":"es-GT",
     "name":"Spanish (Guatemala) (es-GT)"
   },
   {
-    "value":"es-HN",
+    "code":"es-HN",
     "name":"Spanish (Honduras) (es-HN)"
   },
   {
-    "value":"es-419",
+    "code":"es-419",
     "name":"Spanish (Latin America) (es-419)"
   },
   {
-    "value":"es-MX",
+    "code":"es-MX",
     "name":"Spanish (Mexico) (es-MX)"
   },
   {
-    "value":"es-NI",
+    "code":"es-NI",
     "name":"Spanish (Nicaragua) (es-NI)"
   },
   {
-    "value":"es-PA",
+    "code":"es-PA",
     "name":"Spanish (Panama) (es-PA)"
   },
   {
-    "value":"es-PY",
+    "code":"es-PY",
     "name":"Spanish (Paraguay) (es-PY)"
   },
   {
-    "value":"es-PE",
+    "code":"es-PE",
     "name":"Spanish (Peru) (es-PE)"
   },
   {
-    "value":"es-PR",
+    "code":"es-PR",
     "name":"Spanish (Puerto Rico) (es-PR)"
   },
   {
-    "value":"es-ES",
+    "code":"es-ES",
     "name":"Spanish (Spain) (es-ES)"
   },
   {
-    "value":"es-US",
+    "code":"es-US",
     "name":"Spanish (United States) (es-US)"
   },
   {
-    "value":"es-UY",
+    "code":"es-UY",
     "name":"Spanish (Uruguay) (es-UY)"
   },
   {
-    "value":"es-VE",
+    "code":"es-VE",
     "name":"Spanish (Venezuela) (es-VE)"
   },
   {
-    "value":"sw",
+    "code":"sw",
     "name":"Swahili (sw)"
   },
   {
-    "value":"sw-KE",
+    "code":"sw-KE",
     "name":"Swahili (Kenya) (sw-KE)"
   },
   {
-    "value":"sw-TZ",
+    "code":"sw-TZ",
     "name":"Swahili (Tanzania) (sw-TZ)"
   },
   {
-    "value":"sv",
+    "code":"sv",
     "name":"Swedish (sv)"
   },
   {
-    "value":"sv-FI",
+    "code":"sv-FI",
     "name":"Swedish (Finland) (sv-FI)"
   },
   {
-    "value":"sv-SE",
+    "code":"sv-SE",
     "name":"Swedish (Sweden) (sv-SE)"
   },
   {
-    "value":"gsw",
+    "code":"gsw",
     "name":"Swiss German (gsw)"
   },
   {
-    "value":"gsw-CH",
+    "code":"gsw-CH",
     "name":"Swiss German (Switzerland) (gsw-CH)"
   },
   {
-    "value":"shi",
+    "code":"shi",
     "name":"Tachelhit (shi)"
   },
   {
-    "value":"shi-Latn",
+    "code":"shi-Latn",
     "name":"Tachelhit (Latin) (shi-Latn)"
   },
   {
-    "value":"shi-Latn-MA",
+    "code":"shi-Latn-MA",
     "name":"Tachelhit (Latin, Morocco) (shi-Latn-MA)"
   },
   {
-    "value":"shi-Tfng",
+    "code":"shi-Tfng",
     "name":"Tachelhit (Tifinagh) (shi-Tfng)"
   },
   {
-    "value":"shi-Tfng-MA",
+    "code":"shi-Tfng-MA",
     "name":"Tachelhit (Tifinagh, Morocco) (shi-Tfng-MA)"
   },
   {
-    "value":"dav",
+    "code":"dav",
     "name":"Taita (dav)"
   },
   {
-    "value":"dav-KE",
+    "code":"dav-KE",
     "name":"Taita (Kenya) (dav-KE)"
   },
   {
-    "value":"ta",
+    "code":"ta",
     "name":"Tamil (ta)"
   },
   {
-    "value":"ta-IN",
+    "code":"ta-IN",
     "name":"Tamil (India) (ta-IN)"
   },
   {
-    "value":"ta-LK",
+    "code":"ta-LK",
     "name":"Tamil (Sri Lanka) (ta-LK)"
   },
   {
-    "value":"twq",
+    "code":"twq",
     "name":"Tasawaq (twq)"
   },
   {
-    "value":"twq-NE",
+    "code":"twq-NE",
     "name":"Tasawaq (Niger) (twq-NE)"
   },
   {
-    "value":"te",
+    "code":"te",
     "name":"Telugu (te)"
   },
   {
-    "value":"te-IN",
+    "code":"te-IN",
     "name":"Telugu (India) (te-IN)"
   },
   {
-    "value":"teo",
+    "code":"teo",
     "name":"Teso (teo)"
   },
   {
-    "value":"teo-KE",
+    "code":"teo-KE",
     "name":"Teso (Kenya) (teo-KE)"
   },
   {
-    "value":"teo-UG",
+    "code":"teo-UG",
     "name":"Teso (Uganda) (teo-UG)"
   },
   {
-    "value":"th",
+    "code":"th",
     "name":"Thai (th)"
   },
   {
-    "value":"th-TH",
+    "code":"th-TH",
     "name":"Thai (Thailand) (th-TH)"
   },
   {
-    "value":"bo",
+    "code":"bo",
     "name":"Tibetan (bo)"
   },
   {
-    "value":"bo-CN",
+    "code":"bo-CN",
     "name":"Tibetan (China) (bo-CN)"
   },
   {
-    "value":"bo-IN",
+    "code":"bo-IN",
     "name":"Tibetan (India) (bo-IN)"
   },
   {
-    "value":"ti",
+    "code":"ti",
     "name":"Tigrinya (ti)"
   },
   {
-    "value":"ti-ER",
+    "code":"ti-ER",
     "name":"Tigrinya (Eritrea) (ti-ER)"
   },
   {
-    "value":"ti-ET",
+    "code":"ti-ET",
     "name":"Tigrinya (Ethiopia) (ti-ET)"
   },
   {
-    "value":"to",
+    "code":"to",
     "name":"Tongan (to)"
   },
   {
-    "value":"to-TO",
+    "code":"to-TO",
     "name":"Tongan (Tonga) (to-TO)"
   },
   {
-    "value":"tr",
+    "code":"tr",
     "name":"Turkish (tr)"
   },
   {
-    "value":"tr-TR",
+    "code":"tr-TR",
     "name":"Turkish (Turkey) (tr-TR)"
   },
   {
-    "value":"uk",
+    "code":"uk",
     "name":"Ukrainian (uk)"
   },
   {
-    "value":"uk-UA",
+    "code":"uk-UA",
     "name":"Ukrainian (Ukraine) (uk-UA)"
   },
   {
-    "value":"ur",
+    "code":"ur",
     "name":"Urdu (ur)"
   },
   {
-    "value":"ur-IN",
+    "code":"ur-IN",
     "name":"Urdu (India) (ur-IN)"
   },
   {
-    "value":"ur-PK",
+    "code":"ur-PK",
     "name":"Urdu (Pakistan) (ur-PK)"
   },
   {
-    "value":"uz",
+    "code":"uz",
     "name":"Uzbek (uz)"
   },
   {
-    "value":"uz-Arab",
+    "code":"uz-Arab",
     "name":"Uzbek (Arabic) (uz-Arab)"
   },
   {
-    "value":"uz-Arab-AF",
+    "code":"uz-Arab-AF",
     "name":"Uzbek (Arabic, Afghanistan) (uz-Arab-AF)"
   },
   {
-    "value":"uz-Cyrl",
+    "code":"uz-Cyrl",
     "name":"Uzbek (Cyrillic) (uz-Cyrl)"
   },
   {
-    "value":"uz-Cyrl-UZ",
+    "code":"uz-Cyrl-UZ",
     "name":"Uzbek (Cyrillic, Uzbekistan) (uz-Cyrl-UZ)"
   },
   {
-    "value":"uz-Latn",
+    "code":"uz-Latn",
     "name":"Uzbek (Latin) (uz-Latn)"
   },
   {
-    "value":"uz-Latn-UZ",
+    "code":"uz-Latn-UZ",
     "name":"Uzbek (Latin, Uzbekistan) (uz-Latn-UZ)"
   },
   {
-    "value":"vai",
+    "code":"vai",
     "name":"Vai (vai)"
   },
   {
-    "value":"vai-Latn",
+    "code":"vai-Latn",
     "name":"Vai (Latin) (vai-Latn)"
   },
   {
-    "value":"vai-Latn-LR",
+    "code":"vai-Latn-LR",
     "name":"Vai (Latin, Liberia) (vai-Latn-LR)"
   },
   {
-    "value":"vai-Vaii",
+    "code":"vai-Vaii",
     "name":"Vai (Vai) (vai-Vaii)"
   },
   {
-    "value":"vai-Vaii-LR",
+    "code":"vai-Vaii-LR",
     "name":"Vai (Vai, Liberia) (vai-Vaii-LR)"
   },
   {
-    "value":"vi",
+    "code":"vi",
     "name":"Vietnamese (vi)"
   },
   {
-    "value":"vi-VN",
+    "code":"vi-VN",
     "name":"Vietnamese (Vietnam) (vi-VN)"
   },
   {
-    "value":"vun",
+    "code":"vun",
     "name":"Vunjo (vun)"
   },
   {
-    "value":"vun-TZ",
+    "code":"vun-TZ",
     "name":"Vunjo (Tanzania) (vun-TZ)"
   },
   {
-    "value":"cy",
+    "code":"cy",
     "name":"Welsh (cy)"
   },
   {
-    "value":"cy-GB",
+    "code":"cy-GB",
     "name":"Welsh (United Kingdom) (cy-GB)"
   },
   {
-    "value":"yav",
+    "code":"yav",
     "name":"Yangben (yav)"
   },
   {
-    "value":"yav-CM",
+    "code":"yav-CM",
     "name":"Yangben (Cameroon) (yav-CM)"
   },
   {
-    "value":"yo",
+    "code":"yo",
     "name":"Yoruba (yo)"
   },
   {
-    "value":"yo-NG",
+    "code":"yo-NG",
     "name":"Yoruba (Nigeria) (yo-NG)"
   },
   {
-    "value":"dje",
+    "code":"dje",
     "name":"Zarma (dje)"
   },
   {
-    "value":"dje-NE",
+    "code":"dje-NE",
     "name":"Zarma (Niger) (dje-NE)"
   },
   {
-    "value":"zu",
+    "code":"zu",
     "name":"Zulu (zu)"
   },
   {
-    "value":"zu-ZA",
+    "code":"zu-ZA",
     "name":"Zulu (South Africa) (zu-ZA)"
   }
 ]
