@@ -23,13 +23,13 @@
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

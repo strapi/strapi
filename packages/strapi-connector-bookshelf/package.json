@@ -2,7 +2,7 @@
   "name": "strapi-connector-bookshelf",
   "version": "3.4.5",
   "description": "Bookshelf hook for the Strapi framework",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "bookshelf",
     "hook",
@@ -39,13 +39,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {
