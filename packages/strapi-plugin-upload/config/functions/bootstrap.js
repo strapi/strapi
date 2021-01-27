@@ -36,7 +36,7 @@ const wrapFunctionForErrors = fn => async (...args) => {
   }
 };
 
-const createProvider = ({ provider, providerOptions, actionOptions  }) => {
+const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   try {
     const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
 
