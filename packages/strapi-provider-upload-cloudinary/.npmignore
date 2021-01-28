@@ -95,6 +95,8 @@ results
 build
 node_modules
 .node_history
+.snyk
+
 
 
 ############################
@@ -102,3 +104,6 @@ node_modules
 ############################
 
 test
+tests
+__tests__
+jest.config.js

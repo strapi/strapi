@@ -92,6 +92,7 @@ logs
 results
 node_modules
 .node_history
+.snyk
 
 
 ############################
@@ -99,6 +100,9 @@ node_modules
 ############################
 
 test
+tests
+__tests__
+jest.config.js
 testApp
 coverage
 webpack.config.dev.js
