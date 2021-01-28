@@ -5,79 +5,42 @@ jest.mock('koa-passport', () => ({
   initialize: jest.fn(),
 }));
 
-jest.mock('passport-local', () => {
-  return {
-    Strategy: class {
-      constructor(options, handler) {
-        this.options = options;
-        this.handler = handler;
-      }
-    },
-  };
-});
-
-jest.mock('../../../../strapi/lib/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['sso'];
-      },
-    },
-  });
-
-  return eeModule;
-});
-
 const passport = require('koa-passport');
-const createProviderRegistry = require('../passport/provider-registry');
-const createLocalStrategy = require('../../../services/passport/local-strategy');
-const {
-  syncProviderRegistryWithConfig,
-  getStrategyCallbackURL,
-  providerRegistry,
-} = require('../passport');
-const { init } = require('../../../services/passport');
 
-const register = jest.spyOn(providerRegistry, 'register');
+const { init } = require('../../../services/passport');
 
 describe('Passport', () => {
   afterEach(() => {
-    providerRegistry.clear();
+    // Reset the mock on passport.use.toHaveBeenCalledTimes
+    jest.resetAllMocks();
+    // Reset the mock on strapi/lib/utils/ee so we can change its behavior
+    jest.resetModules();
   });
 
-  describe('Sync Provider Registry with Config', () => {
-    test('The provider registry should match the auth config', async () => {
-      global.strapi = {
-        config: {
-          get: () => ({ providers: [{ uid: 'foo' }, { uid: 'bar' }] }),
+  describe('Init (SSO disabled)', () => {
+    beforeAll(() => {
+      jest.mock('../../../../strapi/lib/utils/ee', () => ({
+        features: {
+          // Disable the SSO feature
+          isEnabled: feature => feature !== 'sso',
         },
-      };
-
-      syncProviderRegistryWithConfig();
-
-      expect(register).toHaveBeenCalledTimes(2);
-      expect(providerRegistry.size).toBe(2);
+      }));
     });
-  });
 
-  describe('Init', () => {
-    test('It should register all providers in passport and init it', () => {
+    test('It should register the local provider in passport and init it', () => {
       const createStrategy = jest.fn(() => ({ foo: 'bar' }));
+      const { getPassportStrategies } = require('../passport');
 
       global.strapi = {
         admin: {
           services: {
-            passport: require('../passport'),
+            passport: { getPassportStrategies },
           },
         },
         config: {
           get: () => ({
             providers: [
+              // Since SSO is disabled here, those strategies should be ignored
               { uid: 'foo', createStrategy },
               { uid: 'bar', createStrategy },
             ],
@@ -87,129 +50,46 @@ describe('Passport', () => {
 
       init();
 
-      expect(providerRegistry.size).toBe(2);
-      expect(passport.use).toHaveBeenCalledTimes(3);
+      expect(passport.use).toHaveBeenCalledTimes(1);
       expect(passport.initialize).toHaveBeenCalled();
     });
   });
 
-  describe('Get Strategy Callback URL', () => {
-    const BASE_URL = '/admin/connect/{{provider}}';
-
-    test.each(['foo', 'bar', 'foobar'])('Get a correct callback url for %s', providerName => {
-      expect(getStrategyCallbackURL(providerName)).toBe(
-        BASE_URL.replace('{{provider}}', providerName)
-      );
-    });
-  });
-
-  describe('Provider Registry', () => {
-    const registry = createProviderRegistry();
-    const setSpy = jest.spyOn(registry, 'set');
-    const fooProvider = { uid: 'foo', createStrategy: jest.fn() };
-    const barProvider = { uid: 'bar', createStrategy: jest.fn() };
-
-    beforeEach(() => {
-      global.strapi = { isLoaded: false };
+  describe('Init (SSO enabled)', () => {
+    beforeAll(() => {
+      jest.mock('../../../../strapi/lib/utils/ee', () => ({
+        features: {
+          // Enable all the features (including SSO)
+          isEnabled: () => true,
+        },
+      }));
     });
 
-    afterEach(() => {
-      registry.clear();
-      jest.clearAllMocks();
-    });
+    test('It should register all providers in passport and init them', () => {
+      const createStrategy = jest.fn(() => ({ foo: 'bar' }));
+      const { getPassportStrategies } = require('../passport');
 
-    test('Cannot register after boostrap', () => {
-      global.strapi = { isLoaded: true };
-
-      const fn = () => registry.register(fooProvider);
-
-      expect(fn).toThrowError(`You can't register new provider after the boostrap`);
-      expect(registry.size).toBe(0);
-    });
-
-    test('Can register a provider', () => {
-      registry.register(fooProvider);
-
-      expect(setSpy).toHaveBeenCalledWith(fooProvider.uid, fooProvider);
-      expect(registry.size).toBe(1);
-    });
-
-    test('Can register several providers at once', () => {
-      const providers = [fooProvider, barProvider];
-
-      registry.registerMany(providers);
-
-      expect(setSpy).toHaveBeenCalledTimes(providers.length);
-      expect(registry.size).toBe(providers.length);
-    });
-
-    test('Do not register twice providers with the same uid', () => {
-      const providers = [fooProvider, fooProvider];
-
-      registry.registerMany(providers);
-
-      expect(setSpy).toHaveBeenCalledWith(fooProvider.uid, fooProvider);
-      expect(setSpy).toHaveBeenCalledTimes(2);
-      expect(registry.size).toBe(1);
-    });
-
-    test('Can update the value of a provider', () => {
-      const newFooProvider = {
-        ...fooProvider,
-        newProperty: 'foobar',
-      };
-
-      registry.register(fooProvider);
-      registry.register(newFooProvider);
-
-      expect(setSpy).toHaveBeenCalledTimes(2);
-      expect(registry.size).toBe(1);
-      expect(registry.get(fooProvider.uid)).toEqual(newFooProvider);
-    });
-  });
-
-  describe('Local Strategy', () => {
-    test('It should call the callback with the error if the credentials check fails', async () => {
       global.strapi = {
         admin: {
           services: {
-            auth: {
-              checkCredentials: jest.fn(() => {
-                return Promise.reject('Bad credentials');
-              }),
-            },
+            passport: { getPassportStrategies },
           },
+        },
+        config: {
+          get: () => ({
+            providers: [
+              // Since SSO is enabled, those strategies should be registered
+              { uid: 'foo', createStrategy },
+              { uid: 'bar', createStrategy },
+            ],
+          }),
         },
       };
 
-      const strategy = createLocalStrategy(strapi);
-      const done = jest.fn();
+      init();
 
-      await strategy.handler('foo', 'bar', done);
-
-      expect(done).toHaveBeenCalledWith('Bad credentials');
-    });
-
-    test('It should call the callback with the profile if the credentials check succeed', async () => {
-      const args = [null, { id: 'foo' }, 'bar'];
-      global.strapi = {
-        admin: {
-          services: {
-            auth: {
-              checkCredentials: jest.fn(() => {
-                return Promise.resolve(args);
-              }),
-            },
-          },
-        },
-      };
-
-      const strategy = createLocalStrategy(strapi);
-      const done = jest.fn();
-
-      await strategy.handler('foo', 'bar', done);
-
-      expect(done).toHaveBeenCalledWith(...args);
+      expect(passport.use).toHaveBeenCalledTimes(3);
+      expect(passport.initialize).toHaveBeenCalled();
     });
   });
 });
