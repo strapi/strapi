@@ -93,10 +93,7 @@ const DEFAULT_BREAKPOINTS = {
   small: 500,
 };
 
-const BREAKPOINTS = strapi.config.get(
-  "plugins.upload.breakpoints",
-  DEFAULT_BREAKPOINTS
-)
+const getBreakpoints = () => strapi.config.get('plugins.upload.breakpoints', DEFAULT_BREAKPOINTS);
 
 const generateResponsiveFormats = async file => {
   const {
@@ -111,9 +108,10 @@ const generateResponsiveFormats = async file => {
 
   const originalDimensions = await getDimensions(file.buffer);
 
+  const breakpoints = getBreakpoints();
   return Promise.all(
-    Object.keys(BREAKPOINTS).map(key => {
-      const breakpoint = BREAKPOINTS[key];
+    Object.keys(breakpoints).map(key => {
+      const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
         return generateBreakpoint(key, { file, breakpoint, originalDimensions });
