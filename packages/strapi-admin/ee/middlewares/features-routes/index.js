@@ -5,7 +5,7 @@ const routes = require('./routes');
 
 module.exports = strapi => ({
   beforeInitialize() {
-    strapi.config.hook.load.before.unshift('admin');
+    strapi.config.middleware.load.before.unshift('features-routes');
   },
 
   initialize() {
