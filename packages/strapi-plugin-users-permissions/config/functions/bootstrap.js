@@ -24,6 +24,15 @@ module.exports = async () => {
       enabled: true,
       icon: 'envelope',
     },
+    cas: {
+      enabled: false,
+      icon: 'book',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/cas/callback`,
+      scope: ['openid email'], // scopes should be space delimited
+      subdomain: 'my.subdomain.com/cas',
+    },
     discord: {
       enabled: false,
       icon: 'discord',
