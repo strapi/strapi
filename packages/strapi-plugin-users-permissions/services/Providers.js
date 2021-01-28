@@ -465,6 +465,73 @@ const getProfile = async (provider, query, callback) => {
       }
       break;
     }
+    case 'reddit': {
+      const reddit = purest({
+        provider: 'reddit',
+        config: purestConfig,
+        defaults: {
+          headers: {
+            'user-agent': 'strapi',
+          },
+        },
+      });
+
+      reddit
+        .query('auth')
+        .get('me')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.name,
+              email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
+            });
+          }
+        });
+      break;
+    }
+    case 'auth0': {
+      const purestAuth0Conf = {};
+      purestAuth0Conf[`https://${grant.auth0.subdomain}.auth0.com`] = {
+        __domain: {
+          auth: {
+            auth: { bearer: '[0]' },
+          },
+        },
+        '{endpoint}': {
+          __path: {
+            alias: '__default',
+          },
+        },
+      };
+      const auth0 = purest({
+        provider: 'auth0',
+        config: {
+          auth0: purestAuth0Conf,
+        },
+      });
+
+      auth0
+        .get('userinfo')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            const username =
+              body.username || body.nickname || body.name || body.email.split('@')[0];
+            const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+
+            callback(null, {
+              username,
+              email,
+            });
+          }
+        });
+      break;
+    }
     default:
       callback(new Error('Unknown provider.'));
       break;
