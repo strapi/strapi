@@ -13,10 +13,13 @@ module.exports = async () => {
       sentry.sendError(error, (scope, sentryInstance) => {
         scope.addEventProcessor(event => {
           // Parse Koa context to add error metadata
-          return sentryInstance.Handlers.parseRequest(event, ctx.request);
+          return sentryInstance.Handlers.parseRequest(event, ctx.request, {
+            transaction: false,
+          });
         });
         // Manually add Strapi version
         scope.setTag('strapi_version', strapi.config.info.strapi);
+        scope.setTag('method', ctx.method);
       });
       throw error;
     }
