@@ -51,7 +51,7 @@ const Card = ({
 
   return (
     <Wrapper
-      title={isDisabled ? formatMessage({ id: getTrad('list.assets.type-not-allowed') }) : null}
+      title={isDisabled ? formatMessage({ id: getTrad('list.assets.type-not-allowed') }) : name}
       onClick={handleClick}
     >
       <CardImgWrapper checked={checked} small={small}>
@@ -70,7 +70,7 @@ const Card = ({
       {!withoutFileInfo ? (
         <>
           <Flex>
-            <Title>{name}</Title>
+            <Title title={name}>{name}</Title>
             <Tag label={getType(fileType)} />
           </Flex>
           {!withoutFileInfo && (
