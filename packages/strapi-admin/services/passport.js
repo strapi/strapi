@@ -26,7 +26,6 @@ const registerAuthEvents = () => {
     .filter(valueIsFunctionType);
 
   for (const [eventName, handler] of eventList) {
-    console.log('Register ', eventName);
     strapi.eventHub.on(authEventsMapper[eventName], handler);
   }
 };
