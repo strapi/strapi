@@ -110,7 +110,7 @@ describe('Relation-list route', () => {
 
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
-        method: 'GET',
+        method: 'POST',
         url: '/content-manager/relations/application::shop.shop/products',
       });
 
@@ -118,6 +118,19 @@ describe('Relation-list route', () => {
       data.products.forEach((product, index) => {
         expect(res.body[index]).toStrictEqual(pick(['_id', 'id', 'name'], product));
       });
+    });
+
+    test('Can get relation-list for products of a shop and omit some results', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/relations/application::shop.shop/products',
+        body: {
+          idsToOmit: [data.products[0].id],
+        },
+      });
+
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0]).toStrictEqual(pick(['_id', 'id', 'name'], data.products[1]));
     });
   });
 
@@ -145,7 +158,7 @@ describe('Relation-list route', () => {
 
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
-        method: 'GET',
+        method: 'POST',
         url: '/content-manager/relations/application::shop.shop/products',
       });
 
@@ -160,6 +173,19 @@ describe('Relation-list route', () => {
         ...pick(['_id', 'id', 'name'], data.products[1]),
         published_at: null,
       });
+    });
+
+    test('Can get relation-list for products of a shop and omit some results', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/relations/application::shop.shop/products',
+        body: {
+          idsToOmit: [data.products[1].id],
+        },
+      });
+
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0]).toMatchObject(pick(['_id', 'id', 'name'], data.products[0]));
     });
   });
 });

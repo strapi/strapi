@@ -303,7 +303,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
                   }
 
                   if (type === 'boolean') {
-                    return value !== undefined;
+                    return value !== null;
                   }
 
                   return !isEmpty(value);

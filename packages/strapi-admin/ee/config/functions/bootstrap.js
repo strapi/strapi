@@ -1,10 +1,15 @@
 'use strict';
 
+const { features } = require('../../../../strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../../config/functions/bootstrap');
-const { actions: eeActions } = require('../admin-actions');
+const {
+  features: { sso: ssoActions },
+} = require('../admin-actions');
 
 module.exports = async () => {
-  strapi.admin.services.permission.actionProvider.register(eeActions);
+  if (features.isEnabled('sso')) {
+    strapi.admin.services.permission.actionProvider.register(ssoActions);
+  }
 
   await executeCEBootstrap();
 };

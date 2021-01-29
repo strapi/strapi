@@ -2,6 +2,8 @@
 
 const { yup, formatYupErrors } = require('strapi-utils');
 
+const { features } = require('../../../strapi/lib/utils/ee');
+
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
 const roleCreateSchema = yup
@@ -26,6 +28,10 @@ const rolesDeleteSchema = yup
       .test('roles-deletion-checks', 'Roles deletion checks have failed', async function(ids) {
         try {
           await strapi.admin.services.role.checkRolesIdForDeletion(ids);
+
+          if (features.isEnabled('sso')) {
+            await strapi.admin.services.role.ssoCheckRolesIdForDeletion(ids);
+          }
         } catch (e) {
           return this.createError({ path: 'ids', message: e.message });
         }
@@ -41,6 +47,10 @@ const roleDeleteSchema = yup
   .test('no-admin-single-delete', 'Role deletion checks have failed', async function(id) {
     try {
       await strapi.admin.services.role.checkRolesIdForDeletion([id]);
+
+      if (features.isEnabled('sso')) {
+        await strapi.admin.services.role.ssoCheckRolesIdForDeletion([id]);
+      }
     } catch (e) {
       return this.createError({ path: 'id', message: e.message });
     }
