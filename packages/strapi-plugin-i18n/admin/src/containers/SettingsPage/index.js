@@ -1,171 +1,101 @@
-import React, { useEffect, useReducer, useRef } from 'react';
-import { Header, Inputs } from '@buffetjs/custom';
-import { Text } from '@buffetjs/core';
-import { isEqual } from 'lodash';
-import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+import React from 'react';
+import { useIntl } from 'react-intl';
+import { BaselineAlignment } from 'strapi-helper-plugin';
+import { Header, List } from '@buffetjs/custom';
+import { Pencil } from '@buffetjs/icons';
+import { Button, Text, IconLinks } from '@buffetjs/core';
+import { CustomRow } from '@buffetjs/styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { getRequestUrl, getTrad } from '../../utils';
-import SectionTitleWrapper from './SectionTitleWrapper';
-import Wrapper from './Wrapper';
-import init from './init';
-import reducer, { initialState } from './reducer';
+import { useLocales } from '../../hooks';
+import { getTrad } from '../../utils';
 
-const SettingsPage = () => {
-  const { formatMessage } = useGlobalContext();
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { initialData, isLoading, modifiedData } = reducerState.toJS();
-  const isMounted = useRef(true);
-  const getDataRef = useRef();
-  const abortController = new AbortController();
+const canUpdate = true;
+const canCreate = true;
+const canDelete = true;
+const LocaleSettingsPage = () => {
+  const { formatMessage } = useIntl();
+  const { locales, isLoading } = useLocales();
 
-  getDataRef.current = async () => {
-    try {
-      const { signal } = abortController;
-      const { data } = await request(getRequestUrl('settings', { method: 'GET', signal }));
+  const actions = [
+    {
+      label: 'Add locale',
+      onClick: () => console.log('add locale'),
+      color: 'primary',
+      type: 'button',
+      icon: true,
+      Component: props => {
+        if (canCreate) {
+          return <Button {...props} />;
+        }
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    getDataRef.current();
-
-    return () => {
-      abortController.abort();
-      isMounted.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleSubmit = async () => {
-    try {
-      await request(getRequestUrl('settings'), {
-        method: 'PUT',
-        body: modifiedData,
-      });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-      }
-
-      strapi.notification.toggle({
-        type: 'success',
-        message: { id: 'notification.form.success.fields' },
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        return null;
+      },
+      style: {
+        paddingLeft: 15,
+        paddingRight: 15,
+      },
+    },
+  ];
 
   const headerProps = {
     title: {
-      label: formatMessage({ id: getTrad('settings.header.label') }),
+      label: formatMessage({ id: getTrad('plugin.name') }),
     },
-    content: formatMessage({
-      id: getTrad('settings.sub-header.label'),
-    }),
-    actions: [
-      {
-        color: 'cancel',
-        disabled: isEqual(initialData, modifiedData),
-        // TradId from the strapi-admin package
-        label: formatMessage({ id: 'app.components.Button.cancel' }),
-        onClick: () => {
-          dispatch({
-            type: 'CANCEL_CHANGES',
-          });
-        },
-        type: 'button',
-      },
-      {
-        disabled: false,
-        color: 'success',
-        // TradId from the strapi-admin package
-        label: formatMessage({ id: 'app.components.Button.save' }),
-        onClick: handleSubmit,
-        type: 'button',
-      },
-    ],
+    content: formatMessage({ id: getTrad('Settings.list.description') }),
+    actions,
   };
-
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value,
-    });
-  };
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
 
   return (
     <>
       <Header {...headerProps} />
-      <Wrapper>
-        <div className="container-fluid">
-          <div className="row">
-            <SectionTitleWrapper className="col-12">
-              <Text fontSize="xs" fontWeight="semiBold" color="#787E8F">
-                {formatMessage({ id: getTrad('settings.section.image.label') })}
+      <BaselineAlignment top size="3px" />
+      <List
+        title={formatMessage(
+          {
+            id: getTrad(
+              `Settings.locales.list.title${locales.length > 1 ? '.plural' : '.singular'}`
+            ),
+          },
+          { number: locales.length }
+        )}
+        items={locales}
+        isLoading={isLoading}
+        customRowComponent={locale => (
+          <CustomRow onClick={() => console.log('open modal')}>
+            <td>
+              <Text>{locale.code}</Text>
+            </td>
+            <td>
+              <Text fontWeight="semiBold">{locale.displayName}</Text>
+            </td>
+            <td>
+              <Text ellipsis>
+                {locale.isDefault
+                  ? formatMessage({ id: getTrad('Settings.locales.row.default-locale') })
+                  : null}
               </Text>
-            </SectionTitleWrapper>
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.responsiveDimensions.label'),
-                })}
-                description={formatMessage({
-                  id: getTrad('settings.form.responsiveDimensions.description'),
-                })}
-                name="responsiveDimensions"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.responsiveDimensions}
+            </td>
+            <td>
+              <IconLinks
+                links={[
+                  {
+                    icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
+                    onClick: () => console.log('edit'),
+                  },
+                  {
+                    icon:
+                      canDelete && !locale.isDefault ? <FontAwesomeIcon icon="trash-alt" /> : null,
+                    onClick: () => console.log('open delete modal'),
+                  },
+                ]}
               />
-            </div>
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.sizeOptimization.label'),
-                })}
-                name="sizeOptimization"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.sizeOptimization}
-              />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.autoOrientation.label'),
-                })}
-                description={formatMessage({
-                  id: getTrad('settings.form.autoOrientation.description'),
-                })}
-                name="autoOrientation"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.autoOrientation}
-              />
-            </div>
-          </div>
-        </div>
-      </Wrapper>
+            </td>
+          </CustomRow>
+        )}
+      />
     </>
   );
 };
 
-export default SettingsPage;
+export default LocaleSettingsPage;

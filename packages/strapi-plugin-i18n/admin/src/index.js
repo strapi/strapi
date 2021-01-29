@@ -1,3 +1,4 @@
+import React from 'react';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
@@ -30,12 +31,12 @@ export default strapi => {
           {
             title: {
               id: getTrad('plugin.name'),
-              defaultMessage: 'Media Library',
+              defaultMessage: 'Internationalization',
             },
-            name: 'media-library',
-            to: `${strapi.settingsBaseURL}/media-library`,
+            name: 'internationalization',
+            to: `${strapi.settingsBaseURL}/internationalization`,
             Component: () => <SettingsPage />,
-            permissions: pluginPermissions.settings,
+            // permissions: pluginPermissions.settings,
           },
         ],
       },
