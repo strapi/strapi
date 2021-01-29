@@ -27,9 +27,10 @@ describe('Passport', () => {
       const getPassportStrategiesSpy = jest.fn(getPassportStrategies);
 
       global.strapi = {
+        config: { get: jest.fn(() => ({})) },
         admin: {
           services: {
-            passport: { getPassportStrategies: getPassportStrategiesSpy },
+            passport: { getPassportStrategies: getPassportStrategiesSpy, authEventsMapper: {} },
           },
         },
       };
