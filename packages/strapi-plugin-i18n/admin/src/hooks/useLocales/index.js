@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import reducer, { initialState } from './reducer';
 
+// TODO : Move to react-query when it is merged.
 const useRolesList = () => {
   const [{ locales, isLoading }, dispatch] = useReducer(reducer, initialState);
 
@@ -8,6 +9,7 @@ const useRolesList = () => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
+    // TMP : to display the loader
     setTimeout(() => {
       fetchLocalesList(signal);
     }, 1000);
@@ -21,6 +23,7 @@ const useRolesList = () => {
         type: 'GET_DATA',
       });
 
+      // TMP : Fake data
       const locales = await Promise.resolve([
         {
           id: 1,
