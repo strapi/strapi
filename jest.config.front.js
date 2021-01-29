@@ -44,6 +44,7 @@ module.exports = {
     PUBLIC_PATH: '/admin',
     REMOTE_URL: '/',
     NODE_ENV: 'test',
+    ENABLED_EE_FEATURES: [],
   },
   moduleDirectories: [
     'node_modules',

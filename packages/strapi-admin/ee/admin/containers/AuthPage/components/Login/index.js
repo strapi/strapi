@@ -21,7 +21,7 @@ const Login = loginProps => {
   const { isLoading, data: providers } = useAuthProviders();
   const { formatMessage } = useIntl();
 
-  if (!isLoading && providers.length === 0) {
+  if (!ENABLED_EE_FEATURES.includes('sso') || (!isLoading && providers.length === 0)) {
     return <BaseLogin {...loginProps} />;
   }
 

@@ -25,7 +25,7 @@ const Providers = () => {
     push('/auth/login');
   };
 
-  if (!isLoading && providers.length === 0) {
+  if (!ENABLED_EE_FEATURES.includes('sso') || (!isLoading && providers.length === 0)) {
     return <Redirect to="/auth/login" />;
   }
 
