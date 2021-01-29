@@ -15,6 +15,7 @@ const EmptyPreview = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: ${({ theme }) => theme.main.sizes.fonts.xs};
   color: ${({ theme }) => theme.main.colors.grey};
 `;
 
