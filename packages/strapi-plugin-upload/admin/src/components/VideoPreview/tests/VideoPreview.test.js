@@ -72,7 +72,6 @@ describe('VideoPreview', () => {
 
     fireEvent(container.querySelector('video'), new Event('error'));
 
-    expect(screen.getByTitle('upload.list.assets.not-supported-title')).toBeTruthy();
     expect(screen.getByText('upload.list.assets.not-supported-content')).toBeVisible();
   });
 });

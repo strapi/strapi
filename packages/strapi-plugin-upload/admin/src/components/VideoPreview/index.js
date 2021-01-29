@@ -9,20 +9,13 @@ import Wrapper from './Wrapper';
 import CanvasWrapper from './CanvasWrapper';
 import Thumbnail from './Thumbnail';
 import reducer, { initialState } from './reducer';
-import File from '../../icons/File';
 import getTrad from '../../utils/getTrad';
 
-const EmptyPreviewTitle = styled.h3`
-  text-align: center;
-  color: ${({ theme }) => theme.main.colors.white};
-  font-size: ${({ theme }) => theme.main.sizes.fonts.xl};
-`;
-
-const EmptyPreviewContent = styled.p`
-  font-size: ${({ theme }) => theme.main.sizes.fonts.xs};
-  text-align: center;
-  color: ${({ theme }) => theme.main.colors.white};
-  padding: 0 ${({ theme }) => theme.main.sizes.paddings.sm};
+const EmptyPreview = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.main.colors.grey};
 `;
 
 const VideoPreview = ({ hasIcon, previewUrl, src }) => {
@@ -77,14 +70,9 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
 
   if (isError) {
     return (
-      <div>
-        <EmptyPreviewTitle>
-          <File title={formatMessage({ id: getTrad('list.assets.not-supported-title') })} />
-        </EmptyPreviewTitle>
-        <EmptyPreviewContent>
-          <FormattedMessage id={getTrad('list.assets.not-supported-content')} />
-        </EmptyPreviewContent>
-      </div>
+      <EmptyPreview>
+        <FormattedMessage id={getTrad('list.assets.not-supported-content')} />
+      </EmptyPreview>
     );
   }
 
