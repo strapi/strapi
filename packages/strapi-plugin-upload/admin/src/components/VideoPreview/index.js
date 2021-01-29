@@ -1,18 +1,42 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-
+import styled from 'styled-components';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Duration from '../Duration';
 import LoadingIndicator from '../LoadingIndicator';
 import PlayIcon from '../PlayIcon';
 import Wrapper from './Wrapper';
 import CanvasWrapper from './CanvasWrapper';
 import Thumbnail from './Thumbnail';
-
 import reducer, { initialState } from './reducer';
+import File from '../../icons/File';
+import getTrad from '../../utils/getTrad';
+
+const EmptyPreviewTitle = styled.h3`
+  text-align: center;
+  color: ${({ theme }) => theme.main.colors.white};
+  font-size: ${({ theme }) => theme.main.sizes.fonts.xl};
+`;
+
+const EmptyPreviewContent = styled.p`
+  font-size: ${({ theme }) => theme.main.sizes.fonts.xs};
+  text-align: center;
+  color: ${({ theme }) => theme.main.colors.white};
+  padding: 0 ${({ theme }) => theme.main.sizes.paddings.sm};
+`;
 
 const VideoPreview = ({ hasIcon, previewUrl, src }) => {
+  const { formatMessage } = useIntl();
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { duration, dataLoaded, isHover, metadataLoaded, snapshot, seeked } = reducerState.toJS();
+  const {
+    duration,
+    dataLoaded,
+    isHover,
+    metadataLoaded,
+    snapshot,
+    seeked,
+    isError,
+  } = reducerState.toJS();
 
   // Adapted from https://github.com/brothatru/react-video-thumbnail/blob/master/src/components/VideoThumbnail.js
   // And from https://github.com/soupette/poc-video-preview
@@ -51,6 +75,19 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
     }
   }, [dataLoaded, metadataLoaded, seeked, snapshot]);
 
+  if (isError) {
+    return (
+      <div>
+        <EmptyPreviewTitle>
+          <File title={formatMessage({ id: getTrad('list.assets.not-supported-title') })} />
+        </EmptyPreviewTitle>
+        <EmptyPreviewContent>
+          <FormattedMessage id={getTrad('list.assets.not-supported-content')} />
+        </EmptyPreviewContent>
+      </div>
+    );
+  }
+
   return (
     <Wrapper
       // Specify isHover to prevent bad behavior when compo is under the cursor on modal open
@@ -67,17 +104,35 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
         });
       }}
     >
-      {!snapshot && <LoadingIndicator />}
+      {!snapshot && (
+        <LoadingIndicator
+          aria-label={formatMessage(
+            {
+              id: getTrad('list.assets.loading-asset'),
+            },
+            { path: src }
+          )}
+        />
+      )}
+
       <CanvasWrapper>
         {previewUrl ? (
-          <Thumbnail src={previewUrl} />
+          <Thumbnail
+            src={previewUrl}
+            alt={formatMessage(
+              {
+                id: getTrad('list.assets.preview-asset'),
+              },
+              { path: src }
+            )}
+          />
         ) : (
           <>
             <video
               muted
               ref={videoRef}
               src={src}
-              crossOrigin="anonymous"
+              onError={() => dispatch({ type: 'SET_ERROR', isError: true })}
               onLoadedMetadata={() => {
                 dispatch({
                   type: 'METADATA_LOADED',
@@ -99,6 +154,7 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
           </>
         )}
         <Duration duration={duration} />
+
         {(hasIcon || isHover) && <PlayIcon small />}
       </CanvasWrapper>
     </Wrapper>

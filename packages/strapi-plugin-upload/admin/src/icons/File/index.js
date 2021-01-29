@@ -1,8 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const File = props => {
+const File = ({ title, ...props }) => {
   return (
     <svg width="21" height="25" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <title>{title}</title>
       <defs>
         <filter
           x="-1.7%"
@@ -30,6 +32,14 @@ const File = props => {
       </g>
     </svg>
   );
+};
+
+File.defaultProps = {
+  title: '',
+};
+
+File.propTypes = {
+  title: PropTypes.string,
 };
 
 export default File;
