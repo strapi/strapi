@@ -152,7 +152,7 @@ const buildQueryContext = ({ options, graphqlContext }) => {
 
   ctx.query = {
     ...convertToParams(_.omit(opts, 'where')),
-    ...convertToQuery(opts.where),
+    ...convertToQuery({ _where: opts.where }),
   };
 
   ctx.params = convertToParams(opts);
