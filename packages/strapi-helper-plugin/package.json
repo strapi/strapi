@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.4.0",
+  "version": "3.4.5",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -12,7 +12,7 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "main": "dist/strapi-helper-plugin.cjs.min.js",
   "module": "dist/strapi-helper-plugin.esm.min.js",
@@ -20,7 +20,7 @@
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "license": "SEE LICENSE IN LICENSE",
@@ -33,11 +33,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
-    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.8.0",
+    "enzyme-adapter-react-16": "^1.15.6",
     "rimraf": "3.0.2",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
@@ -50,17 +50,17 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.2-next.2",
-    "@buffetjs/custom": "3.3.2-next.2",
-    "@buffetjs/hooks": "3.3.2-next.2",
-    "@buffetjs/icons": "3.3.2-next.2",
-    "@buffetjs/styles": "3.3.2-next.2",
-    "@buffetjs/utils": "3.3.2-next.2",
+    "@buffetjs/core": "3.3.3-next.2",
+    "@buffetjs/custom": "3.3.3-next.2",
+    "@buffetjs/hooks": "3.3.3-next.2",
+    "@buffetjs/icons": "3.3.3-next.2",
+    "@buffetjs/styles": "3.3.3-next.2",
+    "@buffetjs/utils": "3.3.3-next.2",
     "bootstrap": "^4.5.3",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "moment": "^2.29.1",
     "react": "^16.13.1",
     "react-dom": "^16.9.0",
@@ -70,7 +70,7 @@
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "styled-components": "^5.0.0",
-    "whatwg-fetch": "^3.3.1"
+    "whatwg-fetch": "^3.5.0"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

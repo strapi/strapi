@@ -1,7 +1,7 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.4.0",
-  "description": "This is the description of the plugin.",
+  "version": "3.4.5",
+  "description": "Easily configure your Strapi application to send emails.",
   "strapi": {
     "name": "Email",
     "icon": "paper-plane",
@@ -12,24 +12,24 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "lodash": "4.17.19",
-    "strapi-provider-email-sendmail": "3.4.0",
-    "strapi-utils": "3.4.0"
+    "lodash": "4.17.20",
+    "strapi-provider-email-sendmail": "3.4.5",
+    "strapi-utils": "3.4.5"
   },
   "devDependencies": {
     "rimraf": "3.0.2",
-    "strapi-helper-plugin": "3.4.0"
+    "strapi-helper-plugin": "3.4.5"
   },
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

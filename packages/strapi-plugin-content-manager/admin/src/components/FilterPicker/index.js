@@ -168,7 +168,7 @@ function FilterPicker({
       const useRelation = nextFilters._where.some(obj => Object.keys(obj)[0].includes('.'));
 
       emitEventRef.current('didFilterEntries', { useRelation });
-      setQuery(nextFilters);
+      setQuery({ ...nextFilters, page: 1 });
       toggleFilterPickerState();
     },
     [modifiedData, setQuery, toggleFilterPickerState, metadatas]

@@ -23,7 +23,7 @@
   <a href="https://fastandcomfy.io/strapi/">
     <img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
   </a>
-  
+
   <a href="https://render.com/docs/deploy-strapi">
     <img src="https://assets.strapi.io/uploads/deploy_render_e076b6f23a.png" height="44" />
   </a>
@@ -39,7 +39,7 @@
   <a href="https://travis-ci.org/strapi/strapi">
     <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
   </a>
-  <a href="http://slack.strapi.io">
+  <a href="https://slack.strapi.io">
     <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
   </a>
 </p>
@@ -63,7 +63,7 @@ Strapi is a free and open-source headless CMS delivering your content anywhere y
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/v3.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 ### ⏳ Installation
 
@@ -89,11 +89,11 @@ Enjoy 🎉
 
 ### 🖐 Requirements
 
-Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
+Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
 
 **Supported operating systems**:
 
-- Ubuntu 18.04/Debian 9.x
+- Ubuntu LTS/Debian 9.x
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
@@ -136,7 +136,7 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
-- [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
+- [Slack](https://slack.strapi.io) (For live discussion with the Community and Strapi team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
 - [Community Forum](https://forum.strapi.io) (Questions and Discussions)
 - [Academy](https://academy.strapi.io) (Learn the fundamentals of Strapi)
@@ -147,11 +147,22 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
+Follow our [migration guides](https://strapi.io/documentation/developer-docs/latest/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 
 Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
+
+## Documentation
+
+See our dedicated [repository](https://github.com/strapi/documentation) for the Strapi documentation, or view our documentation live:
+
+- [Developer docs](https://strapi.io/documentation/developer-docs/latest)
+- [User docs](https://strapi.io/documentation/user-docs/latest)
+
+## Try live demo
+
+See for yourself what's under the hood by getting access to a [hosted Strapi project](https://strapi.io/demo) with sample data.
 
 ## License
 

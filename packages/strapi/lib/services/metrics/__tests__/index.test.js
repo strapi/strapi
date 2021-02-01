@@ -1,6 +1,6 @@
 'use strict';
 
-jest.mock('node-fetch');
+jest.mock('node-fetch', () => jest.fn(() => Promise.resolve()));
 
 const fetch = require('node-fetch');
 const metrics = require('../index');

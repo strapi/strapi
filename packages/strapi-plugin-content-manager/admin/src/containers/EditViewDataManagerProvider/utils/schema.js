@@ -212,13 +212,6 @@ const createYupSchema = (
 const createYupSchemaAttribute = (type, validations, options) => {
   let schema = yup.mixed();
 
-  let regex = get(validations, 'regex', null);
-  delete validations.regex;
-
-  if (regex) {
-    validations.regex = new RegExp(regex);
-  }
-
   if (['string', 'uid', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(type)) {
     schema = yup.string();
   }
@@ -303,7 +296,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
                   }
 
                   if (type === 'boolean') {
-                    return value !== undefined;
+                    return value !== null;
                   }
 
                   return !isEmpty(value);
@@ -341,7 +334,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
           break;
         }
         case 'regex':
-          schema = schema.matches(validationValue, errorsTrads.regex);
+          schema = schema.matches(new RegExp(validationValue), errorsTrads.regex);
           break;
         case 'lowercase':
           if (['text', 'textarea', 'email', 'string'].includes(type)) {

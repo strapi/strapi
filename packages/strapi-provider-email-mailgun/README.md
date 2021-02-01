@@ -6,8 +6,8 @@
 
 ## Links
 
-- [Strapi website](http://strapi.io/)
-- [Strapi community on Slack](http://slack.strapi.io)
+- [Strapi website](https://strapi.io/)
+- [Strapi community on Slack](https://slack.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
 
 ## Prerequisites
@@ -46,6 +46,7 @@ module.exports = ({ env }) => ({
     providerOptions: {
       apiKey: env('MAILGUN_API_KEY'),
       domain: env('MAILGUN_DOMAIN'), //Required if you have an account with multiple domains
+      host: env('MAILGUN_HOST', 'api.us.mailgun.net'), //Optional. If domain region is Europe use 'api.eu.mailgun.net'
     },
     settings: {
       defaultFrom: 'myemail@protonmail.com',

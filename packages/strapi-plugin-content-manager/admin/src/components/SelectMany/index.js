@@ -18,6 +18,7 @@ function SelectMany({
   move,
   onInputChange,
   onMenuClose,
+  onMenuOpen,
   onMenuScrollToBottom,
   onRemove,
   options,
@@ -84,6 +85,7 @@ function SelectMany({
         onChange={addRelation}
         onInputChange={onInputChange}
         onMenuClose={onMenuClose}
+        onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={placeholder}
         styles={styles}
@@ -140,6 +142,7 @@ SelectMany.propTypes = {
   name: PropTypes.string.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
+  onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,

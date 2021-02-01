@@ -1,8 +1,8 @@
 {
   "name": "strapi-provider-email-sendmail",
-  "version": "3.4.0",
+  "version": "3.4.5",
   "description": "Sendmail provider for strapi email",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "email",
     "strapi"
@@ -13,7 +13,7 @@
   "main": "./lib",
   "dependencies": {
     "sendmail": "^1.6.1",
-    "strapi-utils": "3.4.0"
+    "strapi-utils": "3.4.5"
   },
   "strapi": {
     "isProvider": true
@@ -21,13 +21,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

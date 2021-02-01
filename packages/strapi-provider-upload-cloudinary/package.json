@@ -1,8 +1,8 @@
 {
   "name": "strapi-provider-upload-cloudinary",
-  "version": "3.4.0",
+  "version": "3.4.5",
   "description": "Cloudinary provider for strapi upload",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "upload",
     "cloudinary",
@@ -31,7 +31,7 @@
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

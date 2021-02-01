@@ -1,8 +1,8 @@
 {
   "name": "strapi-provider-email-amazon-ses",
-  "version": "3.4.0",
+  "version": "3.4.5",
   "description": "Amazon SES provider for strapi email",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "email",
     "strapi",
@@ -15,7 +15,7 @@
   "main": "./lib",
   "dependencies": {
     "node-ses": "^3.0.3",
-    "strapi-utils": "3.4.0"
+    "strapi-utils": "3.4.5"
   },
   "author": {
     "email": "nikolay@tsenkov.net",
@@ -25,7 +25,7 @@
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {
