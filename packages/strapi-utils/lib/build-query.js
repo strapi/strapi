@@ -110,41 +110,41 @@ const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
 };
 
 const normalizeWhereClauses = (whereClauses, { model }) => {
-  return whereClauses.map(({ field, operator, value }) => {
-    if (_.isNil(value)) {
-      const err = new Error(
-        `The field '${field}' in your where filter has ${
-          _.isNull(value) ? 'null' : 'undefined'
-        } as value.`
-      );
-      err.status = 400;
-      throw err;
-    }
+  return whereClauses
+    .filter(({ value }) => !_.isNull(value))
+    .map(({ field, operator, value }) => {
+      if (_.isUndefined(value)) {
+        const err = new Error(
+          `The value of field: '${field}', in your where filter, is undefined.`
+        );
+        err.status = 400;
+        throw err;
+      }
 
-    if (BOOLEAN_OPERATORS.includes(operator)) {
-      return {
+      if (BOOLEAN_OPERATORS.includes(operator)) {
+        return {
+          field,
+          operator,
+          value: value.map(clauses => normalizeWhereClauses(clauses, { model })),
+        };
+      }
+
+      const { model: assocModel, attribute } = getAssociationFromFieldKey({
+        model,
         field,
+      });
+
+      const { type } = _.get(assocModel, ['allAttributes', attribute], {});
+
+      // cast value or array of values
+      const castedValue = castInput({ type, operator, value });
+
+      return {
+        field: normalizeFieldName({ model, field }),
         operator,
-        value: value.map(clauses => normalizeWhereClauses(clauses, { model })),
+        value: castedValue,
       };
-    }
-
-    const { model: assocModel, attribute } = getAssociationFromFieldKey({
-      model,
-      field,
     });
-
-    const { type } = _.get(assocModel, ['allAttributes', attribute], {});
-
-    // cast value or array of values
-    const castedValue = castInput({ type, operator, value });
-
-    return {
-      field: normalizeFieldName({ model, field }),
-      operator,
-      value: castedValue,
-    };
-  });
 };
 
 const normalizeSortClauses = (clauses, { model }) => {
