@@ -36,18 +36,18 @@
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "strapi-helper-plugin": "3.4.5",
-    "swagger-ui-dist": "3.39.0"
+    "swagger-ui-dist": "3.41.1"
   },
   "author": {
     "name": "soupette",
     "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     },
     {
       "name": "soupette",
