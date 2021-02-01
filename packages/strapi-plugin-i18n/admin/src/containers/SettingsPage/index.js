@@ -1,9 +1,9 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from 'strapi-helper-plugin';
-import { Header, List } from '@buffetjs/custom';
+import { ListButton, SettingsPageLayout } from 'strapi-helper-plugin';
+import { Plus } from '@buffetjs/icons';
+import { List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
-
 import { LocaleRow } from '../../components';
 import { useLocales } from '../../hooks';
 import { getTrad } from '../../utils';
@@ -36,14 +36,6 @@ const LocaleSettingsPage = () => {
     },
   ];
 
-  const headerProps = {
-    title: {
-      label: formatMessage({ id: getTrad('plugin.name') }),
-    },
-    content: formatMessage({ id: getTrad('Settings.list.description') }),
-    actions,
-  };
-
   const listTitle = formatMessage(
     {
       id: getTrad(`Settings.locales.list.title${locales.length > 1 ? '.plural' : '.singular'}`),
@@ -52,16 +44,38 @@ const LocaleSettingsPage = () => {
   );
 
   return (
-    <>
-      <Header {...headerProps} />
-      <BaselineAlignment top size="3px" />
-      <List
-        title={listTitle}
-        items={locales}
-        isLoading={isLoading}
-        customRowComponent={locale => <LocaleRow locale={locale} />}
-      />
-    </>
+    <SettingsPageLayout
+      pageTitle="Hello moto"
+      header={{
+        title: {
+          label: formatMessage({ id: getTrad('plugin.name') }),
+        },
+        content: formatMessage({ id: getTrad('Settings.list.description') }),
+        actions,
+      }}
+      Content={(
+        <>
+          <List
+            title={listTitle}
+            items={locales}
+            isLoading={isLoading}
+            customRowComponent={locale => <LocaleRow locale={locale} />}
+          />
+
+          <ListButton>
+            {canCreate && (
+              <Button
+                label="Add locale"
+                onClick={() => undefined}
+                color="primary"
+                type="button"
+                icon={<Plus fill="#007eff" width="11px" height="11px" />}
+              />
+            )}
+          </ListButton>
+        </>
+      )}
+    />
   );
 };
 
