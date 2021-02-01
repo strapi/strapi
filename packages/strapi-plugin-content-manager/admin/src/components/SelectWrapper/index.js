@@ -17,6 +17,11 @@ import Option from './Option';
 import { A, BaselineAlignment } from './components';
 import { connect, select, styles } from './utils';
 
+const initialPaginationState = {
+  _contains: '',
+  _limit: 20,
+  _start: 0,
+};
 function SelectWrapper({
   description,
   editable,
@@ -34,17 +39,13 @@ function SelectWrapper({
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
-
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
-  const [state, setState] = useState({
-    _contains: '',
-    _limit: 20,
-    _start: 0,
-  });
+  const [state, setState] = useState(initialPaginationState);
   const [options, setOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const filteredOptions = useMemo(() => {
     return options.filter(option => {
@@ -64,6 +65,22 @@ function SelectWrapper({
 
   const { endPoint, containsKey, defaultParams, shouldDisplayRelationLink } = queryInfos;
 
+  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
+    relationType
+  );
+
+  const idsToOmit = useMemo(() => {
+    if (!value) {
+      return [];
+    }
+
+    if (isSingle) {
+      return [value];
+    }
+
+    return value.map(val => val.id);
+  }, [isSingle, value]);
+
   const getData = useCallback(
     async signal => {
       // Currently polymorphic relations are not handled
@@ -79,14 +96,21 @@ function SelectWrapper({
         return;
       }
 
-      const params = { _limit: state._limit, _start: state._start, ...defaultParams };
+      setIsLoading(true);
+
+      const params = { _limit: state._limit, ...defaultParams };
 
       if (state._contains) {
         params[containsKey] = state._contains;
       }
 
       try {
-        const data = await request(endPoint, { method: 'GET', params, signal });
+        const data = await request(endPoint, {
+          method: 'POST',
+          params,
+          signal,
+          body: { idsToOmit },
+        });
 
         const formattedData = data.map(obj => {
           return { value: obj, label: obj[mainField.name] };
@@ -108,17 +132,16 @@ function SelectWrapper({
         // Silent
       }
     },
-
     [
-      containsKey,
-      defaultParams,
-      endPoint,
-      isFieldAllowed,
       isMorph,
-      mainField.name,
+      isFieldAllowed,
       state._limit,
-      state._start,
       state._contains,
+      defaultParams,
+      containsKey,
+      endPoint,
+      idsToOmit,
+      mainField.name,
     ]
   );
 
@@ -126,12 +149,14 @@ function SelectWrapper({
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    getData(signal);
+    if (isOpen) {
+      getData(signal);
+    }
 
     return () => abortController.abort();
-  }, [getData]);
+  }, [getData, isOpen]);
 
-  const onInputChange = (inputValue, { action }) => {
+  const handleInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
       setState(prevState => {
         if (prevState._contains === inputValue) {
@@ -145,13 +170,26 @@ function SelectWrapper({
     return inputValue;
   };
 
-  const onMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _start: prevState._start + 20 }));
+  const handleMenuScrollToBottom = () => {
+    setState(prevState => ({ ...prevState, _limit: prevState._limit + 20 }));
   };
 
-  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
-    relationType
-  );
+  const handleMenuClose = () => {
+    setState(initialPaginationState);
+    setIsOpen(false);
+  };
+
+  const handleChange = value => {
+    onChange({ target: { name, value: value ? value.value : value } });
+  };
+
+  const handleAddRelation = value => {
+    addRelation({ target: { name, value } });
+  };
+
+  const handleMenuOpen = () => {
+    setIsOpen(true);
+  };
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
 
@@ -218,9 +256,7 @@ function SelectWrapper({
         <BaselineAlignment />
 
         <Component
-          addRelation={value => {
-            addRelation({ target: { name, value } });
-          }}
+          addRelation={handleAddRelation}
           components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
           displayNavigationLink={shouldDisplayRelationLink}
           id={name}
@@ -231,14 +267,11 @@ function SelectWrapper({
           move={moveRelation}
           name={name}
           options={filteredOptions}
-          onChange={value => {
-            onChange({ target: { name, value: value ? value.value : value } });
-          }}
-          onInputChange={onInputChange}
-          onMenuClose={() => {
-            setState(prevState => ({ ...prevState, _contains: '' }));
-          }}
-          onMenuScrollToBottom={onMenuScrollToBottom}
+          onChange={handleChange}
+          onInputChange={handleInputChange}
+          onMenuClose={handleMenuClose}
+          onMenuOpen={handleMenuOpen}
+          onMenuScrollToBottom={handleMenuScrollToBottom}
           onRemove={onRemoveRelation}
           placeholder={
             isEmpty(placeholder) ? (

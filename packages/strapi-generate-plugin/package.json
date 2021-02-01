@@ -1,8 +1,8 @@
 {
   "name": "strapi-generate-plugin",
-  "version": "3.4.1",
+  "version": "3.4.5",
   "description": "Generate an plugin for a Strapi application.",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "generate",
     "generator",
@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "fs-extra": "^9.0.1",
-    "lodash": "4.17.19",
-    "strapi-utils": "3.4.1"
+    "lodash": "4.17.20",
+    "strapi-utils": "3.4.5"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -23,13 +23,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

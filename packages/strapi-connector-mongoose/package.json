@@ -1,8 +1,8 @@
 {
   "name": "strapi-connector-mongoose",
-  "version": "3.4.1",
+  "version": "3.4.5",
   "description": "Mongoose hook for the Strapi framework",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "mongoose",
     "hook",
@@ -15,24 +15,24 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "mongoose": "5.10.8",
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.3.2",
     "pluralize": "^8.0.0",
     "semver": "^7.3.4",
-    "strapi-utils": "3.4.1"
+    "strapi-utils": "3.4.5"
   },
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

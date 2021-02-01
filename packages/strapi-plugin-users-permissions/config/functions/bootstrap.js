@@ -77,6 +77,7 @@ module.exports = async () => {
       key: '',
       secret: '',
       callback: `${strapi.config.server.url}/auth/instagram/callback`,
+      scope: ['user_profile'],
     },
     vk: {
       enabled: false,
@@ -110,6 +111,24 @@ module.exports = async () => {
       subdomain: 'my.subdomain.com',
       callback: `${strapi.config.server.url}/auth/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
+    },
+    reddit: {
+      enabled: false,
+      icon: 'reddit',
+      key: '',
+      secret: '',
+      state: true,
+      callback: `${strapi.config.server.url}/auth/reddit/callback`,
+      scope: ['identity'],
+    },
+    auth0: {
+      enabled: false,
+      icon: '',
+      key: '',
+      secret: '',
+      subdomain: 'my-tenant.eu',
+      callback: `${strapi.config.server.url}/auth/auth0/callback`,
+      scope: ['openid', 'email', 'profile'],
     },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
