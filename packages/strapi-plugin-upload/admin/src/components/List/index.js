@@ -40,11 +40,11 @@ const List = ({
       <ListRow>
         {data.map(item => {
           const { id } = item;
-          const url = get(item, ['formats', 'small', 'url'], item.url);
+          const thumbnail = get(item, ['formats', 'small'], item);
           const isAllowed =
             allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
-          const fileUrl = prefixFileUrlWithBackendUrl(url);
+          const fileUrl = prefixFileUrlWithBackendUrl(thumbnail.url);
 
           return (
             <ListCell key={id}>
@@ -53,6 +53,7 @@ const List = ({
                 checked={checked}
                 {...item}
                 url={fileUrl}
+                mime={thumbnail.mime}
                 onClick={onCardClick}
                 small={smallCards}
               >

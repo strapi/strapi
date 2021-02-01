@@ -42,6 +42,7 @@ const InputUID = ({
   contentTypeUID,
   description,
   error: inputError,
+  label: inputLabel,
   name,
   onChange,
   validations,
@@ -217,7 +218,7 @@ const InputUID = ({
 
         return (
           <Wrapper ref={wrapperRef}>
-            <Name htmlFor={name}>{name}</Name>
+            <Name htmlFor={name}>{inputLabel}</Name>
             <InputContainer>
               <Input
                 {...inputProps}
@@ -291,6 +292,7 @@ InputUID.propTypes = {
   description: PropTypes.string,
   editable: PropTypes.bool,
   error: PropTypes.string,
+  label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   validations: PropTypes.object,
