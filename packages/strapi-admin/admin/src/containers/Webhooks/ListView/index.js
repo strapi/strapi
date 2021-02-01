@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Header, List } from '@buffetjs/custom';
+import { List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import { omit } from 'lodash';
@@ -17,11 +17,10 @@ import {
   PopUpWarning,
   useUserPermissions,
   LoadingIndicatorPage,
+  SettingsPageLayout,
 } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
-import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyList, ListRow } from '../../../components/Webhooks';
-import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
 
 function ListView() {
@@ -272,42 +271,50 @@ function ListView() {
   }
 
   return (
-    <Wrapper>
-      <PageTitle name="Webhooks" />
-      <Header {...headerProps} />
-      {canRead && (
-        <div className="list-wrapper">
-          {rowsCount > 0 ? (
-            <List
-              {...listProps}
-              customRowComponent={props => {
-                return (
-                  <ListRow
-                    {...props}
-                    canUpdate={canUpdate}
-                    canDelete={canDelete}
-                    onCheckChange={handleChange}
-                    onEditClick={handleGoTo}
-                    onDeleteCLick={handleDeleteClick}
-                    onEnabledChange={handleEnabledChange}
-                    itemsToDelete={webhooksToDelete}
+    <>
+      <SettingsPageLayout
+        pageTitle="Webhooks"
+        header={headerProps}
+        Content={(
+          <>
+            {canRead && (
+              <div className="list-wrapper">
+                {rowsCount > 0 ? (
+                  <List
+                    {...listProps}
+                    customRowComponent={props => {
+                      return (
+                        <ListRow
+                          {...props}
+                          canUpdate={canUpdate}
+                          canDelete={canDelete}
+                          onCheckChange={handleChange}
+                          onEditClick={handleGoTo}
+                          onDeleteCLick={handleDeleteClick}
+                          onEnabledChange={handleEnabledChange}
+                          itemsToDelete={webhooksToDelete}
+                        />
+                      );
+                    }}
                   />
-                );
-              }}
+                ) : (
+                  <EmptyList />
+                )}
+                <ListButton>
+                  {canCreate && <Button {...omit(newButtonProps, 'Component')} />}
+                </ListButton>
+              </div>
+            )}
+            <PopUpWarning
+              isOpen={showModal}
+              toggleModal={() => setShowModal(!showModal)}
+              popUpWarningType="danger"
+              onConfirm={handleConfirmDelete}
             />
-          ) : (
-            <EmptyList />
-          )}
-          <ListButton>{canCreate && <Button {...omit(newButtonProps, 'Component')} />}</ListButton>
-        </div>
-      )}
-      <PopUpWarning
-        isOpen={showModal}
-        toggleModal={() => setShowModal(!showModal)}
-        popUpWarningType="danger"
-        onConfirm={handleConfirmDelete}
+          </>
+        )}
       />
-    </Wrapper>
+    </>
   );
 }
 

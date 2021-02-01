@@ -2,16 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Header } from '@buffetjs/custom';
 import PageTitle from '../PageTitle';
+import Wrapper from './Wrapper';
 import BaselineAlignment from '../BaselineAlignment';
 
 export const SettingsPageLayout = ({ pageTitle, header, Content }) => {
   return (
-    <div>
+    <Wrapper>
       <PageTitle title={pageTitle} header={header} />
       <Header {...header} />
       <BaselineAlignment top size="3px" />
       {Content}
-    </div>
+    </Wrapper>
   );
 };
 
