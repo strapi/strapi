@@ -1047,21 +1047,21 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@buffetjs/core@3.3.3-next.3":
-  version "3.3.3-next.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.3.3-next.3.tgz#c6dc5e8bfdcfe0f0197d33bb70a7f42c33b5fae7"
-  integrity sha512-MrdbaxzBUjrdFRwfu+VQV32QJ+pkkBHYOzNdx/UGUGRsLhkrOrw0zrhGk4wcwW2TIHYT2I+tLdYlAYwm0UEI5w==
+"@buffetjs/core@3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.3.4.tgz#eb7583ab953738027e21da40e0d35c81d6f624dd"
+  integrity sha512-KxxmkXjgRvkqVwW959Ie2BWRYAPtQQbPXYLMZ7tr0KmNs3Eug6ifahiVSw5izcjGSTWnnuA45MOVxWq7EP9D3w==
   dependencies:
-    "@buffetjs/hooks" "3.3.3-next.3"
-    "@buffetjs/icons" "3.3.3-next.3"
-    "@buffetjs/styles" "3.3.3-next.3"
-    "@buffetjs/utils" "3.3.3-next.3"
+    "@buffetjs/hooks" "3.3.4"
+    "@buffetjs/icons" "3.3.4"
+    "@buffetjs/styles" "3.3.4"
+    "@buffetjs/utils" "3.3.4"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"
     "@fortawesome/react-fontawesome" "^0.1.4"
     invariant "^2.2.4"
-    lodash "4.17.19"
+    lodash "4.17.20"
     moment "^2.24.0"
     prop-types "^15.7.2"
     rc-input-number "^4.5.0"
@@ -1071,35 +1071,35 @@
     react-with-direction "^1.3.1"
     reactstrap "^8.5.1"
 
-"@buffetjs/custom@3.3.3-next.3":
-  version "3.3.3-next.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.3.3-next.3.tgz#08dcf9b3af27b49eb86e49c437be4f23c02d8bc8"
-  integrity sha512-rcUy1cEBrfZA/L6eZ1nbHnbyk9cHewUPeS2VX4PxKuygJjvMBQdDYUXxw4OyGNvF15jkmuX03ZTCRTKEXgbVbA==
+"@buffetjs/custom@3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.3.4.tgz#d26b3abd885e3a9f53c33b9a508e44e1652649ca"
+  integrity sha512-So/VOcDRWzHJ0VVIlnRPuUvOLdzjPARClvtSVwwxPPXG510J0AawNdfvj54gokwYAZbblBp9V74s1b2w1fWTZw==
   dependencies:
-    "@buffetjs/core" "3.3.3-next.3"
-    "@buffetjs/styles" "3.3.3-next.3"
-    "@buffetjs/utils" "3.3.3-next.3"
-    lodash "4.17.19"
+    "@buffetjs/core" "3.3.4"
+    "@buffetjs/styles" "3.3.4"
+    "@buffetjs/utils" "3.3.4"
+    lodash "4.17.20"
     moment "^2.24.0"
     prop-types "^15.5.10"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/hooks@3.3.3-next.3":
-  version "3.3.3-next.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.3.3-next.3.tgz#46d376f282a807bdf88406f36c6eae529ed5388c"
-  integrity sha512-hY1AhPoUuHHqiCENIAmQbOLHZE/9JNokq2MWLQJoKMuQDxqkogpD+/M5qN0V9d0GiC0KnbW50z2fkRSPfTTl7A==
+"@buffetjs/hooks@3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.3.4.tgz#2fd7622673a0a28177e910ad85ba9f1386e9c47f"
+  integrity sha512-HUdnzBFovEXWnIVgzts6DtPSEJEn55Ivbu6Xd8AXyZoz5xYTwhD5iCtif0CS5uEtqsXGOoc320kcbPrRn6wEgw==
 
-"@buffetjs/icons@3.3.3-next.3":
-  version "3.3.3-next.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.3.3-next.3.tgz#d26d76a3201360f1b4132e614c86fef4631760a9"
-  integrity sha512-sKIa51d2BIS/bJIeTrG94sDXNQgDpORiORCEEN4DY/2zPsSHo11zTVxAHSfz8fd6NtxSh3yRAc62L40O6ZpyUQ==
+"@buffetjs/icons@3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.3.4.tgz#21b46eea90db7a88b2b929bfed63099275ef068a"
+  integrity sha512-uIjpnydas3TkT+5MyH7y/zP5ny813OFE4Q3Gl0do1nITUdwrkZXqV9VvfYeDDoYoOURaLI5N6yfR/kW6qgV3Kw==
   dependencies:
     prop-types "^15.5.10"
 
-"@buffetjs/styles@3.3.3-next.3":
-  version "3.3.3-next.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.3.3-next.3.tgz#db3476abdc9b111bc34fdbdb41a8bb6cd11c7437"
-  integrity sha512-ZKucPK4G6JRQBVrndyvqqhjjQrOteZ1OC+PJfUtPG9vcwmZJ5RLmnUEhifsuGTlgMWvFiWLakJjFsgUFA23CgQ==
+"@buffetjs/styles@3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.3.4.tgz#41a024e6dab5ccb19d3b16e02491177c6dba7edf"
+  integrity sha512-nAGYnR17D0DhdKxMyWcmKD5UZN29xG99yGraBR/vJ50S5YqEgL0N248oxVghw3YMVF4sLxrKvFIFkTGPSiDfiw==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
@@ -1110,12 +1110,12 @@
     react-dates "^21.1.0"
     react-tooltip "^4.2.11"
 
-"@buffetjs/utils@3.3.3-next.3":
-  version "3.3.3-next.3"
-  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.3.3-next.3.tgz#022d92f236b9da791326f6c2887d523cd4ab1d41"
-  integrity sha512-xfcMGFjP4Aodk82A3KiT92E5ypdQ01vuUJYEeb5rbPU5QoMgnt2nNZJeW7i+fWTgjI2oocz3Te/QRzcTJDGdaQ==
+"@buffetjs/utils@3.3.4":
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.3.4.tgz#6f000d58349d82f8e672aa4053d8f361a1a8a829"
+  integrity sha512-65Z4wFrcjTsSHkVNCxhq0vHOAugct42hgkwcqGcDN42McX45cac0ul8lA6xzJmE5yaA1dzkflgYeFTERHZzjmw==
   dependencies:
-    lodash "4.17.19"
+    lodash "4.17.20"
     yup "^0.27.0"
 
 "@casl/ability@^4.1.5":
