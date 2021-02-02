@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+
 import React from 'react';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
@@ -8,7 +10,6 @@ import themes from '../../../../../../strapi-admin/admin/src/themes';
 // but it bugs somehow when run with jest
 jest.mock('strapi-helper-plugin', () => ({
   BaselineAlignment: () => <div />,
-  // eslint-disable-next-line react/prop-types
   ModalConfirm: ({ onConfirm, isOpen }) =>
     isOpen ? (
       <div role="dialog">
@@ -17,6 +18,11 @@ jest.mock('strapi-helper-plugin', () => ({
         </button>
       </div>
     ) : null,
+
+  Modal: ({ isOpen, children }) => isOpen && <div role="dialog">{children}</div>,
+  ModalHeader: ({ children }) => <div>{children}</div>,
+  ModalSection: ({ children }) => <div>{children}</div>,
+  ModalFooter: ({ children }) => <div>{children}</div>,
 }));
 
 jest.mock('../../../utils', () => ({
@@ -30,6 +36,10 @@ jest.mock('react-intl', () => ({
 }));
 
 describe('i18n settings page', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('initial state', () => {
     it('shows default EN locale with edit button but no delete button', async () => {
       render(
@@ -75,11 +85,28 @@ describe('i18n settings page', () => {
       const rowUtils = within(row);
 
       fireEvent.click(rowUtils.getByLabelText('Delete locale'));
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeVisible();
-
       fireEvent.click(screen.getByText('Confirm'));
+
+      await waitFor(() =>
+        expect(strapi.notification.success).toBeCalledWith('Settings.locales.modal.delete.success')
+      );
+    });
+  });
+
+  describe('edit', () => {
+    it('shows the default edit modal layout', async () => {
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Edit locale'));
+
+      expect(screen.getByText(`Settings.locales.modal.edit.confirmation`)).toBeVisible();
     });
   });
 });

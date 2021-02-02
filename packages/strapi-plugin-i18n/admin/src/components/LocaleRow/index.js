@@ -12,11 +12,11 @@ import { getTrad } from '../../utils';
 const canUpdate = true;
 const canDelete = true;
 
-const LocaleSettingsPage = ({ locale, onDelete }) => {
+const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <CustomRow onClick={() => console.log('open modal')}>
+    <CustomRow onClick={onEdit}>
       <td>
         <Text>{locale.code}</Text>
       </td>
@@ -39,7 +39,7 @@ const LocaleSettingsPage = ({ locale, onDelete }) => {
                   <Pencil fill="#0e1622" />
                 </span>
               ) : null,
-              onClick: () => console.log('edit'),
+              onClick: onEdit,
             },
             {
               icon:
@@ -64,6 +64,7 @@ LocaleSettingsPage.propTypes = {
     code: PropTypes.string.isRequired,
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
 };
 
 export default LocaleSettingsPage;

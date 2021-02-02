@@ -3,10 +3,12 @@ import { useIntl } from 'react-intl';
 import { BaselineAlignment, ModalConfirm } from 'strapi-helper-plugin';
 import { Header, List } from '@buffetjs/custom';
 import { Button, Text } from '@buffetjs/core';
+import ModalEdit from '../../components/ModalEdit';
 import { LocaleRow } from '../../components';
 import { useLocales } from '../../hooks';
 import { getTrad } from '../../utils';
 import useDeleteLocale from '../../hooks/useDeleteLocale';
+import useEditLocale from '../../hooks/useEditLocale';
 
 // Fake permissions
 const canCreate = true;
@@ -19,6 +21,8 @@ const LocaleSettingsPage = () => {
     showDeleteModal,
     hideDeleteModal,
   } = useDeleteLocale();
+
+  const { isEditing, isEditModalOpen, editLocale, showEditModal, hideEditModal } = useEditLocale();
 
   const { formatMessage } = useIntl();
   const { locales, isLoading } = useLocales();
@@ -68,7 +72,11 @@ const LocaleSettingsPage = () => {
         items={locales}
         isLoading={isLoading}
         customRowComponent={locale => (
-          <LocaleRow locale={locale} onDelete={() => showDeleteModal(locale)} />
+          <LocaleRow
+            locale={locale}
+            onDelete={() => showDeleteModal(locale)}
+            onEdit={() => showEditModal(locale)}
+          />
         )}
       />
 
@@ -90,6 +98,16 @@ const LocaleSettingsPage = () => {
           {formatMessage({ id: getTrad('Settings.locales.modal.delete.secondMessage') })}
         </Text>
       </ModalConfirm>
+
+      <ModalEdit
+        isLoading={isEditing}
+        isOpen={isEditModalOpen}
+        onCancel={hideEditModal}
+        onClosed={hideEditModal}
+        onClick={editLocale}
+        onOpened={() => null}
+        onToggle={hideEditModal}
+      />
     </>
   );
 };
