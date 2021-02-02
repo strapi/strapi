@@ -12,7 +12,7 @@ import { getTrad } from '../../utils';
 const canUpdate = true;
 const canDelete = true;
 
-const LocaleSettingsPage = ({ locale }) => {
+const LocaleSettingsPage = ({ locale, onDelete }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -34,12 +34,21 @@ const LocaleSettingsPage = ({ locale }) => {
         <IconLinks
           links={[
             {
-              icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
+              icon: canUpdate ? (
+                <span aria-label="Edit locale">
+                  <Pencil fill="#0e1622" />
+                </span>
+              ) : null,
               onClick: () => console.log('edit'),
             },
             {
-              icon: canDelete && !locale.isDefault ? <FontAwesomeIcon icon="trash-alt" /> : null,
-              onClick: () => console.log('open delete modal'),
+              icon:
+                canDelete && !locale.isDefault ? (
+                  <span aria-label="Delete locale">
+                    <FontAwesomeIcon icon="trash-alt" />
+                  </span>
+                ) : null,
+              onClick: onDelete,
             },
           ]}
         />
@@ -54,6 +63,7 @@ LocaleSettingsPage.propTypes = {
     displayName: PropTypes.string,
     code: PropTypes.string.isRequired,
   }).isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default LocaleSettingsPage;
