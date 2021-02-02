@@ -12,7 +12,7 @@ module.exports = {
     }
   `,
   mutation: `
-    upload(refId: ID, ref: String, field: String, source: String, file: Upload!): UploadFile!
+    upload(refId: ID, ref: String, field: String, source: String, info: FileInfoInput, file: Upload!): UploadFile!
     multipleUpload(refId: ID, ref: String, field: String, source: String, files: [Upload]!): [UploadFile]!
     updateFileInfo(id: ID!, info: FileInfoInput!): UploadFile!
   `,
@@ -29,8 +29,8 @@ module.exports = {
       upload: {
         description: 'Upload one file',
         resolverOf: 'plugins::upload.upload.upload',
-        resolver: async (obj, { file: upload, ...fields }) => {
-          const file = await formatFile(upload, fields);
+        resolver: async (obj, { file: upload, info, ...fields }) => {
+          const file = await formatFile(upload, info, fields);
 
           const uploadedFiles = await strapi.plugins.upload.services.upload.uploadFileAndPersist(
             file
@@ -44,7 +44,7 @@ module.exports = {
         description: 'Upload one file',
         resolverOf: 'plugins::upload.upload.upload',
         resolver: async (obj, { files: uploads, ...fields }) => {
-          const files = await Promise.all(uploads.map(upload => formatFile(upload, fields)));
+          const files = await Promise.all(uploads.map(upload => formatFile(upload, {}, fields)));
 
           const uploadService = strapi.plugins.upload.services.upload;
 
@@ -73,7 +73,7 @@ module.exports = {
   },
 };
 
-const formatFile = async (upload, metas) => {
+const formatFile = async (upload, extraInfo, metas) => {
   const { filename, mimetype, createReadStream } = await upload;
 
   const { optimize } = strapi.plugins.upload.services['image-manipulation'];
@@ -88,7 +88,7 @@ const formatFile = async (upload, metas) => {
       type: mimetype,
       size: buffer.length,
     },
-    {},
+    extraInfo || {},
     metas
   );
 

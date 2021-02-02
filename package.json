@@ -2,7 +2,7 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@swc-node/jest": "^1.0.3",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
@@ -13,7 +13,7 @@
     "chokidar": "3.3.1",
     "cross-env": "^7.0.3",
     "enzyme": "^3.9.0",
-    "enzyme-adapter-react-16": "^1.12.1",
+    "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^7.18.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-base": "^14.0.0",
@@ -82,13 +82,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi Solutions",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi Solutions",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

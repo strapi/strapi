@@ -1,8 +1,8 @@
 {
   "name": "strapi-provider-email-nodemailer",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "description": "Nodemailer provider for Strapi 3",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "strapi",
     "email",
@@ -48,7 +48,7 @@
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "license": "SEE LICENSE IN LICENSE",

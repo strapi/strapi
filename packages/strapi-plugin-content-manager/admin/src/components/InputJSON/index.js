@@ -29,7 +29,7 @@ class InputJSON extends React.Component {
   constructor(props) {
     super(props);
     this.editor = React.createRef();
-    this.state = { error: false, markedText: null, hasInitValue: false };
+    this.state = { error: false, markedText: null };
   }
 
   componentDidMount() {
@@ -54,7 +54,7 @@ class InputJSON extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.value !== this.props.value && !this.state.hasInitValue) {
+    if (prevProps.value !== this.props.value && !this.codeMirror.state.focused) {
       this.setInitValue();
     }
   }
@@ -65,9 +65,9 @@ class InputJSON extends React.Component {
     try {
       if (value === null) return this.codeMirror.setValue('');
 
-      this.setState({ hasInitValue: true });
+      const nextValue = typeof value !== 'string' ? stringify(value, null, 2) : value;
 
-      return this.codeMirror.setValue(stringify(value, null, 2));
+      return this.codeMirror.setValue(nextValue);
     } catch (err) {
       return this.setState({ error: true });
     }
@@ -118,8 +118,6 @@ class InputJSON extends React.Component {
     if (change.origin === 'setValue') {
       return;
     }
-
-    this.setState({ hasInitValue: true });
 
     const { name, onChange } = this.props;
     let value = doc.getValue();
