@@ -17,7 +17,7 @@ const ProviderButton = ({ provider }) => {
             <img
               src={provider.icon}
               alt={provider.displayName}
-              style={{ maxWidth: 80, maxHeight: 40 }}
+              style={{ maxWidth: '100%', maxHeight: 30 }}
             />
           ) : (
             <Text color="black" ellipsis>
