@@ -18,7 +18,7 @@ module.exports = () => {
       });
     },
 
-    toArray() {
+    getAll() {
       return Array.from(this.values());
     },
   });

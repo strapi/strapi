@@ -1,7 +1,5 @@
 'use strict';
 
-// const {} = require('lodash/fp');
-
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest, createRequest } = require('../../../../test/helpers/request');
 const { createUtils } = require('../../../../test/helpers/utils');
@@ -62,7 +60,8 @@ describe('Provider Login', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({ logLevel: 'debug' });
     utils = createUtils(strapi);
-    hasSSO = require('../../../strapi/lib/utils/ee').features.isEnabled('sso');
+    // eslint-disable-next-line node/no-extraneous-require
+    hasSSO = require('strapi/lib/utils/ee').features.isEnabled('sso');
 
     await createFixtures();
 

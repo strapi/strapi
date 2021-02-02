@@ -322,7 +322,8 @@ describe('Role CRUD End to End', () => {
         }
       `);
     } else {
-      const { features } = require('../../strapi/lib/utils/ee');
+      // eslint-disable-next-line node/no-extraneous-require
+      const { features } = require('strapi/lib/utils/ee');
       const hasSSO = features.isEnabled('sso');
 
       if (hasSSO) {

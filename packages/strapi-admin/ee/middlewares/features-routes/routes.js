@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  sso: () => [
+  sso: [
     {
       method: 'GET',
       path: '/providers',

@@ -17,11 +17,13 @@ import {
 import { useAuthProviders } from '../../../../hooks';
 
 const Login = loginProps => {
+  const ssoEnabled = ENABLED_EE_FEATURES.includes('sso');
+
   const theme = useTheme();
-  const { isLoading, data: providers } = useAuthProviders();
+  const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
 
-  if (!ENABLED_EE_FEATURES.includes('sso') || (!isLoading && providers.length === 0)) {
+  if (!ssoEnabled || (!isLoading && providers.length === 0)) {
     return <BaseLogin {...loginProps} />;
   }
 

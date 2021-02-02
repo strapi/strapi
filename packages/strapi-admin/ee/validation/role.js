@@ -1,8 +1,8 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('strapi-utils');
-
-const { features } = require('../../../strapi/lib/utils/ee');
+// eslint-disable-next-line node/no-extraneous-require
+const { features } = require('strapi/lib/utils/ee');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
