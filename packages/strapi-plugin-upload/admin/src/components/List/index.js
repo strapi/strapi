@@ -40,11 +40,13 @@ const List = ({
       <ListRow>
         {data.map(item => {
           const { id } = item;
-          const url = get(item, ['formats', 'small', 'url'], item.url);
+          const thumbnail = get(item, ['formats', 'small'], item);
           const isAllowed =
             allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
-          const fileUrl = prefixFileUrlWithBackendUrl(url);
+
+          const fileUrl = prefixFileUrlWithBackendUrl(thumbnail.url);
+
           const cardOptions = {
             ...pick(item, ['ext', 'name', 'mime', 'height', 'width', 'size', 'previewUrl', 'id']),
             isDisabled: !isAllowed,
