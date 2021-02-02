@@ -1,4 +1,5 @@
 import de from './de.json';
+import dk from './dk.json';
 import en from './en.json';
 import es from './es.json';
 import fr from './fr.json';
@@ -14,6 +15,7 @@ import zh from './zh.json';
 
 const trads = {
   de,
+  dk,
   en,
   es,
   fr,

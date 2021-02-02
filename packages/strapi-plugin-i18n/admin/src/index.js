@@ -1,9 +1,12 @@
+import React from 'react';
 import * as yup from 'yup';
 import pluginPkg from '../../package.json';
 import middlewares from './middlewares';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
+import { getTrad } from './utils';
+import SettingsPage from './containers/SettingsPage';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -21,6 +24,23 @@ export default strapi => {
     mainComponent: null,
     name: pluginPkg.strapi.name,
     pluginLogo,
+    preventComponentRendering: false,
+    settings: {
+      global: {
+        links: [
+          {
+            title: {
+              id: getTrad('plugin.name'),
+              defaultMessage: 'Internationalization',
+            },
+            name: 'internationalization',
+            to: `${strapi.settingsBaseURL}/internationalization`,
+            Component: () => <SettingsPage />,
+            // permissions: pluginPermissions.settings,
+          },
+        ],
+      },
+    },
     trads,
     boot(app) {
       const ctbPlugin = app.getPlugin('content-type-builder');

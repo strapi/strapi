@@ -9,6 +9,7 @@ const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { singular } = require('pluralize');
+const { handleDatabaseError } = require('./utils/errors');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 const pickCountFilters = omit(['sort', 'limit', 'start']);
@@ -48,6 +49,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
     if (transacting) return fn(transacting);
     return db.transaction(trx => fn(trx));
+  };
+
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
   };
 
   /**
@@ -138,7 +147,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
       }
 
-      return this.findOne(params, null, { transacting: trx });
+      return findOne(params, null, { transacting: trx });
     };
 
     return wrapTransaction(runUpdate, { transacting });
@@ -461,7 +470,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         };
       });
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(({ id, component }) => {
       if (!allIds.find(el => el.id === id && el.component.uid === component.uid)) {
         const err = new Error(
@@ -523,7 +532,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       .fetchAll({ transacting })
       .map(el => el.get('component_id').toString());
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
       if (!allIds.includes(id)) {
         const err = new Error(
@@ -667,8 +676,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,

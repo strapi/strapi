@@ -1,4 +1,12 @@
 {
+  "plugin.name": "Internationalization",
   "plugin.description.long": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
-  "plugin.description.short": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API."
+  "plugin.description.short": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
+  "Settings.list.description": "Configure the settings for the internationalization plugin",
+  "Settings.locales.list.title.singular": "{number} Locale",
+  "Settings.locales.list.title.plural": "{number} Locales",
+  "Settings.locales.row.default-locale": "Default locale",
+  "Settings.locales.modal.delete.confirm": "Yes, delete",
+  "Settings.locales.modal.delete.message": "Deleting this locale will delete all associated content. If you want to keep some content, make sure to reallocate it to another locale first.",
+  "Settings.locales.modal.delete.secondMessage": "Do you want to delete this locale?"
 }

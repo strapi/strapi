@@ -67,7 +67,7 @@
       }
     },
     {
-      "method": "GET",
+      "method": "POST",
       "path": "/relations/:model/:targetField",
       "handler": "relations.find",
       "config": {

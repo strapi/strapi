@@ -173,7 +173,10 @@ const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
 
           const idsMap = ids.reduce((acc, id, idx) => assoc(id, idx, acc), {});
 
-          const mongooseQuery = model.find({ _id: { $in: ids } }, null).session(session).populate(populate);
+          const mongooseQuery = model
+            .find({ _id: { $in: ids } }, null)
+            .session(session)
+            .populate(populate);
           const query = applyQueryParams({
             model,
             query: mongooseQuery,
