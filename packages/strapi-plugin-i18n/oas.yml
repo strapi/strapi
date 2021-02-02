@@ -1,0 +1,141 @@
+openapi: 3.0.2
+info:
+  title: Strapi i18n Plugin
+  version: 1.0.0
+servers:
+  - url: http://localhost:1337
+    description: Local server
+externalDocs:
+  url: https://strapi.io/documentation
+  description: Strapi documentation
+paths:
+  /i18n/iso-locales:
+    get:
+      tags:
+        - ISO-locales
+      description: List iso-locales that the app can use
+      responses:
+        200:
+          description: The list of the locales the app can use
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/iso-locale'
+  /i18n/locales:
+    get:
+      tags:
+        - Locales
+      description: List locales used by the app
+      responses:
+        200:
+          description: A list of locales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/locale'
+    post:
+      tags:
+        - Locales
+      description: Create a locale
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/localeInputCreate'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locale'
+  /i18n/locales/{id}:
+    put:
+      tags:
+        - Locales
+      description: Update the name of a locale
+      parameters:
+        - $ref: '#/components/parameters/locale-id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/localeInputUpdate'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locale'
+
+components:
+  schemas:
+    id:
+      oneOf:
+        - type: string
+        - type: integer
+
+    localeInputCreate:
+      type: object
+      required:
+        - code
+      properties:
+        name:
+          type: string
+          description: Name of the locale
+        code:
+          type: string
+          description: ISO code of the locale
+          required: true
+
+    localeInputUpdate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the locale
+          required: true
+
+    locale:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        name:
+          type: string
+          description: Name of the locale
+        code:
+          type: string
+          description: ISO code of the locale
+
+    iso-locale:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the locale
+        code:
+          type: string
+          description: ISO code of the locale
+
+  parameters:
+    locale-id:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: true
+      description: Locale id
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - bearerAuth: []

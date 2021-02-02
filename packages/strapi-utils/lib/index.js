@@ -33,6 +33,7 @@ const contentTypes = require('./content-types');
 const webhook = require('./webhook');
 const env = require('./env-helper');
 const relations = require('./relations');
+const setCreatorFields = require('./set-creator-fields');
 
 module.exports = {
   yup,
@@ -65,4 +66,5 @@ module.exports = {
   webhook,
   env,
   relations,
+  setCreatorFields,
 };

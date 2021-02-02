@@ -1,12 +1,9 @@
 'use strict';
 
 const { pipe } = require('lodash/fp');
-const {
-  getService,
-  wrapBadRequest,
-  setCreatorFields,
-  pickWritableAttributes,
-} = require('../utils');
+const { setCreatorFields } = require('strapi-utils');
+
+const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
 
 const findEntity = async model => {
   const entityManager = getService('entity-manager');
