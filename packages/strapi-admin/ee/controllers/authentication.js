@@ -18,7 +18,7 @@ module.exports = {
   async getProviders(ctx) {
     const { providerRegistry } = strapi.admin.services.passport;
 
-    ctx.body = providerRegistry.toArray().map(toProviderDTO);
+    ctx.body = providerRegistry.getAll().map(toProviderDTO);
   },
 
   async getProviderLoginOptions(ctx) {
@@ -52,10 +52,11 @@ module.exports = {
     };
   },
 
-  providerLogin: (ctx, next) => {
+  providerLogin(ctx, next) {
     const {
       params: { provider: providerName },
     } = ctx;
+
     const { providerRegistry } = strapi.admin.services.passport;
 
     if (!providerRegistry.has(providerName)) {

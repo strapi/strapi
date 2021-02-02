@@ -4,8 +4,7 @@ const passport = require('koa-passport');
 
 const utils = require('./utils');
 
-const isProduction = process.env.NODE_ENV === 'production';
-const defaultConnectionError = new Error('Invalid connection payload');
+const defaultConnectionError = () => new Error('Invalid connection payload');
 
 const authenticate = async (ctx, next) => {
   const {
@@ -20,7 +19,7 @@ const authenticate = async (ctx, next) => {
       }
 
       strapi.eventHub.emit('admin.auth.error', {
-        error: error || defaultConnectionError,
+        error: error || defaultConnectionError(),
         provider,
       });
 
@@ -43,7 +42,7 @@ const authenticate = async (ctx, next) => {
     const isMissingRegisterFields = !username && (!firstname || !lastname);
 
     if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
-      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError, provider });
+      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -51,7 +50,7 @@ const authenticate = async (ctx, next) => {
 
     // If the default role has been misconfigured, redirect with an error
     if (!defaultRole) {
-      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError, provider });
+      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -83,6 +82,9 @@ const redirectWithAuth = ctx => {
   const { user } = ctx.state;
 
   const jwt = strapi.admin.services.token.createJwtToken(user);
+
+  const isProduction = strapi.config.environment === 'production';
+
   const cookiesOptions = { httpOnly: false, secure: isProduction, overwrite: true };
 
   strapi.eventHub.emit('admin.auth.success', { user, provider });

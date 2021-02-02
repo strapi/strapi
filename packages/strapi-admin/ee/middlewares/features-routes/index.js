@@ -1,6 +1,7 @@
 'use strict';
 
-const { features } = require('../../../../strapi/lib/utils/ee');
+// eslint-disable-next-line node/no-extraneous-require
+const { features } = require('strapi/lib/utils/ee');
 const routes = require('./routes');
 
 module.exports = strapi => ({
@@ -16,7 +17,7 @@ module.exports = strapi => ({
 const loadFeaturesRoutes = () => {
   for (const [feature, getFeatureRoutes] of Object.entries(routes)) {
     if (features.isEnabled(feature)) {
-      strapi.admin.config.routes.push(...getFeatureRoutes());
+      strapi.admin.config.routes.push(...getFeatureRoutes);
     }
   }
 };

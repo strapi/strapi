@@ -1,6 +1,7 @@
 'use strict';
 
-const { features } = require('../../../strapi/lib/utils/ee');
+// eslint-disable-next-line node/no-extraneous-require
+const { features } = require('strapi/lib/utils/ee');
 
 const createLocalStrategy = require('../../services/passport/local-strategy');
 const sso = require('./passport/sso');
@@ -16,7 +17,7 @@ const getPassportStrategies = () => {
     sso.syncProviderRegistryWithConfig();
   }
 
-  const providers = sso.providerRegistry.toArray();
+  const providers = sso.providerRegistry.getAll();
   const strategies = providers.map(provider => provider.createStrategy(strapi));
 
   return [localStrategy, ...strategies];

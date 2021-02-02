@@ -1,6 +1,7 @@
 'use strict';
 
-const { features } = require('../../../../strapi/lib/utils/ee');
+// eslint-disable-next-line node/no-extraneous-require
+const { features } = require('strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../../config/functions/bootstrap');
 const {
   features: { sso: ssoActions },
