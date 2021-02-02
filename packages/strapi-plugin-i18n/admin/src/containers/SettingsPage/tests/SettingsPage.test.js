@@ -108,5 +108,21 @@ describe('i18n settings page', () => {
 
       expect(screen.getByText(`Settings.locales.modal.edit.confirmation`)).toBeVisible();
     });
+
+    it('closes the edit modal when clicking on cancel', async () => {
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Edit locale'));
+      fireEvent.click(screen.getByText('app.components.Button.cancel'));
+
+      expect(screen.queryByText(`Edit locale`)).toBeFalsy();
+    });
   });
 });

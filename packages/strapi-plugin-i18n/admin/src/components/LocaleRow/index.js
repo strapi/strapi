@@ -16,7 +16,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <CustomRow onClick={onEdit}>
+    <CustomRow>
       <td>
         <Text>{locale.code}</Text>
       </td>
