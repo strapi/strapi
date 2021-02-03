@@ -1,3 +1,5 @@
+'use strict';
+
 const subject = `Reset password`;
 
 const html = `<p>We heard that you lost your password. Sorry about that!</p>

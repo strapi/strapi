@@ -26,7 +26,7 @@
   "Auth.form.register.news.label": "Manter-me atualizado sobre novas funcionalidades e futuras melhorias (ao fazê-lo, estás a aceitar os {terms} e a {policy}).",
   "Auth.form.rememberMe.label": "Lembrar-me",
   "Auth.form.username.label": "Nome de utilizador",
-  "Auth.form.username.placeholder": "John Doe",
+  "Auth.form.username.placeholder": "Kai Doe",
   "Auth.link.forgot-password": "Esqueceu-se da palavra-passe?",
   "Auth.link.ready": "Pronto para entrar?",
   "Auth.privacy-policy-agreement.policy": "política de privacidade",

@@ -1,6 +1,6 @@
 import React, { forwardRef, useReducer, useImperativeHandle, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { ModalSection, request } from 'strapi-helper-plugin';
+import { BaselineAlignment, ModalSection, request } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { Padded, Text } from '@buffetjs/core';
@@ -14,7 +14,6 @@ import init from './init';
 import Input from '../../SizedInput';
 import Wrapper from './Wrapper';
 import MagicLink from '../MagicLink';
-import BaselineAlignment from '../../BaselineAlignement';
 
 // This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(

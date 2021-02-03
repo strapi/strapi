@@ -241,12 +241,14 @@ module.exports = async ({ models, target }, ctx) => {
 
           if (type === 'dynamiczone') {
             if (returned[name]) {
-              returned[name] = returned[name].filter(el => el && el.kind).map(el => {
-                return {
-                  __component: findComponentByGlobalId(el.kind).uid,
-                  ...el.ref,
-                };
-              });
+              returned[name] = returned[name]
+                .filter(el => el && el.kind)
+                .map(el => {
+                  return {
+                    __component: findComponentByGlobalId(el.kind).uid,
+                    ...el.ref,
+                  };
+                });
             }
           }
         });
@@ -270,9 +272,9 @@ module.exports = async ({ models, target }, ctx) => {
       });
     };
 
-    // Only sync indexes in development env while it's not possible to create complex indexes directly from models
-    // In other environments it will simply create missing indexes (those defined in the models but not present in db)
-    if (strapi.app.env === 'development') {
+    // Only sync indexes when not in production env while it's not possible to create complex indexes directly from models
+    // In production it will simply create missing indexes (those defined in the models but not present in db)
+    if (strapi.app.env !== 'production') {
       // Ensure indexes are synced with the model, prevent duplicate index errors
       // Side-effect: Delete all the indexes not present in the model.json
       Model.syncIndexes(null, handleIndexesErrors);

@@ -2,7 +2,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../../../components/BaselineAlignement';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
 import Input from '../Input';
