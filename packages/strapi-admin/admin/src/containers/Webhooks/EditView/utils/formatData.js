@@ -4,6 +4,7 @@ const cleanData = data => {
   const webhooks = data;
 
   set(webhooks, 'headers', unformatHeaders(data.headers));
+  set(webhooks, 'body', unformatHeaders(data.body));
 
   return webhooks;
 };

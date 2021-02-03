@@ -6,6 +6,7 @@ const header = { key: '', value: '' };
 const initialWebhook = {
   events: [],
   headers: [header],
+  body: [header],
   name: '',
   url: '',
 };
@@ -22,6 +23,8 @@ const initialState = fromJS({
 const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NEW_HEADER':
+      return state.updateIn(['modifiedData', ...action.keys], arr => arr.push(fromJS(header)));
+    case 'ADD_NEW_BODY':
       return state.updateIn(['modifiedData', ...action.keys], arr => arr.push(fromJS(header)));
     case 'GET_DATA_SUCCEEDED': {
       const headers = get(action, ['data', 'headers'], {});
@@ -49,6 +52,15 @@ const reducer = (state, action) => {
         }
 
         return headers.remove(action.index);
+      });
+    }
+    case 'ON_BODY_REMOVE': {
+      return state.updateIn(['modifiedData', 'body'], body => {
+        if (body.size === 1) {
+          return fromJS([header]);
+        }
+
+        return body.remove(action.index);
       });
     }
     case 'ON_TRIGGER_CANCELED':

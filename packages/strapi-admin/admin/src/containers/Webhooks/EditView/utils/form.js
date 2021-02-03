@@ -27,6 +27,12 @@ const form = {
     type: 'headers',
     value: [{ key: '', value: '' }],
   },
+  body: {
+    styleName: 'col-12',
+    label: 'Settings.webhooks.form.body',
+    type: 'body',
+    value: [{ key: '', value: '' }],
+  },
   events: {
     styleName: 'col-12',
     label: 'Settings.webhooks.form.events',

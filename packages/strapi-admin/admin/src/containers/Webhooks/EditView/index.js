@@ -252,6 +252,13 @@ function EditView() {
     });
   };
 
+  const handleClickBody = () => {
+    dispatch({
+      type: 'ADD_NEW_BODY',
+      keys: ['body'],
+    });
+  };
+
   const handleTrigger = async () => {
     dispatch({
       type: 'SET_IS_TRIGGERING',
@@ -291,6 +298,13 @@ function EditView() {
     });
 
     resetHeadersErrors();
+  };
+
+  const handleRemoveBody = index => {
+    dispatch({
+      type: 'ON_BODY_REMOVE',
+      index,
+    });
   };
 
   const handleReset = () =>
@@ -417,6 +431,7 @@ function EditView() {
                       {...form[key]}
                       customInputs={{
                         headers: Inputs,
+                        body: Inputs,
                         events: Inputs,
                       }}
                       label={formatMessage({
@@ -431,6 +446,11 @@ function EditView() {
                       {...(form[key].type === 'headers' && {
                         onClick: handleClick,
                         onRemove: handleRemove,
+                        customError: formattedErrors,
+                      })}
+                      {...(form[key].type === 'body' && {
+                        onClick: handleClickBody,
+                        onRemove: handleRemoveBody,
                         customError: formattedErrors,
                       })}
                     />

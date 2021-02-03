@@ -9,6 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import { ErrorMessage, Label } from '@buffetjs/styles';
 import { Error } from '@buffetjs/core';
 import HeadersInput from '../HeadersInput';
+import BodyInput from '../BodyInput';
 import EventInput from '../EventInput';
 import Wrapper from './Wrapper';
 
@@ -28,7 +29,7 @@ function Inputs({
   return (
     <Wrapper>
       <Label htmlFor={name}>{label}</Label>
-      {type === 'headers' ? (
+      {type === 'headers' && (
         <>
           <HeadersInput
             errors={customError}
@@ -44,7 +45,25 @@ function Inputs({
             </ErrorMessage>
           )}
         </>
-      ) : (
+      )}
+      {type === 'body' && (
+        <>
+          <BodyInput
+            errors={customError}
+            name={name}
+            onClick={onClick}
+            onChange={onChange}
+            onRemove={onRemove}
+            value={value}
+          />
+          {Object.keys(customError).length > 0 && (
+            <ErrorMessage>
+              <FormattedMessage id="components.Input.error.validation.required" />
+            </ErrorMessage>
+          )}
+        </>
+      )}
+      {type !== 'body' && type !== 'headers' && (
         <Error inputError={inputError} name={name} type="text" validations={validations}>
           {({ canCheck, error, dispatch }) => {
             const hasError = Boolean(error);
