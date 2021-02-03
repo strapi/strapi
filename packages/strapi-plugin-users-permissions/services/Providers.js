@@ -315,23 +315,23 @@ const getProfile = async (provider, query, callback) => {
     }
     case 'instagram': {
       const instagram = purest({
-        config: purestConfig,
         provider: 'instagram',
         key: grant.instagram.key,
         secret: grant.instagram.secret,
+        config: purestConfig,
       });
 
       instagram
         .query()
-        .get('users/self')
-        .qs({ access_token })
+        .get('me')
+        .qs({ access_token, fields: 'id,username' })
         .request((err, res, body) => {
           if (err) {
             callback(err);
           } else {
             callback(null, {
-              username: body.data.username,
-              email: `${body.data.username}@strapi.io`, // dummy email as Instagram does not provide user email
+              username: body.username,
+              email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
             });
           }
         });
@@ -463,6 +463,73 @@ const getProfile = async (provider, query, callback) => {
       } catch (err) {
         callback(err);
       }
+      break;
+    }
+    case 'reddit': {
+      const reddit = purest({
+        provider: 'reddit',
+        config: purestConfig,
+        defaults: {
+          headers: {
+            'user-agent': 'strapi',
+          },
+        },
+      });
+
+      reddit
+        .query('auth')
+        .get('me')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.name,
+              email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
+            });
+          }
+        });
+      break;
+    }
+    case 'auth0': {
+      const purestAuth0Conf = {};
+      purestAuth0Conf[`https://${grant.auth0.subdomain}.auth0.com`] = {
+        __domain: {
+          auth: {
+            auth: { bearer: '[0]' },
+          },
+        },
+        '{endpoint}': {
+          __path: {
+            alias: '__default',
+          },
+        },
+      };
+      const auth0 = purest({
+        provider: 'auth0',
+        config: {
+          auth0: purestAuth0Conf,
+        },
+      });
+
+      auth0
+        .get('userinfo')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            const username =
+              body.username || body.nickname || body.name || body.email.split('@')[0];
+            const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+
+            callback(null, {
+              username,
+              email,
+            });
+          }
+        });
       break;
     }
     default:

@@ -200,6 +200,32 @@ class Strapi {
     }
   }
 
+  async destroy() {
+    if (_.has(this, 'server.destroy')) {
+      this.server.destroy();
+    }
+
+    await Promise.all(
+      Object.values(this.plugins).map(plugin => {
+        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
+          return plugin.destroy();
+        }
+      })
+    );
+
+    if (_.has(this, 'admin')) {
+      await this.admin.destroy();
+    }
+
+    this.eventHub.removeAllListeners();
+
+    if (_.has(this, 'db')) {
+      await this.db.destroy();
+    }
+
+    delete global.strapi;
+  }
+
   /**
    * Add behaviors to the server
    */
@@ -224,7 +250,8 @@ class Strapi {
       }
 
       // Emit started event.
-      await this.telemetry.send('didStartServer');
+      const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
+      await this.telemetry.send('didStartServer', { database: databaseClients });
 
       if (cb && typeof cb === 'function') {
         cb();

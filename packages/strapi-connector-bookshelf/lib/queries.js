@@ -4,12 +4,15 @@
  */
 
 const _ = require('lodash');
+const { omit } = require('lodash/fp');
 const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { singular } = require('pluralize');
+const { handleDatabaseError } = require('./utils/errors');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -48,6 +51,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return db.transaction(trx => fn(trx));
   };
 
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
+
   /**
    * Find one entry based on params
    */
@@ -77,7 +88,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
    * Count entries based on filters
    */
   function count(params = {}) {
-    const filters = convertRestQueryParams(_.omit(params, ['_sort', '_limit', '_start']));
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
     return model
       .query(buildQuery({ model, filters }))
@@ -136,7 +147,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
       }
 
-      return this.findOne(params, null, { transacting: trx });
+      return findOne(params, null, { transacting: trx });
     };
 
     return wrapTransaction(runUpdate, { transacting });
@@ -190,7 +201,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   }
 
   function countSearch(params) {
-    const filters = convertRestQueryParams(_.omit(params, ['_q', '_sort', '_limit', '_start']));
+    const countParams = omit(['_q'], params);
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))
@@ -458,7 +470,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         };
       });
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(({ id, component }) => {
       if (!allIds.find(el => el.id === id && el.component.uid === component.uid)) {
         const err = new Error(
@@ -520,7 +532,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       .fetchAll({ transacting })
       .map(el => el.get('component_id').toString());
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
       if (!allIds.includes(id)) {
         const err = new Error(
@@ -664,8 +676,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,

@@ -111,8 +111,16 @@ const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
 
 const normalizeWhereClauses = (whereClauses, { model }) => {
   return whereClauses
-    .filter(({ value }) => !_.isNil(value))
+    .filter(({ value }) => !_.isNull(value))
     .map(({ field, operator, value }) => {
+      if (_.isUndefined(value)) {
+        const err = new Error(
+          `The value of field: '${field}', in your where filter, is undefined.`
+        );
+        err.status = 400;
+        throw err;
+      }
+
       if (BOOLEAN_OPERATORS.includes(operator)) {
         return {
           field,
@@ -146,9 +154,17 @@ const normalizeSortClauses = (clauses, { model }) => {
   }));
 
   normalizedClauses.forEach(({ field }) => {
-    if (field.includes('.')) {
+    const fieldDepth = field.split('.').length - 1;
+    if (fieldDepth === 1) {
       // Check if the relational field exists
       getAssociationFromFieldKey({ model, field });
+    } else if (fieldDepth > 1) {
+      const err = new Error(
+        `Sorting on ${field} is not possible: you cannot sort at a depth greater than 1`
+      );
+
+      err.status = 400;
+      throw err;
     }
   });
 

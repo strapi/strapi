@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, prop, pick } = require('lodash/fp');
+const { has, prop, pick, concat } = require('lodash/fp');
 const { PUBLISHED_AT_ATTRIBUTE } = require('strapi-utils').contentTypes.constants;
 
 const { getService } = require('../utils');
@@ -9,6 +9,7 @@ module.exports = {
   async find(ctx) {
     const { model, targetField } = ctx.params;
     const { _component, ...query } = ctx.request.query;
+    const { idsToOmit } = ctx.request.body;
 
     if (!targetField) {
       return ctx.badRequest();
@@ -29,6 +30,11 @@ module.exports = {
 
     if (!target) {
       return ctx.notFound('target.notFound');
+    }
+
+    if (idsToOmit && Array.isArray(idsToOmit)) {
+      query._where = query._where || {};
+      query._where.id_nin = concat(query._where.id_nin || [], idsToOmit);
     }
 
     const entityManager = getService('entity-manager');

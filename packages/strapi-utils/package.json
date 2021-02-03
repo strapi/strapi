@@ -1,8 +1,8 @@
 {
   "name": "strapi-utils",
-  "version": "3.4.1",
+  "version": "3.4.5",
   "description": "Shared utilities for the Strapi packages",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "strapi",
     "utilities",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "^2.8.1",
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
     "yup": "0.29.3"
@@ -24,13 +24,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

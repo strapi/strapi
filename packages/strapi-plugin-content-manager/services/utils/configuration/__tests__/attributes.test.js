@@ -58,20 +58,89 @@ describe('attributesUtils', () => {
       expect(isSortable(schema, 'jsonInput')).toBe(false);
     });
 
-    test('Relations are not sortable', () => {
+    test('x-to-one relations only are sortable', () => {
       const schema = createMockSchema({
         oneWayRel: {
           type: 'relation',
           targetModel: 'someModel',
+          relationType: 'oneWay',
+        },
+        manyToOneRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'manyToOne',
+        },
+        oneToOneRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'oneToOne',
         },
         manyWayRel: {
           type: 'relation',
           targetModel: 'someModel',
+          relationType: 'manyWay',
+        },
+        oneToManyRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'oneToMany',
+        },
+        manyToManyRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'manyToMany',
+        },
+        manyToManyMorphRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'manyToManyMorph',
+        },
+        manyToOneMorphRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'manyToOneMorph',
+        },
+        oneToManyMorphRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'oneToManyMorph',
+        },
+        oneToOneMorphRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'oneToOneMorph',
+        },
+        oneMorphToOneRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'oneMorphToOne',
+        },
+        manyMorphToOneRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'manyMorphToOne',
+        },
+        manyMorphToManyRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+          relationType: 'manyMorphToMany',
         },
       });
 
-      expect(isSortable(schema, 'oneWayRel')).toBe(false);
+      expect(isSortable(schema, 'oneWayRel')).toBe(true);
+      expect(isSortable(schema, 'manyToOneRel')).toBe(true);
+      expect(isSortable(schema, 'oneToOneRel')).toBe(true);
+
       expect(isSortable(schema, 'manyWayRel')).toBe(false);
+      expect(isSortable(schema, 'oneToManyRel')).toBe(false);
+      expect(isSortable(schema, 'manyToManyRel')).toBe(false);
+      expect(isSortable(schema, 'manyToManyMorphRel')).toBe(false);
+      expect(isSortable(schema, 'manyToOneMorphRel')).toBe(false);
+      expect(isSortable(schema, 'oneToManyMorphRel')).toBe(false);
+      expect(isSortable(schema, 'oneToOneMorphRel')).toBe(false);
+      expect(isSortable(schema, 'oneMorphToOneRel')).toBe(false);
+      expect(isSortable(schema, 'manyMorphToOneRel')).toBe(false);
+      expect(isSortable(schema, 'manyMorphToManyRel')).toBe(false);
     });
   });
 

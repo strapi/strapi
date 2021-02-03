@@ -9,14 +9,42 @@ const {
   },
 } = require('strapi-utils');
 
-const getFetchParams = params => {
+/**
+ * Default limit values from config
+ * @return {{maxLimit: number, defaultLimit: number}}
+ */
+const getLimitConfigDefaults = () => ({
+  defaultLimit: _.toNumber(strapi.config.get('api.rest.defaultLimit', 100)),
+  maxLimit: _.toNumber(strapi.config.get('api.rest.maxLimit')) || null,
+});
+
+const getLimitParam = params => {
+  const { defaultLimit, maxLimit } = getLimitConfigDefaults();
+  if (params._limit === undefined) {
+    return defaultLimit;
+  }
+
+  const limit = _.toNumber(params._limit);
+  // if there is max limit set and params._limit exceeds this number, return configured max limit
+  if (maxLimit && (limit === -1 || limit > maxLimit)) {
+    return maxLimit;
+  }
+
+  return limit;
+};
+
+const getFetchParams = (params = {}) => {
   const defaultParams = {};
 
   Object.assign(defaultParams, {
     _publicationState: DP_PUB_STATE_LIVE,
   });
 
-  return { ...defaultParams, ...params };
+  return {
+    ...defaultParams,
+    ...params,
+    _limit: getLimitParam(params),
+  };
 };
 
 /**
@@ -212,3 +240,5 @@ const createCollectionTypeService = ({ model, strapi }) => {
 };
 
 module.exports = createCoreService;
+
+module.exports.getFetchParams = getFetchParams;
