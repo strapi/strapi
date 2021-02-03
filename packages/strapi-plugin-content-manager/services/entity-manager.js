@@ -73,6 +73,11 @@ module.exports = {
   },
 
   async findOne(id, model, populate) {
+    if (!populate) {
+      const { associations } = strapi.query(model);
+      populate = associations.map(association => association.alias);
+    }
+
     return strapi.entityService.findOne({ params: { id }, populate }, { model });
   },
 
