@@ -29,6 +29,24 @@ const schema = yup.object().shape({
       })
     );
   }),
+  body: yup.lazy(array => {
+    let baseSchema = yup.array();
+
+    if (array.length === 1) {
+      const { key, value } = array[0];
+
+      if (key === '' && value === '') {
+        return baseSchema;
+      }
+    }
+    
+return baseSchema.of(
+      yup.object().shape({
+        key: yup.string().required(translatedErrors.required),
+        value: yup.string().required(translatedErrors.required),
+      })
+    );
+  }),
   events: yup.array().required(translatedErrors.required),
 });
 
