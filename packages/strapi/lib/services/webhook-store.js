@@ -23,6 +23,9 @@ const webhookModel = config => ({
     headers: {
       type: 'json',
     },
+    body: {
+      type: 'json',
+    },
     events: {
       type: 'json',
     },
@@ -37,6 +40,7 @@ const toDBObject = data => {
     name: data.name,
     url: data.url,
     headers: data.headers,
+    body: data.body,
     events: data.events,
     enabled: data.isEnabled,
   };
@@ -48,6 +52,7 @@ const fromDBObject = row => {
     name: row.name,
     url: row.url,
     headers: row.headers,
+    body: row.body,
     events: row.events,
     isEnabled: row.enabled,
   };

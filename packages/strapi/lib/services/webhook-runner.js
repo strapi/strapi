@@ -62,9 +62,7 @@ class WebhookRunner {
   async executeListener({ event, info }) {
     debug(`Executing webhook for event '${event}'`);
     const webhooks = this.webhooksMap.get(event) || [];
-    const activeWebhooks = webhooks.filter(
-      webhook => webhook.isEnabled === true
-    );
+    const activeWebhooks = webhooks.filter(webhook => webhook.isEnabled === true);
 
     for (const webhook of activeWebhooks) {
       await this.run(webhook, event, info).catch(error => {
@@ -75,7 +73,7 @@ class WebhookRunner {
   }
 
   run(webhook, event, info = {}) {
-    const { url, headers } = webhook;
+    const { url, headers, body } = webhook;
 
     return fetch(url, {
       method: 'post',
@@ -83,6 +81,7 @@ class WebhookRunner {
         event,
         created_at: new Date(),
         ...info,
+        ...body,
       }),
       headers: {
         ...this.config.defaultHeaders,
@@ -136,9 +135,7 @@ class WebhookRunner {
     debug(`Unregistering webhook '${webhook.id}'`);
 
     this.webhooksMap.forEach((webhooks, event) => {
-      const filteredWebhooks = webhooks.filter(
-        value => value.id !== webhook.id
-      );
+      const filteredWebhooks = webhooks.filter(value => value.id !== webhook.id);
 
       // Cleanup hanging listeners
       if (filteredWebhooks.length === 0) {
