@@ -111,6 +111,23 @@ const SettingsPage = () => {
             title={formatMessage({ id: getTrad('Settings.form.title.config') })}
             isLoading={showLoader}
           >
+            <Text fontSize="md" lineHeight="18px">
+              <FormattedMessage
+                id={getTrad('Settings.form.text.configuration')}
+                values={{
+                  file: <code>./config/plugins.js</code>,
+                  link: (
+                    <a
+                      href="https://strapi.io/documentation/developer-docs/latest/plugins/email.html#configure-the-plugin"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      link
+                    </a>
+                  ),
+                }}
+              />
+            </Text>
             <SizedInput
               disabled
               label={getTrad('Settings.form.label.defaultFrom')}
@@ -138,23 +155,6 @@ const SettingsPage = () => {
               type="select"
               value={`strapi-provider-email-${config.provider}`}
             />
-            <Text fontSize="md" lineHeight="18px">
-              <FormattedMessage
-                id={getTrad('Settings.form.text.configuration')}
-                values={{
-                  file: <code>./config/plugins.js</code>,
-                  link: (
-                    <a
-                      href="https://strapi.io/documentation/v3.x/plugins/email.html#configure-the-plugin"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      link
-                    </a>
-                  ),
-                }}
-              />
-            </Text>
           </FormBloc>
           <FormBloc
             title={formatMessage({ id: getTrad('Settings.form.title.test') })}
@@ -173,9 +173,9 @@ const SettingsPage = () => {
             <AlignedButton
               color="success"
               disabled={testSuccess}
-              icon={<Envelope style={{ verticalAlign: 'middle' }} />}
+              icon={<Envelope style={{ verticalAlign: 'middle', marginRight: '10px' }} />}
               isLoading={isTestButtonLoading}
-              style={{ minWidth: 150, fontWeight: 600 }}
+              style={{ fontWeight: 600 }}
               type="submit"
             >
               {formatMessage({ id: getTrad('Settings.button.test-email') })}

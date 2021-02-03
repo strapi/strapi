@@ -6,8 +6,10 @@ const Text = styled(TextBase)`
 `;
 
 const AlignedButton = styled(Button)`
-  margin: 29px 15px 0 15px;
   height: 34px;
+  padding-top: 3px;
+  margin: 29px 15px 0 15px;
+  min-width: unset;
 `;
 
 export { Text, AlignedButton };
