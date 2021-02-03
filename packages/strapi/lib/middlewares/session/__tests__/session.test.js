@@ -1,6 +1,8 @@
+'use strict';
+
+const path = require('path');
 const createMiddleware = require('../index');
 const configProvider = require('../../../core/app-configuration/config-provider');
-const path = require('path');
 
 describe('Session middleware', () => {
   beforeEach(() => {
