@@ -75,7 +75,7 @@ function SelectWrapper({
     }
 
     if (isSingle) {
-      return [value];
+      return [value.id];
     }
 
     return value.map(val => val.id);
