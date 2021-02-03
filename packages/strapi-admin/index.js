@@ -257,6 +257,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,
+      disableDotRule: true,
     },
   };
 
