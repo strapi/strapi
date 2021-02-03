@@ -136,6 +136,11 @@ class Wysiwyg extends React.Component {
     // Since we need to perform some operations in the reducer the loading phase stops before all the operations
     // are computed which in some case causes the inputs component to be initialised with a null value.
     if (!prevProps.value && this.props.value) {
+      // This is also called if the first thing you add in the editor is
+      // a markdown formatting block (b, i, u, etc.) which results in
+      // the selection being pushed to the end after the first character is added.
+      // Basically, setInitialValue is always called whenever
+      // you start typing in an empty editor (even after the initial load)
       this.setInitialValue(this.props);
     }
   }
@@ -192,24 +197,31 @@ class Wysiwyg extends React.Component {
       textWithEntity,
       'insert-character'
     );
-    // Update the parent reducer
-    this.sendData(newEditorState);
-    // Don't handle selection : the user has selected some text to be changed with the appropriate markdown
-    if (selectedText !== '') {
-      return this.setState(
-        {
-          editorState: newEditorState,
-        },
-        () => {
-          this.focus();
-        }
-      );
+    
+    if (selectedText.length === 0) {
+      this.setState({
+        // Highlight the text if the selection was empty
+        editorState: EditorState.forceSelection(newEditorState, updatedSelection),
+      }, () => {
+        this.focus();
+        // Update the parent reducer
+        this.sendData(newEditorState);
+      });
+      return;
     }
 
-    return this.setState({
-      // Highlight the text if the selection wad empty
-      editorState: EditorState.forceSelection(newEditorState, updatedSelection),
-    });
+    // Don't handle selection: the user has selected some text to be changed with the appropriate markdown
+    this.setState(
+      {
+        editorState: newEditorState,
+      },
+      () => {
+        this.focus();
+        // Update the parent reducer
+        this.sendData(newEditorState);
+      }
+    );
+    return;
   };
 
   /**
@@ -414,11 +426,14 @@ class Wysiwyg extends React.Component {
 
     newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
 
-    // Update the parent reducer
-    this.sendData(newEditorState);
+    
 
     return this.setState({
       editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
+    }, () => {
+      this.focus();
+      // Update the parent reducer
+      this.sendData(newEditorState);
     });
   };
 
