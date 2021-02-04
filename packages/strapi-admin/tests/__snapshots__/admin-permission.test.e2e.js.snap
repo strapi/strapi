@@ -94,18 +94,6 @@ Object {
         "subCategory": "settings",
       },
       Object {
-        "action": "plugins::email.settings.read",
-        "displayName": "Read",
-        "plugin": "plugin::email",
-        "subCategory": "settings",
-      },
-      Object {
-        "action": "plugins::email.settings.test",
-        "displayName": "Send test emails",
-        "plugin": "plugin::email",
-        "subCategory": "settings",
-      },
-      Object {
         "action": "plugins::upload.assets.copy-link",
         "displayName": "Copy link",
         "plugin": "plugin::upload",
@@ -286,6 +274,18 @@ Object {
         "category": "webhooks",
         "displayName": "Update",
         "subCategory": "general",
+      },
+      Object {
+        "action": "plugins::email.settings.read",
+        "category": "email",
+        "displayName": "Read",
+        "subCategory": "settings",
+      },
+      Object {
+        "action": "plugins::email.settings.test",
+        "category": "email",
+        "displayName": "Send test email",
+        "subCategory": "settings",
       },
       Object {
         "action": "plugins::upload.settings.read",
