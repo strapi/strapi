@@ -8,10 +8,9 @@ const extendCTBInitialDataMiddleware = () => {
     ) {
       const i18n = { localized: false };
 
-      const pluginOptions =
-        action.data && action.data.pluginOptions
-          ? { ...action.data.pluginOptions, i18n }
-          : { i18n };
+      const pluginOptions = action.data.pluginOptions
+        ? { ...action.data.pluginOptions, i18n }
+        : { i18n };
 
       const data = { ...action.data, pluginOptions };
 
@@ -21,7 +20,7 @@ const extendCTBInitialDataMiddleware = () => {
 
       // Override the action if the pluginOption config does not contain i18n
       // In this case we need to set the proper initialData shape
-      if (!has(action.data.pluginOptions, 'i18n')) {
+      if (!has(action.data.pluginOptions, 'i18n.localized')) {
         return next({ ...action, data });
       }
     }
