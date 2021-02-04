@@ -1,4 +1,5 @@
 import { useReducer } from 'react';
+import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { SHOW_MODAL, HIDE_MODAL, RESOLVE_LOCALE, DELETE_LOCALE } from './constants';
 
@@ -11,6 +12,12 @@ const useDeleteLocale = () => {
     return new Promise(resolve =>
       setTimeout(() => {
         dispatch({ type: RESOLVE_LOCALE });
+
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('Settings.locales.modal.delete.success') },
+        });
+
         resolve();
       }, 1000)
     );

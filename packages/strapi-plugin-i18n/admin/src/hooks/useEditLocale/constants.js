@@ -1,0 +1,4 @@
+export const SHOW_MODAL = 'SHOW_MODAL';
+export const HIDE_MODAL = 'HIDE_MODAL';
+export const EDIT_LOCALE = 'EDIT_LOCALE';
+export const RESOLVE_LOCALE_EDITION = 'RESOLVE_LOCALE_EDITION';
