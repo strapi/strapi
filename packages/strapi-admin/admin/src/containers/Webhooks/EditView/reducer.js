@@ -36,7 +36,18 @@ const reducer = (state, action) => {
         });
       }
 
-      const data = fromJS(action.data).update('headers', () => fromJS(formattedHeaders));
+      const body = get(action, ['data', 'body'], {});
+      let formattedBody = [header];
+
+      if (Object.keys(body).length > 0) {
+        formattedBody = Object.keys(body).map(key => {
+          return { key, value: body[key] };
+        });
+      }
+
+      const data = fromJS(action.data)
+        .update('headers', () => fromJS(formattedHeaders))
+        .update('body', () => fromJS(formattedBody));
 
       return state
         .update('isLoading', () => false)

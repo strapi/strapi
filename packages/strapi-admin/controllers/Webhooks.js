@@ -28,6 +28,22 @@ const webhookValidator = yup
         )
         .required();
     }),
+    body: yup.lazy(data => {
+      if (typeof data !== 'object') {
+        return yup.object().required();
+      }
+
+      return yup
+        .object(
+          _.mapValues(data, () => {
+            yup
+              .string()
+              .min(1)
+              .required();
+          })
+        )
+        .required();
+    }),
     events: yup
       .array()
       .of(
