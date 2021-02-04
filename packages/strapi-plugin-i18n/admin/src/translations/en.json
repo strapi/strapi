@@ -5,6 +5,8 @@
   "Settings.permissions.loading": "Loading permissions",
   "Settings.permissions.read.denied.title": "You don't have the permissions to access this content.",
   "Settings.permissions.read.denied.description": "In order to be able to read this, make sure to get in touch with the administrator of your system.",
+  "plugin.schema.i18n.localized.label": "Enable localization for this Content-Type",
+  "plugin.schema.i18n.localized.description": "Allow you to have content in different locales",
   "Settings.list.description": "Configure the settings for the internationalization plugin",
   "Settings.list.empty.title": "There are no locales.",
   "Settings.list.empty.description": "This is not a usual behavior, meaning that you have eventually modified the database manually. Make sure to have at least one locale saved in your database in order to be able to use Strapi correctly.",

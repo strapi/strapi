@@ -5,8 +5,14 @@ const extendCTBInitialDataMiddleware = () => {
       action.modalType === 'contentType' &&
       action.actionType === 'create'
     ) {
-      // TODO
-      const data = { ...action.data, i18n: true, locales: [] };
+      const i18n = { localized: true };
+
+      const pluginOptions =
+        action.data && action.data.pluginOptions
+          ? { ...action.data.pluginOptions, i18n }
+          : { i18n };
+
+      const data = { ...action.data, pluginOptions };
 
       return next({ ...action, data });
     }
