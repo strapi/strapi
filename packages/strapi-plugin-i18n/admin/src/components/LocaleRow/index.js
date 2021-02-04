@@ -8,12 +8,32 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { getTrad } from '../../utils';
 
-// Fake permissions
-const canUpdate = true;
-const canDelete = true;
-
 const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   const { formatMessage } = useIntl();
+
+  const links = [];
+
+  if (onEdit) {
+    links.push({
+      icon: (
+        <span aria-label="Edit locale">
+          <Pencil fill="#0e1622" />
+        </span>
+      ),
+      onClick: () => onEdit(locale),
+    });
+  }
+
+  if (onDelete) {
+    links.push({
+      icon: !locale.isDefault ? (
+        <span aria-label="Delete locale">
+          <FontAwesomeIcon icon="trash-alt" />
+        </span>
+      ) : null,
+      onClick: () => onDelete(locale),
+    });
+  }
 
   return (
     <CustomRow>
@@ -31,30 +51,15 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
         </Text>
       </td>
       <td>
-        <IconLinks
-          links={[
-            {
-              icon: canUpdate ? (
-                <span aria-label="Edit locale">
-                  <Pencil fill="#0e1622" />
-                </span>
-              ) : null,
-              onClick: onEdit,
-            },
-            {
-              icon:
-                canDelete && !locale.isDefault ? (
-                  <span aria-label="Delete locale">
-                    <FontAwesomeIcon icon="trash-alt" />
-                  </span>
-                ) : null,
-              onClick: onDelete,
-            },
-          ]}
-        />
+        <IconLinks links={links} />
       </td>
     </CustomRow>
   );
+};
+
+LocaleSettingsPage.defaultProps = {
+  onDelete: undefined,
+  onEdit: undefined,
 };
 
 LocaleSettingsPage.propTypes = {
@@ -63,8 +68,8 @@ LocaleSettingsPage.propTypes = {
     displayName: PropTypes.string,
     code: PropTypes.string.isRequired,
   }).isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
+  onEdit: PropTypes.func,
 };
 
 export default LocaleSettingsPage;

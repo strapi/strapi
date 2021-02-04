@@ -12,6 +12,8 @@ import useEditLocale from '../../hooks/useEditLocale';
 
 // Fake permissions
 const canCreate = true;
+const canDelete = true;
+const canEdit = true;
 
 const LocaleSettingsPage = () => {
   const {
@@ -63,6 +65,9 @@ const LocaleSettingsPage = () => {
     { number: locales.length }
   );
 
+  const handleDelete = canDelete ? showDeleteModal : undefined;
+  const handleEdit = canEdit ? showEditModal : undefined;
+
   return (
     <>
       <Header {...headerProps} />
@@ -72,11 +77,7 @@ const LocaleSettingsPage = () => {
         items={locales}
         isLoading={isLoading}
         customRowComponent={locale => (
-          <LocaleRow
-            locale={locale}
-            onDelete={() => showDeleteModal(locale)}
-            onEdit={() => showEditModal(locale)}
-          />
+          <LocaleRow locale={locale} onDelete={handleDelete} onEdit={handleEdit} />
         )}
       />
 

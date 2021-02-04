@@ -1,5 +1,4 @@
 import { useReducer } from 'react';
-import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { SHOW_MODAL, HIDE_MODAL, RESOLVE_LOCALE_EDITION, EDIT_LOCALE } from './constants';
@@ -9,7 +8,6 @@ const useEditLocale = () => {
     reducer,
     initialState
   );
-  const { formatMessage } = useIntl();
 
   const editLocale = () => {
     dispatch({ type: EDIT_LOCALE });
@@ -17,9 +15,12 @@ const useEditLocale = () => {
     return new Promise(resolve =>
       setTimeout(() => {
         dispatch({ type: RESOLVE_LOCALE_EDITION });
-        strapi.notification.success(
-          formatMessage({ id: getTrad('Settings.locales.modal.edit.success') })
-        );
+
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('Settings.locales.modal.edit.success') },
+        });
+
         resolve();
       }, 1000)
     );

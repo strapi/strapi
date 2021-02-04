@@ -36,6 +36,10 @@ jest.mock('react-intl', () => ({
 }));
 
 describe('i18n settings page', () => {
+  beforeEach(() => {
+    strapi.notification.toggle = jest.fn();
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -88,7 +92,10 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('Confirm'));
 
       await waitFor(() =>
-        expect(strapi.notification.success).toBeCalledWith('Settings.locales.modal.delete.success')
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'success',
+          message: { id: 'Settings.locales.modal.delete.success' },
+        })
       );
     });
   });
