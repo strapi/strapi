@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil, pick } = require('lodash');
+const { isNil, pick } = require('lodash/fp');
 
 /**
  * Email.js controller
@@ -8,7 +8,7 @@ const { isNil, pick } = require('lodash');
  * @description: A set of functions called "actions" of the `email` plugin.
  */
 module.exports = {
-  send: async ctx => {
+  async send(ctx) {
     let options = ctx.request.body;
     try {
       await strapi.plugins.email.services.email.send(options);
@@ -24,7 +24,7 @@ module.exports = {
     ctx.send({});
   },
 
-  test: async ctx => {
+  async test(ctx) {
     const { to } = ctx.request.body;
 
     if (isNil(to)) {
@@ -53,17 +53,14 @@ module.exports = {
     ctx.send({});
   },
 
-  getSettings: async ctx => {
-    const { config, providers } = strapi.plugins.email.services.email.getProviderSettings();
+  async getSettings(ctx) {
+    const config = strapi.plugins.email.services.email.getProviderSettings();
 
     ctx.send({
-      config: pick(config, [
-        'provider',
-        'settings.defaultFrom',
-        'settings.defaultReplyTo',
-        'settings.testAddress',
-      ]),
-      providers,
+      config: pick(
+        ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo', 'settings.testAddress'],
+        config
+      ),
     });
   },
 };

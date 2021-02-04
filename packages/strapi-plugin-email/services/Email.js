@@ -3,12 +3,7 @@
 const _ = require('lodash');
 
 const getProviderSettings = () => {
-  const config = strapi.plugins.email.config;
-  const providers = Object.keys(strapi.config.info.dependencies)
-    .filter(dependency => dependency.includes('strapi-provider-email-'))
-    .concat('strapi-provider-email-sendmail');
-
-  return { config, providers };
+  return strapi.plugins.email.config;
 };
 
 const send = async options => {

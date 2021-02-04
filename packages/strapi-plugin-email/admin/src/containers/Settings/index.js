@@ -76,7 +76,7 @@ const SettingsPage = () => {
       })
         .then(data => {
           setConfig(data.config);
-          setProviders(data.providers);
+          setProviders([data.config.provider]);
           setTestAddress(get(data, 'config.settings.testAddress'));
         })
         .catch(() =>
