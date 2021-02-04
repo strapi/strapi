@@ -22,15 +22,17 @@ module.exports = async () => {
   // Add permissions
   const actions = [
     {
-      section: 'plugins',
+      section: 'settings',
+      category: 'email',
       displayName: 'Read',
       uid: 'settings.read',
       subCategory: 'settings',
       pluginName: 'email',
     },
     {
-      section: 'plugins',
-      displayName: 'Send test emails',
+      section: 'settings',
+      category: 'email',
+      displayName: 'Send test email',
       uid: 'settings.test',
       subCategory: 'settings',
       pluginName: 'email',
