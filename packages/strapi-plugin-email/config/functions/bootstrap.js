@@ -27,7 +27,6 @@ module.exports = async () => {
       displayName: 'Read',
       uid: 'settings.read',
       subCategory: 'settings',
-      pluginName: 'email',
     },
     {
       section: 'settings',
@@ -35,7 +34,6 @@ module.exports = async () => {
       displayName: 'Send test email',
       uid: 'settings.test',
       subCategory: 'settings',
-      pluginName: 'email',
     },
   ];
 
