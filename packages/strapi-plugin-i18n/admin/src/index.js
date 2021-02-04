@@ -51,17 +51,19 @@ export default strapi => {
 
         ctbFormsAPI.extendContentType({
           validator: () => ({
-            i18n: yup.bool(),
+            i18n: yup.object().shape({
+              localized: yup.bool(),
+            }),
           }),
           form: {
             advanced() {
               return [
-                [{ name: 'i18n', type: 'checkbox', label: { id: 'i18nTest' } }],
                 [
                   {
-                    name: 'i18n-locales',
-                    type: 'localesPicker',
-                    label: { id: 'Select i18n locales' },
+                    name: 'pluginOptions.i18n.localized',
+                    description: { id: getTrad('plugin.schema.i18n.localized.description') },
+                    type: 'checkbox',
+                    label: { id: getTrad('plugin.schema.i18n.localized.label') },
                   },
                 ],
               ];
@@ -71,12 +73,12 @@ export default strapi => {
 
         ctbFormsAPI.extendFields(['text', 'string'], {
           validator: () => ({
-            localize: yup.bool(),
+            i18n: yup.object().shape({
+              localized: yup.bool(),
+            }),
           }),
           form: {
-            advanced(args) {
-              console.log('advanced', args);
-
+            advanced() {
               return [[{ name: 'localized', type: 'checkbox', label: { id: 'i18nTest' } }]];
             },
           },

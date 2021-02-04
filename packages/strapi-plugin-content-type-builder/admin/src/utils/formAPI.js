@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import * as yup from 'yup';
 
 const formsAPI = {
   components: {
@@ -81,13 +82,15 @@ const formsAPI = {
     return { items: [...initSections, ...sectionsToAdd] };
   },
   makeValidator(target, initShape, ...args) {
-    const validators = get(this.types, [...target, 'validators'], []).reduce((acc, current) => {
-      const validator = current(args);
+    const validators = get(this.types, [...target, 'validators'], []);
 
-      return { ...acc, ...validator };
+    const pluginOptionsShape = validators.reduce((acc, current) => {
+      const pluginOptionShape = current(args);
+
+      return { ...acc, ...pluginOptionShape };
     }, {});
 
-    return initShape.shape(validators);
+    return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
   },
 };
 
