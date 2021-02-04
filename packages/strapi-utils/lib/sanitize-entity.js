@@ -61,16 +61,28 @@ const sanitizeEntity = (dataSource, options) => {
         return acc;
       }
 
-      const nextOptions = {
-        model: strapi.getModel(relation, attribute.plugin),
+      const baseOptions = {
         withPrivate,
         isOutput,
         includeFields: nextFields,
       };
 
-      const nextVal = Array.isArray(value)
-        ? value.map(elem => sanitizeEntity(elem, nextOptions))
-        : sanitizeEntity(value, nextOptions);
+      let sanitizeFn;
+      if (relation === '*') {
+        sanitizeFn = entity =>
+          sanitizeEntity(entity, {
+            model: strapi.db.getModelByGlobalId(entity.__contentType),
+            ...baseOptions,
+          });
+      } else {
+        sanitizeFn = entity =>
+          sanitizeEntity(entity, {
+            model: strapi.getModel(relation, attribute.plugin),
+            ...baseOptions,
+          });
+      }
+
+      const nextVal = Array.isArray(value) ? value.map(sanitizeFn) : sanitizeFn(value);
 
       return { ...acc, [key]: nextVal };
     }

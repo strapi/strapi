@@ -235,18 +235,24 @@ const buildAssocResolvers = model => {
               return loader.load(query).then(r => assignOptions(r, obj));
             }
 
-            if (['oneToMany', 'manyToMany'].includes(nature)) {
+            if (
+              nature === 'oneToMany' ||
+              (nature === 'manyToMany' && association.dominant !== true)
+            ) {
               const { via } = association;
 
               const filters = {
                 ...params,
-                [`${via}.id`]: localId,
+                [via]: localId,
               };
 
               return loader.load({ filters }).then(r => assignOptions(r, obj));
             }
 
-            if (nature === 'manyWay') {
+            if (
+              nature === 'manyWay' ||
+              (nature === 'manyToMany' && association.dominant === true)
+            ) {
               let targetIds = [];
 
               // find the related ids to query them and apply the filters
