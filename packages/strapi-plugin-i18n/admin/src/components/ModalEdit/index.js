@@ -12,7 +12,9 @@ const ModalEdit = ({ isLoading, isOpen, onCancel, onClosed, onClick, onOpened, o
 
   return (
     <Modal isOpen={isOpen} onOpened={onOpened} onToggle={onToggle} onClosed={onClosed}>
-      <ModalHeader headerBreadcrumbs={['Edit locale']} />
+      <ModalHeader
+        headerBreadcrumbs={[formatMessage({ id: getTrad('Settings.list.actions.edit') })]}
+      />
       <ModalSection>
         <div>
           <Padded top size="md">

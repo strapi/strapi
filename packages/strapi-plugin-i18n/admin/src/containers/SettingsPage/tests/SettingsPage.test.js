@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request, useUserPermissions } from 'strapi-helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import LocaleSettingsPage from '..';
@@ -26,6 +26,7 @@ jest.mock('strapi-helper-plugin', () => ({
   ModalSection: ({ children }) => <div>{children}</div>,
   ModalFooter: ({ children }) => <div>{children}</div>,
   ListButton: () => <div />,
+  useUserPermissions: jest.fn(),
   request: jest.fn(),
 }));
 
@@ -57,6 +58,12 @@ describe('i18n settings page', () => {
         },
       ])
     );
+
+    useUserPermissions.mockImplementation(() => ({
+      isLoading: false,
+      allowedActions: { canRead: true, canUpdate: true, canCreate: true, canDelete: true },
+    }));
+
     strapi.notification.toggle = jest.fn();
   });
 
@@ -75,8 +82,8 @@ describe('i18n settings page', () => {
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
       const rowUtils = within(row);
 
-      expect(rowUtils.queryByLabelText('Delete locale')).toBeFalsy();
-      expect(rowUtils.getByLabelText('Edit locale')).toBeVisible();
+      expect(rowUtils.queryByLabelText('Settings.list.actions.delete')).toBeFalsy();
+      expect(rowUtils.getByLabelText('Settings.list.actions.edit')).toBeVisible();
       expect(rowUtils.getByText('Settings.locales.row.default-locale')).toBeVisible();
       expect(rowUtils.getByText('en-US')).toBeVisible();
     });
@@ -91,8 +98,8 @@ describe('i18n settings page', () => {
       const row = await waitFor(() => screen.getByText('French').closest('tr'));
       const rowUtils = within(row);
 
-      expect(rowUtils.getByLabelText('Delete locale')).toBeVisible();
-      expect(rowUtils.getByLabelText('Edit locale')).toBeVisible();
+      expect(rowUtils.getByLabelText('Settings.list.actions.delete')).toBeVisible();
+      expect(rowUtils.getByLabelText('Settings.list.actions.edit')).toBeVisible();
       expect(rowUtils.getByText('fr-FR')).toBeVisible();
     });
   });
@@ -108,7 +115,7 @@ describe('i18n settings page', () => {
       const row = await waitFor(() => screen.getByText('French').closest('tr'));
       const rowUtils = within(row);
 
-      fireEvent.click(rowUtils.getByLabelText('Delete locale'));
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.delete'));
       fireEvent.click(screen.getByText('Confirm'));
 
       await waitFor(() =>
@@ -131,7 +138,7 @@ describe('i18n settings page', () => {
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
       const rowUtils = within(row);
 
-      fireEvent.click(rowUtils.getByLabelText('Edit locale'));
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
 
       expect(screen.getByText(`Settings.locales.modal.edit.confirmation`)).toBeVisible();
     });
@@ -146,10 +153,10 @@ describe('i18n settings page', () => {
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
       const rowUtils = within(row);
 
-      fireEvent.click(rowUtils.getByLabelText('Edit locale'));
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
 
-      expect(screen.queryByText(`Edit locale`)).toBeFalsy();
+      expect(screen.queryByText(`Settings.list.actions.edit`)).toBeFalsy();
     });
   });
 
@@ -198,6 +205,96 @@ describe('i18n settings page', () => {
       );
 
       await waitFor(() => expect(screen.getByTestId('empty-list')).toBeVisible());
+    });
+  });
+
+  describe('permissions', () => {
+    it('shows a loading information when resolving the permissions', () => {
+      useUserPermissions.mockImplementation(() => ({
+        isLoading: true,
+        allowedActions: { canRead: false, canUpdate: true, canCreate: true, canDelete: true },
+      }));
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      expect(screen.getByText(`Settings.permissions.loading`));
+    });
+
+    it("shows an informative message when the user doesn't have read permission", () => {
+      const canRead = false;
+
+      useUserPermissions.mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: { canRead, canUpdate: true, canCreate: true, canDelete: true },
+      }));
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      expect(screen.getByText(`Settings.permissions.read.denied.title`)).toBeVisible();
+      expect(screen.getByText(`Settings.permissions.read.denied.description`)).toBeVisible();
+    });
+
+    it('hides "Add locale" buttons when the user is not allowed to create a locale', async () => {
+      const canCreate = false;
+
+      request.mockImplementation(() => Promise.resolve([]));
+      useUserPermissions.mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: { canRead: true, canUpdate: true, canCreate, canDelete: true },
+      }));
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      await waitFor(() => expect(screen.getByTestId('empty-list')).toBeVisible());
+      expect(screen.queryAllByText(`Settings.list.actions.add`).length).toBe(0);
+    });
+
+    it('hides the "Edit locale" button (pencil) when the user is not allowed to update a locale', async () => {
+      const canUpdate = false;
+
+      useUserPermissions.mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: { canRead: true, canUpdate, canCreate: true, canDelete: true },
+      }));
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      await waitFor(() => expect(screen.getByText('English')).toBeVisible());
+      expect(screen.queryAllByLabelText(`Settings.list.actions.edit`).length).toBe(0);
+    });
+
+    it('hides the "Delete locale" button (garbage) when the user is not allowed to delete a locale', async () => {
+      const canDelete = false;
+
+      useUserPermissions.mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: { canRead: true, canUpdate: false, canCreate: true, canDelete },
+      }));
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      await waitFor(() => expect(screen.getByText('English')).toBeVisible());
+      expect(screen.queryAllByLabelText(`Settings.list.actions.delete`).length).toBe(0);
     });
   });
 });

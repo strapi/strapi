@@ -5,7 +5,6 @@ import { Pencil } from '@buffetjs/icons';
 import { Text, IconLinks } from '@buffetjs/core';
 import { CustomRow } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { getTrad } from '../../utils';
 
 const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
@@ -16,7 +15,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   if (onEdit) {
     links.push({
       icon: (
-        <span aria-label="Edit locale">
+        <span aria-label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}>
           <Pencil fill="#0e1622" />
         </span>
       ),
@@ -27,7 +26,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   if (onDelete) {
     links.push({
       icon: !locale.isDefault ? (
-        <span aria-label="Delete locale">
+        <span aria-label={formatMessage({ id: getTrad('Settings.list.actions.delete') })}>
           <FontAwesomeIcon icon="trash-alt" />
         </span>
       ) : null,
