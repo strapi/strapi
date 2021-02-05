@@ -9,7 +9,8 @@
     "required": false
   },
   "dependencies": {
-    "lodash": "4.17.20"
+    "lodash": "4.17.20",
+    "strapi-utils": "3.4.5"
   },
   "author": {
     "name": "A Strapi developer",
