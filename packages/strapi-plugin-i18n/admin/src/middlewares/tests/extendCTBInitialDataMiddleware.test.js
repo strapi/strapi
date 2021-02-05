@@ -1,9 +1,9 @@
-import middlewares from '../middlewares';
+import middleware from '../extendCTBInitialDataMiddleware';
 
 describe('extendCTBInitialDataMiddleware', () => {
   describe('the action type matches "ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT"', () => {
     it('forwards the action when the action type does not match', () => {
-      const extendCTBInitialDataMiddleware = middlewares[0]();
+      const extendCTBInitialDataMiddleware = middleware();
       const next = jest.fn();
       const action = {};
 
@@ -13,7 +13,7 @@ describe('extendCTBInitialDataMiddleware', () => {
     });
 
     it('forwards the action when the modalType and actionType are undefined', () => {
-      const extendCTBInitialDataMiddleware = middlewares[0]();
+      const extendCTBInitialDataMiddleware = middleware();
       const next = jest.fn();
       const action = {
         type: 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT',
@@ -27,7 +27,7 @@ describe('extendCTBInitialDataMiddleware', () => {
     });
 
     it('forwards the action when the action.data.pluginOptions.i18n.localized path exists', () => {
-      const extendCTBInitialDataMiddleware = middlewares[0]();
+      const extendCTBInitialDataMiddleware = middleware();
       const next = jest.fn();
       const action = {
         type: 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT',
@@ -42,7 +42,7 @@ describe('extendCTBInitialDataMiddleware', () => {
     });
 
     it('adds a pluginOptions to the action when data is defined and the action', () => {
-      const extendCTBInitialDataMiddleware = middlewares[0]();
+      const extendCTBInitialDataMiddleware = middleware();
       const next = jest.fn();
       const action = {
         type: 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT',
@@ -64,7 +64,7 @@ describe('extendCTBInitialDataMiddleware', () => {
     });
 
     it('modifies the data.pluginOptions in the action when it already exists', () => {
-      const extendCTBInitialDataMiddleware = middlewares[0]();
+      const extendCTBInitialDataMiddleware = middleware();
       const next = jest.fn();
       const action = {
         type: 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT',
