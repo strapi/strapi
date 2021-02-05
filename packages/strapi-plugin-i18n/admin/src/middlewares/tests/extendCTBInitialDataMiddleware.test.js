@@ -1,6 +1,6 @@
 import middleware from '../extendCTBInitialDataMiddleware';
 
-describe('extendCTBInitialDataMiddleware', () => {
+describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
   describe('the action type matches "ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT"', () => {
     it('forwards the action when the action type does not match', () => {
       const extendCTBInitialDataMiddleware = middleware();
