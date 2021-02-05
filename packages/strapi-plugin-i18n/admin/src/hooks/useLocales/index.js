@@ -1,53 +1,43 @@
 import { useEffect, useReducer } from 'react';
+import { request } from 'strapi-helper-plugin';
 import reducer, { initialState } from './reducer';
 
-// TODO : Move to react-query when it is merged.
-const useRolesList = () => {
+const fetchLocalesList = async (dispatch, signal) => {
+  try {
+    dispatch({
+      type: 'GET_DATA',
+    });
+
+    const data = await request('/i18n/locales', {
+      method: 'GET',
+      signal,
+    });
+
+    dispatch({
+      type: 'GET_DATA_SUCCEEDED',
+      data,
+    });
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+
+    strapi.notification.toggle({
+      type: 'warning',
+      message: { id: 'notification.error' },
+    });
+  }
+};
+
+const useLocales = () => {
   const [{ locales, isLoading }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const abortCtrl = new AbortController();
+    fetchLocalesList(dispatch, abortCtrl.signal);
 
-    // TMP : to display the loader
-    setTimeout(() => {
-      fetchLocalesList(signal);
-    }, 1000);
-
-    return () => abortController.abort();
+    return () => abortCtrl.abort();
   }, []);
-
-  const fetchLocalesList = async () => {
-    try {
-      dispatch({
-        type: 'GET_DATA',
-      });
-
-      // TMP : Fake data
-      const locales = await Promise.resolve([
-        {
-          id: 1,
-          displayName: 'French',
-          code: 'fr-FR',
-          isDefault: false,
-        },
-        {
-          id: 2,
-          displayName: 'English',
-          code: 'en-US',
-          isDefault: true,
-        },
-      ]);
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data: locales,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   return { locales, isLoading };
 };
 
-export default useRolesList;
+export default useLocales;

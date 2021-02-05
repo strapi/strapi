@@ -1,8 +1,9 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment, ModalConfirm } from 'strapi-helper-plugin';
+import { BaselineAlignment, ModalConfirm, EmptyList, ListButton } from 'strapi-helper-plugin';
 import { Header, List } from '@buffetjs/custom';
 import { Button, Text } from '@buffetjs/core';
+import { Plus } from '@buffetjs/icons';
 import ModalEdit from '../../components/ModalEdit';
 import { LocaleRow } from '../../components';
 import { useLocales } from '../../hooks';
@@ -25,13 +26,15 @@ const LocaleSettingsPage = () => {
   } = useDeleteLocale();
 
   const { isEditing, isEditModalOpen, editLocale, showEditModal, hideEditModal } = useEditLocale();
-
   const { formatMessage } = useIntl();
   const { locales, isLoading } = useLocales();
 
+  const handleDelete = canDelete ? showDeleteModal : undefined;
+  const handleEdit = canEdit ? showEditModal : undefined;
+
   const actions = [
     {
-      label: 'Add locale',
+      label: formatMessage({ id: getTrad('Settings.list.actions.add') }),
       onClick: () => console.log('add locale'),
       color: 'primary',
       type: 'button',
@@ -50,36 +53,53 @@ const LocaleSettingsPage = () => {
     },
   ];
 
-  const headerProps = {
-    title: {
-      label: formatMessage({ id: getTrad('plugin.name') }),
-    },
-    content: formatMessage({ id: getTrad('Settings.list.description') }),
-    actions,
-  };
-
-  const listTitle = formatMessage(
-    {
-      id: getTrad(`Settings.locales.list.title${locales.length > 1 ? '.plural' : '.singular'}`),
-    },
-    { number: locales.length }
-  );
-
-  const handleDelete = canDelete ? showDeleteModal : undefined;
-  const handleEdit = canEdit ? showEditModal : undefined;
+  const listTitle = isLoading
+    ? null
+    : formatMessage(
+        {
+          id: getTrad(`Settings.locales.list.title${locales.length > 1 ? '.plural' : '.singular'}`),
+        },
+        { number: locales.length }
+      );
 
   return (
     <>
-      <Header {...headerProps} />
-      <BaselineAlignment top size="3px" />
-      <List
-        title={listTitle}
-        items={locales}
-        isLoading={isLoading}
-        customRowComponent={locale => (
-          <LocaleRow locale={locale} onDelete={handleDelete} onEdit={handleEdit} />
-        )}
+      <Header
+        title={{
+          label: formatMessage({ id: getTrad('plugin.name') }),
+        }}
+        content={formatMessage({ id: getTrad('Settings.list.description') })}
+        actions={actions}
       />
+
+      <BaselineAlignment top size="3px" />
+
+      {isLoading || (locales && locales.length > 0) ? (
+        <List
+          title={listTitle}
+          items={locales}
+          isLoading={isLoading}
+          customRowComponent={locale => (
+            <LocaleRow locale={locale} onDelete={handleDelete} onEdit={handleEdit} />
+          )}
+        />
+      ) : (
+        <>
+          <EmptyList
+            title={formatMessage({ id: getTrad('Settings.list.empty.title') })}
+            description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
+          />
+          <ListButton>
+            <Button
+              label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
+              onClick={() => console.log('Click add locale')}
+              color="primary"
+              type="button"
+              icon={<Plus fill="#007eff" width="11px" height="11px" />}
+            />
+          </ListButton>
+        </>
+      )}
 
       <ModalConfirm
         confirmButtonLabel={{
