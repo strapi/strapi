@@ -2,7 +2,7 @@
 import produce from 'immer';
 
 export const initialState = {
-  locales: [],
+  locales: undefined,
   isLoading: true,
 };
 

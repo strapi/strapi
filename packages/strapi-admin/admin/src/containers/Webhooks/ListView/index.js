@@ -17,10 +17,11 @@ import {
   PopUpWarning,
   useUserPermissions,
   LoadingIndicatorPage,
+  EmptyList,
 } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
-import { EmptyList, ListRow } from '../../../components/Webhooks';
+import { ListRow } from '../../../components/Webhooks';
 import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
 
@@ -296,7 +297,12 @@ function ListView() {
               }}
             />
           ) : (
-            <EmptyList />
+            <EmptyList
+              title={formatMessage({ id: 'Settings.webhooks.list.empty.title' })}
+              description={formatMessage({ id: 'Settings.webhooks.list.empty.description' })}
+              link="https://strapi.io/documentation/developer-docs/latest/concepts/webhooks.html"
+              linkText={formatMessage({ id: 'Settings.webhooks.list.empty.link' })}
+            />
           )}
           <ListButton>{canCreate && <Button {...omit(newButtonProps, 'Component')} />}</ListButton>
         </div>
