@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUserPermissions } from 'strapi-helper-plugin';
+import { useUserPermissions, EmptyState } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import LocaleSettingsPage from './LocaleSettingsPage';
 import i18nPermissions from '../../permissions';
@@ -22,10 +22,10 @@ const ProtectedLocaleSettingsPage = () => {
 
   if (!canRead) {
     return (
-      <div>
-        <p>{formatMessage({ id: getTrad('Settings.permissions.read.denied.title') })}</p>
-        <p>{formatMessage({ id: getTrad('Settings.permissions.read.denied.description') })}</p>
-      </div>
+      <EmptyState
+        title={formatMessage({ id: getTrad('Settings.permissions.read.denied.title') })}
+        description={formatMessage({ id: getTrad('Settings.permissions.read.denied.description') })}
+      />
     );
   }
 

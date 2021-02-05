@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment, ModalConfirm, EmptyList, ListButton } from 'strapi-helper-plugin';
+import { BaselineAlignment, ModalConfirm, EmptyState, ListButton } from 'strapi-helper-plugin';
 import { Header, List } from '@buffetjs/custom';
 import { Button, Text } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
@@ -75,7 +75,7 @@ const LocaleSettingsPage = ({ canCreate, canDelete, canUpdate }) => {
         />
       ) : (
         <>
-          <EmptyList
+          <EmptyState
             title={formatMessage({ id: getTrad('Settings.list.empty.title') })}
             description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
           />

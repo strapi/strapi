@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 
 import Wrapper from './Wrapper';
 
-function EmptyList({ title, description, link, linkText }) {
+function EmptyState({ title, description, link, linkText }) {
   return (
     <Wrapper>
       <p>{title}</p>
@@ -23,16 +23,16 @@ function EmptyList({ title, description, link, linkText }) {
   );
 }
 
-EmptyList.defaultProps = {
+EmptyState.defaultProps = {
   link: undefined,
   linkText: undefined,
 };
 
-EmptyList.propTypes = {
+EmptyState.propTypes = {
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   link: PropTypes.string,
   linkText: PropTypes.string,
 };
 
-export default EmptyList;
+export default EmptyState;

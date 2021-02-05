@@ -10,7 +10,12 @@ import themes from '../../../../../../strapi-admin/admin/src/themes';
 // TODO: we should not be forced to mock this module
 // but it bugs somehow when run with jest
 jest.mock('strapi-helper-plugin', () => ({
-  EmptyList: () => <div data-testid="empty-list" />,
+  EmptyState: ({ title, description }) => (
+    <div data-testid="empty-list">
+      <p>{title}</p>
+      <p>{description}</p>
+    </div>
+  ),
   BaselineAlignment: () => <div />,
   ModalConfirm: ({ onConfirm, isOpen }) =>
     isOpen ? (

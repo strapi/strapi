@@ -17,7 +17,7 @@ import {
   PopUpWarning,
   useUserPermissions,
   LoadingIndicatorPage,
-  EmptyList,
+  EmptyState,
 } from 'strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
@@ -297,7 +297,7 @@ function ListView() {
               }}
             />
           ) : (
-            <EmptyList
+            <EmptyState
               title={formatMessage({ id: 'Settings.webhooks.list.empty.title' })}
               description={formatMessage({ id: 'Settings.webhooks.list.empty.description' })}
               link="https://strapi.io/documentation/developer-docs/latest/concepts/webhooks.html"
