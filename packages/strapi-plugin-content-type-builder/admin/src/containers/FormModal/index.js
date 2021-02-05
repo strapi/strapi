@@ -24,6 +24,7 @@ import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
 import ComponentIconPicker from '../../components/ComponentIconPicker';
+import CheckboxWithDescription from '../../components/CheckboxWithDescription';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -1108,6 +1109,7 @@ const FormModal = () => {
 
   // Styles
   const modalBodyStyle = isPickingAttribute ? { paddingTop: '0.5rem', paddingBottom: '3rem' } : {};
+  console.log({ modifiedData });
 
   return (
     <>
@@ -1356,6 +1358,7 @@ const FormModal = () => {
                                   changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
                                   customInputs={{
                                     allowedTypesSelect: WrapperSelect,
+                                    checkbox: CheckboxWithDescription,
                                     componentIconPicker: ComponentIconPicker,
                                     componentSelect: WrapperSelect,
                                     creatableSelect: WrapperSelect,

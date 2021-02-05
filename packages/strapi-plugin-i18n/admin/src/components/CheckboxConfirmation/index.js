@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Checkbox, Text } from '@buffetjs/core';
-import { Description } from '@buffetjs/styles';
+// import { Description } from '@buffetjs/styles';
 import { ModalConfirm } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
 import Wrapper from './Wrapper';
@@ -34,7 +34,11 @@ const CheckboxConfirmation = ({ description, isCreating, label, name, onChange, 
     <>
       <Wrapper>
         <Checkbox {...rest} message={label} name={name} onChange={handleChange} type="checkbox" />
-        {description && <Description title={description}>{description}</Description>}
+        {description && (
+          <Text color="grey" title={description} fontSize="sm" ellipsis>
+            {description}
+          </Text>
+        )}
       </Wrapper>
       <ModalConfirm
         confirmButtonLabel={{ id: getTrad('CheckboxConfirmation.Modal.button-confirm') }}
