@@ -6,6 +6,7 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
 import { getTrad } from './utils';
+import CheckboxConfirmation from './components/CheckboxConfirmation';
 import SettingsPage from './containers/SettingsPage';
 
 export default strapi => {
@@ -47,7 +48,7 @@ export default strapi => {
 
       if (ctbPlugin) {
         const ctbFormsAPI = ctbPlugin.apis.forms;
-        ctbFormsAPI.components.add({ id: 'localesPicker', component: () => 'locale picker' });
+        ctbFormsAPI.components.add({ id: 'checkboxConfirmation', component: CheckboxConfirmation });
 
         ctbFormsAPI.extendContentType({
           validator: () => ({
@@ -62,7 +63,7 @@ export default strapi => {
                   {
                     name: 'pluginOptions.i18n.localized',
                     description: { id: getTrad('plugin.schema.i18n.localized.description') },
-                    type: 'checkbox',
+                    type: 'checkboxConfirmation',
                     label: { id: getTrad('plugin.schema.i18n.localized.label') },
                   },
                 ],

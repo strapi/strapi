@@ -3,14 +3,14 @@ class Plugin {
 
   decorators = {};
 
-  injectedComponents = {};
+  injectionZones = {};
 
   apis = {};
 
   constructor(pluginConf) {
     this.pluginId = pluginConf.id;
     this.decorators = pluginConf.decorators || {};
-    this.injectedComponents = pluginConf.injectedComponents || {};
+    this.injectionZones = pluginConf.injectionZones || {};
     this.apis = pluginConf.apis || {};
   }
 
@@ -30,7 +30,7 @@ class Plugin {
 
   getInjectedComponents(containerName, blockName) {
     try {
-      return this.injectedComponents[containerName][blockName] || {};
+      return this.injectionZones[containerName][blockName] || {};
     } catch (err) {
       console.error('Cannot get injected component', err);
 
@@ -40,7 +40,7 @@ class Plugin {
 
   injectComponent(containerName, blockName, compo) {
     try {
-      this.injectedComponents[containerName][blockName].push(compo);
+      this.injectionZones[containerName][blockName].push(compo);
     } catch (err) {
       console.error('Cannot inject component', err);
     }

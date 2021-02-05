@@ -251,6 +251,7 @@ const FormModal = () => {
           data: {
             draftAndPublish: true,
           },
+          pluginOptions: {},
         });
       }
 
@@ -260,12 +261,13 @@ const FormModal = () => {
         state.modalType !== 'contentType' &&
         actionType === 'edit'
       ) {
-        const { name, collectionName, draftAndPublish, kind } = get(
+        const { name, collectionName, draftAndPublish, kind, pluginOptions } = get(
           allDataSchema,
           [...pathToSchema, 'schema'],
           {
             name: null,
             collectionName: null,
+            pluginOptions: {},
           }
         );
 
@@ -278,6 +280,7 @@ const FormModal = () => {
             collectionName,
             draftAndPublish,
             kind,
+            pluginOptions,
           },
         });
       }
