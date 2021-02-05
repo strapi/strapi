@@ -1,6 +1,7 @@
 'use strict';
 
 const { setCreatorFields, sanitizeEntity } = require('strapi-utils');
+const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
 const { formatLocale } = require('../domain/locale');
@@ -23,6 +24,7 @@ module.exports = {
   async createLocale(ctx) {
     const { user } = ctx.state;
     const { body } = ctx.request;
+    let { isDefault, ...localeToCreate } = body;
 
     try {
       await validateCreateLocaleInput(body);
@@ -37,10 +39,10 @@ module.exports = {
       return ctx.badRequest('This locale already exists');
     }
 
-    let localeToCreate = formatLocale(body);
+    localeToCreate = formatLocale(localeToCreate);
     localeToCreate = setCreatorFields({ user })(localeToCreate);
 
-    const locale = await localesService.create(localeToCreate);
+    const locale = await localesService.create(localeToCreate, { isDefault });
 
     ctx.body = sanitizeLocale(locale);
   },
@@ -49,6 +51,7 @@ module.exports = {
     const { user } = ctx.state;
     const { id } = ctx.params;
     const { body } = ctx.request;
+    let { isDefault, ...updates } = body;
 
     try {
       await validateUpdateLocaleInput(body);
@@ -63,10 +66,10 @@ module.exports = {
       return ctx.notFound('locale.notFound');
     }
 
-    let updates = { name: body.name };
-    updates = setCreatorFields({ user, isEdition: true })(updates);
+    const allowedParams = ['name', 'isDefault'];
+    const cleanUpdates = setCreatorFields({ user, isEdition: true })(pick(allowedParams, updates));
 
-    const updatedLocale = await localesService.update({ id }, updates);
+    const updatedLocale = await localesService.update({ id }, cleanUpdates, { isDefault });
 
     ctx.body = sanitizeLocale(updatedLocale);
   },

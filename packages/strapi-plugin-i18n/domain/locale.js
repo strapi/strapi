@@ -2,8 +2,8 @@
 
 const formatLocale = locale => {
   return {
+    ...locale,
     name: locale.name || null,
-    code: locale.code,
   };
 };
 
