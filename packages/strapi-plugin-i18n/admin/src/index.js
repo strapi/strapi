@@ -1,4 +1,5 @@
 import React from 'react';
+import { get } from 'lodash';
 import * as yup from 'yup';
 import pluginPkg from '../../package.json';
 import middlewares from './middlewares';
@@ -63,9 +64,11 @@ export default strapi => {
                 [
                   {
                     name: 'pluginOptions.i18n.localized',
-                    description: { id: getTrad('plugin.schema.i18n.localized.description') },
+                    description: {
+                      id: getTrad('plugin.schema.i18n.localized.description-content-type'),
+                    },
                     type: 'checkboxConfirmation',
-                    label: { id: getTrad('plugin.schema.i18n.localized.label') },
+                    label: { id: getTrad('plugin.schema.i18n.localized.label-content-type') },
                   },
                 ],
               ];
@@ -73,18 +76,63 @@ export default strapi => {
           },
         });
 
-        ctbFormsAPI.extendFields(['text', 'string'], {
-          validator: () => ({
-            i18n: yup.object().shape({
-              localized: yup.bool(),
+        ctbFormsAPI.extendFields(
+          [
+            'text',
+            'string',
+            'richtext',
+            'email',
+            'password',
+            'number',
+            'date',
+            'json',
+            'uid',
+            'component',
+            'dynamiczone',
+            'enumeration',
+          ],
+          {
+            validator: () => ({
+              i18n: yup.object().shape({
+                localized: yup.bool(),
+              }),
             }),
-          }),
-          form: {
-            advanced() {
-              return [[{ name: 'localized', type: 'checkbox', label: { id: 'i18nTest' } }]];
+            form: {
+              advanced({ contentTypeSchema, forTarget, type, step }) {
+                if (forTarget !== 'contentType') {
+                  return [];
+                }
+
+                const hasI18nEnabled = get(
+                  contentTypeSchema,
+                  ['schema', 'pluginOptions', 'i18n', 'localized'],
+                  false
+                );
+
+                if (!hasI18nEnabled) {
+                  return [];
+                }
+
+                if (type === 'component' && step === '1') {
+                  return [];
+                }
+
+                return [
+                  [
+                    {
+                      name: 'pluginOptions.i18n.localized',
+                      description: {
+                        id: getTrad('plugin.schema.i18n.localized.description-field'),
+                      },
+                      type: 'checkbox',
+                      label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+                    },
+                  ],
+                ];
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
   };

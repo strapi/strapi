@@ -101,6 +101,7 @@ const FormModal = () => {
     updateSchema,
     reservedNames,
   } = useDataManager();
+  console.log({ allDataSchema });
   const {
     componentToCreate,
     formErrors,
@@ -1211,14 +1212,16 @@ const FormModal = () => {
                         </div>
                       );
                     })
-                  : form(
-                      modifiedData,
-                      state.attributeType,
-                      state.step,
-                      state.actionType,
+                  : form({
+                      data: modifiedData,
+                      type: state.attributeType,
+                      step: state.step,
+                      actionType: state.actionType,
                       attributes,
-                      ctbFormsAPI
-                    ).items.map((row, index) => {
+                      extensions: ctbFormsAPI,
+                      forTarget: state.forTarget,
+                      contentTypeSchema: allDataSchema.contentType || {},
+                    }).items.map((row, index) => {
                       return (
                         <div className="row" key={index}>
                           {row.map((input, i) => {
