@@ -1,6 +1,8 @@
 const extendCTBAttributeInitialDataMiddleware = () => {
   return ({ getState }) => next => action => {
     const enhanceAction = () => {
+      // the block here is to catch the error when trying to access the state
+      // of the ctb when the plugin is not mounted
       try {
         const hasi18nEnabled = getState().getIn([
           'content-type-builder_dataManagerProvider',
