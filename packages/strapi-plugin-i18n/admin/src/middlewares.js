@@ -30,6 +30,62 @@ const extendCTBInitialDataMiddleware = () => {
   };
 };
 
-const middlewares = [extendCTBInitialDataMiddleware];
+const extendCTBAttributeInitialDataMiddleware = () => {
+  return ({ getState }) => next => action => {
+    const enhanceAction = () => {
+      try {
+        const hasi18nEnabled = getState().getIn([
+          'content-type-builder_dataManagerProvider',
+          'modifiedData',
+          'contentType',
+          'schema',
+          'pluginOptions',
+          'i18n',
+          'localized',
+        ]);
+
+        if (hasi18nEnabled) {
+          const pluginOptions = action.options
+            ? { ...action.options.pluginOptions, i18n: { localized: true } }
+            : { i18n: { localized: true } };
+
+          return next({
+            ...action,
+            options: {
+              pluginOptions,
+            },
+          });
+        }
+
+        return next(action);
+      } catch (err) {
+        return next(action);
+      }
+    };
+
+    if (
+      action.type === 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA' &&
+      action.forTarget === 'contentType' &&
+      !['relation', 'media', 'component'].includes(action.attributeType) &&
+      !action.isEditing
+    ) {
+      // We need to make sure the plugin is installed
+      return enhanceAction();
+    }
+
+    if (
+      (action.type ===
+        'ContentTypeBuilder/FormModal/RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO' ||
+        action.type === 'ContentTypeBuilder/FormModal/RESET_PROPS_AND_SAVE_CURRENT_DATA') &&
+      action.forTarget === 'contentType'
+    ) {
+      return enhanceAction();
+    }
+
+    return next(action);
+  };
+};
+
+const middlewares = [extendCTBInitialDataMiddleware, extendCTBAttributeInitialDataMiddleware];
 
 export default middlewares;
