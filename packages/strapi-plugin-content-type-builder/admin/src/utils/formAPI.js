@@ -69,10 +69,10 @@ const formsAPI = {
       }
     });
   },
-  makeAdvancedForm(target, initSections, ...args) {
+  makeAdvancedForm(target, initSections, props) {
     const sectionsToAdd = get(this.types, [...target, 'form', 'advanced'], []).reduce(
       (acc, current) => {
-        const sections = current(args);
+        const sections = current(props);
 
         return [...acc, ...sections];
       },

@@ -45,18 +45,23 @@ const forms = {
       }
     },
     form: {
-      advanced(data, type, step, actionType, attributes, extensions) {
+      advanced({ data, type, step, extensions, ...rest }) {
         try {
           const baseForm = attributesForm.advanced[type](data, step).items;
 
-          return extensions.makeAdvancedForm(['attribute', type], baseForm, data, step);
+          return extensions.makeAdvancedForm(['attribute', type], baseForm, {
+            data,
+            type,
+            step,
+            ...rest,
+          });
         } catch (err) {
           console.error(err);
 
           return { items: [] };
         }
       },
-      base(data, type, step, actionType, attributes) {
+      base({ data, type, step, attributes }) {
         try {
           return attributesForm.base[type](data, step, attributes);
         } catch (err) {
@@ -81,7 +86,7 @@ const forms = {
       );
     },
     form: {
-      base(data = {}, type, step, actionType) {
+      base({ data = {}, actionType }) {
         if (actionType === 'create') {
           const value = data.name ? nameToSlug(data.name) : '';
 
@@ -90,7 +95,7 @@ const forms = {
 
         return contentTypeForm.base.edit();
       },
-      advanced(data, type, step, actionType, attributes, extensions) {
+      advanced({ extensions }) {
         const baseForm = contentTypeForm.advanced.default().items;
 
         return extensions.makeAdvancedForm(['contentType'], baseForm);
@@ -129,7 +134,7 @@ const forms = {
       advanced() {
         return dynamiczoneForm.advanced.default();
       },
-      base(data) {
+      base({ data }) {
         const isCreatingComponent = get(data, 'createComponent', false);
 
         if (isCreatingComponent) {

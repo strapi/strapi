@@ -38,7 +38,7 @@ const advancedForm = {
     }
 
     if (repeatable) {
-      return { items: [[options.required], [uiHelpers.divider], [options.max], [options.min]] };
+      return { items: [[options.required], [uiHelpers.divider], [options.max, options.min]] };
     }
 
     return {
@@ -66,7 +66,7 @@ const advancedForm = {
   },
   dynamiczone: () => {
     return {
-      items: [[options.required], [uiHelpers.divider], [options.max], [options.min]],
+      items: [[options.required], [uiHelpers.divider], [options.max, options.min]],
     };
   },
   email: () => {
