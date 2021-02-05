@@ -276,6 +276,18 @@ Object {
         "subCategory": "general",
       },
       Object {
+        "action": "plugins::email.settings.read",
+        "category": "email",
+        "displayName": "Read",
+        "subCategory": "settings",
+      },
+      Object {
+        "action": "plugins::email.settings.test",
+        "category": "email",
+        "displayName": "Send test email",
+        "subCategory": "settings",
+      },
+      Object {
         "action": "plugins::upload.settings.read",
         "category": "media library",
         "displayName": "Access the Media Library settings page",
