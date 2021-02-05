@@ -7,9 +7,11 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
 import { getTrad } from './utils';
+import pluginPermissions from './permissions';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import SettingsPage from './containers/SettingsPage';
-import pluginPermissions from './permissions';
+import sanitizeCTBContentTypeSchema from './utils/sanitizeCTBContentTypeSchema';
+import LOCALIZED_FIELDS from './utils/localizedFields';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -50,6 +52,7 @@ export default strapi => {
 
       if (ctbPlugin) {
         const ctbFormsAPI = ctbPlugin.apis.forms;
+        ctbFormsAPI.addContentTypeSchemaSanitizer(sanitizeCTBContentTypeSchema);
         ctbFormsAPI.components.add({ id: 'checkboxConfirmation', component: CheckboxConfirmation });
 
         ctbFormsAPI.extendContentType({
@@ -76,63 +79,47 @@ export default strapi => {
           },
         });
 
-        ctbFormsAPI.extendFields(
-          [
-            'text',
-            'string',
-            'richtext',
-            'email',
-            'password',
-            'number',
-            'date',
-            'json',
-            'uid',
-            'component',
-            'dynamiczone',
-            'enumeration',
-          ],
-          {
-            validator: () => ({
-              i18n: yup.object().shape({
-                localized: yup.bool(),
-              }),
+        ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
+          validator: () => ({
+            i18n: yup.object().shape({
+              localized: yup.bool(),
             }),
-            form: {
-              advanced({ contentTypeSchema, forTarget, type, step }) {
-                if (forTarget !== 'contentType') {
-                  return [];
-                }
+          }),
+          form: {
+            advanced({ contentTypeSchema, forTarget, type, step }) {
+              if (forTarget !== 'contentType') {
+                return [];
+              }
 
-                const hasI18nEnabled = get(
-                  contentTypeSchema,
-                  ['schema', 'pluginOptions', 'i18n', 'localized'],
-                  false
-                );
+              const hasI18nEnabled = get(
+                contentTypeSchema,
+                ['schema', 'pluginOptions', 'i18n', 'localized'],
+                false
+              );
 
-                if (!hasI18nEnabled) {
-                  return [];
-                }
+              if (!hasI18nEnabled) {
+                return [];
+              }
 
-                if (type === 'component' && step === '1') {
-                  return [];
-                }
+              if (type === 'component' && step === '1') {
+                return [];
+              }
 
-                return [
-                  [
-                    {
-                      name: 'pluginOptions.i18n.localized',
-                      description: {
-                        id: getTrad('plugin.schema.i18n.localized.description-field'),
-                      },
-                      type: 'checkbox',
-                      label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+              return [
+                [
+                  {
+                    name: 'pluginOptions.i18n.localized',
+                    description: {
+                      id: getTrad('plugin.schema.i18n.localized.description-field'),
                     },
-                  ],
-                ];
-              },
+                    type: 'checkbox',
+                    label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+                  },
+                ],
+              ];
             },
-          }
-        );
+          },
+        });
       }
     },
   };
