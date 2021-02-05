@@ -101,7 +101,7 @@ const FormModal = () => {
     updateSchema,
     reservedNames,
   } = useDataManager();
-  console.log({ allDataSchema });
+
   const {
     componentToCreate,
     formErrors,
@@ -368,6 +368,7 @@ const FormModal = () => {
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
           step,
+          forTarget,
         });
       }
     }
@@ -852,6 +853,7 @@ const FormModal = () => {
           // To the modal for adding a "common field"
           dispatch({
             type: RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+            forTarget: state.forTarget,
           });
 
           // We don't want all the props to be reset
@@ -920,6 +922,7 @@ const FormModal = () => {
           // If we were to create the component before
           dispatch({
             type: RESET_PROPS_AND_SAVE_CURRENT_DATA,
+            forTarget: state.forTarget,
           });
 
           // Terminate because we don't want the reducer to be entirely reset
@@ -1110,7 +1113,6 @@ const FormModal = () => {
 
   // Styles
   const modalBodyStyle = isPickingAttribute ? { paddingTop: '0.5rem', paddingBottom: '3rem' } : {};
-  console.log({ modifiedData });
 
   return (
     <>
