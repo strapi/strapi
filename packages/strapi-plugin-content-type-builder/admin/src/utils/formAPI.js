@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import * as yup from 'yup';
 
 const formsAPI = {
@@ -38,6 +38,10 @@ const formsAPI = {
         base: [],
       },
     },
+  },
+  contentTypeSchemaSanitizers: [],
+  addContentTypeSchemaSanitizer(cb) {
+    this.contentTypeSchemaSanitizers.push(cb);
   },
   extendContentType({ validator, form: { advanced, base } }) {
     const { contentType } = this.types;
@@ -91,6 +95,17 @@ const formsAPI = {
     }, {});
 
     return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
+  },
+  sanitizeContentTypeSchema(data, initialData) {
+    let sanitizedData = cloneDeep(data);
+
+    const refData = cloneDeep(initialData);
+
+    this.contentTypeSchemaSanitizers.forEach(cb => {
+      sanitizedData = cb(sanitizedData, refData);
+    });
+
+    return sanitizedData;
   },
 };
 
