@@ -28,8 +28,7 @@ const advancedForm = {
         ],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
+        [options.required, options.unique],
       ],
     };
   },
@@ -61,8 +60,7 @@ const advancedForm = {
         ],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
+        [options.required, options.unique],
       ],
     };
   },
@@ -82,10 +80,8 @@ const advancedForm = {
         ],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
       ],
     };
   },
@@ -120,8 +116,6 @@ const advancedForm = {
                 : []
             ),
           },
-        ],
-        [
           {
             label: {
               id: getTrad('form.attribute.item.enumeration.graphql'),
@@ -136,14 +130,13 @@ const advancedForm = {
         ],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
+        [options.required, options.unique],
       ],
     };
   },
   json: () => {
     return {
-      items: [[uiHelpers.divider], [options.private], [options.required], [options.unique]],
+      items: [[uiHelpers.divider], [options.private], [options.required, options.unique]],
     };
   },
   media: () => {
@@ -151,8 +144,7 @@ const advancedForm = {
       items: [
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
+        [options.required, options.unique],
         [
           {
             label: {
@@ -186,10 +178,8 @@ const advancedForm = {
         ],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.max],
-        [options.min],
+        [options.required, options.unique],
+        [options.max, options.min],
       ],
     };
   },
@@ -199,10 +189,8 @@ const advancedForm = {
         [options.default],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
       ],
     };
   },
@@ -249,24 +237,19 @@ const advancedForm = {
         [options.default],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
       ],
     };
   },
   text: () => {
     return {
       items: [
-        [options.default],
-        [options.regex],
+        [options.default, options.regex],
         [uiHelpers.divider],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
       ],
     };
   },
@@ -277,8 +260,7 @@ const advancedForm = {
         [uiHelpers.divider],
         [options.private],
         [options.required],
-        [options.maxLength],
-        [options.minLength],
+        [options.maxLength, options.minLength],
       ],
     };
   },
