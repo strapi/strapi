@@ -449,7 +449,7 @@ const DataManagerProvider = ({
       };
 
       if (isInContentTypeView) {
-        const contentType = apis.forms.sanitizeContentTypeSchema(
+        const contentType = apis.forms.mutateContentTypeSchema(
           {
             ...formatMainDataType(modifiedData.contentType),
             ...additionalContentTypeData,

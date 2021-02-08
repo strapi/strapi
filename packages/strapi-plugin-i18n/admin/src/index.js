@@ -9,7 +9,7 @@ import trads from './translations';
 import { getTrad } from './utils';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import SettingsPage from './containers/SettingsPage';
-import sanitizeCTBContentTypeSchema from './utils/sanitizeCTBContentTypeSchema';
+import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 
 export default strapi => {
@@ -51,7 +51,7 @@ export default strapi => {
 
       if (ctbPlugin) {
         const ctbFormsAPI = ctbPlugin.apis.forms;
-        ctbFormsAPI.addContentTypeSchemaSanitizer(sanitizeCTBContentTypeSchema);
+        ctbFormsAPI.addContentTypeSchemaMutation(mutateCTBContentTypeSchema);
         ctbFormsAPI.components.add({ id: 'checkboxConfirmation', component: CheckboxConfirmation });
 
         ctbFormsAPI.extendContentType({

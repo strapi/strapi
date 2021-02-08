@@ -39,9 +39,9 @@ const formsAPI = {
       },
     },
   },
-  contentTypeSchemaSanitizers: [],
-  addContentTypeSchemaSanitizer(cb) {
-    this.contentTypeSchemaSanitizers.push(cb);
+  contentTypeSchemaMutations: [],
+  addContentTypeSchemaMutation(cb) {
+    this.contentTypeSchemaMutations.push(cb);
   },
   extendContentType({ validator, form: { advanced, base } }) {
     const { contentType } = this.types;
@@ -96,16 +96,16 @@ const formsAPI = {
 
     return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
   },
-  sanitizeContentTypeSchema(data, initialData) {
-    let sanitizedData = cloneDeep(data);
+  mutateContentTypeSchema(data, initialData) {
+    let enhancedData = cloneDeep(data);
 
     const refData = cloneDeep(initialData);
 
-    this.contentTypeSchemaSanitizers.forEach(cb => {
-      sanitizedData = cb(sanitizedData, refData);
+    this.contentTypeSchemaMutations.forEach(cb => {
+      enhancedData = cb(enhancedData, refData);
     });
 
-    return sanitizedData;
+    return enhancedData;
   },
 };
 

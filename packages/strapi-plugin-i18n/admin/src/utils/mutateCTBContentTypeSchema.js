@@ -3,7 +3,7 @@ import LOCALIZED_FIELDS from './localizedFields';
 
 const localizedPath = ['pluginOptions', 'i18n', 'localized'];
 
-const sanitizeCTBContentTypeSchema = (nextSchema, prevSchema) => {
+const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   // Don't perform mutations components
   if (!has(nextSchema, localizedPath)) {
     return nextSchema;
@@ -56,4 +56,4 @@ const sanitizeCTBContentTypeSchema = (nextSchema, prevSchema) => {
 
   return nextSchema;
 };
-export default sanitizeCTBContentTypeSchema;
+export default mutateCTBContentTypeSchema;

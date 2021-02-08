@@ -1,10 +1,10 @@
-import sanitizeSchema from '../sanitizeCTBContentTypeSchema';
+import mutateSchema from '../mutateCTBContentTypeSchema';
 
-describe('i18n | utils | sanitizeCTBContentTypeSchema', () => {
+describe('i18n | utils | mutateCTBContentTypeSchema', () => {
   it('should forward the data the pluginOptions.i18n.localized key does not exist in the content type', () => {
     const data = { pluginOptions: { test: true } };
 
-    expect(sanitizeSchema(data)).toEqual(data);
+    expect(mutateSchema(data)).toEqual(data);
   });
 
   it('should remove the pluginOptions.i18n key from the content type schema', () => {
@@ -54,7 +54,7 @@ describe('i18n | utils | sanitizeCTBContentTypeSchema', () => {
       },
     };
 
-    expect(sanitizeSchema(ctSchema, {})).toEqual(expected);
+    expect(mutateSchema(ctSchema, {})).toEqual(expected);
   });
 
   it('should return the data if the initial schema already has i18n enabled', () => {
@@ -84,7 +84,7 @@ describe('i18n | utils | sanitizeCTBContentTypeSchema', () => {
     };
 
     expect(
-      sanitizeSchema(ctSchema, {
+      mutateSchema(ctSchema, {
         pluginOptions: {
           pluginA: { foo: 'bar' },
           i18n: { localized: true },
@@ -126,6 +126,6 @@ describe('i18n | utils | sanitizeCTBContentTypeSchema', () => {
       },
     };
 
-    expect(sanitizeSchema(nextSchema, {})).toEqual(expected);
+    expect(mutateSchema(nextSchema, {})).toEqual(expected);
   });
 });
