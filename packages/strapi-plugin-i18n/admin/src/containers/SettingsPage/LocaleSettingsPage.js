@@ -10,19 +10,18 @@ import ModalDelete from '../../components/ModalDelete';
 import { LocaleRow } from '../../components';
 import { useLocales } from '../../hooks';
 import { getTrad } from '../../utils';
-import useEditLocale from '../../hooks/useEditLocale';
 
 const LocaleSettingsPage = ({ canCreateLocale, canDeleteLocale, canUpdateLocale }) => {
   const [localeToDelete, setLocaleToDelete] = useState(undefined);
-
-  const { isEditing, isEditModalOpen, editLocale, showEditModal, hideEditModal } = useEditLocale();
+  const [localeToEdit, setLocaleToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
   const { locales, isLoading } = useLocales();
 
   const closeModalToDelete = () => setLocaleToDelete(undefined);
   const handleDelete = canDeleteLocale ? setLocaleToDelete : undefined;
 
-  const handleEdit = canUpdateLocale ? showEditModal : undefined;
+  const closeModalToEdit = () => setLocaleToEdit(undefined);
+  const handleEdit = canUpdateLocale ? setLocaleToEdit : undefined;
 
   const actions = [
     {
@@ -90,16 +89,7 @@ const LocaleSettingsPage = ({ canCreateLocale, canDeleteLocale, canUpdateLocale 
       )}
 
       <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
-
-      <ModalEdit
-        isLoading={isEditing}
-        isOpen={isEditModalOpen}
-        onCancel={hideEditModal}
-        onClosed={hideEditModal}
-        onClick={editLocale}
-        onOpened={() => null}
-        onToggle={hideEditModal}
-      />
+      <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} />
     </>
   );
 };

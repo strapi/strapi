@@ -5,6 +5,7 @@ const useDeleteLocale = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const deleteLocale = localeToDelete => {
+    console.log(`About to delete`, localeToDelete);
     setIsDeleting(true);
 
     return new Promise(resolve =>

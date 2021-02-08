@@ -11,6 +11,8 @@ const ModalDelete = ({ localeToDelete, onClose }) => {
   const { formatMessage } = useIntl();
   const isOpened = Boolean(localeToDelete);
 
+  const handleDelete = () => deleteLocale(localeToDelete).then(onClose);
+
   return (
     <ModalConfirm
       confirmButtonLabel={{
@@ -20,7 +22,7 @@ const ModalDelete = ({ localeToDelete, onClose }) => {
       isOpen={isOpened}
       toggle={onClose}
       onClosed={onClose}
-      onConfirm={() => deleteLocale(localeToDelete).then(onClose)}
+      onConfirm={handleDelete}
       type="warning"
       content={{
         id: getTrad(`Settings.locales.modal.delete.message`),
