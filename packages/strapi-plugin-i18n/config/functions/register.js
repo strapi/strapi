@@ -37,7 +37,47 @@ module.exports = () => {
   });
 
   // strapi.database.migrations.push({
-  //   before() {},
-  //   after() {},
+  //   before() {
+  //     // if model had i18N but doesn't anymore
+  //     // on enable
+  //     // -> set locale to default locale
+  //     // -> init localizations json
+  //     // -> init strapiId
+  //     // on disabled
+  //     // -> delete data not in default locale
+  //     // -> remove default locale ?
+  //     // needed operations
+  //   },
+  //   after() {
+  //     // delete la data
+  //     // deleteColumn('locale');
+  //   },
   // });
 };
+
+/**
+ *
+ * migrer de la data sans changer le schema de bdd
+ * puis migrer le schema de bdd
+ *
+ * Content Type 1 -> Content Type 1.1
+ * Content Type 1 (i18N enabled) -> add des attributes (locale, localizations) -> set les default values
+ * Content Type 1.1 (i18n disabled) -> delete la data -> remove les attributes
+ *
+ * Migrations:
+ *  before -> migrationSchema -> after
+ *
+ * before -> oldSchema (from db) - migration - newSchema (from file) -> after
+ *
+ *
+ * i18n:
+ *
+ * (oldSchema, newSchema) ->
+ *  is i18n enabled & disabled before ?
+ *    -> add attributes to new schema (add columns) ? (or already added)
+ *    -> set new attributes to default values
+ *
+ *  is i18n disabled & enabled before ?
+ *    -> delete data
+ *    -> remove attributes (delete columns)
+ */
