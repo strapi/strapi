@@ -243,7 +243,7 @@ describe('i18n settings page', () => {
         </ThemeProvider>
       );
 
-      expect(container.firstChild).toBeNull();
+      expect(container).toMatchSnapshot();
     });
 
     it('hides "Add locale" buttons when the user is not allowed to create a locale', async () => {
@@ -261,8 +261,9 @@ describe('i18n settings page', () => {
         </ThemeProvider>
       );
 
-      await waitFor(() => expect(screen.getByTestId('empty-list')).toBeVisible());
-      expect(screen.queryAllByText(`Settings.list.actions.add`).length).toBe(0);
+      await waitFor(() =>
+        expect(screen.queryAllByText(`Settings.list.actions.add`).length).toBe(0)
+      );
     });
 
     it('hides the "Edit locale" button (pencil) when the user is not allowed to update a locale', async () => {

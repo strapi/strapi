@@ -20,12 +20,9 @@ const ProtectedLocaleSettingsPage = () => {
     );
   }
 
-  if (!canRead) {
-    return null;
-  }
-
   return (
     <LocaleSettingsPage
+      canReadLocale={canRead}
       canCreateLocale={canCreate}
       canUpdateLocale={canUpdate}
       canDeleteLocale={canDelete}
