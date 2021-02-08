@@ -1,32 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment, ModalConfirm, EmptyState, ListButton } from 'strapi-helper-plugin';
+import { BaselineAlignment, EmptyState, ListButton } from 'strapi-helper-plugin';
 import { Header, List } from '@buffetjs/custom';
-import { Button, Text } from '@buffetjs/core';
+import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import ModalEdit from '../../components/ModalEdit';
+import ModalDelete from '../../components/ModalDelete';
 import { LocaleRow } from '../../components';
 import { useLocales } from '../../hooks';
 import { getTrad } from '../../utils';
-import useDeleteLocale from '../../hooks/useDeleteLocale';
 import useEditLocale from '../../hooks/useEditLocale';
 
-const LocaleSettingsPage = ({ canCreate, canDelete, canUpdate }) => {
-  const {
-    isDeleting,
-    isDeleteModalOpen,
-    deleteLocale,
-    showDeleteModal,
-    hideDeleteModal,
-  } = useDeleteLocale();
+const LocaleSettingsPage = ({ canCreateLocale, canDeleteLocale, canUpdateLocale }) => {
+  const [localeToDelete, setLocaleToDelete] = useState(undefined);
 
   const { isEditing, isEditModalOpen, editLocale, showEditModal, hideEditModal } = useEditLocale();
   const { formatMessage } = useIntl();
   const { locales, isLoading } = useLocales();
 
-  const handleDelete = canDelete ? showDeleteModal : undefined;
-  const handleEdit = canUpdate ? showEditModal : undefined;
+  const closeModalToDelete = () => setLocaleToDelete(undefined);
+  const handleDelete = canDeleteLocale ? setLocaleToDelete : undefined;
+
+  const handleEdit = canUpdateLocale ? showEditModal : undefined;
 
   const actions = [
     {
@@ -35,7 +31,7 @@ const LocaleSettingsPage = ({ canCreate, canDelete, canUpdate }) => {
       color: 'primary',
       type: 'button',
       icon: true,
-      Component: props => (canCreate ? <Button {...props} /> : null),
+      Component: props => (canCreateLocale ? <Button {...props} /> : null),
       style: {
         paddingLeft: 15,
         paddingRight: 15,
@@ -79,7 +75,7 @@ const LocaleSettingsPage = ({ canCreate, canDelete, canUpdate }) => {
             title={formatMessage({ id: getTrad('Settings.list.empty.title') })}
             description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
           />
-          {canCreate && (
+          {canCreateLocale && (
             <ListButton>
               <Button
                 label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
@@ -93,24 +89,7 @@ const LocaleSettingsPage = ({ canCreate, canDelete, canUpdate }) => {
         </>
       )}
 
-      <ModalConfirm
-        confirmButtonLabel={{
-          id: getTrad('Settings.locales.modal.delete.confirm'),
-        }}
-        showButtonLoader={isDeleting}
-        isOpen={isDeleteModalOpen}
-        toggle={hideDeleteModal}
-        onClosed={hideDeleteModal}
-        onConfirm={deleteLocale}
-        type="warning"
-        content={{
-          id: getTrad(`Settings.locales.modal.delete.message`),
-        }}
-      >
-        <Text fontWeight="bold">
-          {formatMessage({ id: getTrad('Settings.locales.modal.delete.secondMessage') })}
-        </Text>
-      </ModalConfirm>
+      <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
 
       <ModalEdit
         isLoading={isEditing}
@@ -126,9 +105,9 @@ const LocaleSettingsPage = ({ canCreate, canDelete, canUpdate }) => {
 };
 
 LocaleSettingsPage.propTypes = {
-  canCreate: PropTypes.bool.isRequired,
-  canUpdate: PropTypes.bool.isRequired,
-  canDelete: PropTypes.bool.isRequired,
+  canCreateLocale: PropTypes.bool.isRequired,
+  canUpdateLocale: PropTypes.bool.isRequired,
+  canDeleteLocale: PropTypes.bool.isRequired,
 };
 
 export default LocaleSettingsPage;

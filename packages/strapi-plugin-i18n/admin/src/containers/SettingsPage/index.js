@@ -29,7 +29,13 @@ const ProtectedLocaleSettingsPage = () => {
     );
   }
 
-  return <LocaleSettingsPage canCreate={canCreate} canUpdate={canUpdate} canDelete={canDelete} />;
+  return (
+    <LocaleSettingsPage
+      canCreateLocale={canCreate}
+      canUpdateLocale={canUpdate}
+      canDeleteLocale={canDelete}
+    />
+  );
 };
 
 export default ProtectedLocaleSettingsPage;

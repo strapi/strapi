@@ -16,6 +16,20 @@ const fetchLocalesList = async (dispatch, signal) => {
     dispatch({
       type: 'GET_DATA_SUCCEEDED',
       data,
+      // data: [
+      //   {
+      //     id: 1,
+      //     displayName: 'French',
+      //     code: 'fr-FR',
+      //     isDefault: false,
+      //   },
+      //   {
+      //     id: 2,
+      //     displayName: 'English',
+      //     code: 'en-US',
+      //     isDefault: true,
+      //   },
+      // ],
     });
   } catch (e) {
     if (e.name === 'AbortError') return;
