@@ -47,4 +47,18 @@ describe('formsAPI', () => {
       ).not.toThrow();
     });
   });
+
+  describe('mutateContentTypeSchema', () => {
+    it('should call the mutation with the correct arguments', () => {
+      const mutation = jest.fn(data => data);
+      formsAPI.addContentTypeSchemaMutation(mutation);
+
+      expect(formsAPI.contentTypeSchemaMutations).toHaveLength(1);
+
+      const returnedData = formsAPI.mutateContentTypeSchema({ ok: true }, { ok: false });
+
+      expect(mutation).toHaveBeenCalledWith({ ok: true }, { ok: false });
+      expect(returnedData).toEqual({ ok: true });
+    });
+  });
 });
