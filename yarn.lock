@@ -2705,6 +2705,17 @@
     "@sentry/utils" "6.0.3"
     tslib "^1.9.3"
 
+"@sentry/core@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-6.1.0.tgz#7dd4584dcaf2188a78b94b766068342e6ee65229"
+  integrity sha512-57mXkp3NoyxRycXrL+Ec6bYS6UYJZp9tYX0lUp5Ry2M0FxDZ3Q4drkjr8MIQOhBaQXP2ukSX4QTVLGMPm60zMw==
+  dependencies:
+    "@sentry/hub" "6.1.0"
+    "@sentry/minimal" "6.1.0"
+    "@sentry/types" "6.1.0"
+    "@sentry/utils" "6.1.0"
+    tslib "^1.9.3"
+
 "@sentry/hub@6.0.3":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@sentry/hub/-/hub-6.0.3.tgz#097f7b1e775a4c6c20c9bec60d7507d5ad2e8db0"
@@ -2714,6 +2725,15 @@
     "@sentry/utils" "6.0.3"
     tslib "^1.9.3"
 
+"@sentry/hub@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/hub/-/hub-6.1.0.tgz#fb22734c91c9d68564737996bf28b7e032e3d8ee"
+  integrity sha512-JnBSCgNg3VHiMojUl5tCHU8iWPVuE+qqENIzG9A722oJms1kKWBvWl+yQzhWBNdgk5qeAY3F5UzKWJZkbJ6xow==
+  dependencies:
+    "@sentry/types" "6.1.0"
+    "@sentry/utils" "6.1.0"
+    tslib "^1.9.3"
+
 "@sentry/minimal@6.0.3":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@sentry/minimal/-/minimal-6.0.3.tgz#6eaaf78c479c49720df3e712d41518e7f4f0ffdf"
@@ -2721,6 +2741,15 @@
   dependencies:
     "@sentry/hub" "6.0.3"
     "@sentry/types" "6.0.3"
+    tslib "^1.9.3"
+
+"@sentry/minimal@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/minimal/-/minimal-6.1.0.tgz#b3abf76d93b95477a3c1029db810818bdc56845f"
+  integrity sha512-g6sfNKenL7wnsr/tibp8nFiMv/XRH0s0Pt4p151npmNI+SmjuUz3GGYEXk8ChCyaKldYKilkNOFdVXJxUf5gZw==
+  dependencies:
+    "@sentry/hub" "6.1.0"
+    "@sentry/types" "6.1.0"
     tslib "^1.9.3"
 
 "@sentry/node@6.0.3":
@@ -2738,6 +2767,21 @@
     lru_map "^0.3.3"
     tslib "^1.9.3"
 
+"@sentry/node@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/node/-/node-6.1.0.tgz#9e20443fdfd15e508da5c0b674ef32960e8a6380"
+  integrity sha512-yOxYHoPxg8Br19QOsJbonP2uYirv1FFxdNkdeykfO2QBorRUkcirjET5qjRfz73jF1YYtUZBuxwR+f9ZOPqGTg==
+  dependencies:
+    "@sentry/core" "6.1.0"
+    "@sentry/hub" "6.1.0"
+    "@sentry/tracing" "6.1.0"
+    "@sentry/types" "6.1.0"
+    "@sentry/utils" "6.1.0"
+    cookie "^0.4.1"
+    https-proxy-agent "^5.0.0"
+    lru_map "^0.3.3"
+    tslib "^1.9.3"
+
 "@sentry/tracing@6.0.3":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-6.0.3.tgz#103f4942ddd546321e22ba20c011adf52b25b3f2"
@@ -2749,10 +2793,26 @@
     "@sentry/utils" "6.0.3"
     tslib "^1.9.3"
 
+"@sentry/tracing@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-6.1.0.tgz#cefabd0e4794fefb6a0a17478a8f09b2f1f3d889"
+  integrity sha512-s6a4Ra3hHn4awiNz4fOEK6TCV2w2iLcxdppijcYEB7S/1rJpmqZgHWDicqufbOmVMOLmyKLEQ7w+pZq3TR3WgQ==
+  dependencies:
+    "@sentry/hub" "6.1.0"
+    "@sentry/minimal" "6.1.0"
+    "@sentry/types" "6.1.0"
+    "@sentry/utils" "6.1.0"
+    tslib "^1.9.3"
+
 "@sentry/types@6.0.3":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@sentry/types/-/types-6.0.3.tgz#a1ef6d6b2ac2a9201e3e4a894db6ecf7ceb5b27c"
   integrity sha512-266aBQbk9AGedhG2dzXshWbn23LYLElXqlI74DLku48UrU2v7TGKdyik/8/nfOfquCoRSp0GFGYHbItwU124XQ==
+
+"@sentry/types@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-6.1.0.tgz#5f9379229423ca1325acf6709e95687180f67132"
+  integrity sha512-kIaN52Fw5K+2mKRaHE2YluJ+F/qMGSUzZXIFDNdC6OUMXQ4TM8gZTrITXs8CLDm7cK8iCqFCtzKOjKK6KyOKAg==
 
 "@sentry/utils@6.0.3":
   version "6.0.3"
@@ -2760,6 +2820,14 @@
   integrity sha512-lvuBFvZHYs1zYwI8dkC8Z8ryb0aYnwPFUl1rbZiMwJpYI2Dgl1jpqqZWv9luux2rSRYOMid74uGedV708rvEgA==
   dependencies:
     "@sentry/types" "6.0.3"
+    tslib "^1.9.3"
+
+"@sentry/utils@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-6.1.0.tgz#52e3d7050983e685d3a48f9d2efa1e6eb4ae3e6d"
+  integrity sha512-6JAplzUOS6bEwfX0PDRZBbYRvn9EN22kZfcL0qGHtM9L0QQ5ybjbbVwOpbXgRkiZx++dQbzLFtelxnDhsbFG+Q==
+  dependencies:
+    "@sentry/types" "6.1.0"
     tslib "^1.9.3"
 
 "@sindresorhus/is@^0.14.0":
