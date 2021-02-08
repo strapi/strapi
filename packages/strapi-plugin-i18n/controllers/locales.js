@@ -2,7 +2,7 @@
 
 const { setCreatorFields, sanitizeEntity } = require('strapi-utils');
 const { pick } = require('lodash/fp');
-const { getService } = require('../utils');
+const { getService, setDefaultLocale } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
 const { formatLocale } = require('../domain/locale');
 
@@ -18,7 +18,7 @@ module.exports = {
 
     const locales = await localesService.find();
 
-    ctx.body = sanitizeLocale(locales);
+    ctx.body = await setDefaultLocale(sanitizeLocale(locales));
   },
 
   async createLocale(ctx) {
@@ -44,7 +44,7 @@ module.exports = {
 
     const locale = await localesService.create(localeToCreate, { isDefault });
 
-    ctx.body = sanitizeLocale(locale);
+    ctx.body = await setDefaultLocale(sanitizeLocale(locale));
   },
 
   async updateLocale(ctx) {
@@ -71,6 +71,6 @@ module.exports = {
 
     const updatedLocale = await localesService.update({ id }, cleanUpdates, { isDefault });
 
-    ctx.body = sanitizeLocale(updatedLocale);
+    ctx.body = await setDefaultLocale(sanitizeLocale(updatedLocale));
   },
 };

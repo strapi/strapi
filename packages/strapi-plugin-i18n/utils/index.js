@@ -7,7 +7,7 @@ const getService = name => {
   return prop(`i18n.services.${name}`, strapi.plugins);
 };
 
-const setIsDefault = async locales => {
+const setDefaultLocale = async locales => {
   if (isNil(locales)) {
     return locales;
   }
@@ -30,5 +30,5 @@ const setIsDefault = async locales => {
 
 module.exports = {
   getService,
-  setIsDefault,
+  setDefaultLocale,
 };
