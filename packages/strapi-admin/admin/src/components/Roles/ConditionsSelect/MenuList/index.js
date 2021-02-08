@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { groupBy, intersectionWith } from 'lodash';
@@ -12,11 +12,23 @@ import Ul from './Ul';
 import UpperFirst from './UpperFirst';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+const createCollapsesObject = arrayOfCategories =>
+  arrayOfCategories.reduce((acc, current, index) => {
+    acc[current[0]] = index === 0;
+
+    return acc;
+  }, {});
 
 const MenuList = ({ selectProps, ...rest }) => {
   const Component = components.MenuList;
-  const [collapses, setCollapses] = useState({});
-  const optionsGroupByCategory = groupBy(selectProps.options, 'category');
+  const arrayOfOptionsGroupedByCategory = useMemo(() => {
+    return Object.entries(groupBy(selectProps.options, 'category'));
+  }, [selectProps.options]);
+  const initCollapses = useMemo(() => createCollapsesObject(arrayOfOptionsGroupedByCategory), [
+    arrayOfOptionsGroupedByCategory,
+  ]);
+  const [collapses, setCollapses] = useState(initCollapses);
+
   const toggleCollapse = collapseName => {
     setCollapses(prevState => ({ ...prevState, [collapseName]: !collapses[collapseName] }));
   };
@@ -53,9 +65,11 @@ const MenuList = ({ selectProps, ...rest }) => {
   return (
     <Component {...rest}>
       <Ul disabled>
-        {Object.entries(optionsGroupByCategory).map((category, index) => {
+        {arrayOfOptionsGroupedByCategory.map((category, index) => {
+          const [categoryName, conditions] = category;
+
           return (
-            <li key={category[0]}>
+            <li key={categoryName}>
               <div>
                 <Flex justifyContent="space-between">
                   <Label htmlFor="overrideReactSelectBehavior">
@@ -63,17 +77,17 @@ const MenuList = ({ selectProps, ...rest }) => {
                       <Checkbox
                         disabled
                         id="checkCategory"
-                        name={category[0]}
+                        name={categoryName}
                         onChange={() => {}}
                         value={hasAllCategoryAction(category)}
                         someChecked={hasSomeCategoryAction(category)}
                       />
-                      <UpperFirst content={category[0]} />
+                      <UpperFirst content={categoryName} />
                     </Flex>
                   </Label>
                   <div
                     style={{ flex: 1, textAlign: 'end', cursor: 'pointer' }}
-                    onClick={() => toggleCollapse(category[0])}
+                    onClick={() => toggleCollapse(categoryName)}
                   >
                     <FontAwesomeIcon
                       style={{
@@ -81,13 +95,13 @@ const MenuList = ({ selectProps, ...rest }) => {
                         fontSize: '11px',
                         color: '#919bae',
                       }}
-                      icon={collapses[category[0]] ? 'chevron-up' : 'chevron-down'}
+                      icon={collapses[categoryName] ? 'chevron-up' : 'chevron-down'}
                     />
                   </div>
                 </Flex>
               </div>
-              <SubUl tag="ul" isOpen={collapses[category[0]]}>
-                {category[1].map(action => {
+              <SubUl tag="ul" isOpen={collapses[categoryName]}>
+                {conditions.map(action => {
                   return (
                     <li key={action.id}>
                       <Flex>
@@ -108,7 +122,7 @@ const MenuList = ({ selectProps, ...rest }) => {
                   );
                 })}
               </SubUl>
-              {index + 1 < Object.entries(optionsGroupByCategory).length && (
+              {index + 1 < arrayOfOptionsGroupedByCategory.length.length && (
                 <div style={{ paddingTop: '17px' }} />
               )}
             </li>

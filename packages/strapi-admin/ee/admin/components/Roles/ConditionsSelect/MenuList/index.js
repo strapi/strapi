@@ -97,7 +97,7 @@ const MenuList = ({ selectProps, ...rest }) => {
                     <Flex>
                       <Checkbox
                         id="checkCategory"
-                        name={category[0]}
+                        name={categoryName}
                         onChange={() => {}}
                         value={hasAllCategoryAction(category)}
                         someChecked={hasSomeCategoryAction(category)}
