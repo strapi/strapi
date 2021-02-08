@@ -5,6 +5,7 @@ import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
 import { getTrad } from './utils';
 import SettingsPage from './containers/SettingsPage';
+import pluginPermissions from './permissions';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -36,7 +37,7 @@ export default strapi => {
             name: 'internationalization',
             to: `${strapi.settingsBaseURL}/internationalization`,
             Component: () => <SettingsPage />,
-            // permissions: pluginPermissions.settings,
+            permissions: pluginPermissions.accessMain,
           },
         ],
       },
