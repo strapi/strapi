@@ -229,7 +229,7 @@ describe('i18n settings page', () => {
       expect(screen.getByText(`Settings.permissions.loading`));
     });
 
-    it("shows an informative message when the user doesn't have read permission", () => {
+    it("shows nothing when the user doesn't have read permission", () => {
       const canRead = false;
 
       useUserPermissions.mockImplementation(() => ({
@@ -237,14 +237,13 @@ describe('i18n settings page', () => {
         allowedActions: { canRead, canUpdate: true, canCreate: true, canDelete: true },
       }));
 
-      render(
+      const { container } = render(
         <ThemeProvider theme={themes}>
           <LocaleSettingsPage />
         </ThemeProvider>
       );
 
-      expect(screen.getByText(`Settings.permissions.read.denied.title`)).toBeVisible();
-      expect(screen.getByText(`Settings.permissions.read.denied.description`)).toBeVisible();
+      expect(container.firstChild).toBeNull();
     });
 
     it('hides "Add locale" buttons when the user is not allowed to create a locale', async () => {
