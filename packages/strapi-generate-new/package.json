@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.4.5",
+  "version": "3.4.6",
   "description": "Generate a new Strapi application.",
   "homepage": "https://strapi.io",
   "keywords": [
