@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { EmptyState, ListButton } from 'strapi-helper-plugin';
 import { List, Button } from '@buffetjs/custom';
@@ -7,10 +7,24 @@ import PropTypes from 'prop-types';
 import { useLocales } from '../../hooks';
 import LocaleRow from '../LocaleRow';
 import { getTrad } from '../../utils';
+import ModalEdit from '../ModalEdit';
+import ModalDelete from '../ModalDelete';
 
-const LocaleList = ({ onAddLocale, onDeleteLocale, onEditLocale }) => {
-  const { locales, isLoading } = useLocales();
+const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
+  const [localeToDelete, setLocaleToDelete] = useState();
+  const [localeToEdit, setLocaleToEdit] = useState();
+  const { locales, isLoading, refetch } = useLocales();
   const { formatMessage } = useIntl();
+
+  const closeModalToDelete = () => setLocaleToDelete(undefined);
+  const handleDeleteLocale = canDeleteLocale ? setLocaleToDelete : undefined;
+
+  const closeModalToEdit = () => {
+    refetch();
+    setLocaleToEdit(undefined);
+  };
+
+  const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
 
   if (isLoading || (locales && locales.length > 0)) {
     const listTitle = isLoading
@@ -25,14 +39,19 @@ const LocaleList = ({ onAddLocale, onDeleteLocale, onEditLocale }) => {
         );
 
     return (
-      <List
-        title={listTitle}
-        items={locales}
-        isLoading={isLoading}
-        customRowComponent={locale => (
-          <LocaleRow locale={locale} onDelete={onDeleteLocale} onEdit={onEditLocale} />
-        )}
-      />
+      <>
+        <List
+          title={listTitle}
+          items={locales}
+          isLoading={isLoading}
+          customRowComponent={locale => (
+            <LocaleRow locale={locale} onDelete={handleDeleteLocale} onEdit={handleEditLocale} />
+          )}
+        />
+
+        <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
+        <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
+      </>
     );
   }
 
@@ -42,11 +61,12 @@ const LocaleList = ({ onAddLocale, onDeleteLocale, onEditLocale }) => {
         title={formatMessage({ id: getTrad('Settings.list.empty.title') })}
         description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
       />
-      {onAddLocale && (
+
+      {canCreateLocale && (
         <ListButton>
           <Button
             label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
-            onClick={onAddLocale}
+            onClick={() => undefined}
             color="primary"
             type="button"
             icon={<Plus fill="#007eff" width="11px" height="11px" />}
@@ -57,16 +77,10 @@ const LocaleList = ({ onAddLocale, onDeleteLocale, onEditLocale }) => {
   );
 };
 
-LocaleList.defaultProps = {
-  onAddLocale: undefined,
-  onDeleteLocale: undefined,
-  onEditLocale: undefined,
-};
-
 LocaleList.propTypes = {
-  onAddLocale: PropTypes.func,
-  onDeleteLocale: PropTypes.func,
-  onEditLocale: PropTypes.func,
+  canUpdateLocale: PropTypes.bool.isRequired,
+  canDeleteLocale: PropTypes.bool.isRequired,
+  canCreateLocale: PropTypes.bool.isRequired,
 };
 
 export default LocaleList;

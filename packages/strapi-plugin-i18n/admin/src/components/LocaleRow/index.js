@@ -40,7 +40,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
         <Text>{locale.code}</Text>
       </td>
       <td>
-        <Text fontWeight="semiBold">{locale.displayName}</Text>
+        <Text fontWeight="semiBold">{locale.name}</Text>
       </td>
       <td>
         <Text>
@@ -64,7 +64,7 @@ LocaleSettingsPage.defaultProps = {
 LocaleSettingsPage.propTypes = {
   locale: PropTypes.shape({
     isDefault: PropTypes.bool,
-    displayName: PropTypes.string,
+    name: PropTypes.string,
     code: PropTypes.string.isRequired,
   }).isRequired,
   onDelete: PropTypes.func,

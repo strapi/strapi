@@ -51,13 +51,13 @@ describe('i18n settings page', () => {
       Promise.resolve([
         {
           id: 1,
-          displayName: 'French',
+          name: 'French',
           code: 'fr-FR',
           isDefault: false,
         },
         {
           id: 2,
-          displayName: 'English',
+          name: 'English',
           code: 'en-US',
           isDefault: true,
         },
@@ -133,7 +133,7 @@ describe('i18n settings page', () => {
   });
 
   describe('edit', () => {
-    it('shows the default edit modal layout', async () => {
+    it('shows the default edit modal layout with disabled value', async () => {
       render(
         <ThemeProvider theme={themes}>
           <LocaleSettingsPage />
@@ -146,6 +146,33 @@ describe('i18n settings page', () => {
       fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
 
       expect(screen.getByText(`Settings.locales.modal.edit.confirmation`)).toBeVisible();
+      expect(screen.getByLabelText(`Settings.locales.modal.edit.locales.label`)).toBeDisabled();
+    });
+
+    it('shows a warning and disabled the confirmation button when display name length is over 50', async () => {
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'), {
+        target: {
+          value:
+            'a very very very very long string that has more than fifty characters in order to show a warning',
+        },
+      });
+
+      await waitFor(() =>
+        expect(screen.getByText('Settings.locales.modal.edit.confirmation')).toBeDisabled()
+      );
+      expect(
+        screen.getByText(`Settings.locales.modal.edit.locales.displayName.error`)
+      ).toBeVisible();
     });
 
     it('closes the edit modal when clicking on cancel', async () => {
@@ -162,6 +189,159 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
 
       expect(screen.queryByText(`Settings.list.actions.edit`)).toBeFalsy();
+    });
+
+    it('shows an error when something went wrong when editing', async () => {
+      const requestGetResponse = [
+        {
+          id: 1,
+          name: 'French',
+          code: 'fr-FR',
+          isDefault: false,
+        },
+        {
+          id: 2,
+          name: 'English',
+          code: 'en-US',
+          isDefault: true,
+        },
+      ];
+
+      request.mockImplementation((_, opts) =>
+        opts.method === 'PUT'
+          ? Promise.reject(new Error('Something wrong occured'))
+          : Promise.resolve(requestGetResponse)
+      );
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
+      fireEvent.click(screen.getByText('Settings.locales.modal.edit.confirmation'));
+
+      await waitFor(() =>
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        })
+      );
+    });
+
+    it('shows a success message when editing succeeds', async () => {
+      const requestGetResponse = [
+        {
+          id: 1,
+          name: 'French',
+          code: 'fr-FR',
+          isDefault: false,
+        },
+        {
+          id: 2,
+          name: 'English',
+          code: 'en-US',
+          isDefault: true,
+        },
+      ];
+
+      request.mockImplementation((_, opts) =>
+        opts.method === 'PUT'
+          ? Promise.resolve({
+              id: 2,
+              name: 'Frenchie',
+              code: 'fr-FR',
+              isDefault: false,
+            })
+          : Promise.resolve(requestGetResponse)
+      );
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
+      fireEvent.click(screen.getByText('Settings.locales.modal.edit.confirmation'));
+
+      await waitFor(() =>
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'success',
+          message: { id: 'Settings.locales.modal.edit.success' },
+        })
+      );
+
+      expect(request).toBeCalledWith('/i18n/locales/2', {
+        method: 'PUT',
+        body: { name: 'English' },
+      });
+    });
+
+    it('shows edits the locale with code as displayName when displayName is empty', async () => {
+      const requestGetResponse = [
+        {
+          id: 1,
+          name: 'French',
+          code: 'fr-FR',
+          isDefault: false,
+        },
+        {
+          id: 2,
+          name: 'English',
+          code: 'en-US',
+          isDefault: true,
+        },
+      ];
+
+      request.mockImplementation((_, opts) =>
+        opts.method === 'PUT'
+          ? Promise.resolve({
+              id: 2,
+              name: 'Frenchie',
+              code: 'fr-FR',
+              isDefault: false,
+            })
+          : Promise.resolve(requestGetResponse)
+      );
+
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
+
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'), {
+        target: {
+          value: '',
+        },
+      });
+
+      fireEvent.click(screen.getByText('Settings.locales.modal.edit.confirmation'));
+
+      await waitFor(() =>
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'success',
+          message: { id: 'Settings.locales.modal.edit.success' },
+        })
+      );
+
+      expect(request).toBeCalledWith('/i18n/locales/2', {
+        method: 'PUT',
+        body: { name: 'en-US' },
+      });
     });
   });
 
