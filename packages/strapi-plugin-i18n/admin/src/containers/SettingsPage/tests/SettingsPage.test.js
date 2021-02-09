@@ -147,11 +147,32 @@ describe('i18n settings page', () => {
 
       expect(screen.getByText(`Settings.locales.modal.edit.confirmation`)).toBeVisible();
       expect(screen.getByLabelText(`Settings.locales.modal.edit.locales.label`)).toBeDisabled();
+    });
+
+    it('shows a warning and disabled the confirmation button when display name length is over 50', async () => {
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      const row = await waitFor(() => screen.getByText('English').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'), {
+        target: {
+          value:
+            'a very very very very long string that has more than fifty characters in order to show a warning',
+        },
+      });
+
+      await waitFor(() =>
+        expect(screen.getByText('Settings.locales.modal.edit.confirmation')).toBeDisabled()
+      );
       expect(
-        screen
-          .getByLabelText(`Settings.locales.modal.edit.locales.displayName`)
-          .getAttribute('maxlength')
-      ).toBe('50');
+        screen.getByText(`Settings.locales.modal.edit.locales.displayName.error`)
+      ).toBeVisible();
     });
 
     it('closes the edit modal when clicking on cancel', async () => {

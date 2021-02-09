@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { Button, Label, InputText } from '@buffetjs/core';
 import Select from 'react-select';
 import { Formik } from 'formik';
+import { object, string } from 'yup';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
 
@@ -33,8 +34,11 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
       <Formik
         initialValues={{ displayName: localeToEdit ? localeToEdit.name : '' }}
         onSubmit={handleSubmit}
+        validationSchema={object().shape({
+          displayName: string().max(50, 'Settings.locales.modal.edit.locales.displayName.error'),
+        })}
       >
-        {({ values, handleSubmit, handleChange }) => (
+        {({ values, handleSubmit, handleChange, errors }) => (
           <form onSubmit={handleSubmit}>
             <ModalHeader
               headerBreadcrumbs={[formatMessage({ id: getTrad('Settings.list.actions.edit') })]}
@@ -42,7 +46,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
             <ModalSection>
               <div>
                 <span id="locale-code">
-                  <Label>
+                  <Label htmlFor="">
                     {formatMessage({ id: getTrad('Settings.locales.modal.edit.locales.label') })}
                   </Label>
                 </span>
@@ -61,12 +65,15 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
                     id: getTrad('Settings.locales.modal.edit.locales.displayName'),
                   })}
                 </Label>
-                <InputText
-                  name="displayName"
-                  value={values.displayName}
-                  onChange={handleChange}
-                  maxLength={50}
-                />
+                <InputText name="displayName" value={values.displayName} onChange={handleChange} />
+
+                {errors.displayName && (
+                  <small>
+                    {formatMessage({
+                      id: getTrad(' Settings.locales.modal.edit.locales.displayName.error'),
+                    })}
+                  </small>
+                )}
               </div>
             </ModalSection>
             <ModalFooter>
@@ -74,7 +81,12 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
                 <Button type="button" color="cancel" onClick={onClose}>
                   {formatMessage({ id: 'app.components.Button.cancel' })}
                 </Button>
-                <Button color="success" type="submit" isLoading={isEditing}>
+                <Button
+                  color="success"
+                  type="submit"
+                  isLoading={isEditing}
+                  disabled={Object.keys(errors).length > 0}
+                >
                   {formatMessage({ id: getTrad('Settings.locales.modal.edit.confirmation') })}
                 </Button>
               </section>

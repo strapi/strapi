@@ -21,5 +21,6 @@
   "Settings.locales.modal.edit.confirmation": "Finish",
   "Settings.locales.modal.edit.success": "Locale successfully edited",
   "Settings.locales.modal.edit.locales.label": "Locales",
-  "Settings.locales.modal.edit.locales.displayName": "Locale display name"
+  "Settings.locales.modal.edit.locales.displayName": "Locale display name",
+  "Settings.locales.modal.edit.locales.displayName.error": "The locale display name can only be less than 50 characters."
 }
