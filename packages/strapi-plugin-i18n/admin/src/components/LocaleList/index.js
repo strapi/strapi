@@ -11,8 +11,8 @@ import ModalEdit from '../ModalEdit';
 import ModalDelete from '../ModalDelete';
 
 const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
-  const [localeToDelete, setLocaleToDelete] = useState(undefined);
-  const [localeToEdit, setLocaleToEdit] = useState(undefined);
+  const [localeToDelete, setLocaleToDelete] = useState();
+  const [localeToEdit, setLocaleToEdit] = useState();
   const { locales, isLoading, refetch } = useLocales();
   const { formatMessage } = useIntl();
 

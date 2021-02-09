@@ -14,7 +14,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   const { formatMessage } = useIntl();
   const isOpened = Boolean(localeToEdit);
 
-  const handleSubmit = async ({ displayName }) => {
+  const handleSubmit = ({ displayName }) => {
     const id = localeToEdit.id;
     const name = displayName || localeToEdit.code;
 
