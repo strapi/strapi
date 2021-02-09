@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { request } from 'strapi-helper-plugin';
 import reducer, { initialState } from './reducer';
 
@@ -28,16 +28,19 @@ const fetchLocalesList = async (dispatch, signal) => {
 };
 
 const useLocales = () => {
+  const abortCtrlRef = useRef(new AbortController());
   const [{ locales, isLoading }, dispatch] = useReducer(reducer, initialState);
 
+  const refetch = () => fetchLocalesList(dispatch, abortCtrlRef.current.signal);
+
   useEffect(() => {
-    const abortCtrl = new AbortController();
+    const abortCtrl = abortCtrlRef.current;
     fetchLocalesList(dispatch, abortCtrl.signal);
 
     return () => abortCtrl.abort();
   }, []);
 
-  return { locales, isLoading };
+  return { locales, isLoading, refetch };
 };
 
 export default useLocales;

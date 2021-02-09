@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { BaselineAlignment } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
-import ModalEdit from '../../components/ModalEdit';
-import ModalDelete from '../../components/ModalDelete';
+
 import { getTrad } from '../../utils';
 import LocaleList from '../../components/LocaleList';
 
@@ -15,15 +14,7 @@ const LocaleSettingsPage = ({
   canDeleteLocale,
   canUpdateLocale,
 }) => {
-  const [localeToDelete, setLocaleToDelete] = useState(undefined);
-  const [localeToEdit, setLocaleToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
-
-  const closeModalToDelete = () => setLocaleToDelete(undefined);
-  const handleDeleteLocale = canDeleteLocale ? setLocaleToDelete : undefined;
-
-  const closeModalToEdit = () => setLocaleToEdit(undefined);
-  const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
 
   const actions = [
     {
@@ -54,14 +45,11 @@ const LocaleSettingsPage = ({
 
       {canReadLocale ? (
         <LocaleList
-          onAddLocale={() => undefined}
-          onDeleteLocale={handleDeleteLocale}
-          onEditLocale={handleEditLocale}
+          canUpdateLocale={canUpdateLocale}
+          canDeleteLocale={canDeleteLocale}
+          canCreateLocale={canCreateLocale}
         />
       ) : null}
-
-      <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
-      <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} />
     </>
   );
 };

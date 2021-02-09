@@ -1,25 +1,35 @@
 import { useState } from 'react';
+import { request } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
 
 const useEditLocale = () => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const editLocale = localeToEdit => {
-    console.log(`About to edit`, localeToEdit);
-    setIsEditing(true);
+  const editLocale = async (id, name) => {
+    try {
+      setIsEditing(true);
 
-    return new Promise(resolve =>
-      setTimeout(() => {
-        setIsEditing(false);
+      await request(`/i18n/locales/${id}`, {
+        method: 'PUT',
+        body: {
+          name,
+        },
+      });
 
-        strapi.notification.toggle({
-          type: 'success',
-          message: { id: getTrad('Settings.locales.modal.edit.success') },
-        });
+      setIsEditing(false);
 
-        resolve();
-      }, 1000)
-    );
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: getTrad('Settings.locales.modal.edit.success') },
+      });
+    } catch {
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+
+      setIsEditing(false);
+    }
   };
 
   return { isEditing, editLocale };
