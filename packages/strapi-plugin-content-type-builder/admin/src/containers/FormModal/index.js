@@ -1335,6 +1335,8 @@ const FormModal = () => {
                               value = input.value;
                             } else if (input.name === 'allowedTypes' && retrievedValue === '') {
                               value = null;
+                            } else if (input.type === 'checkbox' && !value) {
+                              value = false;
                             } else {
                               value = retrievedValue;
                             }

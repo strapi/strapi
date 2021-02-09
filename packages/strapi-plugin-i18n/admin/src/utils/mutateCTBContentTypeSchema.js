@@ -3,6 +3,34 @@ import LOCALIZED_FIELDS from './localizedFields';
 
 const localizedPath = ['pluginOptions', 'i18n', 'localized'];
 
+const addLocalisationToFields = attributes =>
+  Object.keys(attributes).reduce((acc, current) => {
+    const currentAttribute = attributes[current];
+
+    if (LOCALIZED_FIELDS.includes(currentAttribute.type)) {
+      const i18n = { localized: true };
+
+      const pluginOptions = currentAttribute.pluginOptions
+        ? { ...currentAttribute.pluginOptions, i18n }
+        : { i18n };
+
+      acc[current] = { ...currentAttribute, pluginOptions };
+
+      return acc;
+    }
+
+    acc[current] = currentAttribute;
+
+    return acc;
+  }, {});
+
+const disableAttributesLocalisation = attributes =>
+  Object.keys(attributes).reduce((acc, current) => {
+    acc[current] = omit(attributes[current], 'pluginOptions.i18n');
+
+    return acc;
+  }, {});
+
 const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   // Don't perform mutations components
   if (!has(nextSchema, localizedPath)) {
@@ -19,25 +47,7 @@ const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   }
 
   if (isNextSchemaLocalized) {
-    const attributes = Object.keys(nextSchema.attributes).reduce((acc, current) => {
-      const currentAttribute = nextSchema.attributes[current];
-
-      if (LOCALIZED_FIELDS.includes(currentAttribute.type)) {
-        const i18n = { localized: true };
-
-        const pluginOptions = currentAttribute.pluginOptions
-          ? { ...currentAttribute.pluginOptions, i18n }
-          : { i18n };
-
-        acc[current] = { ...currentAttribute, pluginOptions };
-
-        return acc;
-      }
-
-      acc[current] = currentAttribute;
-
-      return acc;
-    }, {});
+    const attributes = addLocalisationToFields(nextSchema.attributes);
 
     return { ...nextSchema, attributes };
   }
@@ -45,11 +55,7 @@ const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   // Remove the i18n object from the pluginOptions
   if (!isNextSchemaLocalized) {
     const pluginOptions = omit(nextSchema.pluginOptions, 'i18n');
-    const attributes = Object.keys(nextSchema.attributes).reduce((acc, current) => {
-      acc[current] = omit(nextSchema.attributes[current], 'pluginOptions.i18n');
-
-      return acc;
-    }, {});
+    const attributes = disableAttributesLocalisation(nextSchema.attributes);
 
     return { ...nextSchema, pluginOptions, attributes };
   }
@@ -57,3 +63,4 @@ const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   return nextSchema;
 };
 export default mutateCTBContentTypeSchema;
+export { addLocalisationToFields, disableAttributesLocalisation };

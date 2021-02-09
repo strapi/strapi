@@ -7,7 +7,7 @@ const CheckboxWithDescription = ({ description, label, value, ...rest }) => {
   return (
     <>
       <Wrapper>
-        <Checkbox {...rest} message={label} label={label} type="checkbox" value={value || false} />
+        <Checkbox {...rest} message={label} label={label} type="checkbox" value={value} />
         {description && (
           <Text color="grey" title={description} fontSize="sm" ellipsis>
             {description}
@@ -27,7 +27,7 @@ CheckboxWithDescription.defaultProps = {
 CheckboxWithDescription.propTypes = {
   description: PropTypes.string,
   label: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+  value: PropTypes.bool,
 };
 
 export default CheckboxWithDescription;
