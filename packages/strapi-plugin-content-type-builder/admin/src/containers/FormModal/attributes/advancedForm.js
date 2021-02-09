@@ -27,9 +27,8 @@ const advancedForm = {
           },
         ],
         [uiHelpers.divider],
+        [options.required, options.unique],
         [options.private],
-        [options.required],
-        [options.unique],
       ],
     };
   },
@@ -39,7 +38,7 @@ const advancedForm = {
     }
 
     if (repeatable) {
-      return { items: [[options.required], [uiHelpers.divider], [options.max], [options.min]] };
+      return { items: [[options.required], [uiHelpers.divider], [options.max, options.min]] };
     }
 
     return {
@@ -60,15 +59,14 @@ const advancedForm = {
           },
         ],
         [uiHelpers.divider],
+        [options.required, options.unique],
         [options.private],
-        [options.required],
-        [options.unique],
       ],
     };
   },
   dynamiczone: () => {
     return {
-      items: [[options.required], [uiHelpers.divider], [options.max], [options.min]],
+      items: [[options.required], [uiHelpers.divider], [options.max, options.min]],
     };
   },
   email: () => {
@@ -81,11 +79,9 @@ const advancedForm = {
           },
         ],
         [uiHelpers.divider],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
       ],
     };
   },
@@ -120,8 +116,6 @@ const advancedForm = {
                 : []
             ),
           },
-        ],
-        [
           {
             label: {
               id: getTrad('form.attribute.item.enumeration.graphql'),
@@ -135,24 +129,21 @@ const advancedForm = {
           },
         ],
         [uiHelpers.divider],
+        [options.required, options.unique],
         [options.private],
-        [options.required],
-        [options.unique],
       ],
     };
   },
   json: () => {
     return {
-      items: [[uiHelpers.divider], [options.private], [options.required], [options.unique]],
+      items: [[uiHelpers.divider], [options.required, options.unique], [options.private]],
     };
   },
   media: () => {
     return {
       items: [
         [uiHelpers.divider],
-        [options.private],
-        [options.required],
-        [options.unique],
+        [options.required, options.unique],
         [
           {
             label: {
@@ -164,6 +155,7 @@ const advancedForm = {
             validations: {},
           },
         ],
+        [options.private],
       ],
     };
   },
@@ -185,11 +177,9 @@ const advancedForm = {
           },
         ],
         [uiHelpers.divider],
+        [options.required, options.unique],
+        [options.max, options.min],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.max],
-        [options.min],
       ],
     };
   },
@@ -198,11 +188,9 @@ const advancedForm = {
       items: [
         [options.default],
         [uiHelpers.divider],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
       ],
     };
   },
@@ -248,25 +236,20 @@ const advancedForm = {
       items: [
         [options.default],
         [uiHelpers.divider],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
       ],
     };
   },
   text: () => {
     return {
       items: [
-        [options.default],
-        [options.regex],
+        [options.default, options.regex],
         [uiHelpers.divider],
+        [options.required, options.unique],
+        [options.maxLength, options.minLength],
         [options.private],
-        [options.required],
-        [options.unique],
-        [options.maxLength],
-        [options.minLength],
       ],
     };
   },
@@ -275,10 +258,9 @@ const advancedForm = {
       items: [
         [{ ...options.default, disabled: Boolean(data.targetField), type: 'text' }],
         [uiHelpers.divider],
-        [options.private],
         [options.required],
-        [options.maxLength],
-        [options.minLength],
+        [options.maxLength, options.minLength],
+        [options.private],
       ],
     };
   },

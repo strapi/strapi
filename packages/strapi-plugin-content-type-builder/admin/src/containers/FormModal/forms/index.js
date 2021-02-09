@@ -13,7 +13,8 @@ const forms = {
       attributeType,
       reservedNames,
       alreadyTakenTargetContentTypeAttributes,
-      options
+      options,
+      extensions
     ) {
       const attributes = get(currentSchema, ['schema', 'attributes'], {});
 
@@ -22,25 +23,45 @@ const forms = {
       });
 
       try {
-        return attributeTypes[attributeType](
+        let attributeShape = attributeTypes[attributeType](
+          usedAttributeNames,
+          reservedNames.attributes,
+          alreadyTakenTargetContentTypeAttributes,
+          options
+        );
+
+        return extensions.makeValidator(
+          ['attribute', attributeType],
+          attributeShape,
           usedAttributeNames,
           reservedNames.attributes,
           alreadyTakenTargetContentTypeAttributes,
           options
         );
       } catch (err) {
+        console.error('Error yup build schema', err);
+
         return attributeTypes.default(usedAttributeNames, reservedNames.attributes);
       }
     },
     form: {
-      advanced(data, type, step) {
+      advanced({ data, type, step, extensions, ...rest }) {
         try {
-          return attributesForm.advanced[type](data, step);
+          const baseForm = attributesForm.advanced[type](data, step).items;
+
+          return extensions.makeAdvancedForm(['attribute', type], baseForm, {
+            data,
+            type,
+            step,
+            ...rest,
+          });
         } catch (err) {
+          console.error(err);
+
           return { items: [] };
         }
       },
-      base(data, type, step, actionType, attributes) {
+      base({ data, type, step, attributes }) {
         try {
           return attributesForm.base[type](data, step, attributes);
         } catch (err) {
@@ -50,15 +71,22 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid, reservedNames) {
+    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions) {
       const takenNames = isEditing
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
 
-      return createContentTypeSchema(takenNames, reservedNames.models);
+      const contentTypeShape = createContentTypeSchema(takenNames, reservedNames.models);
+
+      return extensions.makeValidator(
+        ['contentType'],
+        contentTypeShape,
+        takenNames,
+        reservedNames.models
+      );
     },
     form: {
-      base(data = {}, type, step, actionType) {
+      base({ data = {}, actionType }) {
         if (actionType === 'create') {
           const value = data.name ? nameToSlug(data.name) : '';
 
@@ -67,8 +95,10 @@ const forms = {
 
         return contentTypeForm.base.edit();
       },
-      advanced() {
-        return contentTypeForm.advanced.default();
+      advanced({ extensions }) {
+        const baseForm = contentTypeForm.advanced.default().items;
+
+        return extensions.makeAdvancedForm(['contentType'], baseForm);
       },
     },
   },
@@ -104,7 +134,7 @@ const forms = {
       advanced() {
         return dynamiczoneForm.advanced.default();
       },
-      base(data) {
+      base({ data }) {
         const isCreatingComponent = get(data, 'createComponent', false);
 
         if (isCreatingComponent) {

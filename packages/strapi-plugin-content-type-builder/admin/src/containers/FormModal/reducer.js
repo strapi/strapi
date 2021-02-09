@@ -170,7 +170,7 @@ const reducer = (state = initialState, action) => {
     case actions.RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO: {
       // This is run when the user doesn't want to create a new component
       return initialState.update('modifiedData', () =>
-        fromJS({ type: 'component', repeatable: true })
+        fromJS({ type: 'component', repeatable: true, ...action.options })
       );
     }
     case actions.RESET_PROPS_AND_SAVE_CURRENT_DATA: {
@@ -180,6 +180,7 @@ const reducer = (state = initialState, action) => {
         name: componentToCreate.get('name'),
         type: 'component',
         repeatable: false,
+        ...action.options,
         component: createComponentUid(
           componentToCreate.get('name'),
           componentToCreate.get('category')
@@ -214,6 +215,7 @@ const reducer = (state = initialState, action) => {
         nameToSetForRelation,
         targetUid,
         step,
+        options = {},
       } = action;
 
       if (isEditing) {
@@ -233,19 +235,21 @@ const reducer = (state = initialState, action) => {
           };
         } else {
           dataToSet = {
+            ...options,
             type: 'component',
             repeatable: true,
           };
         }
       } else if (attributeType === 'dynamiczone') {
         dataToSet = {
+          ...options,
           type: 'dynamiczone',
           components: [],
         };
       } else if (attributeType === 'text') {
-        dataToSet = { type: 'string' };
+        dataToSet = { ...options, type: 'string' };
       } else if (attributeType === 'number' || attributeType === 'date') {
-        dataToSet = {};
+        dataToSet = options;
       } else if (attributeType === 'media') {
         dataToSet = {
           allowedTypes: ['images', 'files', 'videos'],
@@ -253,7 +257,7 @@ const reducer = (state = initialState, action) => {
           multiple: true,
         };
       } else if (attributeType === 'enumeration') {
-        dataToSet = { type: 'enumeration', enum: [] };
+        dataToSet = { ...options, type: 'enumeration', enum: [] };
       } else if (attributeType === 'relation') {
         dataToSet = {
           name: snakeCase(nameToSetForRelation),
@@ -266,7 +270,7 @@ const reducer = (state = initialState, action) => {
           targetColumnName: null,
         };
       } else {
-        dataToSet = { type: attributeType, default: null };
+        dataToSet = { ...options, type: attributeType, default: null };
       }
 
       return state.update('modifiedData', () => fromJS(dataToSet));
