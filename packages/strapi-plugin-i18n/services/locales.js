@@ -1,11 +1,6 @@
 'use strict';
 
-const getStore = () =>
-  strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'i18n',
-  });
+const { getCoreStore } = require('../utils');
 
 const find = (...args) => strapi.query('locale', 'i18n').find(...args);
 
@@ -13,25 +8,11 @@ const findById = id => strapi.query('locale', 'i18n').findOne({ id });
 
 const findByCode = code => strapi.query('locale', 'i18n').findOne({ code });
 
-const create = async (locale, { isDefault }) => {
-  const createdLocale = await strapi.query('locale', 'i18n').create(locale);
+const create = locale => strapi.query('locale', 'i18n').create(locale);
 
-  if (isDefault) {
-    await getStore().set({ key: 'default_locale', value: locale.code });
-  }
+const update = (params, updates) => strapi.query('locale', 'i18n').update(params, updates);
 
-  return createdLocale;
-};
-
-const update = async (params, updates, { isDefault }) => {
-  const updatedLocale = await strapi.query('locale', 'i18n').update(params, updates);
-
-  if (isDefault) {
-    await getStore().set({ key: 'default_locale', value: updatedLocale.code });
-  }
-
-  return updatedLocale;
-};
+const setDefaultLocale = ({ code }) => getCoreStore().set({ key: 'default_locale', value: code });
 
 module.exports = {
   find,
@@ -39,4 +20,5 @@ module.exports = {
   findByCode,
   create,
   update,
+  setDefaultLocale,
 };
