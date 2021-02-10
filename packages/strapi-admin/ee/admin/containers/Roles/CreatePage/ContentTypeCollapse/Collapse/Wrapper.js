@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Text } from '@buffetjs/core';
 import ConditionsButton from '../../ConditionsButton';
-import Chevron from './Chevron';
+import Chevron from '../../Chevron';
 
 const activeRowStyle = (theme, isActive) => `
   border: 1px solid ${theme.main.colors.darkBlue};

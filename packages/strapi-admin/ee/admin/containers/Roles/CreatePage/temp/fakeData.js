@@ -383,19 +383,13 @@ const data = {
             // 'restaurant',
             'address',
           ],
-          applyToProperties: [
-            'fields',
-            // 'locales'
-          ],
+          applyToProperties: ['fields', 'locales'],
         },
         {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
           subjects: ['restaurant', 'address'],
-          applyToProperties: [
-            'fields',
-            // 'locales'
-          ],
+          applyToProperties: ['fields', 'locales'],
         },
         {
           label: 'Update',

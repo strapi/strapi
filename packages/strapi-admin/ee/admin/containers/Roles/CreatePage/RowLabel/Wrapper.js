@@ -1,18 +1,18 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-const NameWrapper = styled.div`
+const Wrapper = styled.div`
   display: flex;
   align-items: center;
   width: ${({ width }) => width};
 `;
 
-NameWrapper.defaultProps = {
+Wrapper.defaultProps = {
   width: '18rem',
 };
 
-NameWrapper.propTypes = {
+Wrapper.propTypes = {
   width: PropTypes.string,
 };
 
-export default NameWrapper;
+export default Wrapper;
