@@ -1,15 +1,23 @@
-import React, { memo, useRef } from 'react';
 import PropTypes from 'prop-types';
-
-import { getType } from '../../utils';
-
+import React, { memo, useRef } from 'react';
+import styled from 'styled-components';
 import BrokenFile from '../../icons/BrokenFile';
+import { getType } from '../../utils';
 import FileIcon from '../FileIcon';
 import VideoPreview from '../VideoPreview';
-import Wrapper from './Wrapper';
 import Image from './Image';
+import Wrapper from './Wrapper';
 
-const CardPreview = ({ extension, hasError, hasIcon, url, previewUrl, type, withFileCaching }) => {
+const CardPreview = ({
+  extension,
+  hasError,
+  hasIcon,
+  url,
+  previewUrl,
+  type,
+  withFileCaching,
+  filename,
+}) => {
   const isFile = getType(type) === 'file';
   const isVideo = getType(type) === 'video';
   const cacheRef = useRef(performance.now());
@@ -25,7 +33,10 @@ const CardPreview = ({ extension, hasError, hasIcon, url, previewUrl, type, with
   if (isFile) {
     return (
       <Wrapper isFile>
-        <FileIcon ext={extension} />
+        <FileWrap>
+          <FileIcon ext={extension} />
+          {filename && <p>{filename}</p>}
+        </FileWrap>
       </Wrapper>
     );
   }
@@ -43,6 +54,15 @@ const CardPreview = ({ extension, hasError, hasIcon, url, previewUrl, type, with
   );
 };
 
+const FileWrap = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  max-width: 80%;
+  text-align: center;
+`;
+
 CardPreview.defaultProps = {
   extension: null,
   hasError: false,
@@ -51,6 +71,7 @@ CardPreview.defaultProps = {
   url: null,
   type: '',
   withFileCaching: true,
+  filename: '',
 };
 
 CardPreview.propTypes = {
@@ -61,6 +82,7 @@ CardPreview.propTypes = {
   url: PropTypes.string,
   type: PropTypes.string,
   withFileCaching: PropTypes.bool,
+  filename: PropTypes.string,
 };
 
 export default memo(CardPreview);

@@ -1,8 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
-
 import CardPreview from '../CardPreview';
 import Flex from '../Flex';
 import Chevron from './Chevron';
@@ -18,7 +17,13 @@ const InputFilePreview = ({ file, onClick, isSlider }) => {
       justifyContent="space-between"
     >
       {isSlider && <Chevron side="left" onClick={() => onClick(false)} />}
-      <CardPreview hasIcon url={fileUrl} type={file.mime} />
+      <CardPreview
+        hasIcon
+        url={fileUrl}
+        type={file.mime}
+        filename={file.name}
+        extension={file.ext.slice(1)}
+      />
       {isSlider && <Chevron side="right" onClick={() => onClick(true)} />}
     </Flex>
   );
