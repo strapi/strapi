@@ -6,12 +6,19 @@
 const webhookModel = config => ({
   connection: config.get('database.defaultConnection'),
   uid: 'strapi::webhooks',
-  internal: true,
   globalId: 'StrapiWebhooks',
   collectionName: 'strapi_webhooks',
   info: {
     name: 'Strapi webhooks',
     description: '',
+  },
+  pluginOptions: {
+    'content-manager': {
+      visible: false,
+    },
+    'content-type-builder': {
+      visible: false,
+    },
   },
   attributes: {
     name: {
