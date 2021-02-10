@@ -6,14 +6,12 @@ export const TabNavRaw = styled(props => <Flex flexDirection="column" {...props}
   width: 100%;
 `;
 
-export const TabsRaw = styled.div`
+export const TabsRaw = styled(props => (
+  <Flex alignItems="center" justifyContent="flex-end" {...props} />
+))`
   width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  margin-left: ${props => (props.position === 'right' ? 'auto' : 0)};
-  border-bottom: 1px solid ${props => props.theme.main.colors.brightGrey};
+  margin-left: ${({ position }) => (position === 'right' ? 'auto' : 0)};
+  border-bottom: 1px solid ${({ theme }) => theme.main.colors.brightGrey};
 `;
 
 export const TabButton = styled(props => (
