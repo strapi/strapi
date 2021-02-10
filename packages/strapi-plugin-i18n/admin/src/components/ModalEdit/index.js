@@ -70,7 +70,9 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
                     paddingTop: '16px',
                   }}
                 >
-                  Configurations
+                  {formatMessage({
+                    id: getTrad('Settings.locales.modal.title'),
+                  })}
                 </HeaderModalTitle>
 
                 <ModalForm>

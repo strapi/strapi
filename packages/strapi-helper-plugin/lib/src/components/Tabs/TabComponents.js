@@ -1,8 +1,8 @@
+import React from 'react';
 import styled from 'styled-components';
+import { Flex, Text } from '@buffetjs/core';
 
-export const TabNavRaw = styled.div`
-  display: flex;
-  flex-direction: column;
+export const TabNavRaw = styled(props => <Flex flexDirection="column" {...props} />)`
   width: 100%;
 `;
 
@@ -16,15 +16,21 @@ export const TabsRaw = styled.div`
   border-bottom: 1px solid ${props => props.theme.main.colors.brightGrey};
 `;
 
-export const TabButton = styled.button`
+export const TabButton = styled(props => (
+  <Text
+    as="button"
+    textTransform="uppercase"
+    fontSize="sm"
+    fontWeight={props['aria-selected'] ? 'bold' : 'semiBold'}
+    color={props['aria-selected'] ? 'mediumBlue' : 'grey'}
+    {...props}
+  />
+))`
   height: 3.8rem;
-  font-size: 1.2rem;
   letter-spacing: 0.7px;
-  text-transform: uppercase;
-  border-bottom: 2px solid ${props => (props['aria-selected'] ? '#007eff' : 'transparent')};
-  font-weight: ${props => (props['aria-selected'] ? 600 : 500)};
-  color: ${props => (props['aria-selected'] ? '#007eff' : '#9ea7b8')};
   margin-left: 3rem;
+  border-bottom: 2px solid
+    ${props => (props['aria-selected'] ? props.theme.main.colors.mediumBlue : 'transparent')};
   padding: 0;
 `;
 

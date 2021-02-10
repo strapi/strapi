@@ -62,9 +62,9 @@ BaseForm.defaultProps = {
 
 BaseForm.propTypes = {
   options: PropTypes.arrayOf(
-    PropTypes.shape({ value: PropTypes.number.isRequired, label: PropTypes.string.isRequired })
+    PropTypes.exact({ value: PropTypes.number.isRequired, label: PropTypes.string.isRequired })
   ).isRequired,
-  defaultOption: PropTypes.shape({
+  defaultOption: PropTypes.exact({
     value: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
   }),
