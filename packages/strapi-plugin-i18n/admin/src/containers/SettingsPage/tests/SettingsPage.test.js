@@ -30,7 +30,15 @@ jest.mock('strapi-helper-plugin', () => ({
   ModalHeader: ({ children }) => <div>{children}</div>,
   ModalSection: ({ children }) => <div>{children}</div>,
   ModalFooter: ({ children }) => <div>{children}</div>,
+  HeaderModal: ({ children }) => <div>{children}</div>,
+  HeaderModalTitle: ({ children }) => <div>{children}</div>,
+  ModalForm: ({ children }) => <div>{children}</div>,
   ListButton: () => <div />,
+  Tabs: ({ children }) => <div>{children}</div>,
+  TabsNav: ({ children }) => <div>{children}</div>,
+  Tab: ({ children }) => <div>{children}</div>,
+  TabsPanel: ({ children }) => <div>{children}</div>,
+  TabPanel: ({ children }) => <div>{children}</div>,
   useUserPermissions: jest.fn(),
   request: jest.fn(),
 }));
@@ -166,6 +174,7 @@ describe('i18n settings page', () => {
             'a very very very very long string that has more than fifty characters in order to show a warning',
         },
       });
+      fireEvent.blur(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'));
 
       await waitFor(() =>
         expect(screen.getByText('Settings.locales.modal.edit.confirmation')).toBeDisabled()
