@@ -26,52 +26,67 @@ const authenticate = async (ctx, next) => {
       return ctx.redirect(redirectUrls.error);
     }
 
-    const { email, firstname, lastname, username } = profile;
-    const user = await strapi.admin.services.user.findOne({ email });
+    const user = await strapi.admin.services.user.findOne({ email: profile.email });
+    const scenario = user ? existingUserScenario : nonExistingUserScenario;
 
-    // If a profile exists with this email, login with this user
-    if (user) {
-      ctx.state.user = user;
-      return next();
-    }
+    return scenario(ctx, next)(user || profile, provider);
+  })(ctx, next);
+};
 
-    const adminStore = await utils.getAdminStore();
-    const { providers } = await adminStore.get({ key: 'auth' });
+const existingUserScenario = (ctx, next) => async (user, provider) => {
+  const redirectUrls = utils.getPrefixedRedirectUrls();
 
-    // We need at least the username or the firstname/lastname combination to register a new user
-    const isMissingRegisterFields = !username && (!firstname || !lastname);
-
-    if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
-      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
-      return ctx.redirect(redirectUrls.error);
-    }
-
-    const defaultRole = await strapi.admin.services.role.findOne({ id: providers.defaultRole });
-
-    // If the default role has been misconfigured, redirect with an error
-    if (!defaultRole) {
-      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
-      return ctx.redirect(redirectUrls.error);
-    }
-
-    // Register a new user with the information given by the provider and login with it
-    ctx.state.user = await strapi.admin.services.user.create({
-      email,
-      username,
-      firstname,
-      lastname,
-      roles: [defaultRole.id],
-      isActive: true,
-      registrationToken: null,
-    });
-
-    strapi.eventHub.emit('admin.auth.autoRegistration', {
-      user: ctx.state.user,
+  if (!user.isActive) {
+    strapi.eventHub.emit('admin.auth.error', {
+      error: new Error(`Deactivated user tried to login (${user.id})`),
       provider,
     });
+    return ctx.redirect(redirectUrls.error);
+  }
 
-    return next();
-  })(ctx, next);
+  ctx.state.user = user;
+  return next();
+};
+
+const nonExistingUserScenario = (ctx, next) => async (profile, provider) => {
+  const { email, firstname, lastname, username } = profile;
+  const redirectUrls = utils.getPrefixedRedirectUrls();
+  const adminStore = await utils.getAdminStore();
+  const { providers } = await adminStore.get({ key: 'auth' });
+
+  // We need at least the username or the firstname/lastname combination to register a new user
+  const isMissingRegisterFields = !username && (!firstname || !lastname);
+
+  if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
+    strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
+    return ctx.redirect(redirectUrls.error);
+  }
+
+  const defaultRole = await strapi.admin.services.role.findOne({ id: providers.defaultRole });
+
+  // If the default role has been misconfigured, redirect with an error
+  if (!defaultRole) {
+    strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
+    return ctx.redirect(redirectUrls.error);
+  }
+
+  // Register a new user with the information given by the provider and login with it
+  ctx.state.user = await strapi.admin.services.user.create({
+    email,
+    username,
+    firstname,
+    lastname,
+    roles: [defaultRole.id],
+    isActive: true,
+    registrationToken: null,
+  });
+
+  strapi.eventHub.emit('admin.auth.autoRegistration', {
+    user: ctx.state.user,
+    provider,
+  });
+
+  return next();
 };
 
 const redirectWithAuth = ctx => {
