@@ -341,6 +341,17 @@ const data = {
                     {
                       key: 'media',
                       value: 'media',
+                      required: true,
+                    },
+                    {
+                      key: 'closing',
+
+                      value: [
+                        {
+                          key: 'name',
+                          value: [{ key: 'test', value: 'test' }],
+                        },
+                      ],
                     },
                   ],
                 },
@@ -379,10 +390,7 @@ const data = {
         {
           label: 'Create',
           actionId: 'content-manager.explorer.create',
-          subjects: [
-            // 'restaurant',
-            'address',
-          ],
+          subjects: ['restaurant', 'address'],
           applyToProperties: ['fields', 'locales'],
         },
         {
@@ -394,10 +402,7 @@ const data = {
         {
           label: 'Update',
           actionId: 'content-manager.explorer.update',
-          subjects: [
-            'address',
-            // restaurant
-          ],
+          subjects: ['address', 'restaurant'],
           applyToProperties: ['fields'],
         },
         {
