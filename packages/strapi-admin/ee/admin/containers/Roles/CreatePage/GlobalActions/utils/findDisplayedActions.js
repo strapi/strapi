@@ -1,9 +1,4 @@
-import { sortBy } from 'lodash';
-
 const findDisplayedActions = actions =>
-  sortBy(
-    actions.filter(({ subjects }) => subjects && subjects.length),
-    'label'
-  );
+  actions.filter(({ subjects }) => subjects && subjects.length);
 
 export default findDisplayedActions;

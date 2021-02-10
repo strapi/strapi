@@ -288,7 +288,7 @@ const data = {
           properties: [
             {
               label: 'Fields',
-              key: 'Fields',
+              key: 'fields',
               values: [
                 {
                   key: 'POSTAL_CODER',
@@ -315,62 +315,65 @@ const data = {
             },
           ],
         },
-        // restaurant: {
-        //   properties: [
-        //     {
-        //       label: 'Fields',
-        //       key: 'fields',
-        //       values: [
-        //         {
-        //           key: 'f1',
-        //           value: 'f1',
-        //           required: true,
-        //         },
-        //         {
-        //           key: 'f2',
-        //           value: 'f2',
-        //         },
-        //         {
-        //           // nested compo
-        //           key: 'services',
-        //           value: [
-        //             {
-        //               key: 'name',
-        //               value: 'name',
-        //             },
-        //             {
-        //               key: 'media',
-        //               value: 'media',
-        //             },
-        //           ],
-        //         },
-        //         {
-        //           key: 'dz',
-        //           value: 'dz',
-        //         },
-        //         {
-        //           key: 'relation',
-        //           value: 'relation',
-        //         },
-        //       ],
-        //     },
-        //     {
-        //       label: 'Locales',
-        //       key: 'locales',
-        //       values: [
-        //         {
-        //           key: 'French',
-        //           value: 'fr',
-        //           required: true,
-        //         },
-        //         {
-        //           key: 'English',
-        //           value: 'en',
-        //         },
-        //       ],
-        //     },
-        //   ],
-        // },
+        restaurant: {
+          properties: [
+            {
+              label: 'Fields',
+              key: 'fields',
+              values: [
+                {
+                  key: 'f1',
+                  value: 'f1',
+                  required: true,
+                },
+                {
+                  key: 'f2',
+                  value: 'f2',
+                },
+                {
+                  // nested compo
+                  key: 'services',
+                  value: [
+                    {
+                      key: 'name',
+                      value: 'name',
+                    },
+                    {
+                      key: 'media',
+                      value: 'media',
+                    },
+                  ],
+                },
+                {
+                  key: 'dz',
+                  value: 'dz',
+                },
+                {
+                  key: 'relation',
+                  value: 'relation',
+                },
+              ],
+            },
+            {
+              label: 'Locales',
+              key: 'locales',
+              values: [
+                {
+                  key: 'French',
+                  value: 'fr',
+                  required: true,
+                },
+                {
+                  key: 'English',
+                  value: 'en',
+                },
+              ],
+            },
+          ],
+        },
+        test: {
+          properties: [],
+        },
       },
       actions: [
         {
