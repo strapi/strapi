@@ -81,7 +81,9 @@ components:
     localeInputCreate:
       type: object
       required:
+        - name
         - code
+        - isDefault
       properties:
         name:
           type: string
@@ -89,17 +91,19 @@ components:
         code:
           type: string
           description: ISO code of the locale
-          required: true
+        isDefault:
+          type: boolean
+          description: Set default locale (ignored if set to false)
 
     localeInputUpdate:
       type: object
-      required:
-        - name
       properties:
         name:
           type: string
           description: Name of the locale
-          required: true
+        isDefault:
+          type: boolean
+          description: Set default locale (ignored if set to false)
 
     locale:
       type: object
@@ -112,6 +116,9 @@ components:
         code:
           type: string
           description: ISO code of the locale
+        isDefault:
+          type: boolean
+          description: Is the default locale
 
     iso-locale:
       type: object

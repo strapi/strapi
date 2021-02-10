@@ -1,6 +1,7 @@
 'use strict';
 
 const { setCreatorFields, sanitizeEntity } = require('strapi-utils');
+const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
 const { formatLocale } = require('../domain/locale');
@@ -17,12 +18,13 @@ module.exports = {
 
     const locales = await localesService.find();
 
-    ctx.body = sanitizeLocale(locales);
+    ctx.body = await localesService.setIsDefault(sanitizeLocale(locales));
   },
 
   async createLocale(ctx) {
     const { user } = ctx.state;
     const { body } = ctx.request;
+    let { isDefault, ...localeToCreate } = body;
 
     try {
       await validateCreateLocaleInput(body);
@@ -37,18 +39,23 @@ module.exports = {
       return ctx.badRequest('This locale already exists');
     }
 
-    let localeToCreate = formatLocale(body);
+    localeToCreate = formatLocale(localeToCreate);
     localeToCreate = setCreatorFields({ user })(localeToCreate);
 
     const locale = await localesService.create(localeToCreate);
 
-    ctx.body = sanitizeLocale(locale);
+    if (isDefault) {
+      await localesService.setDefaultLocale(locale);
+    }
+
+    ctx.body = await localesService.setIsDefault(sanitizeLocale(locale));
   },
 
   async updateLocale(ctx) {
     const { user } = ctx.state;
     const { id } = ctx.params;
     const { body } = ctx.request;
+    let { isDefault, ...updates } = body;
 
     try {
       await validateUpdateLocaleInput(body);
@@ -63,11 +70,15 @@ module.exports = {
       return ctx.notFound('locale.notFound');
     }
 
-    let updates = { name: body.name };
-    updates = setCreatorFields({ user, isEdition: true })(updates);
+    const allowedParams = ['name', 'isDefault'];
+    const cleanUpdates = setCreatorFields({ user, isEdition: true })(pick(allowedParams, updates));
 
-    const updatedLocale = await localesService.update({ id }, updates);
+    const updatedLocale = await localesService.update({ id }, cleanUpdates);
 
-    ctx.body = sanitizeLocale(updatedLocale);
+    if (isDefault) {
+      await localesService.setDefaultLocale(updatedLocale);
+    }
+
+    ctx.body = await localesService.setIsDefault(sanitizeLocale(updatedLocale));
   },
 };
