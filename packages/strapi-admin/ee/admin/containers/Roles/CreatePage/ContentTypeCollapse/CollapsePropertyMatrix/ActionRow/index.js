@@ -21,6 +21,7 @@ const ActionRow = ({ name, value, required, propertyActions }) => {
 
     return value;
   }, [value]);
+
   const isCollapsable = recursiveValues.length > 0;
 
   const handleClick = useCallback(() => {

@@ -372,11 +372,11 @@ const data = {
                 {
                   key: 'French',
                   value: 'fr',
-                  required: true,
                 },
                 {
                   key: 'English',
-                  value: 'en',
+                  required: true,
+                  value: [{ key: 'EN', value: 'en' }],
                 },
               ],
             },
