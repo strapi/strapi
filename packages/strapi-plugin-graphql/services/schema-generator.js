@@ -65,12 +65,13 @@ const generateSchema = () => {
     .join('\n');
 
   // Concatenate.
+  // Manually defined to avoid exposing all attributes (like password etc.)
   let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
       ${polymorphicSchema.definition}
       ${Types.addInput()}
-      
+
       ${PublicationState.definition}
       type AdminUser {
         id: ID!
@@ -132,18 +133,11 @@ const writeGenerateSchema = schema => {
 };
 
 const buildModelsShadowCRUD = () => {
-  const models = Object.values(strapi.models).filter(model => model.internal !== true);
-
-  const pluginModels = Object.values(strapi.plugins)
-    .map(plugin => Object.values(plugin.models) || [])
-    .reduce((acc, arr) => acc.concat(arr), []);
+  const models = Object.values(strapi.contentTypes).filter(model => model.plugin !== 'admin');
 
   const components = Object.values(strapi.components);
 
-  return mergeSchemas(
-    createDefaultSchema(),
-    ...buildModels([...models, ...pluginModels, ...components])
-  );
+  return mergeSchemas(createDefaultSchema(), ...buildModels([...models, ...components]));
 };
 
 const buildResolvers = resolvers => {

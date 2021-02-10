@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 const generator = require('strapi-generate');
 
@@ -10,10 +11,8 @@ const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { coreUids, pluginsUids } = require('./constants');
 
-const isContentTypeEditable = (contentType = {}) => {
-  const { uid } = contentType;
-  return !uid.startsWith(coreUids.PREFIX) && uid !== pluginsUids.UPLOAD_FILE;
-};
+const isContentTypeVisible = model =>
+  getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
 
 const getRestrictRelationsTo = (contentType = {}) => {
   const { uid } = contentType;
@@ -54,7 +53,7 @@ const formatContentType = contentType => {
       kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
-      editable: isContentTypeEditable(contentType),
+      visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
     },
   };
