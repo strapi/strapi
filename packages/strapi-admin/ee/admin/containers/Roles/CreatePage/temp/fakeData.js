@@ -391,10 +391,7 @@ const data = {
         {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
-          subjects: [
-            // 'restaurant',
-            'address',
-          ],
+          subjects: ['restaurant', 'address'],
           applyToProperties: [
             'fields',
             // 'locales'
@@ -407,6 +404,7 @@ const data = {
             'address',
             // restaurant
           ],
+          applyToProperties: ['fields'],
         },
         {
           label: 'Delete',

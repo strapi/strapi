@@ -8,6 +8,7 @@ import Chevron from './Chevron';
 import HiddenAction from './HiddenAction';
 import NameWrapper from './NameWrapper';
 import Wrapper from './Wrapper';
+import ConditionsButton from '../../ConditionsButton';
 
 const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle }) => {
   return (
@@ -39,6 +40,7 @@ const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle }) =
             return <CheckboxWithCondition key={action.actionId} name={action.actionId} />;
           })}
         </ActionsWrapper>
+        <ConditionsButton isRight onClick={() => console.log('todo')} />
       </Flex>
     </Wrapper>
   );

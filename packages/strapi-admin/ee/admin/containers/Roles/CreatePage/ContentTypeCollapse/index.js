@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Collapse from './Collapse';
-import CollapseContent from './CollapseContent';
+import CollapsePropertyMatrix from './CollapsePropertyMatrix';
 import getAvailableActions from './utils/getAvailableActions';
 import Wrapper from './Wrapper';
 
@@ -21,8 +21,10 @@ const ContentTypeCollapse = ({
     return getAvailableActions(allActions, contentTypeName);
   }, [allActions, contentTypeName]);
 
+  const isOdd = useMemo(() => index % 2 !== 0, [index]);
+
   return (
-    <Wrapper withMargin={index % 2 !== 0}>
+    <Wrapper withMargin={isOdd}>
       <Collapse
         availableActions={availableActions}
         isActive={isActive}
@@ -31,8 +33,18 @@ const ContentTypeCollapse = ({
         onClickToggle={handleClickToggleCollapse}
       />
       {isActive &&
-        properties.map(({ label, key, values }) => {
-          return <CollapseContent label={label} key={key} values={values} />;
+        properties.map(({ label, key, values }, i) => {
+          return (
+            <CollapsePropertyMatrix
+              availableActions={availableActions}
+              label={label}
+              propertyName={key}
+              key={key}
+              isLast={i === properties.length - 1}
+              isOdd={isOdd}
+              values={values}
+            />
+          );
         })}
     </Wrapper>
   );
