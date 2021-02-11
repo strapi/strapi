@@ -7,6 +7,7 @@ import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
+import { getCheckboxState } from '../../utils';
 import RowLabel from '../../../RowLabel';
 import SubActionRow from '../SubActionRow';
 import Wrapper from './Wrapper';
@@ -62,8 +63,9 @@ const ActionRow = ({
                 return <HiddenAction key={label} />;
               }
 
+              const checkboxName = [...pathToData.split('..'), actionId, propertyName, name];
+
               if (!isCollapsable) {
-                const checkboxName = [...pathToData.split('..'), actionId, propertyName, name];
                 const checkboxValue = get(modifiedData, checkboxName, false);
 
                 return (
@@ -76,7 +78,19 @@ const ActionRow = ({
                 );
               }
 
-              return <CheckboxWithCondition key={label} name="todo" />;
+              const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
+                checkboxName,
+                modifiedData
+              );
+
+              return (
+                <CheckboxWithCondition
+                  key={label}
+                  name="todo"
+                  value={hasAllActionsSelected}
+                  someChecked={hasSomeActionsSelected}
+                />
+              );
             })}
           </Flex>
         </Flex>

@@ -10,6 +10,7 @@ import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
+import { getCheckboxState } from '../../utils';
 import { RowStyle, RowWrapper } from './row';
 import { LeftBorderTimeline, TopTimeline } from './timeline';
 import Wrapper from './Wrapper';
@@ -92,14 +93,15 @@ const SubActionRow = ({
                       return <HiddenAction key={actionId} />;
                     }
 
+                    const checkboxName = [
+                      ...pathToDataFromActionRow.split('..'),
+                      actionId,
+                      propertyName,
+                      ...parentName.split('..'),
+                      value,
+                    ];
+
                     if (!subChildrenForm) {
-                      const checkboxName = [
-                        ...pathToDataFromActionRow.split('..'),
-                        actionId,
-                        propertyName,
-                        ...parentName.split('..'),
-                        value,
-                      ];
                       const checkboxValue = get(modifiedData, checkboxName, 'test');
 
                       return (
@@ -112,7 +114,19 @@ const SubActionRow = ({
                       );
                     }
 
-                    return <CheckboxWithCondition key={label} name="todo" />;
+                    const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
+                      checkboxName,
+                      modifiedData
+                    );
+
+                    return (
+                      <CheckboxWithCondition
+                        key={label}
+                        name="todo"
+                        value={hasAllActionsSelected}
+                        someChecked={hasSomeActionsSelected}
+                      />
+                    );
                   })}
                 </Flex>
               </Flex>
