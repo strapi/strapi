@@ -1,13 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalHeader, ModalSection, ModalFooter } from 'strapi-helper-plugin';
+import {
+  Modal,
+  ModalHeader,
+  HeaderModal,
+  HeaderModalTitle,
+  ModalFooter,
+  ModalForm,
+  Tabs,
+  TabsNav,
+  Tab,
+  TabsPanel,
+  TabPanel,
+} from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
-import { Button, Label, InputText } from '@buffetjs/core';
-import Select from 'react-select';
+import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
+import BaseForm from './BaseForm';
 
 const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   const { isEditing, editLocale } = useEditLocale();
@@ -31,6 +43,12 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
 
   return (
     <Modal isOpen={isOpened} onToggle={onClose}>
+      <HeaderModal>
+        <ModalHeader
+          headerBreadcrumbs={[formatMessage({ id: getTrad('Settings.list.actions.edit') })]}
+        />
+      </HeaderModal>
+
       <Formik
         initialValues={{ displayName: localeToEdit ? localeToEdit.name : '' }}
         onSubmit={handleSubmit}
@@ -38,44 +56,49 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
           displayName: string().max(50, 'Settings.locales.modal.edit.locales.displayName.error'),
         })}
       >
-        {({ values, handleSubmit, handleChange, errors }) => (
+        {({ handleSubmit, errors }) => (
           <form onSubmit={handleSubmit}>
-            <ModalHeader
-              headerBreadcrumbs={[formatMessage({ id: getTrad('Settings.list.actions.edit') })]}
-            />
-            <ModalSection>
-              <div>
-                <span id="locale-code">
-                  <Label htmlFor="">
-                    {formatMessage({ id: getTrad('Settings.locales.modal.edit.locales.label') })}
-                  </Label>
-                </span>
-
-                <Select
-                  aria-labelledby="locale-code"
-                  options={options}
-                  defaultValue={defaultOption}
-                  isDisabled
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="displayName">
+            <div className="container-fluid">
+              <div className="container-fluid">
+                <HeaderModalTitle
+                  style={{
+                    fontSize: '1.8rem',
+                    height: '65px',
+                    fontWeight: 'bold',
+                    alignItems: 'center',
+                    marginBottom: '-39px',
+                    paddingTop: '16px',
+                  }}
+                >
                   {formatMessage({
-                    id: getTrad('Settings.locales.modal.edit.locales.displayName'),
+                    id: getTrad('Settings.locales.modal.title'),
                   })}
-                </Label>
-                <InputText name="displayName" value={values.displayName} onChange={handleChange} />
+                </HeaderModalTitle>
 
-                {errors.displayName && (
-                  <small>
-                    {formatMessage({
-                      id: getTrad(' Settings.locales.modal.edit.locales.displayName.error'),
+                <ModalForm>
+                  <TabsNav
+                    defaultSelection={0}
+                    label={formatMessage({
+                      id: getTrad('Settings.locales.modal.edit.tab.label'),
                     })}
-                  </small>
-                )}
+                    id="i18n-settings-tabs"
+                  >
+                    <Tabs position="right">
+                      <Tab>{formatMessage({ id: getTrad('Settings.locales.modal.base') })}</Tab>
+                      <Tab>{formatMessage({ id: getTrad('Settings.locales.modal.advanced') })}</Tab>
+                    </Tabs>
+
+                    <TabsPanel>
+                      <TabPanel>
+                        <BaseForm options={options} defaultOption={defaultOption} />
+                      </TabPanel>
+                      <TabPanel>advanced</TabPanel>
+                    </TabsPanel>
+                  </TabsNav>
+                </ModalForm>
               </div>
-            </ModalSection>
+            </div>
+
             <ModalFooter>
               <section>
                 <Button type="button" color="cancel" onClick={onClose}>
