@@ -1091,6 +1091,7 @@ describe('Filtering API', () => {
         url: '/products',
         qs: {
           _limit: 1,
+          _sort: 'rank:asc',
         },
       });
 
@@ -1116,6 +1117,7 @@ describe('Filtering API', () => {
         url: '/products',
         qs: {
           _start: 1,
+          _sort: 'rank:asc',
         },
       });
 
@@ -1129,6 +1131,7 @@ describe('Filtering API', () => {
         qs: {
           _limit: 1,
           _start: 1,
+          _sort: 'rank:asc',
         },
       });
 
