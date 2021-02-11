@@ -6,7 +6,7 @@ import { getTrad } from '../../utils';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
 import SizedInput from '../SizedInput';
-import { Header, Wrapper } from './Components';
+import { Header, Wrapper, Sticky } from './Components';
 
 const Policies = () => {
   const { modifiedData, selectedAction, routes, policies, onChange } = useUsersPermissions();
@@ -26,7 +26,7 @@ const Policies = () => {
 
   return (
     <Wrapper className="col-md-5">
-      <div className="container-fluid">
+      <Sticky className="container-fluid">
         <div className="row">
           <Header className="col-md-12">
             <FormattedMessage id={`${baseTitle}.${title}`} />
@@ -53,7 +53,7 @@ const Policies = () => {
             </>
           )}
         </div>
-      </div>
+      </Sticky>
     </Wrapper>
   );
 };
