@@ -701,13 +701,14 @@ const buildSearchQuery = ({ model, params }) => qb => {
   const searchColumns = Object.keys(model._attributes)
     .filter(attribute => !associations.includes(attribute))
     .filter(attribute => stringTypes.includes(model._attributes[attribute].type))
-    .filter(attribute => !model._attributes[attribute].skipSearch);
+    .filter(attribute => !('searchable' in model._attributes[attribute] && !model._attributes[attribute].searchable));
 
   if (!_.isNaN(_.toNumber(query))) {
     const numberColumns = Object.keys(model._attributes)
       .filter(attribute => !associations.includes(attribute))
       .filter(attribute => numberTypes.includes(model._attributes[attribute].type))
       .filter(attribute => !model._attributes[attribute].skipSearch);
+      .filter(attribute => !('searchable' in model._attributes[attribute] && !model._attributes[attribute].searchable));
     searchColumns.push(...numberColumns);
   }
 

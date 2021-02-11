@@ -23,12 +23,12 @@
     "width": {
       "type": "integer",
       "configurable": false,
-      "skipSearch": true
+      "searchable": false
     },
     "height": {
       "type": "integer",
       "configurable": false,
-      "skipSearch": true
+      "searchable": false
     },
     "formats": {
       "type": "json",
@@ -38,41 +38,41 @@
       "type": "string",
       "configurable": false,
       "required": true,
-      "skipSearch": true
+      "searchable": false
     },
     "ext": {
       "type": "string",
       "configurable": false,
-      "skipSearch": true
+      "searchable": false
     },
     "mime": {
       "type": "string",
       "configurable": false,
       "required": true,
-      "skipSearch": true
+      "searchable": false
     },
     "size": {
       "type": "decimal",
       "configurable": false,
       "required": true,
-      "skipSearch": true
+      "searchable": false
     },
     "url": {
       "type": "string",
       "configurable": false,
       "required": true,
-      "skipSearch": true
+      "searchable": false
     },
     "previewUrl": {
       "type": "string",
       "configurable": false,
-      "skipSearch": true
+      "searchable": false
     },
     "provider": {
       "type": "string",
       "configurable": false,
       "required": true,
-      "skipSearch": true
+      "searchable": false
     },
     "provider_metadata": {
       "type": "json",
