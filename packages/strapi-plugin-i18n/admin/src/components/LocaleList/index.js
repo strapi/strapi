@@ -4,7 +4,7 @@ import { EmptyState, ListButton } from 'strapi-helper-plugin';
 import { List, Button } from '@buffetjs/custom';
 import { Plus } from '@buffetjs/icons';
 import PropTypes from 'prop-types';
-import { useLocales } from '../../hooks';
+import useLocales from '../../hooks/useLocales';
 import LocaleRow from '../LocaleRow';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
