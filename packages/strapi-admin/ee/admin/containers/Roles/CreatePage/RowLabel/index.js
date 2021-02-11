@@ -4,10 +4,19 @@ import { Checkbox, Text } from '@buffetjs/core';
 import CollapseLabel from '../CollapseLabel';
 import Wrapper from './Wrapper';
 
-const RowLabel = ({ isCollapsable, label, children, onClick, textColor, width }) => {
+const RowLabel = ({
+  value,
+  someChecked,
+  isCollapsable,
+  label,
+  children,
+  onClick,
+  textColor,
+  width,
+}) => {
   return (
     <Wrapper width={width}>
-      <Checkbox name="todo" value={false} />
+      <Checkbox name="todo" someChecked={someChecked} value={value} />
       <CollapseLabel
         title={label}
         alignItems="center"
@@ -32,6 +41,8 @@ const RowLabel = ({ isCollapsable, label, children, onClick, textColor, width })
 
 RowLabel.defaultProps = {
   children: null,
+  value: false,
+  someChecked: false,
   isCollapsable: false,
   textColor: 'grey',
   width: '18rem',
@@ -39,6 +50,8 @@ RowLabel.defaultProps = {
 
 RowLabel.propTypes = {
   children: PropTypes.node,
+  value: PropTypes.bool,
+  someChecked: PropTypes.bool,
   isCollapsable: PropTypes.bool,
   label: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,

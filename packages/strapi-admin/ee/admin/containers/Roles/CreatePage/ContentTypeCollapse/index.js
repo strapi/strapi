@@ -32,6 +32,7 @@ const ContentTypeCollapse = ({
         isGrey={index % 2 === 0}
         name={contentTypeName}
         onClickToggle={handleClickToggleCollapse}
+        pathToData={pathToData}
       />
       {isActive &&
         properties.map(({ label, value, children: childrenForm }, i) => {

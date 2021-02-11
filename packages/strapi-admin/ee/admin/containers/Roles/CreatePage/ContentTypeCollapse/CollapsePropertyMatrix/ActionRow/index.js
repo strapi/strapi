@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Padded, Flex } from '@buffetjs/core';
 import { usePermissionsDataManager } from '../../../contexts/PermissionsDataManagerContext';
+import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
-import { getCheckboxState } from '../../utils';
 import RowLabel from '../../../RowLabel';
 import SubActionRow from '../SubActionRow';
 import Wrapper from './Wrapper';
+import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 
 const ActionRow = ({
   childrenForm,
@@ -48,12 +49,23 @@ const ActionRow = ({
     }
   }, [isCollapsable, name]);
 
+  const { hasAllActionsSelected, hasSomeActionsSelected } = useMemo(() => {
+    return getRowLabelCheckboxeState(propertyActions, modifiedData, pathToData, propertyName, name);
+  }, [propertyActions, modifiedData, pathToData, propertyName, name]);
+
   return (
     <>
       <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <RowLabel width="15rem" onClick={handleClick} isCollapsable={isCollapsable} label={label}>
+          <RowLabel
+            width="15rem"
+            onClick={handleClick}
+            isCollapsable={isCollapsable}
+            label={label}
+            someChecked={hasSomeActionsSelected}
+            value={hasAllActionsSelected}
+          >
             {required && <RequiredSign />}
             <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
           </RowLabel>
@@ -78,10 +90,9 @@ const ActionRow = ({
                 );
               }
 
-              const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
-                checkboxName,
-                modifiedData
-              );
+              const data = get(modifiedData, checkboxName, {});
+
+              const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
 
               return (
                 <CheckboxWithCondition

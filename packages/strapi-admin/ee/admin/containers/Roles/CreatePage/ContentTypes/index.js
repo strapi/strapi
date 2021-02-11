@@ -9,7 +9,7 @@ const ContentTypes = ({ kind, layout: { actions, subjects } }) => {
   return (
     <Wrapper>
       <Padded left right bottom size="md">
-        <GlobalActions actions={actions} />
+        <GlobalActions actions={actions} kind={kind} />
         <ContentTypeCollapses pathToData={kind} subjects={subjects} actions={actions} />
       </Padded>
     </Wrapper>

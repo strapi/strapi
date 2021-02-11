@@ -4,13 +4,13 @@ import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
 import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../contexts/PermissionsDataManagerContext';
+import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
-import { getCheckboxState } from '../../utils';
 import { RowStyle, RowWrapper } from './row';
 import { LeftBorderTimeline, TopTimeline } from './timeline';
 import Wrapper from './Wrapper';
@@ -27,7 +27,6 @@ const SubActionRow = ({
   parentName,
   propertyName,
 }) => {
-  console.log({ pathToDataFromActionRow });
   const { modifiedData, onChangeSimpleCheckbox } = usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = useState(null);
   const handleClickToggleSubLevel = useCallback(name => {
@@ -101,9 +100,9 @@ const SubActionRow = ({
                       value,
                     ];
 
-                    if (!subChildrenForm) {
-                      const checkboxValue = get(modifiedData, checkboxName, 'test');
+                    const checkboxValue = get(modifiedData, checkboxName, 'test');
 
+                    if (!subChildrenForm) {
                       return (
                         <CheckboxWithCondition
                           key={label}
@@ -115,8 +114,7 @@ const SubActionRow = ({
                     }
 
                     const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
-                      checkboxName,
-                      modifiedData
+                      checkboxValue
                     );
 
                     return (

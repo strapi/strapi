@@ -1,18 +1,24 @@
 import React, { memo, useMemo } from 'react';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
+import { usePermissionsDataManager } from '../contexts/PermissionsDataManagerContext';
 import CheckboxWithCondition from '../CheckboxWithCondition';
+import { findDisplayedActions, getCheckboxesState } from './utils';
 import Wrapper from './Wrapper';
 
-const GlobalActions = ({ actions }) => {
+const GlobalActions = ({ actions, kind }) => {
   const { formatMessage } = useIntl();
+  const { modifiedData } = usePermissionsDataManager();
 
   const displayedActions = useMemo(() => {
-    return actions.filter(({ subjects }) => {
-      return subjects.length;
-    });
+    return findDisplayedActions(actions);
   }, [actions]);
+
+  const checkboxesState = useMemo(() => {
+    return getCheckboxesState(displayedActions, modifiedData[kind]);
+  }, [modifiedData, displayedActions, kind]);
 
   return (
     <Wrapper>
@@ -26,7 +32,8 @@ const GlobalActions = ({ actions }) => {
                 defaultMessage: label,
               })}
               name={actionId}
-              value={false}
+              value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
+              someChecked={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}
             />
           );
         })}
@@ -47,6 +54,7 @@ GlobalActions.propTypes = {
       subjects: PropTypes.array.isRequired,
     })
   ),
+  kind: PropTypes.string.isRequired,
 };
 
 export default memo(GlobalActions);

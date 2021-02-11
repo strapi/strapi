@@ -15,6 +15,24 @@ const initialState = {
             city: true,
           },
         },
+        'content-manager.explorer.read': {
+          fields: {
+            postal_coder: true,
+            categories: false,
+            cover: true,
+            images: true,
+            city: true,
+          },
+        },
+        'content-manager.explorer.update': {
+          fields: {
+            postal_coder: true,
+            categories: false,
+            cover: true,
+            images: true,
+            city: true,
+          },
+        },
       },
       restaurant: {
         'content-manager.explorer.create': {
@@ -31,6 +49,28 @@ const initialState = {
               },
             },
             dz: true,
+            relation: true,
+          },
+          locales: {
+            fr: true,
+            en: true,
+          },
+        },
+        'content-manager.explorer.read': {
+          fields: {
+            f1: true,
+            f2: true,
+            services: {
+              name: true,
+              media: true,
+              closing: {
+                name: {
+                  test: true,
+                },
+              },
+            },
+            dz: true,
+            relation: true,
           },
           locales: {
             fr: true,
