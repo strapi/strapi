@@ -348,7 +348,7 @@ module.exports = {
         }
 
         if (isField) {
-          acc.properties[curr] = { type: this.getType(attribute.type) };
+          acc.properties[curr] = { type: this.getType(attribute.type), enum: attribute.enum };
         } else {
           const newGetter = getter.slice();
           newGetter.splice(newGetter.length - 1, 1, 'associations');
