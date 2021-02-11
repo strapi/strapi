@@ -4,8 +4,8 @@ describe('ADMIN | COMPONENTS | Permissions | CollapsePropertyMatrix | utils', ()
   it('should set isActionRelatedToCurrentProperty key to false if the applyToProperties is not an array', () => {
     const data = [{ label: 'test' }, { label: 'test1' }];
     const expected = [
-      { label: 'test', isActionRelatedToCurrentProperty: false },
-      { label: 'test1', isActionRelatedToCurrentProperty: false },
+      { label: 'test', isActionRelatedToCurrentProperty: false, actionId: undefined },
+      { label: 'test1', isActionRelatedToCurrentProperty: false, actionId: undefined },
     ];
 
     expect(generateHeadersFromActions(data, 'test')).toEqual(expected);
@@ -13,12 +13,12 @@ describe('ADMIN | COMPONENTS | Permissions | CollapsePropertyMatrix | utils', ()
 
   it('should set isActionRelatedToCurrentProperty key to false if the propertyName is not in the applyToProperties array', () => {
     const data = [
-      { label: 'test', applyToProperties: ['foo'] },
-      { label: 'test1', applyToProperties: ['foo'] },
+      { label: 'test', applyToProperties: ['foo'], actionId: 'test' },
+      { label: 'test1', applyToProperties: ['foo'], actionId: 'test' },
     ];
     const expected = [
-      { label: 'test', isActionRelatedToCurrentProperty: false },
-      { label: 'test1', isActionRelatedToCurrentProperty: false },
+      { label: 'test', isActionRelatedToCurrentProperty: false, actionId: 'test' },
+      { label: 'test1', isActionRelatedToCurrentProperty: false, actionId: 'test' },
     ];
 
     expect(generateHeadersFromActions(data, 'test')).toEqual(expected);
@@ -26,12 +26,12 @@ describe('ADMIN | COMPONENTS | Permissions | CollapsePropertyMatrix | utils', ()
 
   it('should set isActionRelatedToCurrentProperty key to false if the isDisplayed key is falsy', () => {
     const data = [
-      { label: 'test', isDisplayed: false },
-      { label: 'test1', isDisplayed: false },
+      { label: 'test', isDisplayed: false, actionId: 'test' },
+      { label: 'test1', isDisplayed: false, actionId: 'test' },
     ];
     const expected = [
-      { label: 'test', isActionRelatedToCurrentProperty: false },
-      { label: 'test1', isActionRelatedToCurrentProperty: false },
+      { label: 'test', isActionRelatedToCurrentProperty: false, actionId: 'test' },
+      { label: 'test1', isActionRelatedToCurrentProperty: false, actionId: 'test' },
     ];
 
     expect(generateHeadersFromActions(data, 'test')).toEqual(expected);
@@ -39,12 +39,12 @@ describe('ADMIN | COMPONENTS | Permissions | CollapsePropertyMatrix | utils', ()
 
   it('should set the isActionRelatedToCurrentProperty key to true if isDisplayed is truthy and the propertyName is in the applyToProperties array', () => {
     const data = [
-      { label: 'test', isDisplayed: true, applyToProperties: ['test'] },
-      { label: 'test1', isDisplayed: false, applyToProperties: ['test'] },
+      { label: 'test', isDisplayed: true, applyToProperties: ['test'], actionId: 'test' },
+      { label: 'test1', isDisplayed: false, applyToProperties: ['test'], actionId: 'test' },
     ];
     const expected = [
-      { label: 'test', isActionRelatedToCurrentProperty: true },
-      { label: 'test1', isActionRelatedToCurrentProperty: false },
+      { label: 'test', isActionRelatedToCurrentProperty: true, actionId: 'test' },
+      { label: 'test1', isActionRelatedToCurrentProperty: false, actionId: 'test' },
     ];
 
     expect(generateHeadersFromActions(data, 'test')).toEqual(expected);

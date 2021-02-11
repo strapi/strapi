@@ -1,6 +1,8 @@
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { Padded, Flex } from '@buffetjs/core';
+import { usePermissionsDataManager } from '../../../contexts/PermissionsDataManagerContext';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
@@ -9,8 +11,17 @@ import RowLabel from '../../../RowLabel';
 import SubActionRow from '../SubActionRow';
 import Wrapper from './Wrapper';
 
-const ActionRow = ({ childrenForm, label, name, required, propertyActions }) => {
+const ActionRow = ({
+  childrenForm,
+  label,
+  name,
+  required,
+  pathToData,
+  propertyActions,
+  propertyName,
+}) => {
   const [rowToOpen, setRowToOpen] = useState(null);
+  const { modifiedData, onChangeSimpleCheckbox } = usePermissionsDataManager();
 
   const isActive = rowToOpen === name;
 
@@ -38,27 +49,34 @@ const ActionRow = ({ childrenForm, label, name, required, propertyActions }) => 
 
   return (
     <>
-      <Wrapper alignItems="center" isCollapsable={isCollapsable}>
+      <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <RowLabel
-            width="15rem"
-            onClick={handleClick}
-            isCollapsable={isCollapsable}
-            label={label}
-            // TODO
-            textColor="grey"
-          >
+          <RowLabel width="15rem" onClick={handleClick} isCollapsable={isCollapsable} label={label}>
             {required && <RequiredSign />}
             <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
           </RowLabel>
           <Flex style={{ flex: 1 }}>
-            {propertyActions.map(action => {
-              if (!action.isActionRelatedToCurrentProperty) {
-                return <HiddenAction key={action.label} />;
+            {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
+              if (!isActionRelatedToCurrentProperty) {
+                return <HiddenAction key={label} />;
               }
 
-              return <CheckboxWithCondition key={action.label} name="todo" />;
+              if (!isCollapsable) {
+                const checkboxName = [...pathToData.split('..'), actionId, propertyName, name];
+                const checkboxValue = get(modifiedData, checkboxName, false);
+
+                return (
+                  <CheckboxWithCondition
+                    key={actionId}
+                    name={checkboxName.join('..')}
+                    onChange={onChangeSimpleCheckbox}
+                    value={checkboxValue}
+                  />
+                );
+              }
+
+              return <CheckboxWithCondition key={label} name="todo" />;
             })}
           </Flex>
         </Flex>
@@ -84,7 +102,9 @@ ActionRow.propTypes = {
   childrenForm: PropTypes.array,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  pathToData: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,
+  propertyName: PropTypes.string.isRequired,
   required: PropTypes.bool,
 };
 

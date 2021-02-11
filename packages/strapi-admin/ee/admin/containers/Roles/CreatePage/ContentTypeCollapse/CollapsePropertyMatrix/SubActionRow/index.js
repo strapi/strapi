@@ -44,7 +44,6 @@ const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
         const isArrayType = Array.isArray(subChildrenForm);
         const isSmall = isArrayType || index + 1 === childrenForm.length;
         const isActive = rowToOpen === value;
-        console.log({ label, isSmall });
 
         return (
           <LeftBorderTimeline key={value} isVisible={isVisible}>
