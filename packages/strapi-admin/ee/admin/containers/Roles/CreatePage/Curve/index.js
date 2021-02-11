@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 const Curve = props => (
@@ -32,4 +32,4 @@ Curve.propTypes = {
   fill: PropTypes.string,
 };
 
-export default Curve;
+export default memo(Curve);

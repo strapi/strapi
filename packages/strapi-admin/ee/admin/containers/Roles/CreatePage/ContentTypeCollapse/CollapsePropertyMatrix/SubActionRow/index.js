@@ -5,9 +5,9 @@ import styled from 'styled-components';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import CollapseLabel from '../../../CollapseLabel';
+import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
-import Curve from './Curve';
 import { RowStyle, RowWrapper } from './row';
 import { LeftBorderTimeline, TopTimeline } from './timeline';
 import Wrapper from './Wrapper';
@@ -71,7 +71,7 @@ const SubActionRow = ({ recursiveLevel, values, propertyActions }) => {
                     >
                       {value.key}
                     </Text>
-                    {value.required && <RequiredSign>*</RequiredSign>}
+                    {value.required && <RequiredSign />}
                     <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
                   </CollapseLabel>
                 </RowStyle>

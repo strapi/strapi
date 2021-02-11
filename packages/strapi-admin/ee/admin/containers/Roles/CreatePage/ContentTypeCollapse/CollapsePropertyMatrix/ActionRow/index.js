@@ -49,7 +49,7 @@ const ActionRow = ({ name, value, required, propertyActions }) => {
             // TODO
             textColor="grey"
           >
-            {required && <RequiredSign>*</RequiredSign>}
+            {required && <RequiredSign />}
             <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
           </RowLabel>
           <Flex style={{ flex: 1 }}>

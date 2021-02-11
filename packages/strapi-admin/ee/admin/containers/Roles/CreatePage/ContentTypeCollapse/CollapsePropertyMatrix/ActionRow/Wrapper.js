@@ -1,19 +1,8 @@
 /* eslint-disable indent */
 import styled from 'styled-components';
-import { Flex, Text } from '@buffetjs/core';
-
+import { Flex } from '@buffetjs/core';
+import { activeStyle } from '../../utils';
 import Chevron from '../../../Chevron';
-
-const activeStyle = theme => `
-  color: ${theme.main.colors.mediumBlue};
-  ${Text} {
-    color: ${theme.main.colors.mediumBlue};
-  }
-  ${Chevron} {
-    display: block;
-    color: ${theme.main.colors.mediumBlue};
-  }
-  `;
 
 const RowWrapper = styled(Flex)`
   height: 36px;

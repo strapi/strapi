@@ -1,18 +1,8 @@
 import styled from 'styled-components';
-import { Flex, Text } from '@buffetjs/core';
+import { Flex } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import Chevron from '../../../Chevron';
-
-const activeStyle = theme => `
-  color: ${theme.main.colors.mediumBlue};
-  ${Text} {
-    color: ${theme.main.colors.mediumBlue};
-  }
-  ${Chevron} {
-    display: block;
-    color: ${theme.main.colors.mediumBlue};
-  }
-`;
+import { activeStyle } from '../../utils';
 
 const RowStyle = styled.div`
   padding-left: ${({ theme }) => theme.main.sizes.paddings.xs};
