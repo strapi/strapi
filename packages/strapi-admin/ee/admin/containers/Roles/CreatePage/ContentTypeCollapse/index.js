@@ -33,16 +33,16 @@ const ContentTypeCollapse = ({
         onClickToggle={handleClickToggleCollapse}
       />
       {isActive &&
-        properties.map(({ label, key, values }, i) => {
+        properties.map(({ label, value, children: childrenForm }, i) => {
           return (
             <CollapsePropertyMatrix
               availableActions={availableActions}
+              childrenForm={childrenForm}
               label={label}
-              propertyName={key}
-              key={key}
+              propertyName={value}
+              key={value}
               isLast={i === properties.length - 1}
               isOdd={isOdd}
-              values={values}
             />
           );
         })}

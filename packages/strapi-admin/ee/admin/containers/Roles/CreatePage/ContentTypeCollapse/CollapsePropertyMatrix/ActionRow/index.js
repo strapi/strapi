@@ -6,21 +6,21 @@ import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
 import RowLabel from '../../../RowLabel';
-import RecursiveMatrix from '../SubActionRow';
+import SubActionRow from '../SubActionRow';
 import Wrapper from './Wrapper';
 
-const ActionRow = ({ name, value, required, propertyActions }) => {
+const ActionRow = ({ childrenForm, label, name, required, propertyActions }) => {
   const [rowToOpen, setRowToOpen] = useState(null);
 
   const isActive = rowToOpen === name;
 
   const recursiveValues = useMemo(() => {
-    if (!Array.isArray(value)) {
+    if (!Array.isArray(childrenForm)) {
       return [];
     }
 
-    return value;
-  }, [value]);
+    return childrenForm;
+  }, [childrenForm]);
 
   const isCollapsable = recursiveValues.length > 0;
 
@@ -45,7 +45,7 @@ const ActionRow = ({ name, value, required, propertyActions }) => {
             width="15rem"
             onClick={handleClick}
             isCollapsable={isCollapsable}
-            label={name}
+            label={label}
             // TODO
             textColor="grey"
           >
@@ -64,21 +64,28 @@ const ActionRow = ({ name, value, required, propertyActions }) => {
         </Flex>
       </Wrapper>
       {isActive && (
-        <RecursiveMatrix name={name} propertyActions={propertyActions} values={recursiveValues} />
+        <SubActionRow
+          // label={label}
+          // name={name}
+          propertyActions={propertyActions}
+          childrenForm={recursiveValues}
+        />
       )}
     </>
   );
 };
 
 ActionRow.defaultProps = {
+  childrenForm: [],
   required: false,
 };
 
 ActionRow.propTypes = {
+  childrenForm: PropTypes.array,
+  label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,
   required: PropTypes.bool,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
 };
 
 export default memo(ActionRow);

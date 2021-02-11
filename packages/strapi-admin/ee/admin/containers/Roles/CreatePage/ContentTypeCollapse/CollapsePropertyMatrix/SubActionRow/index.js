@@ -16,7 +16,7 @@ const SubLevelWrapper = styled.div`
   padding-bottom: 8px;
 `;
 
-const SubActionRow = ({ recursiveLevel, values, propertyActions }) => {
+const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
   const [rowToOpen, setRowToOpen] = useState(null);
   const handleClickToggleSubLevel = useCallback(name => {
     setRowToOpen(prev => {
@@ -33,20 +33,21 @@ const SubActionRow = ({ recursiveLevel, values, propertyActions }) => {
       return null;
     }
 
-    return values.find(({ value }) => value === rowToOpen);
-  }, [rowToOpen, values]);
+    return childrenForm.find(({ value }) => value === rowToOpen);
+  }, [rowToOpen, childrenForm]);
 
   return (
     <Wrapper>
       <TopTimeline />
-      {values.map((value, index) => {
-        const isVisible = index + 1 < values.length;
-        const isArrayType = Array.isArray(value.value);
-        const isSmall = isArrayType || index + 1 === values.length;
-        const isActive = rowToOpen === value.value;
+      {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
+        const isVisible = index + 1 < childrenForm.length;
+        const isArrayType = Array.isArray(subChildrenForm);
+        const isSmall = isArrayType || index + 1 === childrenForm.length;
+        const isActive = rowToOpen === value;
+        console.log({ label, isSmall });
 
         return (
-          <LeftBorderTimeline key={value.key} isVisible={isVisible}>
+          <LeftBorderTimeline key={value} isVisible={isVisible}>
             <RowWrapper isSmall={isSmall}>
               <Curve fill="#a5d5ff" />
               <Flex style={{ flex: 1 }}>
@@ -56,10 +57,10 @@ const SubActionRow = ({ recursiveLevel, values, propertyActions }) => {
                     isCollapsable={isArrayType}
                     onClick={() => {
                       if (isArrayType) {
-                        handleClickToggleSubLevel(value.value);
+                        handleClickToggleSubLevel(value);
                       }
                     }}
-                    title={value.key}
+                    title={label}
                   >
                     <Text
                       color={isActive ? 'mediumBlue' : 'grey'}
@@ -69,9 +70,9 @@ const SubActionRow = ({ recursiveLevel, values, propertyActions }) => {
                       lineHeight="20px"
                       textTransform="uppercase"
                     >
-                      {value.key}
+                      {label}
                     </Text>
-                    {value.required && <RequiredSign />}
+                    {required && <RequiredSign />}
                     <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
                   </CollapseLabel>
                 </RowStyle>
@@ -89,10 +90,10 @@ const SubActionRow = ({ recursiveLevel, values, propertyActions }) => {
             {displayedRecursiveValue && isActive && (
               <SubLevelWrapper>
                 <SubActionRow
-                  name={displayedRecursiveValue.key}
+                  // name={displayedRecursiveValue.key}
                   propertyActions={propertyActions}
                   recursiveLevel={recursiveLevel + 1}
-                  values={displayedRecursiveValue.value}
+                  childrenForm={displayedRecursiveValue.children}
                 />
               </SubLevelWrapper>
             )}
@@ -108,9 +109,9 @@ SubActionRow.defaultProps = {
 };
 
 SubActionRow.propTypes = {
+  childrenForm: PropTypes.array.isRequired,
   propertyActions: PropTypes.array.isRequired,
   recursiveLevel: PropTypes.number,
-  values: PropTypes.array.isRequired,
 };
 
 export default memo(SubActionRow);

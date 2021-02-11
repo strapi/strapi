@@ -288,27 +288,27 @@ const data = {
           properties: [
             {
               label: 'Fields',
-              key: 'fields',
-              values: [
+              value: 'fields',
+              children: [
                 {
-                  key: 'POSTAL_CODER',
+                  label: 'POST',
                   value: 'postal_coder',
                   required: true,
                 },
                 {
-                  key: 'CATEGORIES',
+                  label: 'categories',
                   value: 'categories',
                 },
                 {
-                  key: 'COVER',
+                  label: 'cover',
                   value: 'cover',
                 },
                 {
-                  key: 'IMAGES',
+                  label: 'images',
                   value: 'images',
                 },
                 {
-                  key: 'CITY',
+                  label: 'city',
                   value: 'city',
                 },
               ],
@@ -319,72 +319,74 @@ const data = {
           properties: [
             {
               label: 'Fields',
-              key: 'fields',
-              values: [
+              value: 'fields',
+              children: [
                 {
-                  key: 'f1',
+                  label: 'f1',
                   value: 'f1',
                   required: true,
                 },
                 {
-                  key: 'f2',
+                  label: 'f2',
                   value: 'f2',
                 },
                 {
                   // nested compo
-                  key: 'services',
-                  value: [
+                  label: 'services',
+                  value: 'services',
+                  children: [
                     {
-                      key: 'name',
+                      label: 'name',
                       value: 'name',
                     },
                     {
-                      key: 'media',
+                      label: 'media',
                       value: 'media',
                       required: true,
                     },
                     {
-                      key: 'closing',
-
-                      value: [
+                      label: 'closing',
+                      value: 'closing',
+                      children: [
                         {
-                          key: 'name',
-                          value: [{ key: 'test', value: 'test' }],
+                          label: 'name',
+                          value: 'name',
+                          children: [{ label: 'test', value: 'test' }],
                         },
                       ],
                     },
                   ],
                 },
                 {
-                  key: 'dz',
+                  label: 'dz',
                   value: 'dz',
                 },
                 {
-                  key: 'relation',
+                  label: 'relation',
                   value: 'relation',
                 },
               ],
             },
             {
               label: 'Locales',
-              key: 'locales',
-              values: [
+              value: 'locales',
+              children: [
                 {
-                  key: 'French',
+                  label: 'French',
                   value: 'fr',
                 },
                 {
-                  key: 'English',
+                  label: 'English',
                   required: true,
-                  value: [{ key: 'EN', value: 'en' }],
+                  value: 'en',
                 },
               ],
             },
           ],
         },
-        test: {
-          properties: [],
-        },
+        // test: {
+        //   properties: [],
+        // },
       },
       actions: [
         {
@@ -396,13 +398,13 @@ const data = {
         {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
-          subjects: ['restaurant', 'address'],
+          subjects: ['restaurant', 'addresse'],
           applyToProperties: ['fields', 'locales'],
         },
         {
           label: 'Update',
           actionId: 'content-manager.explorer.update',
-          subjects: ['address', 'restaurant'],
+          subjects: ['addresse', 'restaurant'],
           applyToProperties: ['fields'],
         },
         {

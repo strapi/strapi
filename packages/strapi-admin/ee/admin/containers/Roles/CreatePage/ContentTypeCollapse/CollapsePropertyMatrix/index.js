@@ -8,11 +8,11 @@ import Wrapper from './Wrapper';
 
 const CollapsePropertyMatrix = ({
   availableActions,
+  childrenForm,
   isLast,
   isOdd,
   label,
   propertyName,
-  values,
 }) => {
   const propertyActions = useMemo(
     () => generateHeadersFromActions(availableActions, propertyName),
@@ -23,11 +23,12 @@ const CollapsePropertyMatrix = ({
     <Wrapper withPadding={isOdd} isLast={isLast}>
       <Header label={label} headers={propertyActions} />
       <Padded left size="md">
-        {values.map(({ key, value, required }) => (
+        {childrenForm.map(({ children: childrenForm, label, value, required }) => (
           <ActionRow
-            key={key}
-            name={key}
-            value={value}
+            childrenForm={childrenForm}
+            key={value}
+            label={label}
+            name={value}
             required={required}
             propertyActions={propertyActions}
           />
@@ -38,12 +39,12 @@ const CollapsePropertyMatrix = ({
 };
 
 CollapsePropertyMatrix.propTypes = {
+  childrenForm: PropTypes.array.isRequired,
   availableActions: PropTypes.array.isRequired,
   isOdd: PropTypes.bool.isRequired,
   isLast: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   propertyName: PropTypes.string.isRequired,
-  values: PropTypes.array.isRequired,
 };
 
 export default CollapsePropertyMatrix;
