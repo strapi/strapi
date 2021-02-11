@@ -19,7 +19,6 @@ const CollapsePropertyMatrix = ({
     () => generateHeadersFromActions(availableActions, propertyName),
     [availableActions, propertyName]
   );
-  console.log({ propertyName });
 
   return (
     <Wrapper withPadding={isOdd} isLast={isLast}>

@@ -398,24 +398,24 @@ const data = {
         {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
-          subjects: ['restaurant', 'address'],
+          subjects: ['restauranet', 'address'],
           applyToProperties: ['fields', 'locales'],
         },
         {
           label: 'Update',
           actionId: 'content-manager.explorer.update',
-          subjects: ['address', 'restaurant'],
+          subjects: ['address', 'erestaurant'],
           applyToProperties: ['fields'],
         },
         {
           label: 'Delete',
           actionId: 'content-manager.explorer.delete',
-          subjects: ['restaurant', 'address'],
+          subjects: ['restaurante', 'address'],
         },
         {
           label: 'Publish',
           actionId: 'content-manager.explorer.publish',
-          subjects: ['restaurant'],
+          subjects: ['restaurante'],
         },
       ],
     },

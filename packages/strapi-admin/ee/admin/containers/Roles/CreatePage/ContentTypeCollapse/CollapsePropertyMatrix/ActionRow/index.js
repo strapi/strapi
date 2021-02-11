@@ -83,10 +83,12 @@ const ActionRow = ({
       </Wrapper>
       {isActive && (
         <SubActionRow
-          // label={label}
-          // name={name}
-          propertyActions={propertyActions}
           childrenForm={recursiveValues}
+          parentName={name}
+          pathToDataFromActionRow={pathToData}
+          propertyName={propertyName}
+          propertyActions={propertyActions}
+          recursiveLevel={0}
         />
       )}
     </>
