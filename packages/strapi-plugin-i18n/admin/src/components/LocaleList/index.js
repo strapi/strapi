@@ -10,20 +10,21 @@ import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
 import ModalDelete from '../ModalDelete';
 
-const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
+const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal }) => {
   const [localeToDelete, setLocaleToDelete] = useState();
   const [localeToEdit, setLocaleToEdit] = useState();
   const { locales, isLoading, refetch } = useLocales();
   const { formatMessage } = useIntl();
 
+  // Delete actions
   const closeModalToDelete = () => setLocaleToDelete(undefined);
   const handleDeleteLocale = canDeleteLocale ? setLocaleToDelete : undefined;
 
+  // Edit actions
   const closeModalToEdit = () => {
     refetch();
     setLocaleToEdit(undefined);
   };
-
   const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
 
   if (isLoading || (locales && locales.length > 0)) {
@@ -62,11 +63,11 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
         description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
       />
 
-      {canCreateLocale && (
+      {onToggleCreateModal && (
         <ListButton>
           <Button
             label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
-            onClick={() => undefined}
+            onClick={() => onToggleCreateModal(true)}
             color="primary"
             type="button"
             icon={<Plus fill="#007eff" width="11px" height="11px" />}
@@ -77,10 +78,14 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
   );
 };
 
+LocaleList.defaultProps = {
+  onToggleCreateModal: undefined,
+};
+
 LocaleList.propTypes = {
   canUpdateLocale: PropTypes.bool.isRequired,
   canDeleteLocale: PropTypes.bool.isRequired,
-  canCreateLocale: PropTypes.bool.isRequired,
+  onToggleCreateModal: PropTypes.func,
 };
 
 export default LocaleList;

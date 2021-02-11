@@ -491,4 +491,32 @@ describe('i18n settings page', () => {
       expect(screen.queryAllByLabelText(`Settings.list.actions.delete`).length).toBe(0);
     });
   });
+
+  describe('create', () => {
+    // TODO: add the select verifications
+    it('shows the default create modal layout', async () => {
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      fireEvent.click(screen.getByText('Settings.list.actions.add'));
+
+      expect(screen.getByText(`Settings.locales.modal.create.confirmation`)).toBeVisible();
+    });
+
+    it('closes the create modal when clicking on cancel', async () => {
+      render(
+        <ThemeProvider theme={themes}>
+          <LocaleSettingsPage />
+        </ThemeProvider>
+      );
+
+      fireEvent.click(screen.getByText('Settings.list.actions.add'));
+      fireEvent.click(screen.getByText('app.components.Button.cancel'));
+
+      expect(screen.queryByText(`Settings.locales.modal.create.confirmation`)).toBeFalsy();
+    });
+  });
 });
