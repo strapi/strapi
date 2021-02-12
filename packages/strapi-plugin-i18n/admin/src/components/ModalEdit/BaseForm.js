@@ -47,7 +47,7 @@ const BaseForm = ({ options, defaultOption }) => {
           }}
           translatedErrors={{
             max: formatMessage({
-              id: getTrad('Settings.locales.modal.edit.locales.displayName.error'),
+              id: getTrad('Settings.locales.modal.locales.displayName.error'),
             }),
           }}
         />

@@ -16,11 +16,12 @@ const LocaleSettingsPage = ({
 }) => {
   const { formatMessage } = useIntl();
   const [isOpenedCreateModal, setIsOpenedCreateModal] = useState(false);
+  const handleToggleModalCreate = () => setIsOpenedCreateModal(prev => !prev);
 
   const actions = [
     {
       label: formatMessage({ id: getTrad('Settings.list.actions.add') }),
-      onClick: () => setIsOpenedCreateModal(true),
+      onClick: handleToggleModalCreate,
       color: 'primary',
       type: 'button',
       icon: true,
@@ -52,7 +53,7 @@ const LocaleSettingsPage = ({
         />
       ) : null}
 
-      <ModalCreate isOpened={isOpenedCreateModal} onClose={() => setIsOpenedCreateModal(false)} />
+      <ModalCreate isOpened={isOpenedCreateModal} onClose={handleToggleModalCreate} />
     </>
   );
 };

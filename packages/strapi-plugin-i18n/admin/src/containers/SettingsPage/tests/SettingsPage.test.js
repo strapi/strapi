@@ -179,9 +179,7 @@ describe('i18n settings page', () => {
       await waitFor(() =>
         expect(screen.getByText('Settings.locales.modal.edit.confirmation')).toBeDisabled()
       );
-      expect(
-        screen.getByText(`Settings.locales.modal.edit.locales.displayName.error`)
-      ).toBeVisible();
+      expect(screen.getByText(`Settings.locales.modal.locales.displayName.error`)).toBeVisible();
     });
 
     it('closes the edit modal when clicking on cancel', async () => {

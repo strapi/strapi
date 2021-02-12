@@ -16,7 +16,7 @@ import {
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
-import { object, string } from 'yup';
+import localeFormSchema from '../../schemas';
 import { getTrad } from '../../utils';
 
 const ModalCreate = ({ onClose, isOpened }) => {
@@ -33,9 +33,7 @@ const ModalCreate = ({ onClose, isOpened }) => {
       <Formik
         initialValues={{ displayName: '' }}
         onSubmit={() => null}
-        validationSchema={object().shape({
-          displayName: string().max(50, 'Settings.locales.modal.create.locales.displayName.error'),
-        })}
+        validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
           <form onSubmit={handleSubmit}>

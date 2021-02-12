@@ -16,7 +16,7 @@ import {
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
-import { object, string } from 'yup';
+import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
 import BaseForm from './BaseForm';
@@ -52,9 +52,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
       <Formik
         initialValues={{ displayName: localeToEdit ? localeToEdit.name : '' }}
         onSubmit={handleSubmit}
-        validationSchema={object().shape({
-          displayName: string().max(50, 'Settings.locales.modal.edit.locales.displayName.error'),
-        })}
+        validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
           <form onSubmit={handleSubmit}>
