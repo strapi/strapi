@@ -5,10 +5,11 @@ import { roleTabsLabel as TAB_LABELS } from '../../../../../../admin/src/utils';
 import { PermissionsDataManagerProvider } from '../contexts/PermissionsDataManagerContext';
 import ContentTypes from '../ContentTypes';
 import layout from '../temp/fakeData';
+import init from './init';
 import reducer, { initialState } from './reducer';
 
 const Permissions = forwardRef(({ layout }, ref) => {
-  const [{ modifiedData }, dispatch] = useReducer(reducer, initialState);
+  const [{ modifiedData }, dispatch] = useReducer(reducer, initialState, () => init(layout));
 
   useImperativeHandle(ref, () => {
     return {

@@ -388,11 +388,11 @@ const data = {
             },
           ],
         },
-        {
-          uid: 'test',
-          label: 'test',
-          properties: [],
-        },
+        // {
+        //   uid: 'test',
+        //   label: 'test',
+        //   properties: [],
+        // },
       ],
       actions: [
         {
@@ -417,7 +417,7 @@ const data = {
           label: 'Delete',
           actionId: 'content-manager.explorer.delete',
           subjects: ['restaurant', 'address'],
-          applyToProperties: ['locales'],
+          applyToProperties: [],
         },
         {
           label: 'Publish',
