@@ -5,18 +5,20 @@ import CollapseLabel from '../CollapseLabel';
 import Wrapper from './Wrapper';
 
 const RowLabel = ({
-  value,
-  someChecked,
+  children,
   isCollapsable,
   label,
-  children,
+  onChange,
   onClick,
+  checkboxName,
+  someChecked,
   textColor,
+  value,
   width,
 }) => {
   return (
     <Wrapper width={width}>
-      <Checkbox name="todo" someChecked={someChecked} value={value} />
+      <Checkbox name={checkboxName} onChange={onChange} someChecked={someChecked} value={value} />
       <CollapseLabel
         title={label}
         alignItems="center"
@@ -41,6 +43,8 @@ const RowLabel = ({
 
 RowLabel.defaultProps = {
   children: null,
+  checkboxName: '',
+  onChange: () => {},
   value: false,
   someChecked: false,
   isCollapsable: false,
@@ -49,13 +53,15 @@ RowLabel.defaultProps = {
 };
 
 RowLabel.propTypes = {
+  checkboxName: PropTypes.string,
   children: PropTypes.node,
-  value: PropTypes.bool,
-  someChecked: PropTypes.bool,
-  isCollapsable: PropTypes.bool,
   label: PropTypes.string.isRequired,
+  isCollapsable: PropTypes.bool,
+  onChange: PropTypes.func,
   onClick: PropTypes.func.isRequired,
+  someChecked: PropTypes.bool,
   textColor: PropTypes.string,
+  value: PropTypes.bool,
   width: PropTypes.string,
 };
 

@@ -20,6 +20,7 @@ const Permissions = forwardRef(({ layout }, ref) => {
       },
     };
   });
+  console.log({ modifiedData });
 
   const handleChangeSimpleCheckbox = useCallback(({ target: { name, value } }) => {
     dispatch({
@@ -29,9 +30,21 @@ const Permissions = forwardRef(({ layout }, ref) => {
     });
   }, []);
 
+  const handleChangeParentCheckbox = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
+      keys: name,
+      value,
+    });
+  }, []);
+
   return (
     <PermissionsDataManagerProvider
-      value={{ modifiedData, onChangeSimpleCheckbox: handleChangeSimpleCheckbox }}
+      value={{
+        modifiedData,
+        onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
+        onChangeParentCheckbox: handleChangeParentCheckbox,
+      }}
     >
       <Tabs tabsLabel={TAB_LABELS}>
         <ContentTypes layout={layout.sections.collectionTypes} kind="collectionTypes" />

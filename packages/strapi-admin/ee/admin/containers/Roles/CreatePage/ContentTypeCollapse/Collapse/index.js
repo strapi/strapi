@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex, Padded } from '@buffetjs/core';
 import { usePermissionsDataManager } from '../../contexts/PermissionsDataManagerContext';
@@ -12,7 +12,11 @@ import RowLabel from '../../RowLabel';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 
 const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pathToData }) => {
-  const { modifiedData } = usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
 
   // This corresponds to the data related to the CT left checkboxe
   // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true} } } } }
@@ -31,9 +35,11 @@ const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pat
       <Flex style={{ flex: 1 }}>
         <Padded left size="sm" />
         <RowLabel
-          label={name}
-          onClick={onClickToggle}
           isCollapsable
+          label={name}
+          checkboxName={pathToData}
+          onChange={onChangeParentCheckbox}
+          onClick={onClickToggle}
           someChecked={hasSomeActionsSelected}
           value={hasAllActionsSelected}
         >
@@ -41,12 +47,30 @@ const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pat
         </RowLabel>
 
         <Flex style={{ flex: 1 }}>
-          {availableActions.map(({ actionId, isDisplayed }) => {
+          {availableActions.map(({ actionId, isDisplayed, applyToProperties }) => {
             if (!isDisplayed) {
               return <HiddenAction key={actionId} />;
             }
 
-            const checkboxName = [...pathToData.split('..'), actionId];
+            // TODO maybe this is not needed
+            const baseCheckboxName = [...pathToData.split('..'), actionId];
+            const checkboxName = isEmpty(applyToProperties)
+              ? [...baseCheckboxName, 'enabled']
+              : baseCheckboxName;
+
+            if (isEmpty(applyToProperties)) {
+              const value = get(modifiedData, checkboxName, false);
+
+              return (
+                <CheckboxWithCondition
+                  key={actionId}
+                  name={checkboxName.join('..')}
+                  onChange={onChangeSimpleCheckbox}
+                  value={value}
+                />
+              );
+            }
+
             const mainData = get(modifiedData, checkboxName, null);
 
             const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(mainData);
@@ -55,6 +79,7 @@ const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pat
               <CheckboxWithCondition
                 key={actionId}
                 name={checkboxName.join('..')}
+                onChange={onChangeParentCheckbox}
                 someChecked={hasSomeActionsSelected}
                 value={hasAllActionsSelected}
               />

@@ -404,13 +404,14 @@ const data = {
         {
           label: 'Update',
           actionId: 'content-manager.explorer.update',
-          subjects: ['address', 'erestaurant'],
+          subjects: ['address', 'restaurant'],
           applyToProperties: ['fields'],
         },
         {
           label: 'Delete',
           actionId: 'content-manager.explorer.delete',
-          subjects: ['restaurante', 'address'],
+          subjects: ['restaurant', 'address'],
+          applyToProperties: ['locales'],
         },
         {
           label: 'Publish',
