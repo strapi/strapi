@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { capitalize, prop } = require('lodash/fp');
+const { capitalize, prop, pick } = require('lodash/fp');
 
 const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
   section: 'settings',
@@ -24,15 +24,44 @@ module.exports = () => {
 
   // create the localization of the object & link it to the other localizations it has
 
-  Object.values(strapi.contentTypes).forEach(contentType => {
-    if (prop('pluginOptions.i18n.enabled')(contentType) === true) {
-      console.log('i18N is enabled for ', contentType.modelName);
+  Object.values(strapi.models).forEach(model => {
+    if (isLocalized(model)) {
+      console.log('i18N is enabled for ', model.modelName);
 
-      const model = strapi.getModel(contentType.uid);
+      _.set(model, 'lifecycles.beforeCreate', async data => {
+        if (!data.locale) {
+          data.locale = await getDefaultLocale();
+        }
+      });
 
-      _.set(model, 'lifecycles.beforeCreate', async () => {});
+      _.set(model, 'lifecycles.afterCreate', async entry => {
+        // if new entry doesn't have localizations set then create it
 
-      _.set(model, 'lifecycles.afterCreate', async () => {});
+        if (entry.localizations === null) {
+          const localizations = [{ locale: entry.locale, id: entry.id }];
+          await strapi.query(model.uid).update({ id: entry.id }, { localizations });
+
+          Object.assign(entry, { localizations });
+        }
+      });
+
+      _.set(model, 'lifecycles.afterUpdate', async entry => {
+        const toUpdate = pick(getNonLocalizedFields(model), entry);
+
+        if (Array.isArray(entry.localizations)) {
+          await Promise.all(
+            entry.localizations.map(({ id }) => {
+              if (id === entry.id) return Promise.resolve();
+              return strapi.query(model.uid).update(
+                {
+                  id,
+                },
+                toUpdate
+              );
+            })
+          );
+        }
+      });
 
       _.set(model, 'lifecycles.beforeFind', async () => {});
     }
@@ -40,9 +69,22 @@ module.exports = () => {
 
   // wrap content manager routes
 
-  strapi.plugin('content-manager').config.routes.forEach(() => {
-    // add a policy to the route we want to extend
-  });
+  
 
   // or overwrite controllers
+};
+
+const isLocalized = model => {
+  return prop('pluginOptions.i18n.localized', model) === true;
+};
+
+const getNonLocalizedFields = model => {
+  Object.keys(model.attributes).filter(attributeName => {
+    const attribute = model.attributes[attributeName];
+    return prop('pluginOptions.i18n.localized', attribute) !== true && !!attribute.type; // exclude relations
+  });
+};
+
+const getDefaultLocale = async () => {
+  return 'en-US';
 };

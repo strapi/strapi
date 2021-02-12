@@ -12,7 +12,7 @@
   },
   "pluginOptions": {
     "i18n": {
-      "enabled": true
+      "localized": true
     }
   },
   "attributes": {
