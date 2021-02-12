@@ -4,8 +4,19 @@ import React from 'react';
 import { request, useUserPermissions } from 'strapi-helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import LocaleSettingsPage from '..';
 import themes from '../../../../../../strapi-admin/admin/src/themes';
+
+const TestWrapper = ({ children }) => {
+  const queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={themes}>{children}</ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 // TODO: we should not be forced to mock this module
 // but it bugs somehow when run with jest
@@ -87,9 +98,9 @@ describe('i18n settings page', () => {
   describe('initial state', () => {
     it('shows default EN locale with edit button but no delete button', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -103,9 +114,9 @@ describe('i18n settings page', () => {
 
     it('shows FR locale with edit button and delete button', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('French').closest('tr'));
@@ -120,9 +131,9 @@ describe('i18n settings page', () => {
   describe('delete', () => {
     it('removes the locale when clicking the confirmation button', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('French').closest('tr'));
@@ -143,9 +154,9 @@ describe('i18n settings page', () => {
   describe('edit', () => {
     it('shows the default edit modal layout with disabled value', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -159,9 +170,9 @@ describe('i18n settings page', () => {
 
     it('shows a warning and disabled the confirmation button when display name length is over 50', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -184,9 +195,9 @@ describe('i18n settings page', () => {
 
     it('closes the edit modal when clicking on cancel', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -221,9 +232,9 @@ describe('i18n settings page', () => {
       );
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -268,9 +279,9 @@ describe('i18n settings page', () => {
       );
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -320,9 +331,9 @@ describe('i18n settings page', () => {
       );
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       const row = await waitFor(() => screen.getByText('English').closest('tr'));
@@ -359,9 +370,9 @@ describe('i18n settings page', () => {
       );
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       await waitFor(() =>
@@ -378,9 +389,9 @@ describe('i18n settings page', () => {
       request.mockImplementation(() => Promise.reject(error));
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => expect(request).toBeCalled());
@@ -391,9 +402,9 @@ describe('i18n settings page', () => {
       request.mockImplementation(() => Promise.resolve([]));
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => expect(screen.getByTestId('empty-list')).toBeVisible());
@@ -408,9 +419,9 @@ describe('i18n settings page', () => {
       }));
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       expect(screen.getByText(`Settings.permissions.loading`));
@@ -425,9 +436,9 @@ describe('i18n settings page', () => {
       }));
 
       const { container } = render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       expect(container).toMatchSnapshot();
@@ -443,9 +454,9 @@ describe('i18n settings page', () => {
       }));
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       await waitFor(() =>
@@ -462,9 +473,9 @@ describe('i18n settings page', () => {
       }));
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => expect(screen.getByText('English')).toBeVisible());
@@ -480,9 +491,9 @@ describe('i18n settings page', () => {
       }));
 
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => expect(screen.getByText('English')).toBeVisible());
@@ -494,9 +505,9 @@ describe('i18n settings page', () => {
     // TODO: add the select verifications
     it('shows the default create modal layout', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       fireEvent.click(screen.getByText('Settings.list.actions.add'));
@@ -506,9 +517,9 @@ describe('i18n settings page', () => {
 
     it('closes the create modal when clicking on cancel', async () => {
       render(
-        <ThemeProvider theme={themes}>
+        <TestWrapper>
           <LocaleSettingsPage />
-        </ThemeProvider>
+        </TestWrapper>
       );
 
       fireEvent.click(screen.getByText('Settings.list.actions.add'));
