@@ -28,7 +28,7 @@ const ModalCreate = ({ onClose, isOpened }) => {
               tabsAriaLabel={formatMessage({
                 id: getTrad('Settings.locales.modal.create.tab.label'),
               })}
-              tabsId="i18n-settings-tabs"
+              tabsId="i18n-settings-tabs-create"
             >
               <TabPanel>Base form</TabPanel>
               <TabPanel>advanced</TabPanel>
