@@ -49,6 +49,7 @@ const formatContentType = contentType => {
       name: getformattedName(contentType),
       description: _.get(info, 'description', ''),
       draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
+      pluginOptions: contentType.pluginOptions,
       connection,
       kind: kind || 'collectionType',
       collectionName,
