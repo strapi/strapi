@@ -32,7 +32,7 @@ const ActionRow = ({
 
   const isActive = rowToOpen === name;
 
-  const recursiveValues = useMemo(() => {
+  const recursiveChildren = useMemo(() => {
     if (!Array.isArray(childrenForm)) {
       return [];
     }
@@ -40,7 +40,7 @@ const ActionRow = ({
     return childrenForm;
   }, [childrenForm]);
 
-  const isCollapsable = recursiveValues.length > 0;
+  const isCollapsable = recursiveChildren.length > 0;
 
   const handleClick = useCallback(() => {
     if (isCollapsable) {
@@ -119,7 +119,7 @@ const ActionRow = ({
       </Wrapper>
       {isActive && (
         <SubActionRow
-          childrenForm={recursiveValues}
+          childrenForm={recursiveChildren}
           parentName={name}
           pathToDataFromActionRow={pathToData}
           propertyName={propertyName}

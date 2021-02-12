@@ -19,8 +19,11 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
   } = usePermissionsDataManager();
 
   // This corresponds to the data related to the CT left checkboxe
-  // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true} } } } }
+  // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true}, update: {}, ... } } } }
   const mainData = get(modifiedData, pathToData.split('..'), {});
+  // The utils we are using: getCheckboxState, retrieves if all the boolean values of an object in order
+  // to return the state of checkbox. Since the conditions are not related to the property we need to remove the key from the object.
+  // TODO: scope the fields, locales in a properties key to simplify the code
   const dataWithoutCondition = useMemo(() => {
     return Object.keys(mainData).reduce((acc, current) => {
       acc[current] = removeConditionKeyFromData(mainData[current]);

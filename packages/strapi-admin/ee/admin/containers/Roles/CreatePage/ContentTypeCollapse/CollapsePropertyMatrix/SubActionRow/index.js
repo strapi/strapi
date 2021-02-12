@@ -33,6 +33,7 @@ const SubActionRow = ({
     onChangeSimpleCheckbox,
   } = usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = useState(null);
+
   const handleClickToggleSubLevel = useCallback(name => {
     setRowToOpen(prev => {
       if (prev === name) {
@@ -43,7 +44,7 @@ const SubActionRow = ({
     });
   }, []);
 
-  const displayedRecursiveValue = useMemo(() => {
+  const displayedRecursiveChildren = useMemo(() => {
     if (!rowToOpen) {
       return null;
     }
@@ -95,7 +96,10 @@ const SubActionRow = ({
                     if (!isActionRelatedToCurrentProperty) {
                       return <HiddenAction key={actionId} />;
                     }
-
+                    /*
+                     * Usually we use a 'dot' in order to know the key path of an object for which we want to change the value.
+                     * Since an action and a subject are both separated by '.' or '::' we chose to use the '..' separators
+                     */
                     const checkboxName = [
                       ...pathToDataFromActionRow.split('..'),
                       actionId,
@@ -104,7 +108,7 @@ const SubActionRow = ({
                       value,
                     ];
 
-                    const checkboxValue = get(modifiedData, checkboxName, 'test');
+                    const checkboxValue = get(modifiedData, checkboxName, false);
 
                     if (!subChildrenForm) {
                       return (
@@ -134,7 +138,7 @@ const SubActionRow = ({
                 </Flex>
               </Flex>
             </RowWrapper>
-            {displayedRecursiveValue && isActive && (
+            {displayedRecursiveChildren && isActive && (
               <SubLevelWrapper>
                 <SubActionRow
                   parentName={`${parentName}..${value}`}
@@ -142,7 +146,7 @@ const SubActionRow = ({
                   propertyActions={propertyActions}
                   propertyName={propertyName}
                   recursiveLevel={recursiveLevel + 1}
-                  childrenForm={displayedRecursiveValue.children}
+                  childrenForm={displayedRecursiveChildren.children}
                 />
               </SubLevelWrapper>
             )}

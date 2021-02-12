@@ -1,6 +1,6 @@
 import createDefaultCTFormFromLayout, {
-  createConditionsForm,
-  createDefaultFormForProperty,
+  createDefaultConditionsForm,
+  createDefaultPropertyForms,
   createDefaultPropertiesForm,
   findLayouts,
 } from '../createDefaultCTFormFromLayout';
@@ -19,18 +19,18 @@ const conditions = [
 ];
 
 describe('ADMIN | COMPONENTS | Permissions | utils', () => {
-  describe('createConditionGorm', () => {
+  describe('createConditionForm', () => {
     it('should return an object with all the values set to false', () => {
       const expected = {
         'admin::is-creator': false,
         'admin::has-same-role-as-creator': false,
       };
 
-      expect(createConditionsForm(conditions)).toEqual(expected);
+      expect(createDefaultConditionsForm(conditions)).toEqual(expected);
     });
   });
 
-  describe('createDefaultFormForProperty,', () => {
+  describe('createDefaultPropertyForms,', () => {
     it('should return an object with keys corresponding to the property value and all the values set to false', () => {
       const data = {
         children: [
@@ -47,7 +47,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         bar: false,
       };
 
-      expect(createDefaultFormForProperty(data)).toEqual(expected);
+      expect(createDefaultPropertyForms(data)).toEqual(expected);
     });
 
     it('should create the default form for a complex object', () => {
@@ -84,7 +84,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
       };
 
-      expect(createDefaultFormForProperty(data)).toEqual(expected);
+      expect(createDefaultPropertyForms(data)).toEqual(expected);
     });
   });
 

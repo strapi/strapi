@@ -1,6 +1,11 @@
 import { get } from 'lodash';
 import { getCheckboxState } from '../../../../utils';
 
+/**
+ * Returns a filtered array of actionId
+ * @param {array<object>} propertyActions
+ * @returns {string} actionId
+ */
 const getActionIdsFromPropertyActions = propertyActions => {
   const actionIds = propertyActions.reduce((acc, current) => {
     if (current.isActionRelatedToCurrentProperty) {
@@ -13,6 +18,16 @@ const getActionIdsFromPropertyActions = propertyActions => {
   return actionIds;
 };
 
+/**
+ *
+ * Returns the state of the left checkbox of a ActionRow main checkbox
+ * @param {array} propertyActions
+ * @param {object} modifiedData
+ * @param {string} pathToContentType
+ * @param {string} propertyToCheck
+ * @param {string} targetKey
+ * @returns {object}
+ */
 const getRowLabelCheckboxeState = (
   propertyActions,
   modifiedData,

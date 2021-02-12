@@ -11,6 +11,8 @@ const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      // This action is called when a checkbox in the <GlobalActions />
+      // changes
       case 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX': {
         const { collectionTypeKind, actionId, value } = action;
         const pathToData = ['modifiedData', collectionTypeKind];
@@ -40,6 +42,9 @@ const reducer = (state, action) =>
         const objToUpdate = get(state, pathToModifiedDataCollectionType, {});
 
         Object.keys(objToUpdate).forEach(actionId => {
+          // When a ct has multiple properties (ex: locales, field)
+          // We need to make sure that we add any new property to the modifiedData
+          // object.
           if (has(objToUpdate[actionId], propertyName)) {
             const objValue = get(objToUpdate, [actionId, propertyName, rowName]);
             const pathToDataToSet = [
