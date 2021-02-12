@@ -26,6 +26,7 @@ const ActionRow = ({
   const {
     modifiedData,
     onChangeCollectionTypeLeftActionRowCheckbox,
+    onChangeParentCheckbox,
     onChangeSimpleCheckbox,
   } = usePermissionsDataManager();
 
@@ -107,7 +108,8 @@ const ActionRow = ({
               return (
                 <CheckboxWithCondition
                   key={label}
-                  name="todo"
+                  name={checkboxName.join('..')}
+                  onChange={onChangeParentCheckbox}
                   value={hasAllActionsSelected}
                   someChecked={hasSomeActionsSelected}
                 />

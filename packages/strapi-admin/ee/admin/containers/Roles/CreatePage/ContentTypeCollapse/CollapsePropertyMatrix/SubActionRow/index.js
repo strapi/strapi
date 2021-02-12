@@ -27,7 +27,11 @@ const SubActionRow = ({
   parentName,
   propertyName,
 }) => {
-  const { modifiedData, onChangeSimpleCheckbox } = usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = useState(null);
   const handleClickToggleSubLevel = useCallback(name => {
     setRowToOpen(prev => {
@@ -120,7 +124,8 @@ const SubActionRow = ({
                     return (
                       <CheckboxWithCondition
                         key={label}
-                        name="todo"
+                        name={checkboxName.join('..')}
+                        onChange={onChangeParentCheckbox}
                         value={hasAllActionsSelected}
                         someChecked={hasSomeActionsSelected}
                       />
