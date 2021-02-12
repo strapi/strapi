@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { BaselineAlignment } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
-
 import { getTrad } from '../../utils';
 import LocaleList from '../../components/LocaleList';
+import ModalCreate from '../../components/ModalCreate';
 
 const LocaleSettingsPage = ({
   canReadLocale,
@@ -15,11 +15,16 @@ const LocaleSettingsPage = ({
   canUpdateLocale,
 }) => {
   const { formatMessage } = useIntl();
+  const [isOpenedCreateModal, setIsOpenedCreateModal] = useState(false);
+
+  const handleToggleModalCreate = canCreateLocale
+    ? () => setIsOpenedCreateModal(s => !s)
+    : undefined;
 
   const actions = [
     {
       label: formatMessage({ id: getTrad('Settings.list.actions.add') }),
-      onClick: () => console.log('add locale'),
+      onClick: handleToggleModalCreate,
       color: 'primary',
       type: 'button',
       icon: true,
@@ -47,9 +52,11 @@ const LocaleSettingsPage = ({
         <LocaleList
           canUpdateLocale={canUpdateLocale}
           canDeleteLocale={canDeleteLocale}
-          canCreateLocale={canCreateLocale}
+          onToggleCreateModal={handleToggleModalCreate}
         />
       ) : null}
+
+      <ModalCreate isOpened={isOpenedCreateModal} onClose={handleToggleModalCreate} />
     </>
   );
 };
