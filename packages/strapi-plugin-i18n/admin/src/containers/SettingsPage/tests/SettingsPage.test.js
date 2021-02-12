@@ -383,21 +383,6 @@ describe('i18n settings page', () => {
       );
     });
 
-    it('shows doesnt show an error when the request is aborted because of unmounting', async () => {
-      const error = new Error();
-      error.name = 'AbortError';
-      request.mockImplementation(() => Promise.reject(error));
-
-      render(
-        <TestWrapper>
-          <LocaleSettingsPage />
-        </TestWrapper>
-      );
-
-      await waitFor(() => expect(request).toBeCalled());
-      expect(strapi.notification.toggle).not.toBeCalled();
-    });
-
     it('shows an empty state when the array of locale is empty', async () => {
       request.mockImplementation(() => Promise.resolve([]));
 
