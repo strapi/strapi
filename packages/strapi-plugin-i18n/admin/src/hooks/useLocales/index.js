@@ -9,6 +9,8 @@ const fetchLocalesList = async () => {
 
     return data;
   } catch (e) {
+    if (e.name === 'AbortError') return null;
+
     strapi.notification.toggle({
       type: 'warning',
       message: { id: 'notification.error' },
