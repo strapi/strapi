@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { EmptyState, ListButton } from 'strapi-helper-plugin';
-import { List, Button } from '@buffetjs/custom';
+import { List } from '@buffetjs/custom';
+import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import PropTypes from 'prop-types';
 import useLocales from '../../hooks/useLocales';
@@ -67,7 +68,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal }) =
         <ListButton>
           <Button
             label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
-            onClick={() => onToggleCreateModal(true)}
+            onClick={onToggleCreateModal}
             color="primary"
             type="button"
             icon={<Plus fill="#007eff" width="11px" height="11px" />}
