@@ -20,7 +20,21 @@ const Permissions = forwardRef(({ layout }, ref) => {
       },
     };
   });
-  console.log({ modifiedData });
+
+  const handleChangeCollectionTypeLeftActionRowCheckbox = (
+    pathToCollectionType,
+    propertyName,
+    rowName,
+    value
+  ) => {
+    dispatch({
+      type: 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX',
+      pathToCollectionType,
+      propertyName,
+      rowName,
+      value,
+    });
+  };
 
   const handleChangeSimpleCheckbox = useCallback(({ target: { name, value } }) => {
     dispatch({
@@ -44,6 +58,7 @@ const Permissions = forwardRef(({ layout }, ref) => {
         modifiedData,
         onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
         onChangeParentCheckbox: handleChangeParentCheckbox,
+        onChangeCollectionTypeLeftActionRowCheckbox: handleChangeCollectionTypeLeftActionRowCheckbox,
       }}
     >
       <Tabs tabsLabel={TAB_LABELS}>

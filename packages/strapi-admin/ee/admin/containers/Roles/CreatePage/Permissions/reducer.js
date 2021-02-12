@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { isObject, get, set } from 'lodash';
+import { has, isObject, get, set } from 'lodash';
 
 const initialState = {
   initialData: {},
@@ -111,35 +111,65 @@ const initialState = {
   },
 };
 
+const updateValues = (obj, valueToSet) => {
+  return Object.keys(obj).reduce((acc, current) => {
+    const currentValue = obj[current];
+
+    if (current === 'conditions') {
+      acc[current] = currentValue;
+
+      return acc;
+    }
+
+    if (isObject(currentValue)) {
+      return { ...acc, [current]: updateValues(currentValue, valueToSet) };
+    }
+
+    acc[current] = valueToSet;
+
+    return acc;
+  }, {});
+};
+
 /* eslint-disable consistent-return */
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX': {
+        const { pathToCollectionType, propertyName, rowName, value } = action;
+        const pathToModifiedDataCollectionType = [
+          'modifiedData',
+          ...pathToCollectionType.split('..'),
+        ];
+        const objToUpdate = get(state, pathToModifiedDataCollectionType, {});
+
+        Object.keys(objToUpdate).forEach(actionId => {
+          if (has(objToUpdate[actionId], propertyName)) {
+            const objValue = get(objToUpdate, [actionId, propertyName, rowName]);
+            const pathToDataToSet = [
+              ...pathToModifiedDataCollectionType,
+              actionId,
+              propertyName,
+              rowName,
+            ];
+
+            if (!isObject(objValue)) {
+              set(draftState, pathToDataToSet, value);
+            } else {
+              const updatedValue = updateValues(objValue, value);
+
+              set(draftState, pathToDataToSet, updatedValue);
+            }
+          }
+        });
+
+        break;
+      }
       case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
         const pathToValue = ['modifiedData', ...action.keys.split('..')];
         const oldValues = get(state, pathToValue, {});
 
-        const updateValues = obj => {
-          return Object.keys(obj).reduce((acc, current) => {
-            const currentValue = obj[current];
-
-            if (current === 'conditions') {
-              acc[current] = currentValue;
-
-              return acc;
-            }
-
-            if (isObject(currentValue)) {
-              return { ...acc, [current]: updateValues(currentValue) };
-            }
-
-            acc[current] = action.value;
-
-            return acc;
-          }, {});
-        };
-
-        const updatedValues = updateValues(oldValues);
+        const updatedValues = updateValues(oldValues, action.value);
 
         set(draftState, pathToValue, updatedValues);
 

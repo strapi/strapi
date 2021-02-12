@@ -398,13 +398,13 @@ const data = {
         {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
-          subjects: ['restauranet', 'address'],
+          subjects: ['restaurant', 'address'],
           applyToProperties: ['fields', 'locales'],
         },
         {
           label: 'Update',
           actionId: 'content-manager.explorer.update',
-          subjects: ['address', 'restaurant'],
+          subjects: ['address', 'erestaurant'],
           applyToProperties: ['fields'],
         },
         {

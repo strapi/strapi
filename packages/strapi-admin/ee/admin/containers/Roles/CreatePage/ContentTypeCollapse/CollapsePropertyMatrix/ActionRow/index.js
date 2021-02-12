@@ -23,7 +23,11 @@ const ActionRow = ({
   propertyName,
 }) => {
   const [rowToOpen, setRowToOpen] = useState(null);
-  const { modifiedData, onChangeSimpleCheckbox } = usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeCollectionTypeLeftActionRowCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
 
   const isActive = rowToOpen === name;
 
@@ -49,6 +53,10 @@ const ActionRow = ({
     }
   }, [isCollapsable, name]);
 
+  const handleChangeLeftRowCheckbox = ({ target: { value } }) => {
+    onChangeCollectionTypeLeftActionRowCheckbox(pathToData, propertyName, name, value);
+  };
+
   const { hasAllActionsSelected, hasSomeActionsSelected } = useMemo(() => {
     return getRowLabelCheckboxeState(propertyActions, modifiedData, pathToData, propertyName, name);
   }, [propertyActions, modifiedData, pathToData, propertyName, name]);
@@ -60,6 +68,8 @@ const ActionRow = ({
           <Padded left size="sm" />
           <RowLabel
             width="15rem"
+            // checkboxName={}
+            onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
             label={label}

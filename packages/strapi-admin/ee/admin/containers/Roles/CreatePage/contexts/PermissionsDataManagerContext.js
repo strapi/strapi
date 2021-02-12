@@ -17,6 +17,7 @@ PermissionsDataManagerProvider.propTypes = {
   children: PropTypes.node.isRequired,
   value: PropTypes.exact({
     modifiedData: PropTypes.object.isRequired,
+    onChangeCollectionTypeLeftActionRowCheckbox: PropTypes.func.isRequired,
     onChangeSimpleCheckbox: PropTypes.func.isRequired,
     onChangeParentCheckbox: PropTypes.func.isRequired,
   }).isRequired,
