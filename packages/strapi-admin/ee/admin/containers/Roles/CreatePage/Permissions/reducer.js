@@ -76,10 +76,18 @@ const initialState = {
           },
         },
         'content-manager.explorer.delete': {
-          locales: {
-            fr: false,
-            en: false,
+          enabled: true,
+          // locales: {
+          //   fr: false,
+          //   en: false,
+          // },
+          conditions: {
+            'admin::is-creator': false,
+            'admin::has-same-role-as-creator': false,
           },
+        },
+        'content-manager.explorer.publish': {
+          enabled: true,
           conditions: {
             'admin::is-creator': false,
             'admin::has-same-role-as-creator': false,
@@ -160,6 +168,26 @@ const reducer = (state, action) =>
 
               set(draftState, pathToDataToSet, updatedValue);
             }
+          }
+        });
+
+        break;
+      }
+      case 'ON_CHANGE_COLLECTION_TYPE_PARENT_CHECKBOX': {
+        const { collectionTypeKind, actionId, value } = action;
+        const pathToData = ['modifiedData', collectionTypeKind];
+
+        Object.keys(get(state, pathToData)).forEach(collectionType => {
+          const collectionTypeActionData = get(
+            state,
+            [...pathToData, collectionType, actionId],
+            undefined
+          );
+
+          if (collectionTypeActionData) {
+            const updatedValues = updateValues(collectionTypeActionData, value);
+
+            set(draftState, [...pathToData, collectionType, actionId], updatedValues);
           }
         });
 

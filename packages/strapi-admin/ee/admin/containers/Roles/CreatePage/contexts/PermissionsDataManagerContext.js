@@ -20,6 +20,7 @@ PermissionsDataManagerProvider.propTypes = {
     onChangeCollectionTypeLeftActionRowCheckbox: PropTypes.func.isRequired,
     onChangeSimpleCheckbox: PropTypes.func.isRequired,
     onChangeParentCheckbox: PropTypes.func.isRequired,
+    onChangeCollectionTypeGlobalActionCheckbox: PropTypes.func.isRequired,
   }).isRequired,
 };
 

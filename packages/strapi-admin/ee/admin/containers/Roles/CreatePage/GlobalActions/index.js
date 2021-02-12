@@ -10,7 +10,7 @@ import Wrapper from './Wrapper';
 
 const GlobalActions = ({ actions, kind }) => {
   const { formatMessage } = useIntl();
-  const { modifiedData } = usePermissionsDataManager();
+  const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox } = usePermissionsDataManager();
 
   const displayedActions = useMemo(() => {
     return findDisplayedActions(actions);
@@ -31,6 +31,8 @@ const GlobalActions = ({ actions, kind }) => {
                 id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
                 defaultMessage: label,
               })}
+              onChange={({ target: { value } }) =>
+                onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value)}
               name={actionId}
               value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
               someChecked={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}

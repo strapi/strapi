@@ -36,6 +36,20 @@ const Permissions = forwardRef(({ layout }, ref) => {
     });
   };
 
+  const handleChangeCollectionTypeGlobalActionCheckbox = (
+    collectionTypeKind,
+    actionId,
+
+    value
+  ) => {
+    dispatch({
+      type: 'ON_CHANGE_COLLECTION_TYPE_PARENT_CHECKBOX',
+      collectionTypeKind,
+      actionId,
+      value,
+    });
+  };
+
   const handleChangeSimpleCheckbox = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE_SIMPLE_CHECKBOX',
@@ -59,6 +73,7 @@ const Permissions = forwardRef(({ layout }, ref) => {
         onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
         onChangeParentCheckbox: handleChangeParentCheckbox,
         onChangeCollectionTypeLeftActionRowCheckbox: handleChangeCollectionTypeLeftActionRowCheckbox,
+        onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
       }}
     >
       <Tabs tabsLabel={TAB_LABELS}>
