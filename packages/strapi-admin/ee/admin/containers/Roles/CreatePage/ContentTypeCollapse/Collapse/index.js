@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex, Padded } from '@buffetjs/core';
@@ -9,7 +9,7 @@ import ConditionsButton from '../../ConditionsButton';
 import HiddenAction from '../../HiddenAction';
 import Wrapper from './Wrapper';
 import RowLabel from '../../RowLabel';
-import { getCheckboxState } from '../../utils';
+import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 
 const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pathToData }) => {
   const { modifiedData } = usePermissionsDataManager();
@@ -17,7 +17,14 @@ const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pat
   // This corresponds to the data related to the CT left checkboxe
   // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true} } } } }
   const mainData = get(modifiedData, pathToData.split('..'), {});
-  const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(mainData);
+  const dataWithoutCondition = useMemo(() => {
+    return Object.keys(mainData).reduce((acc, current) => {
+      acc[current] = removeConditionKeyFromData(mainData[current]);
+
+      return acc;
+    }, {});
+  }, [mainData]);
+  const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
   return (
     <Wrapper isActive={isActive} isGrey={isGrey}>

@@ -14,6 +14,10 @@ const initialState = {
             images: true,
             city: true,
           },
+          conditions: {
+            'admin::is-creator': false,
+            'admin::has-same-role-as-creator': false,
+          },
         },
         'content-manager.explorer.read': {
           fields: {
@@ -23,6 +27,10 @@ const initialState = {
             images: true,
             city: true,
           },
+          conditions: {
+            'admin::is-creator': false,
+            'admin::has-same-role-as-creator': false,
+          },
         },
         'content-manager.explorer.update': {
           fields: {
@@ -31,6 +39,10 @@ const initialState = {
             cover: true,
             images: true,
             city: true,
+          },
+          conditions: {
+            'admin::is-creator': false,
+            'admin::has-same-role-as-creator': false,
           },
         },
       },
@@ -86,6 +98,9 @@ const initialState = {
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
+      case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
+        break;
+      }
       case 'ON_CHANGE_SIMPLE_CHECKBOX': {
         set(draftState, ['modifiedData', ...action.keys.split('..')], action.value);
         break;

@@ -1,7 +1,10 @@
 import createArrayOfValues from './createArrayOfValues';
+import removeConditionKeyFromData from './removeConditionKeyFromData';
 
-const getCheckboxState = data => {
-  const arrayOfValues = createArrayOfValues(data);
+const getCheckboxState = dataObj => {
+  const dataWithoutCondition = removeConditionKeyFromData(dataObj);
+
+  const arrayOfValues = createArrayOfValues(dataWithoutCondition);
 
   if (!arrayOfValues.length) {
     return { hasAllActionsSelected: false, hasSomeActionsSelected: false };
