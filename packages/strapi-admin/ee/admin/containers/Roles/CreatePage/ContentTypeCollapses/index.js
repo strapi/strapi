@@ -14,17 +14,18 @@ const ContentTypeCollapses = ({ actions, pathToData, subjects }) => {
     [collapseToOpen]
   );
 
-  return Object.keys(subjects).map((subject, index) => {
+  return subjects.map(({ uid, label, properties }, index) => {
     return (
       <ContentTypeCollapse
         allActions={actions}
-        key={subject}
-        contentTypeName={subject}
-        isActive={collapseToOpen === subject}
+        key={uid}
+        contentTypeName={uid}
+        label={label}
+        isActive={collapseToOpen === uid}
         index={index}
         onClickToggleCollapse={handleClickToggleCollapse}
-        pathToData={`${pathToData}..${subject}`}
-        properties={subjects[subject].properties}
+        pathToData={`${pathToData}..${uid}`}
+        properties={properties}
       />
     );
   });
@@ -32,13 +33,19 @@ const ContentTypeCollapses = ({ actions, pathToData, subjects }) => {
 
 ContentTypeCollapses.defaultProps = {
   actions: [],
-  subjects: {},
+  subjects: [],
 };
 
 ContentTypeCollapses.propTypes = {
   actions: PropTypes.array.isRequired,
   pathToData: PropTypes.string.isRequired,
-  subjects: PropTypes.object,
+  subjects: PropTypes.arrayOf(
+    PropTypes.shape({
+      uid: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      properties: PropTypes.array.isRequired,
+    })
+  ),
 };
 
 export default memo(ContentTypeCollapses);

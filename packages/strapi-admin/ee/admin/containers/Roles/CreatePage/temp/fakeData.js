@@ -283,8 +283,10 @@ const data = {
 
     singleTypes: {}, // same format as under,
     collectionTypes: {
-      subjects: {
-        address: {
+      subjects: [
+        {
+          uid: 'address',
+          label: 'Address',
           properties: [
             {
               label: 'Fields',
@@ -315,7 +317,9 @@ const data = {
             },
           ],
         },
-        restaurant: {
+        {
+          uid: 'restaurant',
+          label: 'Restaurant',
           properties: [
             {
               label: 'Fields',
@@ -384,10 +388,12 @@ const data = {
             },
           ],
         },
-        test: {
+        {
+          uid: 'test',
+          label: 'test',
           properties: [],
         },
-      },
+      ],
       actions: [
         {
           label: 'Create',

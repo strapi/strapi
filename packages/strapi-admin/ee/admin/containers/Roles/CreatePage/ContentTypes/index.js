@@ -20,7 +20,13 @@ ContentTypes.propTypes = {
   kind: PropTypes.string.isRequired,
   layout: PropTypes.shape({
     actions: PropTypes.array,
-    subjects: PropTypes.object,
+    subjects: PropTypes.arrayOf(
+      PropTypes.shape({
+        uid: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired,
+        properties: PropTypes.array.isRequired,
+      })
+    ),
   }).isRequired,
 };
 

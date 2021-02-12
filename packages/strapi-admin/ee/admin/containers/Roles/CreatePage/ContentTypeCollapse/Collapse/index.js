@@ -11,7 +11,7 @@ import Wrapper from './Wrapper';
 import RowLabel from '../../RowLabel';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 
-const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pathToData }) => {
+const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pathToData }) => {
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -36,7 +36,7 @@ const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle, pat
         <Padded left size="sm" />
         <RowLabel
           isCollapsable
-          label={name}
+          label={label}
           checkboxName={pathToData}
           onChange={onChangeParentCheckbox}
           onClick={onClickToggle}
@@ -96,7 +96,7 @@ Collapse.propTypes = {
   availableActions: PropTypes.array.isRequired,
   isActive: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
-  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
   onClickToggle: PropTypes.func.isRequired,
   pathToData: PropTypes.string.isRequired,
 };
