@@ -36,14 +36,9 @@ const Permissions = forwardRef(({ layout }, ref) => {
     });
   };
 
-  const handleChangeCollectionTypeGlobalActionCheckbox = (
-    collectionTypeKind,
-    actionId,
-
-    value
-  ) => {
+  const handleChangeCollectionTypeGlobalActionCheckbox = (collectionTypeKind, actionId, value) => {
     dispatch({
-      type: 'ON_CHANGE_COLLECTION_TYPE_PARENT_CHECKBOX',
+      type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
       collectionTypeKind,
       actionId,
       value,

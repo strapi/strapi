@@ -69,7 +69,6 @@ const ActionRow = ({
           <Padded left size="sm" />
           <RowLabel
             width="15rem"
-            // checkboxName={}
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
