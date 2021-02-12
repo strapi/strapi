@@ -35,3 +35,4 @@ const getRowLabelCheckboxeState = (
 };
 
 export default getRowLabelCheckboxeState;
+export { getActionIdsFromPropertyActions };

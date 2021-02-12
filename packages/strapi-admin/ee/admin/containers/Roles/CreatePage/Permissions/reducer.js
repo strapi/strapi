@@ -5,6 +5,7 @@ const initialState = {
   initialData: {},
   modifiedData: {
     collectionTypes: {
+      test: {},
       address: {
         'content-manager.explorer.create': {
           fields: {
@@ -77,10 +78,10 @@ const initialState = {
         },
         'content-manager.explorer.delete': {
           enabled: true,
-          // locales: {
-          //   fr: false,
-          //   en: false,
-          // },
+          locales: {
+            fr: false,
+            en: false,
+          },
           conditions: {
             'admin::is-creator': false,
             'admin::has-same-role-as-creator': false,

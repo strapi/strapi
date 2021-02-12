@@ -384,9 +384,9 @@ const data = {
             },
           ],
         },
-        // test: {
-        //   properties: [],
-        // },
+        test: {
+          properties: [],
+        },
       },
       actions: [
         {
