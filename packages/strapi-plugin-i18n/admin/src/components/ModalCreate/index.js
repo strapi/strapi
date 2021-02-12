@@ -1,35 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Modal,
-  ModalHeader,
-  HeaderModal,
-  HeaderModalTitle,
-  ModalFooter,
-  ModalForm,
-  Tabs,
-  TabsNav,
-  Tab,
-  TabsPanel,
-  TabPanel,
-} from 'strapi-helper-plugin';
+import { Modal, ModalFooter, TabPanel } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
 import localeFormSchema from '../../schemas';
 import { getTrad } from '../../utils';
+import SettingsModal from '../SettingsModal';
 
 const ModalCreate = ({ onClose, isOpened }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Modal isOpen={isOpened} onToggle={onClose}>
-      <HeaderModal>
-        <ModalHeader
-          headerBreadcrumbs={[formatMessage({ id: getTrad('Settings.list.actions.add') })]}
-        />
-      </HeaderModal>
-
       <Formik
         initialValues={{ displayName: '' }}
         onSubmit={() => null}
@@ -37,44 +20,19 @@ const ModalCreate = ({ onClose, isOpened }) => {
       >
         {({ handleSubmit, errors }) => (
           <form onSubmit={handleSubmit}>
-            <div className="container-fluid">
-              <div className="container-fluid">
-                <HeaderModalTitle
-                  style={{
-                    fontSize: '1.8rem',
-                    height: '65px',
-                    fontWeight: 'bold',
-                    alignItems: 'center',
-                    marginBottom: '-39px',
-                    paddingTop: '16px',
-                  }}
-                >
-                  {formatMessage({
-                    id: getTrad('Settings.locales.modal.title'),
-                  })}
-                </HeaderModalTitle>
-
-                <ModalForm>
-                  <TabsNav
-                    defaultSelection={0}
-                    label={formatMessage({
-                      id: getTrad('Settings.locales.modal.create.tab.label'),
-                    })}
-                    id="i18n-settings-tabs"
-                  >
-                    <Tabs position="right">
-                      <Tab>{formatMessage({ id: getTrad('Settings.locales.modal.base') })}</Tab>
-                      <Tab>{formatMessage({ id: getTrad('Settings.locales.modal.advanced') })}</Tab>
-                    </Tabs>
-
-                    <TabsPanel>
-                      <TabPanel>Base form</TabPanel>
-                      <TabPanel>advanced</TabPanel>
-                    </TabsPanel>
-                  </TabsNav>
-                </ModalForm>
-              </div>
-            </div>
+            <SettingsModal
+              title={formatMessage({
+                id: getTrad('Settings.locales.modal.title'),
+              })}
+              breadCrumb={[formatMessage({ id: getTrad('Settings.list.actions.add') })]}
+              tabsAriaLabel={formatMessage({
+                id: getTrad('Settings.locales.modal.create.tab.label'),
+              })}
+              tabsId="i18n-settings-tabs"
+            >
+              <TabPanel>Base form</TabPanel>
+              <TabPanel>advanced</TabPanel>
+            </SettingsModal>
 
             <ModalFooter>
               <section>
