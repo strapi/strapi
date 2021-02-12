@@ -335,9 +335,9 @@ class Strapi {
     this.models['core_store'] = coreStoreModel(this.config);
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
-    await this.runRegisterFunctions();
-
     this.db = createDatabaseManager(this);
+
+    await this.runRegisterFunctions();
     await this.db.initialize();
 
     this.store = createCoreStore({

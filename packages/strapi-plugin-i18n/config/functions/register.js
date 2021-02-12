@@ -59,23 +59,14 @@ module.exports = () => {
     }
   });
 
-  // strapi.database.migrations.push({
-  //   before() {
-  //     // if model had i18N but doesn't anymore
-  //     // on enable
-  //     // -> set locale to default locale
-  //     // -> init localizations json
-  //     // -> init strapiId
-  //     // on disabled
-  //     // -> delete data not in default locale
-  //     // -> remove default locale ?
-  //     // needed operations
-  //   },
-  //   after() {
-  //     // delete la data
-  //     // deleteColumn('locale');
-  //   },
-  // });
+  strapi.db.migrations.register({
+    before() {
+      console.log('before migration');
+    },
+    after() {
+      console.log('after migration');
+    },
+  });
 };
 
 /**

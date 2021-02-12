@@ -398,13 +398,16 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
   }
 };
 
-const migrationRunner = createMigrationRunner(migrateSchemas, {
-  hooks: [draftPublishMigration],
-});
-
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
+  await strapi.db.migrations.register(draftPublishMigration);
   // run migrations
-  await migrationRunner.run({ ORM, loadedModel, definition, connection, model });
+  await strapi.db.migrations.runMigration(migrateSchemas, {
+    ORM,
+    loadedModel,
+    definition,
+    connection,
+    model,
+  });
 
   // store new definitions
   await storeDefinition(definition, ORM);
