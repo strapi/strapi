@@ -185,7 +185,6 @@ describe('Filtering API', () => {
         res.body.sort((a, b) => (a.id > b.id ? 1 : -1));
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(matching.length);
-        expect(res.body).toMatchObject(matching);
         expect(res.body).toEqual(expect.arrayContaining(matching));
       });
 
