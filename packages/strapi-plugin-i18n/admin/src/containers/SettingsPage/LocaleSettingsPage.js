@@ -16,7 +16,10 @@ const LocaleSettingsPage = ({
 }) => {
   const { formatMessage } = useIntl();
   const [isOpenedCreateModal, setIsOpenedCreateModal] = useState(false);
-  const handleToggleModalCreate = () => setIsOpenedCreateModal(prev => !prev);
+
+  const handleToggleModalCreate = canCreateLocale
+    ? () => setIsOpenedCreateModal(s => !s)
+    : undefined;
 
   const actions = [
     {
@@ -49,7 +52,7 @@ const LocaleSettingsPage = ({
         <LocaleList
           canUpdateLocale={canUpdateLocale}
           canDeleteLocale={canDeleteLocale}
-          onToggleCreateModal={canCreateLocale ? setIsOpenedCreateModal : undefined}
+          onToggleCreateModal={handleToggleModalCreate}
         />
       ) : null}
 

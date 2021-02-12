@@ -11,16 +11,19 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'GET_DATA': {
         draftState.isLoading = true;
-        break;
+        
+return draftState;
       }
       case 'GET_DATA_SUCCEEDED': {
         draftState.defaultLocales = action.data;
         draftState.isLoading = false;
-        break;
+        
+return draftState;
       }
       case 'GET_DATA_ERROR': {
         draftState.isLoading = false;
-        break;
+        
+return draftState;
       }
       default:
         return draftState;
