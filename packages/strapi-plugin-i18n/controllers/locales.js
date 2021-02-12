@@ -81,4 +81,24 @@ module.exports = {
 
     ctx.body = await localesService.setIsDefault(sanitizeLocale(updatedLocale));
   },
+
+  async deleteLocale(ctx) {
+    const { id } = ctx.params;
+
+    const localesService = getService('locales');
+
+    const existingLocale = await localesService.findById(id);
+    if (!existingLocale) {
+      return ctx.notFound('locale.notFound');
+    }
+
+    const defaultLocaleCode = await localesService.getDefaultLocale();
+    if (existingLocale.code === defaultLocaleCode) {
+      return ctx.badRequest('Cannot delete the default locale');
+    }
+
+    await localesService.delete({ id });
+
+    ctx.body = await localesService.setIsDefault(sanitizeLocale(existingLocale));
+  },
 };
