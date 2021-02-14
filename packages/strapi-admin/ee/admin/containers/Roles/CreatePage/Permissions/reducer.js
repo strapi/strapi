@@ -82,10 +82,10 @@ const reducer = (state, action) =>
        * 2. Toggle all the end boolean values to the desired one
        * 3. Update the draftState
        *
-       * Since the case works well in order to update what we called "dependent" checkbox. We can
+       * Since the case works well in order to update what we called "parent" checkbox. We can
        * reuse the action when we need to toggle change all the values that depends on this one.
-       * A dependent checkbox is a checkbox which value is not a boolean but depends on its children ones, therefore,
-       * a dependent checkbox does not have a represented value in the draftState, they are just helpers.
+       * A parent checkbox is a checkbox which value is not a boolean but depends on its children ones, therefore,
+       * a parent checkbox does not have a represented value in the draftState, they are just helpers.
        *
        * Given the following data:
        *
