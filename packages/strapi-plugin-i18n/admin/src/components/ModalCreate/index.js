@@ -7,15 +7,40 @@ import { Formik } from 'formik';
 import localeFormSchema from '../../schemas';
 import { getTrad } from '../../utils';
 import SettingsModal from '../SettingsModal';
+import useDefaultLocales from '../../hooks/useDefaultLocales';
+import useAddLocale from '../../hooks/useAddLocale';
+import BaseForm from './BaseForm';
 
 const ModalCreate = ({ onClose, isOpened }) => {
+  const { defaultLocales, isLoading } = useDefaultLocales();
+  const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
+
+  if (!isOpened) return null;
+
+  if (isLoading) {
+    return (
+      <div>
+        <p>
+          {formatMessage({ id: getTrad('Settings.locales.modal.create.defaultLocales.loading') })}
+        </p>
+      </div>
+    );
+  }
+
+  const options = (defaultLocales || []).map(locale => ({
+    label: locale.code,
+    value: locale.name,
+  }));
+
+  const defaultOption = options[0];
 
   return (
     <Modal isOpen={isOpened} onToggle={onClose}>
       <Formik
-        initialValues={{ displayName: '' }}
-        onSubmit={() => null}
+        initialValues={{ code: defaultOption.label, displayName: defaultOption.value }}
+        onSubmit={values =>
+          addLocale({ code: values.code, name: values.displayName }).then(onClose)}
         validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
@@ -30,7 +55,9 @@ const ModalCreate = ({ onClose, isOpened }) => {
               })}
               tabsId="i18n-settings-tabs-create"
             >
-              <TabPanel>Base form</TabPanel>
+              <TabPanel>
+                <BaseForm options={options} defaultOption={defaultOption} />
+              </TabPanel>
               <TabPanel>advanced</TabPanel>
             </SettingsModal>
 
@@ -42,7 +69,7 @@ const ModalCreate = ({ onClose, isOpened }) => {
                 <Button
                   color="success"
                   type="submit"
-                  isLoading={false}
+                  isLoading={isAdding}
                   disabled={Object.keys(errors).length > 0}
                 >
                   {formatMessage({ id: getTrad('Settings.locales.modal.create.confirmation') })}

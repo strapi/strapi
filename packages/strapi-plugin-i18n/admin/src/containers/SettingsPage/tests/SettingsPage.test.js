@@ -179,13 +179,13 @@ describe('i18n settings page', () => {
       const rowUtils = within(row);
 
       fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
-      fireEvent.change(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'), {
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.locales.displayName'), {
         target: {
           value:
             'a very very very very long string that has more than fifty characters in order to show a warning',
         },
       });
-      fireEvent.blur(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'));
+      fireEvent.blur(screen.getByLabelText('Settings.locales.modal.locales.displayName'));
 
       await waitFor(() =>
         expect(screen.getByText('Settings.locales.modal.edit.confirmation')).toBeDisabled()
@@ -341,7 +341,7 @@ describe('i18n settings page', () => {
 
       fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.edit'));
 
-      fireEvent.change(screen.getByLabelText('Settings.locales.modal.edit.locales.displayName'), {
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.locales.displayName'), {
         target: {
           value: '',
         },
@@ -487,7 +487,17 @@ describe('i18n settings page', () => {
   });
 
   describe('create', () => {
-    // TODO: add the select verifications
+    beforeEach(() => {
+      request.mockImplementation(url =>
+        url.includes('/i18n/locales')
+          ? Promise.resolve([])
+          : Promise.resolve([
+              { code: 'fr-FR', name: 'Francais' },
+              { code: 'en-EN', name: 'English' },
+            ])
+      );
+    });
+
     it('shows the default create modal layout', async () => {
       render(
         <TestWrapper>
@@ -497,7 +507,18 @@ describe('i18n settings page', () => {
 
       fireEvent.click(screen.getByText('Settings.list.actions.add'));
 
-      expect(screen.getByText(`Settings.locales.modal.create.confirmation`)).toBeVisible();
+      expect(
+        screen.getByText(`Settings.locales.modal.create.defaultLocales.loading`)
+      ).toBeVisible();
+
+      await waitFor(() =>
+        expect(screen.getByText(`Settings.locales.modal.create.confirmation`)).toBeVisible()
+      );
+
+      expect(screen.getByText(`fr-FR`)).toBeVisible();
+      expect(screen.getByLabelText('Settings.locales.modal.locales.displayName')).toHaveValue(
+        'Francais'
+      );
     });
 
     it('closes the create modal when clicking on cancel', async () => {
@@ -508,9 +529,142 @@ describe('i18n settings page', () => {
       );
 
       fireEvent.click(screen.getByText('Settings.list.actions.add'));
+
+      await waitFor(() =>
+        expect(screen.getByText(`Settings.locales.modal.create.confirmation`)).toBeVisible()
+      );
+
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
 
       expect(screen.queryByText(`Settings.locales.modal.create.confirmation`)).toBeFalsy();
+    });
+
+    it('shows a warning and disabled the confirmation button when display name length is over 50', async () => {
+      render(
+        <TestWrapper>
+          <LocaleSettingsPage />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByText('Settings.list.actions.add'));
+
+      await waitFor(() =>
+        expect(screen.getByText(`Settings.locales.modal.create.confirmation`)).toBeVisible()
+      );
+
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.locales.displayName'), {
+        target: {
+          value:
+            'a very very very very long string that has more than fifty characters in order to show a warning',
+        },
+      });
+
+      fireEvent.blur(screen.getByLabelText('Settings.locales.modal.locales.displayName'));
+
+      await waitFor(() =>
+        expect(screen.getByText(`Settings.locales.modal.locales.displayName.error`)).toBeVisible()
+      );
+    });
+
+    it('sync the select and the text input', async () => {
+      render(
+        <TestWrapper>
+          <LocaleSettingsPage />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByText('Settings.list.actions.add'));
+
+      await waitFor(() =>
+        expect(screen.getByText(`Settings.locales.modal.create.confirmation`)).toBeVisible()
+      );
+
+      // Put some data in the input in order to make sure it resets well when changing locale
+      fireEvent.change(screen.getByLabelText('Settings.locales.modal.locales.displayName'), {
+        target: {
+          value:
+            'a very very very very long string that has more than fifty characters in order to show a warning',
+        },
+      });
+
+      const DOWN_ARROW = { keyCode: 40 };
+      fireEvent.keyDown(screen.getByLabelText('Settings.locales.modal.locales.label'), DOWN_ARROW);
+
+      fireEvent.click(screen.getByText('en-EN'));
+
+      expect(screen.getByLabelText('Settings.locales.modal.locales.displayName')).toHaveValue(
+        'English'
+      );
+    });
+
+    it('shows an error when something went wrong when adding a locale', async () => {
+      request.mockImplementation((url, opts) => {
+        if (opts.method === 'POST') {
+          return Promise.reject(new Error('Something went wrong when adding a locale'));
+        }
+        if (url.includes('/i18n/locales')) return Promise.resolve([]);
+
+        return Promise.resolve([
+          { code: 'fr-FR', name: 'Francais' },
+          { code: 'en-EN', name: 'English' },
+        ]);
+      });
+
+      render(
+        <TestWrapper>
+          <LocaleSettingsPage />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByText('Settings.list.actions.add'));
+
+      const confirmationButton = await waitFor(() =>
+        screen.getByText(`Settings.locales.modal.create.confirmation`)
+      );
+
+      fireEvent.click(confirmationButton);
+
+      await waitFor(() =>
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        })
+      );
+    });
+
+    it('shows an success toast when adding a locale is successful', async () => {
+      request.mockImplementation((url, opts) => {
+        if (opts.method === 'POST') {
+          return Promise.resolve({ id: 3, code: 'en-CA', name: 'Canadien' });
+        }
+        if (url.includes('/i18n/locales')) return Promise.resolve([]);
+
+        return Promise.resolve([
+          { code: 'fr-FR', name: 'Francais' },
+          { code: 'en-EN', name: 'English' },
+        ]);
+      });
+
+      render(
+        <TestWrapper>
+          <LocaleSettingsPage />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByText('Settings.list.actions.add'));
+
+      const confirmationButton = await waitFor(() =>
+        screen.getByText(`Settings.locales.modal.create.confirmation`)
+      );
+
+      fireEvent.click(confirmationButton);
+
+      await waitFor(() =>
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'success',
+          message: { id: 'Settings.locales.modal.create.success' },
+        })
+      );
     });
   });
 });
