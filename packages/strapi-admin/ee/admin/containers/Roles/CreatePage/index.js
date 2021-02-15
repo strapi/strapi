@@ -17,9 +17,10 @@ import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/sr
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormCard from '../../../../../admin/src/components/FormBloc';
-import { ButtonWithNumber, Permissions } from '../../../../../admin/src/components/Roles';
+import { ButtonWithNumber } from '../../../../../admin/src/components/Roles';
 import SizedInput from '../../../../../admin/src/components/SizedInput';
 import { formatPermissionsToApi } from '../../../../../admin/src/utils';
+import Permissions from './Permissions';
 
 import schema from './utils/schema';
 
@@ -31,8 +32,15 @@ const CreatePage = () => {
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
   const id = get(params, 'params.id', null);
-  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
-  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
+  const {
+    isLoading: isLayoutLoading,
+    // data: permissionsLayout
+  } = useFetchPermissionsLayout();
+  const {
+    // role, permissions: rolePermissions,
+    isLoading: isRoleLoading,
+  } = useFetchRole(id);
+  // console.log({ role, rolePermissions });
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -191,10 +199,10 @@ const CreatePage = () => {
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
                   <Permissions
-                    permissionsLayout={permissionsLayout}
+                    // permissionsLayout={permissionsLayout}
                     ref={permissionsRef}
-                    rolePermissions={rolePermissions}
-                    role={role}
+                    // rolePermissions={rolePermissions}
+                    // role={role}
                   />
                 </Padded>
               )}
