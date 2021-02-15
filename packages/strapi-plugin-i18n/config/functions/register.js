@@ -10,8 +10,8 @@ const isLocalized = model => {
 
 // add a register function to do some stuff after the loading but before the boot
 module.exports = () => {
+  
   // need to add some logic to the db layer so we can add fields to the models
-
   Object.values(strapi.models).forEach(model => {
     if (isLocalized(model)) {
       _.set(model.attributes, 'localizations', {
@@ -60,15 +60,7 @@ module.exports = () => {
   });
 
   strapi.db.migrations.register({
-    before() {
-      console.log('before migration');
-    },
-    after() {
-      console.log('after migration');
-    },
+    before() {},
+    after() {},
   });
 };
-
-/**
- * for the CM =>
- */

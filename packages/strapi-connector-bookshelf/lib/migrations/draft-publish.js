@@ -27,6 +27,7 @@ const before = async ({ definition, ORM }, context) => {
   const way = await getDraftAndPublishMigrationWay({ definition, ORM });
 
   if (way === 'disable') {
+    console.log('D&P disable')
     const publishedAtColumnExists = await ORM.knex.schema.hasColumn(
       definition.collectionName,
       PUBLISHED_AT_ATTRIBUTE
@@ -54,6 +55,7 @@ const after = async ({ definition, ORM }) => {
   const way = await getDraftAndPublishMigrationWay({ definition, ORM });
 
   if (way === 'enable') {
+    console.log('D&P enable')
     const now = new Date();
     let publishedAtValue = now;
     if (_.get(definition, 'options.timestamps', false)) {

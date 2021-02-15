@@ -9,7 +9,6 @@ const populateQueries = require('./utils/populate-queries');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
 const { didDefinitionChange, storeDefinition } = require('./utils/store-definition');
-const { migrateDraftAndPublish } = require('./database-migration');
 
 const {
   PUBLISHED_AT_ATTRIBUTE,
@@ -300,12 +299,22 @@ module.exports = async ({ models, target }, ctx) => {
     const definition = models[model];
     const modelInstance = target[model];
     const definitionDidChange = await didDefinitionChange(definition, instance);
+
+    // run migrations
+    await strapi.db.migrations.runMigration(migrateSchema, {
+      definition,
+      model: modelInstance,
+      ORM: instance,
+    });
+
     if (definitionDidChange) {
-      await migrateDraftAndPublish({ definition, model: modelInstance, ORM: instance });
       await storeDefinition(definition, instance);
     }
   }
 };
+
+// noop migration to match migration API
+const migrateSchema = () => {};
 
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
