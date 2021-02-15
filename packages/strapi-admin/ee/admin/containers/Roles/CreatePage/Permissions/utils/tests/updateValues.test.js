@@ -14,7 +14,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
     expect(updateValues(simpleObject, false)).toEqual(expected);
   });
 
-  it('set the deepest values of an object with the second argument passed to the function', () => {
+  it('set the leafs of an object with the second argument passed to the function', () => {
     const complexeObject = {
       enabled: true,
       conditions: 'test',

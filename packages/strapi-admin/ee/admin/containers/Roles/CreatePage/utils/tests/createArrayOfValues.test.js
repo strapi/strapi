@@ -10,7 +10,7 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | utils', () =>
     expect(createArrayOfValues('null')).toEqual([]);
   });
 
-  it('should return an array with the deepest values from the object', () => {
+  it('should return an array with the leafs from the object', () => {
     const data = {
       collectionTypes: {
         address: {

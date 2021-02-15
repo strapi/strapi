@@ -8,7 +8,7 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | utils | getCh
     expect(getCheckboxState({})).toEqual(expected);
   });
 
-  it('should return an object with all the keys set to false when all the deepest values of the object are falsy', () => {
+  it('should return an object with all the keys set to false when all the leafs of the object are falsy', () => {
     const complexeData = {
       f1: false,
       f2: {
@@ -27,7 +27,7 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | utils | getCh
     expect(getCheckboxState(complexeData)).toEqual(expected);
   });
 
-  it('should return an object with hasAllActionsSelected to false and hasSomeActionsSelected to true when some of the deepest values of the object are falsy', () => {
+  it('should return an object with hasAllActionsSelected to false and hasSomeActionsSelected to true when some of the leafs of the object are falsy', () => {
     const complexeData = {
       f1: true,
       f2: {
@@ -45,7 +45,7 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | utils | getCh
     expect(getCheckboxState(complexeData)).toEqual(expected);
   });
 
-  it('should return an object with hasAllActionsSelected key set to true and the other set to false when all the deepest values of the object are truthy', () => {
+  it('should return an object with hasAllActionsSelected key set to true and the other set to false when all the leafs of the object are truthy', () => {
     const complexeData = {
       f1: true,
       f2: {
