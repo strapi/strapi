@@ -11,7 +11,6 @@ class MigrationManager {
 
   register(migration) {
     debug('Register migration');
-    // validateMigration
     this.migrations.push(migration);
   }
 

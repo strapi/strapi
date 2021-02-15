@@ -1,12 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
 const { getService } = require('../../utils');
 
-// add a register function to do some stuff after the loading but before the boot
 module.exports = () => {
-  // need to add some logic to the db layer so we can add fields to the models
   Object.values(strapi.models).forEach(model => {
     if (getService('content-types').isLocalized(model)) {
       _.set(model.attributes, 'localizations', {
@@ -22,35 +19,6 @@ module.exports = () => {
         configurable: false,
         type: 'string',
       });
-
-      // add new route
-      const route =
-        model.kind === 'singleType'
-          ? _.kebabCase(model.modelName)
-          : _.kebabCase(pluralize(model.modelName));
-
-      const localizationRoutes = [
-        {
-          method: 'POST',
-          path: `/${route}/:id/localizations`,
-          handler: `${model.modelName}.createLocalization`,
-          config: {
-            policies: [],
-          },
-        },
-      ];
-
-      const handler = function(ctx) {
-        ctx.body = 'works';
-      };
-
-      strapi.config.routes.push(...localizationRoutes);
-
-      _.set(
-        strapi,
-        `api.${model.apiName}.controllers.${model.modelName}.createLocalization`,
-        handler
-      );
     }
   });
 

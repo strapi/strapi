@@ -27,7 +27,6 @@ const migrateDraftAndPublish = async ({ definition, model, ORM }) => {
   let way = await getDraftAndPublishMigrationWay(definition, ORM);
 
   if (way === 'enable') {
-    console.log('D&P enable');
     const createdAtCol = _.get(definition, 'timestamps.createdAt', 'createdAt');
     await model
       .aggregate([
@@ -42,7 +41,6 @@ const migrateDraftAndPublish = async ({ definition, model, ORM }) => {
       ])
       .exec();
   } else if (way === 'disable') {
-    console.log('D&P disable');
     await model.deleteMany({ [PUBLISHED_AT_ATTRIBUTE]: null });
     await model.updateMany({}, { $unset: { [PUBLISHED_AT_ATTRIBUTE]: '' } }, { strict: false });
   }

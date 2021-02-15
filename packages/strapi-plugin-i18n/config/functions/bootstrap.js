@@ -21,6 +21,8 @@ module.exports = () => {
     if (getService('content-types').isLocalized(model)) {
       console.log('i18N is enabled for ', model.modelName);
 
+      // TODO: support adding lifecycles programmatically or connecting to a database event handler to avoid conflicts with existing lifecycles fonctions
+
       _.set(model, 'lifecycles.beforeCreate', async data => {
         if (!data.locale) {
           data.locale = await getService('locales').getDefaultLocale();
@@ -28,7 +30,6 @@ module.exports = () => {
       });
 
       _.set(model, 'lifecycles.afterCreate', async entry => {
-        // if new entry doesn't have localizations then create it
         await getService('localizations').addLocalizations(entry, { model });
       });
 
