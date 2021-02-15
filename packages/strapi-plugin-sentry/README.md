@@ -11,10 +11,10 @@ The official plugin to track Strapi errors with Sentry.
 
 ## Configuration
 
-| property       | type (default) | description                                                                                                                                         |
-| -------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dsn`          | string (null)  | Your Sentry data source name ([see Sentry docs](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)). Omitting it will disable the plugin. |
-| `sendMetadata` | boolean (true) | Whether the plugin should attach additional information (like OS, browser, etc.) to the events sent to Sentry.                                      |
+| property       | type (default) | description                                                                                                    |
+| -------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
+| `dsn`          | string (null)  | Your Sentry data source name ([see Sentry docs](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)). |
+| `sendMetadata` | boolean (true) | Whether the plugin should attach additional information (like OS, browser, etc.) to the events sent to Sentry. |
 
 **Example**
 
@@ -71,4 +71,45 @@ Use it if you need direct access to the Sentry instance, which should already al
 
 ```js
 const sentryInstance = strapi.plugins.sentry.services.sentry.getInstance();
+```
+
+## Disabling
+
+### Disabling only the middleware
+
+By default, this plugin uses a middleware that logs all your unhandled API errors to Sentry. You can disable this feature by turning off the `sentry` middleware in your app's config.
+
+**Example**
+
+`./config/middleware.js`
+
+```js
+module.exports = {
+  //...
+  settings: {
+    sentry: {
+      enabled: false,
+    },
+  },
+};
+```
+
+Only the middleware will be disabled. You will still have access to the Sentry service.
+
+### Disabling the plugin entirely
+
+You can also completely disable this plugin (both the middleware and the service). If you omit the `dsn` property of your plugin's settings, or if you give it a null value, the Sentry plugin will be ignored. You can use the `env` utility to disable it depending on the environment.
+
+**Example**
+
+`./config/plugins.js`
+
+```js
+module.exports = ({ env }) => ({
+  // ...
+  sentry: {
+    dsn: env('NODE_ENV') === 'development' ? null : env('SENTRY_DSN'),
+  },
+  // ...
+});
 ```
