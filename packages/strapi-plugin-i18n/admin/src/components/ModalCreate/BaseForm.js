@@ -10,7 +10,7 @@ import { getTrad } from '../../utils';
 
 const BaseForm = ({ options, defaultOption }) => {
   const { formatMessage } = useIntl();
-  const { values, handleChange } = useFormikContext();
+  const { values, handleChange, setFieldValue } = useFormikContext();
 
   return (
     <Row>
@@ -18,7 +18,7 @@ const BaseForm = ({ options, defaultOption }) => {
         <span id="locale-code">
           <Label htmlFor="">
             {formatMessage({
-              id: getTrad('Settings.locales.modal.edit.locales.label'),
+              id: getTrad('Settings.locales.modal.locales.label'),
             })}
           </Label>
         </span>
@@ -27,9 +27,13 @@ const BaseForm = ({ options, defaultOption }) => {
           aria-labelledby="locale-code"
           options={options}
           defaultValue={defaultOption}
-          isDisabled
+          onChange={selection => {
+            setFieldValue('displayName', selection.value);
+            setFieldValue('code', selection.label);
+          }}
         />
       </Col>
+
       <Col>
         <Inputs
           label={formatMessage({
@@ -62,10 +66,10 @@ BaseForm.defaultProps = {
 
 BaseForm.propTypes = {
   options: PropTypes.arrayOf(
-    PropTypes.exact({ value: PropTypes.number.isRequired, label: PropTypes.string.isRequired })
+    PropTypes.exact({ value: PropTypes.string.isRequired, label: PropTypes.string.isRequired })
   ).isRequired,
   defaultOption: PropTypes.exact({
-    value: PropTypes.number.isRequired,
+    value: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
   }),
 };

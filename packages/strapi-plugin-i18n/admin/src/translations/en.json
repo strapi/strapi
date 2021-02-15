@@ -30,18 +30,15 @@
   "Settings.locales.modal.delete.success": "Locale successfully deleted",
   "Settings.locales.modal.edit.confirmation": "Finish",
   "Settings.locales.modal.edit.success": "Locale successfully edited",
-  "Settings.locales.modal.edit.locales.label": "Locales",
-  "Settings.locales.modal.edit.locales.displayName": "Locale display name",
-  "Settings.locales.modal.edit.locales.displayName.description":"Locale will be displayed under that name in the administration panel",
   "Settings.locales.modal.edit.tab.label":"Navigating between the I18N base settings and advanced settings",
   "Settings.locales.modal.base": "Base settings",
   "Settings.locales.modal.advanced": "Advanced settings",
-
+  "Settings.locales.modal.create.defaultLocales.loading": "Loading the available locales...",
   "Settings.locales.modal.create.confirmation": "Add locale",
   "Settings.locales.modal.create.success": "Locale successfully added",
-  "Settings.locales.modal.create.locales.label": "Locales",
-  "Settings.locales.modal.create.locales.displayName": "Locale display name",
+  "Settings.locales.modal.locales.label": "Locales",
+  "Settings.locales.modal.locales.displayName": "Locale display name",
   "Settings.locales.modal.locales.displayName.error": "The locale display name can only be less than 50 characters.",
-  "Settings.locales.modal.create.locales.displayName.description":"Locale will be displayed under that name in the administration panel",
+  "Settings.locales.modal.locales.displayName.description":"Locale will be displayed under that name in the administration panel",
   "Settings.locales.modal.create.tab.label":"Navigating between the I18N base settings and advanced settings"
 }
