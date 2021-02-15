@@ -72,7 +72,7 @@ module.exports = function(strapi) {
 
       // eslint-disable-next-line node/no-deprecated-api
       const uriOptions = uri ? url.parse(uri, true).query : {};
-      const { authenticationDatabase, ssl, debug } = _.defaults(
+      const { authenticationDatabase, ssl, debug, sslCA } = _.defaults(
         connection.options,
         uriOptions,
         strapi.config.hook.settings.mongoose
@@ -99,6 +99,7 @@ module.exports = function(strapi) {
       connectOptions.dbName = database;
       connectOptions.useCreateIndex = true;
       connectOptions.useUnifiedTopology = useUnifiedTopology || true;
+      connectOptions.sslCA = sslCA;
 
       try {
         const connectionURL = createConnectionURL({
