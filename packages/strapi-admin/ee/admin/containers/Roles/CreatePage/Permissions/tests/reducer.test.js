@@ -147,7 +147,7 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
   });
 
   describe('ON_CHANGE_TOGGLE_PARENT_CHECKBOX', () => {
-    it('should set all the deepest values of the create action to true', () => {
+    it('should set all the leafs of the create action to true', () => {
       const action = {
         type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
         keys: 'restaurant..create',
