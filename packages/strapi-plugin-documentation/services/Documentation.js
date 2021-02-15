@@ -359,6 +359,7 @@ module.exports = {
           switch (relationNature) {
             case 'manyToMany':
             case 'oneToMany':
+            case 'manyWay':
             case 'manyToManyMorph':
               acc.properties[curr] = {
                 type: 'array',
@@ -573,6 +574,7 @@ module.exports = {
           switch (relationNature) {
             case 'manyToMany':
             case 'oneToMany':
+            case 'manyWay':
             case 'manyToManyMorph':
               acc.properties[current] = {
                 type: 'array',
