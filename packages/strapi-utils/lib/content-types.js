@@ -178,9 +178,13 @@ const getGlobalId = (model, modelName, prefix) => {
   return model.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
+const isRelationalAttribute = attribute =>
+  _.has(attribute, 'model') || _.has(attribute, 'collection');
+
 module.exports = {
   isScalarAttribute,
   isMediaAttribute,
+  isRelationalAttribute,
   getPrivateAttributes,
   getTimestampsAttributes,
   isPrivateAttribute,

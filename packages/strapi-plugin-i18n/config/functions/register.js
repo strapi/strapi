@@ -1,19 +1,14 @@
 'use strict';
 
 const _ = require('lodash');
-const { prop } = require('lodash/fp');
 const pluralize = require('pluralize');
-
-const isLocalized = model => {
-  return prop('pluginOptions.i18n.localized', model) === true;
-};
+const { getService } = require('../../utils');
 
 // add a register function to do some stuff after the loading but before the boot
 module.exports = () => {
-  
   // need to add some logic to the db layer so we can add fields to the models
   Object.values(strapi.models).forEach(model => {
-    if (isLocalized(model)) {
+    if (getService('content-types').isLocalized(model)) {
       _.set(model.attributes, 'localizations', {
         writable: true,
         private: false,
