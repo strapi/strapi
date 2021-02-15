@@ -130,6 +130,25 @@ describe('i18n settings page', () => {
 
   describe('delete', () => {
     it('removes the locale when clicking the confirmation button', async () => {
+      request.mockImplementation((_, opts) =>
+        opts.method === 'DELETE'
+          ? Promise.resolve({ id: 1 })
+          : Promise.resolve([
+              {
+                id: 1,
+                name: 'French',
+                code: 'fr-FR',
+                isDefault: false,
+              },
+              {
+                id: 2,
+                name: 'English',
+                code: 'en-US',
+                isDefault: true,
+              },
+            ])
+      );
+
       render(
         <TestWrapper>
           <LocaleSettingsPage />
@@ -146,6 +165,46 @@ describe('i18n settings page', () => {
         expect(strapi.notification.toggle).toBeCalledWith({
           type: 'success',
           message: { id: 'Settings.locales.modal.delete.success' },
+        })
+      );
+    });
+
+    it('shows an error when something went wrong when deleting', async () => {
+      request.mockImplementation((_, opts) =>
+        opts.method === 'DELETE'
+          ? Promise.reject(new Error('An error'))
+          : Promise.resolve([
+              {
+                id: 1,
+                name: 'French',
+                code: 'fr-FR',
+                isDefault: false,
+              },
+              {
+                id: 2,
+                name: 'English',
+                code: 'en-US',
+                isDefault: true,
+              },
+            ])
+      );
+
+      render(
+        <TestWrapper>
+          <LocaleSettingsPage />
+        </TestWrapper>
+      );
+
+      const row = await waitFor(() => screen.getByText('French').closest('tr'));
+      const rowUtils = within(row);
+
+      fireEvent.click(rowUtils.getByLabelText('Settings.list.actions.delete'));
+      fireEvent.click(screen.getByText('Confirm'));
+
+      await waitFor(() =>
+        expect(strapi.notification.toggle).toBeCalledWith({
+          type: 'warning',
+          message: { id: 'notification.error' },
         })
       );
     });
