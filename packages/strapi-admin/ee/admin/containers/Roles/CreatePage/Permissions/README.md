@@ -6,6 +6,8 @@ The collection types & single types tabs uses the same component: `<ContentTypes
 
 The UI uses the layout received from the back-end in order to build the UI.
 
+> Endpoint: `/admin/permissions`.
+
 ## Layout shape
 
 ```js
@@ -14,30 +16,30 @@ const layout = {
   sections: {
     plugins: [
       { displayName: 'string', action: 'string', subCategory: 'string', plugin: 'string'}
-    ],
+    ], // For the content types permissions, actions can be CRUD + publish but for plugins and settings sections, it depends. Settings/plugins can have custom actions.
     settings: [], // Same shape as the plugins
     collectionTypes: {
-      subjects: [ // Array of subjects
+      subjects: [ // Array of subjects, a subject is a collection type
         {
           uid: 'string', // Collection type uid,
           label: 'string', // Collection type label,
           properties: [
             {
-              label: 'string', // Property label ex: Fields,
-              value: 'string', // Value of the property ex: fields,
+              label: 'string', // Property label ex: Fields. By default a collection type always has the fields property, depending on the installed plugins a property can also be Locales.
+              value: 'string', // Value of the property ex: fields. (Checkout the examples below.)
               children: [ // This corresponds to the fields that we will display
                 {
                   label: 'string',
                   value: 'string',
                   required: 'boolean', // This key is optional,
-                  children: [], // This key is optional, if it exists it means that a field has nested fields
+                  children: [], // This key is optional, if it exists it means that a field has nested fields, the naming can interfere with the React's programmatic API, so in the codebase the key is renamed to `childrenForm`.
                 }
               ]
              },
           ]
         }
       ],
-      actions: [ // Array of actions
+      actions: [ // Array of actions they refer to CRUD methods that are available on a content type
         {
           label: 'string', // Label of the action ex: Create,
           actionId: 'string', // id of the action ex: content-manager.explorer.create
@@ -57,11 +59,11 @@ const layout = {
 - Checkbox: has only 1 `checked=true` or `checked=false`.
 
 - Parent checkbox: A **parent checkbox** is a checkbox which the state value depends on the state of its children ones. It means that we cannot directly access its value from the `modifiedData` object.
-  Such checkbox can have multiple states:
+  Such checkbox has 2 props in order to indicate the user if all the children checkboxes are checked or some of them are checked:
   - someChecked: `true` or `false`,
   - checked: `true` of `false`
     > Both states are coupled: if `someChecked=true` then `checked=false`.
-    > In terms of user's interaction when cliking a parent checkbox is will toggle the value of its children.
+    > In terms of user's interaction when cliking a parent checkbox it will toggle the value of its children.
 
 Ex: given the following data:
 
@@ -81,10 +83,10 @@ const modifiedData = {
 
 From the `modifiedData` object we can identify 4 parent checkboxes:
 
-1. `address` which value depends on the values of `address.create` & `address.create.update` here the state will be: `someChecked=true`
-2. `create` which value depends on the values of `address.create.fields` & `address.create.locles` here the state will be: `someChecked=true, checked=true`
+1. `address` which value depends on the values of `address.create` & `address.update` here the state will be: `someChecked=true`
+2. `create` which value depends on the values of `address.create.fields` & `address.create.locales` here the state will be: `someChecked=true, checked=true`
 3. `fields` which value depends on the values of `address.create.fields.f1` & `address.create.fields.f2` here the state will be: `checked=true`
-4. `locales` which value depends on the values of `address.create.locales.en` & `address.create.locales.fr` here the state will be `checked=false, someChecked=falses`
+4. `locales` which value depends on the values of `address.create.locales.en` & `address.create.locales.fr` here the state will be `checked=false, someChecked=false`
 
 > `address.update` is not a parent checkbox since we can access its value directly `address.update.enabled`
 
@@ -97,7 +99,8 @@ From the `modifiedData` object we can identify 4 parent checkboxes:
 ```js
 <PermissionsDataManagerProvider>
   <Tabs>
-    <ContentTypes /> // Used with the `layout.sections.collectionTypes` data
+    <ContentTypes /> // Used with the `layout.sections.collectionTypes` data, the keys are hardcoded
+    in the DOM directly
     <ContentTypes /> // Used with the `layout.sections.singleTypes` data
     <PluginsAndSettings /> // Used with the `layout.sections.settings` data
     <PluginsAndSettings /> // Used with the `layout.sections.plugins` data
@@ -136,7 +139,7 @@ Below, is the architecture of the `<Permissions />` component:
 
 ### Building the matrix layout
 
-In order to build the layout, the components uses the `sections.collectionTypes.subjects` value received from the API.
+In order to build the layout, the components use the `sections.collectionTypes.subjects` value received from the API.
 
 #### Retrieving the actions to display in the `<GlobalActions />`
 
@@ -170,7 +173,7 @@ const actions = [
 ]
 ```
 
-Here we will display only 3 actions: `create`, `read` and `delete` since they are the only actions that can be applied to a `subject`.
+Here we will display only 3 actions: `create`, `read` and `delete` since they are the only actions that can be applied to a `subject`. The `publish` action is not displayed as it is not applied to any subject since the `subjects` array is empty. In the ui, we only display the CRUD actions that can be applied on a `subject` (content type).
 
 #### Building the content type's matrix
 
@@ -345,10 +348,10 @@ const objectToRetrieveTheStateOfTheCreateCheckbox = {
 };
 ```
 
-Know we need to know, if all the properties are `false` or if some of them `true`, since we are only dealing with `Boolean` values we can create the following array using the object:
+Now we need to know, if all the properties are `false` or if some of them are `true`, since we are only dealing with `Boolean` values we can create the following array using the object:
 
 ```js
-const arrayOfBooleanValues = [
+const arrayOfPermissionLeafsBooleanValues = [
   false, // address.fields.f1
   false, // restaurant.field.f1.f11.f111,
   false, // restaurant.fields.f2,
@@ -357,21 +360,4 @@ const arrayOfBooleanValues = [
 ];
 
 const checkboxCreateState = { someChecked: false, allChecked: false };
-```
-
-- The state of the checkbox located on the left of F1 field (`address.fields.f1`) depends on the values of `address.create.fields.f1` & `address.read.fields.f2`
-
-```js
-const objectToRetrieveTheStateOfTheCheckbox = {
-  create: {
-    f1: false,
-  },
-  read: {
-    f1: false,
-  },
-};
-
-const arrayOfBooleanVales = [false, false];
-
-const checkboxState = { someChecked: false, allChecked: false };
 ```
