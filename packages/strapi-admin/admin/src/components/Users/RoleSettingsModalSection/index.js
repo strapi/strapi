@@ -4,12 +4,12 @@ import { ModalSection } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 import { Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
-import loginSettingsForm from 'ee_else_ce/components/Users/ModalCreateBody/utils/loginSettingsForm';
+import roleSettingsForm from 'ee_else_ce/components/Users/ModalCreateBody/utils/roleSettingsForm';
 
 import Input from '../../SizedInput';
 import Wrapper from '../ModalCreateBody/Wrapper';
 
-const LoginModalSection = ({ isDisabled, modifiedData, onChange, formErrors }) => {
+const RoleSettingsModalSection = ({ isDisabled, modifiedData, onChange, formErrors }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -17,16 +17,18 @@ const LoginModalSection = ({ isDisabled, modifiedData, onChange, formErrors }) =
       <Wrapper>
         <Padded top size="smd">
           <Row>
-            {Object.keys(loginSettingsForm).map(inputName => {
-              if (loginSettingsForm[inputName].Component) {
-                const { Component } = loginSettingsForm[inputName];
+            {Object.keys(roleSettingsForm).map(inputName => {
+              const value = modifiedData[inputName];
+              const { description, type, Component } = roleSettingsForm[inputName];
+              const error = formErrors[inputName];
 
+              if (Component) {
                 return (
                   <Component
                     key={inputName}
-                    value={modifiedData[inputName]}
+                    value={value}
                     onChange={onChange}
-                    error={formErrors[inputName]}
+                    error={error}
                     isDisabled={isDisabled}
                   />
                 );
@@ -34,10 +36,10 @@ const LoginModalSection = ({ isDisabled, modifiedData, onChange, formErrors }) =
 
               return (
                 <Input
-                  {...loginSettingsForm[inputName]}
+                  {...roleSettingsForm[inputName]}
                   key={inputName}
-                  description={formatMessage({ id: loginSettingsForm[inputName].description })}
-                  type={loginSettingsForm[inputName].type}
+                  description={formatMessage({ id: description })}
+                  type={type}
                   disabled={isDisabled}
                   name={inputName}
                   onChange={onChange}
@@ -53,12 +55,12 @@ const LoginModalSection = ({ isDisabled, modifiedData, onChange, formErrors }) =
   );
 };
 
-LoginModalSection.defaultProps = {
+RoleSettingsModalSection.defaultProps = {
   isDisabled: false,
   formErrors: {},
 };
 
-LoginModalSection.propTypes = {
+RoleSettingsModalSection.propTypes = {
   isDisabled: PropTypes.bool,
   modifiedData: PropTypes.shape({
     roles: PropTypes.array,
@@ -71,4 +73,4 @@ LoginModalSection.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-export default LoginModalSection;
+export default RoleSettingsModalSection;

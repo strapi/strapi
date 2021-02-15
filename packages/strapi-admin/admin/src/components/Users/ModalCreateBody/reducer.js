@@ -8,7 +8,7 @@ const initialState = {
   modifiedData: formDataModel,
 };
 
-const reducer = (state = initialState, action) =>
+const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'ON_CHANGE': {

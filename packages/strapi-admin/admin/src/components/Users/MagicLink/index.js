@@ -1,22 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import LinkNotification from '../LinkNotification';
 import basename from '../../../utils/basename';
 
-const MagicLink = ({ registrationToken, description }) => {
+const MagicLink = ({ registrationToken }) => {
+  const { formatMessage } = useIntl();
+
   const link = `${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`;
 
-  return <LinkNotification link={link} description={description} />;
+  return (
+    <LinkNotification target={link}>
+      {formatMessage({ id: 'app.components.Users.MagicLink.connect' })}
+    </LinkNotification>
+  );
 };
 
 MagicLink.defaultProps = {
   registrationToken: '',
-  description: '',
 };
 
 MagicLink.propTypes = {
   registrationToken: PropTypes.string,
-  description: PropTypes.string,
 };
 
 export default MagicLink;

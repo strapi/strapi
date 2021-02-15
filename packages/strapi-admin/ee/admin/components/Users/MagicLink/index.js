@@ -11,17 +11,17 @@ const MagicLink = ({ registrationToken }) => {
   if (registrationToken) {
     return (
       <LinkNotification
-        link={`${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`}
-        description={formatMessage({ id: 'app.components.Users.MagicLink.connect' })}
-      />
+        target={`${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`}
+      >
+        {formatMessage({ id: 'app.components.Users.MagicLink.connect' })}
+      </LinkNotification>
     );
   }
 
   return (
-    <LinkNotification
-      link={`${window.location.origin}${basename}`}
-      description={formatMessage({ id: 'app.components.Users.MagicLink.connect.sso' })}
-    />
+    <LinkNotification target={`${window.location.origin}${basename}`}>
+      {formatMessage({ id: 'app.components.Users.MagicLink.connect.sso' })}
+    </LinkNotification>
   );
 };
 

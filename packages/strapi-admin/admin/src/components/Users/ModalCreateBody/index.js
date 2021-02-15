@@ -14,7 +14,7 @@ import { initialState, reducer } from './reducer';
 import init from './init';
 import Input from '../../SizedInput';
 import Wrapper from './Wrapper';
-import LoginModalSection from '../LoginModalSection';
+import RoleSettingsModalSection from '../RoleSettingsModalSection';
 
 // This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(
@@ -119,7 +119,8 @@ const ModalCreateBody = forwardRef(
             </Text>
           </Padded>
         </ModalSection>
-        <LoginModalSection
+        <RoleSettingsModalSection
+          hasSSORegistration={modifiedData.useSSORegistration}
           modifiedData={modifiedData}
           onChange={handleChange}
           formErrors={formErrors}

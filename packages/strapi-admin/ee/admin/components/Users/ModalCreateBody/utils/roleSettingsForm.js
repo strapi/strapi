@@ -1,4 +1,4 @@
-import baseForm from '../../../../../../admin/src/components/Users/ModalCreateBody/utils/loginSettingsForm';
+import baseForm from '../../../../../../admin/src/components/Users/ModalCreateBody/utils/roleSettingsForm';
 
 const ssoInputs = ENABLED_EE_FEATURES.includes('sso')
   ? {
