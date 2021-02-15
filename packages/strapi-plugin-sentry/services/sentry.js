@@ -15,8 +15,7 @@ const createSentryService = () => {
     init() {
       // Make sure there isn't a Sentry instance already running
       if (instance != null) {
-        strapi.log.warn('Sentry has already been initialized');
-        return;
+        return this;
       }
 
       // Retrieve user settings and merge them with the default ones
@@ -41,6 +40,8 @@ const createSentryService = () => {
       } catch (error) {
         strapi.log.warn('Could not set up Sentry, make sure you entered a valid DSN');
       }
+
+      return this;
     },
 
     /**
