@@ -29,3 +29,4 @@ const createDefaultPluginsFormFromLayout = (pluginsLayout, conditions) => {
 };
 
 export default createDefaultPluginsFormFromLayout;
+export { createSubCategoryForm, createChildrenDefaultForm };
