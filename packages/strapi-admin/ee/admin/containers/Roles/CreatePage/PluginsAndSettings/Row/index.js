@@ -4,34 +4,30 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PermissionsWrapper, RowContainer } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import SubCategory from 'ee_else_ce/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/SubCategory';
+// import SubCategory from 'ee_else_ce/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/SubCategory';
+import SubCategory from '../SubCategory';
+import RowStyle from './Wrapper';
 
-import RowStyle from './RowStyle';
-
-const PermissionRow = ({
-  openedCategory,
-  onOpenCategory,
-  permissions,
-  isWhite,
-  permissionType,
-}) => {
+const PermissionRow = ({ childrenForm, kind, name, isOpen, isWhite, onOpenCategory }) => {
   const { formatMessage } = useIntl();
 
-  const categoryName = useMemo(() => {
-    return permissions.category.includes('::')
-      ? `${permissions.category.split('::')[1]}`
-      : permissions.category;
-  }, [permissions]);
+  const handleClick = () => {
+    onOpenCategory(name);
+  };
 
-  console.log({ permissions, categoryName });
+  const categoryName = useMemo(() => {
+    const split = name.split('::');
+
+    return split[split.length - 1];
+  }, [name]);
 
   return (
     <RowContainer isWhite={isWhite}>
       <RowStyle
         isWhite={isWhite}
-        isActive={openedCategory === permissions.category}
-        key={permissions.category}
-        onClick={onOpenCategory}
+        isActive={isOpen}
+        // key={permissions.category}
+        onClick={handleClick}
       >
         <Flex alignItems="center" justifyContent="space-between">
           <div>
@@ -40,7 +36,7 @@ const PermissionRow = ({
             </Text>
             <Text lineHeight="22px" color="grey">
               {formatMessage({ id: 'Settings.permissions.category' }, { category: categoryName })}
-              &nbsp;{permissionType}
+              &nbsp;{kind === 'plugins' ? 'plugin' : kind}
             </Text>
           </div>
           <div>
@@ -48,14 +44,11 @@ const PermissionRow = ({
           </div>
         </Flex>
       </RowStyle>
-      {openedCategory === permissions.category && (
+
+      {isOpen && (
         <PermissionsWrapper isWhite={isWhite}>
-          {permissions.subCategories.map(subCategory => (
-            <SubCategory
-              categoryName={categoryName}
-              key={subCategory.subCategory}
-              subCategory={subCategory}
-            />
+          {childrenForm.map(({ actions, subCategoryName }) => (
+            <SubCategory categoryName={subCategoryName} key={subCategoryName} actions={actions} />
           ))}
         </PermissionsWrapper>
       )}
@@ -63,16 +56,15 @@ const PermissionRow = ({
   );
 };
 
-PermissionRow.defaultProps = {
-  openedCategory: null,
-  permissionType: null,
-};
+PermissionRow.defaultProps = {};
+
 PermissionRow.propTypes = {
-  openedCategory: PropTypes.string,
-  onOpenCategory: PropTypes.func.isRequired,
-  permissions: PropTypes.object.isRequired,
+  childrenForm: PropTypes.array.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   isWhite: PropTypes.bool.isRequired,
-  permissionType: PropTypes.string,
+  kind: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  onOpenCategory: PropTypes.func.isRequired,
 };
 
 export default PermissionRow;
