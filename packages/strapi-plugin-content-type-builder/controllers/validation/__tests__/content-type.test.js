@@ -85,6 +85,32 @@ describe('Content type validator', () => {
     });
   });
 
+  describe('validateContentTypeInput', () => {
+    test('Can use custom keys', async () => {
+      const input = {
+        contentType: {
+          name: 'test',
+          attributes: {
+            views: {
+              type: 'integer',
+              myCustomKey: 10000,
+            },
+            title: {
+              type: 'string',
+              myCustomKey: true,
+            },
+          },
+        },
+      };
+
+      expect.assertions(1);
+
+      await validateContentTypeInput(input).then(data => {
+        expect(data.contentType.attributes).toBe(input.contentType.attributes);
+      });
+    });
+  });
+
   describe('validateUpdateContentTypeInput', () => {
     test('Deletes empty defaults', async () => {
       const data = {
@@ -149,6 +175,30 @@ describe('Content type validator', () => {
 
       await validateUpdateContentTypeInput(data).then(() => {
         expect(data.contentType.attributes.slug.targetField).toBeUndefined();
+      });
+    });
+
+    test('Can use custom keys', async () => {
+      const input = {
+        contentType: {
+          name: 'test',
+          attributes: {
+            views: {
+              type: 'integer',
+              myCustomKey: 10000,
+            },
+            title: {
+              type: 'string',
+              myCustomKey: true,
+            },
+          },
+        },
+      };
+
+      expect.assertions(1);
+
+      await validateUpdateContentTypeInput(input).then(data => {
+        expect(data.contentType.attributes).toBe(input.contentType.attributes);
       });
     });
   });

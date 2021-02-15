@@ -51,9 +51,19 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             name: 'Test Collection Type',
+            pluginOptions: {
+              i18n: {
+                localized: true,
+              },
+            },
             attributes: {
               title: {
                 type: 'string',
+                pluginOptions: {
+                  i18n: {
+                    localized: true,
+                  },
+                },
               },
             },
           },
@@ -125,9 +135,19 @@ describe('Content Type Builder - Content types', () => {
           contentType: {
             kind: 'singleType',
             name: 'Test Single Type',
+            pluginOptions: {
+              i18n: {
+                localized: true,
+              },
+            },
             attributes: {
               title: {
                 type: 'string',
+                pluginOptions: {
+                  i18n: {
+                    localized: true,
+                  },
+                },
               },
             },
           },

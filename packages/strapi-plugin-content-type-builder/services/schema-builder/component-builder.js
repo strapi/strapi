@@ -52,6 +52,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       if (this.components.size === 0) {
@@ -101,6 +102,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
