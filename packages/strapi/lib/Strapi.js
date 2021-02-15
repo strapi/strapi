@@ -416,62 +416,46 @@ class Strapi {
     return reload;
   }
 
-  async runBootstrapFunctions() {
-    const execBootstrap = async fn => {
+  async runLifecyclesFunctions(functionName) {
+    const execFunction = async fn => {
       if (!fn) return;
 
       return fn();
     };
 
-    // plugins bootstrap
+    const configPath = `functions.${functionName}`;
+
+    // plugins register
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
-        strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
+      const pluginFunc = _.get(this.plugins[plugin], `config.${configPath}`);
+
+      return execFunction(pluginFunc).catch(err => {
+        strapi.log.error(`${functionName} function in plugin "${plugin}" failed`);
         strapi.log.error(err);
         strapi.stop();
       });
     });
+
     await Promise.all(pluginBoostraps);
 
-    // user bootstrap
-    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // user register
+    await execFunction(_.get(this.config, configPath));
 
-    // admin bootstrap : should always run after the others
-    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
-    return execBootstrap(adminBootstrap).catch(err => {
-      strapi.log.error(`Bootstrap function in admin failed`);
+    // admin register : should always run after the others
+    const adminFunc = _.get(this.admin.config, configPath);
+    return execFunction(adminFunc).catch(err => {
+      strapi.log.error(`${functionName} function in admin failed`);
       strapi.log.error(err);
       strapi.stop();
     });
   }
 
+  async runBootstrapFunctions() {
+    return this.runLifecyclesFunctions('bootstrap');
+  }
+
   async runRegisterFunctions() {
-    const execRegister = async fn => {
-      if (!fn) return;
-
-      return fn();
-    };
-
-    // plugins bootstrap
-    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execRegister(_.get(this.plugins[plugin], 'config.functions.register')).catch(err => {
-        strapi.log.error(`Register function in plugin "${plugin}" failed`);
-        strapi.log.error(err);
-        strapi.stop();
-      });
-    });
-    await Promise.all(pluginBoostraps);
-
-    // // user bootstrap
-    // await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
-
-    // // admin bootstrap : should always run after the others
-    // const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
-    // return execBootstrap(adminBootstrap).catch(err => {
-    //   strapi.log.error(`Bootstrap function in admin failed`);
-    //   strapi.log.error(err);
-    //   strapi.stop();
-    // });
+    return this.runLifecyclesFunctions('register');
   }
 
   async freeze() {
@@ -493,14 +477,6 @@ class Strapi {
    */
   query(entity, plugin) {
     return this.db.query(entity, plugin);
-  }
-
-  plugin(name) {
-    if (!_.has(this.plugins, name)) {
-      throw new Error(`Undefined plugin ${name}`);
-    }
-
-    return this.plugins[name];
   }
 }
 
