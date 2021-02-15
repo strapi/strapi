@@ -14,7 +14,7 @@ const strapi = require('../index');
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin, browser }) {
+module.exports = async function({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 
@@ -77,6 +77,7 @@ module.exports = async function({ build, watchAdmin, browser }) {
         dir,
         strapiInstance,
         watchIgnoreFiles: adminWatchIgnoreFiles,
+        polling,
       });
 
       process.on('message', message => {
@@ -106,7 +107,7 @@ module.exports = async function({ build, watchAdmin, browser }) {
  * @param {Strapi} options.strapi - Strapi instance
  * @param {array} options.watchIgnoreFiles - Array of custom file paths that should not be watched
  */
-function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
+function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
   const restart = () => {
     if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
@@ -116,6 +117,7 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
 
   const watcher = chokidar.watch(dir, {
     ignoreInitial: true,
+    usePolling: polling,
     ignored: [
       /(^|[/\\])\../, // dot files
       /tmp/,

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   display: flex;
   overflow-x: hidden;
+  height: 100vh;
   p,
   span {
     font-family: Lato;
