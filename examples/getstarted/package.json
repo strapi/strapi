@@ -16,7 +16,7 @@
     "lodash": "4.17.19",
     "mysql": "^2.17.1",
     "pg": "8.5.1",
-    "sqlite3": "^5.0.0",
+    "sqlite3": "^5.0.1",
     "strapi": "3.4.6",
     "strapi-admin": "3.4.6",
     "strapi-connector-bookshelf": "3.4.6",
