@@ -8,7 +8,15 @@ import { useIntl } from 'react-intl';
 import SubCategory from '../SubCategory';
 import RowStyle from './Wrapper';
 
-const PermissionRow = ({ childrenForm, kind, name, isOpen, isWhite, onOpenCategory }) => {
+const PermissionRow = ({
+  childrenForm,
+  kind,
+  name,
+  isOpen,
+  isWhite,
+  onOpenCategory,
+  pathToData,
+}) => {
   const { formatMessage } = useIntl();
 
   const handleClick = () => {
@@ -23,12 +31,7 @@ const PermissionRow = ({ childrenForm, kind, name, isOpen, isWhite, onOpenCatego
 
   return (
     <RowContainer isWhite={isWhite}>
-      <RowStyle
-        isWhite={isWhite}
-        isActive={isOpen}
-        // key={permissions.category}
-        onClick={handleClick}
-      >
+      <RowStyle isWhite={isWhite} isActive={isOpen} onClick={handleClick}>
         <Flex alignItems="center" justifyContent="space-between">
           <div>
             <Text color="grey" fontWeight="bold" fontSize="xs" textTransform="uppercase">
@@ -47,8 +50,13 @@ const PermissionRow = ({ childrenForm, kind, name, isOpen, isWhite, onOpenCatego
 
       {isOpen && (
         <PermissionsWrapper isWhite={isWhite}>
-          {childrenForm.map(({ actions, subCategoryName }) => (
-            <SubCategory categoryName={subCategoryName} key={subCategoryName} actions={actions} />
+          {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
+            <SubCategory
+              categoryName={subCategoryName}
+              key={subCategoryName}
+              actions={actions}
+              pathToData={[...pathToData, subCategoryId]}
+            />
           ))}
         </PermissionsWrapper>
       )}
@@ -65,6 +73,7 @@ PermissionRow.propTypes = {
   kind: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onOpenCategory: PropTypes.func.isRequired,
+  pathToData: PropTypes.array.isRequired,
 };
 
 export default PermissionRow;

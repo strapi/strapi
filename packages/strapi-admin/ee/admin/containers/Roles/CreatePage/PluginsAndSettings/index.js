@@ -14,10 +14,7 @@ const PluginsAndSettingsPermissions = ({ kind, layout }) => {
   return (
     <ListWrapper>
       <Padded left right size="md">
-        {layout.map(({ category, childrenForm }, index) => {
-          // console.log({ permissionLayout });
-          console.log({ category, childrenForm });
-
+        {layout.map(({ category, categoryId, childrenForm }, index) => {
           return (
             <PermissionRow
               key={category}
@@ -27,7 +24,7 @@ const PluginsAndSettingsPermissions = ({ kind, layout }) => {
               isWhite={index % 2 === 1}
               name={category}
               onOpenCategory={handleOpenCategory}
-              // permissions={permissionLayout}
+              pathToData={[kind, categoryId]}
             />
           );
         })}
@@ -41,6 +38,7 @@ PluginsAndSettingsPermissions.propTypes = {
   layout: PropTypes.arrayOf(
     PropTypes.shape({
       category: PropTypes.string.isRequired,
+      categoryId: PropTypes.string.isRequired,
       childrenForm: PropTypes.arrayOf(
         PropTypes.shape({
           actions: PropTypes.array.isRequired,

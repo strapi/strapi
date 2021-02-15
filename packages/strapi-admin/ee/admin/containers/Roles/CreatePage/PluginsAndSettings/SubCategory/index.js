@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { BaselineAlignment } from 'strapi-helper-plugin';
+import { get } from 'lodash';
+import { usePermissionsDataManager } from '../../contexts/PermissionsDataManagerContext';
+import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
 import CheckboxWrapper from './CheckboxWrapper';
 import Wrapper from './Wrapper';
@@ -16,8 +19,24 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ categoryName, actions }) => {
+const SubCategory = ({ categoryName, actions, pathToData }) => {
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
   const { formatMessage } = useIntl();
+
+  const mainData = get(modifiedData, pathToData, {});
+  const dataWithoutCondition = useMemo(() => {
+    return Object.keys(mainData).reduce((acc, current) => {
+      acc[current] = removeConditionKeyFromData(mainData[current]);
+
+      return acc;
+    }, {});
+  }, [mainData]);
+
+  const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
   return (
     <>
@@ -38,31 +57,36 @@ const SubCategory = ({ categoryName, actions }) => {
           <Padded left size="sm">
             <BaselineAlignment top size="1px" />
             <Checkbox
-              // name={`select-all-${categoryName}`}
-              name="todo"
+              name={pathToData.join('..')}
               message={formatMessage({ id: 'app.utils.select-all' })}
-              disabled
-              onChange={() => {}}
-              someChecked={false}
-              value={false}
+              // TODO
+              disabled={false}
+              onChange={onChangeParentCheckbox}
+              someChecked={hasSomeActionsSelected}
+              value={hasAllActionsSelected}
             />
           </Padded>
         </Flex>
         <BaselineAlignment top size="1px" />
         <Padded top size="xs">
           <Flex flexWrap="wrap">
-            {actions.map(sc => (
-              <CheckboxWrapper disabled hasConditions={false} key={sc.action}>
-                <Checkbox
-                  value={false}
-                  name="todo"
-                  // TODO
-                  disabled={false}
-                  message={sc.displayName}
-                  onChange={() => {}}
-                />
-              </CheckboxWrapper>
-            ))}
+            {actions.map(sc => {
+              const checkboxName = [...pathToData, sc.action, 'enabled'];
+              const value = get(modifiedData, checkboxName, false);
+
+              return (
+                <CheckboxWrapper disabled hasConditions={false} key={sc.action}>
+                  <Checkbox
+                    name={checkboxName.join('..')}
+                    // TODO
+                    disabled={false}
+                    message={sc.displayName}
+                    onChange={onChangeSimpleCheckbox}
+                    value={value}
+                  />
+                </CheckboxWrapper>
+              );
+            })}
           </Flex>
           <ConditionsButtonWrapper disabled={false} hasConditions={false}>
             <ConditionsButton hasConditions={false} onClick={() => {}} />
@@ -74,8 +98,9 @@ const SubCategory = ({ categoryName, actions }) => {
 };
 
 SubCategory.propTypes = {
-  categoryName: PropTypes.string.isRequired,
   actions: PropTypes.array.isRequired,
+  categoryName: PropTypes.string.isRequired,
+  pathToData: PropTypes.array.isRequired,
 };
 
 export default SubCategory;
