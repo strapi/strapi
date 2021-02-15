@@ -27,6 +27,7 @@ const colors = {
   lightBlue: '#E6F0FB',
   mediumBlue: '#007eff',
   darkBlue: '#AED4FB',
+  pale: '#f7f8f8',
   content: {
     background: '#fafafb',
     'background-alpha': 'rgba(14, 22, 34, 0.02)',

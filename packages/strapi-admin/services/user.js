@@ -3,8 +3,8 @@
 const _ = require('lodash');
 const { stringIncludes } = require('strapi-utils');
 const { createUser, hasSuperAdminRole } = require('../domain/user');
-const { SUPER_ADMIN_CODE } = require('./constants');
 const { password: passwordValidator } = require('../validation/common-validators');
+const { SUPER_ADMIN_CODE } = require('./constants');
 
 const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
 

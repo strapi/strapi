@@ -241,12 +241,14 @@ module.exports = async ({ models, target }, ctx) => {
 
           if (type === 'dynamiczone') {
             if (returned[name]) {
-              returned[name] = returned[name].filter(el => el && el.kind).map(el => {
-                return {
-                  __component: findComponentByGlobalId(el.kind).uid,
-                  ...el.ref,
-                };
-              });
+              returned[name] = returned[name]
+                .filter(el => el && el.kind)
+                .map(el => {
+                  return {
+                    __component: findComponentByGlobalId(el.kind).uid,
+                    ...el.ref,
+                  };
+                });
             }
           }
         });
@@ -270,9 +272,9 @@ module.exports = async ({ models, target }, ctx) => {
       });
     };
 
-    // Only sync indexes in development env while it's not possible to create complex indexes directly from models
-    // In other environments it will simply create missing indexes (those defined in the models but not present in db)
-    if (strapi.app.env === 'development') {
+    // Only sync indexes when not in production env while it's not possible to create complex indexes directly from models
+    // In production it will simply create missing indexes (those defined in the models but not present in db)
+    if (strapi.app.env !== 'production') {
       // Ensure indexes are synced with the model, prevent duplicate index errors
       // Side-effect: Delete all the indexes not present in the model.json
       Model.syncIndexes(null, handleIndexesErrors);
@@ -309,7 +311,9 @@ module.exports = async ({ models, target }, ctx) => {
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
-    const { publicationState } = this.getOptions();
+    const { publicationState, _depth = 0 } = this.getOptions();
+
+    if (_depth > 2) return;
 
     const getMatchQuery = assoc => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
@@ -332,7 +336,10 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
         this.populate({ path: alias, match: matchQuery, options: { publicationState } });
       } else if (populatedPaths.includes(alias)) {
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
-        _.set(this._mongooseOptions.populate, [alias, 'options'], { publicationState });
+        _.set(this._mongooseOptions.populate, [alias, 'options'], {
+          publicationState,
+          _depth: _depth + 1,
+        });
 
         if (matchQuery !== undefined) {
           _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
@@ -348,13 +355,13 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
           this.populate({
             path: ast.alias,
             match: getMatchQuery(ast),
-            options: { publicationState },
+            options: { publicationState, _depth: _depth + 1 },
           });
         });
     }
 
     componentAttributes.forEach(key => {
-      this.populate({ path: `${key}.ref`, options: { publicationState } });
+      this.populate({ path: `${key}.ref`, options: { publicationState, _depth: _depth + 1 } });
     });
   };
 };

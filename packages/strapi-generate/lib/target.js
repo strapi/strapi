@@ -263,9 +263,7 @@ function parseTarget(target, scope, cb) {
  */
 
 function isValidTarget(target) {
-  let ok = true;
-
-  ok = ok && typeof target === 'object';
+  let ok = typeof target === 'object';
 
   // Is using a helper.
   // Or is another generator def.

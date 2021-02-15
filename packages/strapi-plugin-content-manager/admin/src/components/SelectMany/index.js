@@ -18,6 +18,7 @@ function SelectMany({
   move,
   onInputChange,
   onMenuClose,
+  onMenuOpen,
   onMenuScrollToBottom,
   onRemove,
   options,
@@ -76,6 +77,7 @@ function SelectMany({
 
           return true;
         }}
+        mainField={mainField}
         isLoading={isLoading}
         isMulti
         isSearchable
@@ -83,6 +85,7 @@ function SelectMany({
         onChange={addRelation}
         onInputChange={onInputChange}
         onMenuClose={onMenuClose}
+        onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={placeholder}
         styles={styles}
@@ -129,11 +132,17 @@ SelectMany.propTypes = {
   displayNavigationLink: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  mainField: PropTypes.string.isRequired,
+  mainField: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
+  onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,

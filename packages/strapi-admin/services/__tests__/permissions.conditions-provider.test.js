@@ -15,7 +15,7 @@ describe('Condition Provider', () => {
         handler: jest.fn(() => true),
       },
       {
-        name: 'john',
+        name: 'kai',
         plugin: 'test',
         category: 'default',
         handler: jest.fn(() => false),
@@ -79,16 +79,16 @@ describe('Condition Provider', () => {
       provider.registerMany(conditions);
 
       const resFoo = provider.get('foo', 'test');
-      const resJohn = provider.get('john', 'test');
+      const resKai = provider.get('kai', 'test');
 
       expect(provider.register).toHaveBeenCalledTimes(2);
       expect(provider.has).toHaveBeenCalledTimes(2);
 
       expect(resFoo).toMatchObject(createCondition(conditions[0]));
-      expect(resJohn).toMatchObject(createCondition(conditions[1]));
+      expect(resKai).toMatchObject(createCondition(conditions[1]));
 
       expect(resFoo.handler()).toBe(true);
-      expect(resJohn.handler()).toBe(false);
+      expect(resKai.handler()).toBe(false);
 
       expect(conditions[0].handler).toHaveBeenCalled();
       expect(conditions[1].handler).toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('Condition Provider', () => {
     test('Returns an array of all the conditions key', () => {
       const conditions = localTestData.conditions;
 
-      const expected = ['plugins::test.foo', 'plugins::test.john'];
+      const expected = ['plugins::test.foo', 'plugins::test.kai'];
 
       provider.registerMany(conditions);
 

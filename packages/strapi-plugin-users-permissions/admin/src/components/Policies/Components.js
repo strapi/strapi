@@ -14,8 +14,13 @@ const Header = styled.div`
   line-height: 3.6rem;
 `;
 
+const Sticky = styled.div`
+  position: sticky;
+  top: 70px;
+`;
+
 Header.propTypes = {
   ...themePropTypes,
 };
 
-export { Header, Wrapper };
+export { Header, Wrapper, Sticky };

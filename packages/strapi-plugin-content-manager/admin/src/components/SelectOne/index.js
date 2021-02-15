@@ -13,6 +13,7 @@ function SelectOne({
   onChange,
   onInputChange,
   onMenuClose,
+  onMenuOpen,
   onMenuScrollToBottom,
   options,
   placeholder,
@@ -26,14 +27,16 @@ function SelectOne({
       isClearable
       isDisabled={isDisabled}
       isLoading={isLoading}
+      mainField={mainField}
       options={options}
       onChange={onChange}
       onInputChange={onInputChange}
       onMenuClose={onMenuClose}
+      onMenuOpen={onMenuOpen}
       onMenuScrollToBottom={onMenuScrollToBottom}
       placeholder={placeholder}
       styles={styles}
-      value={isNull(value) ? null : { label: get(value, [mainField], ''), value }}
+      value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
     />
   );
 }
@@ -47,11 +50,17 @@ SelectOne.propTypes = {
   components: PropTypes.object,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  mainField: PropTypes.string.isRequired,
+  mainField: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
+  onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,

@@ -17,7 +17,7 @@ This provider has only one parameter: `sizeLimit`.
 }
 ```
 
-The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, and the default is 1000000. When setting this value high, you should make sure to also configure the body parser middleware `maxFileSize` so the file can be sent and processed. Read more [here](https://strapi.io/documentation/v3.x/plugins/upload.html#configuration)
+The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, and the default is 1000000. When setting this value high, you should make sure to also configure the body parser middleware `maxFileSize` so the file can be sent and processed. Read more [here](https://strapi.io/documentation/developer-docs/latest/plugins/upload.html#configuration)
 
 ## Resources
 
@@ -25,6 +25,6 @@ The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, 
 
 ## Links
 
-- [Strapi website](http://strapi.io/)
-- [Strapi community on Slack](http://slack.strapi.io)
+- [Strapi website](https://strapi.io/)
+- [Strapi community on Slack](https://slack.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
