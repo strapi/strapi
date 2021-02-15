@@ -6,9 +6,11 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
     const expected = [
       {
         category: 'plugin::content-type-builder',
-        subCategories: [
+        categoryId: 'plugin::content-type-builder',
+        childrenForm: [
           {
-            subCategory: 'general',
+            subCategoryName: 'general',
+            subCategoryId: 'general',
             actions: [
               {
                 displayName: 'Read',
@@ -22,9 +24,11 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
       },
       {
         category: 'plugin::documentation',
-        subCategories: [
+        categoryId: 'plugin::documentation',
+        childrenForm: [
           {
-            subCategory: 'general',
+            subCategoryName: 'general',
+            subCategoryId: 'general',
             actions: [
               {
                 displayName: 'Access the Documentation',
@@ -35,7 +39,8 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             ],
           },
           {
-            subCategory: 'settings',
+            subCategoryName: 'settings',
+            subCategoryId: 'settings',
             actions: [
               {
                 displayName: 'Update and delete',
@@ -55,9 +60,11 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
       },
       {
         category: 'plugin::upload',
-        subCategories: [
+        categoryId: 'plugin::upload',
+        childrenForm: [
           {
-            subCategory: 'general',
+            subCategoryName: 'general',
+            subCategoryId: 'general',
             actions: [
               {
                 displayName: 'Access the Media Library',
@@ -68,7 +75,8 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             ],
           },
           {
-            subCategory: 'assets',
+            subCategoryName: 'assets',
+            subCategoryId: 'assets',
             actions: [
               {
                 displayName: 'Create (upload)',
@@ -91,9 +99,11 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
     const expected = [
       {
         category: 'media library',
-        subCategories: [
+        categoryId: 'media-library',
+        childrenForm: [
           {
-            subCategory: 'general',
+            subCategoryName: 'general',
+            subCategoryId: 'general',
             actions: [
               {
                 displayName: 'Access the Media Library settings page',
@@ -107,9 +117,11 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
       },
       {
         category: 'plugins and marketplace',
-        subCategories: [
+        categoryId: 'plugins-and-marketplace',
+        childrenForm: [
           {
-            subCategory: 'marketplace',
+            subCategoryName: 'marketplace',
+            subCategoryId: 'marketplace',
             actions: [
               {
                 displayName: 'Access the marketplace',
@@ -120,7 +132,8 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             ],
           },
           {
-            subCategory: 'plugins',
+            subCategoryName: 'plugins',
+            subCategoryId: 'plugins',
             actions: [
               {
                 displayName: 'Install (only for dev env)',
