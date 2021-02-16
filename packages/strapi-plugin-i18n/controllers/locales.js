@@ -70,7 +70,7 @@ module.exports = {
       return ctx.notFound('locale.notFound');
     }
 
-    const allowedParams = ['name', 'isDefault'];
+    const allowedParams = ['name'];
     const cleanUpdates = setCreatorFields({ user, isEdition: true })(pick(allowedParams, updates));
 
     const updatedLocale = await localesService.update({ id }, cleanUpdates);
