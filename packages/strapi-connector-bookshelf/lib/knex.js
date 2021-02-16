@@ -102,6 +102,7 @@ module.exports = strapi => {
           ...connection.options,
           debug: _.get(connection.options, 'debug', false),
           pool: {
+            ..._.get(connection.options, 'pool', {}),
             min: _.get(connection.options, 'pool.min', 0),
           },
         },
