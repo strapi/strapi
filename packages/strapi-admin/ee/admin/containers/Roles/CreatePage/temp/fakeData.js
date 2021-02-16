@@ -424,6 +424,7 @@ const data = {
           label: 'Publish',
           actionId: 'content-manager.explorer.publish',
           subjects: ['restaurant'],
+          applyToProperties: ['locales'],
         },
       ],
     },

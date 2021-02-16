@@ -108,6 +108,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
       {modalState.isMounted && (
         <ConditionsModal
           headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+          actions={checkboxesActions}
           isOpen={modalState.isOpen}
           onClosed={handleModalClose}
           onToggle={handleToggleModalIsOpen}

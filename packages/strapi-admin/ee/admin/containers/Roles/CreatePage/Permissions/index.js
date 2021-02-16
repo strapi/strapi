@@ -68,6 +68,7 @@ const Permissions = forwardRef(({ layout }, ref) => {
   return (
     <PermissionsDataManagerProvider
       value={{
+        availableConditions: layout.conditions,
         modifiedData,
         onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
         onChangeParentCheckbox: handleChangeParentCheckbox,

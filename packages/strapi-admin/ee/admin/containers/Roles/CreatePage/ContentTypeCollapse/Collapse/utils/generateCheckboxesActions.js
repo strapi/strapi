@@ -2,7 +2,7 @@ import { get, isEmpty } from 'lodash';
 import { createArrayOfValues, getCheckboxState } from '../../../utils';
 
 const generateCheckboxesActions = (availableActions, modifiedData, pathToData) => {
-  return availableActions.map(({ actionId, isDisplayed, applyToProperties }) => {
+  return availableActions.map(({ actionId, isDisplayed, applyToProperties, label }) => {
     if (!isDisplayed) {
       return { actionId, hasSomeActionsSelected: false, isDisplayed };
     }
@@ -29,6 +29,8 @@ const generateCheckboxesActions = (availableActions, modifiedData, pathToData) =
         hasSomeActionsSelected: value,
         isDisplayed,
         isParentCheckbox: false,
+        label,
+        pathToConditionsObject: baseCheckboxNameArray,
       };
     }
 
@@ -44,6 +46,8 @@ const generateCheckboxesActions = (availableActions, modifiedData, pathToData) =
       hasSomeActionsSelected,
       isDisplayed,
       isParentCheckbox: true,
+      label,
+      pathToConditionsObject: baseCheckboxNameArray,
     };
   });
 };
