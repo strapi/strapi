@@ -40,7 +40,7 @@ const ModalCreate = ({ onClose, isOpened }) => {
       <Formik
         initialValues={{ code: defaultOption.label, displayName: defaultOption.value }}
         onSubmit={values =>
-          addLocale({ code: values.code, name: values.displayName }).then(onClose)}
+          addLocale({ code: values.code, name: values.displayName, isDefault: false }).then(onClose)}
         validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
