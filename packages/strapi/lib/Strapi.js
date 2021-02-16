@@ -28,6 +28,11 @@ const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
 
+const LIFECYCLES = {
+  BOOTSTRAP: 'bootstrap',
+  REGISTER: 'register',
+};
+
 /**
  * Construct an Strapi instance.
  *
@@ -337,7 +342,7 @@ class Strapi {
 
     this.db = createDatabaseManager(this);
 
-    await this.runRegisterFunctions();
+    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     await this.db.initialize();
 
     this.store = createCoreStore({
@@ -363,7 +368,7 @@ class Strapi {
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
 
-    await this.runBootstrapFunctions();
+    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
     await this.freeze();
 
     this.isLoaded = true;
@@ -416,46 +421,40 @@ class Strapi {
     return reload;
   }
 
-  async runLifecyclesFunctions(functionName) {
-    const execFunction = async fn => {
-      if (!fn) return;
+  async runLifecyclesFunctions(lifecycleName) {
+    const execLifecycle = async fn => {
+      if (!fn) {
+        return;
+      }
 
       return fn();
     };
 
-    const configPath = `functions.${functionName}`;
+    const configPath = `functions.${lifecycleName}`;
 
-    // plugins register
-    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      const pluginFunc = _.get(this.plugins[plugin], `config.${configPath}`);
+    // plugins
+    await Promise.all(
+      Object.keys(this.plugins).map(plugin => {
+        const pluginFunc = _.get(this.plugins[plugin], `config.${configPath}`);
 
-      return execFunction(pluginFunc).catch(err => {
-        strapi.log.error(`${functionName} function in plugin "${plugin}" failed`);
-        strapi.log.error(err);
-        strapi.stop();
-      });
-    });
+        return execLifecycle(pluginFunc).catch(err => {
+          strapi.log.error(`${lifecycleName} function in plugin "${plugin}" failed`);
+          strapi.log.error(err);
+          strapi.stop();
+        });
+      })
+    );
 
-    await Promise.all(pluginBoostraps);
+    // user
+    await execLifecycle(_.get(this.config, configPath));
 
-    // user register
-    await execFunction(_.get(this.config, configPath));
-
-    // admin register : should always run after the others
+    // admin
     const adminFunc = _.get(this.admin.config, configPath);
-    return execFunction(adminFunc).catch(err => {
-      strapi.log.error(`${functionName} function in admin failed`);
+    return execLifecycle(adminFunc).catch(err => {
+      strapi.log.error(`${lifecycleName} function in admin failed`);
       strapi.log.error(err);
       strapi.stop();
     });
-  }
-
-  async runBootstrapFunctions() {
-    return this.runLifecyclesFunctions('bootstrap');
-  }
-
-  async runRegisterFunctions() {
-    return this.runLifecyclesFunctions('register');
   }
 
   async freeze() {

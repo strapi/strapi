@@ -17,7 +17,7 @@ class MigrationManager {
   async runMigration(fn, options, context = {}) {
     debug('Run migration');
     await this.runBefore(options, context);
-    await await fn(options, context);
+    await fn(options, context);
     await this.runAfter(options, context);
   }
 

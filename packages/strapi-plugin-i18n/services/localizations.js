@@ -16,11 +16,11 @@ const updateNonLocalizedFields = async (entry, { model }) => {
   const fieldsToUpdate = pick(getNonLocalizedFields(model), entry);
 
   if (Array.isArray(entry.localizations)) {
-    const updateQUeries = entry.localizations
+    const updateQueries = entry.localizations
       .filter(({ id }) => id != entry.id)
       .map(({ id }) => strapi.query(model.uid).update({ id }, fieldsToUpdate));
 
-    await Promise.all(updateQUeries);
+    await Promise.all(updateQueries);
   }
 };
 

@@ -14,7 +14,7 @@ const model = {
       },
     },
     stars: {
-      type: 'interger',
+      type: 'integer',
     },
   },
 };
