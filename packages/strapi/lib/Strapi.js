@@ -29,8 +29,8 @@ const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
 
 const LIFECYCLES = {
-  BOOTSTRAP: 'bootstrap',
   REGISTER: 'register',
+  BOOTSTRAP: 'bootstrap',
 };
 
 /**
