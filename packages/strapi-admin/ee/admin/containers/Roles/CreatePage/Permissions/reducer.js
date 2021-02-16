@@ -81,6 +81,19 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'ON_CHANGE_CONDITIONS': {
+        Object.entries(action.conditions).forEach(array => {
+          const [stringPathToData, conditionsToUpdate] = array;
+
+          set(
+            draftState,
+            ['modifiedData', ...stringPathToData.split('..'), 'conditions'],
+            conditionsToUpdate
+          );
+        });
+
+        break;
+      }
       case 'ON_CHANGE_SIMPLE_CHECKBOX': {
         let nextModifiedDataState = cloneDeep(state.modifiedData);
 

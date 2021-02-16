@@ -12,7 +12,7 @@ import updateValues from '../Permissions/utils/updateValues';
 
 const ConditionsModal = ({ actions, headerBreadCrumbs, isOpen, onClosed, onToggle }) => {
   const { formatMessage } = useIntl();
-  const { availableConditions, modifiedData } = usePermissionsDataManager();
+  const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
 
   const arrayOfOptionsGroupedByCategory = useMemo(() => {
     return Object.entries(groupBy(availableConditions, 'category'));
@@ -55,7 +55,22 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isOpen, onClosed, onToggl
     });
   };
 
-  console.log({ state, modifiedData });
+  const handleSubmit = () => {
+    const conditionsWithoutCategory = Object.entries(state).reduce((acc, current) => {
+      const [key, value] = current;
+
+      const merged = Object.values(value).reduce((acc1, current1) => {
+        return { ...acc1, ...current1 };
+      }, {});
+
+      acc[key] = merged;
+
+      return acc;
+    }, {});
+
+    onChangeConditions(conditionsWithoutCategory);
+    onToggle();
+  };
 
   return (
     <Modal withoverflow="true" onClosed={onClosed} isOpen={isOpen} onToggle={onToggle}>
@@ -95,7 +110,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isOpen, onClosed, onToggl
             {formatMessage({ id: 'app.components.Button.cancel' })}
           </Button>
 
-          <Button type="button" color="success" onClick={() => console.log('todo')}>
+          <Button type="button" color="success" onClick={handleSubmit}>
             {formatMessage({
               id: 'Settings.permissions.conditions.apply',
             })}

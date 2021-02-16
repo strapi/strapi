@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PermissionsWrapper, RowContainer } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-// import SubCategory from 'ee_else_ce/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/SubCategory';
 import SubCategory from '../SubCategory';
 import RowStyle from './Wrapper';
 
@@ -26,7 +25,7 @@ const PermissionRow = ({
   const categoryName = useMemo(() => {
     const split = name.split('::');
 
-    return split[split.length - 1];
+    return split.pop();
   }, [name]);
 
   return (

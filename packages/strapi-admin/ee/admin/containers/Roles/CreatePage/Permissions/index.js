@@ -49,6 +49,10 @@ const Permissions = forwardRef(({ layout }, ref) => {
     });
   };
 
+  const handleChangeConditions = conditions => {
+    dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions });
+  };
+
   const handleChangeSimpleCheckbox = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE_SIMPLE_CHECKBOX',
@@ -70,6 +74,7 @@ const Permissions = forwardRef(({ layout }, ref) => {
       value={{
         availableConditions: layout.conditions,
         modifiedData,
+        onChangeConditions: handleChangeConditions,
         onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
         onChangeParentCheckbox: handleChangeParentCheckbox,
         onChangeCollectionTypeLeftActionRowCheckbox: handleChangeCollectionTypeLeftActionRowCheckbox,

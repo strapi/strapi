@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Text, Padded, Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-// import { usePermissionsDataManager } from '../contexts/PermissionsDataManagerContext';
 
 import ConditionsSelect from '../ConditionsSelect';
 import Wrapper from './Wrapper';
