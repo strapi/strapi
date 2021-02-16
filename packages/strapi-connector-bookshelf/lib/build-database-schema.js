@@ -4,7 +4,11 @@ const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
-const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
+const {
+  getDefinitionFromStore,
+  storeDefinition,
+  getColumnsWhereDefinitionChanged,
+} = require('./utils/store-definition');
 const { getManyRelations } = require('./utils/associations');
 
 const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model }, context) => {
@@ -397,10 +401,14 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
 };
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
+  const previousDefinitionRow = await getDefinitionFromStore(definition, ORM);
+  const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
+
   // run migrations
   await strapi.db.migrations.run(migrateSchemas, {
     ORM,
     loadedModel,
+    previousDefinition,
     definition,
     connection,
     model,
