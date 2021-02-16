@@ -7,6 +7,7 @@ describe('Bootstrap', () => {
     const registerFn = jest.fn();
 
     global.strapi = {
+      models: {},
       admin: {
         services: {
           permission: {

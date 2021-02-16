@@ -6,8 +6,6 @@ const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
 const { getManyRelations } = require('./utils/associations');
-const createMigrationRunner = require('./migrations/create-migration-runner');
-const draftPublishMigration = require('./migrations/draft-publish-migration');
 
 const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model }, context) => {
   // Add created_at and updated_at field if timestamp option is true
@@ -398,13 +396,15 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
   }
 };
 
-const migrationRunner = createMigrationRunner(migrateSchemas, {
-  hooks: [draftPublishMigration],
-});
-
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   // run migrations
-  await migrationRunner.run({ ORM, loadedModel, definition, connection, model });
+  await strapi.db.migrations.runMigration(migrateSchemas, {
+    ORM,
+    loadedModel,
+    definition,
+    connection,
+    model,
+  });
 
   // store new definitions
   await storeDefinition(definition, ORM);

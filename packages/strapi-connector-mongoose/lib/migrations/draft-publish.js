@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
-const { getDefinitionFromStore } = require('./utils/store-definition');
+const { getDefinitionFromStore } = require('../utils/store-definition');
 
 const getDraftAndPublishMigrationWay = async (definition, ORM) => {
   const previousDefRow = await getDefinitionFromStore(definition, ORM);
@@ -47,5 +47,5 @@ const migrateDraftAndPublish = async ({ definition, model, ORM }) => {
 };
 
 module.exports = {
-  migrateDraftAndPublish,
+  before: migrateDraftAndPublish,
 };
