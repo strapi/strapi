@@ -6,9 +6,11 @@ const {
   getVisibleAttributes,
   getNonWritableAttributes,
   constants,
+  getGlobalId,
 } = require('../content-types');
 
 const createModelWithPrivates = (privateAttributes = []) => ({
+  uid: 'myModel',
   options: {
     privateAttributes,
   },
@@ -252,5 +254,26 @@ describe('Content types utils', () => {
       expect(isPrivateAttribute(model, 'foobar')).toBeTruthy();
       expect(strapi.config.get).toHaveBeenCalledWith('api.responses.privateAttributes', []);
     });
+  });
+
+  describe('getGlobalId', () => {
+    const testData = [
+      [{ globalId: 'customId' }, 'modelName', 'admin', 'customId'],
+      [{}, 'modelName', undefined, 'ModelName'],
+      [{}, 'modelName', null, 'ModelName'],
+      [{}, 'modelName', '', 'ModelName'],
+      [{}, 'modelName', 'admin', 'AdminModelName'],
+      [{}, 'MODELNAME', '', 'Modelname'],
+      [{}, 'MODEL-NAME', '', 'ModelName'],
+    ];
+
+    test.each(testData)(
+      'getGlobalId(%p, %p, %p) = %p',
+      (model, modelName, prefix, expectedResult) => {
+        const result = getGlobalId(model, modelName, prefix);
+
+        expect(result).toBe(expectedResult);
+      }
+    );
   });
 });

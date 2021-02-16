@@ -52,9 +52,19 @@ describe('Content Type Builder - Components', () => {
             category: 'default',
             icon: 'default',
             name: 'Some Component',
+            pluginOptions: {
+              pluginName: {
+                option: true,
+              },
+            },
             attributes: {
               title: {
                 type: 'string',
+                pluginOptions: {
+                  pluginName: {
+                    option: true,
+                  },
+                },
               },
               pic: {
                 type: 'media',
@@ -152,9 +162,19 @@ describe('Content Type Builder - Components', () => {
             description: '',
             connection: 'default',
             collectionName: 'components_default_some_components',
+            pluginOptions: {
+              pluginName: {
+                option: true,
+              },
+            },
             attributes: {
               title: {
                 type: 'string',
+                pluginOptions: {
+                  pluginName: {
+                    option: true,
+                  },
+                },
               },
               pic: {
                 type: 'media',
@@ -212,6 +232,11 @@ describe('Content Type Builder - Components', () => {
             icon: 'default',
             name: 'New Component',
             attributes: {},
+            pluginOptions: {
+              pluginName: {
+                option: false,
+              },
+            },
           },
         },
       });
@@ -236,6 +261,11 @@ describe('Content Type Builder - Components', () => {
           uid: 'default.some-component',
           schema: {
             name: 'New Component',
+            pluginOptions: {
+              pluginName: {
+                option: false,
+              },
+            },
           },
         },
       });

@@ -1,6 +1,6 @@
 'use strict';
 
-const { startsWith, upperFirst, has, prop, pick } = require('lodash/fp');
+const { upperFirst, has, prop, pick, getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
@@ -20,7 +20,7 @@ module.exports = {
     return {
       ...contentType,
       apiID: contentType.modelName,
-      isDisplayed: !isHidden(contentType),
+      isDisplayed: isVisible(contentType),
       info: {
         ...contentType.info,
         label: formatContentTypeLabel(contentType),
@@ -94,11 +94,4 @@ const toRelation = (attribute, relation) => {
   };
 };
 
-const HIDDEN_CONTENT_TYPES = [
-  'plugins::upload.file',
-  'plugins::users-permissions.permission',
-  'plugins::users-permissions.role',
-  'plugins::i18n.locale',
-];
-
-const isHidden = ({ uid }) => startsWith('strapi::', uid) || HIDDEN_CONTENT_TYPES.includes(uid);
+const isVisible = model => getOr(true, 'pluginOptions.content-manager.visible', model) === true;

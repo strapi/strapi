@@ -108,6 +108,71 @@ const isMediaAttribute = attr => {
   return (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
 };
 
+const getKind = obj => obj.kind || 'collectionType';
+
+const pickSchema = model => {
+  const schema = _.cloneDeep(
+    _.pick(model, [
+      'connection',
+      'collectionName',
+      'info',
+      'options',
+      'pluginOptions',
+      'attributes',
+    ])
+  );
+
+  schema.kind = getKind(model);
+  return schema;
+};
+
+const createContentType = (
+  model,
+  { modelName, defaultConnection },
+  { apiName, pluginName } = {}
+) => {
+  if (apiName) {
+    Object.assign(model, {
+      uid: `application::${apiName}.${modelName}`,
+      apiName,
+      collectionName: model.collectionName || modelName.toLocaleLowerCase(),
+      globalId: getGlobalId(model, modelName),
+    });
+  } else if (pluginName) {
+    Object.assign(model, {
+      uid: `plugins::${pluginName}.${modelName}`,
+      plugin: pluginName,
+      collectionName: model.collectionName || `${pluginName}_${modelName}`.toLowerCase(),
+      globalId: getGlobalId(model, modelName, pluginName),
+    });
+  } else {
+    Object.assign(model, {
+      uid: `strapi::${modelName}`,
+      plugin: 'admin',
+      globalId: getGlobalId(model, modelName, 'admin'),
+    });
+  }
+
+  Object.assign(model, {
+    __schema__: pickSchema(model),
+    kind: getKind(model),
+    modelType: 'contentType',
+    modelName,
+    connection: model.connection || defaultConnection,
+  });
+  Object.defineProperty(model, 'privateAttributes', {
+    get() {
+      return strapi.getModel(model.uid).privateAttributes;
+    },
+  });
+};
+
+const getGlobalId = (model, modelName, prefix) => {
+  let globalId = prefix ? `${prefix}-${modelName}` : modelName;
+
+  return model.globalId || _.upperFirst(_.camelCase(globalId));
+};
+
 module.exports = {
   isScalarAttribute,
   isMediaAttribute,
@@ -124,4 +189,6 @@ module.exports = {
   isSingleType,
   isCollectionType,
   isKind,
+  createContentType,
+  getGlobalId,
 };

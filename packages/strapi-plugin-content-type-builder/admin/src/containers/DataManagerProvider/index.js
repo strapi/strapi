@@ -426,7 +426,7 @@ const DataManagerProvider = ({
 
   const redirectEndpoint = useMemo(() => {
     const allowedEndpoints = Object.keys(contentTypes)
-      .filter(uid => get(contentTypes, [uid, 'schema', 'editable'], true))
+      .filter(uid => get(contentTypes, [uid, 'schema', 'visible'], true))
       .sort();
 
     return get(allowedEndpoints, '0', '');

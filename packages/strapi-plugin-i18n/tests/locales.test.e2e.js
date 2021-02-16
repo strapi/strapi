@@ -30,6 +30,7 @@ describe('CRUD locales', () => {
       const locale = {
         name: 'French',
         code: 'fr',
+        isDefault: false,
       };
 
       let res = await rq({
@@ -46,27 +47,7 @@ describe('CRUD locales', () => {
       data.locales.push(res.body);
     });
 
-    test('Can create a locale if name is missing', async () => {
-      const locale = {
-        code: 'en',
-      };
-
-      let res = await rq({
-        url: '/i18n/locales',
-        method: 'POST',
-        body: locale,
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
-        id: expect.anything(),
-        name: null,
-        code: 'en',
-      });
-      data.locales.push(res.body);
-    });
-
-    test('Cannot create a locale if code is missing', async () => {
+    test('Cannot create a locale if code or isDefault is missing', async () => {
       const locale = {
         name: 'Italian',
       };
@@ -79,7 +60,10 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        data: { code: ['code is a required field'] },
+        data: {
+          isDefault: ['isDefault is a required field'],
+          code: ['code is a required field'],
+        },
         error: 'Bad Request',
         message: 'ValidationError',
         statusCode: 400,
@@ -90,6 +74,7 @@ describe('CRUD locales', () => {
       const locale = {
         code: 'fr',
         name: 'random name',
+        isDefault: false,
       };
 
       let res = await rq({
@@ -106,6 +91,7 @@ describe('CRUD locales', () => {
       const locale = {
         name: 'French',
         code: 'fr-FR',
+        isDefault: false,
       };
 
       let res = await rq({
@@ -121,12 +107,59 @@ describe('CRUD locales', () => {
       });
       data.locales.push(res.body);
     });
+
+    test('Only one locale can be default (POST)', async () => {
+      let res = await rq({
+        url: '/i18n/locales',
+        method: 'POST',
+        body: { code: 'en', name: 'random', isDefault: true },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+
+      res = await rq({
+        url: '/i18n/locales',
+        method: 'POST',
+        body: { code: 'en-US', name: 'random', isDefault: true },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+
+      res = await rq({
+        url: '/i18n/locales',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      const enLocale = res.body.find(locale => locale.code === 'en');
+      const enUsLocale = res.body.find(locale => locale.code === 'en-US');
+      expect(enLocale.isDefault).toBe(false);
+      expect(enUsLocale.isDefault).toBe(true);
+
+      data.locales.push(enLocale);
+      data.locales.push(enUsLocale);
+    });
+  });
+
+  describe('Read', () => {
+    test('Can list the locales', async () => {
+      let res = await rq({
+        url: '/i18n/locales',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toHaveLength(data.locales.length);
+      expect(res.body.sort(compareLocales)).toMatchObject(data.locales.sort(compareLocales));
+    });
   });
 
   describe('Update', () => {
     test('Can update the name of a locale', async () => {
       const localeUpdate = {
         name: 'French update',
+        isDefault: false,
       };
 
       let res = await rq({
@@ -157,7 +190,6 @@ describe('CRUD locales', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         data: {
-          name: ['name is a required field'],
           undefined: ['this field has unspecified keys: code'],
         },
         error: 'Bad Request',
@@ -188,18 +220,52 @@ describe('CRUD locales', () => {
         statusCode: 400,
       });
     });
-  });
 
-  describe('Read', () => {
-    test('Can list the locales', async () => {
+    test('Only one locale can be default (PUT)', async () => {
       let res = await rq({
+        url: `/i18n/locales/${data.locales[0].id}`,
+        method: 'PUT',
+        body: { isDefault: true },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+
+      res = await rq({
+        url: `/i18n/locales/${data.locales[1].id}`,
+        method: 'PUT',
+        body: { isDefault: true },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+
+      res = await rq({
         url: '/i18n/locales',
         method: 'GET',
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveLength(data.locales.length);
-      expect(res.body.sort(compareLocales)).toMatchObject(data.locales.sort(compareLocales));
+      expect(res.body.find(locale => locale.code === data.locales[0].code).isDefault).toBe(false);
+      expect(res.body.find(locale => locale.code === data.locales[1].code).isDefault).toBe(true);
+    });
+
+    test('Cannot unselect isDefault', async () => {
+      let res = await rq({
+        url: `/i18n/locales/${data.locales[0].id}`,
+        method: 'PUT',
+        body: { isDefault: true },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+
+      res = await rq({
+        url: `/i18n/locales/${data.locales[0].id}`,
+        method: 'PUT',
+        body: { isDefault: false },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
     });
   });
 });

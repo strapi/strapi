@@ -15,11 +15,13 @@ const createLocaleSchema = yup
       .string()
       .min(1)
       .max(50)
-      .nullable(),
+      .nullable()
+      .required(),
     code: yup
       .string()
       .oneOf(allowedLocaleCodes)
       .required(),
+    isDefault: yup.boolean().required(),
   })
   .noUnknown();
 
@@ -34,8 +36,8 @@ const updateLocaleSchema = yup
       .string()
       .min(1)
       .max(50)
-      .nullable()
-      .required(),
+      .nullable(),
+    isDefault: yup.boolean(),
   })
   .noUnknown();
 
