@@ -44,3 +44,4 @@ const createDefaultConditionsForm = (
 };
 
 export default createDefaultConditionsForm;
+export { createConditionsForm, createCategoryForm };

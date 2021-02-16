@@ -19,7 +19,7 @@ const generateCheckboxesActions = (availableActions, modifiedData, pathToData) =
     if (isEmpty(applyToProperties)) {
       const value = get(modifiedData, checkboxNameArray, false);
 
-      // Since applyToProperties is empty such checkbox is not a parent checkbox, therefore hasAllActionsSelected is
+      // Since applyToProperties is empty it is not a parent checkbox, therefore hasAllActionsSelected is
       // equal to hasSomeActionsSelected
       return {
         actionId,

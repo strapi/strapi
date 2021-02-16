@@ -51,7 +51,6 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
 
   // We need to format the actions so it matches the shape of the ConditionsModal actions props
   const formattedActions = formatActions(actions, modifiedData, pathToData);
-
   const doesButtonHasCondition = getConditionsButtonState(get(modifiedData, [...pathToData], {}));
 
   return (

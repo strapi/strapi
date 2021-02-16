@@ -43,6 +43,9 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
   }, [mainData]);
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
+  // Here we create an array of <checkbox>, since the state of each one of them is used in
+  // order to know if whether or not we need to display the associated action in
+  // the <ConditionsModal />
   const checkboxesActions = useMemo(() => {
     return generateCheckboxesActions(availableActions, modifiedData, pathToData);
   }, [availableActions, modifiedData, pathToData]);
