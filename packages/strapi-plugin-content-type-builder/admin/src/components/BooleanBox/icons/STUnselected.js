@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 
 const STUnselected = props => (
@@ -12,11 +13,7 @@ const STUnselected = props => (
         id="filter-1"
       >
         <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1" />
-        <feGaussianBlur
-          stdDeviation="2"
-          in="shadowOffsetOuter1"
-          result="shadowBlurOuter1"
-        />
+        <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
         <feColorMatrix
           values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.05 0"
           type="matrix"
