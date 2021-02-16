@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { capitalize } = require('lodash/fp');
 const { getService } = require('../../utils');
 
@@ -26,23 +25,26 @@ module.exports = async () => {
     await getService('locales').setDefaultLocale(DEFAULT_LOCALE);
   }
 
-  Object.values(strapi.models).forEach(model => {
-    if (getService('content-types').isLocalized(model)) {
-      // TODO: support adding lifecycles programmatically or connecting to a database event handler to avoid conflicts with existing lifecycles fonctions
-
-      _.set(model, 'lifecycles.beforeCreate', async data => {
-        if (!data.locale) {
-          data.locale = await getService('locales').getDefaultLocale();
-        }
+  Object.values(strapi.models)
+    .filter(model => getService('content-types').isLocalized(model))
+    .forEach(model => {
+      strapi.db.lifecycles.register({
+        model: model.uid,
+        async beforeCreate(data) {
+          if (!data.locale) {
+            data.locale = await getService('locales').getDefaultLocale();
+          }
+        },
+        async afterCreate(entry) {
+          await getService('localizations').addLocalizations(entry, { model });
+        },
+        async afterUpdate(entry) {
+          await getService('localizations').updateNonLocalizedFields(entry, { model });
+        },
+        async afterDelete() {
+          // TODO/ implement
+          // await getService('localizations').updateDeletedLocalization(entry, { model });
+        },
       });
-
-      _.set(model, 'lifecycles.afterCreate', async entry => {
-        await getService('localizations').addLocalizations(entry, { model });
-      });
-
-      _.set(model, 'lifecycles.afterUpdate', async entry => {
-        await getService('localizations').updateNonLocalizedFields(entry, { model });
-      });
-    }
-  });
+    });
 };
