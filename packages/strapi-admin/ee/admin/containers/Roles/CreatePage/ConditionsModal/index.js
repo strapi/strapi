@@ -55,6 +55,8 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isOpen, onClosed, onToggl
     });
   };
 
+  console.log({ state, modifiedData });
+
   return (
     <Modal withoverflow="true" onClosed={onClosed} isOpen={isOpen} onToggle={onToggle}>
       <ModalHeader headerBreadcrumbs={headerBreadCrumbs} />

@@ -52,7 +52,8 @@ const PermissionRow = ({
         <PermissionsWrapper isWhite={isWhite}>
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
-              categoryName={subCategoryName}
+              categoryName={categoryName}
+              subCategoryName={subCategoryName}
               key={subCategoryName}
               actions={actions}
               pathToData={[...pathToData, subCategoryId]}

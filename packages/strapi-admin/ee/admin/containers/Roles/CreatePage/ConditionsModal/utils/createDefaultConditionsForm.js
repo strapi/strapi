@@ -2,7 +2,7 @@ import { get } from 'lodash';
 
 const createConditionsForm = (conditions, valueObject) => {
   return conditions.reduce((acc, current) => {
-    acc[current.id] = get(valueObject, current.id, true);
+    acc[current.id] = get(valueObject, current.id, false);
 
     return acc;
   }, {});
