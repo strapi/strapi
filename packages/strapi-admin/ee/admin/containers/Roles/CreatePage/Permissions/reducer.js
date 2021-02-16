@@ -1,5 +1,6 @@
 import produce from 'immer';
-import { has, isObject, get, set } from 'lodash';
+import { cloneDeep, has, isObject, get, set } from 'lodash';
+import updateConditionsToFalse from './utils/updateConditionsToFalse';
 import updateValues from './utils/updateValues';
 
 const initialState = {
@@ -26,7 +27,14 @@ const reducer = (state, action) =>
           );
 
           if (collectionTypeActionData) {
-            const updatedValues = updateValues(collectionTypeActionData, value);
+            let updatedValues = updateValues(collectionTypeActionData, value);
+
+            // We need to remove the applied conditions
+            if (!value && updatedValues.conditions) {
+              const updatedConditions = updateValues(updatedValues.conditions, false);
+
+              updatedValues = { ...updatedValues, conditions: updatedConditions };
+            }
 
             set(draftState, [...pathToData, collectionType, actionId], updatedValues);
           }
@@ -36,11 +44,10 @@ const reducer = (state, action) =>
       }
       case 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX': {
         const { pathToCollectionType, propertyName, rowName, value } = action;
-        const pathToModifiedDataCollectionType = [
-          'modifiedData',
-          ...pathToCollectionType.split('..'),
-        ];
-        const objToUpdate = get(state, pathToModifiedDataCollectionType, {});
+        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        const pathToModifiedDataCollectionType = pathToCollectionType.split('..');
+
+        const objToUpdate = get(nextModifiedDataState, pathToModifiedDataCollectionType, {});
 
         Object.keys(objToUpdate).forEach(actionId => {
           // When a ct has multiple properties (ex: locales, field)
@@ -56,19 +63,35 @@ const reducer = (state, action) =>
             ];
 
             if (!isObject(objValue)) {
-              set(draftState, pathToDataToSet, value);
+              set(nextModifiedDataState, pathToDataToSet, value);
             } else {
               const updatedValue = updateValues(objValue, value);
 
-              set(draftState, pathToDataToSet, updatedValue);
+              set(nextModifiedDataState, pathToDataToSet, updatedValue);
             }
           }
         });
 
+        // When we uncheck a row, we need to check if we also need to disable the conditions
+        if (!value) {
+          nextModifiedDataState = updateConditionsToFalse(nextModifiedDataState);
+        }
+
+        set(draftState, 'modifiedData', nextModifiedDataState);
+
         break;
       }
       case 'ON_CHANGE_SIMPLE_CHECKBOX': {
-        set(draftState, ['modifiedData', ...action.keys.split('..')], action.value);
+        let nextModifiedDataState = cloneDeep(state.modifiedData);
+
+        set(nextModifiedDataState, [...action.keys.split('..')], action.value);
+
+        // When we uncheck a single checkbox we need to remove the conditions from the parent
+        if (!action.value) {
+          nextModifiedDataState = updateConditionsToFalse(nextModifiedDataState);
+        }
+
+        set(draftState, 'modifiedData', nextModifiedDataState);
 
         break;
       }
@@ -106,12 +129,20 @@ const reducer = (state, action) =>
        *
        */
       case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
-        const pathToValue = ['modifiedData', ...action.keys.split('..')];
-        const oldValues = get(state, pathToValue, {});
+        const { keys, value } = action;
+        const pathToValue = [...keys.split('..')];
+        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        const oldValues = get(nextModifiedDataState, pathToValue, {});
 
-        const updatedValues = updateValues(oldValues, action.value);
+        const updatedValues = updateValues(oldValues, value);
+        set(nextModifiedDataState, pathToValue, updatedValues);
 
-        set(draftState, pathToValue, updatedValues);
+        // When we uncheck a parent checkbox we need to remove the associated conditions
+        if (!value) {
+          nextModifiedDataState = updateConditionsToFalse(nextModifiedDataState);
+        }
+
+        set(draftState, ['modifiedData'], nextModifiedDataState);
 
         break;
       }

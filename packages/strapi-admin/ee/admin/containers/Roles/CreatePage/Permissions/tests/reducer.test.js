@@ -100,7 +100,7 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                   en: false,
                 },
                 conditions: {
-                  test: true,
+                  test: false,
                 },
               },
             },

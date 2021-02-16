@@ -146,6 +146,7 @@ const data = {
         plugin: 'plugin::content-manager',
       },
     ],
+
     settings: [
       {
         displayName: 'Create',
