@@ -11,7 +11,7 @@ const ModalDelete = ({ localeToDelete, onClose }) => {
   const { formatMessage } = useIntl();
   const isOpened = Boolean(localeToDelete);
 
-  const handleDelete = () => deleteLocale(localeToDelete).then(onClose);
+  const handleDelete = () => deleteLocale(localeToDelete.id).then(onClose);
 
   return (
     <ModalConfirm
@@ -40,7 +40,9 @@ ModalDelete.defaultProps = {
 };
 
 ModalDelete.propTypes = {
-  localeToDelete: PropTypes.shape({}),
+  localeToDelete: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+  }),
   onClose: PropTypes.func.isRequired,
 };
 
