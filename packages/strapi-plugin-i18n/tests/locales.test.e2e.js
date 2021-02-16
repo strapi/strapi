@@ -7,6 +7,7 @@ const { createAuthRequest } = require('../../../test/helpers/request');
 
 const data = {
   locales: [],
+  deletedLocales: [],
 };
 
 const omitTimestamps = omit(['updatedAt', 'createdAt', 'updated_at', 'created_at']);
@@ -266,6 +267,49 @@ describe('CRUD locales', () => {
       });
       expect(res.statusCode).toBe(200);
       expect(res.body.isDefault).toBe(true);
+    });
+  });
+
+  describe('Delete', () => {
+    test('Cannot delete default locale', async () => {
+      let res = await rq({
+        url: `/i18n/locales/${data.locales[0].id}`,
+        method: 'PUT',
+        body: { isDefault: true },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+      data.locales[1].isDefault = false;
+
+      res = await rq({
+        url: `/i18n/locales/${data.locales[0].id}`,
+        method: 'DELETE',
+      });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe('Cannot delete the default locale');
+    });
+
+    test('Can delete a locale', async () => {
+      const res = await rq({
+        url: `/i18n/locales/${data.locales[1].id}`,
+        method: 'DELETE',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
+      data.deletedLocales.push(res.body);
+      data.locales.splice(1, 1);
+    });
+
+    test('Cannot delete not found locale', async () => {
+      let res = await rq({
+        url: `/i18n/locales/${data.deletedLocales[0].id}`,
+        method: 'DELETE',
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.message).toBe('locale.notFound');
     });
   });
 });

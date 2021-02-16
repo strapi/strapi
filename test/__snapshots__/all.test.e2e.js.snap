@@ -317,6 +317,11 @@ Object {
     "schema": Object {
       "attributes": Object {
         "title": Object {
+          "pluginOptions": Object {
+            "i18n": Object {
+              "localized": true,
+            },
+          },
           "type": "string",
         },
       },
@@ -326,6 +331,11 @@ Object {
       "draftAndPublish": false,
       "kind": "collectionType",
       "name": "Test Collection Type",
+      "pluginOptions": Object {
+        "i18n": Object {
+          "localized": true,
+        },
+      },
       "restrictRelationsTo": null,
       "visible": true,
     },
@@ -365,6 +375,11 @@ Object {
     "schema": Object {
       "attributes": Object {
         "title": Object {
+          "pluginOptions": Object {
+            "i18n": Object {
+              "localized": true,
+            },
+          },
           "type": "string",
         },
       },
@@ -374,6 +389,11 @@ Object {
       "draftAndPublish": false,
       "kind": "singleType",
       "name": "Test Single Type",
+      "pluginOptions": Object {
+        "i18n": Object {
+          "localized": true,
+        },
+      },
       "restrictRelationsTo": null,
       "visible": true,
     },
