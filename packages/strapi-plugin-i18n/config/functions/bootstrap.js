@@ -13,9 +13,18 @@ const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
   uid: `locale.${uid}`,
 }));
 
-module.exports = () => {
+const DEFAULT_LOCALE = {
+  code: 'en-US',
+};
+
+module.exports = async () => {
   const { actionProvider } = strapi.admin.services.permission;
   actionProvider.register(actions);
+
+  const defaultLocale = await getService('locales').getDefaultLocale();
+  if (!defaultLocale) {
+    await getService('locales').setDefaultLocale(DEFAULT_LOCALE);
+  }
 
   Object.values(strapi.models).forEach(model => {
     if (getService('content-types').isLocalized(model)) {
