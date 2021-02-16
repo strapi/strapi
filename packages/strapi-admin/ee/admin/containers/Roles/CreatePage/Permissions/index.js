@@ -4,12 +4,15 @@ import { Tabs } from '../../../../../../admin/src/components/Roles';
 import { roleTabsLabel as TAB_LABELS } from '../../../../../../admin/src/utils';
 import { PermissionsDataManagerProvider } from '../contexts/PermissionsDataManagerContext';
 import ContentTypes from '../ContentTypes';
+import PluginsAndSettings from '../PluginsAndSettings';
 import layout from '../temp/fakeData';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const Permissions = forwardRef(({ layout }, ref) => {
-  const [{ modifiedData }, dispatch] = useReducer(reducer, initialState, () => init(layout));
+  const [{ layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
+    init(layout)
+  );
 
   useImperativeHandle(ref, () => {
     return {
@@ -73,10 +76,10 @@ const Permissions = forwardRef(({ layout }, ref) => {
       }}
     >
       <Tabs tabsLabel={TAB_LABELS}>
-        <ContentTypes layout={layout.sections.collectionTypes} kind="collectionTypes" />
-        <ContentTypes layout={layout.sections.singleTypes} kind="singleTypes" />
-        <div>Plugins</div>
-        <div>Settings</div>
+        <ContentTypes layout={layouts.collectionTypes} kind="collectionTypes" />
+        <ContentTypes layout={layouts.singleTypes} kind="singleTypes" />
+        <PluginsAndSettings layout={layouts.plugins} kind="plugins" />
+        <PluginsAndSettings layout={layouts.settings} kind="settings" />
       </Tabs>
     </PermissionsDataManagerProvider>
   );

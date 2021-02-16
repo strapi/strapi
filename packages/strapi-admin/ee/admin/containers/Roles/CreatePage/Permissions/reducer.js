@@ -5,6 +5,7 @@ import updateValues from './utils/updateValues';
 const initialState = {
   initialData: {},
   modifiedData: {},
+  layouts: {},
 };
 
 /* eslint-disable consistent-return */

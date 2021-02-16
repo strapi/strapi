@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
@@ -34,7 +34,7 @@ const SubActionRow = ({
   } = usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = useState(null);
 
-  const handleClickToggleSubLevel = useCallback(name => {
+  const handleClickToggleSubLevel = name => {
     setRowToOpen(prev => {
       if (prev === name) {
         return null;
@@ -42,7 +42,7 @@ const SubActionRow = ({
 
       return name;
     });
-  }, []);
+  };
 
   const displayedRecursiveChildren = useMemo(() => {
     if (!rowToOpen) {
