@@ -197,16 +197,19 @@ class Wysiwyg extends React.Component {
       textWithEntity,
       'insert-character'
     );
-    
+
     if (selectedText.length === 0) {
-      this.setState({
-        // Highlight the text if the selection was empty
-        editorState: EditorState.forceSelection(newEditorState, updatedSelection),
-      }, () => {
-        this.focus();
-        // Update the parent reducer
-        this.sendData(newEditorState);
-      });
+      this.setState(
+        {
+          // Highlight the text if the selection was empty
+          editorState: EditorState.forceSelection(newEditorState, updatedSelection),
+        },
+        () => {
+          this.focus();
+          // Update the parent reducer
+          this.sendData(newEditorState);
+        }
+      );
       return;
     }
 
@@ -361,14 +364,14 @@ class Wysiwyg extends React.Component {
     );
   };
 
-  addLink = ({ alt, url }) => {
+  addLinks = data => {
+    const links = data.reduce((acc, { alt, url }) => `${acc}![${alt}](${url})\n`, '');
     const { selection } = this.state;
-    const link = `![${alt}](${url})`;
-    const newBlock = createNewBlock(link);
+    const newBlock = createNewBlock(links);
     const newContentState = this.createNewContentStateFromBlock(newBlock);
-    const anchorOffset = link.length;
-    const focusOffset = link.length;
-    let newEditorState = this.createNewEditorState(newContentState, link);
+    const anchorOffset = links.length;
+    const focusOffset = links.length;
+    let newEditorState = this.createNewEditorState(newContentState, links);
 
     const updatedSelection =
       getOffSets(selection).start === 0
@@ -426,15 +429,16 @@ class Wysiwyg extends React.Component {
 
     newEditorState = EditorState.acceptSelection(newEditorState, updatedSelection);
 
-    
-
-    return this.setState({
-      editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
-    }, () => {
-      this.focus();
-      // Update the parent reducer
-      this.sendData(newEditorState);
-    });
+    return this.setState(
+      {
+        editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
+      },
+      () => {
+        this.focus();
+        // Update the parent reducer
+        this.sendData(newEditorState);
+      }
+    );
   };
 
   /**
@@ -775,7 +779,7 @@ class Wysiwyg extends React.Component {
         <MediaLib
           onToggle={this.handleToggle}
           isOpen={isMediaLibraryOpened}
-          onChange={this.addLink}
+          onChange={this.addLinks}
         />
       </WysiwygProvider>
     );
