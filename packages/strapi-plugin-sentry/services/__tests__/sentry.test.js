@@ -80,7 +80,6 @@ describe('strapi-plugin-sentry service', () => {
 
     // Doesn't allow re-init
     sentryService.init();
-    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringMatching(/already/i));
 
     // Send error
     const error = Error('an error');
