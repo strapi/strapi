@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import IntlInput from '../IntlInput';
 
 // TODO: remove this component
-const SizedInput = ({ size, ...rest }) => {
+const SizedInput = ({ size, noMargin, ...rest }) => {
   return (
     <Col {...size}>
       <IntlInput {...rest} />
@@ -16,10 +16,12 @@ SizedInput.defaultProps = {
   size: {
     xs: '6',
   },
+  noMargin: false,
 };
 
 SizedInput.propTypes = {
   size: PropTypes.object,
+  noMargin: PropTypes.bool,
 };
 
 export default SizedInput;
