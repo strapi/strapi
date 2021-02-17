@@ -11,10 +11,11 @@ The official plugin to track Strapi errors with Sentry.
 
 ## Configuration
 
-| property       | type (default) | description                                                                                                    |
-| -------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| `dsn`          | string (null)  | Your Sentry data source name ([see Sentry docs](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)). |
-| `sendMetadata` | boolean (true) | Whether the plugin should attach additional information (like OS, browser, etc.) to the events sent to Sentry. |
+| property       | type (default)   | description                                                                                                                                                                              |
+| -------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dsn`          | string (`null`)  | Your Sentry data source name ([see Sentry docs](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)).                                                                           |
+| `sendMetadata` | boolean (`true`) | Whether the plugin should attach additional information (like OS, browser, etc.) to the events sent to Sentry.                                                                           |
+| `init`         | object (`{}`)    | A config object that is passed directly to Sentry during the `Sentry.init()`. See all available options [on Sentry's docs](https://docs.sentry.io/platforms/node/configuration/options/) |
 
 **Example**
 

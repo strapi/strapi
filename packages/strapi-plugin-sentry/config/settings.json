@@ -1,4 +1,5 @@
 {
   "dsn": null,
-  "sendMetadata": true
+  "sendMetadata": true,
+  "init": {}
 }
