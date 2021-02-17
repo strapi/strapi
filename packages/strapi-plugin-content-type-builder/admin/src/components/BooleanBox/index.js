@@ -1,10 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
+import { Flex } from '@buffetjs/core';
+import styled from 'styled-components';
+import CTIcon from './CT';
+import STIcon from './ST';
 import CustomLabel from './Label';
 import Enumeration from './Enumeration';
 import EnumerationWrapper from './EnumerationWrapper';
 import Wrapper from './Wrapper';
+
+/**
+ * TODO: Those should not exist, remove with design system
+ */
+const CTHackSpan = styled.span`
+  margin-left: -1rem;
+  margin-right: 1rem;
+  margin-top: -1.3rem;
+`;
+const STHackSpan = styled.span`
+  margin-left: -1rem;
+  margin-right: 1rem;
+  margin-top: -0.5rem;
+`;
 
 const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value }) => {
   const { formatMessage } = useGlobalContext();
@@ -31,17 +49,37 @@ const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value })
             value={option.value}
           />
         ))}
-        {options.map(option => (
-          <EnumerationWrapper
-            className="option"
-            key={option.value}
-            htmlFor={option.value.toString()}
-          >
-            <span className="option__indicator" />
-            <span className="option__title">{formatMessage({ id: option.headerId })}</span>
-            <p>{formatMessage({ id: option.descriptionId })}</p>
-          </EnumerationWrapper>
-        ))}
+        {options.map(option => {
+          const isST = option.value === 'singleType';
+          const isCT = option.value === 'collectionType';
+
+          return (
+            <EnumerationWrapper
+              className="option"
+              key={option.value}
+              htmlFor={option.value.toString()}
+            >
+              <Flex>
+                {isST && (
+                  <STHackSpan>
+                    <STIcon selected={value === 'singleType'} />
+                  </STHackSpan>
+                )}
+                {isCT && (
+                  <CTHackSpan>
+                    <CTIcon selected={value === 'collectionType'} />
+                  </CTHackSpan>
+                )}
+
+                <div>
+                  <span className="option__indicator" />
+                  <span className="option__title">{formatMessage({ id: option.headerId })}</span>
+                  <p>{formatMessage({ id: option.descriptionId })}</p>
+                </div>
+              </Flex>
+            </EnumerationWrapper>
+          );
+        })}
       </Wrapper>
     </div>
   );
