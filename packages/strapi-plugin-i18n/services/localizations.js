@@ -6,7 +6,7 @@ const { getService } = require('../utils');
 const { getNonLocalizedFields } = require('./content-types');
 
 /**
- * Adds the default locale to an object if it isn't defined set yet
+ * Adds the default locale to an object if it isn't defined yet
  * @param {Object} data a data object before being persisted into db
  */
 const assignDefaultLocale = async data => {
@@ -49,7 +49,7 @@ const updateNonLocalizedFields = async (entry, { model }) => {
 };
 
 /**
- * Remove entry from localizations & udpate realted localizations
+ * Remove entry from localizations & udpate related localizations
  * This method should be used only after an entry is deleted
  * @param {Object} entry entry to remove from localizations
  * @param {Object} options
