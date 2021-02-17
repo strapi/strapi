@@ -15,7 +15,7 @@ import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
-const AuthPage = ({ hasAdmin }) => {
+const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
   const {
     params: { authType },
@@ -221,6 +221,7 @@ const AuthPage = ({ hasAdmin }) => {
         });
       }
       // Redirect to the homePage
+      setHasAdmin(true);
       push('/');
     } catch (err) {
       if (err.response) {
@@ -308,6 +309,7 @@ AuthPage.defaultProps = {
 
 AuthPage.propTypes = {
   hasAdmin: PropTypes.bool,
+  setHasAdmin: PropTypes.func.isRequired,
 };
 
 export default AuthPage;
