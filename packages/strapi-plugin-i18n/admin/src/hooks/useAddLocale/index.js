@@ -2,13 +2,14 @@ import { request } from 'strapi-helper-plugin';
 import { useMutation, useQueryClient } from 'react-query';
 import { getTrad } from '../../utils';
 
-const addLocale = async ({ code, name }) => {
+const addLocale = async ({ code, name, isDefault }) => {
   try {
     const data = await request(`/i18n/locales`, {
       method: 'POST',
       body: {
         name,
         code,
+        isDefault,
       },
     });
 
