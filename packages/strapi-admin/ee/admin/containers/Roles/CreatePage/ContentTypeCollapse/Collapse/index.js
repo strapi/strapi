@@ -50,6 +50,10 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
     return generateCheckboxesActions(availableActions, modifiedData, pathToData);
   }, [availableActions, modifiedData, pathToData]);
 
+  const doesConditionButtonHasConditions = checkboxesActions.some(
+    ({ hasConditions }) => hasConditions
+  );
+
   return (
     <Wrapper isActive={isActive} isGrey={isGrey}>
       <Flex style={{ flex: 1 }}>
@@ -106,7 +110,11 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
             }
           )}
         </Flex>
-        <ConditionsButton isRight onClick={handleToggleModalIsOpen} />
+        <ConditionsButton
+          isRight
+          onClick={handleToggleModalIsOpen}
+          hasConditions={doesConditionButtonHasConditions}
+        />
       </Flex>
       {modalState.isMounted && (
         <ConditionsModal

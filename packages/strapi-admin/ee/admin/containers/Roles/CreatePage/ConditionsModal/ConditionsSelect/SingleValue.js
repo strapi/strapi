@@ -15,7 +15,7 @@ const Value = ({ children, selectProps, ...props }) => {
     <SingleValue {...props}>
       <Text style={{ paddingTop: 1 }}>
         {valuesArray.length === 0
-          ? 'Anytime'
+          ? formatMessage({ id: 'Settings.permissions.conditions.none-selected' })
           : formatMessage(
               {
                 id: `Settings.permissions.conditions.selected.${
