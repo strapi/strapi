@@ -3,9 +3,8 @@ const debug = require('debug')('strapi-database:lifecycle');
 const { isFunction, isNil } = require('lodash/fp');
 
 class LifecycleManager {
-  constructor(db) {
+  constructor() {
     debug('Initialize lifecycle manager');
-    this.db = db;
     this.lifecycles = [];
   }
 
@@ -13,6 +12,7 @@ class LifecycleManager {
     debug('Register lifecycle');
 
     this.lifecycles.push(lifecycle);
+    return this;
   }
 
   async run(action, model, ...args) {

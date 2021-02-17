@@ -24,7 +24,7 @@ class DatabaseManager {
     this.models = new Map();
 
     this.migrations = createMigrationManager(this);
-    this.lifecycles = createLifecycleManager(this);
+    this.lifecycles = createLifecycleManager();
   }
 
   async initialize() {
