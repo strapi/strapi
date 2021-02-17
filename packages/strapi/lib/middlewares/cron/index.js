@@ -37,6 +37,28 @@ module.exports = strapi => {
             taskValue.task
           );
         });
+
+        _.forEach(_.keys(strapi.plugins), pluginName => {
+          const pluginCron = strapi.plugins[pluginName].config.functions.cron;
+
+          if (pluginCron) {
+            _.forEach(_.entries(pluginCron), ([taskExpression, taskValue]) => {
+              if (_.isFunction(taskValue)) {
+                return cron.scheduleJob(taskExpression, taskValue);
+              }
+
+              const options = _.get(taskValue, 'options', {});
+
+              cron.scheduleJob(
+                {
+                  rule: taskExpression,
+                  ...options,
+                },
+                taskValue.task
+              );
+            });
+          }
+        });
       }
     },
   };
