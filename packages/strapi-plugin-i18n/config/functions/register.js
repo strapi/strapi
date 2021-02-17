@@ -1,22 +1,27 @@
 'use strict';
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
+
 const { getService } = require('../../utils');
 
 module.exports = () => {
-  Object.values(strapi.contentTypes).forEach(model => {
-    if (getService('content-types').isLocalized(model)) {
-      _.set(model.attributes, 'localizations', {
+  const contentTypeService = getService('content-types');
+  const coreApiService = getService('core-api');
+
+  Object.values(strapi.contentTypes).forEach(contentType => {
+    if (contentTypeService.isLocalized(contentType)) {
+      const { attributes, modelName } = contentType;
+
+      _.set(attributes, 'localizations', {
         writable: true,
         private: false,
         configurable: false,
         visible: false,
-        collection: model.modelName,
+        collection: modelName,
         populate: ['id', 'locale', 'published_at'],
       });
 
-      _.set(model.attributes, 'locale', {
+      _.set(attributes, 'locale', {
         writable: true,
         private: false,
         configurable: false,
@@ -24,34 +29,7 @@ module.exports = () => {
         type: 'string',
       });
 
-      // add new route
-      const route =
-        model.kind === 'singleType'
-          ? _.kebabCase(model.modelName)
-          : _.kebabCase(pluralize(model.modelName));
-
-      const localizationRoutes = [
-        {
-          method: 'POST',
-          path: `/${route}/:id/localizations`,
-          handler: `${model.modelName}.createLocalization`,
-          config: {
-            policies: [],
-          },
-        },
-      ];
-
-      const handler = function(ctx) {
-        ctx.body = 'works';
-      };
-
-      strapi.config.routes.push(...localizationRoutes);
-
-      _.set(
-        strapi,
-        `api.${model.apiName}.controllers.${model.modelName}.createLocalization`,
-        handler
-      );
+      coreApiService.addCreateLocalizationAction(contentType);
     }
   });
 
