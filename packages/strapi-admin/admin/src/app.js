@@ -40,6 +40,7 @@ import getInjectors from './utils/reducerInjectors';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 import Strapi from './utils/Strapi';
+import BackendUrlFetcher from './BackendUrlFetcher';
 
 // Import root component
 import App from './containers/App';
@@ -200,7 +201,11 @@ const render = messages => {
         <Fonts />
         <LanguageProvider messages={messages}>
           <BrowserRouter basename={basename}>
-            <App store={store} />
+            <BackendUrlFetcher
+              configUrl={'/backend-url' /* where should the relative url come from? environment? */}
+            >
+              <App store={store} />
+            </BackendUrlFetcher>
           </BrowserRouter>
         </LanguageProvider>
       </StrapiProvider>
