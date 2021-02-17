@@ -103,6 +103,8 @@ function App(props) {
     getData();
   }, []);
 
+  const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -118,7 +120,9 @@ function App(props) {
             {authRoutes}
             <Route
               path="/auth/:authType"
-              render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
+              render={routerProps => (
+                <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+              )}
               exact
             />
             <PrivateRoute path="/" component={Admin} />
