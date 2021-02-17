@@ -71,6 +71,7 @@ export { default as ModalHeader } from './components/ModalHeader';
 export { default as ModalFooter } from './components/FooterModal';
 export { default as ModalForm } from './components/FormModal';
 export { default as ModalSection } from './components/ModalSection';
+export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
@@ -139,5 +140,6 @@ export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWit
 export { default as LayoutIcon } from './svgs/Layout';
 export { default as ClearIcon } from './svgs/Clear';
 export { default as Close } from './svgs/Close';
+export { default as EyeSlashed } from './svgs/EyeSlashed';
 export { default as FilterIcon } from './svgs/Filter';
 export { default as SearchIcon } from './svgs/Search';

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import defaultThemes from '../../../../../../strapi-admin/admin/src/themes';
-import BooleanBox from "..";
+import BooleanBox from '..';
 
 jest.mock('strapi-helper-plugin', () => ({
   useGlobalContext: () => ({ formatMessage: ({ id }) => id }),

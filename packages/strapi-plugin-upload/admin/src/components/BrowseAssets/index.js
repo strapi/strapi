@@ -1,12 +1,12 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { PageFooter } from 'strapi-helper-plugin';
+import { Flex, Padded } from '@buffetjs/core';
+
 import { generatePageFromStart, generateStartFromPage } from '../../utils';
 import Filters from '../Filters';
-import Flex from '../Flex';
 import List from '../List';
 import ListEmpty from '../ListEmpty';
-import Padded from '../Padded';
 import SelectAll from '../SelectAll';
 import SortPicker from '../SortPicker';
 import useModalContext from '../../hooks/useModalContext';

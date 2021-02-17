@@ -124,6 +124,7 @@ if (edition === 'EE') {
 
     afterAll(async () => {
       await deleteFixtures();
+
       await strapi.destroy();
       await builder.cleanup();
     }, 60000);

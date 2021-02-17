@@ -11,12 +11,12 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.3-next.2",
-    "@buffetjs/custom": "3.3.3-next.2",
-    "@buffetjs/hooks": "3.3.3-next.2",
-    "@buffetjs/icons": "3.3.3-next.2",
-    "@buffetjs/styles": "3.3.3-next.2",
-    "@buffetjs/utils": "3.3.3-next.2",
+    "@buffetjs/core": "3.3.4",
+    "@buffetjs/custom": "3.3.4",
+    "@buffetjs/hooks": "3.3.4",
+    "@buffetjs/icons": "3.3.4",
+    "@buffetjs/styles": "3.3.4",
+    "@buffetjs/utils": "3.3.4",
     "cheerio": "^1.0.0-rc.5",
     "fs-extra": "^9.0.1",
     "immutable": "^3.8.2",

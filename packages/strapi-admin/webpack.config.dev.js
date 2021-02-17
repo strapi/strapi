@@ -15,6 +15,7 @@ module.exports = () => {
   const options = {
     backend: 'http://localhost:1337',
     publicPath: '/admin/',
+    features: process.env.ENABLED_EE_FEATURES || ['sso'],
   };
 
   const args = {

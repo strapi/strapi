@@ -24,7 +24,12 @@ module.exports = strapi => ({
       strapi.app.onerror(err);
     });
 
-    const localServerConfig = _.get(strapi, 'plugins.upload.config.providerOptions.localServer') || {};
-    strapi.router.get('/uploads/(.*)', range, koaStatic(staticDir, { defer: true, ...localServerConfig }));
+    const localServerConfig =
+      _.get(strapi, 'plugins.upload.config.providerOptions.localServer') || {};
+    strapi.router.get(
+      '/uploads/(.*)',
+      range,
+      koaStatic(staticDir, { defer: true, ...localServerConfig })
+    );
   },
 });
